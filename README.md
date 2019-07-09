@@ -8,3 +8,7 @@ Mod Engine thinks that a simple representation of what data exists in game is im
 ModEngine believes that the complexity of modern engines is fine for gaming in general, but not ideal for hardcore pc mod fps scene, that this engine hopes to help resurrect.  The reason for that is simple: the hardcore pc mod scene hugely benefits from user content and mods.  The community can make a better game than I can.   
 
 ModEngine hopes to encourage a renaissance of hardcore FPS, and make creation of FPS something more approachable for gamers, not just developers.  We're targeting the pc literate gamers, who can probably figure out how to code anyway, but that might not be their thing, or they might not have enough experience yet.  This will also serve as a great segway for gamers to learn how to code -- but again, this is about hardcore FPS.  
+
+<img src="https://github.com/BradfordMedeiros/ModEngine/blob/master/misc/modengine.png" width="400" height="300">
+
+
