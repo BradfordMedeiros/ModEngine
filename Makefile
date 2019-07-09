@@ -1,7 +1,9 @@
 all: modengine
 
-modengine: 
-	@echo hello world
-
+modengine: build
+	@(cd ./build && cmake .. && make all)
+	@echo modengine output to ./build/modengine
+build:
+	@mkdir -p ./build
 clean:
-	@echo clean placeholder
+	@rm -r ./build
