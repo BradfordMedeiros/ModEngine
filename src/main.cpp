@@ -37,7 +37,6 @@ int main(){
   }
  
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
-  glViewport(0, 0, 800, 600);
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
     glfwPollEvents();
