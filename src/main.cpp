@@ -1,7 +1,12 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-#include <unistd.h>
+
+void handleInput(GLFWwindow *window){
+   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+     	glfwSetWindowShouldClose(window, true);
+   }
+}
 
 int main(){
   glfwInit();
@@ -18,7 +23,8 @@ int main(){
   glfwMakeContextCurrent(window); 
   
   while (!glfwWindowShouldClose(window)){
-    glfwPollEvents(); 
+    handleInput(window);
+    glfwPollEvents();
   } 
   return 0;
 }
