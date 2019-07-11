@@ -32,6 +32,8 @@ int main(){
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
     glfwPollEvents();
-  } 
+  }
+
+  glfwTerminate(); 
   return 0;
 }
