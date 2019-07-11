@@ -6,6 +6,7 @@ int main(){
   std::cout << "hello world" << std::endl; 
 
   glfwInit();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 
   return 0;
 }
