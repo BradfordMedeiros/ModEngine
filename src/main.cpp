@@ -13,6 +13,7 @@ void handleInput(GLFWwindow *window){
 
 void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
   std::cout << "EVENT: framebuffer resized.  new size:  " << "width("<< width << ")" << " height(" << height << ")" << std::endl; 
+  glViewport(0, 0, width, height);
 }
 
 int main(){
@@ -37,6 +38,8 @@ int main(){
   }
  
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
+  glViewport(0, 0, INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); 
+  
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
     glfwPollEvents();
