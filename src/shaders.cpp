@@ -1,10 +1,10 @@
 #include <iostream>
-#include "./shaders.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <glad/glad.h>
 #include <stdexcept>
+#include "./shaders.h"
 
 std::string loadFile(std::string filepath){
    std::ifstream file(filepath.c_str());
@@ -22,4 +22,5 @@ void loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFile
    std::string vertexShader = loadFile(vertexShaderFilepath);
    std::cout << "vertex shader content is: " << vertexShader << std::endl;
    //unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); 
+     
 }
