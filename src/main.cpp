@@ -21,17 +21,29 @@ int main(){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+ 
   GLFWwindow* window = glfwCreateWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "ModEngine", NULL, NULL);
   if (window == NULL){
     std::cerr << "ERROR: failed to create window" << std::endl;
     glfwTerminate();
     return -1;
-  } 
+  }
+  
   glfwMakeContextCurrent(window); 
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+     std::cerr << "ERROR: failed to load opengl functions" << std::endl;
+     glfwTerminate();
+     return -1;
+  }
+ 
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
+  glViewport(0, 0, 800, 600);
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
     glfwPollEvents();
+    glfwSwapBuffers(window);
+    glClearColor(0.1, 0.1, 0.1, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
   }
 
   glfwTerminate(); 
