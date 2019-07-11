@@ -20,6 +20,7 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
 }
 
 int main(){
+  std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -52,6 +53,7 @@ int main(){
     glClear(GL_COLOR_BUFFER_BIT);
   }
 
+  std::cout << "LIFECYCLE: program exiting" << std::endl;
   glfwTerminate(); 
   return 0;
 }
