@@ -1,6 +1,7 @@
 #include <iostream>
 #include "./shaders.h"
+#include <iostream>
 
-void testShaderFunc(){
-   std::cout << "test shader" << std::endl;
+std::string loadFile(std::string filepath){
+   return std::string("hello world");
 }

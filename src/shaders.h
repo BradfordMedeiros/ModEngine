@@ -1,6 +1,7 @@
 #ifndef SHADERS
 #define SHADERS 
+#include <iostream>
 
-void testShaderFunc();
+std::string loadFile(std::string filepath);
 
 #endif 

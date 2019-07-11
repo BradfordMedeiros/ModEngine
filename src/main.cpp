@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include "./shaders.h"
+#include "./options.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -19,8 +20,17 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
   glViewport(0, 0, width, height);
 }
 
-int main(){
-  testShaderFunc();
+int main(int argc, char* argv[]){
+  if (argc < 2){
+    std::cerr << "please provide texture file location" << std::endl;
+    return -1;
+  }
+  options opts = loadOptions(argv[1]);
+
+  std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
+
+  std::string fileContent = loadFile(opts.shaderFolderPath);
+  std::cout << "loaded content " << fileContent << std::endl;
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
