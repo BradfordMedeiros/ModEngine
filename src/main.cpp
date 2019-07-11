@@ -1,6 +1,7 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include "./shaders.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -19,6 +20,8 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
 }
 
 int main(){
+  testShaderFunc();
+
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

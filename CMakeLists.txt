@@ -7,7 +7,10 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 #Executable
-add_executable(${PROJECT_NAME} "${SRC_DIR}/main.cpp")
+add_executable(${PROJECT_NAME} 
+  "${SRC_DIR}/main.cpp" 
+  "${SRC_DIR}/shaders.cpp"
+)
 
 # GLFW Library 
 set(GLFW_DIR "${LIB_DIR}/glfw-3.3")
