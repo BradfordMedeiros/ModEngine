@@ -10,6 +10,7 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 add_executable(${PROJECT_NAME} 
   "${SRC_DIR}/main.cpp" 
   "${SRC_DIR}/shaders.cpp"
+  "${SRC_DIR}/mesh.cpp"
   "${SRC_DIR}/options.cpp"
 )
 

@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include "./shaders.h"
 #include "./options.h"
+#include "./mesh.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -21,6 +22,7 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
 }
 
 int main(int argc, char* argv[]){
+  testFunc();
   if (argc < 2){
     std::cerr << "please provide texture file location" << std::endl;
     return -1;
