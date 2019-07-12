@@ -27,11 +27,7 @@ int main(int argc, char* argv[]){
   }
   options opts = loadOptions(argv[1]);
 
-  std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
-
-  std::string fileContent = loadFile(opts.shaderFolderPath);
-  std::cout << "loaded content " << fileContent << std::endl;
-
+ 
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -56,6 +52,12 @@ int main(int argc, char* argv[]){
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
   glViewport(0, 0, INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); 
  
+  std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
+  loadShader(opts.shaderFolderPath, opts.shaderFolderPath);
+
+  //std::string fileContent = loadFile(opts.shaderFolderPath);
+  //std::cout << "loaded content " << fileContent << std::endl;
+
   glfwSetCursorPosCallback(window, onMouseEvents); 
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
