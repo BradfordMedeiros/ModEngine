@@ -55,9 +55,6 @@ int main(int argc, char* argv[]){
   std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
   loadShader(opts.shaderFolderPath + "/basic-vertex.glsl", opts.shaderFolderPath + "/basic-fragment.glsl");
 
-  //std::string fileContent = loadFile(opts.shaderFolderPath);
-  //std::cout << "loaded content " << fileContent << std::endl;
-
   glfwSetCursorPosCallback(window, onMouseEvents); 
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
