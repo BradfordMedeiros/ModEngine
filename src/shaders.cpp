@@ -11,9 +11,8 @@
 std::string loadFile(std::string filepath){
    std::ifstream file(filepath.c_str());
    if (!file.good()){
-     throw std::runtime_error("file not found");
-   }
-   
+     throw std::runtime_error("file not found" + filepath);
+   }   
    std::stringstream buffer;
    buffer << file.rdbuf();
    return buffer.str();
@@ -24,10 +23,10 @@ struct shaderError {
   std::string errorMessage;	
 };
 
-shaderError checkShaderError (unsigned int shader){
+shaderError checkShaderError (unsigned int shader, GLenum pname){
    int success;
    char infoLog[SHADER_INFO_LOG_LENGTH];
-   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+   glGetShaderiv(shader, pname, &success);
    if (!success){
       glGetShaderInfoLog(shader, SHADER_INFO_LOG_LENGTH, NULL, infoLog); 
    }    
@@ -46,9 +45,9 @@ unsigned int compileShader(std::string shaderContent, unsigned int shaderType){
    return shader;
 }
 
-shaderProgram loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath){
+unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath){
    unsigned int vertexShaderId = compileShader(loadFile(vertexShaderFilepath), GL_VERTEX_SHADER);
-   shaderError vertexShaderError = checkShaderError(vertexShaderId);
+   shaderError vertexShaderError = checkShaderError(vertexShaderId, GL_COMPILE_STATUS);
    if (vertexShaderError.isError){
      std::cerr << "ERROR: compiling vertex shader failed: " << vertexShaderError.errorMessage << std::endl;
    }else{
@@ -56,7 +55,7 @@ shaderProgram loadShader(std::string vertexShaderFilepath, std::string fragmentS
    }
 
    unsigned int fragmentShaderId = compileShader(loadFile(fragmentShaderFilepath), GL_FRAGMENT_SHADER);
-   shaderError fragmentShaderError = checkShaderError(fragmentShaderId);
+   shaderError fragmentShaderError = checkShaderError(fragmentShaderId, GL_COMPILE_STATUS);
    if (fragmentShaderError.isError){
      std::cerr << "ERROR: compiling fragment shader failed: " << fragmentShaderError.errorMessage << std::endl;
    }else{
@@ -66,13 +65,29 @@ shaderProgram loadShader(std::string vertexShaderFilepath, std::string fragmentS
    if (vertexShaderError.isError || fragmentShaderError.isError){
      throw std::runtime_error("error compiling shaders"); 
    }
-   shaderProgram program = {
-     .vertexShaderId = vertexShaderId,
-     .fragmentShaderId = fragmentShaderId,
-   };
-  
-   return program;
+   
+   unsigned int shaderProgramId = glCreateProgram();
+   glAttachShader(shaderProgramId, vertexShaderId);
+   glAttachShader(shaderProgramId, fragmentShaderId);
+   glLinkProgram(shaderProgramId);
+   shaderError programError = checkShaderError(shaderProgramId, GL_LINK_STATUS);
+   if (programError.isError){
+     std::cerr << "ERROR: linking shader program" << programError.errorMessage << std::endl;
+     throw std::runtime_error("error linking shaders");
+   }
+
+   glDeleteShader(vertexShaderId);
+   glDeleteShader(fragmentShaderId);
+   return shaderProgramId;
 }
+
+
+
+
+
+
+
+
 
 
 
