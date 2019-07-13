@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
   glViewport(0, 0, INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); 
  
   std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
-  unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/basic-vertex.glsl", opts.shaderFolderPath + "/basic-fragment.glsl");
+  unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/vertex.glsl", opts.shaderFolderPath + "/fragment.glsl");
 
   glUseProgram(shaderProgram); 
   VAOPointer vaopointer = loadMesh();
