@@ -14,7 +14,7 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/options.cpp"
 )
 
-# GLFW Library 
+# GLFW Library - window management 
 set(GLFW_DIR "${LIB_DIR}/glfw-3.3")
 set(GLFW_BUILD_EXAMPLES   OFF   CACHE   INTERNAL   "build the glfw example programs")
 set(GLFW_BUILD_TESTS      OFF   CACHE   INTERNAL   "build the glfw test programs")
@@ -23,11 +23,16 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")   # make
 target_link_libraries(${PROJECT_NAME} "glfw" "${GLFW_LIBRARIES}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_DIR}/include") 
 
-# Glad Library
+# GLAD Library - opengl bindings
 set(GLAD_DIR "${LIB_DIR}/glad")
 add_library("glad" "${GLAD_DIR}/src/glad.c")
 target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
 
-
+# GLM library - opengl compatible matrix library 
+set(GLM_DIR "${LIB_DIR}/glm-0.9.9.5")
+add_subdirectory("${GLM_DIR}")
+target_link_libraries(${PROJECT_NAME} "glm" "${GLM_LIBRARIES}")
+target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}/include")
+#@todo options to disable building tests 
