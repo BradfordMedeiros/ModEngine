@@ -22,7 +22,6 @@ void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
 }
 
 int main(int argc, char* argv[]){
-  testFunc();
   if (argc < 2){
     std::cerr << "please provide texture file location" << std::endl;
     return -1;
@@ -55,7 +54,10 @@ int main(int argc, char* argv[]){
   glViewport(0, 0, INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); 
  
   std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
-  loadShader(opts.shaderFolderPath + "/basic-vertex.glsl", opts.shaderFolderPath + "/basic-fragment.glsl");
+  unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/basic-vertex.glsl", opts.shaderFolderPath + "/basic-fragment.glsl");
+
+  glUseProgram(shaderProgram); 
+  VAOPointer vaopointer = loadMesh();
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   while (!glfwWindowShouldClose(window)){
@@ -64,6 +66,7 @@ int main(int argc, char* argv[]){
     glfwSwapBuffers(window);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    drawMesh(vaopointer);
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
