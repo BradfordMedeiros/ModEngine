@@ -32,7 +32,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
 
 # GLM library - opengl compatible matrix library 
 set(GLM_DIR "${LIB_DIR}/glm-0.9.9.5")
+set(GLM_TEST_ENABLE OFF CACHE INTERNAL "build glm tests")
 add_subdirectory("${GLM_DIR}")
 target_link_libraries(${PROJECT_NAME} "glm" "${GLM_LIBRARIES}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}/include")
-#@todo options to disable building tests 
