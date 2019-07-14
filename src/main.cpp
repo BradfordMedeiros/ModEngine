@@ -22,10 +22,6 @@ void handleInput(GLFWwindow *window){
 void onMouseEvents(GLFWwindow* window, double xPos, double yPos){
    std::cout << "CONTROL: mouse: xpos(" << xPos << ") yPos(" << yPos << ")" << std::endl; 
 }
-void onFramebufferSizeChange(GLFWwindow* window, int width, int height){
-  std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl; 
-  glViewport(0, 0, width, height);
-}
 
 int main(int argc, char* argv[]){
   if (argc < 2){
@@ -55,7 +51,12 @@ int main(int argc, char* argv[]){
      glfwTerminate();
      return -1;
   }
- 
+
+  auto onFramebufferSizeChange = [](GLFWwindow* window, int width, int height) -> void {
+     std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
+     glViewport(0, 0, width, height);
+  }; 
+
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
   glViewport(0, 0, INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); 
  
