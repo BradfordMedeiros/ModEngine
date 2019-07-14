@@ -1,7 +1,12 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+
 #include <glm/glm.hpp>
+#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "./shaders.h"
 #include "./options.h"
 #include "./mesh.h"
@@ -57,19 +62,29 @@ int main(int argc, char* argv[]){
   std:: cout << "shader file path is " << opts.shaderFolderPath << std::endl;
   unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/vertex.glsl", opts.shaderFolderPath + "/fragment.glsl");
 
+  glm::mat4 model = glm::mat4(1.0f);
+  glm::mat4 view = glm::mat4(1.0f);
+  glm::mat4 projection = glm::mat4(1.0f);
+
   glUseProgram(shaderProgram); 
-  
 
   VAOPointer vaopointer = loadMesh();
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   while (!glfwWindowShouldClose(window)){
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+
     handleInput(window);
     glfwPollEvents();
     glfwSwapBuffers(window);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     drawMesh(vaopointer);
+   
+    //
+    model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0, 1.0, 0.0));
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
