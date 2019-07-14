@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -10,23 +12,43 @@
 #include "./shaders.h"
 #include "./options.h"
 #include "./mesh.h"
+#include "./camera.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
 
-void handleInput(GLFWwindow *window){
-   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-     	glfwSetWindowShouldClose(window, true);
-   }
-}
-void onMouseEvents(GLFWwindow* window, double xPos, double yPos){
-   std::cout << "CONTROL: mouse: xpos(" << xPos << ") yPos(" << yPos << ")" << std::endl; 
-}
 
 unsigned int currentScreenWidth = INITIAL_SCREEN_WIDTH;
 unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 glm::mat4 projection;
+
+unsigned int currentCamera = 0;
+const std::vector<glm::mat4> cameras = { 
+  createCamera(glm::vec3(0.0f, 0.0f, -3.0f)),
+  createCamera(glm::vec3(0.0f, 0.5f, -3.0f)),
+  createCamera(glm::vec3(0.0f, 1.0f, -3.0f)),
+};
+glm::mat4 view = cameras[currentCamera];
+
+void nextCamera(){
+   currentCamera = (currentCamera + 1) % cameras.size();
+   view = cameras[currentCamera];
+   std::cout << "EVENT: camera changed to camera #" << currentCamera << std::endl;
+}
+
+void handleInput(GLFWwindow *window){
+   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+     	glfwSetWindowShouldClose(window, true);
+   }
+   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+       	nextCamera();
+   }
+}
+
+void onMouseEvents(GLFWwindow* window, double xPos, double yPos){
+   std::cout << "CONTROL: mouse: xpos(" << xPos << ") yPos(" << yPos << ")" << std::endl; 
+}
 
 int main(int argc, char* argv[]){
   if (argc < 2){
@@ -71,12 +93,10 @@ int main(int argc, char* argv[]){
   unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/vertex.glsl", opts.shaderFolderPath + "/fragment.glsl");
 
   glm::mat4 model = glm::mat4(1.0f);
-  glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); 
   
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
 
   glUseProgram(shaderProgram); 
-
   VAOPointer vaopointer = loadMesh();
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
