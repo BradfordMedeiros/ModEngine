@@ -44,6 +44,21 @@ void handleInput(GLFWwindow *window){
    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
        	nextCamera();
    }
+   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+        view = glm::rotate(view, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   }
+   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.1f));    
+   }
+   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        view = glm::translate(view, glm::vec3(0.1f, 0.0f, 0.0f));    
+   }
+   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.1f));    
+   }
+   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        view = glm::translate(view, glm::vec3(-0.1f, 0.0f, 0.0f));    
+   }
 }
 
 void onMouseEvents(GLFWwindow* window, double xPos, double yPos){
@@ -101,18 +116,22 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   while (!glfwWindowShouldClose(window)){
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+
 
     handleInput(window);
     glfwPollEvents();
     glfwSwapBuffers(window);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    drawMesh(vaopointer);
+
+    for (unsigned int i = 0; i < 10; i++){
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(i * 0.5f, 0.0f, 0.0f))));
+      drawMesh(vaopointer);
+    }
    
-    model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0, 1.0, 0.0));
+    //model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0, 1.0, 0.0));
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
