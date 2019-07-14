@@ -58,6 +58,8 @@ int main(int argc, char* argv[]){
   unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/vertex.glsl", opts.shaderFolderPath + "/fragment.glsl");
 
   glUseProgram(shaderProgram); 
+  
+
   VAOPointer vaopointer = loadMesh();
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
