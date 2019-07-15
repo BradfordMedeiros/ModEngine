@@ -4,6 +4,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
  
-glm::mat4 createCamera(glm::vec3 position);
+struct Camera{
+   glm::vec3 position;
+   glm::vec3 up;
+   float yaw; 
+   float pitch;
+};
+
+glm::mat4 createModelViewMatrix(Camera camera);
+glm::vec3 moveRelativeToCamera(Camera camera, glm::vec3 direction);
 
 #endif 

@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "./shaders.h"
 #include "./options.h"
@@ -23,18 +24,22 @@ unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 glm::mat4 projection;
 
-unsigned int currentCamera = 0;
-const std::vector<glm::mat4> cameras = { 
-  createCamera(glm::vec3(0.0f, 0.0f, -3.0f)),
-  createCamera(glm::vec3(0.0f, 0.5f, -3.0f)),
-  createCamera(glm::vec3(0.0f, 1.0f, -3.0f)),
+unsigned int currentCameraIndex = 0;
+
+const std::vector<Camera> cameras = {
+   Camera { position: glm::vec3(0.0f, 0.0f, -3.0f), up: glm::vec3(0, 1.0f, 0), yaw: 0, pitch: 0},
+   Camera { position: glm::vec3(0.0f, 0.5f, -3.0f), up: glm::vec3(0, 1.0f, 0), yaw: 15, pitch: 0},
+   Camera { position: glm::vec3(0.0f, 0.5f, -3.0f), up: glm::vec3(0, 1.0f, 0), yaw: 30, pitch: 0},
 };
-glm::mat4 view = cameras[currentCamera];
+
+Camera currentCamera = cameras[currentCameraIndex];
+glm::mat4 view = createModelViewMatrix(currentCamera);
 
 void nextCamera(){
-   currentCamera = (currentCamera + 1) % cameras.size();
-   view = cameras[currentCamera];
-   std::cout << "EVENT: camera changed to camera #" << currentCamera << std::endl;
+   currentCameraIndex = (currentCameraIndex + 1) % cameras.size();
+   view = createModelViewMatrix(cameras[currentCameraIndex]);
+ 
+   std::cout << "EVENT: camera changed to camera #" << currentCameraIndex << std::endl;
 }
 
 void handleInput(GLFWwindow *window){
@@ -44,21 +49,31 @@ void handleInput(GLFWwindow *window){
    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
        	nextCamera();
    }
-   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
-        view = glm::rotate(view, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        currentCamera.yaw = currentCamera.yaw + 0.5f;
+        view = createModelViewMatrix(currentCamera);
+   }
+   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+        currentCamera.yaw = currentCamera.yaw - 0.5f;
+        view = createModelViewMatrix(currentCamera);
    }
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.1f));    
+        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(0, 0, 0.1f));
+        view = createModelViewMatrix(currentCamera);
    }
    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        view = glm::translate(view, glm::vec3(0.1f, 0.0f, 0.0f));    
+        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(0.1f, 0, 0));
+        view = createModelViewMatrix(currentCamera);
    }
    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.1f));    
+        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(0, 0, -0.1f));
+        view = createModelViewMatrix(currentCamera);
    }
    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        view = glm::translate(view, glm::vec3(-0.1f, 0.0f, 0.0f));    
+        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(-0.1f, 0, 0));
+        view = createModelViewMatrix(currentCamera);
    }
+   std::cout << "position:  " << glm::to_string(currentCamera.position) << std::endl;
 }
 
 void onMouseEvents(GLFWwindow* window, double xPos, double yPos){
@@ -131,7 +146,6 @@ int main(int argc, char* argv[]){
       drawMesh(vaopointer);
     }
    
-    //model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0, 1.0, 0.0));
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
