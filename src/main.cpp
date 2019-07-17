@@ -18,66 +18,58 @@
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
 
-
 unsigned int currentScreenWidth = INITIAL_SCREEN_WIDTH;
 unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 glm::mat4 projection;
 
-unsigned int currentCameraIndex = 0;
+Camera cam(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0, 1.0f, 0.0f), 0.2f, 0.0f, 0.0f);
 
-const std::vector<Camera> cameras = {
-   Camera { position: glm::vec3(0.0f, 0.0f, -3.0f), up: glm::vec3(0, 1.0f, 0), yaw: 0, pitch: 0},
-   Camera { position: glm::vec3(0.0f, 0.5f, -3.0f), up: glm::vec3(0, 1.0f, 0), yaw: 15, pitch: 0},
-   Camera { position: glm::vec3(0.0f, 0.5f, -3.0f), up: glm::vec3(0, 1.0f, 0), yaw: 30, pitch: 0},
-};
-
-Camera currentCamera = cameras[currentCameraIndex];
-glm::mat4 view = createModelViewMatrix(currentCamera);
-
-void nextCamera(){
-   currentCameraIndex = (currentCameraIndex + 1) % cameras.size();
-   view = createModelViewMatrix(cameras[currentCameraIndex]);
- 
-   std::cout << "EVENT: camera changed to camera #" << currentCameraIndex << std::endl;
-}
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
 
 void handleInput(GLFWwindow *window){
+   float currentFrame = glfwGetTime();
+   deltaTime = currentFrame - lastFrame;
+   lastFrame = currentFrame;  
+
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-     	glfwSetWindowShouldClose(window, true);
-   }
-   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
-       	nextCamera();
-   }
-   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
-        currentCamera.yaw = currentCamera.yaw + 0.5f;
-        view = createModelViewMatrix(currentCamera);
-   }
-   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
-        currentCamera.yaw = currentCamera.yaw - 0.5f;
-        view = createModelViewMatrix(currentCamera);
+      glfwSetWindowShouldClose(window, true);
    }
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(0, 0, 0.1f));
-        view = createModelViewMatrix(currentCamera);
+      cam.moveFront();
    }
    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(0.1f, 0, 0));
-        view = createModelViewMatrix(currentCamera);
+      cam.moveLeft();
    }
-   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(0, 0, -0.1f));
-        view = createModelViewMatrix(currentCamera);
+   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
+      cam.moveBack();
    }
-   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        currentCamera.position = moveRelativeToCamera(currentCamera, glm::vec3(-0.1f, 0, 0));
-        view = createModelViewMatrix(currentCamera);
+   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
+      cam.moveRight();
    }
-   std::cout << "position:  " << glm::to_string(currentCamera.position) << std::endl;
-}
+}   
 
-void onMouseEvents(GLFWwindow* window, double xPos, double yPos){
-   std::cout << "CONTROL: mouse: xpos(" << xPos << ") yPos(" << yPos << ")" << std::endl; 
+
+bool firstMouse = true;
+float lastX, lastY;
+void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
+    if(firstMouse){
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+        return;
+    }
+  
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; 
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+    cam.setFrontDelta(xoffset, yoffset);
 }
 
 int main(int argc, char* argv[]){
@@ -101,7 +93,9 @@ int main(int argc, char* argv[]){
     return -1;
   }
   
-  glfwMakeContextCurrent(window); 
+  glfwMakeContextCurrent(window);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+ 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
      std::cerr << "ERROR: failed to load opengl functions" << std::endl;
      glfwTerminate();
@@ -131,6 +125,7 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   while (!glfwWindowShouldClose(window)){
+    glm::mat4 view = cam.renderView();
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
 
@@ -145,7 +140,6 @@ int main(int argc, char* argv[]){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(i * 0.5f, 0.0f, 0.0f))));
       drawMesh(vaopointer);
     }
-   
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
