@@ -1,6 +1,4 @@
 #include "./camera.h"
-#include <iostream>
-#include <glm/gtx/string_cast.hpp>
 
 glm::vec3 calculateFront(float yaw, float pitch){
    glm::vec3 front;
