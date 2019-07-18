@@ -38,3 +38,10 @@ set(GLM_TEST_ENABLE OFF CACHE INTERNAL "build glm tests")
 add_subdirectory("${GLM_DIR}")
 target_link_libraries(${PROJECT_NAME} "glm" "${GLM_LIBRARIES}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}/include")
+
+# STB image library - loading images
+set(STB_DIR "${LIB_DIR}/stb")
+add_library("stb" "${STB_DIR}/stb_image.cpp")
+target_include_directories("stb" PRIVATE "${STB_DIR}")
+target_link_libraries(${PROJECT_NAME} "stb" "${CMAKE_DL_LIBS}")
+target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
