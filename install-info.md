@@ -12,4 +12,6 @@ default extensions
 
 glm from:
 https://github.com/g-truc/glm
- 
+
+stb from:
+https://github.com/nothings/stb/blob/master/stb_image.h 
