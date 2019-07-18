@@ -45,3 +45,8 @@ add_library("stb" "${STB_DIR}/stb_image.cpp")
 target_include_directories("stb" PRIVATE "${STB_DIR}")
 target_link_libraries(${PROJECT_NAME} "stb" "${CMAKE_DL_LIBS}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
+
+# OpenAl - sound  @todo 
+ 
+# Bullet - physics @todo
+
