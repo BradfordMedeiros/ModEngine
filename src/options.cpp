@@ -1,9 +1,11 @@
 #include "./options.h"
-#include <iostream>
 
-options loadOptions(std::string args){
+options loadOptions(char* argv[]){
+
    options opts = {
-     .shaderFolderPath = args ,
+     .shaderFolderPath = argv[1],
+     .texturePath = argv[2],
    };
+
    return opts;
 }

@@ -73,11 +73,11 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 }
 
 int main(int argc, char* argv[]){
-  if (argc < 2){
-    std::cerr << "please provide texture file location" << std::endl;
+  if (argc < 3){
+    std::cerr << "please provide shader + texture file location" << std::endl;
     return -1;
   }
-  options opts = loadOptions(argv[1]);
+  options opts = loadOptions(argv);
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
@@ -121,9 +121,11 @@ int main(int argc, char* argv[]){
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
 
   glUseProgram(shaderProgram); 
-  VAOPointer vaopointer = loadMesh();
+  glEnable(GL_DEPTH_TEST);
+  VAOPointer vaopointer = loadMesh(opts.texturePath);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
+  
   while (!glfwWindowShouldClose(window)){
     glm::mat4 view = cam.renderView();
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
@@ -134,10 +136,10 @@ int main(int argc, char* argv[]){
     glfwPollEvents();
     glfwSwapBuffers(window);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (unsigned int i = 0; i < 10; i++){
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(i * 0.5f, 0.0f, 0.0f))));
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(i * 1.5f, 0.0f, 0.0f))));
       drawMesh(vaopointer);
     }
   }

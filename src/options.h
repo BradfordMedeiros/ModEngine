@@ -4,8 +4,9 @@
 
 struct options {
     std::string shaderFolderPath;
+    std::string texturePath;
 };
 
-options loadOptions(std::string argv);
+options loadOptions(char* argv[]);
 
 #endif
