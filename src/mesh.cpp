@@ -49,7 +49,7 @@ float vertices[] = {
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
-VAOPointer loadMesh(std::string textureFilePath){
+Mesh loadMesh(std::string textureFilePath){
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
@@ -66,12 +66,17 @@ VAOPointer loadMesh(std::string textureFilePath){
   useTexture(texture);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
- 
-  return VAO;
+
+  Mesh mesh = {
+    .VAOPointer = VAO,
+    .texture = texture,
+  }; 
+  return mesh;
 }
 
-void drawMesh(VAOPointer vao){
-  glBindVertexArray(vao);
+void drawMesh(Mesh mesh){
+  glBindVertexArray(mesh.VAOPointer);
+  useTexture(mesh.texture);
   glDrawArrays(GL_TRIANGLES, 0, 36); 
 }
 

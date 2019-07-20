@@ -2,10 +2,6 @@
 #define MOD_MESH
 #include <iostream>
 
-typedef unsigned int VAOPointer;
-VAOPointer loadMesh(std::string textureFilePath);  // load mesh and put in into the buffers? 
-void drawMesh(VAOPointer);  // call draw arrays
-
 struct Texture {
    unsigned int textureId;
    unsigned char* data;
@@ -14,5 +10,13 @@ struct Texture {
 Texture loadTexture(std::string textureFilePath);
 void useTexture(Texture texture);
 void freeTextureData(Texture& texture);
+
+struct Mesh {
+  unsigned int VAOPointer;
+  Texture texture; 
+};
+
+Mesh loadMesh(std::string textureFilePath);  // load mesh and put in into the buffers? 
+void drawMesh(Mesh);  // call draw arrays
 
 #endif 
