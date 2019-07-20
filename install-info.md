@@ -15,3 +15,7 @@ https://github.com/g-truc/glm
 
 stb from:
 https://github.com/nothings/stb/blob/master/stb_image.h 
+
+openal install from native package manager, should embed in cmake?
+sudo apt-get install libalut-dev
+sudo apt-get install libopenal-dev
