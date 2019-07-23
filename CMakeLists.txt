@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(modengine)
 
+
 #Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
@@ -13,6 +14,7 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/mesh.cpp"
   "${SRC_DIR}/camera.cpp"
   "${SRC_DIR}/options.cpp"
+  "${SRC_DIR}/sound.cpp"
 )
 
 # GLFW Library - window management 
@@ -46,6 +48,10 @@ target_link_libraries(${PROJECT_NAME} "stb" "${CMAKE_DL_LIBS}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 
 # OpenAl - sound  @todo 
- 
+# This was a pain in the ass, probaly doing it wrong. 
+# See http://distro.ibiblio.org/rootlinux/rootlinux-ports/more/freealut/freealut-1.1.0/doc/alut.html#CompilingLinking
+# https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
+target_link_libraries(${PROJECT_NAME} "alut")
+
 # Bullet - physics @todo
 
