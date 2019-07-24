@@ -112,7 +112,7 @@ int main(int argc, char* argv[]){
   }
 
   startSoundSystem();
-  ALuint soundBuffer = loadSound("");
+  ALuint soundBuffer = loadSound("./res/sounds/sample.wav");
   playSound(soundBuffer);
 
   unsigned int fbo;

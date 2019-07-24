@@ -1,5 +1,9 @@
 #include <iostream>
+#include <stdexcept>
+#include <cerrno>
+#include <cstring>
 #include "./sound.h"
+
 
 void startSoundSystem(){
   alutInit(NULL, NULL);
@@ -18,8 +22,16 @@ void playSound(ALuint soundBuffer){
 }
 
 ALuint loadSound(std::string filepath){
-  std::cout << "load sound placeholder" << std::endl; 
-  ALuint soundBuffer = alutCreateBufferHelloWorld();
-  return soundBuffer;
+ std::cout << "EVENT: loading sound:" << filepath <<  std::endl; 
+  
+ ALuint soundBuffer = alutCreateBufferFromFile(filepath.c_str());
+
+ ALenum error = alutGetError();
+ if (error != ALUT_ERROR_NO_ERROR){
+   std::cerr << "ERROR: " << alutGetErrorString(error) <<  ": " << std::strerror(errno) << std::endl;
+   throw new std::runtime_error("error loading buffer");
+ }  
+
+ return soundBuffer;
 }
 
