@@ -14,10 +14,7 @@ void stopSoundSystem(){
 }
 
 
-void playSound(ALuint soundBuffer){
-  ALuint soundSource;
-  alGenSources(1, &soundSource);
-  alSourcei(soundSource, AL_BUFFER, soundBuffer);
+void playSound(ALuint soundSource){
   alSourcePlay(soundSource);
 }
 
@@ -34,6 +31,10 @@ ALuint loadSound(std::string filepath){
    throw new std::runtime_error("error loading buffer");
  }  
 
- return soundBuffer;
+ ALuint soundSource;
+ alGenSources(1, &soundSource);
+ alSourcei(soundSource, AL_BUFFER, soundBuffer);
+ 
+ return soundSource;
 }
 

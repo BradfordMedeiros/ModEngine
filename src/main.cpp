@@ -29,6 +29,7 @@ Camera cam(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0, 1.0f, 0.0f), 0.2f, 0.0f, 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
+ALuint soundBuffer;
 void handleInput(GLFWwindow *window){
    float currentFrame = glfwGetTime();
    deltaTime = currentFrame - lastFrame;
@@ -48,6 +49,9 @@ void handleInput(GLFWwindow *window){
    }
    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
       cam.moveRight();
+   }
+   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
+      playSound(soundBuffer);
    }
 }   
 
@@ -112,8 +116,7 @@ int main(int argc, char* argv[]){
   }
 
   startSoundSystem();
-  ALuint soundBuffer = loadSound("./res/sounds/sample.wav");
-  playSound(soundBuffer);
+  soundBuffer = loadSound("./res/sounds/sample.wav");
 
   unsigned int fbo;
   glGenFramebuffers(1, &fbo);
