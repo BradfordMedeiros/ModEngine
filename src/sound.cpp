@@ -21,6 +21,8 @@ void playSound(ALuint soundBuffer){
   alSourcePlay(soundSource);
 }
 
+// @todo support ogg file format.
+// This call should support: .wav, .snd, .au , but have only tested .wav
 ALuint loadSound(std::string filepath){
  std::cout << "EVENT: loading sound:" << filepath <<  std::endl; 
   
