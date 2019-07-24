@@ -51,6 +51,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 # This was a pain in the ass, probaly doing it wrong. 
 # See http://distro.ibiblio.org/rootlinux/rootlinux-ports/more/freealut/freealut-1.1.0/doc/alut.html#CompilingLinking
 # https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
+target_link_libraries(${PROJECT_NAME} "openal")
 target_link_libraries(${PROJECT_NAME} "alut")
 
 # Bullet - physics @todo
