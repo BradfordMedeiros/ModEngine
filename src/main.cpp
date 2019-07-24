@@ -14,6 +14,7 @@
 #include "./options.h"
 #include "./mesh.h"
 #include "./camera.h"
+#include "./sound.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -110,6 +111,10 @@ int main(int argc, char* argv[]){
      return -1;
   }
 
+  startSoundSystem();
+  ALuint soundBuffer = loadSound("");
+  playSound(soundBuffer);
+
   unsigned int fbo;
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
@@ -205,6 +210,7 @@ int main(int argc, char* argv[]){
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
+  stopSoundSystem();
   glfwTerminate(); 
   return 0;
 }
