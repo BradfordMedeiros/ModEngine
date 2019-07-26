@@ -2,3 +2,6 @@
 	path = lib/assimp
 	url = https://github.com/assimp/assimp.git
 	branch = v4.1.0
+[submodule "lib/cxxopts"]
+	path = lib/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
