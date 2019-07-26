@@ -54,5 +54,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 target_link_libraries(${PROJECT_NAME} "openal")
 target_link_libraries(${PROJECT_NAME} "alut")
 
+# Command line parsing - CXXopts 
+set (CXX_DIR "${LIB_DIR}/cxxopts")
+set(CXXOPTS_BUILD_EXAMPLES OFF CACHE INTERNAL "build cxxopts examples")
+set(CXXOPTS_BUILD_TESTS OFF CACHE INTERNAL "build cxxopts tests")
+
+add_subdirectory("${CXX_DIR}")
+target_link_libraries(${PROJECT_NAME} "cxxopts")
+
 # Bullet - physics @todo
 
