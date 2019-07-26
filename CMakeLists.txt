@@ -13,7 +13,6 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/shaders.cpp"
   "${SRC_DIR}/mesh.cpp"
   "${SRC_DIR}/camera.cpp"
-  "${SRC_DIR}/options.cpp"
   "${SRC_DIR}/sound.cpp"
 )
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+#include <cxxopts.hpp>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
@@ -11,7 +12,6 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "./shaders.h"
-#include "./options.h"
 #include "./mesh.h"
 #include "./camera.h"
 #include "./sound.h"
@@ -90,8 +90,24 @@ unsigned int framebufferTexture;
 unsigned int rbo;
 
 int main(int argc, char* argv[]){
-  options opts = loadOptions(argc, argv);
+  cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
+  cxxoption.add_options()
+   ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
+   ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
+   ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
+   ("help", "Print help")
+  ;   
 
+  const auto result = cxxoption.parse(argc, argv);
+  if (result["help"].as<bool>()){
+    std::cout << cxxoption.help() << std::endl;
+    return 0;
+  }
+
+  const std::string shaderFolderPath = result["shader"].as<std::string>();
+  const std::string texturePath = result["texture"].as<std::string>();
+  const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
+  
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -167,16 +183,16 @@ int main(int argc, char* argv[]){
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight);
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
   
-  std::cout << "INFO: shader file path is " << opts.shaderFolderPath << std::endl;
-  unsigned int shaderProgram = loadShader(opts.shaderFolderPath + "/vertex.glsl", opts.shaderFolderPath + "/fragment.glsl");
+  std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
+  unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");
   
-  std::cout << "INFO: framebuffer file path is " << opts.framebufferShaderPath << std::endl;
-  unsigned int framebufferProgram = loadShader(opts.framebufferShaderPath + "/vertex.glsl", opts.framebufferShaderPath + "/fragment.glsl");
+  std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
+  unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
 
   glm::mat4 model = glm::mat4(1.0f);
   
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
-  Mesh mesh = loadMesh(opts.texturePath);
+  Mesh mesh = loadMesh(texturePath);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
