@@ -65,6 +65,8 @@ target_link_libraries(${PROJECT_NAME} "cxxopts")
 # ASSIMP
 set(ASSIMP_DIR "${LIB_DIR}/assimp")
 set(ASSIMP_BUILD_DIR "${BUILD_LIB_DIR}/assimp")
+set(ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "If the test suite for Assimp is built in addition to the library.")
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE INTERNAL "If the supplementary tools for Assimp are built in addition to the library.")
 add_subdirectory("${ASSIMP_DIR}")
 target_link_libraries(${PROJECT_NAME} "assimp")
 target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_DIR}/include")
