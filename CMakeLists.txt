@@ -6,6 +6,8 @@ project(modengine)
 #Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
+
 
 #Executable
 add_executable(${PROJECT_NAME} 
@@ -54,12 +56,18 @@ target_link_libraries(${PROJECT_NAME} "openal")
 target_link_libraries(${PROJECT_NAME} "alut")
 
 # Command line parsing - CXXopts 
-set (CXX_DIR "${LIB_DIR}/cxxopts")
+set(CXX_DIR "${LIB_DIR}/cxxopts")
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE INTERNAL "build cxxopts examples")
 set(CXXOPTS_BUILD_TESTS OFF CACHE INTERNAL "build cxxopts tests")
-
 add_subdirectory("${CXX_DIR}")
 target_link_libraries(${PROJECT_NAME} "cxxopts")
 
-# Bullet - physics @todo
+# ASSIMP
+set(ASSIMP_DIR "${LIB_DIR}/assimp")
+set(ASSIMP_BUILD_DIR "${BUILD_LIB_DIR}/assimp")
+add_subdirectory("${ASSIMP_DIR}")
+target_link_libraries(${PROJECT_NAME} "assimp")
+target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_DIR}/include")
+target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_BUILD_DIR}/include")
 
+# Bullet - physics @todo
