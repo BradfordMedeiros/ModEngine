@@ -63,6 +63,7 @@ add_subdirectory("${CXX_DIR}")
 target_link_libraries(${PROJECT_NAME} "cxxopts")
 
 # ASSIMP
+# @todo This can be made faster by settings build options to selectively build importers/etc
 set(ASSIMP_DIR "${LIB_DIR}/assimp")
 set(ASSIMP_BUILD_DIR "${BUILD_LIB_DIR}/assimp")
 set(ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "If the test suite for Assimp is built in addition to the library.")
