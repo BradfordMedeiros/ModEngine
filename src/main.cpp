@@ -95,7 +95,7 @@ int main(int argc, char* argv[]){
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
-   ("help", "Print help")
+   ("h,help", "Print help")
   ;   
 
   const auto result = cxxoption.parse(argc, argv);
