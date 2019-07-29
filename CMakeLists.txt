@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/mesh.cpp"
   "${SRC_DIR}/camera.cpp"
   "${SRC_DIR}/sound.cpp"
+  "${SRC_DIR}/loadmodel.cpp"
 )
 
 # GLFW Library - window management 

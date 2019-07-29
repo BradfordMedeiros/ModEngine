@@ -28,7 +28,7 @@ ALuint loadSound(std::string filepath){
  ALenum error = alutGetError();
  if (error != ALUT_ERROR_NO_ERROR){
    std::cerr << "ERROR: " << alutGetErrorString(error) <<  ": " << std::strerror(errno) << std::endl;
-   throw new std::runtime_error("error loading buffer");
+   throw std::runtime_error("error loading buffer");
  }  
 
  ALuint soundSource;

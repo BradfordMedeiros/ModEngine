@@ -15,6 +15,7 @@
 #include "./mesh.h"
 #include "./camera.h"
 #include "./sound.h"
+#include "./loadmodel.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -95,6 +96,7 @@ int main(int argc, char* argv[]){
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
+   ("m,model", "Model to load", cxxopts::value<std::string>()->default_value("./res/models/column_seat/column_seat.obj"))
    ("h,help", "Print help")
   ;   
 
@@ -131,6 +133,8 @@ int main(int argc, char* argv[]){
      return -1;
   }
 
+  loadModel(result["model"].as<std::string>());
+  
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
 
