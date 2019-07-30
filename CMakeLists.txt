@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_link_libraries(${PROJECT_NAME} "stdc++fs")
 
 # GLFW Library - window management 
 set(GLFW_DIR "${LIB_DIR}/glfw-3.3")
