@@ -2,12 +2,10 @@
 cmake_minimum_required(VERSION 3.8)
 project(modengine)
 
-
 #Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
-
 
 #Executable
 add_executable(${PROJECT_NAME} 
@@ -18,6 +16,8 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/sound.cpp"
   "${SRC_DIR}/loadmodel.cpp"
 )
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 # GLFW Library - window management 
 set(GLFW_DIR "${LIB_DIR}/glfw-3.3")
