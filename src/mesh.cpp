@@ -4,6 +4,7 @@
 #include "glad/glad.h"
 #include <stb_image.h>
 #include "./mesh.h"
+#include "./loadmodel.h"
 
 float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -113,4 +114,40 @@ void useTexture(Texture texture){
 
 void freeTextureData(Texture& texture){
    stbi_image_free(texture.data);
+}
+
+
+Mesh loadMesh2(std::string modelPath){
+  std::vector<ModelData> models = loadModel(modelPath);
+  std::cout << "load mesh2: nummodels: " << models.size() << std::endl;
+
+  unsigned int VAO;
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO); 
+
+ /*unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+*/
+
+  unsigned int VBO;
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+ 
+  std::string textureFilePath = models[0].texturePaths[0];
+  Texture texture = loadTexture(textureFilePath);
+  useTexture(texture);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  Mesh mesh = {
+    .VAOPointer = VAO,
+    .texture = texture,
+  }; 
+  return mesh; 
 }

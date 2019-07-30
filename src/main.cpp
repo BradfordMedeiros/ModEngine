@@ -6,7 +6,6 @@
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -133,7 +132,7 @@ int main(int argc, char* argv[]){
      return -1;
   }
 
-  loadModel(result["model"].as<std::string>());
+  //loadModel(result["model"].as<std::string>());
   
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
@@ -197,6 +196,7 @@ int main(int argc, char* argv[]){
   
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
   Mesh mesh = loadMesh(texturePath);
+  Mesh mesh2 = loadMesh2(result["model"].as<std::string>());
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   

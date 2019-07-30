@@ -2,8 +2,23 @@
 #define MOD_LOADMODEL
 
 #include <iostream>
+#include <vector>
+#include <glm/glm.hpp>
 
-void loadModel(std::string modelPath);
+struct Vertex {
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 texCoords;
+};
 
+struct ModelData {
+  std::vector<Vertex> vertices;
+  std::vector<unsigned int> indices;
+  std::vector<std::string> texturePaths;
+};
+
+// this really should be "load gameobject" --> since need children mesh
+// but no representation for scene/children/objects yet so just flattening it to models
+std::vector<ModelData> loadModel(std::string modelPath);  
 
 #endif 

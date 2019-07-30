@@ -16,7 +16,8 @@ struct Mesh {
   Texture texture; 
 };
 
-Mesh loadMesh(std::string textureFilePath);  // load mesh and put in into the buffers? 
-void drawMesh(Mesh);  // call draw arrays
+Mesh loadMesh(std::string textureFilePath);
+Mesh loadMesh2(std::string modelPath);
+void drawMesh(Mesh);  
 
 #endif 
