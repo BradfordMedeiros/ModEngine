@@ -3,10 +3,8 @@
 #include <assimp/postprocess.h>
 #include <stdexcept>
 #include <functional>
-#include <experimental/filesystem>
+#include <filesystem>
 #include "./loadmodel.h"
-
-namespace fs = std::experimental::filesystem;
 
 ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
@@ -39,10 +37,8 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
    for (unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++){
      aiString texturePath;
      material->GetTexture(aiTextureType_DIFFUSE, i, &texturePath);
-     std::cout << "texture relative to: " << modelPath << std::endl;
-
-     //std::experimental::filesystem::path p1 = modelPath;
-     fs::path p1;
+     std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
+     std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
 
      textureFilepaths.push_back(texturePath.C_Str());  
    }
@@ -62,11 +58,12 @@ void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std:
      onLoadMesh(meshData);
    }
    for (unsigned int i = 0; i < node ->mNumChildren; i++){
-     // Need to check this, but probably should be relative to parent for processing 
      processNode(node->mChildren[i], scene, modelPath, onLoadMesh);
    }
 }
 
+// Currently this just loads all the meshes into the models array. 
+// Should have parent/child relations and a hierarchy but todo.
 std::vector<ModelData> loadModel(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate);
@@ -74,10 +71,14 @@ std::vector<ModelData> loadModel(std::string modelPath){
       std::cerr << "error loading model" << std::endl;
       throw std::runtime_error("error loading stuff");
    } 
+
+   std::cout << "loading model" << std::endl;
   
    std::vector<ModelData> models;
    processNode(scene->mRootNode, scene, modelPath, [&models](ModelData meshdata) -> void {
      models.push_back(meshdata);
    });
+
+   std::cout << "finished loading model" << std::endl;
    return models;
 }
