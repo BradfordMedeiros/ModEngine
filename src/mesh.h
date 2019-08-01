@@ -16,6 +16,7 @@ void freeTextureData(Texture& texture);
 struct Mesh {
   unsigned int VAOPointer;
   Texture texture; 
+  unsigned int numElements;
 };
 
 Mesh loadMesh(std::string textureFilePath);

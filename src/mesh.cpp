@@ -80,6 +80,7 @@ Mesh loadMesh(std::string textureFilePath){
   Mesh mesh = {
     .VAOPointer = VAO,
     .texture = texture,
+    .numElements = sizeof(indices),
   }; 
   return mesh;
 }
@@ -87,7 +88,7 @@ Mesh loadMesh(std::string textureFilePath){
 void drawMesh(Mesh mesh){
   glBindVertexArray(mesh.VAOPointer);
   useTexture(mesh.texture);
-  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 }
 
 
@@ -132,7 +133,8 @@ void freeTextureData(Texture& texture){
 
 Mesh loadMesh2(std::string modelPath){
   std::vector<ModelData> models = loadModel(modelPath);
-  std::cout << "load mesh2: nummodels: " << models.size() << std::endl;
+  
+  ModelData model = models[0];
 
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
@@ -141,28 +143,26 @@ Mesh loadMesh2(std::string modelPath){
   unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * model.indices.size(), &(model.indices[0]), GL_STATIC_DRAW);
 
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * model.vertices.size(), &(model.vertices[0]), GL_STATIC_DRAW);
   
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
   glEnableVertexAttribArray(0);
  
-  std::string textureFilePath = models[0].texturePaths[0];
-  Texture texture = loadTexture(textureFilePath);
+  Texture texture = loadTexture(model.texturePaths[0]);
   useTexture(texture);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   Mesh mesh = {
     .VAOPointer = VAO,
     .texture = texture,
+    .numElements = model.indices.size(),
   }; 
 
-  //Mesh mesh = { };
   return mesh; 
 }
