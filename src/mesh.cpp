@@ -50,16 +50,25 @@ float vertices[] = {
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
+unsigned int indices [] = {
+  0, 1, 2, 3, 4, 5, 6, 7, 8 ,9 ,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35
+};
+
 Mesh loadMesh(std::string textureFilePath){
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
 
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  
+
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
  
@@ -78,7 +87,7 @@ Mesh loadMesh(std::string textureFilePath){
 void drawMesh(Mesh mesh){
   glBindVertexArray(mesh.VAOPointer);
   useTexture(mesh.texture);
-  glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / (sizeof(float) * 5)); 
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
 
@@ -125,7 +134,7 @@ Mesh loadMesh2(std::string modelPath){
   std::vector<ModelData> models = loadModel(modelPath);
   std::cout << "load mesh2: nummodels: " << models.size() << std::endl;
 
-  /*unsigned int VAO;
+  unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
 
@@ -141,19 +150,19 @@ Mesh loadMesh2(std::string modelPath){
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);*/
+  glEnableVertexAttribArray(0);
  
   std::string textureFilePath = models[0].texturePaths[0];
   Texture texture = loadTexture(textureFilePath);
-  /*useTexture(texture);
+  useTexture(texture);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   Mesh mesh = {
     .VAOPointer = VAO,
     .texture = texture,
-  }; */
+  }; 
 
-  Mesh mesh = { };
+  //Mesh mesh = { };
   return mesh; 
 }
