@@ -78,13 +78,15 @@ Mesh loadMesh(std::string textureFilePath){
 void drawMesh(Mesh mesh){
   glBindVertexArray(mesh.VAOPointer);
   useTexture(mesh.texture);
-  glDrawArrays(GL_TRIANGLES, 0, 36); 
+  glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / (sizeof(float) * 5)); 
 }
 
 
-int textureWidth, textureHeight, numChannels;
 
 Texture loadTexture(std::string textureFilePath){
+  std::cout << "Event: loading texture: " << textureFilePath << std::endl;
+
+  int textureWidth, textureHeight, numChannels;
   unsigned int texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -102,13 +104,15 @@ Texture loadTexture(std::string textureFilePath){
   Texture tex = Texture {
     .textureId = texture,
     .data = data,
+    .textureWidth = textureWidth,
+    .textureHeight = textureHeight,
   };
   return tex;
 }
 
 void useTexture(Texture texture){
   glBindTexture(GL_TEXTURE_2D, texture.textureId);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.textureWidth, texture.textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
   glGenerateMipmap(GL_TEXTURE_2D);
 }
 
@@ -121,15 +125,15 @@ Mesh loadMesh2(std::string modelPath){
   std::vector<ModelData> models = loadModel(modelPath);
   std::cout << "load mesh2: nummodels: " << models.size() << std::endl;
 
-  unsigned int VAO;
+  /*unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
 
- /*unsigned int EBO;
+  unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-*/
+
 
   unsigned int VBO;
   glGenBuffers(1, &VBO);
@@ -137,17 +141,19 @@ Mesh loadMesh2(std::string modelPath){
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(0);*/
  
   std::string textureFilePath = models[0].texturePaths[0];
   Texture texture = loadTexture(textureFilePath);
-  useTexture(texture);
+  /*useTexture(texture);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   Mesh mesh = {
     .VAOPointer = VAO,
     .texture = texture,
-  }; 
+  }; */
+
+  Mesh mesh = { };
   return mesh; 
 }

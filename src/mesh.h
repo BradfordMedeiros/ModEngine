@@ -5,6 +5,8 @@
 struct Texture {
    unsigned int textureId;
    unsigned char* data;
+   int textureWidth;
+   int textureHeight;
 };
 
 Texture loadTexture(std::string textureFilePath);

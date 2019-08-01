@@ -39,8 +39,7 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
      material->GetTexture(aiTextureType_DIFFUSE, i, &texturePath);
      std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
      std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
-
-     textureFilepaths.push_back(texturePath.C_Str());  
+     textureFilepaths.push_back(relativePath.string());  
    }
 
    ModelData model = {
@@ -72,13 +71,10 @@ std::vector<ModelData> loadModel(std::string modelPath){
       throw std::runtime_error("error loading stuff");
    } 
 
-   std::cout << "loading model" << std::endl;
-  
    std::vector<ModelData> models;
    processNode(scene->mRootNode, scene, modelPath, [&models](ModelData meshdata) -> void {
      models.push_back(meshdata);
    });
 
-   std::cout << "finished loading model" << std::endl;
    return models;
 }
