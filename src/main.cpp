@@ -97,6 +97,9 @@ int main(int argc, char* argv[]){
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("m,model", "Model to load", cxxopts::value<std::string>()->default_value("./res/models/column_seat/column_seat.obj"))
    ("b,modelbox", "Second model to load", cxxopts::value<std::string>()->default_value("./res/models/box/box.obj"))
+   ("d,twodee", "Image to use for texture for 2d mesh", cxxopts::value<std::string>()->default_value("./res/textures/blacktop.jpg"))
+   ("e,twoshader", "Shader to use for 2d mesh", cxxopts::value<std::string>()->default_value("./res/shaders/2d"))
+
    ("h,help", "Print help")
   ;   
 
@@ -109,6 +112,7 @@ int main(int argc, char* argv[]){
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   const std::string texturePath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
+  const std::string twodeeShaderPath = result["twoshader"].as<std::string>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
@@ -189,6 +193,9 @@ int main(int argc, char* argv[]){
   
   std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");
+
+  std::cout << "INFO: 2D shader file path is " << twodeeShaderPath << std::endl;
+  unsigned int twodeeShaderProgram = loadShader(twodeeShaderPath + "/vertex.glsl", twodeeShaderPath + "/fragment.glsl");
   
   std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
   unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
@@ -196,8 +203,9 @@ int main(int argc, char* argv[]){
   glm::mat4 model = glm::mat4(1.0f);
   
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
-  Mesh mesh2 = loadMesh(result["model"].as<std::string>());
-  Mesh mesh3 = loadMesh(result["modelbox"].as<std::string>());
+  Mesh columnSeatMesh = loadMesh(result["model"].as<std::string>());
+  Mesh boxMesh = loadMesh(result["modelbox"].as<std::string>());
+  Mesh twodeeMesh = load2DMesh(result["twodee"].as<std::string>());
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
@@ -219,12 +227,18 @@ int main(int argc, char* argv[]){
 
     for (unsigned int i = 0; i < 5; i++){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f))));
-      drawMesh(mesh3);
+      drawMesh(boxMesh);
     }
 
-
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f))));
-    drawMesh(mesh2);
+    drawMesh(columnSeatMesh);
+    
+    glUseProgram(twodeeShaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); 
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(0.0f, 0.0f, 3.0f))));
+   
+    drawMesh(twodeeMesh);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -242,4 +256,5 @@ int main(int argc, char* argv[]){
   glfwTerminate(); 
   return 0;
 }
+
 

@@ -13,7 +13,6 @@ void stopSoundSystem(){
   alutExit();
 }
 
-
 void playSound(ALuint soundSource){
   alSourcePlay(soundSource);
 }

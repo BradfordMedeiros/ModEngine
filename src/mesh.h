@@ -1,6 +1,8 @@
 #ifndef MOD_MESH
 #define MOD_MESH
 #include <iostream>
+#include <glm/glm.hpp>
+
 
 struct Texture {
    unsigned int textureId;
@@ -20,6 +22,7 @@ struct Mesh {
 };
 
 Mesh loadMesh(std::string modelPath);
+Mesh load2DMesh(std::string imagePath);
 void drawMesh(Mesh);  
 
 #endif 
