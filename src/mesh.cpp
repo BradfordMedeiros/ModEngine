@@ -117,8 +117,6 @@ Texture loadTexture(std::string textureFilePath){
   Texture tex = Texture {
     .textureId = texture,
     .data = data,
-    .textureWidth = textureWidth,
-    .textureHeight = textureHeight,
   };
 
   return tex;
