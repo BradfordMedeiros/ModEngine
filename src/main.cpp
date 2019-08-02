@@ -96,6 +96,7 @@ int main(int argc, char* argv[]){
    ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("m,model", "Model to load", cxxopts::value<std::string>()->default_value("./res/models/column_seat/column_seat.obj"))
+   ("b,modelbox", "Second model to load", cxxopts::value<std::string>()->default_value("./res/models/column_seat/column_seat.obj"))
    ("h,help", "Print help")
   ;   
 
@@ -195,8 +196,8 @@ int main(int argc, char* argv[]){
   glm::mat4 model = glm::mat4(1.0f);
   
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
-  Mesh mesh = loadMesh(texturePath);
-  Mesh mesh2 = loadMesh2(result["model"].as<std::string>());
+  Mesh mesh2 = loadMesh(result["model"].as<std::string>());
+  Mesh mesh3 = loadMesh(result["modelbox"].as<std::string>());
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
@@ -218,7 +219,7 @@ int main(int argc, char* argv[]){
 
     for (unsigned int i = 0; i < 10; i++){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(i * 1.5f, 0.0f, 0.0f))));
-     drawMesh(mesh);
+      drawMesh(mesh3);
     }
     drawMesh(mesh2);
 
@@ -238,3 +239,4 @@ int main(int argc, char* argv[]){
   glfwTerminate(); 
   return 0;
 }
+

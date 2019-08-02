@@ -19,8 +19,7 @@ struct Mesh {
   unsigned int numElements;
 };
 
-Mesh loadMesh(std::string textureFilePath);
-Mesh loadMesh2(std::string modelPath);
+Mesh loadMesh(std::string modelPath);
 void drawMesh(Mesh);  
 
 #endif 
