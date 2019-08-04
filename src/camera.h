@@ -6,11 +6,12 @@
 
 class Camera {
 private:
-  glm::vec3 position, front, up;
+  glm::vec3 front, up;
   float speed;
   float pitch, yaw;
   void setFront(float yaw, float pitch);
 public:
+  glm::vec3 position;
   Camera(glm::vec3 position, glm::vec3 up, float speed, float pitch, float yaw);
   glm::mat4 getView();
   void moveFront();

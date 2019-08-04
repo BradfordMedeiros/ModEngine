@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "./shaders.h"
 #include "./mesh.h"
@@ -24,7 +25,7 @@ unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 glm::mat4 projection;
 
-Camera cam(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0, 1.0f, 0.0f), 0.2f, 0.0f, 0.0f);
+Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 0.2f, -20.0f, 30.0f);
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -137,8 +138,6 @@ int main(int argc, char* argv[]){
      return -1;
   }
 
-  //loadModel(result["model"].as<std::string>());
-  
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
 
@@ -205,7 +204,8 @@ int main(int argc, char* argv[]){
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
   Mesh columnSeatMesh = loadMesh(result["model"].as<std::string>());
   Mesh boxMesh = loadMesh(result["modelbox"].as<std::string>());
-  Mesh twodeeMesh = load2DMesh(result["twodee"].as<std::string>());
+  Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
+
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
@@ -217,13 +217,12 @@ int main(int argc, char* argv[]){
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glUseProgram(shaderProgram);
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0.1, 0.1, 0.1, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 view = cam.renderView();
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-
-    glClearColor(0.1, 0.1, 0.1, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (unsigned int i = 0; i < 5; i++){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f))));
@@ -236,9 +235,18 @@ int main(int argc, char* argv[]){
     glUseProgram(twodeeShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); 
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(0.0f, 1.7f, 1.05f))));
-   
-    drawMesh(twodeeMesh);
+    
+    glm::mat4 grassModel = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, glm::vec3(0.0, 1.0f, 0.0f)));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(grassModel));
+    drawMesh(grassMesh);
+
+    // billboard 2d mesh
+    // get up vector here
+    // get position vector here 
+    // get player position here then glm::lookAt  
+    // and that becomes the matrix for the billboard
+ 
+    std::cout << "position is: (" << cam.position.x << std::endl;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
