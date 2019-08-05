@@ -6,6 +6,8 @@
 #include "./mesh.h"
 #include "./loadmodel.h"
 
+// Generating the VAO per model is probaby not the most efficient, but figure that this is 
+// a clean abstraction, and we can optimize this fucker after we get more features in it.
 Mesh loadMesh(std::string modelPath){
   std::vector<ModelData> models = loadModel(modelPath);
   
@@ -42,15 +44,10 @@ Mesh loadMesh(std::string modelPath){
   return mesh; 
 }
 
-float quadVerts[] = {
-  -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-  -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-   1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-   1.0f,  1.0f, 0.0f,  1.0f, 1.0f
-};
-unsigned int indices[] = {0, 1, 2, 0, 2, 3 };
+Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indices[], 
+  unsigned int dataSize, unsigned int numIndices, unsigned int vertexWidth, unsigned int textureWidth){
+  unsigned int bufferWidth = vertexWidth + textureWidth;
 
-Mesh load2DMesh(std::string imagePath){
   Texture texture = loadTexture(imagePath);
 
   unsigned int VAO;
@@ -60,17 +57,17 @@ Mesh load2DMesh(std::string imagePath){
   unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, &(indices[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numIndices, &(indices[0]), GL_STATIC_DRAW);
 
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 20, &(quadVerts[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * dataSize, &(vertices[0]), GL_STATIC_DRAW);
   
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
+  glVertexAttribPointer(0, vertexWidth, GL_FLOAT, GL_FALSE, sizeof(float) * bufferWidth, (void*)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
+  glVertexAttribPointer(1, textureWidth, GL_FLOAT, GL_FALSE, sizeof(float) *  bufferWidth, (void*)(sizeof(float) * vertexWidth));
   glEnableVertexAttribArray(1);
  
   Mesh mesh = {
@@ -79,6 +76,26 @@ Mesh load2DMesh(std::string imagePath){
     .numElements = 6,
   };
   return mesh;
+}
+Mesh load2DMesh(std::string imagePath){
+  float quadVerts[] = {
+    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+    1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+    1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+  };
+  unsigned int indices[] = {0, 1, 2, 0, 2, 3};
+  return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2);
+}
+Mesh loadSpriteMesh(std::string imagePath){
+  float uiVerts[] = {
+    0.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+    0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+    1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+  };
+  unsigned int indices[] = {0, 1, 2, 0, 2, 3};
+  return load2DMeshHelper(imagePath, uiVerts, indices, 20, 6, 3, 2);  
 }
 
 void drawMesh(Mesh mesh){
@@ -129,3 +146,5 @@ void useTexture(Texture texture){
 void freeTextureData(Texture& texture){
    stbi_image_free(texture.data);
 }
+
+

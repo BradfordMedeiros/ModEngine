@@ -90,6 +90,9 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 unsigned int framebufferTexture;
 unsigned int rbo;
 
+glm::mat4 orthoProj;
+
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -100,7 +103,8 @@ int main(int argc, char* argv[]){
    ("b,modelbox", "Second model to load", cxxopts::value<std::string>()->default_value("./res/models/box/box.obj"))
    ("d,twodee", "Image to use for texture for 2d mesh", cxxopts::value<std::string>()->default_value("./res/textures/grass.png"))
    ("e,twoshader", "Shader to use for 2d mesh", cxxopts::value<std::string>()->default_value("./res/shaders/2d"))
-
+   ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
+   ("c,crosshair", "icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
    ("h,help", "Print help")
   ;   
 
@@ -114,6 +118,7 @@ int main(int argc, char* argv[]){
   const std::string texturePath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
   const std::string twodeeShaderPath = result["twoshader"].as<std::string>();
+  const std::string uiShaderPath = result["uishader"].as<std::string>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
   glfwInit();
@@ -185,6 +190,8 @@ int main(int argc, char* argv[]){
      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentScreenWidth, currentScreenHeight);
      glViewport(0, 0, currentScreenWidth, currentScreenHeight);
      projection = glm::perspective(glm::radians(45.0f), (float)currentScreenWidth / currentScreenHeight, 0.1f, 100.0f); 
+     orthoProj = glm::ortho(0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f);  
+
   }; 
 
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight);
@@ -199,13 +206,16 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
   unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
 
+  std::cout << "INFO: ui shader file path is " << uiShaderPath << std::endl;
+  unsigned int uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl");
+
   glm::mat4 model = glm::mat4(1.0f);
-  
+
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
   Mesh columnSeatMesh = loadMesh(result["model"].as<std::string>());
   Mesh boxMesh = loadMesh(result["modelbox"].as<std::string>());
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
-
+  Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
@@ -240,13 +250,12 @@ int main(int argc, char* argv[]){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(grassModel));
     drawMesh(grassMesh);
 
-    // billboard 2d mesh
-    // get up vector here
-    // get position vector here 
-    // get player position here then glm::lookAt  
-    // and that becomes the matrix for the billboard
- 
-    std::cout << "position is: (" << cam.position.x << std::endl;
+
+    std::cout << "position: " << cam.position.x << ", " << cam.position.y << ", "  << cam.position.z << std::endl;
+    glUseProgram(uiShaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj));    
+    drawMesh(crosshairSprite);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
