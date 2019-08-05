@@ -92,6 +92,14 @@ unsigned int rbo;
 
 glm::mat4 orthoProj;
 
+void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height){
+  glm::mat4 modelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(left, top, 0)), glm::vec3(width * 1.0f, height * 1.0f, 1.0f)); 
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+  drawMesh(mesh);
+}
+void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height){
+  drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height);
+}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -190,8 +198,7 @@ int main(int argc, char* argv[]){
      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentScreenWidth, currentScreenHeight);
      glViewport(0, 0, currentScreenWidth, currentScreenHeight);
      projection = glm::perspective(glm::radians(45.0f), (float)currentScreenWidth / currentScreenHeight, 0.1f, 100.0f); 
-     orthoProj = glm::ortho(0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f);  
-
+     orthoProj = glm::ortho(0.0f, (float)currentScreenWidth, (float)currentScreenHeight, 0.0f, -1.0f, 1.0f);  
   }; 
 
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight);
@@ -250,12 +257,9 @@ int main(int argc, char* argv[]){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(grassModel));
     drawMesh(grassMesh);
 
-
-    std::cout << "position: " << cam.position.x << ", " << cam.position.y << ", "  << cam.position.z << std::endl;
     glUseProgram(uiShaderProgram);
-    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj));    
-    drawMesh(crosshairSprite);
+    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+    drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 100, 100);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
