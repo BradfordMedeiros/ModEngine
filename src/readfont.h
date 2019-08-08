@@ -17,6 +17,7 @@ struct fontInfo {
 
 struct font {
 	std::string fontname;
+	std::string image;
 	std::vector<fontInfo> chars;
 };
 

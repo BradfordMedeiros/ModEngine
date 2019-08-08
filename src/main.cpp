@@ -114,6 +114,7 @@ int main(int argc, char* argv[]){
    ("e,twoshader", "Shader to use for 2d mesh", cxxopts::value<std::string>()->default_value("./res/shaders/2d"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,crosshair", "icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
+   ("o,font", "font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("h,help", "Print help")
   ;   
 
@@ -228,7 +229,7 @@ int main(int argc, char* argv[]){
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
 
-  font fontToRender = readFont("./res/textures/fonts/gamefont");
+  font fontToRender = readFont(result["font"].as<std::string>());
   for (auto &font : fontToRender.chars) {  
     std::cout << font.id << " ("  << font.x << "," << font.y << ")" << std::endl;
   }
