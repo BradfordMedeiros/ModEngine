@@ -1,21 +1,10 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <glad/glad.h>
 #include <stdexcept>
 #include "./shaders.h"
+#include "./util.h"
 
 #define SHADER_INFO_LOG_LENGTH 512
-
-std::string loadFile(std::string filepath){
-   std::ifstream file(filepath.c_str());
-   if (!file.good()){
-     throw std::runtime_error("file not found" + filepath);
-   }   
-   std::stringstream buffer;
-   buffer << file.rdbuf();
-   return buffer.str();
-}
 
 struct shaderError {
   bool isError;

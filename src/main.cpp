@@ -16,6 +16,7 @@
 #include "./camera.h"
 #include "./sound.h"
 #include "./loadmodel.h"
+#include "./readfont.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -226,6 +227,12 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
+
+  font fontToRender = readFont("./res/textures/fonts/gamefont");
+  for (auto &font : fontToRender.chars) {  
+    std::cout << font.id << " ("  << font.x << "," << font.y << ")" << std::endl;
+  }
+
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
     glfwPollEvents();
@@ -259,7 +266,7 @@ int main(int argc, char* argv[]){
 
     glUseProgram(uiShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
-    drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 100, 100);
+    drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 

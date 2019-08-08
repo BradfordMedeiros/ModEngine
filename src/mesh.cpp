@@ -113,7 +113,6 @@ Texture loadTexture(std::string textureFilePath){
   glBindTexture(GL_TEXTURE_2D, texture);
   
   unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
-  std::cout << "num channels: " << numChannels << std::endl;
 
   GLint format = GL_RGB;
   if (numChannels == 4) {
