@@ -1,7 +1,6 @@
+#include <fstream>
 #include "./readfont.h"
 #include "./util.h"
-#include <fstream>
-
 
 font readFont(std::string fontFolderpath){
 	std::string metadata = fontFolderpath + "/info.sfl";

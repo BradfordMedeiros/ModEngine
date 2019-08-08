@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <stb_image.h>
-#include "glad/glad.h"
 #include <stb_image.h>
+#include "glad/glad.h"
 #include "./mesh.h"
 #include "./loadmodel.h"
 

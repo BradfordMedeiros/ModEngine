@@ -3,7 +3,6 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-
 struct Texture {
    unsigned int textureId;
    unsigned char* data;

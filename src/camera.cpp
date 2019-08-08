@@ -41,5 +41,3 @@ void Camera::setFrontDelta(float deltaYaw, float deltaPitch){
 glm::mat4 Camera::renderView(){
    return glm::lookAt(this->position, this->position + this->front, this->up);
 }
-  
-

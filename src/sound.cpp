@@ -4,15 +4,12 @@
 #include <cstring>
 #include "./sound.h"
 
-
 void startSoundSystem(){
   alutInit(NULL, NULL);
 }
-
 void stopSoundSystem(){
   alutExit();
 }
-
 void playSound(ALuint soundSource){
   alSourcePlay(soundSource);
 }
