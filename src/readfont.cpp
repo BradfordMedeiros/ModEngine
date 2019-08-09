@@ -43,10 +43,23 @@ font readFont(std::string fontFolderpath){
         std::getline(singleFontLine, content, ' ');
         character.y = std::stoul(content);
 
-        info.chars.push_back(character);
+        info.chars[character.id] = character;
     }
 
-    file.close();
-	
-	return info;
+    file.close();	
+    return info;
 }
+
+// font, imagewidth, imageheight -> get ndi for texture coordinates
+// then draw similar to 2d mesh, but with texture coords mapped differently 
+
+
+
+
+
+
+
+
+
+
+

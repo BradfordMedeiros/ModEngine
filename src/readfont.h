@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include <stdexcept>
 #include <sstream>
 
@@ -16,7 +17,7 @@ struct fontInfo {
 struct font {
 	std::string fontname;
 	std::string image;
-	std::vector<fontInfo> chars;
+	std::map<unsigned int, fontInfo> chars;
 };
 
 font readFont(std::string filepath);

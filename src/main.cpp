@@ -56,6 +56,9 @@ void handleInput(GLFWwindow *window){
       playSound(soundBuffer);
    }
 }   
+void keycallback(GLFWwindow* window, unsigned int codepoint){
+  std::cout << "codepoint " << (char)codepoint << std::endl;
+}
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -230,12 +233,14 @@ int main(int argc, char* argv[]){
   
 
   font fontToRender = readFont(result["font"].as<std::string>());
-  for (auto &font : fontToRender.chars) {  
+  /*for (auto &font : fontToRender.chars) {  
     std::cout << font.id << " ("  << font.x << "," << font.y << ")" << std::endl;
-  }
+  }*/
 
+  glfwSetCharCallback(window, keycallback);
   while (!glfwWindowShouldClose(window)){
     handleInput(window);
+
     glfwPollEvents();
     glfwSwapBuffers(window);
     
