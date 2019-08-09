@@ -2,10 +2,14 @@
 #include "./readfont.h"
 #include "./util.h"
 
-fontInfo getFont(unsigned int x, unsigned int y, unsigned int imageWidth, unsigned int imageHeight){
+fontInfo getFont(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int imageWidth, unsigned int imageHeight){
     fontInfo character;
+
     character.x = x/(float)imageWidth;
     character.y = y/(float)imageHeight;
+    character.width = width/(float)imageWidth;
+    character.height = height/(float)imageHeight;
+    
     return character;
 }
 
@@ -36,9 +40,9 @@ font readFont(std::string fontFolderpath){
     unsigned int numchars = std::stoul(line);
 
     getline(file, line);        
-    unsigned int width = std::stoul(line);
+    unsigned int imageWidth = std::stoul(line);
     getline(file, line);       
-    unsigned int height = std::stoul(line);
+    unsigned int imageHeight = std::stoul(line);
 
 	for (unsigned int i = 0; i < numchars, getline(file,line); i++) {
         std::stringstream singleFontLine(line);
@@ -53,7 +57,13 @@ font readFont(std::string fontFolderpath){
         std::getline(singleFontLine, content, ' ');
         unsigned int y = std::stoul(content);
 
-        info.chars[ascii] = getFont(x, y, width, height);
+        std::getline(singleFontLine, content, ' ');
+        unsigned int width = std::stoul(content);
+
+        std::getline(singleFontLine, content, ' ');
+        unsigned int height = std::stoul(content);
+
+        info.chars[ascii] = getFont(x, y, width, height, imageWidth, imageHeight);
     }
 
     file.close();	

@@ -89,10 +89,10 @@ Mesh load2DMesh(std::string imagePath){
 }
 Mesh load2DMeshTexCoords(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi){
   float quadVerts[] = {
-    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-    1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+    -1.0f,  1.0f, 0.0f,  offsetxndi, offsetyndi + heightndi,
+    -1.0f, -1.0f, 0.0f,  offsetxndi, offsetyndi,
+    1.0f, -1.0f, 0.0f,   offsetxndi + widthndi, offsetyndi,
+    1.0f,  1.0f, 0.0f,   offsetxndi + widthndi, offsetyndi + heightndi,
   };
   unsigned int indices[] = {0, 1, 2, 0, 2, 3};
   return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2);

@@ -8,9 +8,12 @@
 #include <stdexcept>
 #include <sstream>
 
+// This is all ndi so [0, 1] relative to texture
 struct fontInfo {
-	float x;	// maybe this should be ndi
+	float x;	
 	float y;
+	float width;
+	float height;
 };
 
 struct font {
