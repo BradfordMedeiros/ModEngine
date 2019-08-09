@@ -3,7 +3,7 @@
 #include "./util.h"
 
 font readFont(std::string fontFolderpath){
-	std::string metadata = fontFolderpath + "/info.sfl";
+	std::string metadata = fontFolderpath + "/info.modfont";
 	std::ifstream file(metadata);
 
 	font info;
@@ -28,6 +28,14 @@ font readFont(std::string fontFolderpath){
     std::getline(file, line);
     unsigned int numchars = std::stoul(line);
 
+    getline(file, line);        
+    unsigned int width = std::stoul(line);
+    info.imageWidth = width;
+
+    getline(file, line);       
+    unsigned int height = std::stoul(line);
+    info.imageHeight = height;
+    
 	for (unsigned int i = 0; i < numchars, getline(file,line); i++) {
         std::stringstream singleFontLine(line);
 		std::string content;
@@ -35,7 +43,7 @@ font readFont(std::string fontFolderpath){
 		fontInfo character;
 
         std::getline(singleFontLine, content, ' ');
-        character.id = std::stoul(content),
+        long unsigned int ascii = std::stoul(content);
 
         std::getline(singleFontLine, content, ' ');
         character.x = std::stoul(content);
@@ -43,7 +51,7 @@ font readFont(std::string fontFolderpath){
         std::getline(singleFontLine, content, ' ');
         character.y = std::stoul(content);
 
-        info.chars[character.id] = character;
+        info.chars[ascii] = character;
     }
 
     file.close();	

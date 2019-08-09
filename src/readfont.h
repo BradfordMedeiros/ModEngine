@@ -9,15 +9,22 @@
 #include <sstream>
 
 struct fontInfo {
-	long unsigned int id;
-	long unsigned int x;
+	long unsigned int x;	// maybe this should be ndi
 	long unsigned int y;
-
 };
 struct font {
 	std::string fontname;
 	std::string image;
 	std::map<unsigned int, fontInfo> chars;
+	unsigned int imageWidth;
+	unsigned int imageHeight;
+};
+
+struct convertedCoords {
+	float offsetxndi;
+	float offsetyndi;
+	float widthndi;
+	float heightndi;
 };
 
 font readFont(std::string filepath);

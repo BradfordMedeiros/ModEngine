@@ -57,7 +57,7 @@ void handleInput(GLFWwindow *window){
    }
 }   
 void keycallback(GLFWwindow* window, unsigned int codepoint){
-  std::cout << "codepoint " << (char)codepoint << std::endl;
+  //std::cout << "codepoint " << (char)codepoint << std::endl;
 }
 
 float quadVertices[] = {
@@ -224,15 +224,18 @@ int main(int argc, char* argv[]){
   glm::mat4 model = glm::mat4(1.0f);
 
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
+
+  font fontToRender = readFont(result["font"].as<std::string>());
+
   Mesh columnSeatMesh = loadMesh(result["model"].as<std::string>());
   Mesh boxMesh = loadMesh(result["modelbox"].as<std::string>());
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
+  Mesh fontMesh = load2DMeshTexCoords(fontToRender.image, 1.0, 1.0, 1.0, 1.0);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
 
-  font fontToRender = readFont(result["font"].as<std::string>());
   /*for (auto &font : fontToRender.chars) {  
     std::cout << font.id << " ("  << font.x << "," << font.y << ")" << std::endl;
   }*/
@@ -273,6 +276,8 @@ int main(int argc, char* argv[]){
     glUseProgram(uiShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
     drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
+
+    drawSpriteAround(uiShaderProgram, fontMesh, currentScreenWidth /4 + 200, currentScreenHeight /4 + 200, 100, 100);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
