@@ -235,10 +235,9 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   
-
-  /*for (auto &font : fontToRender.chars) {  
-    std::cout << font.id << " ("  << font.x << "," << font.y << ")" << std::endl;
-  }*/
+  for ( const auto &[key, font]: fontToRender.chars ) {
+    std::cout << key << " ("  << font.x << "," << font.y << ")" << std::endl;
+  }
 
   glfwSetCharCallback(window, keycallback);
   while (!glfwWindowShouldClose(window)){

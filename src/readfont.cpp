@@ -2,6 +2,13 @@
 #include "./readfont.h"
 #include "./util.h"
 
+fontInfo getFont(unsigned int x, unsigned int y, unsigned int imageWidth, unsigned int imageHeight){
+    fontInfo character;
+    character.x = x/(float)imageWidth;
+    character.y = y/(float)imageHeight;
+    return character;
+}
+
 font readFont(std::string fontFolderpath){
 	std::string metadata = fontFolderpath + "/info.modfont";
 	std::ifstream file(metadata);
@@ -30,28 +37,23 @@ font readFont(std::string fontFolderpath){
 
     getline(file, line);        
     unsigned int width = std::stoul(line);
-    info.imageWidth = width;
-
     getline(file, line);       
     unsigned int height = std::stoul(line);
-    info.imageHeight = height;
-    
+
 	for (unsigned int i = 0; i < numchars, getline(file,line); i++) {
         std::stringstream singleFontLine(line);
 		std::string content;
 
-		fontInfo character;
+        std::getline(singleFontLine, content, ' ');
+        unsigned int ascii = std::stoul(content);
 
         std::getline(singleFontLine, content, ' ');
-        long unsigned int ascii = std::stoul(content);
+        unsigned int x = std::stoul(content);
 
         std::getline(singleFontLine, content, ' ');
-        character.x = std::stoul(content);
+        unsigned int y = std::stoul(content);
 
-        std::getline(singleFontLine, content, ' ');
-        character.y = std::stoul(content);
-
-        info.chars[ascii] = character;
+        info.chars[ascii] = getFont(x, y, width, height);
     }
 
     file.close();	
