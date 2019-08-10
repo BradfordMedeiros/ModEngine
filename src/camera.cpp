@@ -8,21 +8,21 @@ glm::vec3 calculateFront(float yaw, float pitch){
    glm::vec3 cameraFront = glm::normalize(front);
    return cameraFront;
 }
-Camera::Camera(glm::vec3 position, glm::vec3 up, float speed, float pitch, float yaw): position(position), up(up), speed(speed), pitch(pitch), yaw(yaw) {
+Camera::Camera(glm::vec3 position, glm::vec3 up, float speed, float sensitivity, float pitch, float yaw): position(position), up(up), speed(speed), sensitivity(sensitivity), pitch(pitch), yaw(yaw) {
    this->front = calculateFront(yaw, pitch);  
 }
 
-void Camera::moveFront(){
-  this->position += this->speed * this->front;
+void Camera::moveFront(float deltaTime){
+  this->position += this->speed * this->front * deltaTime;
 }
-void Camera::moveBack(){
-  this->position -= this->speed * this->front;
+void Camera::moveBack(float deltaTime){
+  this->position -= this->speed * this->front * deltaTime;
 }
-void Camera::moveLeft(){
-  this->position -= this->speed * glm::normalize(glm::cross(this->front, this->up));
+void Camera::moveLeft(float deltaTime){
+  this->position -= this->speed * glm::normalize(glm::cross(this->front, this->up)) * deltaTime;
 }
-void Camera::moveRight(){
-  this->position += this->speed * glm::normalize(glm::cross(this->front, this->up));
+void Camera::moveRight(float deltaTime){
+  this->position += this->speed * glm::normalize(glm::cross(this->front, this->up)) * deltaTime;
 }
 void Camera::setFront(float yaw, float pitch){
   if(pitch > 89.0f){
@@ -35,8 +35,8 @@ void Camera::setFront(float yaw, float pitch){
   this->pitch = pitch;
   this->front = calculateFront(this->yaw, this->pitch);
 }
-void Camera::setFrontDelta(float deltaYaw, float deltaPitch){
-  this->setFront(this->yaw + deltaYaw, this->pitch + deltaPitch);
+void Camera::setFrontDelta(float deltaYaw, float deltaPitch, float deltaTime){
+  this->setFront(this->yaw + (deltaYaw * this->sensitivity * deltaTime), this->pitch + (deltaPitch * this->sensitivity * deltaTime));
 }
 glm::mat4 Camera::renderView(){
    return glm::lookAt(this->position, this->position + this->front, this->up);

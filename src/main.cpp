@@ -26,7 +26,7 @@ unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 glm::mat4 projection;
 
-Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 0.2f, -20.0f, 30.0f);
+Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 100.0f, -20.0f, 30.0f);
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -41,16 +41,16 @@ void handleInput(GLFWwindow *window){
       glfwSetWindowShouldClose(window, true);
    }
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-      cam.moveFront();
+      cam.moveFront(deltaTime);
    }
    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-      cam.moveLeft();
+      cam.moveLeft(deltaTime);
    }
    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
-      cam.moveBack();
+      cam.moveBack(deltaTime);
    }
    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
-      cam.moveRight();
+      cam.moveRight(deltaTime);
    }
    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
       playSound(soundBuffer);
@@ -58,10 +58,8 @@ void handleInput(GLFWwindow *window){
 }   
 
 std::map<unsigned int, Mesh> fontMeshes;
-Mesh currentCharacter;
 void keycallback(GLFWwindow* window, unsigned int codepoint){
-      currentCharacter = fontMeshes[codepoint];
-
+  //
 }
 
 float quadVertices[] = {
@@ -92,7 +90,7 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
     float sensitivity = 0.05;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
-    cam.setFrontDelta(xoffset, yoffset);
+    cam.setFrontDelta(xoffset, yoffset, deltaTime);
 }
 
 unsigned int framebufferTexture;
@@ -108,6 +106,16 @@ void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float wid
 void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height){
   drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height);
 }
+void drawWords(GLint shaderProgram, std::string word, float left, float top, unsigned int fontSize){
+  float leftAlign = left;
+
+  for (char& character : word){
+    drawSprite(shaderProgram, fontMeshes[(int)character], left + leftAlign, top, fontSize, fontSize);
+    leftAlign += 14;
+  }
+}
+
+unsigned int currentFramerate = 100;
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -239,14 +247,27 @@ int main(int argc, char* argv[]){
   for ( const auto &[ascii, font]: fontToRender.chars ) {
     fontMeshes[ascii] = load2DMeshTexCoords(fontToRender.image, font.x, font.y, font.width, font.height);
   }
-  currentCharacter = fontMeshes[70];
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
-  
-  
-
   glfwSetCharCallback(window, keycallback);
+
+  unsigned int frameCount = 0;
+  float previous = glfwGetTime();
+  float last60 = previous;
+
   while (!glfwWindowShouldClose(window)){
+    frameCount++;
+    float now = glfwGetTime();
+    deltaTime = now - previous;     // this should be used 
+    previous = now;
+
+    if (frameCount == 60){
+      frameCount = 0;
+      float timedelta = now - last60;
+      last60 = now;
+      currentFramerate = (int)60/(timedelta);
+    }
+ 
     handleInput(window);
 
     glfwPollEvents();
@@ -282,7 +303,7 @@ int main(int argc, char* argv[]){
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
     drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
 
-    drawSpriteAround(uiShaderProgram, currentCharacter, currentScreenWidth /4 + 200, currentScreenHeight /4 + 200, 100, 100);
+    drawWords(uiShaderProgram, std::to_string(currentFramerate), 10, 20, 4);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -292,7 +313,6 @@ int main(int argc, char* argv[]){
     glBindVertexArray(quadVAO);
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
