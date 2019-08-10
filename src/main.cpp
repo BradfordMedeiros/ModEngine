@@ -24,6 +24,11 @@
 unsigned int currentScreenWidth = INITIAL_SCREEN_WIDTH;
 unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
+unsigned int cursorLeft = currentScreenWidth / 4;
+unsigned int cursorTop  = currentScreenHeight / 4;
+bool isSelectionMode = false;
+bool isRotateSelection = false;
+
 glm::mat4 projection;
 
 Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
@@ -55,6 +60,10 @@ void handleInput(GLFWwindow *window){
    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
       playSound(soundBuffer);
    }
+   if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
+      isSelectionMode = !isSelectionMode;
+      isRotateSelection = false;
+   }
 }   
 
 std::map<unsigned int, Mesh> fontMeshes;
@@ -62,15 +71,51 @@ void keycallback(GLFWwindow* window, unsigned int codepoint){
   // this can get the raw text input into the keyboard
 }
 
+struct Color {
+  GLfloat r;
+  GLfloat g;
+  GLfloat b;
+};
+struct GLPosition {
+  GLint x;
+  GLint y;
+};
+Color getPixelColor(GLint x, GLint y) {
+    Color color;
+    glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, &color);
+    return color;
+}
+GLPosition getMousePosition(){
+  GLPosition position = {
+    .x = 10, 
+    .y = 40,
+  };
+  return position;
+}
+
 std::string additionalText = "";
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
         playSound(soundBuffer);
     }
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE){
+      if (action == GLFW_PRESS){
+        isRotateSelection = true;
+      }else if (action == GLFW_RELEASE){
+        isRotateSelection = false;
+      }
+      cursorLeft = currentScreenWidth / 2;
+      cursorTop = currentScreenHeight / 2;
+    }
+        
+    Color pixelColor = getPixelColor(cursorLeft, cursorTop);
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-        additionalText = "     <10, 20, 30>";
+      std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
+      additionalText = "     <10, 20, 30>";
     }
 }
+
+
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -100,7 +145,12 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
     float sensitivity = 0.05;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
-    cam.setFrontDelta(xoffset, yoffset, deltaTime);
+    if (!isSelectionMode || isRotateSelection){
+      cam.setFrontDelta(xoffset, yoffset, deltaTime);
+    }else{
+      cursorLeft += (int)(xoffset * 15);
+      cursorTop  -= (int)(yoffset * 15);
+    }
 }
 
 unsigned int framebufferTexture;
@@ -312,7 +362,13 @@ int main(int argc, char* argv[]){
 
     glUseProgram(uiShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
-    drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
+
+    if (!isSelectionMode){
+      drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
+    }else if (!isRotateSelection){
+      drawSpriteAround(uiShaderProgram, crosshairSprite, cursorLeft, cursorTop, 20, 20);
+    }
+
 
     drawWords(uiShaderProgram, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
 

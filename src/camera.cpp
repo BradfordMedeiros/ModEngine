@@ -35,6 +35,7 @@ void Camera::setFront(float yaw, float pitch){
   this->pitch = pitch;
   this->front = calculateFront(this->yaw, this->pitch);
 }
+// @todo fix this, makes looking around feel jerky
 void Camera::setFrontDelta(float deltaYaw, float deltaPitch, float deltaTime){
   this->setFront(this->yaw + (deltaYaw * this->sensitivity * deltaTime), this->pitch + (deltaPitch * this->sensitivity * deltaTime));
 }
