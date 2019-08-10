@@ -26,7 +26,7 @@ unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 glm::mat4 projection;
 
-Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 100.0f, -20.0f, 30.0f);
+Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -59,7 +59,17 @@ void handleInput(GLFWwindow *window){
 
 std::map<unsigned int, Mesh> fontMeshes;
 void keycallback(GLFWwindow* window, unsigned int codepoint){
-  //
+  // this can get the raw text input into the keyboard
+}
+
+std::string additionalText = "";
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+        playSound(soundBuffer);
+    }
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+        additionalText = "     <10, 20, 30>";
+    }
 }
 
 float quadVertices[] = {
@@ -250,6 +260,7 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
 
   unsigned int frameCount = 0;
   float previous = glfwGetTime();
@@ -303,7 +314,7 @@ int main(int argc, char* argv[]){
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
     drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
 
-    drawWords(uiShaderProgram, std::to_string(currentFramerate), 10, 20, 4);
+    drawWords(uiShaderProgram, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 

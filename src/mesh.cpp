@@ -30,7 +30,8 @@ Mesh loadMesh(std::string modelPath){
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
   glEnableVertexAttribArray(0);
  
-  Texture texture = loadTexture(model.texturePaths[0]);
+  // @todo texture loading can be optimized when textures are shared between objects
+  Texture texture = loadTexture(model.texturePaths[0]); 
   useTexture(texture);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(1);
