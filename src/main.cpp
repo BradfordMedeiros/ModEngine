@@ -18,6 +18,7 @@
 #include "./loadmodel.h"
 #include "./readfont.h"
 #include "./sprites.h"
+#include "./scene.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -158,7 +159,6 @@ unsigned int rbo;
 
 glm::mat4 orthoProj;
 
-
 unsigned int currentFramerate = 100;
 
 int main(int argc, char* argv[]){
@@ -170,7 +170,6 @@ int main(int argc, char* argv[]){
    ("m,model", "Model to load", cxxopts::value<std::string>()->default_value("./res/models/column_seat/column_seat.obj"))
    ("b,modelbox", "Second model to load", cxxopts::value<std::string>()->default_value("./res/models/box/box.obj"))
    ("d,twodee", "Image to use for texture for 2d mesh", cxxopts::value<std::string>()->default_value("./res/textures/grass.png"))
-   ("e,twoshader", "Shader to use for 2d mesh", cxxopts::value<std::string>()->default_value("./res/shaders/2d"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,crosshair", "icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
    ("o,font", "font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
@@ -186,7 +185,6 @@ int main(int argc, char* argv[]){
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   const std::string texturePath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
-  const std::string twodeeShaderPath = result["twoshader"].as<std::string>();
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
@@ -267,9 +265,6 @@ int main(int argc, char* argv[]){
   
   std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");
-
-  std::cout << "INFO: 2D shader file path is " << twodeeShaderPath << std::endl;
-  unsigned int twodeeShaderProgram = loadShader(twodeeShaderPath + "/vertex.glsl", twodeeShaderPath + "/fragment.glsl");
   
   std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
   unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
@@ -289,7 +284,8 @@ int main(int argc, char* argv[]){
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  
+  Scene scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
+
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -326,21 +322,15 @@ int main(int argc, char* argv[]){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
 
-    for (unsigned int i = 0; i < 5; i++){
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f))));
-      drawMesh(boxMesh);
+    for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, scene.gameObjects[i].position)));
+      drawMesh(scene.gameObjects[i].mesh);
+    } 
+    for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
+      glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, scene.rotatingGameObjects[i].position));
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+      drawMesh(scene.rotatingGameObjects[i].mesh);
     }
-
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f))));
-    drawMesh(columnSeatMesh);
-    
-    glUseProgram(twodeeShaderProgram);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); 
-    
-    glm::mat4 grassModel = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, glm::vec3(0.0, 1.0f, 0.0f)));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(grassModel));
-    drawMesh(grassMesh);
 
     glUseProgram(uiShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
