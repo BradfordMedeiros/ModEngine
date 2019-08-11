@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/loadmodel.cpp"
   "${SRC_DIR}/readfont.cpp"
   "${SRC_DIR}/util.cpp"
+  "${SRC_DIR}/sprites.cpp"
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

@@ -17,6 +17,7 @@
 #include "./sound.h"
 #include "./loadmodel.h"
 #include "./readfont.h"
+#include "./sprites.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -35,6 +36,7 @@ Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+
 
 ALuint soundBuffer;
 void handleInput(GLFWwindow *window){
@@ -111,11 +113,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     Color pixelColor = getPixelColor(cursorLeft, cursorTop);
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
       std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
-      additionalText = "     <10, 20, 30>";
+      additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  ";
     }
 }
-
-
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -158,22 +158,6 @@ unsigned int rbo;
 
 glm::mat4 orthoProj;
 
-void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height){
-  glm::mat4 modelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(left, top, 0)), glm::vec3(width * 1.0f, height * 1.0f, 1.0f)); 
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  drawMesh(mesh);
-}
-void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height){
-  drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height);
-}
-void drawWords(GLint shaderProgram, std::string word, float left, float top, unsigned int fontSize){
-  float leftAlign = left;
-
-  for (char& character : word){
-    drawSprite(shaderProgram, fontMeshes[(int)character], left + leftAlign, top, fontSize, fontSize);
-    leftAlign += 14;
-  }
-}
 
 unsigned int currentFramerate = 100;
 
@@ -298,16 +282,14 @@ int main(int argc, char* argv[]){
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
 
   font fontToRender = readFont(result["font"].as<std::string>());
+  fontMeshes = loadFontMeshes(fontToRender);
 
   Mesh columnSeatMesh = loadMesh(result["model"].as<std::string>());
   Mesh boxMesh = loadMesh(result["modelbox"].as<std::string>());
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  for ( const auto &[ascii, font]: fontToRender.chars ) {
-    fontMeshes[ascii] = load2DMeshTexCoords(fontToRender.image, font.x, font.y, font.width, font.height);
-  }
-
+  
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -369,8 +351,7 @@ int main(int argc, char* argv[]){
       drawSpriteAround(uiShaderProgram, crosshairSprite, cursorLeft, cursorTop, 20, 20);
     }
 
-
-    drawWords(uiShaderProgram, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
+    drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 

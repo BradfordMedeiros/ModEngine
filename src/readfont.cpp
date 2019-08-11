@@ -69,17 +69,3 @@ font readFont(std::string fontFolderpath){
     file.close();	
     return info;
 }
-
-// font, imagewidth, imageheight -> get ndi for texture coordinates
-// then draw similar to 2d mesh, but with texture coords mapped differently 
-
-
-
-
-
-
-
-
-
-
-
