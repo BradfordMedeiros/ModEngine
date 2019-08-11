@@ -31,6 +31,9 @@ unsigned int cursorTop  = currentScreenHeight / 4;
 bool isSelectionMode = false;
 bool isRotateSelection = false;
 
+Scene scene;
+unsigned int selectedIndex = -1;
+
 glm::mat4 projection;
 
 Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
@@ -101,7 +104,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
         playSound(soundBuffer);
     }
-    if (button == GLFW_MOUSE_BUTTON_MIDDLE){
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS){
+      selectedIndex = (selectedIndex + 1) % scene.gameObjects.size();
+
       if (action == GLFW_PRESS){
         isRotateSelection = true;
       }else if (action == GLFW_RELEASE){
@@ -284,7 +289,7 @@ int main(int argc, char* argv[]){
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  Scene scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
+  scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
@@ -324,6 +329,8 @@ int main(int argc, char* argv[]){
 
     for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, scene.gameObjects[i].position)));
+      // glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f, 1.0f)  send extra light here
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr((i == selectedIndex) ? glm::vec3(0.0f, 0.0f, 1.0f): glm::vec3(1.0f, 1.0f, 1.0f)));
       drawMesh(scene.gameObjects[i].mesh);
     } 
     for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
