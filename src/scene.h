@@ -5,6 +5,7 @@
 #include "./mesh.h"
 
 struct GameObject {
+  short id;
   glm::vec3 position;
   Mesh& mesh;
 };

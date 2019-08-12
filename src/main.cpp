@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <math.h>     
 
 #include <cxxopts.hpp>
 #include <GLFW/glfw3.h>
@@ -32,7 +33,7 @@ bool isSelectionMode = false;
 bool isRotateSelection = false;
 
 Scene scene;
-unsigned int selectedIndex = -1;
+short selectedIndex = -1;
 
 glm::mat4 projection;
 
@@ -70,6 +71,19 @@ void handleInput(GLFWwindow *window){
       isSelectionMode = !isSelectionMode;
       isRotateSelection = false;
    }
+
+   if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS){
+      scene.gameObjects[selectedIndex].position.x+=0.1;
+   }
+   if (glfwGetKey(window, GLFW_KEY_DOWN ) == GLFW_PRESS){
+      scene.gameObjects[selectedIndex].position.x-=0.1;
+   }
+   if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS){
+      scene.gameObjects[selectedIndex].position.z+=0.1;
+   }
+   if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
+      scene.gameObjects[selectedIndex].position.z-=0.1;
+   }
 }   
 
 std::map<unsigned int, Mesh> fontMeshes;
@@ -88,25 +102,33 @@ struct GLPosition {
 };
 Color getPixelColor(GLint x, GLint y) {
     Color color;
-    glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, &color);
+    glReadPixels(x, currentScreenHeight - y, 1, 1, GL_RGB, GL_FLOAT, &color);
     return color;
 }
-GLPosition getMousePosition(){
-  GLPosition position = {
-    .x = 10, 
-    .y = 40,
-  };
-  return position;
+
+glm::vec3 getColorFromGameobject(GameObject object, bool useSelectionColor, bool isSelected){
+  if (isSelected){
+    return glm::vec3(1.0f, 0.0f, 0.0f);
+  }
+  if (!useSelectionColor){
+    return glm::vec3(1.0f, 1.0f, 1.0f);
+  }
+  float blueChannel = object.id * 0.01;
+  return glm::vec3(0.0f, 0.0f, blueChannel);
 }
+unsigned int getIdFromColor(float r, float g, float b){
+  short objectId = round(b / 0.01);
+  return objectId;
+}
+
 
 std::string additionalText = "";
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
         playSound(soundBuffer);
+        selectedIndex = (selectedIndex + 1) % scene.gameObjects.size();
     }
-    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS){
-      selectedIndex = (selectedIndex + 1) % scene.gameObjects.size();
-
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE){
       if (action == GLFW_PRESS){
         isRotateSelection = true;
       }else if (action == GLFW_RELEASE){
@@ -116,8 +138,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
       cursorTop = currentScreenHeight / 2;
     }
         
-    Color pixelColor = getPixelColor(cursorLeft, cursorTop);
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+      Color pixelColor = getPixelColor(cursorLeft, cursorTop);
+      selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
+      std::cout << "(" << cursorLeft << "," << cursorTop << ")" << std::endl;
       std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
       additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  ";
     }
@@ -158,6 +182,23 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
       cursorTop  -= (int)(yoffset * 15);
     }
 }
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
+  glUseProgram(shaderProgram);
+
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+
+  for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, scene.gameObjects[i].position)));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.gameObjects[i], useSelectionColor, selectedIndex == i)));
+    drawMesh(scene.gameObjects[i].mesh);
+  }  
+  for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
+    glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, scene.rotatingGameObjects[i].position));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    drawMesh(scene.rotatingGameObjects[i].mesh);
+  }  
+}
 
 unsigned int framebufferTexture;
 unsigned int rbo;
@@ -165,6 +206,21 @@ unsigned int rbo;
 glm::mat4 orthoProj;
 
 unsigned int currentFramerate = 100;
+
+void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
+    glUseProgram(uiShaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+
+    if (!isSelectionMode){
+      drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
+    }else if (!isRotateSelection){
+      drawSpriteAround(uiShaderProgram, crosshairSprite, cursorLeft, cursorTop, 20, 20);
+    }
+
+    drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
+}
+
+
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -240,6 +296,8 @@ int main(int argc, char* argv[]){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
     return -1;
   }
+
+
   unsigned int quadVAO, quadVBO;
   glGenVertexArrays(1, &quadVAO);
   glGenBuffers(1, &quadVBO);
@@ -277,6 +335,10 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: ui shader file path is " << uiShaderPath << std::endl;
   unsigned int uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl");
 
+  std::string selectionShaderPath = "./res/shaders/selection";
+  std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
+  unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl");
+
   glm::mat4 model = glm::mat4(1.0f);
 
   onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
@@ -312,43 +374,36 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
  
-    handleInput(window);
+    glm::mat4 view = cam.renderView();
 
-    glfwPollEvents();
     glfwSwapBuffers(window);
     
+    // 1ST pass draws selection program shader to be able to handle selection 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glUseProgram(shaderProgram);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    renderScene(scene, selectionProgram, projection, view, model, true);
 
-    glm::mat4 view = cam.renderView();
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-
-    for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, scene.gameObjects[i].position)));
-      // glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f, 1.0f)  send extra light here
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr((i == selectedIndex) ? glm::vec3(0.0f, 0.0f, 1.0f): glm::vec3(1.0f, 1.0f, 1.0f)));
-      drawMesh(scene.gameObjects[i].mesh);
-    } 
-    for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
-      glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, scene.rotatingGameObjects[i].position));
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      drawMesh(scene.rotatingGameObjects[i].mesh);
-    }
-
-    glUseProgram(uiShaderProgram);
-    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
-
-    if (!isSelectionMode){
-      drawSpriteAround(uiShaderProgram, crosshairSprite, currentScreenWidth/2, currentScreenHeight/2, 40, 40);
-    }else if (!isRotateSelection){
-      drawSpriteAround(uiShaderProgram, crosshairSprite, cursorLeft, cursorTop, 20, 20);
-    }
-
-    drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glUseProgram(framebufferProgram); 
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glBindVertexArray(quadVAO);
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    handleInput(window);    // input needs to be called in between so read pixels can read old pixel value
+    glfwPollEvents();
+    
+    // 2ND pass renders what we care about to the screen.
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.1, 0.1, 0.1, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    renderScene(scene, shaderProgram, projection, view, model, false);
+    renderUI(uiShaderProgram, crosshairSprite);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
