@@ -1,0 +1,16 @@
+# Comments are ignored
+# whitespace is also ignored
+# each object lives on newline
+# single name and colon defines a gameobject
+# second arg after : defines parameter
+# position, scale, rotation default values
+# mesh value optional
+# order does not matter
+
+column_seat
+column_seat:mesh:./res/models/column_seat
+column_seat:position:10,0,10
+column_seat:scale:5,5,2
+
+wall:parent:column_seat  # implicit declaration of wall
+wall:mesh:./res/models/box
