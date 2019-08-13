@@ -29,7 +29,7 @@ unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
 unsigned int cursorLeft = currentScreenWidth / 4;
 unsigned int cursorTop  = currentScreenHeight / 4;
-bool isSelectionMode = false;
+bool isSelectionMode = true;
 bool isRotateSelection = false;
 
 Scene scene;
@@ -42,6 +42,22 @@ Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
+unsigned int mode = 0;  // 0 = translate mode, 1 = scale mode, 2 = rotate
+unsigned int axis = 0;  // 0 = x, 1 = y, 2 = z
+
+void translate(float x, float y, float z){
+  scene.gameObjects[selectedIndex].position.x+= x;
+  scene.gameObjects[selectedIndex].position.y+= y;
+  scene.gameObjects[selectedIndex].position.z+=z;
+}
+void scale(float x, float y, float z){
+  scene.gameObjects[selectedIndex].scale.x+= x;
+  scene.gameObjects[selectedIndex].scale.y+= y;
+  scene.gameObjects[selectedIndex].scale.z+=z;
+}
+void rotate(float x, float y, float z){
+
+}
 
 ALuint soundBuffer;
 void handleInput(GLFWwindow *window){
@@ -72,18 +88,73 @@ void handleInput(GLFWwindow *window){
       isRotateSelection = false;
    }
 
-   if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS){
-      scene.gameObjects[selectedIndex].position.x+=0.1;
+   if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
+     if (axis == 0){
+       axis = 1;
+     }else{
+       axis = 0;
+     }
    }
-   if (glfwGetKey(window, GLFW_KEY_DOWN ) == GLFW_PRESS){
-      scene.gameObjects[selectedIndex].position.x-=0.1;
+  
+   if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
+     mode = 0;
    }
-   if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS){
-      scene.gameObjects[selectedIndex].position.z+=0.1;
+   if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
+     mode = 1;
    }
-   if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
-      scene.gameObjects[selectedIndex].position.z-=0.1;
+   if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
+     mode = 2;
    }
+   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+     if (mode == 0){
+       translate(0.1, 0, 0);
+     }else if (mode == 1){
+       scale(0.1, 0, 0);
+     }else if (mode == 2){
+
+     }
+   }
+   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+     if (mode == 0){
+       translate(-0.1, 0, 0);
+     }else if (mode == 1){
+       scale(-0.1, 0, 0);
+     }else if (mode == 2){
+      
+     }    
+   }
+   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+     if (mode == 0){
+       if (axis == 0){
+         translate(0, 0, -0.1);
+       }else{
+         translate(0, -0.1, 0);
+       }
+     }else if (mode == 1){
+       if (axis == 0){
+         scale(0, 0, -0.1);
+       }else{
+         scale(0, -0.1, 0);
+       }
+     }else if (mode == 2){
+      
+     }    
+   }
+   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+     if (mode == 0){
+        if (axis == 0){
+          translate(0, 0, 0.1);
+        }else{
+          translate(0, 0.1, 0);
+        }
+     }else if (mode == 1){
+       if (axis == 0){
+         scale(0, 0, 0.1);
+       }else{
+         scale(0, 0.1, 0);
+       }   
+   }
+  }
 }   
 
 std::map<unsigned int, Mesh> fontMeshes;
@@ -189,12 +260,15 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
 
   for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, scene.gameObjects[i].position)));
+    glm::mat4 modelMatrix = glm::translate(model, scene.gameObjects[i].position);
+    modelMatrix = glm::scale(modelMatrix, scene.gameObjects[i].scale);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.gameObjects[i], useSelectionColor, selectedIndex == i)));
     drawMesh(scene.gameObjects[i].mesh);
   }  
   for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
     glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, scene.rotatingGameObjects[i].position));
+    modelMatrix = glm::scale(modelMatrix, scene.rotatingGameObjects[i].scale);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     drawMesh(scene.rotatingGameObjects[i].mesh);
   }  
@@ -218,6 +292,10 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
     }
 
     drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + additionalText, 10, 20, 4);
+
+    std::string modeText = mode == 0 ? "translate" : (mode == 1 ? "scale" : "rotate"); 
+    std::string axisText = axis == 0 ? "xz" : "xy";
+    drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " +axisText, 10, 40, 3);
 }
 
 

@@ -7,6 +7,7 @@
 struct GameObject {
   short id;
   glm::vec3 position;
+  glm::vec3 scale;
   Mesh& mesh;
 };
 struct Scene {

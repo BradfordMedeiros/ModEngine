@@ -6,6 +6,7 @@ Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
   GameObject columnSeatObject = {
     .id = id,
     .position = glm::vec3(0.0f, 0.0f, 0.0f),
+    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
     .mesh = columnSeatMesh,
   };
   id++;
@@ -14,6 +15,7 @@ Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
     GameObject boxObject = {
       .id = id,
       .position =  glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f),
+      .scale = glm::vec3(1.0f, 1.0f, 1.0f),
       .mesh = boxMesh,
     };
     id++;
@@ -22,6 +24,7 @@ Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
   GameObject grassObject = {
     .id = id,
   	.position = glm::vec3(0.0, 1.0f, 0.0f),
+    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   	.mesh = grassMesh,
   };
   id++;
