@@ -31,3 +31,16 @@ Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
   scene.rotatingGameObjects.push_back(grassObject);
   return scene;
 }
+
+std::string serializeScene(Scene& scene){
+  
+}
+
+Scene deserializeScene(std::string content){
+   std::cout << "INFO: Deserialization: " << std::endl;
+   std::cout << "INFO: Deserialization: content is " << content << std::endl;
+   Scene scene;
+   return scene;
+}
+
+

@@ -17,4 +17,7 @@ struct Scene {
 
 Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh);
 
+std::string serializeScene(Scene& scene);
+Scene deserializeScene(std::string content);
+
 #endif

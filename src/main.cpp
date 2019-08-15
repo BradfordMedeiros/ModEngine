@@ -20,6 +20,7 @@
 #include "./readfont.h"
 #include "./sprites.h"
 #include "./scene.h"
+#include "./util.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -430,6 +431,8 @@ int main(int argc, char* argv[]){
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
   scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
+
+  Scene scene2 = deserializeScene(loadFile("./res/scenes/example.rawscene"));
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
