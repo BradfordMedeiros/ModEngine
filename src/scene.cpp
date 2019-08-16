@@ -10,15 +10,19 @@ GameObject getGameObject(glm::vec3 position, Mesh& mesh, short id){
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, short* id){
+void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, short* id, bool isRotating){
   auto gameobjectObj = getGameObject(position, mesh, *id);
   *id = *id + 1;
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
   };
-  
-  scene.gameObjects.push_back(gameobjectH);
+
+  if (!isRotating){
+    scene.gameObjects.push_back(gameobjectH);
+  }else{
+    scene.rotatingGameObjects.push_back(gameobjectH);
+  }
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
 }
 
@@ -26,11 +30,13 @@ Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
   short id = 0;
   Scene scene;
 
-  addObjectToScene(scene, glm::vec3(0.0f, 0.0f, 0.0f), columnSeatMesh, &id);
+  addObjectToScene(scene, glm::vec3(0.0f, 0.0f, 0.0f), columnSeatMesh, &id, false);
+
   for (unsigned int i = 0;  i < 10; i++){
-    addObjectToScene(scene, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f), boxMesh, &id);
+    addObjectToScene(scene, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f), boxMesh, &id, false);
   }
-  addObjectToScene(scene, glm::vec3(0.0, 1.0f, 0.0f), grassMesh, &id);
+  addObjectToScene(scene, glm::vec3(0.0, 1.0f, 0.0f), grassMesh, &id, true);
+
   return scene;
 }
 

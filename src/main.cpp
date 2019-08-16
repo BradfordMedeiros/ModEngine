@@ -47,14 +47,14 @@ unsigned int mode = 0;  // 0 = translate mode, 1 = scale mode, 2 = rotate
 unsigned int axis = 0;  // 0 = x, 1 = y, 2 = z
 
 void translate(float x, float y, float z){
-  scene.idToGameObjects[scene.gameObjects[selectedIndex].id].position.x+= x;
-  scene.idToGameObjects[scene.gameObjects[selectedIndex].id].position.y+= y;
-  scene.idToGameObjects[scene.gameObjects[selectedIndex].id].position.z+=z;
+  scene.idToGameObjects[selectedIndex].position.x+= x;
+  scene.idToGameObjects[selectedIndex].position.y+= y;
+  scene.idToGameObjects[selectedIndex].position.z+=z;
 }
 void scale(float x, float y, float z){
-  scene.idToGameObjects[scene.gameObjects[selectedIndex].id].scale.x+= x;
-  scene.idToGameObjects[scene.gameObjects[selectedIndex].id].scale.y+= y;
-  scene.idToGameObjects[scene.gameObjects[selectedIndex].id].scale.z+=z;
+  scene.idToGameObjects[selectedIndex].scale.x+= x;
+  scene.idToGameObjects[selectedIndex].scale.y+= y;
+  scene.idToGameObjects[selectedIndex].scale.z+=z;
 }
 void rotate(float x, float y, float z){
 
@@ -264,13 +264,16 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     glm::mat4 modelMatrix = glm::translate(model, scene.idToGameObjects[scene.gameObjects[i].id].position);
     modelMatrix = glm::scale(modelMatrix, scene.idToGameObjects[scene.gameObjects[i].id].scale);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.idToGameObjects[scene.gameObjects[i].id], useSelectionColor, selectedIndex == i)));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.idToGameObjects[scene.gameObjects[i].id], useSelectionColor, selectedIndex == scene.gameObjects[i].id)));
     drawMesh(scene.idToGameObjects[scene.gameObjects[i].id].mesh);
   }  
+
+  // @todo do the proper transformations on the 2d look at 
   for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
     glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, scene.idToGameObjects[scene.rotatingGameObjects[i].id].position));
     modelMatrix = glm::scale(modelMatrix, scene.idToGameObjects[scene.rotatingGameObjects[i].id].scale);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.idToGameObjects[scene.rotatingGameObjects[i].id], useSelectionColor, selectedIndex == scene.rotatingGameObjects[i].id)));
     drawMesh(scene.idToGameObjects[scene.rotatingGameObjects[i].id].mesh);
   }  
 }

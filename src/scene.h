@@ -13,7 +13,6 @@ struct GameObject {
 };
 struct GameObjectH {
   short id;
-  std::vector<GameObjectH> children;
 };
 
 struct Scene {
