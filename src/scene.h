@@ -2,17 +2,24 @@
 #define MOD_SCENE
 
 #include <vector>
+#include <map>
 #include "./mesh.h"
 
 struct GameObject {
   short id;
   glm::vec3 position;
   glm::vec3 scale;
-  Mesh& mesh;
+  Mesh mesh;
 };
+struct GameObjectH {
+  short id;
+  std::vector<GameObjectH> children;
+};
+
 struct Scene {
-  std::vector<GameObject> gameObjects;
-  std::vector<GameObject> rotatingGameObjects;
+  std::vector<GameObjectH> gameObjects;
+  std::vector<GameObjectH> rotatingGameObjects;
+  std::map<short, GameObject> idToGameObjects;
 };
 
 Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh);
