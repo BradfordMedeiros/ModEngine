@@ -35,6 +35,7 @@ bool isRotateSelection = false;
 
 Scene scene;
 short selectedIndex = -1;
+std::string selectedName = "no object selected";
 
 glm::mat4 projection;
 
@@ -198,7 +199,6 @@ std::string additionalText = "";
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
         playSound(soundBuffer);
-        selectedIndex = (selectedIndex + 1) % scene.gameObjects.size();
     }
     if (button == GLFW_MOUSE_BUTTON_MIDDLE){
       if (action == GLFW_PRESS){
@@ -213,9 +213,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
       Color pixelColor = getPixelColor(cursorLeft, cursorTop);
       selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
+      selectedName = scene.idToGameObjects[selectedIndex].name;
       std::cout << "(" << cursorLeft << "," << cursorTop << ")" << std::endl;
       std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
-      additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  ";
+      std::cout << "selected object: " << selectedName << std::endl;
+      additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + selectedName;
     }
 }
 
@@ -256,25 +258,24 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 }
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
-
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
 
   for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
-    glm::mat4 modelMatrix = glm::translate(model, scene.idToGameObjects[scene.gameObjects[i].id].position);
-    modelMatrix = glm::scale(modelMatrix, scene.idToGameObjects[scene.gameObjects[i].id].scale);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.idToGameObjects[scene.gameObjects[i].id], useSelectionColor, selectedIndex == scene.gameObjects[i].id)));
-    drawMesh(scene.idToGameObjects[scene.gameObjects[i].id].mesh);
-  }  
-
-  // @todo do the proper transformations on the 2d look at 
-  for (unsigned int i = 0; i < scene.rotatingGameObjects.size(); i++){
-    glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, scene.idToGameObjects[scene.rotatingGameObjects[i].id].position));
-    modelMatrix = glm::scale(modelMatrix, scene.idToGameObjects[scene.rotatingGameObjects[i].id].scale);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(scene.idToGameObjects[scene.rotatingGameObjects[i].id], useSelectionColor, selectedIndex == scene.rotatingGameObjects[i].id)));
-    drawMesh(scene.idToGameObjects[scene.rotatingGameObjects[i].id].mesh);
+    GameObject object = scene.idToGameObjects[scene.gameObjects[i].id];
+    if (!object.isRotating){
+      glm::mat4 modelMatrix = glm::translate(model, object.position);
+      modelMatrix = glm::scale(modelMatrix, object.scale);
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+      drawMesh(object.mesh);
+    }else{
+      glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
+      modelMatrix = glm::scale(modelMatrix, object.scale);
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+      drawMesh(object.mesh);
+    }
   }  
 }
 
@@ -433,9 +434,13 @@ int main(int argc, char* argv[]){
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
+  //scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
 
-  Scene scene2 = deserializeScene(loadFile("./res/scenes/example.rawscene"));
+  std::map<std::string, Mesh> meshes;
+  meshes[result["model"].as<std::string>()] = columnSeatMesh;
+  meshes[result["modelbox"].as<std::string>()] = boxMesh;
+
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);

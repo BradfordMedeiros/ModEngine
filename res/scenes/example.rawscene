@@ -7,10 +7,35 @@
 # mesh value optional
 # order does not matter
 
-column_seat
-column_seat:mesh:./res/models/column_seat
-column_seat:position:10,0,10
-column_seat:scale:5,5,2
+columnseat:mesh:./res/models/column_seat/column_seat.obj
 
-wall:parent:column_seat  # implicit declaration of wall
-wall:mesh:./res/models/box
+greybox:mesh:./res/models/box/box.obj
+greybox:position:10 0.111 10
+greybox:scale:3 5 2
+greybox:parent:someotherparent
+
+someotherparent:position:0 20 5
+someotherparent:scale:3 3 3
+someotherparent:mesh:./res/models/box/box.obj   # probably should just reference the folder
+
+
+someotherparent1:position:-5 25 5
+someotherparent1:scale:3 3 3
+someotherparent1:mesh:./res/models/box/box.obj   # probably should just reference the folder
+
+
+someotherparent2:position:0 30 5
+someotherparent2:scale:3 3 3
+someotherparent2:mesh:./res/models/box/box.obj   # probably should just reference the folder
+
+someotherparent3:position:5 35 5
+someotherparent3:scale:3 3 3
+someotherparent3:mesh:./res/models/box/box.obj   # probably should just reference the folder
+
+someotherparent4:position:10 40 5
+someotherparent4:scale:3 3 3
+someotherparent4:mesh:./res/models/box/box.obj   # probably should just reference the folder
+
+someotherparent5:position:15 45 5
+someotherparent5:scale:3 3 3
+someotherparent5:mesh:./res/models/box/box.obj   # probably should just reference the folder
