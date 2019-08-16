@@ -1,34 +1,24 @@
 #include "./scene.h"
 
+GameObject getGameObject(glm::vec3 position, Mesh& mesh, short* id){
+  GameObject gameObject = {
+    .id = *id,
+    .position = position,
+    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
+    .mesh = mesh, 
+  };
+  *id = *id + 1;
+  return gameObject;
+}
+
 Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
   short id = 0;
   Scene scene;
-  GameObject columnSeatObject = {
-    .id = id,
-    .position = glm::vec3(0.0f, 0.0f, 0.0f),
-    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-    .mesh = columnSeatMesh,
-  };
-  id++;
-  scene.gameObjects.push_back(columnSeatObject);
+  scene.gameObjects.push_back(getGameObject(glm::vec3(0.0f, 0.0f, 0.0f), columnSeatMesh, &id));
   for (unsigned int i = 0;  i < 10; i++){
-    GameObject boxObject = {
-      .id = id,
-      .position =  glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f),
-      .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-      .mesh = boxMesh,
-    };
-    id++;
-    scene.gameObjects.push_back(boxObject);
+    scene.gameObjects.push_back(getGameObject(glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f), boxMesh, &id));
   }
-  GameObject grassObject = {
-    .id = id,
-  	.position = glm::vec3(0.0, 1.0f, 0.0f),
-    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-  	.mesh = grassMesh,
-  };
-  id++;
-  scene.rotatingGameObjects.push_back(grassObject);
+  scene.rotatingGameObjects.push_back(getGameObject(glm::vec3(0.0, 1.0f, 0.0f), grassMesh, &id));
   return scene;
 }
 
