@@ -259,28 +259,20 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = scene.idToGameObjects[objectH.id];
+
+  glm::mat4 modelMatrix;
   if (!object.isRotating){
-    glm::mat4 modelMatrix = glm::translate(model, object.position);
-    modelMatrix = glm::scale(modelMatrix, object.scale);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
-    drawMesh(object.mesh);
-    for (short id: objectH.children){
-      drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
-    }
+    modelMatrix = glm::translate(model, object.position);
   }else{
-    glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
-    modelMatrix = glm::scale(modelMatrix, object.scale);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
-    drawMesh(object.mesh);
-    for (short id: objectH.children){
-      drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
-    }
+    modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
   }
-
-  
-
+  modelMatrix = glm::scale(modelMatrix, object.scale);
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+  drawMesh(object.mesh);
+  for (short id: objectH.children){
+    drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
+  }
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
