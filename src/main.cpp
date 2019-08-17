@@ -402,7 +402,7 @@ int main(int argc, char* argv[]){
      glBindRenderbuffer(GL_RENDERBUFFER, rbo);
      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentScreenWidth, currentScreenHeight);
      glViewport(0, 0, currentScreenWidth, currentScreenHeight);
-     projection = glm::perspective(glm::radians(45.0f), (float)currentScreenWidth / currentScreenHeight, 0.1f, 100.0f); 
+     projection = glm::perspective(glm::radians(45.0f), (float)currentScreenWidth / currentScreenHeight, 0.1f, 200.0f); 
      orthoProj = glm::ortho(0.0f, (float)currentScreenWidth, (float)currentScreenHeight, 0.0f, -1.0f, 1.0f);  
   }; 
 
