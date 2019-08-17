@@ -101,6 +101,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
         addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, tok.payload, &id, false, -1);
       }
       scene.idToGameObjectsH[scene.nameToId[objectName]].parentId = scene.nameToId[tok.payload];
+      scene.idToGameObjectsH[scene.nameToId[tok.payload]].children.insert(scene.idToGameObjectsH[scene.nameToId[objectName]].id);
     }
   }
 

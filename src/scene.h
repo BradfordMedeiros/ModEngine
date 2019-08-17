@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include "./mesh.h"
 
 struct GameObject {
@@ -17,7 +18,7 @@ struct GameObject {
 struct GameObjectH {
   short id;
   short parentId;
-  std::vector<GameObjectH> children;
+  std::set<short> children;
 };
 
 struct Scene {
