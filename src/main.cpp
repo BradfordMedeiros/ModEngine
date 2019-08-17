@@ -440,8 +440,6 @@ int main(int argc, char* argv[]){
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  //scene = loadScene(columnSeatMesh, boxMesh, grassMesh);
-
   std::map<std::string, Mesh> meshes;
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;

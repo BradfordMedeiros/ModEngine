@@ -7,35 +7,49 @@
 # mesh value optional
 # order does not matter
 
-columnseat:mesh:./res/models/column_seat/column_seat.obj
+sceneparent:
 
-greybox:mesh:./res/models/box/box.obj
-greybox:position:10 0.111 10
-greybox:scale:3 5 2
-greybox:parent:someotherparent
+maincolumn:position:0.0 0.0 0.0
+maincolumn:mesh:./res/models/column_seat/column_seat.obj
+maincolumn:parent:sceneparent
 
-someotherparent:position:0 20 5
-someotherparent:scale:3 3 3
-someotherparent:mesh:./res/models/box/box.obj   # probably should just reference the folder
+box1:position:6 0 0
+box1:mesh:./res/models/box/box.obj
+box1:parent:sceneparent
 
+box2:position:9 0 0
+box2:mesh:./res/models/box/box.obj
+box2:parent:sceneparent
 
-someotherparent1:position:-5 25 5
-someotherparent1:scale:3 3 3
-someotherparent1:mesh:./res/models/box/box.obj   # probably should just reference the folder
+box3:position:12 0 0
+box3:mesh:./res/models/box/box.obj
+box3:parent:sceneparent
 
+box4:position:15 0 0
+box4:mesh:./res/models/box/box.obj
+box4:parent:sceneparent
 
-someotherparent2:position:0 30 5
-someotherparent2:scale:3 3 3
-someotherparent2:mesh:./res/models/box/box.obj   # probably should just reference the folder
+box5:position:18 0 0
+box5:mesh:./res/models/box/box.obj
+box5:parent:sceneparent
 
-someotherparent3:position:5 35 5
-someotherparent3:scale:3 3 3
-someotherparent3:mesh:./res/models/box/box.obj   # probably should just reference the folder
+box6:position:21 0 0
+box6:mesh:./res/models/box/box.obj
+box6:parent:sceneparent
 
-someotherparent4:position:10 40 5
-someotherparent4:scale:3 3 3
-someotherparent4:mesh:./res/models/box/box.obj   # probably should just reference the folder
+box7:position:24 0 0
+box7:mesh:./res/models/box/box.obj
+box7:parent:sceneparent
 
-someotherparent5:position:15 45 5
-someotherparent5:scale:3 3 3
-someotherparent5:mesh:./res/models/box/box.obj   # probably should just reference the folder
+box8:position:27 0 0
+box8:mesh:./res/models/box/box.obj
+box8:parent:sceneparent
+
+box9:position:30 0 0
+box9:mesh:./res/models/box/box.obj
+box9:parent:sceneparent
+
+box10:position:33 0 0
+box10:mesh:./res/models/box/box.obj
+box10:parent:sceneparent
+

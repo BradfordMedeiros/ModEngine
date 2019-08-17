@@ -28,20 +28,6 @@ void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, std::string 
   scene.nameToId[name] = gameobjectObj.id;
 }
 
-Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
-  short id = 0;
-  Scene scene;
-
-  addObjectToScene(scene, glm::vec3(0.0f, 0.0f, 0.0f), columnSeatMesh, std::to_string(id), &id, false, -1);
-
-  for (unsigned int i = 0;  i < 10; i++){
-    addObjectToScene(scene, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f), boxMesh, std::to_string(id), &id, false, -1);
-  }
-  addObjectToScene(scene, glm::vec3(0.0, 1.0f, 0.0f), grassMesh, std::to_string(id), &id, true, -1);
-
-  return scene;
-}
-
 std::string serializeScene(Scene& scene){
   
 }

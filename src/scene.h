@@ -28,8 +28,6 @@ struct Scene {
   std::map<std::string, short> nameToId;
 };
 
-Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh);
-
 std::string serializeScene(Scene& scene);
 Scene deserializeScene(std::string content, Mesh& mesh, std::map<std::string, Mesh> meshes);
 
