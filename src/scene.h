@@ -16,11 +16,14 @@ struct GameObject {
 };
 struct GameObjectH {
   short id;
+  short parentId;
+  std::vector<GameObjectH> children;
 };
 
 struct Scene {
-  std::vector<GameObjectH> gameObjects;
+  std::vector<short> rootGameObjectsH;
   std::map<short, GameObject> idToGameObjects;
+  std::map<short, GameObjectH> idToGameObjectsH;
   std::map<std::string, short> nameToId;
 };
 

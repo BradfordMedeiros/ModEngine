@@ -256,26 +256,31 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
       cursorTop  -= (int)(yoffset * 15);
     }
 }
+
+void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
+  GameObject object = scene.idToGameObjects[objectH.id];
+  if (!object.isRotating){
+    glm::mat4 modelMatrix = glm::translate(model, object.position);
+    modelMatrix = glm::scale(modelMatrix, object.scale);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+    drawMesh(object.mesh);
+  }else{
+    glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
+    modelMatrix = glm::scale(modelMatrix, object.scale);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+    drawMesh(object.mesh);
+  }
+}
+
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
 
-  for (unsigned int i = 0; i < scene.gameObjects.size(); i++){
-    GameObject object = scene.idToGameObjects[scene.gameObjects[i].id];
-    if (!object.isRotating){
-      glm::mat4 modelMatrix = glm::translate(model, object.position);
-      modelMatrix = glm::scale(modelMatrix, object.scale);
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
-      drawMesh(object.mesh);
-    }else{
-      glm::mat4 modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
-      modelMatrix = glm::scale(modelMatrix, object.scale);
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
-      drawMesh(object.mesh);
-    }
+  for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
+    drawGameobject(scene.idToGameObjectsH[scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
   }  
 }
 

@@ -14,15 +14,16 @@ GameObject getGameObject(glm::vec3 position, Mesh& mesh, std::string name, short
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, std::string name, short* id, bool isRotating){
+void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, std::string name, short* id, bool isRotating, short parentId){
   auto gameobjectObj = getGameObject(position, mesh, name, *id, isRotating);
   *id = *id + 1;
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
+    .parentId = parentId,
   };
 
-  scene.gameObjects.push_back(gameobjectH);
+  scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
   scene.nameToId[name] = gameobjectObj.id;
 }
@@ -31,12 +32,12 @@ Scene loadScene(Mesh& columnSeatMesh, Mesh& boxMesh, Mesh& grassMesh){
   short id = 0;
   Scene scene;
 
-  addObjectToScene(scene, glm::vec3(0.0f, 0.0f, 0.0f), columnSeatMesh, std::to_string(id), &id, false);
+  addObjectToScene(scene, glm::vec3(0.0f, 0.0f, 0.0f), columnSeatMesh, std::to_string(id), &id, false, -1);
 
   for (unsigned int i = 0;  i < 10; i++){
-    addObjectToScene(scene, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f), boxMesh, std::to_string(id), &id, false);
+    addObjectToScene(scene, glm::vec3(6.0f + (i * 3.0f), 0.0f, 0.0f), boxMesh, std::to_string(id), &id, false, -1);
   }
-  addObjectToScene(scene, glm::vec3(0.0, 1.0f, 0.0f), grassMesh, std::to_string(id), &id, true);
+  addObjectToScene(scene, glm::vec3(0.0, 1.0f, 0.0f), grassMesh, std::to_string(id), &id, true, -1);
 
   return scene;
 }
@@ -83,7 +84,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
     std::string objectName = tok.target;
 
     if (!(scene.nameToId.find(objectName) != scene.nameToId.end())){
-      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, objectName, &id, false);
+      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, objectName, &id, false, -1);
     }
     if (tok.attribute == "mesh"){
       if(meshes.find(tok.payload) == meshes.end()){
@@ -96,10 +97,16 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
     }else if (tok.attribute == "scale"){
       scene.idToGameObjects[scene.nameToId[objectName]].scale = parseVec(tok.payload);
     }else if (tok.attribute == "parent"){
-      // @todo add back in when scenes have parent representation
-      //if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
-      //  addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, tok.payload, &id, false);
-      //}
+      if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
+        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, tok.payload, &id, false, -1);
+      }
+      scene.idToGameObjectsH[scene.nameToId[objectName]].parentId = scene.nameToId[tok.payload];
+    }
+  }
+
+  for( auto const& [id, gameobjectH] : scene.idToGameObjectsH ){
+    if (gameobjectH.parentId == -1){
+      scene.rootGameObjectsH.push_back(gameobjectH.id);
     }
   }
   return scene;
