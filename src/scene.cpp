@@ -2,20 +2,21 @@
 
 #include <sstream>
 
-GameObject getGameObject(glm::vec3 position, Mesh& mesh, std::string name, short id, bool isRotating){
+GameObject getGameObject(glm::vec3 position, Mesh& mesh, std::string meshName, std::string name, short id, bool isRotating){
   GameObject gameObject = {
     .id = id,
     .name = name,
     .position = position,
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
     .mesh = mesh, 
+    .meshName = meshName,
     .isRotating = isRotating,
   };
   return gameObject;
 }
 
 void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, std::string name, short* id, bool isRotating, short parentId){
-  auto gameobjectObj = getGameObject(position, mesh, name, *id, isRotating);
+  auto gameobjectObj = getGameObject(position, mesh, "", name, *id, isRotating);
   *id = *id + 1;
 
   auto gameobjectH = GameObjectH {
@@ -26,10 +27,6 @@ void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, std::string 
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
   scene.nameToId[name] = gameobjectObj.id;
-}
-
-std::string serializeScene(Scene& scene){
-  
 }
 
 struct Token {
@@ -78,6 +75,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
         continue;
       }
       scene.idToGameObjects[scene.nameToId[objectName]].mesh = meshes[tok.payload];
+      scene.idToGameObjects[scene.nameToId[objectName]].meshName = tok.payload; 
     }else if (tok.attribute == "position"){
       scene.idToGameObjects[scene.nameToId[objectName]].position = parseVec(tok.payload);
     }else if (tok.attribute == "scale"){
@@ -131,4 +129,24 @@ Scene deserializeScene(std::string content, Mesh& defaultMesh, std::map<std::str
   return createSceneFromTokens(dtokens, defaultMesh, meshes);
 }
 
+std::string serializeVec(glm::vec3 vec){
+  return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
+}
+std::string serializeScene(Scene& scene){
+  std::string sceneData = "# Generated scene \n";
+  for (auto [id, gameobjecth]: scene.idToGameObjectsH){
+    GameObject gameobject = scene.idToGameObjects[id];
+    std::string gameobjectName = gameobject.name;
+    std::string parentName = scene.idToGameObjects[gameobjecth.parentId].name;
 
+    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.position) + "\n";
+    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.scale) + "\n";
+    if (gameobject.meshName != ""){
+      sceneData = sceneData + gameobjectName + ":mesh:" + gameobject.meshName + "\n";
+    }
+    if (parentName != ""){
+      sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
+    }
+  }
+  return sceneData;
+}

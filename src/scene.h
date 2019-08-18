@@ -13,6 +13,7 @@ struct GameObject {
   glm::vec3 position;
   glm::vec3 scale;
   Mesh mesh;
+  std::string meshName;
   bool isRotating;
 };
 struct GameObjectH {

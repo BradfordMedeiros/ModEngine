@@ -199,6 +199,7 @@ std::string additionalText = "";
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
         playSound(soundBuffer);
+        std::cout << serializeScene(scene) << std::endl;
     }
     if (button == GLFW_MOUSE_BUTTON_MIDDLE){
       if (action == GLFW_PRESS){
