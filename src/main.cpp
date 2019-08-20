@@ -285,7 +285,7 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   }
 
   modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
-  //modelMatrix = glm::scale(modelMatrix, object.scale);
+  modelMatrix = glm::scale(modelMatrix, object.scale);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
   drawMesh(object.mesh);
