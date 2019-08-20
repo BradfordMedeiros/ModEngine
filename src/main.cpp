@@ -11,6 +11,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 
 #include "./shaders.h"
 #include "./mesh.h"
@@ -58,7 +61,10 @@ void scale(float x, float y, float z){
   scene.idToGameObjects[selectedIndex].scale.z+=z;
 }
 void rotate(float x, float y, float z){
-
+  std::cout << "rotate called: (" << x << "," << y << "," << z << ")" << std::endl;
+  glm::vec3 eulerAngles(x, y, z);
+  glm::quat rotationBy = glm::quat(eulerAngles);
+  scene.idToGameObjects[selectedIndex].rotation = rotationBy * scene.idToGameObjects[selectedIndex].rotation;
 }
 
 ALuint soundBuffer;
@@ -113,7 +119,7 @@ void handleInput(GLFWwindow *window){
      }else if (mode == 1){
        scale(0.1, 0, 0);
      }else if (mode == 2){
-
+       rotate(0.1, 0, 0);
      }
    }
    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
@@ -122,7 +128,7 @@ void handleInput(GLFWwindow *window){
      }else if (mode == 1){
        scale(-0.1, 0, 0);
      }else if (mode == 2){
-      
+       rotate(-0.1, 0, 0);
      }    
    }
    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
@@ -139,7 +145,11 @@ void handleInput(GLFWwindow *window){
          scale(0, -0.1, 0);
        }
      }else if (mode == 2){
-      
+       if (axis == 0){
+          rotate(0, 0, -0.1);
+       }else{
+          rotate(0, -0.1, 0);
+       }
      }    
    }
    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
@@ -155,7 +165,13 @@ void handleInput(GLFWwindow *window){
        }else{
          scale(0, 0.1, 0);
        }   
-   }
+    }else if (mode == 2){
+        if (axis == 0){
+          rotate(0, 0, 0.1);
+        }else{
+          rotate(0, 0.1, 0);
+        }
+    }
   }
 }   
 
@@ -261,13 +277,15 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = scene.idToGameObjects[objectH.id];
 
-  glm::mat4 modelMatrix;
+  glm::mat4 modelMatrix = model;
   if (!object.isRotating){
-    modelMatrix = glm::translate(model, object.position);
+    modelMatrix = glm::translate(modelMatrix, object.position);
   }else{
     modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
   }
-  modelMatrix = glm::scale(modelMatrix, object.scale);
+
+  modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
+  //modelMatrix = glm::scale(modelMatrix, object.scale);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
   drawMesh(object.mesh);

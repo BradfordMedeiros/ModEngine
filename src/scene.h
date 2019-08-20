@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <glm/gtc/quaternion.hpp>
 #include "./mesh.h"
 
 struct GameObject {
@@ -12,6 +13,7 @@ struct GameObject {
   std::string name;
   glm::vec3 position;
   glm::vec3 scale;
+  glm::quat rotation;
   Mesh mesh;
   std::string meshName;
   bool isRotating;

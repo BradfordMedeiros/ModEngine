@@ -8,6 +8,7 @@ GameObject getGameObject(glm::vec3 position, Mesh& mesh, std::string meshName, s
     .name = name,
     .position = position,
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
+    .rotation = glm::quat(0, 0, 0, 1.0f),
     .mesh = mesh, 
     .meshName = meshName,
     .isRotating = isRotating,
