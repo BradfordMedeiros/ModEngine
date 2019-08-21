@@ -81,6 +81,10 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
       scene.idToGameObjects[scene.nameToId[objectName]].position = parseVec(tok.payload);
     }else if (tok.attribute == "scale"){
       scene.idToGameObjects[scene.nameToId[objectName]].scale = parseVec(tok.payload);
+    }else if (tok.attribute == "rotation"){
+      glm::vec3 eulerAngles = parseVec(tok.payload);
+      glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
+      scene.idToGameObjects[scene.nameToId[objectName]].rotation = rotation;
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
         addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, tok.payload, &id, false, -1);
@@ -133,6 +137,13 @@ Scene deserializeScene(std::string content, Mesh& defaultMesh, std::map<std::str
 std::string serializeVec(glm::vec3 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
 }
+std::string serializeRotation(glm::quat rotation){
+  float xx = rotation.x;
+  float yy = rotation.y;
+  float zz = rotation.z;
+  glm::vec3 angles = eulerAngles(rotation);
+  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z - M_PI); 
+}
 std::string serializeScene(Scene& scene){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){
@@ -142,6 +153,8 @@ std::string serializeScene(Scene& scene){
 
     sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.position) + "\n";
     sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.scale) + "\n";
+    sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.rotation) + "\n";
+
     if (gameobject.meshName != ""){
       sceneData = sceneData + gameobjectName + ":mesh:" + gameobject.meshName + "\n";
     }
