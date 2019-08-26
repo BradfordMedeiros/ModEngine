@@ -60,6 +60,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 # https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
 target_link_libraries(${PROJECT_NAME} "openal")
 target_link_libraries(${PROJECT_NAME} "alut")
+target_link_libraries(${PROJECT_NAME} "guile-2.2")
+target_include_directories(${PROJECT_NAME} PRIVATE "/usr/include/guile/2.2")
 
 # Command line parsing - CXXopts 
 set(CXX_DIR "${LIB_DIR}/cxxopts")
