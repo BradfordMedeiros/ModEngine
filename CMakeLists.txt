@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
   "${SRC_DIR}/util.cpp"
   "${SRC_DIR}/sprites.cpp"
   "${SRC_DIR}/scene.cpp"
+  "${SRC_DIR}/guile.cpp"
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
