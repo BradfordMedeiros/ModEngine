@@ -2,9 +2,8 @@
 #define MOD_GUILE
 
 #include <iostream>
+#include <libguile.h>
 
-void initGuile(){
-  std::cout << "Guile initialization" << std::endl;
-}
+void initGuile();
 
 #endif
