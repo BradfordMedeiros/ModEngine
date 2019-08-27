@@ -25,6 +25,8 @@
 #include "./sound.h"
 #include "./common/util.h"
 #include "./guile.h"
+#include "./object_types.h"
+#include "./terminal.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -332,7 +334,9 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
 
 int main(int argc, char* argv[]){
   //initGuile();
-  //return 0;
+  testObjectTypes();
+  testTerminal();
+  return 0;
 
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
