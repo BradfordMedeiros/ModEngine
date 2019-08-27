@@ -5,5 +5,5 @@
 #include <libguile.h>
 
 void initGuile();
-
+void startShellForNewThread();
 #endif

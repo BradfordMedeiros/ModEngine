@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>     
+#include <thread>
 
 #include <cxxopts.hpp>
 #include <GLFW/glfw3.h>
@@ -336,7 +337,9 @@ int main(int argc, char* argv[]){
   //initGuile();
   testObjectTypes();
   testTerminal();
-  return 0;
+
+  initGuile();
+  std::thread shellThread(startShellForNewThread);
 
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -537,6 +540,7 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   stopSoundSystem();
   glfwTerminate(); 
+   
   return 0;
 }
 

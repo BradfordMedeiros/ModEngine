@@ -47,6 +47,11 @@ void initGuile(){
 
   //scm_c_define_gsubr ("tortoise-reset", 0, 0, 0, &tortoise_reset);
 
+}
+
+void startShellForNewThread(){
+  scm_with_guile(&startGuile, NULL);
+
   int argc = 0;
   char* argv[] = { { } };
   scm_shell(argc, argv);
