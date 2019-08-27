@@ -6,4 +6,6 @@
 
 void initGuile();
 void startShellForNewThread();
+
+void registerFunction(const char* name,  SCM (*callback)(SCM arg));
 #endif

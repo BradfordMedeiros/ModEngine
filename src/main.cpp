@@ -27,7 +27,6 @@
 #include "./common/util.h"
 #include "./guile.h"
 #include "./object_types.h"
-#include "./terminal.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -331,15 +330,19 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
     drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " +axisText, 10, 40, 3);
 }
 
+SCM moveCamera(SCM value){
+  cam.moveRight(scm_to_double(value));
+  return SCM_UNSPECIFIED;
+}
 
 
 int main(int argc, char* argv[]){
   //initGuile();
   testObjectTypes();
-  testTerminal();
 
   initGuile();
   std::thread shellThread(startShellForNewThread);
+  registerFunction("movecamera", moveCamera);
 
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()

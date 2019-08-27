@@ -46,8 +46,8 @@ void initGuile(){
   //scm_call (func_symbol, SCM_UNDEFINED);
 
   //scm_c_define_gsubr ("tortoise-reset", 0, 0, 0, &tortoise_reset);
-
 }
+
 
 void startShellForNewThread(){
   scm_with_guile(&startGuile, NULL);
@@ -55,4 +55,8 @@ void startShellForNewThread(){
   int argc = 0;
   char* argv[] = { { } };
   scm_shell(argc, argv);
+}
+
+void registerFunction(const char* name,  SCM (*callback)(SCM arg)){
+  scm_c_define_gsubr(name, 1, 0, 0, (void *)callback);
 }
