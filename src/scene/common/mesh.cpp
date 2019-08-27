@@ -1,10 +1,4 @@
-#include <iostream>
-#include <stdexcept>
-#include <stb_image.h>
-#include <stb_image.h>
-#include "glad/glad.h"
 #include "./mesh.h"
-#include "./loadmodel.h"
 
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.

@@ -15,15 +15,16 @@
 #include <glm/gtc/quaternion.hpp>
 
 
+#include "./scene/scene.h"
+#include "./scene/common/mesh.h"
+#include "./scene/common/util/loadmodel.h"
+#include "./scene/sprites/readfont.h"
+#include "./scene/sprites/sprites.h"
 #include "./shaders.h"
-#include "./mesh.h"
 #include "./camera.h"
 #include "./sound.h"
-#include "./loadmodel.h"
-#include "./readfont.h"
-#include "./sprites.h"
-#include "./scene.h"
-#include "./util.h"
+#include "./common/util.h"
+#include "./guile.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -61,7 +62,6 @@ void scale(float x, float y, float z){
   scene.idToGameObjects[selectedIndex].scale.z+=z;
 }
 void rotate(float x, float y, float z){
-  std::cout << "rotate called: (" << x << "," << y << "," << z << ")" << std::endl;
   glm::vec3 eulerAngles(x, y, z);
   glm::quat rotationBy = glm::quat(eulerAngles);
   scene.idToGameObjects[selectedIndex].rotation = rotationBy * scene.idToGameObjects[selectedIndex].rotation;
@@ -331,6 +331,9 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
 
 
 int main(int argc, char* argv[]){
+  //initGuile();
+  //return 0;
+
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))

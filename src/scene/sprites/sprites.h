@@ -3,8 +3,8 @@
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "./mesh.h"
 #include "./readfont.h"
+#include "../common/mesh.h"
 
 std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad);
 void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height);

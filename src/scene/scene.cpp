@@ -1,7 +1,5 @@
 #include "./scene.h"
 
-#include <sstream>
-
 GameObject getGameObject(glm::vec3 position, Mesh& mesh, std::string meshName, std::string name, short id, bool isRotating){
   GameObject gameObject = {
     .id = id,

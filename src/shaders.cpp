@@ -1,8 +1,4 @@
-#include <iostream>
-#include <glad/glad.h>
-#include <stdexcept>
 #include "./shaders.h"
-#include "./util.h"
 
 #define SHADER_INFO_LOG_LENGTH 512
 

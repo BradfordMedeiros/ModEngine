@@ -1,4 +1,3 @@
-
 #include "./guile.h"
 
 void* startGuile(void* data){

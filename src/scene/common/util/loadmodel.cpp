@@ -1,9 +1,3 @@
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <stdexcept>
-#include <functional>
-#include <filesystem>
 #include "./loadmodel.h"
 
 ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){

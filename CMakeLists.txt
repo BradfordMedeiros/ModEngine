@@ -7,20 +7,10 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
+file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
+
 #Executable
-add_executable(${PROJECT_NAME} 
-  "${SRC_DIR}/main.cpp" 
-  "${SRC_DIR}/shaders.cpp"
-  "${SRC_DIR}/mesh.cpp"
-  "${SRC_DIR}/camera.cpp"
-  "${SRC_DIR}/sound.cpp"
-  "${SRC_DIR}/loadmodel.cpp"
-  "${SRC_DIR}/readfont.cpp"
-  "${SRC_DIR}/util.cpp"
-  "${SRC_DIR}/sprites.cpp"
-  "${SRC_DIR}/scene.cpp"
-  "${SRC_DIR}/guile.cpp"
-)
+add_executable(${PROJECT_NAME} ${source_list})
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} "stdc++fs")

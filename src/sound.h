@@ -3,6 +3,10 @@
 
 #include <iostream>
 #include <AL/alut.h>
+#include <iostream>
+#include <stdexcept>
+#include <cerrno>
+#include <cstring>
 
 void startSoundSystem();
 void stopSoundSystem();

@@ -4,8 +4,9 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <sstream>
 #include <glm/gtc/quaternion.hpp>
-#include "./mesh.h"
+#include "./common/mesh.h"
 
 struct GameObject {
   short id;

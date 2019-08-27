@@ -4,6 +4,13 @@
 #include <iostream>
 #include <vector>
 #include <glm/glm.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <stdexcept>
+#include <functional>
+#include <filesystem>
+#include "./loadmodel.h"
 
 struct Vertex {
   glm::vec3 position;

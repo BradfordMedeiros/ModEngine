@@ -1,6 +1,4 @@
-#include <fstream>
 #include "./readfont.h"
-#include "./util.h"
 
 fontInfo getFont(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int imageWidth, unsigned int imageHeight){
     fontInfo character;

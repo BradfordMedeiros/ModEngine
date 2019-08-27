@@ -1,7 +1,14 @@
 #ifndef MOD_MESH
 #define MOD_MESH
+
 #include <iostream>
 #include <glm/glm.hpp>
+#include <iostream>
+#include <stdexcept>
+#include <stb_image.h>
+#include <stb_image.h>
+#include "glad/glad.h"
+#include "./util/loadmodel.h"
 
 struct Texture {
    unsigned int textureId;

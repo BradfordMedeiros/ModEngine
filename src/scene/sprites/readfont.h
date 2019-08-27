@@ -3,10 +3,11 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <map>
 #include <stdexcept>
 #include <sstream>
+#include <fstream>
+#include "../../common/util.h"
 
 // This is all ndi so [0, 1] relative to texture
 struct fontInfo {

@@ -1,7 +1,3 @@
-#include <iostream>
-#include <stdexcept>
-#include <cerrno>
-#include <cstring>
 #include "./sound.h"
 
 void startSoundSystem(){
