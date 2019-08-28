@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <functional>
 #include <glm/gtc/quaternion.hpp>
 #include "./common/mesh.h"
 
@@ -33,6 +34,6 @@ struct Scene {
 };
 
 std::string serializeScene(Scene& scene);
-Scene deserializeScene(std::string content, Mesh& mesh, std::map<std::string, Mesh> meshes);
+Scene deserializeScene(std::string content, Mesh& mesh, std::map<std::string, Mesh> meshes, std::function<void(short, std::string)> addObject);
 
 #endif

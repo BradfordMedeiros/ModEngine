@@ -337,9 +337,6 @@ SCM moveCamera(SCM value){
 
 
 int main(int argc, char* argv[]){
-  //initGuile();
-  testObjectTypes();
-
   initGuile();
   std::thread shellThread(startShellForNewThread);
   registerFunction("movecamera", moveCamera);
@@ -476,7 +473,12 @@ int main(int argc, char* argv[]){
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes);
+  std::map<short, Objects> objectMapping = getObjectMapping();
+
+
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [&objectMapping](short id, std::string type) -> void {
+    addObject(id, type, objectMapping);
+  });
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
