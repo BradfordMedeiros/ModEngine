@@ -33,7 +33,21 @@ struct Scene {
   std::map<std::string, short> nameToId;
 };
 
-std::string serializeScene(Scene& scene);
-Scene deserializeScene(std::string content, Mesh& mesh, std::map<std::string, Mesh> meshes, std::function<void(short, std::string)> addObject);
+struct Token {
+  std::string target;
+  std::string attribute;
+  std::string payload;
+};
 
+struct Field {
+  char prefix;
+  std::string type;
+  std::vector<std::string> additionalFields;
+};
+
+
+std::string serializeScene(Scene& scene);
+Scene deserializeScene(std::string content, Mesh& mesh, std::map<std::string, Mesh> meshes, 
+  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields);
+  
 #endif

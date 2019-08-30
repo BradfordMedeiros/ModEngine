@@ -473,12 +473,24 @@ int main(int argc, char* argv[]){
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
-  std::map<short, Objects> objectMapping = getObjectMapping();
+  std::map<short, Object> objectMapping = getObjectMapping();
 
 
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [&objectMapping](short id, std::string type) -> void {
-    addObject(id, type, objectMapping);
-  });
+  Field obj = {
+    .prefix = '@', 
+    .type = "default",
+    .additionalFields = { "mesh", "testfield" }
+  };
+
+  Field camera = {
+    .prefix = '>',
+    .type = "camera",
+    .additionalFields = {{ "active" }},
+  };
+
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [&objectMapping, &meshes](short id, std::string type, std::string name, std::string value) -> void {
+    addObject(id, type, objectMapping, meshes);
+  }, { obj, camera });
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);

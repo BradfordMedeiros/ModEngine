@@ -10,18 +10,19 @@
 // to the proper types 
 // this way we can decouple, for example, the camera type, or the concept of a mesh, from our scene graph 
 
-enum ObjectType { MESH = 1 } ;
+enum ObjectType { ERROR = 0, MESH = 1, CAMERA = 2 } ;
 
 union Objects {
   Mesh object;
+  int cameraPlaceholder;
 };
 struct Object {
   Objects obj;
   ObjectType activeType;
 };
 
-std::map<short, Objects> getObjectMapping();
-void addObject(short id, std::string objectName, std::map<short, Objects>& mapping);
-
+std::map<short, Object> getObjectMapping();
+void addObject(short id, std::string objectName,  std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes);
+void renderObject(short id, std::map<short, Object>& mapping);
 
 #endif 
