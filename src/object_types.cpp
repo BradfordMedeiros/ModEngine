@@ -35,8 +35,14 @@ Object createCamera(std::string field, std::string payload){
 void renderMesh(Objects &obj){
   drawMesh(obj.mesh);
 }
+void renderCamera(Mesh& cameraMesh){
+  drawMesh(cameraMesh);
+}
 
-void addObject(short id, std::string objectType, std::string field, std::string payload, std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+void addObject(short id, std::string objectType, std::string field, std::string payload, 
+  std::map<short, Object>& mapping, 
+  std::map<std::string, Mesh>& meshes, std::string defaultMesh
+){
   if (objectType == "default"){
   	mapping[id] = createMesh(field, payload, meshes, defaultMesh);
   }else if(objectType == "camera"){
@@ -47,9 +53,11 @@ void addObject(short id, std::string objectType, std::string field, std::string 
   }
 }
 
-void renderObject(short id, std::map<short, Object>& mapping){
+void renderObject(short id, std::map<short, Object>& mapping, Mesh& cameraMesh, bool showCameras){
 	Object toRender = mapping[id];
 	if (toRender.activeType == MESH){
     renderMesh(toRender.obj);
-	}
+	}else if (showCameras && toRender.activeType == CAMERA){
+    renderCamera(cameraMesh);
+  }
 }

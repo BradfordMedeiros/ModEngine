@@ -31,6 +31,8 @@
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
 
+#define DEFAULT_MESH "./res/models/box/box.obj"
+
 unsigned int currentScreenWidth = INITIAL_SCREEN_WIDTH;
 unsigned int currentScreenHeight = INITIAL_SCREEN_HEIGHT;
 
@@ -40,12 +42,15 @@ bool isSelectionMode = true;
 bool isRotateSelection = false;
 
 Scene scene;
+std::map<std::string, Mesh> meshes;
 std::map<short, Object> objectMapping = getObjectMapping();
+
 short selectedIndex = -1;
 std::string selectedName = "no object selected";
 
 glm::mat4 projection;
 
+bool showCameras = true;
 Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -93,6 +98,9 @@ void handleInput(GLFWwindow *window){
    }
    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
       playSound(soundBuffer);
+   }
+   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+      showCameras = !showCameras;
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       isSelectionMode = !isSelectionMode;
@@ -291,7 +299,7 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   modelMatrix = glm::scale(modelMatrix, object.scale);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
-  renderObject(objectH.id, objectMapping);
+  renderObject(objectH.id, objectMapping, meshes["./res/models/box/box.obj"], showCameras);
   for (short id: objectH.children){
     drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
   }
@@ -470,13 +478,12 @@ int main(int argc, char* argv[]){
   Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  std::map<std::string, Mesh> meshes;
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
 
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [&meshes](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj");
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [](short id, std::string type, std::string field, std::string payload) -> void {
+    addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH);
   }, fields);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 

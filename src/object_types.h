@@ -24,7 +24,7 @@ struct Object {
 
 std::map<short, Object> getObjectMapping();
 void addObject(short id, std::string objectType, std::string field, std::string payload, std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes, std::string defaultMesh);
-void renderObject(short id, std::map<short, Object>& mapping);
+void renderObject(short id, std::map<short, Object>& mapping, Mesh& cameraMesh, bool showCameras);
 
 static Field obj = {
   .prefix = '@', 
