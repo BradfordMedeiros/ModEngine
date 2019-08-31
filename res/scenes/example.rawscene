@@ -11,6 +11,8 @@ sceneparent:
 
 maincolumn:position:0.0 0.0 0.0
 maincolumn:mesh:./res/models/column_seat/column_seat.obj
+maincolumn:scale:0.3 2 0.3
+maincolumn:rotation:1.5 0 1.5
 maincolumn:parent:sceneparent
 
 box1:position:6 0 0
