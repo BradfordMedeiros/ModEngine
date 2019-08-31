@@ -1,4 +1,4 @@
-
+#include "./scene/common/mesh.h"
 #include "./object_types.h"
 
 std::map<short, Object> getObjectMapping() {
@@ -6,49 +6,49 @@ std::map<short, Object> getObjectMapping() {
 	return objectMapping;
 }
 
-void addObject(short id, std::string objectType, std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes){
-  std::cout << "INFO: adding object: " << id << "  type is:  " << objectType << std::endl;  
-  ObjectType activeType = ERROR;
-  if (objectType == "mesh"){
-  	activeType = MESH;
-  }else if(objectType == "camera"){
-  	activeType == CAMERA;
+Object createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+  Objects obj { };
+  if (field == ""){
+    obj.mesh = meshes[defaultMesh];
+  }else{
+    obj.mesh = meshes[payload];
   }
-
-  mapping[id] = Object {
-  	.activeType = activeType,
+  
+  Object objData = {
+  	.activeType = MESH,
+  	.obj = obj, 
   };
+  return objData;
+}
+
+Object createCamera(std::string field, std::string payload){
+  Objects obj = {
+  	.cameraPlaceholder = 4,
+  };
+  Object objData = {
+  	.activeType = CAMERA,
+  	.obj = obj, 
+  };
+  return objData;
+}
+
+void renderMesh(Objects &obj){
+  drawMesh(obj.mesh);
+}
+
+void addObject(short id, std::string objectType, std::string field, std::string payload, std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+  if (objectType == "default"){
+  	mapping[id] = createMesh(field, payload, meshes, defaultMesh);
+  }else if(objectType == "camera"){
+  	mapping[id] = createCamera(field, payload);
+  }else{
+    std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
+  }
 }
 
 void renderObject(short id, std::map<short, Object>& mapping){
 	Object toRender = mapping[id];
 	if (toRender.activeType == MESH){
-		std::cout << "render mesh placeholder" << std::endl;
-	}
-	if (toRender.activeType == CAMERA){
-		std::cout << "render camera placeholder" << std::endl;
+    renderMesh(toRender.obj);
 	}
 }
-/*
-fields {
-	.additionalFields = { "name", "string" },
-	.prefix = '',
-	.type = "mesh",
-}
-
-.fields {
-	.additionalFields = { 'active', 'bool' },
-	.prefix = '>',
-	.type = 'camera',
-}
-*/
-/*
-{
-	additionalFields: [{ name: 'mesh', type: 'string' }, { name: 'color', type: 'vec3' }],
-}
-
-{	
-	prefix: '>'
-	additionalFields: [{ name: 'active', type: 'bool' }]
-}
-*/

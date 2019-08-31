@@ -40,6 +40,7 @@ bool isSelectionMode = true;
 bool isRotateSelection = false;
 
 Scene scene;
+std::map<short, Object> objectMapping = getObjectMapping();
 short selectedIndex = -1;
 std::string selectedName = "no object selected";
 
@@ -290,7 +291,7 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   modelMatrix = glm::scale(modelMatrix, object.scale);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
-  drawMesh(object.mesh);
+  renderObject(objectH.id, objectMapping);
   for (short id: objectH.children){
     drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
   }
@@ -473,24 +474,10 @@ int main(int argc, char* argv[]){
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
-  std::map<short, Object> objectMapping = getObjectMapping();
 
-
-  Field obj = {
-    .prefix = '@', 
-    .type = "default",
-    .additionalFields = { "mesh", "testfield" }
-  };
-
-  Field camera = {
-    .prefix = '>',
-    .type = "camera",
-    .additionalFields = {{ "active" }},
-  };
-
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [&objectMapping, &meshes](short id, std::string type, std::string name, std::string value) -> void {
-    addObject(id, type, objectMapping, meshes);
-  }, { obj, camera });
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [&meshes](short id, std::string type, std::string field, std::string payload) -> void {
+    addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj");
+  }, fields);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
