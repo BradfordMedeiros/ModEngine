@@ -1,0 +1,56 @@
+# Comments are ignored	
+# whitespace is also ignored	
+# each object lives on newline	
+# single name and colon defines a gameobject	
+# second arg after : defines parameter	
+# position, scale, rotation default values	
+# mesh value optional	
+# order does not matter	
+
+sceneparent:
+
+maincolumn:position:0.0 0.0 0.0
+maincolumn:mesh:./res/models/column_seat/column_seat.obj
+maincolumn:parent:sceneparent
+
+box1:position:6 0 0
+box1:mesh:./res/models/box/box.obj
+box1:parent:sceneparent
+
+box2:position:9 0 0
+box2:mesh:./res/models/box/box.obj
+box2:parent:sceneparent
+
+box3:position:12 0 0
+box3:mesh:./res/models/box/box.obj
+box3:parent:sceneparent
+
+box4:position:15 0 0
+box4:mesh:./res/models/box/box.obj
+box4:parent:sceneparent
+
+box5:position:18 0 0
+box5:mesh:./res/models/box/box.obj
+box5:parent:sceneparent
+
+box6:position:21 0 0
+box6:mesh:./res/models/box/box.obj
+box6:parent:sceneparent
+
+box7:position:24 0 0
+box7:mesh:./res/models/box/box.obj
+box7:parent:sceneparent
+
+box8:position:27 0 0
+box8:mesh:./res/models/box/box.obj
+box8:parent:sceneparent
+
+box9:position:30 0 0
+box9:mesh:./res/models/box/box.obj
+box9:parent:sceneparent
+
+box10:position:33 0 0
+box10:mesh:./res/models/box/box.obj
+box10:parent:sceneparent
+
+>primarycamera:position:0 0 0
