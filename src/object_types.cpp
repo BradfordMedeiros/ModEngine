@@ -61,3 +61,20 @@ void renderObject(short id, std::map<short, Object>& mapping, Mesh& cameraMesh, 
     renderCamera(cameraMesh);
   }
 }
+
+std::vector<std::pair<std::string, std::string>> serializeMesh(){
+  return { std::pair<std::string, std::string>("mesh", "placeholder") };
+}
+std::vector<std::pair<std::string, std::string>> serializeCamera(){
+  return {};    // no additional fields for now
+}
+
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, Object>& mapping){
+  Object objectToSerialize = mapping[id];
+  if (objectToSerialize.activeType == MESH){
+    return serializeMesh();
+  }else if (objectToSerialize.activeType == CAMERA){
+    return serializeCamera();
+  }
+  return { };   // probably should throw an exception (would be better to rewrite so this cant happen, same in render)
+}

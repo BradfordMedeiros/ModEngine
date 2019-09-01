@@ -226,7 +226,9 @@ std::string additionalText = "";
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
         playSound(soundBuffer);
-        std::cout << serializeScene(scene) << std::endl;
+        std::cout << serializeScene(scene, [](short objectId)-> std::vector<std::pair<std::string, std::string>> {
+          return getAdditionalFields(objectId, objectMapping);
+        }) << std::endl;
     }
     if (button == GLFW_MOUSE_BUTTON_MIDDLE){
       if (action == GLFW_PRESS){
@@ -482,9 +484,10 @@ int main(int argc, char* argv[]){
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
 
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), boxMesh, meshes, [](short id, std::string type, std::string field, std::string payload) -> void {
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
     addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH);
   }, fields);
+
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);

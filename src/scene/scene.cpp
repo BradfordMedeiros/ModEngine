@@ -1,21 +1,19 @@
 #include "./scene.h"
 
-GameObject getGameObject(glm::vec3 position, Mesh& mesh, std::string meshName, std::string name, short id, bool isRotating){
+GameObject getGameObject(glm::vec3 position, std::string name, short id, bool isRotating){
   GameObject gameObject = {
     .id = id,
     .name = name,
     .position = position,
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
     .rotation = glm::quat(0, 0, 0, 1.0f),
-    .mesh = mesh, 
-    .meshName = meshName,
     .isRotating = isRotating,
   };
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, Mesh& mesh, std::string name, short* id, bool isRotating, short parentId, std::function<void(short, std::string, std::string, std::string)> addObject){
-  auto gameobjectObj = getGameObject(position, mesh, "", name, *id, isRotating);
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short* id, bool isRotating, short parentId, std::function<void(short, std::string, std::string, std::string)> addObject){
+  auto gameobjectObj = getGameObject(position, name, *id, isRotating);
   *id = *id + 1;
 
   auto gameobjectH = GameObjectH {
@@ -53,8 +51,7 @@ glm::vec3 parseVec(std::string positionRaw){;
   return glm::vec3(x, y, z);
 }
 
-Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::map<std::string, Mesh> meshes, 
-  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
+Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
   std::cout << "create scene from tokens" << std::endl;
 
   Scene scene;
@@ -72,7 +69,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
     }
 
     if (!(scene.nameToId.find(objectName) != scene.nameToId.end())){
-      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, objectName, &id, false, -1, addObject);
+      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, &id, false, -1, addObject);
       addObject(scene.nameToId[objectName], activeType, "", "");
     }
 
@@ -88,19 +85,11 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
         short parentId = id;
-        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), defaultMesh, tok.payload, &id, false, -1, addObject);
+        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, &id, false, -1, addObject);
         addObject(parentId, "default", "", "");
       }
       scene.idToGameObjectsH[objectId].parentId = scene.nameToId[tok.payload];
       scene.idToGameObjectsH[scene.nameToId[tok.payload]].children.insert(scene.idToGameObjectsH[objectId].id);
-    }else if (tok.attribute == "mesh"){
-      if(meshes.find(tok.payload) == meshes.end()){
-        std::cerr << "ERROR: failed loading mesh: " << tok.payload << std::endl;
-        continue;
-      }
-      
-      scene.idToGameObjects[objectId].mesh = meshes[tok.payload];
-      scene.idToGameObjects[objectId].meshName = tok.payload; 
     }
 
     for (Field field: fields){
@@ -126,8 +115,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens, Mesh& defaultMesh, std::m
 }
 
 // @todo this parsing is sloppy and buggy... obviously need to harden this..
-Scene deserializeScene(std::string content, Mesh& defaultMesh, std::map<std::string, Mesh> meshes, 
-  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
+Scene deserializeScene(std::string content,  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
   std::cout << "INFO: Deserialization: " << std::endl;
 
   std::vector<Token> dtokens;
@@ -155,7 +143,7 @@ Scene deserializeScene(std::string content, Mesh& defaultMesh, std::map<std::str
     }
   }
 
-  return createSceneFromTokens(dtokens, defaultMesh, meshes, addObject, fields);
+  return createSceneFromTokens(dtokens, addObject, fields);
 }
 
 std::string serializeVec(glm::vec3 vec){
@@ -168,7 +156,7 @@ std::string serializeRotation(glm::quat rotation){
   glm::vec3 angles = eulerAngles(rotation);
   return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z - M_PI); 
 }
-std::string serializeScene(Scene& scene){
+std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){
     GameObject gameobject = scene.idToGameObjects[id];
@@ -179,9 +167,10 @@ std::string serializeScene(Scene& scene){
     sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.scale) + "\n";
     sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.rotation) + "\n";
 
-    if (gameobject.meshName != ""){
-      sceneData = sceneData + gameobjectName + ":mesh:" + gameobject.meshName + "\n";
+    for (auto additionalFields : getAdditionalFields(id)){
+      sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
     }
+
     if (parentName != ""){
       sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
     }

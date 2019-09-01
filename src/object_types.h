@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <vector>
 #include "./scene/common/mesh.h"
 #include "./scene/scene.h"
 
@@ -17,14 +18,11 @@ union Objects {
   Mesh mesh;
   int cameraPlaceholder;
 };
+
 struct Object {
   ObjectType activeType;
   Objects obj;
 };
-
-std::map<short, Object> getObjectMapping();
-void addObject(short id, std::string objectType, std::string field, std::string payload, std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes, std::string defaultMesh);
-void renderObject(short id, std::map<short, Object>& mapping, Mesh& cameraMesh, bool showCameras);
 
 static Field obj = {
   .prefix = '@', 
@@ -35,8 +33,18 @@ static Field obj = {
 static Field camera = {
   .prefix = '>',
   .type = "camera",
-  .additionalFields = {{ "active" }},
+  .additionalFields = { },
 };
 static std::vector fields = { obj, camera };
+
+std::map<short, Object> getObjectMapping();
+void addObject(short id, std::string objectType, std::string field, std::string payload, std::map<short, Object>& mapping, std::map<std::string, Mesh>& meshes, std::string defaultMesh);
+void renderObject(short id, std::map<short, Object>& mapping, Mesh& cameraMesh, bool showCameras);
+
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, Object>& mapping);
+
+std::map<short, int> getCameras();
+std::map<short, Mesh> getMeshObjects();
+
 
 #endif 

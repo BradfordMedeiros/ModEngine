@@ -9,15 +9,13 @@
 #include <glm/gtc/quaternion.hpp>
 #include "./common/mesh.h"
 
+
 struct GameObject {
   short id;
-  short parentId;
   std::string name;
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;
-  Mesh mesh;
-  std::string meshName;
   bool isRotating;
 };
 struct GameObjectH {
@@ -46,8 +44,9 @@ struct Field {
 };
 
 
-std::string serializeScene(Scene& scene);
-Scene deserializeScene(std::string content, Mesh& mesh, std::map<std::string, Mesh> meshes, 
-  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields);
+std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
+Scene deserializeScene(std::string content, std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields);
   
+
+
 #endif
