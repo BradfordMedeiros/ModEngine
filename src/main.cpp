@@ -43,7 +43,7 @@ bool isRotateSelection = false;
 
 Scene scene;
 std::map<std::string, Mesh> meshes;
-std::map<short, Object> objectMapping = getObjectMapping();
+std::map<short, GameObjectObj> objectMapping = getObjectMapping();
 
 short selectedIndex = -1;
 std::string selectedName = "no object selected";

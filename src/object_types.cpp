@@ -1,46 +1,31 @@
 #include "./scene/common/mesh.h"
 #include "./object_types.h"
 
-std::map<short, Object> getObjectMapping() {
-	std::map<short, Object> objectMapping;
+std::map<short, GameObjectObj> getObjectMapping() {
+	std::map<short, GameObjectObj> objectMapping;
 	return objectMapping;
 }
 
-Object createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
-  Objects obj { };
+Mesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
   if (field == ""){
-    obj.mesh = meshes[defaultMesh];
-  }else{
-    obj.mesh = meshes[payload];
+    return  meshes[defaultMesh];
   }
-  
-  Object objData = {
-  	.activeType = MESH,
-  	.obj = obj, 
-  };
-  return objData;
+  return meshes[payload];
 }
 
-Object createCamera(std::string field, std::string payload){
-  Objects obj = {
-  	.cameraPlaceholder = 4,
-  };
-  Object objData = {
-  	.activeType = CAMERA,
-  	.obj = obj, 
-  };
-  return objData;
+int createCamera(std::string field, std::string payload){
+  return 0;
 }
 
-void renderMesh(Objects &obj){
-  drawMesh(obj.mesh);
+void renderMesh(Mesh& mesh){
+  drawMesh(mesh);
 }
 void renderCamera(Mesh& cameraMesh){
   drawMesh(cameraMesh);
 }
 
 void addObject(short id, std::string objectType, std::string field, std::string payload, 
-  std::map<short, Object>& mapping, 
+  std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh
 ){
   if (objectType == "default"){
@@ -53,12 +38,19 @@ void addObject(short id, std::string objectType, std::string field, std::string 
   }
 }
 
-void renderObject(short id, std::map<short, Object>& mapping, Mesh& cameraMesh, bool showCameras){
-	Object toRender = mapping[id];
-	if (toRender.activeType == MESH){
-    renderMesh(toRender.obj);
-	}else if (showCameras && toRender.activeType == CAMERA){
+void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showCameras){
+	GameObjectObj toRender = mapping[id];
+
+  auto meshObj = std::get_if<Mesh>(&toRender);
+	if (meshObj != NULL){
+    renderMesh(*meshObj);
+    return;
+	}
+
+  auto cameraObj = std::get_if<int>(&toRender);
+  if (cameraObj != NULL && showCameras){
     renderCamera(cameraMesh);
+    return;
   }
 }
 
@@ -69,11 +61,16 @@ std::vector<std::pair<std::string, std::string>> serializeCamera(){
   return {};    // no additional fields for now
 }
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, Object>& mapping){
-  Object objectToSerialize = mapping[id];
-  if (objectToSerialize.activeType == MESH){
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
+  GameObjectObj objectToSerialize = mapping[id];
+
+  auto meshObject = std::get_if<Mesh>(&objectToSerialize);
+  if (meshObject != NULL){
     return serializeMesh();
-  }else if (objectToSerialize.activeType == CAMERA){
+  }
+
+  auto cameraObject = std::get_if<int>(&objectToSerialize);
+  if (cameraObject != NULL){
     return serializeCamera();
   }
   return { };   // probably should throw an exception (would be better to rewrite so this cant happen, same in render)
