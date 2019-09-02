@@ -53,17 +53,20 @@ glm::mat4 projection;
 bool showCameras = true;
 Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
 unsigned int activeCamera = 0;
-short activeCameraId = -1;
 bool useDefaultCamera = true;
+GameObject* activeCameraObj;
 
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     useDefaultCamera = true;    
+    activeCameraObj = NULL;
   }
 
   activeCamera = (activeCamera + 1) % cameraIndexs.size();
-  activeCameraId = cameraIndexs[activeCamera];
+  short activeCameraId = cameraIndexs[activeCamera];
+  activeCameraObj = &scene.idToGameObjects[activeCameraId];
+  selectedIndex = activeCameraId;
   std::cout << "active camera is: " << activeCamera << std::endl;
 }
 
@@ -503,8 +506,6 @@ int main(int argc, char* argv[]){
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
     addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH);
   }, fields);
-  nextCamera();
-
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetCharCallback(window, keycallback);
@@ -532,8 +533,7 @@ int main(int argc, char* argv[]){
     if (useDefaultCamera){
       view = cam.renderView();
     }else{
-      auto camera = scene.idToGameObjects[activeCameraId];
-      view = renderView(camera.position, camera.rotation);
+      view = renderView(activeCameraObj->position, activeCameraObj->rotation);
     }
 
     glfwSwapBuffers(window);
