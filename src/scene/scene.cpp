@@ -1,19 +1,18 @@
 #include "./scene.h"
 
-GameObject getGameObject(glm::vec3 position, std::string name, short id, bool isRotating){
+GameObject getGameObject(glm::vec3 position, std::string name, short id){
   GameObject gameObject = {
     .id = id,
     .name = name,
     .position = position,
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
     .rotation = glm::quat(0, 0, 0, 1.0f),
-    .isRotating = isRotating,
   };
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short* id, bool isRotating, short parentId, std::function<void(short, std::string, std::string, std::string)> addObject){
-  auto gameobjectObj = getGameObject(position, name, *id, isRotating);
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short* id, short parentId, std::function<void(short, std::string, std::string, std::string)> addObject){
+  auto gameobjectObj = getGameObject(position, name, *id);
   *id = *id + 1;
 
   auto gameobjectH = GameObjectH {
@@ -69,7 +68,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
     }
 
     if (!(scene.nameToId.find(objectName) != scene.nameToId.end())){
-      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, &id, false, -1, addObject);
+      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, &id, -1, addObject);
       addObject(scene.nameToId[objectName], activeType, "", "");
     }
 
@@ -85,7 +84,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
         short parentId = id;
-        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, &id, false, -1, addObject);
+        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, &id, -1, addObject);
         addObject(parentId, "default", "", "");
       }
       scene.idToGameObjectsH[objectId].parentId = scene.nameToId[tok.payload];

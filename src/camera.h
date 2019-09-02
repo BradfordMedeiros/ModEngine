@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 class Camera {
 private:
@@ -22,5 +23,7 @@ public:
   void setFrontDelta(float deltaYaw, float deltaPitch, float deltaTime);
   glm::mat4 renderView();
 };
+
+glm::mat4 renderView(glm::vec3 position, glm::quat orientation);
 
 #endif 

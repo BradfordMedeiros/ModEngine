@@ -52,6 +52,20 @@ glm::mat4 projection;
 
 bool showCameras = true;
 Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
+unsigned int activeCamera = 0;
+short activeCameraId = -1;
+bool useDefaultCamera = true;
+
+void nextCamera(){
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
+  if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
+    useDefaultCamera = true;    
+  }
+
+  activeCamera = (activeCamera + 1) % cameraIndexs.size();
+  activeCameraId = cameraIndexs[activeCamera];
+  std::cout << "active camera is: " << activeCamera << std::endl;
+}
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -100,11 +114,14 @@ void handleInput(GLFWwindow *window){
       playSound(soundBuffer);
    }
    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+      nextCamera();
+   }
+   if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
       showCameras = !showCameras;
-
-      for (auto id: getGameObjectsIndex<GameObjectCamera>(objectMapping)){
-        scene.idToGameObjects[id].position.y+= 0.01;
-      }
+   }
+   if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
+      useDefaultCamera = !useDefaultCamera;
+      std::cout << "Camera option: " << (useDefaultCamera ? "default" : "new") << std::endl;
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       isSelectionMode = !isSelectionMode;
@@ -294,12 +311,7 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = scene.idToGameObjects[objectH.id];
 
-  glm::mat4 modelMatrix = model;
-  if (!object.isRotating){
-    modelMatrix = glm::translate(modelMatrix, object.position);
-  }else{
-    modelMatrix = glm::inverse(glm::lookAt(glm::vec3(5.0f, 1.7f, 1.05f), cam.position, object.position));
-  }
+  glm::mat4 modelMatrix = glm::translate(model, object.position);
 
   modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
   modelMatrix = glm::scale(modelMatrix, object.scale);
@@ -491,6 +503,7 @@ int main(int argc, char* argv[]){
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
     addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH);
   }, fields);
+  nextCamera();
 
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
@@ -514,7 +527,14 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
  
-    glm::mat4 view = cam.renderView();
+
+    glm::mat4 view;
+    if (useDefaultCamera){
+      view = cam.renderView();
+    }else{
+      auto camera = scene.idToGameObjects[activeCameraId];
+      view = renderView(camera.position, camera.rotation);
+    }
 
     glfwSwapBuffers(window);
     
