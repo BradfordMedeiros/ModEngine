@@ -13,7 +13,13 @@
 // to the proper types 
 // this way we can decouple, for example, the camera type, or the concept of a mesh, from our scene graph 
 
-typedef std::variant<Mesh, int> GameObjectObj;
+struct GameObjectMesh {
+  std::string meshName;
+  Mesh mesh;
+};
+struct GameObjectCamera {};
+
+typedef std::variant<GameObjectMesh, GameObjectCamera> GameObjectObj;
 
 static Field obj = {
   .prefix = '@', 

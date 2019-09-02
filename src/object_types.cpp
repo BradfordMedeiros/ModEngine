@@ -6,19 +6,27 @@ std::map<short, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-Mesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+  std::string meshName;
   if (field == ""){
-    return  meshes[defaultMesh];
+    meshName = defaultMesh;
+  }else{
+    meshName = payload;
   }
-  return meshes[payload];
+  
+  GameObjectMesh obj = {
+    .meshName = meshName,
+    .mesh = meshes[meshName],
+  };
+  return obj;
+}
+GameObjectCamera createCamera(std::string field, std::string payload){
+  GameObjectCamera obj = {};
+  return obj;
 }
 
-int createCamera(std::string field, std::string payload){
-  return 0;
-}
-
-void renderMesh(Mesh& mesh){
-  drawMesh(mesh);
+void renderMesh(GameObjectMesh& obj){
+  drawMesh(obj.mesh);
 }
 void renderCamera(Mesh& cameraMesh){
   drawMesh(cameraMesh);
@@ -41,21 +49,21 @@ void addObject(short id, std::string objectType, std::string field, std::string 
 void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showCameras){
 	GameObjectObj toRender = mapping[id];
 
-  auto meshObj = std::get_if<Mesh>(&toRender);
+  auto meshObj = std::get_if<GameObjectMesh>(&toRender);
 	if (meshObj != NULL){
     renderMesh(*meshObj);
     return;
 	}
 
-  auto cameraObj = std::get_if<int>(&toRender);
+  auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showCameras){
     renderCamera(cameraMesh);
     return;
   }
 }
 
-std::vector<std::pair<std::string, std::string>> serializeMesh(){
-  return { std::pair<std::string, std::string>("mesh", "placeholder") };
+std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
+  return { std::pair<std::string, std::string>("mesh", obj.meshName) };
 }
 std::vector<std::pair<std::string, std::string>> serializeCamera(){
   return {};    // no additional fields for now
@@ -64,12 +72,12 @@ std::vector<std::pair<std::string, std::string>> serializeCamera(){
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
   GameObjectObj objectToSerialize = mapping[id];
 
-  auto meshObject = std::get_if<Mesh>(&objectToSerialize);
+  auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
   if (meshObject != NULL){
-    return serializeMesh();
+    return serializeMesh(*meshObject);
   }
 
-  auto cameraObject = std::get_if<int>(&objectToSerialize);
+  auto cameraObject = std::get_if<GameObjectCamera>(&objectToSerialize);
   if (cameraObject != NULL){
     return serializeCamera();
   }
