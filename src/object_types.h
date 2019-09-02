@@ -9,15 +9,13 @@
 #include "./scene/common/mesh.h"
 #include "./scene/scene.h"
 
-// idea is to have a union of the types we want + active type in struct, and then a data structure which will map ids (objects that we add to the scene)
-// to the proper types 
-// this way we can decouple, for example, the camera type, or the concept of a mesh, from our scene graph 
-
 struct GameObjectMesh {
   std::string meshName;
   Mesh mesh;
 };
-struct GameObjectCamera {};
+struct GameObjectCamera {
+  int number = 0;
+};
 
 typedef std::variant<GameObjectMesh, GameObjectCamera> GameObjectObj;
 
@@ -41,8 +39,16 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping);
 
-std::map<short, int> getCameras();
-std::map<short, Mesh> getMeshObjects();
-
+template<typename T>
+std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){   // putting templates have to be in header?
+  std::vector<short> indicies;
+  for (auto [id, gameobject]: mapping){
+    auto gameobjectP = std::get_if<T>(&gameobject);
+    if (gameobjectP != NULL){
+      indicies.push_back(id);
+    }
+  }
+  return indicies;
+}
 
 #endif 

@@ -101,6 +101,10 @@ void handleInput(GLFWwindow *window){
    }
    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
       showCameras = !showCameras;
+
+      for (auto id: getGameObjectsIndex<GameObjectCamera>(objectMapping)){
+        scene.idToGameObjects[id].position.y+= 0.01;
+      }
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       isSelectionMode = !isSelectionMode;
