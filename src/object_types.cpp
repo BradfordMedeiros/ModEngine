@@ -47,7 +47,6 @@ void addObject(short id, std::string objectType, std::string field, std::string 
   if (objectType == "default"){
   	mapping[id] = createMesh(field, payload, meshes, defaultMesh, ensureMeshLoaded);
   }else if(objectType == "camera"){
-    std::cout << "ADDING CAMERA" << std::endl;
   	mapping[id] = createCamera(field, payload);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;

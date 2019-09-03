@@ -15,7 +15,6 @@ private:
 public:
   glm::vec3 position;
   Camera(glm::vec3 position, glm::vec3 up, float speed, float sensitivity, float pitch, float yaw);
-  glm::mat4 getView();
   void moveFront(float deltaTime);
   void moveBack(float deltaTime);
   void moveLeft(float deltaTime);
@@ -24,7 +23,10 @@ public:
   glm::mat4 renderView();
 };
 
+glm::quat setFromDeltaTo(glm::quat orientation, float deltaYaw, float deltaPitch);
 glm::vec3 moveRelativeTo(glm::vec3 position, glm::quat orientation, glm::vec3 offset);
+glm::vec3 moveTo(glm::vec3 position, glm::vec3 offset);
 glm::mat4 renderView(glm::vec3 position, glm::quat orientation);
+
 
 #endif 

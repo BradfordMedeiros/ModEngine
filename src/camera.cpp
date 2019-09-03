@@ -43,6 +43,12 @@ glm::mat4 Camera::renderView(){
    return glm::lookAt(this->position, this->position + this->front, this->up);
 }
 
+glm::vec3 moveRelativeTo(glm::vec3 position, glm::quat orientation, glm::vec3 offset){
+  return position + glm::vec3(offset.x , offset.y , offset.z );
+}
+glm::vec3 moveTo(glm::vec3 position, glm::vec3 offset){
+    return glm::vec3(position.x + offset.x, position.y + offset.y, position.z + offset.z);
+}
 glm::mat4 renderView(glm::vec3 position, glm::quat orientation){
   return glm::translate(glm::toMat4(orientation), position);
 }

@@ -55,6 +55,7 @@ Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150
 unsigned int activeCamera = 0;
 bool useDefaultCamera = true;
 GameObject* activeCameraObj;
+bool moveRelative = false;
 
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
@@ -77,9 +78,13 @@ unsigned int mode = 0;  // 0 = translate mode, 1 = scale mode, 2 = rotate
 unsigned int axis = 0;  // 0 = x, 1 = y, 2 = z
 
 void translate(float x, float y, float z){
-  scene.idToGameObjects[selectedIndex].position.x+= x;
-  scene.idToGameObjects[selectedIndex].position.y+= y;
-  scene.idToGameObjects[selectedIndex].position.z+=z;
+  auto offset = glm::vec3(x,y,z);
+  if (moveRelative){
+    auto oldGameObject = scene.idToGameObjects[selectedIndex];
+    scene.idToGameObjects[selectedIndex].position = moveRelativeTo(oldGameObject.position, oldGameObject.rotation, offset);
+  }else{
+    scene.idToGameObjects[selectedIndex].position = moveTo(scene.idToGameObjects[selectedIndex].position, offset);   
+  }
 }
 void scale(float x, float y, float z){
   scene.idToGameObjects[selectedIndex].scale.x+= x;
@@ -125,6 +130,10 @@ void handleInput(GLFWwindow *window){
    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
       useDefaultCamera = !useDefaultCamera;
       std::cout << "Camera option: " << (useDefaultCamera ? "default" : "new") << std::endl;
+   }
+   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
+      moveRelative = !moveRelative;
+      std::cout << "Move relative: " << moveRelative << std::endl;
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       isSelectionMode = !isSelectionMode;
