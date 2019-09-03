@@ -96,7 +96,7 @@ ALuint soundBuffer;
 void handleInput(GLFWwindow *window){
    float currentFrame = glfwGetTime();
    deltaTime = currentFrame - lastFrame;
-   lastFrame = currentFrame;  
+   lastFrame = currentFrame;
 
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
       glfwSetWindowShouldClose(window, true);
@@ -500,10 +500,11 @@ int main(int argc, char* argv[]){
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
-  std::cout << "INFO: deserializing scene" << std::endl;
 
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH);
+    addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH, [](std::string meshName) -> void {
+      meshes[meshName] = loadMesh(meshName);
+    });
   }, fields);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 

@@ -6,7 +6,7 @@ std::map<short, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded){
   std::cout << "Creating gameobject: mesh: " << payload << std::endl;
 
   std::string meshName;
@@ -16,6 +16,7 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
     meshName = payload;
   }
   
+  ensureMeshLoaded(meshName);
   if (meshes.find(meshName) == meshes.end()){
     std::cout << "ERROR: loading mesh " << meshName << " does not exist" << std::endl; 
     throw std::runtime_error("mesh does not exist: " + meshName);
@@ -41,10 +42,10 @@ void renderCamera(Mesh& cameraMesh){
 
 void addObject(short id, std::string objectType, std::string field, std::string payload, 
   std::map<short, GameObjectObj>& mapping, 
-  std::map<std::string, Mesh>& meshes, std::string defaultMesh
+  std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded
 ){
   if (objectType == "default"){
-  	mapping[id] = createMesh(field, payload, meshes, defaultMesh);
+  	mapping[id] = createMesh(field, payload, meshes, defaultMesh, ensureMeshLoaded);
   }else if(objectType == "camera"){
     std::cout << "ADDING CAMERA" << std::endl;
   	mapping[id] = createCamera(field, payload);
