@@ -489,8 +489,6 @@ int main(int argc, char* argv[]){
 
   glm::mat4 model = glm::mat4(1.0f);
 
-  onFramebufferSizeChange(window, currentScreenWidth, currentScreenHeight); 
-
   font fontToRender = readFont(result["font"].as<std::string>());
   fontMeshes = loadFontMeshes(fontToRender);
 
@@ -502,6 +500,7 @@ int main(int argc, char* argv[]){
   meshes[result["model"].as<std::string>()] = columnSeatMesh;
   meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
+  std::cout << "INFO: deserializing scene" << std::endl;
 
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
     addObject(id, type, field, payload, objectMapping, meshes, DEFAULT_MESH);
@@ -514,6 +513,9 @@ int main(int argc, char* argv[]){
   unsigned int frameCount = 0;
   float previous = glfwGetTime();
   float last60 = previous;
+
+
+  std::cout << "INFO: render loop starting" << std::endl;
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;

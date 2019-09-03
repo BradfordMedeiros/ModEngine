@@ -7,6 +7,8 @@ std::map<short, GameObjectObj> getObjectMapping() {
 }
 
 GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh){
+  std::cout << "Creating gameobject: mesh: " << payload << std::endl;
+
   std::string meshName;
   if (field == ""){
     meshName = defaultMesh;
@@ -14,6 +16,11 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
     meshName = payload;
   }
   
+  if (meshes.find(meshName) == meshes.end()){
+    std::cout << "ERROR: loading mesh " << meshName << " does not exist" << std::endl; 
+    throw std::runtime_error("mesh does not exist: " + meshName);
+  }
+
   GameObjectMesh obj = {
     .meshName = meshName,
     .mesh = meshes[meshName],

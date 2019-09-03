@@ -24,6 +24,7 @@ public:
   glm::mat4 renderView();
 };
 
+glm::vec3 moveRelativeTo(glm::vec3 position, glm::quat orientation, glm::vec3 offset);
 glm::mat4 renderView(glm::vec3 position, glm::quat orientation);
 
 #endif 
