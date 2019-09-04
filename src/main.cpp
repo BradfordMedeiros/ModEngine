@@ -44,6 +44,7 @@ bool isRotateSelection = false;
 Scene scene;
 std::map<std::string, Mesh> meshes;
 std::map<short, GameObjectObj> objectMapping = getObjectMapping();
+bool visualizeNormals = false;
 
 short selectedIndex = -1;
 std::string selectedName = "no object selected";
@@ -131,9 +132,13 @@ void handleInput(GLFWwindow *window){
       useDefaultCamera = !useDefaultCamera;
       std::cout << "Camera option: " << (useDefaultCamera ? "default" : "new") << std::endl;
    }
-   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
+   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
       moveRelative = !moveRelative;
       std::cout << "Move relative: " << moveRelative << std::endl;
+   }
+   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
+      visualizeNormals = !visualizeNormals;
+      std::cout << "visualizeNormals: " << visualizeNormals << std::endl;
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       isSelectionMode = !isSelectionMode;
@@ -326,10 +331,19 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   glm::mat4 modelMatrix = glm::translate(model, object.position);
 
   modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
+
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+  
+  if (visualizeNormals){
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    drawMesh(meshes["./res/models/cone/cone.obj"]); 
+  }
+
   modelMatrix = glm::scale(modelMatrix, object.scale);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, selectedIndex == object.id)));
+  
   renderObject(objectH.id, objectMapping, meshes["./res/models/box/box.obj"], showCameras);
+
   for (short id: objectH.children){
     drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
   }
