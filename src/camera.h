@@ -23,7 +23,7 @@ public:
   glm::mat4 renderView();
 };
 
-glm::quat setFromDeltaTo(glm::quat orientation, float deltaYaw, float deltaPitch);
+glm::quat setFrontDeltaTo(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll);
 glm::vec3 moveRelativeTo(glm::vec3 position, glm::quat orientation, glm::vec3 offset);
 glm::vec3 moveTo(glm::vec3 position, glm::vec3 offset);
 glm::mat4 renderView(glm::vec3 position, glm::quat orientation);

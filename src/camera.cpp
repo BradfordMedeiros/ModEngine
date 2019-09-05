@@ -43,8 +43,14 @@ glm::mat4 Camera::renderView(){
    return glm::lookAt(this->position, this->position + this->front, this->up);
 }
 
+
+glm::quat setFrontDeltaTo(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll){
+  glm::vec3 eulerAngles(deltaPitch, deltaYaw, deltaRoll);
+  glm::quat rotationBy = glm::quat(eulerAngles);
+  return rotationBy * orientation;
+}
 glm::vec3 moveRelativeTo(glm::vec3 position, glm::quat orientation, glm::vec3 offset){
-  return position + glm::vec3(offset.x , offset.y , offset.z );
+  return position + orientation * offset;
 }
 glm::vec3 moveTo(glm::vec3 position, glm::vec3 offset){
     return glm::vec3(position.x + offset.x, position.y + offset.y, position.z + offset.z);
