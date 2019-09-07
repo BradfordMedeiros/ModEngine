@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <math.h>     
 #include <thread>
 
 #include <cxxopts.hpp>
@@ -27,6 +26,7 @@
 #include "./common/util.h"
 #include "./guile.h"
 #include "./object_types.h"
+#include "./colorselection.h"
 
 #define INITIAL_SCREEN_WIDTH 800
 #define INITIAL_SCREEN_HEIGHT 600
@@ -235,35 +235,6 @@ void keycallback(GLFWwindow* window, unsigned int codepoint){
   // this can get the raw text input into the keyboard
 }
 
-struct Color {
-  GLfloat r;
-  GLfloat g;
-  GLfloat b;
-};
-struct GLPosition {
-  GLint x;
-  GLint y;
-};
-Color getPixelColor(GLint x, GLint y) {
-    Color color;
-    glReadPixels(x, currentScreenHeight - y, 1, 1, GL_RGB, GL_FLOAT, &color);
-    return color;
-}
-
-glm::vec3 getColorFromGameobject(GameObject object, bool useSelectionColor, bool isSelected){
-  if (isSelected){
-    return glm::vec3(1.0f, 0.0f, 0.0f);
-  }
-  if (!useSelectionColor){
-    return glm::vec3(1.0f, 1.0f, 1.0f);
-  }
-  float blueChannel = object.id * 0.01;
-  return glm::vec3(0.0f, 0.0f, blueChannel);
-}
-unsigned int getIdFromColor(float r, float g, float b){
-  short objectId = round(b / 0.01);
-  return objectId;
-}
 
 
 std::string additionalText = "";
@@ -285,7 +256,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
         
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-      Color pixelColor = getPixelColor(cursorLeft, cursorTop);
+      Color pixelColor = getPixelColor(cursorLeft, cursorTop, currentScreenHeight);
       selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
       selectedName = scene.idToGameObjects[selectedIndex].name;
       std::cout << "(" << cursorLeft << "," << cursorTop << ")" << std::endl;
@@ -387,7 +358,6 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
     std::string modeText = mode == 0 ? "translate" : (mode == 1 ? "scale" : "rotate"); 
     std::string axisText = axis == 0 ? "xz" : "xy";
     drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " +axisText, 10, 40, 3);
-
 }
 
 SCM moveCamera(SCM value){
@@ -406,9 +376,6 @@ int main(int argc, char* argv[]){
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
-   ("m,model", "Model to load", cxxopts::value<std::string>()->default_value("./res/models/column_seat/column_seat.obj"))
-   ("b,modelbox", "Second model to load", cxxopts::value<std::string>()->default_value("./res/models/box/box.obj"))
-   ("d,twodee", "Image to use for texture for 2d mesh", cxxopts::value<std::string>()->default_value("./res/textures/grass.png"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,crosshair", "icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
    ("o,font", "font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
@@ -522,13 +489,7 @@ int main(int argc, char* argv[]){
   font fontToRender = readFont(result["font"].as<std::string>());
   fontMeshes = loadFontMeshes(fontToRender);
 
-  Mesh columnSeatMesh = loadMesh(result["model"].as<std::string>());
-  Mesh boxMesh = loadMesh(result["modelbox"].as<std::string>());
-  Mesh grassMesh = load2DMesh(result["twodee"].as<std::string>());
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
-
-  meshes[result["model"].as<std::string>()] = columnSeatMesh;
-  meshes[result["modelbox"].as<std::string>()] = boxMesh;
 
 
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
