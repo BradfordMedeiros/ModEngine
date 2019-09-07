@@ -52,11 +52,19 @@ std::string selectedName = "no object selected";
 glm::mat4 projection;
 
 bool showCameras = true;
-Camera cam(glm::vec3(-8.0f, 4.0f, -8.0f), glm::vec3(0.0, 1.0f, 0.0f), 25.0f, 150.0f, -20.0f, 30.0f);
+
+GameObject defaultCamera = GameObject {
+  .id = -1,
+  .name = "defaultCamera",
+  .position = glm::vec3(-8.0f, 4.0f, -8.0f),
+  .scale = glm::vec3(1.0f, 1.0f, 1.0f),
+  .rotation = glm::quat(0, 1, 0, 0.0f),
+};
+
 unsigned int activeCamera = 0;
 bool useDefaultCamera = true;
 GameObject* activeCameraObj;
-bool moveRelative = false;
+bool moveRelativeEnabled= false;
 
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
@@ -80,11 +88,11 @@ unsigned int axis = 0;  // 0 = x, 1 = y, 2 = z
 
 void translate(float x, float y, float z){
   auto offset = glm::vec3(x,y,z);
-  if (moveRelative){
+  if (moveRelativeEnabled){
     auto oldGameObject = scene.idToGameObjects[selectedIndex];
-    scene.idToGameObjects[selectedIndex].position = moveRelativeTo(oldGameObject.position, oldGameObject.rotation, offset);
+    scene.idToGameObjects[selectedIndex].position = moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
   }else{
-    scene.idToGameObjects[selectedIndex].position = moveTo(scene.idToGameObjects[selectedIndex].position, offset);   
+    scene.idToGameObjects[selectedIndex].position = move(scene.idToGameObjects[selectedIndex].position, offset);   
   }
 }
 void scale(float x, float y, float z){
@@ -93,9 +101,7 @@ void scale(float x, float y, float z){
   scene.idToGameObjects[selectedIndex].scale.z+=z;
 }
 void rotate(float x, float y, float z){
-  glm::vec3 eulerAngles(x, y, z);
-  glm::quat rotationBy = glm::quat(eulerAngles);
-  scene.idToGameObjects[selectedIndex].rotation = rotationBy * scene.idToGameObjects[selectedIndex].rotation;
+  scene.idToGameObjects[selectedIndex].rotation  = setFrontDelta(scene.idToGameObjects[selectedIndex].rotation, x, y, z, 5);
 }
 
 ALuint soundBuffer;
@@ -108,16 +114,16 @@ void handleInput(GLFWwindow *window){
       glfwSetWindowShouldClose(window, true);
    }
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-      cam.moveFront(deltaTime);
+      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(0.0, 0.0, 1.0f));
    }
    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-      cam.moveLeft(deltaTime);
+      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(1.0, 0.0, 0.0f));
    }
    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
-      cam.moveBack(deltaTime);
+      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(0.0, 0.0, -1.0f));
    }
    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
-      cam.moveRight(deltaTime);
+      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(-1.0, 0.0, 0.0f));
    }
    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
       playSound(soundBuffer);
@@ -133,8 +139,8 @@ void handleInput(GLFWwindow *window){
       std::cout << "Camera option: " << (useDefaultCamera ? "default" : "new") << std::endl;
    }
    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
-      moveRelative = !moveRelative;
-      std::cout << "Move relative: " << moveRelative << std::endl;
+      moveRelativeEnabled = !moveRelativeEnabled;
+      std::cout << "Move relative: " << moveRelativeEnabled << std::endl;
    }
    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
       visualizeNormals = !visualizeNormals;
@@ -318,7 +324,7 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     if (!isSelectionMode || isRotateSelection){
-      cam.setFrontDelta(xoffset, yoffset, deltaTime);
+      defaultCamera.rotation = setFrontDelta(defaultCamera.rotation, xoffset, yoffset, 0, 1);
     }else{
       cursorLeft += (int)(xoffset * 15);
       cursorTop  -= (int)(yoffset * 15);
@@ -381,10 +387,11 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite){
     std::string modeText = mode == 0 ? "translate" : (mode == 1 ? "scale" : "rotate"); 
     std::string axisText = axis == 0 ? "xz" : "xy";
     drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " +axisText, 10, 40, 3);
+
 }
 
 SCM moveCamera(SCM value){
-  cam.moveRight(scm_to_double(value));
+  //cam.moveRight(scm_to_double(value));
   return SCM_UNSPECIFIED;
 }
 
@@ -554,10 +561,9 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
  
-
     glm::mat4 view;
     if (useDefaultCamera){
-      view = cam.renderView();
+      view = renderView(defaultCamera.position, defaultCamera.rotation);
     }else{
       view = renderView(activeCameraObj->position, activeCameraObj->rotation);
     }
