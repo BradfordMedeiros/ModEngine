@@ -88,7 +88,7 @@ void playSound(){
   playSound(soundBuffer);
 }
 void handleSerialization(){
-  playSound(soundBuffer);
+  playSound();
   std::cout << serializeScene(scene, [](short objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, objectMapping);
   }) << std::endl; 
@@ -307,7 +307,6 @@ int main(int argc, char* argv[]){
   glfwSetMouseButtonCallback(window, onMouseCallback);
   
   float deltaTime = 0.0f; // Time between current frame and last frame
-  float lastFrame = 0.0f; // Time of last frame
 
   unsigned int frameCount = 0;
   float previous = glfwGetTime();
@@ -317,10 +316,9 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: render loop starting" << std::endl;
 
   while (!glfwWindowShouldClose(window)){
-
     frameCount++;
     float now = glfwGetTime();
-    deltaTime = now - previous;     // this should be used 
+    deltaTime = now - previous;   
     previous = now;
 
     if (frameCount == 60){
@@ -329,7 +327,7 @@ int main(int argc, char* argv[]){
       last60 = now;
       currentFramerate = (int)60/(timedelta);
     }
- 
+
     glm::mat4 view;
     if (state.useDefaultCamera){
       view = renderView(defaultCamera.position, defaultCamera.rotation);
@@ -354,11 +352,7 @@ int main(int argc, char* argv[]){
     glBindVertexArray(quadVAO);
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    float currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
-    
+        
     handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound);
 
     glfwPollEvents();
