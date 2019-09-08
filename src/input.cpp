@@ -1,5 +1,50 @@
 #include "./input.h"
 
+void onMouse(GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
+    if(state.firstMouse){
+        state.lastX = xpos;
+        state.lastY = ypos;
+        state.firstMouse = false;
+        return;
+    }
+  
+    float xoffset = xpos - state.lastX;
+    float yoffset = state.lastY - ypos; 
+    state.lastX = xpos;
+    state.lastY = ypos;
+
+    float sensitivity = 0.05;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+    if (!state.isSelectionMode || state.isRotateSelection){
+      rotateCamera(xoffset, yoffset);
+    }else{
+      state.cursorLeft += (int)(xoffset * 15);
+      state.cursorTop  -= (int)(yoffset * 15);
+    }
+}
+
+void mouse_button_callback(GLFWwindow* window, engineState& state, int button, int action, int mods,
+  void (*handleSerialization) (void), void (*selectItem) (void)){
+
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+    handleSerialization();
+  }
+  if (button == GLFW_MOUSE_BUTTON_MIDDLE){
+    if (action == GLFW_PRESS){
+      state.isRotateSelection = true;
+    }else if (action == GLFW_RELEASE){
+      state.isRotateSelection = false;
+    }
+    state.cursorLeft = state.currentScreenWidth / 2;
+    state.cursorTop = state.currentScreenHeight / 2;
+  }
+      
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    selectItem();
+  }
+}
+
 void handleInput(GLFWwindow *window, float deltaTime, 
   engineState& state, 
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),

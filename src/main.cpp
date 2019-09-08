@@ -30,12 +30,6 @@
 #include "./state.h"
 #include "./input.h"
 
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor);
-void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int currentFramerate);
-void translate(float x, float y, float z);
-void scale(float x, float y, float z);
-void rotate(float x, float y, float z);
-
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
@@ -44,14 +38,27 @@ GameObject defaultCamera = GameObject {
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
-
 engineState state = getDefaultState(800, 600);
-
 Scene scene;
 std::map<std::string, Mesh> meshes;
 std::map<unsigned int, Mesh> fontMeshes;
 std::map<short, GameObjectObj> objectMapping = getObjectMapping();
 
+glm::mat4 projection;
+unsigned int framebufferTexture;
+unsigned int rbo;
+glm::mat4 orthoProj;
+ALuint soundBuffer;
+
+float quadVertices[] = {
+  -1.0f,  1.0f,  0.0f, 1.0f,
+  -1.0f, -1.0f,  0.0f, 0.0f,
+   1.0f, -1.0f,  1.0f, 0.0f,
+
+  -1.0f,  1.0f,  0.0f, 1.0f,
+   1.0f, -1.0f,  1.0f, 0.0f,
+   1.0f,  1.0f,  1.0f, 1.0f
+};
 
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
@@ -66,91 +73,109 @@ void nextCamera(){
   state.selectedIndex = activeCameraId;
   std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
-
-glm::mat4 projection;
-unsigned int framebufferTexture;
-unsigned int rbo;
-glm::mat4 orthoProj;
-
-float deltaTime = 0.0f;	// Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-
-ALuint soundBuffer;
-
 void moveCamera(glm::vec3 offset){
   defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(offset));
 }
-void playSound(){
-  playSound(soundBuffer);
+void rotateCamera(float xoffset, float yoffset){
+  defaultCamera.rotation = setFrontDelta(defaultCamera.rotation, xoffset, yoffset, 0, 1);
 }
-
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
-        playSound(soundBuffer);
-        std::cout << serializeScene(scene, [](short objectId)-> std::vector<std::pair<std::string, std::string>> {
-          return getAdditionalFields(objectId, objectMapping);
-        }) << std::endl;
-    }
-    if (button == GLFW_MOUSE_BUTTON_MIDDLE){
-      if (action == GLFW_PRESS){
-        state.isRotateSelection = true;
-      }else if (action == GLFW_RELEASE){
-        state.isRotateSelection = false;
-      }
-      state.cursorLeft = state.currentScreenWidth / 2;
-      state.cursorTop = state.currentScreenHeight / 2;
-    }
-        
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-      Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-      state.selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
-      state.selectedName = scene.idToGameObjects[state.selectedIndex].name;
-      std::cout << "(" << state.cursorLeft << "," << state.cursorTop << ")" << std::endl;
-      std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
-      std::cout << "selected object: " << state.selectedName << std::endl;
-      state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
-    }
-}
-
-float quadVertices[] = {
-  -1.0f,  1.0f,  0.0f, 1.0f,
-  -1.0f, -1.0f,  0.0f, 0.0f,
-   1.0f, -1.0f,  1.0f, 0.0f,
-
-  -1.0f,  1.0f,  0.0f, 1.0f,
-   1.0f, -1.0f,  1.0f, 0.0f,
-   1.0f,  1.0f,  1.0f, 1.0f
-};
-
-void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-    if(state.firstMouse){
-        state.lastX = xpos;
-        state.lastY = ypos;
-        state.firstMouse = false;
-        return;
-    }
-  
-    float xoffset = xpos - state.lastX;
-    float yoffset = state.lastY - ypos; 
-    state.lastX = xpos;
-    state.lastY = ypos;
-
-    float sensitivity = 0.05;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-    if (!state.isSelectionMode || state.isRotateSelection){
-      defaultCamera.rotation = setFrontDelta(defaultCamera.rotation, xoffset, yoffset, 0, 1);
-    }else{
-      state.cursorLeft += (int)(xoffset * 15);
-      state.cursorTop  -= (int)(yoffset * 15);
-    }
-}
-
 SCM moveCamera(SCM value){
   //cam.moveRight(scm_to_double(value));
   return SCM_UNSPECIFIED;
 }
 
+void playSound(){
+  playSound(soundBuffer);
+}
+void handleSerialization(){
+  playSound(soundBuffer);
+  std::cout << serializeScene(scene, [](short objectId)-> std::vector<std::pair<std::string, std::string>> {
+    return getAdditionalFields(objectId, objectMapping);
+  }) << std::endl; 
+}
+void selectItem(){
+  Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+  state.selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
+  state.selectedName = scene.idToGameObjects[state.selectedIndex].name;
+  std::cout << "(" << state.cursorLeft << "," << state.cursorTop << ")" << std::endl;
+  std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
+  std::cout << "selected object: " << state.selectedName << std::endl;
+  state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
+}
+
+
+void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
+  onMouse(window, state, xpos, ypos, rotateCamera);
+}
+void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
+  mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
+}
+
+void translate(float x, float y, float z){
+  auto offset = glm::vec3(x,y,z);
+  if (state.moveRelativeEnabled){
+    auto oldGameObject = scene.idToGameObjects[state.selectedIndex];
+    scene.idToGameObjects[state.selectedIndex].position = moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
+  }else{
+    scene.idToGameObjects[state.selectedIndex].position = move(scene.idToGameObjects[state.selectedIndex].position, offset);   
+  }
+}
+void scale(float x, float y, float z){
+  scene.idToGameObjects[state.selectedIndex].scale.x+= x;
+  scene.idToGameObjects[state.selectedIndex].scale.y+= y;
+  scene.idToGameObjects[state.selectedIndex].scale.z+=z;
+}
+void rotate(float x, float y, float z){
+  scene.idToGameObjects[state.selectedIndex].rotation  = setFrontDelta(scene.idToGameObjects[state.selectedIndex].rotation, x, y, z, 5);
+}
+
+void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
+  GameObject object = scene.idToGameObjects[objectH.id];
+
+  glm::mat4 modelMatrix = glm::translate(model, object.position);
+  modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
+
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, state.selectedIndex == object.id)));
+  
+  if (state.visualizeNormals){
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    drawMesh(meshes["./res/models/cone/cone.obj"]); 
+  }
+
+  modelMatrix = glm::scale(modelMatrix, object.scale);
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+  
+  renderObject(objectH.id, objectMapping, meshes["./res/models/box/box.obj"], state.showCameras);
+
+  for (short id: objectH.children){
+    drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
+  }
+}
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
+  glUseProgram(shaderProgram);
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+
+  for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
+    drawGameobject(scene.idToGameObjectsH[scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
+  }  
+}
+void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int currentFramerate){
+    glUseProgram(uiShaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+
+    if (!state.isSelectionMode){
+      drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
+    }else if (!state.isRotateSelection){
+      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
+    }
+
+    drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+
+    std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
+    std::string axisText = state.axis == 0 ? "xz" : "xy";
+    drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);
+}
 
 int main(int argc, char* argv[]){
   initGuile();
@@ -184,7 +209,6 @@ int main(int argc, char* argv[]){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
  
   GLFWwindow* window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", NULL, NULL);
   if (window == NULL){
@@ -269,8 +293,6 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
   unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl");
 
-  glm::mat4 model = glm::mat4(1.0f);
-
   font fontToRender = readFont(result["font"].as<std::string>());
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
@@ -282,13 +304,16 @@ int main(int argc, char* argv[]){
   }, fields);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
-  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetMouseButtonCallback(window, onMouseCallback);
+  
+  float deltaTime = 0.0f; // Time between current frame and last frame
+  float lastFrame = 0.0f; // Time of last frame
 
   unsigned int frameCount = 0;
   float previous = glfwGetTime();
   float last60 = previous;
 
-  unsigned int currentFramerate = 100;
+  unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
   while (!glfwWindowShouldClose(window)){
@@ -319,7 +344,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    renderScene(scene, selectionProgram, projection, view, model, true);
+    renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -343,7 +368,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    renderScene(scene, shaderProgram, projection, view, model, false);
+    renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
     renderUI(uiShaderProgram, crosshairSprite, currentFramerate);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -361,73 +386,4 @@ int main(int argc, char* argv[]){
   glfwTerminate(); 
    
   return 0;
-}
-
-
-void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
-  GameObject object = scene.idToGameObjects[objectH.id];
-
-  glm::mat4 modelMatrix = glm::translate(model, object.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
-
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, state.selectedIndex == object.id)));
-  
-  if (state.visualizeNormals){
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    drawMesh(meshes["./res/models/cone/cone.obj"]); 
-  }
-
-  modelMatrix = glm::scale(modelMatrix, object.scale);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  
-  renderObject(objectH.id, objectMapping, meshes["./res/models/box/box.obj"], state.showCameras);
-
-  for (short id: objectH.children){
-    drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
-  }
-}
-
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
-  glUseProgram(shaderProgram);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
-
-  for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
-    drawGameobject(scene.idToGameObjectsH[scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
-  }  
-}
-
-void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int currentFramerate){
-    glUseProgram(uiShaderProgram);
-    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
-
-    if (!state.isSelectionMode){
-      drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
-    }else if (!state.isRotateSelection){
-      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
-    }
-
-    drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
-
-    std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
-    std::string axisText = state.axis == 0 ? "xz" : "xy";
-    drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);
-}
-
-void translate(float x, float y, float z){
-  auto offset = glm::vec3(x,y,z);
-  if (state.moveRelativeEnabled){
-    auto oldGameObject = scene.idToGameObjects[state.selectedIndex];
-    scene.idToGameObjects[state.selectedIndex].position = moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
-  }else{
-    scene.idToGameObjects[state.selectedIndex].position = move(scene.idToGameObjects[state.selectedIndex].position, offset);   
-  }
-}
-void scale(float x, float y, float z){
-  scene.idToGameObjects[state.selectedIndex].scale.x+= x;
-  scene.idToGameObjects[state.selectedIndex].scale.y+= y;
-  scene.idToGameObjects[state.selectedIndex].scale.z+=z;
-}
-void rotate(float x, float y, float z){
-  scene.idToGameObjects[state.selectedIndex].rotation  = setFrontDelta(scene.idToGameObjects[state.selectedIndex].rotation, x, y, z, 5);
 }
