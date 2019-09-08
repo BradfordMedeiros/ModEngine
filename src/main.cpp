@@ -28,17 +28,13 @@
 #include "./object_types.h"
 #include "./colorselection.h"
 #include "./state.h"
+#include "./input.h"
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor);
 void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int currentFramerate);
-
-
-engineState state = getDefaultState(800, 600);
-
-Scene scene;
-std::map<std::string, Mesh> meshes;
-std::map<unsigned int, Mesh> fontMeshes;
-std::map<short, GameObjectObj> objectMapping = getObjectMapping();
+void translate(float x, float y, float z);
+void scale(float x, float y, float z);
+void rotate(float x, float y, float z);
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -48,6 +44,15 @@ GameObject defaultCamera = GameObject {
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
+
+engineState state = getDefaultState(800, 600);
+
+Scene scene;
+std::map<std::string, Mesh> meshes;
+std::map<unsigned int, Mesh> fontMeshes;
+std::map<short, GameObjectObj> objectMapping = getObjectMapping();
+
+
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
@@ -70,149 +75,14 @@ glm::mat4 orthoProj;
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
-void translate(float x, float y, float z){
-  auto offset = glm::vec3(x,y,z);
-  if (state.moveRelativeEnabled){
-    auto oldGameObject = scene.idToGameObjects[state.selectedIndex];
-    scene.idToGameObjects[state.selectedIndex].position = moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
-  }else{
-    scene.idToGameObjects[state.selectedIndex].position = move(scene.idToGameObjects[state.selectedIndex].position, offset);   
-  }
-}
-void scale(float x, float y, float z){
-  scene.idToGameObjects[state.selectedIndex].scale.x+= x;
-  scene.idToGameObjects[state.selectedIndex].scale.y+= y;
-  scene.idToGameObjects[state.selectedIndex].scale.z+=z;
-}
-void rotate(float x, float y, float z){
-  scene.idToGameObjects[state.selectedIndex].rotation  = setFrontDelta(scene.idToGameObjects[state.selectedIndex].rotation, x, y, z, 5);
-}
-
 ALuint soundBuffer;
-void handleInput(GLFWwindow *window){
-   float currentFrame = glfwGetTime();
-   deltaTime = currentFrame - lastFrame;
-   lastFrame = currentFrame;
 
-   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-      glfwSetWindowShouldClose(window, true);
-   }
-   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(0.0, 0.0, 1.0f));
-   }
-   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(1.0, 0.0, 0.0f));
-   }
-   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
-      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(0.0, 0.0, -1.0f));
-   }
-   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
-      defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(-1.0, 0.0, 0.0f));
-   }
-   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
-      playSound(soundBuffer);
-   }
-   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
-      nextCamera();
-   }
-   if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
-      state.showCameras = !state.showCameras;
-   }
-   if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
-      state.useDefaultCamera = !state.useDefaultCamera;
-      std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
-   }
-   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
-      state.moveRelativeEnabled = !state.moveRelativeEnabled;
-      std::cout << "Move relative: " << state.moveRelativeEnabled << std::endl;
-   }
-   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
-      state.visualizeNormals = !state.visualizeNormals;
-      std::cout << "visualizeNormals: " << state.visualizeNormals << std::endl;
-   }
-   if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
-      state.isSelectionMode = !state.isSelectionMode;
-      state.isRotateSelection = false;
-   }
-
-   if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
-     if (state.axis == 0){
-       state.axis = 1;
-     }else{
-       state.axis = 0;
-     }
-   }
-  
-   if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
-     state.mode = 0;
-   }
-   if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
-     state.mode = 1;
-   }
-   if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
-     state.mode = 2;
-   }
-   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-     if (state.mode == 0){
-       translate(0.1, 0, 0);
-     }else if (state.mode == 1){
-       scale(0.1, 0, 0);
-     }else if (state.mode == 2){
-       rotate(0.1, 0, 0);
-     }
-   }
-   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-     if (state.mode == 0){
-       translate(-0.1, 0, 0);
-     }else if (state.mode == 1){
-       scale(-0.1, 0, 0);
-     }else if (state.mode == 2){
-       rotate(-0.1, 0, 0);
-     }    
-   }
-   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-     if (state.mode == 0){
-       if (state.axis == 0){
-         translate(0, 0, -0.1);
-       }else{
-         translate(0, -0.1, 0);
-       }
-     }else if (state.mode == 1){
-       if (state.axis == 0){
-         scale(0, 0, -0.1);
-       }else{
-         scale(0, -0.1, 0);
-       }
-     }else if (state.mode == 2){
-       if (state.axis == 0){
-          rotate(0, 0, -0.1);
-       }else{
-          rotate(0, -0.1, 0);
-       }
-     }    
-   }
-   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-     if (state.mode == 0){
-        if (state.axis == 0){
-          translate(0, 0, 0.1);
-        }else{
-          translate(0, 0.1, 0);
-        }
-     }else if (state.mode == 1){
-       if (state.axis == 0){
-         scale(0, 0, 0.1);
-       }else{
-         scale(0, 0.1, 0);
-       }   
-    }else if (state.mode == 2){
-        if (state.axis == 0){
-          rotate(0, 0, 0.1);
-        }else{
-          rotate(0, 0.1, 0);
-        }
-    }
-  }
-}   
+void moveCamera(glm::vec3 offset){
+  defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(offset));
+}
+void playSound(){
+  playSound(soundBuffer);
+}
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
@@ -252,20 +122,18 @@ float quadVertices[] = {
    1.0f,  1.0f,  1.0f, 1.0f
 };
 
-bool firstMouse = true;
-float lastX, lastY;
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-    if(firstMouse){
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
+    if(state.firstMouse){
+        state.lastX = xpos;
+        state.lastY = ypos;
+        state.firstMouse = false;
         return;
     }
   
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; 
-    lastX = xpos;
-    lastY = ypos;
+    float xoffset = xpos - state.lastX;
+    float yoffset = state.lastY - ypos; 
+    state.lastX = xpos;
+    state.lastY = ypos;
 
     float sensitivity = 0.05;
     xoffset *= sensitivity;
@@ -277,7 +145,6 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
       state.cursorTop  -= (int)(yoffset * 15);
     }
 }
-
 
 SCM moveCamera(SCM value){
   //cam.moveRight(scm_to_double(value));
@@ -463,7 +330,12 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
-    handleInput(window);    // input needs to be called in between so read pixels can read old pixel value
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+    
+    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound);
+
     glfwPollEvents();
     
     // 2ND pass renders what we care about to the screen.
@@ -540,4 +412,22 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int current
     std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
     std::string axisText = state.axis == 0 ? "xz" : "xy";
     drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);
+}
+
+void translate(float x, float y, float z){
+  auto offset = glm::vec3(x,y,z);
+  if (state.moveRelativeEnabled){
+    auto oldGameObject = scene.idToGameObjects[state.selectedIndex];
+    scene.idToGameObjects[state.selectedIndex].position = moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
+  }else{
+    scene.idToGameObjects[state.selectedIndex].position = move(scene.idToGameObjects[state.selectedIndex].position, offset);   
+  }
+}
+void scale(float x, float y, float z){
+  scene.idToGameObjects[state.selectedIndex].scale.x+= x;
+  scene.idToGameObjects[state.selectedIndex].scale.y+= y;
+  scene.idToGameObjects[state.selectedIndex].scale.z+=z;
+}
+void rotate(float x, float y, float z){
+  scene.idToGameObjects[state.selectedIndex].rotation  = setFrontDelta(scene.idToGameObjects[state.selectedIndex].rotation, x, y, z, 5);
 }

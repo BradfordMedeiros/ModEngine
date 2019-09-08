@@ -2,6 +2,7 @@
 #define MOD_STATE
 
 #include <string>
+#include "./scene/scene.h"
 
 struct engineState {
   bool visualizeNormals;
@@ -20,6 +21,11 @@ struct engineState {
   short selectedIndex;
   unsigned int activeCamera;
   std::string additionalText;
+
+  bool firstMouse;
+  float lastX;
+  float lastY;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
