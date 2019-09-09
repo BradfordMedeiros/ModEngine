@@ -20,11 +20,11 @@
 #include "./scene/common/util/loadmodel.h"
 #include "./scene/sprites/readfont.h"
 #include "./scene/sprites/sprites.h"
+#include "./scheme/scheme_bindings.h"
 #include "./shaders.h"
 #include "./camera.h"
 #include "./sound.h"
 #include "./common/util.h"
-#include "./guile.h"
 #include "./object_types.h"
 #include "./colorselection.h"
 #include "./state.h"
@@ -79,10 +79,6 @@ void moveCamera(glm::vec3 offset){
 void rotateCamera(float xoffset, float yoffset){
   defaultCamera.rotation = setFrontDelta(defaultCamera.rotation, xoffset, yoffset, 0, 1);
 }
-SCM moveCamera(SCM value){
-  //cam.moveRight(scm_to_double(value));
-  return SCM_UNSPECIFIED;
-}
 
 void playSound(){
   playSound(soundBuffer);
@@ -102,7 +98,6 @@ void selectItem(){
   std::cout << "selected object: " << state.selectedName << std::endl;
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
-
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(window, state, xpos, ypos, rotateCamera);
@@ -151,6 +146,16 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
     drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
   }
 }
+void removeObjectById(short id){
+  std::cout << "waiting to remove id: " << id << std::endl;
+}
+void getObjectsByType(){
+
+}
+void getObjectsByLabel(){
+
+}
+
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
@@ -178,9 +183,7 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int current
 }
 
 int main(int argc, char* argv[]){
-  initGuile();
-  std::thread shellThread(startShellForNewThread);
-  registerFunction("movecamera", moveCamera);
+
 
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -205,6 +208,7 @@ int main(int argc, char* argv[]){
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
+
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -228,6 +232,9 @@ int main(int argc, char* argv[]){
 
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
+    
+  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, getObjectsByType, getObjectsByLabel);
+  std::thread shellThread(startShell);
 
   unsigned int fbo;
   glGenFramebuffers(1, &fbo);
