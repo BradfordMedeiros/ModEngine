@@ -176,3 +176,38 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   }
   return sceneData;
 }
+
+void addObjectToScene(Scene& scene){
+
+}
+
+
+void traverseNodes(Scene& scene, short id, std::function<void(short)> onAddObject){
+  auto parentObjH = scene.idToGameObjectsH[id];
+  onAddObject(parentObjH.id);
+  for (short id : parentObjH.children){
+    traverseNodes(scene, id, onAddObject);
+  }
+}
+
+std::vector<short> getChildrenIdsAndParent(Scene& scene, short id){
+  std::vector<short> objectIds;
+  auto onAddObject = [&objectIds](short id) -> void {
+    objectIds.push_back(id);
+  };
+  traverseNodes(scene, id, onAddObject);
+  return objectIds;
+}
+
+
+void removeObjectFromScene(Scene& scene, short id){
+  auto objects = getChildrenIdsAndParent(scene, id);
+
+  for (auto id : objects){
+    std::string objectName = scene.idToGameObjects[id].name;
+    scene.rootGameObjectsH.erase(std::remove(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id), scene.rootGameObjectsH.end());  
+    scene.idToGameObjects.erase(id);
+    scene.idToGameObjectsH.erase(id);
+    scene.nameToId.erase(objectName);
+  }
+}

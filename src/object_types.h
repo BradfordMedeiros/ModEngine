@@ -38,6 +38,8 @@ void addObject(short id, std::string objectType, std::string field, std::string 
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded);
 
+void removeObject(std::map<short, GameObjectObj>& mapping, short id);
+
 void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showCameras);
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping);

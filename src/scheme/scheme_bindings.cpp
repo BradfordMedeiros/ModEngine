@@ -21,7 +21,7 @@ SCM makeObject(SCM value){
 void (*removeObjById)(short id);
 SCM removeObject(SCM value){
   std::cout << "placeholder remove object" << std::endl;
-  removeObjById(0);
+  removeObjById(scm_to_short(value));
   return SCM_UNSPECIFIED;
 }
 
@@ -54,10 +54,11 @@ void createStaticSchemeBindings(
 	getObjByType = getObjectsByType;
 	getObjByLabel = getObjectsByLabel;
 
+
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
 	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
 	scm_c_define_gsubr("mkObj", 1, 0, 0, (void *)makeObject);
-	scm_c_define_gsubr("rmObj", 0, 0, 0, (void *)removeObject);
+	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)getObjectsByType);
 	scm_c_define_gsubr("lsObjByLabel", 1, 0, 0, (void *)getObjectsByLabel);
 }

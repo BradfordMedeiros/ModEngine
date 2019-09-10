@@ -146,8 +146,11 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
     drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
   }
 }
+
 void removeObjectById(short id){
-  std::cout << "waiting to remove id: " << id << std::endl;
+  std::cout << "removing object by id: " << id << std::endl;
+  removeObject(objectMapping, id);
+  removeObjectFromScene(scene, id);
 }
 void getObjectsByType(){
 
@@ -309,6 +312,7 @@ int main(int argc, char* argv[]){
       meshes[meshName] = loadMesh(meshName);
     });
   }, fields);
+
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);

@@ -52,6 +52,9 @@ void addObject(short id, std::string objectType, std::string field, std::string 
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   }
 }
+void removeObject(std::map<short, GameObjectObj>& mapping, short id){
+  mapping.erase(id);
+}
 
 void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showCameras){
 	GameObjectObj toRender = mapping[id];
