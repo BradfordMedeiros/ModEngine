@@ -236,7 +236,7 @@ int main(int argc, char* argv[]){
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
     
-  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, getObjectsByType, getObjectsByLabel);
+  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, getObjectsByType);
   std::thread shellThread(startShell);
 
   unsigned int fbo;

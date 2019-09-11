@@ -20,7 +20,6 @@ SCM makeObject(SCM value){
 
 void (*removeObjById)(short id);
 SCM removeObject(SCM value){
-  std::cout << "placeholder remove object" << std::endl;
   removeObjById(scm_to_short(value));
   return SCM_UNSPECIFIED;
 }
@@ -31,19 +30,11 @@ SCM getObjectsByType(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void (*getObjByLabel)();
-SCM getObjectsByLabel(SCM value){
-  std::cout << "placeholder get obj by label" << std::endl;
-  return SCM_UNSPECIFIED;
-}
-
-
 void createStaticSchemeBindings(
 	void(*moveCamera)(glm::vec3), 
 	void(*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
-	void (*getObjectsByType)(),
-	void (*getObjectsByLabel)()
+	void (*getObjectsByType)()
 ){
 	std::cout << "scheme bindings placeholder here" << std::endl;
 	initGuile();
@@ -52,18 +43,17 @@ void createStaticSchemeBindings(
 	rotateCam = rotateCamera;
 	removeObjById = removeObjectById;
 	getObjByType = getObjectsByType;
-	getObjByLabel = getObjectsByLabel;
-
 
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
 	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
 	scm_c_define_gsubr("mkObj", 1, 0, 0, (void *)makeObject);
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)getObjectsByType);
-	scm_c_define_gsubr("lsObjByLabel", 1, 0, 0, (void *)getObjectsByLabel);
 }
 
 void startShell(){
 	startShellForNewThread();
 }
+
+
 
