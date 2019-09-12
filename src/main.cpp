@@ -152,11 +152,18 @@ void removeObjectById(short id){
   removeObject(objectMapping, id);
   removeObjectFromScene(scene, id);
 }
-void getObjectsByType(){
+void makeObject(float x, float y, float z){
 
 }
-void getObjectsByLabel(){
 
+std::vector<short> getObjectsByType(std::string type){
+  if (type == "camera"){
+    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(objectMapping);
+    return indexes;
+  }
+
+  std::vector<short> defaultVec;
+  return defaultVec;
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
@@ -236,7 +243,7 @@ int main(int argc, char* argv[]){
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
     
-  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, getObjectsByType);
+  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, makeObject, getObjectsByType);
   std::thread shellThread(startShell);
 
   unsigned int fbo;
