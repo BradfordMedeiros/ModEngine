@@ -56,12 +56,20 @@ SCM lsObjectsByType(SCM value){
   return list;
 }
 
+void (*setActCamera)(short id);
+SCM setActiveCam(SCM value){
+  short id = scm_to_short(value);
+  setActCamera(id);
+  return SCM_UNSPECIFIED;
+}
+
 void createStaticSchemeBindings(
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
 	void (*makeObjectV)(float, float, float),
-	std::vector<short> (*getObjectsByType)(std::string)
+	std::vector<short> (*getObjectsByType)(std::string),
+	void (*setActiveCamera)(short cameraId)
 ){
 	std::cout << "scheme bindings placeholder here" << std::endl;
 	initGuile();
@@ -71,12 +79,14 @@ void createStaticSchemeBindings(
 	removeObjById = removeObjectById;
 	makeObj = makeObjectV;
 	getObjByType = getObjectsByType;
+	setActCamera = setActiveCamera;
 
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
 	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
 	scm_c_define_gsubr("mkObj", 1, 1, 1, (void *)makeObject);
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
+	scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
 }
 
 void startShell(){

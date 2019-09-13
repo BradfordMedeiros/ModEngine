@@ -1,28 +1,26 @@
 # Generated scene 
-sceneparent:position:0.000000 -5.000000 50.000000
+sceneparent:position:10.000000 -5.000000 20.000000
 sceneparent:scale:1.000000 1.000000 1.000000
 sceneparent:rotation:0.000000 0.000000 -6.283185
 sceneparent:mesh:./res/models/box/box.obj
-
 maincolumn:position:0.000000 0.000000 0.000000
 maincolumn:scale:0.300000 2.000000 0.300000
 maincolumn:rotation:1.500000 0.000000 -4.783185
 maincolumn:mesh:./res/models/column_seat/column_seat.obj
 maincolumn:parent:sceneparent
-
 box1:position:-6.099995 0.000000 -7.899995
-box1:scale:8.099995 1.000000 6.299996
+box1:scale:1.099995 1.000000 1.299996
 box1:rotation:2.100000 -0.000000 -6.283185
 box1:mesh:./res/models/box/box.obj
 box1:parent:sceneparent
-
 box2:position:6.000000 0.000000 0.000000
 box2:scale:1.000000 1.000000 1.000000
 box2:rotation:0.000000 0.000000 -6.283185
 box2:mesh:./res/models/cone/cone.obj
 box2:parent:sceneparent
-
->cam1:position:0.000000 4.400006 0.000000
+>cam1:position:-1.400000 4.400006 0.000000
 >cam1:scale:1.000000 1.000000 1.000000
->cam1:rotation:0.000000 0.000000 -6.283185
->cam1:parent:box2
+>cam1:rotation:3.092487 0.356204 -3.140663
+>cam2:position:-8.999999 -21.300035 -20.400042
+>cam2:scale:1.000000 1.000000 1.000000
+>cam2:rotation:1.339998 0.052597 -6.202919

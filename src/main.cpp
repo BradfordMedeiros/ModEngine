@@ -60,6 +60,16 @@ float quadVertices[] = {
    1.0f,  1.0f,  1.0f, 1.0f
 };
 
+
+void setActiveCamera(short cameraId){
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
+  if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
+    std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
+    return;
+  }
+  activeCameraObj = &scene.idToGameObjects[cameraId];
+  state.selectedIndex = cameraId;
+}
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
@@ -69,10 +79,10 @@ void nextCamera(){
 
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
   short activeCameraId = cameraIndexs[state.activeCamera];
-  activeCameraObj = &scene.idToGameObjects[activeCameraId];
-  state.selectedIndex = activeCameraId;
+  setActiveCamera(activeCameraId);
   std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
+
 void moveCamera(glm::vec3 offset){
   defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(offset));
 }
@@ -243,7 +253,7 @@ int main(int argc, char* argv[]){
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
     
-  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, makeObject, getObjectsByType);
+  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, makeObject, getObjectsByType, setActiveCamera);
   std::thread shellThread(startShell);
 
   unsigned int fbo;

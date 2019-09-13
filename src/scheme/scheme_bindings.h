@@ -11,7 +11,8 @@ void createStaticSchemeBindings(
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
 	void (*makeObjectV)(float, float, float),
-	std::vector<short> (*getObjectsByType)(std::string)
+	std::vector<short> (*getObjectsByType)(std::string),
+	void (*setActiveCamera)(short cameraId)
 );
 
 void startShell();
