@@ -11,7 +11,7 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id){
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short* id, short parentId, std::function<void(short, std::string, std::string, std::string)> addObject){
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short* id, short parentId){
   auto gameobjectObj = getGameObject(position, name, *id);
   *id = *id + 1;
 
@@ -54,11 +54,10 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
   std::cout << "create scene from tokens" << std::endl;
 
   Scene scene;
+  scene.id = 0;
 
-  short id = 0;
   for (Token tok : tokens){
     std::string objectName = tok.target;
-    std::string objectType = "default";
 
     std::string activeType = "default";
     for (Field field : fields){
@@ -68,7 +67,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
     }
 
     if (!(scene.nameToId.find(objectName) != scene.nameToId.end())){
-      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, &id, -1, addObject);
+      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, &scene.id, -1);
       addObject(scene.nameToId[objectName], activeType, "", "");
     }
 
@@ -83,8 +82,8 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
       scene.idToGameObjects[objectId].rotation = rotation;
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
-        short parentId = id;
-        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, &id, -1, addObject);
+        short parentId = scene.id;
+        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, &scene.id, -1);
         addObject(parentId, "default", "", "");
       }
       scene.idToGameObjectsH[objectId].parentId = scene.nameToId[tok.payload];
@@ -177,8 +176,11 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
-void addObjectToScene(Scene& scene){
-
+void addObjectToScene(Scene& scene, std::string name, std::string mesh,  std::function<void(short, std::string, std::string, std::string)> addObject){
+  addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), name, &scene.id, -1);
+  short objectId = scene.nameToId[name];
+  addObject(objectId, "default", "-", mesh);
+  scene.rootGameObjectsH.push_back(objectId);
 }
 
 

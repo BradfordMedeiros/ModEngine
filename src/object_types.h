@@ -56,4 +56,6 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
   return indicies;
 }
 
+std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping);
+
 #endif 

@@ -26,6 +26,8 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
     .meshName = meshName,
     .mesh = meshes[meshName],
   };
+
+  std::cout << "created mesh: " << obj.meshName << std::endl;
   return obj;
 }
 GameObjectCamera createCamera(std::string field, std::string payload){
@@ -92,4 +94,12 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, s
     return serializeCamera();
   }
   return { };   // probably should throw an exception (would be better to rewrite so this cant happen, same in render)
+}
+
+std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
+  std::vector<short> indicies;
+  for (auto [id, _]: mapping){    
+      indicies.push_back(id);
+  }
+  return indicies;
 }

@@ -162,8 +162,15 @@ void removeObjectById(short id){
   removeObject(objectMapping, id);
   removeObjectFromScene(scene, id);
 }
-void makeObject(float x, float y, float z){
 
+auto addObjectAndLoadMesh = [](short id, std::string type, std::string field, std::string payload) -> void {
+  addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [](std::string meshName) -> void {
+    meshes[meshName] = loadMesh(meshName);
+  });
+};
+
+void makeObject(std::string name, std::string meshName, float x, float y, float z){
+  addObjectToScene(scene, name, meshName, addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
 }
 
 std::vector<short> getObjectsByType(std::string type){
@@ -174,9 +181,7 @@ std::vector<short> getObjectsByType(std::string type){
     std::vector indexes = getGameObjectsIndex<GameObjectCamera>(objectMapping);
     return indexes;
   }
-
-  std::vector<short> defaultVec;
-  return defaultVec;
+  return getGameObjectsIndex(objectMapping);
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
@@ -325,12 +330,8 @@ int main(int argc, char* argv[]){
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), [](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [](std::string meshName) -> void {
-      meshes[meshName] = loadMesh(meshName);
-    });
-  }, fields);
 
+  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), addObjectAndLoadMesh, fields);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
