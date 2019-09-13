@@ -58,8 +58,7 @@ SCM lsObjectsByType(SCM value){
 
 void (*setActCamera)(short id);
 SCM setActiveCam(SCM value){
-  short id = scm_to_short(value);
-  setActCamera(id);
+  setActCamera(scm_to_short(value));
   return SCM_UNSPECIFIED;
 }
 

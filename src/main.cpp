@@ -167,7 +167,10 @@ void makeObject(float x, float y, float z){
 }
 
 std::vector<short> getObjectsByType(std::string type){
-  if (type == "camera"){
+  if (type == "mesh"){
+    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(objectMapping);
+    return indexes;
+  }else if (type == "camera"){
     std::vector indexes = getGameObjectsIndex<GameObjectCamera>(objectMapping);
     return indexes;
   }
@@ -203,8 +206,6 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int current
 }
 
 int main(int argc, char* argv[]){
-
-
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
