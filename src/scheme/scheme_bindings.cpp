@@ -78,6 +78,3 @@ void createStaticSchemeBindings(
 void startShell(){
 	startShellForNewThread();
 }
-
-
-

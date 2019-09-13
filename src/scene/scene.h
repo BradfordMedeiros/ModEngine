@@ -8,7 +8,7 @@
 #include <functional>
 #include <glm/gtc/quaternion.hpp>
 #include "./common/mesh.h"
-
+#include "../common/util.h"
 
 struct GameObject {
   short id;
