@@ -1,8 +1,11 @@
 
-(define (print-test) 
-  (display "printing value from test.scm yo!!!")
-)
 
-(define (calculate-tip value) 
-   (* value 1.15)
+(define numFrames 0)
+(define (incr) (set! numFrames (modulo (+ numFrames 1) 60)))
+
+(define (onFrame)
+	(incr)
+	(if (= numFrames 0)
+		(display "click\n")
+	)
 )

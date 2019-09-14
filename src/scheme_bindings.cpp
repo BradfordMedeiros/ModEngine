@@ -1,5 +1,8 @@
 #include "./scheme_bindings.h"
 
+void* startGuile(void* data){
+	return NULL;
+}
 
 void (*moveCam)(glm::vec3);
 SCM scmMoveCamera(SCM arg1, SCM arg2, SCM arg3){
@@ -49,7 +52,13 @@ SCM setActiveCam(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void createStaticSchemeBindings(
+void onFrame(){
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
+  scm_call_0(func_symbol);
+}
+
+func createStaticSchemeBindings(
+  std::string scriptPath,
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
@@ -57,8 +66,10 @@ void createStaticSchemeBindings(
 	std::vector<short> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(short cameraId)
 ){
-	std::cout << "scheme bindings placeholder here" << std::endl;
-	initGuile();
+  scm_with_guile(&startGuile, NULL);
+  scm_c_primitive_load(scriptPath.c_str());
+  
+  scm_c_eval_string("(define evaleddata \"some evaled data\")");
 
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
@@ -73,8 +84,13 @@ void createStaticSchemeBindings(
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
 	scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
+
+  return onFrame;
 }
 
 void startShell(){
-	startShellForNewThread();
+  scm_with_guile(&startGuile, NULL);
+  int argc = 0;
+  char* argv[] = { { } };
+  scm_shell(argc, argv);
 }

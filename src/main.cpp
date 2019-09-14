@@ -20,7 +20,7 @@
 #include "./scene/common/util/loadmodel.h"
 #include "./scene/sprites/readfont.h"
 #include "./scene/sprites/sprites.h"
-#include "./scheme/scheme_bindings.h"
+#include "./scheme_bindings.h"
 #include "./shaders.h"
 #include "./camera.h"
 #include "./sound.h"
@@ -259,8 +259,17 @@ int main(int argc, char* argv[]){
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
     
-  createStaticSchemeBindings(moveCamera, rotateCamera, removeObjectById, makeObject, getObjectsByType, setActiveCamera);
-  std::thread shellThread(startShell);
+  auto onFrame = createStaticSchemeBindings(
+    "./res/scripts/test.scm", 
+    moveCamera, 
+    rotateCamera, 
+    removeObjectById, 
+    makeObject, 
+    getObjectsByType, 
+    setActiveCamera
+  );
+
+  //std::thread shellThread(startShell);
 
   unsigned int fbo;
   glGenFramebuffers(1, &fbo);
@@ -330,7 +339,6 @@ int main(int argc, char* argv[]){
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), addObjectAndLoadMesh, fields);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
@@ -357,6 +365,9 @@ int main(int argc, char* argv[]){
       last60 = now;
       currentFramerate = (int)60/(timedelta);
     }
+    
+    onFrame();  // @todo when should hooks be called?
+
 
     glm::mat4 view;
     if (state.useDefaultCamera){
