@@ -4,6 +4,12 @@ void* startGuile(void* data){
 	return NULL;
 }
 
+void (*setActCamera)(short id);
+SCM setActiveCam(SCM value){
+  setActCamera(scm_to_short(value));
+  return SCM_UNSPECIFIED;
+}
+
 void (*moveCam)(glm::vec3);
 SCM scmMoveCamera(SCM arg1, SCM arg2, SCM arg3){
   moveCam(glm::vec3(scm_to_double(arg1), scm_to_double(arg2), scm_to_double(arg3)));
@@ -40,16 +46,10 @@ SCM lsObjectsByType(SCM value){
  
   for (unsigned int i = 0; i < indexes.size(); i++){
   	SCM num = scm_from_short(indexes[i]);
-	scm_list_set_x (list, scm_from_unsigned_integer(i), num);
+	  scm_list_set_x (list, scm_from_unsigned_integer(i), num);
   }
 
   return list;
-}
-
-void (*setActCamera)(short id);
-SCM setActiveCam(SCM value){
-  setActCamera(scm_to_short(value));
-  return SCM_UNSPECIFIED;
 }
 
 void onFrame(){
@@ -69,8 +69,6 @@ func createStaticSchemeBindings(
   scm_with_guile(&startGuile, NULL);
   scm_c_primitive_load(scriptPath.c_str());
   
-  scm_c_eval_string("(define evaleddata \"some evaled data\")");
-
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
 	removeObjById = removeObjectById;
@@ -78,12 +76,12 @@ func createStaticSchemeBindings(
 	getObjByType = getObjectsByType;
 	setActCamera = setActiveCamera;
 
+  scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
 	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
 	scm_c_define_gsubr("mkObj", 2, 1, 1, (void *)makeObject);
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
-	scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
 
   return onFrame;
 }
@@ -94,3 +92,7 @@ void startShell(){
   char* argv[] = { { } };
   scm_shell(argc, argv);
 }
+
+/* Notes:
+   scm_c_eval_string("(define evaleddata \"some evaled data\")");
+*/

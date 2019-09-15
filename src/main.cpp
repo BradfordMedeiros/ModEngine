@@ -368,7 +368,6 @@ int main(int argc, char* argv[]){
     
     onFrame();  // @todo when should hooks be called?
 
-
     glm::mat4 view;
     if (state.useDefaultCamera){
       view = renderView(defaultCamera.position, defaultCamera.rotation);
