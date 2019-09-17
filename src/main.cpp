@@ -38,7 +38,7 @@ GameObject defaultCamera = GameObject {
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
-engineState state = getDefaultState(800, 600);
+engineState state = getDefaultState(1920, 1080);
 Scene scene;
 std::map<std::string, Mesh> meshes;
 std::map<unsigned int, Mesh> fontMeshes;
@@ -217,8 +217,9 @@ int main(int argc, char* argv[]){
    ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
-   ("c,crosshair", "icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
-   ("o,font", "font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
+   ("c,crosshair", "Icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
+   ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
+   ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
@@ -240,7 +241,8 @@ int main(int argc, char* argv[]){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
  
-  GLFWwindow* window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", NULL, NULL);
+  GLFWmonitor* monitor = result["fullscreen"].as<bool>() ? glfwGetPrimaryMonitor() : NULL;
+  GLFWwindow* window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", monitor, NULL);
   if (window == NULL){
     std::cerr << "ERROR: failed to create window" << std::endl;
     glfwTerminate();
