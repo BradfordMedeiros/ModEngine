@@ -80,7 +80,6 @@ func createStaticSchemeBindings(
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize)
 ){
   scm_with_guile(&startGuile, NULL);
-  scm_c_primitive_load(scriptPath.c_str());
   
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
@@ -97,6 +96,8 @@ func createStaticSchemeBindings(
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
   scm_c_define_gsubr("drawText", 4, 0, 0, (void *)drawTextWords);
+
+  scm_c_primitive_load(scriptPath.c_str());
 
   return onFrame;
 }
