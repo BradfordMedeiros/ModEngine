@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <libguile.h>
+#include <limits>       
 
 typedef void(*func)();
 func createStaticSchemeBindings(
@@ -14,7 +15,8 @@ func createStaticSchemeBindings(
 	void (*removeObjectById)(short id),
 	void (*makeObjectV)(std::string, std::string, float, float, float),
 	std::vector<short> (*getObjectsByType)(std::string),
-	void (*setActiveCamera)(short cameraId)
+	void (*setActiveCamera)(short cameraId),
+	void (*drawText)(std::string word, float left, float top, unsigned int fontSize)
 );
 
 void startShell();		// this isn't thread safe and dont feel like writing thread sync code atm

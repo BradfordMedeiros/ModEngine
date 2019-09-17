@@ -49,6 +49,7 @@ unsigned int framebufferTexture;
 unsigned int rbo;
 glm::mat4 orthoProj;
 ALuint soundBuffer;
+unsigned int uiShaderProgram;
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -88,6 +89,9 @@ void moveCamera(glm::vec3 offset){
 }
 void rotateCamera(float xoffset, float yoffset){
   defaultCamera.rotation = setFrontDelta(defaultCamera.rotation, xoffset, yoffset, 0, 1);
+}
+void drawText(std::string word, float left, float top, unsigned int fontSize){
+  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
 
 void playSound(){
@@ -193,7 +197,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     drawGameobject(scene.idToGameObjectsH[scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
   }  
 }
-void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int currentFramerate){
+void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     glUseProgram(uiShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
@@ -203,11 +207,11 @@ void renderUI(GLint uiShaderProgram, Mesh& crosshairSprite, unsigned int current
       drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
     }
 
-    drawWords(uiShaderProgram, fontMeshes, std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+    drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
 
     std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
     std::string axisText = state.axis == 0 ? "xz" : "xy";
-    drawWords(uiShaderProgram, fontMeshes, "Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);
+    drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);
 }
 
 int main(int argc, char* argv[]){
@@ -268,7 +272,8 @@ int main(int argc, char* argv[]){
     removeObjectById, 
     makeObject, 
     getObjectsByType, 
-    setActiveCamera
+    setActiveCamera,
+    drawText
   );
 
   //std::thread shellThread(startShell);
@@ -331,7 +336,7 @@ int main(int argc, char* argv[]){
   unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
 
   std::cout << "INFO: ui shader file path is " << uiShaderPath << std::endl;
-  unsigned int uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl");
+  uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl");
 
   std::string selectionShaderPath = "./res/shaders/selection";
   std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
@@ -368,8 +373,6 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
     
-    onFrame();  // @todo when should hooks be called?
-
     glm::mat4 view;
     if (state.useDefaultCamera){
       view = renderView(defaultCamera.position, defaultCamera.rotation);
@@ -404,8 +407,11 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
-    renderUI(uiShaderProgram, crosshairSprite, currentFramerate);
+    renderUI(crosshairSprite, currentFramerate);
+
+    onFrame();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 

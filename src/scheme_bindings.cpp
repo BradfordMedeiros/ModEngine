@@ -52,6 +52,18 @@ SCM lsObjectsByType(SCM value){
   return list;
 }
 
+void (*drawTextV)(std::string word, float left, float top, unsigned int fontSize);
+SCM drawTextWords(SCM word, SCM left, SCM top, SCM fontSize){
+  drawTextV(
+    scm_to_locale_string(word), 
+    scm_to_double(left), 
+    scm_to_double(top), 
+    scm_to_unsigned_integer(fontSize, std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max())
+  );
+  return SCM_UNSPECIFIED;
+}
+
+
 void onFrame(){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
   scm_call_0(func_symbol);
@@ -64,7 +76,8 @@ func createStaticSchemeBindings(
 	void (*removeObjectById)(short id),
 	void (*makeObjectV)(std::string, std::string, float, float, float),
 	std::vector<short> (*getObjectsByType)(std::string),
-	void (*setActiveCamera)(short cameraId)
+	void (*setActiveCamera)(short cameraId),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize)
 ){
   scm_with_guile(&startGuile, NULL);
   scm_c_primitive_load(scriptPath.c_str());
@@ -75,6 +88,7 @@ func createStaticSchemeBindings(
 	makeObj = makeObjectV;
 	getObjByType = getObjectsByType;
 	setActCamera = setActiveCamera;
+  drawTextV = drawText;
 
   scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
@@ -82,6 +96,7 @@ func createStaticSchemeBindings(
 	scm_c_define_gsubr("mkObj", 2, 1, 1, (void *)makeObject);
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
 	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
+  scm_c_define_gsubr("drawText", 4, 0, 0, (void *)drawTextWords);
 
   return onFrame;
 }
@@ -96,3 +111,4 @@ void startShell(){
 /* Notes:
    scm_c_eval_string("(define evaleddata \"some evaled data\")");
 */
+
