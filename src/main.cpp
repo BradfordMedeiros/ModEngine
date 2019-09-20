@@ -51,6 +51,8 @@ glm::mat4 orthoProj;
 ALuint soundBuffer;
 unsigned int uiShaderProgram;
 
+SchemeBindingCallbacks schemeBindings;
+
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
   -1.0f, -1.0f,  0.0f, 0.0f,
@@ -116,8 +118,10 @@ void selectItem(){
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(window, state, xpos, ypos, rotateCamera);
 }
+
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
+  schemeBindings.onMouseCallback(button, action, mods);
 }
 
 void translate(float x, float y, float z){
@@ -265,7 +269,7 @@ int main(int argc, char* argv[]){
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
     
-  auto onFrame = createStaticSchemeBindings(
+  schemeBindings  = createStaticSchemeBindings(
     "./res/scripts/test.scm", 
     moveCamera, 
     rotateCamera, 
@@ -411,7 +415,7 @@ int main(int argc, char* argv[]){
     renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
     renderUI(crosshairSprite, currentFramerate);
 
-    onFrame();
+    schemeBindings.onFrame();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 

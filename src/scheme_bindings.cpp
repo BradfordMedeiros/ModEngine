@@ -69,7 +69,13 @@ void onFrame(){
   scm_call_0(func_symbol);
 }
 
-func createStaticSchemeBindings(
+void onMouseCallback(int button, int action, int mods){
+  std::cout << "on mouse callback called" << std::endl;
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKeyPressed"));
+  scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
+}
+
+SchemeBindingCallbacks createStaticSchemeBindings(
   std::string scriptPath,
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
@@ -99,7 +105,12 @@ func createStaticSchemeBindings(
 
   scm_c_primitive_load(scriptPath.c_str());
 
-  return onFrame;
+  SchemeBindingCallbacks callbackFuncs = {
+    .onFrame = onFrame,
+    .onMouseCallback = onMouseCallback,
+  };
+
+  return callbackFuncs;
 }
 
 void startShell(){

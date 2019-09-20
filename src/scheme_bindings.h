@@ -8,7 +8,14 @@
 #include <limits>       
 
 typedef void(*func)();
-func createStaticSchemeBindings(
+typedef void(*mousecallback)(int button, int action, int mods);
+
+struct SchemeBindingCallbacks {
+    func onFrame;
+    mousecallback onMouseCallback;
+};
+
+SchemeBindingCallbacks createStaticSchemeBindings(
 	std::string scriptPath,
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
