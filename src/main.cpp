@@ -5,7 +5,6 @@
 #include <cxxopts.hpp>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,7 +12,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
-
 
 #include "./scene/scene.h"
 #include "./scene/common/mesh.h"
@@ -113,6 +111,7 @@ void selectItem(){
   std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
   std::cout << "selected object: " << state.selectedName << std::endl;
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
+  schemeBindings.onObjectSelected(state.selectedIndex);
 }
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){

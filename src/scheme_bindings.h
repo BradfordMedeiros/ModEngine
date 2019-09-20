@@ -9,10 +9,12 @@
 
 typedef void(*func)();
 typedef void(*mousecallback)(int button, int action, int mods);
+typedef void(*onobjectSelectedFunc)(short index);
 
 struct SchemeBindingCallbacks {
     func onFrame;
     mousecallback onMouseCallback;
+    onobjectSelectedFunc onObjectSelected;
 };
 
 SchemeBindingCallbacks createStaticSchemeBindings(

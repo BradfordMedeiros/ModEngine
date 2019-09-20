@@ -9,11 +9,13 @@
 )
 
 (define (onKeyPressed button action mods)
-	(display (string-append "button: " (number->string button) "\n"))
-	(display (string-append "action: " (number->string action) "\n"))
-	(display (string-append "mods: " (number->string mods) "\n"))
+	;(display (string-append "(" (number->string button) "," (number->string action) "," (number->string mods) ")\n"))
 
 	(if (and (= button 1) (= action 0)) (nextNumber))
+)
+
+(define (onObjSelected selectedIndex) 
+	(display (string-append "object selected: " (number->string selectedIndex) "\n" ))
 )
 
 

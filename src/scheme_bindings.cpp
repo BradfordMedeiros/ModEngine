@@ -68,11 +68,13 @@ void onFrame(){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
   scm_call_0(func_symbol);
 }
-
 void onMouseCallback(int button, int action, int mods){
-  std::cout << "on mouse callback called" << std::endl;
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKeyPressed"));
   scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
+}
+void onObjectSelected(short index){
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onObjSelected"));
+  scm_call_1(func_symbol, scm_from_short(index));
 }
 
 SchemeBindingCallbacks createStaticSchemeBindings(
@@ -108,6 +110,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   SchemeBindingCallbacks callbackFuncs = {
     .onFrame = onFrame,
     .onMouseCallback = onMouseCallback,
+    .onObjectSelected = onObjectSelected,
   };
 
   return callbackFuncs;
