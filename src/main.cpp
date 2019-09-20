@@ -122,6 +122,9 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
   schemeBindings.onMouseCallback(button, action, mods);
 }
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+  schemeBindings.onKeyCallback(key, scancode, action, mods);
+}
 
 void translate(float x, float y, float z){
   auto offset = glm::vec3(x,y,z);
@@ -353,7 +356,8 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
-  
+  glfwSetKeyCallback(window, keyCallback);
+
   float deltaTime = 0.0f; // Time between current frame and last frame
 
   unsigned int frameCount = 0;

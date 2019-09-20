@@ -69,8 +69,12 @@ void onFrame(){
   scm_call_0(func_symbol);
 }
 void onMouseCallback(int button, int action, int mods){
-  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKeyPressed"));
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onMouse"));
   scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
+}
+void onKeyCallback(int key, int scancode, int action, int mods){
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKey"));
+  scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods));  
 }
 void onObjectSelected(short index){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onObjSelected"));
@@ -111,6 +115,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
     .onFrame = onFrame,
     .onMouseCallback = onMouseCallback,
     .onObjectSelected = onObjectSelected,
+    .onKeyCallback = onKeyCallback,
   };
 
   return callbackFuncs;
