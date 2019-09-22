@@ -199,6 +199,14 @@ glm::vec3 getGameObjectPosition(short index){
 void setGameObjectPosition(short index, glm::vec3 pos){
   scene.idToGameObjects[index].position = pos;
 }
+short getGameObjectByName(std::string name){
+  for (auto [id, gameObj]: scene.idToGameObjects){
+    if (gameObj.name == name){
+      return id;
+    }
+  }
+  return -1;
+}
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
@@ -287,7 +295,8 @@ int main(int argc, char* argv[]){
     setActiveCamera,
     drawText,
     getGameObjectPosition,
-    setGameObjectPosition
+    setGameObjectPosition,
+    getGameObjectByName
   );
 
   std::thread shellThread(startShell);
@@ -336,7 +345,7 @@ int main(int argc, char* argv[]){
      glBindRenderbuffer(GL_RENDERBUFFER, rbo);
      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, state.currentScreenWidth, state.currentScreenHeight);
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-     projection = glm::perspective(glm::radians(45.0f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 200.0f); 
+     projection = glm::perspective(glm::radians(45.0f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, (float)state.currentScreenHeight, 0.0f, -1.0f, 1.0f);  
   }; 
 

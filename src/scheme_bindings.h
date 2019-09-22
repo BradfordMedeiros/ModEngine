@@ -29,8 +29,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	void (*setActiveCamera)(short cameraId),
 	void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
 	glm::vec3 (*getGameObjectPos)(short index),
-	void (*setGameObjectPos)(short index, glm::vec3 pos)
-
+	void (*setGameObjectPos)(short index, glm::vec3 pos),
+	short (*getGameObjectByName)(std::string name)
 );
 
 void startShell();		// this isn't thread safe and dont feel like writing thread sync code atm
