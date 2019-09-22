@@ -37,21 +37,6 @@ SCM removeObject(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-std::vector<short> (*getObjByType)(std::string);
-SCM lsObjectsByType(SCM value){
-  std::string objectType = scm_to_locale_string(value);
-  std::vector indexes = getObjByType(objectType);
-
-  SCM list = scm_make_list(scm_from_unsigned_integer(indexes.size()), scm_from_unsigned_integer(0));
- 
-  for (unsigned int i = 0; i < indexes.size(); i++){
-  	SCM num = scm_from_short(indexes[i]);
-	  scm_list_set_x (list, scm_from_unsigned_integer(i), num);
-  }
-
-  return list;
-}
-
 void (*drawTextV)(std::string word, float left, float top, unsigned int fontSize);
 SCM drawTextWords(SCM word, SCM left, SCM top, SCM fontSize){
   drawTextV(
@@ -81,6 +66,52 @@ void onObjectSelected(short index){
   scm_call_1(func_symbol, scm_from_short(index));
 }
 
+struct gameObject {
+  short id;
+};
+
+SCM gameObjectType;
+std::vector<short> (*getObjByType)(std::string);
+SCM lsObjectsByType(SCM value){
+  std::string objectType = scm_to_locale_string(value);
+  std::vector indexes = getObjByType(objectType);
+  SCM list = scm_make_list(scm_from_unsigned_integer(indexes.size()), scm_from_unsigned_integer(0));
+  
+  for (unsigned int i = 0; i < indexes.size(); i++){
+    auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
+    obj->id = indexes[i];
+    scm_list_set_x (list, scm_from_unsigned_integer(i),  scm_make_foreign_object_1(gameObjectType, obj));
+  }
+  return list;
+}
+
+glm::vec3 (*getGameObjectPosn)(short index);
+SCM getGameObjectPosition(SCM value){
+  struct gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  
+  glm::vec3 pos = getGameObjectPosn(obj->id);
+  SCM list = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(pos.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(pos.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(pos.z));
+  return list;
+}
+
+void (*setGameObjectPosn)(short index, glm::vec3 pos);
+SCM setGameObjectPosition(SCM value, SCM positon){
+  struct gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  
+  auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));
+  auto y = scm_to_double(scm_list_ref(positon, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(positon, scm_from_int64(2)));
+  setGameObjectPosn(obj->id, glm::vec3(x, y, z));
+  return SCM_UNSPECIFIED;
+}
+
 SchemeBindingCallbacks createStaticSchemeBindings(
   std::string scriptPath,
 	void (*moveCamera)(glm::vec3),  
@@ -89,7 +120,9 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	void (*makeObjectV)(std::string, std::string, float, float, float),
 	std::vector<short> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(short cameraId),
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize)
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
+  glm::vec3 (*getGameObjectPos)(short index),
+  void (*setGameObjectPos)(short index, glm::vec3 pos)
 ){
   scm_with_guile(&startGuile, NULL);
   
@@ -100,14 +133,24 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	getObjByType = getObjectsByType;
 	setActCamera = setActiveCamera;
   drawTextV = drawText;
+  getGameObjectPosn = getGameObjectPos;
+  setGameObjectPosn = setGameObjectPos;
 
   scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
 	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
 	scm_c_define_gsubr("mkObj", 2, 1, 1, (void *)makeObject);
 	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
-	scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
+  scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
   scm_c_define_gsubr("drawText", 4, 0, 0, (void *)drawTextWords);
+ 
+  // Gameobject funcs
+  SCM name = scm_from_utf8_symbol("gameobj");
+  SCM slots = scm_list_1(scm_from_utf8_symbol("data"));
+  scm_t_struct_finalize finalizer = NULL;
+  gameObjectType = scm_make_foreign_object_type(name, slots, finalizer);
+  scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
+  scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
 
   scm_c_primitive_load(scriptPath.c_str());
 
@@ -127,8 +170,4 @@ void startShell(){
   char* argv[] = { { } };
   scm_shell(argc, argv);
 }
-
-/* Notes:
-   scm_c_eval_string("(define evaleddata \"some evaled data\")");
-*/
 

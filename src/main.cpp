@@ -193,6 +193,12 @@ std::vector<short> getObjectsByType(std::string type){
   }
   return getGameObjectsIndex(objectMapping);
 }
+glm::vec3 getGameObjectPosition(short index){
+  return scene.idToGameObjects[index].position;
+}
+void setGameObjectPosition(short index, glm::vec3 pos){
+  scene.idToGameObjects[index].position = pos;
+}
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
@@ -279,10 +285,12 @@ int main(int argc, char* argv[]){
     makeObject, 
     getObjectsByType, 
     setActiveCamera,
-    drawText
+    drawText,
+    getGameObjectPosition,
+    setGameObjectPosition
   );
 
-  //std::thread shellThread(startShell);
+  std::thread shellThread(startShell);
 
   unsigned int fbo;
   glGenFramebuffers(1, &fbo);
