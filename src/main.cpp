@@ -284,22 +284,6 @@ int main(int argc, char* argv[]){
 
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
-    
-  schemeBindings  = createStaticSchemeBindings(
-    "./res/scripts/test.scm", 
-    moveCamera, 
-    rotateCamera, 
-    removeObjectById, 
-    makeObject, 
-    getObjectsByType, 
-    setActiveCamera,
-    drawText,
-    getGameObjectPosition,
-    setGameObjectPosition,
-    getGameObjectByName
-  );
-
-  std::thread shellThread(startShell);
 
   unsigned int fbo;
   glGenFramebuffers(1, &fbo);
@@ -370,6 +354,24 @@ int main(int argc, char* argv[]){
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), addObjectAndLoadMesh, fields);
+
+    
+  schemeBindings  = createStaticSchemeBindings(
+    "./res/scripts/test.scm", 
+    moveCamera, 
+    rotateCamera, 
+    removeObjectById, 
+    makeObject, 
+    getObjectsByType, 
+    setActiveCamera,
+    drawText,
+    getGameObjectPosition,
+    setGameObjectPosition,
+    getGameObjectByName
+  );
+
+  std::thread shellThread(startShell);
+
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
