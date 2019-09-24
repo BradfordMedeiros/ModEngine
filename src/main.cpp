@@ -180,7 +180,7 @@ auto addObjectAndLoadMesh = [](short id, std::string type, std::string field, st
 };
 
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObjectToScene(scene, name, meshName, addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
+  addObjectToScene(scene, name, meshName, glm::vec3(x, y, z), addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
 }
 
 std::vector<short> getObjectsByType(std::string type){

@@ -47,7 +47,7 @@ struct Field {
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
 Scene deserializeScene(std::string content, std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields);
   
-void addObjectToScene(Scene& scene, std::string name, std::string mesh,  std::function<void(short, std::string, std::string, std::string)> addObject);
+void addObjectToScene(Scene& scene, std::string name, std::string mesh,  glm::vec3 position, std::function<void(short, std::string, std::string, std::string)> addObject);
 void removeObjectFromScene(Scene& scene, short id);
 
 #endif

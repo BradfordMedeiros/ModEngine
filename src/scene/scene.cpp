@@ -159,8 +159,8 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
-void addObjectToScene(Scene& scene, std::string name, std::string mesh,  std::function<void(short, std::string, std::string, std::string)> addObject){
-  addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), name, &scene.id, -1);
+void addObjectToScene(Scene& scene, std::string name, std::string mesh, glm::vec3 position, std::function<void(short, std::string, std::string, std::string)> addObject){
+  addObjectToScene(scene, position, name, &scene.id, -1);
   short objectId = scene.nameToId[name];
   addObject(objectId, "default", "-", mesh);
   scene.rootGameObjectsH.push_back(objectId);
