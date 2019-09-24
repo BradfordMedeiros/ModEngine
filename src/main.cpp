@@ -193,6 +193,10 @@ std::vector<short> getObjectsByType(std::string type){
   }
   return getGameObjectsIndex(objectMapping);
 }
+
+std::string getGameObjectName(short index){
+  return scene.idToGameObjects[index].name;
+}
 glm::vec3 getGameObjectPosition(short index){
   return scene.idToGameObjects[index].position;
 }
@@ -365,6 +369,7 @@ int main(int argc, char* argv[]){
     getObjectsByType, 
     setActiveCamera,
     drawText,
+    getGameObjectName,
     getGameObjectPosition,
     setGameObjectPosition,
     getGameObjectByName

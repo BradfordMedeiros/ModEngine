@@ -28,6 +28,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	std::vector<short> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(short cameraId),
 	void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
+	std::string (*getGameObjectNameForId)(short id),
 	glm::vec3 (*getGameObjectPos)(short index),
 	void (*setGameObjectPos)(short index, glm::vec3 pos),
 	short (*getGameObjectByName)(std::string name)

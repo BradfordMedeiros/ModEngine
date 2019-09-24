@@ -85,6 +85,15 @@ SCM lsObjectsByType(SCM value){
   }
   return list;
 }
+
+std::string (*getGameObjNameForId)(short id);
+SCM getGameObjNameForIdFn(SCM value){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  return scm_from_locale_string(getGameObjNameForId(obj->id).c_str());
+}
+
 glm::vec3 (*getGameObjectPosn)(short index);
 SCM getGameObjectPosition(SCM value){
   gameObject *obj;
@@ -137,11 +146,12 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	std::vector<short> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
+  std::string (*getGameObjectNameForId)(short id),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   short (*getGameObjectByName)(std::string name)
 ){
-  scm_with_guile(&startGuile, NULL);
+  scm_init_guile();
   
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
@@ -150,6 +160,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	getObjByType = getObjectsByType;
 	setActCamera = setActiveCamera;
   drawTextV = drawText;
+  getGameObjNameForId = getGameObjectNameForId;
   getGameObjectPosn = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
   getGameObjName = getGameObjectByName;
@@ -171,6 +182,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
+  scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
+
   ////
   
   scm_c_primitive_load(scriptPath.c_str());
