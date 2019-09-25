@@ -107,9 +107,6 @@ void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   state.selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
   state.selectedName = scene.idToGameObjects[state.selectedIndex].name;
-  std::cout << "(" << state.cursorLeft << "," << state.cursorTop << ")" << std::endl;
-  std::cout << "Info: Pixel color selection: (  " << pixelColor.r << " , " << pixelColor.g << " , " << pixelColor.b << "  )" << std::endl;
-  std::cout << "selected object: " << state.selectedName << std::endl;
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }

@@ -61,11 +61,6 @@ void onKeyCallback(int key, int scancode, int action, int mods){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKey"));
   scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods));  
 }
-void onObjectSelected(short index){
-  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onObjSelected"));
-  scm_call_1(func_symbol, scm_from_short(index));
-}
-
 
 // Gameobject manipulation
 struct gameObject {
@@ -84,6 +79,15 @@ SCM lsObjectsByType(SCM value){
     scm_list_set_x (list, scm_from_unsigned_integer(i),  scm_make_foreign_object_1(gameObjectType, obj));
   }
   return list;
+}
+
+void onObjectSelected(short index){
+  auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
+  obj->id = index;
+  SCM gameobject = scm_make_foreign_object_1(gameObjectType, obj);
+
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onObjSelected"));
+  scm_call_1(func_symbol, gameobject);
 }
 
 std::string (*getGameObjNameForId)(short id);
