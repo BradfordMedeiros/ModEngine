@@ -36,6 +36,8 @@ GameObject defaultCamera = GameObject {
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
+
+bool showDebugInfo = false;
 engineState state = getDefaultState(1920, 1080);
 Scene scene;
 std::map<std::string, Mesh> meshes;
@@ -228,11 +230,12 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
     }
 
-    drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
-
-    std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
-    std::string axisText = state.axis == 0 ? "xz" : "xy";
-    drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);
+    if (showDebugInfo){
+      drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+      std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
+      std::string axisText = state.axis == 0 ? "xz" : "xy";
+      drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
+    }
 }
 
 int main(int argc, char* argv[]){
@@ -240,11 +243,13 @@ int main(int argc, char* argv[]){
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
+   ("x,scriptpath", "Script file to use", cxxopts::value<std::string>()->default_value("./res/scripts/game.scm"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,crosshair", "Icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
    ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
+   ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
@@ -258,6 +263,7 @@ int main(int argc, char* argv[]){
   const std::string texturePath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
   const std::string uiShaderPath = result["uishader"].as<std::string>();
+  showDebugInfo = result["info"].as<bool>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
 
@@ -358,7 +364,7 @@ int main(int argc, char* argv[]){
 
     
   schemeBindings  = createStaticSchemeBindings(
-    "./res/scripts/test.scm", 
+    result["scriptpath"].as<std::string>(), 
     moveCamera, 
     rotateCamera, 
     removeObjectById, 
