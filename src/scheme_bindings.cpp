@@ -4,6 +4,12 @@ void* startGuile(void* data){
 	return NULL;
 }
 
+void (*selectionMode)(bool enabled);
+SCM setSelectionMod(SCM value){
+  selectionMode(scm_to_bool(value));
+  return SCM_UNSPECIFIED;
+}
+
 void (*setActCamera)(short id);
 SCM setActiveCam(SCM value){
   setActCamera(scm_to_short(value));
@@ -153,10 +159,12 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
-  short (*getGameObjectByName)(std::string name)
+  short (*getGameObjectByName)(std::string name),
+  void (*setSelectionMode)(bool enabled)
 ){
   scm_init_guile();
   
+  selectionMode = setSelectionMode;
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
 	removeObjById = removeObjectById;
@@ -169,6 +177,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   setGameObjectPosn = setGameObjectPos;
   getGameObjName = getGameObjectByName;
 
+  scm_c_define_gsubr("setSelectionMode", 1, 0, 0, (void *)setSelectionMod);
   scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
 	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
 	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
@@ -187,7 +196,6 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
-
   ////
   
   scm_c_primitive_load(scriptPath.c_str());

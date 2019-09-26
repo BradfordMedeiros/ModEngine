@@ -31,7 +31,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	std::string (*getGameObjectNameForId)(short id),
 	glm::vec3 (*getGameObjectPos)(short index),
 	void (*setGameObjectPos)(short index, glm::vec3 pos),
-	short (*getGameObjectByName)(std::string name)
+	short (*getGameObjectByName)(std::string name),
+	void (*setSelectionMode)(bool enabled)
 );
 
 void startShell();		// this isn't thread safe and dont feel like writing thread sync code atm

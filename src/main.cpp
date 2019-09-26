@@ -210,6 +210,10 @@ short getGameObjectByName(std::string name){
   }
   return -1;
 }
+void setSelectionMode(bool enabled){
+  state.isSelectionMode = enabled;
+}
+
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
@@ -375,7 +379,8 @@ int main(int argc, char* argv[]){
     getGameObjectName,
     getGameObjectPosition,
     setGameObjectPosition,
-    getGameObjectByName
+    getGameObjectByName,
+    setSelectionMode
   );
 
   std::thread shellThread(startShell);
