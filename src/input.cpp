@@ -70,7 +70,7 @@ void handleInput(GLFWwindow *window, float deltaTime,
     moveCamera(glm::vec3(-1.0, 0.0, 0.0f));
   }
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
-      nextCamera();
+    nextCamera();
   }
    
   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
@@ -88,11 +88,6 @@ void handleInput(GLFWwindow *window, float deltaTime,
     state.moveRelativeEnabled = !state.moveRelativeEnabled;
     std::cout << "Move relative: " << state.moveRelativeEnabled << std::endl;
   }
-  if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
-    state.isSelectionMode = !state.isSelectionMode;
-    state.isRotateSelection = false;
-  }
-
   if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
     if (state.axis == 0){
       state.axis = 1;
