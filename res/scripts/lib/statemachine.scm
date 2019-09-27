@@ -43,15 +43,13 @@
 	(make-statemachine initial-state (make-hash-table) (make-hash-table))
 )
 
-(define statemachine (new-state-machine 'water))
-
 (define-syntax ::
 	(syntax-rules(: - > query | goto) 
-		((:: | transition - callback) (add-transition-callback statemachine transition callback))
-		((:: from-state -> to-state) (create-state statemachine from-state to-state 'default))
-		((:: from-state -> to-state | transition) (create-state statemachine from-state to-state transition))
-		((:: query from-state | transition) (get-state-at-transition statemachine from-state transition))
-		((:: query from-state) (:: query from-state : 'default))
-		((:: goto transition) (move-transition statemachine transition))
+		((:: machine | transition - callback) (add-transition-callback machine transition callback))
+		((:: machine from-state -> to-state) (create-state machine from-state to-state 'default))
+		((:: machine from-state -> to-state | transition) (create-state machine from-state to-state transition))
+		((:: machine query from-state | transition) (get-state-at-transition machine from-state transition))
+		((:: machine query from-state) (:: machine query from-state | 'default))
+		((:: machine goto transition) (move-transition machine transition))
 	)
 )
