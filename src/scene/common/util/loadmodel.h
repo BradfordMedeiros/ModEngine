@@ -18,11 +18,19 @@ struct Vertex {
   glm::vec2 texCoords;
 };
 
+struct BoundInfo {
+  float xMin, xMax;
+  float yMin, yMax;
+  float zMin, zMax;
+};
+
 struct ModelData {
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
   std::vector<std::string> texturePaths;
+  BoundInfo boundInfo;
 };
+
 
 // this really should be "load gameobject" --> since need children mesh
 // but no representation for scene/children/objects yet so just flattening it to models

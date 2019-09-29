@@ -14,7 +14,8 @@ void handleInput(GLFWwindow *window, float deltaTime,
 	engineState& state, 
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
-	void (*playSound)(void)
+	void (*playSound)(void),
+	void (*printModelInfo)(short)
 );
 
 #endif

@@ -34,6 +34,7 @@ Mesh loadMesh(std::string modelPath){
     .VAOPointer = VAO,
     .texture = texture,
     .numElements = model.indices.size(),
+    .boundInfo = model.boundInfo,
   }; 
 
   return mesh; 

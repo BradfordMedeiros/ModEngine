@@ -49,8 +49,12 @@ void handleInput(GLFWwindow *window, float deltaTime,
   engineState& state, 
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
-  void (*playSound)(void)
+  void (*playSound)(void),
+  void (*printModelInfo)(short index)
 ){
+  if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
+    printModelInfo(0);
+  }
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }

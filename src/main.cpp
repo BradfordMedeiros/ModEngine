@@ -95,7 +95,6 @@ void rotateCamera(float xoffset, float yoffset){
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
-
 void playSound(){
   playSound(soundBuffer);
 }
@@ -112,11 +111,9 @@ void selectItem(){
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
-
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(window, state, xpos, ypos, rotateCamera);
 }
-
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
   schemeBindings.onMouseCallback(button, action, mods);
@@ -212,6 +209,16 @@ short getGameObjectByName(std::string name){
 }
 void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
+}
+void printModelInfo(short index){
+  auto gameobjectP = std::get_if<GameObjectMesh>(&objectMapping[index]);
+  if (gameobjectP != NULL){
+    std::cout << "mesh name is: " << gameobjectP->meshName << std::endl;
+    BoundInfo info = gameobjectP->mesh.boundInfo;
+    std::cout << "x: <" << info.xMin << " | " << info.xMax << ">" << std::endl;
+    std::cout << "y: <" << info.yMin << " | " << info.yMax << ">" << std::endl;
+    std::cout << "z: <" << info.zMin << " | " << info.zMax << ">" << std::endl;
+  }
 }
 
 
@@ -437,7 +444,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound);
+    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, printModelInfo);
 
     glfwPollEvents();
     

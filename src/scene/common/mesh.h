@@ -23,6 +23,7 @@ struct Mesh {
   unsigned int VAOPointer;
   Texture texture; 
   unsigned int numElements;
+  BoundInfo boundInfo;
 };
 
 Mesh loadMesh(std::string modelPath);		 // loads model and returns mesh/bound texture data
