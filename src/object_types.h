@@ -12,6 +12,7 @@
 struct GameObjectMesh {
   std::string meshName;
   Mesh mesh;
+  bool isDisabled;
 };
 struct GameObjectCamera {
   int number = 0;
@@ -22,7 +23,7 @@ typedef std::variant<GameObjectMesh, GameObjectCamera> GameObjectObj;
 static Field obj = {
   .prefix = '@', 
   .type = "default",
-  .additionalFields = { "mesh" }
+  .additionalFields = { "mesh", "disabled" }
 };
 
 static Field camera = {

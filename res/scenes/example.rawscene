@@ -16,11 +16,14 @@ box1:parent:sceneparent
 box2:position:6.000000 0.000000 0.000000
 box2:scale:1.000000 1.000000 1.000000
 box2:rotation:0.000000 0.000000 -6.283185
-box2:mesh:./res/models/cone/cone.obj
+box2:mesh:./res/models/boundingbox.obj
 box2:parent:sceneparent
+#box2:disabled
+
 >cam1:position:-1.400000 4.400006 0.000000
 >cam1:scale:1.000000 1.000000 1.000000
 >cam1:rotation:3.092487 0.356204 -3.140663
 >cam2:position:-8.999999 -21.300035 -20.400042
 >cam2:scale:1.000000 1.000000 1.000000
 >cam2:rotation:1.339998 0.052597 -6.202919
+
