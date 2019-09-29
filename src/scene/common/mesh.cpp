@@ -2,7 +2,7 @@
 
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.
-Mesh loadMesh(std::string modelPath){
+Mesh loadMesh(std::string modelPath, std::string defaultTexture){
   std::vector<ModelData> models = loadModel(modelPath);
   
   ModelData model = models[0];
@@ -24,8 +24,15 @@ Mesh loadMesh(std::string modelPath){
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
   glEnableVertexAttribArray(0);
  
-  // @todo texture loading can be optimized when textures are shared between objects
-  Texture texture = loadTexture(model.texturePaths[0]); 
+  // @todo texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly.
+  // right now this is super, super unoptimized.
+  Texture texture;
+  if (model.texturePaths.size() > 0){
+    texture = loadTexture(model.texturePaths[0]); 
+  }else{
+    texture = loadTexture(defaultTexture); 
+  }
+ 
   useTexture(texture);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(1);

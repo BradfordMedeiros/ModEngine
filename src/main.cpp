@@ -171,7 +171,7 @@ void removeObjectById(short id){
 
 auto addObjectAndLoadMesh = [](short id, std::string type, std::string field, std::string payload) -> void {
   addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [](std::string meshName) -> void {
-    meshes[meshName] = loadMesh(meshName);
+    meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
   });
 };
 

@@ -5,7 +5,7 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   float yMin, yMax;
   float zMin, zMax;
 
-  xMin = vertices[0].position.x;
+  xMin = vertices[0].position.x;    // @todo zero vertex model --> which is fucking stupid but correct, will error here.
   xMax = vertices[0].position.x;
   yMin = vertices[0].position.y;
   yMax = vertices[0].position.y;
