@@ -3,8 +3,8 @@ sceneparent:position:10.000000 -5.000000 20.000000
 sceneparent:scale:1.000000 1.000000 1.000000
 sceneparent:rotation:0.000000 0.000000 -6.283185
 sceneparent:mesh:./res/models/box/box.obj
-maincolumn:position:0.000000 0.000000 0.000000
-maincolumn:scale:0.300000 2.000000 0.300000
+maincolumn:position:-8.699997 0.000000 9.199999
+maincolumn:scale:4.599998 2.000000 5.499997
 maincolumn:rotation:1.500000 0.000000 -4.783185
 maincolumn:mesh:./res/models/column_seat/column_seat.obj
 maincolumn:parent:sceneparent
@@ -16,7 +16,7 @@ box1:parent:sceneparent
 box2:position:6.000000 0.000000 0.000000
 box2:scale:1.000000 1.000000 1.000000
 box2:rotation:0.000000 0.000000 -6.283185
-box2:mesh:./res/models/boundingbox.obj
+box2:mesh:./res/models/boundingbox/boundingbox.obj
 box2:parent:sceneparent
 #box2:disabled
 

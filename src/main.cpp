@@ -63,6 +63,53 @@ float quadVertices[] = {
    1.0f,  1.0f,  1.0f, 1.0f
 };
 
+void printBoundInfo(std::string name, Mesh obj){
+  BoundInfo info = obj.boundInfo;
+  std::cout << "mesh name is: " << name << std::endl;
+  std::cout << "x: <" << info.xMin << " | " << info.xMax << ">" << std::endl;
+  std::cout << "y: <" << info.yMin << " | " << info.yMax << ">" << std::endl;
+  std::cout << "z: <" << info.zMin << " | " << info.zMax << ">" << std::endl;
+}
+struct boundRatio {
+    float xratio;
+    float yratio;
+    float zratio;
+    float xoffset;
+    float yoffset;
+    float zoffset;
+};
+
+boundRatio getBoundRatio(BoundInfo info1, BoundInfo info2){
+  float xRatio = (info2.xMax - info2.xMin) / (info1.xMax - info1.xMin);
+  float yRatio = (info2.yMax - info2.yMin) / (info1.yMax - info1.yMin);
+  float zRatio = (info2.zMax - info2.zMin) / (info1.zMax - info1.zMin);
+
+  float xScaleMidInfo1 = xRatio * (info1.xMax + info1.xMin) / 2;
+  float yScaleMidInfo1 = yRatio * (info1.yMax + info1.yMin) / 2;
+  float zScaleMidInfo1 = zRatio * (info1.zMax + info1.zMin) / 2;
+
+  float xMidInfo2 = (info2.xMax + info2.xMin) / 2;
+  float yMidInfo2 = (info2.yMax + info2.yMin) / 2;
+  float zMidInfo2 = (info2.zMax + info2.zMin) / 2;
+
+  float xoffset = xScaleMidInfo1 - xMidInfo2;
+  float yoffset = yScaleMidInfo1 - yMidInfo2;
+  float zoffset = zScaleMidInfo1 - zMidInfo2;
+
+  boundRatio boundingInfo = {
+    .xratio = xRatio,
+    .yratio = yRatio,
+    .zratio = zRatio,
+    .xoffset = -xoffset,
+    .yoffset = -yoffset,
+    .zoffset = -zoffset,
+  };
+  return boundingInfo;
+}
+glm::mat4 getMatrixForBoundRatio(boundRatio ratio, glm::mat4 currentMatrix){
+  return glm::scale(glm::translate(currentMatrix, glm::vec3(ratio.xoffset, ratio.yoffset, ratio.zoffset)), glm::vec3(ratio.xratio, ratio.yratio, ratio.zratio));
+}
+
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
@@ -146,7 +193,8 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   glm::mat4 modelMatrix = glm::translate(model, object.position);
   modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, state.selectedIndex == object.id)));
+  bool objectSelected = state.selectedIndex == object.id;
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
   
   if (state.visualizeNormals){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -154,9 +202,22 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   }
 
   modelMatrix = glm::scale(modelMatrix, object.scale);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   
-  renderObject(objectH.id, objectMapping, meshes["./res/models/box/box.obj"], state.showCameras);
+  // bounding code //////////////////////
+  auto gameObjV = objectMapping[objectH.id];
+  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV);
+  if (meshObj != NULL){
+    auto bounding = getBoundRatio(meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
+
+    if (objectSelected){
+      drawMesh(meshes["./res/models/boundingbox/boundingbox.obj"]);
+    }
+  }
+  /////////////////////////////// end bounding code
+
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+  renderObject(objectH.id, objectMapping, meshes["./res/models/box/box.obj"], objectSelected, meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
 
   for (short id: objectH.children){
     drawGameobject(scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
@@ -210,15 +271,39 @@ short getGameObjectByName(std::string name){
 void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
-void printModelInfo(short index){
-  auto gameobjectP = std::get_if<GameObjectMesh>(&objectMapping[index]);
-  if (gameobjectP != NULL){
-    std::cout << "mesh name is: " << gameobjectP->meshName << std::endl;
-    BoundInfo info = gameobjectP->mesh.boundInfo;
-    std::cout << "x: <" << info.xMin << " | " << info.xMax << ">" << std::endl;
-    std::cout << "y: <" << info.yMin << " | " << info.yMax << ">" << std::endl;
-    std::cout << "z: <" << info.zMin << " | " << info.zMax << ">" << std::endl;
-  }
+
+void printModelInfo(short index){   // index currently unused
+  auto gameobjectP = std::get_if<GameObjectMesh>(&objectMapping[state.selectedIndex]);
+
+  auto boundboxP = meshes["./res/models/boundingbox/boundingbox.obj"];
+  Mesh targetMesh = gameobjectP->mesh;
+
+  printBoundInfo("target mesh", targetMesh);
+  printBoundInfo("bounding box", boundboxP);
+
+  auto bounding = getBoundRatio(targetMesh.boundInfo, boundboxP.boundInfo);
+
+  std::cout << "xRatio: " << bounding.xratio << std::endl; 
+  std::cout << "yRatio: " << bounding.yratio << std::endl;
+  std::cout << "zRatio: " << bounding.zratio << std::endl;
+  std::cout << "xoffset: " << bounding.xoffset << std::endl;
+  std::cout << "yoffset: " << bounding.yoffset << std::endl;
+  std::cout << "zoffset: " << bounding.zoffset << std::endl;
+
+  float newXMin = targetMesh.boundInfo.xMin * bounding.xratio;
+  float newXMax = targetMesh.boundInfo.xMax * bounding.xratio;
+  float newYMin = targetMesh.boundInfo.yMin * bounding.yratio;
+  float newYMax = targetMesh.boundInfo.yMax * bounding.yratio;
+  float newZMin = targetMesh.boundInfo.zMin * bounding.zratio;
+  float newZMax = targetMesh.boundInfo.zMax * bounding.zratio;
+
+  std::cout << "new xmin: " << newXMin << std::endl;
+  std::cout << "new xmax: " << newXMax << std::endl;
+  std::cout << "new ymin: " << newYMin << std::endl;
+  std::cout << "new ymax: " << newYMax << std::endl;
+  std::cout << "new zmin: " << newZMin << std::endl;
+  std::cout << "new zmax: " << newZMax << std::endl;
+   
 }
 
 
