@@ -11,17 +11,12 @@
 #include <functional>
 #include <filesystem>
 #include "./loadmodel.h"
+#include "./boundinfo.h"
 
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 texCoords;
-};
-
-struct BoundInfo {
-  float xMin, xMax;
-  float yMin, yMax;
-  float zMin, zMax;
 };
 
 struct ModelData {
@@ -37,3 +32,4 @@ struct ModelData {
 std::vector<ModelData> loadModel(std::string modelPath);  
 
 #endif 
+

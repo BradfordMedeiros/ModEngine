@@ -16,6 +16,7 @@
 #include "./scene/scene.h"
 #include "./scene/common/mesh.h"
 #include "./scene/common/util/loadmodel.h"
+#include "./scene/common/util/boundinfo.h"
 #include "./scene/sprites/readfont.h"
 #include "./scene/sprites/sprites.h"
 #include "./scheme_bindings.h"
@@ -62,54 +63,6 @@ float quadVertices[] = {
    1.0f, -1.0f,  1.0f, 0.0f,
    1.0f,  1.0f,  1.0f, 1.0f
 };
-
-void printBoundInfo(std::string name, Mesh obj){
-  BoundInfo info = obj.boundInfo;
-  std::cout << "mesh name is: " << name << std::endl;
-  std::cout << "x: <" << info.xMin << " | " << info.xMax << ">" << std::endl;
-  std::cout << "y: <" << info.yMin << " | " << info.yMax << ">" << std::endl;
-  std::cout << "z: <" << info.zMin << " | " << info.zMax << ">" << std::endl;
-}
-struct boundRatio {
-    float xratio;
-    float yratio;
-    float zratio;
-    float xoffset;
-    float yoffset;
-    float zoffset;
-};
-
-boundRatio getBoundRatio(BoundInfo info1, BoundInfo info2){
-  float xRatio = (info2.xMax - info2.xMin) / (info1.xMax - info1.xMin);
-  float yRatio = (info2.yMax - info2.yMin) / (info1.yMax - info1.yMin);
-  float zRatio = (info2.zMax - info2.zMin) / (info1.zMax - info1.zMin);
-
-  float xScaleMidInfo1 = xRatio * (info1.xMax + info1.xMin) / 2;
-  float yScaleMidInfo1 = yRatio * (info1.yMax + info1.yMin) / 2;
-  float zScaleMidInfo1 = zRatio * (info1.zMax + info1.zMin) / 2;
-
-  float xMidInfo2 = (info2.xMax + info2.xMin) / 2;
-  float yMidInfo2 = (info2.yMax + info2.yMin) / 2;
-  float zMidInfo2 = (info2.zMax + info2.zMin) / 2;
-
-  float xoffset = xScaleMidInfo1 - xMidInfo2;
-  float yoffset = yScaleMidInfo1 - yMidInfo2;
-  float zoffset = zScaleMidInfo1 - zMidInfo2;
-
-  boundRatio boundingInfo = {
-    .xratio = xRatio,
-    .yratio = yRatio,
-    .zratio = zRatio,
-    .xoffset = -xoffset,
-    .yoffset = -yoffset,
-    .zoffset = -zoffset,
-  };
-  return boundingInfo;
-}
-glm::mat4 getMatrixForBoundRatio(boundRatio ratio, glm::mat4 currentMatrix){
-  return glm::scale(glm::translate(currentMatrix, glm::vec3(ratio.xoffset, ratio.yoffset, ratio.zoffset)), glm::vec3(ratio.xratio, ratio.yratio, ratio.zratio));
-}
-
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(objectMapping);
@@ -187,6 +140,18 @@ void rotate(float x, float y, float z){
   scene.idToGameObjects[state.selectedIndex].rotation  = setFrontDelta(scene.idToGameObjects[state.selectedIndex].rotation, x, y, z, 5);
 }
 
+void setObjectDimensions(short index, float width, float height, float depth){
+  std::cout << "set object dimensions placeholder" << std::endl;
+
+  auto gameObjV = objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
+  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+  if (meshObj != NULL){
+    auto newScale = getScaleEquivalent(meshObj->mesh.boundInfo, width, height, depth);
+    std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
+    scene.idToGameObjects[state.selectedIndex].scale = newScale;
+  } 
+}
+
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = scene.idToGameObjects[objectH.id];
 
@@ -205,7 +170,7 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   
   // bounding code //////////////////////
   auto gameObjV = objectMapping[objectH.id];
-  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV);
+  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
   if (meshObj != NULL){
     auto bounding = getBoundRatio(meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
@@ -278,8 +243,11 @@ void printModelInfo(short index){   // index currently unused
   auto boundboxP = meshes["./res/models/boundingbox/boundingbox.obj"];
   Mesh targetMesh = gameobjectP->mesh;
 
-  printBoundInfo("target mesh", targetMesh);
-  printBoundInfo("bounding box", boundboxP);
+  std::cout << "target mesh: " << std::endl;
+  printBoundInfo(targetMesh.boundInfo);
+  
+  std::cout << "bounding info mesh: " << std::endl;
+  printBoundInfo(boundboxP.boundInfo);
 
   auto bounding = getBoundRatio(targetMesh.boundInfo, boundboxP.boundInfo);
 
@@ -457,7 +425,6 @@ int main(int argc, char* argv[]){
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
   scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), addObjectAndLoadMesh, fields);
-
     
   schemeBindings  = createStaticSchemeBindings(
     result["scriptpath"].as<std::string>(), 
@@ -529,7 +496,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, printModelInfo);
+    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, printModelInfo, setObjectDimensions);
 
     glfwPollEvents();
     

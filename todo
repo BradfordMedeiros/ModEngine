@@ -1,5 +1,3 @@
-- bounding box object
-- set object size option via width/height
 - create manipulator
 - bullet physics  
 - collision volumes

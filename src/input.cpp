@@ -50,10 +50,14 @@ void handleInput(GLFWwindow *window, float deltaTime,
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
   void (*playSound)(void),
-  void (*printModelInfo)(short index)
+  void (*printModelInfo)(short index),
+  void (*setObjectDimensions)(short index, float width, float height, float depth)
 ){
   if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
     printModelInfo(0);
+  }
+  if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
+    setObjectDimensions(1, 10, 5, 10);
   }
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
