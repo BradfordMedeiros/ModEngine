@@ -28,8 +28,14 @@ void mouse_button_callback(GLFWwindow* window, engineState& state, int button, i
   void (*handleSerialization) (void), void (*selectItem) (void)){
 
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+    state.enableManipulator = true;
     handleSerialization();
   }
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE){
+    state.enableManipulator = false;
+    handleSerialization();
+  }
+
   if (button == GLFW_MOUSE_BUTTON_MIDDLE){
     if (action == GLFW_PRESS){
       state.isRotateSelection = true;
@@ -43,6 +49,7 @@ void mouse_button_callback(GLFWwindow* window, engineState& state, int button, i
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItem();
   }
+
 }
 
 void handleInput(GLFWwindow *window, float deltaTime, 
@@ -61,9 +68,6 @@ void handleInput(GLFWwindow *window, float deltaTime,
   }
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
-  }
-  if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
-    playSound();
   }
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
     moveCamera(glm::vec3(0.0, 0.0, 1.0f));
@@ -111,6 +115,25 @@ void handleInput(GLFWwindow *window, float deltaTime,
   } 
   if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
     state.mode = 2;
+  }
+
+  if (state.manipulatorMode == NONE && glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS){
+    state.manipulatorMode = TRANSLATE;
+  }
+  if (state.manipulatorMode != NONE && glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE){
+    state.manipulatorMode = NONE;
+  }
+  if (state.manipulatorMode == NONE && glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS){
+    state.manipulatorMode = SCALE;
+  }
+  if (state.manipulatorMode != NONE && glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE){
+    state.manipulatorMode = NONE;
+  }
+  if (state.manipulatorMode == NONE && glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
+    state.manipulatorMode = ROTATE;
+  }
+  if (state.manipulatorMode != NONE && glfwGetKey(window, GLFW_KEY_6) == GLFW_RELEASE){
+    state.manipulatorMode = NONE;
   }
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){

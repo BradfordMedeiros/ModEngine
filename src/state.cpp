@@ -19,6 +19,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.activeCamera = 0,
 		.additionalText = "",
 		.firstMouse = true,
+		.enableManipulator = false,
+		.manipulatorMode = NONE,
 	};
 	return state;
 }

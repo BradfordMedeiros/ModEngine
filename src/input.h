@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "./state.h"
+#include "./common/util.h"
 
 void mouse_button_callback(GLFWwindow* window, engineState& state, int button, int action, int mods, 
 	void (*handleSerialization) (void), void (*selectItem) (void)

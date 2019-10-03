@@ -3,6 +3,7 @@
 
 #include <string>
 #include "./scene/scene.h"
+#include "./common/util.h"
 
 struct engineState {
   bool visualizeNormals;
@@ -26,6 +27,8 @@ struct engineState {
   float lastX;
   float lastY;
 
+  bool enableManipulator;
+  ManipulatorMode manipulatorMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
