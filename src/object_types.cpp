@@ -26,7 +26,6 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
     .isDisabled = isDisabled,
   };
 
-  std::cout << "created mesh: " << obj.meshName << std::endl;
   return obj;
 }
 GameObjectCamera createCamera(std::string field, std::string payload){
@@ -38,9 +37,6 @@ void addObject(short id, std::string objectType, std::string field, std::string 
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded
 ){
-  //std::cout << "--------ADD OBJECT CALLED------------" << std::endl;
-  //std::cout << "(" << objectType << " | " << field << " | " << payload << ")" << std::endl;  
-
   if (objectType == "default"){
     GameObjectObj existingObject = mapping[id];
     GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&existingObject);

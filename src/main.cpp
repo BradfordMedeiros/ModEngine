@@ -111,8 +111,36 @@ void selectItem(){
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
+
+glm::vec3 getVecAxis(){
+  return glm::vec3(1.0f, 0.0f, 1.0f);
+}
+glm::vec3 getVecTranslate(){
+  return glm::vec3(-state.offsetX, state.offsetY, state.offsetY);
+}
+glm::vec3 applyTranslation(glm::vec3 position, glm::vec3 axis, glm::vec3 translate){
+  return position + axis * translate;
+}
+void processManipulator(){
+  if (state.enableManipulator){
+    auto selectObject = scene.idToGameObjects[state.selectedIndex];
+    if (state.manipulatorMode == TRANSLATE){
+      std::cout << "translate" << std::endl;
+      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, getVecAxis(), getVecTranslate());
+      std::cout << "position is: (" <<  selectObject.position.x << ", " << selectObject.position.y << ", " << selectObject.position.z << ")" << std::endl;
+    }else if (state.manipulatorMode == SCALE){
+      std::cout << "scale" << std::endl;
+    }else if (state.manipulatorMode == ROTATE){
+      std::cout << "rotate" << std::endl;
+    }
+
+    std::cout << "offset: (" << state.offsetX << " , " << state.offsetY << ")" << std::endl;
+  }
+}
+
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(window, state, xpos, ypos, rotateCamera);
+  processManipulator();
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
@@ -273,7 +301,6 @@ void printModelInfo(short index){   // index currently unused
   std::cout << "new zmax: " << newZMax << std::endl;
    
 }
-
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);

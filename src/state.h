@@ -22,13 +22,14 @@ struct engineState {
   short selectedIndex;
   unsigned int activeCamera;
   std::string additionalText;
+  bool enableManipulator;
+  ManipulatorMode manipulatorMode;
 
   bool firstMouse;
   float lastX;
   float lastY;
-
-  bool enableManipulator;
-  ManipulatorMode manipulatorMode;
+  float offsetX;
+  float offsetY;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

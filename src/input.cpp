@@ -12,6 +12,8 @@ void onMouse(GLFWwindow* window, engineState& state, double xpos, double ypos, v
     float yoffset = state.lastY - ypos; 
     state.lastX = xpos;
     state.lastY = ypos;
+    state.offsetX = xoffset;
+    state.offsetY = yoffset;
 
     float sensitivity = 0.05;
     xoffset *= sensitivity;
@@ -117,22 +119,17 @@ void handleInput(GLFWwindow *window, float deltaTime,
     state.mode = 2;
   }
 
-  if (state.manipulatorMode == NONE && glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS){
+
+  if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS){
     state.manipulatorMode = TRANSLATE;
   }
-  if (state.manipulatorMode != NONE && glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE){
-    state.manipulatorMode = NONE;
-  }
-  if (state.manipulatorMode == NONE && glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS){
+  if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS){
     state.manipulatorMode = SCALE;
   }
-  if (state.manipulatorMode != NONE && glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE){
-    state.manipulatorMode = NONE;
-  }
-  if (state.manipulatorMode == NONE && glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
+  if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
     state.manipulatorMode = ROTATE;
   }
-  if (state.manipulatorMode != NONE && glfwGetKey(window, GLFW_KEY_6) == GLFW_RELEASE){
+  if (!glfwGetKey(window, GLFW_KEY_4) && !glfwGetKey(window, GLFW_KEY_5) && !glfwGetKey(window, GLFW_KEY_6) && glfwGetKey(window, GLFW_KEY_6) == GLFW_RELEASE){
     state.manipulatorMode = NONE;
   }
 
@@ -184,7 +181,7 @@ void handleInput(GLFWwindow *window, float deltaTime,
       }
     }else if (state.mode == 1){
       if (state.axis == 0){
-        scale(0, 0, 0.1);
+      scale(0, 0, 0.1);
 	  }else{
 	    scale(0, 0.1, 0);
 	  }   
