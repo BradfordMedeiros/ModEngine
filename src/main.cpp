@@ -118,23 +118,38 @@ glm::vec3 getVecAxis(){
 glm::vec3 getVecTranslate(){
   return glm::vec3(-state.offsetX, state.offsetY, state.offsetY);
 }
-glm::vec3 applyTranslation(glm::vec3 position, glm::vec3 axis, glm::vec3 translate){
+glm::vec3 applyTranslation(glm::vec3 position){
+  glm::vec3 axis = getVecAxis();
+  glm::vec3 translate = getVecTranslate();
   return position + axis * translate;
 }
+glm::vec3 getDirection(){
+  return glm::vec3(-state.offsetX, state.offsetY, 0);
+}
+glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale){
+  float distanceOld = glm::distance(position, glm::vec3(state.lastX, state.lastY, 0));
+  float distanceNew = glm::distance(position, glm::vec3(state.lastX + state.offsetX, state.lastY + state.offsetY, 0));
+
+  if (distanceNew < distanceOld){
+    return initialScale - glm::vec3(0.1f, 0.1f, 0.1f);
+  }else if (distanceNew > distanceOld){
+    return initialScale + glm::vec3(0.1f, 0.1f, 0.1f);
+  }else{ 
+    return initialScale;
+  }
+}
+
 void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      std::cout << "translate" << std::endl;
-      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, getVecAxis(), getVecTranslate());
-      std::cout << "position is: (" <<  selectObject.position.x << ", " << selectObject.position.y << ", " << selectObject.position.z << ")" << std::endl;
+      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position);
     }else if (state.manipulatorMode == SCALE){
-      std::cout << "scale" << std::endl;
+      scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale);
     }else if (state.manipulatorMode == ROTATE){
       std::cout << "rotate" << std::endl;
     }
-
-    std::cout << "offset: (" << state.offsetX << " , " << state.offsetY << ")" << std::endl;
+    //std::cout << "offset: (" << state.offsetX << " , " << state.offsetY << ")" << std::endl;
   }
 }
 
