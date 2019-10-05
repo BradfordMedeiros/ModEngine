@@ -21,7 +21,7 @@
 #include "./scene/sprites/sprites.h"
 #include "./scheme_bindings.h"
 #include "./shaders.h"
-#include "./camera.h"
+#include "./translations.h"
 #include "./sound.h"
 #include "./common/util.h"
 #include "./object_types.h"
@@ -112,40 +112,14 @@ void selectItem(){
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 
-glm::vec3 getVecAxis(){
-  return glm::vec3(1.0f, 0.0f, 1.0f);
-}
-glm::vec3 getVecTranslate(){
-  return glm::vec3(-state.offsetX, state.offsetY, state.offsetY);
-}
-glm::vec3 applyTranslation(glm::vec3 position){
-  glm::vec3 axis = getVecAxis();
-  glm::vec3 translate = getVecTranslate();
-  return position + axis * translate;
-}
-glm::vec3 getDirection(){
-  return glm::vec3(-state.offsetX, state.offsetY, 0);
-}
-glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale){
-  float distanceOld = glm::distance(position, glm::vec3(state.lastX, state.lastY, 0));
-  float distanceNew = glm::distance(position, glm::vec3(state.lastX + state.offsetX, state.lastY + state.offsetY, 0));
-
-  if (distanceNew < distanceOld){
-    return initialScale - glm::vec3(0.1f, 0.1f, 0.1f);
-  }else if (distanceNew > distanceOld){
-    return initialScale + glm::vec3(0.1f, 0.1f, 0.1f);
-  }else{ 
-    return initialScale;
-  }
-}
 
 void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position);
+      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, state.offsetX, state.offsetY);
     }else if (state.manipulatorMode == SCALE){
-      scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale);
+      scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY);
     }else if (state.manipulatorMode == ROTATE){
       std::cout << "rotate" << std::endl;
     }
