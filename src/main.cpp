@@ -121,9 +121,8 @@ void processManipulator(){
     }else if (state.manipulatorMode == SCALE){
       scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY);
     }else if (state.manipulatorMode == ROTATE){
-      std::cout << "rotate" << std::endl;
+      scene.idToGameObjects[state.selectedIndex].rotation = applyRotation(selectObject.rotation, state.offsetX, state.offsetY);
     }
-    //std::cout << "offset: (" << state.offsetX << " , " << state.offsetY << ")" << std::endl;
   }
 }
 
@@ -222,6 +221,7 @@ void makeObject(std::string name, std::string meshName, float x, float y, float 
   addObjectToScene(scene, name, meshName, glm::vec3(x, y, z), addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
 }
 
+
 std::vector<short> getObjectsByType(std::string type){
   if (type == "mesh"){
     std::vector indexes = getGameObjectsIndex<GameObjectMesh>(objectMapping);
@@ -288,7 +288,6 @@ void printModelInfo(short index){   // index currently unused
   std::cout << "new ymax: " << newYMax << std::endl;
   std::cout << "new zmin: " << newZMin << std::endl;
   std::cout << "new zmax: " << newZMax << std::endl;
-   
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){

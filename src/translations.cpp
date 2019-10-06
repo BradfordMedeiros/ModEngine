@@ -40,3 +40,6 @@ glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, 
     return initialScale;
   }
 }
+glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY){
+  return setFrontDelta(currentOrientation, offsetX, offsetY, 0, 1);
+}
