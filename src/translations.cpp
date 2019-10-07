@@ -35,14 +35,14 @@ glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, Man
   glm::vec3 translate = getVecTranslate(offsetX, offsetY);
   return position + axis * translate;
 }
-glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY){
+glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
   float distanceOld = glm::distance(position, glm::vec3(lastX, lastY, 0));
   float distanceNew = glm::distance(position, glm::vec3(lastX + offsetX, lastY + offsetY, 0));
 
   if (distanceNew < distanceOld){
-    return initialScale - glm::vec3(0.1f, 0.1f, 0.1f);
+    return initialScale - getVecAxis(manipulatorAxis) * 0.1f;
   }else if (distanceNew > distanceOld){
-    return initialScale + glm::vec3(0.1f, 0.1f, 0.1f);
+    return initialScale + getVecAxis(manipulatorAxis) * 0.1f;
   }else{ 
     return initialScale;
   }

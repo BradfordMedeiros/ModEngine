@@ -118,7 +118,7 @@ void processManipulator(){
     if (state.manipulatorMode == TRANSLATE){
       scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY);
+      scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
       scene.idToGameObjects[state.selectedIndex].rotation = applyRotation(selectObject.rotation, state.offsetX, state.offsetY);
     }
