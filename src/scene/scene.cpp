@@ -34,8 +34,6 @@ glm::vec3 parseVec(std::string positionRaw){;
 }
 
 Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
-  std::cout << "create scene from tokens" << std::endl;
-
   Scene scene;
   scene.id = 0;
 

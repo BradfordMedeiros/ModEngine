@@ -14,6 +14,6 @@ glm::mat4 renderView(glm::vec3 position, glm::quat orientation);
 
 glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY);
+glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 
 #endif 
