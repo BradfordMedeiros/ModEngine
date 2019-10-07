@@ -102,7 +102,7 @@ void handleInput(GLFWwindow *window, float deltaTime,
     state.moveRelativeEnabled = !state.moveRelativeEnabled;
     std::cout << "Move relative: " << state.moveRelativeEnabled << std::endl;
   }
-  if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
+  if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS){
     if (state.axis == 0){
       state.axis = 1;
     }else{
@@ -129,9 +129,19 @@ void handleInput(GLFWwindow *window, float deltaTime,
   if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
     state.manipulatorMode = ROTATE;
   }
-  if (!glfwGetKey(window, GLFW_KEY_4) && !glfwGetKey(window, GLFW_KEY_5) && !glfwGetKey(window, GLFW_KEY_6) && glfwGetKey(window, GLFW_KEY_6) == GLFW_RELEASE){
-    state.manipulatorMode = NONE;
+  if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
+    std::cout << "x pressed" << std::endl;
+    state.manipulatorAxis = XAXIS;
   }
+  if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
+    std::cout << "y pressed" << std::endl;
+    state.manipulatorAxis = YAXIS;
+  }
+  if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS){
+    std::cout << "z pressed" << std::endl;
+    state.manipulatorAxis = ZAXIS;
+  }
+
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
     if (state.mode == 0){

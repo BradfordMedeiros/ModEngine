@@ -314,6 +314,20 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
       std::string axisText = state.axis == 0 ? "xz" : "xy";
       drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
+
+      std::string manipulatorAxisString;
+      if (state.manipulatorAxis == XAXIS){
+        manipulatorAxisString = "xaxis";
+      }else if (state.manipulatorAxis == YAXIS){
+        manipulatorAxisString = "yaxis";
+      }else if (state.manipulatorAxis == ZAXIS){
+        manipulatorAxisString = "zaxis";
+      }else{
+        manipulatorAxisString = "noaxis";
+      }
+
+      drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
+
     }
 }
 

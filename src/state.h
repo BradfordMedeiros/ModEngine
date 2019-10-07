@@ -5,6 +5,8 @@
 #include "./scene/scene.h"
 #include "./common/util.h"
 
+enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
+
 struct engineState {
   bool visualizeNormals;
   bool showCameras;
@@ -22,14 +24,16 @@ struct engineState {
   short selectedIndex;
   unsigned int activeCamera;
   std::string additionalText;
+
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
-
+  ManipulatorAxis manipulatorAxis;
   bool firstMouse;
   float lastX;
   float lastY;
   float offsetX;
   float offsetY;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

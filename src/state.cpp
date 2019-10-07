@@ -18,9 +18,10 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.selectedIndex = -1,
 		.activeCamera = 0,
 		.additionalText = "",
+
 		.enableManipulator = false,
 		.manipulatorMode = NONE,
-
+		.manipulatorAxis = NOAXIS,
 		.firstMouse = true,
 		.lastX = 0,
 		.lastY = 0,
