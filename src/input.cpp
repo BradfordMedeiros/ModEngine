@@ -119,7 +119,6 @@ void handleInput(GLFWwindow *window, float deltaTime,
     state.mode = 2;
   }
 
-
   if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS){
     state.manipulatorMode = TRANSLATE;
   }
@@ -130,18 +129,14 @@ void handleInput(GLFWwindow *window, float deltaTime,
     state.manipulatorMode = ROTATE;
   }
   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
-    std::cout << "x pressed" << std::endl;
     state.manipulatorAxis = XAXIS;
   }
   if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
-    std::cout << "y pressed" << std::endl;
     state.manipulatorAxis = YAXIS;
   }
   if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS){
-    std::cout << "z pressed" << std::endl;
     state.manipulatorAxis = ZAXIS;
   }
-
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
     if (state.mode == 0){

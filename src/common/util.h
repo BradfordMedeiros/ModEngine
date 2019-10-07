@@ -12,5 +12,6 @@ std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
 
 enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
+enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 
 #endif

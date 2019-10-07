@@ -5,7 +5,6 @@
 #include "./scene/scene.h"
 #include "./common/util.h"
 
-enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 
 struct engineState {
   bool visualizeNormals;
@@ -33,7 +32,6 @@ struct engineState {
   float lastY;
   float offsetX;
   float offsetY;
-
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

@@ -17,14 +17,21 @@ glm::mat4 renderView(glm::vec3 position, glm::quat orientation){
   return glm::translate(glm::toMat4(orientation), position);
 }
 
-glm::vec3 getVecAxis(){
+glm::vec3 getVecAxis(ManipulatorAxis axis){
+  if (axis == XAXIS){
+    return glm::vec3(1.0f, 0.f, 0.f);
+  }else if (axis == YAXIS){
+    return glm::vec3(0.f, 1.0f, 0.f);
+  }else if (axis == ZAXIS){
+    return glm::vec3(0.f, 0.f, 1.0f);
+  }
   return glm::vec3(1.0f, 0.0f, 1.0f);
 }
 glm::vec3 getVecTranslate(float offsetX, float offsetY){
   return glm::vec3(-offsetX, offsetY, offsetY);
 }
-glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY){
-  glm::vec3 axis = getVecAxis();
+glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  glm::vec3 axis = getVecAxis(manipulatorAxis);
   glm::vec3 translate = getVecTranslate(offsetX, offsetY);
   return position + axis * translate;
 }

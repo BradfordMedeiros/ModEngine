@@ -112,12 +112,11 @@ void selectItem(){
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 
-
 void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, state.offsetX, state.offsetY);
+      scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
       scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY);
     }else if (state.manipulatorMode == ROTATE){
@@ -325,9 +324,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       }else{
         manipulatorAxisString = "noaxis";
       }
-
       drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
-
     }
 }
 
