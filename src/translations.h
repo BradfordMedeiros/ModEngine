@@ -1,5 +1,5 @@
-#ifndef MOD_CAMERA
-#define MOD_CAMERA
+#ifndef MOD_TRANSLATIONS
+#define MOD_TRANSLATIONS
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
