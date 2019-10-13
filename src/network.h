@@ -18,11 +18,10 @@ struct modsocket {
 	fd_set fds;
 	int maxFd;
 };
-
+      
 modsocket createServer();
 void getDataFromSocket(modsocket socketInfo);
 void cleanupSocket(modsocket socketInfo);
-
 
 void createClient();
 void sendMessage();
