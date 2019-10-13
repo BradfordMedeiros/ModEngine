@@ -58,16 +58,17 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
   return false;
 }
 
-void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd){
+void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, void (*onData)(std::string)){
   FD_CLR(socketFd, &socketInfo.fds);
   char buffer[NETWORK_BUFFER_SIZE];
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);
   const char* okString = "ok";
   send(socketFd, okString, strlen(okString), 0);
   close(socketFd);
+  onData(buffer);
 }
 
-void getDataFromSocket(modsocket socketInfo){
+void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string)){
   while (acceptSocketAndMarkNonBlocking(socketInfo));
 
   timeval timeout {
@@ -92,7 +93,7 @@ void getDataFromSocket(modsocket socketInfo){
   }
  
   for(int socketFd:readySocketFds){
-    sendDataAndCloseSocket(socketInfo, socketFd);
+    sendDataAndCloseSocket(socketInfo, socketFd, onData);
   }
 }
 

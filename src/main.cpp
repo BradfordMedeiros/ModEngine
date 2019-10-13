@@ -30,6 +30,8 @@
 #include "./input.h"
 #include "./network.h"
 
+const bool SHELL_ENABLED = false;
+
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
@@ -329,6 +331,10 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     }
 }
 
+void onData(std::string data){
+  std::cout << "got data: " << data << std::endl;
+}
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -357,6 +363,8 @@ int main(int argc, char* argv[]){
   showDebugInfo = result["info"].as<bool>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
+
+  modsocket serverInstance = createServer();
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -469,8 +477,9 @@ int main(int argc, char* argv[]){
     setSelectionMode
   );
 
+  if (SHELL_ENABLED){
   std::thread shellThread(startShell);
-
+  }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -498,6 +507,8 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
     
+    getDataFromSocket(serverInstance, onData);
+
     glm::mat4 view;
     if (state.useDefaultCamera){
       view = renderView(defaultCamera.position, defaultCamera.rotation);

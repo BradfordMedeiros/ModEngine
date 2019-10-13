@@ -20,7 +20,7 @@ struct modsocket {
 };
       
 modsocket createServer();
-void getDataFromSocket(modsocket socketInfo);
+void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string));
 void cleanupSocket(modsocket socketInfo);
 
 void createClient();
