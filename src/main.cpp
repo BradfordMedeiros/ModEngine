@@ -28,6 +28,7 @@
 #include "./colorselection.h"
 #include "./state.h"
 #include "./input.h"
+#include "./network.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
