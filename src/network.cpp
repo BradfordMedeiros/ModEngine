@@ -102,9 +102,7 @@ void cleanupSocket(modsocket socketInfo){
 }
 
 void sendMessage(char* networkBuffer){
-  std::cout << "move message here: " << networkBuffer << std::endl;
-  
-  struct sockaddr_in serveraddr = {
+  struct sockaddr_in address = {
     .sin_family = AF_INET,
     .sin_port = htons(8000),
     .sin_addr = in_addr {
@@ -112,11 +110,13 @@ void sendMessage(char* networkBuffer){
     },
   };
 
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd == -1){
+  int sockFd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockFd == -1){
     throw std::runtime_error("error creating socket");
   }
 
-  
+  guard(connect(sockFd, (struct sockaddr*) &address, sizeof(address)), "error connecting socket");
+  write(sockFd, networkBuffer, strlen(networkBuffer));
+  close(sockFd);
 }
 
