@@ -351,6 +351,7 @@ int main(int argc, char* argv[]){
    ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
+   ("l,listen", "Start server instance (listen)", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
@@ -368,7 +369,12 @@ int main(int argc, char* argv[]){
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
 
-  modsocket serverInstance = createServer();
+  bool isServer = result["listen"].as<bool>();
+  modsocket serverInstance;
+  if (isServer){
+    serverInstance = createServer();;
+  }
+
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -511,7 +517,9 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
     
-    getDataFromSocket(serverInstance, onData);
+    if (isServer){
+      getDataFromSocket(serverInstance, onData);
+    }
 
     glm::mat4 view;
     if (state.useDefaultCamera){
