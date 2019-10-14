@@ -60,11 +60,16 @@ void handleInput(GLFWwindow *window, float deltaTime,
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
   void (*playSound)(void),
   void (*printModelInfo)(short index),
-  void (*setObjectDimensions)(short index, float width, float height, float depth)
+  void (*setObjectDimensions)(short index, float width, float height, float depth),
+  void sendMoveObjectMessage()
 ){
   if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
     printModelInfo(0);
   }
+  if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
+    sendMoveObjectMessage();
+  }
+
   if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
     setObjectDimensions(1, 10, 5, 10);
   }

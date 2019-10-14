@@ -11,6 +11,7 @@
 #include <cstring>
 #include <errno.h>
 #include <vector>
+#include <arpa/inet.h>
 
 struct modsocket {
 	sockaddr_in socketin;
@@ -23,7 +24,14 @@ modsocket createServer();
 void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string));
 void cleanupSocket(modsocket socketInfo);
 
+struct modclient {
+
+};
+
 void createClient();
-void sendMessage();
+void sendMessage(modclient clientInfo, char* networkBuffer);
+void sendMessage(char* networkBuffer);
+void cleanupClient();
+
 
 #endif 

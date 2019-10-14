@@ -11,7 +11,7 @@ void guard(int value, const char* runtimeErrorMessage){
 
 modsocket createServer(){
 	int socketFd = socket(AF_INET, SOCK_STREAM, 0);	
-	if (socketFd == 0){
+	if (socketFd == -1){
 		throw std::runtime_error("error creating socket");
 	}
 
@@ -99,5 +99,24 @@ void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string)){
 
 void cleanupSocket(modsocket socketInfo){
   close(socketInfo.socketFd);
+}
+
+void sendMessage(char* networkBuffer){
+  std::cout << "move message here: " << networkBuffer << std::endl;
+  
+  struct sockaddr_in serveraddr = {
+    .sin_family = AF_INET,
+    .sin_port = htons(8000),
+    .sin_addr = in_addr {
+      .s_addr = inet_addr("127.0.0.1"),
+    },
+  };
+
+  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd == -1){
+    throw std::runtime_error("error creating socket");
+  }
+
+  
 }
 

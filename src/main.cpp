@@ -334,6 +334,10 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 void onData(std::string data){
   std::cout << "got data: " << data << std::endl;
 }
+void sendMoveObjectMessage(){
+  sendMessage((char*)"hello world");
+}
+
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -478,7 +482,7 @@ int main(int argc, char* argv[]){
   );
 
   if (SHELL_ENABLED){
-  std::thread shellThread(startShell);
+    std::thread shellThread(startShell);
   }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
@@ -534,7 +538,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, printModelInfo, setObjectDimensions);
+    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, printModelInfo, setObjectDimensions, sendMoveObjectMessage);
 
     glfwPollEvents();
     
@@ -559,7 +563,9 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
+
   std::cout << "LIFECYCLE: program exiting" << std::endl;
+  cleanupSocket(serverInstance);
   stopSoundSystem();
   glfwTerminate(); 
    
