@@ -1,4 +1,3 @@
-- create manipulator
 - bullet physics  
 - collision volumes
 - optimization to select what to render quicker / multi scene 
