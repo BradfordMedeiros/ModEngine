@@ -5,9 +5,7 @@
 [submodule "lib/cxxopts"]
 	path = lib/cxxopts
 	url = https://github.com/jarro2783/cxxopts.git
-	branch = v2.2.0
-         
-[submodule "bullet3"]
+	branch = v2.2.0  
+[submodule "lib/bullet3"]
 	path = lib/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
-	branch = 2.88	
