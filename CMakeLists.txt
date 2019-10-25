@@ -72,8 +72,7 @@ target_link_libraries(${PROJECT_NAME} "assimp")
 target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_BUILD_DIR}/include")
 
-# Bullet - physics @todo
-set(BULLET_ROOT "${LIB_DIR}/bullet3")
+# Bullet - physics -- this should come from the actual lib folder eventually but oh well for now.
 include(FindBullet)
 target_include_directories(${PROJECT_NAME} PRIVATE ${BULLET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${BULLET_LIBRARIES})
