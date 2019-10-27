@@ -15,6 +15,10 @@ struct physicsEnv {
 
 physicsEnv initPhysics();
 void deinitPhysics(physicsEnv env);
-
+void stepSimulation(physicsEnv& env);
+void addRigidBody(physicsEnv& env, float x, float y, float z);
+void rmRigidBody(physicsEnv& env);
+void addColCol();
+void rmColVol();
 
 #endif 
