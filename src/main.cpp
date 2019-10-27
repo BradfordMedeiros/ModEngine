@@ -29,6 +29,7 @@
 #include "./state.h"
 #include "./input.h"
 #include "./network.h"
+#include "./physics.h"
 
 const bool SHELL_ENABLED = false;
 
@@ -503,6 +504,9 @@ int main(int argc, char* argv[]){
 
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
+
+  auto physicsEnv = initPhysics();
+  deinitPhysics(physicsEnv);
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;
