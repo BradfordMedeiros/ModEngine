@@ -506,8 +506,27 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: render loop starting" << std::endl;
 
   auto physicsEnv = initPhysics();
-  deinitPhysics(physicsEnv);
 
+  std::vector<btRigidBody*> values;
+
+  unsigned int numBodies = 100;
+  for (unsigned int i = 0; i < numBodies; i++){
+    std::cout << "ADDING RIGID BODY: i" << i << std::endl;
+    auto rigidPtr = addRigidBody(physicsEnv, 10, 10, 10);
+    values.push_back(rigidPtr);
+    std::cout << "ADDING PTR: " << rigidPtr << std::endl;
+  }
+  for (unsigned int i = 0; i < numBodies; i++){
+    std::cout << "REMOVING RIGID BODY: i" << i << std::endl;
+    auto rigidPtr = values[i];
+    std::cout << "REMOVING PTR: " << rigidPtr << std::endl;
+    rmRigidBody(physicsEnv, rigidPtr);
+  }
+
+
+
+  deinitPhysics(physicsEnv);
+  
   while (!glfwWindowShouldClose(window)){
     frameCount++;
     float now = glfwGetTime();

@@ -18,33 +18,41 @@ physicsEnv initPhysics(){
   return env;
 }
 
-void addRigidBody(physicsEnv& env, float x, float y, float z){  // @todo obviously this is managed improperly WIP
-  btBoxShape box(btVector3(btScalar(10.0f), btScalar(10.0f), btScalar(10.0f)));
-  btCollisionShape* shape = &box;
-  
-  btScalar mass(1.0f);
-
+btRigidBody* createRigidBody(float x, float y, float z){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(btVector3(x, y, z));   
-  btDefaultMotionState motionState(transform);
+
+  btScalar mass(1.0f);
+
+  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(10.0f), btScalar(10.0f), btScalar(10.0f)));
+  btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
-  box.calculateLocalInertia(mass, inertia);
+  shape -> calculateLocalInertia(mass, inertia);
 
-  btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, &motionState, shape, inertia);
-  btRigidBody body(rbInfo);
-  env.dynamicsWorld -> addRigidBody(&body);
-}
-void rmRigidBody(physicsEnv& env){
-
+  auto rigidBodyPtr = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia));
+  return rigidBodyPtr;
 }
 
-void deinitPhysics(physicsEnv env){
+btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z){  // @todo obviously this is managed improperly WIP
+  auto rigidBodyPtr = createRigidBody(x, y, z);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  return rigidBodyPtr;
+}
+
+void rmRigidBody(physicsEnv& env, btRigidBody* body){
+  env.dynamicsWorld -> removeRigidBody(body);
+  delete body -> getMotionState();
+  delete body -> getCollisionShape();
+  delete body;
+}
+
+void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not
   std::cout << "INFO: DEINIT: physics system" << std::endl;
-  delete env.colConfig;
-  delete env.dispatcher;
-  delete env.broadphase;
-  delete env.constraintSolver;
   delete env.dynamicsWorld;
+  delete env.constraintSolver;
+  delete env.broadphase;
+  delete env.dispatcher;
+  delete env.colConfig;
 }
