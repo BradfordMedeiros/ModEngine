@@ -18,34 +18,54 @@ physicsEnv initPhysics(){
   return env;
 }
 
-btRigidBody* createRigidBody(float x, float y, float z){
+btRigidBody* createRigidBody(float x, float y, float z, bool isStatic){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(btVector3(x, y, z));   
 
-  btScalar mass(1.0f);
+  btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
   btCollisionShape* shape = new btBoxShape(btVector3(btScalar(10.0f), btScalar(10.0f), btScalar(10.0f)));
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
-  shape -> calculateLocalInertia(mass, inertia);
+  if (!isStatic){
+    shape -> calculateLocalInertia(mass, inertia);
+  }
 
   auto rigidBodyPtr = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia));
   return rigidBodyPtr;
 }
-
-btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z){  // @todo obviously this is managed improperly WIP
-  auto rigidBodyPtr = createRigidBody(x, y, z);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
-  return rigidBodyPtr;
-}
-
-void rmRigidBody(physicsEnv& env, btRigidBody* body){
-  env.dynamicsWorld -> removeRigidBody(body);
+void cleanupRigidBody(btRigidBody* body){
   delete body -> getMotionState();
   delete body -> getCollisionShape();
   delete body;
+}
+
+btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, bool isStatic){  // @todo obviously this is managed improperly WIP
+  auto rigidBodyPtr = createRigidBody(x, y, z, isStatic);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  return rigidBodyPtr;
+}
+void rmRigidBody(physicsEnv& env, btRigidBody* body){
+  env.dynamicsWorld -> removeRigidBody(body);
+  cleanupRigidBody(body);
+}
+
+
+// https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
+// https://stackoverflow.com/questions/12251199/re-positioning-a-rigid-body-in-bullet-physics
+// https://gamedev.stackexchange.com/questions/22319/how-to-disable-y-axis-movement-in-the-bullet-physics-engine
+void stepSimulation(physicsEnv& env, float timestep){
+  env.dynamicsWorld -> stepSimulation(timestep);
+
+  // todo detect collision here
+}
+void printRigidBodyInfo(btRigidBody* body){
+  btTransform transform; 
+  body -> getMotionState() -> getWorldTransform(transform);
+  auto origin = transform.getOrigin();
+  std::cout << "position: (" << origin.getX() << " , " << origin.getY() << " , " << origin.getZ() << " )" << std::endl;
 }
 
 void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not

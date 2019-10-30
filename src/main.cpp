@@ -218,6 +218,13 @@ auto addObjectAndLoadMesh = [](short id, std::string type, std::string field, st
   addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [](std::string meshName) -> void {
     meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
   });
+
+  // hacking in rigid body creation here, source of truth should come from addObject
+  if (type == "default"){
+    std::cout << "---------------------------------------" << std::endl;
+    std::cout << "placeholder add physics rigid body here" << std::endl;
+  }
+
 };
 
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
@@ -353,6 +360,7 @@ int main(int argc, char* argv[]){
    ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("l,listen", "Start server instance (listen)", cxxopts::value<bool>()->default_value("false"))
+   ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
@@ -375,7 +383,6 @@ int main(int argc, char* argv[]){
   if (isServer){
     serverInstance = createServer();;
   }
-
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -509,24 +516,24 @@ int main(int argc, char* argv[]){
 
   std::vector<btRigidBody*> values;
 
-  unsigned int numBodies = 100;
+  unsigned int numBodies = 2;
   for (unsigned int i = 0; i < numBodies; i++){
     std::cout << "ADDING RIGID BODY: i" << i << std::endl;
-    auto rigidPtr = addRigidBody(physicsEnv, 10, 10, 10);
+    auto rigidPtr = addRigidBody(physicsEnv, 10, 10, 10, false);
     values.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
-  for (unsigned int i = 0; i < numBodies; i++){
-    std::cout << "REMOVING RIGID BODY: i" << i << std::endl;
-    auto rigidPtr = values[i];
-    std::cout << "REMOVING PTR: " << rigidPtr << std::endl;
-    rmRigidBody(physicsEnv, rigidPtr);
+
+  for (unsigned int i = 0; i < 10 ; i++){
+    stepSimulation(physicsEnv, 1.0f/ 60.f);;
+    printRigidBodyInfo(values[0]);
+
+  }
+  
+  if (result["skiploop"].as<bool>()){
+    goto cleanup;
   }
 
-
-
-  deinitPhysics(physicsEnv);
-  
   while (!glfwWindowShouldClose(window)){
     frameCount++;
     float now = glfwGetTime();
@@ -596,9 +603,12 @@ int main(int argc, char* argv[]){
 
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
-  cleanupSocket(serverInstance);
-  stopSoundSystem();
-  glfwTerminate(); 
+  
+  cleanup:    
+    deinitPhysics(physicsEnv); 
+    cleanupSocket(serverInstance);
+    stopSoundSystem();
+    glfwTerminate(); 
    
   return 0;
 }
