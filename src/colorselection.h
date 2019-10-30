@@ -3,7 +3,7 @@
 #include <math.h>     
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include "./scene/scene.h"
+#include "./scene/scenegraph.h"
 
 struct Color {
   GLfloat r;

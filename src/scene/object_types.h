@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include <vector>
 #include <variant>
-#include "./scene/common/mesh.h"
-#include "./scene/scene.h"
+#include "./common/mesh.h"
+#include "./scenegraph.h"
 
 struct GameObjectMesh {
   std::string meshName;

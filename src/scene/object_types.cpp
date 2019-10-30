@@ -1,4 +1,3 @@
-#include "./scene/common/mesh.h"
 #include "./object_types.h"
 
 std::map<short, GameObjectObj> getObjectMapping() {

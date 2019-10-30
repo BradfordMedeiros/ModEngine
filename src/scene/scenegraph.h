@@ -1,5 +1,5 @@
-#ifndef MOD_SCENE
-#define MOD_SCENE
+#ifndef MOD_SCENEGRAPH
+#define MOD_SCENEGRAPH
 
 #include <vector>
 #include <map>

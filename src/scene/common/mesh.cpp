@@ -159,5 +159,3 @@ void useTexture(Texture texture){
 void freeTextureData(Texture& texture){
    stbi_image_free(texture.data);
 }
-
-

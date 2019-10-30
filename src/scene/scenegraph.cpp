@@ -1,4 +1,4 @@
-#include "./scene.h"
+#include "./scenegraph.h"
 
 GameObject getGameObject(glm::vec3 position, std::string name, short id){
   GameObject gameObject = {

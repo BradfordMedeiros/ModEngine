@@ -13,7 +13,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "./scene/scene.h"
+#include "./scene/scenegraph.h"
+#include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
 #include "./scene/common/util/loadmodel.h"
 #include "./scene/common/util/boundinfo.h"
@@ -24,7 +25,6 @@
 #include "./translations.h"
 #include "./sound.h"
 #include "./common/util.h"
-#include "./object_types.h"
 #include "./colorselection.h"
 #include "./state.h"
 #include "./input.h"
@@ -264,41 +264,6 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
-void printModelInfo(short index){   // index currently unused
-  auto gameobjectP = std::get_if<GameObjectMesh>(&objectMapping[state.selectedIndex]);
-
-  auto boundboxP = meshes["./res/models/boundingbox/boundingbox.obj"];
-  Mesh targetMesh = gameobjectP->mesh;
-
-  std::cout << "target mesh: " << std::endl;
-  printBoundInfo(targetMesh.boundInfo);
-  
-  std::cout << "bounding info mesh: " << std::endl;
-  printBoundInfo(boundboxP.boundInfo);
-
-  auto bounding = getBoundRatio(targetMesh.boundInfo, boundboxP.boundInfo);
-
-  std::cout << "xRatio: " << bounding.xratio << std::endl; 
-  std::cout << "yRatio: " << bounding.yratio << std::endl;
-  std::cout << "zRatio: " << bounding.zratio << std::endl;
-  std::cout << "xoffset: " << bounding.xoffset << std::endl;
-  std::cout << "yoffset: " << bounding.yoffset << std::endl;
-  std::cout << "zoffset: " << bounding.zoffset << std::endl;
-
-  float newXMin = targetMesh.boundInfo.xMin * bounding.xratio;
-  float newXMax = targetMesh.boundInfo.xMax * bounding.xratio;
-  float newYMin = targetMesh.boundInfo.yMin * bounding.yratio;
-  float newYMax = targetMesh.boundInfo.yMax * bounding.yratio;
-  float newZMin = targetMesh.boundInfo.zMin * bounding.zratio;
-  float newZMax = targetMesh.boundInfo.zMax * bounding.zratio;
-
-  std::cout << "new xmin: " << newXMin << std::endl;
-  std::cout << "new xmax: " << newXMax << std::endl;
-  std::cout << "new ymin: " << newYMin << std::endl;
-  std::cout << "new ymax: " << newYMax << std::endl;
-  std::cout << "new zmin: " << newZMin << std::endl;
-  std::cout << "new zmax: " << newZMax << std::endl;
-}
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
@@ -527,7 +492,6 @@ int main(int argc, char* argv[]){
   for (unsigned int i = 0; i < 10 ; i++){
     stepSimulation(physicsEnv, 1.0f/ 60.f);;
     printRigidBodyInfo(values[0]);
-
   }
   
   if (result["skiploop"].as<bool>()){
@@ -576,7 +540,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, printModelInfo, setObjectDimensions, sendMoveObjectMessage);
+    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage);
 
     glfwPollEvents();
     
@@ -600,7 +564,6 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
-
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   

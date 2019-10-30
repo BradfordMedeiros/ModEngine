@@ -16,7 +16,6 @@ void handleInput(GLFWwindow *window, float deltaTime,
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
 	void (*playSound)(void),
-	void (*printModelInfo)(short),
 	void (*setObjectDimensions)(short index, float width, float height, float depth),
   void sendMoveObjectMessage()
 );

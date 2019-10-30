@@ -2,7 +2,7 @@
 #define MOD_STATE
 
 #include <string>
-#include "./scene/scene.h"
+#include "./scene/scenegraph.h"
 #include "./common/util.h"
 
 
