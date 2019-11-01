@@ -13,6 +13,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "./scene/scene.h"
 #include "./scene/scenegraph.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
@@ -47,7 +48,7 @@ engineState state = getDefaultState(1920, 1080);
 Scene scene;
 std::map<std::string, Mesh> meshes;
 std::map<unsigned int, Mesh> fontMeshes;
-std::map<short, GameObjectObj> objectMapping = getObjectMapping();
+std::map<short, GameObjectObj> objectMapping;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;
@@ -89,7 +90,6 @@ void nextCamera(){
   setActiveCamera(activeCameraId);
   std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
-
 void moveCamera(glm::vec3 offset){
   defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(offset));
 }
@@ -104,9 +104,7 @@ void playSound(){
 }
 void handleSerialization(){
   playSound();
-  std::cout << serializeScene(scene, [](short objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, objectMapping);
-  }) << std::endl; 
+  std::cout << serializeFullScene(scene, objectMapping) << std::endl;
 }
 void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
@@ -115,7 +113,6 @@ void selectItem(){
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
-
 void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = scene.idToGameObjects[state.selectedIndex];
@@ -140,7 +137,6 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 }
-
 void translate(float x, float y, float z){
   auto offset = glm::vec3(x,y,z);
   if (state.moveRelativeEnabled){
@@ -160,8 +156,6 @@ void rotate(float x, float y, float z){
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
-  std::cout << "set object dimensions placeholder" << std::endl;
-
   auto gameObjV = objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
@@ -170,10 +164,8 @@ void setObjectDimensions(short index, float width, float height, float depth){
     scene.idToGameObjects[state.selectedIndex].scale = newScale;
   } 
 }
-
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = scene.idToGameObjects[objectH.id];
-
   glm::mat4 modelMatrix = glm::translate(model, object.position);
   modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
 
@@ -213,24 +205,9 @@ void removeObjectById(short id){
   removeObject(objectMapping, id);
   removeObjectFromScene(scene, id);
 }
-
-auto addObjectAndLoadMesh = [](short id, std::string type, std::string field, std::string payload) -> void {
-  addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [](std::string meshName) -> void {
-    meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
-  });
-
-  // hacking in rigid body creation here, source of truth should come from addObject
-  if (type == "default"){
-    std::cout << "---------------------------------------" << std::endl;
-    std::cout << "placeholder add physics rigid body here" << std::endl;
-  }
-
-};
-
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObjectToScene(scene, name, meshName, glm::vec3(x, y, z), addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
+  // addObjectToScene(scene, name, meshName, glm::vec3(x, y, z), addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
 }
-
 
 std::vector<short> getObjectsByType(std::string type){
   if (type == "mesh"){
@@ -263,7 +240,6 @@ short getGameObjectByName(std::string name){
 void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
-
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
@@ -442,8 +418,11 @@ int main(int argc, char* argv[]){
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  scene = deserializeScene(loadFile("./res/scenes/example.rawscene"), addObjectAndLoadMesh, fields);
-    
+  auto fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
+  scene = fullscene.scene;
+  meshes = fullscene.meshes;
+  objectMapping = fullscene.objectMapping;
+
   schemeBindings  = createStaticSchemeBindings(
     result["scriptpath"].as<std::string>(), 
     moveCamera, 

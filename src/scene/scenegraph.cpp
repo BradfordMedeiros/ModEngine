@@ -25,7 +25,6 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short*
   scene.nameToId[name] = gameobjectObj.id;
 }
 
-
 glm::vec3 parseVec(std::string positionRaw){;
   float x, y, z;
   std::istringstream in(positionRaw);
