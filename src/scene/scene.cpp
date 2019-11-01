@@ -8,15 +8,8 @@ FullScene deserializeFullScene(std::string content){
     addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [&meshes](std::string meshName) -> void {
       meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
     });
-  
-    // hacking in rigid body creation here, source of truth should come from addObject
-    if (type == "default"){
-      std::cout << "---------------------------------------" << std::endl;
-      std::cout << "placeholder add physics rigid body here" << std::endl;
-    }
   };
 
-  std::cout << "deserialize scene placeholder" << std::endl;
   Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields);
   FullScene fullscene = {
     .scene = scene,
