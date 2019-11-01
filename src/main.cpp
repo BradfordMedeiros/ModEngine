@@ -249,33 +249,33 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }  
 }
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
-    glUseProgram(uiShaderProgram);
-    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+  glUseProgram(uiShaderProgram);
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
-    if (!state.isSelectionMode){
-      drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
-    }else if (!state.isRotateSelection){
-      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
+  if (!state.isSelectionMode){
+    drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
+  }else if (!state.isRotateSelection){
+    drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
+  }
+
+  if (showDebugInfo){
+    drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+    std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
+    std::string axisText = state.axis == 0 ? "xz" : "xy";
+    drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
+
+    std::string manipulatorAxisString;
+    if (state.manipulatorAxis == XAXIS){
+      manipulatorAxisString = "xaxis";
+    }else if (state.manipulatorAxis == YAXIS){
+      manipulatorAxisString = "yaxis";
+    }else if (state.manipulatorAxis == ZAXIS){
+      manipulatorAxisString = "zaxis";
+    }else{
+      manipulatorAxisString = "noaxis";
     }
-
-    if (showDebugInfo){
-      drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
-      std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
-      std::string axisText = state.axis == 0 ? "xz" : "xy";
-      drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
-
-      std::string manipulatorAxisString;
-      if (state.manipulatorAxis == XAXIS){
-        manipulatorAxisString = "xaxis";
-      }else if (state.manipulatorAxis == YAXIS){
-        manipulatorAxisString = "yaxis";
-      }else if (state.manipulatorAxis == ZAXIS){
-        manipulatorAxisString = "zaxis";
-      }else{
-        manipulatorAxisString = "noaxis";
-      }
-      drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
-    }
+    drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
+  }
 }
 
 void onData(std::string data){
