@@ -17,7 +17,8 @@ void handleInput(GLFWwindow *window, float deltaTime,
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
 	void (*playSound)(void),
 	void (*setObjectDimensions)(short index, float width, float height, float depth),
-  void sendMoveObjectMessage()
+        void sendMoveObjectMessage(),
+        void (*makeObject)(std::string name, std::string meshName, float x, float y, float z)
 );
 
 #endif

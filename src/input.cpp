@@ -60,8 +60,12 @@ void handleInput(GLFWwindow *window, float deltaTime,
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
   void (*playSound)(void),
   void (*setObjectDimensions)(short index, float width, float height, float depth),
-  void sendMoveObjectMessage()
+  void sendMoveObjectMessage(),
+  void (*makeObject)(std::string name, std::string meshName, float x, float y, float z)
 ){
+  if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+     makeObject("testobject", "./res/models/cone/cone.obj", 0, 10, 0);
+  }
   if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
     sendMoveObjectMessage();
   }

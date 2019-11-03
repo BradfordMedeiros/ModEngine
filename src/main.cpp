@@ -204,7 +204,7 @@ void removeObjectById(short id){
   removeObjectFromScene(fullscene.scene, id);
 }
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  // addObjectToScene(scene, name, meshName, glm::vec3(x, y, z), addObjectAndLoadMesh); // todo addObjectAndLoad mesh should be part of scene
+  addObjectToFullScene(fullscene, name, meshName, glm::vec3(x,y,z));
 }
 
 std::vector<short> getObjectsByType(std::string type){
@@ -514,7 +514,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage);
+    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
 
     glfwPollEvents();
     
