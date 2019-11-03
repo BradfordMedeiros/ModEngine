@@ -15,7 +15,7 @@ struct physicsEnv {
 
 physicsEnv initPhysics();
 void deinitPhysics(physicsEnv env);
-void stepSimulation(physicsEnv& env, float timestep);
+void stepPhysicsSimulation(physicsEnv& env, float timestep);
 btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, bool isStatic);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 void addColCol();

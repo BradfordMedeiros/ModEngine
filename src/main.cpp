@@ -284,6 +284,16 @@ void onData(std::string data){
 void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
+void printPhysicsInfo(PhysicsInfo physicsInfo){
+  BoundInfo info = physicsInfo.boundInfo;
+  std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
+  std::cout << "y: [ " << info.yMin << ", " << info.yMax << "]" << std::endl;
+  std::cout << "z: [ " << info.zMin << ", " << info.zMax << "]" << std::endl;
+  std::cout << "pos: (" << physicsInfo.gameobject.position.x << ", " << physicsInfo.gameobject.position.y << ", " << physicsInfo.gameobject.position.z << ")" << std::endl;
+}
+void dumpPhysicsInfo(){
+  std::cout << "DUMP: dumping physics info placeholder" << std::endl;
+}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -299,10 +309,12 @@ int main(int argc, char* argv[]){
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("l,listen", "Start server instance (listen)", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
+   ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
   const auto result = cxxoption.parse(argc, argv);
+  bool dumpPhysics = result["dumpphysics"].as<bool>();
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
     return 0;
@@ -452,43 +464,15 @@ int main(int argc, char* argv[]){
 
   auto physicsEnv = initPhysics();
 
+  std::vector<btRigidBody*> rigidbodies;
   for (auto const& [id, _] : fullscene.scene.idToGameObjects){
-    //std::cout << "info: physics: add rigid body" << std::endl; 
-    //std::cout << gameobj.position.x << "," << gameobj.position.y << "," <<gameobj.position.z << std::endl;
-    //std::cout << gameobj.scale.x << "," << gameobj.scale.y << "," <<gameobj.scale.z << std::endl;
-    // and rotation will be a tricker one maybe
-
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
-    BoundInfo info = physicsInfo.info;
-
-    std::cout << "boundinfo\n--------------------" << std::endl;
-    std::cout << "xMin: " << info.xMin << std::endl;
-    std::cout << "xMax: " << info.xMax << std::endl;
-    std::cout << "yMin: " << info.yMin << std::endl;
-    std::cout << "yMax: " << info.yMax << std::endl;
-    std::cout << "zMin: " << info.zMin << std::endl;
-    std::cout << "zMax: " << info.zMax << std::endl;
-
-
-
-    break;
-  }
-
-  /*std::vector<btRigidBody*> values;
-
-  unsigned int numBodies = 2;
-  for (unsigned int i = 0; i < numBodies; i++){
-    std::cout << "ADDING RIGID BODY: i" << i << std::endl;
-    auto rigidPtr = addRigidBody(physicsEnv, 10, 10, 10, false);
-    values.push_back(rigidPtr);
+    printPhysicsInfo(physicsInfo);
+    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, false);
+    rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
 
-  for (unsigned int i = 0; i < 10 ; i++){
-    stepSimulation(physicsEnv, 1.0f/ 60.f);;
-    printRigidBodyInfo(values[0]);
-  }*/
-  
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -536,6 +520,10 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
     handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
+    stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
+    if (dumpPhysics){
+      dumpPhysicsInfo();
+    }
 
     glfwPollEvents();
     

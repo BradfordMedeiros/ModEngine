@@ -56,7 +56,7 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
 // https://stackoverflow.com/questions/12251199/re-positioning-a-rigid-body-in-bullet-physics
 // https://gamedev.stackexchange.com/questions/22319/how-to-disable-y-axis-movement-in-the-bullet-physics-engine
-void stepSimulation(physicsEnv& env, float timestep){
+void stepPhysicsSimulation(physicsEnv& env, float timestep){
   env.dynamicsWorld -> stepSimulation(timestep);
 
   // todo detect collision here
