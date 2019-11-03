@@ -13,9 +13,15 @@ struct FullScene {
   std::map<short, GameObjectObj> objectMapping;
 };
 
+struct PhysicsInfo {
+  BoundInfo boundInfo;
+  GameObject gameobject;
+};
+
 FullScene deserializeFullScene(std::string content);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 void addObjectToFullScene(FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
+PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index);
 
 #endif
 

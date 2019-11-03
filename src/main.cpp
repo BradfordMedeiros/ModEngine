@@ -285,7 +285,6 @@ void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
 
-
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -453,7 +452,29 @@ int main(int argc, char* argv[]){
 
   auto physicsEnv = initPhysics();
 
-  std::vector<btRigidBody*> values;
+  for (auto const& [id, _] : fullscene.scene.idToGameObjects){
+    //std::cout << "info: physics: add rigid body" << std::endl; 
+    //std::cout << gameobj.position.x << "," << gameobj.position.y << "," <<gameobj.position.z << std::endl;
+    //std::cout << gameobj.scale.x << "," << gameobj.scale.y << "," <<gameobj.scale.z << std::endl;
+    // and rotation will be a tricker one maybe
+
+    auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
+    BoundInfo info = physicsInfo.info;
+
+    std::cout << "boundinfo\n--------------------" << std::endl;
+    std::cout << "xMin: " << info.xMin << std::endl;
+    std::cout << "xMax: " << info.xMax << std::endl;
+    std::cout << "yMin: " << info.yMin << std::endl;
+    std::cout << "yMax: " << info.yMax << std::endl;
+    std::cout << "zMin: " << info.zMin << std::endl;
+    std::cout << "zMax: " << info.zMax << std::endl;
+
+
+
+    break;
+  }
+
+  /*std::vector<btRigidBody*> values;
 
   unsigned int numBodies = 2;
   for (unsigned int i = 0; i < numBodies; i++){
@@ -466,7 +487,7 @@ int main(int argc, char* argv[]){
   for (unsigned int i = 0; i < 10 ; i++){
     stepSimulation(physicsEnv, 1.0f/ 60.f);;
     printRigidBodyInfo(values[0]);
-  }
+  }*/
   
   if (result["skiploop"].as<bool>()){
     goto cleanup;

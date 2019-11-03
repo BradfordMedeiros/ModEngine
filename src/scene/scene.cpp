@@ -32,3 +32,24 @@ void addObjectToFullScene(FullScene& fullscene, std::string name, std::string me
     });
   });
 }
+
+
+PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
+  GameObject obj = fullscene.scene.idToGameObjects[index];
+
+  BoundInfo boundInfo = {
+    .xMin = -1, 
+    .xMax = 1,
+    .yMin = -1, 
+    .yMax = 1,
+    .zMin = -1,
+    .zMax = 1,
+  };
+
+  PhysicsInfo info = {
+    .boundInfo = boundInfo,
+    .gameobject = obj,
+  };
+
+  return info;
+}
