@@ -286,7 +286,7 @@ void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
 void printVec3(std::string prefix, btVector3 vec){
-  std::cout << prefix << vec.getX() << ", " << vec.getY() << ", " << vec.getZ() << std::endl;
+  std::cout << prefix << vec.getX() << "," << vec.getY() << "," << vec.getZ() << std::endl;
 }
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
@@ -296,10 +296,8 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "pos: (" << physicsInfo.gameobject.position.x << ", " << physicsInfo.gameobject.position.y << ", " << physicsInfo.gameobject.position.z << ")" << std::endl;
 }
 void dumpPhysicsInfo(){
-  std::cout << "DUMP: dumping physics info placeholder" << std::endl;
-
   for (unsigned int i = 0; i < rigidbodies.size(); i++){
-    printVec3("PHYSICS: " + std::to_string(i) + " : ", getPosition(rigidbodies[i]));
+    printVec3("PHYSICS:" + std::to_string(i) + ":", getPosition(rigidbodies[i]));
   }
 }
 
