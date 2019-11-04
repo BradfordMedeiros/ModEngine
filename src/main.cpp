@@ -47,6 +47,7 @@ bool showDebugInfo = false;
 engineState state = getDefaultState(1920, 1080);
 FullScene fullscene;
 std::map<unsigned int, Mesh> fontMeshes;
+std::vector<btRigidBody*> rigidbodies;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;
@@ -284,6 +285,9 @@ void onData(std::string data){
 void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
+void printVec3(std::string prefix, btVector3 vec){
+  std::cout << prefix << vec.getX() << ", " << vec.getY() << ", " << vec.getZ() << std::endl;
+}
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
@@ -293,6 +297,10 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
 }
 void dumpPhysicsInfo(){
   std::cout << "DUMP: dumping physics info placeholder" << std::endl;
+
+  for (unsigned int i = 0; i < rigidbodies.size(); i++){
+    printVec3("PHYSICS: " + std::to_string(i) + " : ", getPosition(rigidbodies[i]));
+  }
 }
 
 int main(int argc, char* argv[]){
@@ -464,7 +472,6 @@ int main(int argc, char* argv[]){
 
   auto physicsEnv = initPhysics();
 
-  std::vector<btRigidBody*> rigidbodies;
   for (auto const& [id, _] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
@@ -520,10 +527,10 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
     handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
-    stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
     if (dumpPhysics){
       dumpPhysicsInfo();
     }
+    stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
 
     glfwPollEvents();
     

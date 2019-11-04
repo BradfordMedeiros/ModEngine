@@ -51,7 +51,12 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.dynamicsWorld -> removeRigidBody(body);
   cleanupRigidBody(body);
 }
-
+btVector3 getPosition(btRigidBody* body){
+  btTransform transform; 
+  body -> getMotionState() -> getWorldTransform(transform);
+  auto origin = transform.getOrigin();
+  return origin;
+}
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
 // https://stackoverflow.com/questions/12251199/re-positioning-a-rigid-body-in-bullet-physics
@@ -62,9 +67,7 @@ void stepPhysicsSimulation(physicsEnv& env, float timestep){
   // todo detect collision here
 }
 void printRigidBodyInfo(btRigidBody* body){
-  btTransform transform; 
-  body -> getMotionState() -> getWorldTransform(transform);
-  auto origin = transform.getOrigin();
+  btVector3 origin = getPosition(body);
   std::cout << "position: (" << origin.getX() << " , " << origin.getY() << " , " << origin.getZ() << " )" << std::endl;
 }
 

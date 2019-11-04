@@ -18,6 +18,8 @@ void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, bool isStatic);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
+btVector3 getPosition(btRigidBody* rigidbody);
+
 void addColCol();
 void rmColVol();
 
