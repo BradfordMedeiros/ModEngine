@@ -300,6 +300,22 @@ void dumpPhysicsInfo(){
     printVec3("PHYSICS:" + std::to_string(i) + ":", getPosition(rigidbodies[i]));
   }
 }
+void updatePhysicsPositions(std::vector<btRigidBody*>& rigidbodies, FullScene& fullscene){
+  for (unsigned int i = 0; i < rigidbodies.size(); i++){
+    btVector3 pos = getPosition(rigidbodies[i]);
+    fullscene.scene.idToGameObjects[i].position = glm::vec3(pos.getX(), pos.getY(), pos.getZ());
+  }
+}
+void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
+  for (auto const& [id, _] : fullscene.scene.idToGameObjects){
+    auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
+    printPhysicsInfo(physicsInfo);
+    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, false);
+    rigidbodies.push_back(rigidPtr);
+    std::cout << "ADDING PTR: " << rigidPtr << std::endl;
+  }
+}
+
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -469,14 +485,7 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: render loop starting" << std::endl;
 
   auto physicsEnv = initPhysics();
-
-  for (auto const& [id, _] : fullscene.scene.idToGameObjects){
-    auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
-    printPhysicsInfo(physicsInfo);
-    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, false);
-    rigidbodies.push_back(rigidPtr);
-    std::cout << "ADDING PTR: " << rigidPtr << std::endl;
-  }
+  addPhysicsBodies(physicsEnv, fullscene);
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -525,10 +534,12 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
     handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
+    
     if (dumpPhysics){
       dumpPhysicsInfo();
     }
     stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
+    updatePhysicsPositions(rigidbodies, fullscene);
 
     glfwPollEvents();
     
