@@ -13,6 +13,7 @@
 #include <vector>
 #include <arpa/inet.h>
 
+// Server
 struct modsocket {
 	sockaddr_in socketin;
 	int socketFd;
@@ -24,14 +25,7 @@ modsocket createServer();
 void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string));
 void cleanupSocket(modsocket socketInfo);
 
-struct modclient {
-
-};
-
-void createClient();
-void sendMessage(modclient clientInfo, char* networkBuffer);
+// Client 
 void sendMessage(char* networkBuffer);
-void cleanupClient();
-
 
 #endif 
