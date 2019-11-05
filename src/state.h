@@ -5,7 +5,6 @@
 #include "./scene/scenegraph.h"
 #include "./common/util.h"
 
-
 struct engineState {
   bool visualizeNormals;
   bool showCameras;
@@ -23,7 +22,6 @@ struct engineState {
   short selectedIndex;
   unsigned int activeCamera;
   std::string additionalText;
-
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
   ManipulatorAxis manipulatorAxis;

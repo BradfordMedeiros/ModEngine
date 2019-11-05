@@ -310,7 +310,7 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
   for (auto const& [id, _] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
-    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 2, 2, 2, false);
+    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 2, 2, 2, id == 1);
     rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
