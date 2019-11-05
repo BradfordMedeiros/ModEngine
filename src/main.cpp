@@ -310,7 +310,7 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
   for (auto const& [id, _] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
-    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, false);
+    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 2, 2, 2, false);
     rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
@@ -332,6 +332,7 @@ int main(int argc, char* argv[]){
    ("l,listen", "Start server instance (listen)", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
+   ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
@@ -341,6 +342,7 @@ int main(int argc, char* argv[]){
     std::cout << cxxoption.help() << std::endl;
     return 0;
   }
+  bool enablePhysics = result["physics"].as<bool>();
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   const std::string texturePath = result["texture"].as<std::string>();
@@ -538,8 +540,10 @@ int main(int argc, char* argv[]){
     if (dumpPhysics){
       dumpPhysicsInfo();
     }
-    stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
-    updatePhysicsPositions(rigidbodies, fullscene);
+    if (enablePhysics){
+      stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
+      updatePhysicsPositions(rigidbodies, fullscene);      
+    }
 
     glfwPollEvents();
     

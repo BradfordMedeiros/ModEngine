@@ -16,7 +16,7 @@ struct physicsEnv {
 physicsEnv initPhysics();
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
-btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, bool isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, bool isStatic);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 btVector3 getPosition(btRigidBody* rigidbody);
 

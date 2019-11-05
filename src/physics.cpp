@@ -18,14 +18,14 @@ physicsEnv initPhysics(){
   return env;
 }
 
-btRigidBody* createRigidBody(float x, float y, float z, bool isStatic){
+btRigidBody* createRigidBody(float x, float y, float z, float width, float height, float depth, bool isStatic){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(btVector3(x, y, z));   
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
-  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(10.0f), btScalar(10.0f), btScalar(10.0f)));
+  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width), btScalar(height), btScalar(depth)));
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
@@ -42,8 +42,8 @@ void cleanupRigidBody(btRigidBody* body){
   delete body;
 }
 
-btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, bool isStatic){  // @todo obviously this is managed improperly WIP
-  auto rigidBodyPtr = createRigidBody(x, y, z, isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, bool isStatic){  
+  auto rigidBodyPtr = createRigidBody(x, y, z, width, height, depth, isStatic);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
