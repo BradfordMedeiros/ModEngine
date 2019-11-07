@@ -25,7 +25,7 @@ btRigidBody* createRigidBody(float x, float y, float z, float width, float heigh
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
-  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width), btScalar(height), btScalar(depth)));
+  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width / 2 ), btScalar(height / 2), btScalar(depth / 2)));
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);

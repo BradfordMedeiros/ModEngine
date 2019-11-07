@@ -294,6 +294,7 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "y: [ " << info.yMin << ", " << info.yMax << "]" << std::endl;
   std::cout << "z: [ " << info.zMin << ", " << info.zMax << "]" << std::endl;
   std::cout << "pos: (" << physicsInfo.gameobject.position.x << ", " << physicsInfo.gameobject.position.y << ", " << physicsInfo.gameobject.position.z << ")" << std::endl;
+  std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
 }
 void dumpPhysicsInfo(){
   for (unsigned int i = 0; i < rigidbodies.size(); i++){
@@ -310,7 +311,14 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
   for (auto const& [id, _] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
-    auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 2, 2, 2, id == 1);
+
+    auto rigidPtr = addRigidBody(
+      physicsEnv, 
+      physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 
+      physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
+      id == 1
+    );
+
     rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }

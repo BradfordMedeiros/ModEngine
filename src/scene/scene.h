@@ -16,6 +16,7 @@ struct FullScene {
 struct PhysicsInfo {
   BoundInfo boundInfo;
   GameObject gameobject;
+  glm::vec3 collisionInfo;
 };
 
 FullScene deserializeFullScene(std::string content);

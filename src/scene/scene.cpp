@@ -33,9 +33,16 @@ void addObjectToFullScene(FullScene& fullscene, std::string name, std::string me
   });
 }
 
+glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
+  float x = scale.x * (boundInfo.xMax - boundInfo.xMin);
+  float y = scale.y * (boundInfo.yMax - boundInfo.yMin);
+  float z = scale.z * (boundInfo.zMax - boundInfo.zMin);
+  return glm::vec3(x, y, z);
+}
 
 PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
   GameObject obj = fullscene.scene.idToGameObjects[index];
+  auto gameObjV = fullscene.objectMapping[index]; 
 
   BoundInfo boundInfo = {
     .xMin = -1, 
@@ -46,9 +53,16 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
     .zMax = 1,
   };
 
+  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+
+  if (meshObj != NULL){
+    boundInfo = meshObj->mesh.boundInfo;
+  }
+
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .gameobject = obj,
+    .collisionInfo =  getScaledCollisionBounds(boundInfo, obj.scale),
   };
 
   return info;
