@@ -45,6 +45,8 @@ void cleanupRigidBody(btRigidBody* body){
 btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, bool isStatic){  
   auto rigidBodyPtr = createRigidBody(x, y, z, width, height, depth, isStatic);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  rigidBodyPtr -> setGravity(btVector3(0, -1, 0));
+
   return rigidBodyPtr;
 }
 void rmRigidBody(physicsEnv& env, btRigidBody* body){
@@ -56,6 +58,14 @@ btVector3 getPosition(btRigidBody* body){
   body -> getMotionState() -> getWorldTransform(transform);
   auto origin = transform.getOrigin();
   return origin;
+}
+void setPosition(btRigidBody* rigid, float x, float y, float z){
+  std::cout << "SETTING PHYSICS position: " << x << " , " << y << " , " << z << std::endl;
+  btTransform transform; 
+  rigid -> getMotionState() -> getWorldTransform(transform);
+  transform.setOrigin(btVector3(x, y, z));
+  rigid -> getMotionState() -> setWorldTransform(transform);
+
 }
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example

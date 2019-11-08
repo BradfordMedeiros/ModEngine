@@ -67,3 +67,17 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
 
   return info;
 }
+
+void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index){
+  auto offset = glm::vec3(x,y,z);
+
+  glm::vec3 newPosition;
+  if (moveRelativeEnabled){
+    auto oldGameObject = fullscene.scene.idToGameObjects[index];
+    newPosition= moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
+  }else{
+    newPosition = move(fullscene.scene.idToGameObjects[index].position, offset);   
+  }
+  fullscene.scene.idToGameObjects[index].position = newPosition;
+  setPosition(body, newPosition.x, newPosition.y, newPosition.z);
+}

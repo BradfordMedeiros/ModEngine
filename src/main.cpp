@@ -14,6 +14,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "./scene/scene.h"
+#include "./scene/physics.h"
 #include "./scene/scenegraph.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
@@ -30,7 +31,6 @@
 #include "./state.h"
 #include "./input.h"
 #include "./network.h"
-#include "./physics.h"
 
 const bool SHELL_ENABLED = false;
 
@@ -137,13 +137,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 }
 void translate(float x, float y, float z){
-  auto offset = glm::vec3(x,y,z);
-  if (state.moveRelativeEnabled){
-    auto oldGameObject = fullscene.scene.idToGameObjects[state.selectedIndex];
-    fullscene.scene.idToGameObjects[state.selectedIndex].position = moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
-  }else{
-    fullscene.scene.idToGameObjects[state.selectedIndex].position = move(fullscene.scene.idToGameObjects[state.selectedIndex].position, offset);   
-  }
+  physicsTranslate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
   fullscene.scene.idToGameObjects[state.selectedIndex].scale.x+= x;
