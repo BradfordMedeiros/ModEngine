@@ -8,6 +8,8 @@ physicsEnv initPhysics(){
   auto constraintSolver = new btSequentialImpulseConstraintSolver();
   auto dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, colConfig);
 
+  dynamicsWorld -> setGravity(btVector3(0.f, 9.f, 0.f));
+
   physicsEnv env = {
     .colConfig = colConfig,
     .dispatcher = dispatcher,
@@ -41,6 +43,7 @@ btRigidBody* createRigidBody(float x, float y, float z, float width, float heigh
     body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
     body -> setActivationState(DISABLE_DEACTIVATION);
   }
+
   return body;
 }
 void cleanupRigidBody(btRigidBody* body){
