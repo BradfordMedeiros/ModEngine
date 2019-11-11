@@ -33,10 +33,15 @@ btRigidBody* createRigidBody(float x, float y, float z, float width, float heigh
     shape -> calculateLocalInertia(mass, inertia);
   }
 
-  auto rigidBodyPtr = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia));
+  auto constructionInfo = btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
+  constructionInfo.m_friction = 0.f;
 
-  
-  return rigidBodyPtr;
+  auto body  = new btRigidBody(constructionInfo);
+  if (isStatic){
+    body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+    body -> setActivationState(DISABLE_DEACTIVATION);
+  }
+  return body;
 }
 void cleanupRigidBody(btRigidBody* body){
   delete body -> getMotionState();
@@ -60,13 +65,12 @@ btVector3 getPosition(btRigidBody* body){
   return origin;
 }
 void setPosition(btRigidBody* rigid, float x, float y, float z){
-  std::cout << "SETTING PHYSICS position: " << x << " , " << y << " , " << z << std::endl;
   btTransform transform; 
   rigid -> getMotionState() -> getWorldTransform(transform);
-  //transform.setIdentity();
-  transform.setOrigin(btVector3(x, y - 20, z));
-  rigid -> setWorldTransform(transform);
 
+  transform.setOrigin(btVector3(x, y, z));
+  rigid -> getMotionState() -> setWorldTransform(transform);
+  rigid -> setWorldTransform(transform);
 }
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
