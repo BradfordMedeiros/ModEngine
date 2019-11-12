@@ -145,7 +145,7 @@ void scale(float x, float y, float z){
   fullscene.scene.idToGameObjects[state.selectedIndex].scale.z+=z;
 }
 void rotate(float x, float y, float z){
-  fullscene.scene.idToGameObjects[state.selectedIndex].rotation  = setFrontDelta(fullscene.scene.idToGameObjects[state.selectedIndex].rotation, x, y, z, 5);
+  physicsRotate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
@@ -279,8 +279,8 @@ void onData(std::string data){
 void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
-void printVec3(std::string prefix, btVector3 vec){
-  std::cout << prefix << vec.getX() << "," << vec.getY() << "," << vec.getZ() << std::endl;
+void printVec3(std::string prefix, glm::vec3 vec){
+  std::cout << prefix << vec.x << "," << vec.y << "," << vec.z << std::endl;
 }
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
@@ -297,8 +297,8 @@ void dumpPhysicsInfo(){
 }
 void updatePhysicsPositions(std::vector<btRigidBody*>& rigidbodies, FullScene& fullscene){
   for (unsigned int i = 0; i < rigidbodies.size(); i++){
-    btVector3 pos = getPosition(rigidbodies[i]);
-    fullscene.scene.idToGameObjects[i].position = glm::vec3(pos.getX(), pos.getY(), pos.getZ());
+    fullscene.scene.idToGameObjects[i].position = getPosition(rigidbodies[i]);
+    fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
   }
 }
 void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
@@ -310,6 +310,7 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
       physicsEnv, 
       physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 
       physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
+      physicsInfo.gameobject.rotation,
       id == 1
     );
 

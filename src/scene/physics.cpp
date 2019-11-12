@@ -20,10 +20,11 @@ physicsEnv initPhysics(){
   return env;
 }
 
-btRigidBody* createRigidBody(float x, float y, float z, float width, float height, float depth, bool isStatic){
+btRigidBody* createRigidBody(float x, float y, float z, float width, float height, float depth, glm::quat rot, bool isStatic){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(btVector3(x, y, z));   
+  transform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
@@ -36,7 +37,7 @@ btRigidBody* createRigidBody(float x, float y, float z, float width, float heigh
   }
 
   auto constructionInfo = btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
-  constructionInfo.m_friction = 0.f;
+  constructionInfo.m_friction = 1.0f;
 
   auto body  = new btRigidBody(constructionInfo);
   if (isStatic){
@@ -52,8 +53,8 @@ void cleanupRigidBody(btRigidBody* body){
   delete body;
 }
 
-btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, bool isStatic){  
-  auto rigidBodyPtr = createRigidBody(x, y, z, width, height, depth, isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, glm::quat rotation, bool isStatic){  
+  auto rigidBodyPtr = createRigidBody(x, y, z, width, height, depth, rotation, isStatic);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
@@ -61,19 +62,27 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.dynamicsWorld -> removeRigidBody(body);
   cleanupRigidBody(body);
 }
-btVector3 getPosition(btRigidBody* body){
+glm::vec3 getPosition(btRigidBody* body){
   btTransform transform; 
   body -> getMotionState() -> getWorldTransform(transform);
-  auto origin = transform.getOrigin();
-  return origin;
+  auto pos = transform.getOrigin();
+  return glm::vec3(pos.getX(), pos.getY(), pos.getZ());
 }
 void setPosition(btRigidBody* rigid, float x, float y, float z){
   btTransform transform; 
   rigid -> getMotionState() -> getWorldTransform(transform);
-
   transform.setOrigin(btVector3(x, y, z));
   rigid -> getMotionState() -> setWorldTransform(transform);
   rigid -> setWorldTransform(transform);
+}
+glm::quat getRotation(btRigidBody* body){
+  btTransform transform;
+  body -> getMotionState() -> getWorldTransform(transform);
+  auto rotation = transform.getRotation();
+  return glm::quat(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
+}
+void setRotation(btRigidBody* body, glm::quat rotation){
+
 }
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
@@ -85,8 +94,8 @@ void stepPhysicsSimulation(physicsEnv& env, float timestep){
   // todo detect collision here
 }
 void printRigidBodyInfo(btRigidBody* body){
-  btVector3 origin = getPosition(body);
-  std::cout << "position: (" << origin.getX() << " , " << origin.getY() << " , " << origin.getZ() << " )" << std::endl;
+  glm::vec3 origin = getPosition(body);
+  std::cout << "position: (" << origin.x << " , " << origin.y << " , " << origin.z << " )" << std::endl;
 }
 
 void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not

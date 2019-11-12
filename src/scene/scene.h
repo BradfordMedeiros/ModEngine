@@ -26,6 +26,7 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
 void addObjectToFullScene(FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
 PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index);
 void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
+void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index);
 
 #endif
 
