@@ -1,5 +1,18 @@
 #include "./physics.h"
 
+glm::vec3 btToGlm(btVector3 pos){
+  return glm::vec3(pos.getX(), pos.getY(), pos.getZ());
+}
+btVector3 glmToBt(glm::vec3 pos){
+  return btVector3(pos.x, pos.y, pos.z);
+}
+glm::quat btToGlm(btQuaternion rotation){
+  return glm::quat(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
+}
+btQuaternion glmToBt(glm::quat rotation){
+  return btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+}
+
 physicsEnv initPhysics(){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
@@ -20,11 +33,11 @@ physicsEnv initPhysics(){
   return env;
 }
 
-btRigidBody* createRigidBody(float x, float y, float z, float width, float height, float depth, glm::quat rot, bool isStatic){
+btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic){
   btTransform transform;
   transform.setIdentity();
-  transform.setOrigin(btVector3(x, y, z));   
-  transform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
+  transform.setOrigin(glmToBt(pos));   
+  transform.setRotation(glmToBt(rot));
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
@@ -53,8 +66,8 @@ void cleanupRigidBody(btRigidBody* body){
   delete body;
 }
 
-btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, glm::quat rotation, bool isStatic){  
-  auto rigidBodyPtr = createRigidBody(x, y, z, width, height, depth, rotation, isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic){  
+  auto rigidBodyPtr = createRigidBody(pos, width, height, depth, rotation, isStatic);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
@@ -66,12 +79,12 @@ glm::vec3 getPosition(btRigidBody* body){
   btTransform transform; 
   body -> getMotionState() -> getWorldTransform(transform);
   auto pos = transform.getOrigin();
-  return glm::vec3(pos.getX(), pos.getY(), pos.getZ());
+  return btToGlm(pos);
 }
-void setPosition(btRigidBody* rigid, float x, float y, float z){
+void setPosition(btRigidBody* rigid, glm::vec3 pos){
   btTransform transform; 
   rigid -> getMotionState() -> getWorldTransform(transform);
-  transform.setOrigin(btVector3(x, y, z));
+  transform.setOrigin(glmToBt(pos));
   rigid -> getMotionState() -> setWorldTransform(transform);
   rigid -> setWorldTransform(transform);
 }
@@ -79,12 +92,12 @@ glm::quat getRotation(btRigidBody* body){
   btTransform transform;
   body -> getMotionState() -> getWorldTransform(transform);
   auto rotation = transform.getRotation();
-  return glm::quat(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
+  return btToGlm(rotation);
 }
 void setRotation(btRigidBody* body, glm::quat rotation){
   btTransform transform; 
   body -> getMotionState() -> getWorldTransform(transform);
-  transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+  transform.setRotation(glmToBt(rotation));
   body -> getMotionState() -> setWorldTransform(transform);
   body -> setWorldTransform(transform);
 }
@@ -94,8 +107,6 @@ void setRotation(btRigidBody* body, glm::quat rotation){
 // https://gamedev.stackexchange.com/questions/22319/how-to-disable-y-axis-movement-in-the-bullet-physics-engine
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
   env.dynamicsWorld -> stepSimulation(timestep);
-
-  // todo detect collision here
 }
 void printRigidBodyInfo(btRigidBody* body){
   glm::vec3 origin = getPosition(body);

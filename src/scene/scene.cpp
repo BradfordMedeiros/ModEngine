@@ -79,12 +79,12 @@ void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y,
   }else{
     newPosition = move(fullscene.scene.idToGameObjects[index].position, offset);   
   }
-  fullscene.scene.idToGameObjects[index].position = newPosition;
-  setPosition(body, newPosition.x, newPosition.y, newPosition.z);
+  //fullscene.scene.idToGameObjects[index].position = newPosition;
+  setPosition(body, newPosition);
 }
 
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index){
   glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 15);
-  fullscene.scene.idToGameObjects[index].rotation  = rotation;
+  //fullscene.scene.idToGameObjects[index].rotation  = rotation;
   setRotation(body, rotation);
 }

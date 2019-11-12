@@ -297,8 +297,8 @@ void dumpPhysicsInfo(){
 }
 void updatePhysicsPositions(std::vector<btRigidBody*>& rigidbodies, FullScene& fullscene){
   for (unsigned int i = 0; i < rigidbodies.size(); i++){
+    fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
     fullscene.scene.idToGameObjects[i].position = getPosition(rigidbodies[i]);
-    //fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
   }
 }
 void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
@@ -308,7 +308,7 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
 
     auto rigidPtr = addRigidBody(
       physicsEnv, 
-      physicsInfo.gameobject.position.x, physicsInfo.gameobject.position.y, physicsInfo.gameobject.position.z, 
+      physicsInfo.gameobject.position,
       physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
       physicsInfo.gameobject.rotation,
       id == 1

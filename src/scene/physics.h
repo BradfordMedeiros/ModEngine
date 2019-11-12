@@ -17,9 +17,9 @@ struct physicsEnv {
 physicsEnv initPhysics();
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
-btRigidBody* addRigidBody(physicsEnv& env, float x, float y, float z, float width, float height, float depth, glm::quat rotation, bool isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
-void setPosition(btRigidBody* body, float x, float y, float z);
+void setPosition(btRigidBody* body, glm::vec3);
 glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
