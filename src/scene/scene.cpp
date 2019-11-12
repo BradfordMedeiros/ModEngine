@@ -84,7 +84,7 @@ void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y,
 }
 
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index){
-  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 15);
+  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 5);
   fullscene.scene.idToGameObjects[index].rotation  = rotation;
   setRotation(body, rotation);
 }
