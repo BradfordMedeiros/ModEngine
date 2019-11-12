@@ -82,7 +82,11 @@ glm::quat getRotation(btRigidBody* body){
   return glm::quat(rotation.getX(), rotation.getY(), rotation.getZ(), rotation.getW());
 }
 void setRotation(btRigidBody* body, glm::quat rotation){
-
+  btTransform transform; 
+  body -> getMotionState() -> getWorldTransform(transform);
+  transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+  body -> getMotionState() -> setWorldTransform(transform);
+  body -> setWorldTransform(transform);
 }
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example

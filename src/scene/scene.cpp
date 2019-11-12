@@ -69,7 +69,8 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
 }
 
 void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index){
-  auto offset = glm::vec3(x,y,z);
+  const int SPEED = 5;
+  auto offset = glm::vec3(x * SPEED, y * SPEED, z * SPEED);
 
   glm::vec3 newPosition;
   if (moveRelativeEnabled){
@@ -83,7 +84,7 @@ void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y,
 }
 
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index){
-  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 5);
+  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 15);
   fullscene.scene.idToGameObjects[index].rotation  = rotation;
   setRotation(body, rotation);
 }

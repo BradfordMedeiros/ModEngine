@@ -298,7 +298,7 @@ void dumpPhysicsInfo(){
 void updatePhysicsPositions(std::vector<btRigidBody*>& rigidbodies, FullScene& fullscene){
   for (unsigned int i = 0; i < rigidbodies.size(); i++){
     fullscene.scene.idToGameObjects[i].position = getPosition(rigidbodies[i]);
-    fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
+    //fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
   }
 }
 void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
