@@ -23,6 +23,7 @@ void setPosition(btRigidBody* body, glm::vec3);
 glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
+void setScale(physicsEnv& physicsEnv, btRigidBody* body, float width, float height, float depth);
 
 void addColCol();
 void rmColVol();

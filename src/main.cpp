@@ -46,6 +46,7 @@ GameObject defaultCamera = GameObject {
 bool showDebugInfo = false;
 engineState state = getDefaultState(1920, 1080);
 FullScene fullscene;
+physicsEnv physicsEnvironment;
 std::map<unsigned int, Mesh> fontMeshes;
 std::vector<btRigidBody*> rigidbodies;
 
@@ -140,9 +141,7 @@ void translate(float x, float y, float z){
   physicsTranslate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
-  fullscene.scene.idToGameObjects[state.selectedIndex].scale.x+= x;
-  fullscene.scene.idToGameObjects[state.selectedIndex].scale.y+= y;
-  fullscene.scene.idToGameObjects[state.selectedIndex].scale.z+=z;
+  physicsScale(physicsEnvironment, fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   physicsRotate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.selectedIndex);
@@ -489,8 +488,8 @@ int main(int argc, char* argv[]){
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
-  auto physicsEnv = initPhysics();
-  addPhysicsBodies(physicsEnv, fullscene);
+  physicsEnvironment = initPhysics();
+  addPhysicsBodies(physicsEnvironment, fullscene);
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -544,7 +543,7 @@ int main(int argc, char* argv[]){
       dumpPhysicsInfo();
     }
     if (enablePhysics){
-      stepPhysicsSimulation(physicsEnv, 1.f / 60.f);
+      stepPhysicsSimulation(physicsEnvironment, 1.f / 60.f);
       updatePhysicsPositions(rigidbodies, fullscene);      
     }
 
@@ -574,7 +573,7 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   
   cleanup:    
-    deinitPhysics(physicsEnv); 
+    deinitPhysics(physicsEnvironment); 
     cleanupSocket(serverInstance);
     stopSoundSystem();
     glfwTerminate(); 

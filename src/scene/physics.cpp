@@ -41,7 +41,10 @@ btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float dep
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
-  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width / 2 ), btScalar(height / 2), btScalar(depth / 2)));
+  //btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width / 2 ), btScalar(height / 2), btScalar(depth / 2)));
+  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(1.f / 2 ), btScalar(1.f / 2), btScalar(1.f / 2)));
+  shape -> setLocalScaling(btVector3(width, height, depth));
+
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
@@ -100,6 +103,11 @@ void setRotation(btRigidBody* body, glm::quat rotation){
   transform.setRotation(glmToBt(rotation));
   body -> getMotionState() -> setWorldTransform(transform);
   body -> setWorldTransform(transform);
+}
+
+void setScale(physicsEnv& physicsEnv, btRigidBody* body, float width, float height, float depth){
+  body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
+  physicsEnv.dynamicsWorld -> updateSingleAabb(body);
 }
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example

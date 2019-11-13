@@ -27,6 +27,7 @@ void addObjectToFullScene(FullScene& scene, std::string name, std::string meshNa
 PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index);
 void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index);
+void physicsScale(physicsEnv& physicsEnv, FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z);
 
 #endif
 
