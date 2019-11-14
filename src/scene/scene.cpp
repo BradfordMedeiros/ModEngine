@@ -96,3 +96,22 @@ void physicsScale(FullScene& fullscene, btRigidBody* body, short index, float x,
   auto collisionInfo = getPhysicsInfoForGameObject(fullscene, index).collisionInfo;
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
+
+void applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  auto newPosition = applyTranslation(position, offsetX, offsetY, manipulatorAxis);
+  scene.scene.idToGameObjects[index].position = newPosition;
+  setPosition(body, newPosition);
+}
+
+void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
+  scene.scene.idToGameObjects[index].rotation = newRotation;
+  setRotation(body, newRotation);
+}
+
+void applyPhysicsScaling(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
+  scene.scene.idToGameObjects[index].scale = newScale;
+  auto collisionInfo = getPhysicsInfoForGameObject(scene, index).collisionInfo;
+  setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+}

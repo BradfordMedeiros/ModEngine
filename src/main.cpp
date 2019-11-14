@@ -117,11 +117,11 @@ void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = fullscene.scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      fullscene.scene.idToGameObjects[state.selectedIndex].position = applyTranslation(selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      fullscene.scene.idToGameObjects[state.selectedIndex].scale = applyScaling(selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      fullscene.scene.idToGameObjects[state.selectedIndex].rotation = applyRotation(selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -298,6 +298,7 @@ void updatePhysicsPositions(std::vector<btRigidBody*>& rigidbodies, FullScene& f
   for (unsigned int i = 0; i < rigidbodies.size(); i++){
     fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
     fullscene.scene.idToGameObjects[i].position = getPosition(rigidbodies[i]);
+    // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
   }
 }
 void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
