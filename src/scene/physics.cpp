@@ -105,9 +105,8 @@ void setRotation(btRigidBody* body, glm::quat rotation){
   body -> setWorldTransform(transform);
 }
 
-void setScale(physicsEnv& physicsEnv, btRigidBody* body, float width, float height, float depth){
+void setScale(btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
-  physicsEnv.dynamicsWorld -> updateSingleAabb(body);
 }
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example

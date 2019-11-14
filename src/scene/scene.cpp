@@ -89,9 +89,10 @@ void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, fl
   setRotation(body, rotation);
 }
 
-void physicsScale(physicsEnv& physicsEnv, FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z){
+void physicsScale(FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z){
   auto oldScale = fullscene.scene.idToGameObjects[index].scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   fullscene.scene.idToGameObjects[index].scale = newScale;
-  setScale(physicsEnv, body, newScale.x, newScale.y, newScale.z);
+  auto collisionInfo = getPhysicsInfoForGameObject(fullscene, index).collisionInfo;
+  setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }

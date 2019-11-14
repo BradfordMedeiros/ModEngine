@@ -141,7 +141,7 @@ void translate(float x, float y, float z){
   physicsTranslate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
-  physicsScale(physicsEnvironment, fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, x, y, z);
+  physicsScale(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   physicsRotate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.selectedIndex);
