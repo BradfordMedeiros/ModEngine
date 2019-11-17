@@ -3,14 +3,16 @@
 
 #include <iostream>
 #include <vector>
-#include <bullet/btBulletDynamicsCommon.h>
 #include <glm/gtc/quaternion.hpp>
+#include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/BulletCollision/CollisionDispatch/btGhostObject.h>
 
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
   btCollisionDispatcher* dispatcher;
   btDbvtBroadphase* broadphase;
   btSequentialImpulseConstraintSolver* constraintSolver;
+  btOverlappingPairCallback* btOverlappingPairs;
   btDiscreteDynamicsWorld* dynamicsWorld;
 };
 
@@ -25,8 +27,8 @@ void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
 void setScale(btRigidBody* body, float width, float height, float depth);
 
-void addColCol();
-void rmColVol();
+btGhostObject* addColVol(physicsEnv& env, glm::vec3 pos, float width, float height, float depth);
+void rmColVol(physicsEnv& env, btGhostObject* obj);
 
 void printRigidBodyInfo(btRigidBody* body);
 

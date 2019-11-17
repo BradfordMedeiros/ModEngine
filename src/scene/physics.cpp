@@ -19,7 +19,12 @@ physicsEnv initPhysics(){
   auto dispatcher = new btCollisionDispatcher(colConfig);
   auto broadphase = new btDbvtBroadphase();
   auto constraintSolver = new btSequentialImpulseConstraintSolver();
+  auto btOverlappingPairCallback = new btGhostPairCallback();
   auto dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, colConfig);
+
+  //std::cout << "1: set internal ghost pair callback" << std::endl;
+  //dynamicsWorld -> getBroadphase() -> getOverlappingPairCache() -> setInternalGhostPairCallback(btOverlappingPairCallback);
+  //std::cout << "2: set internal ghost pair callback" << std::endl;
 
   dynamicsWorld -> setGravity(btVector3(0.f, 9.f, 0.f));
 
@@ -28,10 +33,13 @@ physicsEnv initPhysics(){
     .dispatcher = dispatcher,
     .broadphase = broadphase,
     .constraintSolver = constraintSolver,
+    .btOverlappingPairs = btOverlappingPairCallback,
     .dynamicsWorld = dynamicsWorld,
   };
   return env;
 }
+
+//  btGhostObject a;
 
 btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic){
   btTransform transform;
@@ -109,6 +117,30 @@ void setScale(btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
 }
 
+btGhostObject* createColVol(glm::vec3 pos, float width, float height, float depth){
+  btTransform transform;
+  transform.setOrigin(glmToBt(pos));
+  btGhostObject* obj = new btGhostObject();
+  obj -> setCollisionShape(new btBoxShape(btVector3(width, height, depth)));
+  obj -> setWorldTransform(transform);
+  return obj;
+}
+void cleanupColVol(btGhostObject* obj){
+  delete obj -> getCollisionShape();
+  delete obj;
+}
+btGhostObject* addColVol(physicsEnv& env, glm::vec3 pos, float width, float height, float depth){
+  std::cout << "adding collision vol: (" << pos.x << " , " << pos.y << " , " << pos.z << ")" << " : " << width << "|" << height << "|" << depth << std::endl;
+  auto colVolPtr = createColVol(pos, width, height, depth);
+  env.dynamicsWorld -> addCollisionObject(colVolPtr);
+  return colVolPtr;
+}
+void rmColVol(physicsEnv& env, btGhostObject* obj){
+  env.dynamicsWorld -> removeCollisionObject(obj);
+  cleanupColVol(obj);
+}
+
+
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
 // https://stackoverflow.com/questions/12251199/re-positioning-a-rigid-body-in-bullet-physics
 // https://gamedev.stackexchange.com/questions/22319/how-to-disable-y-axis-movement-in-the-bullet-physics-engine
@@ -123,6 +155,7 @@ void printRigidBodyInfo(btRigidBody* body){
 void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not
   std::cout << "INFO: DEINIT: physics system" << std::endl;
   delete env.dynamicsWorld;
+  delete env.btOverlappingPairs;
   delete env.constraintSolver;
   delete env.broadphase;
   delete env.dispatcher;
