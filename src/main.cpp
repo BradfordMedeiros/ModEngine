@@ -307,20 +307,23 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
 
+    bool isCollisionVolumeOnly = id == 3;
+
     auto rigidPtr = addRigidBody(
       physicsEnv, 
       physicsInfo.gameobject.position,
       physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
       physicsInfo.gameobject.rotation,
-      id == 1
+      id == 1 || isCollisionVolumeOnly,
+      !isCollisionVolumeOnly
     );
 
     rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
 
-  auto colVolPtr = addCollisionVolume(physicsEnv, glm::vec3(-16.099995, -12.000000, 10.100005), 1000, 1000, 1000);
-  colVols.push_back(colVolPtr);
+ // auto colVolPtr = addCollisionVolume(physicsEnv, glm::vec3(-16.099995, -12.000000, 10.100005), 1000, 1000, 1000);
+ // colVols.push_back(colVolPtr);
 }
 
 int main(int argc, char* argv[]){
@@ -548,7 +551,7 @@ int main(int argc, char* argv[]){
     }
     if (enablePhysics){
       stepPhysicsSimulation(physicsEnvironment, 1.f / 60.f);
-      checkCollisions(physicsEnvironment, colVols[0]); 
+      checkCollisions(physicsEnvironment); 
       updatePhysicsPositions(rigidbodies, fullscene);     
     }
 

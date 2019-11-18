@@ -19,7 +19,7 @@ struct physicsEnv {
 physicsEnv initPhysics();
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision = true);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 void setPosition(btRigidBody* body, glm::vec3);
 glm::vec3 getPosition(btRigidBody* rigidbody);
@@ -29,7 +29,7 @@ void setScale(btRigidBody* body, float width, float height, float depth);
 
 btGhostObject* addCollisionVolume(physicsEnv& env, glm::vec3 pos, float width, float height, float depth);
 void rmColVol(physicsEnv& env, btGhostObject* obj);
-void checkCollisions(physicsEnv& env, btGhostObject* obj);
+void checkCollisions(physicsEnv& env);
 
 void printRigidBodyInfo(btRigidBody* body);
 

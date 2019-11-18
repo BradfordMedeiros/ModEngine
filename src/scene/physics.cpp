@@ -43,7 +43,7 @@ physicsEnv initPhysics(){
 
 //  btGhostObject a;
 
-btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic){
+btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(glmToBt(pos));   
@@ -65,6 +65,9 @@ btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float dep
   constructionInfo.m_friction = 1.0f;
 
   auto body  = new btRigidBody(constructionInfo);
+  if (!hasCollision){
+    body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+  }
   if (isStatic){
     body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
     body -> setActivationState(DISABLE_DEACTIVATION);
@@ -78,8 +81,8 @@ void cleanupRigidBody(btRigidBody* body){
   delete body;
 }
 
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic){  
-  auto rigidBodyPtr = createRigidBody(pos, width, height, depth, rotation, isStatic);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision){  
+  auto rigidBodyPtr = createRigidBody(pos, width, height, depth, rotation, isStatic, hasCollision);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
@@ -141,15 +144,18 @@ void rmColVol(physicsEnv& env, btGhostObject* obj){
   env.dynamicsWorld -> removeCollisionObject(obj);
   cleanupColVol(obj);
 }
-void checkCollisions(physicsEnv& env, btGhostObject* obj){
-  auto numOverlapping = obj -> getNumOverlappingObjects();
-  std::cout << "overlapping pairs: " << obj->getOverlappingPairs().size() << std::endl;
-  std::cout << "num overlapping is: "  << numOverlapping << std::endl;
+void checkCollisions(physicsEnv& env){
+  auto dispatcher = env.dynamicsWorld -> getDispatcher();
+  int numManifolds = dispatcher -> getNumManifolds();
+  std::cout << "num numManifolds" << std::endl;
+  for (int i = 0; i < numManifolds; i++) {
+    btPersistentManifold* contactManifold = dispatcher -> getManifoldByIndexInternal(i);
+    std::cout << std::endl;
+    std::cout << "1: " << contactManifold -> getBody0();
+    std::cout << "2: " << contactManifold -> getBody1() << std::endl;
+  } 
 }
 
-// https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
-// https://stackoverflow.com/questions/12251199/re-positioning-a-rigid-body-in-bullet-physics
-// https://gamedev.stackexchange.com/questions/22319/how-to-disable-y-axis-movement-in-the-bullet-physics-engine
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
   env.dynamicsWorld -> stepSimulation(timestep);
 }
