@@ -17,14 +17,16 @@ physicsEnv initPhysics(){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
   auto dispatcher = new btCollisionDispatcher(colConfig);
+  
   auto broadphase = new btDbvtBroadphase();
-  auto constraintSolver = new btSequentialImpulseConstraintSolver();
   auto btOverlappingPairCallback = new btGhostPairCallback();
+  broadphase -> getOverlappingPairCache() -> setInternalGhostPairCallback(btOverlappingPairCallback);
+
+  auto constraintSolver = new btSequentialImpulseConstraintSolver();
   auto dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, colConfig);
 
-  //std::cout << "1: set internal ghost pair callback" << std::endl;
-  //dynamicsWorld -> getBroadphase() -> getOverlappingPairCache() -> setInternalGhostPairCallback(btOverlappingPairCallback);
-  //std::cout << "2: set internal ghost pair callback" << std::endl;
+  std::cout << "1: set internal ghost pair callback" << std::endl;
+  std::cout << "2: set internal ghost pair callback" << std::endl;
 
   dynamicsWorld -> setGravity(btVector3(0.f, 9.f, 0.f));
 
@@ -32,8 +34,8 @@ physicsEnv initPhysics(){
     .colConfig = colConfig,
     .dispatcher = dispatcher,
     .broadphase = broadphase,
-    .constraintSolver = constraintSolver,
     .btOverlappingPairs = btOverlappingPairCallback,
+    .constraintSolver = constraintSolver,
     .dynamicsWorld = dynamicsWorld,
   };
   return env;
@@ -49,7 +51,6 @@ btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float dep
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
 
-  //btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width / 2 ), btScalar(height / 2), btScalar(depth / 2)));
   btCollisionShape* shape = new btBoxShape(btVector3(btScalar(1.f / 2 ), btScalar(1.f / 2), btScalar(1.f / 2)));
   shape -> setLocalScaling(btVector3(width, height, depth));
 
@@ -123,13 +124,14 @@ btGhostObject* createColVol(glm::vec3 pos, float width, float height, float dept
   btGhostObject* obj = new btGhostObject();
   obj -> setCollisionShape(new btBoxShape(btVector3(width, height, depth)));
   obj -> setWorldTransform(transform);
+  obj -> setCollisionFlags(obj->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
   return obj;
 }
 void cleanupColVol(btGhostObject* obj){
   delete obj -> getCollisionShape();
   delete obj;
 }
-btGhostObject* addColVol(physicsEnv& env, glm::vec3 pos, float width, float height, float depth){
+btGhostObject* addCollisionVolume(physicsEnv& env, glm::vec3 pos, float width, float height, float depth){
   std::cout << "adding collision vol: (" << pos.x << " , " << pos.y << " , " << pos.z << ")" << " : " << width << "|" << height << "|" << depth << std::endl;
   auto colVolPtr = createColVol(pos, width, height, depth);
   env.dynamicsWorld -> addCollisionObject(colVolPtr);
@@ -139,7 +141,11 @@ void rmColVol(physicsEnv& env, btGhostObject* obj){
   env.dynamicsWorld -> removeCollisionObject(obj);
   cleanupColVol(obj);
 }
-
+void checkCollisions(physicsEnv& env, btGhostObject* obj){
+  auto numOverlapping = obj -> getNumOverlappingObjects();
+  std::cout << "overlapping pairs: " << obj->getOverlappingPairs().size() << std::endl;
+  std::cout << "num overlapping is: "  << numOverlapping << std::endl;
+}
 
 // https://stackoverflow.com/questions/11175694/bullet-physics-simplest-collision-example
 // https://stackoverflow.com/questions/12251199/re-positioning-a-rigid-body-in-bullet-physics

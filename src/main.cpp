@@ -49,6 +49,7 @@ FullScene fullscene;
 physicsEnv physicsEnvironment;
 std::map<unsigned int, Mesh> fontMeshes;
 std::vector<btRigidBody*> rigidbodies;
+std::vector<btGhostObject*> colVols;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;
@@ -317,8 +318,10 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
     rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
-}
 
+  auto colVolPtr = addCollisionVolume(physicsEnv, glm::vec3(-16.099995, -12.000000, 10.100005), 1000, 1000, 1000);
+  colVols.push_back(colVolPtr);
+}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -545,7 +548,8 @@ int main(int argc, char* argv[]){
     }
     if (enablePhysics){
       stepPhysicsSimulation(physicsEnvironment, 1.f / 60.f);
-      updatePhysicsPositions(rigidbodies, fullscene);      
+      checkCollisions(physicsEnvironment, colVols[0]); 
+      updatePhysicsPositions(rigidbodies, fullscene);     
     }
 
     glfwPollEvents();
