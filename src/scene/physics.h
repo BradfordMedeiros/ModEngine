@@ -11,7 +11,6 @@ struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
   btCollisionDispatcher* dispatcher;
   btDbvtBroadphase* broadphase;
-  btOverlappingPairCallback* btOverlappingPairs;
   btSequentialImpulseConstraintSolver* constraintSolver;
   btDiscreteDynamicsWorld* dynamicsWorld;
 };
@@ -26,11 +25,7 @@ glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
 void setScale(btRigidBody* body, float width, float height, float depth);
-
-btGhostObject* addCollisionVolume(physicsEnv& env, glm::vec3 pos, float width, float height, float depth);
-void rmColVol(physicsEnv& env, btGhostObject* obj);
 void checkCollisions(physicsEnv& env);
-
 void printRigidBodyInfo(btRigidBody* body);
 
 #endif 
