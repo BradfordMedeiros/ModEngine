@@ -28,7 +28,6 @@ glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
 void setScale(btRigidBody* body, float width, float height, float depth);
-void checkCollisions(physicsEnv& env);
 void printRigidBodyInfo(btRigidBody* body);
 
 #endif 

@@ -321,9 +321,6 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
     rigidbodies.push_back(rigidPtr);
     std::cout << "ADDING PTR: " << rigidPtr << std::endl;
   }
-
- // auto colVolPtr = addCollisionVolume(physicsEnv, glm::vec3(-16.099995, -12.000000, 10.100005), 1000, 1000, 1000);
- // colVols.push_back(colVolPtr);
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
@@ -332,7 +329,6 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2)
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
 }
-
 bool collisionInList(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions, std::pair<const btCollisionObject*, const btCollisionObject*> collisionPair){
   for (auto collisionPairCheck : currentCollisions){
     if (collisionPair.first == collisionPairCheck.first && collisionPair.second == collisionPairCheck.second || collisionPair.first == collisionPairCheck.second && collisionPair.second == collisionPairCheck.first){
@@ -341,9 +337,7 @@ bool collisionInList(std::vector<std::pair<const btCollisionObject*, const btCol
   }
   return false;
 }
-
-// todo - n^2 this probably should be optimized but w/e for now.
-std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> oldCollisions;   // This diffing function could probably be improved but would want to profile first.
+std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> oldCollisions;   // n^2 - This diffing function could probably be improved but would want to profile first.
 void onObjectsCollide(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs){  
     for (auto collisionPair : collisionPairs){
       if (!collisionInList(oldCollisions, collisionPair)){
@@ -583,7 +577,6 @@ int main(int argc, char* argv[]){
     }
     if (enablePhysics){
       stepPhysicsSimulation(physicsEnvironment, 1.f / 60.f);
-      checkCollisions(physicsEnvironment); 
       updatePhysicsPositions(rigidbodies, fullscene);     
     }
 

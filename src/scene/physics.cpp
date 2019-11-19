@@ -81,6 +81,7 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.dynamicsWorld -> removeRigidBody(body);
   cleanupRigidBody(body);
 }
+
 glm::vec3 getPosition(btRigidBody* body){
   btTransform transform; 
   body -> getMotionState() -> getWorldTransform(transform);
@@ -107,14 +108,12 @@ void setRotation(btRigidBody* body, glm::quat rotation){
   body -> getMotionState() -> setWorldTransform(transform);
   body -> setWorldTransform(transform);
 }
-
 void setScale(btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
 }
     
 void checkCollisions(physicsEnv& env){   
   auto dispatcher = env.dynamicsWorld -> getDispatcher();
-  
   std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs;
   for (int i = 0; i < dispatcher -> getNumManifolds(); i++) {
     btPersistentManifold* contactManifold = dispatcher -> getManifoldByIndexInternal(i);
@@ -123,10 +122,9 @@ void checkCollisions(physicsEnv& env){
   env.onCollide(collisionPairs);
 }
 
-
-
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
   env.dynamicsWorld -> stepSimulation(timestep);
+  checkCollisions(env);
 }
 void printRigidBodyInfo(btRigidBody* body){
   glm::vec3 origin = getPosition(body);
