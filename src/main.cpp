@@ -343,19 +343,19 @@ bool collisionInList(std::vector<std::pair<const btCollisionObject*, const btCol
 }
 
 // todo - n^2 this probably should be optimized but w/e for now.
-std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions;   // This diffing function could probably be improved but would want to profile first.
+std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> oldCollisions;   // This diffing function could probably be improved but would want to profile first.
 void onObjectsCollide(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs){  
     for (auto collisionPair : collisionPairs){
-      if (!collisionInList(currentCollisions, collisionPair)){
+      if (!collisionInList(oldCollisions, collisionPair)){
         onObjectEnter(collisionPair.first, collisionPair.second);
       }
     }
-    for (auto collisionPair : currentCollisions){
+    for (auto collisionPair : oldCollisions){
       if (!collisionInList(collisionPairs, collisionPair)){
         onObjectLeave(collisionPair.first, collisionPair.second);
       }
     }
-    currentCollisions = collisionPairs;
+    oldCollisions = collisionPairs;
 }
 
 int main(int argc, char* argv[]){
