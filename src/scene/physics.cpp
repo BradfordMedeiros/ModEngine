@@ -13,7 +13,7 @@ btQuaternion glmToBt(glm::quat rotation){
   return btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 }
 
-physicsEnv initPhysics(){
+physicsEnv initPhysics(collisionFn onCollide){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
   auto dispatcher = new btCollisionDispatcher(colConfig);  
@@ -29,6 +29,7 @@ physicsEnv initPhysics(){
     .broadphase = broadphase,
     .constraintSolver = constraintSolver,
     .dynamicsWorld = dynamicsWorld,
+    .onCollide = onCollide,
   };
   return env;
 }
@@ -110,18 +111,19 @@ void setRotation(btRigidBody* body, glm::quat rotation){
 void setScale(btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
 }
-
-void checkCollisions(physicsEnv& env){
+    
+void checkCollisions(physicsEnv& env){   
   auto dispatcher = env.dynamicsWorld -> getDispatcher();
-  int numManifolds = dispatcher -> getNumManifolds();
-  std::cout << "num numManifolds" << std::endl;
-  for (int i = 0; i < numManifolds; i++) {
+  
+  std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs;
+  for (int i = 0; i < dispatcher -> getNumManifolds(); i++) {
     btPersistentManifold* contactManifold = dispatcher -> getManifoldByIndexInternal(i);
-    std::cout << std::endl;
-    std::cout << "1: " << contactManifold -> getBody0();
-    std::cout << "2: " << contactManifold -> getBody1() << std::endl;
+    collisionPairs.push_back(std::make_pair(contactManifold -> getBody0(), contactManifold -> getBody1()));
   } 
+  env.onCollide(collisionPairs);
 }
+
+
 
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
   env.dynamicsWorld -> stepSimulation(timestep);

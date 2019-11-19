@@ -7,15 +7,18 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionDispatch/btGhostObject.h>
 
+typedef void(*collisionFn)(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs);
+
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
   btCollisionDispatcher* dispatcher;
   btDbvtBroadphase* broadphase;
   btSequentialImpulseConstraintSolver* constraintSolver;
   btDiscreteDynamicsWorld* dynamicsWorld;
+  collisionFn onCollide;
 };
 
-physicsEnv initPhysics();
+physicsEnv initPhysics(collisionFn onCollide);
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision = true);

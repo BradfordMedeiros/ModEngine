@@ -326,6 +326,38 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
  // colVols.push_back(colVolPtr);
 }
 
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
+  std::cout << "on object enter: (" << obj1 << " , " << obj2 << ")" << std::endl;
+}
+void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
+  std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
+}
+
+bool collisionInList(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions, std::pair<const btCollisionObject*, const btCollisionObject*> collisionPair){
+  for (auto collisionPairCheck : currentCollisions){
+    if (collisionPair.first == collisionPairCheck.first && collisionPair.second == collisionPairCheck.second || collisionPair.first == collisionPairCheck.second && collisionPair.second == collisionPairCheck.first){
+      return true;
+    }
+  }
+  return false;
+}
+
+// todo - n^2 this probably should be optimized but w/e for now.
+std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions;   // This diffing function could probably be improved but would want to profile first.
+void onObjectsCollide(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs){  
+    for (auto collisionPair : collisionPairs){
+      if (!collisionInList(currentCollisions, collisionPair)){
+        onObjectEnter(collisionPair.first, collisionPair.second);
+      }
+    }
+    for (auto collisionPair : currentCollisions){
+      if (!collisionInList(collisionPairs, collisionPair)){
+        onObjectLeave(collisionPair.first, collisionPair.second);
+      }
+    }
+    currentCollisions = collisionPairs;
+}
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -495,7 +527,7 @@ int main(int argc, char* argv[]){
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
-  physicsEnvironment = initPhysics();
+  physicsEnvironment = initPhysics(onObjectsCollide);
   addPhysicsBodies(physicsEnvironment, fullscene);
 
   if (result["skiploop"].as<bool>()){
