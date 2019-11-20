@@ -49,7 +49,6 @@ FullScene fullscene;
 physicsEnv physicsEnvironment;
 std::map<unsigned int, Mesh> fontMeshes;
 std::vector<btRigidBody*> rigidbodies;
-std::vector<btGhostObject*> colVols;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;

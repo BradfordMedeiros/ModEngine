@@ -5,7 +5,6 @@
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletCollision/CollisionDispatch/btGhostObject.h>
 
 typedef void(*collisionFn)(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs);
 
@@ -15,7 +14,7 @@ struct physicsEnv {
   btDbvtBroadphase* broadphase;
   btSequentialImpulseConstraintSolver* constraintSolver;
   btDiscreteDynamicsWorld* dynamicsWorld;
-  collisionFn onCollide;
+  collisionFn onCollide;  
 };
 
 physicsEnv initPhysics(collisionFn onCollide);
