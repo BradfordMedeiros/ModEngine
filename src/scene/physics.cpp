@@ -13,7 +13,7 @@ btQuaternion glmToBt(glm::quat rotation){
   return btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 }
 
-physicsEnv initPhysics(collisionFn onCollide){
+physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectLeave){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
   auto dispatcher = new btCollisionDispatcher(colConfig);  
@@ -23,13 +23,15 @@ physicsEnv initPhysics(collisionFn onCollide){
 
   dynamicsWorld -> setGravity(btVector3(0.f, 9.f, 0.f));
 
+  CollisionCache collisionCache(onObjectEnter, onObjectLeave);
+
   physicsEnv env = {
     .colConfig = colConfig,
     .dispatcher = dispatcher,
     .broadphase = broadphase,
     .constraintSolver = constraintSolver,
     .dynamicsWorld = dynamicsWorld,
-    .onCollide = onCollide,
+    .collisionCache = collisionCache,
   };
   return env;
 }
@@ -119,7 +121,7 @@ void checkCollisions(physicsEnv& env){
     btPersistentManifold* contactManifold = dispatcher -> getManifoldByIndexInternal(i);
     collisionPairs.push_back(std::make_pair(contactManifold -> getBody0(), contactManifold -> getBody1()));
   } 
-  env.onCollide(collisionPairs);
+  env.collisionCache.onObjectsCollide(collisionPairs);
 }
 
 void stepPhysicsSimulation(physicsEnv& env, float timestep){

@@ -15,6 +15,7 @@
 
 #include "./scene/scene.h"
 #include "./scene/physics.h"
+#include "./scene/collision_cache.h"
 #include "./scene/scenegraph.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
@@ -328,28 +329,6 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2)
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
 }
-bool collisionInList(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions, std::pair<const btCollisionObject*, const btCollisionObject*> collisionPair){
-  for (auto collisionPairCheck : currentCollisions){
-    if (collisionPair.first == collisionPairCheck.first && collisionPair.second == collisionPairCheck.second || collisionPair.first == collisionPairCheck.second && collisionPair.second == collisionPairCheck.first){
-      return true;
-    }
-  }
-  return false;
-}
-std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> oldCollisions;   // n^2 - This diffing function could probably be improved but would want to profile first.
-void onObjectsCollide(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs){  
-    for (auto collisionPair : collisionPairs){
-      if (!collisionInList(oldCollisions, collisionPair)){
-        onObjectEnter(collisionPair.first, collisionPair.second);
-      }
-    }
-    for (auto collisionPair : oldCollisions){
-      if (!collisionInList(collisionPairs, collisionPair)){
-        onObjectLeave(collisionPair.first, collisionPair.second);
-      }
-    }
-    oldCollisions = collisionPairs;
-}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -520,7 +499,7 @@ int main(int argc, char* argv[]){
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
-  physicsEnvironment = initPhysics(onObjectsCollide);
+  physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave);
   addPhysicsBodies(physicsEnvironment, fullscene);
 
   if (result["skiploop"].as<bool>()){

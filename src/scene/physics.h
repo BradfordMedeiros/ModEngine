@@ -5,8 +5,7 @@
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
-
-typedef void(*collisionFn)(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs);
+#include "./collision_cache.h"
 
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
@@ -14,10 +13,11 @@ struct physicsEnv {
   btDbvtBroadphase* broadphase;
   btSequentialImpulseConstraintSolver* constraintSolver;
   btDiscreteDynamicsWorld* dynamicsWorld;
-  collisionFn onCollide;  
+  CollisionCache collisionCache;
 };
 
-physicsEnv initPhysics(collisionFn onCollide);
+physicsEnv initPhysics(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
+
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision = true);
