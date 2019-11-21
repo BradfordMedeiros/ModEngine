@@ -30,9 +30,9 @@
 	)
 )
 
-(define (onObjSelected selectedIndex) 
-	(display (string-append "object selected: " (number->string selectedIndex) "\n" ))
-)
+(define objectId "unknown")
+(define (onObjSelected selectedIndex) (set! objectId (number->string (gameobj-id selectedIndex))))
+
 
 (define currentNumber 0)
 (define (onFrame)
@@ -40,6 +40,7 @@
 	(if (= numFrames 0) (nextNumber))
 	(drawText (string-append "Scripting api test: " (number->string currentNumber)) 400 20 4)
 	(drawText (string-append textToWrite) 400 30 2)
+	(drawText (string-append "Object Id: " objectId) 12 100 4)
 	(if (= numFrames 0)
 		(display "wow")
 	)
