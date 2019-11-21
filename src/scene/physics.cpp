@@ -36,17 +36,13 @@ physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectL
   return env;
 }
 
-btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision){
+btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat rot, bool isStatic, bool hasCollision){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(glmToBt(pos));   
   transform.setRotation(glmToBt(rot));
 
   btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
-
-  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(1.f / 2 ), btScalar(1.f / 2), btScalar(1.f / 2)));
-  shape -> setLocalScaling(btVector3(width, height, depth));
-
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
@@ -68,6 +64,16 @@ btRigidBody* createRigidBody(glm::vec3 pos, float width, float height, float dep
 
   return body;
 }
+btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision){
+  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(1.f / 2 ), btScalar(1.f / 2), btScalar(1.f / 2)));
+  shape -> setLocalScaling(btVector3(width, height, depth));
+  return createRigidBody(pos, shape, rot, isStatic, hasCollision);
+}
+btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, bool isStatic, bool hasCollision){
+  btCollisionShape* shape = new btSphereShape(1);
+  shape -> setLocalScaling(btVector3(radius, radius, radius));
+  return createRigidBody(pos, shape, rot, isStatic, hasCollision);
+}
 void cleanupRigidBody(btRigidBody* body){
   delete body -> getMotionState();
   delete body -> getCollisionShape();
@@ -75,10 +81,16 @@ void cleanupRigidBody(btRigidBody* body){
 }
 
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision){  
-  auto rigidBodyPtr = createRigidBody(pos, width, height, depth, rotation, isStatic, hasCollision);
+  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision){
+  auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  return rigidBodyPtr;
+}
+
 void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.dynamicsWorld -> removeRigidBody(body);
   cleanupRigidBody(body);

@@ -307,19 +307,23 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
 
-    bool isCollisionVolumeOnly = id == 3;
-
-    auto rigidPtr = addRigidBody(
-      physicsEnv, 
-      physicsInfo.gameobject.position,
-      physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
-      physicsInfo.gameobject.rotation,
-      id == 1 || isCollisionVolumeOnly,
-      !isCollisionVolumeOnly
-    );
-
-    rigidbodies.push_back(rigidPtr);
-    std::cout << "ADDING PTR: " << rigidPtr << std::endl;
+    if (id == 2){
+      auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position, 1, physicsInfo.gameobject.rotation, false, true);
+      rigidbodies.push_back(rigidPtr);
+      std::cout << "ADDING PTR: " << rigidPtr << std::endl;
+    }else{
+      bool isCollisionVolumeOnly = id == 3;
+      auto rigidPtr = addRigidBody(
+        physicsEnv, 
+        physicsInfo.gameobject.position,
+        physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
+        physicsInfo.gameobject.rotation,
+        id == 1 || isCollisionVolumeOnly,
+        !isCollisionVolumeOnly
+      );
+      rigidbodies.push_back(rigidPtr);
+      std::cout << "ADDING PTR: " << rigidPtr << std::endl;
+    }
   }
 }
 

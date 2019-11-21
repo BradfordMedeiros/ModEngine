@@ -21,6 +21,8 @@ physicsEnv initPhysics(collisionPairFn onObjectEnter, collisionPairFn onObjectLe
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision = true);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision = true);
+
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 void setPosition(btRigidBody* body, glm::vec3);
 glm::vec3 getPosition(btRigidBody* rigidbody);
