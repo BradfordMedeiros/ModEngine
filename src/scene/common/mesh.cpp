@@ -47,6 +47,13 @@ Mesh loadMesh(std::string modelPath, std::string defaultTexture){
   return mesh; 
 }
 
+Mesh loadCube(std::string defaultTexture){
+  return loadMesh("./res/models/box/box.obj", defaultTexture); 
+}
+Mesh loadSphere(std::string defaultTexture){
+  return loadMesh("./res/models/cone/cone.obj", defaultTexture);
+}
+
 Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indices[], 
   unsigned int dataSize, unsigned int numIndices, unsigned int vertexWidth, unsigned int textureWidth){
   unsigned int bufferWidth = vertexWidth + textureWidth;
