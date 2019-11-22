@@ -60,6 +60,9 @@ unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
 
+Mesh cubeMesh;
+Mesh sphereMesh;
+
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
   -1.0f, -1.0f,  0.0f, 0.0f,
@@ -157,6 +160,7 @@ void setObjectDimensions(short index, float width, float height, float depth){
     fullscene.scene.idToGameObjects[state.selectedIndex].scale = newScale;
   } 
 }
+
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
   glm::mat4 modelMatrix = glm::translate(model, object.position);
@@ -234,6 +238,15 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
+void drawCube(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
+  drawMesh(cubeMesh);
+}
+void drawSphere(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
+  drawMesh(sphereMesh);
+}
+
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
@@ -242,7 +255,20 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
     drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
   }  
+
+  
+  for (int i = 0; i < 10; i++){
+      drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 0));
+  }
+  for (int i = 0; i < 10; i++){
+      drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 5));
+  }
+
+  /*for (unsigned int i = 0; i < 10; i++){
+      drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, i, 5));
+  }*/
 }
+
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
@@ -467,6 +493,8 @@ int main(int argc, char* argv[]){
   font fontToRender = readFont(result["font"].as<std::string>());
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
+  cubeMesh = loadCube(texturePath);
+  sphereMesh = loadSphere(texturePath);
 
   fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
   
