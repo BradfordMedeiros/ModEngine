@@ -247,6 +247,43 @@ void drawSphere(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 
   drawMesh(sphereMesh);
 }
 
+struct Line {
+  glm::vec3 fromPos;
+  glm::vec3 toPos;
+};
+void renderLines(){
+  std::vector<Line> lines;
+  lines.push_back(Line {
+    .fromPos = glm::vec3(0, 0, 0),
+    .toPos = glm::vec3(0, 20, 0),
+  });
+  lines.push_back(Line {
+    .fromPos = glm::vec3(0, 20, 0),
+    .toPos = glm::vec3(20, 20, 0),
+  });
+  
+  std::vector<unsigned int> indicies;
+  indicies.push_back(0);
+  indicies.push_back(1);
+
+  unsigned int VAO;
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
+
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicies.size(), &(indicies[0]), GL_STATIC_DRAW);
+
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+}
+
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
@@ -263,10 +300,6 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   for (int i = 0; i < 10; i++){
       drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 5));
   }
-
-  /*for (unsigned int i = 0; i < 10; i++){
-      drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, i, 5));
-  }*/
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
@@ -599,6 +632,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     renderScene(fullscene.scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
+    renderLines();
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();
