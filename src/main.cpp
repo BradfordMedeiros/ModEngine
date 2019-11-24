@@ -307,8 +307,19 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   std::vector<Line> allLines;
-  allLines.push_back(Line { .fromPos = glm::vec3(0, 0, 0), .toPos = glm::vec3(0, -40, 0) });
-  allLines.push_back(Line { .fromPos = glm::vec3(0, -80, 0), .toPos = glm::vec3(100, -40, 0) });
+
+  for (unsigned int i = 0 ; i < 10; i++){
+    allLines.push_back(Line { 
+      .fromPos = glm::vec3(100, i * 10, 0), 
+      .toPos = glm::vec3(200, i * 10, 0),
+    });
+  }
+  for (unsigned int i = 0 ; i < 10; i++){
+    allLines.push_back(Line { 
+      .fromPos = glm::vec3(100 + i * 10, 0, 0), 
+      .toPos = glm::vec3(100 + i * 10, 100, 0),
+    });
+  }
   renderLines(shaderProgram, allLines);
 }
 
