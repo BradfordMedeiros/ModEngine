@@ -203,3 +203,28 @@ void drawLines(std::vector<Line> allLines){
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
+
+void drawCube(){
+
+}
+void drawSphere(){
+
+}
+void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, glm::vec3 pos){   // position is unneccessary eventually, should just use transforms when drawing in shader
+  std::vector<Line> allLines;
+  // horizontal lines
+  for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
+    allLines.push_back(Line {                                                   
+      .fromPos = glm::vec3(pos.x, i * cellSize + pos.y, pos.z), 
+      .toPos = glm::vec3(numCellsWidth * cellSize + pos.x, i * cellSize + pos.y, pos.z),
+    });
+  }
+  // vertical lines
+  for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
+    allLines.push_back(Line { 
+      .fromPos = glm::vec3(i * cellSize + pos.x, pos.y, pos.z), 
+      .toPos = glm::vec3(i * cellSize + pos.x, numCellsHeight * cellSize + pos.y, pos.z),
+    });
+  }
+  drawLines(allLines);
+}

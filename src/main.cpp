@@ -257,7 +257,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }  
 
   
-  ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY 
+  ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
   for (int i = 0; i < 10; i++){
     drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 0));
   }
@@ -265,21 +265,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 5));
   }
 
-  std::vector<Line> allLines;
-
-  for (unsigned int i = 0 ; i < 10; i++){
-    allLines.push_back(Line { 
-      .fromPos = glm::vec3(0, i * 10, 200), 
-      .toPos = glm::vec3(100, i * 10, 200),
-    });
-  }
-  for (unsigned int i = 0 ; i < 10; i++){
-    allLines.push_back(Line { 
-      .fromPos = glm::vec3(i * 10, 0, 200), 
-      .toPos = glm::vec3(i * 10, 100, 200),
-    });
-  }
-  drawLines(allLines);
+  drawGrid(10, 10, 10, glm::vec3(0, -50, 200));
+  ////////////////////////////////////////////
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){

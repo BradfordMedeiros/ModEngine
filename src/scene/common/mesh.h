@@ -39,5 +39,8 @@ struct Line {
   glm::vec3 toPos;
 };
 void drawLines(std::vector<Line> allLines);
+void drawCube();
+void drawSphere();
+void drawGrid(int numCellsWidth, int numCellsHeight, int cellWidth, glm::vec3 position);
 
 #endif 
