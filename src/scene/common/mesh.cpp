@@ -125,6 +125,7 @@ void drawMesh(Mesh mesh){
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 }
 
+
 Texture loadTexture(std::string textureFilePath){
   std::cout << "Event: loading texture: " << textureFilePath << std::endl;
 
@@ -165,4 +166,40 @@ void useTexture(Texture texture){
 
 void freeTextureData(Texture& texture){
    stbi_image_free(texture.data);
+}
+
+void drawLines(std::vector<Line> allLines){
+  std::vector<glm::vec3> lines;
+  for (Line line : allLines){
+    lines.push_back(line.fromPos);
+    lines.push_back(line.toPos);
+  }
+
+  std::vector<unsigned int> indicies;
+  for (unsigned int i = 0; i < lines.size(); i++){
+    indicies.push_back(i);
+  }
+
+  unsigned int VAO;
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
+
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicies.size(), &(indicies[0]), GL_STATIC_DRAW);
+
+  unsigned int VBO;
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * lines.size(), &(lines[0]), GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+  glEnableVertexAttribArray(0);
+  glLineWidth(1);
+  glDrawElements(GL_LINES, indicies.size() , GL_UNSIGNED_INT, 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);               
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }

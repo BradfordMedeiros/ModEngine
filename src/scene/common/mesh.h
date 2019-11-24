@@ -34,4 +34,10 @@ Mesh load2DMeshTexCoords(std::string imagePath, float offsetx, float offsety, fl
 Mesh loadSpriteMesh(std::string imagePath);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
 void drawMesh(Mesh);  						 // draws mesh and related texture info (no shader data supplied)
 
+struct Line {
+  glm::vec3 fromPos;
+  glm::vec3 toPos;
+};
+void drawLines(std::vector<Line> allLines);
+
 #endif 

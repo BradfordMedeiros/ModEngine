@@ -247,47 +247,6 @@ void drawSphere(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 
   drawMesh(sphereMesh);
 }
 
-struct Line {
-  glm::vec3 fromPos;
-  glm::vec3 toPos;
-};
-void renderLines(GLint shaderProgram, std::vector<Line> allLines){
-  std::vector<glm::vec3> lines;
-  for (Line line : allLines){
-    lines.push_back(line.fromPos);
-    lines.push_back(line.toPos);
-  }
-
-  std::vector<unsigned int> indicies;
-  for (unsigned int i = 0; i < lines.size(); i++){
-    indicies.push_back(i);
-  }
-
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  unsigned int EBO;
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicies.size(), &(indicies[0]), GL_STATIC_DRAW);
-
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * lines.size(), &(lines[0]), GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-  glEnableVertexAttribArray(0);
-  glLineWidth(1);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-  glDrawElements(GL_LINES, indicies.size() , GL_UNSIGNED_INT, 0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);               
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-}
-
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
@@ -310,17 +269,17 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
   for (unsigned int i = 0 ; i < 10; i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3(100, i * 10, 0), 
-      .toPos = glm::vec3(200, i * 10, 0),
+      .fromPos = glm::vec3(0, i * 10, 200), 
+      .toPos = glm::vec3(100, i * 10, 200),
     });
   }
   for (unsigned int i = 0 ; i < 10; i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3(100 + i * 10, 0, 0), 
-      .toPos = glm::vec3(100 + i * 10, 100, 0),
+      .fromPos = glm::vec3(i * 10, 0, 200), 
+      .toPos = glm::vec3(i * 10, 100, 200),
     });
   }
-  renderLines(shaderProgram, allLines);
+  drawLines(allLines);
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
