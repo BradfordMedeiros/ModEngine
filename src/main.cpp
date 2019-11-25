@@ -243,8 +243,8 @@ void drawCube(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 po
 }
 void drawSphere(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.0f)));
-  drawSphere(10.f);
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
+  drawSphere(100.f);
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
@@ -258,7 +258,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
   
   ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
-  drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -10, 50));
+  //drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -10, 50));
+  drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -20, 60));
 
   /*for (int i = 0; i < 10; i++){
   }
@@ -266,8 +267,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 5));
   }*/
 
-  drawGrid(10, 10, 10, glm::vec3(0, -50, 200));
-  drawCoordinateSystem(100.f);
+  //drawGrid(10, 10, 10, glm::vec3(0, -50, 200));
+  //drawCoordinateSystem(100.f);
   ////////////////////////////////////////////
 }
 
