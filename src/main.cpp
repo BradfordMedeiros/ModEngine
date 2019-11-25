@@ -266,6 +266,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }*/
 
   drawGrid(10, 10, 10, glm::vec3(0, -50, 200));
+  drawCoordinateSystem(100.f);
   ////////////////////////////////////////////
 }
 

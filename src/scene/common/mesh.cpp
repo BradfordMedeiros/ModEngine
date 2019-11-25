@@ -234,3 +234,19 @@ void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, glm::vec3 pos
   }
   drawLines(allLines);
 }
+void drawCoordinateSystem(float size){
+  std::vector<Line> allLines;
+  allLines.push_back(Line {
+    .fromPos = glm::vec3(-1.f * size, 0.f, 0.f),
+    .toPos = glm::vec3(1.f * size, 0.f, 0.f),
+  });
+  allLines.push_back(Line {
+    .fromPos = glm::vec3(0.f, -1.f * size, 0.f),
+    .toPos = glm::vec3(0.f, 1.f * size, 0.f),
+  });
+  allLines.push_back(Line {
+    .fromPos = glm::vec3(0.f, 0.f, -1.f * size),
+    .toPos = glm::vec3(0.f, 0.f, 1.f * size),
+  });
+  drawLines(allLines);
+}
