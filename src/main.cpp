@@ -60,9 +60,6 @@ unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
 
-Mesh cubeMesh;
-Mesh sphereMesh;
-
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
   -1.0f, -1.0f,  0.0f, 0.0f,
@@ -240,11 +237,13 @@ void setSelectionMode(bool enabled){
 
 void drawCube(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
-  drawMesh(cubeMesh);
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.0f)));
+  drawCube(10, 10, 1);
 }
 void drawSphere(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
-  drawMesh(sphereMesh);
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.0f)));
+  drawSphere(10.f);
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
@@ -258,12 +257,13 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
   
   ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
-  for (int i = 0; i < 10; i++){
-    drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 0));
+  drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -10, 50));
+
+  /*for (int i = 0; i < 10; i++){
   }
   for (int i = 0; i < 10; i++){
     drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 5));
-  }
+  }*/
 
   drawGrid(10, 10, 10, glm::vec3(0, -50, 200));
   ////////////////////////////////////////////
@@ -493,8 +493,6 @@ int main(int argc, char* argv[]){
   font fontToRender = readFont(result["font"].as<std::string>());
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
-  cubeMesh = loadCube(texturePath);
-  sphereMesh = loadSphere(texturePath);
 
   fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
   

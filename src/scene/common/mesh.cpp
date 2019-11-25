@@ -47,13 +47,6 @@ Mesh loadMesh(std::string modelPath, std::string defaultTexture){
   return mesh; 
 }
 
-Mesh loadCube(std::string defaultTexture){
-  return loadMesh("./res/models/box/box.obj", defaultTexture); 
-}
-Mesh loadSphere(std::string defaultTexture){
-  return loadMesh("./res/models/cone/cone.obj", defaultTexture);
-}
-
 Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indices[], 
   unsigned int dataSize, unsigned int numIndices, unsigned int vertexWidth, unsigned int textureWidth){
   unsigned int bufferWidth = vertexWidth + textureWidth;
@@ -204,13 +197,26 @@ void drawLines(std::vector<Line> allLines){
   glBindVertexArray(0);
 }
 
-void drawCube(){
+void drawCube(float width, float height, float depth){
+  std::vector<Line> allLines;                    
+  allLines.push_back(Line { .fromPos = glm::vec3(0, 0, 0),           .toPos = glm::vec3(width, 0, 0)          });
+  allLines.push_back(Line { .fromPos = glm::vec3(0,  height, 0),     .toPos = glm::vec3(width, height, 0)     });
+  allLines.push_back(Line { .fromPos = glm::vec3(0,  0, depth),      .toPos = glm::vec3(width, 0, depth)      });
+  allLines.push_back(Line { .fromPos = glm::vec3(0,  height, depth), .toPos = glm::vec3(width, height, depth) });
+  allLines.push_back(Line { .fromPos = glm::vec3(0, 0, 0),           .toPos = glm::vec3(0, height, 0)         });
+  allLines.push_back(Line { .fromPos = glm::vec3(width, 0, 0),       .toPos = glm::vec3(width, height, 0)     });
+  allLines.push_back(Line { .fromPos = glm::vec3(0, 0, depth),       .toPos = glm::vec3(0, height, depth)     });
+  allLines.push_back(Line { .fromPos = glm::vec3(width, 0, depth),   .toPos = glm::vec3(width, height, depth) });
+  allLines.push_back(Line { .fromPos = glm::vec3(0, 0, 0),           .toPos = glm::vec3(0, 0, depth)          });
+  allLines.push_back(Line { .fromPos = glm::vec3(0, height, 0),      .toPos = glm::vec3(0, height, depth)     });
+  allLines.push_back(Line { .fromPos = glm::vec3(width, 0, 0),       .toPos = glm::vec3(width, 0, depth)      });
+  allLines.push_back(Line { .fromPos = glm::vec3(width, height, 0),  .toPos = glm::vec3(width, height, depth) });
+  drawLines(allLines);
+}
+void drawSphere(float radius){
 
 }
-void drawSphere(){
-
-}
-void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, glm::vec3 pos){   // position is unneccessary eventually, should just use transforms when drawing in shader
+void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, glm::vec3 pos){   
   std::vector<Line> allLines;
   // horizontal lines
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){

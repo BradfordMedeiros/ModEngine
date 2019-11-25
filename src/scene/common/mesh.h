@@ -27,8 +27,6 @@ struct Mesh {
 };
 
 Mesh loadMesh(std::string modelPath, std::string defaultTexture);		 // loads model and returns mesh/bound texture data
-Mesh loadCube(std::string defaultTexture);
-Mesh loadSphere(std::string defaultTexture);
 Mesh load2DMesh(std::string imagePath);		 // loads single quad mesh with texture centered around -1 to 1 x/y
 Mesh load2DMeshTexCoords(std::string imagePath, float offsetx, float offsety, float width, float height); // 2DMesh with subimage selection
 Mesh loadSpriteMesh(std::string imagePath);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
@@ -39,8 +37,8 @@ struct Line {
   glm::vec3 toPos;
 };
 void drawLines(std::vector<Line> allLines);
-void drawCube();
-void drawSphere();
+void drawCube(float width, float height, float depth);
+void drawSphere(float radius);
 void drawGrid(int numCellsWidth, int numCellsHeight, int cellWidth, glm::vec3 position);
 
 #endif 
