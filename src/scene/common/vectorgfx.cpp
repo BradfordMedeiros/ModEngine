@@ -16,6 +16,7 @@ void drawCube(float width, float height, float depth){
   allLines.push_back(Line { .fromPos = glm::vec3(width, height, 0),  .toPos = glm::vec3(width, height, depth) });
   drawLines(allLines);
 }
+
 void drawSphere(float radius){                  // lots of repeat code here, should generalize
   static unsigned int resolution = 15;
   std::vector<Line> allLines;
@@ -26,10 +27,7 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
     float radianAngle = i * ((2 * M_PI) / resolution);
     float x = cos(radianAngle);
     float y = sin(radianAngle);
-    allLines.push_back(Line{
-      .fromPos = glm::vec3(lastX, lastY, 1.f),
-      .toPos = glm::vec3(x, y, 1.f),
-    });
+    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, lastY, 1.f), .toPos = glm::vec3(x, y, 1.f) });
     lastX = x;
     lastY = y;
   }
@@ -40,10 +38,7 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
     float radianAngle = i * ((2 * M_PI) / resolution);
     float x = cos(radianAngle);
     float y = sin(radianAngle);
-    allLines.push_back(Line{
-      .fromPos = glm::vec3(lastX, 1.f - 1.f, lastY + 1.f),
-      .toPos = glm::vec3(x, 1.f - 1.f, y + 1.f),
-    });
+    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, 1.f - 1.f, lastY + 1.f), .toPos = glm::vec3(x, 1.f - 1.f, y + 1.f) });
     lastX = x;
     lastY = y;
   }
@@ -54,10 +49,7 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
     float radianAngle = i * ((2 * M_PI) / resolution);
     float x = cos(radianAngle);
     float y = sin(radianAngle);
-    allLines.push_back(Line{
-      .fromPos = glm::vec3(1.f - 1.f, lastX, lastY + 1.f),
-      .toPos = glm::vec3(1.f - 1.f, x, y + 1.f),
-    });
+    allLines.push_back(Line{ .fromPos = glm::vec3(1.f - 1.f, lastX, lastY + 1.f), .toPos = glm::vec3(1.f - 1.f, x, y + 1.f) });
     lastX = x;
     lastY = y;
   }
@@ -86,17 +78,8 @@ void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, glm::vec3 pos
 
 void drawCoordinateSystem(float size){
   std::vector<Line> allLines;
-  allLines.push_back(Line {
-    .fromPos = glm::vec3(-1.f * size, 0.f, 0.f),
-    .toPos = glm::vec3(1.f * size, 0.f, 0.f),
-  });
-  allLines.push_back(Line {
-    .fromPos = glm::vec3(0.f, -1.f * size, 0.f),
-    .toPos = glm::vec3(0.f, 1.f * size, 0.f),
-  });
-  allLines.push_back(Line {
-    .fromPos = glm::vec3(0.f, 0.f, -1.f * size),
-    .toPos = glm::vec3(0.f, 0.f, 1.f * size),
-  });
+  allLines.push_back(Line { .fromPos = glm::vec3(-1.f * size, 0.f, 0.f), .toPos = glm::vec3(1.f * size, 0.f, 0.f) });
+  allLines.push_back(Line { .fromPos = glm::vec3(0.f, -1.f * size, 0.f), .toPos = glm::vec3(0.f, 1.f * size, 0.f) });
+  allLines.push_back(Line { .fromPos = glm::vec3(0.f, 0.f, -1.f * size), .toPos = glm::vec3(0.f, 0.f, 1.f * size) });
   drawLines(allLines);
 }
