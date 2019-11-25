@@ -19,6 +19,7 @@
 #include "./scene/scenegraph.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
+#include "./scene/common/vectorgfx.h"
 #include "./scene/common/util/loadmodel.h"
 #include "./scene/common/util/boundinfo.h"
 #include "./scene/sprites/readfont.h"
