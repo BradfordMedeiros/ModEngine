@@ -244,12 +244,11 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
   }  
 
+  ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 0.f)), glm::vec3(1.f, 1.f, 1.f))));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.5f, 0.5f)));
   drawCoordinateSystem(100.f);
   
-  ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
-  //drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -10, 50));
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(1.f, 1.f, 1.f))));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
  
