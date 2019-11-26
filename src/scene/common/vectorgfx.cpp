@@ -17,8 +17,8 @@ void drawCube(float width, float height, float depth){
   drawLines(allLines);
 }
 
-void drawSphere(float radius){                  // lots of repeat code here, should generalize
-  static unsigned int resolution = 15;
+void drawSphere(){                  // lots of repeat code here, should generalize
+  static unsigned int resolution = 30;
   std::vector<Line> allLines;
 
   float lastX  = 1;
@@ -27,7 +27,7 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
     float radianAngle = i * ((2 * M_PI) / resolution);
     float x = cos(radianAngle);
     float y = sin(radianAngle);
-    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, lastY, 1.f), .toPos = glm::vec3(x, y, 1.f) });
+    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, lastY, 0), .toPos = glm::vec3(x, y, 0) });
     lastX = x;
     lastY = y;
   }
@@ -38,7 +38,7 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
     float radianAngle = i * ((2 * M_PI) / resolution);
     float x = cos(radianAngle);
     float y = sin(radianAngle);
-    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, 1.f - 1.f, lastY + 1.f), .toPos = glm::vec3(x, 1.f - 1.f, y + 1.f) });
+    allLines.push_back(Line{ .fromPos = glm::vec3(lastX, 0, lastY), .toPos = glm::vec3(x, 0, y) });
     lastX = x;
     lastY = y;
   }
@@ -49,7 +49,7 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
     float radianAngle = i * ((2 * M_PI) / resolution);
     float x = cos(radianAngle);
     float y = sin(radianAngle);
-    allLines.push_back(Line{ .fromPos = glm::vec3(1.f - 1.f, lastX, lastY + 1.f), .toPos = glm::vec3(1.f - 1.f, x, y + 1.f) });
+    allLines.push_back(Line{ .fromPos = glm::vec3(0, lastX, lastY), .toPos = glm::vec3(0, x, y) });
     lastX = x;
     lastY = y;
   }
@@ -57,20 +57,20 @@ void drawSphere(float radius){                  // lots of repeat code here, sho
   drawLines(allLines);
 }
 
-void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, glm::vec3 pos){   
+void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize){   
   std::vector<Line> allLines;
   // horizontal lines
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
-      .fromPos = glm::vec3(pos.x, i * cellSize + pos.y, pos.z), 
-      .toPos = glm::vec3(numCellsWidth * cellSize + pos.x, i * cellSize + pos.y, pos.z),
+      .fromPos = glm::vec3(0, i * cellSize, 0), 
+      .toPos = glm::vec3(numCellsWidth * cellSize, i * cellSize, 0),
     });
   }
   // vertical lines
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3(i * cellSize + pos.x, pos.y, pos.z), 
-      .toPos = glm::vec3(i * cellSize + pos.x, numCellsHeight * cellSize + pos.y, pos.z),
+      .fromPos = glm::vec3(i * cellSize, 0, 0), 
+      .toPos = glm::vec3(i * cellSize + 0, numCellsHeight * cellSize, 0),
     });
   }
   drawLines(allLines);

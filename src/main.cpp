@@ -159,42 +159,6 @@ void setObjectDimensions(short index, float width, float height, float depth){
   } 
 }
 
-void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
-  GameObject object = fullscene.scene.idToGameObjects[objectH.id];
-  glm::mat4 modelMatrix = glm::translate(model, object.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
-
-  bool objectSelected = state.selectedIndex == object.id;
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
-  
-  if (state.visualizeNormals){
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    drawMesh(fullscene.meshes["./res/models/cone/cone.obj"]); 
-  }
-
-  modelMatrix = glm::scale(modelMatrix, object.scale);
-  
-  // bounding code //////////////////////
-  auto gameObjV = fullscene.objectMapping[objectH.id];
-  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
-  if (meshObj != NULL){
-    auto bounding = getBoundRatio(fullscene.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
-
-    if (objectSelected){
-      drawMesh(fullscene.meshes["./res/models/boundingbox/boundingbox.obj"]);
-    }
-  }
-  /////////////////////////////// end bounding code
-
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  renderObject(objectH.id, fullscene.objectMapping, fullscene.meshes["./res/models/box/box.obj"], objectSelected, fullscene.meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
-
-  for (short id: objectH.children){
-    drawGameobject(fullscene.scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
-  }
-}
-
 void removeObjectById(short id){
   std::cout << "removing object by id: " << id << std::endl;
   removeObject(fullscene.objectMapping, id);
@@ -236,17 +200,41 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
-void drawCube(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.0f)));
-  drawCube(10, 10, 1);
-}
-void drawSphere(GLint shaderProgram, glm::mat4 model, glm::vec3 size, glm::vec3 position){
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, position), size)));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
-  drawSphere(100.f);
-}
+void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
+  GameObject object = fullscene.scene.idToGameObjects[objectH.id];
+  glm::mat4 modelMatrix = glm::translate(model, object.position);
+  modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
 
+  bool objectSelected = state.selectedIndex == object.id;
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
+  
+  if (state.visualizeNormals){
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    drawMesh(fullscene.meshes["./res/models/cone/cone.obj"]); 
+  }
+
+  modelMatrix = glm::scale(modelMatrix, object.scale);
+  
+  // bounding code //////////////////////
+  auto gameObjV = fullscene.objectMapping[objectH.id];
+  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
+  if (meshObj != NULL){
+    auto bounding = getBoundRatio(fullscene.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
+
+    if (objectSelected){
+      drawMesh(fullscene.meshes["./res/models/boundingbox/boundingbox.obj"]);
+    }
+  }
+  /////////////////////////////// end bounding code
+
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+  renderObject(objectH.id, fullscene.objectMapping, fullscene.meshes["./res/models/box/box.obj"], objectSelected, fullscene.meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
+
+  for (short id: objectH.children){
+    drawGameobject(fullscene.scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
+  }
+}
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
@@ -256,19 +244,23 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
   }  
 
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 0.f)), glm::vec3(1.f, 1.f, 1.f))));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.5f, 0.5f)));
+  drawCoordinateSystem(100.f);
   
   ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
   //drawCube(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -10, 50));
-  drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(-20, -20, 60));
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(1.f, 1.f, 1.f))));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
+ 
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(10.f, 10.f, 10.f))));
+  drawSphere();
+  drawCube(10, 10, 1);
 
-  /*for (int i = 0; i < 10; i++){
-  }
-  for (int i = 0; i < 10; i++){
-    drawSphere(shaderProgram, model, glm::vec3(1, 1, 1), glm::vec3(i, -i * 2, 5));
-  }*/
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(1.f, 1.f, 1.f))));
+  drawGrid(10, 10, 10);
 
-  //drawGrid(10, 10, 10, glm::vec3(0, -50, 200));
-  //drawCoordinateSystem(100.f);
   ////////////////////////////////////////////
 }
 
