@@ -48,9 +48,7 @@ GameObject defaultCamera = GameObject {
 bool showDebugInfo = false;
 engineState state = getDefaultState(1920, 1080);
 FullScene fullscene;
-physicsEnv physicsEnvironment;
 std::map<unsigned int, Mesh> fontMeshes;
-std::vector<btRigidBody*> rigidbodies;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;
@@ -119,11 +117,11 @@ void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = fullscene.scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -140,13 +138,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 }
 void translate(float x, float y, float z){
-  physicsTranslate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  physicsTranslate(fullscene, fullscene.rigidbodies[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
-  physicsScale(fullscene, rigidbodies[state.selectedIndex], state.selectedIndex, x, y, z);
+  physicsScale(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
-  physicsRotate(fullscene, rigidbodies[state.selectedIndex], x, y, z, state.selectedIndex);
+  physicsRotate(fullscene, fullscene.rigidbodies[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
@@ -299,60 +297,6 @@ void onData(std::string data){
 void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
-void printVec3(std::string prefix, glm::vec3 vec){
-  std::cout << prefix << vec.x << "," << vec.y << "," << vec.z << std::endl;
-}
-void printPhysicsInfo(PhysicsInfo physicsInfo){
-  BoundInfo info = physicsInfo.boundInfo;
-  std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
-  std::cout << "y: [ " << info.yMin << ", " << info.yMax << "]" << std::endl;
-  std::cout << "z: [ " << info.zMin << ", " << info.zMax << "]" << std::endl;
-  std::cout << "pos: (" << physicsInfo.gameobject.position.x << ", " << physicsInfo.gameobject.position.y << ", " << physicsInfo.gameobject.position.z << ")" << std::endl;
-  std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
-}
-void dumpPhysicsInfo(){
-  for (unsigned int i = 0; i < rigidbodies.size(); i++){
-    printVec3("PHYSICS:" + std::to_string(i) + ":", getPosition(rigidbodies[i]));
-  }
-}
-void updatePhysicsPositions(std::vector<btRigidBody*>& rigidbodies, FullScene& fullscene){
-  for (unsigned int i = 0; i < rigidbodies.size(); i++){
-    fullscene.scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
-    fullscene.scene.idToGameObjects[i].position = getPosition(rigidbodies[i]);
-    // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
-  }
-}
-void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
-  for (auto const& [id, _] : fullscene.scene.idToGameObjects){
-    auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
-    printPhysicsInfo(physicsInfo);
-
-    if (id == 2){
-      auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position, 1, physicsInfo.gameobject.rotation, false, true);
-      rigidbodies.push_back(rigidPtr);
-      std::cout << "ADDING PTR: " << rigidPtr << std::endl;
-    }else{
-      bool isCollisionVolumeOnly = id == 3;
-      auto rigidPtr = addRigidBody(
-        physicsEnv, 
-        physicsInfo.gameobject.position,
-        physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
-        physicsInfo.gameobject.rotation,
-        id == 1 || isCollisionVolumeOnly,
-        !isCollisionVolumeOnly
-      );
-      rigidbodies.push_back(rigidPtr);
-      std::cout << "ADDING PTR: " << rigidPtr << std::endl;
-    }
-  }
-}
-
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  std::cout << "on object enter: (" << obj1 << " , " << obj2 << ")" << std::endl;
-}
-void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
-}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -489,7 +433,7 @@ int main(int argc, char* argv[]){
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
   fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
-  
+
   schemeBindings  = createStaticSchemeBindings(
     result["scriptpath"].as<std::string>(), 
     moveCamera, 
@@ -522,9 +466,6 @@ int main(int argc, char* argv[]){
 
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
-
-  physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave);
-  addPhysicsBodies(physicsEnvironment, fullscene);
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -574,12 +515,8 @@ int main(int argc, char* argv[]){
         
     handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
     
-    if (dumpPhysics){
-      dumpPhysicsInfo();
-    }
     if (enablePhysics){
-      stepPhysicsSimulation(physicsEnvironment, 1.f / 60.f);
-      updatePhysicsPositions(rigidbodies, fullscene);     
+      onPhysicsFrame(fullscene, dumpPhysics); 
     }
 
     glfwPollEvents();
@@ -608,7 +545,7 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   
   cleanup:    
-    deinitPhysics(physicsEnvironment); 
+    deinitPhysics(fullscene.physicsEnvironment); 
     cleanupSocket(serverInstance);
     stopSoundSystem();
     glfwTerminate(); 
