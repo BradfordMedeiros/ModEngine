@@ -1,12 +1,16 @@
 #include "./scenegraph.h"
 
 GameObject getGameObject(glm::vec3 position, std::string name, short id){
+  auto physicsOptions = physicsOpts {
+    .enabled = false,
+  };
   GameObject gameObject = {
     .id = id,
     .name = name,
     .position = position,
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
     .rotation = glm::quat(0, 0, 0, 1.0f),
+    .physicsOptions = physicsOptions,
   };
   return gameObject;
 }
