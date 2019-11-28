@@ -1,29 +1,23 @@
-# Generated scene 
-sceneparent:position:10.000000 -5.000000 20.000000
-sceneparent:scale:1.000000 1.000000 1.000000
-sceneparent:rotation:0.000000 0.000000 -6.283185
-sceneparent:mesh:./res/models/box/box.obj
-maincolumn:position:-8.699997 0.000000 9.199999
-maincolumn:scale:4.599998 2.000000 5.499997
-maincolumn:rotation:1.500000 0.000000 -4.783185
-maincolumn:mesh:./res/models/column_seat/column_seat.obj
-maincolumn:parent:sceneparent
-box1:position:-6.099995 0.000000 -7.899995
+
+collisionobj:position:1.000000 1.000000 1.000000
+collisionobj:scale:1.000000 1.000000 1.000000
+collisionobj:rotation:0.000000 -0.000000 0.000000
+collisionobj:mesh:./res/models/boundingbox/boundingbox.obj
+
+maincolumn:position:-0.199997 0.000000 0.699997
+maincolumn:scale:20.000000 1.000000 20.000000
+maincolumn:rotation:0.000000 -0.000000 0.000000
+maincolumn:mesh:./res/models/box/box.obj
+
+box1:position:11.900009 -11.000000 10.100005
 box1:scale:1.099995 1.000000 1.299996
-box1:rotation:2.100000 -0.000000 -6.283185
+box1:rotation:0.000000 -0.000000 0.000000
 box1:mesh:./res/models/box/box.obj
-box1:parent:sceneparent
-box2:position:6.000000 0.000000 0.000000
-box2:scale:1.000000 1.000000 1.000000
-box2:rotation:0.000000 0.000000 -6.283185
-box2:mesh:./res/models/boundingbox/boundingbox.obj
-box2:parent:sceneparent
-#box2:disabled
 
->cam1:position:-1.400000 4.400006 0.000000
->cam1:scale:1.000000 1.000000 1.000000
->cam1:rotation:3.092487 0.356204 -3.140663
->cam2:position:-8.999999 -21.300035 -20.400042
->cam2:scale:1.000000 1.000000 1.000000
->cam2:rotation:1.339998 0.052597 -6.202919
+box1:physics:shape_sphere
+box1:physics:dynamic
 
+box2:position:-6.599995 -24.000000 8.100006
+box2:scale:6.299998 8.699997 5.899998
+box2:rotation:0.000000 -0.000000 0.000000
+box2:mesh:./res/models/box/box.obj
