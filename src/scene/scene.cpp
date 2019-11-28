@@ -19,9 +19,9 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
 void printVec3(std::string prefix, glm::vec3 vec){
   std::cout << prefix << vec.x << "," << vec.y << "," << vec.z << std::endl;
 }
-void dumpPhysicsInfo(std::vector<btRigidBody*>& rigidbodies){
-  for (unsigned int i = 0; i < rigidbodies.size(); i++){
-    printVec3("PHYSICS:" + std::to_string(i) + ":", getPosition(rigidbodies[i]));
+void dumpPhysicsInfo(std::map<short, btRigidBody*>& rigidbodys){
+  for (auto [i, rigidBody]: rigidbodys){
+    printVec3("PHYSICS:" + std::to_string(i) + ":", getPosition(rigidBody));
   }
 }
 
@@ -60,28 +60,49 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
   return info;
 }
 
-void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene, std::vector<btRigidBody*>& rigidbodies){
-  for (auto const& [id, _] : fullscene.scene.idToGameObjects){
+float maxvalue(float x, float y, float z){
+  if (x >= y && x >= z){
+    return x;
+  }
+  if (y >= x && y >= z){
+    return y;
+  }
+  return z;
+}
+
+void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
+  for (auto const& [id, gameObject] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
 
-    if (id == 2){
-      auto rigidPtr = addRigidBody(physicsEnv, physicsInfo.gameobject.position, 1, physicsInfo.gameobject.rotation, false, true);
-      rigidbodies.push_back(rigidPtr);
-      std::cout << "ADDING PTR: " << rigidPtr << std::endl;
-    }else{
-      bool isCollisionVolumeOnly = id == 3;
-      auto rigidPtr = addRigidBody(
+    auto physicsOptions = gameObject.physicsOptions;
+    btRigidBody* rigidBody;
+    if (physicsOptions.shape == BOX){
+      std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
+      rigidBody = addRigidBody(
         physicsEnv, 
-        physicsInfo.gameobject.position,
+        physicsInfo.gameobject.position, 
         physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
         physicsInfo.gameobject.rotation,
-        id == 1 || isCollisionVolumeOnly,
-        !isCollisionVolumeOnly
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions
       );
-      rigidbodies.push_back(rigidPtr);
-      std::cout << "ADDING PTR: " << rigidPtr << std::endl;
+    }else if (physicsOptions.shape == SPHERE){
+      std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
+      rigidBody = addRigidBody(
+        physicsEnv, 
+        physicsInfo.gameobject.position,
+        maxvalue(physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z),                             
+        physicsInfo.gameobject.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions
+      );
+    }else{
+      std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
+      exit(1);
     }
+
+    fullscene.rigidbodys[id] = rigidBody;
   }
 }
 
@@ -96,7 +117,6 @@ FullScene deserializeFullScene(std::string content){
   };
 
   Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields);
-
   auto physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave);
 
   FullScene fullscene = {
@@ -105,7 +125,7 @@ FullScene deserializeFullScene(std::string content){
     .objectMapping = objectMapping,
     .physicsEnvironment = physicsEnvironment,
   };
-  addPhysicsBodies(fullscene.physicsEnvironment, fullscene, fullscene.rigidbodies);
+  addPhysicsBodies(fullscene.physicsEnvironment, fullscene);
 
   return fullscene;
 }
@@ -172,18 +192,19 @@ void applyPhysicsScaling(FullScene& scene, btRigidBody* body, short index, glm::
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
 
-void updatePhysicsPositions(Scene& scene, std::vector<btRigidBody*>& rigidbodies){
-  for (unsigned int i = 0; i < rigidbodies.size(); i++){
-    scene.idToGameObjects[i].rotation = getRotation(rigidbodies[i]);
-    scene.idToGameObjects[i].position = getPosition(rigidbodies[i]);
+void updatePhysicsPositions(Scene& scene, std::map<short, btRigidBody*>& rigidbodys){
+  for (auto [i, rigidBody]: rigidbodys){
+    scene.idToGameObjects[i].rotation = getRotation(rigidBody);
+    scene.idToGameObjects[i].position = getPosition(rigidBody);
     // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
   }
+
 }
 
 void onPhysicsFrame(FullScene& fullscene, bool dumpPhysics){
   if (dumpPhysics){
-    dumpPhysicsInfo(fullscene.rigidbodies);
+    dumpPhysicsInfo(fullscene.rigidbodys);
   }
   stepPhysicsSimulation(fullscene.physicsEnvironment, 1.f / 60.f);
-  updatePhysicsPositions(fullscene.scene, fullscene.rigidbodies);    
+  updatePhysicsPositions(fullscene.scene, fullscene.rigidbodys);    
 }

@@ -14,7 +14,7 @@ struct FullScene {
   std::map<std::string, Mesh> meshes;
   std::map<short, GameObjectObj> objectMapping;
   physicsEnv physicsEnvironment;
-  std::vector<btRigidBody*> rigidbodies;
+  std::map<short, btRigidBody*> rigidbodys;
 };
 
 struct PhysicsInfo {

@@ -10,8 +10,13 @@
 #include "./common/mesh.h"
 #include "../common/util.h"
 
+enum ColliderShape { BOX, SPHERE };
+
 struct physicsOpts {
   bool enabled;
+  bool isStatic;
+  bool hasCollisions;
+  ColliderShape shape;
 };
 
 struct GameObject {

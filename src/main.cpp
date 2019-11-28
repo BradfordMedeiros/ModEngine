@@ -117,11 +117,11 @@ void processManipulator(){
   if (state.enableManipulator){
     auto selectObject = fullscene.scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -138,13 +138,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 }
 void translate(float x, float y, float z){
-  physicsTranslate(fullscene, fullscene.rigidbodies[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  physicsTranslate(fullscene, fullscene.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
-  physicsScale(fullscene, fullscene.rigidbodies[state.selectedIndex], state.selectedIndex, x, y, z);
+  physicsScale(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
-  physicsRotate(fullscene, fullscene.rigidbodies[state.selectedIndex], x, y, z, state.selectedIndex);
+  physicsRotate(fullscene, fullscene.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){

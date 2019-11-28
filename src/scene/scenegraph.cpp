@@ -3,6 +3,9 @@
 GameObject getGameObject(glm::vec3 position, std::string name, short id){
   auto physicsOptions = physicsOpts {
     .enabled = false,
+    .isStatic = true,
+    .hasCollisions = true,
+    .shape = BOX,
   };
   GameObject gameObject = {
     .id = id,
@@ -64,6 +67,24 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
       glm::vec3 eulerAngles = parseVec(tok.payload);
       glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
       scene.idToGameObjects[objectId].rotation = rotation;
+    }else if (tok.attribute == "physics"){
+      auto physicsOptions = scene.idToGameObjects[objectId].physicsOptions;
+      if (tok.payload == "enabled"){
+        physicsOptions.enabled = true;
+      }
+      if (tok.payload == "disabled"){
+        physicsOptions.enabled = false;
+      }
+      if (tok.payload == "dynamic"){
+        physicsOptions.isStatic = false;
+      }
+      if (tok.payload == "nocollide"){
+        physicsOptions.hasCollisions = false;
+      }
+      if (tok.payload == "shape_sphere"){
+        physicsOptions.shape = SPHERE;
+      }
+      scene.idToGameObjects[objectId].physicsOptions = physicsOptions;
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
         short parentId = scene.id;
