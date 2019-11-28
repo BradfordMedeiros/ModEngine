@@ -70,6 +70,8 @@ float maxvalue(float x, float y, float z){
   return z;
 }
 
+// @todo - this currently adds a physics body for every single object 
+// no good, this should only add if enabled. 
 void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
   for (auto const& [id, gameObject] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
