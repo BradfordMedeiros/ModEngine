@@ -313,6 +313,7 @@ int main(int argc, char* argv[]){
    ("l,listen", "Start server instance (listen)", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
+   ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
@@ -324,6 +325,7 @@ int main(int argc, char* argv[]){
     return 0;
   }
   bool enablePhysics = result["physics"].as<bool>();
+  bool showPhysicsColliders = result["bounds"].as<bool>();
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   const std::string texturePath = result["texture"].as<std::string>();
