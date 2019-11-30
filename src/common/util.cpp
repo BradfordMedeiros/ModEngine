@@ -28,3 +28,9 @@ std::vector<std::string> split(std::string strToSplit, char delimeter){
   }
   return splittedStrings;
 }
+
+std::string print(glm::vec3 vec){
+  std::stringstream stream;
+  stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+  return stream.str();
+}

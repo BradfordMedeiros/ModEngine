@@ -14,7 +14,8 @@ glm::vec3 move(glm::vec3 position, glm::vec3 offset){
   return glm::vec3(position.x + offset.x, position.y + offset.y, position.z + offset.z);
 }
 glm::mat4 renderView(glm::vec3 position, glm::quat orientation){
-  return glm::translate(glm::toMat4(orientation), position);
+  return glm::translate(glm::toMat4(orientation), glm::vec3(position.x * -1, position.y * - 1, position.z * -1));
+  
 }
 
 glm::vec3 getVecAxis(ManipulatorAxis axis){

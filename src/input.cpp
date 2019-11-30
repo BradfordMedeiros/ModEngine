@@ -77,16 +77,16 @@ void handleInput(GLFWwindow *window, float deltaTime,
     glfwSetWindowShouldClose(window, true);
   }
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-    moveCamera(glm::vec3(0.0, 0.0, 1.0f));
-  }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-    moveCamera(glm::vec3(1.0, 0.0, 0.0));
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
     moveCamera(glm::vec3(0.0, 0.0, -1.0f));
   }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+    moveCamera(glm::vec3(-1.0, 0.0, 0.0));
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
+    moveCamera(glm::vec3(0.0, 0.0, 1.0f));
+  }
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
-    moveCamera(glm::vec3(-1.0, 0.0, 0.0f));
+    moveCamera(glm::vec3(1.0, 0.0, 0.0f));
   }
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
     nextCamera();

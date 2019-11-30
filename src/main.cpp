@@ -40,7 +40,7 @@ GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
   .name = "defaultCamera",
-  .position = glm::vec3(-8.0f, 4.0f, -8.0f),
+  .position = glm::vec3(-8.0f, -4.0f, -8.0f),
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
