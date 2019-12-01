@@ -114,7 +114,7 @@ void selectItem(){
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
-  if (state.enableManipulator){
+  if (state.enableManipulator && state.selectedIndex != -1){
     auto selectObject = fullscene.scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
       applyPhysicsTranslation(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
@@ -138,12 +138,21 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 }
 void translate(float x, float y, float z){
+  if (state.selectedIndex == -1){
+    return;
+  }
   physicsTranslate(fullscene, fullscene.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
+  if (state.selectedIndex == -1){
+    return;
+  }
   physicsScale(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
+  if (state.selectedIndex == -1){
+    return;
+  }
   physicsRotate(fullscene, fullscene.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
