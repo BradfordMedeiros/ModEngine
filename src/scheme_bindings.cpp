@@ -72,7 +72,7 @@ void onKeyCallback(int key, int scancode, int action, int mods){
 struct gameObject {
   short id;
 };
-SCM gameObjectType;
+SCM gameObjectType;   // this is modified during init
 std::vector<short> (*getObjByType)(std::string);
 SCM lsObjectsByType(SCM value){
   std::string objectType = scm_to_locale_string(value);
@@ -123,12 +123,33 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
   
-  auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));
+  auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   // shouldnt this be double?
   auto y = scm_to_double(scm_list_ref(positon, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(positon, scm_from_int64(2)));
   setGameObjectPosn(obj->id, glm::vec3(x, y, z));
   return SCM_UNSPECIFIED;
 }
+
+glm::quat (*getGameObjectRotn)(short index);
+SCM getGameObjectRotation(SCM value){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  glm::vec3 pos = getGameObjectPosn(obj->id);
+  SCM list = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(pos.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(pos.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(pos.z));
+  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(10.f));
+  return SCM_UNSPECIFIED;
+
+}
+void (*setGameObjectRotn)(short index, glm::quat rotation);
+SCM setGameObjectRotation(SCM value, SCM rotation){
+  return SCM_UNSPECIFIED;
+}
+
+
 SCM getGameObjectId(SCM value){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
@@ -159,6 +180,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
+  glm::quat (*getGameObjectRot)(short index),
+  void (*setGameObjectRot)(short index, glm::quat rotation),
   short (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled)
 ){
@@ -175,17 +198,19 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   getGameObjNameForId = getGameObjectNameForId;
   getGameObjectPosn = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
+  //getGameObjectRotn = getGameObjectRot;
+  //setGameObjectRotn = setGameObjectRotn;
   getGameObjName = getGameObjectByName;
 
-  scm_c_define_gsubr("setSelectionMode", 1, 0, 0, (void *)setSelectionMod);
-  scm_c_define_gsubr("setCamera", 1, 0, 0, (void *)setActiveCam);
-	scm_c_define_gsubr("movCam", 3, 0, 0, (void *)scmMoveCamera);
-	scm_c_define_gsubr("rotCam", 2, 0, 0, (void *)scmRotateCamera);
-	scm_c_define_gsubr("mkObj", 2, 1, 1, (void *)makeObject);
-	scm_c_define_gsubr("rmObj", 1, 0, 0, (void *)removeObject);
-  scm_c_define_gsubr("lsObjByType", 1, 0, 0, (void *)lsObjectsByType);
-  scm_c_define_gsubr("lsObjByName", 1, 0, 0, (void *)getGameObjByName);
-  scm_c_define_gsubr("drawText", 4, 0, 0, (void *)drawTextWords);
+  scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
+  scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);
+	scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);
+	scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
+	scm_c_define_gsubr("mk-obj", 2, 1, 1, (void *)makeObject);
+	scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
+  scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
+  scm_c_define_gsubr("lsobj-name", 1, 0, 0, (void *)getGameObjByName);
+  scm_c_define_gsubr("draw-text", 4, 0, 0, (void *)drawTextWords);
  
   // Gameobject funcs
   SCM name = scm_from_utf8_symbol("gameobj");
@@ -196,7 +221,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
-  ////
+  //////////////////////////////////////////////////////////////////////////////
   
   scm_c_primitive_load(scriptPath.c_str());
 

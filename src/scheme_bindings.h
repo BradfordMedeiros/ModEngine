@@ -31,6 +31,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	std::string (*getGameObjectNameForId)(short id),
 	glm::vec3 (*getGameObjectPos)(short index),
 	void (*setGameObjectPos)(short index, glm::vec3 pos),
+  glm::quat (*getGameObjectRot)(short index),
+  void (*setGameObjectRot)(short index, glm::quat rotation),
 	short (*getGameObjectByName)(std::string name),
 	void (*setSelectionMode)(bool enabled)
 );

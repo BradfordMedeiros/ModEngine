@@ -186,6 +186,12 @@ glm::vec3 getGameObjectPosition(short index){
 void setGameObjectPosition(short index, glm::vec3 pos){
   fullscene.scene.idToGameObjects[index].position = pos;
 }
+void setGameObjectRotation(short index, glm::quat rotation){
+  fullscene.scene.idToGameObjects[index].rotation = rotation;
+}
+glm::quat getGameObjectRotation(short index){
+   return fullscene.scene.idToGameObjects[index].rotation;
+}
 short getGameObjectByName(std::string name){
   for (auto [id, gameObj]: fullscene.scene.idToGameObjects){
     if (gameObj.name == name){
@@ -194,6 +200,7 @@ short getGameObjectByName(std::string name){
   }
   return -1;
 }
+
 void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
@@ -448,6 +455,8 @@ int main(int argc, char* argv[]){
     getGameObjectName,
     getGameObjectPosition,
     setGameObjectPosition,
+    getGameObjectRotation,
+    setGameObjectRotation,
     getGameObjectByName,
     setSelectionMode
   );
