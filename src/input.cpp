@@ -67,7 +67,7 @@ void handleInput(GLFWwindow *window, float deltaTime,
      makeObject("testobject", "./res/models/cone/cone.obj", 0, 10, 0);
   }
   if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
-    sendMoveObjectMessage();
+    //sendMoveObjectMessage();
   }
 
   if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
