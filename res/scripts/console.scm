@@ -1,3 +1,4 @@
+(use-modules (ice-9 eval-string))
 
 (define (onMouse button action mods) (display ""))
 (define (onObjSelected selectedIndex) (display ""))
@@ -5,17 +6,20 @@
 
 (define lineHistory #())
 (define (logToHistory lineText)
-  (display (string-append "line text length is " (number->string (string-length lineText))))
   (cond 
-    ((equal? lineText "CLEAR")  (set! lineHistory #()))
-    ((equal? lineText "QUIT") (exit))
-    (#t (set! lineHistory (list->vector (reverse (cons lineText (reverse (vector->list lineHistory)))))))
+    ((equal? lineText ";clear")  (set! lineHistory #()))
+    ((equal? lineText ";quit") (exit))
+    (#t (begin 
+      (set! lineHistory (list->vector (reverse (cons lineText (reverse (vector->list lineHistory))))))
+      (display (string-append "evaling: " lineText "\n"))
+      (eval-string lineText)
+    ))
   )
 )
 
 (define currentLineBuffer "")
 (define (appendToBuffer value)
-  (set! currentLineBuffer (string-append currentLineBuffer value))
+  (set! currentLineBuffer (string-append currentLineBuffer (string-downcase value)))
 )
 (define (submitBuffer)
   (logToHistory currentLineBuffer)
