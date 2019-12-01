@@ -500,7 +500,7 @@ int main(int argc, char* argv[]){
     }
 
     glm::mat4 view;
-    if (state.useDefaultCamera){
+    if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.position, defaultCamera.rotation);
     }else{
       view = renderView(activeCameraObj->position, activeCameraObj->rotation);
