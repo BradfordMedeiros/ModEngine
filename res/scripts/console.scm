@@ -3,7 +3,6 @@
 (define (onMouse button action mods) (display ""))
 (define (onObjSelected selectedIndex) (display ""))
 
-
 (define lineHistory #())
 (define (logToHistory lineText)
   (cond 
@@ -32,25 +31,25 @@
 
 (define (drawFrame numLines fontSize offsetY)
   (define currentHeight 0)
-  (drawText "ModTerminal" 10 (+ offsetY currentHeight) fontSize)
+  (draw-text "ModTerminal" 10 (+ offsetY currentHeight) fontSize)
   (set! currentHeight (+ currentHeight 10))
-  (drawText "--------------------------------------" 10 (+ offsetY currentHeight) 1)
+  (draw-text "--------------------------------------" 10 (+ offsetY currentHeight) 1)
   (do ((row (- numLines 1) (- row 1))) ((< row 0))
     (let* ((historyLength (vector-length lineHistory)) (lineIndex (- historyLength row)))
       (if (and (< lineIndex historyLength) (>= lineIndex 0))
         (begin 
           (set! currentHeight (+ currentHeight 10))
-          (drawText (vector-ref lineHistory lineIndex) 10 (+ offsetY currentHeight) fontSize)
+          (draw-text (vector-ref lineHistory lineIndex) 10 (+ offsetY currentHeight) fontSize)
         )
       )
     )
   )
   (set! currentHeight (+ currentHeight 10))
-  (drawText "//////////////////////////////" 10 (+ offsetY currentHeight) 2)
+  (draw-text "//////////////////////////////" 10 (+ offsetY currentHeight) 2)
   (set! currentHeight (+ currentHeight 10))
-  (drawText currentLineBuffer 10 (+ offsetY currentHeight) fontSize)
+  (draw-text currentLineBuffer 10 (+ offsetY currentHeight) fontSize)
   (set! currentHeight (+ currentHeight 10))
-  (drawText "//////////////////////////////" 10 (+ offsetY currentHeight) 2)
+  (draw-text "//////////////////////////////" 10 (+ offsetY currentHeight) 2)
 )
 
 
