@@ -3,12 +3,12 @@
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight){
 	engineState state = {
 		.visualizeNormals = false,
-		.showCameras = true,
+		.showCameras = false,
 		.isSelectionMode = true,
 		.isRotateSelection = false,
 		.selectedName = "no object selected",
 		.useDefaultCamera = false,
-		.moveRelativeEnabled= false,
+		.moveRelativeEnabled = false,
 		.mode = 0,  // 0 = translate mode, 1 = scale mode, 2 = rotate
 		.axis = 0,  // 0 = x, 1 = y, 2 = z
 	  .currentScreenWidth = initialScreenWidth,
