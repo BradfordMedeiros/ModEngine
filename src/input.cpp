@@ -1,6 +1,9 @@
 #include "./input.h"
 
-void onMouse(GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
+void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
+    if (disableInput){
+      return;
+    }
     if(state.firstMouse){
         state.lastX = xpos;
         state.lastY = ypos;
@@ -26,9 +29,11 @@ void onMouse(GLFWwindow* window, engineState& state, double xpos, double ypos, v
     }
 }
 
-void mouse_button_callback(GLFWwindow* window, engineState& state, int button, int action, int mods,
+void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,
   void (*handleSerialization) (void), void (*selectItem) (void)){
-
+  if (disableInput){
+    return;
+  }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
     state.enableManipulator = true;
     handleSerialization();
@@ -54,7 +59,7 @@ void mouse_button_callback(GLFWwindow* window, engineState& state, int button, i
 
 }
 
-void handleInput(GLFWwindow *window, float deltaTime, 
+void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
   engineState& state, 
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
@@ -63,18 +68,21 @@ void handleInput(GLFWwindow *window, float deltaTime,
   void sendMoveObjectMessage(),
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z)
 ){
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+    glfwSetWindowShouldClose(window, true);
+  }
+  if (disableInput){    // we return after escape, so escape still quits
+    return;
+  }
+
   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
      makeObject("testobject", "./res/models/cone/cone.obj", 0, 10, 0);
   }
   if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
     //sendMoveObjectMessage();
   }
-
   if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
     setObjectDimensions(1, 10, 5, 10);
-  }
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-    glfwSetWindowShouldClose(window, true);
   }
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
     moveCamera(glm::vec3(0.0, 0.0, -1.0f));

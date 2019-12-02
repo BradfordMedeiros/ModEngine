@@ -128,16 +128,11 @@ void processManipulator(){
 }
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  if (disableInput){
-    return;
-  }
-  onMouse(window, state, xpos, ypos, rotateCamera);
+  onMouse(disableInput, window, state, xpos, ypos, rotateCamera);
   processManipulator();
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
-  if (!disableInput){
-    mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
-  }
+  mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization, selectItem);
   schemeBindings.onMouseCallback(button, action, mods);
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -541,9 +536,7 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    if (!disableInput){
-      handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
-    }
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
     
     if (enablePhysics){
       onPhysicsFrame(fullscene, dumpPhysics); 

@@ -6,12 +6,12 @@
 #include "./state.h"
 #include "./common/util.h"
 
-void mouse_button_callback(GLFWwindow* window, engineState& state, int button, int action, int mods, 
+void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods, 
 	void (*handleSerialization) (void), void (*selectItem) (void)
 );
-void onMouse(GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float));
+void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float));
 
-void handleInput(GLFWwindow *window, float deltaTime, 
+void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
 	engineState& state, 
 	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),

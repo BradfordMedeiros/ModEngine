@@ -7,7 +7,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.isSelectionMode = true,
 		.isRotateSelection = false,
 		.selectedName = "no object selected",
-		.useDefaultCamera = true,
+		.useDefaultCamera = false,
 		.moveRelativeEnabled= false,
 		.mode = 0,  // 0 = translate mode, 1 = scale mode, 2 = rotate
 		.axis = 0,  // 0 = x, 1 = y, 2 = z
