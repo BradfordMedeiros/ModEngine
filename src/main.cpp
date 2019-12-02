@@ -46,6 +46,7 @@ GameObject defaultCamera = GameObject {
 };
 
 bool showDebugInfo = false;
+bool disableInput = false;
 engineState state = getDefaultState(1920, 1080);
 FullScene fullscene;
 std::map<unsigned int, Mesh> fontMeshes;
@@ -127,11 +128,16 @@ void processManipulator(){
 }
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
+  if (disableInput){
+    return;
+  }
   onMouse(window, state, xpos, ypos, rotateCamera);
   processManipulator();
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
-  mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
+  if (!disableInput){
+    mouse_button_callback(window, state, button, action, mods, handleSerialization, selectItem);
+  }
   schemeBindings.onMouseCallback(button, action, mods);
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -331,6 +337,7 @@ int main(int argc, char* argv[]){
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
+   ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
@@ -356,6 +363,7 @@ int main(int argc, char* argv[]){
   if (isServer){
     serverInstance = createServer();;
   }
+  disableInput = result["noinput"].as<bool>();
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -533,7 +541,9 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
+    if (!disableInput){
+      handleInput(window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
+    }
     
     if (enablePhysics){
       onPhysicsFrame(fullscene, dumpPhysics); 
