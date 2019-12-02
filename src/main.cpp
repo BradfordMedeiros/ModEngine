@@ -34,8 +34,6 @@
 #include "./input.h"
 #include "./network.h"
 
-const bool SHELL_ENABLED = false;
-
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
@@ -472,10 +470,6 @@ int main(int argc, char* argv[]){
     getGameObjectByName,
     setSelectionMode
   );
-
-  if (SHELL_ENABLED){
-    std::thread shellThread(startShell);
-  }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);

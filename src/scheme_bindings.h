@@ -37,6 +37,4 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	void (*setSelectionMode)(bool enabled)
 );
 
-void startShell();		// this isn't thread safe and dont feel like writing thread sync code atm
-
 #endif

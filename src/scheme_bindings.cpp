@@ -1,9 +1,5 @@
 #include "./scheme_bindings.h"
 
-void* startGuile(void* data){
-	return NULL;
-}
-
 void (*selectionMode)(bool enabled);
 SCM setSelectionMod(SCM value){
   selectionMode(scm_to_bool(value));
@@ -235,10 +231,4 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   return callbackFuncs;
 }
 
-void startShell(){
-  scm_with_guile(&startGuile, NULL);
-  int argc = 0;
-  char* argv[] = { { } };
-  scm_shell(argc, argv);
-}
 
