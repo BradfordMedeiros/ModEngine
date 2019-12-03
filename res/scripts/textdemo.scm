@@ -14,6 +14,7 @@
 (define textBuffer "")
 (define textToWrite "enter text here")
 
+(define (onKeyChar char) (+ 0 0))
 (define (onKey key scancode action mods)
 	(if (= action 0) 
 		(begin 

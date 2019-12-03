@@ -1,10 +1,11 @@
 (use-modules (ice-9 eval-string))
 
+
 (define (onMouse button action mods) (display ""))
 (define (onObjSelected selectedIndex) (display ""))
 
 (define lineHistory #())
-(define (logToHistory lineText)
+(define (executeCommand lineText)
   (cond 
     ((equal? lineText ";clear")  (set! lineHistory #()))
     ((equal? lineText ";quit") (exit))
@@ -18,10 +19,10 @@
 
 (define currentLineBuffer "")
 (define (appendToBuffer value)
-  (set! currentLineBuffer (string-append currentLineBuffer (string-downcase value)))
+  (set! currentLineBuffer (string-append currentLineBuffer value))
 )
 (define (submitBuffer)
-  (logToHistory currentLineBuffer)
+  (executeCommand currentLineBuffer)
   (set! currentLineBuffer "")
 )
 (define (backspaceBuffer)
@@ -69,9 +70,15 @@
       (cond
         ((= key 257) (submitBuffer)) 
         ((= key 259) (backspaceBuffer))
-        (#t (appendToBuffer (string (integer->char key))))
+        (#t (+ 0 0))
       )
     )
+  )
+)
+
+(define (onKeyChar key)
+  (if (and showConsole (not (= key 96)))
+    (appendToBuffer (string (integer->char key)))
   )
 )
 

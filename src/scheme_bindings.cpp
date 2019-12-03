@@ -63,6 +63,10 @@ void onKeyCallback(int key, int scancode, int action, int mods){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKey"));
   scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods));  
 }
+void onKeyCharCallback(unsigned int codepoint){
+   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKeyChar"));
+   scm_call_1(func_symbol, scm_from_unsigned_integer(codepoint));
+}
 
 struct gameObject {
   short id;
@@ -236,6 +240,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
     .onMouseCallback = onMouseCallback,
     .onObjectSelected = onObjectSelected,
     .onKeyCallback = onKeyCallback,
+    .onKeyCharCallback = onKeyCharCallback,
   };
 
   return callbackFuncs;
