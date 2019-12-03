@@ -64,7 +64,6 @@ void onKeyCallback(int key, int scancode, int action, int mods){
   scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods));  
 }
 
-// Gameobject manipulation
 struct gameObject {
   short id;
 };
@@ -131,17 +130,26 @@ SCM getGameObjectRotation(SCM value){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  glm::vec3 pos = getGameObjectPosn(obj->id);
-  SCM list = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
-  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(pos.x));
-  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(pos.y));
-  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(pos.z));
-  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(10.f));
-  return SCM_UNSPECIFIED;
+  glm::quat rot = getGameObjectRotn(obj->id);
+  SCM list = scm_make_list(scm_from_unsigned_integer(4), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(rot.w));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(rot.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(rot.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(rot.z));
+  return list;
 
 }
 void (*setGameObjectRotn)(short index, glm::quat rotation);
 SCM setGameObjectRotation(SCM value, SCM rotation){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  
+  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));   // shouldnt this be double?
+  auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
+  auto y = scm_to_double(scm_list_ref(rotation, scm_from_int64(2)));
+  auto z = scm_to_double(scm_list_ref(rotation, scm_from_int64(3)));
+  setGameObjectRotn(obj->id, glm::quat(w, x, y, z));
   return SCM_UNSPECIFIED;
 }
 
@@ -194,8 +202,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   getGameObjNameForId = getGameObjectNameForId;
   getGameObjectPosn = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
-  //getGameObjectRotn = getGameObjectRot;
-  //setGameObjectRotn = setGameObjectRotn;
+  getGameObjectRotn = getGameObjectRot;
+  setGameObjectRotn = setGameObjectRotn;
   getGameObjName = getGameObjectByName;
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
@@ -215,6 +223,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   gameObjectType = scm_make_foreign_object_type(name, slots, finalizer);
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
+  scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)getGameObjectRotation);
+  scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
   //////////////////////////////////////////////////////////////////////////////
