@@ -11,13 +11,23 @@
   (set! lineHistory (list->vector (reverse (cons lineText (reverse (vector->list lineHistory))))))
 )
 
+(define (catchAsString thunk)
+  (catch #t thunk
+    (lambda (key . parameters)
+      (format (current-error-port) "Uncaught throw to '~a: ~a\n" key parameters)
+      "<< ERROR >>"
+    )
+  )
+)
+
+
 (define (executeCommand lineText)
   (cond 
     ((equal? lineText ";clear")  (set! lineHistory #()))
     ((equal? lineText ";quit") (exit))
     (#t (begin 
       (appendHistory lineText)
-      (let ((result (eval-string lineText)))
+      (let ((result (catchAsString (lambda () (eval-string lineText)))))
         (appendHistory (format #f "; >result: ~y" result))
       )
     ))
@@ -130,3 +140,4 @@
     (appendToBuffer (string (integer->char key)))
   )
 )
+
