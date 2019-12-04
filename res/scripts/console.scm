@@ -25,29 +25,34 @@
 )
 
 (define (splitString line cursorFromEnd)
-  (list 
-    (substring line 0 (- (string-length line) cursorFromEnd))  
-    (substring line (- (string-length line) cursorFromEnd) (string-length line))
-  ) 
+  (list (substring line 0 (- (string-length line) cursorFromEnd)) (substring line (- (string-length line) cursorFromEnd) (string-length line))) 
 )
 
 (define currentLineBuffer "")
 (define (appendToBuffer value)
-  (set! currentLineBuffer (string-append currentLineBuffer value))
+  (let ((splittedString (splitString currentLineBuffer cursorFromEnd)))
+    (set! currentLineBuffer (string-append (car splittedString) value (cadr splittedString)))
+  )
 )
 (define (submitBuffer)
   (executeCommand currentLineBuffer)
   (set! currentLineBuffer "")
   (set! activeLineIndex (vector-length lineHistory))
+  (set! cursorFromEnd 0)
 )
 (define (backspaceBuffer)
-  (set! currentLineBuffer (substring currentLineBuffer 0 (max 0 (- (string-length currentLineBuffer) 1))))
+  (if (not (equal? cursorFromEnd (string-length currentLineBuffer)))
+    (let* ((splittedString (splitString currentLineBuffer cursorFromEnd)) (firstString (car splittedString)) (secString (cadr splittedString)))
+      (set! currentLineBuffer (string-append (substring firstString 0 (- (string-length firstString) 1)) secString))
+    )
+  )
 )
 (define (upArrow)
   (if (not (= activeLineIndex 0))
     (begin
       (set! activeLineIndex (- activeLineIndex 1))
       (set! currentLineBuffer (vector-ref lineHistory activeLineIndex))
+      (set! cursorFromEnd 0)
     )
   )
 )
@@ -56,11 +61,12 @@
     (begin
       (set! activeLineIndex (+ activeLineIndex 1))
       (set! currentLineBuffer (vector-ref lineHistory activeLineIndex))
+      (set! cursorFromEnd 0)
     )
   )
 )
-(define (leftArrow)  (set! cursorFromEnd (+ cursorFromEnd 1)))
-(define (rightArrow) (set! cursorFromEnd (- cursorFromEnd 1)))
+(define (leftArrow)  (if (< cursorFromEnd (string-length currentLineBuffer)) (set! cursorFromEnd (+ cursorFromEnd 1))))
+(define (rightArrow) (if (> cursorFromEnd 0 )                                (set! cursorFromEnd (- cursorFromEnd 1))))
 
 
 (define (currentLineWithCursor line cursorPos)
@@ -74,7 +80,7 @@
   (set! currentHeight (+ currentHeight 10))
   (draw-text "--------------------------------------" 10 (+ offsetY currentHeight) 1)
   (do ((row (- numLines 1) (- row 1))) ((< row 0))
-    (let* ((historyLength (vector-length lineHistory)) (lineIndex (- historyLength row)))
+    (let* ((historyLength (vector-length lineHistory)) (lineIndex (- historyLength row 1)))
       (if (and (< lineIndex historyLength) (>= lineIndex 0))
         (begin 
           (set! currentHeight (+ currentHeight 10))
@@ -92,9 +98,10 @@
 )
 
 
+(define buffer-size 20)
 (define (onFrame)
   (if showConsole
-    (drawFrame 10 4 100)
+    (drawFrame buffer-size 4 100)
   )
 )
 
@@ -123,4 +130,3 @@
     (appendToBuffer (string (integer->char key)))
   )
 )
-
