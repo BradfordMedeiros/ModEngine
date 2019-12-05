@@ -122,7 +122,7 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
   
-  auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   // shouldnt this be double?
+  auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(positon, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(positon, scm_from_int64(2)));
   setGameObjectPosn(obj->id, glm::vec3(x, y, z));
@@ -149,7 +149,7 @@ SCM setGameObjectRotation(SCM value, SCM rotation){
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
   
-  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));   // shouldnt this be double?
+  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
   auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
   auto y = scm_to_double(scm_list_ref(rotation, scm_from_int64(2)));
   auto z = scm_to_double(scm_list_ref(rotation, scm_from_int64(3)));
@@ -207,7 +207,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   getGameObjectPosn = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
   getGameObjectRotn = getGameObjectRot;
-  setGameObjectRotn = setGameObjectRotn;
+  setGameObjectRotn = setGameObjectRot;
   getGameObjName = getGameObjectByName;
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
