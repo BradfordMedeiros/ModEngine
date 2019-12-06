@@ -470,6 +470,7 @@ int main(int argc, char* argv[]){
     setGameObjectPosition,
     getGameObjectRotation,
     setGameObjectRotation,
+    setFrontDelta,
     getGameObjectByName,
     setSelectionMode
   );

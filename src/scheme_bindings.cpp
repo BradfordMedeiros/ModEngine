@@ -129,32 +129,46 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   return SCM_UNSPECIFIED;
 }
 
+glm::quat scmListToQuat(SCM rotation){
+  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
+  auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
+  auto y = scm_to_double(scm_list_ref(rotation, scm_from_int64(2)));
+  auto z = scm_to_double(scm_list_ref(rotation, scm_from_int64(3)));  
+  return  glm::quat(w, x, y, z);
+}
+SCM scmQuatToSCM(glm::quat rotation){
+  SCM list = scm_make_list(scm_from_unsigned_integer(4), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(rotation.w));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(rotation.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(rotation.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(rotation.z));
+  return list;
+}
+
 glm::quat (*getGameObjectRotn)(short index);
 SCM getGameObjectRotation(SCM value){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
   glm::quat rot = getGameObjectRotn(obj->id);
-  SCM list = scm_make_list(scm_from_unsigned_integer(4), scm_from_unsigned_integer(0));
-  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(rot.w));
-  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(rot.x));
-  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(rot.y));
-  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(rot.z));
-  return list;
-
+  return scmQuatToSCM(rot);
 }
 void (*setGameObjectRotn)(short index, glm::quat rotation);
 SCM setGameObjectRotation(SCM value, SCM rotation){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  
-  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
-  auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
-  auto y = scm_to_double(scm_list_ref(rotation, scm_from_int64(2)));
-  auto z = scm_to_double(scm_list_ref(rotation, scm_from_int64(3)));
-  setGameObjectRotn(obj->id, glm::quat(w, x, y, z));
+  setGameObjectRotn(obj->id, scmListToQuat(rotation));
   return SCM_UNSPECIFIED;
+}
+
+glm::quat (*_setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
+SCM scm_setFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
+  glm::quat intialOrientation = scmListToQuat(orientation);
+  auto deltaY = scm_to_double(deltaYaw);
+  auto deltaP = scm_to_double(deltaPitch);
+  auto deltaR = scm_to_double(deltaRoll); 
+  return scmQuatToSCM(_setFrontDelta(intialOrientation, deltaY, deltaP, deltaR, 1));
 }
 
 
@@ -190,6 +204,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   glm::quat (*getGameObjectRot)(short index),
   void (*setGameObjectRot)(short index, glm::quat rotation),
+  glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   short (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled)
 ){
@@ -208,6 +223,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   setGameObjectPosn = setGameObjectPos;
   getGameObjectRotn = getGameObjectRot;
   setGameObjectRotn = setGameObjectRot;
+  _setFrontDelta = setFrontDelta;
   getGameObjName = getGameObjectByName;
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
@@ -231,6 +247,10 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
+
+  // UTILITY FUNCTIONS
+  scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void *)scm_setFrontDelta);
+
   //////////////////////////////////////////////////////////////////////////////
   
   scm_c_primitive_load(scriptPath.c_str());

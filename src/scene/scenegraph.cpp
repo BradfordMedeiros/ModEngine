@@ -106,7 +106,6 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
         }
       }
     }
-
   }
 
   for( auto const& [id, gameobjectH] : scene.idToGameObjectsH ){

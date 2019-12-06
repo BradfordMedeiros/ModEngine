@@ -36,6 +36,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	void (*setGameObjectPos)(short index, glm::vec3 pos),
   glm::quat (*getGameObjectRot)(short index),
   void (*setGameObjectRot)(short index, glm::quat rotation),
+  glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
 	short (*getGameObjectByName)(std::string name),
 	void (*setSelectionMode)(bool enabled)
 );
