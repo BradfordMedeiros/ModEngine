@@ -195,10 +195,10 @@ glm::vec3 getGameObjectPosition(short index){
   return fullscene.scene.idToGameObjects[index].position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
-  fullscene.scene.idToGameObjects[index].position = pos;
+  physicsTranslateSet(fullscene, fullscene.rigidbodys[index], pos, index);
 }
 void setGameObjectRotation(short index, glm::quat rotation){
-  fullscene.scene.idToGameObjects[index].rotation = rotation;
+  physicsRotateSet(fullscene, fullscene.rigidbodys[index], rotation,  index);
 }
 glm::quat getGameObjectRotation(short index){
    return fullscene.scene.idToGameObjects[index].rotation;

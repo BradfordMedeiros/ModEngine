@@ -160,10 +160,18 @@ void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y,
   fullscene.scene.idToGameObjects[index].position = newPosition;
   setPosition(body, newPosition);
 }
+void physicsTranslateSet(FullScene& fullscene, btRigidBody* body, glm::vec3 pos, short index){
+  fullscene.scene.idToGameObjects[index].position = pos;
+  setPosition(body, pos);
+}
 
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index){
   glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 5);
   fullscene.scene.idToGameObjects[index].rotation  = rotation;
+  setRotation(body, rotation);
+}
+void physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotation, short index){
+  fullscene.scene.idToGameObjects[index].rotation = rotation;
   setRotation(body, rotation);
 }
 

@@ -27,7 +27,9 @@ FullScene deserializeFullScene(std::string content);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 void addObjectToFullScene(FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
 void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
+void physicsTranslateSet(FullScene& fullScene, btRigidBody* body, glm::vec3 pos, short index);
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index);
+void physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotation, short index);  // this sets to rotation
 void physicsScale(FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z);
 void applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
