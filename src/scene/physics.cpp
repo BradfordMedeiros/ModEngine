@@ -145,6 +145,13 @@ void printRigidBodyInfo(btRigidBody* body){
   std::cout << "position: (" << origin.x << " , " << origin.y << " , " << origin.z << " )" << std::endl;
 }
 
+void applyImpulse(btRigidBody* body, btVector3 force){
+  body -> applyCentralImpulse(force);
+}
+void clearImpulse(btRigidBody* body){
+  body -> applyCentralImpulse(btVector3(0.f, 0.f, 0.f));
+}
+
 void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not
   std::cout << "INFO: DEINIT: physics system" << std::endl;
   delete env.dynamicsWorld;
