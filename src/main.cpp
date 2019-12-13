@@ -216,6 +216,13 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
+void applyImpulse(short index, glm::vec3 impulse){
+  applyImpulse(fullscene.rigidbodys[index], impulse);
+}
+void clearImpulse(short index){
+  clearImpulse(fullscene.rigidbodys[index]);
+}
+
 void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
   glm::mat4 modelMatrix = glm::translate(model, object.position);
@@ -472,7 +479,9 @@ int main(int argc, char* argv[]){
     setGameObjectRotation,
     setFrontDelta,
     getGameObjectByName,
-    setSelectionMode
+    setSelectionMode,
+    applyImpulse,
+    clearImpulse
   );
 
   glfwSetCursorPosCallback(window, onMouseEvents); 

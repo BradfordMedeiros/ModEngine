@@ -145,8 +145,8 @@ void printRigidBodyInfo(btRigidBody* body){
   std::cout << "position: (" << origin.x << " , " << origin.y << " , " << origin.z << " )" << std::endl;
 }
 
-void applyImpulse(btRigidBody* body, btVector3 force){
-  body -> applyCentralImpulse(force);
+void applyImpulse(btRigidBody* body, glm::vec3 force){
+  body -> applyCentralImpulse(btVector3(force.x, force.y, force.z));
 }
 void clearImpulse(btRigidBody* body){
   body -> applyCentralImpulse(btVector3(0.f, 0.f, 0.f));

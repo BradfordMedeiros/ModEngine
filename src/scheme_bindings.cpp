@@ -206,7 +206,9 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   short (*getGameObjectByName)(std::string name),
-  void (*setSelectionMode)(bool enabled)
+  void (*setSelectionMode)(bool enabled),
+  void (*applyImpulse)(short index, glm::vec3 impulse),
+  void (*clearImpulse)(short index)
 ){
   scm_init_guile();
   
