@@ -1,19 +1,18 @@
-
-(define board (make-vector 2 23 3 4 ))
-
-
-(setupdate update)
-
-- get object pos/scale/rot
-- update object pos/scale/rot
-
-- get objects by type (camera/etc)
-- get objects by labels (user specified)
-
-- add object
-- delete object
-
-- move-active-camera
-
-
-(getobjectws)
+1. oncollision callback to scheme
+2. render layers
+3. blending ability (each layer blends and you specify alpha mask i guess)
+4. sound management system play multiple sounds (maybe just load sounds globally into scene to begin with?)
+5. play sounds scheme api
+6. look into how to get animations
+7. multi scene serialization/deserialization
+8. voxel creation.
+9. world chunking
+10. advanced lighting
+11. animation control loops.
+12. support normal maps.
+13. support emission maps. 
+14. support phong lighting
+15. support dynamic lighting.
+16. support specular lighting.
+17. maybe skybox (maybe not, since can already do a cube skybox right?)
+18. options api to expose user options to set from userland code.
