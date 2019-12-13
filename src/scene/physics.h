@@ -29,6 +29,10 @@ glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
 void setScale(btRigidBody* body, float width, float height, float depth);
+
+void applyImpulse(btRigidBody* body);
+void clearImpulse(btRigidBody* body);
+
 void printRigidBodyInfo(btRigidBody* body);
 
 #endif 
