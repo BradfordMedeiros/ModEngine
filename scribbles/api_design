@@ -16,3 +16,4 @@
 16. support specular lighting.
 17. maybe skybox (maybe not, since can already do a cube skybox right?)
 18. options api to expose user options to set from userland code.
+19. animated textures
