@@ -171,6 +171,25 @@ SCM scm_setFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRo
   return scmQuatToSCM(_setFrontDelta(intialOrientation, deltaY, deltaP, deltaR, 1));
 }
 
+void (*_applyImpulse)(short index, glm::vec3 impulse);
+SCM scm_applyImpulse(SCM value, SCM impulse){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  auto x = scm_to_double(scm_list_ref(impulse, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(impulse, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(impulse, scm_from_int64(2)));
+  _applyImpulse(obj -> id, glm::vec3(x, y, z));
+  return SCM_UNSPECIFIED;
+}
+void (*_clearImpulse)(short index);
+SCM scm_clearImpulse(SCM value){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  _clearImpulse(obj -> id);
+  return SCM_UNSPECIFIED;
+}
 
 SCM getGameObjectId(SCM value){
   gameObject *obj;
@@ -226,6 +245,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   getGameObjectRotn = getGameObjectRot;
   setGameObjectRotn = setGameObjectRot;
   _setFrontDelta = setFrontDelta;
+  _applyImpulse = applyImpulse;
+  _clearImpulse = clearImpulse;
   getGameObjName = getGameObjectByName;
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
@@ -252,6 +273,10 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 
   // UTILITY FUNCTIONS
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void *)scm_setFrontDelta);
+
+  // physics functions
+  scm_c_define_gsubr("applyimpulse", 2, 0, 0, (void *)scm_applyImpulse);
+  scm_c_define_gsubr("clearimpulse", 1, 0, 0, (void *)scm_clearImpulse);
 
   //////////////////////////////////////////////////////////////////////////////
   
