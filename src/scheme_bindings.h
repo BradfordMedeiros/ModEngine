@@ -17,7 +17,8 @@ typedef void(*onobjectSelectedFunc)(short index);
 
 struct SchemeBindingCallbacks {
     func onFrame;
-    colfun onCollision;
+    colfun onCollisionEnter;
+    colfun onCollisionExit;
     mousecallback onMouseCallback;
     onobjectSelectedFunc onObjectSelected;
     keycallback onKeyCallback;

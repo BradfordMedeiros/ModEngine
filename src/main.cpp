@@ -324,12 +324,11 @@ void sendMoveObjectMessage(){
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollision(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
+  schemeBindings.onCollisionEnter(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollision(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
+  schemeBindings.onCollisionExit(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
 }
-
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
