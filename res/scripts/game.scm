@@ -28,6 +28,6 @@
 )
 
 
-(define (onCollide)
-  (display "on collide placeholder")
+(define (onCollide obj1 obj2)
+  (display (string-append "collision " (number->string obj1) "-" (number->string obj2) "\n"))
 )

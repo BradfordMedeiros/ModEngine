@@ -2,14 +2,15 @@
 
 bool collisionInList(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions, std::pair<const btCollisionObject*, const btCollisionObject*> collisionPair){
   for (auto collisionPairCheck : currentCollisions){
-    if (collisionPair.first == collisionPairCheck.first && collisionPair.second == collisionPairCheck.second || collisionPair.first == collisionPairCheck.second && collisionPair.second == collisionPairCheck.first){
+    if (collisionPair.first == collisionPairCheck.first  && collisionPair.second == collisionPairCheck.second || 
+        collisionPair.first == collisionPairCheck.second && collisionPair.second == collisionPairCheck.first){
       return true;
     }
   }
   return false;
 }
 
-void  onCollisionDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2){}
+void onCollisionDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2){}
 
 CollisionCache::CollisionCache(){
   this -> onObjectEnter = onCollisionDoNothing;

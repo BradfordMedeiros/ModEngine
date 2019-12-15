@@ -9,6 +9,7 @@
 #include <limits>       
 
 typedef void(*func)();
+typedef void(*colfun)(short obj1, short obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
@@ -16,7 +17,7 @@ typedef void(*onobjectSelectedFunc)(short index);
 
 struct SchemeBindingCallbacks {
     func onFrame;
-    func onCollision;
+    colfun onCollision;
     mousecallback onMouseCallback;
     onobjectSelectedFunc onObjectSelected;
     keycallback onKeyCallback;

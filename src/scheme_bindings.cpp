@@ -55,9 +55,9 @@ void onFrame(){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
   scm_call_0(func_symbol);
 }
-void onCollision(){
+void onCollision(short obj1, short obj2){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCollide"));
-  scm_call_0(func_symbol);
+  scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
 }
 
 void onMouseCallback(int button, int action, int mods){

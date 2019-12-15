@@ -35,6 +35,7 @@ void applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, g
 void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void applyPhysicsScaling(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void onPhysicsFrame(FullScene& fullscene, bool dumpPhysics);
+short getIdForCollisionObject(FullScene& fullscene,  const btCollisionObject* body);
 
 #endif
 

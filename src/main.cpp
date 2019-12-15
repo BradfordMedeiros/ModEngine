@@ -324,12 +324,10 @@ void sendMoveObjectMessage(){
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  std::cout << "on object enter: (" << obj1 << " , " << obj2 << ")" << std::endl;
-  schemeBindings.onCollision();
+  schemeBindings.onCollision(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
-  schemeBindings.onCollision();
+  schemeBindings.onCollision(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
 }
 
 

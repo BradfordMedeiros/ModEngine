@@ -101,6 +101,15 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
   }
 }
 
+short getIdForCollisionObject(FullScene& fullscene, const btCollisionObject* body){
+  for (auto const&[id, rigidbody] : fullscene.rigidbodys){
+    if (rigidbody == body){
+      return id;
+    }
+  }
+  return -1;
+}
+
 FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
   std::map<std::string, Mesh> meshes;
   auto objectMapping = getObjectMapping();
