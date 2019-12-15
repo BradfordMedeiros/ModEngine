@@ -1,12 +1,5 @@
 #include "./scene.h"
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  std::cout << "on object enter: (" << obj1 << " , " << obj2 << ")" << std::endl;
-}
-void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
-}
-
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
@@ -108,7 +101,7 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
   }
 }
 
-FullScene deserializeFullScene(std::string content){
+FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
   std::map<std::string, Mesh> meshes;
   auto objectMapping = getObjectMapping();
 

@@ -1,13 +1,12 @@
 1. oncollision callback to scheme
-2. render layers
-3. blending ability (each layer blends and you specify alpha mask i guess)
-4. sound management system play multiple sounds (maybe just load sounds globally into scene to begin with?)
-5. play sounds scheme api
-6. look into how to get animations
-7. multi scene serialization/deserialization
-8. voxel creation.
-9. world chunking
-10. advanced lighting
+3. render layers
+4. blending ability (each layer blends and you specify alpha mask i guess)
+5. sound management system play multiple sounds (maybe just load sounds globally into scene to begin with?)
+6. play sounds scheme api
+7. look into how to get animations
+8. multi scene serialization/deserialization
+9. voxel creation.
+10. world chunking
 11. animation control loops.
 12. support normal maps.
 13. support emission maps. 
@@ -15,5 +14,8 @@
 15. support dynamic lighting.
 16. support specular lighting.
 17. maybe skybox (maybe not, since can already do a cube skybox right?)
-18. options api to expose user options to set from userland code.
-19. animated textures
+18. animated textures (apng format maybe?)
+
+
+some minor work:
+1. on callbacks in scheme should be optional

@@ -55,6 +55,11 @@ void onFrame(){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
   scm_call_0(func_symbol);
 }
+void onCollision(){
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCollide"));
+  scm_call_0(func_symbol);
+}
+
 void onMouseCallback(int button, int action, int mods){
   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onMouse"));
   scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
@@ -284,6 +289,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 
   SchemeBindingCallbacks callbackFuncs = {
     .onFrame = onFrame,
+    .onCollision = onCollision,
     .onMouseCallback = onMouseCallback,
     .onObjectSelected = onObjectSelected,
     .onKeyCallback = onKeyCallback,

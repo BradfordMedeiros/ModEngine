@@ -23,7 +23,7 @@ struct PhysicsInfo {
   glm::vec3 collisionInfo;
 };
 
-FullScene deserializeFullScene(std::string content);
+FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 void addObjectToFullScene(FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
 void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);

@@ -26,3 +26,8 @@
 (define (onFrame)
   (+ 0 0)
 )
+
+
+(define (onCollide)
+  (display "on collide placeholder")
+)

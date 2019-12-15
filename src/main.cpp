@@ -323,6 +323,16 @@ void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
 
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
+  std::cout << "on object enter: (" << obj1 << " , " << obj2 << ")" << std::endl;
+  schemeBindings.onCollision();
+}
+void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
+  std::cout << "on object leave: (" << obj1 << " , " << obj2 << ")" << std::endl;
+  schemeBindings.onCollision();
+}
+
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -461,8 +471,6 @@ int main(int argc, char* argv[]){
   fontMeshes = loadFontMeshes(fontToRender);
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
-
   schemeBindings  = createStaticSchemeBindings(
     result["scriptpath"].as<std::string>(), 
     moveCamera, 
@@ -483,6 +491,8 @@ int main(int argc, char* argv[]){
     applyImpulse,
     clearImpulse
   );
+
+  fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"), onObjectEnter, onObjectLeave);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
