@@ -28,6 +28,10 @@
 )
 
 
-(define (onCollide obj1 obj2)
-  (display (string-append "collision " (number->string obj1) "-" (number->string obj2) "\n"))
+(define (onCollideEnter obj1 obj2)
+  (display (string-append "collision enter " (number->string obj1) "-" (number->string obj2) "\n"))
+)
+
+(define (onCollideExit obj1 obj2)
+  (display (string-append "collision exit" (number->string obj1) "-" (number->string obj2) "\n"))
 )
