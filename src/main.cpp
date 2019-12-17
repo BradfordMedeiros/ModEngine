@@ -223,7 +223,7 @@ void clearImpulse(short index){
   clearImpulse(fullscene.rigidbodys[index]);
 }
 
-void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
+void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
   glm::mat4 modelMatrix = glm::translate(model, object.position);
   modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
@@ -255,16 +255,16 @@ void drawGameobject(GameObjectH objectH, Scene& scene, GLint shaderProgram, glm:
   renderObject(objectH.id, fullscene.objectMapping, fullscene.meshes["./res/models/box/box.obj"], objectSelected, fullscene.meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
 
   for (short id: objectH.children){
-    drawGameobject(fullscene.scene.idToGameObjectsH[id], scene, shaderProgram, modelMatrix, useSelectionColor);
+    drawGameobject(fullscene.scene.idToGameObjectsH[id], fullscene, shaderProgram, modelMatrix, useSelectionColor);
   }
 }
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
+void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
 
   for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
-    drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], scene, shaderProgram, model, useSelectionColor);
+    drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], fullscene, shaderProgram, model, useSelectionColor);
   }  
 
   ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
@@ -544,7 +544,7 @@ int main(int argc, char* argv[]){
 
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    renderScene(fullscene.scene, selectionProgram, projection, view, glm::mat4(1.0f), true);
+    renderScene(fullscene, selectionProgram, projection, view, glm::mat4(1.0f), true);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -569,7 +569,7 @@ int main(int argc, char* argv[]){
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    renderScene(fullscene.scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
+    renderScene(fullscene, shaderProgram, projection, view, glm::mat4(1.0f), false);
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();
