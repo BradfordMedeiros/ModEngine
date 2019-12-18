@@ -8,6 +8,7 @@
 #include "./object_types.h"
 #include "./common/mesh.h"
 #include "../translations.h"
+#include "../common/util.h"
 
 struct FullScene {
   Scene scene;

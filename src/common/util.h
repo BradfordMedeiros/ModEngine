@@ -18,4 +18,6 @@ enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 
 std::string print(glm::vec3 vec);
 
+float maxvalue(float x, float y, float z);
+
 #endif

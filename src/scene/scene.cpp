@@ -53,16 +53,6 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
   return info;
 }
 
-float maxvalue(float x, float y, float z){
-  if (x >= y && x >= z){
-    return x;
-  }
-  if (y >= x && y >= z){
-    return y;
-  }
-  return z;
-}
-
 // @todo - this currently adds a physics body for every single object 
 // no good, this should only add if enabled. 
 void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
