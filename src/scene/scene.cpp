@@ -110,6 +110,17 @@ short getIdForCollisionObject(FullScene& fullscene, const btCollisionObject* bod
   return -1;
 }
 
+physicsEnv createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
+  auto physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave);
+  return physicsEnvironment;
+}
+void addSceneToWorld(physicsEnv& env, FullScene& scene){
+  addPhysicsBodies(env, scene);
+}
+void removeSceneFromWorld(physicsEnv& env, FullScene& scene){
+  // this needs to be implemented
+}
+
 FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
   std::map<std::string, Mesh> meshes;
   auto objectMapping = getObjectMapping();
