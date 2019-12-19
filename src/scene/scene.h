@@ -10,12 +10,15 @@
 #include "../translations.h"
 #include "../common/util.h"
 
+struct World {
+  physicsEnv physicsEnvironment;
+  std::map<short, btRigidBody*> rigidbodys;
+};
+
 struct FullScene {
   Scene scene;
   std::map<std::string, Mesh> meshes;
   std::map<short, GameObjectObj> objectMapping;
-  physicsEnv physicsEnvironment;
-  std::map<short, btRigidBody*> rigidbodys;
 };
 
 struct PhysicsInfo {
@@ -25,8 +28,8 @@ struct PhysicsInfo {
 };
 
 
-physicsEnv createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
-void addSceneToWorld(physicsEnv& env, FullScene& scene);
+World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
+void addSceneToWorld(World& world, physicsEnv& env, FullScene& scene);
 void removeSceneFromWorld(physicsEnv& env, FullScene& scene);
 
 FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
@@ -41,8 +44,8 @@ void physicsScale(FullScene& fullscene, btRigidBody* body, short index, float x,
 void applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void applyPhysicsScaling(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void onPhysicsFrame(FullScene& fullscene, bool dumpPhysics);
-short getIdForCollisionObject(FullScene& fullscene,  const btCollisionObject* body);
+void onPhysicsFrame(World& world, FullScene& fullscene, bool dumpPhysics);
+short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 
 #endif
 

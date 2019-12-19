@@ -47,6 +47,8 @@ bool showDebugInfo = false;
 bool disableInput = false;
 engineState state = getDefaultState(1920, 1080);
 FullScene fullscene;
+World world;
+
 std::map<unsigned int, Mesh> fontMeshes;
 
 glm::mat4 projection;
@@ -116,11 +118,11 @@ void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1){
     auto selectObject = fullscene.scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -143,19 +145,19 @@ void translate(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsTranslate(fullscene, fullscene.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  physicsTranslate(fullscene, world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsScale(fullscene, fullscene.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
+  physicsScale(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsRotate(fullscene, fullscene.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
+  physicsRotate(fullscene, world.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
@@ -195,10 +197,10 @@ glm::vec3 getGameObjectPosition(short index){
   return fullscene.scene.idToGameObjects[index].position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
-  physicsTranslateSet(fullscene, fullscene.rigidbodys[index], pos, index);
+  physicsTranslateSet(fullscene, world.rigidbodys[index], pos, index);
 }
 void setGameObjectRotation(short index, glm::quat rotation){
-  physicsRotateSet(fullscene, fullscene.rigidbodys[index], rotation,  index);
+  physicsRotateSet(fullscene, world.rigidbodys[index], rotation,  index);
 }
 glm::quat getGameObjectRotation(short index){
    return fullscene.scene.idToGameObjects[index].rotation;
@@ -217,10 +219,10 @@ void setSelectionMode(bool enabled){
 }
 
 void applyImpulse(short index, glm::vec3 impulse){
-  applyImpulse(fullscene.rigidbodys[index], impulse);
+  applyImpulse(world.rigidbodys[index], impulse);
 }
 void clearImpulse(short index){
-  clearImpulse(fullscene.rigidbodys[index]);
+  clearImpulse(world.rigidbodys[index]);
 }
 
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
@@ -324,10 +326,10 @@ void sendMoveObjectMessage(){
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionEnter(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
+  schemeBindings.onCollisionEnter(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionExit(getIdForCollisionObject(fullscene, obj1), getIdForCollisionObject(fullscene, obj2));
+  schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
 }
 
 int main(int argc, char* argv[]){
@@ -489,7 +491,9 @@ int main(int argc, char* argv[]){
     clearImpulse
   );
 
+  world = createWorld(onObjectEnter, onObjectLeave);
   fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"), onObjectEnter, onObjectLeave);
+  addSceneToWorld(world, world.physicsEnvironment, fullscene);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -558,7 +562,7 @@ int main(int argc, char* argv[]){
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
     
     if (enablePhysics){
-      onPhysicsFrame(fullscene, dumpPhysics); 
+      onPhysicsFrame(world, fullscene, dumpPhysics); 
     }
 
     glfwPollEvents();
@@ -587,7 +591,7 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   
   cleanup:    
-    deinitPhysics(fullscene.physicsEnvironment); 
+    deinitPhysics(world.physicsEnvironment); 
     cleanupSocket(serverInstance);
     stopSoundSystem();
     glfwTerminate(); 

@@ -55,7 +55,7 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
 
 // @todo - this currently adds a physics body for every single object 
 // no good, this should only add if enabled. 
-void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
+void addPhysicsBodies(World& world, physicsEnv physicsEnv, FullScene& fullscene){
   for (auto const& [id, gameObject] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
     printPhysicsInfo(physicsInfo);
@@ -87,12 +87,12 @@ void addPhysicsBodies(physicsEnv physicsEnv, FullScene& fullscene){
       exit(1);
     }
 
-    fullscene.rigidbodys[id] = rigidBody;
+    world.rigidbodys[id] = rigidBody;
   }
 }
 
-short getIdForCollisionObject(FullScene& fullscene, const btCollisionObject* body){
-  for (auto const&[id, rigidbody] : fullscene.rigidbodys){
+short getIdForCollisionObject(World& world, const btCollisionObject* body){
+  for (auto const&[id, rigidbody] : world.rigidbodys){
     if (rigidbody == body){
       return id;
     }
@@ -100,12 +100,14 @@ short getIdForCollisionObject(FullScene& fullscene, const btCollisionObject* bod
   return -1;
 }
 
-physicsEnv createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
-  auto physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave);
-  return physicsEnvironment;
+World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
+  World world = {
+    .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave),
+  };
+  return world;
 }
-void addSceneToWorld(physicsEnv& env, FullScene& scene){
-  addPhysicsBodies(env, scene);
+void addSceneToWorld(World& world, physicsEnv& env, FullScene& scene){
+  addPhysicsBodies(world, env, scene);
 }
 void removeSceneFromWorld(physicsEnv& env, FullScene& scene){
   // this needs to be implemented
@@ -128,9 +130,7 @@ FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnte
     .scene = scene,
     .meshes = meshes,
     .objectMapping = objectMapping,
-    .physicsEnvironment = physicsEnvironment,
   };
-  addPhysicsBodies(fullscene.physicsEnvironment, fullscene);
 
   return fullscene;
 }
@@ -214,10 +214,10 @@ void updatePhysicsPositions(Scene& scene, std::map<short, btRigidBody*>& rigidbo
 
 }
 
-void onPhysicsFrame(FullScene& fullscene, bool dumpPhysics){
+void onPhysicsFrame(World& world, FullScene& fullscene, bool dumpPhysics){
   if (dumpPhysics){
-    dumpPhysicsInfo(fullscene.rigidbodys);
+    dumpPhysicsInfo(world.rigidbodys);
   }
-  stepPhysicsSimulation(fullscene.physicsEnvironment, 1.f / 60.f);
-  updatePhysicsPositions(fullscene.scene, fullscene.rigidbodys);    
+  stepPhysicsSimulation(world.physicsEnvironment, 1.f / 60.f);
+  updatePhysicsPositions(fullscene.scene, world.rigidbodys);    
 }
