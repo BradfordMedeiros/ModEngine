@@ -32,7 +32,7 @@ World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
 void addSceneToWorld(World& world, physicsEnv& env, FullScene& scene);
 void removeSceneFromWorld(physicsEnv& env, FullScene& scene);
 
-FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
+FullScene deserializeFullScene(std::string content);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 
 void addObjectToFullScene(FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);

@@ -113,7 +113,7 @@ void removeSceneFromWorld(physicsEnv& env, FullScene& scene){
   // this needs to be implemented
 }
 
-FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
+FullScene deserializeFullScene(std::string content){
   std::map<std::string, Mesh> meshes;
   auto objectMapping = getObjectMapping();
 
@@ -124,7 +124,6 @@ FullScene deserializeFullScene(std::string content, collisionPairFn onObjectEnte
   };
 
   Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields);
-  auto physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave);
 
   FullScene fullscene = {
     .scene = scene,

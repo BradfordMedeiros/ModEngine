@@ -492,7 +492,7 @@ int main(int argc, char* argv[]){
   );
 
   world = createWorld(onObjectEnter, onObjectLeave);
-  fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"), onObjectEnter, onObjectLeave);
+  fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
   addSceneToWorld(world, world.physicsEnvironment, fullscene);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
