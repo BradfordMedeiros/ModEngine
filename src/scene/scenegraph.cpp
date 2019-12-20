@@ -18,9 +18,8 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id){
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short* id, short parentId){
-  auto gameobjectObj = getGameObject(position, name, *id);
-  *id = *id + 1;
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId){
+  auto gameobjectObj = getGameObject(position, name, id);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
@@ -39,9 +38,13 @@ glm::vec3 parseVec(std::string positionRaw){;
   return glm::vec3(x, y, z);
 }
 
-Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
+Scene createSceneFromTokens(
+  std::vector<Token> tokens,  
+  std::function<void(short, std::string, std::string, std::string)> addObject, 
+  std::vector<Field> fields,
+  short (*getNewObjectId)()
+){
   Scene scene;
-  scene.id = 0;
 
   for (Token tok : tokens){
     std::string objectName = tok.target;
@@ -54,7 +57,7 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
     }
 
     if (!(scene.nameToId.find(objectName) != scene.nameToId.end())){
-      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, &scene.id, -1);
+      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, getNewObjectId(), -1);
       addObject(scene.nameToId[objectName], activeType, "", "");
     }
 
@@ -87,8 +90,8 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
       scene.idToGameObjects[objectId].physicsOptions = physicsOptions;
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
-        short parentId = scene.id;
-        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, &scene.id, -1);
+        short parentId = getNewObjectId();
+        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, parentId, -1);
         addObject(parentId, "default", "", "");
       }
       scene.idToGameObjectsH[objectId].parentId = scene.nameToId[tok.payload];
@@ -117,7 +120,12 @@ Scene createSceneFromTokens(std::vector<Token> tokens,  std::function<void(short
 }
 
 // @todo this parsing is sloppy and buggy... obviously need to harden this..
-Scene deserializeScene(std::string content,  std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields){
+Scene deserializeScene(
+  std::string content,  
+  std::function<void(short, std::string, std::string, std::string)> addObject, 
+  std::vector<Field> fields,  
+  short (*getNewObjectId)()
+){
   std::cout << "INFO: Deserialization: " << std::endl;
 
   std::vector<Token> dtokens;
@@ -145,7 +153,7 @@ Scene deserializeScene(std::string content,  std::function<void(short, std::stri
     }
   }
 
-  return createSceneFromTokens(dtokens, addObject, fields);
+  return createSceneFromTokens(dtokens, addObject, fields, getNewObjectId);
 }
 
 std::string serializeVec(glm::vec3 vec){
@@ -180,8 +188,8 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
-void addObjectToScene(Scene& scene, std::string name, std::string mesh, glm::vec3 position, std::function<void(short, std::string, std::string, std::string)> addObject){
-  addObjectToScene(scene, position, name, &scene.id, -1);
+void addObjectToScene(Scene& scene, std::string name, std::string mesh, glm::vec3 position, short (*getNewObjectId)(), std::function<void(short, std::string, std::string, std::string)> addObject){
+  addObjectToScene(scene, position, name, getNewObjectId(), -1);
   short objectId = scene.nameToId[name];
   addObject(objectId, "default", "-", mesh);
   scene.rootGameObjectsH.push_back(objectId);

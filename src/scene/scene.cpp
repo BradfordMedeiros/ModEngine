@@ -113,6 +113,12 @@ void removeSceneFromWorld(physicsEnv& env, FullScene& scene){
   // this needs to be implemented
 }
 
+static short id = -1;
+short getObjectId(){
+  id++;
+  return id;
+}
+
 FullScene deserializeFullScene(std::string content){
   std::map<std::string, Mesh> meshes;
   auto objectMapping = getObjectMapping();
@@ -123,7 +129,7 @@ FullScene deserializeFullScene(std::string content){
     });
   };
 
-  Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields);
+  Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields, getObjectId);
 
   FullScene fullscene = {
     .scene = scene,
@@ -141,7 +147,7 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
 }
 
 void addObjectToFullScene(FullScene& fullscene, std::string name, std::string meshName, glm::vec3 pos){
-  addObjectToScene(fullscene.scene, name, meshName, pos, [&fullscene](short id, std::string type, std::string field, std::string payload) -> void {
+  addObjectToScene(fullscene.scene, name, meshName, pos, getObjectId, [&fullscene](short id, std::string type, std::string field, std::string payload) -> void {
     addObject(id, type, field, payload, fullscene.objectMapping, fullscene.meshes, "./res/models/box/box.obj", [&fullscene](std::string meshName) -> void { // @todo dup with commented above
       fullscene.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
     });

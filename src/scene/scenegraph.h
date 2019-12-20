@@ -34,7 +34,6 @@ struct GameObjectH {
 };
 
 struct Scene {
-  short id;
   std::vector<short> rootGameObjectsH;
   std::map<short, GameObject> idToGameObjects;
   std::map<short, GameObjectH> idToGameObjectsH;
@@ -55,8 +54,20 @@ struct Field {
 
 
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
-Scene deserializeScene(std::string content, std::function<void(short, std::string, std::string, std::string)> addObject, std::vector<Field> fields);
-void addObjectToScene(Scene& scene, std::string name, std::string mesh,  glm::vec3 position, std::function<void(short, std::string, std::string, std::string)> addObject);
+Scene deserializeScene(
+  std::string content, 
+  std::function<void(short, std::string, std::string, std::string)> addObject, 
+  std::vector<Field> fields,
+  short (*getNewObjectId)()
+);
+void addObjectToScene(
+  Scene& scene, 
+  std::string name, 
+  std::string mesh,  
+  glm::vec3 position, 
+  short (*getNewObjectId)(),
+  std::function<void(short, std::string, std::string, std::string)> addObject
+);
 void removeObjectFromScene(Scene& scene, short id);
 
 #endif

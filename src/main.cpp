@@ -493,6 +493,7 @@ int main(int argc, char* argv[]){
 
   world = createWorld(onObjectEnter, onObjectLeave);
   fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
+  auto fullscene2 = deserializeFullScene(loadFile("./res/scenes/example2.rawscene"));
   addSceneToWorld(world, world.physicsEnvironment, fullscene);
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
@@ -549,6 +550,7 @@ int main(int argc, char* argv[]){
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderScene(fullscene, selectionProgram, projection, view, glm::mat4(1.0f), true);
+    renderScene(fullscene2, selectionProgram, projection, view, glm::mat4(1.0f), true);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -574,6 +576,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     renderScene(fullscene, shaderProgram, projection, view, glm::mat4(1.0f), false);
+    renderScene(fullscene2,shaderProgram, projection, view, glm::mat4(1.0f), false);
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();
