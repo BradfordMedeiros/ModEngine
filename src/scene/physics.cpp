@@ -21,7 +21,7 @@ physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectL
   auto constraintSolver = new btSequentialImpulseConstraintSolver();
   auto dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, colConfig);
 
-  dynamicsWorld -> setGravity(btVector3(0.f, 9.f, 0.f));
+  dynamicsWorld -> setGravity(btVector3(0.f, 1.f, 0.f));
 
   CollisionCache collisionCache(onObjectEnter, onObjectLeave);
 
@@ -137,7 +137,7 @@ void checkCollisions(physicsEnv& env){
 }
 
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
-  env.dynamicsWorld -> stepSimulation(timestep);
+  env.dynamicsWorld -> stepSimulation(timestep, 1);
   checkCollisions(env);
 }
 void printRigidBodyInfo(btRigidBody* body){

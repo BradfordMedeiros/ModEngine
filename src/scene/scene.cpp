@@ -25,9 +25,9 @@ glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
   return glm::vec3(x, y, z);
 }
 
-PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
+PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, short index){
   GameObject obj = fullscene.scene.idToGameObjects[index];
-  auto gameObjV = fullscene.objectMapping[index]; 
+  auto gameObjV = world.objectMapping[index]; 
 
   BoundInfo boundInfo = {
     .xMin = -1, 
@@ -57,7 +57,7 @@ PhysicsInfo getPhysicsInfoForGameObject(FullScene& fullscene, short index){
 // no good, this should only add if enabled. 
 void addPhysicsBodies(World& world, physicsEnv physicsEnv, FullScene& fullscene){
   for (auto const& [id, gameObject] : fullscene.scene.idToGameObjects){
-    auto physicsInfo = getPhysicsInfoForGameObject(fullscene, id);
+    auto physicsInfo = getPhysicsInfoForGameObject(world, fullscene, id);
     printPhysicsInfo(physicsInfo);
 
     auto physicsOptions = gameObject.physicsOptions;
@@ -101,8 +101,11 @@ short getIdForCollisionObject(World& world, const btCollisionObject* body){
 }
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
+  auto objectMapping = getObjectMapping();
+
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave),
+    .objectMapping = objectMapping,
   };
   return world;
 }
@@ -119,13 +122,11 @@ short getObjectId(){
   return id;
 }
 
-FullScene deserializeFullScene(std::string content){
-  std::map<std::string, Mesh> meshes;
-  auto objectMapping = getObjectMapping();
-
-  auto addObjectAndLoadMesh = [&meshes, &objectMapping](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, objectMapping, meshes, "./res/models/box/box.obj", [&meshes](std::string meshName) -> void {  // @todo this is duplicate with commented below
-      meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
+FullScene deserializeFullScene(World& world, short sceneId, std::string content){
+  auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
+    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId](std::string meshName) -> void {  // @todo this is duplicate with commented below
+      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");     // @todo protect against loading this mesh many times. 
+      world.idToScene[sceneId] = sceneId;
     });
   };
 
@@ -133,8 +134,6 @@ FullScene deserializeFullScene(std::string content){
 
   FullScene fullscene = {
     .scene = scene,
-    .meshes = meshes,
-    .objectMapping = objectMapping,
   };
 
   return fullscene;
@@ -146,10 +145,10 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
   });
 }
 
-void addObjectToFullScene(FullScene& fullscene, std::string name, std::string meshName, glm::vec3 pos){
-  addObjectToScene(fullscene.scene, name, meshName, pos, getObjectId, [&fullscene](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, fullscene.objectMapping, fullscene.meshes, "./res/models/box/box.obj", [&fullscene](std::string meshName) -> void { // @todo dup with commented above
-      fullscene.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");
+void addObjectToFullScene(World& world, FullScene& fullscene, std::string name, std::string meshName, glm::vec3 pos){
+  addObjectToScene(fullscene.scene, name, meshName, pos, getObjectId, [&world](short id, std::string type, std::string field, std::string payload) -> void {
+    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void { // @todo dup with commented above
+      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
     });
   });
 }
@@ -183,11 +182,11 @@ void physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotatio
   setRotation(body, rotation);
 }
 
-void physicsScale(FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z){
+void physicsScale(World& world, FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z){
   auto oldScale = fullscene.scene.idToGameObjects[index].scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   fullscene.scene.idToGameObjects[index].scale = newScale;
-  auto collisionInfo = getPhysicsInfoForGameObject(fullscene, index).collisionInfo;
+  auto collisionInfo = getPhysicsInfoForGameObject(world, fullscene, index).collisionInfo;
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
 
@@ -203,10 +202,10 @@ void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm:
   setRotation(body, newRotation);
 }
 
-void applyPhysicsScaling(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+void applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
   auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
   scene.scene.idToGameObjects[index].scale = newScale;
-  auto collisionInfo = getPhysicsInfoForGameObject(scene, index).collisionInfo;
+  auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
 
@@ -219,10 +218,10 @@ void updatePhysicsPositions(Scene& scene, std::map<short, btRigidBody*>& rigidbo
 
 }
 
-void onPhysicsFrame(World& world, FullScene& fullscene, bool dumpPhysics){
+void onPhysicsFrame(World& world, FullScene& fullscene, float timestep, bool dumpPhysics){
   if (dumpPhysics){
     dumpPhysicsInfo(world.rigidbodys);
   }
-  stepPhysicsSimulation(world.physicsEnvironment, 1.f / 60.f);
+  stepPhysicsSimulation(world.physicsEnvironment, timestep);
   updatePhysicsPositions(fullscene.scene, world.rigidbodys);    
 }

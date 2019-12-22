@@ -46,7 +46,6 @@ GameObject defaultCamera = GameObject {
 bool showDebugInfo = false;
 bool disableInput = false;
 engineState state = getDefaultState(1920, 1080);
-FullScene fullscene;
 World world;
 
 std::map<unsigned int, Mesh> fontMeshes;
@@ -71,16 +70,16 @@ float quadVertices[] = {
 };
 
 void setActiveCamera(short cameraId){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(fullscene.objectMapping);
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     return;
   }
-  activeCameraObj = &fullscene.scene.idToGameObjects[cameraId];
+  activeCameraObj = &world.scenes[0].scene.idToGameObjects[cameraId];
   state.selectedIndex = cameraId;
 }
 void nextCamera(){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(fullscene.objectMapping);
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     state.useDefaultCamera = true;    
     activeCameraObj = NULL;
@@ -103,26 +102,27 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 void playSound(){
   playSound(soundBuffer);
 }
-void handleSerialization(){
+void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
-  std::cout << serializeFullScene(fullscene.scene, fullscene.objectMapping) << std::endl;
+  static unsigned int sceneToSerialize = 0;
+  std::cout << serializeFullScene(world.scenes[sceneToSerialize].scene, world.objectMapping) << std::endl;
 }
 void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   state.selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
-  state.selectedName = fullscene.scene.idToGameObjects[state.selectedIndex].name;
+  state.selectedName = world.scenes[0].scene.idToGameObjects[state.selectedIndex].name;
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1){
-    auto selectObject = fullscene.scene.idToGameObjects[state.selectedIndex];
+    auto selectObject = world.scenes[0].scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(world, world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -145,68 +145,68 @@ void translate(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsTranslate(fullscene, world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  physicsTranslate(world.scenes[0], world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsScale(fullscene, world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
+  physicsScale(world, world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsRotate(fullscene, world.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
+  physicsRotate(world.scenes[0], world.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
-  auto gameObjV = fullscene.objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
+  auto gameObjV = world.objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     auto newScale = getScaleEquivalent(meshObj->mesh.boundInfo, width, height, depth);
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-    fullscene.scene.idToGameObjects[state.selectedIndex].scale = newScale;
+    world.scenes[0].scene.idToGameObjects[state.selectedIndex].scale = newScale;
   } 
 }
 
 void removeObjectById(short id){
   std::cout << "removing object by id: " << id << std::endl;
-  removeObject(fullscene.objectMapping, id);
-  removeObjectFromScene(fullscene.scene, id);
+  removeObject(world.objectMapping, id);
+  removeObjectFromScene(world.scenes[0].scene, id);
 }
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObjectToFullScene(fullscene, name, meshName, glm::vec3(x,y,z));
+  addObjectToFullScene(world, world.scenes[0], name, meshName, glm::vec3(x,y,z));
 }
 
 std::vector<short> getObjectsByType(std::string type){
   if (type == "mesh"){
-    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(fullscene.objectMapping);
+    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(world.objectMapping);
     return indexes;
   }else if (type == "camera"){
-    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(fullscene.objectMapping);
+    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
     return indexes;
   }
-  return getGameObjectsIndex(fullscene.objectMapping);
+  return getGameObjectsIndex(world.objectMapping);
 }
 
 std::string getGameObjectName(short index){
-  return fullscene.scene.idToGameObjects[index].name;
+  return world.scenes[0].scene.idToGameObjects[index].name;
 }
 glm::vec3 getGameObjectPosition(short index){
-  return fullscene.scene.idToGameObjects[index].position;
+  return world.scenes[0].scene.idToGameObjects[index].position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
-  physicsTranslateSet(fullscene, world.rigidbodys[index], pos, index);
+  physicsTranslateSet(world.scenes[0], world.rigidbodys[index], pos, index);
 }
 void setGameObjectRotation(short index, glm::quat rotation){
-  physicsRotateSet(fullscene, world.rigidbodys[index], rotation,  index);
+  physicsRotateSet(world.scenes[0], world.rigidbodys[index], rotation,  index);
 }
 glm::quat getGameObjectRotation(short index){
-   return fullscene.scene.idToGameObjects[index].rotation;
+   return world.scenes[0].scene.idToGameObjects[index].rotation;
 }
 short getGameObjectByName(std::string name){
-  for (auto [id, gameObj]: fullscene.scene.idToGameObjects){
+  for (auto [id, gameObj]: world.scenes[0].scene.idToGameObjects){
     if (gameObj.name == name){
       return id;
     }
@@ -235,26 +235,26 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
   
   if (state.visualizeNormals){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    drawMesh(fullscene.meshes["./res/models/cone/cone.obj"]); 
+    drawMesh(world.meshes["./res/models/cone/cone.obj"]); 
   }
 
   modelMatrix = glm::scale(modelMatrix, object.scale);
   
   // bounding code //////////////////////
-  auto gameObjV = fullscene.objectMapping[objectH.id];
+  auto gameObjV = world.objectMapping[objectH.id];
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
   if (meshObj != NULL){
-    auto bounding = getBoundRatio(fullscene.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
+    auto bounding = getBoundRatio(world.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
 
     if (objectSelected){
-      drawMesh(fullscene.meshes["./res/models/boundingbox/boundingbox.obj"]);
+      drawMesh(world.meshes["./res/models/boundingbox/boundingbox.obj"]);
     }
   }
   /////////////////////////////// end bounding code
 
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  renderObject(objectH.id, fullscene.objectMapping, fullscene.meshes["./res/models/box/box.obj"], objectSelected, fullscene.meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
+  renderObject(objectH.id, world.objectMapping, world.meshes["./res/models/box/box.obj"], objectSelected, world.meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
 
   for (short id: objectH.children){
     drawGameobject(fullscene.scene.idToGameObjectsH[id], fullscene, shaderProgram, modelMatrix, useSelectionColor);
@@ -284,7 +284,6 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(1.f, 1.f, 1.f))));
   drawGrid(10, 10, 10);
-
   ////////////////////////////////////////////
 }
 
@@ -317,6 +316,8 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
   }
 }
+
+
 
 void onData(std::string data){
   std::cout << "got data: " << data << std::endl;
@@ -492,9 +493,11 @@ int main(int argc, char* argv[]){
   );
 
   world = createWorld(onObjectEnter, onObjectLeave);
-  fullscene = deserializeFullScene(loadFile("./res/scenes/example.rawscene"));
-  auto fullscene2 = deserializeFullScene(loadFile("./res/scenes/example2.rawscene"));
-  addSceneToWorld(world, world.physicsEnvironment, fullscene);
+  world.scenes.push_back(deserializeFullScene(world, 0, loadFile("./res/scenes/example.rawscene")));
+  world.scenes.push_back(deserializeFullScene(world, 1, loadFile("./res/scenes/example2.rawscene")));
+  for (int i = 0; i < world.scenes.size(); i++){
+    addSceneToWorld(world, world.physicsEnvironment, world.scenes[i]);
+  }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -549,8 +552,10 @@ int main(int argc, char* argv[]){
 
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    renderScene(fullscene, selectionProgram, projection, view, glm::mat4(1.0f), true);
-    renderScene(fullscene2, selectionProgram, projection, view, glm::mat4(1.0f), true);
+    
+    for (int i = 0; i < world.scenes.size(); i++){
+      renderScene(world.scenes[i], selectionProgram, projection, view, glm::mat4(1.0f), true);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -563,8 +568,9 @@ int main(int argc, char* argv[]){
         
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
     
+    std::cout << "delta time is: " << deltaTime << std::endl;
     if (enablePhysics){
-      onPhysicsFrame(world, fullscene, dumpPhysics); 
+      onPhysicsFrame(world, world.scenes[0], deltaTime * 10, dumpPhysics); 
     }
 
     glfwPollEvents();
@@ -575,8 +581,9 @@ int main(int argc, char* argv[]){
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    renderScene(fullscene, shaderProgram, projection, view, glm::mat4(1.0f), false);
-    renderScene(fullscene2,shaderProgram, projection, view, glm::mat4(1.0f), false);
+    for (int i = 0; i < world.scenes.size(); i++){
+      renderScene(world.scenes[i], shaderProgram, projection, view, glm::mat4(1.0f), false);
+    }
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();

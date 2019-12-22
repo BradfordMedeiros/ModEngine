@@ -10,15 +10,17 @@
 #include "../translations.h"
 #include "../common/util.h"
 
+struct FullScene {    // @todo probably get rid of fullscene.  This use to have more stuff moved to world, so now this is obsolete (for now). 
+  Scene scene;
+};
+
 struct World {
   physicsEnv physicsEnvironment;
   std::map<short, btRigidBody*> rigidbodys;
-};
-
-struct FullScene {
-  Scene scene;
-  std::map<std::string, Mesh> meshes;
   std::map<short, GameObjectObj> objectMapping;
+  std::map<std::string, Mesh> meshes;
+  std::vector<FullScene> scenes;
+  std::map<short, short> idToScene;
 };
 
 struct PhysicsInfo {
@@ -27,24 +29,23 @@ struct PhysicsInfo {
   glm::vec3 collisionInfo;
 };
 
-
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
 void addSceneToWorld(World& world, physicsEnv& env, FullScene& scene);
 void removeSceneFromWorld(physicsEnv& env, FullScene& scene);
 
-FullScene deserializeFullScene(std::string content);
+FullScene   deserializeFullScene(World& world, short sceneId, std::string content);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 
-void addObjectToFullScene(FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
-void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
-void physicsTranslateSet(FullScene& fullScene, btRigidBody* body, glm::vec3 pos, short index);
-void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index);
-void physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotation, short index);  // this sets to rotation
-void physicsScale(FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z);
-void applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void applyPhysicsScaling(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void onPhysicsFrame(World& world, FullScene& fullscene, bool dumpPhysics);
+void  addObjectToFullScene(World& world, FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
+void  physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
+void  physicsTranslateSet(FullScene& fullScene, btRigidBody* body, glm::vec3 pos, short index);
+void  physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index);
+void  physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotation, short index);  // this sets to rotation
+void  physicsScale(World& world, FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z);
+void  applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
+void  applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
+void  applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
+void  onPhysicsFrame(World& world, FullScene& fullscene, float timestep, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 
 #endif
