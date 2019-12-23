@@ -36,7 +36,7 @@ void removeSceneFromWorld(physicsEnv& env, FullScene& scene);
 FullScene   deserializeFullScene(World& world, short sceneId, std::string content);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 
-void  addObjectToFullScene(World& world, FullScene& scene, std::string name, std::string meshName, glm::vec3 pos);
+void  addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos);
 void  physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
 void  physicsTranslateSet(FullScene& fullScene, btRigidBody* body, glm::vec3 pos, short index);
 void  physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index);
@@ -45,7 +45,7 @@ void  physicsScale(World& world, FullScene& fullscene, btRigidBody* body, short 
 void  applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void  onPhysicsFrame(World& world, FullScene& fullscene, float timestep, bool dumpPhysics);
+void  onPhysicsFrame(World& world, float timestep, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 
 #endif

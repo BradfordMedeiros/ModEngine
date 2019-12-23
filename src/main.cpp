@@ -75,7 +75,8 @@ void setActiveCamera(short cameraId){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     return;
   }
-  activeCameraObj = &world.scenes[0].scene.idToGameObjects[cameraId];
+  auto sceneId = world.idToScene[cameraId];
+  activeCameraObj = &world.scenes[sceneId].scene.idToGameObjects[cameraId];
   state.selectedIndex = cameraId;
 }
 void nextCamera(){
@@ -110,19 +111,22 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
 void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   state.selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
-  state.selectedName = world.scenes[0].scene.idToGameObjects[state.selectedIndex].name;
+
+  auto sceneId = world.idToScene[state.selectedIndex];
+  state.selectedName = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex].name;
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1){
-    auto selectObject = world.scenes[0].scene.idToGameObjects[state.selectedIndex];
+    auto sceneId = world.idToScene[state.selectedIndex];
+    auto selectObject = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(world, world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(world, world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -145,19 +149,22 @@ void translate(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsTranslate(world.scenes[0], world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  auto sceneId = world.idToScene[state.selectedIndex];
+  physicsTranslate(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsScale(world, world.scenes[0], world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
+  auto sceneId = world.idToScene[state.selectedIndex];
+  physicsScale(world, world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   if (state.selectedIndex == -1){
     return;
   }
-  physicsRotate(world.scenes[0], world.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
+  auto sceneId = world.idToScene[state.selectedIndex];
+  physicsRotate(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
@@ -166,17 +173,19 @@ void setObjectDimensions(short index, float width, float height, float depth){
   if (meshObj != NULL){
     auto newScale = getScaleEquivalent(meshObj->mesh.boundInfo, width, height, depth);
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-    world.scenes[0].scene.idToGameObjects[state.selectedIndex].scale = newScale;
+    auto sceneId = world.idToScene[state.selectedIndex];
+    world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex].scale = newScale;
   } 
 }
 
 void removeObjectById(short id){
   std::cout << "removing object by id: " << id << std::endl;
   removeObject(world.objectMapping, id);
-  removeObjectFromScene(world.scenes[0].scene, id);
+  auto sceneId = world.idToScene[id];
+  removeObjectFromScene(world.scenes[sceneId].scene, id);
 }
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObjectToFullScene(world, world.scenes[0], name, meshName, glm::vec3(x,y,z));
+  addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
 }
 
 std::vector<short> getObjectsByType(std::string type){
@@ -191,24 +200,31 @@ std::vector<short> getObjectsByType(std::string type){
 }
 
 std::string getGameObjectName(short index){
-  return world.scenes[0].scene.idToGameObjects[index].name;
+  auto sceneId = world.idToScene[index];
+  return world.scenes[sceneId].scene.idToGameObjects[index].name;
 }
 glm::vec3 getGameObjectPosition(short index){
-  return world.scenes[0].scene.idToGameObjects[index].position;
+  auto sceneId = world.idToScene[index];
+  return world.scenes[sceneId].scene.idToGameObjects[index].position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
-  physicsTranslateSet(world.scenes[0], world.rigidbodys[index], pos, index);
+  auto sceneId = world.idToScene[index];
+  physicsTranslateSet(world.scenes[sceneId], world.rigidbodys[index], pos, index);
 }
 void setGameObjectRotation(short index, glm::quat rotation){
-  physicsRotateSet(world.scenes[0], world.rigidbodys[index], rotation,  index);
+  auto sceneId = world.idToScene[index];
+  physicsRotateSet(world.scenes[sceneId], world.rigidbodys[index], rotation,  index);
 }
 glm::quat getGameObjectRotation(short index){
-   return world.scenes[0].scene.idToGameObjects[index].rotation;
+  auto sceneId = world.idToScene[index];
+  return world.scenes[sceneId].scene.idToGameObjects[index].rotation;
 }
 short getGameObjectByName(std::string name){
-  for (auto [id, gameObj]: world.scenes[0].scene.idToGameObjects){
-    if (gameObj.name == name){
-      return id;
+  for (int i = 0; i < world.scenes.size(); i++){
+    for (auto [id, gameObj]: world.scenes[i].scene.idToGameObjects){
+      if (gameObj.name == name){
+        return id;
+      }
     }
   }
   return -1;
@@ -568,9 +584,8 @@ int main(int argc, char* argv[]){
         
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
     
-    std::cout << "delta time is: " << deltaTime << std::endl;
     if (enablePhysics){
-      onPhysicsFrame(world, world.scenes[0], deltaTime, dumpPhysics); 
+      onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
 
     glfwPollEvents();

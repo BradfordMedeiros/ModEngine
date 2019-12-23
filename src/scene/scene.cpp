@@ -124,9 +124,9 @@ short getObjectId(){
 
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
   auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId](std::string meshName) -> void {  // @todo this is duplicate with commented below
+    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId, &id](std::string meshName) -> void {  // @todo this is duplicate with commented below
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");     // @todo protect against loading this mesh many times. 
-      world.idToScene[sceneId] = sceneId;
+      world.idToScene[id] = sceneId;
     });
   };
 
@@ -145,10 +145,11 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
   });
 }
 
-void addObjectToFullScene(World& world, FullScene& fullscene, std::string name, std::string meshName, glm::vec3 pos){
-  addObjectToScene(fullscene.scene, name, meshName, pos, getObjectId, [&world](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void { // @todo dup with commented above
+void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
+  addObjectToScene(world.scenes[sceneId].scene, name, meshName, pos, getObjectId, [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
+    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId, &id](std::string meshName) -> void { // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
+      world.idToScene[id] = sceneId;
     });
   });
 }
@@ -209,19 +210,20 @@ void applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, shor
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
 
-void updatePhysicsPositions(Scene& scene, std::map<short, btRigidBody*>& rigidbodys){
+void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
-    scene.idToGameObjects[i].rotation = getRotation(rigidBody);
-    scene.idToGameObjects[i].position = getPosition(rigidBody);
+    auto sceneId = world.idToScene[i];
+    world.scenes[sceneId].scene.idToGameObjects[i].rotation = getRotation(rigidBody);
+    world.scenes[sceneId].scene.idToGameObjects[i].position = getPosition(rigidBody);
     // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
   }
 
 }
 
-void onPhysicsFrame(World& world, FullScene& fullscene, float timestep, bool dumpPhysics){
+void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
   if (dumpPhysics){
     dumpPhysicsInfo(world.rigidbodys);
   }
   stepPhysicsSimulation(world.physicsEnvironment, timestep);
-  updatePhysicsPositions(fullscene.scene, world.rigidbodys);    
+  updatePhysicsPositions(world, world.rigidbodys);    
 }
