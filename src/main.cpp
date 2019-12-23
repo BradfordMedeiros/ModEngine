@@ -240,6 +240,11 @@ void applyImpulse(short index, glm::vec3 impulse){
 void clearImpulse(short index){
   clearImpulse(world.rigidbodys[index]);
 }
+void loadScene(std::string sceneFile){
+  auto sceneIndex = world.scenes.size();
+  world.scenes.push_back(deserializeFullScene(world, sceneIndex, loadFile(sceneFile)));
+  addSceneToWorld(world, world.physicsEnvironment, world.scenes[sceneIndex]);
+}
 
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
@@ -509,11 +514,8 @@ int main(int argc, char* argv[]){
   );
 
   world = createWorld(onObjectEnter, onObjectLeave);
-  world.scenes.push_back(deserializeFullScene(world, 0, loadFile("./res/scenes/example.rawscene")));
-  world.scenes.push_back(deserializeFullScene(world, 1, loadFile("./res/scenes/example2.rawscene")));
-  for (int i = 0; i < world.scenes.size(); i++){
-    addSceneToWorld(world, world.physicsEnvironment, world.scenes[i]);
-  }
+  loadScene("./res/scenes/example.rawscene");
+  loadScene("./res/scenes/example2.rawscene");
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
