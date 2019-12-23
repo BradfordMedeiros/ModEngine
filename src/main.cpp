@@ -570,7 +570,7 @@ int main(int argc, char* argv[]){
     
     std::cout << "delta time is: " << deltaTime << std::endl;
     if (enablePhysics){
-      onPhysicsFrame(world, world.scenes[0], deltaTime * 10, dumpPhysics); 
+      onPhysicsFrame(world, world.scenes[0], deltaTime, dumpPhysics); 
     }
 
     glfwPollEvents();
