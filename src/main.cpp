@@ -219,7 +219,7 @@ glm::quat getGameObjectRotation(short index){
   auto sceneId = world.idToScene[index];
   return world.scenes[sceneId].scene.idToGameObjects[index].rotation;
 }
-short getGameObjectByName(std::string name){
+short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   for (int i = 0; i < world.scenes.size(); i++){
     for (auto [id, gameObj]: world.scenes[i].scene.idToGameObjects){
       if (gameObj.name == name){
