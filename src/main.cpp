@@ -17,6 +17,7 @@
 #include "./scene/physics.h"
 #include "./scene/collision_cache.h"
 #include "./scene/scenegraph.h"
+#include "./scene/worldloader.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
 #include "./scene/common/vectorgfx.h"
@@ -246,6 +247,13 @@ void loadScene(std::string sceneFile){
   world.scenes.push_back(deserializeFullScene(world, sceneIndex, loadFile(sceneFile)));
   addSceneToWorld(world, world.physicsEnvironment, world.scenes[sceneIndex]);
 }
+void unloadScene(int sceneId){  
+  // remove scene from world.scenes
+  // remove all entries in world.rigidbodys
+  // remove all entries in objectmapping
+  // remove free meshes (no way to tell currently if free -> need counting probably) from meshes
+  // remove world.idToScene
+};
 
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
