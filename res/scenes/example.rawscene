@@ -1,4 +1,8 @@
 
+>camtest:position:-74.500000 -59.000000 -37.000000
+>camtest:scale:1.000000 1.000000 1.000000
+>camtest:rotation:-2.152896 0.802106 -2.312180
+
 collisionobj:position:1.000000 1.000000 1.000000
 collisionobj:scale:1.000000 1.000000 1.000000
 collisionobj:rotation:0.000000 -0.000000 0.000000
@@ -13,11 +17,12 @@ box1:position:11.900009 -11.000000 10.100005
 box1:scale:1.099995 1.000000 1.299996
 box1:rotation:0.000000 -0.000000 0.000000
 box1:mesh:./res/models/box/box.obj
-
-box1:physics:shape_sphere
+#box1:physics:shape_sphere
 box1:physics:dynamic
 
 box2:position:-6.599995 -24.000000 8.100006
 box2:scale:6.299998 8.699997 5.899998
 box2:rotation:0.000000 -0.000000 0.000000
 box2:mesh:./res/models/box/box.obj
+box2:physics:dynamic
+#box2:physics:nocollide

@@ -1,5 +1,11 @@
 #include "./scheme_bindings.h"
 
+void (*_loadScene)(std::string);
+SCM scm_loadScene(SCM value){
+  _loadScene(scm_to_locale_string(value));
+  return SCM_UNSPECIFIED;
+}
+
 void (*selectionMode)(bool enabled);
 SCM setSelectionMod(SCM value){
   selectionMode(scm_to_bool(value));
@@ -220,6 +226,7 @@ SCM getGameObjByName(SCM value){
 
 SchemeBindingCallbacks createStaticSchemeBindings(
   std::string scriptPath,
+  void (*loadScene)(std::string),  
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
@@ -240,6 +247,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 ){
   scm_init_guile();
   
+  _loadScene = loadScene;
   selectionMode = setSelectionMode;
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
@@ -258,6 +266,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   _clearImpulse = clearImpulse;
   getGameObjName = getGameObjectByName;
 
+
+  scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
   scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);
 	scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);

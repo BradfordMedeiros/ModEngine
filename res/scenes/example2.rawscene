@@ -10,3 +10,4 @@ meshskybox:position:1.000000 25.000000 1.000000
 meshskybox:scale:400 400 400
 meshskybox:rotation:0.000000 -0.000000 -6.283185
 meshskybox:mesh:./res/models/box/box.obj
+meshskybox:physics:nocollide

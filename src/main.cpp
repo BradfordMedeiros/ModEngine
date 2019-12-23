@@ -241,6 +241,7 @@ void clearImpulse(short index){
   clearImpulse(world.rigidbodys[index]);
 }
 void loadScene(std::string sceneFile){
+  std::cout << "INFO: SCENE MANAGEMENT: loading " << sceneFile << std::endl;
   auto sceneIndex = world.scenes.size();
   world.scenes.push_back(deserializeFullScene(world, sceneIndex, loadFile(sceneFile)));
   addSceneToWorld(world, world.physicsEnvironment, world.scenes[sceneIndex]);
@@ -494,6 +495,7 @@ int main(int argc, char* argv[]){
 
   schemeBindings  = createStaticSchemeBindings(
     result["scriptpath"].as<std::string>(), 
+    loadScene,
     moveCamera, 
     rotateCamera, 
     removeObjectById, 
@@ -515,7 +517,6 @@ int main(int argc, char* argv[]){
 
   world = createWorld(onObjectEnter, onObjectLeave);
   loadScene("./res/scenes/example.rawscene");
-  loadScene("./res/scenes/example2.rawscene");
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
