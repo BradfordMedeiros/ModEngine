@@ -223,3 +223,11 @@ void removeObjectFromScene(Scene& scene, short id){
     scene.nameToId.erase(objectName);
   }
 }
+
+std::vector<short> listObjInScene(Scene& scene){
+  std::vector<short> allObjects;
+  for (auto const&[id, _] : scene.idToGameObjects){
+    allObjects.push_back(id);
+  }
+  return allObjects;
+}

@@ -69,5 +69,6 @@ void addObjectToScene(
   std::function<void(short, std::string, std::string, std::string)> addObject
 );
 void removeObjectFromScene(Scene& scene, short id);
+std::vector<short> listObjInScene(Scene& scene);
 
 #endif
