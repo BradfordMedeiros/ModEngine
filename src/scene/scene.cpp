@@ -55,7 +55,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
 
 // @todo - this currently adds a physics body for every single object 
 // no good, this should only add if enabled. 
-void addPhysicsBodies(World& world, physicsEnv physicsEnv, FullScene& fullscene){
+void addPhysicsBodies(World& world, FullScene& fullscene){
   for (auto const& [id, gameObject] : fullscene.scene.idToGameObjects){
     auto physicsInfo = getPhysicsInfoForGameObject(world, fullscene, id);
     printPhysicsInfo(physicsInfo);
@@ -65,7 +65,7 @@ void addPhysicsBodies(World& world, physicsEnv physicsEnv, FullScene& fullscene)
     if (physicsOptions.shape == BOX){
       std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
       rigidBody = addRigidBody(
-        physicsEnv, 
+        world.physicsEnvironment, 
         physicsInfo.gameobject.position, 
         physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
         physicsInfo.gameobject.rotation,
@@ -75,7 +75,7 @@ void addPhysicsBodies(World& world, physicsEnv physicsEnv, FullScene& fullscene)
     }else if (physicsOptions.shape == SPHERE){
       std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
       rigidBody = addRigidBody(
-        physicsEnv, 
+        world.physicsEnvironment, 
         physicsInfo.gameobject.position,
         maxvalue(physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z),                             
         physicsInfo.gameobject.rotation,
@@ -109,12 +109,6 @@ World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
   };
   return world;
 }
-void addSceneToWorld(World& world, physicsEnv& env, FullScene& scene){
-  addPhysicsBodies(world, env, scene);
-}
-void removeSceneFromWorld(physicsEnv& env, FullScene& scene){
-  // this needs to be implemented
-}
 
 static short id = -1;
 short getObjectId(){
@@ -143,6 +137,24 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
   return serializeScene(scene, [&objectMapping](short objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, objectMapping);
   });
+}
+
+void addSceneToWorld(World& world, std::string sceneFile){
+  auto sceneIndex = world.scenes.size();
+  world.scenes.push_back(deserializeFullScene(world, sceneIndex, loadFile(sceneFile)));
+  addPhysicsBodies(world, world.scenes[sceneIndex]);
+}
+void removeSceneFromWorld(World& world, FullScene& fullscene){
+  for (auto objectId : listObjInScene(fullscene.scene)){
+    auto rigidBody = world.rigidbodys[objectId];
+    rmRigidBody(world.physicsEnvironment, rigidBody);
+
+  }
+
+  //  // remove scene from world.scenes
+  // remove all entries in objectmapping
+  // remove free meshes (no way to tell currently if free -> need counting probably) from meshes
+  // remove world.idToScene
 }
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){

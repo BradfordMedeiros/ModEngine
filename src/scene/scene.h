@@ -30,10 +30,10 @@ struct PhysicsInfo {
 };
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
-void addSceneToWorld(World& world, physicsEnv& env, FullScene& scene);
-void removeSceneFromWorld(physicsEnv& env, FullScene& scene);
+void addSceneToWorld(World& world, std::string sceneFile);
+void removeSceneFromWorld(World& world, FullScene& fullscene);
 
-FullScene   deserializeFullScene(World& world, short sceneId, std::string content);
+FullScene   deserializeFullScene(World& world, std::string sceneFile);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 
 void  addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos);

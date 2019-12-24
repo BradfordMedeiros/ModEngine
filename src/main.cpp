@@ -243,16 +243,11 @@ void clearImpulse(short index){
 }
 void loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE MANAGEMENT: loading " << sceneFile << std::endl;
-  auto sceneIndex = world.scenes.size();
-  world.scenes.push_back(deserializeFullScene(world, sceneIndex, loadFile(sceneFile)));
-  addSceneToWorld(world, world.physicsEnvironment, world.scenes[sceneIndex]);
+  addSceneToWorld(world, sceneFile);
 }
-void unloadScene(int sceneId){  
-  // remove scene from world.scenes
-  // remove all entries in world.rigidbodys
-  // remove all entries in objectmapping
-  // remove free meshes (no way to tell currently if free -> need counting probably) from meshes
-  // remove world.idToScene
+void unloadScene(short sceneId){  
+  std::cout << "INFO: SCENE MANAGEMENT: unloading " << sceneId << std::endl;
+  //removeSceneFromWorld(world, world.scenes[sceneId]);
 };
 
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
@@ -504,6 +499,7 @@ int main(int argc, char* argv[]){
   schemeBindings  = createStaticSchemeBindings(
     result["scriptpath"].as<std::string>(), 
     loadScene,
+    unloadScene,
     moveCamera, 
     rotateCamera, 
     removeObjectById, 
