@@ -250,7 +250,7 @@ void loadScene(std::string sceneFile){
 }
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE MANAGEMENT: unloading " << sceneId << std::endl;
-  //removeSceneFromWorld(world, world.scenes[sceneId]);
+  removeSceneFromWorld(world, sceneId);
 };
 void printObjectIds(){
   auto ids = listObjInScene(world.scenes[0].scene);
@@ -586,8 +586,8 @@ int main(int argc, char* argv[]){
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    for (int i = 0; i < world.scenes.size(); i++){
-      renderScene(world.scenes[i], selectionProgram, projection, view, glm::mat4(1.0f), true);
+    for (auto &[_, scene] : world.scenes){
+      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -613,8 +613,8 @@ int main(int argc, char* argv[]){
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    for (int i = 0; i < world.scenes.size(); i++){
-      renderScene(world.scenes[i], shaderProgram, projection, view, glm::mat4(1.0f), false);
+    for (auto &[_, scene] : world.scenes){
+      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
     }
     renderUI(crosshairSprite, currentFramerate);
 

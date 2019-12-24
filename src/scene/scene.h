@@ -19,7 +19,7 @@ struct World {
   std::map<short, btRigidBody*> rigidbodys;
   std::map<short, GameObjectObj> objectMapping;
   std::map<std::string, Mesh> meshes;
-  std::vector<FullScene> scenes;
+  std::map<short, FullScene> scenes;
   std::map<short, short> idToScene;
 };
 
@@ -31,7 +31,7 @@ struct PhysicsInfo {
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
 void addSceneToWorld(World& world, std::string sceneFile);
-void removeSceneFromWorld(World& world, FullScene& fullscene);
+void removeSceneFromWorld(World& world, int sceneId);
 
 FullScene   deserializeFullScene(World& world, std::string sceneFile);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);

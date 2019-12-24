@@ -115,11 +115,19 @@ World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
   return world;
 }
 
+////////////////  need unique values for these, there are probably better ways to pick these (maybe based on value of ptr?)
 static short id = -1;
 short getObjectId(){
   id++;
   return id;
 }
+
+static short sceneId = -1;
+short getSceneId(){
+  sceneId++;
+  return sceneId;
+}
+//////////////////// 
 
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
   auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
@@ -145,22 +153,21 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
 }
 
 void addSceneToWorld(World& world, std::string sceneFile){
-  auto sceneIndex = world.scenes.size();
-  world.scenes.push_back(deserializeFullScene(world, sceneIndex, loadFile(sceneFile)));
-  addPhysicsBodies(world, world.scenes[sceneIndex]);
+  auto sceneId = getSceneId();
+  world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile));
+  addPhysicsBodies(world, world.scenes[sceneId]);
 }
-void removeSceneFromWorld(World& world, FullScene& fullscene){
+void removeSceneFromWorld(World& world, int sceneId){
+  auto fullscene = world.scenes[sceneId];
   for (auto objectId : listObjInScene(fullscene.scene)){
     auto rigidBody = world.rigidbodys[objectId];
-    //rmRigidBody(world.physicsEnvironment, rigidBody);
-    std::cout << "object id" << objectId << "  @  " << rigidBody << std::endl;  
+    rmRigidBody(world.physicsEnvironment, rigidBody);
+    world.objectMapping.erase(objectId);
+    world.idToScene.erase(objectId);
   }
-  exit(1);
 
-  //  // remove scene from world.scenes
-  // remove all entries in objectmapping
+  // remove scene from world.scenes
   // remove free meshes (no way to tell currently if free -> need counting probably) from meshes
-  // remove world.idToScene
 }
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
