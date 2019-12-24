@@ -169,6 +169,9 @@ void rotate(float x, float y, float z){
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
+  if (state.selectedIndex == -1){
+    return;
+  }
   auto gameObjV = world.objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
@@ -249,6 +252,12 @@ void unloadScene(short sceneId){
   std::cout << "INFO: SCENE MANAGEMENT: unloading " << sceneId << std::endl;
   //removeSceneFromWorld(world, world.scenes[sceneId]);
 };
+void printObjectIds(){
+  auto ids = listObjInScene(world.scenes[0].scene);
+  for (int i = 0; i < ids.size() ; i++){
+    std::cout << "id: " << ids[i] << std::endl;
+  }
+}
 
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
@@ -554,6 +563,7 @@ int main(int argc, char* argv[]){
       float timedelta = now - last60;
       last60 = now;
       currentFramerate = (int)60/(timedelta);
+      printObjectIds();
     }
     
     if (isServer){
