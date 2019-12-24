@@ -164,10 +164,12 @@ void removeSceneFromWorld(World& world, int sceneId){
     rmRigidBody(world.physicsEnvironment, rigidBody);
     world.objectMapping.erase(objectId);
     world.idToScene.erase(objectId);
+    world.scenes.erase(objectId);
+
+    // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
+
   }
 
-  // remove scene from world.scenes
-  // remove free meshes (no way to tell currently if free -> need counting probably) from meshes
 }
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
