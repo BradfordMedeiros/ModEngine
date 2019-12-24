@@ -164,11 +164,12 @@ void removeSceneFromWorld(World& world, FullScene& fullscene){
 }
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
+  // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
   addObjectToScene(world.scenes[sceneId].scene, name, meshName, pos, getObjectId, [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
-    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId, &id](std::string meshName) -> void { // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
+    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId, &id](std::string meshName) -> void { 
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
       world.idToScene[id] = sceneId;
-      addPhysicsBody(world, world.scenes[sceneId], id);
+      addPhysicsBody(world, world.scenes[sceneId], id);  // this is diffedrent than in deserialize only because it uses it to find the gameobject, not b/c good reasons
     });
   });
 }
