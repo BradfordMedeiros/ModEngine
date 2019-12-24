@@ -53,41 +53,46 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   return info;
 }
 
+void addPhysicsBody(World& world, FullScene& fullscene, short id){
+  auto obj = fullscene.scene.idToGameObjects[id];
+  auto physicsInfo = getPhysicsInfoForGameObject(world, fullscene, id);
+  printPhysicsInfo(physicsInfo);
+
+  auto physicsOptions = obj.physicsOptions;
+  btRigidBody* rigidBody;
+  if (physicsOptions.shape == BOX){
+    std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
+    rigidBody = addRigidBody(
+      world.physicsEnvironment, 
+      physicsInfo.gameobject.position, 
+      physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
+      physicsInfo.gameobject.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions
+    );
+  }else if (physicsOptions.shape == SPHERE){
+    std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
+    rigidBody = addRigidBody(
+      world.physicsEnvironment, 
+      physicsInfo.gameobject.position,
+      maxvalue(physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z),                             
+      physicsInfo.gameobject.rotation,
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions
+    );
+  }else{
+    std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
+      exit(1);
+  }
+
+  world.rigidbodys[id] = rigidBody;
+}
+
 // @todo - this currently adds a physics body for every single object 
 // no good, this should only add if enabled. 
 void addPhysicsBodies(World& world, FullScene& fullscene){
-  for (auto const& [id, gameObject] : fullscene.scene.idToGameObjects){
-    auto physicsInfo = getPhysicsInfoForGameObject(world, fullscene, id);
-    printPhysicsInfo(physicsInfo);
-
-    auto physicsOptions = gameObject.physicsOptions;
-    btRigidBody* rigidBody;
-    if (physicsOptions.shape == BOX){
-      std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
-      rigidBody = addRigidBody(
-        world.physicsEnvironment, 
-        physicsInfo.gameobject.position, 
-        physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
-        physicsInfo.gameobject.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions
-      );
-    }else if (physicsOptions.shape == SPHERE){
-      std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
-      rigidBody = addRigidBody(
-        world.physicsEnvironment, 
-        physicsInfo.gameobject.position,
-        maxvalue(physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z),                             
-        physicsInfo.gameobject.rotation,
-        physicsOptions.isStatic,
-        physicsOptions.hasCollisions
-      );
-    }else{
-      std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
-      exit(1);
-    }
-
-    world.rigidbodys[id] = rigidBody;
+  for (auto &[id, _] : fullscene.scene.idToGameObjects){
+    addPhysicsBody(world, fullscene, id);
   }
 }
 
@@ -147,9 +152,10 @@ void addSceneToWorld(World& world, std::string sceneFile){
 void removeSceneFromWorld(World& world, FullScene& fullscene){
   for (auto objectId : listObjInScene(fullscene.scene)){
     auto rigidBody = world.rigidbodys[objectId];
-    rmRigidBody(world.physicsEnvironment, rigidBody);
-
+    //rmRigidBody(world.physicsEnvironment, rigidBody);
+    std::cout << "object id" << objectId << "  @  " << rigidBody << std::endl;  
   }
+  exit(1);
 
   //  // remove scene from world.scenes
   // remove all entries in objectmapping
@@ -162,6 +168,7 @@ void addObjectToFullScene(World& world, short sceneId, std::string name, std::st
     addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world, &sceneId, &id](std::string meshName) -> void { // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
       world.idToScene[id] = sceneId;
+      addPhysicsBody(world, world.scenes[sceneId], id);
     });
   });
 }
