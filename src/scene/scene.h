@@ -30,8 +30,8 @@ struct PhysicsInfo {
 };
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
-void addSceneToWorld(World& world, std::string sceneFile);
-void removeSceneFromWorld(World& world, int sceneId);
+short addSceneToWorld(World& world, std::string sceneFile);
+void removeSceneFromWorld(World& world, short sceneId);
 
 FullScene   deserializeFullScene(World& world, std::string sceneFile);
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);

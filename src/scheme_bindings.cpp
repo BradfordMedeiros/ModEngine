@@ -1,9 +1,9 @@
 #include "./scheme_bindings.h"
 
-void (*_loadScene)(std::string);
+short (*_loadScene)(std::string);
 SCM scm_loadScene(SCM value){
-  _loadScene(scm_to_locale_string(value));
-  return SCM_UNSPECIFIED;
+  auto sceneId = _loadScene(scm_to_locale_string(value));
+  return scm_from_short(sceneId);
 }
 void (*_unloadScene)(short id);
 SCM scm_unloadScene(SCM value){
@@ -231,7 +231,7 @@ SCM getGameObjByName(SCM value){
 
 SchemeBindingCallbacks createStaticSchemeBindings(
   std::string scriptPath,
-  void (*loadScene)(std::string),  
+  short (*loadScene)(std::string),  
   void (*unloadScene)(short id),  
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),

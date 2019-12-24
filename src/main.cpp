@@ -244,9 +244,9 @@ void applyImpulse(short index, glm::vec3 impulse){
 void clearImpulse(short index){
   clearImpulse(world.rigidbodys[index]);
 }
-void loadScene(std::string sceneFile){
+short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE MANAGEMENT: loading " << sceneFile << std::endl;
-  addSceneToWorld(world, sceneFile);
+  return addSceneToWorld(world, sceneFile);
 }
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE MANAGEMENT: unloading " << sceneId << std::endl;
@@ -563,7 +563,7 @@ int main(int argc, char* argv[]){
       float timedelta = now - last60;
       last60 = now;
       currentFramerate = (int)60/(timedelta);
-      printObjectIds();
+      //printObjectIds();
     }
     
     if (isServer){

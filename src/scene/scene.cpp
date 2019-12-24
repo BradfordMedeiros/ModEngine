@@ -152,22 +152,28 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
   });
 }
 
-void addSceneToWorld(World& world, std::string sceneFile){
+short addSceneToWorld(World& world, std::string sceneFile){
   auto sceneId = getSceneId();
   world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile));
   addPhysicsBodies(world, world.scenes[sceneId]);
+  return sceneId;
 }
-void removeSceneFromWorld(World& world, int sceneId){
+void removeSceneFromWorld(World& world, short sceneId){
+  if ( world.scenes.find(sceneId) == world.scenes.end()) {
+    return;   // @todo maybe better to throw error instead
+  }
+
   auto fullscene = world.scenes[sceneId];
   for (auto objectId : listObjInScene(fullscene.scene)){
     auto rigidBody = world.rigidbodys[objectId];
     rmRigidBody(world.physicsEnvironment, rigidBody);
+    world.rigidbodys.erase(objectId);
     world.objectMapping.erase(objectId);
     world.idToScene.erase(objectId);
     world.scenes.erase(objectId);
 
     // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
-
+    std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
   }
 
 }
@@ -246,7 +252,6 @@ void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbo
     world.scenes[sceneId].scene.idToGameObjects[i].position = getPosition(rigidBody);
     // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
   }
-
 }
 
 void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){

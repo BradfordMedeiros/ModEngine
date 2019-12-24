@@ -27,7 +27,7 @@ struct SchemeBindingCallbacks {
 
 SchemeBindingCallbacks createStaticSchemeBindings(
 	std::string scriptPath,
-  void (*loadScene)(std::string),  
+  short (*loadScene)(std::string),  
   void (*unloadScene)(short id),  
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
