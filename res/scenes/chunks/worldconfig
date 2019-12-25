@@ -1,0 +1,6 @@
+
+chunk_size:400        # size is default, but then more specific height/width/depth overwrites this.
+chunk_width:400
+chunk_height:500
+chunk_depth:100
+
