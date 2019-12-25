@@ -251,7 +251,8 @@ short loadScene(std::string sceneFile){
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE MANAGEMENT: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId);
-};
+}
+
 void printObjectIds(){
   auto ids = listObjInScene(world.scenes[0].scene);
   for (int i = 0; i < ids.size() ; i++){
@@ -529,6 +530,7 @@ int main(int argc, char* argv[]){
   );
 
   world = createWorld(onObjectEnter, onObjectLeave);
+  auto dynamicLoading = createDynamicLoading();
   loadScene("./res/scenes/example.rawscene");
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
@@ -600,7 +602,8 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
-    
+
+    handleChunkLoading(dynamicLoading, 0, 0, 0, loadScene, unloadScene);
     if (enablePhysics){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }

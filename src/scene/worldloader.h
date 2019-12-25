@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
-struct DynamicWorld {
+struct DynamicLoading {
   float entityPosX;
   float entityPosY;
   float entityPosZ;
@@ -12,6 +13,8 @@ struct DynamicWorld {
   float chunkXWidth;
   float chunkYHeight;
   float chunkZDepth;
+
+  std::map<std::string, short> sceneFileToId; 
 };
 
 struct ChunkAddress {
@@ -25,7 +28,9 @@ struct ChunkLoadingInfo {
   std::vector<ChunkAddress> chunksToUnload;
 };
 
-void updateEntityPos(DynamicWorld& world, float posx, float posy, float posz);
-ChunkLoadingInfo getChunkLoadingInfo(DynamicWorld& world); 
+DynamicLoading createDynamicLoading();
+ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
+std::string chunkAddressToSceneFile(ChunkAddress chunk);
+void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, short(*loadScene)(std::string sceneFile), void(*unloadScene)(short sceneId));
 
 #endif
