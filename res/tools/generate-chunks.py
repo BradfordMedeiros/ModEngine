@@ -5,9 +5,9 @@ import os
 def generate_file_extension_list(num_chunks_width, num_chunks_height, num_chunks_depth):
   file_names = []
   
-  offset_x = num_chunks_width / 2
-  offset_y = num_chunks_height / 2
-  offset_z = num_chunks_depth / 2
+  offset_x = num_chunks_width // 2
+  offset_y = num_chunks_height // 2
+  offset_z = num_chunks_depth // 2
   
   for x in range(0, num_chunks_width):
     for y in range(0, num_chunks_height):
@@ -29,6 +29,7 @@ def write_content(size, ouput_directory):
     write_file(file_extension, ouput_directory)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', '-o', help='Directory to output generated chunk files')
+parser.add_argument('--output', '-o', type=str, default='.', help='Directory to output generated chunk files')
+parser.add_argument('--size', '-s', type=int, default=1, help='Number of chunks to make')
 args = parser.parse_args()
-print (args.output)
+write_content(int(args.size), args.output)
