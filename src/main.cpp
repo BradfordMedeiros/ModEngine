@@ -245,11 +245,11 @@ void clearImpulse(short index){
   clearImpulse(world.rigidbodys[index]);
 }
 short loadScene(std::string sceneFile){
-  std::cout << "INFO: SCENE MANAGEMENT: loading " << sceneFile << std::endl;
+  std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   return addSceneToWorld(world, sceneFile);
 }
 void unloadScene(short sceneId){  
-  std::cout << "INFO: SCENE MANAGEMENT: unloading " << sceneId << std::endl;
+  std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId);
 }
 
@@ -531,7 +531,6 @@ int main(int argc, char* argv[]){
 
   world = createWorld(onObjectEnter, onObjectLeave);
   auto dynamicLoading = createDynamicLoading();
-  loadScene("./res/scenes/example.rawscene");
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -603,7 +602,7 @@ int main(int argc, char* argv[]){
         
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
 
-    handleChunkLoading(dynamicLoading, 0, 0, 0, loadScene, unloadScene);
+    handleChunkLoading(dynamicLoading, defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, loadScene, unloadScene);
     if (enablePhysics){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
