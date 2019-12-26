@@ -314,10 +314,10 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
 
   drawGrid(10, 10, 10);
-  drawLines(getChunkingLines(dynamicLoading));
+  //drawGrid3D();
   drawCoordinateSystem(100.f);
-  drawSphere();
-  drawCube(10, 10, 1);
+  //drawSphere();
+  //drawCube(10, 10, 1);
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){

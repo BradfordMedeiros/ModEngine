@@ -37,6 +37,5 @@ DynamicLoading createDynamicLoading();
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string chunkAddressToSceneFile(ChunkAddress chunk);
 void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, short(*loadScene)(std::string sceneFile), void(*unloadScene)(short sceneId));
-std::vector<Line> getChunkingLines(DynamicLoading& world);
 
 #endif

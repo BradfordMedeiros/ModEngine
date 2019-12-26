@@ -13,15 +13,6 @@ DynamicLoading createDynamicLoading(){
   return loading;
 }
 
-std::vector<Line> getChunkingLines(DynamicLoading& world){
-  std::vector<Line> lines;
-  lines.push_back({ 
-    fromPos: glm::vec3(0.f, 0.f, 0.f), 
-    toPos: glm::vec3(100.f, 100.f, 0.f) 
-  });
-  return lines;
-}
-
 std::set<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world){
   int chunkX = world.entityPosX / world.chunkXWidth;
   int chunkY = world.entityPosY / world.chunkYHeight;
