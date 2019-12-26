@@ -2,4 +2,4 @@ build
 .CMakeLists.txt.swp
 *.swp
 *.swo
-./res/scenes/chunks
+res/scenes/chunks

@@ -48,6 +48,7 @@ bool showDebugInfo = false;
 bool disableInput = false;
 engineState state = getDefaultState(1920, 1080);
 World world;
+DynamicLoading dynamicLoading;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
@@ -303,23 +304,20 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
     drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], fullscene, shaderProgram, model, useSelectionColor);
   }  
+}
 
-  ////  ALL OF THE BELOW IS JUST TEMPORARY UNTIL BETTER HOME FOR THIS FUNCTIONALITY   
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 0.f)), glm::vec3(1.f, 1.f, 1.f))));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.5f, 0.5f)));
+void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
+  glUseProgram(shaderProgram);
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
+
+  drawGrid(10, 10, 10);
+  drawLines(getChunkingLines(dynamicLoading));
   drawCoordinateSystem(100.f);
-  
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(1.f, 1.f, 1.f))));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
- 
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(10.f, 10.f, 10.f))));
   drawSphere();
   drawCube(10, 10, 1);
-
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(model, glm::vec3(0.f, 0.f, 100.f)), glm::vec3(1.f, 1.f, 1.f))));
-  drawGrid(10, 10, 10);
-  ////////////////////////////////////////////
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
@@ -530,7 +528,7 @@ int main(int argc, char* argv[]){
   );
 
   world = createWorld(onObjectEnter, onObjectLeave);
-  auto dynamicLoading = createDynamicLoading();
+  dynamicLoading = createDynamicLoading();
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -618,6 +616,7 @@ int main(int argc, char* argv[]){
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
     }
+    renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();

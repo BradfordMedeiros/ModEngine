@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include "./common/util/types.h"
 
 struct ChunkAddress {
   int x;
@@ -17,7 +18,6 @@ struct ChunkLoadingInfo {
   std::set<ChunkAddress> chunksToLoad;
   std::set<ChunkAddress> chunksToUnload;
 };
-
 
 struct DynamicLoading {
   float entityPosX;
@@ -37,5 +37,6 @@ DynamicLoading createDynamicLoading();
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string chunkAddressToSceneFile(ChunkAddress chunk);
 void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, short(*loadScene)(std::string sceneFile), void(*unloadScene)(short sceneId));
+std::vector<Line> getChunkingLines(DynamicLoading& world);
 
 #endif

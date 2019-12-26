@@ -9,6 +9,7 @@
 #include <stb_image.h>
 #include "glad/glad.h"
 #include "./util/loadmodel.h"
+#include "./util/types.h"
 
 struct Texture {
    unsigned int textureId;
@@ -31,11 +32,6 @@ Mesh load2DMesh(std::string imagePath);		 // loads single quad mesh with texture
 Mesh load2DMeshTexCoords(std::string imagePath, float offsetx, float offsety, float width, float height); // 2DMesh with subimage selection
 Mesh loadSpriteMesh(std::string imagePath);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
 void drawMesh(Mesh);  						 // draws mesh and related texture info (no shader data supplied)
-
-struct Line {
-  glm::vec3 fromPos;
-  glm::vec3 toPos;
-};
 void drawLines(std::vector<Line> allLines);
 
 #endif 
