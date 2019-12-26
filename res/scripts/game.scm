@@ -1,11 +1,7 @@
 
 
 (define (onMouse button action mods) (+ 0 0))
-(define (onKeyChar codepoint)
-  (display "codepoint is: ")
-  (display codepoint)
-  (display "\n")
-)
+(define (onKeyChar codepoint) (+ 0 0))
 
 
 (define selectionModeEnabled #f)
