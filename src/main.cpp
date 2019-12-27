@@ -313,10 +313,14 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
 
-  drawGrid(10, 10, 10, 0, 0, 0);
+  /*drawGrid(10, 10, 10, 0, 0, 0);
   drawGrid(10, 10, 10, 0, 0, 50);
-  //drawGrid(10, 10, 10, 0, -10, 0);
-  //drawGrid3D();
+  drawGridHorizontal(10, 10, 10, 0, 0, 50);
+  drawGridHorizontal(10, 10, 10, 0, 10, 50);
+  drawGridHorizontal(10, 10, 10, 0, 20, 50);
+  drawGridHorizontal(10, 10, 10, 0, 30, 50);
+  */
+  drawGrid3DCentered(5, 1.0f);
   drawCoordinateSystem(100.f);
   //drawSphere();
   //drawCube(10, 10, 1);
