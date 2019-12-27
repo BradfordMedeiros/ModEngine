@@ -57,16 +57,14 @@ void drawSphere(){                  // lots of repeat code here, should generali
   drawLines(allLines);
 }
 
-void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, int offsetX, int offsetY, int offsetZ){   
+void drawGridVertical(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){   
   std::vector<Line> allLines;
-  // horizontal lines
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
       .fromPos = glm::vec3(0 + offsetX, (i * cellSize) + offsetY, 0 + offsetZ), 
       .toPos = glm::vec3((numCellsWidth * cellSize) + offsetX, (i * cellSize) + offsetY, 0 + offsetZ),
     });
   }
-  // vertical lines
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
       .fromPos = glm::vec3((i * cellSize) + offsetX, 0 + offsetY, 0 + offsetZ), 
@@ -76,10 +74,35 @@ void drawGrid(int numCellsWidth, int numCellsHeight, int cellSize, int offsetX, 
   drawLines(allLines);
 }
 
-void drawGrid3D(int numLayersHeight){
-  /*for (unsigned int i = 0; i < numLayersHeight; i++){
-    drawGrid(10, 10, 40);
-  }*/
+void drawGridHorizontal(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){
+  std::vector<Line> allLines;
+  for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
+    allLines.push_back(Line {                                                   
+      .fromPos = glm::vec3(0 + offsetX, offsetY, (i * cellSize) + offsetZ), 
+      .toPos = glm::vec3((numCellsWidth * cellSize) + offsetX, offsetY, (i * cellSize) + offsetZ),
+    });
+  }
+  for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
+    allLines.push_back(Line { 
+      .fromPos = glm::vec3((i * cellSize) + offsetX, 0 + offsetY, 0 + offsetZ), 
+      .toPos = glm::vec3((i * cellSize) + offsetX, offsetY, (numCellsHeight * cellSize) +  offsetZ),
+    });
+  }
+  drawLines(allLines);
+}
+
+void drawGrid3D(int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
+  for (int i = 0; i <= numCellsWidth; i++){
+    drawGridHorizontal(numCellsWidth, numCellsWidth, cellSize, offsetX, i * cellSize + offsetY, offsetZ);
+  }
+  for (int i = 0; i <= numCellsWidth; i++){
+    drawGridVertical(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, i * cellSize + offsetZ);
+  }
+}
+
+void drawGrid3DCentered(int numCellsWidth, float cellSize){
+  float offset = numCellsWidth * cellSize / 2.f;
+  drawGrid3D(numCellsWidth, cellSize, -offset, -offset, -offset);
 }
 
 void drawCoordinateSystem(float size){
