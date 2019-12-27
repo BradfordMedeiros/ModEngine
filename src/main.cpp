@@ -46,6 +46,7 @@ GameObject defaultCamera = GameObject {
 
 bool showDebugInfo = false;
 bool disableInput = false;
+bool showChunkingGrid = false;
 engineState state = getDefaultState(1920, 1080);
 World world;
 DynamicLoading dynamicLoading;
@@ -320,7 +321,10 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   drawGridHorizontal(10, 10, 10, 0, 20, 50);
   drawGridHorizontal(10, 10, 10, 0, 30, 50);
   */
-  drawGrid3DCentered(5, 1.0f);
+
+  if (showChunkingGrid){
+    drawGrid3DCentered(10, dynamicLoading.chunkXWidth);
+  }
   drawCoordinateSystem(100.f);
   //drawSphere();
   //drawCube(10, 10, 1);
@@ -390,11 +394,14 @@ int main(int argc, char* argv[]){
    ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
+   ("g,grid", "Draw chunking grid used for open world streaming", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
+  showChunkingGrid = result["grid"].as<bool>();
+
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
     return 0;
