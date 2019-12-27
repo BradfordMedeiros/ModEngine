@@ -47,6 +47,8 @@ GameObject defaultCamera = GameObject {
 bool showDebugInfo = false;
 bool disableInput = false;
 bool showChunkingGrid = false;
+bool useChunkingSystem = false;
+
 engineState state = getDefaultState(1920, 1080);
 World world;
 DynamicLoading dynamicLoading;
@@ -395,12 +397,14 @@ int main(int argc, char* argv[]){
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Draw chunking grid used for open world streaming", cxxopts::value<bool>()->default_value("false"))
+   ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;   
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   showChunkingGrid = result["grid"].as<bool>();
+  useChunkingSystem = result["world"].as<bool>();
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
@@ -542,6 +546,9 @@ int main(int argc, char* argv[]){
 
   world = createWorld(onObjectEnter, onObjectLeave);
   dynamicLoading = createDynamicLoading();
+  if (!useChunkingSystem){
+    loadScene("./res/scenes/example.rawscene");
+  }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -613,7 +620,9 @@ int main(int argc, char* argv[]){
         
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
 
-    handleChunkLoading(dynamicLoading, defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, loadScene, unloadScene);
+    if (useChunkingSystem){
+      handleChunkLoading(dynamicLoading, defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, loadScene, unloadScene);
+    }
     if (enablePhysics){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
