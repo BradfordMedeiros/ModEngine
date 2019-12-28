@@ -14,17 +14,15 @@ DynamicLoading createDynamicLoading(){
 }
 
 std::set<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world){
-  int chunkX = world.entityPosX / world.chunkXWidth;
-  int chunkY = world.entityPosY / world.chunkYHeight;
-  int chunkZ = world.entityPosZ / world.chunkZDepth;
-
-  int chunkOffset = world.chunkRadius / 2;
+  int chunkX = round(world.entityPosX / world.chunkXWidth);
+  int chunkY = round(world.entityPosY / world.chunkYHeight);
+  int chunkZ = round(world.entityPosZ / world.chunkZDepth);
 
   std::set<ChunkAddress> chunks;
   for (int x = 0; x < world.chunkRadius; x++){
     for (int y = 0; y < world.chunkRadius; y++){
       for (int z = 0; z < world.chunkRadius; z++){
-        ChunkAddress chunk = { .x = x + chunkX - chunkOffset, .y = y + chunkY - chunkOffset, .z = z + chunkZ - chunkOffset };    // not quite right, but want to think about whether or not to center?
+        ChunkAddress chunk = { .x = x + chunkX, .y = y + chunkY, .z = z + chunkZ };   
         chunks.insert(chunk);
       }
     }
