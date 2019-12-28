@@ -8,7 +8,7 @@ DynamicLoading createDynamicLoading(){
     .chunkXWidth = 100.f, 
     .chunkYHeight = 100.f,
     .chunkZDepth = 100.f,
-    .chunkRadius = 1, 
+    .chunkRadius = 2, 
   };
   return loading;
 }
@@ -18,10 +18,12 @@ std::set<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world){
   int chunkY = round(world.entityPosY / world.chunkYHeight);
   int chunkZ = round(world.entityPosZ / world.chunkZDepth);
 
+  int adjacentChunks = world.chunkRadius -1;   
+
   std::set<ChunkAddress> chunks;
-  for (int x = 0; x < world.chunkRadius; x++){
-    for (int y = 0; y < world.chunkRadius; y++){
-      for (int z = 0; z < world.chunkRadius; z++){
+  for (int x = -adjacentChunks; x <= adjacentChunks; x++){
+    for (int y = -adjacentChunks; y <= adjacentChunks; y++){
+      for (int z = -adjacentChunks; z <= adjacentChunks; z++){
         ChunkAddress chunk = { .x = x + chunkX, .y = y + chunkY, .z = z + chunkZ };   
         chunks.insert(chunk);
       }
