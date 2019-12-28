@@ -17,14 +17,15 @@ def generate_file_extension_list(num_chunks_width, num_chunks_height, num_chunks
 
   return file_names
 
-def write_content(size, output_directory):
+def write_content(size, output_directory, data):
   for file_extension in generate_file_extension_list(size, size, size):
     with open(os.path.join(output_directory, file_extension), 'w') as filehandle:
-      filehandle.write('\n')
+      filehandle.write(data + '\n')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--output', '-o', type=str, default='.', help='Directory to output generated chunk files')
 parser.add_argument('--size', '-s', type=int, default=1, help='Number of chunks to make')
+parser.add_argument('--data', '-d', type=str, default='', help='Data to insert into each chunk file')
 args = parser.parse_args()
 
-write_content(args.size, args.output)
+write_content(args.size, args.output, args.data)
