@@ -1,0 +1,5 @@
+
+unitcube:position:100 150.0 0
+unitcube:scale:100.0 1.0 100.0
+unitcube:mesh:./res/models/unit_rect/unit_rect.obj
+
