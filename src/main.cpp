@@ -46,7 +46,7 @@ GameObject defaultCamera = GameObject {
 
 bool showDebugInfo = false;
 bool disableInput = false;
-bool showChunkingGrid = false;
+int numChunkingGridCells = 0;
 bool useChunkingSystem = false;
 std::string rawSceneFile;
 
@@ -325,8 +325,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   drawGridHorizontal(10, 10, 10, 0, 30, 50);
   */
 
-  if (showChunkingGrid){
-    drawGrid3DCentered(3, dynamicLoading.chunkXWidth);
+  if (numChunkingGridCells > 0){
+    drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth);
     drawCoordinateSystem(100.f);
   }
   //drawSphere();
@@ -399,15 +399,15 @@ int main(int argc, char* argv[]){
    ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
-   ("g,grid", "Draw chunking grid used for open world streaming", cxxopts::value<bool>()->default_value("false"))
+   ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::string>()->default_value("./res/scenes/example.rawscene"))
    ("h,help", "Print help")
-  ;   
+  ;        
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
-  showChunkingGrid = result["grid"].as<bool>();
+  numChunkingGridCells = result["grid"].as<int>();
   useChunkingSystem = result["world"].as<bool>();
   rawSceneFile = result["rawscene"].as<std::string>();
 
