@@ -360,6 +360,8 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       manipulatorAxisString = "noaxis";
     }
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
+   
+    drawText("position: " + print(defaultCamera.position), 10, 60, 3);
   }
 }
 
