@@ -327,8 +327,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
 
   if (showChunkingGrid){
     drawGrid3DCentered(10, dynamicLoading.chunkXWidth);
+    drawCoordinateSystem(100.f);
   }
-  drawCoordinateSystem(100.f);
   //drawSphere();
   //drawCube(10, 10, 1);
 }
