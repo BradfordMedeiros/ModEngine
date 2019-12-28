@@ -48,6 +48,7 @@ bool showDebugInfo = false;
 bool disableInput = false;
 bool showChunkingGrid = false;
 bool useChunkingSystem = false;
+std::string rawSceneFile;
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -398,6 +399,7 @@ int main(int argc, char* argv[]){
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Draw chunking grid used for open world streaming", cxxopts::value<bool>()->default_value("false"))
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
+   ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::string>()->default_value("./res/scenes/example.rawscene"))
    ("h,help", "Print help")
   ;   
 
@@ -405,6 +407,7 @@ int main(int argc, char* argv[]){
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   showChunkingGrid = result["grid"].as<bool>();
   useChunkingSystem = result["world"].as<bool>();
+  rawSceneFile = result["rawscene"].as<std::string>();
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
@@ -547,7 +550,7 @@ int main(int argc, char* argv[]){
   world = createWorld(onObjectEnter, onObjectLeave);
   dynamicLoading = createDynamicLoading();
   if (!useChunkingSystem){
-    loadScene("./res/scenes/example.rawscene");
+    loadScene(rawSceneFile);
   }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 

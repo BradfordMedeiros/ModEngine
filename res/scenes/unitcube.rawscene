@@ -1,0 +1,4 @@
+
+unitcube:position:0 0 0
+unitcube:scale:1.0 1.0 1.0
+unitcube:mesh:./res/models/box/box.obj
