@@ -30,7 +30,7 @@ def content_for_filename(filename, chunksize):
   return template_file
 
 
-def write_content(num, size, output_directory, data):
+def write_content(num, size, output_directory):
   for file_extension in generate_file_extension_list(num, num, num):
     with open(os.path.join(output_directory, file_extension), 'w') as filehandle:
       filehandle.write(content_for_filename(file_extension, size))
