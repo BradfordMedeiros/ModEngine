@@ -36,7 +36,7 @@ def write_content(num, size, output_directory):
       filehandle.write(content_for_filename(file_extension, size))
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', '-o', type=str, default='.', help='Directory to output generated chunk files')
+parser.add_argument('--output', '-o', type=str, default='./res/scenes/chunks', help='Directory to output generated chunk files')
 parser.add_argument('--num', '-n', type=int, default=1, help='Number of chunks to make')
 parser.add_argument('--size', '-s', type=int, default=100, help='Size of the chunk (assumes x,y,z values are equal)')
 args = parser.parse_args()
