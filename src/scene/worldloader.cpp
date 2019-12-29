@@ -13,34 +13,57 @@ DynamicLoading createDynamicLoading(){
   return loading;
 }
 
-std::set<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world){
+std::vector<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world){
   int chunkX = round(world.entityPosX / world.chunkXWidth);
   int chunkY = round(world.entityPosY / world.chunkYHeight);
   int chunkZ = round(world.entityPosZ / world.chunkZDepth);
 
   int adjacentChunks = world.chunkRadius -1;   
 
-  std::set<ChunkAddress> chunks;
+  std::vector<ChunkAddress> chunks;
   for (int x = -adjacentChunks; x <= adjacentChunks; x++){
     for (int y = -adjacentChunks; y <= adjacentChunks; y++){
       for (int z = -adjacentChunks; z <= adjacentChunks; z++){
         ChunkAddress chunk = { .x = x + chunkX, .y = y + chunkY, .z = z + chunkZ };   
-        chunks.insert(chunk);
+        chunks.push_back(chunk);
       }
     }
   }
 
   return chunks;
 }
-ChunkLoadingInfo getChunkDiff(std::set<ChunkAddress> alreadyLoadedChunks, std::set<ChunkAddress> chunksShouldBeLoaded){  // give this 
-  std::set<ChunkAddress> chunksToLoad = chunksShouldBeLoaded;
-  std::set<ChunkAddress> chunksToUnload = alreadyLoadedChunks;
 
-  for (auto &chunk : alreadyLoadedChunks){
-    chunksToLoad.erase(chunk);
+bool chunksEqual(ChunkAddress chunk1, ChunkAddress chunk2){
+  return chunk1.x == chunk2.x && chunk1.y == chunk2.y && chunk1.z == chunk2.z;
+}
+ChunkLoadingInfo getChunkDiff(std::vector<ChunkAddress> alreadyLoadedChunks, std::vector<ChunkAddress> chunksShouldBeLoaded){  // give this 
+  std::vector<ChunkAddress> chunksToLoad;
+  std::vector<ChunkAddress> chunksToUnload;
+
+  for (auto &chunk : chunksShouldBeLoaded){                   // chunksToLoad is set(chunksShouldBeLoaded) - set(alreadyLoadedChunks)
+    bool foundChunk = false;
+    for (auto &alreadyLoadedChunk : alreadyLoadedChunks){
+      if (chunksEqual(alreadyLoadedChunk, chunk)){
+        foundChunk = true;
+        break;
+      }
+    }
+    if (!foundChunk){
+      chunksToLoad.push_back(chunk);
+    }
   }
-  for (auto &chunk : chunksShouldBeLoaded){
-    chunksToUnload.erase(chunk);    
+
+  for (auto &chunk : alreadyLoadedChunks){                   // chunksToUnload is set(alreadyLoadedChunks) - set(chunksThatShouldBeLoadedChunks)
+    bool foundChunk = false;
+    for (auto &shouldBeLoadedChunk : chunksShouldBeLoaded){
+      if (chunksEqual(shouldBeLoadedChunk, chunk)){
+        foundChunk = true;
+        break;
+      }
+    }
+    if (!foundChunk){
+      chunksToUnload.push_back(chunk);
+    }
   }
 
   ChunkLoadingInfo info = {
@@ -62,6 +85,13 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
   auto chunksShouldBeLoaded = getChunksShouldBeLoaded(loadingInfo);
   auto chunkLoading = getChunkDiff(loadingInfo.loadedChunks, chunksShouldBeLoaded);
 
+  for (auto &chunk : chunkLoading.chunksToUnload){
+    std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
+    auto sceneFile = chunkAddressToSceneFile(chunk);
+    short sceneId = loadingInfo.sceneFileToId[sceneFile];
+    unloadScene(sceneId);
+    loadingInfo.sceneFileToId.erase(sceneFile);
+  }
   for (auto &chunk : chunkLoading.chunksToLoad){
     std::cout << "INFO: CHUNK MANAGEMENT: load: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = chunkAddressToSceneFile(chunk);
@@ -80,6 +110,3 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
   loadingInfo.loadedChunks = chunksShouldBeLoaded;
 }
 
-bool operator<(const ChunkAddress& lhs, const ChunkAddress& rhs){
-      return lhs.x < rhs.x || lhs.y < rhs.y || lhs.z < rhs.z;   // based on logic sets do !(a < b) and !(b < a) to test equality
-}

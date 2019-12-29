@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <set>
 #include "./common/util/types.h"
 
 struct ChunkAddress {
@@ -12,11 +11,10 @@ struct ChunkAddress {
   int y;
   int z;
 };
-bool operator<(const ChunkAddress& lhs, const ChunkAddress& rhs);  // This is for so we can use ChunkAddress with set, and returns if any value is less than (so uniqueness).  
 
 struct ChunkLoadingInfo {
-  std::set<ChunkAddress> chunksToLoad;
-  std::set<ChunkAddress> chunksToUnload;
+  std::vector<ChunkAddress> chunksToLoad;
+  std::vector<ChunkAddress> chunksToUnload;
 };
 
 struct DynamicLoading {
@@ -30,7 +28,7 @@ struct DynamicLoading {
   float chunkRadius;    // how many adjacent chunks to load 0 -> no chunks, 1 -> just chunk you're in,  2 -> chunk you're in + perimenter, 3 -> one more perimeter after, etc 
 
   std::map<std::string, short> sceneFileToId; 
-  std::set<ChunkAddress> loadedChunks;
+  std::vector<ChunkAddress> loadedChunks;
 };
 
 DynamicLoading createDynamicLoading();
