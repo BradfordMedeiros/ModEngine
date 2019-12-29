@@ -47,6 +47,7 @@ GameObject defaultCamera = GameObject {
 bool showDebugInfo = false;
 bool disableInput = false;
 int numChunkingGridCells = 0;
+float chunkSize = 100;
 bool useChunkingSystem = false;
 std::string rawSceneFile;
 
@@ -317,20 +318,12 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
 
-  /*drawGrid(10, 10, 10, 0, 0, 0);
-  drawGrid(10, 10, 10, 0, 0, 50);
-  drawGridHorizontal(10, 10, 10, 0, 0, 50);
-  drawGridHorizontal(10, 10, 10, 0, 10, 50);
-  drawGridHorizontal(10, 10, 10, 0, 20, 50);
-  drawGridHorizontal(10, 10, 10, 0, 30, 50);
-  */
-
   if (numChunkingGridCells > 0){
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth);
+
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
     drawCoordinateSystem(100.f);
   }
-  //drawSphere();
-  //drawCube(10, 10, 1);
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
@@ -400,6 +393,7 @@ int main(int argc, char* argv[]){
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
+   ("e,chunksize", "Size of worlds chunks", cxxopts::value<float>()->default_value("100"))
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::string>()->default_value("./res/scenes/example.rawscene"))
    ("h,help", "Print help")
@@ -409,6 +403,7 @@ int main(int argc, char* argv[]){
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
   useChunkingSystem = result["world"].as<bool>();
+  chunkSize = result["chunksize"].as<float>();
   rawSceneFile = result["rawscene"].as<std::string>();
 
   if (result["help"].as<bool>()){
@@ -550,7 +545,7 @@ int main(int argc, char* argv[]){
   );
 
   world = createWorld(onObjectEnter, onObjectLeave);
-  dynamicLoading = createDynamicLoading();
+  dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
     loadScene(rawSceneFile);
   }

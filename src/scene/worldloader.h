@@ -25,13 +25,13 @@ struct DynamicLoading {
   float chunkXWidth;
   float chunkYHeight;
   float chunkZDepth;
-  float chunkRadius;    // how many adjacent chunks to load 0 -> no chunks, 1 -> just chunk you're in,  2 -> chunk you're in + perimenter, 3 -> one more perimeter after, etc 
+  float chunkRadius;  
 
   std::map<std::string, short> sceneFileToId; 
   std::vector<ChunkAddress> loadedChunks;
 };
 
-DynamicLoading createDynamicLoading();
+DynamicLoading createDynamicLoading(float chunkSize);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string chunkAddressToSceneFile(ChunkAddress chunk);
 void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, short(*loadScene)(std::string sceneFile), void(*unloadScene)(short sceneId));

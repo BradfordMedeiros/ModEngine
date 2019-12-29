@@ -1,13 +1,13 @@
 #include "./worldloader.h"
 
-DynamicLoading createDynamicLoading(){
+DynamicLoading createDynamicLoading(float chunkSize){
   DynamicLoading loading = {
     .entityPosX = 0.f, 
     .entityPosY = 0.f,
     .entityPosZ = 0.f,
-    .chunkXWidth = 100.f, 
-    .chunkYHeight = 100.f,
-    .chunkZDepth = 100.f,
+    .chunkXWidth = chunkSize, 
+    .chunkYHeight = chunkSize,
+    .chunkZDepth = chunkSize,
     .chunkRadius = 2, 
   };
   return loading;
@@ -89,6 +89,7 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
     std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = chunkAddressToSceneFile(chunk);
     short sceneId = loadingInfo.sceneFileToId[sceneFile];
+    std::cout << "want to unload: " << sceneId << std::endl;
     unloadScene(sceneId);
     loadingInfo.sceneFileToId.erase(sceneFile);
   }
@@ -97,14 +98,6 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
     auto sceneFile = chunkAddressToSceneFile(chunk);
     auto sceneId = loadScene(sceneFile);
     loadingInfo.sceneFileToId[sceneFile] = sceneId;
-  }
-
-  for (auto &chunk : chunkLoading.chunksToUnload){
-    std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
-    auto sceneFile = chunkAddressToSceneFile(chunk);
-    short sceneId = loadingInfo.sceneFileToId[sceneFile];
-    unloadScene(sceneId);
-    loadingInfo.sceneFileToId.erase(sceneFile);
   }
 
   loadingInfo.loadedChunks = chunksShouldBeLoaded;
