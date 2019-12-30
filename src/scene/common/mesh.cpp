@@ -24,8 +24,7 @@ Mesh loadMesh(std::string modelPath, std::string defaultTexture){
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
   glEnableVertexAttribArray(0);
  
-  // @todo texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly.
-  // right now this is super, super unoptimized.
+  // @TODO texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly. right now this is super, super unoptimized.
   Texture texture;
   if (model.texturePaths.size() > 0){
     texture = loadTexture(model.texturePaths[0]); 
@@ -36,6 +35,9 @@ Mesh loadMesh(std::string modelPath, std::string defaultTexture){
   useTexture(texture);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 
   Mesh mesh = {
     .VAOPointer = VAO,
