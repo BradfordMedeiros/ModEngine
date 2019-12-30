@@ -100,9 +100,9 @@ void drawGrid3D(int numCellsWidth, float cellSize, float offsetX, float offsetY,
   }
 }
 
-void drawGrid3DCentered(int numCellsWidth, float cellSize){
+void drawGrid3DCentered(int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
   float offset = numCellsWidth * cellSize / 2.f;
-  drawGrid3D(numCellsWidth, cellSize, -offset, -offset, -offset);
+  drawGrid3D(numCellsWidth, cellSize, -offset + offsetX, -offset + offsetY, -offset + offsetZ);
 }
 
 void drawCoordinateSystem(float size){

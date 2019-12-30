@@ -39,7 +39,7 @@ GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
   .name = "defaultCamera",
-  .position = glm::vec3(-8.0f, -4.0f, -8.0f),
+  .position = glm::vec3(0.f, 0.f, 0.f),
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
@@ -319,7 +319,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
 
   if (numChunkingGridCells > 0){
-    drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth);
+    float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.chunkXWidth / 2) : 0;
+    drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth, offset, offset, offset);
 
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
     drawCoordinateSystem(100.f);
