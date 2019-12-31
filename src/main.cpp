@@ -310,11 +310,9 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
 
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
-  std::cout << "num lights is: " << lightsIndexs.size() << std::endl;
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lightsIndexs.size());
   for (int i = 0; i < lightsIndexs.size(); i++){
     glm::vec3 position = fullscene.scene.idToGameObjects[lightsIndexs[i]].position;
-    std::cout << "position is: " << print(position) << std::endl;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
