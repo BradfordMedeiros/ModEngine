@@ -15,7 +15,12 @@ struct GameObjectMesh {
   bool isDisabled;
 };
 struct GameObjectCamera {};
-struct GameObjectLight {};
+struct GameObjectLight {
+  /*!light:type:directional
+  !light:type:directional 
+  !light:maxangle:50
+  !light:color:10 10 20 */
+};
 
 typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectLight> GameObjectObj;
 
