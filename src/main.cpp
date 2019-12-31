@@ -273,18 +273,6 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
 
   bool objectSelected = state.selectedIndex == object.id;
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.position));
-  glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
-  glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
-
-  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
-  std::cout << "num lights is: " << lightsIndexs.size() << std::endl;
-  glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lightsIndexs.size());
-  for (int i = 0; i < lightsIndexs.size(); i++){
-    glm::vec3 position = fullscene.scene.idToGameObjects[lightsIndexs[i]].position;
-    std::cout << "position is: " << print(position) << std::endl;
-    glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
-  }
 
   if (state.visualizeNormals){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -317,6 +305,18 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.position));
+  glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
+  glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
+
+  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
+  std::cout << "num lights is: " << lightsIndexs.size() << std::endl;
+  glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lightsIndexs.size());
+  for (int i = 0; i < lightsIndexs.size(); i++){
+    glm::vec3 position = fullscene.scene.idToGameObjects[lightsIndexs[i]].position;
+    std::cout << "position is: " << print(position) << std::endl;
+    glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
+  }
 
   for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
     drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], fullscene, shaderProgram, model, useSelectionColor);
