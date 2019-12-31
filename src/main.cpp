@@ -273,7 +273,9 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
 
   bool objectSelected = state.selectedIndex == object.id;
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
-  
+  glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.position));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "lightPosition"), 1, glm::value_ptr(glm::vec3(0.f, -10.f, 0.f)));
+
   if (state.visualizeNormals){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     drawMesh(world.meshes["./res/models/cone/cone.obj"]); 
