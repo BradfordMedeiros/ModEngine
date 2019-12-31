@@ -277,10 +277,9 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
   glUniform3fv(glGetUniformLocation(shaderProgram, "lightPosition"), 1, glm::value_ptr(glm::vec3(0.f, -10.f, 0.f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
-
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), 2);
-  glUniform3fv(glGetUniformLocation(shaderProgram, ("dlights[" + std::to_string(0) + "].position").c_str()), 1, glm::value_ptr(glm::vec3(0.f, -10.f, 0.f)));
-  glUniform3fv(glGetUniformLocation(shaderProgram, ("dlights[" + std::to_string(1) + "].position").c_str()), 1, glm::value_ptr(glm::vec3(0.f, -10.f, 5.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(0) + "].position").c_str()), 1, glm::value_ptr(glm::vec3(0.f, -10.f, 0.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(1) + "].position").c_str()), 1, glm::value_ptr(glm::vec3(0.f, -10.f, 5.f)));
 
   if (state.visualizeNormals){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
