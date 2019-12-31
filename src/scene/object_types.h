@@ -14,11 +14,10 @@ struct GameObjectMesh {
   Mesh mesh;
   bool isDisabled;
 };
-struct GameObjectCamera {
-  int number = 0;
-};
+struct GameObjectCamera {};
+struct GameObjectLight {};
 
-typedef std::variant<GameObjectMesh, GameObjectCamera> GameObjectObj;
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectLight> GameObjectObj;
 
 static Field obj = {
   .prefix = '@', 
@@ -31,7 +30,14 @@ static Field camera = {
   .type = "camera",
   .additionalFields = { },
 };
-static std::vector fields = { obj, camera };
+
+static Field light = {
+  .prefix = '!',
+  .type = "light",
+  .additionalFields = { },
+};
+
+static std::vector fields = { obj, camera, light };
 
 std::map<short, GameObjectObj> getObjectMapping();
 

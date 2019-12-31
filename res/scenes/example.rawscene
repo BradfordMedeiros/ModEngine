@@ -3,6 +3,9 @@
 >camtest:scale:1.000000 1.000000 1.000000
 >camtest:rotation:-2.152896 0.802106 -2.312180
 
+!onelight:position:0 -10 0
+!seclight:position:3 -10 0
+
 collisionobj:position:1.000000 1.000000 1.000000
 collisionobj:scale:1.000000 1.000000 1.000000
 collisionobj:rotation:0.000000 -0.000000 0.000000
@@ -26,3 +29,4 @@ box2:rotation:0.000000 -0.000000 0.000000
 box2:mesh:./res/models/box/box.obj
 box2:physics:dynamic
 #box2:physics:nocollide
+

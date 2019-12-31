@@ -7,7 +7,6 @@ in vec3 Normal;
 uniform sampler2D textureData;
 uniform vec3 tint;
 uniform vec3 cameraPosition;
-uniform vec3 lightPosition;
 
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
@@ -32,7 +31,7 @@ void main(){
     
     for (int i = 0; i < min(numlights, MAX_LIGHTS); i++){
         vec3 lightPos = lights[i];
-        vec3 lightDir = normalize(lightPosition - FragPos);
+        vec3 lightDir = normalize(lightPos - FragPos);
         vec3 normal = normalize(Normal);
 
         vec3 diffuse = max(dot(normal, lightDir), 0.0) * vec3(1.0, 1.0, 1.0);

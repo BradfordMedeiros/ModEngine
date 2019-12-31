@@ -19,7 +19,7 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
     throw std::runtime_error("mesh does not exist: " + meshName);
   }
 
-  GameObjectMesh obj = {
+  GameObjectMesh obj {
     .meshName = meshName,
     .mesh = meshes[meshName],
     .isDisabled = isDisabled,
@@ -27,8 +27,12 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
 
   return obj;
 }
-GameObjectCamera createCamera(std::string field, std::string payload){
-  GameObjectCamera obj = {};
+GameObjectCamera createCamera(){
+  GameObjectCamera obj {};
+  return obj;
+}
+GameObjectLight createLight(){
+  GameObjectLight obj {};
   return obj;
 }
 
@@ -41,8 +45,11 @@ void addObject(short id, std::string objectType, std::string field, std::string 
     GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&existingObject);
     mapping[id] = createMesh(field, payload, meshes, defaultMesh, ensureMeshLoaded, *meshObject);
   }else if(objectType == "camera"){
-    mapping[id] = createCamera(field, payload);
-  }else{
+    mapping[id] = createCamera();
+  }else if (objectType == "light"){
+    mapping[id] = createLight();
+  }
+  else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   }
 }
@@ -67,14 +74,21 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
     drawMesh(cameraMesh);
     return;
   }
+
+  auto lightObj = std::get_if<GameObjectLight>(&toRender);
+  if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
+    std::cout << "PLACEHOLDER --> we should probably render debug lights in a special way?" << std::endl;
+    drawMesh(cameraMesh);
+    return;
+  }
 }
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
   return { std::pair<std::string, std::string>("mesh", obj.meshName) };
 }
-std::vector<std::pair<std::string, std::string>> serializeCamera(){
-  return {};    // no additional fields for now
-}
+std::vector<std::pair<std::string, std::string>> defaultSerialization(){
+  return {}; 
+}   
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
   GameObjectObj objectToSerialize = mapping[id];
@@ -86,8 +100,14 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, s
 
   auto cameraObject = std::get_if<GameObjectCamera>(&objectToSerialize);
   if (cameraObject != NULL){
-    return serializeCamera();
+    return defaultSerialization();
   }
+
+  auto lightObject = std::get_if<GameObjectLight>(&objectToSerialize);
+  if (lightObject != NULL){
+    return defaultSerialization();
+  }
+
   return { };   // probably should throw an exception (would be better to rewrite so this cant happen, same in render)
 }
 
