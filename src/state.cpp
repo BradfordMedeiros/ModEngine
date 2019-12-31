@@ -26,6 +26,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.lastY = 0,
 		.offsetX = 0,
 		.offsetY = 0,
+		.enableDiffuse = true,
+		.enableSpecular = true,
 	};
 	return state;
 }

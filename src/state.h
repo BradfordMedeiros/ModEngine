@@ -30,6 +30,8 @@ struct engineState {
   float lastY;
   float offsetX;
   float offsetY;
+  bool enableDiffuse;
+  bool enableSpecular;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

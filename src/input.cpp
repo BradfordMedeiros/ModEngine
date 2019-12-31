@@ -61,7 +61,9 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
 
 void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
   engineState& state, 
-	void (*translate)(float, float, float), void (*scale)(float, float, float), void (*rotate)(float, float, float),
+	void (*translate)(float, float, float), 
+  void (*scale)(float, float, float), 
+  void (*rotate)(float, float, float),
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
   void (*playSound)(void),
   void (*setObjectDimensions)(short index, float width, float height, float depth),
@@ -73,6 +75,13 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   }
   if (disableInput){    // we return after escape, so escape still quits
     return;
+  }
+
+  if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS){
+    state.enableDiffuse = !state.enableDiffuse;
+  }
+  if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
+    state.enableSpecular = !state.enableSpecular;
   }
 
   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
