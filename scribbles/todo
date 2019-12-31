@@ -1,0 +1,20 @@
+- bullet physics  
+- collision volumes
+- optimization to select what to render quicker / multi scene 
+- animations
+- 2d ui 
+- tcp messaging (basic updates)
+- lifecycle (load/unload scenes --> should allow for both loading splash/ menus to new levels to new parts of levels)
+
+- udp messaging 
+- lighting model (use shading, dynamic lights)
+- better graphics
+- in engine voxel style editor? 
+- ai 
+
+in engine stuff:
+- editor to allow for easier editing scenes
+- "novel objects"
+	- 2d sprite editor grid
+	- 3d block editor grid (magnets?  fixed size grid units? etc)
+
