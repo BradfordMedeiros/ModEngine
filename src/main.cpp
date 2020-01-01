@@ -39,7 +39,7 @@ GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
   .name = "defaultCamera",
-  .position = glm::vec3(0.f, 0.f, 0.f),
+  .position = glm::vec3(0.f, -2.f, 0.f),
   .scale = glm::vec3(1.0f, 1.0f, 1.0f),
   .rotation = glm::quat(0, 1, 0, 0.0f),
 };
@@ -59,7 +59,8 @@ std::map<unsigned int, Mesh> fontMeshes;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;
-unsigned int rbo;
+unsigned int depthTexture;
+
 glm::mat4 orthoProj;
 ALuint soundBuffer;
 unsigned int uiShaderProgram;
@@ -475,12 +476,14 @@ int main(int argc, char* argv[]){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glBindTexture(GL_TEXTURE_2D, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-  
-  glGenRenderbuffers(1, &rbo);
-  glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, state.currentScreenWidth, state.currentScreenHeight);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);  
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); 
+
+  glGenTextures(1, &depthTexture);
+  glBindTexture(GL_TEXTURE_2D, depthTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_COMPONENT32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
  
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
@@ -504,9 +507,10 @@ int main(int argc, char* argv[]){
      state.currentScreenHeight = height;
      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  
-     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, state.currentScreenWidth, state.currentScreenHeight);
+
+     glBindTexture(GL_TEXTURE_2D, depthTexture);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
      projection = glm::perspective(glm::radians(45.0f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, (float)state.currentScreenHeight, 0.0f, -1.0f, 1.0f);  
@@ -520,6 +524,10 @@ int main(int argc, char* argv[]){
   
   std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
   unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
+
+  std::string depthShaderPath = "./res/shaders/depth";
+  std::cout << "INFO: depth file path is " << depthShaderPath << std::endl;
+  unsigned int depthProgram = loadShader(depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl");
 
   std::cout << "INFO: ui shader file path is " << uiShaderPath << std::endl;
   uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl");
@@ -655,12 +663,13 @@ int main(int argc, char* argv[]){
     schemeBindings.onFrame();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(framebufferProgram); 
+    glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
+    
     glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTexture : framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 

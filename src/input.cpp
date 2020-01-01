@@ -150,6 +150,9 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
     state.manipulatorMode = ROTATE;
   }
+  if (glfwGetKey(window, GLFW_KEY_9) == GLFW_PRESS){
+    state.showDepthBuffer = !state.showDepthBuffer;
+  }
   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
     state.manipulatorAxis = XAXIS;
   }
