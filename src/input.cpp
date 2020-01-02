@@ -40,7 +40,6 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE){
     state.enableManipulator = false;
-    handleSerialization();
   }
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE){

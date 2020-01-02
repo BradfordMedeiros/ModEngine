@@ -77,7 +77,6 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
-    std::cout << "PLACEHOLDER --> we should probably render debug lights in a special way?" << std::endl;
     drawMesh(cameraMesh);
     return;
   }
