@@ -11,7 +11,7 @@ uniform vec3 cameraPosition;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
 
-#define MAX_LIGHTS 128
+#define MAX_LIGHTS 32
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 
