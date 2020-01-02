@@ -59,7 +59,8 @@ std::map<unsigned int, Mesh> fontMeshes;
 
 glm::mat4 projection;
 unsigned int framebufferTexture;
-unsigned int depthTexture;
+unsigned int fbo;
+unsigned int depthTextures[32];
 
 glm::mat4 orthoProj;
 ALuint soundBuffer;
@@ -76,6 +77,32 @@ float quadVertices[] = {
    1.0f, -1.0f,  1.0f, 0.0f,
    1.0f,  1.0f,  1.0f, 1.0f
 };
+
+const int numTextures = 32;
+int activeDepthTexture = 0;
+
+void updateDepthTexturesSize(){
+  for (int i = 0; i < numTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_COMPONENT32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+  }
+}
+void generateDepthTextures(){
+  glGenTextures(numTextures, depthTextures);
+  for (int i = 0; i < numTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    updateDepthTexturesSize();
+  }
+}
+void setActiveDepthTexture(int index){
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
+  unsigned int texture = depthTextures[index];
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+}
+
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
@@ -108,9 +135,14 @@ void rotateCamera(float xoffset, float yoffset){
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
+
 void playSound(){
   playSound(soundBuffer);
+  activeDepthTexture = (activeDepthTexture + 1) % numTextures;
+  setActiveDepthTexture(activeDepthTexture);
 }
+
+
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
   static unsigned int sceneToSerialize = 0;
@@ -465,7 +497,6 @@ int main(int argc, char* argv[]){
   startSoundSystem();
   soundBuffer = loadSound("./res/sounds/sample.wav");
 
-  unsigned int fbo;
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
 
@@ -477,14 +508,9 @@ int main(int argc, char* argv[]){
   glBindTexture(GL_TEXTURE_2D, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
-  glGenTextures(1, &depthTexture);
-  glBindTexture(GL_TEXTURE_2D, depthTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_COMPONENT32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  generateDepthTextures();
+  setActiveDepthTexture(0);
 
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
- 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
     return -1;
@@ -508,8 +534,7 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-     glBindTexture(GL_TEXTURE_2D, depthTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+     updateDepthTexturesSize();
 
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
      projection = glm::perspective(glm::radians(45.0f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
@@ -612,15 +637,23 @@ int main(int argc, char* argv[]){
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.position, defaultCamera.rotation);
     }else{
-      view = renderView(activeCameraObj->position, activeCameraObj->rotation);
+      view = renderView(activeCameraObj->position, activeCameraObj->rotation);   // this is position incorrect because this needs to traverse the object hierachy
     }
 
     glfwSwapBuffers(window);
     
+    // depth buffer form point of view of main camera
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(255.0, 255.0, 255.0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    for (auto &[_, scene] : world.scenes){
+      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true);    // selection program since it's lightweight and we just care about depth buffer
+    }
+
     // 1ST pass draws selection program shader to be able to handle selection 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
-
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -653,10 +686,10 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
     }
+
     renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     renderUI(crosshairSprite, currentFramerate);
 
@@ -669,7 +702,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     
     glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTexture : framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[(activeDepthTexture - 1) >= 0 ? (activeDepthTexture - 1) : (numTextures - 1)] : framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
