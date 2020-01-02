@@ -71,4 +71,9 @@ void addObjectToScene(
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
 
+// @TODO code these functions
+void tranverseScene(Scene& scene, void (*onObject)());  
+glm::vec3 getFullPosition(short id);
+glm::quat getFullRotation(short id);
+
 #endif
