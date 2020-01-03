@@ -1,5 +1,7 @@
 #include "./worldloader.h"
 
+// @TODO currently dynamic chunkloading assumes it has exclusive access to scene management (or at least that loadscene/unload scene gives it that).
+// This causes the use case of, for example, a user loading a scene in code manually to have this unload the scene if the scene file happens to match that, which is questionable behavior
 DynamicLoading createDynamicLoading(float chunkSize){
   DynamicLoading loading = {
     .entityPosX = 0.f, 
@@ -89,7 +91,7 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
     std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = chunkAddressToSceneFile(chunk);
     short sceneId = loadingInfo.sceneFileToId[sceneFile];
-    std::cout << "want to unload: " << sceneId << std::endl;
+    std::cout << "INFO: CHUNK MANAGEMENT: want to unload id: " << sceneId << std::endl;
     unloadScene(sceneId);
     loadingInfo.sceneFileToId.erase(sceneFile);
   }
@@ -97,6 +99,7 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
     std::cout << "INFO: CHUNK MANAGEMENT: load: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = chunkAddressToSceneFile(chunk);
     auto sceneId = loadScene(sceneFile);
+    std::cout << "INFO: CHUNK MANAGEMENT: want to load id: " << sceneId << std::endl;
     loadingInfo.sceneFileToId[sceneFile] = sceneId;
   }
 
