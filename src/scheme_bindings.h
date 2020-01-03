@@ -29,6 +29,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 	std::string scriptPath,
   short (*loadScene)(std::string),  
   void (*unloadScene)(short id),  
+  std::vector<short> (*listScenes)(),  
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),

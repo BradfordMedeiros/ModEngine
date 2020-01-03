@@ -10,6 +10,16 @@ SCM scm_unloadScene(SCM value){
   _unloadScene(scm_to_short(value));
   return SCM_UNSPECIFIED;
 }
+std::vector<short> (*_listScenes)();
+SCM scm_listScenes(){
+  auto scenes = _listScenes();
+  SCM list = scm_make_list(scm_from_unsigned_integer(scenes.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < scenes.size(); i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_short(scenes[i])); 
+  }
+  return list;
+}
+
 
 void (*selectionMode)(bool enabled);
 SCM setSelectionMod(SCM value){
@@ -233,6 +243,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   std::string scriptPath,
   short (*loadScene)(std::string),  
   void (*unloadScene)(short id),  
+  std::vector<short> (*listScenes)(),  
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
@@ -255,6 +266,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   
   _loadScene = loadScene;
   _unloadScene = unloadScene;
+  _listScenes = listScenes;
   selectionMode = setSelectionMode;
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
@@ -276,6 +288,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
+  scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
   scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);

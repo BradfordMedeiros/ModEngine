@@ -291,6 +291,13 @@ void unloadScene(short sceneId){
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId);
 }
+std::vector<short> listScenes(){
+  std::vector<short> sceneIds;
+  for (auto &[id, _] : world.scenes){
+    sceneIds.push_back(id);
+  }
+  return sceneIds;
+}
 
 void printObjectIds(){
   auto ids = listObjInScene(world.scenes[0].scene);
@@ -569,6 +576,7 @@ int main(int argc, char* argv[]){
     result["scriptpath"].as<std::string>(), 
     loadScene,
     unloadScene,
+    listScenes,
     moveCamera, 
     rotateCamera, 
     removeObjectById, 
