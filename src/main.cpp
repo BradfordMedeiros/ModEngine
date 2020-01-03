@@ -146,8 +146,11 @@ void playSound(){
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
-  static unsigned int sceneToSerialize = 0;
-  std::cout << serializeFullScene(world.scenes[sceneToSerialize].scene, world.objectMapping) << std::endl;
+  int sceneToSerialize = world.scenes.size() - 1;
+  if (sceneToSerialize >= 0){
+    std::cout << serializeFullScene(world.scenes[sceneToSerialize].scene, world.objectMapping) << std::endl;
+  }
+  
 }
 void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
