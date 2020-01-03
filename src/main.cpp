@@ -159,7 +159,7 @@ void selectItem(){
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
-  if (state.enableManipulator && state.selectedIndex != -1){
+  if (state.enableManipulator && state.selectedIndex != -1 && !(world.idToScene.find(state.selectedIndex) == world.idToScene.end())){
     auto sceneId = world.idToScene[state.selectedIndex];
     auto selectObject = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex];
     if (state.manipulatorMode == TRANSLATE){
@@ -187,21 +187,22 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint);
 }
 void translate(float x, float y, float z){
-  if (state.selectedIndex == -1){
+  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
+  
   auto sceneId = world.idToScene[state.selectedIndex];
   physicsTranslate(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
-  if (state.selectedIndex == -1){
+  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
   auto sceneId = world.idToScene[state.selectedIndex];
   physicsScale(world, world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
-  if (state.selectedIndex == -1){
+  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
   auto sceneId = world.idToScene[state.selectedIndex];
@@ -209,7 +210,7 @@ void rotate(float x, float y, float z){
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
-  if (state.selectedIndex == -1){
+  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
   auto gameObjV = world.objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
@@ -229,7 +230,8 @@ void removeObjectById(short id){
   removeObjectFromScene(world.scenes[sceneId].scene, id);
 }
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
+  //addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
+  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
 }
 
 std::vector<short> getObjectsByType(std::string type){

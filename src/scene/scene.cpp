@@ -82,9 +82,10 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
     );
   }else{
     std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
-      exit(1);
+    exit(1);
   }
 
+  assert(rigidBody != NULL);
   world.rigidbodys[id] = rigidBody;
 }
 
@@ -159,23 +160,24 @@ short addSceneToWorld(World& world, std::string sceneFile){
   return sceneId;
 }
 void removeSceneFromWorld(World& world, short sceneId){
-  if ( world.scenes.find(sceneId) == world.scenes.end()) {
+  if (world.scenes.find(sceneId) == world.scenes.end()) {
+    std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
   }
 
   auto fullscene = world.scenes[sceneId];
   for (auto objectId : listObjInScene(fullscene.scene)){
     auto rigidBody = world.rigidbodys[objectId];
+    assert(rigidBody != NULL);
     rmRigidBody(world.physicsEnvironment, rigidBody);
     world.rigidbodys.erase(objectId);
     world.objectMapping.erase(objectId);
     world.idToScene.erase(objectId);
-    world.scenes.erase(objectId);
 
     // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
     std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
   }
-
+  world.scenes.erase(sceneId);
 }
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
