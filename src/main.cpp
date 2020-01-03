@@ -119,6 +119,7 @@ void nextCamera(){
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     state.useDefaultCamera = true;    
     activeCameraObj = NULL;
+    return;
   }
 
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
