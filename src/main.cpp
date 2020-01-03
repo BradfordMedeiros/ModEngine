@@ -146,18 +146,27 @@ void playSound(){
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
-  int sceneToSerialize = world.scenes.size() - 1;
-  if (sceneToSerialize >= 0){
-    std::cout << serializeFullScene(world.scenes[sceneToSerialize].scene, world.objectMapping) << std::endl;
-  }
+
+  // TODO - serialization is broken since didn't keep up with it   
+  //int sceneToSerialize = world.scenes.size() - 1;
+  //if (sceneToSerialize >= 0){
+  //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
+  //}
   
 }
 void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-  state.selectedIndex = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
+  auto selectedId = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
+
+  if (world.idToScene.find(selectedId) == world.idToScene.end()){
+    std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
+    return;
+  }
+
+  state.selectedIndex = selectedId;
 
   auto sceneId = world.idToScene[state.selectedIndex];
-  state.selectedName = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex].name;
+  state.selectedName = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex].name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
