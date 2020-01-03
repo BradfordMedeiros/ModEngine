@@ -345,7 +345,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lightsIndexs.size());
   for (int i = 0; i < lightsIndexs.size(); i++){
-    glm::vec3 position = fullscene.scene.idToGameObjects[lightsIndexs[i]].position;
+    glm::vec3 position = world.scenes[world.idToScene[lightsIndexs[i]]].scene.idToGameObjects[lightsIndexs[i]].position;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
