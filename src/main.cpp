@@ -356,7 +356,7 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
     drawGameobject(fullscene.scene.idToGameObjectsH[id], fullscene, shaderProgram, modelMatrix, useSelectionColor);
   }
 }
-void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor){
+void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
@@ -364,10 +364,9 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
 
-  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
-  glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lightsIndexs.size());
-  for (int i = 0; i < lightsIndexs.size(); i++){
-    glm::vec3 position = world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)).position;
+  glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
+  for (int i = 0; i < lights.size(); i++){
+    glm::vec3 position = lights[i] -> position;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
@@ -665,14 +664,24 @@ int main(int argc, char* argv[]){
 
     glfwSwapBuffers(window);
     
+    setActiveDepthTexture(1);
+
+    auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
+    std::vector<GameObject*> lights;
+    for (int i = 0; i < lightsIndexs.size(); i++){
+      lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)));
+    }
+
     // depth buffer form point of view of main camera
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true);    // selection program since it's lightweight and we just care about depth buffer
+      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
     }
+
+    setActiveDepthTexture(0);
 
     // 1ST pass draws selection program shader to be able to handle selection 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -681,7 +690,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true);
+      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -703,14 +712,14 @@ int main(int argc, char* argv[]){
     }
 
     glfwPollEvents();
-    
+
     // 2ND pass renders what we care about to the screen.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false);
+      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights);
     }
 
     renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
