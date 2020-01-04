@@ -90,7 +90,7 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
   for (auto &chunk : chunkLoading.chunksToUnload){
     std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = chunkAddressToSceneFile(chunk);
-    short sceneId = loadingInfo.sceneFileToId[sceneFile];
+    short sceneId = loadingInfo.sceneFileToId.at(sceneFile);
     std::cout << "INFO: CHUNK MANAGEMENT: want to unload id: " << sceneId << std::endl;
     unloadScene(sceneId);
     loadingInfo.sceneFileToId.erase(sceneFile);

@@ -21,7 +21,7 @@ GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::
 
   GameObjectMesh obj {
     .meshName = meshName,
-    .mesh = meshes[meshName],
+    .mesh = meshes.at(meshName),
     .isDisabled = isDisabled,
   };
 

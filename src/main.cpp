@@ -110,8 +110,8 @@ void setActiveCamera(short cameraId){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     return;
   }
-  auto sceneId = world.idToScene[cameraId];
-  activeCameraObj = &world.scenes[sceneId].scene.idToGameObjects[cameraId];
+  auto sceneId = world.idToScene.at(cameraId);
+  activeCameraObj = &world.scenes.at(sceneId).scene.idToGameObjects.at(cameraId);
   state.selectedIndex = cameraId;
 }
 void nextCamera(){
@@ -123,7 +123,7 @@ void nextCamera(){
   }
 
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
-  short activeCameraId = cameraIndexs[state.activeCamera];
+  short activeCameraId = cameraIndexs.at(state.activeCamera);
   setActiveCamera(activeCameraId);
   std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
@@ -165,21 +165,21 @@ void selectItem(){
 
   state.selectedIndex = selectedId;
 
-  auto sceneId = world.idToScene[state.selectedIndex];
-  state.selectedName = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex].name + "(" + std::to_string(state.selectedIndex) + ")";
+  auto sceneId = world.idToScene.at(state.selectedIndex);
+  state.selectedName = world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && !(world.idToScene.find(state.selectedIndex) == world.idToScene.end())){
-    auto sceneId = world.idToScene[state.selectedIndex];
-    auto selectObject = world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex];
+    auto sceneId = world.idToScene.at(state.selectedIndex);
+    auto selectObject = world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex);
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(world, world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(world, world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -203,43 +203,43 @@ void translate(float x, float y, float z){
     return;
   }
   
-  auto sceneId = world.idToScene[state.selectedIndex];
-  physicsTranslate(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  auto sceneId = world.idToScene.at(state.selectedIndex);
+  physicsTranslate(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), x, y, z, state.moveRelativeEnabled, state.selectedIndex);
 }
 void scale(float x, float y, float z){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
-  auto sceneId = world.idToScene[state.selectedIndex];
-  physicsScale(world, world.scenes[sceneId], world.rigidbodys[state.selectedIndex], state.selectedIndex, x, y, z);
+  auto sceneId = world.idToScene.at(state.selectedIndex);
+  physicsScale(world, world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
-  auto sceneId = world.idToScene[state.selectedIndex];
-  physicsRotate(world.scenes[sceneId], world.rigidbodys[state.selectedIndex], x, y, z, state.selectedIndex);
+  auto sceneId = world.idToScene.at(state.selectedIndex);
+  physicsRotate(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), x, y, z, state.selectedIndex);
 }
 
 void setObjectDimensions(short index, float width, float height, float depth){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
-  auto gameObjV = world.objectMapping[state.selectedIndex];  // todo this is bs, need a wrapper around objectmappping + scene
+  auto gameObjV = world.objectMapping.at(state.selectedIndex);  // todo this is bs, need a wrapper around objectmappping + scene
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     auto newScale = getScaleEquivalent(meshObj->mesh.boundInfo, width, height, depth);
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-    auto sceneId = world.idToScene[state.selectedIndex];
-    world.scenes[sceneId].scene.idToGameObjects[state.selectedIndex].scale = newScale;
+    auto sceneId = world.idToScene.at(state.selectedIndex);
+    world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).scale = newScale;
   } 
 }
 
 void removeObjectById(short id){
   std::cout << "removing object by id: " << id << std::endl;
   removeObject(world.objectMapping, id);
-  auto sceneId = world.idToScene[id];
-  removeObjectFromScene(world.scenes[sceneId].scene, id);
+  auto sceneId = world.idToScene.at(id);
+  removeObjectFromScene(world.scenes.at(sceneId).scene, id);
 }
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
   //addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
@@ -258,28 +258,28 @@ std::vector<short> getObjectsByType(std::string type){
 }
 
 std::string getGameObjectName(short index){
-  auto sceneId = world.idToScene[index];
-  return world.scenes[sceneId].scene.idToGameObjects[index].name;
+  auto sceneId = world.idToScene.at(index);
+  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).name;
 }
 glm::vec3 getGameObjectPosition(short index){
-  auto sceneId = world.idToScene[index];
-  return world.scenes[sceneId].scene.idToGameObjects[index].position;
+  auto sceneId = world.idToScene.at(index);
+  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
-  auto sceneId = world.idToScene[index];
-  physicsTranslateSet(world.scenes[sceneId], world.rigidbodys[index], pos, index);
+  auto sceneId = world.idToScene.at(index);
+  physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
 }
 void setGameObjectRotation(short index, glm::quat rotation){
-  auto sceneId = world.idToScene[index];
-  physicsRotateSet(world.scenes[sceneId], world.rigidbodys[index], rotation,  index);
+  auto sceneId = world.idToScene.at(index);
+  physicsRotateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), rotation,  index);
 }
 glm::quat getGameObjectRotation(short index){
-  auto sceneId = world.idToScene[index];
-  return world.scenes[sceneId].scene.idToGameObjects[index].rotation;
+  auto sceneId = world.idToScene.at(index);
+  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).rotation;
 }
 short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   for (int i = 0; i < world.scenes.size(); i++){
-    for (auto [id, gameObj]: world.scenes[i].scene.idToGameObjects){
+    for (auto [id, gameObj]: world.scenes.at(i).scene.idToGameObjects){
       if (gameObj.name == name){
         return id;
       }
@@ -293,10 +293,10 @@ void setSelectionMode(bool enabled){
 }
 
 void applyImpulse(short index, glm::vec3 impulse){
-  applyImpulse(world.rigidbodys[index], impulse);
+  applyImpulse(world.rigidbodys.at(index), impulse);
 }
 void clearImpulse(short index){
-  clearImpulse(world.rigidbodys[index]);
+  clearImpulse(world.rigidbodys.at(index));
 }
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
@@ -315,9 +315,9 @@ std::vector<short> listScenes(){
 }
 
 void printObjectIds(){
-  auto ids = listObjInScene(world.scenes[0].scene);
+  auto ids = listObjInScene(world.scenes.at(0).scene);
   for (int i = 0; i < ids.size() ; i++){
-    std::cout << "id: " << ids[i] << std::endl;
+    std::cout << "id: " << ids.at(i) << std::endl;
   }
 }
 
@@ -331,7 +331,7 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
 
   if (state.visualizeNormals){
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    drawMesh(world.meshes["./res/models/cone/cone.obj"]); 
+    drawMesh(world.meshes.at("./res/models/cone/cone.obj")); 
   }
 
   modelMatrix = glm::scale(modelMatrix, object.scale);
@@ -344,13 +344,13 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
 
     if (objectSelected){
-      drawMesh(world.meshes["./res/models/boundingbox/boundingbox.obj"]);
+      drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"));
     }
   }
   /////////////////////////////// end bounding code
 
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  renderObject(objectH.id, world.objectMapping, world.meshes["./res/models/box/box.obj"], objectSelected, world.meshes["./res/models/boundingbox/boundingbox.obj"], state.showCameras);
+  renderObject(objectH.id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
 
   for (short id: objectH.children){
     drawGameobject(fullscene.scene.idToGameObjectsH[id], fullscene, shaderProgram, modelMatrix, useSelectionColor);
@@ -367,12 +367,12 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lightsIndexs.size());
   for (int i = 0; i < lightsIndexs.size(); i++){
-    glm::vec3 position = world.scenes[world.idToScene[lightsIndexs[i]]].scene.idToGameObjects[lightsIndexs[i]].position;
+    glm::vec3 position = world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)).position;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
   for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
-    drawGameobject(fullscene.scene.idToGameObjectsH[fullscene.scene.rootGameObjectsH[i]], fullscene, shaderProgram, model, useSelectionColor);
+    drawGameobject(fullscene.scene.idToGameObjectsH.at(fullscene.scene.rootGameObjectsH.at(i)), fullscene, shaderProgram, model, useSelectionColor);
   }  
 }
 
