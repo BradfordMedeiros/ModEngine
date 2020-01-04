@@ -15,6 +15,9 @@ uniform bool enableSpecular;
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 
+const float constant = 0.4;
+const float linear = 0.2;
+const float quadratic = 0.0;
 
 void main(){
   if (tint.r < 0.1){
@@ -40,8 +43,11 @@ void main(){
         vec3 reflectDir = reflect(-lightDir, normal);  
         vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
  
-        totalDiffuse = totalDiffuse + diffuse;
-        totalSpecular = totalSpecular + specular;
+        float distanceToLight = length(lightPos - FragPos);
+        float attenuation = 1.0 / (constant + linear * distanceToLight + quadratic * (distanceToLight * distanceToLight));  
+
+        totalDiffuse = totalDiffuse + (attenuation * diffuse);
+        totalSpecular = totalSpecular + (attenuation * specular);
     }
 
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
