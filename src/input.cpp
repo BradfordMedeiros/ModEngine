@@ -164,6 +164,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   }
   if (glfwGetKey(window, GLFW_KEY_9) == GLFW_PRESS){
     state.showDepthBuffer = !state.showDepthBuffer;
+    state.showCameras = false; // turn this off so light isn't trapped in the box 
   }
   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
     state.manipulatorAxis = XAXIS;

@@ -32,7 +32,8 @@ Mesh loadMesh(std::string modelPath, std::string defaultTexture){
     texture = loadTexture(defaultTexture); 
   }
  
-  useTexture(texture);
+  glBindTexture(GL_TEXTURE_2D, texture.textureId);
+
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
@@ -116,7 +117,7 @@ Mesh loadSpriteMesh(std::string imagePath){
 
 void drawMesh(Mesh mesh){
   glBindVertexArray(mesh.VAOPointer);
-  useTexture(mesh.texture);
+  glBindTexture(GL_TEXTURE_2D, mesh.texture.textureId);
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 }
 
@@ -149,14 +150,10 @@ Texture loadTexture(std::string textureFilePath){
  
   Texture tex = Texture {
     .textureId = texture,
-    .data = data,
+    .data = data,     // @TODO -> we can just free the memory, dont need to keep it around since glTexImage2D copies it. 
   };
 
   return tex;
-}
-
-void useTexture(Texture texture){
-  glBindTexture(GL_TEXTURE_2D, texture.textureId);
 }
 
 void freeTextureData(Texture& texture){

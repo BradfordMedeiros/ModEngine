@@ -58,7 +58,7 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
 }
 
 void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh, Mesh& boundingBoxMesh, bool showCameras){
-  GameObjectObj toRender = mapping[id];
+  GameObjectObj toRender = mapping.at(id);
 
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
