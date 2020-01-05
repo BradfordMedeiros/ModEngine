@@ -13,12 +13,9 @@
 
 struct Texture {
    unsigned int textureId;
-   unsigned char* data;
 };
 
 Texture loadTexture(std::string textureFilePath);
-void useTexture(Texture texture);
-void freeTextureData(Texture& texture);
 
 struct Mesh {
   unsigned int VAOPointer;

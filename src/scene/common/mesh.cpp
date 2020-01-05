@@ -131,7 +131,10 @@ Texture loadTexture(std::string textureFilePath){
   glBindTexture(GL_TEXTURE_2D, texture);
   
   unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
-
+  if (!data){
+    throw std::runtime_error("failed loading texture " + textureFilePath);
+  }
+  
   GLint format = GL_RGB;
   if (numChannels == 4) {
     format = GL_RGBA;
@@ -143,21 +146,14 @@ Texture loadTexture(std::string textureFilePath){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
-
-  if (!data){
-    throw std::runtime_error("failed loading texture " + textureFilePath);
-  }  
+  
+  stbi_image_free(data);
  
   Texture tex = Texture {
     .textureId = texture,
-    .data = data,     // @TODO -> we can just free the memory, dont need to keep it around since glTexImage2D copies it. 
   };
 
   return tex;
-}
-
-void freeTextureData(Texture& texture){
-   stbi_image_free(texture.data);
 }
 
 void drawLines(std::vector<Line> allLines){
