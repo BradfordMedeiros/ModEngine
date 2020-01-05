@@ -58,6 +58,15 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
 
 }
 
+void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, double yoffset){
+  if (state.toggleFov){
+    if ((state.fov <= 0 && yoffset < 0) || (state.fov >= 180 && yoffset > 0)){
+      return;
+    }
+    state.fov = state.fov + yoffset;
+  }
+}
+
 void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
   engineState& state, 
 	void (*translate)(float, float, float), 
@@ -112,7 +121,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
     state.visualizeNormals = !state.visualizeNormals;
     std::cout << "visualizeNormals: " << state.visualizeNormals << std::endl;
   }
-  if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
+  if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
     state.showCameras = !state.showCameras;
   }
   if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
@@ -122,6 +131,10 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
     state.moveRelativeEnabled = !state.moveRelativeEnabled;
     std::cout << "Move relative: " << state.moveRelativeEnabled << std::endl;
+  }
+  if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
+    state.toggleFov = !state.toggleFov;
+    std::cout << "ToggleFOV: " << state.toggleFov << std::endl;
   }
   if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS){
     if (state.axis == 0){

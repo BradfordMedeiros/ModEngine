@@ -29,6 +29,9 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.enableDiffuse = true,
 		.enableSpecular = true,
 		.showDepthBuffer = false,
+		.fov = 45.f,
+		.toggleFov = false
+
 	};
 	return state;
 }

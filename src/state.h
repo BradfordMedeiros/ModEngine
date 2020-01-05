@@ -33,6 +33,8 @@ struct engineState {
   bool enableDiffuse;
   bool enableSpecular;
   bool showDepthBuffer;
+  float fov;  // in degrees
+  bool toggleFov;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

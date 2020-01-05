@@ -192,6 +192,9 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization, selectItem);
   schemeBindings.onMouseCallback(button, action, mods);
 }
+void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
+  scroll_callback(window, state, xoffset, yoffset);
+}
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 }
@@ -353,7 +356,7 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
   renderObject(objectH.id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
 
   for (short id: objectH.children){
-    drawGameobject(fullscene.scene.idToGameObjectsH[id], fullscene, shaderProgram, modelMatrix, useSelectionColor);
+    drawGameobject(fullscene.scene.idToGameObjectsH.at(id), fullscene, shaderProgram, modelMatrix, useSelectionColor);
   }
 }
 void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
@@ -418,8 +421,8 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       manipulatorAxisString = "noaxis";
     }
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
-   
     drawText("position: " + print(defaultCamera.position), 10, 60, 3);
+    drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
   }
 }
 
@@ -558,7 +561,6 @@ int main(int argc, char* argv[]){
      updateDepthTexturesSize();
 
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-     projection = glm::perspective(glm::radians(45.0f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, (float)state.currentScreenHeight, 0.0f, -1.0f, 1.0f);  
   }; 
 
@@ -618,6 +620,7 @@ int main(int argc, char* argv[]){
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
+  glfwSetScrollCallback(window, onScrollCallback);
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCharCallback(window, keyCharCallback);
   
@@ -661,10 +664,11 @@ int main(int argc, char* argv[]){
     }else{
       view = renderView(activeCameraObj->position, activeCameraObj->rotation);   // this is position incorrect because this needs to traverse the object hierachy
     }
+    projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
+
 
     glfwSwapBuffers(window);
     
-    setActiveDepthTexture(1);
 
     auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
     std::vector<GameObject*> lights;
@@ -672,13 +676,15 @@ int main(int argc, char* argv[]){
       lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)));
     }
 
-    // depth buffer form point of view of main camera
+    setActiveDepthTexture(1);
+
+    // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
+      renderScene(scene, selectionProgram, projection, renderView(lights.at(0) -> position, lights.at(0) -> rotation), glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
     }
 
     setActiveDepthTexture(0);
@@ -734,7 +740,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     
     glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[(activeDepthTexture - 1) >= 0 ? (activeDepthTexture - 1) : (numTextures - 1)] : framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
