@@ -1,10 +1,15 @@
 #version 330 core
 
-out vec4 FragColor;
 in vec3 FragPos;
 in vec2 TexCoord;
 in vec3 Normal;
-uniform sampler2D textureData;
+
+out vec4 FragColor;
+
+uniform sampler2D coolzero;
+uniform sampler2D coolsomevalue;
+uniform sampler2D maintexture;
+
 uniform vec3 tint;
 uniform vec3 cameraPosition;
 
@@ -23,7 +28,10 @@ void main(){
   if (tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
-    vec4 texColor = texture(textureData, TexCoord);
+    //vec4 texColor = (texture(coolzero, TexCoord) + texture(coolsomevalue, TexCoord)) / 2;
+    //vec4 texColor = 
+    vec4 texColor = texture(maintexture, TexCoord);
+    
     if (texColor.a < 0.1){
       discard;
     }

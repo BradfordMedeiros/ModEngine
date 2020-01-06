@@ -50,6 +50,8 @@ int numChunkingGridCells = 0;
 float chunkSize = 100;
 bool useChunkingSystem = false;
 std::string rawSceneFile;
+Texture blacktopTexture;
+Texture grassTexture;
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -139,8 +141,8 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 
 void playSound(){
   playSound(soundBuffer);
-  activeDepthTexture = (activeDepthTexture + 1) % numTextures;
-  setActiveDepthTexture(activeDepthTexture);
+  //activeDepthTexture = (activeDepthTexture + 1) % numTextures;
+  //setActiveDepthTexture(activeDepthTexture);
 }
 
 
@@ -361,11 +363,24 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
 }
 void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
+  
+  glActiveTexture(GL_TEXTURE0 + 1);
+  glBindTexture(GL_TEXTURE_2D, blacktopTexture.textureId);
+  glUniform1i(glGetUniformLocation(shaderProgram, "coolzero"), 1);
+  
+  glActiveTexture(GL_TEXTURE0 + 2);
+  glBindTexture(GL_TEXTURE_2D, grassTexture.textureId);
+  glUniform1i(glGetUniformLocation(shaderProgram, "coolsomevalue"), 2);
+
+  glActiveTexture(GL_TEXTURE0); 
+
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
   glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.position));
   glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
+  glUniform1i(glGetUniformLocation(shaderProgram, "coolone"), 0);
+    
 
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
@@ -633,6 +648,9 @@ int main(int argc, char* argv[]){
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
+  blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
+  grassTexture = loadTexture("./res/textures/grass.png");
+
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -679,13 +697,19 @@ int main(int argc, char* argv[]){
     setActiveDepthTexture(1);
 
     // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
+
+    auto lightView = renderView(lights.at(0) -> position, lights.at(0) -> rotation);
+    auto lightTransform = projection * lightView;
+    
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, renderView(lights.at(0) -> position, lights.at(0) -> rotation), glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
+      renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
     }
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldtolight"), 1, GL_FALSE, glm::value_ptr(lightView));
 
     setActiveDepthTexture(0);
 
@@ -724,6 +748,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights);
     }
@@ -732,6 +757,7 @@ int main(int argc, char* argv[]){
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();
+
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
