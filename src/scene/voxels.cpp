@@ -28,5 +28,49 @@ void removeVoxel(Voxels& chunk, int x, int y, int z){
 }
 
 VoxelRenderData generateRenderData(Voxels& chunk){
+  std::vector<float> vertexData;
+  vertexData.push_back(-1.0f);
+  vertexData.push_back(1.0f);    
+  vertexData.push_back(0.0f);
+  vertexData.push_back(0.0f);
+  vertexData.push_back(1.0f);
 
+  vertexData.push_back(-1.0f);
+  vertexData.push_back(-1.0f);
+  vertexData.push_back(0.0f);
+  vertexData.push_back(0.0f);
+  vertexData.push_back(0.0f);
+ 
+  vertexData.push_back(1.0f);
+  vertexData.push_back(-1.0f);
+  vertexData.push_back(0.0f);
+  vertexData.push_back(1.0f);
+  vertexData.push_back(0.0f);
+ 
+  vertexData.push_back(1.0f);
+  vertexData.push_back(-1.0f);
+  vertexData.push_back(0.0f);
+  vertexData.push_back(1.0f);
+  vertexData.push_back(0.0f);
+ 
+  vertexData.push_back(1.0f);
+  vertexData.push_back(1.0f);
+  vertexData.push_back(0.0f);
+  vertexData.push_back(1.0f);
+  vertexData.push_back(1.0f);
+
+  std::vector<unsigned int> indicies;
+  indicies.push_back(0);
+  indicies.push_back(1);
+  indicies.push_back(2);
+  indicies.push_back(0);
+  indicies.push_back(2);
+  indicies.push_back(3);
+  
+  VoxelRenderData data = {
+    .verticesAndTexCoords = vertexData,    // A voxel render must use one texture (assumption for now)
+    .indicies = indicies,
+  };
+  return data;
 }
+

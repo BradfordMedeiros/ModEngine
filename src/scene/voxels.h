@@ -11,9 +11,8 @@ struct Voxels {
 };
 
 struct VoxelRenderData {
-  std::vector<float> verticesAndTexCoords;    // A voxel render must use one texture (assumption for now)
+  std::vector<float> verticesAndTexCoords;    
   std::vector<unsigned int> indicies;
-  std::string textureFilePath;
 };
 
 Voxels createVoxels(int width, int height, int depth, int numWidth, int numHeight, int numDepth);

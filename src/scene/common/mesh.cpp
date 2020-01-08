@@ -91,7 +91,7 @@ Mesh load2DMesh(std::string imagePath){
     1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
   };
   unsigned int indices[] = {0, 1, 2, 0, 2, 3};
-  return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2);
+  return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2);  // @TODO last 4 nums seem derivable in load2dmesh helper
 }
 Mesh load2DMeshTexCoords(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi){
   float quadVerts[] = {
@@ -104,7 +104,7 @@ Mesh load2DMeshTexCoords(std::string imagePath, float offsetxndi, float offsetyn
   return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2);
 }
 Mesh loadMeshFrom3Vert2TexCoords(std::string imagePath, std::vector<float> vertices, std::vector<unsigned int> indicies){
-  throw std::runtime_error("not yet implemented");
+  return load2DMeshHelper(imagePath, &(vertices[0]), &indicies[0], vertices.size(), indicies.size(), 3, 2);
 }
 
 Mesh loadSpriteMesh(std::string imagePath){

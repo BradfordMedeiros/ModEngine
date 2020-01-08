@@ -54,6 +54,7 @@ std::string rawSceneFile;
 Texture blacktopTexture;
 Texture grassTexture;
 Voxels voxel;
+Mesh twoDeeMesh;
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -152,10 +153,10 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   playSound();
 
   // TODO - serialization is broken since didn't keep up with it   
-  //int sceneToSerialize = world.scenes.size() - 1;
-  //if (sceneToSerialize >= 0){
-  //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
-  //}
+  int sceneToSerialize = world.scenes.size() - 1;
+  if (sceneToSerialize >= 0){
+    std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
+  }
   
 }
 void selectItem(){
@@ -368,7 +369,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   
   glActiveTexture(GL_TEXTURE0 + 1);
   glBindTexture(GL_TEXTURE_2D, blacktopTexture.textureId);
-  glUniform1i(glGetUniformLocation(shaderProgram, "coolzero"), 1);
+  glUniform1i(glGetUniformLocation(shaderProgram, "coolzero"), 1);         // @todo just a sample extra texture, this will eventually become something real
   
   glActiveTexture(GL_TEXTURE0 + 2);
   glBindTexture(GL_TEXTURE_2D, grassTexture.textureId);
@@ -391,6 +392,10 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
     drawGameobject(fullscene.scene.idToGameObjectsH.at(fullscene.scene.rootGameObjectsH.at(i)), fullscene, shaderProgram, model, useSelectionColor);
   }  
+
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+  drawMesh(twoDeeMesh);
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -660,10 +665,11 @@ int main(int argc, char* argv[]){
   addVoxel(voxel, 1, 1, 1);
   addVoxel(voxel, 1, 2, 2);
   addVoxel(voxel, 1, 3, 3);
-  //VoxelRenderData renderData = generateRenderData(voxel);
-
-  //loadMeshFrom3Vert2TexCoords("./res/textures/wood.jpg", renderData.verticesAndTexCoords, renderData.indicies);
   
+  VoxelRenderData renderData = generateRenderData(voxel);
+  //twoDeeMesh = loadMeshFrom3Vert2TexCoords("./res/textures/wood.jpg", renderData.verticesAndTexCoords, renderData.indicies);
+  twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
+
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -711,8 +717,8 @@ int main(int argc, char* argv[]){
 
     // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
 
+    assert(lights.size() > 0);   // temporary assertion 
     auto lightView = renderView(lights.at(0) -> position, lights.at(0) -> rotation);
-    auto lightTransform = projection * lightView;
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
@@ -722,7 +728,7 @@ int main(int argc, char* argv[]){
       renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
     }
 
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldtolight"), 1, GL_FALSE, glm::value_ptr(lightView));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldtolight"), 1, GL_FALSE, glm::value_ptr(lightView));  // leftover from shadow mapping attempt, will revisit
 
     setActiveDepthTexture(0);
 
