@@ -79,7 +79,7 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
   Mesh mesh = {
     .VAOPointer = VAO,
     .texture = texture,
-    .numElements = 6,
+    .numElements = numIndices,
   };
   return mesh;
 }
