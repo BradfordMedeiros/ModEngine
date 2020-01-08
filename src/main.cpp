@@ -667,8 +667,8 @@ int main(int argc, char* argv[]){
   addVoxel(voxel, 1, 3, 3);
   
   VoxelRenderData renderData = generateRenderData(voxel);
-  //twoDeeMesh = loadMeshFrom3Vert2TexCoords("./res/textures/wood.jpg", renderData.verticesAndTexCoords, renderData.indicies);
-  twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
+  twoDeeMesh = loadMeshFrom3Vert2TexCoords("./res/textures/wood.jpg", renderData.verticesAndTexCoords, renderData.indicies);
+  //twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;

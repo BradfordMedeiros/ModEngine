@@ -27,46 +27,69 @@ void removeVoxel(Voxels& chunk, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
 }
 
+static const int numElements = 180;
+static float cubes[numElements] = {
+  // Front face
+  -1.f, 1.f, -1, 0, 1.f, 
+  -1.f, -1.f, -1, 0, 0,
+  1.f, -1.f, -1, 1.f, 0.f,
+  -1.f, 1.f, -1, 0, 1.f,
+  1.f, -1.f, -1, 1.f, 0,
+  1.f, 1.f, -1, 1.f, 1.f,
+
+  // Back face
+  -1.f, 1.f, 1, 0, 1.f, 
+  -1.f, -1.f, 1, 0, 0,
+  1.f, -1.f, 1, 1.f, 0.f,
+  -1.f, 1.f, 1, 0, 1.f,
+  1.f, -1.f, 1, 1.f, 0,
+  1.f, 1.f, 1, 1.f, 1.f,
+
+  // Left face
+  -1.f, 1.f, -1.f, 0, 1.f, 
+  -1.f, -1.f, -1.f, 0, 0,
+  -1.f, -1.f, 1.f, 1.f, 0.f,
+  -1.f, 1.f,  -1.f, 0, 1.f,
+  -1.f, -1.f, 1.f, 1.f, 0,
+  -1.f, 1.f, 1.f, 1.f, 1.f,
+
+  // Right face
+  1.f, 1.f, -1.f, 0, 1.f, 
+  1.f, -1.f, -1.f, 0, 0,
+  1.f, -1.f, 1.f, 1.f, 0.f,
+  1.f, 1.f,  -1.f, 0, 1.f,
+  1.f, -1.f, 1.f, 1.f, 0,
+  1.f, 1.f, 1.f, 1.f, 1.f,
+
+  // Top face
+  1.f, 1.f, -1.f, 0, 1.f, 
+  -1.f, 1.f, -1.f, 0, 0,
+  -1.f, 1.f, 1.f, 1.f, 0.f,
+  1.f, 1.f,  -1.f, 0, 1.f,
+  -1.f, 1.f, 1.f, 1.f, 0,
+  1.f, 1.f, 1.f, 1.f, 1.f,
+
+  // Bottom face
+  1.f, -1.f, -1.f, 0, 1.f, 
+  -1.f, -1.f, -1.f, 0, 0,
+  -1.f, -1.f, 1.f, 1.f, 0.f,
+  1.f, -1.f,  -1.f, 0, 1.f,
+  -1.f, -1.f, 1.f, 1.f, 0,
+  1.f, -1.f, 1.f, 1.f, 1.f,
+};
+void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies){
+  for (int i = 0; i < numElements; i++){
+    vertexData.push_back(cubes[i]);
+  }
+  for (int i = 0; i < vertexData.size(); i++){
+    indicies.push_back(i);
+  }
+}
+
 VoxelRenderData generateRenderData(Voxels& chunk){
   std::vector<float> vertexData;
-  vertexData.push_back(-1.0f);
-  vertexData.push_back(1.0f);    
-  vertexData.push_back(0.0f);
-  vertexData.push_back(0.0f);
-  vertexData.push_back(1.0f);
-
-  vertexData.push_back(-1.0f);
-  vertexData.push_back(-1.0f);
-  vertexData.push_back(0.0f);
-  vertexData.push_back(0.0f);
-  vertexData.push_back(0.0f);
- 
-  vertexData.push_back(1.0f);
-  vertexData.push_back(-1.0f);
-  vertexData.push_back(0.0f);
-  vertexData.push_back(1.0f);
-  vertexData.push_back(0.0f);
- 
-  vertexData.push_back(1.0f);
-  vertexData.push_back(-1.0f);
-  vertexData.push_back(0.0f);
-  vertexData.push_back(1.0f);
-  vertexData.push_back(0.0f);
- 
-  vertexData.push_back(1.0f);
-  vertexData.push_back(1.0f);
-  vertexData.push_back(0.0f);
-  vertexData.push_back(1.0f);
-  vertexData.push_back(1.0f);
-
   std::vector<unsigned int> indicies;
-  indicies.push_back(0);
-  indicies.push_back(1);
-  indicies.push_back(2);
-  indicies.push_back(0);
-  indicies.push_back(2);
-  indicies.push_back(3);
-  
+  addCube(vertexData, indicies);
   VoxelRenderData data = {
     .verticesAndTexCoords = vertexData,    // A voxel render must use one texture (assumption for now)
     .indicies = indicies,
