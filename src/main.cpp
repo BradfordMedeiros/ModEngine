@@ -25,6 +25,7 @@
 #include "./scene/common/util/boundinfo.h"
 #include "./scene/sprites/readfont.h"
 #include "./scene/sprites/sprites.h"
+#include "./scene/voxels.h"
 #include "./scheme_bindings.h"
 #include "./shaders.h"
 #include "./translations.h"
@@ -52,6 +53,7 @@ bool useChunkingSystem = false;
 std::string rawSceneFile;
 Texture blacktopTexture;
 Texture grassTexture;
+Voxels voxel;
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -379,8 +381,6 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.position));
   glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
-  glUniform1i(glGetUniformLocation(shaderProgram, "coolone"), 0);
-    
 
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
@@ -651,6 +651,19 @@ int main(int argc, char* argv[]){
   blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
   grassTexture = loadTexture("./res/textures/grass.png");
 
+  voxel = createVoxels(10, 10, 10, 5, 5, 5);
+  addVoxel(voxel, 0, 0, 0);
+  addVoxel(voxel, 0, 1, 1);
+  addVoxel(voxel, 0, 2, 2);
+  addVoxel(voxel, 0, 3, 3);
+  addVoxel(voxel, 1, 0, 0);
+  addVoxel(voxel, 1, 1, 1);
+  addVoxel(voxel, 1, 2, 2);
+  addVoxel(voxel, 1, 3, 3);
+  //VoxelRenderData renderData = generateRenderData(voxel);
+
+  //loadMeshFrom3Vert2TexCoords("./res/textures/wood.jpg", renderData.verticesAndTexCoords, renderData.indicies);
+  
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }

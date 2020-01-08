@@ -103,6 +103,9 @@ Mesh load2DMeshTexCoords(std::string imagePath, float offsetxndi, float offsetyn
   unsigned int indices[] = {0, 1, 2, 0, 2, 3};
   return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2);
 }
+Mesh loadMeshFrom3Vert2TexCoords(std::string imagePath, std::vector<float> vertices, std::vector<unsigned int> indicies){
+  throw std::runtime_error("not yet implemented");
+}
 
 Mesh loadSpriteMesh(std::string imagePath){
   float uiVerts[] = {
