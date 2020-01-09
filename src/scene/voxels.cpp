@@ -51,7 +51,7 @@ static float cubes[numElements] = {
   0.5f, -0.5f, 0.5f, 0.5f, 0.5f,
 };
 
-Voxels createVoxels(int width, int height, int depth, int numWidth, int numHeight, int numDepth){
+Voxels createVoxels(int numWidth, int numHeight, int numDepth){
   std::vector<std::vector<std::vector<int>>> cubes;         // @TODO this initialization could be done faster 
 
   for (int row = 0; row < numWidth; row++){
@@ -78,7 +78,7 @@ void removeVoxel(Voxels& chunk, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
 }
 
-void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, int offsetX, int offsetY, int offsetZ){
+void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, float offsetX, float offsetY, float offsetZ){
   int originalVertexLength  = vertexData.size();
   for (int i = 0; i < numElements; i++){
     vertexData.push_back(cubes[i]);
@@ -105,7 +105,7 @@ VoxelRenderData generateRenderData(Voxels& chunk){
   for (int i = 0; i < 10; i++){
     for (int j = 0; j < 3; j++){
       for (int k = 0; k < 10; k++){
-        addCube(vertexData, indicies, i, j, k);
+        addCube(vertexData, indicies, i + 0.5f, j + 0.5f, k + 0.5f);
       }
     }
   }
