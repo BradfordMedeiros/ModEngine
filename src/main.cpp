@@ -656,7 +656,7 @@ int main(int argc, char* argv[]){
   blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
   grassTexture = loadTexture("./res/textures/grass.png");
 
-  voxel = createVoxels(10, 10, 10, 5, 5, 5);
+  voxel = createVoxels(5, 5, 5);
   addVoxel(voxel, 0, 0, 0);
   addVoxel(voxel, 0, 1, 1);
   addVoxel(voxel, 0, 2, 2);
@@ -800,3 +800,5 @@ int main(int argc, char* argv[]){
    
   return 0;
 }
+
+
