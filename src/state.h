@@ -17,8 +17,8 @@ struct engineState {
   unsigned int axis; 
   unsigned int currentScreenWidth;
   unsigned int currentScreenHeight;
-  unsigned int cursorLeft;
-  unsigned int cursorTop;
+  int cursorLeft;
+  int cursorTop;
   short selectedIndex;
   unsigned int activeCamera;
   std::string additionalText;

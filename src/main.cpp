@@ -63,6 +63,7 @@ DynamicLoading dynamicLoading;
 std::map<unsigned int, Mesh> fontMeshes;
 
 glm::mat4 projection;
+glm::mat4 view;
 unsigned int framebufferTexture;
 unsigned int fbo;
 unsigned int depthTextures[32];
@@ -142,20 +143,49 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
 
+float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
+  return (value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow)) + toBaseLow;
+}
+
+// Find better home for this code
+struct Ray {
+  glm::vec3 position;
+  glm::vec3 direction;
+};
+Ray getCursorRay(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight){
+  glm::mat4 inversionMatrix = glm::inverse(projection * view);
+  float screenXPosNdi = convertBase(cursorLeft, 0, screenWidth, -1, 1);
+  float screenYPosNdi = convertBase(cursorTop, 0, screenHeight, -1, 1);
+
+  glm::vec4 position = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 0.0f, 1.0f);  
+  glm::vec4 direction = inversionMatrix * glm::vec4(screenYPosNdi, screenXPosNdi, 1.0f, 1.0f);
+
+  Ray ray {
+    .position = glm::vec3(position.x, position.y, position.z),
+    .direction = glm::vec3(direction.x, direction.y, direction.z),
+  };
+  return ray;
+}
+//////////
+
 void playSound(){
   playSound(soundBuffer);
   //activeDepthTexture = (activeDepthTexture + 1) % numTextures;
   //setActiveDepthTexture(activeDepthTexture);
+ 
 }
 
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
+  auto ray = getCursorRay(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  std::cout << "ray position" << print(ray.position) << std::endl;
+  std::cout << "ray direction" << print(ray.direction) << std::endl;
   // TODO - serialization is broken since didn't keep up with it   
   int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
-    std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
+  //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
   }
   
 }
@@ -443,6 +473,8 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
     drawText("position: " + print(defaultCamera.position), 10, 60, 3);
     drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
+    drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop) , 10, 80, 3);
+
   }
 }
 
@@ -696,7 +728,6 @@ int main(int argc, char* argv[]){
       getDataFromSocket(serverInstance, onData);
     }
 
-    glm::mat4 view;
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.position, defaultCamera.rotation);
     }else{
