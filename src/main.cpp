@@ -144,19 +144,6 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
 
-float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
-  return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
-}
-
-// Find better home for this code
-
-glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight){
-  glm::mat4 inversionMatrix = glm::inverse(projection * view);
-  float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
-  float screenYPosNdi = convertBase(cursorTop, 0.f, screenHeight, -1.f, 1.f);
-  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
-  return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
-}
 //////////
 
 void playSound(){
@@ -833,5 +820,3 @@ int main(int argc, char* argv[]){
    
   return 0;
 }
-
-
