@@ -59,6 +59,7 @@ Mesh twoDeeMesh;
 engineState state = getDefaultState(1920, 1080);
 World world;
 DynamicLoading dynamicLoading;
+std::vector<Line> lines;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
@@ -144,27 +145,17 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 }
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
-  return (value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow)) + toBaseLow;
+  return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
 }
 
 // Find better home for this code
-struct Ray {
-  glm::vec3 position;
-  glm::vec3 direction;
-};
-Ray getCursorRay(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight){
+
+glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight){
   glm::mat4 inversionMatrix = glm::inverse(projection * view);
-  float screenXPosNdi = convertBase(cursorLeft, 0, screenWidth, -1, 1);
-  float screenYPosNdi = convertBase(cursorTop, 0, screenHeight, -1, 1);
-
-  glm::vec4 position = inversionMatrix * glm::vec4(screenXPosNdi, screenYPosNdi, 0.0f, 1.0f);  
-  glm::vec4 direction = inversionMatrix * glm::vec4(screenYPosNdi, screenXPosNdi, 1.0f, 1.0f);
-
-  Ray ray {
-    .position = glm::vec3(position.x, position.y, position.z),
-    .direction = glm::vec3(direction.x, direction.y, direction.z),
-  };
-  return ray;
+  float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
+  float screenYPosNdi = convertBase(cursorTop, 0.f, screenHeight, -1.f, 1.f);
+  glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
+  return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
 }
 //////////
 
@@ -179,9 +170,17 @@ void playSound(){
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
-  auto ray = getCursorRay(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
-  std::cout << "ray position" << print(ray.position) << std::endl;
-  std::cout << "ray direction" << print(ray.direction) << std::endl;
+  auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  std::cout << "ray direction" << print(rayDirection) << std::endl;
+
+  Line line = {
+    .fromPos = defaultCamera.position,
+    .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
+  };
+ 
+  lines.push_back(line);
+  std::cout << "lines length is: "  << lines.size() << std::endl;
+
   // TODO - serialization is broken since didn't keep up with it   
   int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
@@ -442,6 +441,9 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
     drawCoordinateSystem(100.f);
   }
+
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
+  drawLines(lines);
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
@@ -473,7 +475,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
     drawText("position: " + print(defaultCamera.position), 10, 60, 3);
     drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
-    drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop) , 10, 80, 3);
+    drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 80, 3);
 
   }
 }
@@ -783,7 +785,6 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
 
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, loadScene, unloadScene);
@@ -791,7 +792,8 @@ int main(int argc, char* argv[]){
     if (enablePhysics){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
-
+   
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
     glfwPollEvents();
 
     // 2ND pass renders what we care about to the screen.

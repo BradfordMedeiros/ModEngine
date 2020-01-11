@@ -187,6 +187,6 @@ void drawLines(std::vector<Line> allLines){
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
   glEnableVertexAttribArray(0);
-  glLineWidth(1);
+  glLineWidth(2);
   glDrawElements(GL_LINES, indicies.size() , GL_UNSIGNED_INT, 0);
 }
