@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
+#include <iostream>
+#include "./common/mesh.h"
 
 // @TODO instancing/gpu rendering/marching cubes etc all good stuff, but just want an implementation for now
 
@@ -14,6 +16,7 @@ struct Voxels {
 struct VoxelRenderData {
   std::vector<float> verticesAndTexCoords;    
   std::vector<unsigned int> indicies;
+  std::string textureFilePath;
 };
 
 Voxels createVoxels(int numWidth, int numHeight, int numDepth);
@@ -22,6 +25,8 @@ void removeVoxel(Voxels& chunk, int x, int y, int z);
 void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId);
 int getTexture(Voxels& chunk, int x, int y, int z, int face);
 VoxelRenderData generateRenderData(Voxels& chunk);
+Mesh generateVoxelMesh(VoxelRenderData& renderData);
+
 void getCollision(Voxels& chunk);
 
 struct VoxelAddress {

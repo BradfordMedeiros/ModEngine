@@ -42,6 +42,7 @@ Mesh loadMesh(std::string modelPath, std::string defaultTexture){
 
   Mesh mesh = {
     .VAOPointer = VAO,
+    .VBOPointer = VBO,
     .texture = texture,
     .numElements = model.indices.size(),
     .boundInfo = model.boundInfo,
@@ -78,6 +79,7 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
  
   Mesh mesh = {
     .VAOPointer = VAO,
+    .VBOPointer = VBO,
     .texture = texture,
     .numElements = numIndices,
   };

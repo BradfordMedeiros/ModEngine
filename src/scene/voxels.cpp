@@ -112,6 +112,14 @@ VoxelRenderData generateRenderData(Voxels& chunk){
   VoxelRenderData data = {
     .verticesAndTexCoords = vertexData,    // A voxel render must use one texture (assumption for now)
     .indicies = indicies,
+    .textureFilePath = "./res/textures/blacktop.jpg",
   };
   return data;
+}
+
+Mesh generateVoxelMesh(VoxelRenderData& renderData){
+  return loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies);
+}
+void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId){
+  std::cout << "apply texture called" << std::endl;
 }

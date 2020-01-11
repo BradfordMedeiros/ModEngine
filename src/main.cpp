@@ -150,14 +150,15 @@ void playSound(){
   playSound(soundBuffer);
   //activeDepthTexture = (activeDepthTexture + 1) % numTextures;
   //setActiveDepthTexture(activeDepthTexture);
- 
 }
 
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
-  auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  applyTexture(voxel, 0, 0, 0, 0, 0);
+
+  /*auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   std::cout << "ray direction" << print(rayDirection) << std::endl;
 
   Line line = {
@@ -172,7 +173,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
   //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
-  }
+  }*/
   
 }
 void selectItem(){
@@ -688,7 +689,7 @@ int main(int argc, char* argv[]){
   addVoxel(voxel, 1, 3, 3);
   
   VoxelRenderData renderData = generateRenderData(voxel);
-  twoDeeMesh = loadMeshFrom3Vert2TexCoords("./res/textures/wood.jpg", renderData.verticesAndTexCoords, renderData.indicies);
+  twoDeeMesh = generateVoxelMesh(renderData);
   //twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
 
   if (result["skiploop"].as<bool>()){
