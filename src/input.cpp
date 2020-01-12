@@ -76,7 +76,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*playSound)(void),
   void (*setObjectDimensions)(short index, float width, float height, float depth),
   void sendMoveObjectMessage(),
-  void (*makeObject)(std::string name, std::string meshName, float x, float y, float z)
+  void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
+  void (*onDebugKey)()
 ){
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
@@ -123,6 +124,9 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   }
   if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
     state.showCameras = !state.showCameras;
+  }
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+    onDebugKey();
   }
   if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
     state.useDefaultCamera = !state.useDefaultCamera;

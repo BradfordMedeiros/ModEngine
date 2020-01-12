@@ -54,6 +54,7 @@ std::string rawSceneFile;
 Texture blacktopTexture;
 Texture grassTexture;
 Voxels voxel;
+VoxelRenderData renderData;
 Mesh twoDeeMesh;
 
 engineState state = getDefaultState(1920, 1080);
@@ -153,11 +154,18 @@ void playSound(){
 }
 
 
+static int textureId = 0;
+static int activeFace = 0;
+void onDebugKey(){
+  activeFace = (activeFace + 1) % 6;
+  std::cout << "active face is: " << activeFace << std::endl;
+}
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
-  applyTexture(voxel, 0, 0, 0, 0, 0);
-
+  applyTexture(voxel, twoDeeMesh, 0, 0, 0, activeFace, textureId);
+  textureId++;
+  textureId = textureId % 25;
   /*auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   std::cout << "ray direction" << print(rayDirection) << std::endl;
 
@@ -678,8 +686,8 @@ int main(int argc, char* argv[]){
   blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
   grassTexture = loadTexture("./res/textures/grass.png");
 
-  voxel = createVoxels(5, 5, 5);
-  addVoxel(voxel, 0, 0, 0);
+  voxel = createVoxels(1, 1, 1);
+  /*addVoxel(voxel, 0, 0, 0);
   addVoxel(voxel, 0, 1, 1);
   addVoxel(voxel, 0, 2, 2);
   addVoxel(voxel, 0, 3, 3);
@@ -687,8 +695,8 @@ int main(int argc, char* argv[]){
   addVoxel(voxel, 1, 1, 1);
   addVoxel(voxel, 1, 2, 2);
   addVoxel(voxel, 1, 3, 3);
-  
-  VoxelRenderData renderData = generateRenderData(voxel);
+  */
+  renderData = generateRenderData(voxel);
   twoDeeMesh = generateVoxelMesh(renderData);
   //twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
 
@@ -781,7 +789,7 @@ int main(int argc, char* argv[]){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
    
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject);
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject, onDebugKey);
     glfwPollEvents();
 
     // 2ND pass renders what we care about to the screen.

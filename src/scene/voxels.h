@@ -11,6 +11,9 @@
 
 struct Voxels {
   std::vector<std::vector<std::vector<int>>> cubes;
+  int numWidth;
+  int numHeight;
+  int numDepth;
 };
 
 struct VoxelRenderData {
@@ -22,8 +25,7 @@ struct VoxelRenderData {
 Voxels createVoxels(int numWidth, int numHeight, int numDepth);
 void addVoxel(Voxels& chunk, int x, int y, int z);
 void removeVoxel(Voxels& chunk, int x, int y, int z);
-void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId);
-int getTexture(Voxels& chunk, int x, int y, int z, int face);
+void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face, int textureId);
 VoxelRenderData generateRenderData(Voxels& chunk);
 Mesh generateVoxelMesh(VoxelRenderData& renderData);
 
