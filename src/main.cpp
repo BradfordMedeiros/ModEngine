@@ -159,11 +159,12 @@ static int activeFace = 0;
 void onDebugKey(){
   activeFace = (activeFace + 1) % 6;
   std::cout << "active face is: " << activeFace << std::endl;
+  applyTextureToCube(voxel, twoDeeMesh, activeFace, 0, 0, textureId);
 }
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
-  applyTexture(voxel, twoDeeMesh, 0, 0, 0, activeFace, textureId);
+  applyTextureToCube(voxel, twoDeeMesh, activeFace, 0, 0, textureId);
   textureId++;
   textureId = textureId % 25;
   /*auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
@@ -686,18 +687,18 @@ int main(int argc, char* argv[]){
   blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
   grassTexture = loadTexture("./res/textures/grass.png");
 
-  voxel = createVoxels(1, 1, 1);
-  /*addVoxel(voxel, 0, 0, 0);
-  addVoxel(voxel, 0, 1, 1);
-  addVoxel(voxel, 0, 2, 2);
-  addVoxel(voxel, 0, 3, 3);
-  addVoxel(voxel, 1, 0, 0);
-  addVoxel(voxel, 1, 1, 1);
-  addVoxel(voxel, 1, 2, 2);
-  addVoxel(voxel, 1, 3, 3);
-  */
+  voxel = createVoxels(10, 10, 10);
   renderData = generateRenderData(voxel);
   twoDeeMesh = generateVoxelMesh(renderData);
+
+  addVoxel(voxel, twoDeeMesh, 0, 0, 0);
+  addVoxel(voxel, twoDeeMesh, 1, 0, 0);
+  addVoxel(voxel, twoDeeMesh, 2, 0, 0);
+  addVoxel(voxel, twoDeeMesh, 2, 0, 1);
+  addVoxel(voxel, twoDeeMesh, 2, 1, 1);
+
+  
+ 
   //twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
 
   if (result["skiploop"].as<bool>()){

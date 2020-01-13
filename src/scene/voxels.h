@@ -23,9 +23,10 @@ struct VoxelRenderData {
 };
 
 Voxels createVoxels(int numWidth, int numHeight, int numDepth);
-void addVoxel(Voxels& chunk, int x, int y, int z);
-void removeVoxel(Voxels& chunk, int x, int y, int z);
+void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);
+void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);   
 void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face, int textureId);
+void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int textureId);
 VoxelRenderData generateRenderData(Voxels& chunk);
 Mesh generateVoxelMesh(VoxelRenderData& renderData);
 

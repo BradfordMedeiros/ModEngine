@@ -70,13 +70,6 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
   return vox;
 }
 
-void addVoxel(Voxels& chunk, int x, int y, int z){    // currently just an invisible texture
-  chunk.cubes.at(x).at(y).at(z) = 1;
-}
-void removeVoxel(Voxels& chunk, int x, int y, int z){
-  chunk.cubes.at(x).at(y).at(z) = 0;
-}
-
 void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, float offsetX, float offsetY, float offsetZ){
   int originalVertexLength  = vertexData.size();
   for (int i = 0; i < numElements; i++){
@@ -116,6 +109,7 @@ VoxelRenderData generateRenderData(Voxels& chunk){
   };
   return data;
 }
+
 int getVoxelLinearIndex (Voxels& voxels, int x, int y, int z){
   return (x * voxels.numHeight * voxels.numDepth) + (y * voxels.numDepth) + z;
 }
@@ -155,4 +149,19 @@ void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face,
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 15, sizeof(newTextureCoords3), &newTextureCoords3); 
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 20, sizeof(newTextureCoords4), &newTextureCoords4); 
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 25, sizeof(newTextureCoords5), &newTextureCoords5); 
+}
+void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int textureId){
+  for (int i = 0; i < 6; i++){
+    applyTexture(chunk, voxelMesh, x, y, z, i, textureId);
+  }
+}
+
+void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){    
+  chunk.cubes.at(x).at(y).at(z) = 1;
+  applyTextureToCube(chunk, voxelMesh, x, y, z, 13);
+
+}
+void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
+  chunk.cubes.at(x).at(y).at(z) = 0;
+  applyTextureToCube(chunk, voxelMesh, x, y, z, 13);
 }
