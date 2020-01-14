@@ -77,7 +77,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*setObjectDimensions)(short index, float width, float height, float depth),
   void sendMoveObjectMessage(),
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
-  void (*onDebugKey)()
+  void (*onDebugKey)(),
+  void (*onArrowKey)(int key) 
 ){
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
@@ -240,4 +241,22 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
       }
     }
   }
+
+   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+     std::cout << "enter key pressed" << std::endl;
+   }
+   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+     onArrowKey(GLFW_KEY_RIGHT);
+
+   }
+   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+     onArrowKey(GLFW_KEY_LEFT);
+
+   }
+   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+     onArrowKey(GLFW_KEY_UP);
+   }
+   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+     onArrowKey(GLFW_KEY_DOWN);
+   }
 }

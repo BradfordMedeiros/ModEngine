@@ -61,6 +61,13 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
     }
     cubes.push_back(cubestack);
   }
+
+  VoxelAddress address = {
+    .x = 0,
+    .y = 0,
+    .z = 0,
+    .face = 0,
+  };
   Voxels vox = {
     .cubes = cubes,
     .numWidth = numWidth,
@@ -158,10 +165,9 @@ void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int
 
 void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){    
   chunk.cubes.at(x).at(y).at(z) = 1;
-  applyTextureToCube(chunk, voxelMesh, x, y, z, 13);
-
+  applyTextureToCube(chunk, voxelMesh, x, y, z, 1);
 }
 void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
-  applyTextureToCube(chunk, voxelMesh, x, y, z, 13);
+  applyTextureToCube(chunk, voxelMesh, x, y, z, 0);
 }

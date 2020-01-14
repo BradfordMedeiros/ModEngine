@@ -35,6 +35,11 @@ struct engineState {
   bool showDepthBuffer;
   float fov;  // in degrees
   bool toggleFov;
+
+  int voxelX;
+  int voxelY;
+  int voxelZ;
+  int voxelFace;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

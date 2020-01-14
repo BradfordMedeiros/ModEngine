@@ -20,7 +20,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
 	void (*setObjectDimensions)(short index, float width, float height, float depth),
   void sendMoveObjectMessage(),
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
-  void (*onDebugKey)()
+  void (*onDebugKey)(),
+  void (*onArrowKey)(int key)
 );
 
 #endif
