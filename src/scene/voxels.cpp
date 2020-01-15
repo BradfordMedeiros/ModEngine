@@ -162,6 +162,11 @@ void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int
     applyTexture(chunk, voxelMesh, x, y, z, i, textureId);
   }
 }
+void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels, int textureId){
+  for (auto voxel : voxels){
+    applyTextureToCube(chunk, voxelMesh, voxel.x, voxel.y, voxel.z, textureId);
+  }
+}
 
 void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){    
   chunk.cubes.at(x).at(y).at(z) = 1;
@@ -205,4 +210,53 @@ std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, gl
     }
   }
   return addresses;
+}
+
+bool voxelEqual(VoxelAddress x, VoxelAddress y){
+  return (x.x == y.x) && (x.y == y.y) && (x.z == y.z);
+}
+bool hasVoxel(std::vector<VoxelAddress> voxelList, VoxelAddress voxel){
+  for (auto voxelAddress: voxelList){
+    if (voxelEqual(voxelAddress, voxel)){
+      return true;
+    }
+  }
+  return false;
+}
+
+VoxelExpansion expandVoxels(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z){
+  std::vector<VoxelAddress> newSelectedVoxels;
+  std::vector<VoxelAddress> voxelsToExpand;
+
+  int multiplierValueX = (x >= 0) ? 1 : -1;
+  int multiplierValueY = (y >= 0) ? 1 : -1;
+
+  for (auto voxel : selectedVoxels){
+    for (int xx = 0; xx <= (multiplierValueX * x); xx++){
+      for (int yy = 0; yy <= (multiplierValueY * y); yy++){
+        int expandedX = voxel.x + (multiplierValueX * xx);
+        int expandedY = voxel.y + (multiplierValueY * yy);
+        if (expandedX < 0 || expandedX >= chunk.numWidth){
+          continue;
+        }
+        if (expandedY < 0 || expandedY >= chunk.numHeight){
+          continue;
+        }
+        VoxelAddress voxelToAdd {
+          .x = expandedX,
+          .y = expandedY,
+          .z = voxel.z,
+        };
+        if (!hasVoxel(newSelectedVoxels, voxelToAdd)){
+          newSelectedVoxels.push_back(voxelToAdd);
+        }
+      }
+    }
+  }
+
+  VoxelExpansion expansion = {
+    newSelectedVoxels = newSelectedVoxels,
+    voxelsToExpand = voxelsToExpand,
+  };
+  return expansion;
 }

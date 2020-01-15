@@ -17,6 +17,11 @@ struct VoxelAddress {
   int face;
 };
 
+struct VoxelExpansion {
+  std::vector<VoxelAddress> newSelectedVoxels;
+  std::vector<VoxelAddress> voxelsToExpand;
+};
+
 struct Voxels {
   std::vector<std::vector<std::vector<int>>> cubes;
   int numWidth;
@@ -30,14 +35,16 @@ struct VoxelRenderData {
   std::string textureFilePath;
 };
 
+
 Voxels createVoxels(int numWidth, int numHeight, int numDepth);
 void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);
 void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);   
 void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face, int textureId);
+void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels, int textureId);
 void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int textureId);
 VoxelRenderData generateRenderData(Voxels& chunk);
 Mesh generateVoxelMesh(VoxelRenderData& renderData);
-
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection);
+VoxelExpansion expandVoxels(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z);
 
 #endif

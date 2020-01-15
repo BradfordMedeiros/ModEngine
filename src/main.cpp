@@ -157,8 +157,36 @@ void playSound(){
 
 void onDebugKey(){
 }
+
+std::vector<VoxelAddress> selectedVoxels;
 void onArrowKey(int key){
   std::cout << "on arrow key pressed: " << key << std::endl;
+  if (key == GLFW_KEY_LEFT){
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, -1, 0, 0).newSelectedVoxels;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+  }
+  if (key == GLFW_KEY_RIGHT){
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 1, 0, 0).newSelectedVoxels;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+  }
+  if (key == GLFW_KEY_UP){
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, -1, 0).newSelectedVoxels;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+  }
+  if (key == GLFW_KEY_DOWN){
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, 1, 0).newSelectedVoxels;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+  }
+  if (key == GLFW_KEY_ENTER){
+    selectedVoxels.clear();
+  }
+
+
+
 }
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
@@ -182,9 +210,20 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
   if (collidedVoxels.size() > 0){
     auto collision = collidedVoxels[0];
-    std::cout << "voxel address: " << collision.x << " " << collision.y << " " << collision.z << std::endl;
-    applyTextureToCube(voxel, twoDeeMesh, collision.x, collision.y, collision.z, 4);
+    //std::cout << "voxel address: " << collision.x << " " << collision.y << " " << collision.z << std::endl;
+    //applyTextureToCube(voxel, twoDeeMesh, collision.x, collision.y, collision.z, 4);
+
+    std::vector<VoxelAddress> newSelected;
+    newSelected.push_back(collision);
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+    selectedVoxels = newSelected;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+
   }
+
+ 
+
+
   // TODO - serialization is broken since didn't keep up with it   
   /*int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
