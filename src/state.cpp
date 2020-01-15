@@ -31,12 +31,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.showDepthBuffer = false,
 		.fov = 45.f,
 		.toggleFov = false,
-
-		.voxelX = 0,
-  	.voxelY = 0,
-  	.voxelZ = 0,
-  	.voxelFace = 0
-
 	};
 	return state;
 }

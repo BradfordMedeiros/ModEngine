@@ -154,35 +154,11 @@ void playSound(){
 }
 
 
-static int textureId = 0;
-static int activeFace = 0;
+
 void onDebugKey(){
-  activeFace = (activeFace + 1) % 6;
-  applyTextureToCube(voxel, twoDeeMesh, activeFace, 0, 0, textureId);
 }
 void onArrowKey(int key){
   std::cout << "on arrow key pressed: " << key << std::endl;
-  if (key == GLFW_KEY_LEFT){
-    if (state.voxelX > 0){
-      state.voxelX--;
-    }
-  }
-  if (key == GLFW_KEY_RIGHT){
-    if (state.voxelX < 10){
-      state.voxelX++;
-    }
-  }
-  if (key == GLFW_KEY_DOWN){
-    if (state.voxelZ > 0){
-      state.voxelZ--;
-    }
-  }
-  if (key == GLFW_KEY_UP){
-    if (state.voxelZ < 10){
-      state.voxelZ++;
-    }
-  }
-  applyTextureToCube(voxel, twoDeeMesh, state.voxelX, state.voxelY, state.voxelZ, textureId);
 }
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
