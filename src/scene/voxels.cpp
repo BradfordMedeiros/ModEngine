@@ -171,3 +171,38 @@ void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
   applyTextureToCube(chunk, voxelMesh, x, y, z, 0);
 }
+
+// This is effectively line drawing.  This has error, but I don't know if it matters
+// @todo this function sucks, is imprecise, and can cause infinite loop
+std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection){    
+  float magnitudeLine = sqrt(chunk.numWidth * chunk.numWidth + chunk.numHeight * chunk.numHeight + chunk.numDepth * chunk.numDepth);
+  glm::vec3 lineEnd = rayPosition + (rayDirection * magnitudeLine);
+
+  glm::vec3 currentPosition = rayPosition;
+  glm::vec3 rayIncrement = glm::normalize(rayDirection);
+
+  std::vector<VoxelAddress> addresses;
+
+  int maxIterations = maxvalue(chunk.numWidth, chunk.numHeight, chunk.numDepth);   // hackey hackey see below
+  int numIterations = 0;
+
+  while (currentPosition.x < chunk.numWidth && currentPosition.y < chunk.numHeight && currentPosition.z < chunk.numDepth){
+    if ((currentPosition.x > 0 && currentPosition.y > 0 && currentPosition.z > 0) && chunk.cubes.at(currentPosition.x).at(currentPosition.y).at(currentPosition.z) == 1){
+      VoxelAddress voxel = {
+        .x = (int)(currentPosition.x),
+        .y = (int)(currentPosition.y),
+        .z = (int)(currentPosition.z)
+      };
+      addresses.push_back(voxel);
+    } 
+    currentPosition.x += rayIncrement.x;
+    currentPosition.y += rayIncrement.y;
+    currentPosition.z += rayIncrement.z;
+    
+    numIterations++;
+    if (numIterations > maxIterations){     // hackey code, happens because of negative ray directions that needs to be fixed
+      break;
+    }
+  }
+  return addresses;
+}

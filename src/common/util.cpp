@@ -44,3 +44,14 @@ float maxvalue(float x, float y, float z){
   }
   return z;
 }
+
+int maxvalue(int x, int y, int z){
+  if (x >= y && x >= z){
+    return x;
+  }
+  if (y >= x && y >= z){
+    return y;
+  }
+  return z;
+}
+

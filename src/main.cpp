@@ -182,16 +182,16 @@ void onArrowKey(int key){
       state.voxelZ++;
     }
   }
-  applyTextureToCube(voxel, twoDeeMesh, state.voxelX, state.voxelY, state.voxelZ, 1);
+  applyTextureToCube(voxel, twoDeeMesh, state.voxelX, state.voxelY, state.voxelZ, textureId);
 }
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
-  applyTextureToCube(voxel, twoDeeMesh, activeFace, 0, 0, textureId);
-  textureId++;
-  textureId = textureId % 25;
-  /*auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  //applyTextureToCube(voxel, twoDeeMesh, activeFace, 0, 0, textureId);
+  //textureId++;
+  //textureId = textureId % 25;
+  auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   std::cout << "ray direction" << print(rayDirection) << std::endl;
 
   Line line = {
@@ -199,11 +199,18 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
  
+  lines.clear();
   lines.push_back(line);
-  std::cout << "lines length is: "  << lines.size() << std::endl;
-
+ 
+  auto collidedVoxels = raycastVoxels(voxel, line.fromPos, rayDirection);
+  std::cout << "length is: " << collidedVoxels.size() << std::endl;
+  if (collidedVoxels.size() > 0){
+    auto collision = collidedVoxels[0];
+    std::cout << "voxel address: " << collision.x << " " << collision.y << " " << collision.z << std::endl;
+    applyTextureToCube(voxel, twoDeeMesh, collision.x, collision.y, collision.z, 4);
+  }
   // TODO - serialization is broken since didn't keep up with it   
-  int sceneToSerialize = world.scenes.size() - 1;
+  /*int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
   //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
   }*/
