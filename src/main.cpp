@@ -153,48 +153,54 @@ void playSound(){
   //setActiveDepthTexture(activeDepthTexture);
 }
 
-
+bool useYAxis = true;
+std::vector<VoxelAddress> selectedVoxels;
 
 void onDebugKey(){
+  useYAxis = !useYAxis;
+  std::cout << "use yaxis: " << useYAxis << std::endl;
 }
 
-std::vector<VoxelAddress> selectedVoxels;
+void expandVoxelUp(){
+  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0).newSelectedVoxels;
+  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+}
+void expandVoxelDown(){
+  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0).newSelectedVoxels;
+  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+}
+void expandVoxelLeft(){
+  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, -1, 0, 0).newSelectedVoxels;
+  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+}
+void expandVoxelRight(){
+  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 1, 0, 0).newSelectedVoxels;
+  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+}
+
 void onArrowKey(int key){
   std::cout << "on arrow key pressed: " << key << std::endl;
   if (key == GLFW_KEY_LEFT){
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, -1, 0, 0).newSelectedVoxels;
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+    expandVoxelLeft();
   }
   if (key == GLFW_KEY_RIGHT){
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 1, 0, 0).newSelectedVoxels;
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+    expandVoxelRight();
   }
   if (key == GLFW_KEY_UP){
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, -1, 0).newSelectedVoxels;
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+    expandVoxelUp();
   }
   if (key == GLFW_KEY_DOWN){
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-    selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, 1, 0).newSelectedVoxels;
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+    expandVoxelDown();
   }
-  if (key == GLFW_KEY_ENTER){
-    selectedVoxels.clear();
-  }
-
-
-
 }
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
 
-  //applyTextureToCube(voxel, twoDeeMesh, activeFace, 0, 0, textureId);
-  //textureId++;
-  //textureId = textureId % 25;
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   std::cout << "ray direction" << print(rayDirection) << std::endl;
 
@@ -213,17 +219,10 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
     //std::cout << "voxel address: " << collision.x << " " << collision.y << " " << collision.z << std::endl;
     //applyTextureToCube(voxel, twoDeeMesh, collision.x, collision.y, collision.z, 4);
 
-    std::vector<VoxelAddress> newSelected;
-    newSelected.push_back(collision);
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-    selectedVoxels = newSelected;
+    selectedVoxels.push_back(collision);
     applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
 
   }
-
- 
-
-
   // TODO - serialization is broken since didn't keep up with it   
   /*int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
@@ -268,9 +267,29 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization, selectItem);
   schemeBindings.onMouseCallback(button, action, mods);
+
+  if (button == 0){
+    selectedVoxels.clear();
+  }
 }
+
+int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
+
+  if (yoffset > 0){
+    textureId += 1;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, textureId);
+  }
+  if (yoffset < 0){
+    textureId -= 1;
+    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, textureId);
+  }
+
+
+  // temp voxel editing code, probably should not live in core of engine at all
+  
+  ////////////////////
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(key, scancode, action, mods);
@@ -738,10 +757,7 @@ int main(int argc, char* argv[]){
   twoDeeMesh = generateVoxelMesh(renderData);
 
   addVoxel(voxel, twoDeeMesh, 0, 0, 0);
-  addVoxel(voxel, twoDeeMesh, 1, 0, 0);
-  addVoxel(voxel, twoDeeMesh, 2, 0, 0);
-  addVoxel(voxel, twoDeeMesh, 2, 0, 1);
-  addVoxel(voxel, twoDeeMesh, 2, 1, 1);
+
 
   
  

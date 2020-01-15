@@ -172,6 +172,12 @@ void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 1;
   applyTextureToCube(chunk, voxelMesh, x, y, z, 1);
 }
+void addVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels){
+  for (auto voxel: voxels){
+    chunk.cubes.at(voxel.x).at(voxel.y).at(voxel.z) = 1;
+  }
+}
+
 void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
   applyTextureToCube(chunk, voxelMesh, x, y, z, 0);
@@ -230,25 +236,33 @@ VoxelExpansion expandVoxels(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAdd
 
   int multiplierValueX = (x >= 0) ? 1 : -1;
   int multiplierValueY = (y >= 0) ? 1 : -1;
+  int multiplierValueZ = (z >= 0) ? 1 : -1;
 
   for (auto voxel : selectedVoxels){
     for (int xx = 0; xx <= (multiplierValueX * x); xx++){
       for (int yy = 0; yy <= (multiplierValueY * y); yy++){
-        int expandedX = voxel.x + (multiplierValueX * xx);
-        int expandedY = voxel.y + (multiplierValueY * yy);
-        if (expandedX < 0 || expandedX >= chunk.numWidth){
-          continue;
-        }
-        if (expandedY < 0 || expandedY >= chunk.numHeight){
-          continue;
-        }
-        VoxelAddress voxelToAdd {
-          .x = expandedX,
-          .y = expandedY,
-          .z = voxel.z,
-        };
-        if (!hasVoxel(newSelectedVoxels, voxelToAdd)){
-          newSelectedVoxels.push_back(voxelToAdd);
+        for (int zz = 0; zz <= (multiplierValueZ * z); zz++){
+          int expandedX = voxel.x + (multiplierValueX * xx);
+          int expandedY = voxel.y + (multiplierValueY * yy);
+          int expandedZ = voxel.z + (multiplierValueZ * zz);
+
+          if (expandedX < 0 || expandedX >= chunk.numWidth){
+            continue;
+          }
+          if (expandedY < 0 || expandedY >= chunk.numHeight){
+            continue;
+          }
+          if (expandedZ < 0 || expandedZ >= chunk.numDepth){
+            continue;
+          }
+          VoxelAddress voxelToAdd {
+            .x = expandedX,
+            .y = expandedY,
+            .z = expandedZ,
+          };
+          if (!hasVoxel(newSelectedVoxels, voxelToAdd)){
+            newSelectedVoxels.push_back(voxelToAdd);
+          }
         }
       }
     }
