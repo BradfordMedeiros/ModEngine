@@ -47,36 +47,6 @@ static float cubes[numElements] = {
   0.5f, -0.5f, 0.5f, 0.2f, 0.2f,
 };
 
-Voxels createVoxels(int numWidth, int numHeight, int numDepth){
-  std::vector<std::vector<std::vector<int>>> cubes;         // @TODO this initialization could be done faster 
-
-  for (int row = 0; row < numWidth; row++){
-    std::vector<std::vector<int>> cubestack;
-    for (int col = 0; col < numHeight; col++){
-      std::vector<int> cuberow;
-      for (int depth = 0; depth < numDepth; depth++){
-        cuberow.push_back(0);
-      }
-      cubestack.push_back(cuberow);
-    }
-    cubes.push_back(cubestack);
-  }
-
-  VoxelAddress address = {
-    .x = 0,
-    .y = 0,
-    .z = 0,
-    .face = 0,
-  };
-  Voxels vox = {
-    .cubes = cubes,
-    .numWidth = numWidth,
-    .numHeight = numHeight,
-    .numDepth = numDepth,
-  };
-  return vox;
-}
-
 void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, float offsetX, float offsetY, float offsetZ){
   int originalVertexLength  = vertexData.size();
   for (int i = 0; i < numElements; i++){
@@ -98,13 +68,12 @@ void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies
   }
 }
 
-
-VoxelRenderData generateRenderData(Voxels& chunk){
+VoxelRenderData generateRenderData(int numWidth, int numHeight, int numDepth){
   std::vector<float> vertexData;
   std::vector<unsigned int> indicies;
-  for (int x = 0; x < chunk.numWidth; x++){
-    for (int y = 0; y < chunk.numHeight; y++){
-      for (int z = 0; z < chunk.numDepth; z++){
+  for (int x = 0; x < numWidth; x++){
+    for (int y = 0; y < numHeight; y++){
+      for (int z = 0; z < numDepth; z++){
         addCube(vertexData, indicies, x + 0.5f, y + 0.5f, z + 0.5f);
       }
     }
@@ -116,22 +85,55 @@ VoxelRenderData generateRenderData(Voxels& chunk){
   };
   return data;
 }
+Mesh generateVoxelMesh(VoxelRenderData& renderData){
+  return loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies);
+}
+
+Voxels createVoxels(int numWidth, int numHeight, int numDepth){
+  std::vector<std::vector<std::vector<int>>> cubes;         // @TODO this initialization could be done faster 
+
+  for (int row = 0; row < numWidth; row++){
+    std::vector<std::vector<int>> cubestack;
+    for (int col = 0; col < numHeight; col++){
+      std::vector<int> cuberow;
+      for (int depth = 0; depth < numDepth; depth++){
+        cuberow.push_back(0);
+      }
+      cubestack.push_back(cuberow);
+    }
+    cubes.push_back(cubestack);
+  }
+
+  VoxelAddress address = {
+    .x = 0,
+    .y = 0,
+    .z = 0,
+    .face = 0,
+  };
+
+  VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth);
+  Voxels vox = {
+    .cubes = cubes,
+    .numWidth = numWidth,
+    .numHeight = numHeight,
+    .numDepth = numDepth,
+    .mesh = generateVoxelMesh(renderData)
+  };
+  return vox;
+}
 
 int getVoxelLinearIndex (Voxels& voxels, int x, int y, int z){
   return (x * voxels.numHeight * voxels.numDepth) + (y * voxels.numDepth) + z;
 }
 
-Mesh generateVoxelMesh(VoxelRenderData& renderData){
-  return loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies);
-}
-void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face, int textureId){
+void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId){
   assert(x < chunk.numWidth);
   assert(y < chunk.numHeight);
   assert(z < chunk.numDepth);
   assert(face < 6);
   assert(textureId < 25);
 
-  glBindBuffer(GL_ARRAY_BUFFER, voxelMesh.VBOPointer);
+  glBindBuffer(GL_ARRAY_BUFFER, chunk.mesh.VBOPointer);
   int voxelNumber = getVoxelLinearIndex(chunk, x, y, z);
   int voxelOffset = voxelNumber * (sizeof(float) * numElements);
   int faceOffset = (sizeof(float) * 5 * 6) * face;
@@ -157,35 +159,35 @@ void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face,
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 20, sizeof(newTextureCoords4), &newTextureCoords4); 
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 25, sizeof(newTextureCoords5), &newTextureCoords5); 
 }
-void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int textureId){
+void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){
   for (int i = 0; i < 6; i++){
-    applyTexture(chunk, voxelMesh, x, y, z, i, textureId);
+    applyTexture(chunk, x, y, z, i, textureId);
   }
 }
-void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels, int textureId){
+void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId){
   for (auto voxel : voxels){
-    applyTextureToCube(chunk, voxelMesh, voxel.x, voxel.y, voxel.z, textureId);
+    applyTextureToCube(chunk, voxel.x, voxel.y, voxel.z, textureId);
   }
 }
 
-void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){    
+void addVoxel(Voxels& chunk, int x, int y, int z){    
   chunk.cubes.at(x).at(y).at(z) = 1;
-  applyTextureToCube(chunk, voxelMesh, x, y, z, 1);
+  applyTextureToCube(chunk, x, y, z, 1);
 }
-void addVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels){
+void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
   for (auto voxel: voxels){
     chunk.cubes.at(voxel.x).at(voxel.y).at(voxel.z) = 1;
   }
 }
 
-void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
+void removeVoxel(Voxels& chunk, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
-  applyTextureToCube(chunk, voxelMesh, x, y, z, 0);
+  applyTextureToCube(chunk, x, y, z, 0);
 }
 
-void removeVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels){
+void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
   for (auto voxel: voxels){
-    removeVoxel(chunk, voxelMesh, voxel.x, voxel.y, voxel.z);
+    removeVoxel(chunk, voxel.x, voxel.y, voxel.z);
   }
 }
 
@@ -236,9 +238,8 @@ bool hasVoxel(std::vector<VoxelAddress> voxelList, VoxelAddress voxel){
   return false;
 }
 
-VoxelExpansion expandVoxels(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z){
+std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z){
   std::vector<VoxelAddress> newSelectedVoxels;
-  std::vector<VoxelAddress> voxelsToExpand;
 
   int multiplierValueX = (x >= 0) ? 1 : -1;
   int multiplierValueY = (y >= 0) ? 1 : -1;
@@ -274,9 +275,5 @@ VoxelExpansion expandVoxels(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAdd
     }
   }
 
-  VoxelExpansion expansion = {
-    newSelectedVoxels = newSelectedVoxels,
-    voxelsToExpand = voxelsToExpand,
-  };
-  return expansion;
+  return newSelectedVoxels;
 }

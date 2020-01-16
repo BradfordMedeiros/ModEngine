@@ -55,7 +55,6 @@ Texture blacktopTexture;
 Texture grassTexture;
 Voxels voxel;
 VoxelRenderData renderData;
-Mesh twoDeeMesh;
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -162,24 +161,24 @@ void onDebugKey(){
 }
 
 void expandVoxelUp(){
-  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0).newSelectedVoxels;
-  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+  applyTextureToCube(voxel, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, selectedVoxels, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
+  addVoxel(voxel, selectedVoxels);
 }
 void expandVoxelDown(){
-  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0).newSelectedVoxels;
-  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+  applyTextureToCube(voxel, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, selectedVoxels, 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
+  addVoxel(voxel, selectedVoxels);
 }
 void expandVoxelLeft(){
-  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, -1, 0, 0).newSelectedVoxels;
-  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+  applyTextureToCube(voxel, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, selectedVoxels, -1, 0, 0);
+  addVoxel(voxel, selectedVoxels);
 }
 void expandVoxelRight(){
-  applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, twoDeeMesh, selectedVoxels, 1, 0, 0).newSelectedVoxels;
-  addVoxel(voxel, twoDeeMesh, selectedVoxels);
+  applyTextureToCube(voxel, selectedVoxels, 1);
+  selectedVoxels = expandVoxels(voxel, selectedVoxels, 1, 0, 0);
+  addVoxel(voxel, selectedVoxels);
 }
 
 void onArrowKey(int key){
@@ -216,11 +215,8 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
   if (collidedVoxels.size() > 0){
     auto collision = collidedVoxels[0];
-    //std::cout << "voxel address: " << collision.x << " " << collision.y << " " << collision.z << std::endl;
-    //applyTextureToCube(voxel, twoDeeMesh, collision.x, collision.y, collision.z, 4);
-
     selectedVoxels.push_back(collision);
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, 2);
+    applyTextureToCube(voxel, selectedVoxels, 2);
 
   }
   // TODO - serialization is broken since didn't keep up with it   
@@ -279,11 +275,11 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 
   if (yoffset > 0){
     textureId += 1;
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, textureId);
+    applyTextureToCube(voxel, selectedVoxels, textureId);
   }
   if (yoffset < 0){
     textureId -= 1;
-    applyTextureToCube(voxel, twoDeeMesh, selectedVoxels, textureId);
+    applyTextureToCube(voxel, selectedVoxels, textureId);
   }
 
 
@@ -296,7 +292,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   // temp hackey for voxels
   if (key == 261){  // delete
-    removeVoxel(voxel, twoDeeMesh, selectedVoxels);
+    removeVoxel(voxel, selectedVoxels);
     selectedVoxels.clear();
   } 
   ////////////////
@@ -494,7 +490,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-  drawMesh(twoDeeMesh);
+  drawMesh(voxel.mesh);
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -761,15 +757,7 @@ int main(int argc, char* argv[]){
   grassTexture = loadTexture("./res/textures/grass.png");
 
   voxel = createVoxels(100, 5, 100);
-  renderData = generateRenderData(voxel);
-  twoDeeMesh = generateVoxelMesh(renderData);
-
-  addVoxel(voxel, twoDeeMesh, 0, 0, 0);
-
-
-  
- 
-  //twoDeeMesh = load2DMesh("./res/textures/wood.jpg");
+  addVoxel(voxel, 0, 0, 0);
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;

@@ -17,16 +17,12 @@ struct VoxelAddress {
   int face;
 };
 
-struct VoxelExpansion {
-  std::vector<VoxelAddress> newSelectedVoxels;
-  std::vector<VoxelAddress> voxelsToExpand;
-};
-
 struct Voxels {
   std::vector<std::vector<std::vector<int>>> cubes;
   int numWidth;
   int numHeight;
   int numDepth;
+  Mesh mesh;
 };
 
 struct VoxelRenderData {
@@ -35,18 +31,16 @@ struct VoxelRenderData {
   std::string textureFilePath;
 };
 
-
 Voxels createVoxels(int numWidth, int numHeight, int numDepth);
-void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);
-void addVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels);
-void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);   
-void removeVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels);   
-void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face, int textureId);
-void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels, int textureId);
-void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int textureId);
-VoxelRenderData generateRenderData(Voxels& chunk);
+void addVoxel(Voxels& chunk, int x, int y, int z);
+void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);
+void removeVoxel(Voxels& chunk, int x, int y, int z);   
+void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   
+void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId);
+void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId);
+void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId);
 Mesh generateVoxelMesh(VoxelRenderData& renderData);
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection);
-VoxelExpansion expandVoxels(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z);
+std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z);
 
 #endif
