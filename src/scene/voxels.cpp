@@ -183,6 +183,12 @@ void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z){
   applyTextureToCube(chunk, voxelMesh, x, y, z, 0);
 }
 
+void removeVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels){
+  for (auto voxel: voxels){
+    removeVoxel(chunk, voxelMesh, voxel.x, voxel.y, voxel.z);
+  }
+}
+
 // This is effectively line drawing.  This has error, but I don't know if it matters
 // @todo this function sucks, is imprecise, and can cause infinite loop
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection){    

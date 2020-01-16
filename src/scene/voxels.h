@@ -40,6 +40,7 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth);
 void addVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);
 void addVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels);
 void removeVoxel(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z);   
+void removeVoxel(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels);   
 void applyTexture(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int face, int textureId);
 void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, std::vector<VoxelAddress> voxels, int textureId);
 void applyTextureToCube(Voxels& chunk, Mesh& voxelMesh, int x, int y, int z, int textureId);

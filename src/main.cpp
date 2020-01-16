@@ -293,9 +293,17 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(key, scancode, action, mods);
+
+  // temp hackey for voxels
+  if (key == 261){  // delete
+    removeVoxel(voxel, twoDeeMesh, selectedVoxels);
+    selectedVoxels.clear();
+  } 
+  ////////////////
+
 }
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
-  schemeBindings.onKeyCharCallback(codepoint);
+  schemeBindings.onKeyCharCallback(codepoint); 
 }
 void translate(float x, float y, float z){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
