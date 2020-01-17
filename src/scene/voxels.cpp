@@ -1,5 +1,7 @@
 #include "./voxels.h"
 
+static const float TEXTURE_PADDING_PERCENT = 0.02f;
+
 // Currently assumes 1 5x5 voxel sheet (resolution independent)
 // front(0) back(1) left(2) right(3) bottom(4) top(5)
 static const int numElements = 180;     
@@ -115,7 +117,7 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
     .face = 0,
   };
 
-  float texturePadding = 0.02f;
+  float texturePadding = TEXTURE_PADDING_PERCENT;
   VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
   Voxels vox = {
     .cubes = cubes,
