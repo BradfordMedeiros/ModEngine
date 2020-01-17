@@ -792,10 +792,8 @@ int main(int argc, char* argv[]){
     }
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
 
-
     glfwSwapBuffers(window);
     
-
     auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
     std::vector<GameObject*> lights;
     for (int i = 0; i < lightsIndexs.size(); i++){
@@ -865,7 +863,6 @@ int main(int argc, char* argv[]){
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();
-
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 

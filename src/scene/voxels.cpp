@@ -47,10 +47,14 @@ static float cubes[numElements] = {
   0.5f, -0.5f, 0.5f, 0.2f, 0.2f,
 };
 
-void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, float offsetX, float offsetY, float offsetZ){
+void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, float offsetX, float offsetY, float offsetZ, float texturePadding){
   int originalVertexLength  = vertexData.size();
   for (int i = 0; i < numElements; i++){
-    vertexData.push_back(cubes[i]);
+    if (i % 5 == 3 || i % 5 == 4){
+      vertexData.push_back(cubes[i] == 0.2f ? (cubes[i] - texturePadding) : cubes[i] + texturePadding);
+    }else{
+      vertexData.push_back(cubes[i]);
+    }
   }
   for (int i = originalVertexLength; i < (originalVertexLength + numElements); i+=5){
     vertexData[i] += offsetX;
@@ -68,13 +72,13 @@ void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies
   }
 }
 
-VoxelRenderData generateRenderData(int numWidth, int numHeight, int numDepth){
+VoxelRenderData generateRenderData(int numWidth, int numHeight, int numDepth, float padding){
   std::vector<float> vertexData;
   std::vector<unsigned int> indicies;
   for (int x = 0; x < numWidth; x++){
     for (int y = 0; y < numHeight; y++){
       for (int z = 0; z < numDepth; z++){
-        addCube(vertexData, indicies, x + 0.5f, y + 0.5f, z + 0.5f);
+        addCube(vertexData, indicies, x + 0.5f, y + 0.5f, z + 0.5f, padding);
       }
     }
   }
@@ -111,13 +115,16 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
     .face = 0,
   };
 
-  VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth);
+  float texturePadding = 0.02f;
+  VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
   Voxels vox = {
     .cubes = cubes,
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
-    .mesh = generateVoxelMesh(renderData)
+    .mesh = generateVoxelMesh(renderData),
+    .texturePadding = texturePadding
+
   };
   return vox;
 }
@@ -145,12 +152,12 @@ void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId){
   float textureNdiX = textureX * 0.2f;
   float textureNdiY = textureY * 0.2f;
 
-  float newTextureCoords0[2] = { textureNdiX, textureNdiY + 0.2f };
-  float newTextureCoords1[2] = { textureNdiX, textureNdiY };
-  float newTextureCoords2[2] = { textureNdiX + 0.2f, textureNdiY };
-  float newTextureCoords3[2] = { textureNdiX, textureNdiY + 0.2f };
-  float newTextureCoords4[2] = { textureNdiX + 0.2f, textureNdiY };
-  float newTextureCoords5[2] = { textureNdiX + 0.2f, textureNdiY + 0.2f };
+  float newTextureCoords0[2] = { textureNdiX + chunk.texturePadding, textureNdiY + 0.2f - chunk.texturePadding };
+  float newTextureCoords1[2] = { textureNdiX + chunk.texturePadding, textureNdiY + chunk.texturePadding };
+  float newTextureCoords2[2] = { textureNdiX + 0.2f - chunk.texturePadding, textureNdiY + chunk.texturePadding };
+  float newTextureCoords3[2] = { textureNdiX + chunk.texturePadding, textureNdiY + 0.2f - chunk.texturePadding };
+  float newTextureCoords4[2] = { textureNdiX + 0.2f - chunk.texturePadding, textureNdiY + chunk.texturePadding };
+  float newTextureCoords5[2] = { textureNdiX + 0.2f - chunk.texturePadding, textureNdiY + 0.2f - chunk.texturePadding };
 
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset, sizeof(newTextureCoords0), &newTextureCoords0); 
   glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 5, sizeof(newTextureCoords1), &newTextureCoords1); 
@@ -274,6 +281,5 @@ std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> 
       }
     }
   }
-
   return newSelectedVoxels;
 }

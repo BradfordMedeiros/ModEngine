@@ -23,6 +23,7 @@ struct Voxels {
   int numHeight;
   int numDepth;
   Mesh mesh;
+  float texturePadding;
 };
 
 struct VoxelRenderData {
