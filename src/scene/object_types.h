@@ -21,8 +21,9 @@ struct GameObjectLight {
   !light:maxangle:50
   !light:color:10 10 20 */
 };
+struct GameObjectVoxel { };
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectLight> GameObjectObj;
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectLight, GameObjectVoxel> GameObjectObj;
 
 static Field obj = {
   .prefix = '@', 
@@ -42,13 +43,25 @@ static Field light = {
   .additionalFields = { },
 };
 
-static std::vector fields = { obj, camera, light };
+static Field voxelField = {
+  .prefix = ']',
+  .type = "voxel",
+  .additionalFields = { },
+};
+
+static std::vector fields = { obj, camera, light, voxelField };
 
 std::map<short, GameObjectObj> getObjectMapping();
 
-void addObject(short id, std::string objectType, std::string field, std::string payload, 
+void addObject(
+  short id, 
+  std::string objectType, 
+  std::string field, 
+  std::string payload, 
   std::map<short, GameObjectObj>& mapping, 
-  std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded);
+  std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
+  std::function<void(std::string)> ensureMeshLoaded
+);
 
 void removeObject(std::map<short, GameObjectObj>& mapping, short id);
 void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh,  Mesh& boundingboxMesh, bool showCameras);

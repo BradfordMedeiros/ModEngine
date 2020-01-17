@@ -35,10 +35,20 @@ GameObjectLight createLight(){
   GameObjectLight obj {};
   return obj;
 }
+GameObjectVoxel createVoxel(){
+  GameObjectVoxel obj {};
+  return obj;
+}
 
-void addObject(short id, std::string objectType, std::string field, std::string payload, 
+void addObject(
+  short id, 
+  std::string objectType, 
+  std::string field, 
+  std::string payload, 
   std::map<short, GameObjectObj>& mapping, 
-  std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded
+  std::map<std::string, Mesh>& meshes, 
+  std::string defaultMesh, 
+  std::function<void(std::string)> ensureMeshLoaded
 ){
   if (objectType == "default"){
     GameObjectObj existingObject = mapping[id];
@@ -48,7 +58,10 @@ void addObject(short id, std::string objectType, std::string field, std::string 
     mapping[id] = createCamera();
   }else if (objectType == "light"){
     mapping[id] = createLight();
+  }else if (objectType == "voxel"){
+    mapping[id] = createVoxel();
   }
+
   else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   }
@@ -62,9 +75,6 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
-    //if (showBoundingBoxForMesh){
-    //  drawMesh(boundingBoxMesh);
-    //}
     drawMesh(meshObj->mesh);
     return;
   }
@@ -80,6 +90,12 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
     drawMesh(cameraMesh);
     return;
   }
+
+  auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
+  if (voxelObj != NULL){
+    std::cout << "render voxel placeholder" << std::endl;
+    return;
+  }
 }
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
@@ -91,23 +107,11 @@ std::vector<std::pair<std::string, std::string>> defaultSerialization(){
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
   GameObjectObj objectToSerialize = mapping[id];
-
   auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
   if (meshObject != NULL){
     return serializeMesh(*meshObject);
   }
-
-  auto cameraObject = std::get_if<GameObjectCamera>(&objectToSerialize);
-  if (cameraObject != NULL){
-    return defaultSerialization();
-  }
-
-  auto lightObject = std::get_if<GameObjectLight>(&objectToSerialize);
-  if (lightObject != NULL){
-    return defaultSerialization();
-  }
-
-  return { };   // probably should throw an exception (would be better to rewrite so this cant happen, same in render)
+  return defaultSerialization();
 }
 
 std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
