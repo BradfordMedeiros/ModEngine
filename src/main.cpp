@@ -55,6 +55,8 @@ Texture blacktopTexture;
 Texture grassTexture;
 
 GameObjectVoxel* voxelPtr;
+short voxelPtrId = -1;
+glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -194,6 +196,12 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   std::cout << "ray direction" << print(rayDirection) << std::endl;
 
+  // raycast voxels works relative to local model voxel space so if Voxel(X)  is voxels in X space
+  // we calculate voxel rasterization in Voxel(Model) but the voxels actually exist in Voxel(World)
+  // we could Voxel(Model) -> Voxel(World) but code for rasterization complex
+  // instead think Ray(Model), and currently it's Ray(World) so need transform(World -> Model)
+  
+
   Line line = {
     .fromPos = defaultCamera.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
@@ -201,8 +209,11 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
  
   lines.clear();
   lines.push_back(line);
- 
-  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, line.fromPos, rayDirection);
+
+  glm::vec4 positionModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, 1.f);
+  glm::vec4 rayDirectionModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(rayDirection.x, rayDirection.y, rayDirection.z, 1.f);
+
+  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, positionModelSpace, rayDirectionModelSpace);
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
   if (collidedVoxels.size() > 0){
     auto collision = collidedVoxels[0];
@@ -418,10 +429,12 @@ void printObjectIds(){
 
 void updateVoxelPtr(){
   auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
-  GameObjectObj& toRender = world.objectMapping.at(voxelIndexes.at(0));
+  short id = voxelIndexes.at(0);
+  GameObjectObj& toRender = world.objectMapping.at(id);
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   assert(voxelObj != NULL);
   voxelPtr = voxelObj;
+  voxelPtrId = id;
 }
 
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
@@ -454,6 +467,11 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
 
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   renderObject(objectH.id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
+  // @TODO get rid of hackey code for voxelptr.  Should do when make this graph tranversal more standard
+  if (objectH.id == voxelPtrId){
+    voxelPtrModelMatrix = modelMatrix;
+  }
+  /////////////////////
 
   for (short id: objectH.children){
     drawGameobject(fullscene.scene.idToGameObjectsH.at(id), fullscene, shaderProgram, modelMatrix, useSelectionColor);
