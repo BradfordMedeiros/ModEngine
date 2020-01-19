@@ -36,7 +36,11 @@ GameObjectLight createLight(){
   return obj;
 }
 GameObjectVoxel createVoxel(){
-  GameObjectVoxel obj {};
+  auto voxel = createVoxels(100, 5, 100);
+  addVoxel(voxel, 0, 0, 0);
+  GameObjectVoxel obj {
+    .voxel = voxel,
+  };
   return obj;
 }
 
@@ -71,7 +75,7 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
 }
 
 void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh, Mesh& boundingBoxMesh, bool showCameras){
-  GameObjectObj toRender = mapping.at(id);
+  GameObjectObj& toRender = mapping.at(id);
 
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
@@ -93,7 +97,7 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
-    std::cout << "render voxel placeholder" << std::endl;
+    drawMesh(voxelObj -> voxel.mesh);
     return;
   }
 }

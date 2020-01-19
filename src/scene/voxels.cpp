@@ -119,14 +119,16 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
 
   float texturePadding = TEXTURE_PADDING_PERCENT;
   VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
+
+  std::vector<VoxelAddress> selectedVoxels;
   Voxels vox = {
     .cubes = cubes,
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
     .mesh = generateVoxelMesh(renderData),
-    .texturePadding = texturePadding
-
+    .texturePadding = texturePadding,
+    .selectedVoxels = selectedVoxels
   };
   return vox;
 }
@@ -284,4 +286,11 @@ std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> 
     }
   }
   return newSelectedVoxels;
+}
+
+void expandVoxels(Voxels& voxel, int x, int y, int z){
+  std::cout << "expanding voxels! (" << &voxel << ")" << std::endl;
+  applyTextureToCube(voxel, voxel.selectedVoxels, 1);
+  voxel.selectedVoxels = expandVoxels(voxel, voxel.selectedVoxels, x, y, z);
+  addVoxel(voxel, voxel.selectedVoxels);
 }

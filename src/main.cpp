@@ -53,8 +53,8 @@ bool useChunkingSystem = false;
 std::string rawSceneFile;
 Texture blacktopTexture;
 Texture grassTexture;
-Voxels voxel;
-VoxelRenderData renderData;
+
+GameObjectVoxel* voxelPtr;
 
 engineState state = getDefaultState(1920, 1080);
 World world;
@@ -153,7 +153,6 @@ void playSound(){
 }
 
 bool useYAxis = true;
-std::vector<VoxelAddress> selectedVoxels;
 
 void onDebugKey(){
   useYAxis = !useYAxis;
@@ -161,24 +160,16 @@ void onDebugKey(){
 }
 
 void expandVoxelUp(){
-  applyTextureToCube(voxel, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, selectedVoxels, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
-  addVoxel(voxel, selectedVoxels);
+  expandVoxels(voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
 }
 void expandVoxelDown(){
-  applyTextureToCube(voxel, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, selectedVoxels, 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
-  addVoxel(voxel, selectedVoxels);
+  expandVoxels(voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
 }
 void expandVoxelLeft(){
-  applyTextureToCube(voxel, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, selectedVoxels, -1, 0, 0);
-  addVoxel(voxel, selectedVoxels);
+  expandVoxels(voxelPtr -> voxel, -1, 0, 0);
 }
 void expandVoxelRight(){
-  applyTextureToCube(voxel, selectedVoxels, 1);
-  selectedVoxels = expandVoxels(voxel, selectedVoxels, 1, 0, 0);
-  addVoxel(voxel, selectedVoxels);
+  expandVoxels(voxelPtr -> voxel, 1, 0, 0);
 }
 
 void onArrowKey(int key){
@@ -211,14 +202,15 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   lines.clear();
   lines.push_back(line);
  
-  auto collidedVoxels = raycastVoxels(voxel, line.fromPos, rayDirection);
+  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, line.fromPos, rayDirection);
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
   if (collidedVoxels.size() > 0){
     auto collision = collidedVoxels[0];
-    selectedVoxels.push_back(collision);
-    applyTextureToCube(voxel, selectedVoxels, 2);
-
+    voxelPtr -> voxel.selectedVoxels.push_back(collision);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
   }
+
+  std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
   // TODO - serialization is broken since didn't keep up with it   
   /*int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
@@ -265,7 +257,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   schemeBindings.onMouseCallback(button, action, mods);
 
   if (button == 0){
-    selectedVoxels.clear();
+    voxelPtr -> voxel.selectedVoxels.clear();
   }
 }
 
@@ -275,11 +267,11 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 
   if (yoffset > 0){
     textureId += 1;
-    applyTextureToCube(voxel, selectedVoxels, textureId);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
   }
   if (yoffset < 0){
     textureId -= 1;
-    applyTextureToCube(voxel, selectedVoxels, textureId);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
   }
 
 
@@ -292,8 +284,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   // temp hackey for voxels
   if (key == 261){  // delete
-    removeVoxel(voxel, selectedVoxels);
-    selectedVoxels.clear();
+    removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
+    voxelPtr -> voxel.selectedVoxels.clear();
   } 
   ////////////////
 
@@ -424,6 +416,14 @@ void printObjectIds(){
   }
 }
 
+void updateVoxelPtr(){
+  auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
+  GameObjectObj& toRender = world.objectMapping.at(voxelIndexes.at(0));
+  auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
+  assert(voxelObj != NULL);
+  voxelPtr = voxelObj;
+}
+
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
   glm::mat4 modelMatrix = glm::translate(model, object.position);
@@ -488,9 +488,9 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     drawGameobject(fullscene.scene.idToGameObjectsH.at(fullscene.scene.rootGameObjectsH.at(i)), fullscene, shaderProgram, model, useSelectionColor);
   }  
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-  drawMesh(voxel.mesh);
+  //glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
+  //glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+  //drawMesh(voxelPtr -> voxel.mesh);
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -756,9 +756,6 @@ int main(int argc, char* argv[]){
   blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
   grassTexture = loadTexture("./res/textures/grass.png");
 
-  voxel = createVoxels(100, 5, 100);
-  addVoxel(voxel, 0, 0, 0);
-
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -799,6 +796,8 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < lightsIndexs.size(); i++){
       lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)));
     }
+
+    updateVoxelPtr();
 
     setActiveDepthTexture(1);
 

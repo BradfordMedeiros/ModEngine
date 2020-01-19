@@ -8,6 +8,7 @@
 #include <variant>
 #include "./common/mesh.h"
 #include "./scenegraph.h"
+#include "./voxels.h"
 
 struct GameObjectMesh {
   std::string meshName;
@@ -21,7 +22,9 @@ struct GameObjectLight {
   !light:maxangle:50
   !light:color:10 10 20 */
 };
-struct GameObjectVoxel { };
+struct GameObjectVoxel {
+  Voxels voxel;
+};
 
 typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectLight, GameObjectVoxel> GameObjectObj;
 
