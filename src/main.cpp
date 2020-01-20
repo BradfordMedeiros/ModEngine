@@ -437,51 +437,6 @@ void updateVoxelPtr(){
   voxelPtrId = id;
 }
 
-void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
-  GameObject object = fullscene.scene.idToGameObjects[objectH.id];
-  glm::mat4 modelMatrix = glm::translate(model, object.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.rotation);
-
-  bool objectSelected = state.selectedIndex == object.id;
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
-
-  if (state.visualizeNormals){
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    drawMesh(world.meshes.at("./res/models/cone/cone.obj")); 
-  }
-
-  modelMatrix = glm::scale(modelMatrix, object.scale);
-  
-  // bounding code //////////////////////
-  auto gameObjV = world.objectMapping[objectH.id];
-  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
-  if (meshObj != NULL){
-    auto bounding = getBoundRatio(world.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
-
-    if (objectSelected){
-      drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"));
-    }
-  }
-  /////////////////////////////// end bounding code
-
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  renderObject(objectH.id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
-  // @TODO get rid of hackey code for voxelptr.  Should do when make this graph tranversal more standard
-  if (objectH.id == voxelPtrId){
-    voxelPtrModelMatrix = modelMatrix;
-  }
-  /////////////////////
-
-  for (short id: objectH.children){
-    drawGameobject(fullscene.scene.idToGameObjectsH.at(id), fullscene, shaderProgram, modelMatrix, useSelectionColor);
-  }
-}
-
-void onObject(){
-  std::cout << "on object called" << std::endl;
-}
-
 void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
   
@@ -507,9 +462,36 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
-  for (unsigned int i = 0; i < fullscene.scene.rootGameObjectsH.size(); i++){
-    drawGameobject(fullscene.scene.idToGameObjectsH.at(fullscene.scene.rootGameObjectsH.at(i)), fullscene, shaderProgram, model, useSelectionColor);
-  }  
+  traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix) -> void {
+    if (id == voxelPtrId){
+      voxelPtrModelMatrix = modelMatrix;
+    }
+    
+    GameObject object = fullscene.scene.idToGameObjects[id];
+    bool objectSelected = state.selectedIndex == id;
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
+
+    if (state.visualizeNormals){
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+      drawMesh(world.meshes.at("./res/models/cone/cone.obj")); 
+    }
+
+    // bounding code //////////////////////
+    auto gameObjV = world.objectMapping[id];
+    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
+    if (meshObj != NULL){
+      auto bounding = getBoundRatio(world.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
+
+      if (objectSelected){
+        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"));
+      }
+    }
+    /////////////////////////////// end bounding code
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    renderObject(id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
+  });
 
 }
 
@@ -562,7 +544,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("position: " + print(defaultCamera.position), 10, 60, 3);
     drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
     drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 80, 3);
-
   }
 }
 

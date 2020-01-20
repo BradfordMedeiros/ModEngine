@@ -8,7 +8,6 @@
 #include <functional>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-
 #include "./common/mesh.h"
 #include "../common/util.h"
 
@@ -55,7 +54,6 @@ struct Field {
   std::vector<std::string> additionalFields;
 };
 
-
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
 Scene deserializeScene(
   std::string content, 
@@ -75,7 +73,7 @@ void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
 
 // @TODO code these functions
-void traverseScene(Scene& scene, void (*onObject)());  
+void traverseScene(Scene& scene, std::function<void(short, glm::mat4)> onObject);  
 glm::vec3 getFullPosition(short id);
 glm::quat getFullRotation(short id);
 
