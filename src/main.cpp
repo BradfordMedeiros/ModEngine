@@ -440,7 +440,7 @@ void updateVoxelPtr(){
 void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgram, glm::mat4 model, bool useSelectionColor){
   GameObject object = fullscene.scene.idToGameObjects[objectH.id];
   glm::mat4 modelMatrix = glm::translate(model, object.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.rotation) ;
+  modelMatrix = modelMatrix * glm::toMat4(object.rotation);
 
   bool objectSelected = state.selectedIndex == object.id;
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
@@ -477,6 +477,11 @@ void drawGameobject(GameObjectH objectH, FullScene& fullscene, GLint shaderProgr
     drawGameobject(fullscene.scene.idToGameObjectsH.at(id), fullscene, shaderProgram, modelMatrix, useSelectionColor);
   }
 }
+
+void onObject(){
+  std::cout << "on object called" << std::endl;
+}
+
 void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
   
@@ -506,9 +511,6 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     drawGameobject(fullscene.scene.idToGameObjectsH.at(fullscene.scene.rootGameObjectsH.at(i)), fullscene, shaderProgram, model, useSelectionColor);
   }  
 
-  //glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
-  //glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-  //drawMesh(voxelPtr -> voxel.mesh);
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){

@@ -7,8 +7,11 @@
 #include <sstream>
 #include <functional>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 #include "./common/mesh.h"
 #include "../common/util.h"
+
 
 enum ColliderShape { BOX, SPHERE };
 

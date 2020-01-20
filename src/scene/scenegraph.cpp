@@ -231,3 +231,23 @@ std::vector<short> listObjInScene(Scene& scene){
   }
   return allObjects;
 }
+
+
+void traverseScene(GameObjectH objectH, Scene& scene, glm::mat4 model, void (*onObject)()){
+  onObject();
+
+  GameObject object = scene.idToGameObjects[objectH.id];
+  glm::mat4 modelMatrix = glm::translate(model, object.position);
+  modelMatrix = modelMatrix * glm::toMat4(object.rotation);
+  modelMatrix = glm::scale(modelMatrix, object.scale);
+
+  for (short id: objectH.children){
+    traverseScene(scene.idToGameObjectsH.at(id), scene, modelMatrix, onObject);
+  }
+}
+
+void traverseScene(Scene& scene, void (*onObject)()){
+  for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
+    traverseScene(scene.idToGameObjectsH.at(scene.rootGameObjectsH.at(i)), scene, glm::mat4(1.f), onObject);
+  }  
+}
