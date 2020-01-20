@@ -203,7 +203,7 @@ void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
 }
 
 // This is effectively line drawing.  This has error, but I don't know if it matters
-// @todo this function sucks, is imprecise, and can cause infinite loop
+// @todo this function sucks, is imprecise
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection){    
   float magnitudeLine = sqrt(chunk.numWidth * chunk.numWidth + chunk.numHeight * chunk.numHeight + chunk.numDepth * chunk.numDepth);
   glm::vec3 lineEnd = rayPosition + (rayDirection * magnitudeLine);
@@ -216,18 +216,36 @@ std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, gl
   int maxIterations = maxvalue(chunk.numWidth, chunk.numHeight, chunk.numDepth);   // hackey hackey see below
   int numIterations = 0;
 
-  while (currentPosition.x < chunk.numWidth && currentPosition.y < chunk.numHeight && currentPosition.z < chunk.numDepth){
-    if ((currentPosition.x > 0 && currentPosition.y > 0 && currentPosition.z > 0) && chunk.cubes.at(currentPosition.x).at(currentPosition.y).at(currentPosition.z) == 1){
-      VoxelAddress voxel = {
-        .x = (int)(currentPosition.x),
-        .y = (int)(currentPosition.y),
-        .z = (int)(currentPosition.z)
-      };
-      addresses.push_back(voxel);
-    } 
+  float endWidth = chunk.numWidth;
+  float endHeight = chunk.numHeight;
+  float endDepth = chunk.numDepth;
+
+  bool terminatesXLow = rayIncrement.x < 0;
+  bool terminatesYLow = rayIncrement.y < 0;
+  bool terminatesZLow = rayIncrement.z < 0;
+
+  while (
+    ((currentPosition.x < endWidth || terminatesXLow) && (currentPosition.y < endHeight || terminatesYLow) && (currentPosition.z < endDepth || terminatesZLow)) && 
+    ((currentPosition.x > 0 || !terminatesXLow) && (currentPosition.y > 0 || !terminatesYLow) && (currentPosition.z > 0 || !terminatesZLow))
+  ){
+    auto position = currentPosition;
     currentPosition.x += rayIncrement.x;
     currentPosition.y += rayIncrement.y;
     currentPosition.z += rayIncrement.z;
+
+    if (position.x < 0 || position.y < 0 || position.z < 0 || position.x > endWidth || position.y > endHeight || position.z > endDepth){
+      continue;
+    }
+
+    if (chunk.cubes.at(position.x).at(position.y).at(position.z) == 1){
+      VoxelAddress voxel = {
+        .x = (int)(position.x),
+        .y = (int)(position.y),
+        .z = (int)(position.z)
+      };
+      addresses.push_back(voxel);
+    } 
+
     
     numIterations++;
     if (numIterations > maxIterations){     // hackey code, happens because of negative ray directions that needs to be fixed
@@ -289,7 +307,6 @@ std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> 
 }
 
 void expandVoxels(Voxels& voxel, int x, int y, int z){
-  std::cout << "expanding voxels! (" << &voxel << ")" << std::endl;
   applyTextureToCube(voxel, voxel.selectedVoxels, 1);
   voxel.selectedVoxels = expandVoxels(voxel, voxel.selectedVoxels, x, y, z);
   addVoxel(voxel, voxel.selectedVoxels);
