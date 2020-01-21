@@ -2,6 +2,7 @@
 import tkinter
 import tkinter.filedialog
 from  PIL import ImageTk, Image
+from my_image_sprite import myImageSprite
 import cv2
 import os
 import shutil
