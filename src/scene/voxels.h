@@ -24,10 +24,7 @@ struct Voxels {
   int numDepth;
   Mesh mesh;
   float texturePadding;
-
   std::vector<VoxelAddress> selectedVoxels;
-
-
 };
 
 struct VoxelRenderData {
@@ -38,16 +35,9 @@ struct VoxelRenderData {
 
 Voxels createVoxels(int numWidth, int numHeight, int numDepth);
 void addVoxel(Voxels& chunk, int x, int y, int z);
-void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);
-void removeVoxel(Voxels& chunk, int x, int y, int z);   
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   
-void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId);
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId);
-void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId);
-Mesh generateVoxelMesh(VoxelRenderData& renderData);
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection);
-std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> selectedVoxels, int x, int y, int z);
-
 void expandVoxels(Voxels& voxel, int x, int y, int z);
 
 #endif

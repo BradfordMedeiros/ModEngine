@@ -76,5 +76,6 @@ std::vector<short> listObjInScene(Scene& scene);
 void traverseScene(Scene& scene, std::function<void(short, glm::mat4)> onObject);  
 glm::vec3 getFullPosition(short id);
 glm::quat getFullRotation(short id);
+glm::vec3 getFullScale(short id);
 
 #endif

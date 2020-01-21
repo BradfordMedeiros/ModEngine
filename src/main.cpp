@@ -798,7 +798,7 @@ int main(int argc, char* argv[]){
       lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)));
     }
 
-    updateVoxelPtr();
+    updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
     setActiveDepthTexture(1);
 

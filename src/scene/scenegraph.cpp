@@ -232,7 +232,6 @@ std::vector<short> listObjInScene(Scene& scene){
   return allObjects;
 }
 
-
 void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model, std::function<void(short, glm::mat4)> onObject){
   GameObject object = scene.idToGameObjects[objectH.id];
   glm::mat4 modelMatrix = glm::translate(model, object.position);
