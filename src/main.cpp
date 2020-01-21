@@ -201,7 +201,6 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   // we could Voxel(Model) -> Voxel(World) but code for rasterization complex
   // instead think Ray(Model), and currently it's Ray(World) so need transform(World -> Model)
   
-
   Line line = {
     .fromPos = defaultCamera.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
@@ -227,8 +226,8 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   if (sceneToSerialize >= 0){
   //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
   }*/
-  
 }
+
 void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);

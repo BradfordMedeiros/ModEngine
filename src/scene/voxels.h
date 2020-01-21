@@ -40,4 +40,6 @@ void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int tex
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection);
 void expandVoxels(Voxels& voxel, int x, int y, int z);
 
+void getPhysicsBoundingData(Voxels& voxel);
+
 #endif

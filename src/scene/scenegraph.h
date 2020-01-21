@@ -12,7 +12,7 @@
 #include "../common/util.h"
 
 
-enum ColliderShape { BOX, SPHERE };
+enum ColliderShape { BOX, SPHERE, AUTOSHAPE };
 
 struct physicsOpts {
   bool enabled;

@@ -16,35 +16,35 @@ typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(short index);
 
 struct SchemeBindingCallbacks {
-    func onFrame;
-    colfun onCollisionEnter;
-    colfun onCollisionExit;
-    mousecallback onMouseCallback;
-    onobjectSelectedFunc onObjectSelected;
-    keycallback onKeyCallback;
-    keycharcallback onKeyCharCallback;
+  func onFrame;
+  colfun onCollisionEnter;
+  colfun onCollisionExit;
+  mousecallback onMouseCallback;
+  onobjectSelectedFunc onObjectSelected;
+  keycallback onKeyCallback;
+  keycharcallback onKeyCharCallback;
 };
 
 SchemeBindingCallbacks createStaticSchemeBindings(
-	std::string scriptPath,
+  std::string scriptPath,
   short (*loadScene)(std::string),  
   void (*unloadScene)(short id),  
   std::vector<short> (*listScenes)(),  
-	void (*moveCamera)(glm::vec3),  
-	void (*rotateCamera)(float xoffset, float yoffset),
-	void (*removeObjectById)(short id),
-	void (*makeObjectV)(std::string, std::string, float, float, float),
-	std::vector<short> (*getObjectsByType)(std::string),
-	void (*setActiveCamera)(short cameraId),
-	void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
-	std::string (*getGameObjectNameForId)(short id),
-	glm::vec3 (*getGameObjectPos)(short index),
-	void (*setGameObjectPos)(short index, glm::vec3 pos),
+  void (*moveCamera)(glm::vec3),  
+  void (*rotateCamera)(float xoffset, float yoffset),
+  void (*removeObjectById)(short id),
+  void (*makeObjectV)(std::string, std::string, float, float, float),
+  std::vector<short> (*getObjectsByType)(std::string),
+  void (*setActiveCamera)(short cameraId),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
+  std::string (*getGameObjectNameForId)(short id),
+  glm::vec3 (*getGameObjectPos)(short index),
+  void (*setGameObjectPos)(short index, glm::vec3 pos),
   glm::quat (*getGameObjectRot)(short index),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
-	short (*getGameObjectByName)(std::string name),
-	void (*setSelectionMode)(bool enabled),
+  short (*getGameObjectByName)(std::string name),
+  void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(short index, glm::vec3 impulse),
   void (*clearImpulse)(short index)
 );

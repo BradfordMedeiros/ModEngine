@@ -87,6 +87,9 @@ Scene createSceneFromTokens(
       if (tok.payload == "shape_sphere"){
         physicsOptions.shape = SPHERE;
       }
+      if (tok.payload == "shape_auto"){
+        physicsOptions.shape = AUTOSHAPE;
+      }
       scene.idToGameObjects[objectId].physicsOptions = physicsOptions;
     }else if (tok.attribute == "parent"){
       if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){

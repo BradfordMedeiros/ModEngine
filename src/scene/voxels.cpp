@@ -311,3 +311,7 @@ void expandVoxels(Voxels& voxel, int x, int y, int z){
   voxel.selectedVoxels = expandVoxels(voxel, voxel.selectedVoxels, x, y, z);
   addVoxel(voxel, voxel.selectedVoxels);
 }
+
+void getPhysicsBoundingData(Voxels& voxel){
+  
+}

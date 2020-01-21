@@ -59,7 +59,7 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
   printPhysicsInfo(physicsInfo);
 
   auto physicsOptions = obj.physicsOptions;
-  btRigidBody* rigidBody;
+  btRigidBody* rigidBody = NULL;
   if (physicsOptions.shape == BOX){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
     rigidBody = addRigidBody(
@@ -80,6 +80,8 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
       physicsOptions.isStatic,
       physicsOptions.hasCollisions
     );
+  }else if (physicsOptions.shape == AUTOSHAPE){
+    std::cout << "composite shape specified" << std::endl;
   }else{
     std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
     exit(1);
@@ -186,7 +188,7 @@ void addObjectToFullScene(World& world, short sceneId, std::string name, std::st
   // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
   addObjectToScene(world.scenes[sceneId].scene, name, meshName, pos, getObjectId, [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
     world.idToScene[id] = sceneId;
-    addPhysicsBody(world, world.scenes.at(sceneId), id);  // this is diffedrent than in deserialize only because it uses it to find the gameobject, not b/c good reasons
+    addPhysicsBody(world, world.scenes.at(sceneId), id);  // this is different than in deserialize only because it uses it to find the gameobject, not b/c good reasons
     addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void { 
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
     });
