@@ -74,9 +74,32 @@ btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, b
   shape -> setLocalScaling(btVector3(radius, radius, radius));
   return createRigidBody(pos, shape, rot, isStatic, hasCollision);
 }
+btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision){
+  btCompoundShape* shape = new btCompoundShape();
+  for (auto body: bodies){
+    btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(body.scale.x / 2 ), btScalar(body.scale.y / 2), btScalar(body.scale.z / 2)));
+    btTransform position;
+    position.setOrigin(glmToBt(body.position));
+    shape -> addChildShape(position, cshape1);
+  }
+  shape -> setLocalScaling(btVector3(1, 1, 1));
+  return createRigidBody(pos, shape, rotation, isStatic, hasCollision);
+}
+
 void cleanupRigidBody(btRigidBody* body){
   delete body -> getMotionState();
-  delete body -> getCollisionShape();
+  btCollisionShape* shape = body -> getCollisionShape(); 
+
+  btCompoundShape* cshape = dynamic_cast<btCompoundShape*>(shape);      // @TODO verify this
+  if (cshape != NULL){
+    int numChildren = cshape -> getNumChildShapes();
+    for (int i = 0; i < numChildren; i++){
+      btCollisionShape * childShape = cshape -> getChildShape(i);
+      delete childShape;
+    }
+  }else{
+    delete shape;
+  }
   delete body;
 }
 
@@ -87,6 +110,11 @@ btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float hei
 }
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision){
   auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  return rigidBodyPtr;
+}
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision){
+  auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }

@@ -60,7 +60,10 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
 
   auto physicsOptions = obj.physicsOptions;
   btRigidBody* rigidBody = NULL;
-  if (physicsOptions.shape == BOX){
+
+  GameObjectObj& toRender = world.objectMapping.at(id);
+  bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
+  if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
@@ -80,8 +83,17 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
       physicsOptions.isStatic,
       physicsOptions.hasCollisions
     );
-  }else if (physicsOptions.shape == AUTOSHAPE){
-    std::cout << "composite shape specified" << std::endl;
+  }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
+    std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
+
+    rigidBody = addRigidBody(
+      world.physicsEnvironment, 
+      physicsInfo.gameobject.position,
+      physicsInfo.gameobject.rotation,
+      getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions
+    );
   }else{
     std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
     exit(1);

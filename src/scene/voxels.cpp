@@ -312,6 +312,7 @@ void expandVoxels(Voxels& voxel, int x, int y, int z){
   addVoxel(voxel, voxel.selectedVoxels);
 }
 
-void getPhysicsBoundingData(Voxels& voxel){
-  
+std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
+  std::vector<VoxelBody> bodies;
+  return bodies;
 }

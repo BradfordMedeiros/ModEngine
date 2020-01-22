@@ -6,6 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include "./collision_cache.h"
+#include "./common/util/types.h"
 
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
@@ -22,6 +23,7 @@ void stepPhysicsSimulation(physicsEnv& env, float timestep);
 
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision = true);
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision = true);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision = true);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 
 void setPosition(btRigidBody* body, glm::vec3);
