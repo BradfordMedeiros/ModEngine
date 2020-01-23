@@ -10,16 +10,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "./common/mesh.h"
 #include "../common/util.h"
-
-
-enum ColliderShape { BOX, SPHERE, AUTOSHAPE };
-
-struct physicsOpts {
-  bool enabled;
-  bool isStatic;
-  bool hasCollisions;
-  ColliderShape shape;
-};
+#include "./serialization.h"
 
 struct GameObject {
   short id;
@@ -42,17 +33,7 @@ struct Scene {
   std::map<std::string, short> nameToId;
 };
 
-struct Token {
-  std::string target;
-  std::string attribute;
-  std::string payload;
-};
 
-struct Field {
-  char prefix;
-  std::string type;
-  std::vector<std::string> additionalFields;
-};
 
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
 Scene deserializeScene(

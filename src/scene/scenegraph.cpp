@@ -31,19 +31,19 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
   scene.nameToId[name] = gameobjectObj.id;
 }
 
-glm::vec3 parseVec(std::string positionRaw){;
-  float x, y, z;
-  std::istringstream in(positionRaw);
-  in >> x >> y >> z;
-  return glm::vec3(x, y, z);
+glm::quat parseQuat(std::string payload){
+  glm::vec3 eulerAngles = parseVec(payload);
+  glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
+  return rotation;
 }
-
 Scene createSceneFromTokens(
   std::vector<Token> tokens,  
   std::function<void(short, std::string, std::string, std::string)> addObject, 
   std::vector<Field> fields,
   short (*getNewObjectId)()
 ){
+  deserializeScene(tokens);
+
   Scene scene;
 
   for (Token tok : tokens){
@@ -67,9 +67,7 @@ Scene createSceneFromTokens(
     }else if (tok.attribute == "scale"){
       scene.idToGameObjects[objectId].scale = parseVec(tok.payload);
     }else if (tok.attribute == "rotation"){
-      glm::vec3 eulerAngles = parseVec(tok.payload);
-      glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
-      scene.idToGameObjects[objectId].rotation = rotation;
+      scene.idToGameObjects[objectId].rotation = parseQuat(tok.payload);
     }else if (tok.attribute == "physics"){
       auto physicsOptions = scene.idToGameObjects[objectId].physicsOptions;
       if (tok.payload == "enabled"){
@@ -122,6 +120,7 @@ Scene createSceneFromTokens(
   return scene;
 }
 
+
 // @todo this parsing is sloppy and buggy... obviously need to harden this..
 Scene deserializeScene(
   std::string content,  
@@ -130,33 +129,7 @@ Scene deserializeScene(
   short (*getNewObjectId)()
 ){
   std::cout << "INFO: Deserialization: " << std::endl;
-
-  std::vector<Token> dtokens;
-
-  std::vector<std::string> lines = split(content, '\n');
-  for(std::string line: lines){
-    std::vector<std::string> tokens = split(line, '#');
-
-    if (tokens.size() > 0){
-      std::vector<std::string> validToken = split(tokens[0], ':');
-
-      Token token = {};
-      if (validToken.size() > 0){
-        token.target = trim(validToken[0]);
-      }
-      if (validToken.size() > 1){
-        token.attribute = trim(validToken[1]);
-      }
-      if (validToken.size() > 2){
-        token.payload = trim(validToken[2]);
-      }
-      if (token.target.length() > 0 ){
-        dtokens.push_back(token);
-      }
-    }
-  }
-
-  return createSceneFromTokens(dtokens, addObject, fields, getNewObjectId);
+  return createSceneFromTokens(getTokens(content), addObject, fields, getNewObjectId);
 }
 
 std::string serializeVec(glm::vec3 vec){
