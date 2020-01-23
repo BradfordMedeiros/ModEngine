@@ -314,5 +314,18 @@ void expandVoxels(Voxels& voxel, int x, int y, int z){
 
 std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
   std::vector<VoxelBody> bodies;
+  for (int x = 0; x < voxels.numWidth; x++){
+    for (int y = 0; y < voxels.numHeight; y++){
+      for (int z = 0; z < voxels.numDepth; z++){
+        if (voxels.cubes.at(x).at(y).at(z) == 1){
+          VoxelBody body = {
+            .position = glm::vec3(x, y, z),
+            .scale = glm::vec3(1.f, 1.f, 1.f),
+          };
+          bodies.push_back(body);
+        }
+      }
+    }
+  }
   return bodies;
 }
