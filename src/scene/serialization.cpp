@@ -61,6 +61,8 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = glm::quat(0.f, 0.f, 0.f, 0.f),
+    .hasParent = false,
+    .parentName = "",
     .physics = physics,
     .type = getType(name, additionalFields)
   };
@@ -72,7 +74,7 @@ void populateAdditionalFields(std::map<std::string, SerializationObject>& object
     if (field.type == type){
       for (std::string fieldName : field.additionalFields){
         if (token.attribute == fieldName){
-          objects[token.target].additionalFields[token.attribute] = token.payload;
+          objects.at(token.target).additionalFields[token.attribute] = token.payload;
           return;
         }
       }
@@ -82,7 +84,7 @@ void populateAdditionalFields(std::map<std::string, SerializationObject>& object
 }
 
 
-std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields){
+std::map<std::string, SerializationObject> deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
   for (Token token : tokens){
@@ -91,52 +93,52 @@ std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens, std
     if (objects.find(token.target) == objects.end()) {
       objects[token.target] = getDefaultObject(token.target, additionalFields);
     }
-    if (token.attribute == "parent" && (objects.find(token.payload) == objects.end())){   // parent is special case that creates the other object as default if it does not yet exist
-      objects[token.payload] = getDefaultObject(token.payload, additionalFields);
+    if (token.attribute == "parent"){   // parent is special case that creates the other object as default if it does not yet exist
+      if (objects.find(token.payload) == objects.end()){
+        objects[token.payload] = getDefaultObject(token.payload, additionalFields);
+      }
+      objects.at(token.target).hasParent = true;
+      objects.at(token.target).parentName = token.payload;
     }
     if (token.attribute == "position"){
-      objects[token.target].position = parseVec(token.payload);
+      objects.at(token.target).position = parseVec(token.payload);
     }
     if (token.attribute == "scale"){
-      objects[token.target].scale = parseVec(token.payload);
+      objects.at(token.target).scale = parseVec(token.payload);
     }
     if (token.attribute == "rotation"){
-      objects[token.target].rotation = parseQuat(token.payload);
+      objects.at(token.target).rotation = parseQuat(token.payload);
     }
 
     if (token.attribute == "physics"){
       if (token.payload == "enabled"){
-        objects[token.target].physics.enabled = true;
+        objects.at(token.target).physics.enabled = true;
       }
       if (token.payload == "disabled"){
-        objects[token.target].physics.enabled = false;
+        objects.at(token.target).physics.enabled = false;
       }
       if (token.payload == "dynamic"){
-        objects[token.target].physics.isStatic = false;
+        objects.at(token.target).physics.isStatic = false;
       }
       if (token.payload == "nocollide"){
-        objects[token.target].physics.hasCollisions = false;
+        objects.at(token.target).physics.hasCollisions = false;
       }
       if (token.payload == "shape_sphere"){
-        objects[token.target].physics.shape = SPHERE;
+        objects.at(token.target).physics.shape = SPHERE;
       }
       if (token.payload == "shape_box"){
-        objects[token.target].physics.shape = BOX;
+        objects.at(token.target).physics.shape = BOX;
       }
       if (token.payload == "shape_auto"){
-        objects[token.target].physics.shape = AUTOSHAPE;
+        objects.at(token.target).physics.shape = AUTOSHAPE;
       }
     }
     
     std::string type = getType(token.target, additionalFields);
-    objects[token.target].type = type;
+    objects.at(token.target).type = type;
     populateAdditionalFields(objects, token, type, additionalFields);
   }
-  std::vector<SerializationObject> objs;
-  for (auto [_, value] : objects){
-    objs.push_back(value);
-  }
-  return objs;
+  return objects;
 }
 
 // this isn't complete output of serialization but exposes some fields

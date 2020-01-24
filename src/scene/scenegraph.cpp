@@ -31,18 +31,12 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
   scene.nameToId[name] = gameobjectObj.id;
 }
 
-glm::quat parseQuat(std::string payload){
-  glm::vec3 eulerAngles = parseVec(payload);
-  glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
-  return rotation;
-}
 Scene createSceneFromTokens(
   std::vector<Token> tokens,  
   std::function<void(short, std::string, std::string, std::string)> addObject, 
   std::vector<Field> fields,
   short (*getNewObjectId)()
 ){
-  deserializeScene(tokens);
 
   Scene scene;
 

@@ -35,6 +35,8 @@ struct SerializationObject {
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;
+  bool hasParent;
+  std::string parentName;
   physicsOpts physics;
   std::string type;
   std::map<std::string, std::string> additionalFields;
@@ -43,7 +45,7 @@ struct SerializationObject {
 glm::quat parseQuat(std::string payload);
 glm::vec3 parseVec(std::string positionRaw);
 std::vector<Token> getTokens(std::string content);
-std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens,  std::vector<Field> fields);
+std::map<std::string, SerializationObject> deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields);
 std::string serializationObjectToString(std::vector<SerializationObject> object);
 
 #endif
