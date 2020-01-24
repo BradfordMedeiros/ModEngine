@@ -36,10 +36,14 @@ struct SerializationObject {
   glm::vec3 scale;
   glm::quat rotation;
   physicsOpts physics;
+  std::string type;
+  std::map<std::string, std::string> additionalFields;
 };
 
+glm::quat parseQuat(std::string payload);
 glm::vec3 parseVec(std::string positionRaw);
 std::vector<Token> getTokens(std::string content);
-std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens);
+std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens,  std::vector<Field> fields);
+std::string serializationObjectToString(std::vector<SerializationObject> object);
 
 #endif

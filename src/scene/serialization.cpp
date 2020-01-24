@@ -6,6 +6,11 @@ glm::vec3 parseVec(std::string positionRaw){;
   in >> x >> y >> z;
   return glm::vec3(x, y, z);
 }
+glm::quat parseQuat(std::string payload){
+  glm::vec3 eulerAngles = parseVec(payload);
+  glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
+  return rotation;
+}
 
 std::vector<Token> getTokens(std::string content) {
   std::vector<Token> dtokens;
@@ -34,34 +39,69 @@ std::vector<Token> getTokens(std::string content) {
   return dtokens;
 }
 
-SerializationObject getDefaultObject(std::string name){
+std::string getType(std::string name, std::vector<Field> additionalFields){
+  std::string type = "default";
+  for (Field field : additionalFields){
+    if (name[0] == field.prefix){
+      type = field.type;
+    }
+  }
+  return type;
+}
+
+SerializationObject getDefaultObject(std::string name, std::vector<Field> additionalFields){
+  physicsOpts physics {
+    .enabled = true,
+    .isStatic = true,
+    .hasCollisions = true,
+    .shape = AUTOSHAPE
+  };
   SerializationObject newObject {
     .name = name,
     .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = glm::quat(0.f, 0.f, 0.f, 0.f),
+    .physics = physics,
+    .type = getType(name, additionalFields)
   };
   return newObject;
 }
 
-std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens){
+void populateAdditionalFields(std::map<std::string, SerializationObject>& objects, Token token, std::string type, std::vector<Field> additionalFields){
+  for (Field field : additionalFields){
+    if (field.type == type){
+      for (std::string fieldName : field.additionalFields){
+        if (token.attribute == fieldName){
+          objects[token.target].additionalFields[token.attribute] = token.payload;
+          return;
+        }
+      }
+      return;
+    }
+  }
+}
+
+
+std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
-  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject(token.target);
+      objects[token.target] = getDefaultObject(token.target, additionalFields);
     }
     if (token.attribute == "parent" && (objects.find(token.payload) == objects.end())){   // parent is special case that creates the other object as default if it does not yet exist
-      objects[token.payload] = getDefaultObject(token.payload);
+      objects[token.payload] = getDefaultObject(token.payload, additionalFields);
     }
     if (token.attribute == "position"){
       objects[token.target].position = parseVec(token.payload);
     }
     if (token.attribute == "scale"){
       objects[token.target].scale = parseVec(token.payload);
+    }
+    if (token.attribute == "rotation"){
+      objects[token.target].rotation = parseQuat(token.payload);
     }
 
     if (token.attribute == "physics"){
@@ -80,83 +120,52 @@ std::vector<SerializationObject> deserializeScene(std::vector<Token> tokens){
       if (token.payload == "shape_sphere"){
         objects[token.target].physics.shape = SPHERE;
       }
+      if (token.payload == "shape_box"){
+        objects[token.target].physics.shape = BOX;
+      }
       if (token.payload == "shape_auto"){
         objects[token.target].physics.shape = AUTOSHAPE;
       }
     }
+    
+    std::string type = getType(token.target, additionalFields);
+    objects[token.target].type = type;
+    populateAdditionalFields(objects, token, type, additionalFields);
   }
-  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
   std::vector<SerializationObject> objs;
   for (auto [_, value] : objects){
     objs.push_back(value);
   }
   return objs;
+}
 
-    /*std::string objectName = tok.target;
-
-    std::string activeType = "default";
-    for (Field field : fields){
-      if (tok.target[0] == field.prefix ){
-        activeType = field.type;
-      }
+// this isn't complete output of serialization but exposes some fields
+std::string serializationObjectToString(std::vector<SerializationObject> objects){
+  std::string serial = "";
+  for (auto obj : objects){
+    serial = serial + obj.name + ":position:" + std::to_string(obj.position.x) + " " + std::to_string(obj.position.y) + " " + std::to_string(obj.position.z) + "\n";
+    serial = serial + obj.name + ":scale:" + std::to_string(obj.scale.x) + " " + std::to_string(obj.scale.y) + " " + std::to_string(obj.scale.z) + "\n";
+    
+    if (!obj.physics.enabled){
+      serial = serial + obj.name + ":physics:disabled" + "\n";
+    }
+    if (!obj.physics.isStatic){
+      serial = serial + obj.name + ":physics:dynamic" + "\n";
+    }
+    if (!obj.physics.hasCollisions){
+      serial = serial + obj.name + ":physics:nocollide" + "\n";
+    }
+    if (obj.physics.shape == SPHERE ){
+      serial = serial + obj.name + ":physics:shape_sphere" + "\n";
+    }
+    if (obj.physics.shape == BOX){
+      serial = serial + obj.name + ":physics:box" + "\n";
     }
 
-    if (!(scene.nameToId.find(objectName) != scene.nameToId.end())){
-      addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), objectName, getNewObjectId(), -1);
-      addObject(scene.nameToId[objectName], activeType, "", "");
+    for (auto [field, payload] : obj.additionalFields){
+      serial = serial + obj.name + ":" + field + ":" + payload + "\n";
     }
-
-    short objectId = scene.nameToId[objectName];
-    if (tok.attribute == "position"){
-      scene.idToGameObjects[objectId].position = parseVec(tok.payload);
-    }else if (tok.attribute == "scale"){
-      scene.idToGameObjects[objectId].scale = parseVec(tok.payload);
-    }else if (tok.attribute == "rotation"){
-      glm::vec3 eulerAngles = parseVec(tok.payload);
-      glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
-      scene.idToGameObjects[objectId].rotation = rotation;
-    }else if (tok.attribute == "physics"){
-      auto physicsOptions = scene.idToGameObjects[objectId].physicsOptions;
-      if (tok.payload == "enabled"){
-        physicsOptions.enabled = true;
-      }
-      if (tok.payload == "disabled"){
-        physicsOptions.enabled = false;
-      }
-      if (tok.payload == "dynamic"){
-        physicsOptions.isStatic = false;
-      }
-      if (tok.payload == "nocollide"){
-        physicsOptions.hasCollisions = false;
-      }
-      if (tok.payload == "shape_sphere"){
-        physicsOptions.shape = SPHERE;
-      }
-      if (tok.payload == "shape_auto"){
-        physicsOptions.shape = AUTOSHAPE;
-      }
-      scene.idToGameObjects[objectId].physicsOptions = physicsOptions;
-    }else if (tok.attribute == "parent"){
-      if (!(scene.nameToId.find(tok.payload) != scene.nameToId.end())){
-        short parentId = getNewObjectId();
-        addObjectToScene(scene, glm::vec3(1.0f, 1.0f, 1.0f), tok.payload, parentId, -1);
-        addObject(parentId, "default", "", "");
-      }
-      scene.idToGameObjectsH[objectId].parentId = scene.nameToId[tok.payload];
-      scene.idToGameObjectsH[scene.nameToId[tok.payload]].children.insert(scene.idToGameObjectsH[objectId].id);
-    }
-
-    for (Field field: fields){
-      if (field.type != activeType){
-        continue;
-      }
-      for (std::string field : field.additionalFields){
-        if (tok.attribute == field){
-          addObject(objectId, activeType, field, tok.payload);
-          break;
-        }
-      }
-    }
-  }*/
-
+    serial = serial + "\n\n";
+  }
+  return serial;
 }
