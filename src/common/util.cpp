@@ -34,6 +34,12 @@ std::string print(glm::vec3 vec){
   stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
   return stream.str();
 }
+std::string print(glm::quat quat){
+  std::stringstream stream;
+  stream << "(" << quat.x << ", " << quat.y << ", " << quat.z << ")";
+  return stream.str();
+}
+
 
 float maxvalue(float x, float y, float z){
   if (x >= y && x >= z){

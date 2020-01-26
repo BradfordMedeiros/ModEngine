@@ -38,18 +38,19 @@ struct Scene {
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
 Scene deserializeScene(
   std::string content, 
-  std::function<void(short, std::string, std::string, std::string)> addObject, 
+  std::function<void(short id, std::string type, std::map<std::string, std::string> additionalFields)> addObject, 
   std::vector<Field> fields,
   short (*getNewObjectId)()
 );
 void addObjectToScene(
   Scene& scene, 
   std::string name, 
-  std::string mesh,  
+  std::string mesh, 
   glm::vec3 position, 
-  short (*getNewObjectId)(),
-  std::function<void(short, std::string, std::string, std::string)> addObject
+  short (*getNewObjectId)(), 
+  std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
 );
+
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
 

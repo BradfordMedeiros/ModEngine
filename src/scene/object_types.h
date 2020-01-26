@@ -59,8 +59,7 @@ std::map<short, GameObjectObj> getObjectMapping();
 void addObject(
   short id, 
   std::string objectType, 
-  std::string field, 
-  std::string payload, 
+  std::map<std::string, std::string> additionalFields,
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
   std::function<void(std::string)> ensureMeshLoaded

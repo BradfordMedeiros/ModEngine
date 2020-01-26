@@ -543,6 +543,13 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("position: " + print(defaultCamera.position), 10, 60, 3);
     drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
     drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 80, 3);
+  
+    if (state.selectedIndex != -1){
+      auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).scene.idToGameObjects.at(state.selectedIndex);
+      drawText("position: " + print(obj.position), 10, 90, 3);
+      drawText("scale: " + print(obj.scale), 10, 100, 3);
+      drawText("rotation: " + print(obj.rotation), 10, 110, 3);
+    }
   }
 }
 
