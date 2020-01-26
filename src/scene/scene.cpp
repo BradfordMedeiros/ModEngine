@@ -147,15 +147,18 @@ short getSceneId(){
 // @TODO scene deserialization is all messy.  Fix this this is bullshit. 
 // Addobject gets called multiple times.  Should be okay, but more work than necessary. bullshit!
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
-  auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
+  auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::map<std::string, std::string> additionalFields) -> void {
+    std::cout << "add object called for (" << type << ")" << std::endl;
+    for (auto [attribute, value] : additionalFields){
+      std::cout << "(" << attribute << "," << value << ")" << std::endl;
+    }
     world.idToScene[id] = sceneId;
-    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
+    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");     // @todo protect against loading this mesh many times. 
     });
   };
-
+  
   Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields, getObjectId);
-
   FullScene fullscene = {
     .scene = scene,
   };
@@ -198,13 +201,13 @@ void removeSceneFromWorld(World& world, short sceneId){
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
   // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
-  addObjectToScene(world.scenes[sceneId].scene, name, meshName, pos, getObjectId, [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
+  /*addObjectToScene(world.scenes[sceneId].scene, name, meshName, pos, getObjectId, [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
     world.idToScene[id] = sceneId;
     addPhysicsBody(world, world.scenes.at(sceneId), id);  // this is different than in deserialize only because it uses it to find the gameobject, not b/c good reasons
     addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void { 
       world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
     });
-  });
+  });*/
 }
 
 void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index){
@@ -227,7 +230,7 @@ void physicsTranslateSet(FullScene& fullscene, btRigidBody* body, glm::vec3 pos,
 }
 
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index){
-  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects[index].rotation, x, y, z, 5);
+  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects.at(index).rotation, x, y, z, 5);
   fullscene.scene.idToGameObjects.at(index).rotation  = rotation;
   setRotation(body, rotation);
 }
@@ -237,7 +240,7 @@ void physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotatio
 }
 
 void physicsScale(World& world, FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z){
-  auto oldScale = fullscene.scene.idToGameObjects[index].scale;
+  auto oldScale = fullscene.scene.idToGameObjects.at(index).scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   fullscene.scene.idToGameObjects.at(index).scale = newScale;
   auto collisionInfo = getPhysicsInfoForGameObject(world, fullscene, index).collisionInfo;

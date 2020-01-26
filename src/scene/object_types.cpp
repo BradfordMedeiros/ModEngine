@@ -5,13 +5,13 @@ std::map<short, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-GameObjectMesh createMesh(std::string field, std::string payload, std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
-  std::function<void(std::string)> ensureMeshLoaded, GameObjectMesh& gameobj){
-  std::cout << "Creating gameobject: mesh: " << payload << std::endl;
+GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded){
+  auto meshName = additionalFields.at("mesh");
 
-  std::string meshName = (field == "mesh") ? payload : gameobj.meshName;
+  std::cout << "Creating gameobject: mesh: " << meshName << std::endl;
   meshName = (meshName == "") ? defaultMesh : meshName;
-  bool isDisabled = gameobj.isDisabled || (field == "disabled");
+
+  bool isDisabled = additionalFields.find("disabled") != additionalFields.end() ; 
   
   ensureMeshLoaded(meshName);
   if (meshes.find(meshName) == meshes.end()){
@@ -47,17 +47,14 @@ GameObjectVoxel createVoxel(){
 void addObject(
   short id, 
   std::string objectType, 
-  std::string field, 
-  std::string payload, 
+  std::map<std::string, std::string> additionalFields,
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
   std::function<void(std::string)> ensureMeshLoaded
 ){
   if (objectType == "default"){
-    GameObjectObj existingObject = mapping[id];
-    GameObjectMesh* meshObject = std::get_if<GameObjectMesh>(&existingObject);
-    mapping[id] = createMesh(field, payload, meshes, defaultMesh, ensureMeshLoaded, *meshObject);
+    mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if (objectType == "light"){
@@ -65,7 +62,6 @@ void addObject(
   }else if (objectType == "voxel"){
     mapping[id] = createVoxel();
   }
-
   else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   }

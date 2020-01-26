@@ -60,7 +60,7 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .name = name,
     .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
-    .rotation = glm::quat(0.f, 0.f, 0.f, 0.f),
+    .rotation = glm::quat(0.f, 0.f, 0.f, 1.f),
     .hasParent = false,
     .parentName = "",
     .physics = physics,
