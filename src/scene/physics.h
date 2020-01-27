@@ -7,6 +7,7 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include "./collision_cache.h"
 #include "./common/util/types.h"
+#include "./bulletdebug.h"
 
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
@@ -15,9 +16,10 @@ struct physicsEnv {
   btSequentialImpulseConstraintSolver* constraintSolver;
   btDiscreteDynamicsWorld* dynamicsWorld;
   CollisionCache collisionCache;
+  bool hasDebugDrawer;
 };
 
-physicsEnv initPhysics(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
+physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 

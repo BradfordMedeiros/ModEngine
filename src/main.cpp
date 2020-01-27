@@ -586,6 +586,7 @@ int main(int argc, char* argv[]){
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
+   ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("e,chunksize", "Size of worlds chunks", cxxopts::value<float>()->default_value("100"))
@@ -739,7 +740,10 @@ int main(int argc, char* argv[]){
     clearImpulse
   );
 
-  world = createWorld(onObjectEnter, onObjectLeave);
+  BulletDebugDrawer drawer;
+  btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
+
+  world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
     loadScene(rawSceneFile);
