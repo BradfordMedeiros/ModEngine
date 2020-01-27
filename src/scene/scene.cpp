@@ -120,13 +120,13 @@ short getIdForCollisionObject(World& world, const btCollisionObject* body){
   return -1;
 }
 
-World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave){
+World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   auto objectMapping = getObjectMapping();
-
   World world = {
-    .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave),
+    .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
   };
+
   return world;
 }
 
@@ -175,7 +175,7 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
 short addSceneToWorld(World& world, std::string sceneFile){
   auto sceneId = getSceneId();
   world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile));
-  addPhysicsBodies(world, world.scenes[sceneId]);
+  addPhysicsBodies(world, world.scenes.at(sceneId));
   return sceneId;
 }
 void removeSceneFromWorld(World& world, short sceneId){

@@ -29,7 +29,7 @@ struct PhysicsInfo {
   glm::vec3 collisionInfo;
 };
 
-World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
+World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 short addSceneToWorld(World& world, std::string sceneFile);
 void removeSceneFromWorld(World& world, short sceneId);
 

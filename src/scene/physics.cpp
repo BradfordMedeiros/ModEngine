@@ -13,7 +13,7 @@ btQuaternion glmToBt(glm::quat rotation){
   return btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 }
 
-physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectLeave){
+physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
   auto dispatcher = new btCollisionDispatcher(colConfig);  
@@ -32,7 +32,12 @@ physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectL
     .constraintSolver = constraintSolver,
     .dynamicsWorld = dynamicsWorld,
     .collisionCache = collisionCache,
+    .hasDebugDrawer = debugDrawer != NULL
   };
+
+  if (env.hasDebugDrawer){
+    env.dynamicsWorld -> setDebugDrawer(debugDrawer);
+  }
   return env;
 }
 
@@ -167,6 +172,9 @@ void checkCollisions(physicsEnv& env){
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
   env.dynamicsWorld -> stepSimulation(timestep, 10);
   checkCollisions(env);
+  if (env.hasDebugDrawer){
+    env.dynamicsWorld -> debugDrawWorld();
+  }
 }
 void printRigidBodyInfo(btRigidBody* body){
   glm::vec3 origin = getPosition(body);
