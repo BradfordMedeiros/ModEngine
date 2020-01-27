@@ -37,7 +37,6 @@ Scene createSceneFromTokens(
   std::vector<Field> fields,
   short (*getNewObjectId)()
 ){
-
   Scene scene;
 
   std::map<std::string, SerializationObject>  serialObjs = deserializeScene(tokens, fields);

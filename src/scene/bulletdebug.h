@@ -3,14 +3,14 @@
 
 #include "LinearMath/btIDebugDraw.h"
 #include <iostream>
+#include <glm/glm.hpp>
+#include "./physics_common.h"
 
-class BulletDebugDrawer : public btIDebugDraw
-{
+class BulletDebugDrawer : public btIDebugDraw {
    int m_debugMode;
-
+  void (*debugDrawLine)(glm::vec3 fromPos, glm::vec3 toPos);
 public:
-
-  BulletDebugDrawer();
+  BulletDebugDrawer(void (*drawLine)(glm::vec3 fromPos, glm::vec3 toPos));
   virtual ~BulletDebugDrawer();
   virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor);
   virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);

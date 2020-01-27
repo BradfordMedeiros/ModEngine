@@ -206,7 +206,6 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
  
-  lines.clear();
   lines.push_back(line);
 
   glm::vec4 positionModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, 1.f);
@@ -457,7 +456,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
 
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
-    glm::vec3 position = lights[i] -> position;
+    glm::vec3 position = lights.at(i) -> position;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
@@ -466,7 +465,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       voxelPtrModelMatrix = modelMatrix;
     }
     
-    GameObject object = fullscene.scene.idToGameObjects[id];
+    GameObject object = fullscene.scene.idToGameObjects.at(id);
     bool objectSelected = state.selectedIndex == id;
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
 
@@ -476,10 +475,10 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     }
 
     // bounding code //////////////////////
-    auto gameObjV = world.objectMapping[id];
+    auto gameObjV = world.objectMapping.at(id);
     auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
     if (meshObj != NULL){
-      auto bounding = getBoundRatio(world.meshes["./res/models/boundingbox/boundingbox.obj"].boundInfo, meshObj->mesh.boundInfo);
+      auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").boundInfo, meshObj->mesh.boundInfo);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
 
       if (objectSelected){
@@ -511,6 +510,14 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
   drawLines(lines);
+  lines.clear();
+}
+void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
+  Line line = {
+    .fromPos = fromPos,
+    .toPos = toPos
+  };
+  lines.push_back(line);
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
@@ -740,7 +747,7 @@ int main(int argc, char* argv[]){
     clearImpulse
   );
 
-  BulletDebugDrawer drawer;
+  BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
@@ -855,7 +862,7 @@ int main(int argc, char* argv[]){
     if (enablePhysics){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
-   
+    
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject, onDebugKey, onArrowKey);
     glfwPollEvents();
 
@@ -864,7 +871,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+       
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights);
     }

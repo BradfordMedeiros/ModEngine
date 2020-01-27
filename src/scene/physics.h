@@ -8,6 +8,7 @@
 #include "./collision_cache.h"
 #include "./common/util/types.h"
 #include "./bulletdebug.h"
+#include "./physics_common.h"
 
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
