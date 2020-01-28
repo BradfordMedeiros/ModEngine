@@ -121,12 +121,21 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
   VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
 
   std::vector<VoxelAddress> selectedVoxels;
+
+  Mesh mesh = generateVoxelMesh(renderData);
+  BoundInfo info = {
+    .xMin = 0, .xMax = 100,
+    .yMin = 0, .yMax = 10,
+    .zMin = 0, .zMax = 10
+  };
+  mesh.boundInfo = info;
+
   Voxels vox = {
     .cubes = cubes,
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
-    .mesh = generateVoxelMesh(renderData),
+    .mesh = mesh,
     .texturePadding = texturePadding,
     .selectedVoxels = selectedVoxels
   };

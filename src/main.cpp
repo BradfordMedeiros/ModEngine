@@ -196,11 +196,6 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
 
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
 
-  // raycast voxels works relative to local model voxel space so if Voxel(X)  is voxels in X space
-  // we calculate voxel rasterization in Voxel(Model) but the voxels actually exist in Voxel(World)
-  // we could Voxel(Model) -> Voxel(World) but code for rasterization complex
-  // instead think Ray(Model), and currently it's Ray(World) so need transform(World -> Model)
-  
   Line line = {
     .fromPos = defaultCamera.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
@@ -215,6 +210,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
 
 
+  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
   auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
   if (collidedVoxels.size() > 0){

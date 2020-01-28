@@ -39,10 +39,15 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   };
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
-
   if (meshObj != NULL){
-    boundInfo = meshObj->mesh.boundInfo;
+    boundInfo = meshObj -> mesh.boundInfo;
   }
+
+  auto voxelObj = std::get_if<GameObjectVoxel>(&gameObjV);
+  if (voxelObj != NULL){
+    boundInfo = voxelObj -> voxel.mesh.boundInfo;
+  }
+
 
   PhysicsInfo info = {
     .boundInfo = boundInfo,
@@ -86,6 +91,7 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
   }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
     std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
 
+    assert(false);
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
       physicsInfo.gameobject.position,

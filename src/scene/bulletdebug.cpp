@@ -4,17 +4,13 @@ BulletDebugDrawer::BulletDebugDrawer(void(*drawLine)(glm::vec3 fromPos, glm::vec
   this -> setDebugMode(btIDebugDraw::DBG_DrawWireframe);
   this -> debugDrawLine = drawLine; 
 }
-BulletDebugDrawer::~BulletDebugDrawer(){
-
-}
+BulletDebugDrawer::~BulletDebugDrawer(){}
 
 
 void BulletDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor){
-  std::cout << "bullet debug drawer -- draw line" << std::endl;
   this -> debugDrawLine(btToGlm(from), btToGlm(to));
 }
 void BulletDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
-  std::cout << "bullet debug drawer -- draw line" << std::endl;
   this -> debugDrawLine(btToGlm(from), btToGlm(to));
 }
 void BulletDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color){
