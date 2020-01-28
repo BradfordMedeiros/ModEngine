@@ -91,8 +91,19 @@ VoxelRenderData generateRenderData(int numWidth, int numHeight, int numDepth, fl
   };
   return data;
 }
-Mesh generateVoxelMesh(VoxelRenderData& renderData){
-  return loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies);
+
+BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth){   
+  BoundInfo info = {
+    .xMin = 0, .xMax = 100,
+    .yMin = 0, .yMax = 10,
+    .zMin = 0, .zMax = 10
+  };
+  return info; 
+}
+Mesh generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth, VoxelRenderData& renderData){
+  Mesh mesh = loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies);
+  mesh.boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth);
+  return mesh;
 }
 
 Voxels createVoxels(int numWidth, int numHeight, int numDepth){
@@ -122,13 +133,7 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
 
   std::vector<VoxelAddress> selectedVoxels;
 
-  Mesh mesh = generateVoxelMesh(renderData);
-  BoundInfo info = {
-    .xMin = 0, .xMax = 100,
-    .yMin = 0, .yMax = 10,
-    .zMin = 0, .zMax = 10
-  };
-  mesh.boundInfo = info;
+  Mesh mesh = generateVoxelMesh(cubes, numWidth, numHeight, numDepth, renderData);
 
   Voxels vox = {
     .cubes = cubes,
