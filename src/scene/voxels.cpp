@@ -202,8 +202,6 @@ void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
   }
 }
 
-// This is effectively line drawing.  This has error, but I don't know if it matters
-// @todo this function sucks, is imprecise
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection){    
   float magnitudeLine = sqrt(chunk.numWidth * chunk.numWidth + chunk.numHeight * chunk.numHeight + chunk.numDepth * chunk.numDepth);
   glm::vec3 lineEnd = rayPosition + (rayDirection * magnitudeLine);
@@ -213,9 +211,6 @@ std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, gl
 
   std::vector<VoxelAddress> addresses;
 
-  int maxIterations = maxvalue(chunk.numWidth, chunk.numHeight, chunk.numDepth);   // hackey hackey see below
-  int numIterations = 0;
-
   float endWidth = chunk.numWidth;
   float endHeight = chunk.numHeight;
   float endDepth = chunk.numDepth;
@@ -224,9 +219,10 @@ std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, gl
   bool terminatesYLow = rayIncrement.y < 0;
   bool terminatesZLow = rayIncrement.z < 0;
 
-  while (
-    ((currentPosition.x < endWidth || terminatesXLow) && (currentPosition.y < endHeight || terminatesYLow) && (currentPosition.z < endDepth || terminatesZLow)) && 
-    ((currentPosition.x > 0 || !terminatesXLow) && (currentPosition.y > 0 || !terminatesYLow) && (currentPosition.z > 0 || !terminatesZLow))
+  while ( 
+    ((currentPosition.x < endWidth || terminatesXLow) &&  (currentPosition.x > 0 || !terminatesXLow)) ||
+    ((currentPosition.y < endHeight || terminatesYLow) && (currentPosition.y > 0 || !terminatesYLow)) || 
+    ((currentPosition.z < endDepth || terminatesZLow) && (currentPosition.z > 0 || !terminatesZLow))
   ){
     auto position = currentPosition;
     currentPosition.x += rayIncrement.x;
@@ -245,12 +241,6 @@ std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, gl
       };
       addresses.push_back(voxel);
     } 
-
-    
-    numIterations++;
-    if (numIterations > maxIterations){     // hackey code, happens because of negative ray directions that needs to be fixed
-      break;
-    }
   }
   return addresses;
 }

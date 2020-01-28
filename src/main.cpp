@@ -62,6 +62,7 @@ engineState state = getDefaultState(1920, 1080);
 World world;
 DynamicLoading dynamicLoading;
 std::vector<Line> lines;
+std::vector<Line> permaLines;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
@@ -194,7 +195,6 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   playSound();
 
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
-  std::cout << "ray direction" << print(rayDirection) << std::endl;
 
   // raycast voxels works relative to local model voxel space so if Voxel(X)  is voxels in X space
   // we calculate voxel rasterization in Voxel(Model) but the voxels actually exist in Voxel(World)
@@ -206,12 +206,16 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
  
-  lines.push_back(line);
+  permaLines.clear();
+  permaLines.push_back(line);
 
-  glm::vec4 positionModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, 1.f);
-  glm::vec4 rayDirectionModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(rayDirection.x, rayDirection.y, rayDirection.z, 1.f);
+  glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
+  glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
+  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
+  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
 
-  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, positionModelSpace, rayDirectionModelSpace);
+
+  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
   if (collidedVoxels.size() > 0){
     auto collision = collidedVoxels[0];
@@ -509,6 +513,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
+  drawLines(permaLines);
   drawLines(lines);
   lines.clear();
 }
