@@ -92,11 +92,45 @@ VoxelRenderData generateRenderData(int numWidth, int numHeight, int numDepth, fl
   return data;
 }
 
-BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth){   
+BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth){  
+  float xMin = 0;
+  float xMax = 0;
+  float yMin = 0;
+  float yMax = 0;
+  float zMin = 0;
+  float zMax = 0;
+
+  for (int x = 0; x < cubes.size(); x++){
+    for (int y = 0; y < cubes.at(0).size(); y++){
+      for (int z = 0; z < cubes.at(0).at(0).size(); z++){
+        int value = cubes.at(x).at(y).at(z);
+        if (value != 0){
+          if (x < xMin){
+            xMin = x;
+          }
+          if (x > xMax){
+            xMax = x;
+          }
+          if (y < yMin){
+            yMin = y;
+          }
+          if (y > yMax){
+            yMax = y;
+          }
+          if (z < zMin){
+            zMin = z;
+          }
+          if (z > zMax){
+            zMax = z;
+          }
+        }
+      }
+    }
+  }
   BoundInfo info = {
-    .xMin = 0, .xMax = 100,
-    .yMin = 0, .yMax = 10,
-    .zMin = 0, .zMax = 10
+    .xMin = xMin, .xMax = xMax,
+    .yMin = yMin, .yMax = yMax,
+    .zMin = zMin, .zMax = zMax
   };
   return info; 
 }
@@ -106,7 +140,7 @@ Mesh generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int nu
   return mesh;
 }
 
-Voxels createVoxels(int numWidth, int numHeight, int numDepth){
+Voxels createVoxels(int numWidth, int numHeight, int numDepth, std::function<void()> onVoxelBoundInfoChanged){
   std::vector<std::vector<std::vector<int>>> cubes;         // @TODO this initialization could be done faster 
 
   for (int row = 0; row < numWidth; row++){
@@ -142,8 +176,10 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth){
     .numDepth = numDepth,
     .mesh = mesh,
     .texturePadding = texturePadding,
-    .selectedVoxels = selectedVoxels
+    .selectedVoxels = selectedVoxels,
+    .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged
   };
+  addVoxel(vox, 0, 0, 0, false);
   return vox;
 }
 
@@ -195,19 +231,25 @@ void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int tex
   }
 }
 
-void addVoxel(Voxels& chunk, int x, int y, int z){    
+void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged){    
   chunk.cubes.at(x).at(y).at(z) = 1;
   applyTextureToCube(chunk, x, y, z, 1);
+  chunk.mesh.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
+  if (callOnChanged){
+    chunk.onVoxelBoundInfoChanged();
+  }
 }
 void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
   for (auto voxel: voxels){
-    chunk.cubes.at(voxel.x).at(voxel.y).at(voxel.z) = 1;
+    addVoxel(chunk, voxel.x, voxel.y, voxel.z);
   }
 }
 
 void removeVoxel(Voxels& chunk, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
   applyTextureToCube(chunk, x, y, z, 0);
+  chunk.mesh.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
+  chunk.onVoxelBoundInfoChanged();
 }
 
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){

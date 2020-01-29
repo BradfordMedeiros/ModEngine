@@ -35,9 +35,9 @@ GameObjectLight createLight(){
   GameObjectLight obj {};
   return obj;
 }
-GameObjectVoxel createVoxel(){
-  auto voxel = createVoxels(100, 5, 100);
-  addVoxel(voxel, 0, 0, 0);
+
+GameObjectVoxel createVoxel(std::function<void()> onVoxelBoundInfoChanged){
+  auto voxel = createVoxels(100, 5, 100, onVoxelBoundInfoChanged);
   GameObjectVoxel obj {
     .voxel = voxel,
   };
@@ -51,7 +51,8 @@ void addObject(
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
-  std::function<void(std::string)> ensureMeshLoaded
+  std::function<void(std::string)> ensureMeshLoaded,
+  std::function<void()> onVoxelBoundInfoChanged
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded);
@@ -60,7 +61,7 @@ void addObject(
   }else if (objectType == "light"){
     mapping[id] = createLight();
   }else if (objectType == "voxel"){
-    mapping[id] = createVoxel();
+    mapping[id] = createVoxel(onVoxelBoundInfoChanged);
   }
   else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;

@@ -5,6 +5,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <functional>
 #include "./common/mesh.h"
 #include "../common/util.h"
 
@@ -25,6 +26,7 @@ struct Voxels {
   Mesh mesh;
   float texturePadding;
   std::vector<VoxelAddress> selectedVoxels;
+  std::function<void()> onVoxelBoundInfoChanged;
 };
 
 struct VoxelRenderData {
@@ -33,8 +35,8 @@ struct VoxelRenderData {
   std::string textureFilePath;
 };
 
-Voxels createVoxels(int numWidth, int numHeight, int numDepth);
-void addVoxel(Voxels& chunk, int x, int y, int z);
+Voxels createVoxels(int numWidth, int numHeight, int numDepth, std::function<void()> onVoxelBoundInfoChanged);
+void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged = true);
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId);
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection);

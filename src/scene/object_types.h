@@ -62,7 +62,8 @@ void addObject(
   std::map<std::string, std::string> additionalFields,
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
-  std::function<void(std::string)> ensureMeshLoaded
+  std::function<void(std::string)> ensureMeshLoaded,
+  std::function<void()> onVoxelBoundInfoChanged
 );
 
 void removeObject(std::map<short, GameObjectObj>& mapping, short id);

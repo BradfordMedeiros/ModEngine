@@ -109,8 +109,11 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
   world.rigidbodys[id] = rigidBody;
 }
 
-// @todo - this currently adds a physics body for every single object 
-// no good, this should only add if enabled. 
+void updatePhysicsBody(World& world, FullScene& scene, short id){
+ // std::cout << "todo to update physics body for id " << id << std::endl;
+}
+
+// @todo - this currently adds a physics body for every single object, probably should default to this not being the case (I think)
 void addPhysicsBodies(World& world, FullScene& fullscene){
   for (auto &[id, _] : fullscene.scene.idToGameObjects){
     addPhysicsBody(world, fullscene, id);
@@ -148,20 +151,18 @@ short getSceneId(){
   sceneId++;
   return sceneId;
 }
-//////////////////// 
 
-// @TODO scene deserialization is all messy.  Fix this this is bullshit. 
-// Addobject gets called multiple times.  Should be okay, but more work than necessary. bullshit!
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
   auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::map<std::string, std::string> additionalFields) -> void {
-    std::cout << "add object called for (" << type << ")" << std::endl;
-    for (auto [attribute, value] : additionalFields){
-      std::cout << "(" << attribute << "," << value << ")" << std::endl;
-    }
     world.idToScene[id] = sceneId;
-    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
-      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");     // @todo protect against loading this mesh many times. 
-    });
+    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
+      [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
+        world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");     // @todo protect against loading this mesh many times. 
+      }, 
+      [&world, sceneId, id]() -> void {
+        updatePhysicsBody(world, world.scenes.at(sceneId), id);
+      }
+    );
   };
   
   Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields, getObjectId);
