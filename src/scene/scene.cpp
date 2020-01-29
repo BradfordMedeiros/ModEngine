@@ -61,7 +61,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
 void addPhysicsBody(World& world, FullScene& fullscene, short id){
   auto obj = fullscene.scene.idToGameObjects.at(id);
   auto physicsInfo = getPhysicsInfoForGameObject(world, fullscene, id);
-  printPhysicsInfo(physicsInfo);
 
   auto physicsOptions = obj.physicsOptions;
   btRigidBody* rigidBody = NULL;
@@ -108,9 +107,16 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
   assert(rigidBody != NULL);
   world.rigidbodys[id] = rigidBody;
 }
+void rmRigidBody(World& world, short id){
+  auto rigidBodyPtr = world.rigidbodys.at(id);
+  assert(rigidBodyPtr != NULL);
+  rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
+  world.rigidbodys.erase(id);
+}
 
 void updatePhysicsBody(World& world, FullScene& scene, short id){
- // std::cout << "todo to update physics body for id " << id << std::endl;
+  rmRigidBody(world, id);
+  addPhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id);
 }
 
 // @todo - this currently adds a physics body for every single object, probably should default to this not being the case (I think)
