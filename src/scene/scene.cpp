@@ -36,6 +36,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
     .yMax = 1,
     .zMin = -1,
     .zMax = 1,
+    .isNotCentered = false,
   };
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
@@ -52,7 +53,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .gameobject = obj,
-    .collisionInfo =  getScaledCollisionBounds(boundInfo, obj.scale),
+    .collisionInfo =  getScaledCollisionBounds(boundInfo, obj.scale)
   };
 
   return info;
@@ -68,14 +69,15 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
   GameObjectObj& toRender = world.objectMapping.at(id);
   bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
   if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
-    std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY" << std::endl;
+    std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
       physicsInfo.gameobject.position, 
       physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
       physicsInfo.gameobject.rotation,
       physicsOptions.isStatic,
-      physicsOptions.hasCollisions
+      physicsOptions.hasCollisions,
+      !physicsInfo.boundInfo.isNotCentered
     );
   }else if (physicsOptions.shape == SPHERE){
     std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
@@ -84,8 +86,7 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
       physicsInfo.gameobject.position,
       maxvalue(physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z),                             
       physicsInfo.gameobject.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions
+      physicsOptions.isStatic
     );
   }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
     std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;

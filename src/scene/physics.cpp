@@ -56,7 +56,18 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
 
   return body;
 }
-btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision){
+btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision, bool isCentered){
+  if (!isCentered){
+    btCompoundShape* shape = new btCompoundShape();
+    btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(width / 2.f), btScalar(height / 2.f), btScalar(depth / 2.f)));
+    btTransform position;
+    position.setIdentity();
+    position.setOrigin(btVector3(width / 2.f, height / 2.f, depth / 2.f));
+    shape -> addChildShape(position, cshape1);
+    shape -> setLocalScaling(btVector3(1, 1, 1));
+    return createRigidBody(pos, shape, rot, isStatic, hasCollision);
+  }
+
   btCollisionShape* shape = new btBoxShape(btVector3(btScalar(1.f / 2 ), btScalar(1.f / 2), btScalar(1.f / 2)));
   shape -> setLocalScaling(btVector3(width, height, depth));
   return createRigidBody(pos, shape, rot, isStatic, hasCollision);
@@ -71,6 +82,7 @@ btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vec
   for (auto body: bodies){
     btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(body.scale.x / 2 ), btScalar(body.scale.y / 2), btScalar(body.scale.z / 2)));
     btTransform position;
+    position.setIdentity();
     position.setOrigin(glmToBt(body.position));
     shape -> addChildShape(position, cshape1);
   }
@@ -95,8 +107,8 @@ void cleanupRigidBody(btRigidBody* body){
   delete body;
 }
 
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision){  
-  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered){  
+  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision, isCentered);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }

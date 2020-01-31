@@ -24,7 +24,7 @@ physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectL
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision = true);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered);
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision = true);
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision = true);
 void rmRigidBody(physicsEnv& env, btRigidBody* body);

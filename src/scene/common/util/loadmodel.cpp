@@ -37,6 +37,7 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
     .xMin = xMin, .xMax = xMax,
     .yMin = yMin, .yMax = yMax,
     .zMin = zMin, .zMax = zMax,
+    .isNotCentered = false
   };
   return info;
 }

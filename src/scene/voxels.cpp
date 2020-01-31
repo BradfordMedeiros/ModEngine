@@ -108,20 +108,20 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
           if (x < xMin){
             xMin = x;
           }
-          if (x > xMax){
-            xMax = x;
+          if ((x + 1) > xMax){
+            xMax = (x + 1);
           }
           if (y < yMin){
             yMin = y;
           }
-          if (y > yMax){
-            yMax = y;
+          if ((y + 1) > yMax){
+            yMax = (y + 1);
           }
           if (z < zMin){
             zMin = z;
           }
-          if (z > zMax){
-            zMax = z;
+          if ((z + 1) > zMax){
+            zMax = (z + 1);
           }
         }
       }
@@ -130,7 +130,8 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
   BoundInfo info = {
     .xMin = xMin, .xMax = xMax,
     .yMin = yMin, .yMax = yMax,
-    .zMin = zMin, .zMax = zMax
+    .zMin = zMin, .zMax = zMax,
+    .isNotCentered = true
   };
   return info; 
 }
