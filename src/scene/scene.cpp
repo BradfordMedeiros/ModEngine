@@ -53,13 +53,13 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .gameobject = obj,
-    .collisionInfo =  getScaledCollisionBounds(boundInfo, obj.scale)
+    .collisionInfo =  obj.scale
   };
 
   return info;
 }
 
-void addPhysicsBody(World& world, FullScene& fullscene, short id){
+void addPhysicsBody(World& world, FullScene& fullscene, short id, glm::vec3 initialScale){
   auto obj = fullscene.scene.idToGameObjects.at(id);
   auto physicsInfo = getPhysicsInfoForGameObject(world, fullscene, id);
 
@@ -73,20 +73,23 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
       physicsInfo.gameobject.position, 
-      physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z,
+      (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
       physicsInfo.gameobject.rotation,
       physicsOptions.isStatic,
       physicsOptions.hasCollisions,
-      !physicsInfo.boundInfo.isNotCentered
+      !physicsInfo.boundInfo.isNotCentered,
+      physicsInfo.collisionInfo
     );
   }else if (physicsOptions.shape == SPHERE){
     std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
       physicsInfo.gameobject.position,
-      maxvalue(physicsInfo.collisionInfo.x, physicsInfo.collisionInfo.y, physicsInfo.collisionInfo.z),                             
+      maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
       physicsInfo.gameobject.rotation,
-      physicsOptions.isStatic
+      physicsOptions.isStatic,
+      physicsOptions.hasCollisions,
+      physicsInfo.collisionInfo
     );
   }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
     std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
@@ -96,7 +99,8 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
       physicsInfo.gameobject.rotation,
       getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
       physicsOptions.isStatic,
-      physicsOptions.hasCollisions
+      physicsOptions.hasCollisions,
+      initialScale
     );
   }
 
@@ -111,14 +115,16 @@ void rmRigidBody(World& world, short id){
 }
 
 void updatePhysicsBody(World& world, FullScene& scene, short id){
+  auto rigidBody = world.rigidbodys.at(id);
+  glm::vec3 oldScale = getScale(rigidBody);
   rmRigidBody(world, id);
-  addPhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id);
+  addPhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id, oldScale);
 }
 
 // @todo - this currently adds a physics body for every single object, probably should default to this not being the case (I think)
 void addPhysicsBodies(World& world, FullScene& fullscene){
   for (auto &[id, _] : fullscene.scene.idToGameObjects){
-    addPhysicsBody(world, fullscene, id);
+    addPhysicsBody(world, fullscene, id, glm::vec3(1.f, 1.f, 1.f));
   }
 }
 

@@ -37,7 +37,7 @@ GameObjectLight createLight(){
 }
 
 GameObjectVoxel createVoxel(std::function<void()> onVoxelBoundInfoChanged){
-  auto voxel = createVoxels(2, 2, 2, onVoxelBoundInfoChanged);
+  auto voxel = createVoxels(10, 4, 10, onVoxelBoundInfoChanged);
   GameObjectVoxel obj {
     .voxel = voxel,
   };

@@ -28,7 +28,7 @@ physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectL
   return env;
 }
 
-btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat rot, bool isStatic, bool hasCollision){
+btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling){
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(glmToBt(pos));   
@@ -41,6 +41,7 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
   if (!isStatic){
     shape -> calculateLocalInertia(mass, inertia);
   }
+  shape -> setLocalScaling(glmToBt(scaling));
 
   auto constructionInfo = btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
   constructionInfo.m_friction = 1.0f;
@@ -56,7 +57,7 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
 
   return body;
 }
-btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision, bool isCentered){
+btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling){
   if (!isCentered){
     btCompoundShape* shape = new btCompoundShape();
     btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(width / 2.f), btScalar(height / 2.f), btScalar(depth / 2.f)));
@@ -66,19 +67,17 @@ btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float
     position.setOrigin(btVector3(width / 2.f, height / 2.f, depth / 2.f));
     shape -> addChildShape(position, cshape1);
     shape -> setLocalScaling(btVector3(1, 1, 1));
-    return createRigidBody(pos, shape, rot, isStatic, hasCollision);
+    return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling);
   }
 
-  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(1.f / 2 ), btScalar(1.f / 2), btScalar(1.f / 2)));
-  shape -> setLocalScaling(btVector3(width, height, depth));
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision);
+  btCollisionShape* shape = new btBoxShape(btVector3(btScalar(width * 1.f / 2 ), btScalar(height * 1.f / 2), btScalar(depth * 1.f / 2)));
+  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling);
 }
-btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, bool isStatic, bool hasCollision){
-  btCollisionShape* shape = new btSphereShape(1);
-  shape -> setLocalScaling(btVector3(radius, radius, radius));
-  return createRigidBody(pos, shape, rot, isStatic, hasCollision);
+btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling){
+  btCollisionShape* shape = new btSphereShape(radius); 
+  return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling);
 }
-btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision){
+btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling){
   btCompoundShape* shape = new btCompoundShape();
   for (auto body: bodies){
     btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
@@ -87,8 +86,7 @@ btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vec
     position.setOrigin(glmToBt(body.position + glm::vec3(0.5f, 0.5f, 0.5f)));
     shape -> addChildShape(position, cshape1);
   }
-  shape -> setLocalScaling(btVector3(1, 1, 1));
-  return createRigidBody(pos, shape, rotation, isStatic, hasCollision);
+  return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling);
 }
 
 void cleanupRigidBody(btRigidBody* body){
@@ -108,18 +106,18 @@ void cleanupRigidBody(btRigidBody* body){
   delete body;
 }
 
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered){  
-  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision, isCentered);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling){  
+  auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision, isCentered, scaling);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision){
-  auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling){
+  auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision, scaling);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
-btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision){
-  auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision);
+btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling){
+  auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision, scaling);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   return rigidBodyPtr;
 }
@@ -157,6 +155,9 @@ void setRotation(btRigidBody* body, glm::quat rotation){
 }
 void setScale(btRigidBody* body, float width, float height, float depth){
   body -> getCollisionShape() -> setLocalScaling(btVector3(width, height, depth));
+}
+glm::vec3 getScale(btRigidBody* body){
+  return btToGlm(body -> getCollisionShape() -> getLocalScaling());
 }
     
 void checkCollisions(physicsEnv& env){   
