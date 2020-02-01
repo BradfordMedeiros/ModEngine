@@ -90,8 +90,6 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
     );
   }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
     std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
-
-    assert(false);
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
       physicsInfo.gameobject.position,
@@ -100,9 +98,6 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id){
       physicsOptions.isStatic,
       physicsOptions.hasCollisions
     );
-  }else{
-    std::cerr << "CRITICAL ERROR: default case for physics shape type" << std::endl;
-    exit(1);
   }
 
   assert(rigidBody != NULL);
