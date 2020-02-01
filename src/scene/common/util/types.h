@@ -10,7 +10,6 @@ struct Line {
 
 struct VoxelBody {
   glm::vec3 position;
-  glm::vec3 scale;
 };
 
 #endif

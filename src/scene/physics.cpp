@@ -60,6 +60,7 @@ btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float
   if (!isCentered){
     btCompoundShape* shape = new btCompoundShape();
     btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(width / 2.f), btScalar(height / 2.f), btScalar(depth / 2.f)));
+    cshape1 -> setLocalScaling(btVector3(1, 1, 1));
     btTransform position;
     position.setIdentity();
     position.setOrigin(btVector3(width / 2.f, height / 2.f, depth / 2.f));
@@ -80,10 +81,10 @@ btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, b
 btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision){
   btCompoundShape* shape = new btCompoundShape();
   for (auto body: bodies){
-    btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(body.scale.x / 2 ), btScalar(body.scale.y / 2), btScalar(body.scale.z / 2)));
+    btCollisionShape* cshape1 = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
     btTransform position;
     position.setIdentity();
-    position.setOrigin(glmToBt(body.position));
+    position.setOrigin(glmToBt(body.position + glm::vec3(0.5f, 0.5f, 0.5f)));
     shape -> addChildShape(position, cshape1);
   }
   shape -> setLocalScaling(btVector3(1, 1, 1));

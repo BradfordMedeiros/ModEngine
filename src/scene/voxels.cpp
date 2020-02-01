@@ -367,7 +367,6 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
         if (voxels.cubes.at(x).at(y).at(z) == 1){
           VoxelBody body = {
             .position = glm::vec3(x, y, z),
-            .scale = glm::vec3(1.f, 1.f, 1.f),
           };
           bodies.push_back(body);
         }
