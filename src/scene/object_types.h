@@ -49,7 +49,7 @@ static Field light = {
 static Field voxelField = {
   .prefix = ']',
   .type = "voxel",
-  .additionalFields = { },
+  .additionalFields = { "from" },
 };
 
 static std::vector fields = { obj, camera, light, voxelField };

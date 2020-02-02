@@ -141,8 +141,47 @@ Mesh generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int nu
   return mesh;
 }
 
-Voxels createVoxels(int numWidth, int numHeight, int numDepth, std::function<void()> onVoxelBoundInfoChanged){
-  std::vector<std::vector<std::vector<int>>> cubes;         // @TODO this initialization could be done faster 
+Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged){
+  int numWidth = initialState.numWidth;
+  int numHeight = initialState.numHeight;
+  int numDepth = initialState.numDepth;
+  auto cubes = initialState.cubes;
+
+  float texturePadding = TEXTURE_PADDING_PERCENT;
+  VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
+
+  std::vector<VoxelAddress> selectedVoxels;
+  Mesh mesh = generateVoxelMesh(cubes, numWidth, numHeight, numDepth, renderData);
+
+  Voxels vox = {
+    .cubes = cubes,
+    .numWidth = numWidth,
+    .numHeight = numHeight,
+    .numDepth = numDepth,
+    .mesh = mesh,
+    .texturePadding = texturePadding,
+    .selectedVoxels = selectedVoxels,
+    .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged
+  };
+
+  for (int row = 0; row < numWidth; row++){
+    for (int col = 0; col < numHeight; col++){
+      for (int depth = 0; depth < numDepth; depth++){
+        auto value = cubes.at(row).at(col).at(depth);
+        if (value != 0){
+          addVoxel(vox, row, col, depth, false);
+        }
+      }
+    }
+  }
+  return vox;
+}
+VoxelState parseVoxelState(std::string voxelState){
+  std::vector<std::vector<std::vector<int>>> cubes;
+
+  int numWidth = 5;
+  int numHeight = 5;
+  int numDepth = 2;
 
   for (int row = 0; row < numWidth; row++){
     std::vector<std::vector<int>> cubestack;
@@ -156,32 +195,16 @@ Voxels createVoxels(int numWidth, int numHeight, int numDepth, std::function<voi
     cubes.push_back(cubestack);
   }
 
-  VoxelAddress address = {
-    .x = 0,
-    .y = 0,
-    .z = 0,
-    .face = 0,
-  };
+  cubes.at(0).at(0).at(0) = 1;
+  cubes.at(0).at(0).at(1) = 1;
 
-  float texturePadding = TEXTURE_PADDING_PERCENT;
-  VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
-
-  std::vector<VoxelAddress> selectedVoxels;
-
-  Mesh mesh = generateVoxelMesh(cubes, numWidth, numHeight, numDepth, renderData);
-
-  Voxels vox = {
-    .cubes = cubes,
+  VoxelState state {
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
-    .mesh = mesh,
-    .texturePadding = texturePadding,
-    .selectedVoxels = selectedVoxels,
-    .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged
+    .cubes = cubes
   };
-  addVoxel(vox, 0, 0, 0, false);
-  return vox;
+  return state;
 }
 
 int getVoxelLinearIndex (Voxels& voxels, int x, int y, int z){
