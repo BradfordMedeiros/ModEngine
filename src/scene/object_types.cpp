@@ -37,7 +37,7 @@ GameObjectLight createLight(){
 }
 
 GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged){
-  auto voxel = createVoxels(parseVoxelState("2|2|2|11000022"), onVoxelBoundInfoChanged);
+  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged);
   GameObjectVoxel obj {
     .voxel = voxel,
   };

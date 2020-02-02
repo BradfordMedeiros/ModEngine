@@ -179,24 +179,31 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
 VoxelState parseVoxelState(std::string voxelState){
   std::vector<std::vector<std::vector<int>>> cubes;
 
-  int numWidth = 5;
-  int numHeight = 5;
-  int numDepth = 2;
+  auto voxelStrings = split(voxelState, '|');
+  int numWidth = std::stoi(voxelStrings.at(0));
+  int numHeight = std::stoi(voxelStrings.at(1));
+  int numDepth = std::stoi(voxelStrings.at(2));
+  std::string voxelData = voxelStrings.at(3);
+  assert(voxelData.size() == (numWidth * numHeight * numDepth));
+
+  std::vector<int> textureValues;
+  for (char textureData : voxelData){
+    textureValues.push_back(atoi(&textureData));
+  }
 
   for (int row = 0; row < numWidth; row++){
     std::vector<std::vector<int>> cubestack;
     for (int col = 0; col < numHeight; col++){
       std::vector<int> cuberow;
       for (int depth = 0; depth < numDepth; depth++){
-        cuberow.push_back(0);
+        auto flattenedIndex = (row * numHeight * numDepth) + (col * numDepth) + depth;  
+        auto value = textureValues.at(flattenedIndex);
+        cuberow.push_back(value == 0 ? 0 : 1);
       }
       cubestack.push_back(cuberow);
     }
     cubes.push_back(cubestack);
   }
-
-  cubes.at(0).at(0).at(0) = 1;
-  cubes.at(0).at(0).at(1) = 1;
 
   VoxelState state {
     .numWidth = numWidth,
