@@ -5,6 +5,7 @@
 Mesh loadMesh(std::string modelPath, std::string defaultTexture){
   std::vector<ModelData> models = loadModel(modelPath);
   
+  assert(models.size() == 1);
   ModelData model = models[0];
 
   unsigned int VAO;
