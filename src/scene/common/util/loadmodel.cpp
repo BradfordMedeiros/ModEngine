@@ -49,7 +49,7 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
      Vertex vertex;
      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);  
 
      // load one layer of texture coordinates for now
      if (!mesh->mTextureCoords[0]){
@@ -102,7 +102,7 @@ void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std:
 // Should have parent/child relations and a hierarchy but todo.
 std::vector<ModelData> loadModel(std::string modelPath){
    Assimp::Importer import;
-   const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate);
+   const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
    if (!scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
       std::cerr << "error loading model" << std::endl;
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist?");
