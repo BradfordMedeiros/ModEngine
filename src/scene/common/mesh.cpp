@@ -138,7 +138,7 @@ Texture loadTexture(std::string textureFilePath){
   
   unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
   if (!data){
-    throw std::runtime_error("failed loading texture " + textureFilePath);
+    throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
   }
   
   GLint format = GL_RGB;
