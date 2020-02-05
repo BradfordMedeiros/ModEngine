@@ -51,6 +51,16 @@ void processAnimations(const aiScene* scene){
     std::cout << "ticks per seconds: " << animation -> mTicksPerSecond << std::endl;
     std::cout << "duration is: " << animation -> mDuration << std::endl;
 
+    for (int j = 0; j < animation -> mNumChannels; j++){
+      // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
+      // http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
+
+      // what about mesh animations ? http://assimp.sourceforge.net/lib_html/structai_mesh_anim.html
+      // I think that's not skeletal animation, but rather a bunch of meshes, but im not sure need to check
+      aiNodeAnim* aiAnimation = animation-> mChannels[j];  
+
+    }
+
   }
 }
 void processBones(aiMesh* mesh){
