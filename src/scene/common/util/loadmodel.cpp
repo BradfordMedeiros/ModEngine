@@ -42,6 +42,38 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   return info;
 }
 
+void processAnimations(const aiScene* scene){
+  int numAnimations = scene -> mNumAnimations;
+  std::cout << "num animations: " << numAnimations << std::endl;
+  for (int i = 0; i < numAnimations; i++){
+    aiAnimation* animation = scene -> mAnimations[i];
+    std::cout << "animation name is: " << animation -> mName.C_Str() << std::endl;
+    std::cout << "ticks per seconds: " << animation -> mTicksPerSecond << std::endl;
+    std::cout << "duration is: " << animation -> mDuration << std::endl;
+
+  }
+}
+void processBones(aiMesh* mesh){
+  int numBones = mesh -> mNumBones;
+  aiBone** bones = mesh -> mBones;
+  for (int i = 0; i < numBones; i++){
+    aiBone* bone = bones[i];
+    std::cout << "bone name is: " << bone -> mName.C_Str() << std::endl;
+
+    int numVerticesInBone = bone -> mNumWeights;
+    std::cout << "num verts is: " << numVerticesInBone << std::endl;
+
+    for (int j = 0; j < numVerticesInBone; j++){
+      aiVertexWeight weight = bone -> mWeights[j];
+      std::cout << "vertex id: " << weight.mVertexId << ", weight: " << weight.mWeight << std::endl;
+      auto offsetMatrix = bone -> mOffsetMatrix[j];   // wtf is this i dont get it
+    } 
+  }
+
+
+  std::cout << "num bones: " << numBones << std::endl;
+}
+
 ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
@@ -67,7 +99,7 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
    }
 
    // Eventually this should support more than just diffuse maps.
-   aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+   aiMaterial* material = scene->mMaterials[mesh -> mMaterialIndex];
    
    std::vector<std::string> textureFilepaths;
    for (unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++){
@@ -77,6 +109,8 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
      std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
      textureFilepaths.push_back(relativePath.string());  
    }
+
+   processBones(mesh);
 
    ModelData model = {
      .vertices = vertices,
@@ -109,6 +143,8 @@ std::vector<ModelData> loadModel(std::string modelPath){
    } 
 
    std::vector<ModelData> models;
+
+   processAnimations(scene);
    processNode(scene->mRootNode, scene, modelPath, [&models](ModelData meshdata) -> void {
      models.push_back(meshdata);
    });
