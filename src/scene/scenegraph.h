@@ -12,12 +12,16 @@
 #include "../common/util.h"
 #include "./serialization.h"
 
-struct GameObject {
-  short id;
-  std::string name;
+struct Transformation {
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;
+};
+
+struct GameObject {
+  short id;
+  std::string name;
+  Transformation transformation;
   physicsOpts physicsOptions;
 };
 struct GameObjectH {
@@ -32,8 +36,6 @@ struct Scene {
   std::map<short, GameObjectH> idToGameObjectsH;
   std::map<std::string, short> nameToId;
 };
-
-
 
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
 Scene deserializeScene(
@@ -50,6 +52,8 @@ void addObjectToScene(
   short (*getNewObjectId)(), 
   std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
 );
+
+void addSubsceneToRoot(std::pair<short, short> parentToChildPairs, std::pair<short, Transformation>);
 
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);

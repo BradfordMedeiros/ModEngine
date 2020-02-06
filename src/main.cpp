@@ -40,9 +40,11 @@ GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
   .name = "defaultCamera",
-  .position = glm::vec3(0.f, -2.f, 0.f),
-  .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-  .rotation = glm::quat(0, 1, 0, 0.0f),
+  .transformation = Transformation {
+    .position = glm::vec3(0.f, -2.f, 0.f),
+    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
+    .rotation = glm::quat(0, 1, 0, 0.0f),
+  }
 };
 
 bool showDebugInfo = false;
@@ -138,10 +140,10 @@ void nextCamera(){
   std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
 void moveCamera(glm::vec3 offset){
-  defaultCamera.position = moveRelative(defaultCamera.position, defaultCamera.rotation, glm::vec3(offset));
+  defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset));
 }
 void rotateCamera(float xoffset, float yoffset){
-  defaultCamera.rotation = setFrontDelta(defaultCamera.rotation, xoffset, yoffset, 0, 1);
+  defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 1);
 }
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
@@ -197,7 +199,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
 
   Line line = {
-    .fromPos = defaultCamera.position,
+    .fromPos = defaultCamera.transformation.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
  
@@ -248,11 +250,11 @@ void processManipulator(){
     auto sceneId = world.idToScene.at(state.selectedIndex);
     auto selectObject = world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex);
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(world, world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(world, world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -335,7 +337,7 @@ void setObjectDimensions(short index, float width, float height, float depth){
     auto newScale = getScaleEquivalent(meshObj->mesh.boundInfo, width, height, depth);
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
     auto sceneId = world.idToScene.at(state.selectedIndex);
-    world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).scale = newScale;
+    world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).transformation.scale = newScale;
   } 
 }
 
@@ -367,7 +369,7 @@ std::string getGameObjectName(short index){
 }
 glm::vec3 getGameObjectPosition(short index){
   auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).position;
+  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation.position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
   auto sceneId = world.idToScene.at(index);
@@ -379,7 +381,7 @@ void setGameObjectRotation(short index, glm::quat rotation){
 }
 glm::quat getGameObjectRotation(short index){
   auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).rotation;
+  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation.rotation;
 }
 short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   for (int i = 0; i < world.scenes.size(); i++){
@@ -450,13 +452,13 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
 
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.position));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.transformation.position));
   glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
 
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
-    glm::vec3 position = lights.at(i) -> position;
+    glm::vec3 position = lights.at(i) -> transformation.position;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
@@ -548,15 +550,15 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       manipulatorAxisString = "noaxis";
     }
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
-    drawText("position: " + print(defaultCamera.position), 10, 60, 3);
+    drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
     drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
     drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 80, 3);
   
     if (state.selectedIndex != -1){
       auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).scene.idToGameObjects.at(state.selectedIndex);
-      drawText("position: " + print(obj.position), 10, 90, 3);
-      drawText("scale: " + print(obj.scale), 10, 100, 3);
-      drawText("rotation: " + print(obj.rotation), 10, 110, 3);
+      drawText("position: " + print(obj.transformation.position), 10, 90, 3);
+      drawText("scale: " + print(obj.transformation.scale), 10, 100, 3);
+      drawText("rotation: " + print(obj.transformation.rotation), 10, 110, 3);
     }
   }
 }
@@ -802,9 +804,9 @@ int main(int argc, char* argv[]){
     }
 
     if (state.useDefaultCamera || activeCameraObj == NULL){
-      view = renderView(defaultCamera.position, defaultCamera.rotation);
+      view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
     }else{
-      view = renderView(activeCameraObj->position, activeCameraObj->rotation);   // this is position incorrect because this needs to traverse the object hierachy
+      view = renderView(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation);   // this is position incorrect because this needs to traverse the object hierachy
     }
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
 
@@ -823,7 +825,7 @@ int main(int argc, char* argv[]){
     // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
 
     assert(lights.size() > 0);   // temporary assertion 
-    auto lightView = renderView(lights.at(0) -> position, lights.at(0) -> rotation);
+    auto lightView = renderView(lights.at(0) -> transformation.position, lights.at(0) -> transformation.rotation);
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
@@ -858,7 +860,7 @@ int main(int argc, char* argv[]){
         
 
     if (useChunkingSystem){
-      handleChunkLoading(dynamicLoading, defaultCamera.position.x, defaultCamera.position.y, defaultCamera.position.z, loadScene, unloadScene);
+      handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
     if (enablePhysics){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 

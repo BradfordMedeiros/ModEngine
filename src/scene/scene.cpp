@@ -5,7 +5,7 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
   std::cout << "y: [ " << info.yMin << ", " << info.yMax << "]" << std::endl;
   std::cout << "z: [ " << info.zMin << ", " << info.zMax << "]" << std::endl;
-  std::cout << "pos: (" << physicsInfo.gameobject.position.x << ", " << physicsInfo.gameobject.position.y << ", " << physicsInfo.gameobject.position.z << ")" << std::endl;
+  std::cout << "pos: (" << physicsInfo.gameobject.transformation.position.x << ", " << physicsInfo.gameobject.transformation.position.y << ", " << physicsInfo.gameobject.transformation.position.z << ")" << std::endl;
   std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
 }
 
@@ -53,7 +53,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .gameobject = obj,
-    .collisionInfo =  obj.scale
+    .collisionInfo =  obj.transformation.scale
   };
 
   return info;
@@ -72,9 +72,9 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id, glm::vec3 init
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
-      physicsInfo.gameobject.position, 
+      physicsInfo.gameobject.transformation.position, 
       (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
-      physicsInfo.gameobject.rotation,
+      physicsInfo.gameobject.transformation.rotation,
       physicsOptions.isStatic,
       physicsOptions.hasCollisions,
       !physicsInfo.boundInfo.isNotCentered,
@@ -84,9 +84,9 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id, glm::vec3 init
     std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
-      physicsInfo.gameobject.position,
+      physicsInfo.gameobject.transformation.position,
       maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
-      physicsInfo.gameobject.rotation,
+      physicsInfo.gameobject.transformation.rotation,
       physicsOptions.isStatic,
       physicsOptions.hasCollisions,
       physicsInfo.collisionInfo
@@ -95,8 +95,8 @@ void addPhysicsBody(World& world, FullScene& fullscene, short id, glm::vec3 init
     std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
     rigidBody = addRigidBody(
       world.physicsEnvironment, 
-      physicsInfo.gameobject.position,
-      physicsInfo.gameobject.rotation,
+      physicsInfo.gameobject.transformation.position,
+      physicsInfo.gameobject.transformation.rotation,
       getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
       physicsOptions.isStatic,
       physicsOptions.hasCollisions,
@@ -232,51 +232,51 @@ void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y,
   glm::vec3 newPosition;
   if (moveRelativeEnabled){
     auto oldGameObject = fullscene.scene.idToGameObjects.at(index);
-    newPosition= moveRelative(oldGameObject.position, oldGameObject.rotation, offset);
+    newPosition= moveRelative(oldGameObject.transformation.position, oldGameObject.transformation.rotation, offset);
   }else{
-    newPosition = move(fullscene.scene.idToGameObjects.at(index).position, offset);   
+    newPosition = move(fullscene.scene.idToGameObjects.at(index).transformation.position, offset);   
   }
-  fullscene.scene.idToGameObjects.at(index).position = newPosition;
+  fullscene.scene.idToGameObjects.at(index).transformation.position = newPosition;
   setPosition(body, newPosition);
 }
 void physicsTranslateSet(FullScene& fullscene, btRigidBody* body, glm::vec3 pos, short index){
-  fullscene.scene.idToGameObjects.at(index).position = pos;
+  fullscene.scene.idToGameObjects.at(index).transformation.position = pos;
   setPosition(body, pos);
 }
 
 void physicsRotate(FullScene& fullscene, btRigidBody* body, float x, float y, float z, short index){
-  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects.at(index).rotation, x, y, z, 5);
-  fullscene.scene.idToGameObjects.at(index).rotation  = rotation;
+  glm::quat rotation = setFrontDelta(fullscene.scene.idToGameObjects.at(index).transformation.rotation, x, y, z, 5);
+  fullscene.scene.idToGameObjects.at(index).transformation.rotation  = rotation;
   setRotation(body, rotation);
 }
 void physicsRotateSet(FullScene& fullscene, btRigidBody* body, glm::quat rotation, short index){
-  fullscene.scene.idToGameObjects.at(index).rotation = rotation;
+  fullscene.scene.idToGameObjects.at(index).transformation.rotation = rotation;
   setRotation(body, rotation);
 }
 
 void physicsScale(World& world, FullScene& fullscene, btRigidBody* body, short index, float x, float y, float z){
-  auto oldScale = fullscene.scene.idToGameObjects.at(index).scale;
+  auto oldScale = fullscene.scene.idToGameObjects.at(index).transformation.scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
-  fullscene.scene.idToGameObjects.at(index).scale = newScale;
+  fullscene.scene.idToGameObjects.at(index).transformation.scale = newScale;
   auto collisionInfo = getPhysicsInfoForGameObject(world, fullscene, index).collisionInfo;
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
 
 void applyPhysicsTranslation(FullScene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
   auto newPosition = applyTranslation(position, offsetX, offsetY, manipulatorAxis);
-  scene.scene.idToGameObjects.at(index).position = newPosition;
+  scene.scene.idToGameObjects.at(index).transformation.position = newPosition;
   setPosition(body, newPosition);
 }
 
 void applyPhysicsRotation(FullScene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
   auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
-  scene.scene.idToGameObjects.at(index).rotation = newRotation;
+  scene.scene.idToGameObjects.at(index).transformation.rotation = newRotation;
   setRotation(body, newRotation);
 }
 
 void applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
   auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
-  scene.scene.idToGameObjects.at(index).scale = newScale;
+  scene.scene.idToGameObjects.at(index).transformation.scale = newScale;
   auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
@@ -284,8 +284,8 @@ void applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, shor
 void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     auto sceneId = world.idToScene.at(i);
-    world.scenes.at(sceneId).scene.idToGameObjects.at(i).rotation = getRotation(rigidBody);
-    world.scenes.at(sceneId).scene.idToGameObjects.at(i).position = getPosition(rigidBody);
+    world.scenes.at(sceneId).scene.idToGameObjects.at(i).transformation.rotation = getRotation(rigidBody);
+    world.scenes.at(sceneId).scene.idToGameObjects.at(i).transformation.position = getPosition(rigidBody);
     // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
   }
 }
