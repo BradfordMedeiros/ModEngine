@@ -58,6 +58,7 @@ void processAnimations(const aiScene* scene){
       // what about mesh animations ? http://assimp.sourceforge.net/lib_html/structai_mesh_anim.html
       // I think that's not skeletal animation, but rather a bunch of meshes, but im not sure need to check
       aiNodeAnim* aiAnimation = animation-> mChannels[j];  
+      std::cout << "affected node name: " << aiAnimation -> mNodeName.C_Str() << std::endl;  // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
 
     }
 
@@ -94,10 +95,10 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
      vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);  
 
      // load one layer of texture coordinates for now
-     if (!mesh->mTextureCoords[0]){
+     if (!mesh -> mTextureCoords[0]){
         continue;
      }
-     vertex.texCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
+     vertex.texCoords = glm::vec2(mesh-> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
      vertices.push_back(vertex);
    } 
  

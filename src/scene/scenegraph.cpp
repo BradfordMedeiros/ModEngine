@@ -7,12 +7,15 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id){
     .hasCollisions = true,
     .shape = BOX,
   };
+
   GameObject gameObject = {
     .id = id,
     .name = name,
-    .position = position,
-    .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-    .rotation = glm::identity<glm::quat>(),
+    .transformation = Transformation {
+      .position = position,
+      .scale = glm::vec3(1.0f, 1.0f, 1.0f),
+      .rotation = glm::identity<glm::quat>(),
+    },
     .physicsOptions = physicsOptions,
   };
   return gameObject;
@@ -43,9 +46,9 @@ Scene createSceneFromTokens(
   for (auto [_, serialObj] : serialObjs){
     short id = getNewObjectId();
     addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1);
-    scene.idToGameObjects.at(id).position = serialObj.position;
-    scene.idToGameObjects.at(id).scale = serialObj.scale;
-    scene.idToGameObjects.at(id).rotation = serialObj.rotation;
+    scene.idToGameObjects.at(id).transformation.position = serialObj.position;
+    scene.idToGameObjects.at(id).transformation.scale = serialObj.scale;
+    scene.idToGameObjects.at(id).transformation.rotation = serialObj.rotation;
     scene.idToGameObjects.at(id).physicsOptions = serialObj.physics;
   }
 
@@ -98,9 +101,9 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
     std::string gameobjectName = gameobject.name;
     std::string parentName = scene.idToGameObjects[gameobjecth.parentId].name;
 
-    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.position) + "\n";
-    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.scale) + "\n";
-    sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.rotation) + "\n";
+    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
+    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
+    sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
 
     for (auto additionalFields : getAdditionalFields(id)){
       sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
@@ -160,9 +163,9 @@ std::vector<short> listObjInScene(Scene& scene){
 
 void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model, std::function<void(short, glm::mat4)> onObject){
   GameObject object = scene.idToGameObjects[objectH.id];
-  glm::mat4 modelMatrix = glm::translate(model, object.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.rotation);
-  modelMatrix = glm::scale(modelMatrix, object.scale);
+  glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
+  modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
+  modelMatrix = glm::scale(modelMatrix, object.transformation.scale);
 
   onObject(id, modelMatrix);
 
