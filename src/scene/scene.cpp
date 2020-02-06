@@ -165,7 +165,10 @@ FullScene deserializeFullScene(World& world, short sceneId, std::string content)
     world.idToScene[id] = sceneId;
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
       [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
-        world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");     // @todo protect against loading this mesh many times. 
+        std::vector<ModelData> models = loadModel(meshName);
+        assert(models.size() >= 1);
+        ModelData model = models[0];
+        world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
       }, 
       [&world, sceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
