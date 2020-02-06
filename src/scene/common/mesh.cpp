@@ -2,7 +2,7 @@
 
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.
-Mesh loadMesh(std::string defaultTexture, ModelData model){
+Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
@@ -10,20 +10,20 @@ Mesh loadMesh(std::string defaultTexture, ModelData model){
   unsigned int EBO;
   glGenBuffers(1, &EBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * model.indices.size(), &(model.indices[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * meshData.indices.size(), &(meshData.indices[0]), GL_STATIC_DRAW);
 
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * model.vertices.size(), &(model.vertices[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * meshData.vertices.size(), &(meshData.vertices[0]), GL_STATIC_DRAW);
   
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
   glEnableVertexAttribArray(0);
  
   // @TODO texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly. right now this is super, super unoptimized.
   Texture texture;
-  if (model.texturePaths.size() > 0){
-    texture = loadTexture(model.texturePaths[0]); 
+  if (meshData.texturePaths.size() > 0){
+    texture = loadTexture(meshData.texturePaths[0]); 
   }else{
     texture = loadTexture(defaultTexture); 
   }
@@ -40,8 +40,8 @@ Mesh loadMesh(std::string defaultTexture, ModelData model){
     .VAOPointer = VAO,
     .VBOPointer = VBO,
     .texture = texture,
-    .numElements = model.indices.size(),
-    .boundInfo = model.boundInfo,
+    .numElements = meshData.indices.size(),
+    .boundInfo = meshData.boundInfo,
   }; 
 
   return mesh; 

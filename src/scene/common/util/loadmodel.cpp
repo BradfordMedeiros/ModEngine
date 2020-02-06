@@ -85,7 +85,7 @@ void processBones(aiMesh* mesh){
   std::cout << "num bones: " << numBones << std::endl;
 }
 
-ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
+MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
@@ -123,7 +123,7 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
 
    processBones(mesh);
 
-   ModelData model = {
+   MeshData model = {
      .vertices = vertices,
      .indices = indices,       
      .texturePaths = textureFilepaths,
@@ -133,9 +133,9 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
    return model;
 }
 
-void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std::function<void(ModelData)> onLoadMesh){
+void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std::function<void(MeshData)> onLoadMesh){
    for (unsigned int i = 0; i < node->mNumMeshes; i++){
-     ModelData meshData = processMesh(scene->mMeshes[node->mMeshes[i]], scene, modelPath);
+     MeshData meshData = processMesh(scene->mMeshes[node->mMeshes[i]], scene, modelPath);
      onLoadMesh(meshData);
    }
    for (unsigned int i = 0; i < node ->mNumChildren; i++){
@@ -145,7 +145,7 @@ void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std:
 
 // Currently this just loads all the meshes into the models array. 
 // Should have parent/child relations and a hierarchy but todo.
-std::vector<ModelData> loadModel(std::string modelPath){
+std::vector<MeshData> loadModel(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
    if (!scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
@@ -153,12 +153,13 @@ std::vector<ModelData> loadModel(std::string modelPath){
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist?");
    } 
 
-   std::vector<ModelData> models;
+   std::vector<MeshData> models;
 
    processAnimations(scene);
-   processNode(scene->mRootNode, scene, modelPath, [&models](ModelData meshdata) -> void {
+   processNode(scene->mRootNode, scene, modelPath, [&models](MeshData meshdata) -> void {
      models.push_back(meshdata);
    });
 
    return models;
 }
+

@@ -12,12 +12,6 @@
 #include "../common/util.h"
 #include "./serialization.h"
 
-struct Transformation {
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::quat rotation;
-};
-
 struct GameObject {
   short id;
   std::string name;
@@ -53,7 +47,7 @@ void addObjectToScene(
   std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
 );
 
-void addSubsceneToRoot(std::pair<short, short> parentToChildPairs, std::pair<short, Transformation>);
+void addSubsceneToRoot(std::map<short, short> parentToChild, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names);
 
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
