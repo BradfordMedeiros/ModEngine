@@ -165,15 +165,16 @@ FullScene deserializeFullScene(World& world, short sceneId, std::string content)
     world.idToScene[id] = sceneId;
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
       [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
-        std::vector<MeshData> models = loadModel(meshName);
-        assert(models.size() >= 1);
-        MeshData model = models[0];
-        world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
-
-        std::map<short, short> parentToChild;
-        std::map<short, Transformation> nodeTransform;
-        std::map<short, std::string> names;
-        addSubsceneToRoot(parentToChild, nodeTransform, names);
+        if (world.meshes.find(meshName) == world.meshes.end()){
+          std::vector<MeshData> models = loadModel(meshName);
+          assert(models.size() >= 1);
+          MeshData model = models[0];
+          world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
+          std::map<short, short> parentToChild;
+          std::map<short, Transformation> nodeTransform;
+          std::map<short, std::string> names;
+          addSubsceneToRoot(parentToChild, nodeTransform, names);
+        }
       }, 
       [&world, sceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
