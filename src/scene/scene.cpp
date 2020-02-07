@@ -161,17 +161,17 @@ short getSceneId(){
 }
 
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
-  auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::map<std::string, std::string> additionalFields) -> void {
+  auto addObjectAndLoadMesh = [&world, &sceneId](Scene& scene, short id, std::string type, std::map<std::string, std::string> additionalFields) -> void {
     world.idToScene[id] = sceneId;
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
-      [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
+      [&world, &scene](std::string meshName) -> void {  // @todo this is duplicate with commented below
         if (world.meshes.find(meshName) == world.meshes.end()){
           ModelData data = loadModel(meshName);
           std::vector<MeshData> models = data.meshData;
           assert(models.size() >= 1);
           MeshData model = models[0];
           world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
-          addSubsceneToRoot(data.childToParent, data.nodeTransform, data.names);
+          addSubsceneToRoot(scene, data.childToParent, data.nodeTransform, data.names, getObjectId);
         }
       }, 
       [&world, sceneId, id]() -> void {

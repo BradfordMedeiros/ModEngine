@@ -36,7 +36,7 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
 
 Scene createSceneFromTokens(
   std::vector<Token> tokens,  
-  std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject, 
+  std::function<void(Scene& scene, short, std::string, std::map<std::string, std::string> additionalFields)> addObject, 
   std::vector<Field> fields,
   short (*getNewObjectId)()
 ){
@@ -66,7 +66,7 @@ Scene createSceneFromTokens(
   }
 
   for (auto [_, serialObj] : serialObjs){
-    addObject(scene.nameToId.at(serialObj.name), serialObj.type, serialObj.additionalFields);
+    addObject(scene, scene.nameToId.at(serialObj.name), serialObj.type, serialObj.additionalFields);
   }
 
   return scene;
@@ -76,7 +76,7 @@ Scene createSceneFromTokens(
 // @todo this parsing is sloppy and buggy... obviously need to harden this..
 Scene deserializeScene(
   std::string content,  
-  std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject, 
+  std::function<void(Scene& scene, short, std::string, std::map<std::string, std::string> additionalFields)> addObject, 
   std::vector<Field> fields,  
   short (*getNewObjectId)()
 ){
@@ -84,7 +84,13 @@ Scene deserializeScene(
   return createSceneFromTokens(getTokens(content), addObject, fields, getNewObjectId);
 }
 
-void addSubsceneToRoot(std::map<short, short> childToParent, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names){
+void addSubsceneToRoot(
+  Scene& scene, 
+  std::map<short, short> childToParent, 
+  std::map<short, Transformation> gameobjTransforms, 
+  std::map<short, std::string> names,
+  short (*getNewObjectId)()
+){
   for (auto [childId, parentId] : childToParent){
     std::cout << "p-c (" << parentId << ", " << childId << ")" << std::endl; 
   }
