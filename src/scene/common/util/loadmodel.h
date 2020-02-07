@@ -30,13 +30,10 @@ struct MeshData {
 
 struct ModelData {
   std::vector<MeshData> meshData;
-  /*std::map<short, short> parentToChild;
+  std::map<short, short> childToParent;
   std::map<short, Transformation> nodeTransform;
-  std::map<short, std::string> names;*/
+  std::map<short, std::string> names;
 };
-
-
-
 
 // this really should be "load gameobject" --> since need children mesh
 // but no representation for scene/children/objects yet so just flattening it to models

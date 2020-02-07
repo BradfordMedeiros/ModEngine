@@ -167,16 +167,11 @@ FullScene deserializeFullScene(World& world, short sceneId, std::string content)
       [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
         if (world.meshes.find(meshName) == world.meshes.end()){
           ModelData data = loadModel(meshName);
-
           std::vector<MeshData> models = data.meshData;
           assert(models.size() >= 1);
           MeshData model = models[0];
-
           world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
-          std::map<short, short> parentToChild;
-          std::map<short, Transformation> nodeTransform;
-          std::map<short, std::string> names;
-          addSubsceneToRoot(parentToChild, nodeTransform, names);
+          addSubsceneToRoot(data.childToParent, data.nodeTransform, data.names);
         }
       }, 
       [&world, sceneId, id]() -> void {

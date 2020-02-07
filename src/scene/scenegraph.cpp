@@ -84,9 +84,18 @@ Scene deserializeScene(
   return createSceneFromTokens(getTokens(content), addObject, fields, getNewObjectId);
 }
 
-void addSubsceneToRoot(std::map<short, short> parentToChild, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names){
-  
-}
+void addSubsceneToRoot(std::map<short, short> childToParent, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names){
+  for (auto [childId, parentId] : childToParent){
+    std::cout << "p-c (" << parentId << ", " << childId << ")" << std::endl; 
+  }
+  for (auto [nodeId, transform] : gameobjTransforms){
+    std::cout << "n-t (" << nodeId << ", " << print(transform.position) << ")" << std::endl; 
+  }
+  for (auto [nodeId, name] : names){
+    std::cout << "n-n (" << nodeId << ", " << name << ")" << std::endl; 
+  }
+
+} 
 
 std::string serializeVec(glm::vec3 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);

@@ -47,7 +47,7 @@ void addObjectToScene(
   std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
 );
 
-void addSubsceneToRoot(std::map<short, short> parentToChild, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names);
+void addSubsceneToRoot(std::map<short, short> childToParent, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names);
 
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
