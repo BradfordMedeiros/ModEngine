@@ -98,7 +98,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      if (!mesh -> mTextureCoords[0]){
         continue;
      }
-     vertex.texCoords = glm::vec2(mesh-> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
+     vertex.texCoords = glm::vec2(mesh -> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
      vertices.push_back(vertex);
    } 
  
@@ -145,7 +145,7 @@ void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std:
 
 // Currently this just loads all the meshes into the models array. 
 // Should have parent/child relations and a hierarchy but todo.
-std::vector<MeshData> loadModel(std::string modelPath){
+ModelData loadModel(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
    if (!scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
@@ -160,6 +160,9 @@ std::vector<MeshData> loadModel(std::string modelPath){
      models.push_back(meshdata);
    });
 
-   return models;
+   ModelData data = {
+     .meshData = models,
+   };
+   return data;
 }
 

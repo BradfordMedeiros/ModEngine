@@ -40,7 +40,7 @@ struct ModelData {
 
 // this really should be "load gameobject" --> since need children mesh
 // but no representation for scene/children/objects yet so just flattening it to models
-std::vector<MeshData> loadModel(std::string modelPath);  
+ModelData loadModel(std::string modelPath);  
 
 #endif 
 
