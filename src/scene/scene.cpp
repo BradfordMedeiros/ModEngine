@@ -160,25 +160,47 @@ short getSceneId(){
   return sceneId;
 }
 
-FullScene deserializeFullScene(World& world, short sceneId, std::string content){
-  auto addObjectAndLoadMesh = [&world, &sceneId](short id, std::string type, std::map<std::string, std::string> additionalFields) -> void {
+void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs){
+  for (auto [_, serialObj] : serialObjs){
+    auto id =  scene.nameToId.at(serialObj.name);
+    auto type = serialObj.type;
+    auto additionalFields = serialObj.additionalFields;
+
     world.idToScene[id] = sceneId;
+    auto localSceneId = sceneId;
+
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
-      [&world](std::string meshName) -> void {  // @todo this is duplicate with commented below
-        std::vector<ModelData> models = loadModel(meshName);
-        assert(models.size() >= 1);
-        ModelData model = models[0];
-        world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
+      [&world, &scene](std::string meshName) -> void {  // @todo this is duplicate with commented below
+        if (world.meshes.find(meshName) == world.meshes.end()){
+          ModelData data = loadModel(meshName);
+          std::vector<MeshData> models = data.meshData;
+          assert(models.size() >= 1);
+          MeshData model = models[0];
+          world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
+          if (models.size() > 1){
+            auto newSerialObjs = addSubsceneToRoot(
+              scene, 
+              data.childToParent, 
+              data.nodeTransform, 
+              data.names, 
+              getObjectId
+            );
+            addObjects(world, scene, newSerialObjs);
+          }
+
+        }
       }, 
-      [&world, sceneId, id]() -> void {
+      [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
       }
     );
-  };
-  
-  Scene scene = deserializeScene(content, addObjectAndLoadMesh, fields, getObjectId);
+  }
+}
+FullScene deserializeFullScene(World& world, short sceneId, std::string content){
+  SceneDeserialization deserializedScene = deserializeScene(content, fields, getObjectId);
+  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs);
   FullScene fullscene = {
-    .scene = scene,
+    .scene = deserializedScene.scene,
   };
 
   return fullscene;

@@ -6,9 +6,7 @@ std::map<short, GameObjectObj> getObjectMapping() {
 }
 
 GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded){
-  auto meshName = additionalFields.at("mesh");
-
-  std::cout << "Creating gameobject: mesh: " << meshName << std::endl;
+  auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
   meshName = (meshName == "") ? defaultMesh : meshName;
 
   bool isDisabled = additionalFields.find("disabled") != additionalFields.end() ; 

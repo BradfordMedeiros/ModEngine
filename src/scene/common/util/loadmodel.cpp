@@ -85,7 +85,7 @@ void processBones(aiMesh* mesh){
   std::cout << "num bones: " << numBones << std::endl;
 }
 
-ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
+MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
@@ -98,7 +98,7 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
      if (!mesh -> mTextureCoords[0]){
         continue;
      }
-     vertex.texCoords = glm::vec2(mesh-> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
+     vertex.texCoords = glm::vec2(mesh -> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
      vertices.push_back(vertex);
    } 
  
@@ -115,15 +115,14 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
    std::vector<std::string> textureFilepaths;
    for (unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++){
      aiString texturePath;
-     material->GetTexture(aiTextureType_DIFFUSE, i, &texturePath);
+     material -> GetTexture(aiTextureType_DIFFUSE, i, &texturePath);
      std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
      std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
      textureFilepaths.push_back(relativePath.string());  
    }
 
-   processBones(mesh);
 
-   ModelData model = {
+   MeshData model = {
      .vertices = vertices,
      .indices = indices,       
      .texturePaths = textureFilepaths,
@@ -133,19 +132,44 @@ ModelData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath)
    return model;
 }
 
-void processNode(aiNode* node, const aiScene* scene, std::string modelPath, std::function<void(ModelData)> onLoadMesh){
-   for (unsigned int i = 0; i < node->mNumMeshes; i++){
-     ModelData meshData = processMesh(scene->mMeshes[node->mMeshes[i]], scene, modelPath);
+void processNode(
+  aiNode* node, 
+  const aiScene* scene, 
+  std::string modelPath, 
+  int parentNodeId,
+  int* localNodeId, 
+  std::function<void(MeshData)> onLoadMesh,
+  std::function<void(std::string, int, aiMatrix4x4)> onAddNode,
+  std::function<void(int, int)> addParent
+){
+   *localNodeId = *localNodeId + 1;
+   int currentNodeId =  *localNodeId;
+  
+   std::cout << "processing node: " << currentNodeId << std::endl;
+   if (parentNodeId != -1){
+     addParent(currentNodeId, parentNodeId);
+   }
+
+   std::cout << "num meshes: " << node -> mNumMeshes << std::endl;
+   if (node -> mNumMeshes > 1){
+      std::cout << "ERROR: more than one mesh associated with node -- currently unsupported" << std::endl;
+      assert(false);
+   } 
+
+   onAddNode(node -> mName.C_Str(), currentNodeId, node -> mTransformation);
+   for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
+     MeshData meshData = processMesh(scene -> mMeshes[node -> mMeshes[i]], scene, modelPath);
      onLoadMesh(meshData);
    }
-   for (unsigned int i = 0; i < node ->mNumChildren; i++){
-     processNode(node->mChildren[i], scene, modelPath, onLoadMesh);
+
+   for (unsigned int i = 0; i < node -> mNumChildren; i++){
+     processNode(node -> mChildren[i], scene, modelPath, currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
    }
 }
 
 // Currently this just loads all the meshes into the models array. 
 // Should have parent/child relations and a hierarchy but todo.
-std::vector<ModelData> loadModel(std::string modelPath){
+ModelData loadModel(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
    if (!scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
@@ -153,12 +177,43 @@ std::vector<ModelData> loadModel(std::string modelPath){
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist?");
    } 
 
-   std::vector<ModelData> models;
+   std::vector<MeshData> models;
+   std::map<short, short> childToParent;
+   std::map<short, Transformation> nodeTransform;
+   std::map<short, std::string> names;
 
-   processAnimations(scene);
-   processNode(scene->mRootNode, scene, modelPath, [&models](ModelData meshdata) -> void {
-     models.push_back(meshdata);
-   });
+   //processAnimations(scene);
 
-   return models;
+   int localNodeId = -1;
+   processNode(scene -> mRootNode, scene, modelPath, localNodeId, &localNodeId, 
+    [&models, &nodeTransform, &names](MeshData meshdata) -> void {
+      models.push_back(meshdata);
+    },
+    [&nodeTransform, &names](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
+      names[nodeId] = name;
+      aiVector3t<float> scaling;
+      aiQuaterniont<float> rotation;
+      aiVector3t<float> position;
+      transform.Decompose(scaling, rotation, position);
+      Transformation trans = {
+        .position = glm::vec3(position.x, position.y, position.z),
+        .scale = glm::vec3(scaling.x, scaling.y, scaling.z),
+        .rotation = glm::quat(1.f, 0, 0, 0)
+      };
+      nodeTransform[nodeId] = trans;
+      std::cout << "adding node id: " << nodeId << std::endl;
+    },
+    [&childToParent](int parentId, int nodeId) -> void {
+      childToParent[parentId] = nodeId;
+    }
+  );
+
+   ModelData data = {
+     .meshData = models,
+     .childToParent = childToParent,
+     .nodeTransform = nodeTransform,
+     .names = names
+   };
+   return data;
 }
+
