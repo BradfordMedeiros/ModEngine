@@ -31,13 +31,18 @@ struct Scene {
   std::map<std::string, short> nameToId;
 };
 
+struct SceneDeserialization {
+  Scene scene;
+  std::map<std::string, SerializationObject> serialObjs;
+};
+
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
-Scene deserializeScene(
+SceneDeserialization deserializeScene(
   std::string content, 
-  std::function<void(Scene& scene, short id, std::string type, std::map<std::string, std::string> additionalFields)> addObject, 
   std::vector<Field> fields,
   short (*getNewObjectId)()
 );
+
 void addObjectToScene(
   Scene& scene, 
   std::string name, 
@@ -47,7 +52,7 @@ void addObjectToScene(
   std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
 );
 
-void addSubsceneToRoot(Scene& scene, std::map<short, short> childToParent, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names, short (*getNewObjectId)());
+std::map<std::string, SerializationObject> addSubsceneToRoot(Scene& scene, std::map<short, short> childToParent, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names, short (*getNewObjectId)());
 
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);

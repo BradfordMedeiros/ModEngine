@@ -34,9 +34,8 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
   scene.nameToId[name] = gameobjectObj.id;
 }
 
-Scene createSceneFromTokens(
+SceneDeserialization createSceneFromTokens(
   std::vector<Token> tokens,  
-  std::function<void(Scene& scene, short, std::string, std::map<std::string, std::string> additionalFields)> addObject, 
   std::vector<Field> fields,
   short (*getNewObjectId)()
 ){
@@ -65,42 +64,69 @@ Scene createSceneFromTokens(
     }
   }
 
-  for (auto [_, serialObj] : serialObjs){
-    addObject(scene, scene.nameToId.at(serialObj.name), serialObj.type, serialObj.additionalFields);
-  }
-
-  return scene;
+  SceneDeserialization deserializedScene {
+    .scene = scene,
+    .serialObjs = serialObjs
+  };
+  return deserializedScene;
 }
 
 
 // @todo this parsing is sloppy and buggy... obviously need to harden this..
-Scene deserializeScene(
+SceneDeserialization deserializeScene(
   std::string content,  
-  std::function<void(Scene& scene, short, std::string, std::map<std::string, std::string> additionalFields)> addObject, 
   std::vector<Field> fields,  
   short (*getNewObjectId)()
 ){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromTokens(getTokens(content), addObject, fields, getNewObjectId);
+  return createSceneFromTokens(getTokens(content), fields, getNewObjectId);
 }
 
-void addSubsceneToRoot(
+std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
   std::map<short, short> childToParent, 
   std::map<short, Transformation> gameobjTransforms, 
   std::map<short, std::string> names,
   short (*getNewObjectId)()
 ){
-  for (auto [childId, parentId] : childToParent){
-    std::cout << "p-c (" << parentId << ", " << childId << ")" << std::endl; 
-  }
+  std::cout << "++ add subscene start" << std::endl;
+
+  std::map<std::string, SerializationObject> serialObjs;
+
+
+  std::map<short, short> nodeIdToRealId;
   for (auto [nodeId, transform] : gameobjTransforms){
-    std::cout << "n-t (" << nodeId << ", " << print(transform.position) << ")" << std::endl; 
-  }
-  for (auto [nodeId, name] : names){
-    std::cout << "n-n (" << nodeId << ", " << name << ")" << std::endl; 
+    short id = getNewObjectId();
+    nodeIdToRealId[nodeId] = id;
+
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1);
+    scene.idToGameObjects.at(id).transformation.position = transform.position;
+    scene.idToGameObjects.at(id).transformation.scale = transform.scale;
+    scene.idToGameObjects.at(id).transformation.rotation = transform.rotation;
+    //  default physics options here  scene.idToGameObjects.at(id).physicsOptions
+
+    serialObjs[names.at(nodeId)] = SerializationObject {
+      .name = names.at(nodeId),
+      .position = transform.position,
+      .scale = transform.scale,
+      .rotation = transform.rotation,
+      .hasParent = false,
+      .parentName = "-",
+      // unused .physics 
+      .type = "default",
+      // unused .additionalFields
+    };  
   }
 
+  for (auto [childId, parentId] : childToParent){
+    auto realChildId = nodeIdToRealId.at(childId);
+    auto realParentId = nodeIdToRealId.at(parentId);
+    scene.idToGameObjectsH.at(realChildId).parentId = realParentId;
+    scene.idToGameObjectsH.at(realParentId).children.insert(realChildId);
+  }
+  scene.rootGameObjectsH.push_back(nodeIdToRealId.at(0));
+
+  return serialObjs;
 } 
 
 std::string serializeVec(glm::vec3 vec){

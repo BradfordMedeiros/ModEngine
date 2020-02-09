@@ -138,7 +138,8 @@ void processNode(
   std::string modelPath, 
   int parentNodeId,
   int* localNodeId, 
-  std::function<void(MeshData, std::string, int, aiMatrix4x4)> onLoadMesh,
+  std::function<void(MeshData)> onLoadMesh,
+  std::function<void(std::string, int, aiMatrix4x4)> onAddNode,
   std::function<void(int, int)> addParent
 ){
    *localNodeId = *localNodeId + 1;
@@ -154,13 +155,15 @@ void processNode(
       std::cout << "ERROR: more than one mesh associated with node -- currently unsupported" << std::endl;
       assert(false);
    } 
+
+   onAddNode(node -> mName.C_Str(), currentNodeId, node -> mTransformation);
    for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
      MeshData meshData = processMesh(scene -> mMeshes[node -> mMeshes[i]], scene, modelPath);
-     onLoadMesh(meshData, node -> mName.C_Str(), currentNodeId, node -> mTransformation);
+     onLoadMesh(meshData);
    }
 
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(node -> mChildren[i], scene, modelPath, currentNodeId, localNodeId, onLoadMesh, addParent);
+     processNode(node -> mChildren[i], scene, modelPath, currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
    }
 }
 
@@ -183,8 +186,10 @@ ModelData loadModel(std::string modelPath){
 
    int localNodeId = -1;
    processNode(scene -> mRootNode, scene, modelPath, localNodeId, &localNodeId, 
-    [&models, &nodeTransform, &names](MeshData meshdata, std::string name, int nodeId, aiMatrix4x4 transform) -> void {
+    [&models, &nodeTransform, &names](MeshData meshdata) -> void {
       models.push_back(meshdata);
+    },
+    [&nodeTransform, &names](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
       names[nodeId] = name;
       aiVector3t<float> scaling;
       aiQuaterniont<float> rotation;
