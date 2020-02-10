@@ -52,7 +52,16 @@ void addObjectToScene(
   std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
 );
 
-std::map<std::string, SerializationObject> addSubsceneToRoot(Scene& scene, std::map<short, short> childToParent, std::map<short, Transformation> gameobjTransforms, std::map<short, std::string> names, short (*getNewObjectId)());
+std::map<std::string, SerializationObject> addSubsceneToRoot(
+  Scene& scene, 
+  short rootId,
+  short rootIdNode, 
+  std::map<short, short> childToParent, 
+  std::map<short, Transformation> gameobjTransforms, 
+  std::map<short, std::string> names, 
+  std::map<short, std::map<std::string, std::string>> additionalFields,
+  short (*getNewObjectId)()
+);
 
 void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);

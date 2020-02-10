@@ -51,7 +51,6 @@ glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offse
   float deltaYaw = manipulatorAxis == XAXIS ? offsetY : 0;
   float deltaPitch = manipulatorAxis == YAXIS ? offsetX : 0;
   float deltaRoll = manipulatorAxis == ZAXIS ? offsetX : 0;
-
   return setFrontDelta(currentOrientation, deltaYaw, deltaPitch, deltaRoll, 1);
 }
 

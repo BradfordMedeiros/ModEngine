@@ -143,7 +143,10 @@ World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, 
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
   };
-
+  ModelData data = loadModel("./res/models/ui/node.obj");
+  assert(data.meshIdToMeshData.size() ==  1);
+  auto meshData = data.meshIdToMeshData.begin() -> second;
+  world.meshes["./res/models/ui/node.obj"] =  loadMesh("./res/textures/default.jpg", meshData);     
   return world;
 }
 
@@ -170,23 +173,70 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
-      [&world, &scene](std::string meshName) -> void {  // @todo this is duplicate with commented below
+      [&world, &scene, id](std::string meshName) -> void {  // @todo this is duplicate with commented below
+        std::cout << "********** ensure: " << meshName << std::endl;
         if (world.meshes.find(meshName) == world.meshes.end()){
+          std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$ ensure mesh loaded called for " << meshName << std::endl;
           ModelData data = loadModel(meshName);
-          std::vector<MeshData> models = data.meshData;
-          assert(models.size() >= 1);
-          MeshData model = models[0];
-          world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
-          if (models.size() > 1){
-            auto newSerialObjs = addSubsceneToRoot(
-              scene, 
-              data.childToParent, 
-              data.nodeTransform, 
-              data.names, 
-              getObjectId
-            );
-            addObjects(world, scene, newSerialObjs);
+          std::cout << "nodeToMeshId size: " << data.nodeToMeshId.size() << std::endl;
+          auto meshesForId = data.nodeToMeshId.at(0);
+          std::cout << "meshes for id size: " << meshesForId.size() << std::endl;
+
+          bool hasMesh = meshesForId.size() > 0;
+          if (hasMesh){
+            auto meshId = meshesForId.at(0);
+            MeshData model =  data.meshIdToMeshData.at(meshId);
+            world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
+          }else{
+            std::cout << "loading default node mesh for: " << meshName << std::endl;
+            world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"
           }
+          
+          for (auto [meshId, meshData] : data.meshIdToMeshData){
+            auto meshRef = meshName + "::" + std::to_string(meshId);
+            std::cout << "loading mesh: " << meshRef << std::endl;
+            world.meshes[meshRef] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
+          } 
+
+          std::map<short, std::map<std::string, std::string>> additionalFieldsMap;
+          for (auto [nodeId, _] : data.nodeTransform){
+            std::map<std::string, std::string> emptyFields;
+            additionalFieldsMap[nodeId] = emptyFields;
+          }
+
+          std::cout << "about to set mesh ref" << std::endl;
+          for (auto [nodeId, meshListIds] : data.nodeToMeshId){
+            if (meshListIds.size() >= 1){
+              if (meshListIds.size() > 1){
+                std::cout << "warning node: " << data.names.at(nodeId) << " has more than 1 mesh (" << std::to_string(meshListIds.size()) << ")" << std::endl;
+              }
+              auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
+              std::cout << "setting mesh: " << meshRef << std::endl;
+              additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
+            }else{
+              std::cout << "note node: " << data.names.at(nodeId) << " has no meshes" << std::endl;
+
+            }
+          }
+
+          auto newSerialObjs = addSubsceneToRoot(
+            scene, 
+            id,
+            0,
+            data.childToParent, 
+            data.nodeTransform, 
+            data.names, 
+            additionalFieldsMap,
+            getObjectId
+          );
+          for (auto [serialObjName, serialObj] : newSerialObjs){
+            if (serialObj.additionalFields.find("mesh") == serialObj.additionalFields.end()){
+              std::cout << "additionalmesh name is not present" << std::endl;
+            }else{
+              std::cout << "additionalmesh name is: " << serialObj.additionalFields.at("mesh") << std::endl;
+            }
+          }
+          addObjects(world, scene, newSerialObjs);
 
         }
       }, 

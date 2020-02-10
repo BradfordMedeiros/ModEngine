@@ -134,11 +134,9 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
 
 void processNode(
   aiNode* node, 
-  const aiScene* scene, 
-  std::string modelPath, 
   int parentNodeId,
   int* localNodeId, 
-  std::function<void(MeshData)> onLoadMesh,
+  std::function<void(int, int)> onLoadMesh,
   std::function<void(std::string, int, aiMatrix4x4)> onAddNode,
   std::function<void(int, int)> addParent
 ){
@@ -150,20 +148,14 @@ void processNode(
      addParent(currentNodeId, parentNodeId);
    }
 
-   std::cout << "num meshes: " << node -> mNumMeshes << std::endl;
-   if (node -> mNumMeshes > 1){
-      std::cout << "ERROR: more than one mesh associated with node -- currently unsupported" << std::endl;
-      assert(false);
-   } 
-
    onAddNode(node -> mName.C_Str(), currentNodeId, node -> mTransformation);
+   std::cout << "node named: " << node -> mName.C_Str() << " has " << std::to_string(node -> mNumMeshes) << " meshes" << std::endl;
    for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
-     MeshData meshData = processMesh(scene -> mMeshes[node -> mMeshes[i]], scene, modelPath);
-     onLoadMesh(meshData);
+     onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
 
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(node -> mChildren[i], scene, modelPath, currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
+     processNode(node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
    }
 }
 
@@ -177,7 +169,8 @@ ModelData loadModel(std::string modelPath){
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist?");
    } 
 
-   std::vector<MeshData> models;
+   std::map<short, MeshData> meshIdToMeshData;
+   std::map<short, std::vector<int>> nodeToMeshId;
    std::map<short, short> childToParent;
    std::map<short, Transformation> nodeTransform;
    std::map<short, std::string> names;
@@ -185,11 +178,13 @@ ModelData loadModel(std::string modelPath){
    //processAnimations(scene);
 
    int localNodeId = -1;
-   processNode(scene -> mRootNode, scene, modelPath, localNodeId, &localNodeId, 
-    [&models, &nodeTransform, &names](MeshData meshdata) -> void {
-      models.push_back(meshdata);
+   processNode(scene -> mRootNode, localNodeId, &localNodeId, 
+    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId](int nodeId, int meshId) -> void {
+      MeshData meshData = processMesh(scene -> mMeshes[meshId], scene, modelPath);
+      nodeToMeshId[nodeId].push_back(meshId);
+      meshIdToMeshData[meshId] = meshData;
     },
-    [&nodeTransform, &names](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
+    [&nodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
       names[nodeId] = name;
       aiVector3t<float> scaling;
       aiQuaterniont<float> rotation;
@@ -201,6 +196,10 @@ ModelData loadModel(std::string modelPath){
         .rotation = glm::quat(1.f, 0, 0, 0)
       };
       nodeTransform[nodeId] = trans;
+      if (nodeToMeshId.find(nodeId) == nodeToMeshId.end()){
+        std::vector<int> emptyMeshList;
+        nodeToMeshId[nodeId] = emptyMeshList;
+      }
       std::cout << "adding node id: " << nodeId << std::endl;
     },
     [&childToParent](int parentId, int nodeId) -> void {
@@ -209,7 +208,8 @@ ModelData loadModel(std::string modelPath){
   );
 
    ModelData data = {
-     .meshData = models,
+     .meshIdToMeshData = meshIdToMeshData,
+     .nodeToMeshId = nodeToMeshId,
      .childToParent = childToParent,
      .nodeTransform = nodeTransform,
      .names = names

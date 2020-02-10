@@ -84,18 +84,21 @@ SceneDeserialization deserializeScene(
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
+  short rootId, 
+  short rootIdNode, 
   std::map<short, short> childToParent, 
   std::map<short, Transformation> gameobjTransforms, 
   std::map<short, std::string> names,
+  std::map<short, std::map<std::string, std::string>> additionalFields,
   short (*getNewObjectId)()
 ){
-  std::cout << "++ add subscene start" << std::endl;
 
   std::map<std::string, SerializationObject> serialObjs;
-
-
   std::map<short, short> nodeIdToRealId;
   for (auto [nodeId, transform] : gameobjTransforms){
+    if (nodeId == rootIdNode){
+      continue;
+    }
     short id = getNewObjectId();
     nodeIdToRealId[nodeId] = id;
 
@@ -105,6 +108,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     scene.idToGameObjects.at(id).transformation.rotation = transform.rotation;
     //  default physics options here  scene.idToGameObjects.at(id).physicsOptions
 
+    std::cout << "creating serial obj" << std::endl;
     serialObjs[names.at(nodeId)] = SerializationObject {
       .name = names.at(nodeId),
       .position = transform.position,
@@ -114,17 +118,16 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .parentName = "-",
       // unused .physics 
       .type = "default",
-      // unused .additionalFields
+      .additionalFields = additionalFields.at(nodeId)
     };  
   }
 
   for (auto [childId, parentId] : childToParent){
     auto realChildId = nodeIdToRealId.at(childId);
-    auto realParentId = nodeIdToRealId.at(parentId);
+    auto realParentId = parentId == rootIdNode ? rootId : nodeIdToRealId.at(parentId);
     scene.idToGameObjectsH.at(realChildId).parentId = realParentId;
     scene.idToGameObjectsH.at(realParentId).children.insert(realChildId);
   }
-  scene.rootGameObjectsH.push_back(nodeIdToRealId.at(0));
 
   return serialObjs;
 } 
@@ -207,9 +210,10 @@ std::vector<short> listObjInScene(Scene& scene){
 }
 
 void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model, std::function<void(short, glm::mat4)> onObject){
-  GameObject object = scene.idToGameObjects[objectH.id];
-  glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
+  GameObject object = scene.idToGameObjects.at(objectH.id);
+  glm::mat4 modelMatrix = model;
+  modelMatrix = glm::translate(modelMatrix, object.transformation.position);
+  modelMatrix = glm::toMat4(object.transformation.rotation) * modelMatrix;
   modelMatrix = glm::scale(modelMatrix, object.transformation.scale);
 
   onObject(id, modelMatrix);

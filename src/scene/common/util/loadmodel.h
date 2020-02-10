@@ -29,7 +29,8 @@ struct MeshData {
 };
 
 struct ModelData {
-  std::vector<MeshData> meshData;
+  std::map<short, MeshData> meshIdToMeshData;
+  std::map<short, std::vector<int>> nodeToMeshId;
   std::map<short, short> childToParent;
   std::map<short, Transformation> nodeTransform;
   std::map<short, std::string> names;
