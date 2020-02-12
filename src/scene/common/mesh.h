@@ -22,7 +22,7 @@ struct Mesh {
   unsigned int VAOPointer;
   unsigned int VBOPointer;
   Texture texture; 
-  unsigned int numElements;
+  long unsigned int numElements;
   BoundInfo boundInfo;
 };
 
