@@ -209,23 +209,34 @@ std::vector<short> listObjInScene(Scene& scene){
   return allObjects;
 }
 
-void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model, std::function<void(short, glm::mat4)> onObject){
+void traverseScene(short id, GameObjectH objectH, Scene& scene, std::vector<glm::mat4> transforms, glm::vec3 totalScale, std::function<void(short, glm::mat4)> onObject){
   GameObject object = scene.idToGameObjects.at(objectH.id);
-  glm::mat4 modelMatrix = model;
-  modelMatrix = glm::translate(modelMatrix, object.transformation.position);
-  modelMatrix = glm::toMat4(object.transformation.rotation) * modelMatrix;
-  modelMatrix = glm::scale(modelMatrix, object.transformation.scale);
+  
+  glm::mat4 translation = glm::translate(glm::mat4(1.f), object.transformation.position);
+  glm::mat4 rotation = glm::toMat4(object.transformation.rotation);
+  glm::vec3 scaling = object.transformation.scale * totalScale;  // having trouble with doing the scaling here so putting out of band.   Anyone in the ether please help if more elegant. 
+  
+  glm::mat4 transform =  translation * rotation;
+  transforms.push_back(transform);
+
+  glm::mat4 modelMatrix = glm::mat4(1.f);
+  for (int i = transforms.size() - 1; i >= 0; i--){
+    modelMatrix =  modelMatrix * transforms.at(i);
+  }
+  modelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
 
   onObject(id, modelMatrix);
 
   for (short id: objectH.children){
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, onObject);
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, transforms, scaling, onObject);
   }
 }
 
 void traverseScene(Scene& scene, std::function<void(short, glm::mat4)> onObject){
   for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
     short id = scene.rootGameObjectsH.at(i);
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), onObject);
-  }  
+    std::vector<glm::mat4> transforms;
+    transforms.push_back(glm::mat4(1.f));
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, transforms, glm::vec3(1.f, 1.f, 1.f), onObject);
+  }   
 }
