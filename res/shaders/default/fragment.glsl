@@ -1,8 +1,8 @@
 #version 330 core
 
 in vec3 FragPos;
-in vec2 TexCoord;
 in vec3 Normal;
+in vec2 TexCoord;
 
 out vec4 FragColor;
 
@@ -30,7 +30,7 @@ void main(){
   }else{
     //vec4 texColor = (texture(coolzero, TexCoord) + texture(coolsomevalue, TexCoord)) / 2;
     //vec4 texColor = 
-    vec4 texColor = texture(maintexture, TexCoord);
+    vec4 texColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
     
     if (texColor.a < 0.1){
       discard;
