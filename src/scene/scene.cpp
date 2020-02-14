@@ -177,8 +177,8 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
         std::cout << "********** ensure: " << meshName << std::endl;
         if (world.meshes.find(meshName) == world.meshes.end()){
           std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$ ensure mesh loaded called for " << meshName << std::endl;
-          ModelData data = loadModel(meshName);
-          std::cout << "nodeToMeshId size: " << data.nodeToMeshId.size() << std::endl;
+          ModelData data = loadModel(meshName);        
+
           auto meshesForId = data.nodeToMeshId.at(0);
           std::cout << "meshes for id size: " << meshesForId.size() << std::endl;
 

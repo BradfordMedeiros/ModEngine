@@ -221,7 +221,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
   }
 
-  std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
+  //std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
   // TODO - serialization is broken since didn't keep up with it   
   /*int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){

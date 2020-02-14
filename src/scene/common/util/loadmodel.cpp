@@ -143,17 +143,14 @@ void processNode(
    *localNodeId = *localNodeId + 1;
    int currentNodeId =  *localNodeId;
   
-   std::cout << "processing node: " << currentNodeId << std::endl;
    if (parentNodeId != -1){
      addParent(currentNodeId, parentNodeId);
    }
 
    onAddNode(node -> mName.C_Str(), currentNodeId, node -> mTransformation);
-   std::cout << "node named: " << node -> mName.C_Str() << " has " << std::to_string(node -> mNumMeshes) << " meshes" << std::endl;
    for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
      onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
-
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
      processNode(node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
    }
@@ -200,12 +197,14 @@ ModelData loadModel(std::string modelPath){
         std::vector<int> emptyMeshList;
         nodeToMeshId[nodeId] = emptyMeshList;
       }
-      std::cout << "adding node id: " << nodeId << std::endl;
     },
     [&childToParent](int parentId, int nodeId) -> void {
       childToParent[parentId] = nodeId;
     }
   );
+
+   assert(nodeToMeshId.size() == nodeTransform.size());
+   assert(names.size() ==  nodeToMeshId.size());
 
    ModelData data = {
      .meshIdToMeshData = meshIdToMeshData,
