@@ -221,7 +221,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
   }
 
-  //std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
+  std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
   // TODO - serialization is broken since didn't keep up with it   
   /*int sceneToSerialize = world.scenes.size() - 1;
   if (sceneToSerialize >= 0){
@@ -334,7 +334,8 @@ void setObjectDimensions(short index, float width, float height, float depth){
   auto gameObjV = world.objectMapping.at(state.selectedIndex);  // todo this is bs, need a wrapper around objectmappping + scene
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
-    auto newScale = getScaleEquivalent(meshObj->mesh.boundInfo, width, height, depth);
+    // @TODO this is resizing based upon first mesh only, which is questionable
+    auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
     auto sceneId = world.idToScene.at(state.selectedIndex);
     world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).transformation.scale = newScale;
@@ -478,9 +479,10 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
 
     // bounding code //////////////////////
     auto gameObjV = world.objectMapping.at(id);
-    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); // doing this here is absolute bullshit.  fucked up abstraction level render should handle 
+    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
     if (meshObj != NULL){
-      auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").boundInfo, meshObj->mesh.boundInfo);
+      // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
+      auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
 
       if (objectSelected){
