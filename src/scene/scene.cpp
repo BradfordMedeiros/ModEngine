@@ -215,10 +215,8 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
           for (auto [nodeId, meshListIds] : data.nodeToMeshId){
             if (meshListIds.size() == 1){
               auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-              std::cout << "setting mesh: " << meshRef << std::endl;
               additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
             }else if (meshListIds.size() > 1){
-              std::cout << "warning node: " << data.names.at(nodeId) << " has more than 1 mesh (" << std::to_string(meshListIds.size()) << ")" << std::endl;
               std::vector<std::string> meshRefNames;
               for (auto id : meshListIds){
                 auto meshRef = meshName + "::" + std::to_string(id);
@@ -226,7 +224,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
               }
               additionalFieldsMap.at(nodeId)["meshes"] = join(meshRefNames, ',');
             }else{
-              std::cout << "WARNING: note node: " << data.names.at(nodeId) << " has no meshes" << std::endl;
+              std::cout << "WARNING: node: " << data.names.at(nodeId) << " has no meshes" << std::endl;
             }
           }
 
