@@ -6,20 +6,29 @@ std::map<short, GameObjectObj> getObjectMapping() {
 }
 
 GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded){
-  auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
-  meshName = (meshName == "") ? defaultMesh : meshName;
-
+  bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
   bool isDisabled = additionalFields.find("disabled") != additionalFields.end() ; 
-  
-  ensureMeshLoaded(meshName);
-  if (meshes.find(meshName) == meshes.end()){
-    std::cout << "ERROR: loading mesh " << meshName << " does not exist" << std::endl; 
-    throw std::runtime_error("mesh does not exist: " + meshName);
+
+  std::vector<std::string> meshNames;
+  std::vector<Mesh> meshesToRender;
+
+  if (usesMultipleMeshes){
+    auto meshStrings = split(additionalFields.at("meshes"), ',');
+    for (auto meshName : meshStrings){
+      ensureMeshLoaded(meshName);
+      meshesToRender.push_back(meshes.at(meshName));
+    }
+  }else{
+    auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
+    meshName = (meshName == "") ? defaultMesh : meshName;
+    ensureMeshLoaded(meshName);
+    meshNames.push_back(meshName);
+    meshesToRender.push_back(meshes.at(meshName));
   }
 
   GameObjectMesh obj {
-    .meshName = meshName,
-    .mesh = meshes.at(meshName),
+    .meshNames = meshNames,
+    .meshesToRender = meshesToRender,
     .isDisabled = isDisabled,
   };
 
@@ -60,8 +69,7 @@ void addObject(
     mapping[id] = createLight();
   }else if (objectType == "voxel"){
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
-  }
-  else{
+  }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   }
 }
@@ -74,7 +82,9 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
-    drawMesh(meshObj->mesh);
+    for (auto meshToRender : meshObj -> meshesToRender){
+      drawMesh(meshToRender);    
+    }
     return;
   }
 
@@ -98,7 +108,8 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 }
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
-  return { std::pair<std::string, std::string>("mesh", obj.meshName) };
+  // @TODO fix scene serialization, only serializing first mesh right now, which is wrong
+  return { std::pair<std::string, std::string>("mesh", obj.meshNames.at(0)) };
 }
 std::vector<std::pair<std::string, std::string>> defaultSerialization(){
   return {}; 

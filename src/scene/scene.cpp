@@ -25,6 +25,11 @@ glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
   return glm::vec3(x, y, z);
 }
 
+BoundInfo getMaxUnionBoundingInfo(std::vector<Mesh> boundings){
+  return boundings.at(0).boundInfo;
+}
+
+
 PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, short index){
   GameObject obj = fullscene.scene.idToGameObjects.at(index);
   auto gameObjV = world.objectMapping.at(index); 
@@ -41,7 +46,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
-    boundInfo = meshObj -> mesh.boundInfo;
+    boundInfo = getMaxUnionBoundingInfo(meshObj -> meshesToRender);
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&gameObjV);
@@ -206,16 +211,18 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
 
           std::cout << "about to set mesh ref" << std::endl;
           for (auto [nodeId, meshListIds] : data.nodeToMeshId){
-            if (meshListIds.size() >= 1){
-              if (meshListIds.size() > 1){
-                std::cout << "warning node: " << data.names.at(nodeId) << " has more than 1 mesh (" << std::to_string(meshListIds.size()) << ")" << std::endl;
-              }
+            if (meshListIds.size() == 1){
               auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-              std::cout << "setting mesh: " << meshRef << std::endl;
               additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
+            }else if (meshListIds.size() > 1){
+              std::vector<std::string> meshRefNames;
+              for (auto id : meshListIds){
+                auto meshRef = meshName + "::" + std::to_string(id);
+                meshRefNames.push_back(meshRef);
+              }
+              additionalFieldsMap.at(nodeId)["meshes"] = join(meshRefNames, ',');
             }else{
-              std::cout << "note node: " << data.names.at(nodeId) << " has no meshes" << std::endl;
-
+              std::cout << "WARNING: node: " << data.names.at(nodeId) << " has no meshes" << std::endl;
             }
           }
 

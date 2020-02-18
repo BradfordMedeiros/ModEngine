@@ -11,8 +11,8 @@
 #include "./voxels.h"
 
 struct GameObjectMesh {
-  std::string meshName;
-  Mesh mesh;
+  std::vector<std::string> meshNames;
+  std::vector<Mesh> meshesToRender;
   bool isDisabled;
 };
 struct GameObjectCamera {};

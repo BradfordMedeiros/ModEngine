@@ -29,6 +29,17 @@ std::vector<std::string> split(std::string strToSplit, char delimeter){
   return splittedStrings;
 }
 
+std::string join(std::vector<std::string> values, char delimeter){
+  std::string value = "";
+  for (int i = 0; i < values.size(); i++){
+    value = value + values[i];
+    if (i < (values.size() - 1)){
+      value = value + delimeter;
+    }
+  }
+  return value;
+}
+
 std::string print(glm::vec3 vec){
   std::stringstream stream;
   stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
