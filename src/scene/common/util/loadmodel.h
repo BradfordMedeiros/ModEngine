@@ -21,6 +21,15 @@ struct Vertex {
   glm::vec2 texCoords;
 };
 
+struct Animation {
+  std::string name;
+  double duration;
+  double ticksPerSecond;
+};
+struct Animations {
+  std::vector<Animation> animations;
+};
+
 struct MeshData {
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
@@ -34,6 +43,7 @@ struct ModelData {
   std::map<short, short> childToParent;
   std::map<short, Transformation> nodeTransform;
   std::map<short, std::string> names;
+  Animations animations;
 };
 
 // this really should be "load gameobject" --> since need children mesh

@@ -42,14 +42,21 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   return info;
 }
 
-void processAnimations(const aiScene* scene){
+Animations processAnimations(const aiScene* scene){
+  std::vector<Animation> animations;
+
   int numAnimations = scene -> mNumAnimations;
   std::cout << "num animations: " << numAnimations << std::endl;
   for (int i = 0; i < numAnimations; i++){
     aiAnimation* animation = scene -> mAnimations[i];
-    std::cout << "animation name is: " << animation -> mName.C_Str() << std::endl;
-    std::cout << "ticks per seconds: " << animation -> mTicksPerSecond << std::endl;
-    std::cout << "duration is: " << animation -> mDuration << std::endl;
+
+    Animation ani {
+      .name = animation -> mName.C_Str(),
+      .duration = animation -> mDuration,
+      .ticksPerSecond = animation -> mTicksPerSecond
+    };
+
+    animations.push_back(ani);
 
     for (int j = 0; j < animation -> mNumChannels; j++){
       // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
@@ -59,10 +66,13 @@ void processAnimations(const aiScene* scene){
       // I think that's not skeletal animation, but rather a bunch of meshes, but im not sure need to check
       aiNodeAnim* aiAnimation = animation-> mChannels[j];  
       std::cout << "affected node name: " << aiAnimation -> mNodeName.C_Str() << std::endl;  // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
-
     }
-
   }
+
+  Animations anis {
+    .animations = animations
+  };
+  return anis;
 }
 void processBones(aiMesh* mesh){
   int numBones = mesh -> mNumBones;
@@ -80,9 +90,6 @@ void processBones(aiMesh* mesh){
       auto offsetMatrix = bone -> mOffsetMatrix[j];   // wtf is this i dont get it
     } 
   }
-
-
-  std::cout << "num bones: " << numBones << std::endl;
 }
 
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
@@ -172,7 +179,7 @@ ModelData loadModel(std::string modelPath){
    std::map<short, Transformation> nodeTransform;
    std::map<short, std::string> names;
 
-   //processAnimations(scene);
+   auto animations = processAnimations(scene);
 
    int localNodeId = -1;
    processNode(scene -> mRootNode, localNodeId, &localNodeId, 
@@ -211,7 +218,8 @@ ModelData loadModel(std::string modelPath){
      .nodeToMeshId = nodeToMeshId,
      .childToParent = childToParent,
      .nodeTransform = nodeTransform,
-     .names = names
+     .names = names,
+     .animations = animations
    };
    return data;
 }
