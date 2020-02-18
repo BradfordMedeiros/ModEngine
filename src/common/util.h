@@ -13,6 +13,7 @@
 std::string loadFile(std::string filepath);
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
+std::string join(std::vector<std::string> values, char delimeter);
 
 enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
 enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
