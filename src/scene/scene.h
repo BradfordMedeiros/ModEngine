@@ -19,6 +19,7 @@ struct World {
   std::map<short, btRigidBody*> rigidbodys;
   std::map<short, GameObjectObj> objectMapping;
   std::map<std::string, Mesh> meshes;
+  std::map<std::string, Animations> animations;
   std::map<short, FullScene> scenes;
   std::map<short, short> idToScene;
 };

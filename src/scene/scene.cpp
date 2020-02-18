@@ -181,14 +181,8 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       [&world, &scene, id](std::string meshName) -> void {  // @todo this is duplicate with commented below
         if (world.meshes.find(meshName) == world.meshes.end()){
           ModelData data = loadModel(meshName); 
-
-          if (data.animations.animations.size() > 0){
-            for (auto animation : data.animations.animations){
-              std::cout << "animation name is: " << animation.name << std::endl;
-            }
-            assert(false);
-          }
-
+          world.animations[meshName] = data.animations;
+                
           auto meshesForId = data.nodeToMeshId.at(0);
 
           bool hasMesh = meshesForId.size() > 0;
