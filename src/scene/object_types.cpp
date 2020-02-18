@@ -14,12 +14,10 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
 
   if (usesMultipleMeshes){
     auto meshStrings = split(additionalFields.at("meshes"), ',');
-    std::cout << "num mesh strings: " << meshStrings.size() << std::endl;
     for (auto meshName : meshStrings){
       ensureMeshLoaded(meshName);
       meshesToRender.push_back(meshes.at(meshName));
     }
-    std::cout << "thing is about to exit" << std::endl;
   }else{
     auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
     meshName = (meshName == "") ? defaultMesh : meshName;
