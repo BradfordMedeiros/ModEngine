@@ -46,7 +46,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
-    std::vector<BoundInfo> info;
     boundInfo = getMaxUnionBoundingInfo(meshObj -> meshesToRender);
   }
 
