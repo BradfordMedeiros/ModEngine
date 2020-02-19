@@ -74,24 +74,19 @@ std::vector<Animation> processAnimations(const aiScene* scene){
 
 std::vector<Bone> processBones(aiMesh* mesh){
   std::vector<Bone> meshBones;
-
-  int numBones = mesh -> mNumBones;
   aiBone** bones = mesh -> mBones;
-  for (int i = 0; i < numBones; i++){
+  for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
-    std::cout << "bone name is: " << bone -> mName.C_Str() << std::endl;
 
-    int numVerticesInBone = bone -> mNumWeights;
-    std::cout << "num verts is: " << numVerticesInBone << std::endl;
-
-    for (int j = 0; j < numVerticesInBone; j++){
-      aiVertexWeight weight = bone -> mWeights[j];
-      std::cout << "vertex id: " << weight.mVertexId << ", weight: " << weight.mWeight << std::endl;
-      auto offsetMatrix = bone -> mOffsetMatrix[j];   // wtf is this i dont get it
+    std::vector<aiVertexWeight> vertexWeights;
+    for (int j = 0; j < bone -> mNumWeights; j++){
+      vertexWeights.push_back(bone -> mWeights[j]);   // is there a faster way to copy this? 
     }
 
     Bone meshBone {
-      .name = bone -> mName.C_Str()
+      .name = bone -> mName.C_Str(),
+      .offsetMatrix = bone -> mOffsetMatrix,
+      .vertexWeights = vertexWeights
     };
     meshBones.push_back(meshBone);
   }

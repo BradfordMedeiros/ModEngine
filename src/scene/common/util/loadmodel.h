@@ -30,6 +30,8 @@ struct Animation {
 
 struct Bone {
   std::string name;
+  aiMatrix4x4t<float> offsetMatrix;
+  std::vector<aiVertexWeight> vertexWeights;  //  weight.mVertexId,  weight.mWeight
 };
 
 struct MeshData {
