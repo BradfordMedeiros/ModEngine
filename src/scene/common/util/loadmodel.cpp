@@ -59,11 +59,6 @@ std::vector<Animation> processAnimations(const aiScene* scene){
     animations.push_back(ani);
 
     for (int j = 0; j < animation -> mNumChannels; j++){
-      // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
-      // http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
-
-      // what about mesh animations ? http://assimp.sourceforge.net/lib_html/structai_mesh_anim.html
-      // I think that's not skeletal animation, but rather a bunch of meshes, but im not sure need to check
       aiNodeAnim* aiAnimation = animation-> mChannels[j];  
       std::cout << "affected node name: " << aiAnimation -> mNodeName.C_Str() << std::endl;  // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
     }
@@ -74,6 +69,7 @@ std::vector<Animation> processAnimations(const aiScene* scene){
 
 std::vector<Bone> processBones(aiMesh* mesh){
   std::vector<Bone> meshBones;
+
   aiBone** bones = mesh -> mBones;
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
