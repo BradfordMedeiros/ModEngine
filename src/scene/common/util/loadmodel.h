@@ -26,8 +26,10 @@ struct Animation {
   double duration;
   double ticksPerSecond;
 };
-struct Animations {
-  std::vector<Animation> animations;
+
+
+struct Bone {
+  std::string name;
 };
 
 struct MeshData {
@@ -35,6 +37,7 @@ struct MeshData {
   std::vector<unsigned int> indices;
   std::vector<std::string> texturePaths;
   BoundInfo boundInfo;
+  std::vector<Bone> bones;
 };
 
 struct ModelData {
@@ -43,7 +46,7 @@ struct ModelData {
   std::map<short, short> childToParent;
   std::map<short, Transformation> nodeTransform;
   std::map<short, std::string> names;
-  Animations animations;
+  std::vector<Animation> animations;
 };
 
 // this really should be "load gameobject" --> since need children mesh

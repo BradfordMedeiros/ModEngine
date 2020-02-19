@@ -42,7 +42,7 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   return info;
 }
 
-Animations processAnimations(const aiScene* scene){
+std::vector<Animation> processAnimations(const aiScene* scene){
   std::vector<Animation> animations;
 
   int numAnimations = scene -> mNumAnimations;
@@ -69,12 +69,12 @@ Animations processAnimations(const aiScene* scene){
     }
   }
 
-  Animations anis {
-    .animations = animations
-  };
-  return anis;
+  return animations;
 }
-void processBones(aiMesh* mesh){
+
+std::vector<Bone> processBones(aiMesh* mesh){
+  std::vector<Bone> meshBones;
+
   int numBones = mesh -> mNumBones;
   aiBone** bones = mesh -> mBones;
   for (int i = 0; i < numBones; i++){
@@ -88,9 +88,16 @@ void processBones(aiMesh* mesh){
       aiVertexWeight weight = bone -> mWeights[j];
       std::cout << "vertex id: " << weight.mVertexId << ", weight: " << weight.mWeight << std::endl;
       auto offsetMatrix = bone -> mOffsetMatrix[j];   // wtf is this i dont get it
-    } 
+    }
+
+    Bone meshBone {
+      .name = bone -> mName.C_Str()
+    };
+    meshBones.push_back(meshBone);
   }
+  return meshBones;
 }
+
 
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
@@ -134,6 +141,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .indices = indices,       
      .texturePaths = textureFilepaths,
      .boundInfo = getBounds(vertices),
+     .bones = processBones(mesh)
    };
 
    return model;
