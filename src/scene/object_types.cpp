@@ -77,12 +77,13 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
   mapping.erase(id);
 }
 
-void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh, Mesh& boundingBoxMesh, bool showCameras){
+void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh, Mesh& boundingBoxMesh, bool showCameras){
   GameObjectObj& toRender = mapping.at(id);
 
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
     for (auto meshToRender : meshObj -> meshesToRender){
+      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), meshToRender.hasBones);
       drawMesh(meshToRender);    
     }
     return;
@@ -90,18 +91,21 @@ void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& camer
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showCameras){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.hasBones);
     drawMesh(cameraMesh);
     return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.hasBones);
     drawMesh(cameraMesh);
     return;
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.hasBones);
     drawMesh(voxelObj -> voxel.mesh);
     return;
   }

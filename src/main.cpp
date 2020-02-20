@@ -492,7 +492,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     /////////////////////////////// end bounding code
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    renderObject(id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
+    renderObject(shaderProgram, id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
   });
 
 }

@@ -19,6 +19,8 @@ struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 texCoords;
+  short boneIndexes[20]; // hardcoded limit of 20 bones
+  float boneWeights[20]; // hardcoded limit of 20 weights
 };
 
 struct Animation {
@@ -31,7 +33,6 @@ struct Animation {
 struct Bone {
   std::string name;
   aiMatrix4x4t<float> offsetMatrix;
-  std::vector<aiVertexWeight> vertexWeights;  //  weight.mVertexId,  weight.mWeight
 };
 
 struct MeshData {

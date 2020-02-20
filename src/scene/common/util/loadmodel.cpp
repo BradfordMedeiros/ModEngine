@@ -74,21 +74,41 @@ std::vector<Bone> processBones(aiMesh* mesh){
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
 
-    std::vector<aiVertexWeight> vertexWeights;
-    for (int j = 0; j < bone -> mNumWeights; j++){
-      vertexWeights.push_back(bone -> mWeights[j]);   // is there a faster way to copy this? 
-    }
-
     Bone meshBone {
       .name = bone -> mName.C_Str(),
       .offsetMatrix = bone -> mOffsetMatrix,
-      .vertexWeights = vertexWeights
     };
     meshBones.push_back(meshBone);
   }
   return meshBones;
 }
 
+/*std::vector<aiVertexWeight> processBonesVertexWeights(aiMesh* mesh){
+  std::vector<aiVertexWeight> vertexWeights;
+  aiBone** bones = mesh -> mBones;
+
+  for (int i = 0; i < mesh -> mNumBones; i++){
+    aiBone* bone = bones[i];
+
+    for (int j = 0; j < bone -> mNumWeights; j++){
+      vertexWeights.push_back(bone -> mWeights[j]);   // is there a faster way to copy this? 
+    }
+  }
+  return vertexWeights;
+}*/
+
+
+void setDefaultBoneIndexes(short* indices, int size){
+  for (int i = 0; i < size; i++){
+    indices[i] = 0;
+  }
+}
+
+void setDefaultBoneWeights(float* weights, int size){
+  for (int i = 0; i < size; i++){
+    weights[i] = 0;
+  }
+}
 
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
@@ -97,7 +117,9 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
      Vertex vertex;
      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);  
+     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z); 
+     setDefaultBoneIndexes(vertex.boneIndexes, 20);
+     setDefaultBoneWeights(vertex.boneWeights, 20);
 
      // load one layer of texture coordinates for now
      if (!mesh -> mTextureCoords[0]){
