@@ -19,6 +19,7 @@ uniform bool enableSpecular;
 #define MAX_LIGHTS 32
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
+uniform bool hasBones;
 
 const float constant = 0.4;
 const float linear = 0.2;
@@ -62,6 +63,8 @@ void main(){
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
     FragColor = color * vec4(tint.x, tint.y, tint.z, 1.0);
-    
+    if (hasBones){
+        FragColor = FragColor + vec4(0, 0, 1.0, 1.0);
+    }
   }
 }
