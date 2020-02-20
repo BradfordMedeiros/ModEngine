@@ -45,7 +45,6 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     .texture = texture,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
-    .hasBones = meshData.bones.size() > 0,
     .bones = meshData.bones
   }; 
 

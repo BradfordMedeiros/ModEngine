@@ -24,7 +24,6 @@ struct Mesh {
   Texture texture; 
   long unsigned int numElements;
   BoundInfo boundInfo;
-  bool hasBones;
   std::vector<Bone> bones;
 };
 

@@ -83,13 +83,15 @@ void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>&
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
     for (auto meshToRender : meshObj -> meshesToRender){
-      if (meshToRender.hasBones){
+      if (meshToRender.bones.size() > 0){
         auto boneMatrix = glm::mat4(1.f);
         //meshToRender.bones.at
         for (int i = 0; i < 20; i++){ // 20 = hardcoded number of bones
           glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(boneMatrix));
         }
         glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), true);
+      }else{
+        glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
       }
 
       drawMesh(meshToRender);    
@@ -99,21 +101,21 @@ void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>&
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showCameras){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.hasBones);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     drawMesh(cameraMesh);
     return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.hasBones);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     drawMesh(cameraMesh);
     return;
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.hasBones);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
     drawMesh(voxelObj -> voxel.mesh);
     return;
   }
