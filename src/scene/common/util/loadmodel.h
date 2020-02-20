@@ -15,12 +15,13 @@
 #include "./boundinfo.h"
 #include "./types.h"
 
+#define NUM_BONES_PER_VERTEX 10
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 texCoords;
-  short boneIndexes[20]; // hardcoded limit of 20 bones
-  float boneWeights[20]; // hardcoded limit of 20 weights
+  short boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 10s per vertex
+  float boneWeights[NUM_BONES_PER_VERTEX]; 
 };
 
 struct Animation {
@@ -32,7 +33,7 @@ struct Animation {
 
 struct Bone {
   std::string name;
-  aiMatrix4x4t<float> offsetMatrix;
+  glm::mat4 offsetMatrix;
 };
 
 struct MeshData {

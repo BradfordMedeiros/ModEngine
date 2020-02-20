@@ -36,7 +36,15 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoords));
 
- // glEnableVertexAttribArray(3);
+  // this is directly coupled to :  ./util/loadmodel.h Vertex struct definition
+  for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+    glEnableVertexAttribArray(3 + i);
+    glVertexAttribIPointer(3 + i, 1, GL_INT, sizeof(Vertex), (void*) (offsetof(Vertex, boneIndexes) + (sizeof(short) * i)));    
+  
+    glEnableVertexAttribArray(3 + NUM_BONES_PER_VERTEX + i);
+    glVertexAttribPointer(3 + NUM_BONES_PER_VERTEX + i, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, boneWeights) + (sizeof(float) * i)));
+  }
+
  // glVertexAttribIPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, boneIndexes));
   
   Mesh mesh = {

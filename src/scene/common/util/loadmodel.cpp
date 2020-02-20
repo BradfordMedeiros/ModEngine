@@ -76,7 +76,9 @@ std::vector<Bone> processBones(aiMesh* mesh){
 
     Bone meshBone {
       .name = bone -> mName.C_Str(),
-      .offsetMatrix = bone -> mOffsetMatrix,
+     // .offsetMatrix = bone -> mOffsetMatrix,
+        //aiMatrix4x4t<float> offsetMatrix;
+      .offsetMatrix = glm::mat4(1.0f),
     };
     meshBones.push_back(meshBone);
   }
@@ -100,13 +102,13 @@ std::vector<Bone> processBones(aiMesh* mesh){
 
 void setDefaultBoneIndexes(short* indices, int size){
   for (int i = 0; i < size; i++){
-    indices[i] = 0;
+    indices[i] = i;
   }
 }
 
 void setDefaultBoneWeights(float* weights, int size){
   for (int i = 0; i < size; i++){
-    weights[i] = 0;
+    weights[i] = i;
   }
 }
 
@@ -118,8 +120,8 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      Vertex vertex;
      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
      vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z); 
-     setDefaultBoneIndexes(vertex.boneIndexes, 20);
-     setDefaultBoneWeights(vertex.boneWeights, 20);
+     setDefaultBoneIndexes(vertex.boneIndexes, NUM_BONES_PER_VERTEX);
+     setDefaultBoneWeights(vertex.boneWeights, NUM_BONES_PER_VERTEX);
 
      // load one layer of texture coordinates for now
      if (!mesh -> mTextureCoords[0]){
