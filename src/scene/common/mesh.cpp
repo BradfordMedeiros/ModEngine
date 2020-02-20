@@ -36,6 +36,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoords));
 
+ // glEnableVertexAttribArray(3);
+ // glVertexAttribIPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, boneIndexes));
   
   Mesh mesh = {
     .VAOPointer = VAO,
@@ -43,7 +45,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     .texture = texture,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
-    .hasBones = meshData.bones.size() > 0
+    .hasBones = meshData.bones.size() > 0,
+    .bones = meshData.bones
   }; 
 
   return mesh; 
