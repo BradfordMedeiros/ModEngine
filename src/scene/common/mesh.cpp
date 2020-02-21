@@ -169,6 +169,9 @@ Texture loadTexture(std::string textureFilePath){
   return tex;
 }
 
+// @TODO [memory leak] - this function is okay, but it's usage is bad.  Currently things will call this and just let memory go.
+// That's a hardcore memory leak if there is one to talk about.  Ok since this is used in debugging, but maybe just free it after the call 
+// or something
 void drawLines(std::vector<Line> allLines){
   std::vector<glm::vec3> lines;
   for (Line line : allLines){

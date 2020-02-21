@@ -72,7 +72,6 @@ SceneDeserialization createSceneFromTokens(
 }
 
 
-// @todo this parsing is sloppy and buggy... obviously need to harden this..
 SceneDeserialization deserializeScene(
   std::string content,  
   std::vector<Field> fields,  
@@ -110,7 +109,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
 
     std::cout << "creating serial obj" << std::endl;
     serialObjs[names.at(nodeId)] = SerializationObject {
-      .name = names.at(nodeId),
+      .name = names.at(nodeId),  // @TODO this is probably not unique name so probably will be bad
       .position = transform.position,
       .scale = transform.scale,
       .rotation = transform.rotation,
