@@ -77,6 +77,10 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
   mapping.erase(id);
 }
 
+void drawBones(std::vector<Bone> bones){
+  std::cout << "draw bones placeholder" << std::endl;
+}
+
 void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh, Mesh& boundingBoxMesh, bool showCameras){
   GameObjectObj& toRender = mapping.at(id);
 
@@ -88,6 +92,7 @@ void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>&
           glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(meshToRender.bones.at(i).offsetMatrix));
         }
         glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), true);
+        drawBones(meshToRender.bones);
       }else{
         glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
       }
