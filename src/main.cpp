@@ -492,7 +492,16 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     /////////////////////////////// end bounding code
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    renderObject(shaderProgram, id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
+    renderObject(
+      shaderProgram, 
+      id, 
+      world.objectMapping, 
+      world.meshes.at("./res/models/box/box.obj"), 
+      objectSelected, 
+      world.meshes.at("./res/models/boundingbox/boundingbox.obj"), 
+      state.showCameras, 
+      modelMatrix
+    );
   });
 
 }
@@ -513,8 +522,13 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
-  drawLines(permaLines);
-  drawLines(lines);
+  if (permaLines.size() > 0){
+    drawLines(permaLines);
+  }
+  if (lines.size() > 0){
+   drawLines(lines);
+  
+  }
   lines.clear();
 }
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){

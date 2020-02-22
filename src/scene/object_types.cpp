@@ -78,7 +78,6 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
 }
 
 void drawBones(GLint shaderProgram, glm::mat4 model, std::vector<Bone> bones){
-
   int index  = 0;
   for (auto bone : bones){
     std::vector<Line> lines;

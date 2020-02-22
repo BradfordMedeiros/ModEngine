@@ -77,10 +77,22 @@ glm::mat4 aiMatrixToGlm(aiMatrix4x4 from){
   return to;
 }
 
-std::vector<Bone> processBones(aiMesh* mesh){
+struct BoneWeighting {
+  int boneId;
+  float weight;
+};
+
+struct BoneInfo {
+  std::vector<Bone> bones;
+  std::map<unsigned int, std::vector<BoneWeighting>>  vertexBoneWeight;
+};
+
+BoneInfo processBones(aiMesh* mesh){
   std::vector<Bone> meshBones;
 
   aiBone** bones = mesh -> mBones;
+
+  std::map<unsigned int, std::vector<BoneWeighting>> vertexToBones;
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
 
@@ -89,47 +101,57 @@ std::vector<Bone> processBones(aiMesh* mesh){
       .offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix)
     };
     meshBones.push_back(meshBone);
-  }
-  return meshBones;
-}
-
-/*std::vector<aiVertexWeight> processBonesVertexWeights(aiMesh* mesh){
-  std::vector<aiVertexWeight> vertexWeights;
-  aiBone** bones = mesh -> mBones;
-
-  for (int i = 0; i < mesh -> mNumBones; i++){
-    aiBone* bone = bones[i];
 
     for (int j = 0; j < bone -> mNumWeights; j++){
-      vertexWeights.push_back(bone -> mWeights[j]);   // is there a faster way to copy this? 
+      aiVertexWeight boneVertexWeight = bone -> mWeights[j];
+      BoneWeighting boneWeight {
+        .boneId = i,
+        .weight = boneVertexWeight.mWeight
+      };
+      vertexToBones[boneVertexWeight.mVertexId].push_back(boneWeight);
     }
   }
-  return vertexWeights;
-}*/
 
+  BoneInfo info {
+    .bones = meshBones,
+    .vertexBoneWeight = vertexToBones
+  };
+  
+  return info;
+}
 
-void setDefaultBoneIndexes(short* indices, int size){
+void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeighting>>&  vertexBoneWeight, int vertexId, short* indices, float* weights, int size){
+  std::vector<BoneWeighting> weighting;
+  if (vertexBoneWeight.find(vertexId) != vertexBoneWeight.end()){
+    weighting = vertexBoneWeight.at(vertexId);
+  }
+  assert(weighting.size() <= size);
+
   for (int i = 0; i < size; i++){
-    indices[i] = i;
+    if (i < weighting.size()){
+      auto weight = weighting.at(i);
+      indices[i] = weight.boneId;
+      weights[i] = weight.weight;
+    }else{
+      indices[i] = 0;   // if no associated bone id, just put 0 bone id with 0 weighting so it won't add to the weight
+      weights[i] = 0;
+    }
   }
 }
 
-void setDefaultBoneWeights(float* weights, int size){
-  for (int i = 0; i < size; i++){
-    weights[i] = i;
-  }
-}
+
 
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
+   BoneInfo boneInfo = processBones(mesh);
+
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
      Vertex vertex;
      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
      vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z); 
-     setDefaultBoneIndexes(vertex.boneIndexes, NUM_BONES_PER_VERTEX);
-     setDefaultBoneWeights(vertex.boneWeights, NUM_BONES_PER_VERTEX);
+     setDefaultBoneIndexesAndWeights(boneInfo.vertexBoneWeight, i, vertex.boneIndexes, vertex.boneWeights, NUM_BONES_PER_VERTEX);
 
      // load one layer of texture coordinates for now
      if (!mesh -> mTextureCoords[0]){
@@ -164,7 +186,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .indices = indices,       
      .texturePaths = textureFilepaths,
      .boundInfo = getBounds(vertices),
-     .bones = processBones(mesh)
+     .bones = boneInfo.bones
    };
 
    return model;
