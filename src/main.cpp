@@ -576,6 +576,10 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       drawText("scale: " + print(obj.transformation.scale), 10, 100, 3);
       drawText("rotation: " + print(obj.transformation.rotation), 10, 110, 3);
     }
+    
+    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 130, 3);
+
   }
 }
 
