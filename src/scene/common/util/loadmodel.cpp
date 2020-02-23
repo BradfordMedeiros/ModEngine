@@ -67,15 +67,10 @@ std::vector<Animation> processAnimations(const aiScene* scene){
   return animations;
 }
 
-// https://stackoverflow.com/questions/29184311/how-to-rotate-a-skinned-models-bones-in-c-using-assimp
-glm::mat4 aiMatrixToGlm(aiMatrix4x4 from){
-  glm::mat4 to;
-  to[0][0] = (GLfloat)from.a1; to[0][1] = (GLfloat)from.b1;  to[0][2] = (GLfloat)from.c1; to[0][3] = (GLfloat)from.d1;
-  to[1][0] = (GLfloat)from.a2; to[1][1] = (GLfloat)from.b2;  to[1][2] = (GLfloat)from.c2; to[1][3] = (GLfloat)from.d2;
-  to[2][0] = (GLfloat)from.a3; to[2][1] = (GLfloat)from.b3;  to[2][2] = (GLfloat)from.c3; to[2][3] = (GLfloat)from.d3;
-  to[3][0] = (GLfloat)from.a4; to[3][1] = (GLfloat)from.b4;  to[3][2] = (GLfloat)from.c4; to[3][3] = (GLfloat)from.d4;
-  return to;
+glm::mat4 aiMatrixToGlm(aiMatrix4x4 from) { 
+  return glm::transpose(glm::make_mat4(&from.a1)); 
 }
+
 
 struct BoneWeighting {
   int boneId;
@@ -126,20 +121,20 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
     weighting = vertexBoneWeight.at(vertexId);
   }
   assert(weighting.size() <= size);
+  assert(size == 4);
+  //assert(weighting.size() >= 1);
 
   for (int i = 0; i < size; i++){
     if (i < weighting.size()){
       auto weight = weighting.at(i);
       indices[i] = weight.boneId;
       weights[i] = weight.weight;
-    }else{
+     }else{
       indices[i] = 0;   // if no associated bone id, just put 0 bone id with 0 weighting so it won't add to the weight
       weights[i] = 0;
     }
   }
 }
-
-
 
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
@@ -155,6 +150,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
 
      // load one layer of texture coordinates for now
      if (!mesh -> mTextureCoords[0]){
+        assert(false);
         continue;
      }
      vertex.texCoords = glm::vec2(mesh -> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 

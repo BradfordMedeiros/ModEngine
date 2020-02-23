@@ -6,6 +6,7 @@
 #include <map>
 #include <GL/gl.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -16,12 +17,12 @@
 #include "./boundinfo.h"
 #include "./types.h"
 
-#define NUM_BONES_PER_VERTEX 10
+#define NUM_BONES_PER_VERTEX 4
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 texCoords;
-  short boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 10s per vertex
+  short boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
   float boneWeights[NUM_BONES_PER_VERTEX]; 
 };
 

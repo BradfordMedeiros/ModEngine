@@ -106,11 +106,15 @@ void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>&
   if (meshObj != NULL && !meshObj->isDisabled){
     for (auto meshToRender : meshObj -> meshesToRender){
       if (meshToRender.bones.size() > 0){
-        for (int i = 0; i < meshToRender.bones.size(); i++){
-          glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(meshToRender.bones.at(i).offsetMatrix));
+        for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+          if (i >= meshToRender.bones.size()){
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(glm::mat4(0.f)));
+          }else{
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(meshToRender.bones.at(i).offsetMatrix));
+          }
         }
         glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), true);
-        drawBones(shaderProgram, model, meshToRender.bones);
+        //drawBones(shaderProgram, model, meshToRender.bones);
       }else{
         glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
       }
