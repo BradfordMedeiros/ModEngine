@@ -4,6 +4,11 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
 
+// temporary
+in vec4 glFragPos;
+flat in vec4 overcolor;
+//
+
 out vec4 FragColor;
 
 uniform sampler2D coolzero;
@@ -20,22 +25,23 @@ uniform bool enableSpecular;
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform bool hasBones;
+uniform mat4 bones[100];
 
 const float constant = 0.4;
 const float linear = 0.2;
 const float quadratic = 0.0;
 
 void main(){
-  if (tint.r < 0.1){
+  if (false && tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
     //vec4 texColor = (texture(coolzero, TexCoord) + texture(coolsomevalue, TexCoord)) / 2;
     //vec4 texColor = 
     vec4 texColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
     
-    if (texColor.a < 0.1){
+   /* if (texColor.a < 0.1){
       discard;
-    }
+    }*/
 
     vec3 ambient = vec3(0.6, 0.6, 0.6);     
     vec3 totalSpecular = vec3(0, 0, 0);
@@ -63,8 +69,10 @@ void main(){
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
     FragColor = color * vec4(tint.x, tint.y, tint.z, 1.0);
-    if (hasBones){
-        FragColor = FragColor + vec4(0, 0, 1.0, 1.0);
-    }
+
+   
+    //if (hasBones){
+    //  FragColor = overcolor;
+    //}
   }
 }
