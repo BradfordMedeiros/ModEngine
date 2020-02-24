@@ -75,7 +75,18 @@ void addObject(
 );
 
 void removeObject(std::map<short, GameObjectObj>& mapping, short id);
-void renderObject(GLint shaderProgram, short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh,  Mesh& boundingboxMesh, bool showCameras, glm::mat4 model);
+void renderObject(
+  GLint shaderProgram, 
+  short id, 
+  std::map<short, GameObjectObj>& mapping,
+  Mesh& cameraMesh, 
+  bool showBoundingBoxForMesh,  
+  Mesh& boundingboxMesh, 
+  bool showCameras, 
+  glm::mat4 model,
+  bool showBoneWeight,
+  bool useBoneTransform
+);
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping);
 

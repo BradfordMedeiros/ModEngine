@@ -500,7 +500,9 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       objectSelected, 
       world.meshes.at("./res/models/boundingbox/boundingbox.obj"), 
       state.showCameras, 
-      modelMatrix
+      modelMatrix,
+      state.showBoneWeight,
+      state.useBoneTransform
     );
   });
 
@@ -579,6 +581,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 130, 3);
+    drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 140, 3);
 
   }
 }
