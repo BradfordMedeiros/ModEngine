@@ -81,11 +81,16 @@ void drawBones(GLint shaderProgram, glm::mat4 model, std::vector<Bone> bones){
   int index  = 0;
   for (auto bone : bones){
     std::vector<Line> lines;
-    Line line = {
-      .fromPos = glm::vec3(0.f, 0.f, 0.f),
-      .toPos = glm::vec3(0.f, 0.1f, 0.f)
+    Line line1 = {
+      .fromPos = glm::vec3(0.5f, 0.f, 0.f),
+      .toPos = glm::vec3(0.5f, 1.f, 0.f)
     };
-    lines.push_back(line);
+    Line line2 = {
+      .fromPos = glm::vec3(0.f, 0.5f, 0.f),
+      .toPos = glm::vec3(1.f, 0.5f, 0.f)
+    };
+    lines.push_back(line1);
+    lines.push_back(line2);
 
     glm::mat4 newModel = bone.offsetMatrix;
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(newModel));
@@ -113,6 +118,8 @@ void renderObject(
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
     for (auto meshToRender : meshObj -> meshesToRender){
+
+      bool hasBones = false;
       if (meshToRender.bones.size() > 0){
         for (int i = 0; i < 100; i++){
           if ( i >= meshToRender.bones.size()){
@@ -122,15 +129,18 @@ void renderObject(
           }
 
         }
-        glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), true);
+        hasBones = true;
       }else{
-        glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
+        hasBones = false;
       }
 
       glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
-      //drawBones(shaderProgram, model, meshToRender.bones);
+      
+      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
+      drawBones(shaderProgram, model, meshToRender.bones);
 
+      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);
       drawMesh(meshToRender);    
     }
     return;
