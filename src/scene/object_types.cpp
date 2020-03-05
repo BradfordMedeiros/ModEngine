@@ -121,8 +121,24 @@ void renderObject(
 
       bool hasBones = false;
       if (meshToRender.bones.size() > 0){
+        int activeProgramId; 
+        glGetIntegerv(GL_CURRENT_PROGRAM, &activeProgramId);
+
+        //std::cout << "!!!: BONE LOCATION START -------------------: (" << activeProgramId << ")" << std::endl;
+
+
+        auto modelUniformLocation = glGetUniformLocation(shaderProgram, "model");
+        //std::cout << "model uniform location: " << modelUniformLocation << std::endl;
+
+        auto hasBonesLocation = glGetUniformLocation(shaderProgram, "hasBones");
+        //std::cout << "has bones location: " << hasBonesLocation << std::endl;
+
         for (int i = 0; i < 100; i++){
-          if ( i >= meshToRender.bones.size()){
+           auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
+          //std::cout << "!!!: BONE LOCATION: " << boneUniformLocation << std::endl;
+
+          if (i >= meshToRender.bones.size()){
+   
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
           }else{
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(meshToRender.bones.at(i).offsetMatrix));
@@ -138,10 +154,12 @@ void renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
       
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-      drawBones(shaderProgram, model, meshToRender.bones);
+      //drawBones(shaderProgram, model, meshToRender.bones);
 
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);
-      drawMesh(meshToRender);    
+      if (hasBones){
+        drawMesh(meshToRender);    
+      }
     }
     return;
   }

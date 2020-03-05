@@ -26,10 +26,19 @@ struct Vertex {
   float boneWeights[NUM_BONES_PER_VERTEX]; 
 };
 
+
+struct AnimationChannel {
+  std::string nodeName;
+  std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 
+  std::vector<aiVectorKey> scalingKeys;
+  std::vector<aiQuatKey> rotationKeys;
+};
+
 struct Animation {
   std::string name;
   double duration;
   double ticksPerSecond;
+  std::vector<AnimationChannel> channels;
 };
 
 

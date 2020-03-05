@@ -35,6 +35,7 @@
 #include "./state.h"
 #include "./input.h"
 #include "./network.h"
+#include "./timeplayback.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -157,11 +158,28 @@ void playSound(){
   //setActiveDepthTexture(activeDepthTexture);
 }
 
+
+void playAnimation(){
+  std::cout << "play animation placeholder" << std::endl;
+  auto targetModel = "./res/models/bob/bob_lamp_update_export.md5mesh";
+  std::cout << "animations for: " << targetModel << std::endl;
+
+  auto animations = world.animations.at(targetModel);
+  for (auto animation : animations){
+    std::cout << "(" << animation.name << "," << animation.duration << "," << animation.ticksPerSecond <<  ")" << std::endl; 
+  }
+
+}
+
+
 bool useYAxis = true;
 
 void onDebugKey(){
   useYAxis = !useYAxis;
-  std::cout << "use yaxis: " << useYAxis << std::endl;
+  //std::cout << "use yaxis: " << useYAxis << std::endl;
+
+  playSound();
+  playAnimation();
 }
 
 void expandVoxelUp(){
@@ -808,6 +826,7 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
   while (!glfwWindowShouldClose(window)){
     frameCount++;
     float now = glfwGetTime();
@@ -821,7 +840,7 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
       //printObjectIds();
     }
-    
+
     if (isServer){
       getDataFromSocket(serverInstance, onData);
     }

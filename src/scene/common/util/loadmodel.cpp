@@ -50,18 +50,46 @@ std::vector<Animation> processAnimations(const aiScene* scene){
   for (int i = 0; i < numAnimations; i++){
     aiAnimation* animation = scene -> mAnimations[i];
 
+    std::string animationName = animation -> mName.C_Str();
+    if (animationName == ""){
+      animationName = "default:" + std::to_string(i); 
+    }
+
+    std::vector<AnimationChannel> channels;
+    for (int j = 0; j < animation -> mNumChannels; j++){
+      aiNodeAnim* aiAnimation = animation-> mChannels[j];  
+
+      std::vector<aiVectorKey> positionKeys;   
+      std::vector<aiVectorKey> scalingKeys;
+      std::vector<aiQuatKey> rotationKeys;
+
+      for (int k = 0; k < aiAnimation -> mNumPositionKeys; k++){
+        positionKeys.push_back(aiAnimation -> mPositionKeys[k]);
+      }
+      for (int k = 0; k < aiAnimation -> mNumScalingKeys; k++){
+        scalingKeys.push_back(aiAnimation -> mScalingKeys[k]);
+
+      }
+      for (int k = 0; k < aiAnimation -> mNumRotationKeys; k++){
+        rotationKeys.push_back(aiAnimation -> mRotationKeys[k]);
+      }
+
+      AnimationChannel channel {
+        .nodeName = aiAnimation -> mNodeName.C_Str(),
+        .positionKeys = positionKeys,
+        .scalingKeys = scalingKeys,
+        .rotationKeys = rotationKeys
+      };
+    }
+    
     Animation ani {
-      .name = animation -> mName.C_Str(),
+      .name = animationName,
       .duration = animation -> mDuration,
-      .ticksPerSecond = animation -> mTicksPerSecond
+      .ticksPerSecond = animation -> mTicksPerSecond,
+      .channels = channels
     };
 
     animations.push_back(ani);
-
-    for (int j = 0; j < animation -> mNumChannels; j++){
-      aiNodeAnim* aiAnimation = animation-> mChannels[j];  
-      std::cout << "affected node name: " << aiAnimation -> mNodeName.C_Str() << std::endl;  // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
-    }
   }
 
   return animations;
