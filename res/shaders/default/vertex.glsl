@@ -41,17 +41,17 @@ void main(){
     if (useBoneTransform){
       modelPosition= vec4(aPos.xyz, 1.0);
     }else{          
-      float totalWeight = aBoneWeight[0] + aBoneWeight[1] + aBoneWeight[2] + aBoneWeight[3];
+      float totalWeight = aBoneWeight[0]; //+ aBoneWeight[1] + aBoneWeight[2] + aBoneWeight[3];
       float multiplier = 1 / totalWeight;
 
 
-      modelPosition=                   (bones[aBoneIndex[0]] * aBoneWeight[0] * multiplier ) * vec4(aPos.xyz, 1.0);
-      modelPosition = modelPosition + ((bones[aBoneIndex[1]] * aBoneWeight[1] * multiplier) * vec4(aPos.xyz, 1.0));
-      modelPosition = modelPosition + ((bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) * vec4(aPos.xyz, 1.0));
-      modelPosition = modelPosition + ((bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier) * vec4(aPos.xyz, 1.0));
+      modelPosition =                   (bones[aBoneIndex[0]] * aBoneWeight[0] * multiplier) * vec4(aPos.xyz, 1.0);
+      modelPosition = modelPosition +  ((bones[aBoneIndex[1]] * aBoneWeight[1] * multiplier) * vec4(aPos.xyz, 1.0));
+      modelPosition = modelPosition +  ((bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) * vec4(aPos.xyz, 1.0));
+      modelPosition = modelPosition +  ((bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier) * vec4(aPos.xyz, 1.0));
     }
 
-    gl_Position = projection * view *  modelPosition;
+    gl_Position = projection * view *  model * modelPosition;
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
