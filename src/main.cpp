@@ -35,6 +35,7 @@
 #include "./state.h"
 #include "./input.h"
 #include "./network.h"
+#include "./timeplayback.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -157,11 +158,56 @@ void playSound(){
   //setActiveDepthTexture(activeDepthTexture);
 }
 
-bool useYAxis = true;
+auto targetModel = "./res/models/bob/bob_lamp_update_export.md5mesh";
+Animation getTargetAnimation(){
+  return world.animations.at(targetModel).at(0);
+}
 
+void playAnimation(){
+  std::cout << "play animation placeholder" << std::endl;
+  std::cout << "animations for: " << targetModel << std::endl;
+
+  auto animations = world.animations.at(targetModel);
+  for (auto animation : animations){
+    std::cout << "(" << animation.name << "," << animation.duration << "," << animation.ticksPerSecond <<  ")" << std::endl; 
+  }
+}
+
+
+
+void advanceAnimation(float currentTime, float elapsedTime){
+  auto animation = getTargetAnimation();
+  std::cout << "playing animation: " << animation.name << std::endl;
+  std::cout << "current time: " << currentTime << std::endl;
+  std::cout << "elapsed time: " << elapsedTime << std::endl;
+  /*  
+    struct AnimationChannel {
+      std::string nodeName;
+      std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 
+      std::vector<aiVectorKey> scalingKeys;
+      std::vector<aiQuatKey> rotationKeys;
+    };
+
+    struct Animation {
+      std::string name;
+      double duration;
+      double ticksPerSecond;
+      std::vector<AnimationChannel> channels;
+    }
+  */
+}
+
+TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
+  advanceAnimation(currentTime, elapsedTime);
+}); 
+
+bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
-  std::cout << "use yaxis: " << useYAxis << std::endl;
+  //std::cout << "use yaxis: " << useYAxis << std::endl;
+
+  playSound();
+  playAnimation();
 }
 
 void expandVoxelUp(){
@@ -492,7 +538,18 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     /////////////////////////////// end bounding code
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    renderObject(id, world.objectMapping, world.meshes.at("./res/models/box/box.obj"), objectSelected, world.meshes.at("./res/models/boundingbox/boundingbox.obj"), state.showCameras);
+    renderObject(
+      shaderProgram, 
+      id, 
+      world.objectMapping, 
+      world.meshes.at("./res/models/box/box.obj"), 
+      objectSelected, 
+      world.meshes.at("./res/models/boundingbox/boundingbox.obj"), 
+      state.showCameras, 
+      modelMatrix,
+      state.showBoneWeight,
+      state.useBoneTransform
+    );
   });
 
 }
@@ -513,8 +570,13 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
-  drawLines(permaLines);
-  drawLines(lines);
+  if (permaLines.size() > 0){
+    drawLines(permaLines);
+  }
+  if (lines.size() > 0){
+   drawLines(lines);
+  
+  }
   lines.clear();
 }
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
@@ -562,6 +624,11 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
       drawText("scale: " + print(obj.transformation.scale), 10, 100, 3);
       drawText("rotation: " + print(obj.transformation.rotation), 10, 110, 3);
     }
+    
+    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 130, 3);
+    drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 140, 3);
+
   }
 }
 
@@ -787,11 +854,13 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
   while (!glfwWindowShouldClose(window)){
     frameCount++;
     float now = glfwGetTime();
     deltaTime = now - previous;   
     previous = now;
+    timePlayback.setElapsedTime(deltaTime);
 
     if (frameCount == 60){
       frameCount = 0;
@@ -800,7 +869,7 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
       //printObjectIds();
     }
-    
+
     if (isServer){
       getDataFromSocket(serverInstance, onData);
     }

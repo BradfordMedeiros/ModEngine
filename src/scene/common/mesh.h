@@ -24,6 +24,7 @@ struct Mesh {
   Texture texture; 
   long unsigned int numElements;
   BoundInfo boundInfo;
+  std::vector<Bone> bones;
 };
 
 Mesh loadMesh(std::string defaultTexture, MeshData modelData);		 // loads model and returns mesh/bound texture data

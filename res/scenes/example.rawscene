@@ -3,6 +3,8 @@
 >camtest:scale:1.000000 1.000000 1.000000
 >camtest:rotation:-2.152896 0.802106 -2.312180
 
+]grid1:from:1|1|1|0
+
 !onelight:position:0 -10 0
 !seclight:position:3 -10 0
 

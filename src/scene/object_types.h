@@ -10,6 +10,14 @@
 #include "./scenegraph.h"
 #include "./voxels.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 struct GameObjectMesh {
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
@@ -67,7 +75,18 @@ void addObject(
 );
 
 void removeObject(std::map<short, GameObjectObj>& mapping, short id);
-void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh,  Mesh& boundingboxMesh, bool showCameras);
+void renderObject(
+  GLint shaderProgram, 
+  short id, 
+  std::map<short, GameObjectObj>& mapping,
+  Mesh& cameraMesh, 
+  bool showBoundingBoxForMesh,  
+  Mesh& boundingboxMesh, 
+  bool showCameras, 
+  glm::mat4 model,
+  bool showBoneWeight,
+  bool useBoneTransform
+);
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping);
 

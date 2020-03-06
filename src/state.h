@@ -35,6 +35,8 @@ struct engineState {
   bool showDepthBuffer;
   float fov;  // in degrees
   bool toggleFov;
+  bool showBoneWeight;
+  bool useBoneTransform;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

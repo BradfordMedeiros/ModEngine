@@ -179,13 +179,11 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
       [&world, &scene, id](std::string meshName) -> void {  // @todo this is duplicate with commented below
-        std::cout << "********** ensure: " << meshName << std::endl;
         if (world.meshes.find(meshName) == world.meshes.end()){
-          std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$ ensure mesh loaded called for " << meshName << std::endl;
-          ModelData data = loadModel(meshName);        
-
+          ModelData data = loadModel(meshName); 
+          world.animations[meshName] = data.animations;
+                
           auto meshesForId = data.nodeToMeshId.at(0);
-          std::cout << "meshes for id size: " << meshesForId.size() << std::endl;
 
           bool hasMesh = meshesForId.size() > 0;
           if (hasMesh){
@@ -209,12 +207,12 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             additionalFieldsMap[nodeId] = emptyFields;
           }
 
-          std::cout << "about to set mesh ref" << std::endl;
           for (auto [nodeId, meshListIds] : data.nodeToMeshId){
             if (meshListIds.size() == 1){
               auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
               additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
             }else if (meshListIds.size() > 1){
+              // @TODO - think - maybe this should just be multiple objects with one mesh each, would be easier for manipulation and stuff, but this ok for now
               std::vector<std::string> meshRefNames;
               for (auto id : meshListIds){
                 auto meshRef = meshName + "::" + std::to_string(id);

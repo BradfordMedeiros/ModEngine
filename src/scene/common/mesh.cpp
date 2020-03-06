@@ -36,14 +36,32 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoords));
 
-  
+  for (auto vertex : meshData.vertices){
+    for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+      if (vertex.boneIndexes[i] > 50){
+        std::cout << "value is: " << vertex.boneIndexes[i] << std::endl;
+        assert(false);
+      }
+     }
+  }
 
+  // this is directly coupled to :  ./util/loadmodel.h Vertex struct definition
+  for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+    glEnableVertexAttribArray(3 + i);
+    glVertexAttribIPointer(3 + i, 1, GL_BYTE, sizeof(Vertex), (void*) (offsetof(Vertex, boneIndexes) + (sizeof(short) * i)));    
+
+    glEnableVertexAttribArray(3 + NUM_BONES_PER_VERTEX + i);
+    glVertexAttribPointer(3 + NUM_BONES_PER_VERTEX + i, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, boneWeights) + (sizeof(float) * i)));
+  }
+
+  
   Mesh mesh = {
     .VAOPointer = VAO,
     .VBOPointer = VBO,
     .texture = texture,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
+    .bones = meshData.bones
   }; 
 
   return mesh; 
@@ -159,6 +177,9 @@ Texture loadTexture(std::string textureFilePath){
   return tex;
 }
 
+// @TODO [memory leak] - this function is okay, but it's usage is bad.  Currently things will call this and just let memory go.
+// That's a hardcore memory leak if there is one to talk about.  Ok since this is used in debugging, but maybe just free it after the call 
+// or something
 void drawLines(std::vector<Line> allLines){
   std::vector<glm::vec3> lines;
   for (Line line : allLines){

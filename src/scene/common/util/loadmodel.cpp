@@ -42,60 +42,143 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   return info;
 }
 
-void processAnimations(const aiScene* scene){
+std::vector<Animation> processAnimations(const aiScene* scene){
+  std::vector<Animation> animations;
+
   int numAnimations = scene -> mNumAnimations;
   std::cout << "num animations: " << numAnimations << std::endl;
   for (int i = 0; i < numAnimations; i++){
     aiAnimation* animation = scene -> mAnimations[i];
-    std::cout << "animation name is: " << animation -> mName.C_Str() << std::endl;
-    std::cout << "ticks per seconds: " << animation -> mTicksPerSecond << std::endl;
-    std::cout << "duration is: " << animation -> mDuration << std::endl;
 
-    for (int j = 0; j < animation -> mNumChannels; j++){
-      // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
-      // http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
-
-      // what about mesh animations ? http://assimp.sourceforge.net/lib_html/structai_mesh_anim.html
-      // I think that's not skeletal animation, but rather a bunch of meshes, but im not sure need to check
-      aiNodeAnim* aiAnimation = animation-> mChannels[j];  
-      std::cout << "affected node name: " << aiAnimation -> mNodeName.C_Str() << std::endl;  // http://assimp.sourceforge.net/lib_html/structai_node_anim.html
-
+    std::string animationName = animation -> mName.C_Str();
+    if (animationName == ""){
+      animationName = "default:" + std::to_string(i); 
     }
 
+    std::vector<AnimationChannel> channels;
+    for (int j = 0; j < animation -> mNumChannels; j++){
+      aiNodeAnim* aiAnimation = animation-> mChannels[j];  
+
+      std::vector<aiVectorKey> positionKeys;   
+      std::vector<aiVectorKey> scalingKeys;
+      std::vector<aiQuatKey> rotationKeys;
+
+      for (int k = 0; k < aiAnimation -> mNumPositionKeys; k++){
+        positionKeys.push_back(aiAnimation -> mPositionKeys[k]);
+      }
+      for (int k = 0; k < aiAnimation -> mNumScalingKeys; k++){
+        scalingKeys.push_back(aiAnimation -> mScalingKeys[k]);
+
+      }
+      for (int k = 0; k < aiAnimation -> mNumRotationKeys; k++){
+        rotationKeys.push_back(aiAnimation -> mRotationKeys[k]);
+      }
+
+      AnimationChannel channel {
+        .nodeName = aiAnimation -> mNodeName.C_Str(),
+        .positionKeys = positionKeys,
+        .scalingKeys = scalingKeys,
+        .rotationKeys = rotationKeys
+      };
+    }
+    
+    Animation ani {
+      .name = animationName,
+      .duration = animation -> mDuration,
+      .ticksPerSecond = animation -> mTicksPerSecond,
+      .channels = channels
+    };
+
+    animations.push_back(ani);
   }
+
+  return animations;
 }
-void processBones(aiMesh* mesh){
-  int numBones = mesh -> mNumBones;
+
+glm::mat4 aiMatrixToGlm(aiMatrix4x4 from) { 
+  return glm::transpose(glm::make_mat4(&from.a1)); 
+}
+
+
+struct BoneWeighting {
+  int boneId;
+  float weight;
+};
+
+struct BoneInfo {
+  std::vector<Bone> bones;
+  std::map<unsigned int, std::vector<BoneWeighting>>  vertexBoneWeight;
+};
+
+BoneInfo processBones(aiMesh* mesh){
+  std::vector<Bone> meshBones;
+
   aiBone** bones = mesh -> mBones;
-  for (int i = 0; i < numBones; i++){
+
+  std::map<unsigned int, std::vector<BoneWeighting>> vertexToBones;
+  for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
-    std::cout << "bone name is: " << bone -> mName.C_Str() << std::endl;
 
-    int numVerticesInBone = bone -> mNumWeights;
-    std::cout << "num verts is: " << numVerticesInBone << std::endl;
+    Bone meshBone {
+      .name = bone -> mName.C_Str(),
+      .offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix)
+    };
+    meshBones.push_back(meshBone);
 
-    for (int j = 0; j < numVerticesInBone; j++){
-      aiVertexWeight weight = bone -> mWeights[j];
-      std::cout << "vertex id: " << weight.mVertexId << ", weight: " << weight.mWeight << std::endl;
-      auto offsetMatrix = bone -> mOffsetMatrix[j];   // wtf is this i dont get it
-    } 
+    for (int j = 0; j < bone -> mNumWeights; j++){
+      aiVertexWeight boneVertexWeight = bone -> mWeights[j];
+      BoneWeighting boneWeight {
+        .boneId = i,
+        .weight = boneVertexWeight.mWeight
+      };
+      vertexToBones[boneVertexWeight.mVertexId].push_back(boneWeight);
+    }
   }
 
+  BoneInfo info {
+    .bones = meshBones,
+    .vertexBoneWeight = vertexToBones
+  };
+  
+  return info;
+}
 
-  std::cout << "num bones: " << numBones << std::endl;
+void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeighting>>&  vertexBoneWeight, int vertexId, short* indices, float* weights, int size){
+  std::vector<BoneWeighting> weighting;
+  if (vertexBoneWeight.find(vertexId) != vertexBoneWeight.end()){
+    weighting = vertexBoneWeight.at(vertexId);
+  }
+  assert(weighting.size() <= size);
+  assert(size == 4);
+  //assert(weighting.size() >= 1);
+
+  for (int i = 0; i < size; i++){
+    if (i < weighting.size()){
+      auto weight = weighting.at(i);
+      indices[i] = weight.boneId;
+      weights[i] = weight.weight;
+     }else{
+      indices[i] = 0;   // if no associated bone id, just put 0 bone id with 0 weighting so it won't add to the weight
+      weights[i] = 0;
+    }
+  }
 }
 
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
+   BoneInfo boneInfo = processBones(mesh);
+
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
      Vertex vertex;
      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);  
+     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z); 
+     setDefaultBoneIndexesAndWeights(boneInfo.vertexBoneWeight, i, vertex.boneIndexes, vertex.boneWeights, NUM_BONES_PER_VERTEX);
 
      // load one layer of texture coordinates for now
      if (!mesh -> mTextureCoords[0]){
+        assert(false);
         continue;
      }
      vertex.texCoords = glm::vec2(mesh -> mTextureCoords[0][i].x, mesh -> mTextureCoords[0][i].y);  // Maybe warn here is no texcoords but no materials ? 
@@ -127,6 +210,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .indices = indices,       
      .texturePaths = textureFilepaths,
      .boundInfo = getBounds(vertices),
+     .bones = boneInfo.bones
    };
 
    return model;
@@ -172,7 +256,7 @@ ModelData loadModel(std::string modelPath){
    std::map<short, Transformation> nodeTransform;
    std::map<short, std::string> names;
 
-   //processAnimations(scene);
+   auto animations = processAnimations(scene);
 
    int localNodeId = -1;
    processNode(scene -> mRootNode, localNodeId, &localNodeId, 
@@ -211,7 +295,8 @@ ModelData loadModel(std::string modelPath){
      .nodeToMeshId = nodeToMeshId,
      .childToParent = childToParent,
      .nodeTransform = nodeTransform,
-     .names = names
+     .names = names,
+     .animations = animations
    };
    return data;
 }

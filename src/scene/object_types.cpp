@@ -77,31 +77,110 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
   mapping.erase(id);
 }
 
-void renderObject(short id, std::map<short, GameObjectObj>& mapping, Mesh& cameraMesh, bool showBoundingBoxForMesh, Mesh& boundingBoxMesh, bool showCameras){
-  GameObjectObj& toRender = mapping.at(id);
+void drawBones(GLint shaderProgram, glm::mat4 model, std::vector<Bone> bones){
+  int index  = 0;
+  for (auto bone : bones){
+    std::vector<Line> lines;
+    Line line1 = {
+      .fromPos = glm::vec3(0.5f, 0.f, 0.f),
+      .toPos = glm::vec3(0.5f, 1.f, 0.f)
+    };
+    Line line2 = {
+      .fromPos = glm::vec3(0.f, 0.5f, 0.f),
+      .toPos = glm::vec3(1.f, 0.5f, 0.f)
+    };
+    lines.push_back(line1);
+    lines.push_back(line2);
 
+    glm::mat4 newModel = bone.offsetMatrix;
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(newModel));
+    drawLines(lines);
+    index++;
+  }
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+}
+
+
+void renderObject(
+  GLint shaderProgram, 
+  short id, 
+  std::map<short, GameObjectObj>& mapping, 
+  Mesh& cameraMesh, 
+  bool showBoundingBoxForMesh, 
+  Mesh& boundingBoxMesh, 
+  bool showCameras, 
+  glm::mat4 model,
+  bool showBoneWeight,
+  bool useBoneTransform
+){
+  GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL && !meshObj->isDisabled){
     for (auto meshToRender : meshObj -> meshesToRender){
-      drawMesh(meshToRender);    
+
+      bool hasBones = false;
+      if (meshToRender.bones.size() > 0){
+        int activeProgramId; 
+        glGetIntegerv(GL_CURRENT_PROGRAM, &activeProgramId);
+
+        //std::cout << "!!!: BONE LOCATION START -------------------: (" << activeProgramId << ")" << std::endl;
+
+
+        auto modelUniformLocation = glGetUniformLocation(shaderProgram, "model");
+        //std::cout << "model uniform location: " << modelUniformLocation << std::endl;
+
+        auto hasBonesLocation = glGetUniformLocation(shaderProgram, "hasBones");
+        //std::cout << "has bones location: " << hasBonesLocation << std::endl;
+
+        for (int i = 0; i < 100; i++){
+           auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
+          //std::cout << "!!!: BONE LOCATION: " << boneUniformLocation << std::endl;
+
+          if (i >= meshToRender.bones.size()){
+   
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+          }else{
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(meshToRender.bones.at(i).offsetMatrix));
+          }
+
+        }
+        hasBones = true;
+      }else{
+        hasBones = false;
+      }
+
+      glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
+      glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
+      
+      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
+      //drawBones(shaderProgram, model, meshToRender.bones);
+
+      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);
+      if (hasBones){
+        drawMesh(meshToRender);    
+      }
     }
     return;
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showCameras){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     drawMesh(cameraMesh);
     return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     drawMesh(cameraMesh);
     return;
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
     drawMesh(voxelObj -> voxel.mesh);
     return;
   }

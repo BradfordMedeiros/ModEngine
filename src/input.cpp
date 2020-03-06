@@ -259,4 +259,13 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
      onArrowKey(GLFW_KEY_DOWN);
    }
+
+   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS){
+     state.showBoneWeight = !state.showBoneWeight;
+     std::cout << "state: show bone weight " << state.showBoneWeight << std::endl;
+   }
+   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS){
+     state.useBoneTransform = !state.useBoneTransform;
+     std::cout << "state: use bone transform: " << state.useBoneTransform << std::endl;
+   }
 }
