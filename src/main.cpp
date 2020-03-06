@@ -199,7 +199,7 @@ void advanceAnimation(float currentTime, float elapsedTime){
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   advanceAnimation(currentTime, elapsedTime);
-}); 
+}, 10); 
 
 bool useYAxis = true;
 void onDebugKey(){
@@ -208,6 +208,11 @@ void onDebugKey(){
 
   playSound();
   playAnimation();
+  if (timePlayback.isPaused()){
+    timePlayback.play();
+  }else{
+    timePlayback.pause();
+  }
 }
 
 void expandVoxelUp(){
