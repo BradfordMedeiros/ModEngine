@@ -1,0 +1,24 @@
+>camtest:position:-74.500000 -59.000000 -37.000000
+>camtest:scale:1.000000 1.000000 1.000000
+>camtest:rotation:-2.152896 0.802106 -2.312180
+
+collisionobj:position:1.000000 1.000000 1.000000
+collisionobj:scale:1.000000 1.000000 1.000000
+collisionobj:rotation:0.000000 -0.000000 -6.283185
+collisionobj:mesh:./res/models/boundingbox/boundingbox.obj
+maincolumn:position:-0.199997 0.000000 0.699997
+maincolumn:scale:20.000000 1.000000 20.000000
+maincolumn:rotation:0.000000 -0.000000 -6.283185
+maincolumn:mesh:./res/models/box/box.obj
+box1:position:-1.099991 -2.000000 7.100005
+box1:scale:0.699995 7.699995 8.799994
+box1:rotation:0.000000 -0.000000 -6.283185
+box1:mesh:./res/models/box/box.obj
+!light:position:34.000000 -7.000000 16.000000
+!light:scale:1.000000 1.000000 1.000000
+!light:rotation:0.000000 -1.343909 -6.283185
+
+box2:position:-14.599991 -8.000000 1.100006
+box2:scale:1.100002 16.800028 16.400028
+box2:rotation:0.000000 -0.000000 -6.283185
+box2:mesh:./res/models/box/box.obj

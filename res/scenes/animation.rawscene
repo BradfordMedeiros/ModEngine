@@ -1,0 +1,14 @@
+>camtest:position:-74.500000 -59.000000 -37.000000
+!onelight:position:0 -10 0
+]grid1:from:1|1|1|1
+collisionobj:position:1.000000 100.000000 1.000000
+collisionobj:mesh:./res/models/boundingbox/boundingbox.obj
+
+
+
+bob:mesh:./res/models/bob/bob_lamp_update_export.md5mesh
+bob:position:10 0 0
+#bob:physics:dynamic
+
+#boxan:mesh:./res/models/boxan/boxan.fbx
+#boxan:position:10 0 0

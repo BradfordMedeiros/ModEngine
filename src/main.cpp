@@ -158,22 +158,50 @@ void playSound(){
   //setActiveDepthTexture(activeDepthTexture);
 }
 
+auto targetModel = "./res/models/bob/bob_lamp_update_export.md5mesh";
+Animation getTargetAnimation(){
+  return world.animations.at(targetModel).at(0);
+}
 
 void playAnimation(){
   std::cout << "play animation placeholder" << std::endl;
-  auto targetModel = "./res/models/bob/bob_lamp_update_export.md5mesh";
   std::cout << "animations for: " << targetModel << std::endl;
 
   auto animations = world.animations.at(targetModel);
   for (auto animation : animations){
     std::cout << "(" << animation.name << "," << animation.duration << "," << animation.ticksPerSecond <<  ")" << std::endl; 
   }
-
 }
 
 
-bool useYAxis = true;
 
+void advanceAnimation(float currentTime, float elapsedTime){
+  auto animation = getTargetAnimation();
+  std::cout << "playing animation: " << animation.name << std::endl;
+  std::cout << "current time: " << currentTime << std::endl;
+  std::cout << "elapsed time: " << elapsedTime << std::endl;
+  /*  
+    struct AnimationChannel {
+      std::string nodeName;
+      std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 
+      std::vector<aiVectorKey> scalingKeys;
+      std::vector<aiQuatKey> rotationKeys;
+    };
+
+    struct Animation {
+      std::string name;
+      double duration;
+      double ticksPerSecond;
+      std::vector<AnimationChannel> channels;
+    }
+  */
+}
+
+TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
+  advanceAnimation(currentTime, elapsedTime);
+}); 
+
+bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
   //std::cout << "use yaxis: " << useYAxis << std::endl;
@@ -832,6 +860,7 @@ int main(int argc, char* argv[]){
     float now = glfwGetTime();
     deltaTime = now - previous;   
     previous = now;
+    timePlayback.setElapsedTime(deltaTime);
 
     if (frameCount == 60){
       frameCount = 0;
