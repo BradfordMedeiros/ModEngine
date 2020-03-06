@@ -2,14 +2,11 @@
 #define MODENGINE_TIMEPLAYBACK
 
 #include <functional>
-#include <iostream>
 #include <math.h>
 
 enum EndBehavior {
     PAUSE,         
     RESTART  
-    // @TODO - eventually will probably want pause on first frame 
-
 };
     
 // future is + and past is -
@@ -23,6 +20,7 @@ class TimePlayback {
 
     std::function<void(float, float)> onFrame;
     bool hasRemainingTime();
+    
   public:
     TimePlayback(float currentTime, std::function<void(float, float)> onFrame, float duration = INFINITY, EndBehavior behavior = RESTART); 
     void play();
