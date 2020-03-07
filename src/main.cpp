@@ -174,13 +174,34 @@ void playAnimation(){
 }
 
 
+template<typename KeyType> 
+int findIndexForKey(std::vector<KeyType>& keys){
+  keys.at(0).mTime;
+  return 0;
+}
+
 
 void advanceAnimation(float currentTime, float elapsedTime){
   auto animation = getTargetAnimation();
   std::cout << "playing animation: " << animation.name << std::endl;
   std::cout << "current time: " << currentTime << std::endl;
   std::cout << "elapsed time: " << elapsedTime << std::endl;
-  /*  
+  
+  // 200 ticks / 100 ticks per second = 2 seconds
+  assert(animation.ticksPerSecond != 0);  // some models can have 0 ticks, probably should just set a default rate for these
+  double animationLengthSec = animation.duration / animation.ticksPerSecond;
+  std::cout << "anim length: " << animationLengthSec << std::endl;
+  std::cout << "num ticks: " << animation.duration << std::endl;
+  std::cout << "ticks/s " << animation.ticksPerSecond << std::endl;
+  std::cout << "num channels: " << animation.channels.size() << std::endl;
+
+  std::cout << "num chan0 pos keys: " << animation.channels.at(0).positionKeys.size() << std::endl;
+  std::cout << "num chan0 rot keys: " << animation.channels.at(0).rotationKeys.size() << std::endl;
+  std::cout << "num chan0 scale keys: " << animation.channels.at(0).scalingKeys.size() << std::endl;
+    
+
+
+   /*  
     struct AnimationChannel {
       std::string nodeName;
       std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 

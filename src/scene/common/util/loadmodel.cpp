@@ -56,6 +56,8 @@ std::vector<Animation> processAnimations(const aiScene* scene){
     }
 
     std::vector<AnimationChannel> channels;
+
+    assert(animation -> mNumChannels > 0);
     for (int j = 0; j < animation -> mNumChannels; j++){
       aiNodeAnim* aiAnimation = animation-> mChannels[j];  
 
@@ -80,6 +82,7 @@ std::vector<Animation> processAnimations(const aiScene* scene){
         .scalingKeys = scalingKeys,
         .rotationKeys = rotationKeys
       };
+      channels.push_back(channel);
     }
     
     Animation ani {
