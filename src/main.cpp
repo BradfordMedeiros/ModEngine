@@ -36,6 +36,7 @@
 #include "./input.h"
 #include "./network.h"
 #include "./timeplayback.h"
+#include "./animation.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -174,65 +175,10 @@ void playAnimation(){
 }
 
 
-template<typename KeyType> 
-int findIndexForKey(std::vector<KeyType>& keys, float currentTick){
-  int tick = -1;
-  for (int i = 0; i < keys.size(); i++){                                                  // mTime is in ticks
-    auto key = keys[i];
-
-    std::cout << "Current tick: " << currentTick << std::endl;
-    std::cout << "comparing against: " << key.mTime << std::endl;
-    if (key.mTime >= currentTick){
-      return i;
-    }
-  }
-  return tick;
-}
-
-
-void advanceAnimation(float currentTime, float elapsedTime){
-  auto animation = getTargetAnimation();
-  std::cout << "playing animation: " << animation.name << std::endl;
-  std::cout << "current time: " << currentTime << std::endl;
-  std::cout << "elapsed time: " << elapsedTime << std::endl;
-  
-  // 200 ticks / 100 ticks per second = 2 seconds
-  assert(animation.ticksPerSecond != 0);  // some models can have 0 ticks, probably should just set a default rate for these
-  double animationLengthSec = animation.duration / animation.ticksPerSecond;
-  std::cout << "anim length: " << animationLengthSec << std::endl;
-  std::cout << "num ticks: " << animation.duration << std::endl;
-  std::cout << "ticks/s " << animation.ticksPerSecond << std::endl;
-  std::cout << "num channels: " << animation.channels.size() << std::endl;
-
-  std::cout << "num chan0 pos keys: " << animation.channels.at(0).positionKeys.size() << std::endl;
-  std::cout << "num chan0 rot keys: " << animation.channels.at(0).rotationKeys.size() << std::endl;
-  std::cout << "num chan0 scale keys: " << animation.channels.at(0).scalingKeys.size() << std::endl;
-  
-  auto currentTick = currentTime * animation.ticksPerSecond;   
-  std::cout << "current tick: " << currentTick << std::endl;
-  auto tick = findIndexForKey(animation.channels.at(0).positionKeys, currentTick);
-  assert(tick != -1);
-  std::cout << "tick --> " << tick << std::endl;
-
-   /*  
-    struct AnimationChannel {
-      std::string nodeName;
-      std::vector<aiVectorKey> positionKeys;    // @TODO decouple this from assimp 
-      std::vector<aiVectorKey> scalingKeys;
-      std::vector<aiQuatKey> rotationKeys;
-    };
-
-    struct Animation {
-      std::string name;
-      double duration;
-      double ticksPerSecond;
-      std::vector<AnimationChannel> channels;
-    }
-  */
-}
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
-  advanceAnimation(currentTime, elapsedTime);
+  auto animation = getTargetAnimation();
+  advanceAnimation(animation, currentTime, elapsedTime);
 }, 10); 
 
 bool useYAxis = true;

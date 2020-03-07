@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <functional>
 #include <filesystem>
-#include "./loadmodel.h"
 #include "./boundinfo.h"
 #include "./types.h"
 
