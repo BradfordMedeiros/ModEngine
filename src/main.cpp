@@ -175,9 +175,18 @@ void playAnimation(){
 
 
 template<typename KeyType> 
-int findIndexForKey(std::vector<KeyType>& keys){
-  keys.at(0).mTime;
-  return 0;
+int findIndexForKey(std::vector<KeyType>& keys, float currentTick){
+  int tick = -1;
+  for (int i = 0; i < keys.size(); i++){                                                  // mTime is in ticks
+    auto key = keys[i];
+
+    std::cout << "Current tick: " << currentTick << std::endl;
+    std::cout << "comparing against: " << key.mTime << std::endl;
+    if (key.mTime >= currentTick){
+      return i;
+    }
+  }
+  return tick;
 }
 
 
@@ -198,8 +207,12 @@ void advanceAnimation(float currentTime, float elapsedTime){
   std::cout << "num chan0 pos keys: " << animation.channels.at(0).positionKeys.size() << std::endl;
   std::cout << "num chan0 rot keys: " << animation.channels.at(0).rotationKeys.size() << std::endl;
   std::cout << "num chan0 scale keys: " << animation.channels.at(0).scalingKeys.size() << std::endl;
-    
-
+  
+  auto currentTick = currentTime * animation.ticksPerSecond;   
+  std::cout << "current tick: " << currentTick << std::endl;
+  auto tick = findIndexForKey(animation.channels.at(0).positionKeys, currentTick);
+  assert(tick != -1);
+  std::cout << "tick --> " << tick << std::endl;
 
    /*  
     struct AnimationChannel {
