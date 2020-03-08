@@ -101,17 +101,21 @@ std::vector<Animation> processAnimations(const aiScene* scene){
 glm::mat4 aiMatrixToGlm(aiMatrix4x4 from) { 
   return glm::transpose(glm::make_mat4(&from.a1)); 
 }
-
-glm::vec3 aiVectorKeyToGlm(aiVectorKey& key){
-  return glm::vec3(0.f, 0.f, 0.f);
+glm::vec3 aiVectorToGlm(aiVector3D& vec){
+  return glm::vec3(vec.x, vec.y, vec.z);
 }
-glm::quat aiQuatKeyToGlm(aiQuatKey& key){
-  return glm::identity<glm::quat>();
+glm::quat aiQuatToGlm(aiQuaternion& quat){
+  auto quaternion = glm::identity<glm::quat>();
+  quaternion.x = quat.x;
+  quaternion.y = quat.y;
+  quaternion.z = quat.z;
+  quaternion.w = quat.w;
+  return quaternion;
 }
 glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
-  auto position = aiVectorKeyToGlm(positionKey);
-  auto rotation = aiQuatKeyToGlm(rotationKey);
-  auto scaling = aiVectorKeyToGlm(scalingKey);
+  auto position = aiVectorToGlm(positionKey.mValue);
+  auto rotation = aiQuatToGlm(rotationKey.mValue);
+  auto scaling = aiVectorToGlm(scalingKey.mValue);
     
   auto scalingMatrix = glm::scale(glm::mat4(1.f), scaling);                     //http://assimp.sourceforge.net/lib_html/structai_node_anim.html  scaling, then rotation, then translation
   auto rotationMatrix = glm::toMat4(rotation);

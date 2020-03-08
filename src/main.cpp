@@ -168,16 +168,19 @@ int getBoneId(std::vector<Bone>& bones, std::string boneName){
   return -1;
 }
 
+void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, std::map<std::string, Mesh*>& meshes){
+  //  bones.at(boneId).offsetMatrix = glm::mat4(1.f);
+
+}
+
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
   std::vector<Bone> bones;
 
-  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 13);
-  // once we get the meshes, we should play back all animations for these meshes (or select a mesh and animate that)
-
   advanceAnimation(animation, currentTime, elapsedTime, [&bones](std::string boneName, glm::mat4 newPose) -> void {
     auto boneId = getBoneId(bones, boneName);
-  //  bones.at(boneId).offsetMatrix = glm::mat4(1.f);
+    auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);
+    processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
   });
 }, 10); 
 

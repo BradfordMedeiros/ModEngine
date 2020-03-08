@@ -212,7 +212,7 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
   return indicies;
 }
 
-std::map<std::string, Mesh*>  getMeshesForId(std::map<short, GameObjectObj>& mapping, short id){
+std::map<std::string, Mesh*>  getMeshesForId(std::map<short, GameObjectObj>& mapping, short id){  
   std::map<std::string, Mesh*> meshes; 
 
   GameObjectObj gameObj = mapping.at(id);
