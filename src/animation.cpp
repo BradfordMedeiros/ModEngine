@@ -76,7 +76,8 @@ void advanceAnimation(Animation& animation, float currentTime, float elapsedTime
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
 
-  auto channel = animation.channels.at(0);
-  glm::mat4 newNodePose = advanceAnimationForNode(channel, currentTick);
-  setBonePose(channel.nodeName, newNodePose);
+  for (auto channel : animation.channels){
+    glm::mat4 newNodePose = advanceAnimationForNode(channel, currentTick);
+    setBonePose(channel.nodeName, newNodePose);  
+  }
 }
