@@ -174,11 +174,12 @@ void playAnimation(){
   }
 }
 
-
-
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
-  advanceAnimation(animation, currentTime, elapsedTime);
+  std::vector<Bone> bones;
+  advanceAnimation(animation, currentTime, elapsedTime, [](std::string boneName, glm::mat4 newPose) -> void {
+    std::cout << "new pose set for " << boneName << std::endl;
+  });
 }, 10); 
 
 bool useYAxis = true;

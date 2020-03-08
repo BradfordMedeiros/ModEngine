@@ -51,18 +51,18 @@ int findIndexForKey(std::vector<KeyType>& keys, float currentTick){
   return tick;
 }
 
-void animateNode(std::string nodeName, aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
-
+glm::mat4 getNodePose(std::string nodeName, aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
+  return glm::mat4(1.f);
 }
 
-void advanceAnimationForNode(Animation& animation, AnimationChannel& channel, float currentTick, float currentTime, float elapsedTime){
+glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
   auto tickPosIndex = findIndexForKey(channel.positionKeys, currentTick);
   auto tickRotIndex = findIndexForKey(channel.rotationKeys, currentTick);
   auto tickScaleIndex = findIndexForKey(channel.scalingKeys, currentTick);
 
   printChannelInfo(channel, tickPosIndex, tickRotIndex, tickScaleIndex);
 
-  animateNode(
+  return getNodePose(
     channel.nodeName,  
     channel.positionKeys.at(tickPosIndex), 
     channel.rotationKeys.at(tickRotIndex), 
@@ -70,10 +70,13 @@ void advanceAnimationForNode(Animation& animation, AnimationChannel& channel, fl
   );
 }
 
-void advanceAnimation(Animation& animation, float currentTime, float elapsedTime){
+void advanceAnimation(Animation& animation, float currentTime, float elapsedTime, std::function<void(std::string, glm::mat4)> setBonePose){
   assert(animation.ticksPerSecond != 0);                                                      // some models can have 0 ticks, probably should just set a default rate for these
 
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
-  advanceAnimationForNode(animation, animation.channels.at(0), currentTick, currentTime, elapsedTime);
+
+  auto channel = animation.channels.at(0);
+  glm::mat4 newNodePose = advanceAnimationForNode(channel, currentTick);
+  setBonePose(channel.nodeName, newNodePose);
 }
