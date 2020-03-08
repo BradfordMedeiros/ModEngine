@@ -16,6 +16,7 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
     auto meshStrings = split(additionalFields.at("meshes"), ',');
     for (auto meshName : meshStrings){
       ensureMeshLoaded(meshName);
+      meshNames.push_back(meshName);
       meshesToRender.push_back(meshes.at(meshName));
     }
   }else{
@@ -195,7 +196,7 @@ std::vector<std::pair<std::string, std::string>> defaultSerialization(){
 }   
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
-  GameObjectObj objectToSerialize = mapping[id];
+  GameObjectObj objectToSerialize = mapping.at(id);
   auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
   if (meshObject != NULL){
     return serializeMesh(*meshObject);
@@ -213,6 +214,16 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
 
 std::map<std::string, Mesh*>  getMeshesForId(std::map<short, GameObjectObj>& mapping, short id){
   std::map<std::string, Mesh*> meshes; 
-  std::vector indexes = getGameObjectsIndex<GameObjectMesh>(mapping);
+
+  GameObjectObj gameObj = mapping.at(id);
+  auto meshObject = std::get_if<GameObjectMesh>(&gameObj);
+
+  if (meshObject != NULL){
+    for (int i = 0; i < meshObject -> meshesToRender.size(); i++){
+      auto meshName = meshObject -> meshNames.at(i);
+      meshes[meshName] = &meshObject -> meshesToRender.at(i);
+    }
+  }
+
   return meshes;
 }
