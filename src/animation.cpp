@@ -51,10 +51,6 @@ int findIndexForKey(std::vector<KeyType>& keys, float currentTick){
   return tick;
 }
 
-glm::mat4 getNodePose(std::string nodeName, aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
-  return glm::mat4(1.f);
-}
-
 glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
   auto tickPosIndex = findIndexForKey(channel.positionKeys, currentTick);
   auto tickRotIndex = findIndexForKey(channel.rotationKeys, currentTick);
@@ -62,12 +58,12 @@ glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
 
   printChannelInfo(channel, tickPosIndex, tickRotIndex, tickScaleIndex);
 
-  return getNodePose(
-    channel.nodeName,  
+  auto newPose = aiKeysToGlm(
     channel.positionKeys.at(tickPosIndex), 
     channel.rotationKeys.at(tickRotIndex), 
     channel.scalingKeys.at(tickScaleIndex)
   );
+  return newPose;
 }
 
 void advanceAnimation(Animation& animation, float currentTime, float elapsedTime, std::function<void(std::string, glm::mat4)> setBonePose){

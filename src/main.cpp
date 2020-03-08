@@ -164,21 +164,20 @@ Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
-void playAnimation(){
-  std::cout << "play animation placeholder" << std::endl;
-  std::cout << "animations for: " << targetModel << std::endl;
-
-  auto animations = world.animations.at(targetModel);
-  for (auto animation : animations){
-    std::cout << "(" << animation.name << "," << animation.duration << "," << animation.ticksPerSecond <<  ")" << std::endl; 
-  }
+int getBoneId(std::vector<Bone>& bones, std::string boneName){
+  return -1;
 }
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
   std::vector<Bone> bones;
-  advanceAnimation(animation, currentTime, elapsedTime, [](std::string boneName, glm::mat4 newPose) -> void {
-    std::cout << "new pose set for " << boneName << std::endl;
+
+  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 13);
+  // once we get the meshes, we should play back all animations for these meshes (or select a mesh and animate that)
+
+  advanceAnimation(animation, currentTime, elapsedTime, [&bones](std::string boneName, glm::mat4 newPose) -> void {
+    auto boneId = getBoneId(bones, boneName);
+  //  bones.at(boneId).offsetMatrix = glm::mat4(1.f);
   });
 }, 10); 
 
@@ -188,7 +187,7 @@ void onDebugKey(){
   //std::cout << "use yaxis: " << useYAxis << std::endl;
 
   playSound();
-  playAnimation();
+
   if (timePlayback.isPaused()){
     timePlayback.play();
   }else{

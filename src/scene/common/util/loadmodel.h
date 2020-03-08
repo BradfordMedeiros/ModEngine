@@ -17,6 +17,9 @@
 #include "./types.h"
 
 #define NUM_BONES_PER_VERTEX 4
+
+glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey);
+
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;

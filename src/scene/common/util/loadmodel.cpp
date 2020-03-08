@@ -102,6 +102,24 @@ glm::mat4 aiMatrixToGlm(aiMatrix4x4 from) {
   return glm::transpose(glm::make_mat4(&from.a1)); 
 }
 
+glm::vec3 aiVectorKeyToGlm(aiVectorKey& key){
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+glm::quat aiQuatKeyToGlm(aiQuatKey& key){
+  return glm::identity<glm::quat>();
+}
+glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
+  auto position = aiVectorKeyToGlm(positionKey);
+  auto rotation = aiQuatKeyToGlm(rotationKey);
+  auto scaling = aiVectorKeyToGlm(scalingKey);
+    
+  auto scalingMatrix = glm::scale(glm::mat4(1.f), scaling);                     //http://assimp.sourceforge.net/lib_html/structai_node_anim.html  scaling, then rotation, then translation
+  auto rotationMatrix = glm::toMat4(rotation);
+  auto positionMatrix = glm::translate(glm::mat4(1.f), position);
+
+  return positionMatrix * rotationMatrix * scalingMatrix;
+}
+
 
 struct BoneWeighting {
   int boneId;
