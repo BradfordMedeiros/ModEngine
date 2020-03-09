@@ -164,21 +164,23 @@ Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
-int getBoneId(std::vector<Bone>& bones, std::string boneName){
-  return -1;
-}
-
-void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, std::map<std::string, Mesh*>& meshes){
-  //  bones.at(boneId).offsetMatrix = glm::mat4(1.f);
-
+void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
+  for (int i = 0; i < meshData.meshes.size(); i++){
+    std::string meshName = meshData.meshNames.at(i);
+    Mesh& mesh = meshData.meshes.at(i);
+    for (Bone& bone : mesh.bones){
+      if (bone.name == boneName){
+        std::cout << "found matching bonename: " << boneName <<  "(" << meshName << ")" << std::endl;
+        bone.offsetMatrix = newPose;
+      }
+    }
+  }
 }
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
-  std::vector<Bone> bones;
-
-  advanceAnimation(animation, currentTime, elapsedTime, [&bones](std::string boneName, glm::mat4 newPose) -> void {
-    auto boneId = getBoneId(bones, boneName);
+  
+  advanceAnimation(animation, currentTime, elapsedTime, [](std::string boneName, glm::mat4 newPose) -> void {
     auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);
     processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
   });

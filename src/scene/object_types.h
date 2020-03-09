@@ -103,6 +103,12 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
 }
 
 std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping);
-std::map<std::string, Mesh*> getMeshesForId(std::map<short, GameObjectObj>& mapping, short id);
+
+struct NameAndMesh {
+  std::vector<std::reference_wrapper<std::string>> meshNames;
+  std::vector<std::reference_wrapper<Mesh>> meshes;
+};
+
+NameAndMesh getMeshesForId(std::map<short, GameObjectObj>& mapping, short id);
 
 #endif 
