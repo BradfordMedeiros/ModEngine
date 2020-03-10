@@ -126,8 +126,6 @@ void renderObject(
         glGetIntegerv(GL_CURRENT_PROGRAM, &activeProgramId);
 
         //std::cout << "!!!: BONE LOCATION START -------------------: (" << activeProgramId << ")" << std::endl;
-
-
         auto modelUniformLocation = glGetUniformLocation(shaderProgram, "model");
         //std::cout << "model uniform location: " << modelUniformLocation << std::endl;
 

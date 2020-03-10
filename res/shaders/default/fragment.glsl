@@ -71,8 +71,8 @@ void main(){
     FragColor = color * vec4(tint.x, tint.y, tint.z, 1.0);
 
    
-    //if (hasBones){
-    //  FragColor = overcolor;
-    //}
+    if (false && hasBones){
+      FragColor = overcolor;
+    }
   }
 }

@@ -170,7 +170,6 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
     Mesh& mesh = meshData.meshes.at(i);
     for (Bone& bone : mesh.bones){
       if (bone.name == boneName){
-        std::cout << "found matching bonename: " << boneName <<  "(" << meshName << ")" << std::endl;
         bone.offsetMatrix = newPose;
       }
     }
@@ -179,9 +178,9 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
-  
-  advanceAnimation(animation, currentTime, elapsedTime, [](std::string boneName, glm::mat4 newPose) -> void {
-    auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);
+  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);
+
+  advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes](std::string boneName, glm::mat4 newPose) -> void {
     processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
   });
 }, 10); 

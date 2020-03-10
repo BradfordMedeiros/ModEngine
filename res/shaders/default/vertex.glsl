@@ -40,22 +40,38 @@ void main(){
     //modelPosition = modelPosition + (bones[aBoneIndex[3]] * aBoneWeight[3] * vec4(aPos.xyz, 1.0));
     if (useBoneTransform){
       modelPosition= vec4(aPos.xyz, 1.0);
+      overcolor = vec4(0, 0, 1, 1);
     }else{          
-      float totalWeight = aBoneWeight[0]; //+ aBoneWeight[1] + aBoneWeight[2] + aBoneWeight[3];
+      float totalWeight = aBoneWeight[0] + aBoneWeight[1] + aBoneWeight[2] + aBoneWeight[3];  // @TODO -> what if there's no weights?  Probably should just use identity
       float multiplier = 1 / totalWeight;
+      bool useIdentity = totalWeight < 0.1;
 
+      mat4 mul = 
+      (bones[aBoneIndex[0]] * aBoneWeight[0] * multiplier) + 
+      (bones[aBoneIndex[1]] * aBoneWeight[1] * multiplier) + 
+      (bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) + 
+      (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
-      modelPosition =                   (bones[aBoneIndex[0]] * aBoneWeight[0] * multiplier) * vec4(aPos.xyz, 1.0);
-      modelPosition = modelPosition +  ((bones[aBoneIndex[1]] * aBoneWeight[1] * multiplier) * vec4(aPos.xyz, 1.0));
-      modelPosition = modelPosition +  ((bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) * vec4(aPos.xyz, 1.0));
-      modelPosition = modelPosition +  ((bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier) * vec4(aPos.xyz, 1.0));
+      if (useIdentity){
+        mul = mat4(1);
+      }
+
+      modelPosition = mul * vec4(aPos.xyz, 1.0);
+
+      /*if (totalWeight == 1){
+        overcolor = vec4(1, 0, 0, 1);
+      }else{
+        overcolor = vec4(0, 1, 0, 1);
+      }*/
+
     }
 
-    gl_Position = projection * view *  model * modelPosition;
+    gl_Position = projection * view *  model * vec4(modelPosition.x, modelPosition.y, modelPosition.z, 1.0);
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
     
+
     if (!showBoneWeight){
       overcolor = vec4(aBoneIndex[0], aBoneIndex[1], aBoneIndex[2], 1.0);
     }else{

@@ -45,9 +45,6 @@ int findIndexForKey(std::vector<KeyType>& keys, float currentTick){
       return i;
     }
   }
-
-  std::cout << "mTime: " << keys[0].mTime << std::endl;
-  std::cout << "current tick: " << currentTick << std::endl;
   return tick;
 }
 
@@ -58,7 +55,7 @@ glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
 
   printChannelInfo(channel, tickPosIndex, tickRotIndex, tickScaleIndex);
 
-  auto newPose = aiKeysToGlm(
+  auto newPose = aiKeysToGlm(                     // @TODO - animation - add interpolation (linear, but being able to change this to other interpolation methods could be interesting...)
     channel.positionKeys.at(tickPosIndex), 
     channel.rotationKeys.at(tickRotIndex), 
     channel.scalingKeys.at(tickScaleIndex)
