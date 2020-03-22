@@ -72,6 +72,7 @@ void addObject(
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
+    assert(false);
   }
 }
 void removeObject(std::map<short, GameObjectObj>& mapping, short id){

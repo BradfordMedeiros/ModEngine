@@ -31,8 +31,15 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<Mesh> boundings){
 
 
 PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, short index){
+  std::cout << "physics info begin 0, for index: " << index << std::endl;
+
   GameObject obj = fullscene.scene.idToGameObjects.at(index);
+
+  std::cout << "physics info begin 1" << std::endl;
+
   auto gameObjV = world.objectMapping.at(index); 
+
+  std::cout << "physics info begin 2" << std::endl;
 
   BoundInfo boundInfo = {
     .xMin = -1, 
@@ -177,6 +184,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
+    std::cout << "adding object index: " << id << " (" << serialObj.name << ")" << std::endl;
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
       [&world, &scene, id](std::string meshName) -> void {  // @TODO this is duplicate with commented below
         if (world.meshes.find(meshName) == world.meshes.end()){
@@ -234,15 +242,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             additionalFieldsMap,
             getObjectId
           );
-          for (auto [serialObjName, serialObj] : newSerialObjs){
-            if (serialObj.additionalFields.find("mesh") == serialObj.additionalFields.end()){
-              std::cout << "additionalmesh name is not present" << std::endl;
-            }else{
-              std::cout << "additionalmesh name is: " << serialObj.additionalFields.at("mesh") << std::endl;
-            }
-          }
           addObjects(world, scene, newSerialObjs);
-
         }
       }, 
       [&world, localSceneId, id]() -> void {
