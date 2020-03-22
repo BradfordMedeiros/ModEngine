@@ -178,8 +178,7 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
-  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);
-
+  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
   advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes](std::string boneName, glm::mat4 newPose) -> void {
     processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
   });

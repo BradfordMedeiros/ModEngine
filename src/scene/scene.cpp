@@ -178,7 +178,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
-      [&world, &scene, id](std::string meshName) -> void {  // @todo this is duplicate with commented below
+      [&world, &scene, id](std::string meshName) -> void {  // @TODO this is duplicate with commented below
         if (world.meshes.find(meshName) == world.meshes.end()){
           ModelData data = loadModel(meshName); 
           world.animations[meshName] = data.animations;
@@ -189,7 +189,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
           if (hasMesh){
             auto meshId = meshesForId.at(0);
             MeshData model =  data.meshIdToMeshData.at(meshId);
-            world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @todo protect against loading this mesh many times. 
+            world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @TODO protect against loading this mesh many times. 
           }else{
             std::cout << "loading default node mesh for: " << meshName << std::endl;
             world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"

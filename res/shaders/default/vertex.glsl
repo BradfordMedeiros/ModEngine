@@ -31,13 +31,7 @@ uniform bool useBoneTransform;
 
 void main(){
   if (hasBones){
-    //vec4 modelPosition = model *  vec4(aPos.xyz, 1.0);
-    //vec4 modelPosition = vec4(aPos.xyz, 1.0) * 0; // * (1 - (aBoneWeight[0] + aBoneWeight[1] + aBoneWeight[2] + aBoneWeight[3]));
-
     vec4 modelPosition;
-    //modelPosition = modelPosition + (bones[aBoneIndex[1]] * aBoneWeight[1] * vec4(aPos.xyz, 1.0));
-    //modelPosition = modelPosition + (bones[aBoneIndex[2]] * aBoneWeight[2] * vec4(aPos.xyz, 1.0));
-    //modelPosition = modelPosition + (bones[aBoneIndex[3]] * aBoneWeight[3] * vec4(aPos.xyz, 1.0));
     if (useBoneTransform){
       modelPosition= vec4(aPos.xyz, 1.0);
       overcolor = vec4(0, 0, 1, 1);

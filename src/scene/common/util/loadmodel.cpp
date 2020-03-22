@@ -175,7 +175,6 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   }
   assert(weighting.size() <= size);
   assert(size == 4);
-  //assert(weighting.size() >= 1);
 
   for (int i = 0; i < size; i++){
     if (i < weighting.size()){
@@ -183,6 +182,7 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
       indices[i] = weight.boneId;
       weights[i] = weight.weight;
      }else{
+//    assert(i != 0);
       indices[i] = 0;   // if no associated bone id, just put 0 bone id with 0 weighting so it won't add to the weight
       weights[i] = 0;
     }
@@ -195,6 +195,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    
    BoneInfo boneInfo = processBones(mesh);
 
+   std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
      Vertex vertex;
      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
