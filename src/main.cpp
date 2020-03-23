@@ -158,6 +158,14 @@ void playSound(){
   //activeDepthTexture = (activeDepthTexture + 1) % numTextures;
   //setActiveDepthTexture(activeDepthTexture);
 }
+void printSceneGraphAsDot(){
+  for (auto [id, scene] : world.scenes){
+    std::cout << std::endl;
+    std::cout << "scenegraph: " << id << std::endl;
+    std::cout << scenegraphAsDotFormat(scene.scene) << std::endl;
+    std::cout << std::endl;
+  }
+}
 
 auto targetModel = "./res/models/bob/bob_lamp_update_export.md5mesh";
 Animation getTargetAnimation(){
@@ -177,11 +185,11 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
 }
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
-  auto animation = getTargetAnimation();
+  /*auto animation = getTargetAnimation();
   auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
   advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes](std::string boneName, glm::mat4 newPose) -> void {
     processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
-  });
+  });*/
 }, 10); 
 
 bool useYAxis = true;
@@ -229,6 +237,7 @@ void onArrowKey(int key){
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
+  printSceneGraphAsDot();
 
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -917,7 +926,6 @@ int main(int argc, char* argv[]){
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
         
-
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
