@@ -378,8 +378,10 @@ void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
   updatePhysicsPositions(world, world.rigidbodys);    
 }
 
-
-std::string scenegraphAsDotFormat(Scene& scene){
+std::string getDotInfoForNode(std::string nodeName, int nodeId, std::vector<std::string> meshes){
+  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + "\n" + join(meshes, ' ') + "\"";
+}
+std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping){
   std::string graph = "";
   std::string prefix = "strict graph {\n";
   std::string suffix = "}"; 
@@ -391,8 +393,8 @@ std::string scenegraphAsDotFormat(Scene& scene){
 
     auto childName = scene.idToGameObjects.at(childId).name;
     auto parentName = parentId == -1 ? "root" : scene.idToGameObjects.at(parentId).name;
-
-    relations = relations + "\"" + parentName + "(" + std::to_string(parentId) + ")\"" + std::string(" -- ") + "\"" + childName + "(" + std::to_string(childId) + ")\"" + "\n";
+        
+    relations = relations + getDotInfoForNode(parentName, parentId, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId, getMeshNames(objectMapping, childId)) + "\n";
   }
   graph = graph + prefix + relations + suffix;
   return graph;

@@ -14,6 +14,7 @@
 
 if [[ -z "$1" ]]; then
   rm ./out.png
+  rm ./testgraph.dot
 else
   echo "$1" >> testgraph.dot && dot ./testgraph.dot -Tpng -o out.png && rm ./testgraph.dot && xdg-open ./out.png 
 fi 

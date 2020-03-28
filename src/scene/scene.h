@@ -48,7 +48,7 @@ void  applyPhysicsScaling(World& world, FullScene& scene, btRigidBody* body, sho
 void  onPhysicsFrame(World& world, float timestep, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 
-std::string scenegraphAsDotFormat(Scene& scene);
+std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping);
 
 
 #endif

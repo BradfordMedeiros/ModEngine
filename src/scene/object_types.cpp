@@ -233,3 +233,15 @@ NameAndMesh getMeshesForId(std::map<short, GameObjectObj>& mapping, short id){
   assert(meshNames.size() == meshes.size());
   return meshData;
 }
+
+std::vector<std::string> getMeshNames(std::map<short, GameObjectObj>& mapping, short id){
+  std::vector<std::string> names;
+  if (id == -1){
+    return names;
+  }
+  for (auto name : getMeshesForId(mapping, id).meshNames){
+    names.push_back(name);
+  }
+
+  return names;
+}

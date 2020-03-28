@@ -110,5 +110,6 @@ struct NameAndMesh {
 };
 
 NameAndMesh getMeshesForId(std::map<short, GameObjectObj>& mapping, short id);
+std::vector<std::string> getMeshNames(std::map<short, GameObjectObj>& mapping, short id);
 
 #endif 
