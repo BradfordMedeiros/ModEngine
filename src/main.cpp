@@ -204,15 +204,27 @@ void onDebugKey(){
 }
 
 void expandVoxelUp(){
+  if (voxelPtr == NULL){
+    return;
+  }
   expandVoxels(voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
 }
 void expandVoxelDown(){
+  if (voxelPtr == NULL){
+    return;
+  }
   expandVoxels(voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
 }
 void expandVoxelLeft(){
+  if (voxelPtr == NULL){
+    return;
+  }
   expandVoxels(voxelPtr -> voxel, -1, 0, 0);
 }
 void expandVoxelRight(){
+  if (voxelPtr == NULL){
+    return;
+  }
   expandVoxels(voxelPtr -> voxel, 1, 0, 0);
 }
 
@@ -245,6 +257,10 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
  
   permaLines.clear();
   permaLines.push_back(line);
+
+  if (voxelPtr == NULL){
+    return;
+  }
 
   glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
   glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
@@ -307,7 +323,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization, selectItem);
   schemeBindings.onMouseCallback(button, action, mods);
 
-  if (button == 0){
+  if (button == 0 && voxelPtr != NULL){
     voxelPtr -> voxel.selectedVoxels.clear();
   }
 }
@@ -316,6 +332,10 @@ int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
 
+  if (voxelPtr == NULL){
+    return;
+  }
+  
   if (yoffset > 0){
     textureId += 1;
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
@@ -334,7 +354,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   schemeBindings.onKeyCallback(key, scancode, action, mods);
 
   // temp hackey for voxels
-  if (key == 261){  // delete
+  if (key == 261 && voxelPtr != NULL){  // delete
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
   } 
@@ -470,12 +490,18 @@ void printObjectIds(){
 
 void updateVoxelPtr(){
   auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
-  short id = voxelIndexes.at(0);
-  GameObjectObj& toRender = world.objectMapping.at(id);
-  auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
-  assert(voxelObj != NULL);
-  voxelPtr = voxelObj;
-  voxelPtrId = id;
+  if (voxelIndexes.size() > 0){
+    short id = voxelIndexes.at(0);
+    GameObjectObj& toRender = world.objectMapping.at(id);
+    auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
+    assert(voxelObj != NULL);
+    voxelPtr = voxelObj;
+    voxelPtrId = id;    
+  }else{
+    voxelPtr = NULL;
+    voxelPtrId = -1;
+  }
+
 }
 
 void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
@@ -504,6 +530,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   }
 
   traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix) -> void {
+    assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
     }
