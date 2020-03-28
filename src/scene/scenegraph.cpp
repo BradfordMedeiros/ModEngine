@@ -229,22 +229,3 @@ void traverseScene(Scene& scene, std::function<void(short, glm::mat4)> onObject)
     traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
   }  
 }
-
-std::string scenegraphAsDotFormat(Scene& scene){
-  std::string graph = "";
-  std::string prefix = "strict graph {\n";
-  std::string suffix = "}"; 
-
-  std::string relations = "";
-  for (auto [id, obj] : scene.idToGameObjectsH){
-    auto childId = id;
-    auto parentId = obj.parentId;
-
-    auto childName = scene.idToGameObjects.at(childId).name;
-    auto parentName = parentId == -1 ? "root" : scene.idToGameObjects.at(parentId).name;
-
-    relations = relations + "\"" + parentName + "(" + std::to_string(parentId) + ")\"" + std::string(" -- ") + "\"" + childName + "(" + std::to_string(childId) + ")\"" + "\n";
-  }
-  graph = graph + prefix + relations + suffix;
-  return graph;
-}

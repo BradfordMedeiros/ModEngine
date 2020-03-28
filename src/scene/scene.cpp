@@ -377,3 +377,23 @@ void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
   stepPhysicsSimulation(world.physicsEnvironment, timestep);
   updatePhysicsPositions(world, world.rigidbodys);    
 }
+
+
+std::string scenegraphAsDotFormat(Scene& scene){
+  std::string graph = "";
+  std::string prefix = "strict graph {\n";
+  std::string suffix = "}"; 
+
+  std::string relations = "";
+  for (auto [id, obj] : scene.idToGameObjectsH){
+    auto childId = id;
+    auto parentId = obj.parentId;
+
+    auto childName = scene.idToGameObjects.at(childId).name;
+    auto parentName = parentId == -1 ? "root" : scene.idToGameObjects.at(parentId).name;
+
+    relations = relations + "\"" + parentName + "(" + std::to_string(parentId) + ")\"" + std::string(" -- ") + "\"" + childName + "(" + std::to_string(childId) + ")\"" + "\n";
+  }
+  graph = graph + prefix + relations + suffix;
+  return graph;
+}

@@ -72,7 +72,4 @@ glm::vec3 getFullPosition(short id);
 glm::quat getFullRotation(short id);
 glm::vec3 getFullScale(short id);
 
-
-std::string scenegraphAsDotFormat(Scene& scene);
-
 #endif

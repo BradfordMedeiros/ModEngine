@@ -160,10 +160,7 @@ void playSound(){
 }
 void printSceneGraphAsDot(){
   for (auto [id, scene] : world.scenes){
-    std::cout << std::endl;
-    std::cout << "scenegraph: " << id << std::endl;
     std::cout << scenegraphAsDotFormat(scene.scene) << std::endl;
-    std::cout << std::endl;
   }
 }
 
