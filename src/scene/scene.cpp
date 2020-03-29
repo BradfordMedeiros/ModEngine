@@ -159,6 +159,7 @@ World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, 
   assert(data.meshIdToMeshData.size() ==  1);
   auto meshData = data.meshIdToMeshData.begin() -> second;
   world.meshes["./res/models/ui/node.obj"] =  loadMesh("./res/textures/default.jpg", meshData);     
+ 
   return world;
 }
 
@@ -185,7 +186,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     auto localSceneId = sceneId;
 
     std::cout << "adding object index: " << id << " (" << serialObj.name << ")" << std::endl;
-    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/box/box.obj", 
+    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj", 
       [&world, &scene, id](std::string meshName) -> void {  // @TODO this is duplicate with commented below
         if (world.meshes.find(meshName) == world.meshes.end()){
           ModelData data = loadModel(meshName); 
