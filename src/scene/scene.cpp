@@ -149,17 +149,25 @@ short getIdForCollisionObject(World& world, const btCollisionObject* body){
   return -1;
 }
 
+void addMesh(World& world, std::string meshpath){
+  ModelData data = loadModel(meshpath);
+  assert(data.meshIdToMeshData.size() ==  1);
+  auto meshData = data.meshIdToMeshData.begin() -> second;
+  world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData);     
+}
+
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   auto objectMapping = getObjectMapping();
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
   };
-  ModelData data = loadModel("./res/models/ui/node.obj");
-  assert(data.meshIdToMeshData.size() ==  1);
-  auto meshData = data.meshIdToMeshData.begin() -> second;
-  world.meshes["./res/models/ui/node.obj"] =  loadMesh("./res/textures/default.jpg", meshData);     
- 
+
+  // Default meshes that are silently loaded in the background
+  addMesh(world, "./res/models/ui/node.obj");
+  addMesh(world, "./res/models/boundingbox/boundingbox.obj");
+  addMesh(world, "./res/models/cone/cone.obj");
+
   return world;
 }
 

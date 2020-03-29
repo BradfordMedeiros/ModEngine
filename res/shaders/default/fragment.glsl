@@ -32,16 +32,14 @@ const float linear = 0.2;
 const float quadratic = 0.0;
 
 void main(){
-  if (false && tint.r < 0.1){
+  if (tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
-    //vec4 texColor = (texture(coolzero, TexCoord) + texture(coolsomevalue, TexCoord)) / 2;
-    //vec4 texColor = 
     vec4 texColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
     
-   /* if (texColor.a < 0.1){
+    if (texColor.a < 0.1){
       discard;
-    }*/
+    }
 
     vec3 ambient = vec3(0.6, 0.6, 0.6);     
     vec3 totalSpecular = vec3(0, 0, 0);
