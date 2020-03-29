@@ -388,7 +388,7 @@ void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
 }
 
 std::string getDotInfoForNode(std::string nodeName, int nodeId, std::vector<std::string> meshes){
-  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + "\n" + join(meshes, ' ') + "\"";
+  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] \"";
 }
 std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping){
   std::string graph = "";
