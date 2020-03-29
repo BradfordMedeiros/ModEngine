@@ -916,8 +916,9 @@ int main(int argc, char* argv[]){
 
     // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
 
-    assert(lights.size() > 0);   // temporary assertion 
-    auto lightView = renderView(lights.at(0) -> transformation.position, lights.at(0) -> transformation.rotation);
+    auto lightPosition = lights.size() > 0 ? lights.at(0) -> transformation.position : glm::vec3(0, 0, 0);
+    auto lightRotation = lights.size() > 0 ? lights.at(0) -> transformation.rotation : glm::identity<glm::quat>();
+    auto lightView = renderView(lightPosition, lightRotation);
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
