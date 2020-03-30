@@ -28,7 +28,6 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
     meshesToRender.push_back(meshes.at(meshName));
   }
 
-
   std::cout << "INFO: create mesh end, name: " << (hasMesh ? additionalFields.at("mesh") : "-- no mesh field ") << std::endl;
   GameObjectMesh obj {
     .meshNames = meshNames,
