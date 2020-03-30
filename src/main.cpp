@@ -344,11 +344,6 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     textureId -= 1;
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
   }
-
-
-  // temp voxel editing code, probably should not live in core of engine at all
-  
-  ////////////////////
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(key, scancode, action, mods);
@@ -504,6 +499,35 @@ void updateVoxelPtr(){
 
 }
 
+void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
+  Line line = {
+    .fromPos = fromPos,
+    .toPos = toPos
+  };
+  lines.push_back(line);
+}
+
+std::vector<glm::vec3> traversalPositions;
+void addPositionToRender(glm::mat4 modelMatrix){
+  glm::vec3 scale;
+  glm::quat rotation;
+  glm::vec3 translation;
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(modelMatrix, scale, rotation, translation, skew, perspective);
+  traversalPositions.push_back(translation);
+}
+void clearTraversalPositions(){
+  traversalPositions.clear();
+}
+void drawTraversalPositions(){
+  for (int i = 0; i < traversalPositions.size() - 1; i++){
+    auto fromPos = traversalPositions.at(i);
+    auto toPos = traversalPositions.at(i + 1);
+    addLineNextCycle(fromPos, toPos);
+  }
+}
+
 void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
   
@@ -529,7 +553,8 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
   }
 
-  traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix) -> void {
+  clearTraversalPositions();
+  traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix) -> void {    
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
@@ -571,8 +596,10 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       state.showBoneWeight,
       state.useBoneTransform
     );
-  });
 
+    addPositionToRender(modelMatrix);
+  });
+  drawTraversalPositions();
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -600,13 +627,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
   lines.clear();
 }
-void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
-  Line line = {
-    .fromPos = fromPos,
-    .toPos = toPos
-  };
-  lines.push_back(line);
-}
+
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   glUseProgram(uiShaderProgram);
@@ -652,8 +673,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 
   }
 }
-
-
 
 void onData(std::string data){
   std::cout << "got data: " << data << std::endl;

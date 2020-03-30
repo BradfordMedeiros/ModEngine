@@ -7,7 +7,6 @@ std::map<short, GameObjectObj> getObjectMapping() {
 
 GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string)> ensureMeshLoaded){
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
-  bool isDisabled = additionalFields.find("disabled") != additionalFields.end() ; 
 
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
@@ -31,11 +30,9 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
-    .isDisabled = isDisabled,
+    .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
     .nodeOnly = hasMesh == false
   };
-  std::cout << "create mesh: 4" << std::endl;
-
   return obj;
 }
 GameObjectCamera createCamera(){
@@ -139,8 +136,6 @@ void renderObject(
           }
         }
         hasBones = true;
-      }else{
-        hasBones = false;
       }
 
       glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
