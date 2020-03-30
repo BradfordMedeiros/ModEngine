@@ -22,6 +22,7 @@ struct GameObjectMesh {
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
   bool isDisabled;
+  bool nodeOnly;
 };
 struct GameObjectCamera {};
 struct GameObjectLight {
@@ -70,7 +71,7 @@ void addObject(
   std::map<std::string, std::string> additionalFields,
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
-  std::function<void(std::string)> ensureMeshLoaded,
+  std::function<bool(std::string)> ensureMeshLoaded,  
   std::function<void()> onVoxelBoundInfoChanged
 );
 

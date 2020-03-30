@@ -5,32 +5,36 @@ std::map<short, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<void(std::string)> ensureMeshLoaded){
-  bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
+GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string)> ensureMeshLoaded){
+  bool usesMultipleMeshes = ;
   bool isDisabled = additionalFields.find("disabled") != additionalFields.end() ; 
 
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
 
+  bool hasMesh = false;
   if (usesMultipleMeshes){
     auto meshStrings = split(additionalFields.at("meshes"), ',');
     for (auto meshName : meshStrings){
-      ensureMeshLoaded(meshName);
+      hasMesh = hasMesh || ensureMeshLoaded(meshName);
       meshNames.push_back(meshName);
       meshesToRender.push_back(meshes.at(meshName));
     }
   }else{
     auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
     meshName = (meshName == "") ? defaultMesh : meshName;
-    ensureMeshLoaded(meshName);
+    hasMesh = hasMesh || ensureMeshLoaded(meshName);
     meshNames.push_back(meshName);
     meshesToRender.push_back(meshes.at(meshName));
   }
 
+
+  std::cout << "INFO: create mesh end, name: " << (hasMesh ? additionalFields.at("mesh") : "-- no mesh field ") << std::endl;
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
     .isDisabled = isDisabled,
+    .nodeOnly = hasMesh == false
   };
 
   return obj;
@@ -59,7 +63,7 @@ void addObject(
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
-  std::function<void(std::string)> ensureMeshLoaded,
+  std::function<bool(std::string)> ensureMeshLoaded,
   std::function<void()> onVoxelBoundInfoChanged
 ){
   if (objectType == "default"){
@@ -118,9 +122,8 @@ void renderObject(
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-  if (meshObj != NULL && !meshObj->isDisabled){
+  if (meshObj != NULL && !meshObj -> isDisabled && !meshObj -> nodeOnly){
     for (auto meshToRender : meshObj -> meshesToRender){
-
       bool hasBones = false;
       if (meshToRender.bones.size() > 0){
         int activeProgramId; 

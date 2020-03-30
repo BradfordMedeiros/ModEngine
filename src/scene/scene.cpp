@@ -29,17 +29,9 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<Mesh> boundings){
   return boundings.at(0).boundInfo;
 }
 
-
 PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, short index){
-  std::cout << "physics info begin 0, for index: " << index << std::endl;
-
   GameObject obj = fullscene.scene.idToGameObjects.at(index);
-
-  std::cout << "physics info begin 1" << std::endl;
-
   auto gameObjV = world.objectMapping.at(index); 
-
-  std::cout << "physics info begin 2" << std::endl;
 
   BoundInfo boundInfo = {
     .xMin = -1, 
@@ -60,7 +52,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   if (voxelObj != NULL){
     boundInfo = voxelObj -> voxel.mesh.boundInfo;
   }
-
 
   PhysicsInfo info = {
     .boundInfo = boundInfo,
@@ -184,6 +175,29 @@ short getSceneId(){
   return sceneId;
 }
 
+std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data){
+  std::map<short, std::map<std::string, std::string>> additionalFieldsMap;
+  for (auto [nodeId, _] : data.nodeTransform){
+    std::map<std::string, std::string> emptyFields;
+    additionalFieldsMap[nodeId] = emptyFields;
+  }
+
+  for (auto [nodeId, meshListIds] : data.nodeToMeshId){
+    if (meshListIds.size() == 1){
+      auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
+      additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
+    }else if (meshListIds.size() > 1){
+      std::vector<std::string> meshRefNames;
+      for (auto id : meshListIds){
+        auto meshRef = meshName + "::" + std::to_string(id);
+        meshRefNames.push_back(meshRef);
+      }
+      additionalFieldsMap.at(nodeId)["meshes"] = join(meshRefNames, ',');
+    }
+  }
+  return additionalFieldsMap;
+}
+
 void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs){
   for (auto [_, serialObj] : serialObjs){
     auto id =  scene.nameToId.at(serialObj.name);
@@ -195,64 +209,38 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
 
     std::cout << "adding object index: " << id << " (" << serialObj.name << ")" << std::endl;
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj", 
-      [&world, &scene, id](std::string meshName) -> void {  // @TODO this is duplicate with commented below
-        if (world.meshes.find(meshName) == world.meshes.end()){
-          ModelData data = loadModel(meshName); 
-          world.animations[meshName] = data.animations;
-                
-          auto meshesForId = data.nodeToMeshId.at(0);
-
-          bool hasMesh = meshesForId.size() > 0;
-          if (hasMesh){
-            auto meshId = meshesForId.at(0);
-            MeshData model =  data.meshIdToMeshData.at(meshId);
-            world.meshes[meshName] = loadMesh("./res/textures/default.jpg", model);     // @TODO protect against loading this mesh many times. 
-          }else{
-            std::cout << "loading default node mesh for: " << meshName << std::endl;
-            world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"
-          }
-          
-          for (auto [meshId, meshData] : data.meshIdToMeshData){
-            auto meshRef = meshName + "::" + std::to_string(meshId);
-            std::cout << "loading mesh: " << meshRef << std::endl;
-            world.meshes[meshRef] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
-          } 
-
-          std::map<short, std::map<std::string, std::string>> additionalFieldsMap;
-          for (auto [nodeId, _] : data.nodeTransform){
-            std::map<std::string, std::string> emptyFields;
-            additionalFieldsMap[nodeId] = emptyFields;
-          }
-
-          for (auto [nodeId, meshListIds] : data.nodeToMeshId){
-            if (meshListIds.size() == 1){
-              auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-              additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
-            }else if (meshListIds.size() > 1){
-              // @TODO - think - maybe this should just be multiple objects with one mesh each, would be easier for manipulation and stuff, but this ok for now
-              std::vector<std::string> meshRefNames;
-              for (auto id : meshListIds){
-                auto meshRef = meshName + "::" + std::to_string(id);
-                meshRefNames.push_back(meshRef);
-              }
-              additionalFieldsMap.at(nodeId)["meshes"] = join(meshRefNames, ',');
-            }else{
-              std::cout << "WARNING: node: " << data.names.at(nodeId) << " has no meshes" << std::endl;
-            }
-          }
-
-          auto newSerialObjs = addSubsceneToRoot(
-            scene, 
-            id,
-            0,
-            data.childToParent, 
-            data.nodeTransform, 
-            data.names, 
-            additionalFieldsMap,
-            getObjectId
-          );
-          addObjects(world, scene, newSerialObjs);
+      [&world, &scene, id](std::string meshName) -> bool {  // @TODO this is duplicate with commented below
+        bool meshAlreadyLoaded = !(world.meshes.find(meshName) == world.meshes.end());
+        if (meshAlreadyLoaded){
+          return true;
         }
+
+        ModelData data = loadModel(meshName); 
+        world.animations[meshName] = data.animations;
+
+        bool hasMesh = data.nodeToMeshId.at(0).size() > 0;    // why is this checking the root node?
+        if (!hasMesh){
+          std::cout << "INFO: create mesh: loading default node mesh for: " << meshName << std::endl;
+          world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"
+          hasMesh = false;
+        }
+          
+        for (auto [meshId, meshData] : data.meshIdToMeshData){
+          world.meshes[meshName + "::" + std::to_string(meshId)] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
+        } 
+
+        auto newSerialObjs = addSubsceneToRoot(
+          scene, 
+          id,
+          0,
+          data.childToParent, 
+          data.nodeTransform, 
+          data.names, 
+          generateAdditionalFields(meshName, data),
+          getObjectId
+        );
+        addObjects(world, scene, newSerialObjs);
+        return hasMesh;
       }, 
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
@@ -260,6 +248,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     );
   }
 }
+
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
   SceneDeserialization deserializedScene = deserializeScene(content, fields, getObjectId);
   addObjects(world, deserializedScene.scene, deserializedScene.serialObjs);
