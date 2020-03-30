@@ -6,7 +6,7 @@ std::map<short, GameObjectObj> getObjectMapping() {
 }
 
 GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string)> ensureMeshLoaded){
-  bool usesMultipleMeshes = ;
+  bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
   bool isDisabled = additionalFields.find("disabled") != additionalFields.end() ; 
 
   std::vector<std::string> meshNames;
@@ -28,13 +28,13 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
     meshesToRender.push_back(meshes.at(meshName));
   }
 
-  std::cout << "INFO: create mesh end, name: " << (hasMesh ? additionalFields.at("mesh") : "-- no mesh field ") << std::endl;
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
     .isDisabled = isDisabled,
     .nodeOnly = hasMesh == false
   };
+  std::cout << "create mesh: 4" << std::endl;
 
   return obj;
 }
@@ -121,7 +121,7 @@ void renderObject(
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-  if (meshObj != NULL && !meshObj -> isDisabled && !meshObj -> nodeOnly){
+  if (meshObj != NULL && !meshObj -> isDisabled && (!meshObj -> nodeOnly || showCameras)){
     for (auto meshToRender : meshObj -> meshesToRender){
       bool hasBones = false;
       if (meshToRender.bones.size() > 0){
