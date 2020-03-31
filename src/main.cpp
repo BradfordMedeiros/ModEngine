@@ -507,23 +507,30 @@ void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
   lines.push_back(line);
 }
 
-std::vector<glm::vec3> traversalPositions;
-void addPositionToRender(glm::mat4 modelMatrix){
+glm::vec3 getPositionFromMatrix(glm::mat4 matrix){
   glm::vec3 scale;
   glm::quat rotation;
   glm::vec3 translation;
   glm::vec3 skew;
   glm::vec4 perspective;
-  glm::decompose(modelMatrix, scale, rotation, translation, skew, perspective);
-  traversalPositions.push_back(translation);
+  glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+  return translation;  
+}
+
+std::vector<glm::vec3> traversalPositions;
+std::vector<glm::vec3> parentTraversalPositions;
+void addPositionToRender(glm::mat4 modelMatrix, glm::mat4 parentMatrix){
+  traversalPositions.push_back(getPositionFromMatrix(modelMatrix));
+  parentTraversalPositions.push_back(getPositionFromMatrix(parentMatrix));
 }
 void clearTraversalPositions(){
   traversalPositions.clear();
+  parentTraversalPositions.clear();
 }
 void drawTraversalPositions(){
-  for (int i = 0; i < traversalPositions.size() - 1; i++){
+  for (int i = 0; i < traversalPositions.size(); i++){
     auto fromPos = traversalPositions.at(i);
-    auto toPos = traversalPositions.at(i + 1);
+    auto toPos = parentTraversalPositions.at(i);
     addLineNextCycle(fromPos, toPos);
   }
 }
@@ -554,7 +561,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   }
 
   clearTraversalPositions();
-  traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix) -> void {    
+  traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix) -> void {    
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
@@ -597,7 +604,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       state.useBoneTransform
     );
 
-    addPositionToRender(modelMatrix);
+    addPositionToRender(modelMatrix, parentModelMatrix);
   });
   drawTraversalPositions();
 }
