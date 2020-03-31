@@ -15,6 +15,7 @@
 #include <filesystem>
 #include "./boundinfo.h"
 #include "./types.h"
+#include "../../../common/util.h"
 
 #define NUM_BONES_PER_VERTEX 4
 

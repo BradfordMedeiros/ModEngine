@@ -189,6 +189,29 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   }
 }
 
+void dumpVerticesData(std::string modelPath, MeshData& model){
+  std::cout << "debug for model: " << modelPath << std::endl;
+  for (auto vertex : model.vertices){
+    std::string vertexInfo = "";
+
+    vertexInfo = vertexInfo + print(vertex.position) + " " + print(vertex.normal) + " " + print(vertex.normal);
+
+    vertexInfo = vertexInfo + " (";
+    for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+      vertexInfo = vertexInfo + std::to_string(vertex.boneIndexes[i]) + (i < NUM_BONES_PER_VERTEX - 1 ? ", " : "");
+    }
+    vertexInfo = vertexInfo + ")";
+
+    vertexInfo = vertexInfo + " (";
+    for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
+      vertexInfo = vertexInfo + std::to_string(vertex.boneWeights[i]) + (i < NUM_BONES_PER_VERTEX - 1 ? ", " : "");
+    }
+    vertexInfo = vertexInfo + ") ";
+
+    std::cout << vertexInfo << std::endl;
+  }
+} 
+
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
@@ -230,7 +253,6 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      textureFilepaths.push_back(relativePath.string());  
    }
 
-
    MeshData model = {
      .vertices = vertices,
      .indices = indices,       
@@ -238,6 +260,8 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .boundInfo = getBounds(vertices),
      .bones = boneInfo.bones
    };
+
+   //dumpVerticesData(modelPath, model); 
 
    return model;
 }

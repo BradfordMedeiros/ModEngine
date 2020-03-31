@@ -19,6 +19,7 @@ enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
 enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 
 std::string print(glm::vec3 vec);
+std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
 
 float maxvalue(float x, float y, float z);

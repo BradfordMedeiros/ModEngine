@@ -45,6 +45,11 @@ std::string print(glm::vec3 vec){
   stream << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
   return stream.str();
 }
+std::string print(glm::vec2 vec){
+  std::stringstream stream;
+  stream << "(" << vec.x << ", " << vec.y << ")";
+  return stream.str();
+}
 std::string print(glm::quat quat){
   std::stringstream stream;
   stream << "(" << quat.x << ", " << quat.y << ", " << quat.z << ")";
