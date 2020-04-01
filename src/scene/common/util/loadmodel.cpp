@@ -190,10 +190,8 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
 }
 
 void dumpVerticesData(std::string modelPath, MeshData& model){
-  std::cout << "debug for model: " << modelPath << std::endl;
   for (auto vertex : model.vertices){
     std::string vertexInfo = "";
-
     vertexInfo = vertexInfo + print(vertex.position) + " " + print(vertex.normal) + " " + print(vertex.normal);
 
     vertexInfo = vertexInfo + " (";
@@ -208,7 +206,7 @@ void dumpVerticesData(std::string modelPath, MeshData& model){
     }
     vertexInfo = vertexInfo + ") ";
 
-    std::cout << vertexInfo << std::endl;
+    std::cout << modelPath << " v: " << vertexInfo << std::endl;
   }
 } 
 
@@ -261,7 +259,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .bones = boneInfo.bones
    };
 
-   //dumpVerticesData(modelPath, model); 
+   dumpVerticesData(modelPath, model); 
 
    return model;
 }

@@ -164,7 +164,7 @@ void printSceneGraphAsDot(){
   }
 }
 
-auto targetModel = "./res/models/bob/bob_lamp_update_export.md5mesh";
+auto targetModel = "./res/models/bendybox/bendybox.dae";
 Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
@@ -182,12 +182,13 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
 }
 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
-  /*auto animation = getTargetAnimation();
-  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 5);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
+  auto animation = getTargetAnimation();
+  std::cout << "animation name:  " << animation.name << std::endl;
+  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 4);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
   advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes](std::string boneName, glm::mat4 newPose) -> void {
     processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
-  });*/
-}, 10); 
+  });
+},4); 
 
 bool useYAxis = true;
 void onDebugKey(){

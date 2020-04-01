@@ -31,7 +31,7 @@ void printChannelInfo(AnimationChannel& channel, int tickPosIndex, int tickRotIn
 // this probably will need to be sped up.  Might make sense to put this into a ticktime -> position/scale/rot structure + seems to miss last key.  assumes array is in time order as well.
 template<typename KeyType>   
 int findIndexForKey(std::vector<KeyType>& keys, float currentTick){                    
-  int tick = -1;
+  int tick = 0;
   for (int i = 0; i < keys.size(); i++){                 
     auto key = keys[i];
     if (i == (keys.size() - 1)){
