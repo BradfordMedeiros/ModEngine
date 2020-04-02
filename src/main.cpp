@@ -164,11 +164,20 @@ void printSceneGraphAsDot(){
   }
 }
 
-auto targetModel = "./res/models/bendybox/bendybox.dae";
+auto targetModel = "./res/models/bendybox/sentinal.dae";
 Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
+glm::mat4 getParentBoneMatrix(std::string currentBone, std::string parentBone){
+  return glm::mat4(1.f);
+}
+
+/*
+root: SENTINAL_ARMATURE_NECK, SENTINAL_ARMATURE_TAIL, SENTINAL_ARMATURE_LEFTARM, SENTINAL_ARMATURE_RIGHTARM
+SENTINAL_ARMATURE_RIGHTARM -> SENTINAL_ARMATURE_RIGHTHAND
+SENTINAL_ARMATURE_LEFTARM  -> SENTINAL_ARMATURE_LEFTHAND
+*/
 std::map<std::string, glm::mat4> offsets;
 void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
   for (int i = 0; i < meshData.meshes.size(); i++){
@@ -179,7 +188,8 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
         if (offsets.find(bone.name) == offsets.end()){
           offsets[bone.name] = bone.offsetMatrix;
         }
-        bone.offsetMatrix = newPose * offsets.at(bone.name);
+        bone.offsetMatrix = getParentBoneMatrix(bone.name, bone.name) *  newPose * offsets.at(bone.name);
+        std::cout << "moving bone: " << bone.name << std::endl;
       }
     }
   }
@@ -188,7 +198,7 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
   std::cout << "animation name:  " << animation.name << std::endl;
-  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 4);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
+  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 9);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
   advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes](std::string boneName, glm::mat4 newPose) -> void {
     processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
   });
@@ -875,6 +885,7 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
+
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
     loadScene(rawSceneFile);
