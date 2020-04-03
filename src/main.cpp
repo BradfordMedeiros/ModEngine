@@ -169,17 +169,16 @@ Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
+
+
 glm::mat4 getParentBoneMatrix(std::string currentBone, std::string parentBone){
   return glm::mat4(1.f);
 }
 
-/*
-root: SENTINAL_ARMATURE_NECK, SENTINAL_ARMATURE_TAIL, SENTINAL_ARMATURE_LEFTARM, SENTINAL_ARMATURE_RIGHTARM
-SENTINAL_ARMATURE_RIGHTARM -> SENTINAL_ARMATURE_RIGHTHAND
-SENTINAL_ARMATURE_LEFTARM  -> SENTINAL_ARMATURE_LEFTHAND
-*/
+
 std::map<std::string, glm::mat4> offsets;
-void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
+void processNewPoseOnMesh(
+  std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
   for (int i = 0; i < meshData.meshes.size(); i++){
     std::string meshName = meshData.meshNames.at(i);
     Mesh& mesh = meshData.meshes.at(i);
@@ -188,20 +187,62 @@ void processNewPoseOnMesh(std::string boneName, glm::mat4 newPose, NameAndMesh& 
         if (offsets.find(bone.name) == offsets.end()){
           offsets[bone.name] = bone.offsetMatrix;
         }
-        bone.offsetMatrix = getParentBoneMatrix(bone.name, bone.name) *  newPose * offsets.at(bone.name);
-        std::cout << "moving bone: " << bone.name << std::endl;
+
+        auto bonePose = newPose;
+        nodeToTransformedPose[bone.name] = bonePose;
       }
     }
   }
 }
 
+
+glm::mat4 getParentBone(std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
+  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_NECK") != nodeToTransformedPose.end());
+  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_TAIL") != nodeToTransformedPose.end());
+  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_LEFTARM") != nodeToTransformedPose.end());
+  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_RIGHTARM") != nodeToTransformedPose.end());
+  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_LEFTHAND") != nodeToTransformedPose.end());
+  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_RIGHTHAND") != nodeToTransformedPose.end());
+
+  if (boneName == "SENTINAL_ARMATURE_LEFTHAND"){
+    return nodeToTransformedPose.at("SENTINAL_ARMATURE_LEFTARM");
+  }
+  if (boneName == "SENTINAL_ARMATURE_RIGHTHAND"){
+    return nodeToTransformedPose.at("SENTINAL_ARMATURE_RIGHTARM");
+  }
+  return glm::mat4(1.f);
+} 
+
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   auto animation = getTargetAnimation();
   std::cout << "animation name:  " << animation.name << std::endl;
   auto meshNameToMeshes = getMeshesForId(world.objectMapping, 9);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
-  advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes](std::string boneName, glm::mat4 newPose) -> void {
-    processNewPoseOnMesh(boneName, newPose, meshNameToMeshes);
+  
+  std::map<std::string, glm::mat4> nodeToTransformedPose;
+  advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes, &nodeToTransformedPose](std::string boneName, glm::mat4 newPose) -> void {
+    processNewPoseOnMesh(nodeToTransformedPose, boneName, newPose, meshNameToMeshes);
   });
+
+/*
+root: SENTINAL_ARMATURE_NECK, SENTINAL_ARMATURE_TAIL, SENTINAL_ARMATURE_LEFTARM, SENTINAL_ARMATURE_RIGHTARM
+SENTINAL_ARMATURE_RIGHTARM -> SENTINAL_ARMATURE_RIGHTHAND
+SENTINAL_ARMATURE_LEFTARM  -> SENTINAL_ARMATURE_LEFTHAND
+*/
+
+  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
+    std::string meshName = meshNameToMeshes.meshNames.at(i);
+    Mesh& mesh = meshNameToMeshes.meshes.at(i);
+    for (Bone& bone : mesh.bones){
+      std::cout << "checking bone" << bone.name << std::endl;
+      if (nodeToTransformedPose.find(bone.name) != nodeToTransformedPose.end()){
+         bone.offsetMatrix = getParentBone(nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * offsets.at(bone.name);
+         std::cout << "setting offset matrix" << std::endl;
+      }
+  
+    }
+  }
+
+
 },4); 
 
 bool useYAxis = true;
