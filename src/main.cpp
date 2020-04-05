@@ -169,26 +169,17 @@ Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
-
-std::map<std::string, glm::mat4> offsets;
 void processNewPoseOnMesh(
   std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
   for (int i = 0; i < meshData.meshes.size(); i++){
-    std::string meshName = meshData.meshNames.at(i);
     Mesh& mesh = meshData.meshes.at(i);
     for (Bone& bone : mesh.bones){
-      if (bone.name == boneName){       // TODO - this is super hackey way of storing this data, but seems to work, need to restructure.
-        if (offsets.find(bone.name) == offsets.end()){
-          offsets[bone.name] = bone.offsetMatrix;
-        }
-
-        auto bonePose = newPose;
-        nodeToTransformedPose[bone.name] = bonePose;
+      if (bone.name == boneName){    
+        nodeToTransformedPose[bone.name] = newPose;
       }
     }
   }
 }
-
 
 glm::mat4 getParentBone(Mesh& mesh, std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
   if (mesh.boneToParent.find(boneName) != mesh.boneToParent.end()){
@@ -211,9 +202,8 @@ TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime
     std::string meshName = meshNameToMeshes.meshNames.at(i);
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     for (Bone& bone : mesh.bones){
-      std::cout << "checking bone" << bone.name << std::endl;
       if (nodeToTransformedPose.find(bone.name) != nodeToTransformedPose.end()){
-         bone.offsetMatrix = getParentBone(mesh, nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * offsets.at(bone.name);
+         bone.offsetMatrix = getParentBone(mesh, nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * bone.initialOffsetMatrix;
       }
     }
   }

@@ -48,6 +48,7 @@ struct Animation {
 struct Bone {
   std::string name;
   glm::mat4 offsetMatrix;
+  glm::mat4 initialOffsetMatrix;
 };
 
 struct MeshData {

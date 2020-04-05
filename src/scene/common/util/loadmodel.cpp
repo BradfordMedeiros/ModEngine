@@ -144,9 +144,11 @@ BoneInfo processBones(aiMesh* mesh){
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
 
+    auto offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix);
     Bone meshBone {
       .name = bone -> mName.C_Str(),
-      .offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix)
+      .offsetMatrix = offsetMatrix,
+      .initialOffsetMatrix = offsetMatrix
     };
     meshBones.push_back(meshBone);
 
