@@ -3,6 +3,7 @@
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.
 Mesh loadMesh(std::string defaultTexture, MeshData meshData){
+  std::cout << "load mesh 0" << std::endl;
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
@@ -61,7 +62,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     .texture = texture,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
-    .bones = meshData.bones
+    .bones = meshData.bones,
+    .boneToParent = meshData.boneToParent
   }; 
 
   return mesh; 

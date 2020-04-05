@@ -170,12 +170,6 @@ Animation getTargetAnimation(){
 }
 
 
-
-glm::mat4 getParentBoneMatrix(std::string currentBone, std::string parentBone){
-  return glm::mat4(1.f);
-}
-
-
 std::map<std::string, glm::mat4> offsets;
 void processNewPoseOnMesh(
   std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
@@ -196,19 +190,9 @@ void processNewPoseOnMesh(
 }
 
 
-glm::mat4 getParentBone(std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
-  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_NECK") != nodeToTransformedPose.end());
-  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_TAIL") != nodeToTransformedPose.end());
-  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_LEFTARM") != nodeToTransformedPose.end());
-  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_RIGHTARM") != nodeToTransformedPose.end());
-  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_LEFTHAND") != nodeToTransformedPose.end());
-  assert(nodeToTransformedPose.find("SENTINAL_ARMATURE_RIGHTHAND") != nodeToTransformedPose.end());
-
-  if (boneName == "SENTINAL_ARMATURE_LEFTHAND"){
-    return nodeToTransformedPose.at("SENTINAL_ARMATURE_LEFTARM");
-  }
-  if (boneName == "SENTINAL_ARMATURE_RIGHTHAND"){
-    return nodeToTransformedPose.at("SENTINAL_ARMATURE_RIGHTARM");
+glm::mat4 getParentBone(Mesh& mesh, std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
+  if (mesh.boneToParent.find(boneName) != mesh.boneToParent.end()){
+    return nodeToTransformedPose.at(mesh.boneToParent.at(boneName));
   }
   return glm::mat4(1.f);
 } 
@@ -223,26 +207,16 @@ TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime
     processNewPoseOnMesh(nodeToTransformedPose, boneName, newPose, meshNameToMeshes);
   });
 
-/*
-root: SENTINAL_ARMATURE_NECK, SENTINAL_ARMATURE_TAIL, SENTINAL_ARMATURE_LEFTARM, SENTINAL_ARMATURE_RIGHTARM
-SENTINAL_ARMATURE_RIGHTARM -> SENTINAL_ARMATURE_RIGHTHAND
-SENTINAL_ARMATURE_LEFTARM  -> SENTINAL_ARMATURE_LEFTHAND
-*/
-
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
     std::string meshName = meshNameToMeshes.meshNames.at(i);
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     for (Bone& bone : mesh.bones){
       std::cout << "checking bone" << bone.name << std::endl;
       if (nodeToTransformedPose.find(bone.name) != nodeToTransformedPose.end()){
-         bone.offsetMatrix = getParentBone(nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * offsets.at(bone.name);
-         std::cout << "setting offset matrix" << std::endl;
+         bone.offsetMatrix = getParentBone(mesh, nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * offsets.at(bone.name);
       }
-  
     }
   }
-
-
 },4); 
 
 bool useYAxis = true;

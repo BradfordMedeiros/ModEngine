@@ -56,6 +56,7 @@ struct MeshData {
   std::vector<std::string> texturePaths;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
+  std::map<std::string, std::string> boneToParent;
 };
 
 struct ModelData {

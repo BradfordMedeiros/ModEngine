@@ -210,11 +210,19 @@ void dumpVerticesData(std::string modelPath, MeshData& model){
   }
 } 
 
+std::map<std::string, std::string> getBoneHierarchy(){
+  std::map<std::string, std::string> boneToParent;
+  boneToParent["SENTINAL_ARMATURE_LEFTHAND"] = "SENTINAL_ARMATURE_LEFTARM";
+  boneToParent["SENTINAL_ARMATURE_RIGHTHAND"] = "SENTINAL_ARMATURE_RIGHTARM";
+  return boneToParent;
+}
+
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
    BoneInfo boneInfo = processBones(mesh);
+   auto boneToParent = getBoneHierarchy();
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
@@ -256,7 +264,8 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .indices = indices,       
      .texturePaths = textureFilepaths,
      .boundInfo = getBounds(vertices),
-     .bones = boneInfo.bones
+     .bones = boneInfo.bones,
+     .boneToParent = boneToParent
    };
 
    dumpVerticesData(modelPath, model); 
