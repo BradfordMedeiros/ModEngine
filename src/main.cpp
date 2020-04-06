@@ -26,6 +26,8 @@
 #include "./scene/sprites/readfont.h"
 #include "./scene/sprites/sprites.h"
 #include "./scene/voxels.h"
+#include "./scene/animation/timeplayback.h"
+#include "./scene/animation/animation.h"
 #include "./scheme_bindings.h"
 #include "./shaders.h"
 #include "./translations.h"
@@ -35,8 +37,6 @@
 #include "./state.h"
 #include "./input.h"
 #include "./network.h"
-#include "./timeplayback.h"
-#include "./animation.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -211,7 +211,6 @@ TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime
 bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
-  //std::cout << "use yaxis: " << useYAxis << std::endl;
 
   playSound();
 
