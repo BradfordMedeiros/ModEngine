@@ -27,6 +27,11 @@ struct Mesh {
   std::vector<Bone> bones;
 };
 
+struct NameAndMesh {
+  std::vector<std::reference_wrapper<std::string>> meshNames;
+  std::vector<std::reference_wrapper<Mesh>> meshes;
+};
+
 Mesh loadMesh(std::string defaultTexture, MeshData modelData);		 // loads model and returns mesh/bound texture data
 Mesh load2DMesh(std::string imagePath);		 // loads single quad mesh with texture centered around -1 to 1 x/y
 Mesh load2DMeshTexCoords(std::string imagePath, float offsetx, float offsety, float width, float height); // 2DMesh with subimage selection

@@ -28,6 +28,7 @@
 #include "./scene/voxels.h"
 #include "./scene/animation/timeplayback.h"
 #include "./scene/animation/animation.h"
+#include "./scene/animation/playback.h"
 #include "./scheme_bindings.h"
 #include "./shaders.h"
 #include "./translations.h"
@@ -169,43 +170,11 @@ Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
-void processNewPoseOnMesh(std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
-  for (int i = 0; i < meshData.meshes.size(); i++){
-    Mesh& mesh = meshData.meshes.at(i);
-    for (Bone& bone : mesh.bones){
-      if (bone.name == boneName){    
-        nodeToTransformedPose[bone.name] = newPose;
-      }
-    }
-  }
-}
-
-glm::mat4 getParentBone(std::map<std::string, std::string>& boneToParent, std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
-  if (boneToParent.find(boneName) != boneToParent.end()){
-    return nodeToTransformedPose.at(boneToParent.at(boneName));
-  }
-  return glm::mat4(1.f);
-} 
-
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
+   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
   auto animation = getTargetAnimation();
-  std::cout << "animation name:  " << animation.name << std::endl;
-  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 9);   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
-  
-  std::map<std::string, glm::mat4> nodeToTransformedPose;
-  advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes, &nodeToTransformedPose](std::string boneName, glm::mat4 newPose) -> void {
-    processNewPoseOnMesh(nodeToTransformedPose, boneName, newPose, meshNameToMeshes);
-  });
-
-  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
-    std::string meshName = meshNameToMeshes.meshNames.at(i);
-    Mesh& mesh = meshNameToMeshes.meshes.at(i);
-    for (Bone& bone : mesh.bones){
-      if (nodeToTransformedPose.find(bone.name) != nodeToTransformedPose.end()){
-        bone.offsetMatrix = getParentBone(world.meshnameToBoneToParent.at(meshName), nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * bone.initialOffsetMatrix;
-      }
-    }
-  }
+  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 9); 
+  playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);
 },4); 
 
 bool useYAxis = true;
