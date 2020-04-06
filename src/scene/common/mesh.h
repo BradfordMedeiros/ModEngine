@@ -25,7 +25,6 @@ struct Mesh {
   long unsigned int numElements;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
-  std::map<std::string, std::string> boneToParent;
 };
 
 Mesh loadMesh(std::string defaultTexture, MeshData modelData);		 // loads model and returns mesh/bound texture data

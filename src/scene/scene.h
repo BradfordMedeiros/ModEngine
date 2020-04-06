@@ -22,6 +22,7 @@ struct World {
   std::map<std::string, std::vector<Animation>> animations;
   std::map<short, FullScene> scenes;
   std::map<short, short> idToScene;
+  std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
 };
 
 struct PhysicsInfo {

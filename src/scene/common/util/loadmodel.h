@@ -57,7 +57,6 @@ struct MeshData {
   std::vector<std::string> texturePaths;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
-  std::map<std::string, std::string> boneToParent;
 };
 
 struct ModelData {
@@ -67,6 +66,7 @@ struct ModelData {
   std::map<short, Transformation> nodeTransform;
   std::map<short, std::string> names;
   std::vector<Animation> animations;
+  std::map<std::string, std::string> boneToParent;  // @TODO - multiple meshes can share same bone hierchy, but this map is copied by value, so easy optimization here
 };
 
 // this really should be "load gameobject" --> since need children mesh

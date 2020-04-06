@@ -212,10 +212,37 @@ void dumpVerticesData(std::string modelPath, MeshData& model){
   }
 } 
 
-std::map<std::string, std::string> getBoneHierarchy(){
+int getIndexByName(std::map<short, std::string>& names, std::string name){
+  for (auto &[id, nameInNames] : names){
+    if (nameInNames == name){
+      return id;
+    }
+  }
+  return -1;
+}
+bool hasBone(std::vector<Bone>&bones, std::string boneName){
+  for (auto &bone : bones){
+    if (bone.name == boneName){
+      return true;
+    }
+  }
+  return false;
+}
+std::map<std::string, std::string> getBoneHierarchy(std::map<short, std::string>& names, std::map<short, short>& childToParent, std::map<short, MeshData>& meshIdToMeshData){
   std::map<std::string, std::string> boneToParent;
-  boneToParent["SENTINAL_ARMATURE_LEFTHAND"] = "SENTINAL_ARMATURE_LEFTARM";
-  boneToParent["SENTINAL_ARMATURE_RIGHTHAND"] = "SENTINAL_ARMATURE_RIGHTARM";
+  for (auto &[_, meshData] : meshIdToMeshData){
+    for (auto &bone : meshData.bones){
+      auto index = getIndexByName(names, bone.name);
+      assert(index != -1);
+      if (childToParent.find(index) != childToParent.end()){
+        auto parentIndex = childToParent.at(index);
+        auto parentName = names.at(parentIndex);
+        if (hasBone(meshData.bones, parentName)){
+          boneToParent[bone.name] = parentName; 
+        }
+      }
+    }
+  }
   return boneToParent;
 }
 
@@ -224,7 +251,6 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<unsigned int> indices;
    
    BoneInfo boneInfo = processBones(mesh);
-   auto boneToParent = getBoneHierarchy();
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh->mNumVertices; i++){
@@ -267,7 +293,6 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .texturePaths = textureFilepaths,
      .boundInfo = getBounds(vertices),
      .bones = boneInfo.bones,
-     .boneToParent = boneToParent
    };
 
    dumpVerticesData(modelPath, model); 
@@ -355,7 +380,8 @@ ModelData loadModel(std::string modelPath){
      .childToParent = childToParent,
      .nodeTransform = nodeTransform,
      .names = names,
-     .animations = animations
+     .animations = animations,
+     .boneToParent = getBoneHierarchy(names, childToParent, meshIdToMeshData)
    };
    return data;
 }

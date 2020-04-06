@@ -63,7 +63,6 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
-    .boneToParent = meshData.boneToParent
   }; 
 
   return mesh; 

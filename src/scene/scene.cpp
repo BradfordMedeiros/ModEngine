@@ -145,6 +145,8 @@ void addMesh(World& world, std::string meshpath){
   assert(data.meshIdToMeshData.size() ==  1);
   auto meshData = data.meshIdToMeshData.begin() -> second;
   world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData);     
+  world.meshnameToBoneToParent[meshpath] = data.boneToParent;
+  std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
@@ -222,11 +224,14 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
         if (!hasMesh){
           std::cout << "INFO: create mesh: loading default node mesh for: " << meshName << std::endl;
           world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"
+          world.meshnameToBoneToParent[meshName] = data.boneToParent;
           hasMesh = false;
         }
           
         for (auto [meshId, meshData] : data.meshIdToMeshData){
-          world.meshes[meshName + "::" + std::to_string(meshId)] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
+          auto meshPath = meshName + "::" + std::to_string(meshId);
+          world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
+          world.meshnameToBoneToParent[meshPath] = data.boneToParent;
         } 
 
         auto newSerialObjs = addSubsceneToRoot(

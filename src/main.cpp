@@ -169,8 +169,7 @@ Animation getTargetAnimation(){
   return world.animations.at(targetModel).at(0);
 }
 
-void processNewPoseOnMesh(
-  std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
+void processNewPoseOnMesh(std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName, glm::mat4 newPose, NameAndMesh& meshData){
   for (int i = 0; i < meshData.meshes.size(); i++){
     Mesh& mesh = meshData.meshes.at(i);
     for (Bone& bone : mesh.bones){
@@ -181,9 +180,9 @@ void processNewPoseOnMesh(
   }
 }
 
-glm::mat4 getParentBone(Mesh& mesh, std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
-  if (mesh.boneToParent.find(boneName) != mesh.boneToParent.end()){
-    return nodeToTransformedPose.at(mesh.boneToParent.at(boneName));
+glm::mat4 getParentBone(std::map<std::string, std::string>& boneToParent, std::map<std::string, glm::mat4>& nodeToTransformedPose, std::string boneName){
+  if (boneToParent.find(boneName) != boneToParent.end()){
+    return nodeToTransformedPose.at(boneToParent.at(boneName));
   }
   return glm::mat4(1.f);
 } 
@@ -203,7 +202,7 @@ TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     for (Bone& bone : mesh.bones){
       if (nodeToTransformedPose.find(bone.name) != nodeToTransformedPose.end()){
-         bone.offsetMatrix = getParentBone(mesh, nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * bone.initialOffsetMatrix;
+        bone.offsetMatrix = getParentBone(world.meshnameToBoneToParent.at(meshName), nodeToTransformedPose, bone.name) * nodeToTransformedPose.at(bone.name) * bone.initialOffsetMatrix;
       }
     }
   }
