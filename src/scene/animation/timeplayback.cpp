@@ -31,9 +31,6 @@ void TimePlayback::setElapsedTime(float elapsedTime){
   if (!this -> paused){
     this -> currentTime = this -> currentTime + elapsedTime;
     this -> onFrame(this -> currentTime, elapsedTime); 
-  
-    float totalElapsedTime = this -> currentTime - this -> beginTime;
-    float remainingTime = this -> duration - totalElapsedTime;
 
     if (!this -> hasRemainingTime()){
       if (this ->endBehavior == PAUSE){

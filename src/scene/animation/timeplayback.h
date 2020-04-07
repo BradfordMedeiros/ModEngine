@@ -23,6 +23,7 @@ class TimePlayback {
     
   public:
     TimePlayback(float currentTime, std::function<void(float, float)> onFrame, float duration = INFINITY, EndBehavior behavior = RESTART); 
+    TimePlayback(){ };  // Do not use, just to satisfy maps 
     void play();
     void pause();
     void setElapsedTime(float elapsedTime);

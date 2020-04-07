@@ -165,16 +165,30 @@ void printSceneGraphAsDot(){
   }
 }
 
-auto targetModel = "./res/models/bendybox/sentinal.dae";
-Animation getTargetAnimation(){
-  return world.animations.at(targetModel).at(0);
+struct AnimationState {
+  std::map<short, TimePlayback> playbacks;
+};
+void tickAnimations(AnimationState& animationState, float elapsedTime){
+  for (auto &[_, playback] : animationState.playbacks){
+    playback.setElapsedTime(elapsedTime);
+  }
 }
 
-TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
-   // @TODO - this currently just uses all meshes for the 5th item, which only maps to target animation in the specific scene
-  auto animation = getTargetAnimation();
-  auto meshNameToMeshes = getMeshesForId(world.objectMapping, 9); 
-  playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);
+float initialTime = glfwGetTime();
+void addAnimation(AnimationState& animationState, std::string model, short objectId){
+  assert(animationState.playbacks.find(objectId) == animationState.playbacks.end());
+
+  TimePlayback playback(initialTime, [model, objectId](float currentTime, float elapsedTime) -> void {  
+    auto animation = world.animations.at(model).at(0);
+    auto meshNameToMeshes = getMeshesForId(world.objectMapping, objectId); 
+    playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);
+  }, 4);
+  animationState.playbacks[objectId] = playback;
+}
+
+AnimationState animations;
+TimePlayback timePlayback(initialTime, [](float currentTime, float elapsedTime) -> void {
+  tickAnimations(animations, elapsedTime);
 },4); 
 
 bool useYAxis = true;
@@ -665,8 +679,18 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 130, 3);
     drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 140, 3);
 
+
+    drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 160, 3);
+
+
+    drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 170, 3);
+    drawText("using object id: -1" , 40, 180, 3);
   }
 }
+
+
+
+
 
 void onData(std::string data){
   std::cout << "got data: " << data << std::endl;
@@ -889,6 +913,8 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  // Add one animation -> this should ultimately come from user input (and I need a way to autoresolve the ids given targetmodel)
+  addAnimation(animations, "./res/models/bendybox/sentinal.dae", 9);
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;
