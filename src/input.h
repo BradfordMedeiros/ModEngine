@@ -18,7 +18,6 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
 	void (*playSound)(void),
 	void (*setObjectDimensions)(short index, float width, float height, float depth),
-  void sendMoveObjectMessage(),
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key)

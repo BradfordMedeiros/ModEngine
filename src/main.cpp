@@ -123,13 +123,6 @@ void setActiveDepthTexture(int index){
 
 void playSound(){
   playSound(soundBuffer);
-  //activeDepthTexture = (activeDepthTexture + 1) % numTextures;
-  //setActiveDepthTexture(activeDepthTexture);
-}
-void printSceneGraphAsDot(){
-  for (auto [id, scene] : world.scenes){
-    std::cout << scenegraphAsDotFormat(scene.scene, world.objectMapping) << std::endl;
-  }
 }
 
 struct AnimationState {
@@ -222,7 +215,9 @@ void onArrowKey(int key){
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
-  printSceneGraphAsDot();
+  for (auto [id, scene] : world.scenes){
+    std::cout << scenegraphAsDotFormat(scene.scene, world.objectMapping) << std::endl;
+  }
 
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -254,11 +249,9 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   }
 
   std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
-  // TODO - serialization is broken since didn't keep up with it   
-  /*int sceneToSerialize = world.scenes.size() - 1;
-  if (sceneToSerialize >= 0){
-  //  std::cout << serializeFullScene(world.scenes.begin()->second.scene, world.objectMapping) << std::endl;
-  }*/
+  
+  // TODO - serialization is broken since didn't keep up with it   use to be here but obviously this needs to have a real api
+
 }
 
 void selectItem(){
@@ -566,13 +559,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   }
 }
 
-void onData(std::string data){
-  std::cout << "got data: " << data << std::endl;
-}
-void sendMoveObjectMessage(){
-  sendMessage((char*)"hello world");
-}
-
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -585,7 +571,6 @@ int main(int argc, char* argv[]){
    ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
-   ("l,listen", "Start server instance (listen)", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
@@ -620,12 +605,6 @@ int main(int argc, char* argv[]){
   showDebugInfo = result["info"].as<bool>();
   
   std::cout << "LIFECYCLE: program starting" << std::endl;
-
-  bool isServer = result["listen"].as<bool>();
-  modsocket serverInstance;
-  if (isServer){
-    serverInstance = createServer();;
-  }
   disableInput = result["noinput"].as<bool>();
 
   glfwInit();
@@ -797,10 +776,6 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
-    if (isServer){
-      getDataFromSocket(serverInstance, onData);
-    }
-
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
     }else{
@@ -864,7 +839,7 @@ int main(int argc, char* argv[]){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
     
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, sendMoveObjectMessage, makeObject, onDebugKey, onArrowKey);
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, makeObject, onDebugKey, onArrowKey);
     glfwPollEvents();
 
     // 2ND pass renders what we care about to the screen.
@@ -897,7 +872,6 @@ int main(int argc, char* argv[]){
   
   cleanup:    
     deinitPhysics(world.physicsEnvironment); 
-    cleanupSocket(serverInstance);
     stopSoundSystem();
     glfwTerminate(); 
    
