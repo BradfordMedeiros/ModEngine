@@ -6,15 +6,14 @@
 ]grid1:from:1|1|1|0
 
 !onelight:position:0 -10 0
-!seclight:position:3 -10 0
 
 collisionobj:position:1.000000 1.000000 1.000000
 collisionobj:scale:1.000000 1.000000 1.000000
 collisionobj:rotation:0.000000 -0.000000 0.000000
 collisionobj:mesh:./res/models/boundingbox/boundingbox.obj
 
-maincolumn:position:-0.199997 0.000000 0.699997
-maincolumn:scale:20.000000 1.000000 20.000000
+maincolumn:position:0 0 0
+maincolumn:scale:20.000000 20.000000 20.000000
 maincolumn:rotation:0.000000 -0.000000 0.000000
 maincolumn:mesh:./res/models/box/box.obj
 
@@ -30,5 +29,6 @@ box2:scale:6.299998 8.699997 5.899998
 box2:rotation:0.000000 -0.000000 0.000000
 box2:mesh:./res/models/box/box.obj
 box2:physics:dynamic
+#box2:parent:box1
 #box2:physics:nocollide
 

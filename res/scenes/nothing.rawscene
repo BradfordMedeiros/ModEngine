@@ -1,0 +1,6 @@
+
+maincolumn:position:0 0 0
+maincolumn:rotation:0.000000 -0.000000 0.000000
+maincolumn:mesh:./res/models/bendybox/sentinal.dae
+
+!onelight:position:0 -10 0

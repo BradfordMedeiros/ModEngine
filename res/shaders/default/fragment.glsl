@@ -67,10 +67,5 @@ void main(){
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
     FragColor = color * vec4(tint.x, tint.y, tint.z, 1.0);
-
-   
-    if (false && hasBones){
-      FragColor = overcolor;
-    }
   }
 }
