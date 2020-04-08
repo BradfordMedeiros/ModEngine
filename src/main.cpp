@@ -13,6 +13,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "./main_api.h"
 #include "./scene/scene.h"
 #include "./scene/physics.h"
 #include "./scene/collision_cache.h"
@@ -118,36 +119,6 @@ void setActiveDepthTexture(int index){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 }
 
-
-void setActiveCamera(short cameraId){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
-  if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
-    std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
-    return;
-  }
-  auto sceneId = world.idToScene.at(cameraId);
-  activeCameraObj = &world.scenes.at(sceneId).scene.idToGameObjects.at(cameraId);
-  state.selectedIndex = cameraId;
-}
-void nextCamera(){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
-  if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
-    state.useDefaultCamera = true;    
-    activeCameraObj = NULL;
-    return;
-  }
-
-  state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
-  short activeCameraId = cameraIndexs.at(state.activeCamera);
-  setActiveCamera(activeCameraId);
-  std::cout << "active camera is: " << state.activeCamera << std::endl;
-}
-void moveCamera(glm::vec3 offset){
-  defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset));
-}
-void rotateCamera(float xoffset, float yoffset){
-  defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 1);
-}
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
@@ -481,27 +452,6 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
-void applyImpulse(short index, glm::vec3 impulse){
-  applyImpulse(world.rigidbodys.at(index), impulse);
-}
-void clearImpulse(short index){
-  clearImpulse(world.rigidbodys.at(index));
-}
-short loadScene(std::string sceneFile){
-  std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-  return addSceneToWorld(world, sceneFile);
-}
-void unloadScene(short sceneId){  
-  std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  removeSceneFromWorld(world, sceneId);
-}
-std::vector<short> listScenes(){
-  std::vector<short> sceneIds;
-  for (auto &[id, _] : world.scenes){
-    sceneIds.push_back(id);
-  }
-  return sceneIds;
-}
 
 void printObjectIds(){
   auto ids = listObjInScene(world.scenes.at(0).scene);
@@ -714,10 +664,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   }
 }
 
-
-
-
-
 void onData(std::string data){
   std::cout << "got data: " << data << std::endl;
 }
@@ -725,12 +671,6 @@ void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionEnter(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
-}
-void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
-}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
