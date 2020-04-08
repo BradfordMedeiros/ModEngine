@@ -25,4 +25,16 @@ std::vector<short> listScenes();
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
+short getGameObjectByName(std::string name);
+std::vector<short> getObjectsByType(std::string type);
+std::string getGameObjectName(short index);
+glm::vec3 getGameObjectPosition(short index);
+void setGameObjectPosition(short index, glm::vec3 pos);
+void setGameObjectRotation(short index, glm::quat rotation);
+glm::quat getGameObjectRotation(short index);
+void setSelectionMode(bool enabled);
+
+
+
+
 #endif

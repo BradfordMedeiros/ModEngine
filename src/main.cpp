@@ -406,53 +406,6 @@ void makeObject(std::string name, std::string meshName, float x, float y, float 
   std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
 }
 
-std::vector<short> getObjectsByType(std::string type){
-  if (type == "mesh"){
-    std::vector indexes = getGameObjectsIndex<GameObjectMesh>(world.objectMapping);
-    return indexes;
-  }else if (type == "camera"){
-    std::vector indexes = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
-    return indexes;
-  }
-  return getGameObjectsIndex(world.objectMapping);
-}
-
-std::string getGameObjectName(short index){
-  auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).name;
-}
-glm::vec3 getGameObjectPosition(short index){
-  auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation.position;
-}
-void setGameObjectPosition(short index, glm::vec3 pos){
-  auto sceneId = world.idToScene.at(index);
-  physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
-}
-void setGameObjectRotation(short index, glm::quat rotation){
-  auto sceneId = world.idToScene.at(index);
-  physicsRotateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), rotation,  index);
-}
-glm::quat getGameObjectRotation(short index){
-  auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation.rotation;
-}
-short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
-  for (int i = 0; i < world.scenes.size(); i++){
-    for (auto [id, gameObj]: world.scenes.at(i).scene.idToGameObjects){
-      if (gameObj.name == name){
-        return id;
-      }
-    }
-  }
-  return -1;
-}
-
-void setSelectionMode(bool enabled){
-  state.isSelectionMode = enabled;
-}
-
-
 void printObjectIds(){
   auto ids = listObjInScene(world.scenes.at(0).scene);
   for (int i = 0; i < ids.size() ; i++){
