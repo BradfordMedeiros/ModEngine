@@ -163,13 +163,6 @@ void onDebugKey(){
   }else{
     timePlayback.pause();
   }
-
-  int id = 9;
-  std::cout << "Getting animations for id: " << std::to_string(id) << std::endl;
-  for (auto animationName : getAnimationsById(id)){
-    std::cout << "animation: " << animationName << std::endl;
-  }
-  std::cout << "---------------------" << std::endl;
 }
 
 void expandVoxelUp(){
@@ -215,7 +208,16 @@ void onArrowKey(int key){
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
-  for (auto [id, scene] : world.scenes){
+  
+
+  int id = 9;
+  std::cout << "Getting animations for id: " << std::to_string(id) << std::endl;
+  for (auto animationName : getAnimationsById(id)){
+    std::cout << "animation: " << animationName << std::endl;
+  }
+  std::cout << "---------------------" << std::endl;
+
+  /*for (auto [id, scene] : world.scenes){
     std::cout << scenegraphAsDotFormat(scene.scene, world.objectMapping) << std::endl;
   }
 
@@ -238,7 +240,6 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
   glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
 
-
   // This raycast happens in model space of voxel, so specify position + ray in voxel model space
   auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
   std::cout << "length is: " << collidedVoxels.size() << std::endl;
@@ -249,7 +250,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   }
 
   std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
-  
+  */
   // TODO - serialization is broken since didn't keep up with it   use to be here but obviously this needs to have a real api
 
 }
@@ -372,7 +373,6 @@ void updateVoxelPtr(){
     voxelPtr = NULL;
     voxelPtrId = -1;
   }
-
 }
 
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
@@ -695,8 +695,7 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
   unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl");
 
-  font fontToRender = readFont(result["font"].as<std::string>());
-  fontMeshes = loadFontMeshes(fontToRender);
+  fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
   schemeBindings  = createStaticSchemeBindings(

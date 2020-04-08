@@ -114,6 +114,21 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
+void makeObject(std::string name, std::string meshName, float x, float y, float z){
+  //addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
+  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
+}
+void removeObjectById(short id){
+  std::cout << "removing object by id: " << id << std::endl;
+  removeObject(world.objectMapping, id);
+  auto sceneId = world.idToScene.at(id);
+  removeObjectFromScene(world.scenes.at(sceneId).scene, id);
+}
+
+void drawText(std::string word, float left, float top, unsigned int fontSize){
+  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
+}
+
 std::vector<std::string> getAnimationsById(short id){
   std::vector<std::string> animationNames;
   animationNames.push_back("test animation");
@@ -130,19 +145,4 @@ void playAnimation(short id, std::string animationToPlay){
   }
   assert(isValidAnimation);
   std::cout << "play animation placeholder" << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
-}
-
-void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  //addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
-  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
-}
-void removeObjectById(short id){
-  std::cout << "removing object by id: " << id << std::endl;
-  removeObject(world.objectMapping, id);
-  auto sceneId = world.idToScene.at(id);
-  removeObjectFromScene(world.scenes.at(sceneId).scene, id);
-}
-
-void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
