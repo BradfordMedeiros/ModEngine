@@ -119,10 +119,6 @@ void setActiveDepthTexture(int index){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 }
 
-void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
-}
-
 //////////
 
 void playSound(){
@@ -161,24 +157,6 @@ AnimationState animations;
 TimePlayback timePlayback(initialTime, [](float currentTime, float elapsedTime) -> void {
   tickAnimations(animations, elapsedTime);
 },4); 
-
-std::vector<std::string> getAnimationsById(short id){
-  std::vector<std::string> animationNames;
-  animationNames.push_back("test animation");
-  return animationNames;
-}
-void playAnimation(short id, std::string animationToPlay){
-  auto animations = getAnimationsById(id);
-  bool isValidAnimation = false;
-  for (auto animation : animations){
-    if (animation == animationToPlay){
-      isValidAnimation = true;
-      break;
-    }
-  }
-  assert(isValidAnimation);
-  std::cout << "play animation placeholder" << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
-}
 
 
 bool useYAxis = true;
@@ -312,7 +290,6 @@ void processManipulator(){
     }
   }
 }
-
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(disableInput, window, state, xpos, ypos, rotateCamera);
   processManipulator();
@@ -345,14 +322,10 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(key, scancode, action, mods);
-
-  // temp hackey for voxels
   if (key == 261 && voxelPtr != NULL){  // delete
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
   } 
-  ////////////////
-
 }
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint); 
@@ -379,7 +352,6 @@ void rotate(float x, float y, float z){
   auto sceneId = world.idToScene.at(state.selectedIndex);
   physicsRotate(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), x, y, z, state.selectedIndex);
 }
-
 void setObjectDimensions(short index, float width, float height, float depth){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
@@ -394,18 +366,6 @@ void setObjectDimensions(short index, float width, float height, float depth){
     world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).transformation.scale = newScale;
   } 
 }
-
-void removeObjectById(short id){
-  std::cout << "removing object by id: " << id << std::endl;
-  removeObject(world.objectMapping, id);
-  auto sceneId = world.idToScene.at(id);
-  removeObjectFromScene(world.scenes.at(sceneId).scene, id);
-}
-void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  //addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
-  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
-}
-
 void updateVoxelPtr(){
   auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
   if (voxelIndexes.size() > 0){
