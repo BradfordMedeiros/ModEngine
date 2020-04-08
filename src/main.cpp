@@ -191,6 +191,25 @@ TimePlayback timePlayback(initialTime, [](float currentTime, float elapsedTime) 
   tickAnimations(animations, elapsedTime);
 },4); 
 
+std::vector<std::string> getAnimationsById(short id){
+  std::vector<std::string> animationNames;
+  animationNames.push_back("test animation");
+  return animationNames;
+}
+void playAnimation(short id, std::string animationToPlay){
+  auto animations = getAnimationsById(id);
+  bool isValidAnimation = false;
+  for (auto animation : animations){
+    if (animation == animationToPlay){
+      isValidAnimation = true;
+      break;
+    }
+  }
+  assert(isValidAnimation);
+  std::cout << "play animation placeholder" << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
+}
+
+
 bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
@@ -202,6 +221,13 @@ void onDebugKey(){
   }else{
     timePlayback.pause();
   }
+
+  int id = 9;
+  std::cout << "Getting animations for id: " << std::to_string(id) << std::endl;
+  for (auto animationName : getAnimationsById(id)){
+    std::cout << "animation: " << animationName << std::endl;
+  }
+  std::cout << "---------------------" << std::endl;
 }
 
 void expandVoxelUp(){
