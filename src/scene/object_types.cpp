@@ -79,31 +79,6 @@ void removeObject(std::map<short, GameObjectObj>& mapping, short id){
   mapping.erase(id);
 }
 
-void drawBones(GLint shaderProgram, glm::mat4 model, std::vector<Bone> bones){
-  int index  = 0;
-  for (auto bone : bones){
-    std::vector<Line> lines;
-    Line line1 = {
-      .fromPos = glm::vec3(0.5f, 0.f, 0.f),
-      .toPos = glm::vec3(0.5f, 1.f, 0.f)
-    };
-    Line line2 = {
-      .fromPos = glm::vec3(0.f, 0.5f, 0.f),
-      .toPos = glm::vec3(1.f, 0.5f, 0.f)
-    };
-    lines.push_back(line1);
-    lines.push_back(line2);
-
-    glm::mat4 newModel = bone.offsetMatrix;
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(newModel));
-    drawLines(lines);
-    index++;
-  }
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-}
-
-
 void renderObject(
   GLint shaderProgram, 
   short id, 
@@ -140,10 +115,6 @@ void renderObject(
 
       glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
-      
-      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
-      //drawBones(shaderProgram, model, meshToRender.bones);
-
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);     
       drawMesh(meshToRender);    
     }
