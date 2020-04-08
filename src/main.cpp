@@ -406,13 +406,6 @@ void makeObject(std::string name, std::string meshName, float x, float y, float 
   std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
 }
 
-void printObjectIds(){
-  auto ids = listObjInScene(world.scenes.at(0).scene);
-  for (int i = 0; i < ids.size() ; i++){
-    std::cout << "id: " << ids.at(i) << std::endl;
-  }
-}
-
 void updateVoxelPtr(){
   auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
   if (voxelIndexes.size() > 0){
@@ -565,7 +558,6 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   lines.clear();
 }
 
-
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
@@ -608,10 +600,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 130, 3);
     drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 140, 3);
 
-
     drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 160, 3);
-
-
     drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 170, 3);
     drawText("using object id: -1" , 40, 180, 3);
   }
@@ -623,7 +612,6 @@ void onData(std::string data){
 void sendMoveObjectMessage(){
   sendMessage((char*)"hello world");
 }
-
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
