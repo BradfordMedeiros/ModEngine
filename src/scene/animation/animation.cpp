@@ -53,7 +53,7 @@ glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
   auto tickRotIndex = findIndexForKey(channel.rotationKeys, currentTick);
   auto tickScaleIndex = findIndexForKey(channel.scalingKeys, currentTick);
 
-  printChannelInfo(channel, tickPosIndex, tickRotIndex, tickScaleIndex);
+  //printChannelInfo(channel, tickPosIndex, tickRotIndex, tickScaleIndex);
 
   auto newPose = aiKeysToGlm(                     // @TODO - animation - add interpolation (linear, but being able to change this to other interpolation methods could be interesting...)
     channel.positionKeys.at(tickPosIndex), 
@@ -67,7 +67,7 @@ void advanceAnimation(Animation& animation, float currentTime, float elapsedTime
   assert(animation.ticksPerSecond != 0);                                                      // some models can have 0 ticks, probably should just set a default rate for these
 
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
-  printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
+  //printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
 
   for (auto channel : animation.channels){
     glm::mat4 newNodePose = advanceAnimationForNode(channel, currentTick);
