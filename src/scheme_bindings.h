@@ -11,6 +11,7 @@
 typedef void(*func)();
 typedef void(*colfun)(short obj1, short obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
+typedef void(*mousemovecallback)(double xPos, double yPos);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(short index);
@@ -20,6 +21,7 @@ struct SchemeBindingCallbacks {
   colfun onCollisionEnter;
   colfun onCollisionExit;
   mousecallback onMouseCallback;
+  mousemovecallback onMouseMoveCallback;
   onobjectSelectedFunc onObjectSelected;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;

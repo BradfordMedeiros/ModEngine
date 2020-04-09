@@ -285,7 +285,8 @@ void processManipulator(){
   }
 }
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  onMouse(disableInput, window, state, xpos, ypos, rotateCamera);
+  onMouse(disableInput, window, state, xpos, ypos, rotateCamera);  
+  schemeBindings.onMouseMoveCallback(state.offsetX, state.offsetY); 
   processManipulator();
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
