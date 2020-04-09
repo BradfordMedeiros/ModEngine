@@ -1,9 +1,7 @@
 
 
 (define (onMouse button action mods) (+ 0 0))
-(define (onMouseMove xPos yPos)
-  (display (string-append "xPos: " (number->string xPos) " yPos: " (number->string yPos) "\n"))
-)
+(define (onMouseMove xPos yPos) (+ 0 0))
 (define (onKeyChar codepoint) (+ 0 0))
 
 
