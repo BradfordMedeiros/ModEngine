@@ -1,0 +1,44 @@
+
+want to add state machine that define the state, transitions, and applies attributes when in certain states
+
+(locked -> unlocked : use-key)
+(unlocked -> lock   : press)
+
+(locked 
+  (attributes 
+    (color red)        # use defined attribute
+    (physics:enabled)  # notice this is a basic core engine attribute 
+  )
+)
+(unlocked 
+  (attributes
+    (color blue)
+  )
+)
+
+Attributes override, and multiple state machines can apply to an object with precedence.
+This is a cool property, and will allow, for example, attribute of full application state (playing level not) 
+that might load a full scene, which individual gameobjects then load scripts containing these machines.
+
+An example: 
+I define a collision volume that makes all enemies more powerful. They should all be colored red and playing angry animations
+When these enties get attacked,  i want them to be able to play their own animations, override the default color etc, but then 
+be able to return to the top level behavior. 
+
+Another cool idea:
+Tracks. 
+
+Play an animation during a state
+So for example another property:
+
+(locked 
+   (track 
+     (0   (attributes (color red)))
+     (10s (attributes (color blue)))
+)
+
+which then allows timing functionality. 
+
+
+Being able to trigger state transition (use-key) is useful above. 
+Probably just allow executable code here, doesn't have to be pure data (although data only makes serialization easier but w/e)
