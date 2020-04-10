@@ -714,6 +714,7 @@ int main(int argc, char* argv[]){
     getGameObjectName,
     getGameObjectPosition,
     setGameObjectPosition,
+    setGameObjectPositionRelative,
     getGameObjectRotation,
     setGameObjectRotation,
     setFrontDelta,

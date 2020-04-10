@@ -163,6 +163,19 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   return SCM_UNSPECIFIED;
 }
 
+void (*setGameObjectPosnRel)(short index, float x, float y, float z);
+SCM setGameObjectPositionRel(SCM value, SCM position){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  
+  auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
+  setGameObjectPosnRel(obj->id, x, y, z);
+  return SCM_UNSPECIFIED;
+}
+
 glm::quat scmListToQuat(SCM rotation){
   auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
   auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
@@ -258,6 +271,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
+  void (*setGameObjectPosRelative)(short index, float x, float y, float z),
   glm::quat (*getGameObjectRot)(short index),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
@@ -282,6 +296,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   getGameObjNameForId = getGameObjectNameForId;
   getGameObjectPosn = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
+  setGameObjectPosnRel = setGameObjectPosRelative;
   getGameObjectRotn = getGameObjectRot;
   setGameObjectRotn = setGameObjectRot;
   _setFrontDelta = setFrontDelta;
@@ -311,6 +326,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   gameObjectType = scm_make_foreign_object_type(name, slots, finalizer);
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
+  scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
   scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)getGameObjectRotation);
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
