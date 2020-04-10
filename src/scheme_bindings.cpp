@@ -210,6 +210,21 @@ SCM setGameObjectRotation(SCM value, SCM rotation){
 }
 
 glm::quat (*_setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
+SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  glm::quat rot = getGameObjectRotn(obj->id);
+
+  auto deltaY = scm_to_double(deltaYaw);
+  auto deltaP = scm_to_double(deltaPitch);
+  auto deltaR = scm_to_double(deltaRoll); 
+
+  glm::quat newOrientation = _setFrontDelta(rot, deltaY, deltaP, deltaR, 1);
+  setGameObjectRotn(obj->id, newOrientation);
+
+  return SCM_UNSPECIFIED;
+}
 SCM scm_setFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
   glm::quat intialOrientation = scmListToQuat(orientation);
   auto deltaY = scm_to_double(deltaYaw);
@@ -310,8 +325,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
-  scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);
-	scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);
+  scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);    
+	scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
 	scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
 	scm_c_define_gsubr("mk-obj", 2, 1, 1, (void *)makeObject);
 	scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
@@ -327,10 +342,14 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
+  
   scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)getGameObjectRotation);
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
+  scm_c_define_gsubr("gameobj-setrotd!", 4, 0, 0, (void *)setGameObjectRotationDelta);
+
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
+
 
   // UTILITY FUNCTIONS
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void *)scm_setFrontDelta);
