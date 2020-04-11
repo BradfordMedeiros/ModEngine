@@ -199,7 +199,7 @@ std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
-void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs){
+void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel){
   for (auto [_, serialObj] : serialObjs){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
@@ -208,52 +208,38 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    std::cout << "adding object index: " << id << " (" << serialObj.name << ")" << std::endl;
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj", 
-      [&world, &scene, id](std::string meshName) -> bool {  // @TODO this is duplicate with commented below
-        bool meshAlreadyLoaded = !(world.meshes.find(meshName) == world.meshes.end());
-        if (meshAlreadyLoaded){
-          return true;
+      [&world, &scene, id, shouldLoadModel](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+        if (shouldLoadModel){
+          ModelData data = loadModel(meshName); 
+          world.animations[meshName] = data.animations;
+
+          bool hasMesh = data.nodeToMeshId.at(0).size() > 0;     // this is 0 node because we just loaded a mesh, so by definition is root node
+
+          for (auto [meshId, meshData] : data.meshIdToMeshData){
+            auto meshPath = meshName + "::" + std::to_string(meshId);
+            bool meshAlreadyLoaded = !(world.meshes.find(meshPath) == world.meshes.end());
+            if (meshAlreadyLoaded){
+              continue;
+            }
+            world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData);    
+            world.meshnameToBoneToParent[meshPath] = data.boneToParent;
+          } 
+
+          auto newSerialObjs = addSubsceneToRoot(
+            scene, 
+            id,
+            0,
+            data.childToParent, 
+            data.nodeTransform, 
+            data.names, 
+            generateAdditionalFields(meshName, data),
+            getObjectId
+          );
+          addObjects(world, scene, newSerialObjs, false);
+          return hasMesh;
         }
-
-        ModelData data = loadModel(meshName); 
-        world.animations[meshName] = data.animations;
-
-        bool hasMesh = data.nodeToMeshId.at(0).size() > 0;    // why is this checking the root node?
-        if (!hasMesh){
-          std::cout << "INFO: create mesh: loading default node mesh for: " << meshName << std::endl;
-
-          if (world.meshes.find(meshName) != world.meshes.end()){
-            std::cout << "mesh name: " << meshName << "already loaded" << std::endl;
-            assert(false);
-          }
-          world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"
-          world.meshnameToBoneToParent[meshName] = data.boneToParent;
-          hasMesh = false;
-        }
-          
-        for (auto [meshId, meshData] : data.meshIdToMeshData){
-          auto meshPath = meshName + "::" + std::to_string(meshId);
-          if (world.meshes.find(meshPath) != world.meshes.end()){
-            std::cout << "mesh name: " << meshPath << "already loaded" << std::endl;
-            assert(false);
-          }
-          world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
-          world.meshnameToBoneToParent[meshPath] = data.boneToParent;
-        } 
-
-        auto newSerialObjs = addSubsceneToRoot(
-          scene, 
-          id,
-          0,
-          data.childToParent, 
-          data.nodeTransform, 
-          data.names, 
-          generateAdditionalFields(meshName, data),
-          getObjectId
-        );
-        addObjects(world, scene, newSerialObjs);
-        return hasMesh;
+        return true;   // This is basically ensure model loaded so by definition this was already loaded. 
       }, 
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
@@ -264,7 +250,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
 
 FullScene deserializeFullScene(World& world, short sceneId, std::string content){
   SceneDeserialization deserializedScene = deserializeScene(content, fields, getObjectId);
-  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs);
+  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true);
   FullScene fullscene = {
     .scene = deserializedScene.scene,
   };
