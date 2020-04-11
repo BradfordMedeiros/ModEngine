@@ -8,7 +8,7 @@
 #include "./common/util.h"
 
 glm::quat setFrontDelta(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
-glm::vec3 moveRelative(glm::vec3 position, glm::quat orientation, glm::vec3 offset);
+glm::vec3 moveRelative(glm::vec3 position, glm::quat orientation, glm::vec3 offset, bool xzPlaneOnly);
 glm::vec3 move(glm::vec3 position, glm::vec3 offset);
 glm::mat4 renderView(glm::vec3 position, glm::quat orientation);
 

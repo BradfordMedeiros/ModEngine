@@ -163,7 +163,7 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   return SCM_UNSPECIFIED;
 }
 
-void (*setGameObjectPosnRel)(short index, float x, float y, float z);
+void (*setGameObjectPosnRel)(short index, float x, float y, float z, bool xzPlaneOnly);
 SCM setGameObjectPositionRel(SCM value, SCM position){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
@@ -172,7 +172,7 @@ SCM setGameObjectPositionRel(SCM value, SCM position){
   auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
-  setGameObjectPosnRel(obj->id, x, y, z);
+  setGameObjectPosnRel(obj->id, x, y, z, true);
   return SCM_UNSPECIFIED;
 }
 
@@ -286,7 +286,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(short index, float x, float y, float z),
+  void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
   glm::quat (*getGameObjectRot)(short index),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),

@@ -42,7 +42,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(short index, float x, float y, float z),
+  void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
   glm::quat (*getGameObjectRot)(short index),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),

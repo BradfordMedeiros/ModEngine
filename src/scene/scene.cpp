@@ -315,7 +315,7 @@ void physicsTranslate(FullScene& fullscene, btRigidBody* body, float x, float y,
   glm::vec3 newPosition;
   if (moveRelativeEnabled){
     auto oldGameObject = fullscene.scene.idToGameObjects.at(index);
-    newPosition= moveRelative(oldGameObject.transformation.position, oldGameObject.transformation.rotation, offset);
+    newPosition= moveRelative(oldGameObject.transformation.position, oldGameObject.transformation.rotation, offset, false);
   }else{
     newPosition = move(fullscene.scene.idToGameObjects.at(index).transformation.position, offset);   
   }
