@@ -1,9 +1,9 @@
 #include "./translations.h"
 
 glm::quat setFrontDelta(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta){
-  glm::quat yawRotation = glm::rotate(orientation, glm::radians(deltaYaw * delta), glm::vec3(0.0f, -1.0f, 0.0f));
-  glm::quat rotatedYaw = glm::rotate(yawRotation, glm::radians(deltaPitch * delta), glm::vec3(-1.0f, 0.0f, 0.0f) * yawRotation);
-  glm::quat rotated = glm::rotate(rotatedYaw, glm::radians(deltaRoll * delta), glm::vec3(0.0f, 0.0f, -1.0f) * rotatedYaw);
+  glm::quat yawRotation = glm::rotate(orientation, glm::radians(deltaYaw * delta), glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::quat rotatedYaw = glm::rotate(yawRotation, glm::radians(deltaPitch * delta), glm::vec3(1.0f, 0.0f, 0.0f) * yawRotation);
+  glm::quat rotated = glm::rotate(rotatedYaw, glm::radians(deltaRoll * delta), glm::vec3(0.0f, 0.0f, 1.0f) * rotatedYaw);
   return rotated;
 }
 

@@ -158,6 +158,7 @@ World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, 
   addMesh(world, "./res/models/ui/node.obj");
   addMesh(world, "./res/models/boundingbox/boundingbox.obj");
   addMesh(world, "./res/models/cone/cone.obj");
+  addMesh(world, "./res/models/camera/camera.dae");
 
   return world;
 }

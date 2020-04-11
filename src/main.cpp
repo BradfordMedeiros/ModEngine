@@ -47,7 +47,7 @@ GameObject defaultCamera = GameObject {
   .transformation = Transformation {
     .position = glm::vec3(0.f, -2.f, 0.f),
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-    .rotation = glm::quat(0, 1, 0, 0.0f),
+    .rotation = glm::quat(1.0, 0, 0, 0.0f),
   }
 };
 
@@ -217,10 +217,10 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   }
   std::cout << "---------------------" << std::endl;
 
-  /*for (auto [id, scene] : world.scenes){
+  for (auto [id, scene] : world.scenes){
     std::cout << scenegraphAsDotFormat(scene.scene, world.objectMapping) << std::endl;
   }
-
+/*
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
 
   Line line = {
@@ -472,7 +472,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       shaderProgram, 
       id, 
       world.objectMapping, 
-      world.meshes.at("./res/models/ui/node.obj"), 
+      world.meshes.at("./res/models/camera/camera.dae"), 
       objectSelected, 
       world.meshes.at("./res/models/boundingbox/boundingbox.obj"), 
       state.showCameras, 
@@ -540,23 +540,25 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     }
     drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
     drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
-    drawText("fov: " + std::to_string(state.fov), 10, 70, 3);
-    drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 80, 3);
+    drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
+
+    drawText("fov: " + std::to_string(state.fov), 10, 80, 3);
+    drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
     if (state.selectedIndex != -1){
       auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).scene.idToGameObjects.at(state.selectedIndex);
-      drawText("position: " + print(obj.transformation.position), 10, 90, 3);
-      drawText("scale: " + print(obj.transformation.scale), 10, 100, 3);
-      drawText("rotation: " + print(obj.transformation.rotation), 10, 110, 3);
+      drawText("position: " + print(obj.transformation.position), 10, 100, 3);
+      drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
+      drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
     }
     
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-    drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 130, 3);
-    drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 140, 3);
+    drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 140, 3);
+    drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 150, 3);
 
-    drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 160, 3);
-    drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 170, 3);
-    drawText("using object id: -1" , 40, 180, 3);
+    drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 170, 3);
+    drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 180, 3);
+    drawText("using object id: -1" , 40, 190, 3);
   }
 }
 
