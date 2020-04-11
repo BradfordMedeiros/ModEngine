@@ -9,12 +9,10 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
 }
 
-void printVec3(std::string prefix, glm::vec3 vec){
-  std::cout << prefix << vec.x << "," << vec.y << "," << vec.z << std::endl;
-}
+
 void dumpPhysicsInfo(std::map<short, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
-    printVec3("PHYSICS:" + std::to_string(i) + ":", getPosition(rigidBody));
+    std::cout << "PHYSICS:" << std::to_string(i) << ":" <<  print(getPosition(rigidBody));
   }
 }
 

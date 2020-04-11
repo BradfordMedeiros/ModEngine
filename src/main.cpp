@@ -761,7 +761,7 @@ int main(int argc, char* argv[]){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Add one animation -> this should ultimately come from user input (and I need a way to autoresolve the ids given targetmodel)
-  addAnimation(animations, "./res/models/bendybox/sentinal.dae", 9, 0);
+  //addAnimation(animations, "./res/models/bendybox/sentinal.dae", 9, 0);
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;
