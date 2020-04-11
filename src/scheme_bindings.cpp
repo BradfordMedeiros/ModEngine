@@ -164,7 +164,7 @@ SCM setGameObjectPosition(SCM value, SCM positon){
 }
 
 void (*setGameObjectPosnRel)(short index, float x, float y, float z, bool xzPlaneOnly);
-SCM setGameObjectPositionRel(SCM value, SCM position){
+void setPosition(SCM value, SCM position, bool xzOnly){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
@@ -172,9 +172,17 @@ SCM setGameObjectPositionRel(SCM value, SCM position){
   auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
-  setGameObjectPosnRel(obj->id, x, y, z, true);
+  setGameObjectPosnRel(obj->id, x, y, z, xzOnly);
+}
+SCM setGameObjectPositionRel(SCM value, SCM position){
+  setPosition(value, position, false);
   return SCM_UNSPECIFIED;
 }
+SCM setGameObjectPositionRelXZ(SCM value, SCM position){
+  setPosition(value, position, true);
+  return SCM_UNSPECIFIED;
+}
+
 
 glm::quat scmListToQuat(SCM rotation){
   auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
@@ -342,6 +350,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
+  scm_c_define_gsubr("gameobj-setpos-relxz!", 2, 0, 0, (void *)setGameObjectPositionRelXZ);
   
   scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)getGameObjectRotation);
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);

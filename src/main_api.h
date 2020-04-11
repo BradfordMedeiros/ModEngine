@@ -31,7 +31,7 @@ std::vector<short> getObjectsByType(std::string type);
 std::string getGameObjectName(short index);
 glm::vec3 getGameObjectPosition(short index);
 void setGameObjectPosition(short index, glm::vec3 pos);
-void setGameObjectPositionRelative(short index, float x, float y, float z);
+void setGameObjectPositionRelative(short index, float x, float y, float z, bool xzPlaneOnly);
 
 glm::quat getGameObjectRotation(short index);
 void setGameObjectRotation(short index, glm::quat rotation);

@@ -32,7 +32,7 @@ void nextCamera(){
   std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
 void moveCamera(glm::vec3 offset){
-  defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset));
+  defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
 }
 void rotateCamera(float xoffset, float yoffset){
   defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 1);
@@ -101,10 +101,10 @@ void setGameObjectPosition(short index, glm::vec3 pos){
   auto sceneId = world.idToScene.at(index);
   physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
 }
-void setGameObjectPositionRelative(short index, float x, float y, float z){
+void setGameObjectPositionRelative(short index, float x, float y, float z, bool xzPlaneOnly){
   auto sceneId = world.idToScene.at(index);
   auto transformation = world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation;
-  glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z));
+  glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z), xzPlaneOnly);
   physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
 }
 
