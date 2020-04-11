@@ -77,7 +77,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*setObjectDimensions)(short index, float width, float height, float depth),
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
   void (*onDebugKey)(),
-  void (*onArrowKey)(int key) 
+  void (*onArrowKey)(int key),
+  void (*onCameraSystemChange)(bool usingBuiltInCamera)
 ){
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
@@ -129,6 +130,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
     state.useDefaultCamera = !state.useDefaultCamera;
     std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
+    onCameraSystemChange(state.useDefaultCamera);
   }
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
     state.moveRelativeEnabled = !state.moveRelativeEnabled;

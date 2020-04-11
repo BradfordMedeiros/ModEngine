@@ -101,6 +101,11 @@ void onKeyCharCallback(unsigned int codepoint){
    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKeyChar"));
    scm_call_1(func_symbol, scm_from_unsigned_integer(codepoint));
 }
+void onCameraSystemChange(bool usingBuiltInCamera){
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCameraSystemChange"));
+  scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
+}
+
 
 struct gameObject {
   short id;
@@ -380,6 +385,7 @@ SchemeBindingCallbacks createStaticSchemeBindings(
     .onObjectSelected = onObjectSelected,
     .onKeyCallback = onKeyCallback,
     .onKeyCharCallback = onKeyCharCallback,
+    .onCameraSystemChange = onCameraSystemChange
   };
 
   return callbackFuncs;

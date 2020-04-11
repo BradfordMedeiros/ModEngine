@@ -842,7 +842,7 @@ int main(int argc, char* argv[]){
       onPhysicsFrame(world, deltaTime, dumpPhysics); 
     }
     
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, makeObject, onDebugKey, onArrowKey);
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
     glfwPollEvents();
 
     // 2ND pass renders what we care about to the screen.

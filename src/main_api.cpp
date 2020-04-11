@@ -21,7 +21,6 @@ void setActiveCamera(short cameraId){
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
-    state.useDefaultCamera = true;    
     activeCameraObj = NULL;
     return;
   }

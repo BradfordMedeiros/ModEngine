@@ -15,6 +15,7 @@ typedef void(*mousemovecallback)(double xPos, double yPos);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(short index);
+typedef void(*boolfunc)(bool value);
 
 struct SchemeBindingCallbacks {
   func onFrame;
@@ -25,6 +26,7 @@ struct SchemeBindingCallbacks {
   onobjectSelectedFunc onObjectSelected;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
+  boolfunc onCameraSystemChange;
 };
 
 SchemeBindingCallbacks createStaticSchemeBindings(
