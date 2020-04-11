@@ -86,6 +86,7 @@ void renderObject(
   GLint shaderProgram, 
   short id, 
   std::map<short, GameObjectObj>& mapping, 
+  Mesh& nodeMesh,
   Mesh& cameraMesh, 
   bool showCameras, 
   bool showBoneWeight,
@@ -93,7 +94,7 @@ void renderObject(
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-  if (meshObj != NULL && !meshObj -> isDisabled){
+  if (meshObj != NULL && !meshObj -> isDisabled && !meshObj ->nodeOnly){
     for (auto meshToRender : meshObj -> meshesToRender){
       bool hasBones = false;
       if (meshToRender.bones.size() > 0){
@@ -115,11 +116,12 @@ void renderObject(
     }
     return;
   }
-  if (meshObj != NULL && meshObj -> nodeOnly && showCameras){
+
+  if (meshObj != NULL && meshObj -> nodeOnly && showCameras) {
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);     
-    drawMesh(cameraMesh);    
+    drawMesh(nodeMesh);    
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
@@ -132,7 +134,7 @@ void renderObject(
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
-    drawMesh(cameraMesh);
+    drawMesh(nodeMesh);
     return;
   }
 

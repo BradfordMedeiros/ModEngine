@@ -80,6 +80,7 @@ void renderObject(
   GLint shaderProgram, 
   short id, 
   std::map<short, GameObjectObj>& mapping,
+  Mesh& nodeMesh,
   Mesh& cameraMesh, 
   bool showCameras, 
   bool showBoneWeight,

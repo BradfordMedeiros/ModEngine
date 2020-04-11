@@ -472,6 +472,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       shaderProgram, 
       id, 
       world.objectMapping, 
+      world.meshes.at("./res/models/ui/node.obj"),
       world.meshes.at("./res/models/camera/camera.dae"), 
       state.showCameras, 
       state.showBoneWeight,
