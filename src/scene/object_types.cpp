@@ -11,27 +11,30 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
 
-  bool hasMesh = false;
   if (usesMultipleMeshes){
     auto meshStrings = split(additionalFields.at("meshes"), ',');
     for (auto meshName : meshStrings){
-      hasMesh = hasMesh || ensureMeshLoaded(meshName);
-      meshNames.push_back(meshName);
-      meshesToRender.push_back(meshes.at(meshName));
+      bool loadedMesh = ensureMeshLoaded(meshName);
+      if (loadedMesh){
+        meshNames.push_back(meshName);
+        meshesToRender.push_back(meshes.at(meshName));  
+      }
     }
   }else{
     auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
     meshName = (meshName == "") ? defaultMesh : meshName;
-    hasMesh = hasMesh || ensureMeshLoaded(meshName);
-    meshNames.push_back(meshName);
-    meshesToRender.push_back(meshes.at(meshName));
+    bool loadedMesh = ensureMeshLoaded(meshName);
+    if (loadedMesh){
+      meshNames.push_back(meshName);
+      meshesToRender.push_back(meshes.at(meshName));   
+    }
   }
 
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
     .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
-    .nodeOnly = hasMesh == false
+    .nodeOnly = meshNames.size() == 0
   };
   return obj;
 }
@@ -84,24 +87,16 @@ void renderObject(
   short id, 
   std::map<short, GameObjectObj>& mapping, 
   Mesh& cameraMesh, 
-  bool showBoundingBoxForMesh, 
-  Mesh& boundingBoxMesh, 
   bool showCameras, 
-  glm::mat4 model,
   bool showBoneWeight,
   bool useBoneTransform
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-  if (meshObj != NULL && !meshObj -> isDisabled && (!meshObj -> nodeOnly || showCameras)){
+  if (meshObj != NULL && !meshObj -> isDisabled){
     for (auto meshToRender : meshObj -> meshesToRender){
       bool hasBones = false;
       if (meshToRender.bones.size() > 0){
-        int activeProgramId; 
-        glGetIntegerv(GL_CURRENT_PROGRAM, &activeProgramId);
-        auto modelUniformLocation = glGetUniformLocation(shaderProgram, "model");
-        auto hasBonesLocation = glGetUniformLocation(shaderProgram, "hasBones");
-
         for (int i = 0; i < 100; i++){
           auto boneUniformLocation = glGetUniformLocation(shaderProgram, ("bones[" + std::to_string(i) + "]").c_str());
           if (i >= meshToRender.bones.size()){
@@ -119,6 +114,12 @@ void renderObject(
       drawMesh(meshToRender);    
     }
     return;
+  }
+  if (meshObj != NULL && meshObj -> nodeOnly && showCameras){
+    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);     
+    drawMesh(cameraMesh);    
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);

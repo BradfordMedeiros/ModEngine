@@ -81,10 +81,7 @@ void renderObject(
   short id, 
   std::map<short, GameObjectObj>& mapping,
   Mesh& cameraMesh, 
-  bool showBoundingBoxForMesh,  
-  Mesh& boundingboxMesh, 
   bool showCameras, 
-  glm::mat4 model,
   bool showBoneWeight,
   bool useBoneTransform
 );

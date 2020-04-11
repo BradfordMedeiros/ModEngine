@@ -473,10 +473,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
       id, 
       world.objectMapping, 
       world.meshes.at("./res/models/camera/camera.dae"), 
-      objectSelected, 
-      world.meshes.at("./res/models/boundingbox/boundingbox.obj"), 
       state.showCameras, 
-      modelMatrix,
       state.showBoneWeight,
       state.useBoneTransform
     );
