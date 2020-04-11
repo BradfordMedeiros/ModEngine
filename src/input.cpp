@@ -22,7 +22,7 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     if (!state.isSelectionMode || state.isRotateSelection){
-      rotateCamera(xoffset, yoffset);
+      rotateCamera(xoffset, -yoffset);   // -y offset because mouse move forward is negative, which is ok, but inverted
     }else{
       state.cursorLeft += (int)(xoffset * 15);
       state.cursorTop  -= (int)(yoffset * 15);
@@ -121,6 +121,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   }
   if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
     state.showCameras = !state.showCameras;
+    std::cout << "show cameras: " << state.showCameras << std::endl;
   }
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
     onDebugKey();
