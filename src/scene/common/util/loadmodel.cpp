@@ -295,7 +295,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .bones = boneInfo.bones,
    };
 
-   dumpVerticesData(modelPath, model); 
+   //dumpVerticesData(modelPath, model); 
 
    return model;
 }

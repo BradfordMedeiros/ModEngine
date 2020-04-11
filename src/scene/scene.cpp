@@ -42,7 +42,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, FullScene& fullscene, shor
   };
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
-  if (meshObj != NULL){
+  if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
     boundInfo = getMaxUnionBoundingInfo(meshObj -> meshesToRender);
   }
 
@@ -222,6 +222,11 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
         bool hasMesh = data.nodeToMeshId.at(0).size() > 0;    // why is this checking the root node?
         if (!hasMesh){
           std::cout << "INFO: create mesh: loading default node mesh for: " << meshName << std::endl;
+
+          if (world.meshes.find(meshName) != world.meshes.end()){
+            std::cout << "mesh name: " << meshName << "already loaded" << std::endl;
+            assert(false);
+          }
           world.meshes[meshName] = world.meshes.at("./res/models/ui/node.obj");    // temporary this shouldn't load a unique mesh.  Really this just needs to say "no mesh"
           world.meshnameToBoneToParent[meshName] = data.boneToParent;
           hasMesh = false;
@@ -229,6 +234,10 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
           
         for (auto [meshId, meshData] : data.meshIdToMeshData){
           auto meshPath = meshName + "::" + std::to_string(meshId);
+          if (world.meshes.find(meshPath) != world.meshes.end()){
+            std::cout << "mesh name: " << meshPath << "already loaded" << std::endl;
+            assert(false);
+          }
           world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData);     // @todo protect against loading this mesh many times. 
           world.meshnameToBoneToParent[meshPath] = data.boneToParent;
         } 

@@ -456,7 +456,7 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
     // bounding code //////////////////////
     auto gameObjV = world.objectMapping.at(id);
     auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
-    if (meshObj != NULL){
+    if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
       auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
