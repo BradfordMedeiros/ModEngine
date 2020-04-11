@@ -82,7 +82,7 @@ void renderObject(
   std::map<short, GameObjectObj>& mapping,
   Mesh& nodeMesh,
   Mesh& cameraMesh, 
-  bool showCameras, 
+  bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform
 );

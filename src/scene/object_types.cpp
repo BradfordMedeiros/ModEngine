@@ -88,7 +88,7 @@ void renderObject(
   std::map<short, GameObjectObj>& mapping, 
   Mesh& nodeMesh,
   Mesh& cameraMesh, 
-  bool showCameras, 
+  bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform
 ){
@@ -117,7 +117,7 @@ void renderObject(
     return;
   }
 
-  if (meshObj != NULL && meshObj -> nodeOnly && showCameras) {
+  if (meshObj != NULL && meshObj -> nodeOnly && showDebug) {
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);     
@@ -125,14 +125,14 @@ void renderObject(
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
-  if (cameraObj != NULL && showCameras){
+  if (cameraObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     drawMesh(cameraMesh);
     return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
-  if (lightObj != NULL && showCameras){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
+  if (lightObj != NULL && showDebug){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     drawMesh(nodeMesh);
     return;
