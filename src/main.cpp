@@ -481,7 +481,9 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
 
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
-  drawTraversalPositions();
+  if (state.showCameras){
+    drawTraversalPositions();   
+  }
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -761,7 +763,7 @@ int main(int argc, char* argv[]){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Add one animation -> this should ultimately come from user input (and I need a way to autoresolve the ids given targetmodel)
-  //addAnimation(animations, "./res/models/bendybox/sentinal.dae", 9, 0);
+  //addAnimation(animations, "./res/models/bendybox/sentinal.dae", 8, 0);
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;
