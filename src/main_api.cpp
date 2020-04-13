@@ -34,7 +34,7 @@ void moveCamera(glm::vec3 offset){
   defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
 }
 void rotateCamera(float xoffset, float yoffset){
-  defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 1);
+  defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
 }
 
 void applyImpulse(short index, glm::vec3 impulse){

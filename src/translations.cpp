@@ -1,9 +1,9 @@
 #include "./translations.h"
 
 glm::quat setFrontDelta(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta){ // Might be worth considering the ordering of this. 
-  glm::quat pitch  = angleAxis(deltaPitch * delta, glm::vec3(1.0f, 0.0f, 0.0f)) ;
-  glm::quat yaw = glm::angleAxis(deltaYaw * delta,  glm::vec3(0.0f, 1.0f, 0.0f));
-  glm::quat roll = glm::angleAxis(deltaRoll * delta,  glm::vec3(0.0f, 0.0f, 1.0f));
+  glm::quat pitch  = angleAxis(-1 * deltaPitch * delta, glm::vec3(1.0f, 0.0f, 0.0f)) ;
+  glm::quat yaw = glm::angleAxis(-1 * deltaYaw * delta,  glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::quat roll = glm::angleAxis(-1 * deltaRoll * delta,  glm::vec3(0.0f, 0.0f, 1.0f));
   return roll * yaw * orientation * pitch;                                      
 }
 
@@ -53,7 +53,7 @@ glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offse
   float deltaYaw = manipulatorAxis == XAXIS ? offsetY : 0;
   float deltaPitch = manipulatorAxis == YAXIS ? offsetX : 0;
   float deltaRoll = manipulatorAxis == ZAXIS ? offsetX : 0;
-  return setFrontDelta(currentOrientation, deltaYaw, deltaPitch, deltaRoll, 1);
+  return setFrontDelta(currentOrientation, deltaYaw, deltaPitch, deltaRoll, 0.1);
 }
 
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){

@@ -233,7 +233,7 @@ SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM delt
   auto deltaP = scm_to_double(deltaPitch);
   auto deltaR = scm_to_double(deltaRoll); 
 
-  glm::quat newOrientation = _setFrontDelta(rot, deltaY, deltaP, deltaR, 1);
+  glm::quat newOrientation = _setFrontDelta(rot, deltaY, deltaP, deltaR, 0.1);
   setGameObjectRotn(obj->id, newOrientation);
 
   return SCM_UNSPECIFIED;
