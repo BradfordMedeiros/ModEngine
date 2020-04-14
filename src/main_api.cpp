@@ -1,6 +1,7 @@
 #include "./main_api.h"
 
 extern World world;
+extern AnimationState animations;
 extern GameObject* activeCameraObj;
 extern engineState state;
 extern GameObject defaultCamera;
@@ -147,17 +148,34 @@ std::vector<std::string> listAnimations(short id){
   }
   return animationNames;
 }
-void playAnimation(short id, std::string animationToPlay){
-  /*auto animations = listAnimations(id);
-  bool isValidAnimation = false;
-  for (auto animation : animations){
-    if (animation == animationToPlay){
-      isValidAnimation = true;
-      break;
+Animation getAnimation(World& world, short groupId, std::string animationToPlay){  
+  Animation noAnimation { };
+  for (auto animation :  world.animations.at(groupId)){
+    if (animation.name == animationToPlay){
+      return animation;
     }
   }
-  assert(isValidAnimation);*/
-
-
-  std::cout << "play animation placeholder: " << std::to_string(id) << " " << animationToPlay << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
+  std::cout << "no animation found" << std::endl;
+  assert(false);
+  return  noAnimation;  // @todo probably use optional here.
 }
+
+void addAnimation(AnimationState& animationState, short groupId, std::string animationToPlay){
+  auto animation = getAnimation(world, groupId, animationToPlay);
+  std::cout << "going to play animation: "  << animation.name << " with duration: " << std::to_string(animation.duration) << std::endl;
+  TimePlayback playback(glfwGetTime(), [&animation, groupId](float currentTime, float elapsedTime) -> void { 
+    auto meshNameToMeshes = getMeshesForId(world.objectMapping, groupId); 
+    playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  // crashes here 
+  }, 4);  // @TODO this is 4 long, which is not right.  I think just use animation.duration, but need to look up the api
+  animationState.playbacks[groupId] = playback;
+}
+bool hasActiveAnimation(AnimationState& animationState, short groupId){
+  return animationState.playbacks.find(groupId) != animationState.playbacks.end();
+}
+
+void playAnimation(short id, std::string animationToPlay){
+  auto groupId =  world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
+  assert(!hasActiveAnimation(animations, groupId));
+  addAnimation(animations, groupId, animationToPlay);
+}
+

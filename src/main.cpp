@@ -66,6 +66,8 @@ glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+AnimationState animations;
+
 DynamicLoading dynamicLoading;
 std::vector<Line> lines;
 std::vector<Line> permaLines;
@@ -125,29 +127,12 @@ void playSound(){
   playSound(soundBuffer);
 }
 
-struct AnimationState {
-  std::map<short, TimePlayback> playbacks;
-};
 void tickAnimations(AnimationState& animationState, float elapsedTime){
   for (auto &[_, playback] : animationState.playbacks){
     playback.setElapsedTime(elapsedTime);
   }
 }
 
-void addAnimation(AnimationState& animationState, std::string model, short objectId, short animationIndex, float initialTime){
-  assert(animationState.playbacks.find(objectId) == animationState.playbacks.end());
-
-  auto groupId =  world.scenes.at(world.idToScene.at(objectId)).idToGameObjectsH.at(objectId).groupId;
-
-  TimePlayback playback(initialTime, [model, groupId, animationIndex](float currentTime, float elapsedTime) -> void { 
-    auto animation = world.animations.at(groupId).at(animationIndex);
-    auto meshNameToMeshes = getMeshesForId(world.objectMapping, groupId); 
-    playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);
-  }, 4);
-  animationState.playbacks[groupId] = playback;
-}
-
-AnimationState animations;
 TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   tickAnimations(animations, elapsedTime);
 },4); 
@@ -210,13 +195,15 @@ void onArrowKey(int key){
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
   
-
-  int id = 9;
-  std::cout << "Getting animations for id: " << std::to_string(id) << std::endl;
-  for (auto animationName : listAnimations(id)){
-    std::cout << "animation: " << animationName << std::endl;
+  auto sentinelId = getGameObjectByName("sentinel");
+  std::cout << "sentinel id: " << sentinelId << std::endl;
+  auto animations = listAnimations(sentinelId);
+  for (auto animation: animations){
+    std::cout << "animation: " << animation << std::endl;
   }
-  std::cout << "---------------------" << std::endl;
+
+  playAnimation(sentinelId, animations.at(0));
+
 
   for (auto [id, scene] : world.scenes){
     std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;

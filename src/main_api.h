@@ -1,11 +1,14 @@
 #ifndef MOD_MAINAPI
 #define MOD_MAINAPI
 
+#include <GLFW/glfw3.h>
 #include "./scene/scene.h"
 #include "./state.h"
 #include "./scene/physics.h"
 #include "./scheme_bindings.h"
 #include "./scene/sprites/sprites.h"
+#include "./scene/animation/playback.h"
+#include "./scene/animation/timeplayback.h"
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
@@ -42,6 +45,9 @@ void removeObjectById(short id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 
+struct AnimationState {
+  std::map<short, TimePlayback> playbacks;
+};
 std::vector<std::string> listAnimations(short id);
 void playAnimation(short id, std::string animationToPlay);
 
