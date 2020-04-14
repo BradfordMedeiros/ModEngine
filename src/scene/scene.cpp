@@ -212,7 +212,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       [&world, &scene, id, shouldLoadModel](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
-          world.animations[meshName] = data.animations;
+          world.animations[id] = data.animations;
 
           bool hasMesh = data.nodeToMeshId.at(0).size() > 0;     // this is 0 node because we just loaded a mesh, so by definition is root node
 

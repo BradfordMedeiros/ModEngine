@@ -137,7 +137,14 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 
 std::vector<std::string> listAnimations(short id){
   std::vector<std::string> animationNames;
-  animationNames.push_back("test animation");
+  auto groupId =  world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
+  if (world.animations.find(groupId) == world.animations.end()){
+    return animationNames;
+  }
+  auto animations = world.animations.at(groupId);
+  for (auto animation : animations){
+    animationNames.push_back(animation.name);
+  }
   return animationNames;
 }
 void playAnimation(short id, std::string animationToPlay){
@@ -150,5 +157,7 @@ void playAnimation(short id, std::string animationToPlay){
     }
   }
   assert(isValidAnimation);*/
+
+
   std::cout << "play animation placeholder: " << std::to_string(id) << " " << animationToPlay << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
 }

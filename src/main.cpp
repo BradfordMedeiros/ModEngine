@@ -134,20 +134,21 @@ void tickAnimations(AnimationState& animationState, float elapsedTime){
   }
 }
 
-float initialTime = glfwGetTime();
-void addAnimation(AnimationState& animationState, std::string model, short objectId, short animationIndex){
+void addAnimation(AnimationState& animationState, std::string model, short objectId, short animationIndex, float initialTime){
   assert(animationState.playbacks.find(objectId) == animationState.playbacks.end());
 
-  TimePlayback playback(initialTime, [model, objectId, animationIndex](float currentTime, float elapsedTime) -> void {  
-    auto animation = world.animations.at(model).at(animationIndex);
-    auto meshNameToMeshes = getMeshesForId(world.objectMapping, objectId); 
+  auto groupId =  world.scenes.at(world.idToScene.at(objectId)).idToGameObjectsH.at(objectId).groupId;
+
+  TimePlayback playback(initialTime, [model, groupId, animationIndex](float currentTime, float elapsedTime) -> void { 
+    auto animation = world.animations.at(groupId).at(animationIndex);
+    auto meshNameToMeshes = getMeshesForId(world.objectMapping, groupId); 
     playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);
   }, 4);
-  animationState.playbacks[objectId] = playback;
+  animationState.playbacks[groupId] = playback;
 }
 
 AnimationState animations;
-TimePlayback timePlayback(initialTime, [](float currentTime, float elapsedTime) -> void {
+TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
   tickAnimations(animations, elapsedTime);
 },4); 
 
@@ -763,9 +764,6 @@ int main(int argc, char* argv[]){
   //glEnable(GL_CULL_FACE);  
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // Add one animation -> this should ultimately come from user input (and I need a way to autoresolve the ids given targetmodel)
-  //addAnimation(animations, "./res/models/bendybox/sentinal.dae", 8, 0);
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;
