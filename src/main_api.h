@@ -42,7 +42,7 @@ void removeObjectById(short id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 
-std::vector<std::string> getAnimationsById(short id);
+std::vector<std::string> listAnimations(short id);
 void playAnimation(short id, std::string animationToPlay);
 
 #endif

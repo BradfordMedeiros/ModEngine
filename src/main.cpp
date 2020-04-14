@@ -212,7 +212,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
 
   int id = 9;
   std::cout << "Getting animations for id: " << std::to_string(id) << std::endl;
-  for (auto animationName : getAnimationsById(id)){
+  for (auto animationName : listAnimations(id)){
     std::cout << "animation: " << animationName << std::endl;
   }
   std::cout << "---------------------" << std::endl;
@@ -723,7 +723,9 @@ int main(int argc, char* argv[]){
     getGameObjectByName,
     setSelectionMode,
     applyImpulse,
-    clearImpulse
+    clearImpulse,
+    listAnimations,
+    playAnimation
   );
 
   BulletDebugDrawer drawer(addLineNextCycle);

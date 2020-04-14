@@ -135,13 +135,13 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
 
-std::vector<std::string> getAnimationsById(short id){
+std::vector<std::string> listAnimations(short id){
   std::vector<std::string> animationNames;
   animationNames.push_back("test animation");
   return animationNames;
 }
 void playAnimation(short id, std::string animationToPlay){
-  auto animations = getAnimationsById(id);
+  /*auto animations = listAnimations(id);
   bool isValidAnimation = false;
   for (auto animation : animations){
     if (animation == animationToPlay){
@@ -149,6 +149,6 @@ void playAnimation(short id, std::string animationToPlay){
       break;
     }
   }
-  assert(isValidAnimation);
-  std::cout << "play animation placeholder" << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
+  assert(isValidAnimation);*/
+  std::cout << "play animation placeholder: " << std::to_string(id) << " " << animationToPlay << std::endl; // -- should add it to animation, maybe this should restart it, potentially replace the current animation playing" << std::endl;
 }

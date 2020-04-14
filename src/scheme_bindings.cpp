@@ -246,6 +246,32 @@ SCM scm_setFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRo
   return scmQuatToSCM(_setFrontDelta(intialOrientation, deltaY, deltaP, deltaR, 1));
 }
 
+std::vector<std::string>(*_listAnimations)(short id);
+SCM scmListAnimations(SCM value){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  auto animations = _listAnimations(obj->id);
+  int numAnimations = animations.size();
+
+  SCM list = scm_make_list(scm_from_unsigned_integer(numAnimations), scm_from_unsigned_integer(0));
+  for (int i = 0; i < numAnimations; i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_locale_string(animations.at(i).c_str()));
+  }
+
+  return list;
+}
+
+void (*_playAnimation)(short id, std::string animationName);
+SCM scmPlayAnimation(SCM value, SCM animationName){
+  gameObject *obj;
+  scm_assert_foreign_object_type (gameObjectType, value);
+  obj = (gameObject*)scm_foreign_object_ref (value, 0);
+  _playAnimation(obj->id, scm_to_locale_string(animationName));
+  return SCM_UNSPECIFIED;
+}
+
+
 void (*_applyImpulse)(short index, glm::vec3 impulse);
 SCM scm_applyImpulse(SCM value, SCM impulse){
   gameObject *obj;
@@ -306,7 +332,9 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   short (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(short index, glm::vec3 impulse),
-  void (*clearImpulse)(short index)
+  void (*clearImpulse)(short index),
+  std::vector<std::string> (*listAnimations)(short id),
+  void playAnimation(short id, std::string animationToPlay)
 ){
   scm_init_guile();
   
@@ -331,7 +359,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   _applyImpulse = applyImpulse;
   _clearImpulse = clearImpulse;
   getGameObjName = getGameObjectByName;
-
+  _listAnimations = listAnimations;
+  _playAnimation = playAnimation;
 
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
@@ -364,6 +393,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
 
+  scm_c_define_gsubr("gameobj-animations", 1, 0, 0, (void *)scmListAnimations);
+  scm_c_define_gsubr("gameobj-playanimation", 2, 0, 0, (void *)scmPlayAnimation);
 
   // UTILITY FUNCTIONS
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void *)scm_setFrontDelta);
