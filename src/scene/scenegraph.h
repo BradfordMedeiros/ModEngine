@@ -22,6 +22,7 @@ struct GameObjectH {
   short id;
   short parentId;
   std::set<short> children;
+  short groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
 };
 
 struct Scene {

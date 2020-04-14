@@ -27,6 +27,7 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
     .parentId = parentId,
+    .groupId = gameobjectObj.id
   };
 
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
@@ -102,6 +103,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     nodeIdToRealId[nodeId] = id;
 
     addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1);
+    scene.idToGameObjectsH.at(id).groupId = rootId;
     scene.idToGameObjects.at(id).transformation.position = transform.position;
     scene.idToGameObjects.at(id).transformation.scale = transform.scale;
     scene.idToGameObjects.at(id).transformation.rotation = transform.rotation;

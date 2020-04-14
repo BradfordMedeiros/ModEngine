@@ -371,8 +371,8 @@ void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
   updatePhysicsPositions(world, world.rigidbodys);    
 }
 
-std::string getDotInfoForNode(std::string nodeName, int nodeId, std::vector<std::string> meshes){
-  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] \"";
+std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
+  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }
 std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping){
   std::string graph = "";
@@ -383,11 +383,13 @@ std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& 
   for (auto [id, obj] : scene.idToGameObjectsH){
     auto childId = id;
     auto parentId = obj.parentId;
+    auto groupId = obj.groupId;
+    auto parentGroupId = parentId != - 1 ? scene.idToGameObjectsH.at(parentId).groupId : -1;
 
     auto childName = scene.idToGameObjects.at(childId).name;
     auto parentName = parentId == -1 ? "root" : scene.idToGameObjects.at(parentId).name;
         
-    relations = relations + getDotInfoForNode(parentName, parentId, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId, getMeshNames(objectMapping, childId)) + "\n";
+    relations = relations + getDotInfoForNode(parentName, parentId, parentGroupId, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId, groupId, getMeshNames(objectMapping, childId)) + "\n";
   }
   graph = graph + prefix + relations + suffix;
   return graph;
