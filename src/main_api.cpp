@@ -15,7 +15,7 @@ void setActiveCamera(short cameraId){
     return;
   }
   auto sceneId = world.idToScene.at(cameraId);
-  activeCameraObj = &world.scenes.at(sceneId).scene.idToGameObjects.at(cameraId);
+  activeCameraObj = &world.scenes.at(sceneId).idToGameObjects.at(cameraId);
   state.selectedIndex = cameraId;
 }
 void nextCamera(){
@@ -69,7 +69,7 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 
 short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   for (int i = 0; i < world.scenes.size(); i++){
-    for (auto [id, gameObj]: world.scenes.at(i).scene.idToGameObjects){
+    for (auto [id, gameObj]: world.scenes.at(i).idToGameObjects){
       if (gameObj.name == name){
         return id;
       }
@@ -90,11 +90,11 @@ std::vector<short> getObjectsByType(std::string type){
 }
 std::string getGameObjectName(short index){
   auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).name;
+  return world.scenes.at(sceneId).idToGameObjects.at(index).name;
 }
 glm::vec3 getGameObjectPosition(short index){
   auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation.position;
+  return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
   auto sceneId = world.idToScene.at(index);
@@ -102,7 +102,7 @@ void setGameObjectPosition(short index, glm::vec3 pos){
 }
 void setGameObjectPositionRelative(short index, float x, float y, float z, bool xzPlaneOnly){
   auto sceneId = world.idToScene.at(index);
-  auto transformation = world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation;
+  auto transformation = world.scenes.at(sceneId).idToGameObjects.at(index).transformation;
   glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z), xzPlaneOnly);
   physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
 }
@@ -113,7 +113,7 @@ void setGameObjectRotation(short index, glm::quat rotation){
 }
 glm::quat getGameObjectRotation(short index){
   auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).scene.idToGameObjects.at(index).transformation.rotation;
+  return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.rotation;
 }
 
 void setSelectionMode(bool enabled){
@@ -128,7 +128,7 @@ void removeObjectById(short id){
   std::cout << "removing object by id: " << id << std::endl;
   removeObject(world.objectMapping, id);
   auto sceneId = world.idToScene.at(id);
-  removeObjectFromScene(world.scenes.at(sceneId).scene, id);
+  removeObjectFromScene(world.scenes.at(sceneId), id);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

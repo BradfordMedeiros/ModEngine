@@ -218,7 +218,7 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
   std::cout << "---------------------" << std::endl;
 
   for (auto [id, scene] : world.scenes){
-    std::cout << scenegraphAsDotFormat(scene.scene, world.objectMapping) << std::endl;
+    std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
   }
 /*
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
@@ -267,14 +267,14 @@ void selectItem(){
   state.selectedIndex = selectedId;
 
   auto sceneId = world.idToScene.at(state.selectedIndex);
-  state.selectedName = world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).name + "(" + std::to_string(state.selectedIndex) + ")";
+  state.selectedName = world.scenes.at(sceneId).idToGameObjects.at(state.selectedIndex).name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && !(world.idToScene.find(state.selectedIndex) == world.idToScene.end())){
     auto sceneId = world.idToScene.at(state.selectedIndex);
-    auto selectObject = world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex);
+    auto selectObject = world.scenes.at(sceneId).idToGameObjects.at(state.selectedIndex);
     if (state.manipulatorMode == TRANSLATE){
       applyPhysicsTranslation(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
@@ -358,7 +358,7 @@ void setObjectDimensions(short index, float width, float height, float depth){
     auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
     auto sceneId = world.idToScene.at(state.selectedIndex);
-    world.scenes.at(sceneId).scene.idToGameObjects.at(state.selectedIndex).transformation.scale = newScale;
+    world.scenes.at(sceneId).idToGameObjects.at(state.selectedIndex).transformation.scale = newScale;
   } 
 }
 void updateVoxelPtr(){
@@ -412,7 +412,7 @@ void drawTraversalPositions(){
   }
 }
 
-void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
   
   glActiveTexture(GL_TEXTURE0 + 1);
@@ -438,13 +438,13 @@ void renderScene(FullScene& fullscene, GLint shaderProgram, glm::mat4 projection
   }
 
   clearTraversalPositions();
-  traverseScene(fullscene.scene, [useSelectionColor, shaderProgram, &fullscene](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix) -> void {    
+  traverseScene(scene, [useSelectionColor, shaderProgram, &scene](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix) -> void {    
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
     }
     
-    GameObject object = fullscene.scene.idToGameObjects.at(id);
+    GameObject object = scene.idToGameObjects.at(id);
     bool objectSelected = state.selectedIndex == id;
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
 
@@ -546,7 +546,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
     if (state.selectedIndex != -1){
-      auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).scene.idToGameObjects.at(state.selectedIndex);
+      auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).idToGameObjects.at(state.selectedIndex);
       drawText("position: " + print(obj.transformation.position), 10, 100, 3);
       drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
       drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
@@ -791,7 +791,7 @@ int main(int argc, char* argv[]){
     auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
     std::vector<GameObject*> lights;
     for (int i = 0; i < lightsIndexs.size(); i++){
-      lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).scene.idToGameObjects.at(lightsIndexs.at(i)));
+      lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).idToGameObjects.at(lightsIndexs.at(i)));
     }
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
