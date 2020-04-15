@@ -196,16 +196,6 @@ void onArrowKey(int key){
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
   playSound();
   
-  auto sentinelId = getGameObjectByName("sentinel");
-  std::cout << "sentinel id: " << sentinelId << std::endl;
-  auto animations = listAnimations(sentinelId);
-  for (auto animation: animations){
-    std::cout << "animation: " << animation << std::endl;
-  }
-
-  playAnimation(sentinelId, animations.at(0));
-
-
   for (auto [id, scene] : world.scenes){
     std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
   }
