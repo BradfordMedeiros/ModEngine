@@ -371,6 +371,30 @@ void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
   updatePhysicsPositions(world, world.rigidbodys);    
 }
 
+std::vector<short> getIds(short groupId){
+  std::vector<short> groupIds;
+  groupIds.push_back(id);
+  return groupIds;
+}
+
+NameAndMesh getMeshesForGroupId(World& world, short groupId){
+  std::vector<std::reference_wrapper<std::string>> meshNames;
+  std::vector<std::reference_wrapper<Mesh>> meshes;
+  NameAndMesh nameAndMeshes = {
+    .meshNames = meshNames,
+    .meshes = meshes
+  };
+  auto ids = getIds(groupId);
+  for (auto id : ids){
+    auto meshesForId = getMeshesForId(world.objectMapping, id);
+    for (int i = 0; i < meshesForId.meshes.size(); i++){
+      nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
+      nameAndMeshes.meshes.push_back(meshesForId.meshes.at(i));
+    }    
+  }
+  return nameAndMeshes;
+}
+
 std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }

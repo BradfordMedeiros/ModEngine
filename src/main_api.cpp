@@ -164,7 +164,7 @@ Animation getAnimation(World& world, short groupId, std::string animationToPlay)
 void addAnimation(AnimationState& animationState, short groupId, std::string animationToPlay){
   TimePlayback playback(initialTime, [animationToPlay, groupId](float currentTime, float elapsedTime) -> void { 
     auto animation = getAnimation(world, groupId, animationToPlay);
-    auto meshNameToMeshes = getMeshesForId(world.objectMapping, groupId);   // maybe this should be getting all meshes with group id
+    auto meshNameToMeshes = getMeshesForGroupId(world, 8);   // maybe this should be getting all meshes with group id
     playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  // crashes here 
   }, 4);  // @TODO this is 4 long, which is not right.  I think just use animation.duration, but need to look up the api
   animationState.playbacks[groupId] = playback;

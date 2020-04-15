@@ -44,6 +44,7 @@ void  applyPhysicsRotation(Scene& scene, btRigidBody* body, short index, glm::qu
 void  applyPhysicsScaling(World& world, Scene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  onPhysicsFrame(World& world, float timestep, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
+NameAndMesh getMeshesForGroupId(World& world, short id);
 
 std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping);
 
