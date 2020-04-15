@@ -18,7 +18,7 @@ void processNewPoseOnMesh(std::map<std::string, glm::mat4>& nodeToTransformedPos
   }
 }
 
-void playbackAnimation(Animation& animation,  std::map<std::string, std::map<std::string, std::string>>& meshnameToBoneToParent, NameAndMesh& meshNameToMeshes,  float currentTime, float elapsedTime){  
+void playbackAnimation(Animation animation,  std::map<std::string, std::map<std::string, std::string>>& meshnameToBoneToParent, NameAndMesh meshNameToMeshes,  float currentTime, float elapsedTime){  
   std::map<std::string, glm::mat4> nodeToTransformedPose;
   advanceAnimation(animation, currentTime, elapsedTime, [&meshNameToMeshes, &nodeToTransformedPose](std::string boneName, glm::mat4 newPose) -> void {
     processNewPoseOnMesh(nodeToTransformedPose, boneName, newPose, meshNameToMeshes);

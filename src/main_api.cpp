@@ -162,11 +162,15 @@ Animation getAnimation(World& world, short groupId, std::string animationToPlay)
 }
 
 void addAnimation(AnimationState& animationState, short groupId, std::string animationToPlay){
-  TimePlayback playback(initialTime, [animationToPlay, groupId](float currentTime, float elapsedTime) -> void { 
-    auto animation = getAnimation(world, groupId, animationToPlay);
-    auto meshNameToMeshes = getMeshesForGroupId(world, groupId);   // maybe this should be getting all meshes with group id
-    playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  // crashes here 
-  }, 4);  // @TODO this is 4 long, which is not right.  I think just use animation.duration, but need to look up the api
+  auto animation = getAnimation(world, groupId, animationToPlay);
+  auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
+  TimePlayback playback(
+    initialTime, 
+    [animation, meshNameToMeshes](float currentTime, float elapsedTime) -> void { 
+      playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  
+    }, 
+    animation.duration
+  );  
   animationState.playbacks[groupId] = playback;
 }
 bool hasActiveAnimation(AnimationState& animationState, short groupId){
