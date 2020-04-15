@@ -5,6 +5,8 @@
 (define (onObjSelected selectedIndex) (display ""))
 (define (onCollideEnter obj1 obj2) (display ""))
 (define (onCollideExit obj1 obj2) (display ""))
+(define (onMouseMove xPos yPos) (+ 0 0))
+(define (onCameraSystemChange type) #t)
 
 (define activeLineIndex 0)
 (define lineHistory #())

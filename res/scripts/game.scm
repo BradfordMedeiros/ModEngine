@@ -4,9 +4,15 @@
 (define (onMouseMove xPos yPos) (+ 0 0))
 (define (onKeyChar codepoint) (+ 0 0))
 
+(define (playanimation)
+  (let* ((sentinel (lsobj-name "sentinel")) (animationname (car (gameobj-animations sentinel))))
+    (gameobj-playanimation sentinel animationname)
+  )
+)
 
 (define selectionModeEnabled #f)
 (define (onKey key scancode action mods)
+  (if (and (= key 75) (= action 1)) (playanimation))
   (if (and (= key 80) (= action 1))
     (begin 
     	(display "toggled selection mode")(display "\n")
@@ -32,3 +38,5 @@
 (define (onCollideExit obj1 obj2)
   (display (string-append "collision exit" (number->string obj1) "-" (number->string obj2) "\n"))
 )
+
+(define (onCameraSystemChange type) #t)
