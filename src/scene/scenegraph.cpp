@@ -231,3 +231,13 @@ void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4)
     traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
   }  
 }
+
+std::vector<short> getIdsInGroup(Scene& scene, short groupId){
+  std::vector<short> ids;
+  for (auto [_, gameobj] : scene.idToGameObjectsH){
+    if (gameobj.groupId == groupId){
+      ids.push_back(gameobj.id);
+    }
+  }
+  return ids;
+}

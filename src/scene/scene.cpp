@@ -371,12 +371,6 @@ void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
   updatePhysicsPositions(world, world.rigidbodys);    
 }
 
-std::vector<short> getIds(short groupId){
-  std::vector<short> groupIds;
-  groupIds.push_back(id);
-  return groupIds;
-}
-
 NameAndMesh getMeshesForGroupId(World& world, short groupId){
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
@@ -384,8 +378,7 @@ NameAndMesh getMeshesForGroupId(World& world, short groupId){
     .meshNames = meshNames,
     .meshes = meshes
   };
-  auto ids = getIds(groupId);
-  for (auto id : ids){
+  for (auto id : getIdsInGroup(world.scenes.at(world.idToScene.at(groupId)), groupId)){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
     for (int i = 0; i < meshesForId.meshes.size(); i++){
       nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
