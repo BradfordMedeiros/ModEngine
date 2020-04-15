@@ -133,7 +133,8 @@ void tickAnimations(AnimationState& animationState, float elapsedTime){
   }
 }
 
-TimePlayback timePlayback(glfwGetTime(), [](float currentTime, float elapsedTime) -> void {
+float initialTime = glfwGetTime();
+TimePlayback timePlayback(initialTime, [](float currentTime, float elapsedTime) -> void {
   tickAnimations(animations, elapsedTime);
 },4); 
 

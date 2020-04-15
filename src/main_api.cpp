@@ -8,6 +8,7 @@ extern GameObject defaultCamera;
 extern SchemeBindingCallbacks schemeBindings;
 extern std::map<unsigned int, Mesh> fontMeshes;
 extern unsigned int uiShaderProgram;
+extern float initialTime;
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
@@ -161,10 +162,9 @@ Animation getAnimation(World& world, short groupId, std::string animationToPlay)
 }
 
 void addAnimation(AnimationState& animationState, short groupId, std::string animationToPlay){
-  auto animation = getAnimation(world, groupId, animationToPlay);
-  std::cout << "going to play animation: "  << animation.name << " with duration: " << std::to_string(animation.duration) << std::endl;
-  TimePlayback playback(glfwGetTime(), [&animation, groupId](float currentTime, float elapsedTime) -> void { 
-    auto meshNameToMeshes = getMeshesForId(world.objectMapping, groupId); 
+  TimePlayback playback(initialTime, [animationToPlay, groupId](float currentTime, float elapsedTime) -> void { 
+    auto animation = getAnimation(world, groupId, animationToPlay);
+    auto meshNameToMeshes = getMeshesForId(world.objectMapping, groupId);   // maybe this should be getting all meshes with group id
     playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  // crashes here 
   }, 4);  // @TODO this is 4 long, which is not right.  I think just use animation.duration, but need to look up the api
   animationState.playbacks[groupId] = playback;

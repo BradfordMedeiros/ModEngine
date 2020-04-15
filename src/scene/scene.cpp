@@ -223,7 +223,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
               continue;
             }
             world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData);    
-            world.meshnameToBoneToParent[meshPath] = data.boneToParent;
+            world.meshnameToBoneToParent[meshPath] = data.boneToParent;  
           } 
 
           auto newSerialObjs = addSubsceneToRoot(
