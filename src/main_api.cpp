@@ -169,6 +169,9 @@ void addAnimation(AnimationState& animationState, short groupId, std::string ani
     [animation, meshNameToMeshes](float currentTime, float elapsedTime) -> void { 
       playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  
     }, 
+    [groupId, &animationState]() -> void { 
+      animationState.playbacks.erase(groupId);
+    },
     animation.duration
   );  
   animationState.playbacks[groupId] = playback;

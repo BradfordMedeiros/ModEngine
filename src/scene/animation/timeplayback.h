@@ -19,10 +19,11 @@ class TimePlayback {
     EndBehavior endBehavior;
 
     std::function<void(float, float)> onFrame;
+    std::function<void()> onFinish;
     bool hasRemainingTime();
     
   public:
-    TimePlayback(float currentTime, std::function<void(float, float)> onFrame, float duration = INFINITY, EndBehavior behavior = RESTART); 
+    TimePlayback(float currentTime, std::function<void(float, float)> onFrame,  std::function<void()> onFinish, float duration = INFINITY, EndBehavior behavior = RESTART); 
     TimePlayback(){ };  // Do not use, just to satisfy maps 
     void play();
     void pause();

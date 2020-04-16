@@ -1,10 +1,11 @@
 #include "./timeplayback.h"
 
-TimePlayback::TimePlayback(float currentTime, std::function<void(float, float)> onFrame, float duration, EndBehavior behavior){
+TimePlayback::TimePlayback(float currentTime, std::function<void(float, float)> onFrame, std::function<void()> onFinish, float duration, EndBehavior behavior){
   this -> beginTime = currentTime;
   this -> currentTime = currentTime;
   this -> paused = false;
   this -> onFrame = onFrame;
+  this -> onFinish = onFinish;
   this -> duration = duration;
   this -> endBehavior = behavior;
 }
@@ -33,6 +34,7 @@ void TimePlayback::setElapsedTime(float elapsedTime){
     this -> onFrame(this -> currentTime, elapsedTime); 
 
     if (!this -> hasRemainingTime()){
+      this -> onFinish();
       if (this ->endBehavior == PAUSE){
         this -> pause();
       }else{

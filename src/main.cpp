@@ -134,9 +134,13 @@ void tickAnimations(AnimationState& animationState, float elapsedTime){
 }
 
 float initialTime = glfwGetTime();
-TimePlayback timePlayback(initialTime, [](float currentTime, float elapsedTime) -> void {
-  tickAnimations(animations, elapsedTime);
-},4); 
+TimePlayback timePlayback(
+  initialTime, 
+  [](float currentTime, float elapsedTime) -> void {
+    tickAnimations(animations, elapsedTime);
+  }, 
+  []() -> void {}
+); 
 
 
 bool useYAxis = true;
