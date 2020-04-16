@@ -173,13 +173,12 @@ void addAnimation(AnimationState& animationState, short groupId, std::string ani
   );  
   animationState.playbacks[groupId] = playback;
 }
-bool hasActiveAnimation(AnimationState& animationState, short groupId){
-  return animationState.playbacks.find(groupId) != animationState.playbacks.end();
-}
 
 void playAnimation(short id, std::string animationToPlay){
   auto groupId =  world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
-  assert(!hasActiveAnimation(animations, groupId));
+  if (animations.playbacks.find(groupId) != animations.playbacks.end()){
+    animations.playbacks.erase(groupId);
+  }
   addAnimation(animations, groupId, animationToPlay);
 }
 
