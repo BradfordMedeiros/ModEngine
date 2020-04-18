@@ -1,0 +1,14 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+box:mesh:./res/models/box/box.obj
+box:position:0 -2 0
+
+gun:mesh:./res/models/gun/gun2.obj
+gun:position:1 0 0 
+
+>maincamera:position:0 0 0
+gun:lookat:>maincamera
+>maincamera:physics:dynamic
