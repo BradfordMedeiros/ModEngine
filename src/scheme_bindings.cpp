@@ -134,21 +134,21 @@ void onObjectSelected(short index){
   scm_call_1(func_symbol, gameobject);
 }
 
-std::string (*getGameObjNameForId)(short id);
-SCM getGameObjNameForIdFn(SCM value){
+short getGameobjId(SCM value){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  return scm_from_locale_string(getGameObjNameForId(obj->id).c_str());
+  return obj->id;  
+}
+
+std::string (*getGameObjNameForId)(short id);
+SCM getGameObjNameForIdFn(SCM value){
+  return scm_from_locale_string(getGameObjNameForId(getGameobjId(value)).c_str());
 }
 
 glm::vec3 (*getGameObjectPosn)(short index);
 SCM getGameObjectPosition(SCM value){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  
-  glm::vec3 pos = getGameObjectPosn(obj->id);
+  glm::vec3 pos = getGameObjectPosn(getGameobjId(value));
   SCM list = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
   scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(pos.x));
   scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(pos.y));
@@ -157,27 +157,19 @@ SCM getGameObjectPosition(SCM value){
 }
 void (*setGameObjectPosn)(short index, glm::vec3 pos);
 SCM setGameObjectPosition(SCM value, SCM positon){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  
   auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(positon, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(positon, scm_from_int64(2)));
-  setGameObjectPosn(obj->id, glm::vec3(x, y, z));
+  setGameObjectPosn(getGameobjId(value), glm::vec3(x, y, z));
   return SCM_UNSPECIFIED;
 }
 
 void (*setGameObjectPosnRel)(short index, float x, float y, float z, bool xzPlaneOnly);
 void setPosition(SCM value, SCM position, bool xzOnly){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  
   auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
-  setGameObjectPosnRel(obj->id, x, y, z, xzOnly);
+  setGameObjectPosnRel(getGameobjId(value), x, y, z, xzOnly);
 }
 SCM setGameObjectPositionRel(SCM value, SCM position){
   setPosition(value, position, false);
@@ -207,34 +199,25 @@ SCM scmQuatToSCM(glm::quat rotation){
 
 glm::quat (*getGameObjectRotn)(short index);
 SCM getGameObjectRotation(SCM value){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  glm::quat rot = getGameObjectRotn(obj->id);
-  return scmQuatToSCM(rot);
+  return scmQuatToSCM(getGameObjectRotn(getGameobjId(value)));
 }
 void (*setGameObjectRotn)(short index, glm::quat rotation);
 SCM setGameObjectRotation(SCM value, SCM rotation){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  setGameObjectRotn(obj->id, scmListToQuat(rotation));
+  setGameObjectRotn(getGameobjId(value), scmListToQuat(rotation));
   return SCM_UNSPECIFIED;
 }
 
 glm::quat (*_setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
 SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  glm::quat rot = getGameObjectRotn(obj->id);
+  short id = getGameobjId(value);
+  glm::quat rot = getGameObjectRotn(id);
 
   auto deltaY = scm_to_double(deltaYaw);
   auto deltaP = scm_to_double(deltaPitch);
   auto deltaR = scm_to_double(deltaRoll); 
 
   glm::quat newOrientation = _setFrontDelta(rot, deltaY, deltaP, deltaR, 0.1);
-  setGameObjectRotn(obj->id, newOrientation);
+  setGameObjectRotn(id, newOrientation);
 
   return SCM_UNSPECIFIED;
 }
@@ -248,10 +231,7 @@ SCM scm_setFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRo
 
 std::vector<std::string>(*_listAnimations)(short id);
 SCM scmListAnimations(SCM value){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  auto animations = _listAnimations(obj->id);
+  auto animations = _listAnimations(getGameobjId(value));
   int numAnimations = animations.size();
 
   SCM list = scm_make_list(scm_from_unsigned_integer(numAnimations), scm_from_unsigned_integer(0));
@@ -264,39 +244,27 @@ SCM scmListAnimations(SCM value){
 
 void (*_playAnimation)(short id, std::string animationName);
 SCM scmPlayAnimation(SCM value, SCM animationName){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  _playAnimation(obj->id, scm_to_locale_string(animationName));
+  _playAnimation(getGameobjId(value), scm_to_locale_string(animationName));
   return SCM_UNSPECIFIED;
 }
 
 
 void (*_applyImpulse)(short index, glm::vec3 impulse);
 SCM scm_applyImpulse(SCM value, SCM impulse){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
   auto x = scm_to_double(scm_list_ref(impulse, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(impulse, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(impulse, scm_from_int64(2)));
-  _applyImpulse(obj -> id, glm::vec3(x, y, z));
+  _applyImpulse(getGameobjId(value), glm::vec3(x, y, z));
   return SCM_UNSPECIFIED;
 }
 void (*_clearImpulse)(short index);
 SCM scm_clearImpulse(SCM value){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  _clearImpulse(obj -> id);
+  _clearImpulse(getGameobjId(value));
   return SCM_UNSPECIFIED;
 }
 
 SCM getGameObjectId(SCM value){
-  gameObject *obj;
-  scm_assert_foreign_object_type (gameObjectType, value);
-  obj = (gameObject*)scm_foreign_object_ref (value, 0);
-  return scm_from_short(obj->id);
+  return scm_from_short(getGameobjId(value));
 }
 short (*getGameObjName)(std::string name);
 SCM getGameObjByName(SCM value){
