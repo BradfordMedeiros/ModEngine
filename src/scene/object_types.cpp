@@ -42,6 +42,13 @@ GameObjectCamera createCamera(){
   GameObjectCamera obj {};
   return obj;
 }
+GameObjectSound createSound(std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadClip){
+  GameObjectSound obj {
+    .clip = additionalFields.at("clip")
+  };
+  loadClip(obj.clip);
+  return obj;
+}
 GameObjectLight createLight(){
   GameObjectLight obj {};
   return obj;
@@ -62,6 +69,7 @@ void addObject(
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
+  std::function<void(std::string)> loadClip,
   std::function<bool(std::string)> ensureMeshLoaded,
   std::function<void()> onVoxelBoundInfoChanged
 ){
@@ -69,6 +77,8 @@ void addObject(
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
+  }else if(objectType == "sound"){
+    mapping[id] = createSound(additionalFields, loadClip);
   }else if (objectType == "light"){
     mapping[id] = createLight();
   }else if (objectType == "voxel"){

@@ -20,11 +20,14 @@
 
 struct GameObjectMesh {
   std::vector<std::string> meshNames;
-  std::vector<Mesh> meshesToRender;
+  std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
   bool isDisabled;
   bool nodeOnly;
 };
 struct GameObjectCamera {};
+struct GameObjectSound{
+  std::string clip;  
+};
 struct GameObjectLight {
   /*!light:type:directional
   !light:type:directional 
@@ -35,7 +38,7 @@ struct GameObjectVoxel {
   Voxels voxel;
 };
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectLight, GameObjectVoxel> GameObjectObj;
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel> GameObjectObj;
 
 static Field obj = {
   .prefix = '@', 
@@ -47,6 +50,12 @@ static Field camera = {
   .prefix = '>',
   .type = "camera",
   .additionalFields = { },
+};
+
+static Field sound = {
+  .prefix = '&',
+  .type = "sound",
+  .additionalFields = { "clip" },
 };
 
 static Field light = {
@@ -61,7 +70,7 @@ static Field voxelField = {
   .additionalFields = { "from" },
 };
 
-static std::vector fields = { obj, camera, light, voxelField };
+static std::vector fields = { obj, camera, sound, light, voxelField };
 
 std::map<short, GameObjectObj> getObjectMapping();
 
@@ -71,7 +80,8 @@ void addObject(
   std::map<std::string, std::string> additionalFields,
   std::map<short, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
-  std::function<bool(std::string)> ensureMeshLoaded,  
+  std::function<void(std::string)> loadClip,
+  std::function<bool(std::string)> ensureMeshLoaded,
   std::function<void()> onVoxelBoundInfoChanged
 );
 

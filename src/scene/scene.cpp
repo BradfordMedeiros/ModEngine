@@ -199,7 +199,7 @@ std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
-void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel){
+void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip){
   for (auto [_, serialObj] : serialObjs){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
@@ -208,8 +208,8 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj", 
-      [&world, &scene, id, shouldLoadModel](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  loadClip, 
+      [&world, &scene, loadClip, id, shouldLoadModel](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -236,7 +236,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             generateAdditionalFields(meshName, data),
             getObjectId
           );
-          addObjects(world, scene, newSerialObjs, false);
+          addObjects(world, scene, newSerialObjs, false, loadClip);
           return hasMesh;
         }
         return true;   // This is basically ensure model loaded so by definition this was already loaded. 
@@ -248,9 +248,9 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
   }
 }
 
-Scene deserializeFullScene(World& world, short sceneId, std::string content){
+Scene deserializeFullScene(World& world, short sceneId, std::string content, std::function<void(std::string)> loadClip){
   SceneDeserialization deserializedScene = deserializeScene(content, fields, getObjectId);
-  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true);
+  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true, loadClip);
   return deserializedScene.scene;
 }
 
@@ -260,9 +260,9 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
   });
 }
 
-short addSceneToWorld(World& world, std::string sceneFile){
+short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip){
   auto sceneId = getSceneId();
-  world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile));
+  world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile), loadClip);
   addPhysicsBodies(world, world.scenes.at(sceneId));
   return sceneId;
 }
@@ -378,9 +378,6 @@ void enforceLookAt(World& world){
         // @TODO consider extracting a better up direction from current orientation
         // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
         gameobj.transformation.rotation  = glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
-        std::cout << "set new rotation for lookat" << std::endl;
-      }else{
-        std::cout << "did not find a look for: " << lookAt << std::endl;
       }
     }
   }
