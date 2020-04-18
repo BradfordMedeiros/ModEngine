@@ -368,7 +368,7 @@ void enforceLookAt(World& world){
  for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
       std::string lookAt = gameobj.lookat;                          // @TODO this id could be calculated on loading the scene to save extra lookups
-      if (lookAt == ""){
+      if (lookAt == "" || lookAt == gameobj.name){
         continue;
       }
       if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
