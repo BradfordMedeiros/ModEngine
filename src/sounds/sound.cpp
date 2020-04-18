@@ -26,7 +26,6 @@ ALuint loadSound(std::string filepath){
  ALuint soundSource;
  alGenSources(1, &soundSource);
  alSourcei(soundSource, AL_BUFFER, soundBuffer);
- 
  return soundSource;
 }
 

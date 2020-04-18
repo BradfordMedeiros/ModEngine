@@ -278,7 +278,7 @@ void removeSceneFromWorld(World& world, short sceneId){
     assert(rigidBody != NULL);
     rmRigidBody(world.physicsEnvironment, rigidBody);
     world.rigidbodys.erase(objectId);
-    world.objectMapping.erase(objectId);
+    world.objectMapping.erase(objectId);    // @TODO this needs cleanup, eg for meshes and sounds
     world.idToScene.erase(objectId);
 
     // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes

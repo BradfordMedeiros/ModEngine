@@ -33,7 +33,7 @@
 #include "./scheme_bindings.h"
 #include "./shaders.h"
 #include "./translations.h"
-#include "./sound.h"
+#include "./sounds/soundmanager.h"
 #include "./common/util.h"
 #include "./colorselection.h"
 #include "./state.h"
