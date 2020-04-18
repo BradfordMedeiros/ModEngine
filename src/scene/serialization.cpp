@@ -133,6 +133,10 @@ std::map<std::string, SerializationObject> deserializeScene(std::vector<Token> t
         objects.at(token.target).physics.shape = AUTOSHAPE;
       }
     }
+
+    if (token.attribute == "lookat"){
+      objects.at(token.target).lookat = token.payload;
+    }
     
     std::string type = getType(token.target, additionalFields);
     objects.at(token.target).type = type;
@@ -162,6 +166,9 @@ std::string serializationObjectToString(std::vector<SerializationObject> objects
     }
     if (obj.physics.shape == BOX){
       serial = serial + obj.name + ":physics:box" + "\n";
+    }
+    if (obj.lookat != ""){
+      serial = serial + obj.name + ":lookat:" + obj.lookat + "\n";
     }
 
     for (auto [field, payload] : obj.additionalFields){

@@ -17,6 +17,7 @@ struct GameObject {
   std::string name;
   Transformation transformation;
   physicsOpts physicsOptions;
+  std::string lookat;
 };
 struct GameObjectH {
   short id;

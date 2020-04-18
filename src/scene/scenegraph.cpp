@@ -1,6 +1,6 @@
 #include "./scenegraph.h"
 
-GameObject getGameObject(glm::vec3 position, std::string name, short id){
+GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat){
   auto physicsOptions = physicsOpts {
     .enabled = false,
     .isStatic = true,
@@ -17,12 +17,13 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id){
       .rotation = glm::identity<glm::quat>(),
     },
     .physicsOptions = physicsOptions,
+    .lookat =  lookat
   };
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId){
-  auto gameobjectObj = getGameObject(position, name, id);
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId, std::string lookat){
+  auto gameobjectObj = getGameObject(position, name, id, lookat);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
@@ -45,7 +46,7 @@ SceneDeserialization createSceneFromTokens(
   std::map<std::string, SerializationObject>  serialObjs = deserializeScene(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
     short id = getNewObjectId();
-    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1);
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat);
     scene.idToGameObjects.at(id).transformation.position = serialObj.position;
     scene.idToGameObjects.at(id).transformation.scale = serialObj.scale;
     scene.idToGameObjects.at(id).transformation.rotation = serialObj.rotation;
@@ -102,7 +103,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     short id = getNewObjectId();
     nodeIdToRealId[nodeId] = id;
 
-    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1);
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1, "");
     scene.idToGameObjectsH.at(id).groupId = rootId;
     scene.idToGameObjects.at(id).transformation.position = transform.position;
     scene.idToGameObjects.at(id).transformation.scale = transform.scale;

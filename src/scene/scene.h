@@ -42,7 +42,7 @@ void  physicsScale(World& world, Scene& scene, btRigidBody* body, short index, f
 void  applyPhysicsTranslation(Scene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  applyPhysicsRotation(Scene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  applyPhysicsScaling(World& world, Scene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void  onPhysicsFrame(World& world, float timestep, bool dumpPhysics);
+void  onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, short id);
 

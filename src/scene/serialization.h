@@ -39,6 +39,7 @@ struct SerializationObject {
   std::string parentName;
   physicsOpts physics;
   std::string type;
+  std::string lookat;
   std::map<std::string, std::string> additionalFields;
 };
 

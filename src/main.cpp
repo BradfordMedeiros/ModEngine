@@ -826,9 +826,8 @@ int main(int argc, char* argv[]){
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
-    if (enablePhysics){
-      onPhysicsFrame(world, deltaTime, dumpPhysics); 
-    }
+  
+    onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
     glfwPollEvents();

@@ -363,12 +363,38 @@ void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbo
   }
 }
 
-void onPhysicsFrame(World& world, float timestep, bool dumpPhysics){
-  if (dumpPhysics){
-    dumpPhysicsInfo(world.rigidbodys);
+
+void enforceLookAt(World& world){
+ for (auto &[_, scene] : world.scenes){
+    for (auto &[id, gameobj] : scene.idToGameObjects){
+      std::string lookAt = gameobj.lookat;                          // @TODO this id could be calculated on loading the scene to save extra lookups
+      if (lookAt == ""){
+        continue;
+      }
+      if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
+        short lookatId = scene.nameToId.at(lookAt);
+        glm::vec3 fromPos = gameobj.transformation.position;
+        glm::vec3 targetPosition = scene.idToGameObjects.at(lookatId).transformation.position;
+        // @TODO consider extracting a better up direction from current orientation
+        // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
+        gameobj.transformation.rotation  = glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
+        std::cout << "set new rotation for lookat" << std::endl;
+      }else{
+        std::cout << "did not find a look for: " << lookAt << std::endl;
+      }
+    }
   }
-  stepPhysicsSimulation(world.physicsEnvironment, timestep);
-  updatePhysicsPositions(world, world.rigidbodys);    
+}
+
+void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics){
+  if (enablePhysics){
+    if (dumpPhysics){
+      dumpPhysicsInfo(world.rigidbodys);
+    }
+    stepPhysicsSimulation(world.physicsEnvironment, timestep);
+    updatePhysicsPositions(world, world.rigidbodys);     
+  }
+  enforceLookAt(world);
 }
 
 NameAndMesh getMeshesForGroupId(World& world, short groupId){
