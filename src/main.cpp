@@ -127,10 +127,16 @@ void playSound(){
   playSound(soundBuffer);
 }
 
+std::vector<short> playbacksToRemove;
 void tickAnimations(AnimationState& animationState, float elapsedTime){
   for (auto &[_, playback] : animationState.playbacks){
     playback.setElapsedTime(elapsedTime);
   }
+  for (auto groupId : playbacksToRemove){
+    std::cout << "removed playback: " << groupId << std::endl;
+    animationState.playbacks.erase(groupId);
+  }
+  playbacksToRemove.clear();
 }
 
 float initialTime = glfwGetTime();

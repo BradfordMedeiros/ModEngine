@@ -9,6 +9,7 @@ extern SchemeBindingCallbacks schemeBindings;
 extern std::map<unsigned int, Mesh> fontMeshes;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
+extern std::vector<short> playbacksToRemove;
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
@@ -170,7 +171,7 @@ void addAnimation(AnimationState& animationState, short groupId, std::string ani
       playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  
     }, 
     [groupId, &animationState]() -> void { 
-      animationState.playbacks.erase(groupId);
+      playbacksToRemove.push_back(groupId);
     },
     animation.duration
   );  
