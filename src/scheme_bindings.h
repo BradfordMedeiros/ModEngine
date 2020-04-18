@@ -8,6 +8,11 @@
 #include <libguile.h>
 #include <limits>       
 
+/*
+    https://www.gnu.org/software/guile/manual/html_node/Sandboxed-Evaluation.html#Sandboxed-Evaluation
+
+*/
+
 typedef void(*func)();
 typedef void(*colfun)(short obj1, short obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
