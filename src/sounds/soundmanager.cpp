@@ -1,15 +1,36 @@
 #include "./soundmanager.h"
 
 static std::map<std::string, SoundInfo> managedSounds;  
+static std::map<std::string, int> soundUsages;
+
+int getUsages(std::string filepath){
+  if (soundUsages.find(filepath) == soundUsages.end()){
+    return 0;
+  }
+  return soundUsages.at(filepath);
+}
 
 void loadSoundState(std::string filepath){
-  SoundInfo sound = loadSound(filepath);
-  managedSounds[filepath] = sound;
+  int usages = getUsages(filepath);
+  if (usages == 0){
+    SoundInfo sound = loadSound(filepath);
+    managedSounds[filepath] = sound;
+  }
+  if (soundUsages.find(filepath) == soundUsages.end()){
+    soundUsages[filepath] = 0;
+  }
+  soundUsages[filepath] = soundUsages[filepath] + 1;
 }
 void unloadSoundState(std::string filepath){
- // unloadSound(managedSounds.at(filepath));
- // managedSounds.erase(filepath);
- // @TODO need to do reference counting basically, so going to hold off here for now
+  int usages = getUsages(filepath);
+  assert(usages > 0);
+  if (usages == 1){
+    soundUsages.erase(filepath);
+    unloadSound(managedSounds.at(filepath));
+    managedSounds.erase(filepath);
+  }else{
+    soundUsages[filepath] = soundUsages[filepath] - 1;
+  }
 }
 void playSoundState(std::string filepath){
   playSound(managedSounds.at(filepath));
