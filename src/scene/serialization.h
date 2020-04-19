@@ -53,11 +53,15 @@ struct Deserialization {
 glm::quat parseQuat(std::string payload);
 glm::vec3 parseVec(std::string positionRaw);
 
+struct LayerInfo {
+  std::string name;
+  int zIndex;
+};
 struct ParsedContent {
   std::vector<Token> tokens; 
+  std::vector<LayerInfo> layers;
 };
 ParsedContent parseFormat(std::string content);
-
 
 Deserialization deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields);
 std::string serializationObjectToString(std::vector<SerializationObject> object);

@@ -18,6 +18,7 @@ struct GameObject {
   Transformation transformation;
   physicsOpts physicsOptions;
   std::string lookat;
+  std::string layer;
 };
 struct GameObjectH {
   short id;

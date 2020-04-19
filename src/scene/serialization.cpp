@@ -12,6 +12,7 @@ glm::quat parseQuat(std::string payload){
   return rotation;
 }
 
+// format: <token>:<attribute>:<payload>
 std::optional<Token> parseToken(std::string content, std::string layer) {
   std::vector<std::string> validToken = split(content, ':');
   Token token = { 
@@ -20,18 +21,50 @@ std::optional<Token> parseToken(std::string content, std::string layer) {
     .payload = (validToken.size() > 2) ? trim(validToken.at(2)) : "",
     .layer = layer,
   };
-  if (token.target.length() > 0){
+  if (token.target.length() > 0 && token.attribute.length() > 0 && token.payload.length() > 0){
     return token;
   }
   return std::nullopt;
 }
-std::optional<std::string> parseLayer(std::string content){
-  return std::nullopt;
+
+// format: (<layername>:zindex:<layername>)
+std::optional<LayerInfo> parseLayer(std::string content){
+  if (content.size() <= 2 || content.at(0) != '(' || content.at(content.size() - 1) != ')'){
+    return std::nullopt;
+  }
+
+  std::vector<std::string> tokens = split(content.substr(1, content.size() - 2), ':');
+  bool isLayerContent = (tokens.size() == 3) &&  tokens.at(1) == "zindex";
+  if (!isLayerContent){
+    return std::nullopt;
+  }
+  LayerInfo layer {
+    .name = trim(tokens.at(0)),
+    .zIndex = std::stoi(trim(tokens.at(2))),
+  };
+  return layer;
+}
+std::vector<LayerInfo> reduceLayers(std::vector<LayerInfo> layers){
+  std::map<std::string, LayerInfo> reducedLayers;
+  for (auto layer : layers){
+    reducedLayers[layer.name] = layer;
+  }
+  std::vector<LayerInfo> newLayers;
+  for (auto [_, layer] : reducedLayers){
+    newLayers.push_back(layer);    
+  }
+  return newLayers;
 }
 
 ParsedContent parseFormat(std::string content) {
   std::vector<Token> dtokens;
+  std::vector<LayerInfo> layers;
+
   std::string currentLayer = "default";  
+  layers.push_back(LayerInfo{
+    .name = currentLayer,
+    .zIndex = 0,
+  });
 
   std::vector<std::string> lines = split(content, '\n');
   for(std::string line : lines){
@@ -40,7 +73,8 @@ ParsedContent parseFormat(std::string content) {
       auto lineCommentsStripped = tokens.at(0);
       auto layer = parseLayer(lineCommentsStripped);
       if (layer.has_value()){
-        // @TODO change current based on directives here
+        currentLayer = layer.value().name;
+        layers.push_back(layer.value());
       }else{
         auto parsedToken = parseToken(lineCommentsStripped, currentLayer);
         if (parsedToken.has_value()){
@@ -49,8 +83,10 @@ ParsedContent parseFormat(std::string content) {
       }
     }
   }
+
   ParsedContent parsedContent {
     .tokens = dtokens,
+    .layers = reduceLayers(layers),
   };
   return parsedContent;
 }
