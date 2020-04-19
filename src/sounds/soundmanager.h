@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <assert.h>
 #include "./sound.h"
 
 void loadSoundState(std::string filepath);
