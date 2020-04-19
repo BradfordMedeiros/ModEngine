@@ -1,2 +1,22 @@
 
 # Demonstrates layering system, basic transparency (since transparent panels need to render last)
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+
+
+
+
+abox:mesh:./res/models/box/box.obj
+abox:position:-3 -3 -15
+abox:scale:1 10 1
+
+window:mesh:./res/models/box/plane.dae
+window:position:0 -3 -7
+window:scale:20 1 20
+
+zbox:mesh:./res/models/box/box.obj
+zbox:position:5 -3 -15
+zbox:scale:1 10 1
