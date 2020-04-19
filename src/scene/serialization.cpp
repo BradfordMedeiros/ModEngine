@@ -12,31 +12,47 @@ glm::quat parseQuat(std::string payload){
   return rotation;
 }
 
-std::vector<Token> getTokens(std::string content) {
+std::optional<Token> parseToken(std::string content, std::string layer) {
+  std::vector<std::string> validToken = split(content, ':');
+  Token token = { 
+    .target = (validToken.size() > 0) ? trim(validToken.at(0)) : "",
+    .attribute = (validToken.size() > 1) ? trim(validToken.at(1)) : "",
+    .payload = (validToken.size() > 2) ? trim(validToken.at(2)) : "",
+    .layer = layer,
+  };
+  if (token.target.length() > 0){
+    return token;
+  }
+  return std::nullopt;
+}
+std::optional<std::string> parseLayer(std::string content){
+  return std::nullopt;
+}
+
+ParsedContent parseFormat(std::string content) {
   std::vector<Token> dtokens;
+  std::string currentLayer = "default";  
+
   std::vector<std::string> lines = split(content, '\n');
-  for(std::string line: lines){
+  for(std::string line : lines){
     std::vector<std::string> tokens = split(line, '#');
-
     if (tokens.size() > 0){
-      std::vector<std::string> validToken = split(tokens[0], ':');
-
-      Token token = {};
-      if (validToken.size() > 0){
-        token.target = trim(validToken[0]);
-      }
-      if (validToken.size() > 1){
-        token.attribute = trim(validToken[1]);
-      }
-      if (validToken.size() > 2){
-        token.payload = trim(validToken[2]);
-      }
-      if (token.target.length() > 0 ){
-        dtokens.push_back(token);
+      auto lineCommentsStripped = tokens.at(0);
+      auto layer = parseLayer(lineCommentsStripped);
+      if (layer.has_value()){
+        // @TODO change current based on directives here
+      }else{
+        auto parsedToken = parseToken(lineCommentsStripped, currentLayer);
+        if (parsedToken.has_value()){
+          dtokens.push_back(parsedToken.value());
+        }    
       }
     }
   }
-  return dtokens;
+  ParsedContent parsedContent {
+    .tokens = dtokens,
+  };
+  return parsedContent;
 }
 
 std::string getType(std::string name, std::vector<Field> additionalFields){
@@ -49,7 +65,7 @@ std::string getType(std::string name, std::vector<Field> additionalFields){
   return type;
 }
 
-SerializationObject getDefaultObject(std::string name, std::vector<Field> additionalFields){
+SerializationObject getDefaultObject(std::string name, std::vector<Field> additionalFields, std::string layer){
   physicsOpts physics {
     .enabled = true,
     .isStatic = true,
@@ -64,7 +80,8 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .hasParent = false,
     .parentName = "",
     .physics = physics,
-    .type = getType(name, additionalFields)
+    .type = getType(name, additionalFields),
+    .layer = layer
   };
   return newObject;
 }
@@ -84,18 +101,18 @@ void populateAdditionalFields(std::map<std::string, SerializationObject>& object
 }
 
 
-std::map<std::string, SerializationObject> deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields){
+Deserialization deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject(token.target, additionalFields);
+      objects[token.target] = getDefaultObject(token.target, additionalFields, token.layer);
     }
-    if (token.attribute == "parent"){   // parent is special case that creates the other object as default if it does not yet exist
+    if (token.attribute == "parent"){   // parent is special case that creates the other object as default if it does not yet exist, inherits layer declared in
       if (objects.find(token.payload) == objects.end()){
-        objects[token.payload] = getDefaultObject(token.payload, additionalFields);
+        objects[token.payload] = getDefaultObject(token.payload, additionalFields, token.layer);
       }
       objects.at(token.target).hasParent = true;
       objects.at(token.target).parentName = token.payload;
@@ -142,7 +159,12 @@ std::map<std::string, SerializationObject> deserializeScene(std::vector<Token> t
     objects.at(token.target).type = type;
     populateAdditionalFields(objects, token, type, additionalFields);
   }
-  return objects;
+
+  Deserialization deserialization {
+    .objects = objects,
+  };
+
+  return deserialization;
 }
 
 // this isn't complete output of serialization but exposes some fields

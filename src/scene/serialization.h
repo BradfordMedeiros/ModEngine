@@ -22,6 +22,7 @@ struct Token {
   std::string target;
   std::string attribute;
   std::string payload;
+  std::string layer;
 };
 
 struct Field {
@@ -40,13 +41,25 @@ struct SerializationObject {
   physicsOpts physics;
   std::string type;
   std::string lookat;
+  std::string layer;
   std::map<std::string, std::string> additionalFields;
+};
+
+struct Deserialization {
+  std::map<std::string, SerializationObject> objects;
+  std::vector<std::string> layers;
 };
 
 glm::quat parseQuat(std::string payload);
 glm::vec3 parseVec(std::string positionRaw);
-std::vector<Token> getTokens(std::string content);
-std::map<std::string, SerializationObject> deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields);
+
+struct ParsedContent {
+  std::vector<Token> tokens; 
+};
+ParsedContent parseFormat(std::string content);
+
+
+Deserialization deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields);
 std::string serializationObjectToString(std::vector<SerializationObject> object);
 
 #endif

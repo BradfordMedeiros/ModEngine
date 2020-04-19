@@ -43,7 +43,7 @@ SceneDeserialization createSceneFromTokens(
 ){
   Scene scene;
 
-  std::map<std::string, SerializationObject>  serialObjs = deserializeScene(tokens, fields);
+  std::map<std::string, SerializationObject>  serialObjs = deserializeScene(tokens, fields).objects;
   for (auto [_, serialObj] : serialObjs){
     short id = getNewObjectId();
     addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat);
@@ -80,7 +80,7 @@ SceneDeserialization deserializeScene(
   short (*getNewObjectId)()
 ){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromTokens(getTokens(content), fields, getNewObjectId);
+  return createSceneFromTokens(parseFormat(content).tokens, fields, getNewObjectId);
 }
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
@@ -110,7 +110,6 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     scene.idToGameObjects.at(id).transformation.rotation = transform.rotation;
     //  default physics options here  scene.idToGameObjects.at(id).physicsOptions
 
-    std::cout << "creating serial obj" << std::endl;
     serialObjs[names.at(nodeId)] = SerializationObject {
       .name = names.at(nodeId),  // @TODO this is probably not unique name so probably will be bad
       .position = transform.position,
@@ -120,6 +119,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .parentName = "-",
       // unused .physics 
       .type = "default",
+      .layer = "default",  // @ TODO - this is wrong, should get this from the parent's layer 
       .additionalFields = additionalFields.at(nodeId)
     };  
   }
