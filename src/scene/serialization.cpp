@@ -137,7 +137,7 @@ void populateAdditionalFields(std::map<std::string, SerializationObject>& object
 }
 
 
-Deserialization deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields){
+std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
   for (Token token : tokens){
@@ -195,12 +195,7 @@ Deserialization deserializeScene(std::vector<Token> tokens, std::vector<Field> a
     objects.at(token.target).type = type;
     populateAdditionalFields(objects, token, type, additionalFields);
   }
-
-  Deserialization deserialization {
-    .objects = objects,
-  };
-
-  return deserialization;
+  return objects;
 }
 
 // this isn't complete output of serialization but exposes some fields

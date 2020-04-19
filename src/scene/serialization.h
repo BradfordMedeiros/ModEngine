@@ -45,11 +45,6 @@ struct SerializationObject {
   std::map<std::string, std::string> additionalFields;
 };
 
-struct Deserialization {
-  std::map<std::string, SerializationObject> objects;
-  std::vector<std::string> layers;
-};
-
 glm::quat parseQuat(std::string payload);
 glm::vec3 parseVec(std::string positionRaw);
 
@@ -63,7 +58,7 @@ struct ParsedContent {
 };
 ParsedContent parseFormat(std::string content);
 
-Deserialization deserializeScene(std::vector<Token> tokens, std::vector<Field> additionalFields);
+std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields);
 std::string serializationObjectToString(std::vector<SerializationObject> object);
 
 #endif

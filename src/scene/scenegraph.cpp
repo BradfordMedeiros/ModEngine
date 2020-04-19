@@ -37,14 +37,16 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
   scene.nameToId[name] = gameobjectObj.id;
 }
 
-SceneDeserialization createSceneFromTokens(
-  std::vector<Token> tokens,  
+SceneDeserialization createSceneFromParsedContent(
+  ParsedContent parsedContent,  
   std::vector<Field> fields,
   short (*getNewObjectId)()
 ){
   Scene scene;
+  auto tokens = parsedContent.tokens;
+  scene.layers = parsedContent.layers;
 
-  std::map<std::string, SerializationObject>  serialObjs = deserializeScene(tokens, fields).objects;
+  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
     short id = getNewObjectId();
     addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer);
@@ -81,7 +83,7 @@ SceneDeserialization deserializeScene(
   short (*getNewObjectId)()
 ){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromTokens(parseFormat(content).tokens, fields, getNewObjectId);
+  return createSceneFromParsedContent(parseFormat(content), fields, getNewObjectId);
 }
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(

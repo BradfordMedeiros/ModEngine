@@ -32,6 +32,7 @@ struct Scene {
   std::map<short, GameObject> idToGameObjects;
   std::map<short, GameObjectH> idToGameObjectsH;
   std::map<std::string, short> nameToId;
+  std::vector<LayerInfo> layers;
 };
 
 struct SceneDeserialization {
