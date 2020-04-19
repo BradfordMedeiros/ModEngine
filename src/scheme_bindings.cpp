@@ -276,6 +276,21 @@ SCM getGameObjByName(SCM value){
   obj->id = id;
   return scm_make_foreign_object_1(gameObjectType, obj);
 }
+
+std::vector<std::string> (*_listClips)();
+SCM scmListClips(){
+  auto clips = _listClips();
+  SCM list = scm_make_list(scm_from_unsigned_integer(clips.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < clips.size(); i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_locale_string(clips.at(i).c_str()));
+  }
+  return list;
+}
+void (*_playClip)(std::string);
+SCM scmPlayClip(SCM soundname){
+  _playClip(scm_to_locale_string(soundname));
+  return SCM_UNSPECIFIED;
+}
 ////////////
 
 SchemeBindingCallbacks createStaticSchemeBindings(
@@ -302,7 +317,9 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   void (*applyImpulse)(short index, glm::vec3 impulse),
   void (*clearImpulse)(short index),
   std::vector<std::string> (*listAnimations)(short id),
-  void playAnimation(short id, std::string animationToPlay)
+  void playAnimation(short id, std::string animationToPlay),
+  std::vector<std::string>(*listClips)(),
+  void (*playClip)(std::string)
 ){
   scm_init_guile();
   
@@ -329,6 +346,8 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   getGameObjName = getGameObjectByName;
   _listAnimations = listAnimations;
   _playAnimation = playAnimation;
+  _listClips = listClips;
+  _playClip = playClip;
 
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
@@ -371,6 +390,10 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   scm_c_define_gsubr("applyimpulse", 2, 0, 0, (void *)scm_applyImpulse);
   scm_c_define_gsubr("clearimpulse", 1, 0, 0, (void *)scm_clearImpulse);
 
+  // audio stuff
+  scm_c_define_gsubr("lsclips", 0, 0, 0, (void*)scmListClips);
+  scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
+
   //////////////////////////////////////////////////////////////////////////////
   
   scm_c_primitive_load(scriptPath.c_str());
@@ -389,5 +412,3 @@ SchemeBindingCallbacks createStaticSchemeBindings(
 
   return callbackFuncs;
 }
-
-

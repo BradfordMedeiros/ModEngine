@@ -8,9 +8,14 @@
 #include <cerrno>
 #include <cstring>
 
+struct SoundInfo {
+  ALuint source;
+  ALuint buffer;
+};
 void startSoundSystem();
 void stopSoundSystem();
-ALuint loadSound(std::string filepath);
-void playSound(ALuint soundBuffer);
+SoundInfo loadSound(std::string filepath);
+void unloadSound(SoundInfo sound);
+void playSound(SoundInfo sound);
 
 #endif 

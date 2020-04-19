@@ -58,7 +58,9 @@ SchemeBindingCallbacks createStaticSchemeBindings(
   void (*applyImpulse)(short index, glm::vec3 impulse),
   void (*clearImpulse)(short index),
   std::vector<std::string> (*listAnimations)(short id),
-  void playAnimation(short id, std::string animationToPlay)
+  void playAnimation(short id, std::string animationToPlay),
+  std::vector<std::string>(*listClips)(),
+  void (*playClip)(std::string)
 );
 
 #endif

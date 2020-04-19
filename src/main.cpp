@@ -81,7 +81,6 @@ unsigned int fbo;
 unsigned int depthTextures[32];
 
 glm::mat4 orthoProj;
-ALuint soundBuffer;
 unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
@@ -123,10 +122,6 @@ void setActiveDepthTexture(int index){
 
 //////////
 
-void playSound(){
-  playSound(soundBuffer);
-}
-
 std::vector<short> playbacksToRemove;
 void tickAnimations(AnimationState& animationState, float elapsedTime){
   for (auto &[_, playback] : animationState.playbacks){
@@ -152,8 +147,6 @@ TimePlayback timePlayback(
 bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
-
-  playSound();
 
   if (timePlayback.isPaused()){
     timePlayback.play();
@@ -203,9 +196,7 @@ void onArrowKey(int key){
   }
 }
 
-void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk
-  playSound();
-  
+void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk  
   for (auto [id, scene] : world.scenes){
     std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
   }
@@ -622,7 +613,6 @@ int main(int argc, char* argv[]){
   }
 
   startSoundSystem();
-  soundBuffer = loadSound("./res/sounds/sample.wav");
 
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
@@ -714,7 +704,9 @@ int main(int argc, char* argv[]){
     applyImpulse,
     clearImpulse,
     listAnimations,
-    playAnimation
+    playAnimation,
+    listSounds,
+    playSoundState
   );
 
   BulletDebugDrawer drawer(addLineNextCycle);
@@ -829,7 +821,7 @@ int main(int argc, char* argv[]){
   
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, playSound, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
     glfwPollEvents();
 
     // 2ND pass renders what we care about to the screen.

@@ -6,13 +6,13 @@ void startSoundSystem(){
 void stopSoundSystem(){
   alutExit();
 }
-void playSound(ALuint soundSource){
-  alSourcePlay(soundSource);
+void playSound(SoundInfo sound){
+  alSourcePlay(sound.source);
 }
 
 // @todo support ogg file format.
 // This call should support: .wav, .snd, .au , but have only tested .wav
-ALuint loadSound(std::string filepath){
+SoundInfo loadSound(std::string filepath){
  std::cout << "EVENT: loading sound:" << filepath <<  std::endl; 
   
  ALuint soundBuffer = alutCreateBufferFromFile(filepath.c_str());
@@ -26,6 +26,15 @@ ALuint loadSound(std::string filepath){
  ALuint soundSource;
  alGenSources(1, &soundSource);
  alSourcei(soundSource, AL_BUFFER, soundBuffer);
- return soundSource;
+
+ SoundInfo handles {
+  .source = soundSource,
+  .buffer = soundBuffer,
+ };
+ return handles;
 }
 
+void unloadSound(SoundInfo sound){
+  alDeleteSources(1, &sound.source);
+  alDeleteBuffers(1, &sound.buffer);
+}

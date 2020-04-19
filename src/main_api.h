@@ -9,6 +9,7 @@
 #include "./scene/sprites/sprites.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/timeplayback.h"
+#include "./sounds/soundmanager.h"
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
@@ -50,5 +51,8 @@ struct AnimationState {
 };
 std::vector<std::string> listAnimations(short id);
 void playAnimation(short id, std::string animationToPlay);
+
+std::vector<std::string> listSounds(short id);
+void playSound(std::string sound);
 
 #endif

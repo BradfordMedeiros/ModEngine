@@ -49,9 +49,7 @@ void clearImpulse(short index){
 
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-  return addSceneToWorld(world, sceneFile, [](std::string clipToLoad) -> void {
-    std::cout << "INFO: LOADING CLIP: " << clipToLoad << std::endl;
-  });
+  return addSceneToWorld(world, sceneFile, loadSoundState);
 }
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
@@ -187,4 +185,3 @@ void playAnimation(short id, std::string animationToPlay){
   }
   addAnimation(animations, groupId, animationToPlay);
 }
-
