@@ -7,8 +7,9 @@ void loadSoundState(std::string filepath){
   managedSounds[filepath] = sound;
 }
 void unloadSoundState(std::string filepath){
-  unloadSound(managedSounds.at(filepath));
-  managedSounds.erase(filepath);
+ // unloadSound(managedSounds.at(filepath));
+ // managedSounds.erase(filepath);
+ // @TODO need to do reference counting basically, so going to hold off here for now
 }
 void playSoundState(std::string filepath){
   playSound(managedSounds.at(filepath));

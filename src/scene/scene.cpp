@@ -266,7 +266,7 @@ short addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   addPhysicsBodies(world, world.scenes.at(sceneId));
   return sceneId;
 }
-void removeSceneFromWorld(World& world, short sceneId){
+void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip){
   if (world.scenes.find(sceneId) == world.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
@@ -278,7 +278,7 @@ void removeSceneFromWorld(World& world, short sceneId){
     assert(rigidBody != NULL);
     rmRigidBody(world.physicsEnvironment, rigidBody);
     world.rigidbodys.erase(objectId);
-    world.objectMapping.erase(objectId);    // @TODO this needs cleanup, eg for meshes and sounds
+    removeObject(world.objectMapping, objectId, unloadClip);
     world.idToScene.erase(objectId);
 
     // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes

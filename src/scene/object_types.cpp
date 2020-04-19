@@ -88,7 +88,12 @@ void addObject(
     assert(false);
   }
 }
-void removeObject(std::map<short, GameObjectObj>& mapping, short id){
+void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip){
+  auto Object = mapping.at(id); 
+  auto soundObj = std::get_if<GameObjectSound>(&Object);
+  if (soundObj != NULL){
+    unloadClip(soundObj -> clip); 
+  }
   mapping.erase(id);
 }
 

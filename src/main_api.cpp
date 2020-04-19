@@ -53,7 +53,7 @@ short loadScene(std::string sceneFile){
 }
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  removeSceneFromWorld(world, sceneId);
+  removeSceneFromWorld(world, sceneId, unloadSoundState);
 }
 std::vector<short> listScenes(){
   std::vector<short> sceneIds;
@@ -128,10 +128,7 @@ void makeObject(std::string name, std::string meshName, float x, float y, float 
   std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
 }
 void removeObjectById(short id){
-  std::cout << "removing object by id: " << id << std::endl;
-  removeObject(world.objectMapping, id);
-  auto sceneId = world.idToScene.at(id);
-  removeObjectFromScene(world.scenes.at(sceneId), id);
+  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

@@ -85,7 +85,7 @@ void addObject(
   std::function<void()> onVoxelBoundInfoChanged
 );
 
-void removeObject(std::map<short, GameObjectObj>& mapping, short id);
+void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip);
 void renderObject(
   GLint shaderProgram, 
   short id, 

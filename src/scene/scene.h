@@ -29,7 +29,7 @@ struct PhysicsInfo {
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip);
-void removeSceneFromWorld(World& world, short sceneId);
+void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip);
 
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 
