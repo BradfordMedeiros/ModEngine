@@ -44,6 +44,7 @@ SceneDeserialization createSceneFromParsedContent(
 ){
   Scene scene;
   auto tokens = parsedContent.tokens;
+  std::sort(std::begin(parsedContent.layers), std::end(parsedContent.layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
   scene.layers = parsedContent.layers;
 
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
@@ -230,11 +231,32 @@ void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model,
   }
 }
 
+struct traversalData {
+  short id;
+  glm::mat4 modelMatrix;
+  glm::mat4 parentMatrix;
+};
 void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4)> onObject){
+  std::vector<traversalData> datum;
+
   for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
     short id = scene.rootGameObjectsH.at(i);
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
-  }  
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), [&datum](short id, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
+      datum.push_back(traversalData{
+        .id = id,
+        .modelMatrix = modelMatrix,
+        .parentMatrix = parentMatrix,
+      });
+    });
+  }
+
+  for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame
+    for (auto data : datum){
+      if (scene.idToGameObjects.at(data.id).layer == layer.name){
+        onObject(data.id, data.modelMatrix, data.parentMatrix);
+      }
+    }  
+  }
 }
 
 std::vector<short> getIdsInGroup(Scene& scene, short groupId){
