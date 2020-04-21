@@ -54,7 +54,10 @@ struct Bone {
 struct MeshData {
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
-  std::vector<std::string> texturePaths;
+  std::string diffuseTexturePath;
+  bool hasDiffuseTexture;
+  std::string emissionTexturePath;
+  bool hasEmissionTexture;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
 };

@@ -23,8 +23,9 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
  
   // @TODO texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly. right now this is super, super unoptimized.
   Texture texture;
-  if (meshData.texturePaths.size() > 0){
-    texture = loadTexture(meshData.texturePaths.at(0)); 
+
+  if (meshData.hasDiffuseTexture > 0){
+    texture = loadTexture(meshData.diffuseTexturePath); 
   }else{
     texture = loadTexture(defaultTexture); 
   }

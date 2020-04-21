@@ -275,22 +275,38 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      }
    }
 
-   // Eventually this should support more than just diffuse maps.
    aiMaterial* material = scene->mMaterials[mesh -> mMaterialIndex];
    
-   std::vector<std::string> textureFilepaths;
-   for (unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++){
-     aiString texturePath;
-     material -> GetTexture(aiTextureType_DIFFUSE, i, &texturePath);
-     std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
-     std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
-     textureFilepaths.push_back(relativePath.string());  
+   int diffuseTextureCount = material -> GetTextureCount(aiTextureType_DIFFUSE);
+   assert(diffuseTextureCount == 0 || diffuseTextureCount == 1);
+   std::string diffuseTexturePath;
+
+   if (diffuseTextureCount == 1){
+    aiString texturePath;
+    material -> GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+    std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
+    std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
+    diffuseTexturePath = relativePath.string();
+   }
+
+   int emissionTextureCount = material -> GetTextureCount(aiTextureType_EMISSIVE);
+   assert(emissionTextureCount == 0 || emissionTextureCount == 1);
+   std::string emissionTexturePath;
+   if (emissionTextureCount == 1){
+    aiString texturePath;
+    material -> GetTexture(aiTextureType_EMISSIVE, 0, &texturePath);
+    std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
+    std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
+    diffuseTexturePath = relativePath.string();
    }
 
    MeshData model = {
      .vertices = vertices,
      .indices = indices,       
-     .texturePaths = textureFilepaths,
+     .diffuseTexturePath = diffuseTexturePath,
+     .hasDiffuseTexture = diffuseTextureCount == 1,
+     .emissionTexturePath = emissionTexturePath,
+     .hasEmissionTexture = emissionTextureCount == 1,
      .boundInfo = getBounds(vertices),
      .bones = boneInfo.bones,
    };
