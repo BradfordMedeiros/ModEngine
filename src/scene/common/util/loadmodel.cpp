@@ -246,6 +246,15 @@ std::map<std::string, std::string> getBoneHierarchy(std::map<short, std::string>
   return boneToParent;
 }
 
+
+std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMaterial* material){
+  aiString texturePath;
+  material -> GetTexture(type, 0, &texturePath);
+  std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
+  std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
+  return relativePath.string();
+}
+
 MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
@@ -280,24 +289,15 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    int diffuseTextureCount = material -> GetTextureCount(aiTextureType_DIFFUSE);
    assert(diffuseTextureCount == 0 || diffuseTextureCount == 1);
    std::string diffuseTexturePath;
-
    if (diffuseTextureCount == 1){
-    aiString texturePath;
-    material -> GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
-    std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
-    std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
-    diffuseTexturePath = relativePath.string();
+     diffuseTexturePath = getTexturePath(aiTextureType_DIFFUSE, modelPath, material);
    }
 
    int emissionTextureCount = material -> GetTextureCount(aiTextureType_EMISSIVE);
    assert(emissionTextureCount == 0 || emissionTextureCount == 1);
    std::string emissionTexturePath;
    if (emissionTextureCount == 1){
-    aiString texturePath;
-    material -> GetTexture(aiTextureType_EMISSIVE, 0, &texturePath);
-    std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
-    std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
-    diffuseTexturePath = relativePath.string();
+     emissionTexturePath = getTexturePath(aiTextureType_EMISSIVE, modelPath, material);
    }
 
    MeshData model = {
