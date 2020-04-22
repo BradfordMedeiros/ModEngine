@@ -11,15 +11,15 @@ flat in vec4 overcolor;
 
 out vec4 FragColor;
 
-uniform sampler2D coolzero;
-uniform sampler2D coolsomevalue;
 uniform sampler2D maintexture;
+uniform sampler2D emissionTexture;
 
 uniform vec3 tint;
 uniform vec3 cameraPosition;
 
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
+uniform bool hasEmissionTexture;
 
 #define MAX_LIGHTS 32
 uniform int numlights;
@@ -35,8 +35,10 @@ void main(){
   if (tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
-    vec4 texColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
-    
+    vec4 diffuseColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
+    vec4 emissionColor = texture(emissionTexture, vec2(TexCoord.x, -TexCoord.y));
+    vec4 texColor = diffuseColor + (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
+
     if (texColor.a < 0.1){
       discard;
     }

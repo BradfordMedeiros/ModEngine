@@ -33,8 +33,6 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   Texture emission;
   if (meshData.hasEmissionTexture){
     emission = loadTexture(meshData.emissionTexturePath);
-  }else{
-    emission = loadTexture(defaultTexture); 
   }
 
   glEnableVertexAttribArray(1);
@@ -159,6 +157,7 @@ void drawMesh(Mesh mesh, GLint shaderProgram){
   glActiveTexture(GL_TEXTURE0); 
   glBindTexture(GL_TEXTURE_2D, mesh.texture.textureId);
  
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasEmissionTexture"), mesh.hasEmissionTexture);
   glActiveTexture(GL_TEXTURE0 + 1);
   glBindTexture(GL_TEXTURE_2D, mesh.emissionTexture.textureId);
  
