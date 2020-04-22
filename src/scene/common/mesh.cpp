@@ -36,8 +36,6 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   }else{
     emission = loadTexture(defaultTexture); 
   }
- 
-  glBindTexture(GL_TEXTURE_2D, texture.textureId);
 
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, normal));
@@ -155,11 +153,19 @@ Mesh loadSpriteMesh(std::string imagePath){
   return load2DMeshHelper(imagePath, uiVerts, indices, 20, 6, 3, 2);  
 }
 
-void drawMesh(Mesh mesh){
+void drawMesh(Mesh mesh, GLint shaderProgram){
   glBindVertexArray(mesh.VAOPointer);
+ 
+  glActiveTexture(GL_TEXTURE0); 
   glBindTexture(GL_TEXTURE_2D, mesh.texture.textureId);
+ 
+  glActiveTexture(GL_TEXTURE0 + 1);
+  glBindTexture(GL_TEXTURE_2D, mesh.emissionTexture.textureId);
+ 
+  glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 }
+
 
 
 Texture loadTexture(std::string textureFilePath){

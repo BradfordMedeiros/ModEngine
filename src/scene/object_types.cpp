@@ -127,7 +127,7 @@ void renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);     
-      drawMesh(meshToRender);    
+      drawMesh(meshToRender, shaderProgram);    
     }
     return;
   }
@@ -136,27 +136,27 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);     
-    drawMesh(nodeMesh);    
+    drawMesh(nodeMesh, shaderProgram);    
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
-    drawMesh(cameraMesh);
+    drawMesh(cameraMesh, shaderProgram);
     return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showDebug){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
-    drawMesh(nodeMesh);
+    drawMesh(nodeMesh, shaderProgram);
     return;
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
-    drawMesh(voxelObj -> voxel.mesh);
+    drawMesh(voxelObj -> voxel.mesh, shaderProgram);
     return;
   }
 }

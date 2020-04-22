@@ -395,13 +395,8 @@ void drawTraversalPositions(){
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
   glUseProgram(shaderProgram);
   
-  glActiveTexture(GL_TEXTURE0 + 1);
-  glBindTexture(GL_TEXTURE_2D, blacktopTexture.textureId);
-  glUniform1i(glGetUniformLocation(shaderProgram, "coolzero"), 1);         // @todo just a sample extra texture, this will eventually become something real
-  
-  glActiveTexture(GL_TEXTURE0 + 2);
-  glBindTexture(GL_TEXTURE_2D, grassTexture.textureId);
-  glUniform1i(glGetUniformLocation(shaderProgram, "coolsomevalue"), 2);
+  glUniform1i(glGetUniformLocation(shaderProgram, "maintexture"), 0);        
+  glUniform1i(glGetUniformLocation(shaderProgram, "emissionTexture"), 1);
 
   glActiveTexture(GL_TEXTURE0); 
 
@@ -430,7 +425,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      drawMesh(world.meshes.at("./res/models/cone/cone.obj")); 
+      drawMesh(world.meshes.at("./res/models/cone/cone.obj"), shaderProgram); 
     }
 
     // bounding code //////////////////////
@@ -442,7 +437,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
 
       if (objectSelected){
-        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"));
+        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), shaderProgram);
       }
     }
     /////////////////////////////// end bounding code
