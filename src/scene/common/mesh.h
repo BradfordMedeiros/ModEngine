@@ -22,6 +22,8 @@ struct Mesh {
   unsigned int VAOPointer;
   unsigned int VBOPointer;
   Texture texture; 
+  bool hasEmissionTexture;
+  Texture emissionTexture;
   long unsigned int numElements;
   BoundInfo boundInfo;
   std::vector<Bone> bones;

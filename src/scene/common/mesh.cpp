@@ -3,7 +3,6 @@
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.
 Mesh loadMesh(std::string defaultTexture, MeshData meshData){
-  std::cout << "load mesh 0" << std::endl;
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
@@ -24,10 +23,18 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
   // @TODO texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly. right now this is super, super unoptimized.
   Texture texture;
 
-  if (meshData.hasDiffuseTexture > 0){
+  if (meshData.hasDiffuseTexture){
     texture = loadTexture(meshData.diffuseTexturePath); 
   }else{
     texture = loadTexture(defaultTexture); 
+  }
+
+
+  Texture emission;
+  if (meshData.hasEmissionTexture){
+    emission = loadTexture(meshData.emissionTexturePath);
+  }else{
+    emission = loadTexture(defaultTexture); 
   }
  
   glBindTexture(GL_TEXTURE_2D, texture.textureId);
@@ -61,6 +68,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     .VAOPointer = VAO,
     .VBOPointer = VBO,
     .texture = texture,
+    .hasEmissionTexture = meshData.hasEmissionTexture,
+    .emissionTexture = emission,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
@@ -95,12 +104,20 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
   glVertexAttribPointer(1, textureWidth, GL_FLOAT, GL_FALSE, sizeof(float) *  bufferWidth, (void*)(sizeof(float) * vertexWidth));
   glEnableVertexAttribArray(1);
  
+  Texture emissionTexture;
+  BoundInfo boundInfo { };
+  std::vector<Bone> bones;
   Mesh mesh = {
     .VAOPointer = VAO,
     .VBOPointer = VBO,
     .texture = texture,
+    .hasEmissionTexture = false,
+    .emissionTexture = emissionTexture,
     .numElements = numIndices,
+    .boundInfo = boundInfo,
+    .bones = bones,
   };
+
   return mesh;
 }
 Mesh load2DMesh(std::string imagePath){
@@ -171,8 +188,8 @@ Texture loadTexture(std::string textureFilePath){
   glGenerateMipmap(GL_TEXTURE_2D);
   
   stbi_image_free(data);
- 
-  Texture tex = Texture {
+
+  Texture tex {
     .textureId = texture,
   };
 
