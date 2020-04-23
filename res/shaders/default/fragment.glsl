@@ -31,13 +31,15 @@ const float constant = 0.4;
 const float linear = 0.2;
 const float quadratic = 0.0;
 
+const float emissionAmount = 1;
+
 void main(){
   if (tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
     vec4 diffuseColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
     vec4 emissionColor = texture(emissionTexture, vec2(TexCoord.x, -TexCoord.y));
-    vec4 texColor = diffuseColor + (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
+    vec4 texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
 
     if (texColor.a < 0.1){
       discard;
