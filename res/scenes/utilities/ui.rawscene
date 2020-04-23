@@ -1,3 +1,12 @@
-
 # Demonstrates orthographic projections to make a user interface.  
 # Since world is perspective and ui orthographics, layering system used.
+
+hud:mesh:./res/models/ui/hud.obj
+hud:scale:10 10 10
+>camera:position:0 0 0
+hud:parent:>camera
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
