@@ -443,6 +443,9 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     /////////////////////////////// end bounding code
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    std::cout << "discard amount: " << state.discardAmount << std::endl;
+    glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
     renderObject(
       shaderProgram, 
       id, 

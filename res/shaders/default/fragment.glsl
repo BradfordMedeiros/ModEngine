@@ -33,13 +33,23 @@ const float quadratic = 0.0;
 
 const float emissionAmount = 1;
 
+uniform float discardTexAmount;
+
 void main(){
   if (tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
     vec4 diffuseColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
     vec4 emissionColor = texture(emissionTexture, vec2(TexCoord.x, -TexCoord.y));
-    vec4 texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
+
+    bool discardTexture = hasEmissionTexture && emissionColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
+
+    vec4 texColor;
+    if (discardTexture){
+        discard;
+    }else{
+        texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
+    }
 
     if (texColor.a < 0.1){
       discard;

@@ -266,4 +266,11 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
      state.useBoneTransform = !state.useBoneTransform;
      std::cout << "state: use bone transform: " << state.useBoneTransform << std::endl;
    }
+
+   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+      state.discardAmount += 0.01;
+   }
+   if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
+      state.discardAmount -= 0.01;
+   }
 }
