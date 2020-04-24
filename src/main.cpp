@@ -147,7 +147,6 @@ TimePlayback timePlayback(
 bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
-
   if (timePlayback.isPaused()){
     timePlayback.play();
   }else{
@@ -397,6 +396,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   
   glUniform1i(glGetUniformLocation(shaderProgram, "maintexture"), 0);        
   glUniform1i(glGetUniformLocation(shaderProgram, "emissionTexture"), 1);
+  glUniform1i(glGetUniformLocation(shaderProgram, "opacityTexture"), 2);
 
   glActiveTexture(GL_TEXTURE0); 
 
@@ -444,7 +444,6 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    std::cout << "discard amount: " << state.discardAmount << std::endl;
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
     renderObject(
       shaderProgram, 
@@ -495,9 +494,9 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
   if (!state.isSelectionMode){
-    drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
+     drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
   }else if (!state.isRotateSelection){
-    drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
+     drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
   }
 
   if (showDebugInfo){

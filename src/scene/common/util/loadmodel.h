@@ -58,6 +58,8 @@ struct MeshData {
   bool hasDiffuseTexture;
   std::string emissionTexturePath;
   bool hasEmissionTexture;
+  std::string opacityTexturePath;
+  bool hasOpacityTexture;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
 };

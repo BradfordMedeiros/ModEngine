@@ -300,6 +300,13 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      emissionTexturePath = getTexturePath(aiTextureType_EMISSIVE, modelPath, material);
    }
 
+   int opacityTextureCount = material -> GetTextureCount(aiTextureType_OPACITY);
+   assert(opacityTextureCount == 0 || opacityTextureCount == 1);
+   std::string opacityTexturePath;
+   if (opacityTextureCount == 1){
+     opacityTexturePath = getTexturePath(aiTextureType_OPACITY, modelPath, material);
+   }
+
    MeshData model = {
      .vertices = vertices,
      .indices = indices,       
@@ -307,6 +314,8 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      .hasDiffuseTexture = diffuseTextureCount == 1,
      .emissionTexturePath = emissionTexturePath,
      .hasEmissionTexture = emissionTextureCount == 1,
+     .opacityTexturePath = opacityTexturePath,
+     .hasOpacityTexture = opacityTextureCount == 1,
      .boundInfo = getBounds(vertices),
      .bones = boneInfo.bones,
    };

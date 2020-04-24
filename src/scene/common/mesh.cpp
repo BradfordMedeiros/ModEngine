@@ -35,6 +35,11 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     emission = loadTexture(meshData.emissionTexturePath);
   }
 
+  Texture opacity;
+  if (meshData.hasOpacityTexture){
+    opacity = loadTexture(meshData.opacityTexturePath);
+  }
+
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, normal));
 
@@ -66,6 +71,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData){
     .texture = texture,
     .hasEmissionTexture = meshData.hasEmissionTexture,
     .emissionTexture = emission,
+    .hasOpacityTexture = meshData.hasOpacityTexture,
+    .opacityTexture = opacity,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
@@ -100,7 +107,7 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
   glVertexAttribPointer(1, textureWidth, GL_FLOAT, GL_FALSE, sizeof(float) *  bufferWidth, (void*)(sizeof(float) * vertexWidth));
   glEnableVertexAttribArray(1);
  
-  Texture emissionTexture;
+  Texture noTexture;
   BoundInfo boundInfo { };
   std::vector<Bone> bones;
   Mesh mesh = {
@@ -108,7 +115,9 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
     .VBOPointer = VBO,
     .texture = texture,
     .hasEmissionTexture = false,
-    .emissionTexture = emissionTexture,
+    .emissionTexture = noTexture,
+    .hasOpacityTexture = false,
+    .opacityTexture = noTexture,
     .numElements = numIndices,
     .boundInfo = boundInfo,
     .bones = bones,
@@ -160,7 +169,11 @@ void drawMesh(Mesh mesh, GLint shaderProgram){
   glUniform1i(glGetUniformLocation(shaderProgram, "hasEmissionTexture"), mesh.hasEmissionTexture);
   glActiveTexture(GL_TEXTURE0 + 1);
   glBindTexture(GL_TEXTURE_2D, mesh.emissionTexture.textureId);
- 
+
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasOpacityTexture"), mesh.hasOpacityTexture);
+  glActiveTexture(GL_TEXTURE0 + 2);
+  glBindTexture(GL_TEXTURE_2D, mesh.opacityTexture.textureId);
+
   glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 }

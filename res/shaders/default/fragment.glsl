@@ -13,6 +13,7 @@ out vec4 FragColor;
 
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
+uniform sampler2D opacityTexture;
 
 uniform vec3 tint;
 uniform vec3 cameraPosition;
@@ -20,6 +21,7 @@ uniform vec3 cameraPosition;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
 uniform bool hasEmissionTexture;
+uniform bool hasOpacityTexture;
 
 #define MAX_LIGHTS 32
 uniform int numlights;
@@ -41,8 +43,9 @@ void main(){
   }else{
     vec4 diffuseColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
     vec4 emissionColor = texture(emissionTexture, vec2(TexCoord.x, -TexCoord.y));
+    vec4 opacityColor = texture(opacityTexture, vec2(TexCoord.x, -TexCoord.y));
 
-    bool discardTexture = hasEmissionTexture && emissionColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
+    bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
 
     vec4 texColor;
     if (discardTexture){
