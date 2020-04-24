@@ -413,7 +413,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   clearTraversalPositions();
-  traverseScene(scene, [useSelectionColor, shaderProgram, &scene](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix) -> void {    
+  traverseScene(scene, [useSelectionColor, shaderProgram, &scene](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
+    std::cout << "render object! ortho? " << orthographic << std::endl;    
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;

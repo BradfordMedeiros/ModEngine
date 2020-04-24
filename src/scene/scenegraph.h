@@ -71,7 +71,7 @@ void removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
 
 // @TODO code these functions
-void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4)> onObject);  
+void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4, bool)> onObject);  
 glm::vec3 getFullPosition(short id);
 glm::quat getFullRotation(short id);
 glm::vec3 getFullScale(short id);

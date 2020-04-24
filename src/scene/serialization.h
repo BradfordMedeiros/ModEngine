@@ -51,6 +51,7 @@ glm::vec3 parseVec(std::string positionRaw);
 struct LayerInfo {
   std::string name;
   int zIndex;
+  bool orthographic;
 };
 struct ParsedContent {
   std::vector<Token> tokens; 

@@ -236,7 +236,7 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4)> onObject){
+void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4, bool)> onObject){
   std::vector<traversalData> datum;
 
   for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
@@ -253,7 +253,7 @@ void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4)
   for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
       if (scene.idToGameObjects.at(data.id).layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix);
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic);
       }
     }  
   }

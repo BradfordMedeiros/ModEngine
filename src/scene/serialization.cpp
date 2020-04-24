@@ -33,14 +33,17 @@ std::optional<LayerInfo> parseLayer(std::string content){
     return std::nullopt;
   }
 
-  std::vector<std::string> tokens = split(content.substr(1, content.size() - 2), ':');
-  bool isLayerContent = (tokens.size() == 3) &&  tokens.at(1) == "zindex";
+
+// TODO - notice this and reduce layers isn't actually allowed more than one statement. Need to join the set of them.
+std::vector<std::string> tokens = split(content.substr(1, content.size() - 2), ':');
+  bool isLayerContent = (tokens.size() == 3) &&  (tokens.at(1) == "zindex" || tokens.at(1) == "projection");
   if (!isLayerContent){
     return std::nullopt;
   }
   LayerInfo layer {
     .name = trim(tokens.at(0)),
-    .zIndex = std::stoi(trim(tokens.at(2))),
+    .zIndex = tokens.at(1) != "zindex" ? 0 : std::stoi(trim(tokens.at(2))),
+    .orthographic = tokens.at(1) != "projection" ? false : (tokens.at(2) == "orthographic")
   };
   return layer;
 }
