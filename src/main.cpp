@@ -413,8 +413,13 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   clearTraversalPositions();
-  traverseScene(scene, [useSelectionColor, shaderProgram, &scene](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
-    std::cout << "render object! ortho? " << orthographic << std::endl;    
+  traverseScene(scene, [useSelectionColor, shaderProgram, &scene, projection](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
+    if (orthographic){
+     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
+    }else{
+     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+    }
+
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
