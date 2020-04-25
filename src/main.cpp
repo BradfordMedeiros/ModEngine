@@ -652,6 +652,8 @@ int main(int argc, char* argv[]){
      updateDepthTexturesSize();
 
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+
+     // TODO orthoproj is using current screen width and height.  Switch this to match NDI for simplification. 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, (float)state.currentScreenHeight, 0.0f, -1.0f, 1.0f);  
   }; 
 
