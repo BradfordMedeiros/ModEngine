@@ -1,7 +1,7 @@
 #include "./scheme_bindings.h"
 
 bool symbolDefined(const char* symbol){
-  return scm_to_bool(scm_defined_p(scm_string_to_symbol (scm_from_locale_string(symbol)), scm_current_module()));
+  return scm_to_bool(scm_defined_p(scm_string_to_symbol (scm_from_locale_string("onMouse")), scm_current_module()));
 }
 
 // Main Api
@@ -254,70 +254,50 @@ SCM scmPlayClip(SCM soundname){
 
 // Callbacks
 void onFrame(){
-  const char* function = "onFrame";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
-    scm_call_0(func_symbol);
-  }
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onFrame"));
+  scm_call_0(func_symbol);
 }
 void onCollisionEnter(short obj1, short obj2){
-  const char* function = "onCollideEnter";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCollideEnter"));
-    scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
-  }
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCollideEnter"));
+  scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
 }
 void onCollisionExit(short obj1, short obj2){
-  const char* function = "onCollideExit";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCollideExit"));
-    scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
-  }
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCollideExit"));
+  scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
 }
 void onMouseCallback(int button, int action, int mods){
-  const char* function = "onMouse";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+  if (symbolDefined("onMouse")){
+    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onMouse"));
     scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
   }
 }
 void onMouseMoveCallback(double xPos, double yPos){
-  const char* function = "onMouseMove";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+  if (symbolDefined("onMouseMove")){
+    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onMouseMove"));
     scm_call_2(func_symbol, scm_from_double(xPos), scm_from_double(yPos));
   }
 }
 void onObjectSelected(short index){
-  const char* function = "onObjectSelected";
-  if (symbolDefined(function)){
+  if (symbolDefined("onObjSelected")){
     auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
     obj->id = index;
     SCM gameobject = scm_make_foreign_object_1(gameObjectType, obj);
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+
+    static SCM func_symbol = scm_variable_ref(scm_c_lookup("onObjSelected"));
     scm_call_1(func_symbol, gameobject);
   }
 }
 void onKeyCallback(int key, int scancode, int action, int mods){
-  const char* function = "onKey";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods)); 
-  } 
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKey"));
+  scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods));  
 }
 void onKeyCharCallback(unsigned int codepoint){
-   const char* function = "onKeyChar";
-   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_1(func_symbol, scm_from_unsigned_integer(codepoint));
-   }
+   static SCM func_symbol = scm_variable_ref(scm_c_lookup("onKeyChar"));
+   scm_call_1(func_symbol, scm_from_unsigned_integer(codepoint));
 }
 void onCameraSystemChange(bool usingBuiltInCamera){
-  const char* function = "onCameraSystemChange";
-  if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
-  }
+  static SCM func_symbol = scm_variable_ref(scm_c_lookup("onCameraSystemChange"));
+  scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
 }
 
 ////////////

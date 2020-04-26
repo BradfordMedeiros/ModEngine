@@ -1,13 +1,6 @@
 (use-modules (ice-9 eval-string))
 (use-modules (ice-9 format))
 
-(define (onMouse button action mods) (display ""))
-(define (onObjSelected selectedIndex) (display ""))
-(define (onCollideEnter obj1 obj2) (display ""))
-(define (onCollideExit obj1 obj2) (display ""))
-(define (onMouseMove xPos yPos) (+ 0 0))
-(define (onCameraSystemChange type) #t)
-
 (define activeLineIndex 0)
 (define lineHistory #())
 (define cursorFromEnd 0)
@@ -144,4 +137,5 @@
     (appendToBuffer (string (integer->char key)))
   )
 )
+
 
