@@ -57,8 +57,6 @@ int numChunkingGridCells = 0;
 float chunkSize = 100;
 bool useChunkingSystem = false;
 std::string rawSceneFile;
-Texture blacktopTexture;
-Texture grassTexture;
 
 GameObjectVoxel* voxelPtr;
 short voxelPtrId = -1;
@@ -738,9 +736,6 @@ int main(int argc, char* argv[]){
 
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
-
-  blacktopTexture = loadTexture("./res/textures/blacktop.jpg");
-  grassTexture = loadTexture("./res/textures/grass.png");
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;
