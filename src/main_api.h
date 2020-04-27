@@ -5,7 +5,7 @@
 #include "./scene/scene.h"
 #include "./state.h"
 #include "./scene/physics.h"
-#include "./scheme_bindings.h"
+#include "./scheme/scriptmanager.h"
 #include "./scene/sprites/sprites.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/timeplayback.h"

@@ -30,7 +30,8 @@
 #include "./scene/animation/timeplayback.h"
 #include "./scene/animation/animation.h"
 #include "./scene/animation/playback.h"
-#include "./scheme_bindings.h"
+#include "./scheme/scheme_bindings.h"
+#include "./scheme/scriptmanager.h"
 #include "./shaders.h"
 #include "./translations.h"
 #include "./sounds/soundmanager.h"
@@ -683,8 +684,7 @@ int main(int argc, char* argv[]){
   fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
 
-  schemeBindings  = createStaticSchemeBindings(
-    result["scriptpath"].as<std::string>(), 
+  createStaticSchemeBindings(
     loadScene,
     unloadScene,
     listScenes,
@@ -711,6 +711,10 @@ int main(int argc, char* argv[]){
     listSounds,
     playSoundState
   );
+
+  schemeBindings = getSchemeCallbacks();
+  loadScript(result["scriptpath"].as<std::string>());
+
 
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
