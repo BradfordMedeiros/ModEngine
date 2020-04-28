@@ -2,19 +2,22 @@
 
 static std::map<std::string, SCM> scriptnameToModule;
 
-void loadScript(std::string script){  // scm_current_module()
+void loadScript(std::string script){ 
   std::cout << "loading script: " << script << std::endl;
   assert(scriptnameToModule.find(script) == scriptnameToModule.end());
-  SCM module = scm_c_define_module(script.c_str(), NULL, NULL);  // should think about what we should name the module
-  scriptnameToModule[script] = module;    // This probably will be per entity not 1:1 with script paths
+  SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
+  scriptnameToModule[script] = module;                                  // This probably will be per entity not 1:1 with script paths
   scm_set_current_module(module);
   defineFunctions();
   scm_c_primitive_load(script.c_str());
   onFrame();
 }
+
+// @TODO -- need to figure out how to really unload a module.
+// I don't think this actually causes this module to be garbage collected.
 void unloadScript(std::string script){
   assert(scriptnameToModule.find(script) != scriptnameToModule.end());
-  assert(false);    
+  scriptnameToModule.erase(script);
 }
 
 void onFrameAllScripts(){
