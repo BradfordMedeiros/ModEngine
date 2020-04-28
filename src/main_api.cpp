@@ -49,7 +49,11 @@ void clearImpulse(short index){
 
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-  return addSceneToWorld(world, sceneFile, loadSoundState);
+  return addSceneToWorld(world, sceneFile, loadSoundState, [](std::string script, short id) -> void {
+    auto name = world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id).name;
+    std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
+    loadScript(script);
+  });
 }
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;

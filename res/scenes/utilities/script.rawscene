@@ -7,3 +7,4 @@ platform:position:0 -5 0
 
 door:mesh:./res/models/box/box.obj
 door:scale:5 5 0.1
+door:script:./res/scripts/movement/toggle-up-down.scm

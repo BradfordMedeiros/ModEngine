@@ -713,8 +713,6 @@ int main(int argc, char* argv[]){
   );
 
   schemeBindings = getSchemeCallbacks();
-  loadScript(result["scriptpath"].as<std::string>());
-
 
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;

@@ -42,6 +42,7 @@ struct SerializationObject {
   std::string type;
   std::string lookat;
   std::string layer;
+  std::string script;
   std::map<std::string, std::string> additionalFields;
 };
 

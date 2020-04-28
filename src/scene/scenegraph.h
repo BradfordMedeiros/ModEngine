@@ -19,6 +19,7 @@ struct GameObject {
   physicsOpts physicsOptions;
   std::string lookat;
   std::string layer;
+  std::string script;
 };
 struct GameObjectH {
   short id;

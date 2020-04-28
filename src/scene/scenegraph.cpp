@@ -1,6 +1,6 @@
 #include "./scenegraph.h"
 
-GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer){
+GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer, std::string script){
   auto physicsOptions = physicsOpts {
     .enabled = false,
     .isStatic = true,
@@ -19,12 +19,13 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id, std::st
     .physicsOptions = physicsOptions,
     .lookat =  lookat,
     .layer = layer,
+    .script = script,
   };
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId, std::string lookat, std::string layer){
-  auto gameobjectObj = getGameObject(position, name, id, lookat, layer);
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId, std::string lookat, std::string layer, std::string script){
+  auto gameobjectObj = getGameObject(position, name, id, lookat, layer, script);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
@@ -50,7 +51,7 @@ SceneDeserialization createSceneFromParsedContent(
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
     short id = getNewObjectId();
-    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer);
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer, serialObj.script);
     scene.idToGameObjects.at(id).transformation.position = serialObj.position;
     scene.idToGameObjects.at(id).transformation.scale = serialObj.scale;
     scene.idToGameObjects.at(id).transformation.rotation = serialObj.rotation;
@@ -108,7 +109,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     nodeIdToRealId[nodeId] = id;
 
     auto layer = scene.idToGameObjects.at(rootId).layer;
-    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1, "", layer);
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1, "", layer, "");
     scene.idToGameObjectsH.at(id).groupId = rootId;
     scene.idToGameObjects.at(id).transformation.position = transform.position;
     scene.idToGameObjects.at(id).transformation.scale = transform.scale;
@@ -124,7 +125,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .parentName = "-",
       // unused .physics 
       .type = "default",
-      .layer = layer,  // @ TODO - this is wrong, should get this from the parent's layer 
+      .layer = layer,
       .additionalFields = additionalFields.at(nodeId)
     };  
   }

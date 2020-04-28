@@ -260,10 +260,15 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
   });
 }
 
-short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip){
+short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   auto sceneId = getSceneId();
   world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile), loadClip);
   addPhysicsBodies(world, world.scenes.at(sceneId));
+  for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
+    if (obj.script != ""){
+      loadScript(obj.script, id);
+    }
+  }
   return sceneId;
 }
 void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip){

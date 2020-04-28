@@ -193,7 +193,10 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (token.attribute == "lookat"){
       objects.at(token.target).lookat = token.payload;
     }
-    
+    if (token.attribute == "script"){
+      objects.at(token.target).script = token.payload;
+    }
+
     std::string type = getType(token.target, additionalFields);
     objects.at(token.target).type = type;
     populateAdditionalFields(objects, token, type, additionalFields);
