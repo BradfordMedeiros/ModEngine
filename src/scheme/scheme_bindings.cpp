@@ -257,36 +257,37 @@ SCM scmPlayClip(SCM soundname){
 // Callbacks
 void onFrame(){
   const char* function = "onFrame";
+
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_0(func_symbol);
   }
 }
 void onCollisionEnter(short obj1, short obj2){
   const char* function = "onCollideEnter";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
   }
 }
 void onCollisionExit(short obj1, short obj2){
   const char* function = "onCollideExit";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
   }
 }
 void onMouseCallback(int button, int action, int mods){
   const char* function = "onMouse";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
   }
 }
 void onMouseMoveCallback(double xPos, double yPos){
   const char* function = "onMouseMove";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_2(func_symbol, scm_from_double(xPos), scm_from_double(yPos));
   }
 }
@@ -297,28 +298,28 @@ void onObjectSelected(short index){
     obj->id = index;
     SCM gameobject = scm_make_foreign_object_1(gameObjectType, obj);
 
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_1(func_symbol, gameobject);
   }
 }
 void onKeyCallback(int key, int scancode, int action, int mods){
   const char* function = "onKey";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_4(func_symbol, scm_from_int(key), scm_from_int(scancode), scm_from_int(action), scm_from_int(mods));  
   }
 }
 void onKeyCharCallback(unsigned int codepoint){
   const char* function = "onKeyChar";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_1(func_symbol, scm_from_unsigned_integer(codepoint));
   }
 }
 void onCameraSystemChange(bool usingBuiltInCamera){
   const char* function = "onCameraSystemChange";
   if (symbolDefined(function)){
-    static SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
   }
 }
@@ -339,8 +340,6 @@ void defineFunctions(){
   scm_c_define_gsubr("lsobj-name", 1, 0, 0, (void *)getGameObjByName);
   scm_c_define_gsubr("draw-text", 4, 0, 0, (void *)drawTextWords);
  
-  // Gameobject funcs
-  gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
@@ -367,7 +366,6 @@ void defineFunctions(){
   scm_c_define_gsubr("lsclips", 0, 0, 0, (void*)scmListClips);
   scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
 }
-
 
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),  
@@ -397,7 +395,8 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string)
 ){
   scm_init_guile();
-  
+  gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
+
   _loadScene = loadScene;
   _unloadScene = unloadScene;
   _listScenes = listScenes;
