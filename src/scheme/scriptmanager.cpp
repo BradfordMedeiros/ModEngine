@@ -19,35 +19,33 @@ void unloadScript(std::string script){
 
 void onFrameAllScripts(){
   for (auto &[script, module] : scriptnameToModule){
-    std::cout << "executing script: " << script << std::endl;
     scm_set_current_module(module);
     onFrame();
   }
-  std::cout << "-----" << std::endl;
 }
 void onCollisionEnterAllScripts(short obj1, short obj2){
- /* for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onCollisionEnter(obj1, obj2);
-  }*/
+  }
 }
 void onCollisionExitAllScripts(short obj1, short obj2){
-  /*for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onCollisionExit(obj1, obj2);
-  }*/
+  }
 }
 void onMouseCallbackAllScripts(int button, int action, int mods){
-  /*for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onMouseCallback(button, action, mods);
-  }*/
+  }
 }
 void onMouseMoveCallbackAllScripts(double xPos, double yPos){
-  /*for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onMouseMoveCallback(xPos, yPos);
-  }*/
+  }
 }
 void onObjectSelectedAllScripts(short index){
   for (auto &[_, module] : scriptnameToModule){
@@ -56,22 +54,22 @@ void onObjectSelectedAllScripts(short index){
   }
 }
 void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){
-  /*for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onKeyCallback(key, scancode, action, mods);
-  }*/
+  }
 }
 void onKeyCharCallbackAllScripts(unsigned int codepoint){
-  /*for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onKeyCharCallback(codepoint);
-  }*/
+  }
 }
 void onCameraSystemChangeAllScripts(bool usingBuiltInCamera){
-  /*for (auto &[_, module] : scriptnameToModule){
+  for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onCameraSystemChange(usingBuiltInCamera);
-  }*/
+  }
 }
 
 SchemeBindingCallbacks getSchemeCallbacks(){
