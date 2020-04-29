@@ -232,7 +232,7 @@ short (*getGameObjName)(std::string name);
 SCM getGameObjByName(SCM value){
   short id = getGameObjName(scm_to_locale_string(value));
   if (id == -1){
-    return SCM_UNSPECIFIED;
+    return scm_from_bool(false);
   }
   auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
   obj->id = id;
