@@ -6,8 +6,12 @@
   (set! selectedIndex (min (+ selectedIndex 1) (- (length menu) 1)))
 )
 
+(define displayObjName "debugobject")
 (define (select)
-  (display (string-append "make object: " (list-ref menu selectedIndex) "\n"))
+  (let ((obj (lsobj-name displayObjName)))
+    (if obj (rm-obj (gameobj-id obj)))
+    (mk-obj displayObjName (list-ref menu selectedIndex) '(0 5 0))
+  )
 )
 
 (define selectedIndex 0)
