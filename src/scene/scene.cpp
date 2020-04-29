@@ -292,15 +292,30 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
   world.scenes.erase(sceneId);
 }
 
-void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos){
-  // @todo dup with commented above      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
-  /*addObjectToScene(world.scenes[sceneId].scene, name, meshName, pos, getObjectId, [&world, &sceneId](short id, std::string type, std::string field, std::string payload) -> void {
-    world.idToScene[id] = sceneId;
-    addPhysicsBody(world, world.scenes.at(sceneId), id);  // this is different than in deserialize only because it uses it to find the gameobject, not b/c good reasons
-    addObject(id, type, field, payload, world.objectMapping, world.meshes, "./res/models/box/box.obj", [&world](std::string meshName) -> void { 
-      world.meshes[meshName] = loadMesh(meshName, "./res/textures/default.jpg");      // @todo protect against loading
-    });
-  });*/
+void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+  // @TODO consolidate with addSceneToWorld.  Duplicate code.
+  auto serialObj = makeObjectInScene(
+    world.scenes.at(sceneId), 
+    name, 
+    meshName, 
+    pos, 
+    "default",
+    getObjectId,
+    fields
+  );
+  
+  std::map<std::string, SerializationObject> serialObjs;
+  serialObjs[name] = serialObj;
+
+  addObjects(world, world.scenes.at(sceneId), serialObjs, true, loadClip);
+  auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
+  auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
+  
+  addPhysicsBody(world, world.scenes.at(sceneId), gameobjId, glm::vec3(1.f, 1.f, 1.f));
+  if (gameobj.script != ""){
+    loadScript(gameobj.script, gameobjId);
+  }
+  
 }
 
 void physicsTranslate(Scene& scene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index){

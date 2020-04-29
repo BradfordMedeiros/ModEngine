@@ -47,13 +47,14 @@ void clearImpulse(short index){
   clearImpulse(world.rigidbodys.at(index));
 }
 
+void loadScriptFromWorld(std::string script, short id){
+  auto name = world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id).name;
+  std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
+  loadScript(script);
+}
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-  return addSceneToWorld(world, sceneFile, loadSoundState, [](std::string script, short id) -> void {
-    auto name = world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id).name;
-    std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-    loadScript(script);
-  });
+  return addSceneToWorld(world, sceneFile, loadSoundState, loadScriptFromWorld);
 }
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
@@ -128,11 +129,10 @@ void setSelectionMode(bool enabled){
 }
 
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  //addObjectToFullScene(world, 0, name, meshName, glm::vec3(x,y,z));
-  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
+  addObjectToFullScene(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
 }
 void removeObjectById(short id){
-  std::cout << "make object called -- this doesn't work anymore with mutli scene" << std::endl;
+  //std::cout << "remove object called -- this doesn't work anymore with mutli scene" << std::endl;
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

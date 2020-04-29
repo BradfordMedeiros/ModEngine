@@ -1,13 +1,16 @@
 #include "./scenegraph.h"
 
-GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer, std::string script){
-  auto physicsOptions = physicsOpts {
+physicsOpts defaultPhysicsOpts(){
+  physicsOpts defaultOption = {
     .enabled = false,
     .isStatic = true,
     .hasCollisions = true,
     .shape = BOX,
   };
+  return defaultOption;
+}
 
+GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer, std::string script){
   GameObject gameObject = {
     .id = id,
     .name = name,
@@ -16,7 +19,7 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id, std::st
       .scale = glm::vec3(1.0f, 1.0f, 1.0f),
       .rotation = glm::identity<glm::quat>(),
     },
-    .physicsOptions = physicsOptions,
+    .physicsOptions = defaultPhysicsOpts(),
     .lookat =  lookat,
     .layer = layer,
     .script = script,
@@ -116,6 +119,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     scene.idToGameObjects.at(id).transformation.rotation = transform.rotation;
     //  default physics options here  scene.idToGameObjects.at(id).physicsOptions
 
+    // @TODO this is duplicated, should just be fn (gameobj -> serializationObject)
     serialObjs[names.at(nodeId)] = SerializationObject {
       .name = names.at(nodeId),  // @TODO this is probably not unique name so probably will be bad
       .position = transform.position,
@@ -123,7 +127,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .rotation = transform.rotation,
       .hasParent = false,
       .parentName = "-",
-      // unused .physics 
+      .physics = defaultPhysicsOpts(),
       .type = "default",
       .layer = layer,
       .additionalFields = additionalFields.at(nodeId)
@@ -172,13 +176,43 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
-/*void addObjectToScene(Scene& scene, std::string name, std::string mesh, glm::vec3 position, short (*getNewObjectId)(), std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject){
-  addObjectToScene(scene, position, name, getNewObjectId(), -1);
-  short objectId = scene.nameToId[name];
-  std::map<std::string, std::string> additionalFields;
-  addObject(objectId, "default", additionalFields);
+SerializationObject  makeObjectInScene(
+  Scene& scene, 
+  std::string name, 
+  std::string mesh, 
+  glm::vec3 position, 
+  std::string layer,
+  short (*getNewObjectId)(),
+  std::vector<Field> fields
+){
+  auto objectId = getNewObjectId();
+
+   // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
+  // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
+  addObjectToScene(scene, position, name, objectId, -1, "", layer, "");      
+
+  std::map<std::string, std::string> additionalFields;   // This is a hack, this needs to come from serialization
+  additionalFields["mesh"] = mesh;  
+
   scene.rootGameObjectsH.push_back(objectId);
-}*/
+
+  auto objectAdded = scene.idToGameObjects.at(objectId);
+  SerializationObject serialObj {
+    .name = objectAdded.name,
+    .position = objectAdded.transformation.position,
+    .scale = objectAdded.transformation.scale,
+    .rotation = objectAdded.transformation.rotation,
+    .hasParent = false, 
+    .parentName = "",
+    .physics = objectAdded.physicsOptions,
+    .type = getType(objectAdded.name, fields),
+    .lookat = objectAdded.lookat,
+    .layer = objectAdded.layer,
+    .script = objectAdded.script,
+    .additionalFields = additionalFields,
+  };
+  return serialObj;
+}
 
 
 void traverseNodes(Scene& scene, short id, std::function<void(short)> onAddObject){

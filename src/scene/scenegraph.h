@@ -48,13 +48,14 @@ SceneDeserialization deserializeScene(
   short (*getNewObjectId)()
 );
 
-void addObjectToScene(
+SerializationObject makeObjectInScene(
   Scene& scene, 
   std::string name, 
   std::string mesh, 
   glm::vec3 position, 
-  short (*getNewObjectId)(), 
-  std::function<void(short, std::string, std::map<std::string, std::string> additionalFields)> addObject
+  std::string layer,
+  short (*getNewObjectId)(),
+  std::vector<Field> fields
 );
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(

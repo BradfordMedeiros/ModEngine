@@ -62,5 +62,6 @@ ParsedContent parseFormat(std::string content);
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields);
 std::string serializationObjectToString(std::vector<SerializationObject> object);
+std::string getType(std::string name, std::vector<Field> additionalFields);
 
 #endif
