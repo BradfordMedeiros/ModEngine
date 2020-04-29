@@ -240,16 +240,11 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
     }
   }
 
-   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
-     std::cout << "enter key pressed" << std::endl;
-   }
    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
      onArrowKey(GLFW_KEY_RIGHT);
-
    }
    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
      onArrowKey(GLFW_KEY_LEFT);
-
    }
    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
      onArrowKey(GLFW_KEY_UP);
