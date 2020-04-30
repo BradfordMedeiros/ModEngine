@@ -30,11 +30,10 @@ struct PhysicsInfo {
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
 void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip);
+void addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
+void removeObject(World& world, short id, std::function<void(std::string)> unloadClip);
 
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
-
-void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
-void removeObjectToFullScene(World& world, short id);
 
 void  physicsTranslate(Scene& scene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
 void  physicsTranslateSet(Scene& scene, btRigidBody* body, glm::vec3 pos, short index);

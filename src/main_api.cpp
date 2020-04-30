@@ -129,10 +129,10 @@ void setSelectionMode(bool enabled){
 }
 
 void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObjectToFullScene(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
+  addObject(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
 }
 void removeObjectById(short id){
-  //std::cout << "remove object called -- this doesn't work anymore with mutli scene" << std::endl;
+  removeObject(world, id, unloadSoundState);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

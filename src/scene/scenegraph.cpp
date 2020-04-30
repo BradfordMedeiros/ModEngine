@@ -216,7 +216,7 @@ SerializationObject  makeObjectInScene(
 
 
 void traverseNodes(Scene& scene, short id, std::function<void(short)> onAddObject){
-  auto parentObjH = scene.idToGameObjectsH[id];
+  auto parentObjH = scene.idToGameObjectsH.at(id);
   onAddObject(parentObjH.id);
   for (short id : parentObjH.children){
     traverseNodes(scene, id, onAddObject);
@@ -232,10 +232,10 @@ std::vector<short> getChildrenIdsAndParent(Scene& scene, short id){
   return objectIds;
 }
 
-void removeObjectFromScene(Scene& scene, short id){
+void removeObjectFromScene(Scene& scene, short id){  // it might make sense to check if any layers here are not present and then 
   auto objects = getChildrenIdsAndParent(scene, id);
   for (auto id : objects){
-    std::string objectName = scene.idToGameObjects[id].name;
+    std::string objectName = scene.idToGameObjects.at(id).name;
     scene.rootGameObjectsH.erase(std::remove(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id), scene.rootGameObjectsH.end());  
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);

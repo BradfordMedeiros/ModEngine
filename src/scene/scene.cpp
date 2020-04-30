@@ -269,6 +269,17 @@ short addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   }
   return sceneId;
 }
+
+void removeObjectById(World& world, short objectId, std::function<void(std::string)> unloadClip){
+  auto rigidBody = world.rigidbodys.at(objectId);
+  assert(rigidBody != NULL);
+  rmRigidBody(world.physicsEnvironment, rigidBody);
+  world.rigidbodys.erase(objectId);
+  removeObject(world.objectMapping, objectId, unloadClip);
+  world.idToScene.erase(objectId);
+  // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
+  std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
+}
 void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip){
   if (world.scenes.find(sceneId) == world.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
@@ -277,20 +288,12 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
 
   auto scene = world.scenes.at(sceneId);
   for (auto objectId : listObjInScene(scene)){
-    auto rigidBody = world.rigidbodys.at(objectId);
-    assert(rigidBody != NULL);
-    rmRigidBody(world.physicsEnvironment, rigidBody);
-    world.rigidbodys.erase(objectId);
-    removeObject(world.objectMapping, objectId, unloadClip);
-    world.idToScene.erase(objectId);
-
-    // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
-    std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
+    removeObjectById(world, objectId, unloadClip);
   }
   world.scenes.erase(sceneId);
 }
 
-void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+void addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
   std::vector<short> idsAdded;
   auto getId = [&idsAdded]() -> short {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -323,7 +326,15 @@ void addObjectToFullScene(World& world, short sceneId, std::string name, std::st
   if (gameobj.script != ""){
     loadScript(gameobj.script, gameobjId);
   }
-  
+}
+void removeObject(World& world, short objectId, std::function<void(std::string)> unloadClip){  // this needs to also delete all children objects. 
+  Scene& scene = world.scenes.at(world.idToScene.at(objectId));
+  auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
+  for (auto gameobjId : getIdsInGroup(scene, groupId)){
+    std::cout << "remove object id: " << gameobjId << std::endl;
+    removeObjectFromScene(scene, gameobjId);
+    removeObjectById(world, gameobjId, unloadClip);
+  }
 }
 
 void physicsTranslate(Scene& scene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index){
