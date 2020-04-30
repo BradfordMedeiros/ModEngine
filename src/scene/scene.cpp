@@ -248,12 +248,6 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
   }
 }
 
-Scene deserializeFullScene(World& world, short sceneId, std::string content, std::function<void(std::string)> loadClip){
-  SceneDeserialization deserializedScene = deserializeScene(content, fields, getObjectId);
-  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true, loadClip, getObjectId);
-  return deserializedScene.scene;
-}
-
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping){
   return serializeScene(scene, [&objectMapping](short objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, objectMapping);
@@ -262,7 +256,11 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
 
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   auto sceneId = getSceneId();
-  world.scenes[sceneId] = deserializeFullScene(world, sceneId, loadFile(sceneFile), loadClip);
+  
+  SceneDeserialization deserializedScene = deserializeScene(loadFile(sceneFile), fields, getObjectId);
+  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true, loadClip, getObjectId);
+  world.scenes[sceneId] = deserializedScene.scene;
+
   addPhysicsBodies(world, world.scenes.at(sceneId));
   for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
     if (obj.script != ""){
