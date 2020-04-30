@@ -45,7 +45,7 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
 SceneDeserialization deserializeScene(
   std::string content, 
   std::vector<Field> fields,
-  short (*getNewObjectId)()
+  std::function<short()> getNewObjectId
 );
 
 SerializationObject makeObjectInScene(
@@ -54,7 +54,7 @@ SerializationObject makeObjectInScene(
   std::string mesh, 
   glm::vec3 position, 
   std::string layer,
-  short (*getNewObjectId)(),
+  std::function<short()> getNewObjectId,
   std::vector<Field> fields
 );
 
@@ -66,7 +66,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   std::map<short, Transformation> gameobjTransforms, 
   std::map<short, std::string> names, 
   std::map<short, std::map<std::string, std::string>> additionalFields,
-  short (*getNewObjectId)()
+  std::function<short()> getNewObjectId
 );
 
 void removeObjectFromScene(Scene& scene, short id);

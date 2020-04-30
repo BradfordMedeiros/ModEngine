@@ -199,7 +199,7 @@ std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
-void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip){
+void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<short()> getId){
   for (auto [_, serialObj] : serialObjs){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
@@ -209,7 +209,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  loadClip, 
-      [&world, &scene, loadClip, id, shouldLoadModel](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, loadClip, id, shouldLoadModel, getId](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -234,9 +234,9 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             data.nodeTransform, 
             data.names, 
             generateAdditionalFields(meshName, data),
-            getObjectId
+            getId
           );
-          addObjects(world, scene, newSerialObjs, false, loadClip);
+          addObjects(world, scene, newSerialObjs, false, loadClip, getId);
           return hasMesh;
         }
         return true;   // This is basically ensure model loaded so by definition this was already loaded. 
@@ -250,7 +250,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
 
 Scene deserializeFullScene(World& world, short sceneId, std::string content, std::function<void(std::string)> loadClip){
   SceneDeserialization deserializedScene = deserializeScene(content, fields, getObjectId);
-  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true, loadClip);
+  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true, loadClip, getObjectId);
   return deserializedScene.scene;
 }
 
@@ -294,24 +294,34 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
 
 void addObjectToFullScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
+  std::vector<short> idsAdded;
+  auto getId = [&idsAdded]() -> short {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+    auto newId = getObjectId();
+    idsAdded.push_back(newId);
+    return newId;
+  };
+
   auto serialObj = makeObjectInScene(
     world.scenes.at(sceneId), 
     name, 
     meshName, 
     pos, 
     "default",
-    getObjectId,
+    getId,
     fields
   );
-  
+
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[name] = serialObj;
 
-  addObjects(world, world.scenes.at(sceneId), serialObjs, true, loadClip);
+  addObjects(world, world.scenes.at(sceneId), serialObjs, true, loadClip, getId);
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
   
-  addPhysicsBody(world, world.scenes.at(sceneId), gameobjId, glm::vec3(1.f, 1.f, 1.f));
+  for (auto id : idsAdded){
+    std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
+    addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
+  }
   if (gameobj.script != ""){
     loadScript(gameobj.script, gameobjId);
   }
