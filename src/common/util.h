@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <filesystem>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -11,6 +12,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 std::string loadFile(std::string filepath);
+std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions);
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
 std::string join(std::vector<std::string> values, char delimeter);

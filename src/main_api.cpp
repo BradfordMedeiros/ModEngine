@@ -188,7 +188,5 @@ void playAnimation(short id, std::string animationToPlay){
 }
 
 std::vector<std::string> listModels(){
-  std::vector<std::string> models;
-  models.push_back("some_model");
-  return models;
+  return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }

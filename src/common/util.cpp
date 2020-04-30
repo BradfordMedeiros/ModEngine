@@ -9,6 +9,37 @@ std::string loadFile(std::string filepath){
    buffer << file.rdbuf();
    return buffer.str();
 }
+std::vector<std::string> listAllFiles(std::filesystem::path path) {
+  std::vector<std::string> files;
+  for(auto &file: std::filesystem::recursive_directory_iterator(path)) {
+    if (!std::filesystem::is_directory(file)) {
+      files.push_back(file.path());
+    }
+  }
+  return files;
+}
+std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions){
+  std::vector<std::string> models;
+  for (auto file : listAllFiles(folder)){
+    auto parts = split(file, '.');
+    if (parts.size() >= 2){
+      auto extension = parts.at(parts.size() - 1);
+
+      bool isValidExtension = false;
+      for (auto knownExtension : extensions){
+        if (extension == knownExtension){
+          isValidExtension = true;
+          break;
+        }
+      }
+      if (isValidExtension){
+        models.push_back(file);
+      }
+    }
+  }
+  return models;
+}
+
 
 std::string trim(const std::string& str){
   size_t first = str.find_first_not_of(' ');
