@@ -55,4 +55,6 @@ void playAnimation(short id, std::string animationToPlay);
 std::vector<std::string> listSounds(short id);
 void playSound(std::string sound);
 
+std::vector<std::string> listModels();
+
 #endif

@@ -709,7 +709,8 @@ int main(int argc, char* argv[]){
     listAnimations,
     playAnimation,
     listSounds,
-    playSoundState
+    playSoundState,
+    listModels
   );
 
   schemeBindings = getSchemeCallbacks();

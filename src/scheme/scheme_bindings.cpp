@@ -254,6 +254,16 @@ SCM scmPlayClip(SCM soundname){
   return SCM_UNSPECIFIED;
 }
 
+std::vector<std::string> (*_listModels)();
+SCM scmListModels(){
+  std::vector<std::string> models = _listModels();
+  SCM list = scm_make_list(scm_from_unsigned_integer(models.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < models.size(); i++){
+    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_locale_string(models.at(i).c_str()));
+  }
+  return list;
+}
+
 // Callbacks
 void onFrame(){
   const char* function = "onFrame";
@@ -329,6 +339,7 @@ void defineFunctions(){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
+  scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
 
   scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
   scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);    
@@ -392,7 +403,8 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listAnimations)(short id),
   void playAnimation(short id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
-  void (*playClip)(std::string)
+  void (*playClip)(std::string),
+  std::vector<std::string> (*listModels)()
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -422,4 +434,5 @@ void createStaticSchemeBindings(
   _playAnimation = playAnimation;
   _listClips = listClips;
   _playClip = playClip;
+  _listModels = listModels;
 }
