@@ -9,7 +9,7 @@
 (define displayObjName "debugobject")
 (define (select)
   (let ((obj (lsobj-name displayObjName)))
-    ;(if obj (rm-obj (gameobj-id obj)))
+    (if obj (rm-obj (gameobj-id obj)))
     (mk-obj displayObjName (list-ref menu selectedIndex) '(0 0 0))
   )
 )
