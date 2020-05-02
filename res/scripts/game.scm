@@ -12,7 +12,7 @@
 
 (define selectionModeEnabled #f)
 (define (onKey key scancode action mods)
-  (if (and (= key 75) (= action 1)) (playanimation))
+ ; (if (and (= key 75) (= action 1)) (playanimation))
   (if (and (= key 80) (= action 1))
     (begin 
     	(display "toggled selection mode")(display "\n")

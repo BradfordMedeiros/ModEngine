@@ -1,0 +1,16 @@
+
+# Demonstrates basic usage of an event system, where a box which has a 
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+platform:script:./res/scripts/enterkeyevent.scm
+
+door:mesh:./res/models/box/box.obj
+door:script:./res/scripts/movement/toggle-up-down.scm
+
+# It 
+%enterOpensDoor:from:enterpressed
+%enterOpensDoor:to:closedoor
+
+

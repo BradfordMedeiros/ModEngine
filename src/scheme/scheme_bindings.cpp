@@ -265,7 +265,8 @@ SCM scmListModels(){
 }
 
 void (*_sendEventMessage)(std::string message);
-SCM scmSendEventMessage(){
+SCM scmSendEventMessage(SCM channelFrom){
+  _sendEventMessage(scm_to_locale_string(channelFrom));
   return SCM_UNSPECIFIED;
 }
 
@@ -390,7 +391,7 @@ void defineFunctions(){
   scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
 
   // event system
-  scm_c_define_gsubr("sendmessage", 0, 0, 0, (void*)scmSendEventMessage);
+  scm_c_define_gsubr("sendmessage", 1, 0, 0, (void*)scmSendEventMessage);
 }
 
 

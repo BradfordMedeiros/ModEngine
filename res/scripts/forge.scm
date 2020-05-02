@@ -9,18 +9,13 @@
 (define displayObjName "debugobject")
 (define (select)
   (let ((obj (lsobj-name displayObjName)))
-    (if obj (rm-obj (gameobj-id obj)))
-    (mk-obj displayObjName (list-ref menu selectedIndex) '(0 5 0))
+    ;(if obj (rm-obj (gameobj-id obj)))
+    (mk-obj displayObjName (list-ref menu selectedIndex) '(0 0 0))
   )
 )
 
 (define selectedIndex 0)
-(define menu '(
-    "./res/models/bendybox.dae"
-    "./res/models/ui/hud.obj"
-    "./res/models/box/box.obj"
-  )
-)
+(define menu (ls-models))
 
 (define (maybe-highlight text index)
   (if (equal? selectedIndex index)

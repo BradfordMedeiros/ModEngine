@@ -79,7 +79,10 @@ void onCameraSystemChangeAllScripts(bool usingBuiltInCamera){
   }
 }
 void onMessageAllScripts(std::vector<std::string>& messages){
-  for (auto &[_, module] : scriptnameToModule){
+  if (messages.size() <= 0){
+    return;
+  }
+  for (auto &[name, module] : scriptnameToModule){
     scm_set_current_module(module);
     for (auto message : messages){
       onMessage(message);
@@ -100,15 +103,6 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onCameraSystemChange = onCameraSystemChangeAllScripts,
     .onMessage = onMessageAllScripts,
   };
-
-
-
-
- 
-  //auto topLevelHasLs = symbolDefinedInModule("onFrame", topLevelModule);
-  //auto someLevelHasLs = symbolDefinedInModule("lsclips", somemoduleRef);
-
-  //scm_set_current_module(somemoduleRef);
 
   return callbackFuncs;
 }

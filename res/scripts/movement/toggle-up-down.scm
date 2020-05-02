@@ -1,5 +1,12 @@
 (define doorDown #f)
 
+
+(define (onMessage event)
+  (if (equal? event "closedoor")
+    (toggleDoor)
+  )
+)
+
 (define (onKey key scancode action mods)
   (if (and (equal? key 75) (equal? action 0))
     (toggleDoor)
