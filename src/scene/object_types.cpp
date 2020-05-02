@@ -62,6 +62,18 @@ GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields,
   return obj;
 }
 
+GameObjectChannel createChannel(std::map<std::string, std::string> additionalFields){
+  bool hasFrom = additionalFields.find("from") != additionalFields.end();
+  bool hasTo = additionalFields.find("to") != additionalFields.end();
+
+  GameObjectChannel obj {
+    .from = hasFrom ? additionalFields.at("from") : "",
+    .to = hasTo ? additionalFields.at("to") : "",
+    .complete = hasFrom && hasTo,
+  };
+  return obj;
+}
+
 void addObject(
   short id, 
   std::string objectType, 
@@ -83,6 +95,8 @@ void addObject(
     mapping[id] = createLight();
   }else if (objectType == "voxel"){
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
+  }else if (objectType == "channel"){
+    mapping[id] = createChannel(additionalFields);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -148,7 +162,7 @@ void renderObject(
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showDebug){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     drawMesh(nodeMesh, shaderProgram);
     return;
   }
@@ -157,6 +171,13 @@ void renderObject(
   if (voxelObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
     drawMesh(voxelObj -> voxel.mesh, shaderProgram);
+    return;
+  }
+
+  auto channelObj = std::get_if<GameObjectChannel>(&toRender);
+  if (channelObj != NULL && showDebug){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    drawMesh(nodeMesh, shaderProgram);
     return;
   }
 }
@@ -219,4 +240,19 @@ std::vector<std::string> getMeshNames(std::map<short, GameObjectObj>& mapping, s
   }
 
   return names;
+}
+
+std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<short, GameObjectObj>& mapping){
+  std::map<std::string, std::vector<std::string>> channelMapping;
+  for (auto &[_, obj] : mapping){
+    auto channelObj = std::get_if<GameObjectChannel>(&obj);
+    if (channelObj != NULL && channelObj -> complete){
+      std::vector<std::string> toChannels;
+      if (channelMapping.find(channelObj -> from) == channelMapping.end()){
+        channelMapping[channelObj -> from] = toChannels;
+      }
+      channelMapping[channelObj -> from].push_back(channelObj -> to);   
+    } 
+  }
+  return channelMapping;
 }

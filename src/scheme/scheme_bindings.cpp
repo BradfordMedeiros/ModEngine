@@ -264,6 +264,11 @@ SCM scmListModels(){
   return list;
 }
 
+void (*_sendEventMessage)(std::string message);
+SCM scmSendEventMessage(){
+  return SCM_UNSPECIFIED;
+}
+
 // Callbacks
 void onFrame(){
   const char* function = "onFrame";
@@ -333,6 +338,13 @@ void onCameraSystemChange(bool usingBuiltInCamera){
     scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
   }
 }
+void onMessage(std::string message){
+  const char* function = "onMessage";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, scm_from_locale_string(message.c_str()));
+  }
+}
 
 ////////////
 void defineFunctions(){
@@ -376,7 +388,11 @@ void defineFunctions(){
   // audio stuff
   scm_c_define_gsubr("lsclips", 0, 0, 0, (void*)scmListClips);
   scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
+
+  // event system
+  scm_c_define_gsubr("sendmessage", 0, 0, 0, (void*)scmSendEventMessage);
 }
+
 
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),  
@@ -404,7 +420,8 @@ void createStaticSchemeBindings(
   void playAnimation(short id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string),
-  std::vector<std::string> (*listModels)()
+  std::vector<std::string> (*listModels)(),
+  void (*sendEventMessage)(std::string message)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -435,4 +452,5 @@ void createStaticSchemeBindings(
   _listClips = listClips;
   _playClip = playClip;
   _listModels = listModels;
+  _sendEventMessage = sendEventMessage;
 }

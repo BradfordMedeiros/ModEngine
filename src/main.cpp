@@ -83,6 +83,7 @@ glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
+std::vector<std::string> channelMessages;
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -710,7 +711,8 @@ int main(int argc, char* argv[]){
     playAnimation,
     listSounds,
     playSoundState,
-    listModels
+    listModels,
+    sendEventMessage
   );
 
   schemeBindings = getSchemeCallbacks();
@@ -842,6 +844,8 @@ int main(int argc, char* argv[]){
     renderUI(crosshairSprite, currentFramerate);
 
     schemeBindings.onFrame();
+    schemeBindings.onMessage(channelMessages);
+    channelMessages.clear();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 

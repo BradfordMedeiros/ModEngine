@@ -10,6 +10,7 @@ extern std::map<unsigned int, Mesh> fontMeshes;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::vector<short> playbacksToRemove;
+extern std::vector<std::string> channelMessages;
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
@@ -189,4 +190,15 @@ void playAnimation(short id, std::string animationToPlay){
 
 std::vector<std::string> listModels(){
   return listFilesWithExtensions("./res/models", { "obj", "dae" });
+}
+
+
+
+void sendEventMessage(std::string message){
+  auto channelMapping = getChannelMapping(world.objectMapping);
+  if (channelMapping.find(message) != channelMapping.end()){
+    for (auto to : channelMapping.at(message)){
+      channelMessages.push_back(to);
+    }
+  }
 }

@@ -56,5 +56,6 @@ std::vector<std::string> listSounds(short id);
 void playSound(std::string sound);
 
 std::vector<std::string> listModels();
+void sendEventMessage(std::string message);
 
 #endif

@@ -34,7 +34,8 @@ void createStaticSchemeBindings(
   void playAnimation(short id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string),
-  std::vector<std::string> (*listModels)()
+  std::vector<std::string> (*listModels)(),
+  void (*sendEventMessage)(std::string message)
 );
 
 void defineFunctions();
@@ -48,5 +49,6 @@ void onObjectSelected(short index);
 void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
 void onCameraSystemChange(bool usingBuiltInCamera);
+void onMessage(std::string message);
 
 #endif

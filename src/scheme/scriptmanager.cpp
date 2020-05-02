@@ -29,6 +29,7 @@ void onFrameAllScripts(){
     onFrame();
   }
 }
+
 void onCollisionEnterAllScripts(short obj1, short obj2){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
@@ -77,6 +78,14 @@ void onCameraSystemChangeAllScripts(bool usingBuiltInCamera){
     onCameraSystemChange(usingBuiltInCamera);
   }
 }
+void onMessageAllScripts(std::vector<std::string>& messages){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    for (auto message : messages){
+      onMessage(message);
+    }
+  }
+}
 
 SchemeBindingCallbacks getSchemeCallbacks(){
   SchemeBindingCallbacks callbackFuncs = {
@@ -89,6 +98,7 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onKeyCallback = onKeyCallbackAllScripts,
     .onKeyCharCallback = onKeyCharCallbackAllScripts,
     .onCameraSystemChange = onCameraSystemChangeAllScripts,
+    .onMessage = onMessageAllScripts,
   };
 
 
