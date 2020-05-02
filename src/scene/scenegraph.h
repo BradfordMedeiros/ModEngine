@@ -69,7 +69,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   std::function<short()> getNewObjectId
 );
 
-void removeObjectFromScene(Scene& scene, short id);
+std::vector<short> removeObjectFromScene(Scene& scene, short id);
 std::vector<short> listObjInScene(Scene& scene);
 
 // @TODO code these functions

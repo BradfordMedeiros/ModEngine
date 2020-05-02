@@ -331,9 +331,13 @@ void removeObject(World& world, short objectId, std::function<void(std::string)>
   Scene& scene = world.scenes.at(world.idToScene.at(objectId));
   auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
   for (auto gameobjId : getIdsInGroup(scene, groupId)){
-    std::cout << "remove object id: " << gameobjId << std::endl;
-    removeObjectFromScene(scene, gameobjId);
-    removeObjectById(world, gameobjId, unloadClip);
+    if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
+      continue;
+    }
+    auto removedObjects = removeObjectFromScene(scene, gameobjId);  
+    for (auto id : removedObjects){
+      removeObjectById(world, id, unloadClip);
+    }
   }
 }
 

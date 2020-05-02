@@ -232,7 +232,8 @@ std::vector<short> getChildrenIdsAndParent(Scene& scene, short id){
   return objectIds;
 }
 
-void removeObjectFromScene(Scene& scene, short id){  // it might make sense to check if any layers here are not present and then 
+std::vector<short> removeObjectFromScene(Scene& scene, short id){  // it might make sense to check if any layers here are not present and then 
+  std::vector<short> removedIds;
   auto objects = getChildrenIdsAndParent(scene, id);
   for (auto id : objects){
     std::string objectName = scene.idToGameObjects.at(id).name;
@@ -240,7 +241,9 @@ void removeObjectFromScene(Scene& scene, short id){  // it might make sense to c
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
     scene.nameToId.erase(objectName);
+    removedIds.push_back(id);
   }
+  return removedIds;
 }
 
 std::vector<short> listObjInScene(Scene& scene){
