@@ -125,6 +125,16 @@ SCM scmGetGameObjectAttr(SCM gameobj){
 
 void (*_setGameObjectAttr)(short id, std::map<std::string, std::string> attr);
 SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
+  auto id = getGameobjId(gameobj);
+  std::map<std::string, std::string> newAttributes;
+  auto numElements = scm_to_unsigned_integer(scm_length(attr), std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max());
+  for (int i = 0; i < numElements; i++){
+    auto nameValuePair = scm_list_ref(attr, scm_from_unsigned_integer(i));
+    auto attrName = scm_to_locale_string(scm_list_ref(nameValuePair, scm_from_unsigned_integer(0)));
+    auto attrValue = scm_to_locale_string(scm_list_ref(nameValuePair, scm_from_unsigned_integer(1)));
+    newAttributes[attrName] = attrValue;
+  }
+  _setGameObjectAttr(id, newAttributes);
   return SCM_UNSPECIFIED;
 }
 

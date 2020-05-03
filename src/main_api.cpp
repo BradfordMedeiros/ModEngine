@@ -109,7 +109,9 @@ std::map<std::string, std::string> getGameObjectAttr(short id){
   return attr;
 }
 void setGameObjectAttr(short id, std::map<std::string, std::string> attr){
-
+  for (auto [key, value] : attr){
+    std::cout << "setting: " << key << " | " << value << std::endl;
+  } 
 }
 
 glm::vec3 getGameObjectPosition(short index){
