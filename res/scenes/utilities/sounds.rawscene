@@ -3,5 +3,10 @@
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
+platform:script:./res/scripts/enterkeyevent.scm
 
 &sample:clip:./res/sounds/sample.wav
+&sample:script:./res/scripts/playsound.scm
+
+%enterplaysclip:from:enterpressed
+%enterplaysclip:to:./res/sounds/sample.wav
