@@ -32,7 +32,7 @@ uniform bool useBoneTransform;
 void main(){
   if (hasBones){
     vec4 modelPosition;
-    if (useBoneTransform){
+    if (!useBoneTransform){
       modelPosition= vec4(aPos.xyz, 1.0);
       overcolor = vec4(0, 0, 1, 1);
     }else{          
