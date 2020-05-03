@@ -1,10 +1,6 @@
 
-(define attributeList
-  '(("position" "0 0 0")
-    ("mesh" "./res/models/box/box.obj")
-    ("enabled" "true")
-  )
-)
+(define attributeList '())
+(define currGameobj #f)
 
 (define (maybe-replace attr name value)
   (if (equal? (car attr) name)
@@ -14,7 +10,7 @@
 ) 
 
 (define (submit attributes)
-  (display "hello\n")
+  (gameobj-setattr! currGameobj attributes)
 )
 (define (createAttributes name value)
   (map (lambda (attr) (maybe-replace attr name value)) attributeList)
@@ -22,6 +18,7 @@
 
 (define (submitAttributes attributeIndex newValue)
   (submit (createAttributes (car (list-ref attributeList attributeIndex)) newValue))
+  (set! attributeList (gameobj-attr currGameobj))
 )
 
 (define selectedIndex 0)
@@ -89,8 +86,6 @@
   (draw-text "//////////////////////////////" 10 currentHeight 2)
   (set! currentHeight (+ currentHeight 10))
   (drawEditor  currentHeight 0)
-  (set! currentHeight (+ currentHeight 10))
-  (draw-text "//////////////////////////////" 10 currentHeight 2)
 )
 
 (define (onFrame)
@@ -120,4 +115,9 @@
   (if (and showConsole (not (= key 96)))
     (set! bufferValue (string-append bufferValue (string (integer->char key))))
   )
+)
+
+(define (onObjSelected obj)
+  (set! currGameobj obj)
+  (set! attributeList (gameobj-attr obj))
 )
