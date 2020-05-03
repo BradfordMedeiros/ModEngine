@@ -1,10 +1,4 @@
 
-; TODO - this should be something that 
-; - selects between objects;
-; - displays the attributes
-; - allows text input into it  
-
-
 (define attributeList
   '(("position" "0 0 0")
     ("mesh" "./res/models/box/box.obj")
@@ -12,12 +6,66 @@
   )
 )
 
-(define (drawAttribute value currentHeight)
+(define (maybe-replace attr name value)
+  (if (equal? (car attr) name)
+    (list name value)
+    attr
+  )
+) 
+
+(define (submit attributes)
+  (display "hello\n")
+)
+(define (createAttributes name value)
+  (map (lambda (attr) (maybe-replace attr name value)) attributeList)
+)
+
+(define (submitAttributes attributeIndex newValue)
+  (submit (createAttributes (car (list-ref attributeList attributeIndex)) newValue))
+)
+
+(define selectedIndex 0)
+(define editingMode #f)
+(define bufferValue "")
+
+(define (upArrow)
+  (set! selectedIndex (max (- selectedIndex 1) 0))
+)
+(define (downArrow)
+  (set! selectedIndex (min (+ selectedIndex 1) (- (length attributeList) 1)))
+)
+(define (select)
+  (if (equal? editingMode #t)
+    (begin
+      (submitAttributes selectedIndex bufferValue)
+      (set! bufferValue "")
+    )
+  )
+  (set! editingMode (not editingMode))
+)
+(define (backspace)
+  (set! bufferValue (substring bufferValue 0 (max 0 (- (string-length bufferValue) 1))))
+)
+
+(define (maybe-highlight value index iskey)
+  (if (equal? iskey #t)
+    (if (equal? selectedIndex index)
+      (string-append "> " value)
+      value
+    )
+    (if (and (equal? selectedIndex index) (equal? editingMode #t)) 
+      bufferValue
+      value
+    )
+  )
+)
+
+(define (drawAttribute value currentHeight index)
   (draw-text 
     (string-append 
-      (string-pad-right (car value) 15) 
+      (string-pad-right (maybe-highlight (car value) index #t) 30) 
       "  " 
-      (string-pad-right (cadr value) 15)
+      (string-pad-right (maybe-highlight (cadr value) index #f) 30)
     ) 
     10 
     currentHeight 
@@ -28,7 +76,7 @@
 (define (drawEditor currentHeight index)
   (if (< index (length attributeList))
     (begin
-      (drawAttribute (list-ref attributeList index) currentHeight)
+      (drawAttribute (list-ref attributeList index) currentHeight index)
       (drawEditor (+ currentHeight 10) (+ index 1))
     )
   )
@@ -45,23 +93,11 @@
   (draw-text "//////////////////////////////" 10 currentHeight 2)
 )
 
-
 (define (onFrame)
   (if showConsole
     (drawFrame 100)
   )
 )
-
-(define (upArrow)
-  (display "up placeholder\n")
-)
-(define (downArrow)
-  (display "down placeholder\n")
-)
-(define (select)
-  (display "select placeholder\n")
-)
-
 
 (define showConsole #f)
 (define (onKey key scancode action mods)
@@ -73,11 +109,15 @@
       (cond
         ((= key 257) (select)) 
         ((= key 265) (upArrow))    
-        ((= key 264) (downArrow))   
+        ((= key 264) (downArrow))  
+        ((= key 259) (backspace)) 
       )
     )
   )
 )
 
-
-
+(define (onKeyChar key)
+  (if (and showConsole (not (= key 96)))
+    (set! bufferValue (string-append bufferValue (string (integer->char key))))
+  )
+)
