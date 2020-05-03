@@ -697,6 +697,8 @@ int main(int argc, char* argv[]){
     setActiveCamera,
     drawText,
     getGameObjectName,
+    getGameObjectAttr,
+    setGameObjectAttr,
     getGameObjectPosition,
     setGameObjectPosition,
     setGameObjectPositionRelative,

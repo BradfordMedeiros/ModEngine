@@ -7,6 +7,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <libguile.h>
 #include <limits>       
+#include <map>
 
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),  
@@ -20,6 +21,8 @@ void createStaticSchemeBindings(
   void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   std::string (*getGameObjectNameForId)(short id),
+  std::map<std::string, std::string> getGameObjectAttr(short id),
+  void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),

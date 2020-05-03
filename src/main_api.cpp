@@ -101,6 +101,17 @@ std::string getGameObjectName(short index){
   auto sceneId = world.idToScene.at(index);
   return world.scenes.at(sceneId).idToGameObjects.at(index).name;
 }
+
+std::map<std::string, std::string> getGameObjectAttr(short id){
+  std::map<std::string, std::string> attr;
+  attr["name1"] = "value1";
+  attr["name2"] = "value2";
+  return attr;
+}
+void setGameObjectAttr(short id, std::map<std::string, std::string> attr){
+
+}
+
 glm::vec3 getGameObjectPosition(short index){
   auto sceneId = world.idToScene.at(index);
   return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.position;
@@ -191,8 +202,6 @@ void playAnimation(short id, std::string animationToPlay){
 std::vector<std::string> listModels(){
   return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }
-
-
 
 void sendEventMessage(std::string message){
   auto channelMapping = getChannelMapping(world.objectMapping);

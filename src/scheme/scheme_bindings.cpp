@@ -108,6 +108,26 @@ SCM getGameObjNameForIdFn(SCM value){
   return scm_from_locale_string(getGameObjNameForId(getGameobjId(value)).c_str());
 }
 
+std::map<std::string, std::string> (*_getGameObjectAttr)(short id);
+SCM scmGetGameObjectAttr(SCM gameobj){
+  std::map<std::string, std::string> attributes = _getGameObjectAttr(getGameobjId(gameobj));
+  SCM list = scm_make_list(scm_from_unsigned_integer(attributes.size()), scm_from_unsigned_integer(0));
+  int index = 0;
+  for (auto [name, value] : attributes){
+    SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(name.c_str()));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_locale_string(value.c_str()));
+    scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
+    index = index + 1;
+  }
+  return list;
+}
+
+void (*_setGameObjectAttr)(short id, std::map<std::string, std::string> attr);
+SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
+  return SCM_UNSPECIFIED;
+}
+
 glm::vec3 (*getGameObjectPosn)(short index);
 SCM getGameObjectPosition(SCM value){
   glm::vec3 pos = getGameObjectPosn(getGameobjId(value));
@@ -379,6 +399,10 @@ void defineFunctions(){
   scm_c_define_gsubr("gameobj-animations", 1, 0, 0, (void *)scmListAnimations);
   scm_c_define_gsubr("gameobj-playanimation", 2, 0, 0, (void *)scmPlayAnimation);
 
+  scm_c_define_gsubr("gameobj-attr", 1, 0, 0, (void *)scmGetGameObjectAttr);
+  scm_c_define_gsubr("gameobj-setattr!", 2, 0, 0, (void *)scmSetGameObjectAttr);
+
+
   // UTILITY FUNCTIONS
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void *)scm_setFrontDelta);
 
@@ -407,6 +431,8 @@ void createStaticSchemeBindings(
 	void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   std::string (*getGameObjectNameForId)(short id),
+  std::map<std::string, std::string> getGameObjectAttr(short id),
+  void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
   glm::vec3 (*getGameObjectPos)(short index),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
@@ -439,6 +465,9 @@ void createStaticSchemeBindings(
 	setActCamera = setActiveCamera;
   drawTextV = drawText;
   getGameObjNameForId = getGameObjectNameForId;
+  _getGameObjectAttr = getGameObjectAttr;
+  _setGameObjectAttr = setGameObjectAttr;
+
   getGameObjectPosn = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
   setGameObjectPosnRel = setGameObjectPosRelative;
