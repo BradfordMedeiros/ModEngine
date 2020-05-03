@@ -47,6 +47,9 @@ void  onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPh
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, short id);
 
+std::map<std::string, std::string> getAttributes(World& world, short id);
+void setAttributes(World& world, short id, std::map<std::string, std::string> attr);
+
 std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping);
 
 

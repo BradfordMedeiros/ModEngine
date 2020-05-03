@@ -103,15 +103,10 @@ std::string getGameObjectName(short index){
 }
 
 std::map<std::string, std::string> getGameObjectAttr(short id){
-  std::map<std::string, std::string> attr;
-  attr["name1"] = "value1";
-  attr["name2"] = "value2";
-  return attr;
+  return getAttributes(world, id);
 }
 void setGameObjectAttr(short id, std::map<std::string, std::string> attr){
-  for (auto [key, value] : attr){
-    std::cout << "setting: " << key << " | " << value << std::endl;
-  } 
+  setAttributes(world, id, attr);
 }
 
 glm::vec3 getGameObjectPosition(short index){

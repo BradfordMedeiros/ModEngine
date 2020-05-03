@@ -454,6 +454,19 @@ NameAndMesh getMeshesForGroupId(World& world, short groupId){
   return nameAndMeshes;
 }
 
+std::map<std::string, std::string> getAttributes(World& world, short id){
+  std::map<std::string, std::string> attr;
+  attr["name1"] = "value1";
+  attr["name2"] = "value2";
+  return attr;
+}
+void setAttributes(World& world, short id, std::map<std::string, std::string> attr){
+  for (auto [key, value] : attr){
+    std::cout << "setting: " << key << " | " << value << std::endl;
+  } 
+}
+
+
 std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }
