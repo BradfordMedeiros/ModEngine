@@ -306,3 +306,13 @@ std::vector<short> getIdsInGroup(Scene& scene, short groupId){
   }
   return ids;
 }
+
+std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id){
+  std::map<std::string, std::string> attributes;
+  attributes["scene-attribute1"] = "scene-value1";
+  attributes["scene-attribute2"] = "scene-value2";
+  return attributes;
+}
+void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string>& attributes){
+
+}

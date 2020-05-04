@@ -455,15 +455,38 @@ NameAndMesh getMeshesForGroupId(World& world, short groupId){
 }
 
 std::map<std::string, std::string> getAttributes(World& world, short id){
+  // @TODO handle types better
   std::map<std::string, std::string> attr;
-  attr["name1"] = "value1";
-  attr["name2"] = "value2";
+  auto objAttrs = objectAttributes(world.objectMapping, id);
+  auto sceneAttrs = scenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id);
+
+  for (auto [attrName, attrValue] : objAttrs){
+    attr[attrName] = attrValue;
+  }
+  for (auto [attrName, attrValue] : sceneAttrs){
+    attr[attrName] = attrValue;
+  }
   return attr;
 }
+
+struct AttributeTypes {
+  std::map<std::string, std::string> objectAttrs;
+  std::map<std::string, std::string> sceneAttrs;
+};
+AttributeTypes sortAttributes(std::map<std::string, std::string> attr){
+  std::map<std::string, std::string> objectAttrs;
+  std::map<std::string, std::string> sceneAttrs;
+
+  AttributeTypes attributes {
+    .objectAttrs = objectAttrs,
+    .sceneAttrs = sceneAttrs,
+  };  
+  return attributes;
+}
 void setAttributes(World& world, short id, std::map<std::string, std::string> attr){
-  for (auto [key, value] : attr){
-    std::cout << "setting: " << key << " | " << value << std::endl;
-  } 
+  auto attributes = sortAttributes(attr);
+  setObjectAttributes(world.objectMapping, id, attributes.objectAttrs);
+  setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, attributes.sceneAttrs);
 }
 
 

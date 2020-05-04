@@ -182,6 +182,16 @@ void renderObject(
   }
 }
 
+std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectObj>& mapping, short id){
+  std::map<std::string, std::string> attributes;
+  attributes["obj-attribute1"] = "obj-value1";
+  attributes["obj-attribute2"] = "obj-value2";
+  return attributes;
+}
+void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std::map<std::string, std::string>& attributes){
+
+}
+
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
   // @TODO fix scene serialization, only serializing first mesh right now, which is wrong
   return { std::pair<std::string, std::string>("mesh", obj.meshNames.at(0)) };

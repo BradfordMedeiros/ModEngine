@@ -109,6 +109,8 @@ void renderObject(
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping);
+std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectObj>& mapping, short id);
+void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std::map<std::string, std::string>& attributes);
 
 template<typename T>
 std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){   // putting templates have to be in header?
