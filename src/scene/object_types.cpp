@@ -184,8 +184,45 @@ void renderObject(
 
 std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectObj>& mapping, short id){
   std::map<std::string, std::string> attributes;
-  attributes["obj-attribute1"] = "obj-value1";
-  attributes["obj-attribute2"] = "obj-value2";
+
+  GameObjectObj& toRender = mapping.at(id);
+  auto meshObj = std::get_if<GameObjectMesh>(&toRender);
+  if (meshObj != NULL){
+    if (meshObj -> meshNames.size() > 0){
+      attributes["mesh"] = meshObj -> meshNames.at(0);
+    }
+    attributes["isDisabled"] = meshObj -> isDisabled;
+    return attributes;
+  }
+
+  auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
+  if (cameraObj != NULL){
+    return attributes;
+  }
+
+  auto lightObj = std::get_if<GameObjectLight>(&toRender);
+  if (lightObj != NULL){   
+    return attributes;
+  }
+
+  auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
+  if (voxelObj != NULL){
+    // not yet implemented
+    return attributes;
+  }
+
+  auto soundObj = std::get_if<GameObjectSound>(&toRender);
+  if (soundObj != NULL){
+    attributes["clip"] = soundObj -> clip;
+    return attributes;
+  }
+
+  auto channelObj = std::get_if<GameObjectChannel>(&toRender);
+  if (channelObj != NULL){
+    attributes["from"] = channelObj -> from;
+    attributes["to"] = channelObj -> to;
+    return attributes;
+  }
   return attributes;
 }
 void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std::map<std::string, std::string>& attributes){
