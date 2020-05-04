@@ -309,8 +309,24 @@ std::vector<short> getIdsInGroup(Scene& scene, short groupId){
 
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id){
   std::map<std::string, std::string> attributes;
-  attributes["scene-attribute1"] = "scene-value1";
-  attributes["scene-attribute2"] = "scene-value2";
+
+  auto gameobj = scene.idToGameObjects.at(id);
+
+  // todo missing physics 
+  // TODO I should expose the real types here not strings
+  attributes["position"] = print(gameobj.transformation.position);
+  attributes["scale"] = print(gameobj.transformation.scale);
+  attributes["rotation"] = print(gameobj.transformation.rotation);
+
+  if (gameobj.lookat != ""){
+    attributes["lookat"] = gameobj.lookat;
+  }
+  if (gameobj.layer != ""){
+    attributes["layer"] = gameobj.layer;
+  }
+  if (gameobj.script != ""){
+    attributes["script"] = gameobj.script;
+  }
   return attributes;
 }
 void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string>& attributes){

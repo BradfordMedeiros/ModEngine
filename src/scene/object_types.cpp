@@ -191,7 +191,7 @@ std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectOb
     if (meshObj -> meshNames.size() > 0){
       attributes["mesh"] = meshObj -> meshNames.at(0);
     }
-    attributes["isDisabled"] = meshObj -> isDisabled;
+    attributes["isDisabled"] = meshObj -> isDisabled ? "true": "false";
     return attributes;
   }
 
