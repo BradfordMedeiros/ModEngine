@@ -477,6 +477,40 @@ AttributeTypes sortAttributes(std::map<std::string, std::string> attr){
   std::map<std::string, std::string> objectAttrs;
   std::map<std::string, std::string> sceneAttrs;
 
+  if (attr.find("mesh") != attr.end()){
+    objectAttrs["mesh"] = attr.at("mesh");
+  }
+  if (attr.find("isDisabled") != attr.end()){
+    objectAttrs["isDisabled"] = attr.at("isDisabled");
+  }
+  if (attr.find("clip") != attr.end()){
+    objectAttrs["clip"] = attr.at("clip");
+  }
+  if (attr.find("from") != attr.end()){
+    objectAttrs["from"] = attr.at("from");
+  }
+  if (attr.find("to") != attr.end()){
+    objectAttrs["to"] = attr.at("to");
+  }
+  if (attr.find("position") != attr.end()){
+    sceneAttrs["position"] = attr.at("position");
+  }
+  if (attr.find("scale") != attr.end()){
+    sceneAttrs["scale"] = attr.at("scale");
+  }
+  if (attr.find("rotation") != attr.end()){
+    sceneAttrs["rotation"] = attr.at("rotation");
+  }
+  if (attr.find("lookat") != attr.end()){
+    sceneAttrs["lookat"] = attr.at("lookat");
+  }
+  if (attr.find("layer") != attr.end()){
+    sceneAttrs["layer"] = attr.at("layer");
+  }
+  if (attr.find("script") != attr.end()){
+    sceneAttrs["script"] = attr.at("script");
+  }
+
   AttributeTypes attributes {
     .objectAttrs = objectAttrs,
     .sceneAttrs = sceneAttrs,
@@ -488,7 +522,6 @@ void setAttributes(World& world, short id, std::map<std::string, std::string> at
   setObjectAttributes(world.objectMapping, id, attributes.objectAttrs);
   setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, attributes.sceneAttrs);
 }
-
 
 std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
