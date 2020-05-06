@@ -26,10 +26,12 @@ uniform bool hasOpacityTexture;
 #define MAX_LIGHTS 32
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
+uniform vec3 lightscolor[MAX_LIGHTS];
+
 uniform bool hasBones;
 uniform mat4 bones[100];
 
-const float constant = 0.4;
+const float constant = 0.6;
 const float linear = 0.2;
 const float quadratic = 0.0;
 
@@ -67,7 +69,7 @@ void main(){
         vec3 lightDir = normalize(lightPos - FragPos);
         vec3 normal = normalize(Normal);
 
-        vec3 diffuse = max(dot(normal, lightDir), 0.0) * vec3(1.0, 1.0, 1.0);
+        vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
 
         vec3 viewDir = normalize(cameraPosition - FragPos);
         vec3 reflectDir = reflect(-lightDir, normal);  

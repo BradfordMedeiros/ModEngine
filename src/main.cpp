@@ -391,7 +391,13 @@ void drawTraversalPositions(){
   }
 }
 
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<GameObject*>& lights){
+struct LightInfo {
+  glm::vec3 pos;
+  glm::quat rotation;
+  glm::vec3 color;
+};
+
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights){
   glUseProgram(shaderProgram);
   
   glUniform1i(glGetUniformLocation(shaderProgram, "maintexture"), 0);        
@@ -408,8 +414,9 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
   glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
-    glm::vec3 position = lights.at(i) -> transformation.position;
+    glm::vec3 position = lights.at(i).pos;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
+    glUniform3fv(glGetUniformLocation(shaderProgram, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).color));
   }
 
   clearTraversalPositions();
@@ -777,9 +784,18 @@ int main(int argc, char* argv[]){
     glfwSwapBuffers(window);
     
     auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
-    std::vector<GameObject*> lights;
+    std::vector<LightInfo> lights;
     for (int i = 0; i < lightsIndexs.size(); i++){
-      lights.push_back(&world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).idToGameObjects.at(lightsIndexs.at(i)));
+      auto lightObj = world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).idToGameObjects.at(lightsIndexs.at(i));
+      auto objectLight = world.objectMapping.at(lightsIndexs.at(i));
+      auto lightObject = std::get_if<GameObjectLight>(&objectLight);
+
+      LightInfo light {
+        .pos = lightObj.transformation.position,
+        .rotation = lightObj.transformation.rotation,
+        .color = lightObject -> color,
+      };
+      lights.push_back(light);
     }
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
@@ -788,8 +804,8 @@ int main(int argc, char* argv[]){
 
     // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
 
-    auto lightPosition = lights.size() > 0 ? lights.at(0) -> transformation.position : glm::vec3(0, 0, 0);
-    auto lightRotation = lights.size() > 0 ? lights.at(0) -> transformation.rotation : glm::identity<glm::quat>();
+    auto lightPosition = lights.size() > 0 ? lights.at(0).pos : glm::vec3(0, 0, 0);
+    auto lightRotation = lights.size() > 0 ? lights.at(0).rotation : glm::identity<glm::quat>();
     auto lightView = renderView(lightPosition, lightRotation);
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);

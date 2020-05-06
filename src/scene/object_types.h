@@ -31,8 +31,8 @@ struct GameObjectSound{
 struct GameObjectLight {
   /*!light:type:directional
   !light:type:directional 
-  !light:maxangle:50
-  !light:color:10 10 20 */
+  !light:maxangle:50*/
+  glm::vec3 color;
 };
 struct GameObjectVoxel {
   Voxels voxel;
@@ -66,7 +66,7 @@ static Field sound = {
 static Field light = {
   .prefix = '!',
   .type = "light",
-  .additionalFields = { },
+  .additionalFields = { "color" },
 };
 
 static Field voxelField = {

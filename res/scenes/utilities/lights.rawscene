@@ -1,0 +1,17 @@
+# Demonstrates basic usage of an event system
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+door:mesh:./res/models/box/box.obj
+
+!lightone:position:0 2 0
+!lightone:color:1 0 0
+
+!lighttwo:position:-10 2 0
+!lighttwo:color:0 1 0
+
+
+!lightthree:position:10 2 0
+!lightthree:color:0 0 1

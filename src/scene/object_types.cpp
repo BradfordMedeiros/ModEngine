@@ -49,8 +49,11 @@ GameObjectSound createSound(std::map<std::string, std::string> additionalFields,
   loadClip(obj.clip);
   return obj;
 }
-GameObjectLight createLight(){
-  GameObjectLight obj {};
+GameObjectLight createLight(std::map<std::string, std::string> additionalFields){
+  auto color = additionalFields.find("color") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("color"));
+  GameObjectLight obj {
+    .color = color,
+  };
   return obj;
 }
 
@@ -92,7 +95,7 @@ void addObject(
   }else if(objectType == "sound"){
     mapping[id] = createSound(additionalFields, loadClip);
   }else if (objectType == "light"){
-    mapping[id] = createLight();
+    mapping[id] = createLight(additionalFields);
   }else if (objectType == "voxel"){
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
   }else if (objectType == "channel"){
