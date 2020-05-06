@@ -23,6 +23,9 @@ enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 std::string print(glm::vec3 vec);
 std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
+glm::vec3 parseVec(std::string positionRaw);
+glm::quat parseQuat(std::string payload);
+
 
 float maxvalue(float x, float y, float z);
 int maxvalue(int x, int y, int z);

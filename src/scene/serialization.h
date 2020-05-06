@@ -46,9 +46,6 @@ struct SerializationObject {
   std::map<std::string, std::string> additionalFields;
 };
 
-glm::quat parseQuat(std::string payload);
-glm::vec3 parseVec(std::string positionRaw);
-
 struct LayerInfo {
   std::string name;
   int zIndex;

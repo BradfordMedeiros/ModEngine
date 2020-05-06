@@ -1,17 +1,5 @@
 #include "./serialization.h"
 
-glm::vec3 parseVec(std::string positionRaw){;
-  float x, y, z;
-  std::istringstream in(positionRaw);
-  in >> x >> y >> z;
-  return glm::vec3(x, y, z);
-}
-glm::quat parseQuat(std::string payload){
-  glm::vec3 eulerAngles = parseVec(payload);
-  glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
-  return rotation;
-}
-
 // format: <token>:<attribute>:<payload>
 std::optional<Token> parseToken(std::string content, std::string layer) {
   std::vector<std::string> validToken = split(content, ':');
