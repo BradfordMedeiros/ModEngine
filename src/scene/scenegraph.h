@@ -80,6 +80,6 @@ glm::vec3 getFullScale(short id);
 std::vector<short> getIdsInGroup(Scene& scene, short groupId);
 
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id);
-void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string>& attributes);
+void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string> attributes);
 
 #endif

@@ -329,6 +329,14 @@ std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id){
   }
   return attributes;
 }
-void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string>& attributes){
+void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string> attributes){
+  GameObject& obj = scene.idToGameObjects.at(id);
 
+  if (attributes.find("position") != attributes.end()){
+    obj.transformation.position = parseVec(attributes.at("position"));
+  }
+  if (attributes.find("scale") != attributes.end()){
+    obj.transformation.scale = parseVec(attributes.at("scale"));
+  }
+  // @TODO add more overrideable fields
 }

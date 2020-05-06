@@ -225,8 +225,8 @@ std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectOb
   }
   return attributes;
 }
-void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std::map<std::string, std::string>& attributes){
-  GameObjectObj& toRender = mapping.at(id);
+void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std::map<std::string, std::string> attributes){
+ GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL){
     if (attributes.find("isDisabled") != attributes.end()){
@@ -242,14 +242,6 @@ void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std:
     }
     if (attributes.find("from") != attributes.end()){
       cameraObj -> from = attributes.at("from");
-    }
-    return;
-  }
-
-  auto soundObj = std::get_if<GameObjectSound>(&toRender);
-  if (soundObj != NULL){
-    if (attributes.find("clip") != attributes.end()){
-      soundObj -> clip = attributes.at("clip");
     }
     return;
   }

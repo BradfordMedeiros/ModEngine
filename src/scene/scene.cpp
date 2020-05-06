@@ -469,58 +469,20 @@ std::map<std::string, std::string> getAttributes(World& world, short id){
   return attr;
 }
 
-struct AttributeTypes {
-  std::map<std::string, std::string> objectAttrs;
-  std::map<std::string, std::string> sceneAttrs;
-};
-AttributeTypes sortAttributes(std::map<std::string, std::string> attr){
-  std::map<std::string, std::string> objectAttrs;
-  std::map<std::string, std::string> sceneAttrs;
-
-  if (attr.find("mesh") != attr.end()){
-    objectAttrs["mesh"] = attr.at("mesh");
+std::map<std::string, std::string> extractAttributes(std::map<std::string, std::string>& attr,  std::vector<std::string> attributes){
+  std::map<std::string, std::string> attrToSet;
+  for (auto attribute : attributes){
+    if (attr.find(attribute) != attr.end()){
+      attrToSet[attribute] = attr.at(attribute);
+    }    
   }
-  if (attr.find("isDisabled") != attr.end()){
-    objectAttrs["isDisabled"] = attr.at("isDisabled");
-  }
-  if (attr.find("clip") != attr.end()){
-    objectAttrs["clip"] = attr.at("clip");
-  }
-  if (attr.find("from") != attr.end()){
-    objectAttrs["from"] = attr.at("from");
-  }
-  if (attr.find("to") != attr.end()){
-    objectAttrs["to"] = attr.at("to");
-  }
-  if (attr.find("position") != attr.end()){
-    sceneAttrs["position"] = attr.at("position");
-  }
-  if (attr.find("scale") != attr.end()){
-    sceneAttrs["scale"] = attr.at("scale");
-  }
-  if (attr.find("rotation") != attr.end()){
-    sceneAttrs["rotation"] = attr.at("rotation");
-  }
-  if (attr.find("lookat") != attr.end()){
-    sceneAttrs["lookat"] = attr.at("lookat");
-  }
-  if (attr.find("layer") != attr.end()){
-    sceneAttrs["layer"] = attr.at("layer");
-  }
-  if (attr.find("script") != attr.end()){
-    sceneAttrs["script"] = attr.at("script");
-  }
-
-  AttributeTypes attributes {
-    .objectAttrs = objectAttrs,
-    .sceneAttrs = sceneAttrs,
-  };  
-  return attributes;
+  return attrToSet;
 }
+
 void setAttributes(World& world, short id, std::map<std::string, std::string> attr){
-  auto attributes = sortAttributes(attr);
-  setObjectAttributes(world.objectMapping, id, attributes.objectAttrs);
-  setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, attributes.sceneAttrs);
+  // @TODO create complete lists for attributes. 
+  setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to" }));
+  setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
 }
 
 std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
