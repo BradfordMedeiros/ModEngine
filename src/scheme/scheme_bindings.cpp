@@ -123,6 +123,7 @@ SCM scmGetGameObjectAttr(SCM gameobj){
   return list;
 }
 
+// @TODO -> add types around this
 void (*_setGameObjectAttr)(short id, std::map<std::string, std::string> attr);
 SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
   auto id = getGameobjId(gameobj);
