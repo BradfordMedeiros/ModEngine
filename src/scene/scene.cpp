@@ -481,7 +481,7 @@ std::map<std::string, std::string> extractAttributes(std::map<std::string, std::
 
 void setAttributes(World& world, short id, std::map<std::string, std::string> attr){
   // @TODO create complete lists for attributes. 
-  setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to" }));
+  setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
   setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
 }
 

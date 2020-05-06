@@ -205,6 +205,7 @@ std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectOb
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL){   
+    attributes["color"] = print(lightObj -> color);
     return attributes;
   }
 
@@ -248,6 +249,13 @@ void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std:
     }
     return;
   }
+
+  auto lightObj = std::get_if<GameObjectLight>(&toRender);
+  if (lightObj != NULL){   
+    lightObj -> color = parseVec(attributes.at("color"));
+    return;
+  }
+
 }
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
