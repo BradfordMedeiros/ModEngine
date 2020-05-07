@@ -1,0 +1,11 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+platform:script:./res/scripts/enterkeyevent.scm
+
+targetmodel:mesh:./res/models/bendybox/sentinal.dae
+targetmodel:script:./res/scripts/playtargetanim.scm
+
+%enterPlaysAnimation:from:enterpressed
+%enterPlaysAnimation:to:animateFromChannel
