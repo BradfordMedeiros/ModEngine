@@ -147,7 +147,7 @@ BoneInfo processBones(aiMesh* mesh){
     auto offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix);
     Bone meshBone {
       .name = bone -> mName.C_Str(),
-      .offsetMatrix = offsetMatrix,
+      .offsetMatrix = glm::mat4(1.f),
       .initialOffsetMatrix = offsetMatrix
     };
     meshBones.push_back(meshBone);
