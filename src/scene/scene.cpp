@@ -24,6 +24,7 @@ glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
 }
 
 BoundInfo getMaxUnionBoundingInfo(std::vector<Mesh> boundings){
+  assert(boundings.size() == 1);
   return boundings.at(0).boundInfo;
 }
 
