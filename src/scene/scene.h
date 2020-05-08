@@ -35,11 +35,11 @@ void removeObject(World& world, short id, std::function<void(std::string)> unloa
 
 std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
 
-void  physicsTranslate(Scene& scene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index);
-void  physicsTranslateSet(Scene& scene, btRigidBody* body, glm::vec3 pos, short index);
-void  physicsRotate(Scene& scene, btRigidBody* body, float x, float y, float z, short index);
-void  physicsRotateSet(Scene& scene, btRigidBody* body, glm::quat rotation, short index);  // this sets to rotation
-void  physicsScale(World& world, Scene& scene, btRigidBody* body, short index, float x, float y, float z);
+void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled);
+void  physicsTranslateSet(World& world, short index, glm::vec3 pos);
+void  physicsRotate(World& world, short index, float x, float y, float z);
+void  physicsRotateSet(World& world, short index, glm::quat rotation);  // this sets to rotation
+void  physicsScale(World& world, short index, float x, float y, float z);
 void  applyPhysicsTranslation(Scene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  applyPhysicsRotation(Scene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  applyPhysicsScaling(World& world, Scene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);

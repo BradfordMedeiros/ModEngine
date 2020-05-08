@@ -115,18 +115,18 @@ glm::vec3 getGameObjectPosition(short index){
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
   auto sceneId = world.idToScene.at(index);
-  physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
+  physicsTranslateSet(world, index, pos);
 }
 void setGameObjectPositionRelative(short index, float x, float y, float z, bool xzPlaneOnly){
   auto sceneId = world.idToScene.at(index);
   auto transformation = world.scenes.at(sceneId).idToGameObjects.at(index).transformation;
   glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z), xzPlaneOnly);
-  physicsTranslateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), pos, index);
+  physicsTranslateSet(world, index, pos);
 }
 
 void setGameObjectRotation(short index, glm::quat rotation){
   auto sceneId = world.idToScene.at(index);
-  physicsRotateSet(world.scenes.at(sceneId), world.rigidbodys.at(index), rotation,  index);
+  physicsRotateSet(world, index, rotation);
 }
 glm::quat getGameObjectRotation(short index){
   auto sceneId = world.idToScene.at(index);

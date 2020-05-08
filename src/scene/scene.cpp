@@ -70,6 +70,7 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
 
   GameObjectObj& toRender = world.objectMapping.at(id);
   bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
+  
   if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
     std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
     rigidBody = addRigidBody(
@@ -106,8 +107,9 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
     );
   }
 
-  assert(rigidBody != NULL);
-  world.rigidbodys[id] = rigidBody;
+  if (rigidBody != NULL){
+    world.rigidbodys[id] = rigidBody;   
+  }
 }
 void rmRigidBody(World& world, short id){
   auto rigidBodyPtr = world.rigidbodys.at(id);
@@ -342,7 +344,10 @@ void removeObject(World& world, short objectId, std::function<void(std::string)>
   }
 }
 
-void physicsTranslate(Scene& scene, btRigidBody* body, float x, float y, float z, bool moveRelativeEnabled, short index){
+void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
+
   const int SPEED = 5;
   auto offset = glm::vec3(x * SPEED, y * SPEED, z * SPEED);
 
@@ -356,22 +361,30 @@ void physicsTranslate(Scene& scene, btRigidBody* body, float x, float y, float z
   scene.idToGameObjects.at(index).transformation.position = newPosition;
   setPosition(body, newPosition);
 }
-void physicsTranslateSet(Scene& scene, btRigidBody* body, glm::vec3 pos, short index){
+void physicsTranslateSet(World& world, short index, glm::vec3 pos){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   scene.idToGameObjects.at(index).transformation.position = pos;
   setPosition(body, pos);
 }
 
-void physicsRotate(Scene& scene, btRigidBody* body, float x, float y, float z, short index){
+void physicsRotate(World& world, short index, float x, float y, float z){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   glm::quat rotation = setFrontDelta(scene.idToGameObjects.at(index).transformation.rotation, x, y, z, 5);
   scene.idToGameObjects.at(index).transformation.rotation  = rotation;
   setRotation(body, rotation);
 }
-void physicsRotateSet(Scene& scene, btRigidBody* body, glm::quat rotation, short index){
+void physicsRotateSet(World& world, short index, glm::quat rotation){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   scene.idToGameObjects.at(index).transformation.rotation = rotation;
   setRotation(body, rotation);
 }
 
-void physicsScale(World& world, Scene& scene, btRigidBody* body, short index, float x, float y, float z){
+void physicsScale(World& world, short index, float x, float y, float z){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   auto oldScale = scene.idToGameObjects.at(index).transformation.scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   scene.idToGameObjects.at(index).transformation.scale = newScale;

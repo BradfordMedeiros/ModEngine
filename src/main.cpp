@@ -308,23 +308,21 @@ void translate(float x, float y, float z){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
-  
-  auto sceneId = world.idToScene.at(state.selectedIndex);
-  physicsTranslate(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), x, y, z, state.moveRelativeEnabled, state.selectedIndex);
+  physicsTranslate(world, state.selectedIndex, x, y, z, state.moveRelativeEnabled);
 }
 void scale(float x, float y, float z){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
   auto sceneId = world.idToScene.at(state.selectedIndex);
-  physicsScale(world, world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), state.selectedIndex, x, y, z);
+  physicsScale(world, state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
     return;
   }
   auto sceneId = world.idToScene.at(state.selectedIndex);
-  physicsRotate(world.scenes.at(sceneId), world.rigidbodys.at(state.selectedIndex), x, y, z, state.selectedIndex);
+  physicsRotate(world, state.selectedIndex, x, y, z);
 }
 void setObjectDimensions(short index, float width, float height, float depth){
   if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
