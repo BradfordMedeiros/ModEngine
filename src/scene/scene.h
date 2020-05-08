@@ -40,9 +40,9 @@ void  physicsTranslateSet(World& world, short index, glm::vec3 pos);
 void  physicsRotate(World& world, short index, float x, float y, float z);
 void  physicsRotateSet(World& world, short index, glm::quat rotation);  // this sets to rotation
 void  physicsScale(World& world, short index, float x, float y, float z);
-void  applyPhysicsTranslation(Scene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void  applyPhysicsRotation(Scene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
-void  applyPhysicsScaling(World& world, Scene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
+void  applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
+void  applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
+void  applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis);
 void  onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, short id);

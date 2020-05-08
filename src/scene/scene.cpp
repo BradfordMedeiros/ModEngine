@@ -392,19 +392,25 @@ void physicsScale(World& world, short index, float x, float y, float z){
   setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
 }
 
-void applyPhysicsTranslation(Scene& scene, btRigidBody* body, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+void applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   auto newPosition = applyTranslation(position, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.position = newPosition;
   setPosition(body, newPosition);
 }
 
-void applyPhysicsRotation(Scene& scene, btRigidBody* body, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+void applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.rotation = newRotation;
   setRotation(body, newRotation);
 }
 
-void applyPhysicsScaling(World& world, Scene& scene, btRigidBody* body, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+  auto scene = world.scenes.at(world.idToScene.at(index));
+  auto body =  world.rigidbodys.at(index);
   auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
   auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
