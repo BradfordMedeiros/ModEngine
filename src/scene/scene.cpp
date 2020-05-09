@@ -120,6 +120,7 @@ void rmRigidBody(World& world, short id){
 
 void updatePhysicsBody(World& world, Scene& scene, short id){
   auto rigidBody = world.rigidbodys.at(id);
+  assert(rigidBody != NULL);
   glm::vec3 oldScale = getScale(rigidBody);
   rmRigidBody(world, id);
   addPhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id, oldScale);
