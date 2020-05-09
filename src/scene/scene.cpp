@@ -289,7 +289,7 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
     return;   // @todo maybe better to throw error instead
   }
 
-  auto scene = world.scenes.at(sceneId);
+  Scene& scene = world.scenes.at(sceneId);
   for (auto objectId : listObjInScene(scene)){
     removeObjectById(world, objectId, unloadClip);
   }
@@ -345,8 +345,7 @@ void removeObject(World& world, short objectId, std::function<void(std::string)>
 }
 
 void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
 
   const int SPEED = 5;
   auto offset = glm::vec3(x * SPEED, y * SPEED, z * SPEED);
@@ -359,62 +358,87 @@ void physicsTranslate(World& world, short index, float x, float y, float z, bool
     newPosition = move(scene.idToGameObjects.at(index).transformation.position, offset);   
   }
   scene.idToGameObjects.at(index).transformation.position = newPosition;
-  setPosition(body, newPosition);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setPosition(body, newPosition);
+  }
 }
 void physicsTranslateSet(World& world, short index, glm::vec3 pos){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   scene.idToGameObjects.at(index).transformation.position = pos;
-  setPosition(body, pos);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setPosition(body, pos);
+  }
 }
 
 void physicsRotate(World& world, short index, float x, float y, float z){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   glm::quat rotation = setFrontDelta(scene.idToGameObjects.at(index).transformation.rotation, x, y, z, 5);
   scene.idToGameObjects.at(index).transformation.rotation  = rotation;
-  setRotation(body, rotation);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setRotation(body, rotation);
+  }
 }
 void physicsRotateSet(World& world, short index, glm::quat rotation){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   scene.idToGameObjects.at(index).transformation.rotation = rotation;
-  setRotation(body, rotation);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setRotation(body, rotation);
+  }
 }
 
 void physicsScale(World& world, short index, float x, float y, float z){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto oldScale = scene.idToGameObjects.at(index).transformation.scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
   auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
-  setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+  }
 }
 
 void applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newPosition = applyTranslation(position, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.position = newPosition;
-  setPosition(body, newPosition);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setPosition(body, newPosition);
+  }
 }
 
 void applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.rotation = newRotation;
-  setRotation(body, newRotation);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setRotation(body, newRotation);
+  }
 }
 
 void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
-  auto scene = world.scenes.at(world.idToScene.at(index));
-  auto body =  world.rigidbodys.at(index);
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
   auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
-  setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+  }
 }
 
 void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbodys){
