@@ -4,7 +4,7 @@ physicsOpts defaultPhysicsOpts(){
   physicsOpts defaultOption = {
     .enabled = false,
     .isStatic = true,
-    .hasCollisions = true,
+    .hasCollisions = false,
     .shape = BOX,
   };
   return defaultOption;

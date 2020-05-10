@@ -9,7 +9,6 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
 }
 
-
 void dumpPhysicsInfo(std::map<short, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     std::cout << "PHYSICS:" << std::to_string(i) << ":" <<  print(getPosition(rigidBody));
@@ -23,12 +22,29 @@ glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
   return glm::vec3(x, y, z);
 }
 
-BoundInfo getMaxUnionBoundingInfo(std::vector<Mesh> boundings){
+BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes the biggest, assuming one physics object per collision.  Can be inaccurate with
   assert(boundings.size() == 1);
-  return boundings.at(0).boundInfo;
+  return boundings.at(0);
 }
 
-PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index){
+NameAndMesh getMeshesForGroupId(World& world, short groupId){
+  std::vector<std::reference_wrapper<std::string>> meshNames;
+  std::vector<std::reference_wrapper<Mesh>> meshes;
+  NameAndMesh nameAndMeshes = {
+    .meshNames = meshNames,
+    .meshes = meshes
+  };
+  for (auto id : getIdsInGroup(world.scenes.at(world.idToScene.at(groupId)), groupId)){
+    auto meshesForId = getMeshesForId(world.objectMapping, id);
+    for (int i = 0; i < meshesForId.meshes.size(); i++){
+      nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
+      nameAndMeshes.meshes.push_back(meshesForId.meshes.at(i));
+    }    
+  }
+  return nameAndMeshes;
+}
+
+PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index){   // should be "for group id"
   GameObject obj = scene.idToGameObjects.at(index);
   auto gameObjV = world.objectMapping.at(index); 
 
@@ -43,8 +59,14 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index)
   };
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
-  if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
-    boundInfo = getMaxUnionBoundingInfo(meshObj -> meshesToRender);
+  if (meshObj != NULL){
+    std::vector<BoundInfo> boundInfos;
+    auto meshes = getMeshesForGroupId(world, index).meshes;
+    std::cout << "INFO: number meshes for id: (" << std::to_string(index) << ")  -- " << std::to_string(meshes.size()) << std::endl;
+    for (Mesh& mesh : meshes){
+      boundInfos.push_back(mesh.boundInfo);
+    }
+    boundInfo = getMaxUnionBoundingInfo(boundInfos);
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&gameObjV);
@@ -61,50 +83,75 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index)
   return info;
 }
 
-void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale){
-  auto obj = scene.idToGameObjects.at(id);
-  auto physicsInfo = getPhysicsInfoForGameObject(world, scene, id);
+struct GroupPhysicsInfo {
+  bool isRoot;
+  PhysicsInfo physicsInfo;
+  physicsOpts physicsOptions;
+};
 
-  auto physicsOptions = obj.physicsOptions;
+GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, short id){
+  auto groupId = scene.idToGameObjectsH.at(id).groupId;
+  bool isRoot = groupId == id;
+  if (!isRoot){
+    return GroupPhysicsInfo {
+      .isRoot = isRoot,
+    };
+  }
+
+  GroupPhysicsInfo groupInfo {
+    .isRoot = isRoot,
+    .physicsInfo = getPhysicsInfoForGameObject(world, scene, id),
+    .physicsOptions = scene.idToGameObjects.at(id).physicsOptions,
+  };  
+  return groupInfo;
+}
+
+
+void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale){
+  auto groupPhysicsInfo = getPhysicsInfoForGroup(world, scene, id);
   btRigidBody* rigidBody = NULL;
 
   GameObjectObj& toRender = world.objectMapping.at(id);
   bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
   
-  if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
-    std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
-    rigidBody = addRigidBody(
-      world.physicsEnvironment, 
-      physicsInfo.gameobject.transformation.position, 
-      (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
-      physicsInfo.gameobject.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
-      !physicsInfo.boundInfo.isNotCentered,
-      physicsInfo.collisionInfo
-    );
-  }else if (physicsOptions.shape == SPHERE){
-    std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
-    rigidBody = addRigidBody(
-      world.physicsEnvironment, 
-      physicsInfo.gameobject.transformation.position,
-      maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
-      physicsInfo.gameobject.transformation.rotation,
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
-      physicsInfo.collisionInfo
-    );
-  }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
-    std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
-    rigidBody = addRigidBody(
-      world.physicsEnvironment, 
-      physicsInfo.gameobject.transformation.position,
-      physicsInfo.gameobject.transformation.rotation,
-      getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
-      physicsOptions.isStatic,
-      physicsOptions.hasCollisions,
-      initialScale
-    );
+  if (groupPhysicsInfo.isRoot){
+    auto physicsOptions = groupPhysicsInfo.physicsOptions;
+    auto physicsInfo = groupPhysicsInfo.physicsInfo;
+    if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
+      std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
+      rigidBody = addRigidBody(
+        world.physicsEnvironment, 
+        physicsInfo.gameobject.transformation.position, 
+        (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
+        physicsInfo.gameobject.transformation.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        !physicsInfo.boundInfo.isNotCentered,
+        physicsInfo.collisionInfo
+      );
+    }else if (physicsOptions.shape == SPHERE){
+      std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
+      rigidBody = addRigidBody(
+        world.physicsEnvironment, 
+        physicsInfo.gameobject.transformation.position,
+        maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
+        physicsInfo.gameobject.transformation.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        physicsInfo.collisionInfo
+      );
+    }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
+      std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
+      rigidBody = addRigidBody(
+        world.physicsEnvironment, 
+        physicsInfo.gameobject.transformation.position,
+        physicsInfo.gameobject.transformation.rotation,
+        getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        initialScale
+      );
+    }
   }
 
   if (rigidBody != NULL){
@@ -400,9 +447,9 @@ void physicsScale(World& world, short index, float x, float y, float z){
   auto oldScale = scene.idToGameObjects.at(index).transformation.scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
-  auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
@@ -434,9 +481,9 @@ void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
-  auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
@@ -480,23 +527,6 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
     updatePhysicsPositions(world, world.rigidbodys);     
   }
   enforceLookAt(world);
-}
-
-NameAndMesh getMeshesForGroupId(World& world, short groupId){
-  std::vector<std::reference_wrapper<std::string>> meshNames;
-  std::vector<std::reference_wrapper<Mesh>> meshes;
-  NameAndMesh nameAndMeshes = {
-    .meshNames = meshNames,
-    .meshes = meshes
-  };
-  for (auto id : getIdsInGroup(world.scenes.at(world.idToScene.at(groupId)), groupId)){
-    auto meshesForId = getMeshesForId(world.objectMapping, id);
-    for (int i = 0; i < meshesForId.meshes.size(); i++){
-      nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
-      nameAndMeshes.meshes.push_back(meshesForId.meshes.at(i));
-    }    
-  }
-  return nameAndMeshes;
 }
 
 std::map<std::string, std::string> getAttributes(World& world, short id){
