@@ -243,10 +243,12 @@ void selectItem(){
     return;
   }
 
-  state.selectedIndex = selectedId;
+  Scene& scene = world.scenes.at(world.idToScene.at(selectedId));
+  auto actualSelectedObject = scene.idToGameObjectsH.at(selectedId);
+  auto selectedObject = scene.idToGameObjects.at(actualSelectedObject.groupId);
+  state.selectedIndex = actualSelectedObject.groupId;
 
-  auto sceneId = world.idToScene.at(state.selectedIndex);
-  state.selectedName = world.scenes.at(sceneId).idToGameObjects.at(state.selectedIndex).name + "(" + std::to_string(state.selectedIndex) + ")";
+  state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
