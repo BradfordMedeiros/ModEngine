@@ -16,6 +16,8 @@ struct physicsOpts {
   bool isStatic;
   bool hasCollisions;
   ColliderShape shape;
+  glm::vec3 linearFactor;
+  glm::vec3 angularFactor;
 };
 
 struct Token {
