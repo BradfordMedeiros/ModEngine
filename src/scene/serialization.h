@@ -18,6 +18,7 @@ struct physicsOpts {
   ColliderShape shape;
   glm::vec3 linearFactor;
   glm::vec3 angularFactor;
+  glm::vec3 gravity;
 };
 
 struct Token {

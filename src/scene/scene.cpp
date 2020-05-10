@@ -129,7 +129,8 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
         !physicsInfo.boundInfo.isNotCentered,
         physicsInfo.collisionInfo, 
         physicsOptions.linearFactor,
-        physicsOptions.angularFactor
+        physicsOptions.angularFactor,
+        physicsOptions.gravity
       );
     }else if (physicsOptions.shape == SPHERE){
       std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
@@ -142,7 +143,8 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
         physicsOptions.hasCollisions,
         physicsInfo.collisionInfo,
         physicsOptions.linearFactor,
-        physicsOptions.angularFactor
+        physicsOptions.angularFactor,
+        physicsOptions.gravity
       );
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
@@ -155,7 +157,8 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
         physicsOptions.hasCollisions,
         initialScale,
         physicsOptions.linearFactor,
-        physicsOptions.angularFactor
+        physicsOptions.angularFactor,
+        physicsOptions.gravity
       );
     }
   }

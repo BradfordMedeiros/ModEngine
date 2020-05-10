@@ -512,44 +512,42 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
   }
 
-  if (showDebugInfo){
-    drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
-    std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
-    std::string axisText = state.axis == 0 ? "xz" : "xy";
-    drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
+  drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+  std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
+  std::string axisText = state.axis == 0 ? "xz" : "xy";
+  drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
 
-    std::string manipulatorAxisString;
-    if (state.manipulatorAxis == XAXIS){
-      manipulatorAxisString = "xaxis";
-    }else if (state.manipulatorAxis == YAXIS){
-      manipulatorAxisString = "yaxis";
-    }else if (state.manipulatorAxis == ZAXIS){
-      manipulatorAxisString = "zaxis";
-    }else{
-      manipulatorAxisString = "noaxis";
-    }
-    drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
-    drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
-    drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
-
-    drawText("fov: " + std::to_string(state.fov), 10, 80, 3);
-    drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
-  
-    if (state.selectedIndex != -1){
-      auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).idToGameObjects.at(state.selectedIndex);
-      drawText("position: " + print(obj.transformation.position), 10, 100, 3);
-      drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
-      drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
-    }
-    
-    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-    drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 140, 3);
-    drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 150, 3);
-
-    drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 170, 3);
-    drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 180, 3);
-    drawText("using object id: -1" , 40, 190, 3);
+  std::string manipulatorAxisString;
+  if (state.manipulatorAxis == XAXIS){
+    manipulatorAxisString = "xaxis";
+  }else if (state.manipulatorAxis == YAXIS){
+    manipulatorAxisString = "yaxis";
+  }else if (state.manipulatorAxis == ZAXIS){
+    manipulatorAxisString = "zaxis";
+  }else{
+    manipulatorAxisString = "noaxis";
   }
+  drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
+  drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
+  drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
+
+  drawText("fov: " + std::to_string(state.fov), 10, 80, 3);
+  drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
+  
+  if (state.selectedIndex != -1){
+    auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).idToGameObjects.at(state.selectedIndex);
+    drawText("position: " + print(obj.transformation.position), 10, 100, 3);
+    drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
+    drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
+  }
+    
+  Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+  drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 140, 3);
+  drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 150, 3);
+
+  drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 170, 3);
+  drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 180, 3);
+  drawText("using object id: -1" , 40, 190, 3);
 }
 
 int main(int argc, char* argv[]){
@@ -859,7 +857,10 @@ int main(int argc, char* argv[]){
     }
 
     renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
-    renderUI(crosshairSprite, currentFramerate);
+
+    if (showDebugInfo){
+      renderUI(crosshairSprite, currentFramerate);
+    }
 
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);

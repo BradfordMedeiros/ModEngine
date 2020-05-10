@@ -99,7 +99,8 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .hasCollisions = true,
     .shape = AUTOSHAPE,
     .linearFactor = glm::vec3(1.f, 1.f, 1.f),
-    .angularFactor = glm::vec3(1.f, 1.f, 1.f)
+    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
+    .gravity = glm::vec3(0.f, -9.81f, 0.f),
   };
   SerializationObject newObject {
     .name = name,
@@ -184,6 +185,9 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     }
     if (token.attribute == "physics_linear"){
       objects.at(token.target).physics.linearFactor = parseVec(token.payload);
+    }
+    if (token.attribute == "physics_gravity"){
+      objects.at(token.target).physics.gravity = parseVec(token.payload);
     }
 
     if (token.attribute == "lookat"){
