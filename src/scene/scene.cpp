@@ -100,7 +100,7 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, short id){
 
   GroupPhysicsInfo groupInfo {
     .isRoot = isRoot,
-    .physicsInfo = getPhysicsInfoForGameObject(world, scene, id),
+    .physicsInfo = getPhysicsInfoForGameObject(world, scene, groupId),
     .physicsOptions = scene.idToGameObjects.at(id).physicsOptions,
   };  
   return groupInfo;
