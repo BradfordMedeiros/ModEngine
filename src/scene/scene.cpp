@@ -560,6 +560,10 @@ void setAttributes(World& world, short id, std::map<std::string, std::string> at
   setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
 }
 
+bool idInGroup(World& world, short id, short groupId){
+  return groupId == world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
+}
+
 std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }

@@ -433,7 +433,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     }
     
     GameObject object = scene.idToGameObjects.at(id);
-    bool objectSelected = state.selectedIndex == id;
+    bool objectSelected = idInGroup(world, id, state.selectedIndex);
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
 
     if (state.visualizeNormals){
