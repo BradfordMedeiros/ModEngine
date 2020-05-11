@@ -1,0 +1,13 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+box1:mesh:./res/models/box/box.obj
+box1:position:-10 -3 -20
+box2:mesh:./res/models/box/box.obj
+box2:position:10 -3 -20
+
+#^rail:position:0 0 0
+#^rail:collision-radius:3
+^rail:connect:box1,box2

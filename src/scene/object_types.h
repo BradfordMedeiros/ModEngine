@@ -43,7 +43,15 @@ struct GameObjectChannel {
   bool complete;
 };
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel> GameObjectObj;
+struct RailConnection {
+  std::string from;
+  std::string to;
+};
+struct GameObjectRail {
+  std::vector<RailConnection> connections;
+};
+
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail> GameObjectObj;
 
 static Field obj = {
   .prefix = '@', 
@@ -81,7 +89,13 @@ static Field channelField {
   .additionalFields = { "from", "to" },
 };
 
-static std::vector fields = { obj, camera, sound, light, voxelField, channelField };
+static Field railField {
+  .prefix = '^',
+  .type = "rail",
+  .additionalFields = { "connect" },
+};
+
+static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField };
 
 std::map<short, GameObjectObj> getObjectMapping();
 
@@ -128,5 +142,6 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping);
 NameAndMesh getMeshesForId(std::map<short, GameObjectObj>& mapping, short id);
 std::vector<std::string> getMeshNames(std::map<short, GameObjectObj>& mapping, short id);
 std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<short, GameObjectObj>& mapping);
+std::vector<RailConnection> getRails(std::map<short, GameObjectObj>& mapping);
 
 #endif 

@@ -77,6 +77,14 @@ GameObjectChannel createChannel(std::map<std::string, std::string> additionalFie
   return obj;
 }
 
+GameObjectRail createRail(std::map<std::string, std::string> additionalFields){
+  std::vector<RailConnection> connections;
+  GameObjectRail obj {
+    .connections = connections,
+  };
+  return obj;
+}
+
 void addObject(
   short id, 
   std::string objectType, 
@@ -94,12 +102,14 @@ void addObject(
     mapping[id] = createCamera();
   }else if(objectType == "sound"){
     mapping[id] = createSound(additionalFields, loadClip);
-  }else if (objectType == "light"){
+  }else if(objectType == "light"){
     mapping[id] = createLight(additionalFields);
-  }else if (objectType == "voxel"){
+  }else if(objectType == "voxel"){
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
-  }else if (objectType == "channel"){
+  }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
+  }else if(objectType == "rail"){
+    mapping[id] = createRail(additionalFields);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -182,6 +192,13 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     drawMesh(nodeMesh, shaderProgram);
     return;
+  }
+
+  auto railObj = std::get_if<GameObjectRail>(&toRender);
+  if (railObj != NULL && showDebug){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    drawMesh(nodeMesh, shaderProgram);
+    return; 
   }
 }
 
@@ -331,4 +348,18 @@ std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<short
     } 
   }
   return channelMapping;
+}
+
+
+std::vector<RailConnection> getRails(std::map<short, GameObjectObj>& mapping){
+  std::vector<RailConnection> connections;
+  for (auto [_, obj] : mapping){
+    auto railObj = std::get_if<GameObjectRail>(&obj);
+    if (railObj != NULL){
+      for (auto connection : railObj -> connections){
+        connections.push_back(connection);              // maybe this should deduplicate 
+      }      
+    }
+  }
+  return connections;
 }
