@@ -235,6 +235,9 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
 }
 
 void selectItem(){
+  if (!showDebugInfo){
+    return;
+  }
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
 
