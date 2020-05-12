@@ -40,6 +40,7 @@
 #include "./state.h"
 #include "./input.h"
 #include "./network.h"
+#include "./scene/rails.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -65,6 +66,8 @@ glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+RailSystem rails;
+
 AnimationState animations;
 
 DynamicLoading dynamicLoading;
@@ -750,6 +753,7 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
+  rails = createRailSystem();
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
