@@ -69,6 +69,7 @@ AnimationState animations;
 
 DynamicLoading dynamicLoading;
 std::vector<Line> lines;
+std::vector<Line> bluelines;
 std::vector<Line> permaLines;
 
 std::map<unsigned int, Mesh> fontMeshes;
@@ -405,7 +406,7 @@ void addLinesFromRails(std::map<short, RailConnection> rails){
     auto scene = world.scenes.at(world.idToScene.at(id));
     auto fromId = scene.nameToId.at(rail.from);
     auto toId = scene.nameToId.at(rail.to);
-    lines.push_back(Line {
+    bluelines.push_back(Line {
       .fromPos = scene.idToGameObjects.at(fromId).transformation.position,
       .toPos = scene.idToGameObjects.at(toId).transformation.position
     });
@@ -513,7 +514,13 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   if (lines.size() > 0){
    drawLines(lines);
   }
+
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 0.f, 1.f)));
+  if (bluelines.size() > 0){
+   drawLines(bluelines);
+  }
   lines.clear();
+  bluelines.clear();
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
@@ -870,8 +877,10 @@ int main(int argc, char* argv[]){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights);
     }
 
-    addLinesFromRails(getRails(world.objectMapping));
-    renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
+    if (showDebugInfo){
+      addLinesFromRails(getRails(world.objectMapping));
+      renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
+    }
 
     if (showDebugInfo){
       renderUI(crosshairSprite, currentFramerate);
