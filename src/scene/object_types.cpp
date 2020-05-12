@@ -77,10 +77,18 @@ GameObjectChannel createChannel(std::map<std::string, std::string> additionalFie
   return obj;
 }
 
-GameObjectRail createRail(std::map<std::string, std::string> additionalFields){
-  std::vector<RailConnection> connections;
+GameObjectRail createRail(short id, std::map<std::string, std::string> additionalFields){
+  std::cout << "yay1" << std::endl;
+
+  RailConnection connection {
+    .from = additionalFields.at("from"),
+    .to = additionalFields.at("to")
+  };
+
+  std::cout << "yay2" << std::endl;
   GameObjectRail obj {
-    .connections = connections,
+    .id = id,
+    .connection = connection,
   };
   return obj;
 }
@@ -109,7 +117,7 @@ void addObject(
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "rail"){
-    mapping[id] = createRail(additionalFields);
+    mapping[id] = createRail(id, additionalFields);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -351,14 +359,12 @@ std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<short
 }
 
 
-std::vector<RailConnection> getRails(std::map<short, GameObjectObj>& mapping){
-  std::vector<RailConnection> connections;
+std::map<short, RailConnection> getRails(std::map<short, GameObjectObj>& mapping){
+  std::map<short, RailConnection> connections;
   for (auto [_, obj] : mapping){
     auto railObj = std::get_if<GameObjectRail>(&obj);
     if (railObj != NULL){
-      for (auto connection : railObj -> connections){
-        connections.push_back(connection);              // maybe this should deduplicate 
-      }      
+      connections[railObj -> id] = railObj -> connection;
     }
   }
   return connections;

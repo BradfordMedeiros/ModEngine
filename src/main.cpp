@@ -400,6 +400,18 @@ struct LightInfo {
   glm::vec3 color;
 };
 
+void addLinesFromRails(std::map<short, RailConnection> rails){
+  for (auto [id, rail] : rails){
+    auto scene = world.scenes.at(world.idToScene.at(id));
+    auto fromId = scene.nameToId.at(rail.from);
+    auto toId = scene.nameToId.at(rail.to);
+    lines.push_back(Line {
+      .fromPos = scene.idToGameObjects.at(fromId).transformation.position,
+      .toPos = scene.idToGameObjects.at(toId).transformation.position
+    });
+  }
+}
+
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights){
   glUseProgram(shaderProgram);
   
@@ -500,7 +512,6 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
   if (lines.size() > 0){
    drawLines(lines);
-  
   }
   lines.clear();
 }
@@ -859,6 +870,7 @@ int main(int argc, char* argv[]){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights);
     }
 
+    addLinesFromRails(getRails(world.objectMapping));
     renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
 
     if (showDebugInfo){

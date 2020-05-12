@@ -48,7 +48,8 @@ struct RailConnection {
   std::string to;
 };
 struct GameObjectRail {
-  std::vector<RailConnection> connections;
+  short id;
+  RailConnection connection;
 };
 
 typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail> GameObjectObj;
@@ -92,7 +93,7 @@ static Field channelField {
 static Field railField {
   .prefix = '^',
   .type = "rail",
-  .additionalFields = { "connect" },
+  .additionalFields = { "from", "to" },
 };
 
 static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField };
@@ -142,6 +143,8 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping);
 NameAndMesh getMeshesForId(std::map<short, GameObjectObj>& mapping, short id);
 std::vector<std::string> getMeshNames(std::map<short, GameObjectObj>& mapping, short id);
 std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<short, GameObjectObj>& mapping);
-std::vector<RailConnection> getRails(std::map<short, GameObjectObj>& mapping);
+
+
+std::map<short, RailConnection> getRails(std::map<short, GameObjectObj>& mapping);
 
 #endif 
