@@ -2,15 +2,23 @@
 #define MOD_RAILS
 
 #include <map>
+#include <vector>
 #include <glm/glm.hpp>
 #include <functional>
 
+struct RailNode {
+  std::string from;
+  std::string to;
+};
+
 struct RailSystem {
+  std::map<std::string, RailNode> rails;
 };
 
 RailSystem createRailSystem();
 void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std::string nodeTo);
 void removeRail(RailSystem& rails, std::string railName);
+std::vector<std::string> railnames(RailSystem& rails);
 
 // given a specified rail, and a direction vector, give me the next position.
 // based on direction vector if distance > deltaX , take a speed + direction and expand for new distance
