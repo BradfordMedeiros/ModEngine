@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <glm/glm.hpp>
-#include <iostream>
 #include <vector>
 #include <stdexcept>
 #include <stb_image.h>

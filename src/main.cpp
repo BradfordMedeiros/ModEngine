@@ -404,8 +404,14 @@ struct LightInfo {
   glm::vec3 color;
 };
 
-void addLinesFromRails(std::map<short, RailConnection> rails){
-  for (auto [id, rail] : rails){
+std::string currentRail = "^rail";
+
+void updateRails(std::map<short, RailConnection> railPairs){
+  for (auto railName: railnames(rails)){
+    removeRail(rails, railName);
+  }
+
+  for (auto [id, rail] : railPairs){
     auto scene = world.scenes.at(world.idToScene.at(id));
     auto fromId = scene.nameToId.at(rail.from);
     auto toId = scene.nameToId.at(rail.to);
@@ -413,7 +419,25 @@ void addLinesFromRails(std::map<short, RailConnection> rails){
       .fromPos = scene.idToGameObjects.at(fromId).transformation.position,
       .toPos = scene.idToGameObjects.at(toId).transformation.position
     });
+    addRail(rails, scene.idToGameObjects.at(id).name, rail.from, rail.to);
   }
+
+  auto ballId = getGameObjectByName("ball");
+  auto ballPosition = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.position;
+  auto ballOrientation = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.rotation;
+
+  auto nextRail = nextPosition(
+    rails, 
+    [](std::string value) -> glm::vec3 { 
+      auto objectId = getGameObjectByName(value);
+      return world.scenes.at(world.idToScene.at(objectId)).idToGameObjects.at(objectId).transformation.position;
+    }, 
+    currentRail, 
+    ballPosition, 
+    ballOrientation
+  ); 
+  currentRail = nextRail.rail;
+  physicsTranslateSet(world, ballId, nextRail.position);
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights){
@@ -882,7 +906,7 @@ int main(int argc, char* argv[]){
     }
 
     if (showDebugInfo){
-      addLinesFromRails(getRails(world.objectMapping));
+      updateRails(getRails(world.objectMapping));
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
 

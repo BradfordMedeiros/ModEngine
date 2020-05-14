@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <functional>
+#include <glm/gtx/quaternion.hpp>
 
 struct RailNode {
   std::string from;
@@ -29,6 +30,6 @@ struct NextRail {
   std::string rail;
 };
 
-NextRail nextPosition(RailSystem& rails, std::function<void(std::string)> positionForRail, std::string railName, glm::vec3 position, glm::vec3 direction); 
+NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> positionForRail, std::string railName, glm::vec3 position, glm::quat direction); 
 
 #endif
