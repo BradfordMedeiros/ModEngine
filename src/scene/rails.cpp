@@ -34,6 +34,9 @@ NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> p
   auto currentRail = rails.rails.at(railName);
   auto fromPos = positionForRail(currentRail.from);
   auto toPos = positionForRail(currentRail.to);
+  auto railDirection = toPos - fromPos;
+
+  // something something dot production raildirection + direction
 
   auto newPosition = glm::vec3(position.x + 0.2f, position.y, position.z);
   NextRail rail {
