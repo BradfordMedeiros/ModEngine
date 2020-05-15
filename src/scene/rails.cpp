@@ -32,21 +32,21 @@ std::vector<std::string> railnames(RailSystem& rails){
 
 NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> positionForRail, std::string railName, glm::vec3 position, glm::quat direction){
   auto currentRail = rails.rails.at(railName);
-  auto fromPos = positionForRail(currentRail.from);
-  auto toPos = positionForRail(currentRail.to);
+  auto toRail = positionForRail(currentRail.to);
+  auto fromRail = positionForRail(currentRail.from);
+  
+  bool isNullRail = (toRail.x == fromRail.x) && (toRail.y == fromRail.y) && (toRail.z == fromRail.z);
+  if (isNullRail){
+    return NextRail{
+      .position = position,
+      .rail = railName
+    };
+  }  
 
-  auto railDirection = toPos - fromPos;
-  auto moveDirection = quatToVec(direction);
-  float value = glm::dot(railDirection, moveDirection);
-  bool positiveDirection = value > 0;
+  auto railDirection = glm::normalize(toRail - fromRail);
+  bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
+  auto newPosition = position + (inDirectionOfRail ? 0.1f : -0.1f) * railDirection;   // might be interesting to allow the dot value to actually be used to determine speed as well 
 
-  std::cout << "from: " << print(fromPos) << std::endl;
-  std::cout << "to: " << print(toPos) << std::endl;
-
-  std::cout << "value: " << value << std::endl;
-  std::cout << "positiveDirection: " << (positiveDirection ? "true" : "false") << std::endl;
-
-  auto newPosition = glm::vec3(position.x + (positiveDirection ? 0.2f : -0.2f), position.y, position.z);
   NextRail rail {
     .position = newPosition,
     .rail = railName
