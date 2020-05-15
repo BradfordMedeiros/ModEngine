@@ -30,7 +30,18 @@ std::vector<std::string> railnames(RailSystem& rails){
   return railNames;
 }
 
-NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> positionForRail, std::string railName, glm::vec3 position, glm::quat direction){
+// return first rail found that has a rail connecting it
+std::string railForNode(RailSystem& rails, std::string node, std::string exclude){
+  return "";
+}
+
+NextRail nextPosition(
+  RailSystem& rails, 
+  std::function<glm::vec3(std::string)> positionForRail, 
+  std::string railName, 
+  glm::vec3 position, 
+  glm::quat direction
+){
   auto currentRail = rails.rails.at(railName);
   auto toRail = positionForRail(currentRail.to);
   auto fromRail = positionForRail(currentRail.from);
@@ -47,12 +58,11 @@ NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> p
   bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
   auto newPosition = position + (inDirectionOfRail ? 0.1f : -0.1f) * railDirection;   // might be interesting to allow the dot value to actually be used to determine speed as well 
  
-  auto atEndpoint = glm::distance(toRail, position) < 0.01;
-  // TODO -> if currentRail.to is a rail, return that here.
+  auto atEndpoint = glm::distance(toRail, position) < 0.01;   // If it's negative this can be the fromRail
 
   NextRail rail {
     .position = newPosition,
-    .rail = atEndpoint ? "" : railName
+    .rail = atEndpoint ? railForNode(rails, currentRail.to, railName) : railName
   };
 
   return rail;
