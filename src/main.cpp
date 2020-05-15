@@ -426,18 +426,20 @@ void updateRails(std::map<short, RailConnection> railPairs){
   auto ballPosition = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.position;
   auto ballOrientation = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.rotation;
 
-  auto nextRail = nextPosition(
-    rails, 
-    [](std::string value) -> glm::vec3 { 
-      auto objectId = getGameObjectByName(value);
-      return world.scenes.at(world.idToScene.at(objectId)).idToGameObjects.at(objectId).transformation.position;
-    }, 
-    currentRail, 
-    ballPosition, 
-    ballOrientation
-  ); 
-  currentRail = nextRail.rail;
-  physicsTranslateSet(world, ballId, nextRail.position);
+  if (currentRail != ""){
+    auto nextRail = nextPosition(
+      rails, 
+      [](std::string value) -> glm::vec3 { 
+        auto objectId = getGameObjectByName(value);
+        return world.scenes.at(world.idToScene.at(objectId)).idToGameObjects.at(objectId).transformation.position;
+      }, 
+      currentRail, 
+      ballPosition, 
+      ballOrientation
+    ); 
+    currentRail = nextRail.rail;
+    physicsTranslateSet(world, ballId, nextRail.position);
+  }
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights){

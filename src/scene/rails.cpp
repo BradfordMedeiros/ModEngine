@@ -46,10 +46,13 @@ NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> p
   auto railDirection = glm::normalize(toRail - fromRail);
   bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
   auto newPosition = position + (inDirectionOfRail ? 0.1f : -0.1f) * railDirection;   // might be interesting to allow the dot value to actually be used to determine speed as well 
+ 
+  auto atEndpoint = glm::distance(toRail, position) < 0.01;
+  // TODO -> if currentRail.to is a rail, return that here.
 
   NextRail rail {
     .position = newPosition,
-    .rail = railName
+    .rail = atEndpoint ? "" : railName
   };
 
   return rail;
