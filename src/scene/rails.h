@@ -6,6 +6,10 @@
 #include <glm/glm.hpp>
 #include <functional>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <iostream>
+#include "../common/util.h"
 
 struct RailNode {
   std::string from;

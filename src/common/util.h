@@ -25,7 +25,7 @@ std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
 glm::vec3 parseVec(std::string positionRaw);
 glm::quat parseQuat(std::string payload);
-
+glm::vec3 quatToVec(glm::quat quat);
 
 float maxvalue(float x, float y, float z);
 int maxvalue(int x, int y, int z);

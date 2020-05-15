@@ -97,7 +97,9 @@ glm::quat parseQuat(std::string payload){
   glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
   return rotation;
 }
-
+glm::vec3 quatToVec(glm::quat quat){
+  return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
+}
 
 float maxvalue(float x, float y, float z){
   if (x >= y && x >= z){
