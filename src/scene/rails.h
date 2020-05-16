@@ -25,10 +25,6 @@ void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std:
 void removeRail(RailSystem& rails, std::string railName);
 std::vector<std::string> railnames(RailSystem& rails);
 
-// given a specified rail, and a direction vector, give me the next position.
-// based on direction vector if distance > deltaX , take a speed + direction and expand for new distance
-// else expand it's nodes and then based on direction vector determine new to and from nodes
-
 struct NextRail {
   glm::vec3 position;
   std::string rail;
