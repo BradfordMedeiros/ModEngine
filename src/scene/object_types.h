@@ -108,7 +108,8 @@ void addObject(
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string)> ensureMeshLoaded,
-  std::function<void()> onVoxelBoundInfoChanged
+  std::function<void()> onVoxelBoundInfoChanged,
+  std::function<void(bool)> onRail
 );
 
 void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip);

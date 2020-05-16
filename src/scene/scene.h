@@ -6,6 +6,7 @@
 #include "./scenegraph.h"
 #include "./physics.h"
 #include "./object_types.h"
+#include "./rails.h"
 #include "./common/mesh.h"
 #include "../translations.h"
 #include "../common/util.h"
@@ -19,6 +20,7 @@ struct World {
   std::map<short, Scene> scenes;
   std::map<short, short> idToScene;
   std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
+  RailSystem rails;
 };
 
 struct PhysicsInfo {

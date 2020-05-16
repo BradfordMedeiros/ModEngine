@@ -209,9 +209,11 @@ void addMesh(World& world, std::string meshpath){
 
 World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   auto objectMapping = getObjectMapping();
+  RailSystem rails;
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
+    .rails = rails,
   };
 
   // Default meshes that are silently loaded in the background
@@ -303,6 +305,9 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       }, 
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
+      },
+      [](bool shouldRemove) -> void {
+        std::cout << "on add rail: " << shouldRemove << std::endl;
       }
     );
   }

@@ -32,6 +32,11 @@ std::vector<std::string> railnames(RailSystem& rails){
 
 // return first rail found that has a rail connecting it
 std::string railForNode(RailSystem& rails, std::string node, std::string exclude){
+  for (auto [railName, connection] : rails.rails){
+    if (railName != exclude && (connection.from == node || connection.to == node)){
+      return railName;
+    }
+  }
   return "";
 }
 
@@ -55,10 +60,10 @@ NextRail nextPosition(
   }  
 
   auto railDirection = glm::normalize(toRail - fromRail);
-  bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
+  //bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
+  bool inDirectionOfRail = true;
   auto newPosition = position + (inDirectionOfRail ? 0.1f : -0.1f) * railDirection;   // might be interesting to allow the dot value to actually be used to determine speed as well 
- 
-  auto atEndpoint = glm::distance(toRail, position) < 0.01;   // If it's negative this can be the fromRail
+  auto atEndpoint = glm::distance(toRail, position) < 0.1;                            // If it's negative this can be the fromRail, also can be weird if rail moves while this is happening. 
 
   NextRail rail {
     .position = newPosition,

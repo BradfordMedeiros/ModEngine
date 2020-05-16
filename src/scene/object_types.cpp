@@ -102,7 +102,8 @@ void addObject(
   std::string defaultMesh, 
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string)> ensureMeshLoaded,
-  std::function<void()> onVoxelBoundInfoChanged
+  std::function<void()> onVoxelBoundInfoChanged,
+  std::function<void(bool)> onRail
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded);
