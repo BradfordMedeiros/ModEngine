@@ -109,10 +109,10 @@ void addObject(
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string)> ensureMeshLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(bool)> onRail
+  std::function<void(short id, std::string from, std::string to)> onRail
 );
 
-void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip);
+void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail);
 void renderObject(
   GLint shaderProgram, 
   short id, 

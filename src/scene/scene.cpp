@@ -306,8 +306,8 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
       },
-      [](bool shouldRemove) -> void {
-        std::cout << "on add rail: " << shouldRemove << std::endl;
+      [&world, &scene](short id, std::string from, std::string to) -> void {
+        addRail(world.rails, scene.idToGameObjects.at(id).name, from, to);
       }
     );
   }
@@ -340,7 +340,10 @@ void removeObjectById(World& world, short objectId, std::function<void(std::stri
   assert(rigidBody != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBody);
   world.rigidbodys.erase(objectId);
-  removeObject(world.objectMapping, objectId, unloadClip);
+  removeObject(world.objectMapping, objectId, unloadClip, []() -> void {
+    std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
+    assert(false);
+  });
   world.idToScene.erase(objectId);
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
   std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;

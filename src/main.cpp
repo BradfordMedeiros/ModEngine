@@ -66,7 +66,6 @@ glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
-RailSystem rails;
 
 AnimationState animations;
 
@@ -407,10 +406,6 @@ struct LightInfo {
 std::string currentRail = "^rail";
 
 void updateRails(std::map<short, RailConnection> railPairs){
-  for (auto railName: railnames(rails)){
-    removeRail(rails, railName);
-  }
-
   for (auto [id, rail] : railPairs){
     auto scene = world.scenes.at(world.idToScene.at(id));
     auto fromId = scene.nameToId.at(rail.from);
@@ -419,7 +414,6 @@ void updateRails(std::map<short, RailConnection> railPairs){
       .fromPos = scene.idToGameObjects.at(fromId).transformation.position,
       .toPos = scene.idToGameObjects.at(toId).transformation.position
     });
-    addRail(rails, scene.idToGameObjects.at(id).name, rail.from, rail.to);
   }
 
   auto ballId = getGameObjectByName("ball");
@@ -428,7 +422,7 @@ void updateRails(std::map<short, RailConnection> railPairs){
 
   if (currentRail != ""){
     auto nextRail = nextPosition(
-      rails, 
+      world.rails, 
       [](std::string value) -> glm::vec3 { 
         auto objectId = getGameObjectByName(value);
         return world.scenes.at(world.idToScene.at(objectId)).idToGameObjects.at(objectId).transformation.position;
@@ -779,7 +773,6 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
-  rails = createRailSystem();
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){

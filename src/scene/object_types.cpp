@@ -77,19 +77,16 @@ GameObjectChannel createChannel(std::map<std::string, std::string> additionalFie
   return obj;
 }
 
-GameObjectRail createRail(short id, std::map<std::string, std::string> additionalFields){
-  std::cout << "yay1" << std::endl;
-
+GameObjectRail createRail(short id, std::map<std::string, std::string> additionalFields, std::function<void(short id, std::string from, std::string to)> createRail){
   RailConnection connection {
     .from = additionalFields.at("from"),
     .to = additionalFields.at("to")
   };
-
-  std::cout << "yay2" << std::endl;
   GameObjectRail obj {
     .id = id,
     .connection = connection,
   };
+  createRail(id, connection.from, connection.to);
   return obj;
 }
 
@@ -103,7 +100,7 @@ void addObject(
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string)> ensureMeshLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(bool)> onRail
+  std::function<void(short id, std::string from, std::string to)> addRail
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded);
@@ -118,17 +115,22 @@ void addObject(
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "rail"){
-    mapping[id] = createRail(id, additionalFields);
+    mapping[id] = createRail(id, additionalFields, addRail);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
   }
 }
-void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip){
+void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail){
+  // @TODO - handle resource cleanup better here eg unload meshes
   auto Object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&Object);
   if (soundObj != NULL){
     unloadClip(soundObj -> clip); 
+  }
+  auto railObj = std::get_if<GameObjectRail>(&Object);
+  if (railObj != NULL){
+    removeRail();
   }
   mapping.erase(id);
 }
