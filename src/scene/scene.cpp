@@ -335,8 +335,8 @@ short addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   auto sceneId = getSceneId();
   
   SceneDeserialization deserializedScene = deserializeScene(loadFile(sceneFile), fields, getObjectId);
-  addObjects(world, deserializedScene.scene, deserializedScene.serialObjs, true, loadClip, getObjectId);
   world.scenes[sceneId] = deserializedScene.scene;
+  addObjects(world, world.scenes.at(sceneId), deserializedScene.serialObjs, true, loadClip, getObjectId);
 
   addPhysicsBodies(world, world.scenes.at(sceneId));
   for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
