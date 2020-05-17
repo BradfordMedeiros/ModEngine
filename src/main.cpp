@@ -403,39 +403,13 @@ struct LightInfo {
   glm::vec3 color;
 };
 
-std::string currentRail = "^rail";
-
-
-
-void updateRails(std::map<short, RailConnection> railPairs){
+void displayRails(std::map<short, RailConnection> railPairs){
   for (auto [id, rail] : railPairs){
     auto scene = world.scenes.at(world.idToScene.at(id));
-    auto fromId = scene.nameToId.at(rail.from);
-    auto toId = scene.nameToId.at(rail.to);
     bluelines.push_back(Line {
-      .fromPos = scene.idToGameObjects.at(fromId).transformation.position,
-      .toPos = scene.idToGameObjects.at(toId).transformation.position
+      .fromPos = scene.idToGameObjects.at(scene.nameToId.at(rail.from)).transformation.position,
+      .toPos = scene.idToGameObjects.at(scene.nameToId.at(rail.to)).transformation.position
     });
-  }
-
-
-  auto ballId = getGameObjectByName("ball");
-  auto ballPosition = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.position;
-  auto ballOrientation = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.rotation;
-
-  if (currentRail != ""){
-    auto nextRail = nextPosition(
-      world.rails, 
-      [](std::string value) -> glm::vec3 { 
-        auto objectId = getGameObjectByName(value);
-        return world.scenes.at(world.idToScene.at(objectId)).idToGameObjects.at(objectId).transformation.position;
-      }, 
-      currentRail, 
-      ballPosition, 
-      ballOrientation
-    ); 
-    currentRail = nextRail.rail;
-    physicsTranslateSet(world, ballId, nextRail.position);
   }
 }
 
@@ -776,12 +750,12 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
-  addEntity(world.rails, 0, "^rail1");
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
     loadScene(rawSceneFile);
   }
+  addEntity(world.rails, getGameObjectByName("ball"), "^rail");
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);
@@ -905,7 +879,7 @@ int main(int argc, char* argv[]){
     }
 
     if (showDebugInfo){
-      updateRails(getRails(world.objectMapping));
+      displayRails(getRails(world.objectMapping));
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
 

@@ -48,6 +48,7 @@ void  applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::ve
 void  onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, short id);
+short getGameObjectByName(World& world, std::string name);
 
 std::map<std::string, std::string> getAttributes(World& world, short id);
 void setAttributes(World& world, short id, std::map<std::string, std::string> attr);
@@ -55,6 +56,7 @@ bool idInGroup(World& world, short id, short groupId);
 
 std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping);
 
+void updateEntities(World& world);
 
 #endif
 

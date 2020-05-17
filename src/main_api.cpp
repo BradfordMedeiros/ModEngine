@@ -77,14 +77,7 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 }
 
 short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
-  for (int i = 0; i < world.scenes.size(); i++){
-    for (auto [id, gameObj]: world.scenes.at(i).idToGameObjects){
-      if (gameObj.name == name){
-        return id;
-      }
-    }
-  }
-  return -1;
+  return getGameObjectByName(world, name);
 }
 
 std::vector<short> getObjectsByType(std::string type){

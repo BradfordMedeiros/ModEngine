@@ -8,7 +8,7 @@ box1:position:-10 -3 -20
 box2:mesh:./res/models/box/box.obj
 box2:position:10 -3 -20
 box3:mesh:./res/models/box/box.obj
-box3:position:20 -3 -20
+box3:position:20 -3 -30
 
 ball:mesh:./res/models/box/box.obj
 ball:scale:0.5 0.5 0.5
@@ -18,3 +18,5 @@ ball:position:-5 -3 -20
 ^rail:to:box2
 ^rail2:from:box2
 ^rail2:to:box3
+^rail3:from:box3
+^rail3:to:box1

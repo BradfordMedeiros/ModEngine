@@ -81,8 +81,17 @@ bool entityExists(RailSystem& rails, short id){
   }
   return false;
 }
+bool railExists(RailSystem& rails, std::string railName){
+  for (auto [rail, _] : rails.rails){
+    if (rail == railName){
+      return true;
+    }
+  }
+  return false;
+}
 void addEntity(RailSystem& rails, short id, std::string railName){
   assert(!entityExists(rails, id));
+  assert(railExists(rails, railName));
   rails.activeRails.push_back(ActiveRail{
     .id = id,
     .rail = railName,
@@ -97,7 +106,4 @@ void removeEntity(RailSystem& rails, short id){
     }
   }
   rails.activeRails = newRails;
-}
-void updateEntities(RailSystem& rails){
-
 }

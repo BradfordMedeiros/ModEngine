@@ -44,6 +44,18 @@ NameAndMesh getMeshesForGroupId(World& world, short groupId){
   return nameAndMeshes;
 }
 
+short getGameObjectByName(World& world, std::string name){
+  for (int i = 0; i < world.scenes.size(); i++){
+    for (auto [id, gameObj]: world.scenes.at(i).idToGameObjects){
+      if (gameObj.name == name){
+        return id;
+      }
+    }
+  }
+  return -1; 
+}
+
+
 PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index){   // should be "for group id"
   GameObject obj = scene.idToGameObjects.at(index);
   auto gameObjV = world.objectMapping.at(index); 
@@ -535,6 +547,29 @@ void enforceLookAt(World& world){
   }
 }
 
+void updateEntities(World& world){
+  for (auto &activeRail : world.rails.activeRails){
+    auto entityId = activeRail.id;
+    auto entityPosition = world.scenes.at(world.idToScene.at(entityId)).idToGameObjects.at(entityId).transformation.position;
+    auto entityOrientation = world.scenes.at(world.idToScene.at(entityId)).idToGameObjects.at(entityId).transformation.rotation;
+
+    if (activeRail.rail != ""){
+      auto nextRail = nextPosition(
+        world.rails, 
+        [&world](std::string value) -> glm::vec3 { 
+          auto objectId = getGameObjectByName(world, value);
+          return world.scenes.at(world.idToScene.at(objectId)).idToGameObjects.at(objectId).transformation.position;
+        }, 
+        activeRail.rail, 
+        entityPosition, 
+        entityOrientation
+      ); 
+      activeRail.rail = nextRail.rail;
+      physicsTranslateSet(world, entityId, nextRail.position);
+    }
+  }
+}
+
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics){
   if (enablePhysics){
     if (dumpPhysics){
@@ -544,6 +579,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
     updatePhysicsPositions(world, world.rigidbodys);     
   }
   enforceLookAt(world);
+  updateEntities(world);
 }
 
 std::map<std::string, std::string> getAttributes(World& world, short id){
@@ -604,3 +640,4 @@ std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& 
   graph = graph + prefix + relations + suffix;
   return graph;
 }
+
