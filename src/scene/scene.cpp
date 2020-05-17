@@ -273,16 +273,27 @@ std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
-// assume a 1x1x1 cube
-// get position of from as fromPos
-// get position of to as toPos
-// calculate distance between from and two as dist
-// calculate orientation between from and to as rot
-// set orientation to rot
-// set position as fromPos
-// set scale as (dist / relevant dimension of cube (which? -> just forward? )
-// set x and y as standard
-void setRailSizing(World& world, short id, std::string from, std::string to){
+glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
+  // @TODO consider extracting a better up direction from current orientation
+  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
+  return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
+}
+
+
+glm::vec3 positionFromScene(Scene& scene, short id){
+  return scene.idToGameObjects.at(id).transformation.position;
+} 
+
+// Need to take account proper dimensions of the mesh used obj -> should be derivable from mesh boundInfo
+void setRailSizing(Scene& scene, short id, std::string from, std::string to){
+  auto fromPosition = positionFromScene(scene, scene.nameToId.at(from));
+  auto toPosition = positionFromScene(scene, scene.nameToId.at(to));
+  auto distance = glm::distance(fromPosition, toPosition);
+  auto orientation = orientationFromPos(fromPosition, toPosition);
+  GameObject& obj = scene.idToGameObjects.at(id);
+  obj.transformation.scale = glm::vec3(1.f, 1.f, distance);
+  obj.transformation.position = fromPosition;
+  obj.transformation.rotation = orientation;
 
 }
 void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<short()> getId){
@@ -332,7 +343,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       },
       [&world, &scene](short id, std::string from, std::string to) -> void {
         addRail(world.rails, scene.idToGameObjects.at(id).name, from, to);
-        setRailSizing(world, id, from, to);
+        setRailSizing(scene, id, from, to);
       }
     );
   }
@@ -539,7 +550,6 @@ void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbo
   }
 }
 
-
 void enforceLookAt(World& world){
  for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
@@ -551,9 +561,7 @@ void enforceLookAt(World& world){
         short lookatId = scene.nameToId.at(lookAt);
         glm::vec3 fromPos = gameobj.transformation.position;
         glm::vec3 targetPosition = scene.idToGameObjects.at(lookatId).transformation.position;
-        // @TODO consider extracting a better up direction from current orientation
-        // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
-        gameobj.transformation.rotation  = glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
+        gameobj.transformation.rotation =  orientationFromPos(fromPos, targetPosition);;
       }
     }
   }
