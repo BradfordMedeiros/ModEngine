@@ -405,6 +405,8 @@ struct LightInfo {
 
 std::string currentRail = "^rail";
 
+
+
 void updateRails(std::map<short, RailConnection> railPairs){
   for (auto [id, rail] : railPairs){
     auto scene = world.scenes.at(world.idToScene.at(id));
@@ -415,6 +417,7 @@ void updateRails(std::map<short, RailConnection> railPairs){
       .toPos = scene.idToGameObjects.at(toId).transformation.position
     });
   }
+
 
   auto ballId = getGameObjectByName("ball");
   auto ballPosition = world.scenes.at(world.idToScene.at(ballId)).idToGameObjects.at(ballId).transformation.position;
@@ -773,6 +776,7 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
+  addEntity(world.rails, 0, "^rail1");
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){

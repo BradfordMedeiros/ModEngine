@@ -15,14 +15,23 @@ struct RailNode {
   std::string from;
   std::string to;
 };
+struct ActiveRail {
+  short id;
+  std::string rail;
+};
 
 struct RailSystem {
   std::map<std::string, RailNode> rails;
+  std::vector<ActiveRail> activeRails;
 };
 
 RailSystem createRailSystem();
 void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std::string nodeTo);
 void removeRail(RailSystem& rails, std::string railName);
+void addEntity(RailSystem& rails, short id, std::string railName);
+void removeEntity(RailSystem& rails, short id);
+void updateEntities(RailSystem& rails);
+
 std::vector<std::string> railnames(RailSystem& rails);
 
 struct NextRail {
