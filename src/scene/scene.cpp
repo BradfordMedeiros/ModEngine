@@ -273,6 +273,18 @@ std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
+// assume a 1x1x1 cube
+// get position of from as fromPos
+// get position of to as toPos
+// calculate distance between from and two as dist
+// calculate orientation between from and to as rot
+// set orientation to rot
+// set position as fromPos
+// set scale as (dist / relevant dimension of cube (which? -> just forward? )
+// set x and y as standard
+void setRailSizing(World& world, short id, std::string from, std::string to){
+
+}
 void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<short()> getId){
   for (auto [_, serialObj] : serialObjs){
     auto id =  scene.nameToId.at(serialObj.name);
@@ -320,6 +332,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       },
       [&world, &scene](short id, std::string from, std::string to) -> void {
         addRail(world.rails, scene.idToGameObjects.at(id).name, from, to);
+        setRailSizing(world, id, from, to);
       }
     );
   }
@@ -333,7 +346,6 @@ std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> obje
 
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   auto sceneId = getSceneId();
-  
   SceneDeserialization deserializedScene = deserializeScene(loadFile(sceneFile), fields, getObjectId);
   world.scenes[sceneId] = deserializedScene.scene;
   addObjects(world, world.scenes.at(sceneId), deserializedScene.serialObjs, true, loadClip, getObjectId);
