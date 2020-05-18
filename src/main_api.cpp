@@ -201,3 +201,11 @@ void sendEventMessage(std::string message){
     }
   }
 }
+
+void attachToRail(short id, std::string rail){
+  addEntity(world.rails, id, rail);
+}
+
+void unattachFromRail(short id){
+  removeEntity(world.rails, id);
+}

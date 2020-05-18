@@ -740,7 +740,9 @@ int main(int argc, char* argv[]){
     listSounds,
     playSoundState,
     listModels,
-    sendEventMessage
+    sendEventMessage,
+    attachToRail,
+    unattachFromRail
   );
 
   schemeBindings = getSchemeCallbacks();
@@ -755,7 +757,6 @@ int main(int argc, char* argv[]){
   if (!useChunkingSystem){
     loadScene(rawSceneFile);
   }
-  addEntity(world.rails, getGameObjectByName("ball"), "^rail");
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
   glfwSetMouseButtonCallback(window, onMouseCallback);

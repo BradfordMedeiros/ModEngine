@@ -61,4 +61,7 @@ void playSound(std::string sound);
 std::vector<std::string> listModels();
 void sendEventMessage(std::string message);
 
+void attachToRail(short id, std::string rail);
+void unattachFromRail(short id);
+
 #endif

@@ -305,6 +305,18 @@ SCM scmSendEventMessage(SCM channelFrom){
   return SCM_UNSPECIFIED;
 }
 
+void (*_attachToRail)(short id, std::string rail);
+SCM scmAttachToRail(SCM obj, SCM rail){
+  _attachToRail(getGameobjId(obj), scm_to_locale_string(rail));
+  return SCM_UNSPECIFIED;
+}
+void (*_unattachFromRail)(short id);
+SCM scmUnattachFromRail(SCM obj){
+  _unattachFromRail(getGameobjId(obj));
+  return SCM_UNSPECIFIED;
+}
+
+
 // Callbacks
 void onFrame(){
   const char* function = "onFrame";
@@ -431,6 +443,10 @@ void defineFunctions(){
 
   // event system
   scm_c_define_gsubr("sendmessage", 1, 0, 0, (void*)scmSendEventMessage);
+
+  // rails
+  scm_c_define_gsubr("attach-rail", 2, 0, 0, (void*)scmAttachToRail);
+  scm_c_define_gsubr("unattach-rail", 1, 0, 0, (void*)scmUnattachFromRail);
 }
 
 
@@ -463,7 +479,9 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
-  void (*sendEventMessage)(std::string message)
+  void (*sendEventMessage)(std::string message),
+  void (*attachToRail)(short id, std::string rail),
+  void (*unattachFromRail)(short id)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -498,4 +516,6 @@ void createStaticSchemeBindings(
   _playClip = playClip;
   _listModels = listModels;
   _sendEventMessage = sendEventMessage;
+  _attachToRail = attachToRail;
+  _unattachFromRail = unattachFromRail;
 }
