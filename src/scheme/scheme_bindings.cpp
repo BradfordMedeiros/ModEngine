@@ -259,15 +259,19 @@ SCM scm_clearImpulse(SCM value){
 SCM getGameObjectId(SCM value){
   return scm_from_short(getGameobjId(value));
 }
+SCM createGameObject(short id){
+  auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
+  obj->id = id;
+  return scm_make_foreign_object_1(gameObjectType, obj); 
+}
+
 short (*getGameObjName)(std::string name);
 SCM getGameObjByName(SCM value){
   short id = getGameObjName(scm_to_locale_string(value));
   if (id == -1){
     return scm_from_bool(false);
   }
-  auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
-  obj->id = id;
-  return scm_make_foreign_object_1(gameObjectType, obj);
+  return createGameObject(id);
 }
 
 std::vector<std::string> (*_listClips)();
@@ -314,14 +318,14 @@ void onCollisionEnter(short obj1, short obj2){
   const char* function = "onCollideEnter";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
+    scm_call_2(func_symbol, createGameObject(obj1), createGameObject(obj2));
   }
 }
 void onCollisionExit(short obj1, short obj2){
   const char* function = "onCollideExit";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, scm_from_short(obj1), scm_from_short(obj2));
+    scm_call_2(func_symbol, createGameObject(obj1), createGameObject(obj2));
   }
 }
 void onMouseCallback(int button, int action, int mods){
