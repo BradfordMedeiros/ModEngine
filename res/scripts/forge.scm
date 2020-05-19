@@ -7,11 +7,13 @@
 )
 
 (define displayObjName "debugobject")
+(define num 0)
+(define (getNextName)
+  (set! num (+ num 1))
+  (string-append displayObjName (number->string num))
+)
 (define (select)
-  (let ((obj (lsobj-name displayObjName)))
-    (if obj (rm-obj (gameobj-id obj)))
-    (mk-obj displayObjName (list-ref menu selectedIndex) '(0 0 0))
-  )
+  (mk-obj (getNextName) (list-ref menu selectedIndex) '(0 0 0))
 )
 
 (define selectedIndex 0)
