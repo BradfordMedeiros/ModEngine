@@ -100,12 +100,13 @@ void addEntity(RailSystem& rails, short id, std::string railName){
   });
 }
 void removeEntity(RailSystem& rails, short id){
-  assert(entityExists(rails, id));
-  std::vector<ActiveRail> newRails;
-  for (auto activeRail : rails.activeRails){
-    if (activeRail.id != id){
-      newRails.push_back(activeRail);
+  if (entityExists(rails, id)){
+    std::vector<ActiveRail> newRails;
+    for (auto activeRail : rails.activeRails){
+      if (activeRail.id != id){
+        newRails.push_back(activeRail);
+      }
     }
+    rails.activeRails = newRails;
   }
-  rails.activeRails = newRails;
 }
