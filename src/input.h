@@ -6,7 +6,7 @@
 #include "./state.h"
 #include "./common/util.h"
 
-void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void), void (*selectItem) (void));
+void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));
 void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float));
 void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, double yoffset);
 

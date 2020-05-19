@@ -237,6 +237,8 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
 
 }
 
+bool selectItemCalled = false;
+
 void selectItem(){
   if (!showDebugInfo){
     return;
@@ -277,7 +279,11 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   processManipulator();
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
-  mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization, selectItem);
+  mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization);
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    selectItemCalled = true;
+  }
+
   schemeBindings.onMouseCallback(button, action, mods);
 
   if (button == 0 && voxelPtr != NULL){
@@ -857,6 +863,10 @@ int main(int argc, char* argv[]){
     
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights);
+    }
+    if (selectItemCalled){
+      selectItem();
+      selectItemCalled = false;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

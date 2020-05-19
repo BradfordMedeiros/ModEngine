@@ -29,8 +29,7 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
     }
 }
 
-void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,
-  void (*handleSerialization) (void), void (*selectItem) (void)){
+void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
   if (disableInput){
     return;
   }
@@ -51,11 +50,7 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
     state.cursorLeft = state.currentScreenWidth / 2;
     state.cursorTop = state.currentScreenHeight / 2;
   }
-      
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-    selectItem();
-  }
-
+    
 }
 
 void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, double yoffset){

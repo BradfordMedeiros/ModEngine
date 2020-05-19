@@ -7,9 +7,13 @@ glm::quat setFrontDelta(glm::quat orientation, float deltaYaw, float deltaPitch,
   return roll * yaw * orientation * pitch;                                      
 }
 
-glm::vec3 moveRelative(glm::vec3 position, glm::quat orientation, glm::vec3 offset, bool xzPlaneOnly){
+glm::vec3 calculateRelativeOffset(glm::quat orientation, glm::vec3 offset, bool xzPlaneOnly){
   glm::vec3 delta = orientation * offset;
-  return position + (xzPlaneOnly ? glm::vec3(delta.x, 0, delta.z) : delta);   // @TODO This loses magnitude if you do have upwards velocity.  This should really be just projecting offset onto xz plane
+  return (xzPlaneOnly ? glm::vec3(delta.x, 0, delta.z) : delta);
+}
+
+glm::vec3 moveRelative(glm::vec3 position, glm::quat orientation, glm::vec3 offset, bool xzPlaneOnly){
+  return position + calculateRelativeOffset(orientation, offset, xzPlaneOnly);   // @TODO This loses magnitude if you do have upwards velocity.  This should really be just projecting offset onto xz plane
 }
 glm::vec3 move(glm::vec3 position, glm::vec3 offset){
   return glm::vec3(position.x + offset.x, position.y + offset.y, position.z + offset.z);

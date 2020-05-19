@@ -45,7 +45,7 @@ void applyImpulse(short index, glm::vec3 impulse){
   applyImpulse(world.rigidbodys.at(index), impulse);
 }
 void applyImpulseRel(short index, glm::vec3 impulse){
-  glm::vec3 relativeImpulse = world.scenes.at(world.idToScene.at(index)).idToGameObjects.at(index).transformation.rotation * impulse;
+  glm::vec3 relativeImpulse = calculateRelativeOffset(world.scenes.at(world.idToScene.at(index)).idToGameObjects.at(index).transformation.rotation, impulse, true);
   applyImpulse(world.rigidbodys.at(index), relativeImpulse);
 }
 
