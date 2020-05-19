@@ -796,6 +796,13 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
+    glfwPollEvents();
+    schemeBindings.onFrame();
+    schemeBindings.onMessage(channelMessages);
+    channelMessages.clear();
+    onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
+
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
     }else{
@@ -865,11 +872,6 @@ int main(int argc, char* argv[]){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
   
-    onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
-
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
-    glfwPollEvents();
-
     // 2ND pass renders what we care about to the screen.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
@@ -888,10 +890,6 @@ int main(int argc, char* argv[]){
     if (showDebugInfo){
       renderUI(crosshairSprite, currentFramerate);
     }
-
-    schemeBindings.onFrame();
-    schemeBindings.onMessage(channelMessages);
-    channelMessages.clear();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
