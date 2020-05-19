@@ -23,7 +23,7 @@ glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
 }
 
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes the biggest, assuming one physics object per collision.  Can be inaccurate with
-  assert(boundings.size() == 1);
+  //assert(boundings.size() == 1);
   return boundings.at(0);
 }
 
@@ -78,6 +78,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index)
     for (Mesh& mesh : meshes){
       boundInfos.push_back(mesh.boundInfo);
     }
+    std::cout << "size: " << boundInfos.size() << std::endl;
     boundInfo = getMaxUnionBoundingInfo(boundInfos);
   }
 
@@ -591,6 +592,7 @@ void updateEntities(World& world){
 }
 
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics){
+  updateEntities(world);  
   if (enablePhysics){
     if (dumpPhysics){
       dumpPhysicsInfo(world.rigidbodys);
@@ -598,8 +600,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
     stepPhysicsSimulation(world.physicsEnvironment, timestep);
     updatePhysicsPositions(world, world.rigidbodys);     
   }
-  enforceLookAt(world);
-  updateEntities(world);
+  enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
 }
 
 std::map<std::string, std::string> getAttributes(World& world, short id){

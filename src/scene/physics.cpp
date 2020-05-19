@@ -137,10 +137,7 @@ void rmRigidBody(physicsEnv& env, btRigidBody* body){
 }
 
 glm::vec3 getPosition(btRigidBody* body){
-  btTransform transform; 
-  body -> getMotionState() -> getWorldTransform(transform);
-  auto pos = transform.getOrigin();
-  return btToGlm(pos);
+  return btToGlm(body -> getWorldTransform().getOrigin());
 }
 void setPosition(btRigidBody* rigid, glm::vec3 pos){
   btTransform transform; 
@@ -150,10 +147,7 @@ void setPosition(btRigidBody* rigid, glm::vec3 pos){
   rigid -> setWorldTransform(transform);
 }
 glm::quat getRotation(btRigidBody* body){
-  btTransform transform;
-  body -> getMotionState() -> getWorldTransform(transform);
-  auto rotation = transform.getRotation();
-  return btToGlm(rotation);
+  return btToGlm(body -> getWorldTransform().getRotation());
 }
 void setRotation(btRigidBody* body, glm::quat rotation){
   btTransform transform; 
