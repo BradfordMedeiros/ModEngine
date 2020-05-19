@@ -21,6 +21,7 @@ void moveCamera(glm::vec3 offset);
 void rotateCamera(float xoffset, float yoffset);
 
 void applyImpulse(short index, glm::vec3 impulse);
+void applyImpulseRel(short index, glm::vec3 impulse);
 void clearImpulse(short index);
 
 short loadScene(std::string sceneFile);

@@ -44,6 +44,11 @@ void rotateCamera(float xoffset, float yoffset){
 void applyImpulse(short index, glm::vec3 impulse){
   applyImpulse(world.rigidbodys.at(index), impulse);
 }
+void applyImpulseRel(short index, glm::vec3 impulse){
+  glm::vec3 relativeImpulse = world.scenes.at(world.idToScene.at(index)).idToGameObjects.at(index).transformation.rotation * impulse;
+  applyImpulse(world.rigidbodys.at(index), relativeImpulse);
+}
+
 void clearImpulse(short index){
   clearImpulse(world.rigidbodys.at(index));
 }

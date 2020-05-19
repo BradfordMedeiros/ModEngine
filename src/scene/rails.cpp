@@ -60,8 +60,7 @@ NextRail nextPosition(
   }  
 
   auto railDirection = glm::normalize(toRail - fromRail);
-  //bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
-  bool inDirectionOfRail = true;
+  bool inDirectionOfRail = glm::dot(railDirection, quatToVec(direction)) >= 0;
   auto newPosition = position + (inDirectionOfRail ? 1.0f : -1.0f) * railDirection;   // might be interesting to allow the dot value to actually be used to determine speed as well 
   auto atEndpoint = glm::distance(toRail, position) < 0.1;                            // If it's negative this can be the fromRail, also can be weird if rail moves while this is happening. 
 

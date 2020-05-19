@@ -32,6 +32,7 @@ void createStaticSchemeBindings(
   short (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(short index, glm::vec3 impulse),
+  void (*applyImpulseRel)(short index, glm::vec3 impulse),
   void (*clearImpulse)(short index),
   std::vector<std::string> (*listAnimations)(short id),
   void playAnimation(short id, std::string animationToPlay),

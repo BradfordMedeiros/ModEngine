@@ -241,15 +241,24 @@ SCM scmPlayAnimation(SCM value, SCM animationName){
   return SCM_UNSPECIFIED;
 }
 
+glm::vec3 listToVec3(SCM vecList){
+  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
+  return glm::vec3(x, y, z);
+}
 
 void (*_applyImpulse)(short index, glm::vec3 impulse);
 SCM scm_applyImpulse(SCM value, SCM impulse){
-  auto x = scm_to_double(scm_list_ref(impulse, scm_from_int64(0)));   
-  auto y = scm_to_double(scm_list_ref(impulse, scm_from_int64(1)));
-  auto z = scm_to_double(scm_list_ref(impulse, scm_from_int64(2)));
-  _applyImpulse(getGameobjId(value), glm::vec3(x, y, z));
+  _applyImpulse(getGameobjId(value), listToVec3(impulse));
   return SCM_UNSPECIFIED;
 }
+void (*_applyImpulseRel)(short index, glm::vec3 impulse);
+SCM scm_applyImpulseRel(SCM value, SCM impulse){
+  _applyImpulseRel(getGameobjId(value), listToVec3(impulse));
+  return SCM_UNSPECIFIED;
+}
+
 void (*_clearImpulse)(short index);
 SCM scm_clearImpulse(SCM value){
   _clearImpulse(getGameobjId(value));
@@ -435,6 +444,7 @@ void defineFunctions(){
 
   // physics functions
   scm_c_define_gsubr("applyimpulse", 2, 0, 0, (void *)scm_applyImpulse);
+  scm_c_define_gsubr("applyimpulse-rel", 2, 0, 0, (void *)scm_applyImpulseRel);
   scm_c_define_gsubr("clearimpulse", 1, 0, 0, (void *)scm_clearImpulse);
 
   // audio stuff
@@ -473,6 +483,7 @@ void createStaticSchemeBindings(
   short (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(short index, glm::vec3 impulse),
+  void (*applyImpulseRel)(short index, glm::vec3 impulse),
   void (*clearImpulse)(short index),
   std::vector<std::string> (*listAnimations)(short id),
   void playAnimation(short id, std::string animationToPlay),
@@ -507,8 +518,12 @@ void createStaticSchemeBindings(
   getGameObjectRotn = getGameObjectRot;
   setGameObjectRotn = setGameObjectRot;
   _setFrontDelta = setFrontDelta;
+
   _applyImpulse = applyImpulse;
+  _applyImpulseRel = applyImpulseRel;
   _clearImpulse = clearImpulse;
+
+
   getGameObjName = getGameObjectByName;
   _listAnimations = listAnimations;
   _playAnimation = playAnimation;

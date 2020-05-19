@@ -734,6 +734,7 @@ int main(int argc, char* argv[]){
     getGameObjectByName,
     setSelectionMode,
     applyImpulse,
+    applyImpulseRel,
     clearImpulse,
     listAnimations,
     playAnimation,
@@ -865,7 +866,7 @@ int main(int argc, char* argv[]){
     }
   
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
-    
+
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
     glfwPollEvents();
 
