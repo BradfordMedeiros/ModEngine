@@ -41,7 +41,8 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*attachToRail)(short id, std::string rail),
-  void (*unattachFromRail)(short id)
+  void (*unattachFromRail)(short id),
+  double (*timeSeconds)()
 );
 
 void defineFunctions();

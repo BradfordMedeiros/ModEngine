@@ -66,6 +66,7 @@ glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+float now = 0;
 
 AnimationState animations;
 
@@ -749,7 +750,8 @@ int main(int argc, char* argv[]){
     listModels,
     sendEventMessage,
     attachToRail,
-    unattachFromRail
+    unattachFromRail,
+    timeSeconds
   );
 
   schemeBindings = getSchemeCallbacks();
@@ -790,7 +792,7 @@ int main(int argc, char* argv[]){
 
   while (!glfwWindowShouldClose(window)){
     frameCount++;
-    float now = glfwGetTime();
+    now = glfwGetTime();
     deltaTime = now - previous;   
     previous = now;
     timePlayback.setElapsedTime(deltaTime);

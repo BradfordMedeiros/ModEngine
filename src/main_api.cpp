@@ -11,6 +11,7 @@ extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::vector<short> playbacksToRemove;
 extern std::vector<std::string> channelMessages;
+extern float now;
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
@@ -213,4 +214,8 @@ void attachToRail(short id, std::string rail){
 
 void unattachFromRail(short id){
   removeEntity(world.rails, id);
+}
+
+double timeSeconds(){
+  return now;
 }

@@ -325,6 +325,10 @@ SCM scmUnattachFromRail(SCM obj){
   return SCM_UNSPECIFIED;
 }
 
+double (*_timeSeconds)();
+SCM scmTimeSeconds(){
+  return scm_from_double(_timeSeconds());
+}
 
 // Callbacks
 void onFrame(){
@@ -457,6 +461,9 @@ void defineFunctions(){
   // rails
   scm_c_define_gsubr("attach-rail", 2, 0, 0, (void*)scmAttachToRail);
   scm_c_define_gsubr("unattach-rail", 1, 0, 0, (void*)scmUnattachFromRail);
+
+  // time
+  scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
 }
 
 
@@ -492,7 +499,8 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*attachToRail)(short id, std::string rail),
-  void (*unattachFromRail)(short id)
+  void (*unattachFromRail)(short id),
+  double (*timeSeconds)()
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -533,4 +541,5 @@ void createStaticSchemeBindings(
   _sendEventMessage = sendEventMessage;
   _attachToRail = attachToRail;
   _unattachFromRail = unattachFromRail;
+  _timeSeconds = timeSeconds;
 }
