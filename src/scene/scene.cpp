@@ -87,6 +87,14 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index)
     boundInfo = voxelObj -> voxel.mesh.boundInfo;
   }
 
+  auto railObj = std::get_if<GameObjectRail>(&gameObjV);
+  if (railObj != NULL){
+    auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
+    std::vector<BoundInfo> infos;
+    infos.push_back(railMesh.boundInfo);
+    boundInfo = getMaxUnionBoundingInfo(infos);
+  }
+
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .gameobject = obj,

@@ -206,7 +206,7 @@ void renderObject(
   }
 
   auto railObj = std::get_if<GameObjectRail>(&toRender);
-  if (railObj != NULL && showDebug){
+  if (railObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     drawMesh(nodeMesh, shaderProgram);
     return; 
