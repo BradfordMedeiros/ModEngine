@@ -294,14 +294,18 @@ glm::vec3 positionFromScene(Scene& scene, short id){
 } 
 
 // Need to take account proper dimensions of the mesh used obj -> should be derivable from mesh boundInfo
-void setRailSizing(Scene& scene, short id, std::string from, std::string to){
+void setRailSizing(Scene& scene, BoundInfo info, short id, std::string from, std::string to){
+  auto zLength = info.zMax - info.zMin;
   auto fromPosition = positionFromScene(scene, scene.nameToId.at(from));
   auto toPosition = positionFromScene(scene, scene.nameToId.at(to));
   auto distance = glm::distance(fromPosition, toPosition);
   auto orientation = orientationFromPos(fromPosition, toPosition);
   GameObject& obj = scene.idToGameObjects.at(id);
-  obj.transformation.scale = glm::vec3(1.f, 1.f, distance);
-  obj.transformation.position = fromPosition;
+
+  glm::vec3 scale = glm::vec3(1.f, 1.f, distance / zLength);
+  obj.transformation.scale = scale;
+  glm::vec3 meshOffset = orientation * (glm::vec3(0.f, 0.f, 1.f) * distance * 0.5f);
+  obj.transformation.position = fromPosition - meshOffset;  
   obj.transformation.rotation = orientation;
 
 }
@@ -352,7 +356,8 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       },
       [&world, &scene](short id, std::string from, std::string to) -> void {
         addRail(world.rails, scene.idToGameObjects.at(id).name, from, to);
-        setRailSizing(scene, id, from, to);
+        auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
+        setRailSizing(scene, railMesh.boundInfo, id, from, to);
       }
     );
   }
