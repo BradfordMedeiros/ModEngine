@@ -329,6 +329,11 @@ double (*_timeSeconds)();
 SCM scmTimeSeconds(){
   return scm_from_double(_timeSeconds());
 }
+void (*_saveScene)();
+SCM scmSaveScene(){
+  _saveScene();
+  return SCM_UNSPECIFIED;
+}
 
 // Callbacks
 void onFrame(){
@@ -462,8 +467,8 @@ void defineFunctions(){
   scm_c_define_gsubr("attach-rail", 2, 0, 0, (void*)scmAttachToRail);
   scm_c_define_gsubr("unattach-rail", 1, 0, 0, (void*)scmUnattachFromRail);
 
-  // time
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
+  scm_c_define_gsubr("save-scene", 0, 0, 0, (void*)scmSaveScene);
 }
 
 
@@ -500,7 +505,8 @@ void createStaticSchemeBindings(
   void (*sendEventMessage)(std::string message),
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
-  double (*timeSeconds)()
+  double (*timeSeconds)(),
+  void (*saveScene)()
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -542,4 +548,5 @@ void createStaticSchemeBindings(
   _attachToRail = attachToRail;
   _unattachFromRail = unattachFromRail;
   _timeSeconds = timeSeconds;
+  _saveScene = saveScene;
 }

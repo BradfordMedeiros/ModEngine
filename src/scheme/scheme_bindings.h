@@ -42,7 +42,8 @@ void createStaticSchemeBindings(
   void (*sendEventMessage)(std::string message),
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
-  double (*timeSeconds)()
+  double (*timeSeconds)(),
+  void (*saveScene)()
 );
 
 void defineFunctions();

@@ -751,7 +751,8 @@ int main(int argc, char* argv[]){
     sendEventMessage,
     attachToRail,
     unattachFromRail,
-    timeSeconds
+    timeSeconds,
+    saveScene
   );
 
   schemeBindings = getSchemeCallbacks();
@@ -804,11 +805,6 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
-    glfwPollEvents();
-    schemeBindings.onFrame();
-    schemeBindings.onMessage(channelMessages);
-    channelMessages.clear();
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
 
     if (state.useDefaultCamera || activeCameraObj == NULL){
@@ -902,6 +898,12 @@ int main(int argc, char* argv[]){
     if (showDebugInfo){
       renderUI(crosshairSprite, currentFramerate);
     }
+
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
+    glfwPollEvents();
+    schemeBindings.onFrame();
+    schemeBindings.onMessage(channelMessages);
+    channelMessages.clear();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 

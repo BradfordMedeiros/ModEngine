@@ -67,6 +67,11 @@ void unloadScene(short sceneId){
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId, unloadSoundState);
 }
+
+void saveScene(){
+  std::cout << "save scene placeholder" << std::endl;
+}
+
 std::vector<short> listScenes(){
   std::vector<short> sceneIds;
   for (auto &[id, _] : world.scenes){
