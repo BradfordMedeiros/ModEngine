@@ -539,7 +539,10 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   }else if (!state.isRotateSelection){
      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
   }
-
+  if (!showDebugInfo){
+    return;
+  }
+  
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
   std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
   std::string axisText = state.axis == 0 ? "xz" : "xy";
@@ -895,9 +898,7 @@ int main(int argc, char* argv[]){
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
 
-    if (showDebugInfo){
-      renderUI(crosshairSprite, currentFramerate);
-    }
+    renderUI(crosshairSprite, currentFramerate);
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
     glfwPollEvents();
