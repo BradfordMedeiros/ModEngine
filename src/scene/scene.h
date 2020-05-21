@@ -35,7 +35,7 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
 void addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
 void removeObject(World& world, short id, std::function<void(std::string)> unloadClip);
 
-std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping);
+std::string serializeScene(World& world, short sceneId);
 
 void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled);
 void  physicsTranslateSet(World& world, short index, glm::vec3 pos);

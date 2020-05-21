@@ -12,6 +12,8 @@ extern float initialTime;
 extern std::vector<short> playbacksToRemove;
 extern std::vector<std::string> channelMessages;
 extern float now;
+extern std::string rawSceneFile;
+
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
@@ -68,8 +70,12 @@ void unloadScene(short sceneId){
   removeSceneFromWorld(world, sceneId, unloadSoundState);
 }
 
+// @TODO - save all the scenes in the world
 void saveScene(){
-  std::cout << "save scene placeholder" << std::endl;
+  auto id = 0;
+  auto fileToSave = rawSceneFile;
+  std::cout << "saving scene id: " << id << " to file: " << fileToSave << std::endl;
+  saveFile(fileToSave, serializeScene(world, id));
 }
 
 std::vector<short> listScenes(){

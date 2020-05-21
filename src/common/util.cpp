@@ -9,6 +9,13 @@ std::string loadFile(std::string filepath){
    buffer << file.rdbuf();
    return buffer.str();
 }
+void saveFile(std::string filepath, std::string content){
+  std::ofstream file;
+  file.open(filepath);
+  file << content;
+  file.close();
+}
+
 std::vector<std::string> listAllFiles(std::filesystem::path path) {
   std::vector<std::string> files;
   for(auto &file: std::filesystem::recursive_directory_iterator(path)) {

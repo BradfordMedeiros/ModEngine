@@ -286,21 +286,11 @@ void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std:
 
 }
 
-std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
-  // @TODO fix scene serialization, only serializing first mesh right now, which is wrong
-  return { std::pair<std::string, std::string>("mesh", obj.meshNames.at(0)) };
-}
 std::vector<std::pair<std::string, std::string>> defaultSerialization(){
   return {}; 
 }   
-
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
-  GameObjectObj objectToSerialize = mapping.at(id);
-  auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
-  if (meshObject != NULL){
-    return serializeMesh(*meshObject);
-  }
-  return defaultSerialization();
+  return defaultSerialization();    // @TODO serialize object specific fields here
 }
 
 std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){

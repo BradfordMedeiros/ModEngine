@@ -363,9 +363,11 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
   }
 }
 
-std::string serializeFullScene(Scene& scene, std::map<short, GameObjectObj> objectMapping){
-  return serializeScene(scene, [&objectMapping](short objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, objectMapping);
+std::string serializeScene(World& world, short sceneId){
+  std::cout << "scene size: " << world.scenes.size() << std::endl;
+  Scene& scene = world.scenes.at(sceneId);
+  return serializeScene(scene, [&world](short objectId)-> std::vector<std::pair<std::string, std::string>> {
+    return getAdditionalFields(objectId, world.objectMapping);
   });
 }
 
