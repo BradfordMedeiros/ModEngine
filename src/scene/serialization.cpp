@@ -204,36 +204,3 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
   return objects;
 }
 
-// this isn't complete output of serialization but exposes some fields
-std::string serializationObjectToString(std::vector<SerializationObject> objects){
-  std::string serial = "";
-  for (auto obj : objects){
-    serial = serial + obj.name + ":position:" + std::to_string(obj.position.x) + " " + std::to_string(obj.position.y) + " " + std::to_string(obj.position.z) + "\n";
-    serial = serial + obj.name + ":scale:" + std::to_string(obj.scale.x) + " " + std::to_string(obj.scale.y) + " " + std::to_string(obj.scale.z) + "\n";
-    
-    if (!obj.physics.enabled){
-      serial = serial + obj.name + ":physics:disabled" + "\n";
-    }
-    if (!obj.physics.isStatic){
-      serial = serial + obj.name + ":physics:dynamic" + "\n";
-    }
-    if (!obj.physics.hasCollisions){
-      serial = serial + obj.name + ":physics:nocollide" + "\n";
-    }
-    if (obj.physics.shape == SPHERE ){
-      serial = serial + obj.name + ":physics:shape_sphere" + "\n";
-    }
-    if (obj.physics.shape == BOX){
-      serial = serial + obj.name + ":physics:box" + "\n";
-    }
-    if (obj.lookat != ""){
-      serial = serial + obj.name + ":lookat:" + obj.lookat + "\n";
-    }
-
-    for (auto [field, payload] : obj.additionalFields){
-      serial = serial + obj.name + ":" + field + ":" + payload + "\n";
-    }
-    serial = serial + "\n\n";
-  }
-  return serial;
-}
