@@ -23,6 +23,7 @@ struct GameObjectMesh {
   std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
   bool isDisabled;
   bool nodeOnly;
+  std::string rootMesh;
 };
 struct GameObjectCamera {};
 struct GameObjectSound{

@@ -6,6 +6,7 @@ std::map<short, GameObjectObj> getObjectMapping() {
 }
 
 GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string)> ensureMeshLoaded){
+  std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
 
   std::vector<std::string> meshNames;
@@ -34,7 +35,8 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
     .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
-    .nodeOnly = meshNames.size() == 0
+    .nodeOnly = meshNames.size() == 0,
+    .rootMesh = rootMeshName
   };
   return obj;
 }
@@ -286,12 +288,86 @@ void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std:
 
 }
 
-std::vector<std::pair<std::string, std::string>> defaultSerialization(){
-  return {}; 
-}   
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
-  return defaultSerialization();    // @TODO serialize object specific fields here
+std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  if (obj.rootMesh != ""){
+    pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh));
+  }
+  if (obj.isDisabled){
+    pairs.push_back(std::pair<std::string, std::string>("disabled", "true"));
+  }
+  return pairs;  
 }
+std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj){
+  return {}; 
+}  
+std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  if (obj.clip != ""){
+    pairs.push_back(std::pair<std::string, std::string>("clip", obj.clip));
+  }
+  return pairs;
+}   
+std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  pairs.push_back(std::pair<std::string, std::string>("color", serializeVec(obj.color)));
+  return pairs;
+}  
+std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  std::cout << "NOT YET IMPLEMENTED" << std::endl;
+  assert(false);
+  return pairs;
+}  
+std::vector<std::pair<std::string, std::string>> serializeChannel(GameObjectChannel obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  return pairs;
+}
+std::vector<std::pair<std::string, std::string>> serializeRail(GameObjectRail obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  if (obj.connection.from != ""){
+    pairs.push_back(std::pair<std::string, std::string>("from", obj.connection.from));
+  }
+  if (obj.connection.to != ""){
+    pairs.push_back(std::pair<std::string, std::string>("to", obj.connection.to));
+  }
+  return pairs;
+}
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping){
+  GameObjectObj objectToSerialize = mapping.at(id);
+  auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
+  if (meshObject != NULL){
+    return serializeMesh(*meshObject);
+  }
+  auto cameraObject = std::get_if<GameObjectCamera>(&objectToSerialize);
+  if (cameraObject != NULL){
+    return serializeCamera(*cameraObject);
+  }
+  auto soundObject = std::get_if<GameObjectSound>(&objectToSerialize);
+  if (soundObject != NULL){
+    return serializeSound(*soundObject);
+  }
+  auto lightObject = std::get_if<GameObjectLight>(&objectToSerialize);
+  if (lightObject != NULL){
+    return serializeLight(*lightObject);
+  }
+  auto voxelObject = std::get_if<GameObjectVoxel>(&objectToSerialize);
+  if (voxelObject != NULL){
+    return serializeVoxel(*voxelObject);
+  }
+  auto channelObject = std::get_if<GameObjectChannel>(&objectToSerialize);
+  if (channelObject != NULL){
+    return serializeChannel(*channelObject);
+  }
+  auto railObject = std::get_if<GameObjectRail>(&objectToSerialize);
+  if (railObject != NULL){
+    return serializeRail(*railObject);
+  }
+
+  assert(false);  
+  return {};
+}
+
 
 std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
   std::vector<short> indicies;

@@ -154,17 +154,6 @@ bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }
 
-std::string serializeVec(glm::vec3 vec){
-  return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
-}
-std::string serializeRotation(glm::quat rotation){
-  float xx = rotation.x;
-  float yy = rotation.y;
-  float zz = rotation.z;
-  glm::vec3 angles = eulerAngles(rotation);
-  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z - M_PI); 
-}
-
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){

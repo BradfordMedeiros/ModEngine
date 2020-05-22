@@ -107,6 +107,16 @@ glm::quat parseQuat(std::string payload){
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
 }
+std::string serializeVec(glm::vec3 vec){
+  return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
+}
+std::string serializeRotation(glm::quat rotation){
+  float xx = rotation.x;
+  float yy = rotation.y;
+  float zz = rotation.z;
+  glm::vec3 angles = eulerAngles(rotation);
+  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z - M_PI); 
+}
 
 float maxvalue(float x, float y, float z){
   if (x >= y && x >= z){

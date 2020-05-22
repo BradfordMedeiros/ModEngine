@@ -27,6 +27,9 @@ std::string print(glm::quat quat);
 glm::vec3 parseVec(std::string positionRaw);
 glm::quat parseQuat(std::string payload);
 glm::vec3 quatToVec(glm::quat quat);
+std::string serializeVec(glm::vec3 vec);
+std::string serializeRotation(glm::quat rotation);
+
 
 float maxvalue(float x, float y, float z);
 int maxvalue(int x, int y, int z);
