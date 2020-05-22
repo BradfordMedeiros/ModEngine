@@ -157,6 +157,9 @@ std::string serializeRotation(glm::quat rotation){
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){
+    if (gameobjecth.groupId != id){
+      continue;
+    }
     GameObject gameobject = scene.idToGameObjects[id];
     std::string gameobjectName = gameobject.name;
     std::string parentName = scene.idToGameObjects[gameobjecth.parentId].name;
