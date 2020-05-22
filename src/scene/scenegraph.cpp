@@ -144,6 +144,16 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   return serialObjs;
 } 
 
+bool isDefaultPosition(glm::vec3 pos){
+  return pos.x == 0 && pos.y == 0 && pos.z == 0;
+}
+bool isIdentityVec(glm::vec3 scale){
+  return scale.x = 1 && scale.y == 1 && scale.z == 1;
+}
+bool isDefaultGravity(glm::vec3 gravity){
+  return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
+}
+
 std::string serializeVec(glm::vec3 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
 }
@@ -154,26 +164,63 @@ std::string serializeRotation(glm::quat rotation){
   glm::vec3 angles = eulerAngles(rotation);
   return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z - M_PI); 
 }
+
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){
     if (gameobjecth.groupId != id){
       continue;
     }
-    GameObject gameobject = scene.idToGameObjects[id];
+    GameObject gameobject = scene.idToGameObjects.at(id);
     std::string gameobjectName = gameobject.name;
-    std::string parentName = scene.idToGameObjects[gameobjecth.parentId].name;
+    if (!(scene.idToGameObjects.find(gameobjecth.parentId) == scene.idToGameObjects.end())){
+      std::string parentName = scene.idToGameObjects.at(gameobjecth.parentId).name;
+      if (parentName != ""){
+        sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
+      }
+    }
 
-    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
-    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
+    if (!isDefaultPosition(gameobject.transformation.position)){
+      sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
+    }
+    if (!isIdentityVec(gameobject.transformation.scale)){
+      sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
+    }
     sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
+
+    if (!gameobject.physicsOptions.enabled){
+      sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
+    }
+    if (!gameobject.physicsOptions.isStatic){
+      sceneData = sceneData + gameobjectName + ":physics:dynamic" + "\n"; 
+    }
+    if (!gameobject.physicsOptions.hasCollisions){
+      sceneData = sceneData + gameobjectName + ":physics:nocollide" + "\n"; 
+    }
+    if (gameobject.physicsOptions.shape == BOX){
+      sceneData = sceneData + gameobjectName + ":physics:shape_box" + "\n"; 
+    }
+    if (gameobject.physicsOptions.shape == SPHERE){
+      sceneData = sceneData + gameobjectName + ":physics:shape_sphere" + "\n"; 
+    }
+    if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
+      sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
+    }
+    if (!isIdentityVec(gameobject.physicsOptions.angularFactor)){
+      sceneData = sceneData + gameobjectName + ":physics_angle:" + serializeVec(gameobject.physicsOptions.angularFactor) + "\n"; 
+    }
+    if (!isDefaultGravity(gameobject.physicsOptions.gravity)){
+      sceneData = sceneData + gameobjectName + ":physics_gravity:" + serializeVec(gameobject.physicsOptions.gravity) + "\n"; 
+    }
+    if (gameobject.lookat != ""){
+      sceneData = sceneData + gameobjectName + ":lookat:" + gameobject.lookat + "\n"; 
+    }
+    if (gameobject.script != ""){
+       sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
+    }
 
     for (auto additionalFields : getAdditionalFields(id)){
       sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
-    }
-
-    if (parentName != ""){
-      sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
     }
   }
   return sceneData;
