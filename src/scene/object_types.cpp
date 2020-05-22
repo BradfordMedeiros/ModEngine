@@ -321,6 +321,12 @@ std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel 
 }  
 std::vector<std::pair<std::string, std::string>> serializeChannel(GameObjectChannel obj){
   std::vector<std::pair<std::string, std::string>> pairs;
+  if (obj.from != ""){
+    pairs.push_back(std::pair<std::string, std::string>("from", obj.from));
+  }
+  if (obj.to != ""){
+    pairs.push_back(std::pair<std::string, std::string>("to", obj.to));
+  }
   return pairs;
 }
 std::vector<std::pair<std::string, std::string>> serializeRail(GameObjectRail obj){
