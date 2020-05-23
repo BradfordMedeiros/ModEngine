@@ -24,7 +24,7 @@ struct engineState {
   std::string additionalText;
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
-  ManipulatorAxis manipulatorAxis;
+  Axis manipulatorAxis;
   bool firstMouse;
   float lastX;
   float lastY;

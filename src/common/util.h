@@ -19,7 +19,7 @@ std::vector<std::string> split(std::string strToSplit, char delimeter);
 std::string join(std::vector<std::string> values, char delimeter);
 
 enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
-enum ManipulatorAxis { NOAXIS, XAXIS, YAXIS, ZAXIS };
+enum Axis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 
 std::string print(glm::vec3 vec);
 std::string print(glm::vec2 vec);

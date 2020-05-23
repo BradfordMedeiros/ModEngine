@@ -41,6 +41,7 @@
 #include "./input.h"
 #include "./network.h"
 #include "./scene/rails.h"
+#include "./easy_use.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -184,18 +185,21 @@ void expandVoxelRight(){
 }
 
 void onArrowKey(int key){
-  std::cout << "on arrow key pressed: " << key << std::endl;
   if (key == GLFW_KEY_LEFT){
-    expandVoxelLeft();
+    //expandVoxelLeft();
+    setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), YAXIS));
   }
   if (key == GLFW_KEY_RIGHT){
-    expandVoxelRight();
+    //expandVoxelRight();
+    setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), YAXIS));
   }
   if (key == GLFW_KEY_UP){
-    expandVoxelUp();
+    //expandVoxelUp();
+    setSnapAngleUp();
   }
   if (key == GLFW_KEY_DOWN){
-    expandVoxelDown();
+    //expandVoxelDown();
+    setSnapAngleDown();
   }
 }
 

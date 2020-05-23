@@ -23,7 +23,7 @@ glm::mat4 renderView(glm::vec3 position, glm::quat orientation){
   return glm::inverse(cameraModelMatrix);
 }
 
-glm::vec3 getVecAxis(ManipulatorAxis axis){
+glm::vec3 getVecAxis(Axis axis){
   if (axis == XAXIS){
     return glm::vec3(1.0f, 0.f, 0.f);
   }else if (axis == YAXIS){
@@ -36,12 +36,12 @@ glm::vec3 getVecAxis(ManipulatorAxis axis){
 glm::vec3 getVecTranslate(float offsetX, float offsetY){
   return glm::vec3(-offsetX, offsetY, offsetY);
 }
-glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
   glm::vec3 axis = getVecAxis(manipulatorAxis);
   glm::vec3 translate = getVecTranslate(offsetX, offsetY);
   return position + axis * translate;
 }
-glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
   float distanceOld = glm::distance(position, glm::vec3(lastX, lastY, 0));
   float distanceNew = glm::distance(position, glm::vec3(lastX + offsetX, lastY + offsetY, 0));
 
@@ -53,7 +53,7 @@ glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, 
     return initialScale;
   }
 }
-glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY, ManipulatorAxis manipulatorAxis){
+glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
   float deltaYaw = manipulatorAxis == XAXIS ? offsetY : 0;
   float deltaPitch = manipulatorAxis == YAXIS ? offsetX : 0;
   float deltaRoll = manipulatorAxis == ZAXIS ? offsetX : 0;
