@@ -15,8 +15,31 @@ void setSnapAngleDown(){
   std::cout << "Snap angle is now: " << snapAngles.at(currentAngleIndex) << std::endl;
 }
 
-float getClosestNumber(float current, int snapAngle, bool isUp){
-  return current + snapAngle;
+float getClosestNumber(float angle, int snapAngle, bool isUp){
+  int numIterations = (360 / snapAngle) + 1;
+  float current = angle < 0 ? (360 + angle) : angle;
+
+  std::cout << "current: " << current << std::endl;
+  assert(current >= 0);
+
+  if (isUp){
+    for (int i = -numIterations; i <= numIterations; i++){
+      int angleToSnapTo = snapAngle * i;
+      if ((int)current < angleToSnapTo){
+        return angleToSnapTo;
+      }
+    }  
+  }else{
+    for (int i = numIterations; i >= -numIterations; i--){
+      int angleToSnapTo = snapAngle * i;
+      if ((int)current > angleToSnapTo){
+        return angleToSnapTo;
+      }
+    }  
+  }
+
+  // shouldn't ever be reached
+  assert(false);
 }
 
 glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp){

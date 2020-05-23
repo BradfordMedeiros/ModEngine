@@ -174,7 +174,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
     state.manipulatorAxis = ZAXIS;
   }
 
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+  /*if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
     if (state.mode == 0){
       translate(0.1 * deltaTime, 0, 0);
     }else if (state.mode == 1){
@@ -234,6 +234,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
       }
     }
   }
+  */
 
    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
      onArrowKey(GLFW_KEY_RIGHT);

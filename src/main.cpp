@@ -187,19 +187,15 @@ void expandVoxelRight(){
 void onArrowKey(int key){
   if (key == GLFW_KEY_LEFT){
     //expandVoxelLeft();
-    setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
   }
   if (key == GLFW_KEY_RIGHT){
     //expandVoxelRight();
-    setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
   }
   if (key == GLFW_KEY_UP){
     //expandVoxelUp();
-    setSnapAngleUp();
   }
   if (key == GLFW_KEY_DOWN){
     //expandVoxelDown();
-    setSnapAngleDown();
   }
 }
 
@@ -316,6 +312,19 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
   } 
+
+  if (key == GLFW_KEY_LEFT && action == 1){
+    setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
+  }
+  if (key == GLFW_KEY_RIGHT && action == 1){
+    setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
+  }
+  if (key == GLFW_KEY_UP && action == 1){
+    setSnapAngleUp();
+  }
+  if (key == GLFW_KEY_DOWN && action == 1){
+    setSnapAngleDown();
+  }
 }
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint); 
