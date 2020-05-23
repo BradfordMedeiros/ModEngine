@@ -18,8 +18,6 @@ void setSnapAngleDown(){
 float getClosestNumber(float angle, int snapAngle, bool isUp){
   int numIterations = (360 / snapAngle) + 1;
   float current = angle < 0 ? (360 + angle) : angle;
-
-  std::cout << "current: " << current << std::endl;
   assert(current >= 0);
 
   if (isUp){
@@ -37,8 +35,6 @@ float getClosestNumber(float angle, int snapAngle, bool isUp){
       }
     }  
   }
-
-  // shouldn't ever be reached
   assert(false);
 }
 
@@ -66,4 +62,26 @@ glm::quat snapAngleUp(glm::quat angle, Axis rotationAxis){
 glm::quat snapAngleDown(glm::quat angle, Axis rotationAxis){
   std::cout << "snap angle down placeholder" << std::endl;
   return snapAngle(angle, rotationAxis, false);
+}
+
+
+static std::vector<float> snapTranslates = { 15, 30, 45, 90, 180 };
+static int currentTranslateIndex = 0;
+
+void setSnapTranslateUp(){
+  currentTranslateIndex = (currentTranslateIndex + 1) % snapTranslates.size();
+  std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
+}
+void setSnapTranslateDown(){
+  currentTranslateIndex = (currentTranslateIndex - 1);
+  if (currentTranslateIndex < 0){
+    currentTranslateIndex = snapAngles.size() - 1;
+  }
+  std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
+}
+glm::vec3 snapTranslateUp(glm::vec3 currentPos, Axis translationAxis){
+
+}
+glm::vec3 snapTranslateDown(glm::vec3 currentPos, Axis translationAxis){
+
 }
