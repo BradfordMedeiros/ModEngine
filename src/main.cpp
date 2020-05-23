@@ -187,11 +187,11 @@ void expandVoxelRight(){
 void onArrowKey(int key){
   if (key == GLFW_KEY_LEFT){
     //expandVoxelLeft();
-    setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), YAXIS));
+    setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
   }
   if (key == GLFW_KEY_RIGHT){
     //expandVoxelRight();
-    setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), YAXIS));
+    setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
   }
   if (key == GLFW_KEY_UP){
     //expandVoxelUp();
