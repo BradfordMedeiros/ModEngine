@@ -174,7 +174,7 @@ void checkCollisions(physicsEnv& env){
 }
 
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
-  env.dynamicsWorld -> stepSimulation(timestep, 10);
+  env.dynamicsWorld -> stepSimulation(timestep, 0);   // TODO revisit # of substeps
   checkCollisions(env);
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> debugDrawWorld();
