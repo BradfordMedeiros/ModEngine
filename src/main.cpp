@@ -314,16 +314,36 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   } 
 
   if (key == GLFW_KEY_LEFT && action == 1){
-    setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
+    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
+      setGameObjectPosition(state.selectedIndex, snapTranslateUp(getGameObjectPosition(state.selectedIndex), state.manipulatorAxis));
+    }else if (state.manipulatorMode == ROTATE){
+      setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
+    }else if (state.manipulatorMode == SCALE){
+    }
   }
   if (key == GLFW_KEY_RIGHT && action == 1){
-    setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
+    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
+      setGameObjectPosition(state.selectedIndex, snapTranslateDown(getGameObjectPosition(state.selectedIndex), state.manipulatorAxis));
+    }else if (state.manipulatorMode == ROTATE){
+      setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
+    }else if (state.manipulatorMode == SCALE){
+    }
   }
   if (key == GLFW_KEY_UP && action == 1){
-    setSnapAngleUp();
+    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
+      setSnapTranslateUp();
+    }else if (state.manipulatorMode == ROTATE){
+      setSnapAngleUp();
+    }else if (state.manipulatorMode == SCALE){
+    }
   }
   if (key == GLFW_KEY_DOWN && action == 1){
-    setSnapAngleDown();
+    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
+      setSnapTranslateDown();
+    }else if (state.manipulatorMode == ROTATE){
+      setSnapAngleDown();
+    }else if (state.manipulatorMode == SCALE){
+    }
   }
 }
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
