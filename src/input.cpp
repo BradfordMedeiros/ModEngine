@@ -72,7 +72,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
-  void (*onCameraSystemChange)(bool usingBuiltInCamera)
+  void (*onCameraSystemChange)(bool usingBuiltInCamera),
+  void (*onDelete)()
 ){
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
@@ -263,5 +264,9 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       state.discardAmount -= 0.01;
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS){
+      onDelete();
    }
 }

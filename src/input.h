@@ -20,7 +20,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
-  void (*onCameraSystemChange)(bool usingBuiltInCamera)
+  void (*onCameraSystemChange)(bool usingBuiltInCamera),
+  void (*onDelete)()
 );
 
 #endif

@@ -198,6 +198,13 @@ void onArrowKey(int key){
     //expandVoxelDown();
   }
 }
+void onDelete(){
+  if (state.selectedIndex != -1){
+    std::cout << "OnDelete object id: " << state.selectedIndex << std::endl;
+    removeObjectById(state.selectedIndex);
+    state.selectedIndex = -1;
+  }
+}
 
 void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk  
   for (auto [id, scene] : world.scenes){
@@ -934,7 +941,7 @@ int main(int argc, char* argv[]){
 
     renderUI(crosshairSprite, currentFramerate);
 
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange);
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);

@@ -387,10 +387,12 @@ short addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
 }
 
 void removeObjectById(World& world, short objectId, std::function<void(std::string)> unloadClip){
-  auto rigidBody = world.rigidbodys.at(objectId);
-  assert(rigidBody != NULL);
-  rmRigidBody(world.physicsEnvironment, rigidBody);
-  world.rigidbodys.erase(objectId);
+  if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
+    auto rigidBody = world.rigidbodys.at(objectId);
+    assert(rigidBody != NULL);
+    rmRigidBody(world.physicsEnvironment, rigidBody);
+    world.rigidbodys.erase(objectId);
+  }
   removeObject(world.objectMapping, objectId, unloadClip, []() -> void {
     std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
     assert(false);
