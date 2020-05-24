@@ -91,7 +91,7 @@ void setSnapTranslateUp(){
 void setSnapTranslateDown(){
   currentTranslateIndex = (currentTranslateIndex - 1);
   if (currentTranslateIndex < 0){
-    currentTranslateIndex = snapAngles.size() - 1;
+    currentTranslateIndex = snapTranslates.size() - 1;
   }
   std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
 }
