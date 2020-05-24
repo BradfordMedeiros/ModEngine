@@ -42,6 +42,9 @@ glm::vec3 getGameObjectPosition(short index);
 void setGameObjectPosition(short index, glm::vec3 pos);
 void setGameObjectPositionRelative(short index, float x, float y, float z, bool xzPlaneOnly);
 
+glm::vec3 getGameObjectScale(short index);
+void setGameObjectScale(short index, glm::vec3 scale);
+
 glm::quat getGameObjectRotation(short index);
 void setGameObjectRotation(short index, glm::quat rotation);
 void setSelectionMode(bool enabled);

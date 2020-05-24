@@ -319,6 +319,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }else if (state.manipulatorMode == ROTATE){
       setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
     }else if (state.manipulatorMode == SCALE){
+      setGameObjectScale(state.selectedIndex, snapScaleDown(getGameObjectScale(state.selectedIndex), state.manipulatorAxis));
     }
   }
   if (key == GLFW_KEY_RIGHT && action == 1){
@@ -327,6 +328,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }else if (state.manipulatorMode == ROTATE){
       setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
     }else if (state.manipulatorMode == SCALE){
+      setGameObjectScale(state.selectedIndex, snapScaleUp(getGameObjectScale(state.selectedIndex), state.manipulatorAxis));
     }
   }
   if (key == GLFW_KEY_UP && action == 1){
@@ -335,6 +337,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }else if (state.manipulatorMode == ROTATE){
       setSnapAngleUp();
     }else if (state.manipulatorMode == SCALE){
+      setSnapScaleUp();
     }
   }
   if (key == GLFW_KEY_DOWN && action == 1){
@@ -343,6 +346,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }else if (state.manipulatorMode == ROTATE){
       setSnapAngleDown();
     }else if (state.manipulatorMode == SCALE){
+      setSnapScaleDown();
     }
   }
 }

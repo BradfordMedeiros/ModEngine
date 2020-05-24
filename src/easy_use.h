@@ -16,4 +16,9 @@ void setSnapTranslateDown();
 glm::vec3 snapTranslateUp(glm::vec3 currentPos, Axis translationAxis);
 glm::vec3 snapTranslateDown(glm::vec3 currentPos, Axis translationAxis);
 
+void setSnapScaleUp();
+void setSnapScaleDown();
+glm::vec3 snapScaleUp(glm::vec3 currentScale, Axis translationAxis);
+glm::vec3 snapScaleDown(glm::vec3 currentScale, Axis translationAxis);
+
 #endif

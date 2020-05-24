@@ -510,11 +510,22 @@ void physicsRotateSet(World& world, short index, glm::quat rotation){
   }
 }
 
+
 void physicsScale(World& world, short index, float x, float y, float z){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto oldScale = scene.idToGameObjects.at(index).transformation.scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
+    auto body =  world.rigidbodys.at(index);
+    setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+  }
+}
+void physicsScaleSet(World& world, short index, glm::vec3 scale){
+  Scene& scene = world.scenes.at(world.idToScene.at(index));
+  scene.idToGameObjects.at(index).transformation.scale = scale;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;

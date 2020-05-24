@@ -42,6 +42,7 @@ void  physicsTranslateSet(World& world, short index, glm::vec3 pos);
 void  physicsRotate(World& world, short index, float x, float y, float z);
 void  physicsRotateSet(World& world, short index, glm::quat rotation);  // this sets to rotation
 void  physicsScale(World& world, short index, float x, float y, float z);
+void  physicsScaleSet(World& world, short index, glm::vec3 scale);
 void  applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
 void  applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
 void  applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);

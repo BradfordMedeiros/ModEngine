@@ -1,8 +1,7 @@
 #include "./easy_use.h"
 
-static std::vector<int> snapAngles = { 15, 30, 45, 90, 180 };
+static std::vector<int> snapAngles = { 1, 5, 15, 30, 45, 90, 180 };
 static int currentAngleIndex = 0;
-
 void setSnapAngleUp(){
   currentAngleIndex = (currentAngleIndex + 1) % snapAngles.size();
   std::cout << "Snap angle is now: " << snapAngles.at(currentAngleIndex) << std::endl;
@@ -14,7 +13,6 @@ void setSnapAngleDown(){
   }
   std::cout << "Snap angle is now: " << snapAngles.at(currentAngleIndex) << std::endl;
 }
-
 float getClosestAngle(float angle, int snapAngle, bool isUp){
   int numIterations = (360 / snapAngle) + 1;
   float current = angle < 0 ? (360 + angle) : angle;
@@ -37,7 +35,6 @@ float getClosestAngle(float angle, int snapAngle, bool isUp){
   }
   assert(false);
 }
-
 glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp){
   glm::vec3 euler = glm::degrees(glm::eulerAngles(angle));
  
@@ -54,7 +51,6 @@ glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp){
   glm::quat newRotation = glm::quat(newAngle);
   return newRotation;
 }
-
 glm::quat snapAngleUp(glm::quat angle, Axis rotationAxis){
   return snapAngle(angle, rotationAxis, true);
 }
@@ -63,9 +59,31 @@ glm::quat snapAngleDown(glm::quat angle, Axis rotationAxis){
 }
 
 
+float getClosestPosition(float position, float snapAmount, bool isUp){
+  int multiple = position / snapAmount;
+  if (isUp){
+    return (multiple + 1) * snapAmount; 
+  }
+  return (multiple - 1) * snapAmount;
+};
+glm::vec3 snapVector(glm::vec3 current, Axis translationAxis, bool isUp, float snapAmount){
+  if (translationAxis == NOAXIS || translationAxis == XAXIS){
+    float newX = getClosestPosition(current.x, snapAmount, isUp);    
+    return glm::vec3(newX, current.y, current.z);
+  }else if (translationAxis == YAXIS){
+    float newY = getClosestPosition(current.y, snapAmount, isUp);
+    return glm::vec3(current.x, newY, current.z);
+  }else if (translationAxis == ZAXIS){
+    float newZ = getClosestPosition(current.z, snapAmount, isUp);
+    return glm::vec3(current.x, current.y, newZ);
+  }else{
+    assert(false);
+  }
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+
 static std::vector<float> snapTranslates = { 0.01, 0.1, 0.5, 1, 5, 10 };
 static int currentTranslateIndex = 0;
-
 void setSnapTranslateUp(){
   currentTranslateIndex = (currentTranslateIndex + 1) % snapTranslates.size();
   std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
@@ -77,31 +95,29 @@ void setSnapTranslateDown(){
   }
   std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
 }
-float getClosestPosition(float position, float snapTranslate, bool isUp){
-  int multiple = position / snapTranslate;
-  if (isUp){
-    return (multiple + 1) * snapTranslate; 
-  }
-  return (multiple - 1) * snapTranslate;
-};
-glm::vec3 snapTranslate(glm::vec3 current, Axis translationAxis, bool isUp){
-  if (translationAxis == NOAXIS || translationAxis == XAXIS){
-    float newX = getClosestPosition(current.x, snapTranslates.at(currentTranslateIndex), isUp);    
-    return glm::vec3(newX, current.y, current.z);
-  }else if (translationAxis == YAXIS){
-    float newY = getClosestPosition(current.y, snapTranslates.at(currentTranslateIndex), isUp);
-    return glm::vec3(current.x, newY, current.z);
-  }else if (translationAxis == ZAXIS){
-    float newZ = getClosestPosition(current.z, snapTranslates.at(currentTranslateIndex), isUp);
-    return glm::vec3(current.x, current.y, newZ);
-  }else{
-    assert(false);
-  }
-  return glm::vec3(0.f, 0.f, 0.f);
-}
 glm::vec3 snapTranslateUp(glm::vec3 currentPos, Axis translationAxis){
-  return snapTranslate(currentPos, translationAxis, true);
+  return snapVector(currentPos, translationAxis, true, snapTranslates.at(currentTranslateIndex));
 }
 glm::vec3 snapTranslateDown(glm::vec3 currentPos, Axis translationAxis){
-  return snapTranslate(currentPos, translationAxis, false);
+  return snapVector(currentPos, translationAxis, false, snapTranslates.at(currentTranslateIndex));
+}
+
+static std::vector<float> snapScales = { 0.01, 0.1, 0.5, 1, 5, 10 };
+static int currentScaleIndex = 0;
+void setSnapScaleUp(){
+  currentScaleIndex = (currentScaleIndex + 1) % snapScales.size();
+  std::cout << "Snap scale is now: " << snapScales.at(currentScaleIndex) << std::endl;
+}
+void setSnapScaleDown(){
+  currentScaleIndex = (currentScaleIndex - 1);
+  if (currentScaleIndex < 0){
+    currentScaleIndex = snapScales.size() - 1;
+  }
+  std::cout << "Snap scale is now: " << snapScales.at(currentScaleIndex) << std::endl;
+}
+glm::vec3 snapScaleUp(glm::vec3 currentScale, Axis translationAxis){
+  return snapVector(currentScale, translationAxis, true, snapScales.at(currentScaleIndex));
+}
+glm::vec3 snapScaleDown(glm::vec3 currentScale, Axis translationAxis){
+  return snapVector(currentScale, translationAxis, false, snapScales.at(currentScaleIndex));
 }
