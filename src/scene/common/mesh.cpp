@@ -160,10 +160,12 @@ Mesh loadSpriteMesh(std::string imagePath){
   return load2DMeshHelper(imagePath, uiVerts, indices, 20, 6, 3, 2);  
 }
 
-void drawMesh(Mesh mesh, GLint shaderProgram){
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId){
   glBindVertexArray(mesh.VAOPointer);
  
   glActiveTexture(GL_TEXTURE0); 
+
+  auto diffuseTextureId = customTextureId == -1 ? mesh.texture.textureId : customTextureId;
   glBindTexture(GL_TEXTURE_2D, mesh.texture.textureId);
  
   glUniform1i(glGetUniformLocation(shaderProgram, "hasEmissionTexture"), mesh.hasEmissionTexture);
