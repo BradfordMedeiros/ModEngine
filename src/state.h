@@ -38,6 +38,7 @@ struct engineState {
   bool showBoneWeight;
   bool useBoneTransform;
   float discardAmount;
+  bool offsetTextureMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

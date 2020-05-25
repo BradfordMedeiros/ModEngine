@@ -300,6 +300,10 @@ int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
 
+  if (state.offsetTextureMode){
+    std::cout << "offset texture placeholder" << std::endl;
+    std::cout << "axis: " << state.manipulatorAxis << std::endl;
+  }
   if (voxelPtr == NULL){
     return;
   }

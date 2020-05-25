@@ -33,7 +33,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.toggleFov = false,
 		.showBoneWeight = false,
   	.useBoneTransform = true,
-  	.discardAmount = 0.5
+  	.discardAmount = 0.5,
+  	.offsetTextureMode = true
 	};
 	return state;
 }

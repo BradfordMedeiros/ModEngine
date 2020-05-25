@@ -161,6 +161,10 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
     state.manipulatorMode = ROTATE;
   }
+  if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS){
+    state.offsetTextureMode = !state.offsetTextureMode;
+    std::cout << "offset texture mode: " << state.offsetTextureMode << std::endl;
+  } 
   if (glfwGetKey(window, GLFW_KEY_9) == GLFW_PRESS){
     state.showDepthBuffer = !state.showDepthBuffer;
     state.showCameras = false; // turn this off so light isn't trapped in the box 
