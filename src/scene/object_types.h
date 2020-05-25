@@ -25,6 +25,8 @@ struct GameObjectMesh {
   bool nodeOnly;
   std::string rootMesh;
   glm::vec2 textureoffset;
+  std::string textureOverloadName;
+  int textureOverloadId;;
 };
 struct GameObjectCamera {};
 struct GameObjectSound{
@@ -59,7 +61,7 @@ typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObje
 static Field obj = {
   .prefix = '@', 
   .type = "default",
-  .additionalFields = { "mesh", "disabled", "textureoffset" }
+  .additionalFields = { "mesh", "disabled", "textureoffset", "texture" }
 };
 
 static Field camera = {
@@ -110,6 +112,7 @@ void addObject(
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
+  std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(short id, std::string from, std::string to)> onRail
 );

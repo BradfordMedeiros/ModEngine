@@ -166,7 +166,7 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId){
   glActiveTexture(GL_TEXTURE0); 
 
   auto diffuseTextureId = customTextureId == -1 ? mesh.texture.textureId : customTextureId;
-  glBindTexture(GL_TEXTURE_2D, mesh.texture.textureId);
+  glBindTexture(GL_TEXTURE_2D, diffuseTextureId);
  
   glUniform1i(glGetUniformLocation(shaderProgram, "hasEmissionTexture"), mesh.hasEmissionTexture);
   glActiveTexture(GL_TEXTURE0 + 1);

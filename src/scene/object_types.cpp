@@ -5,11 +5,19 @@ std::map<short, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-static std::vector<std::string> meshFieldsToCopy = { "textureoffset" };
-GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded){
+static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texture" };
+GameObjectMesh createMesh(
+  std::map<std::string, std::string> additionalFields, 
+  std::map<std::string, Mesh>& meshes, 
+  std::string defaultMesh, 
+  std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
+  std::function<int(std::string)> ensureTextureLoaded
+){
   std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
   glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
+  std::string textureOverloadName = additionalFields.find("texture") == additionalFields.end() ? "" : additionalFields.at("texture");
+  std::cout << "texture overload name" << textureOverloadName << std::endl;
 
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
@@ -39,7 +47,9 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
     .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
-    .textureoffset = textureoffset
+    .textureoffset = textureoffset,
+    .textureOverloadName = textureOverloadName,
+    .textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName)
   };
   return obj;
 }
@@ -104,11 +114,12 @@ void addObject(
   std::string defaultMesh, 
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
+  std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(short id, std::string from, std::string to)> addRail
 ){
   if (objectType == "default"){
-    mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded);
+    mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if(objectType == "sound"){
@@ -173,7 +184,7 @@ void renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
 
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
-      drawMesh(meshToRender, shaderProgram);    
+      drawMesh(meshToRender, shaderProgram, meshObj -> textureOverloadId);    
     }
     return;
   }
@@ -183,7 +194,7 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
-    drawMesh(nodeMesh, shaderProgram);    
+    drawMesh(nodeMesh, shaderProgram, meshObj -> textureOverloadId);    
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
