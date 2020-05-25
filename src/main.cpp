@@ -296,13 +296,31 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   }
 }
 
+void maybeApplyTextureOffset(int index, glm::vec2 offset){
+  GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));
+  if (meshObj == NULL){
+    return;
+  }
+
+  Scene& scene =  world.scenes.at(world.idToScene.at(index)); 
+  auto groupId = scene.idToGameObjectsH.at(index).groupId;
+  auto ids = getIdsInGroup(scene, groupId);
+
+  bool rootIdHasMesh = false;
+  for (auto id : ids){
+    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
+    assert(meshObj != NULL);
+    meshObj -> textureoffset = meshObj -> textureoffset + offset;
+  }
+}
+
 int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
 
-  if (state.offsetTextureMode){
-    std::cout << "offset texture placeholder" << std::endl;
-    std::cout << "axis: " << state.manipulatorAxis << std::endl;
+  if (state.offsetTextureMode && state.selectedIndex != -1){
+    float offsetAmount = yoffset * 0.001;
+    maybeApplyTextureOffset(state.selectedIndex, glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
   }
   if (voxelPtr == NULL){
     return;
