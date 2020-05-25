@@ -223,7 +223,7 @@ void addMesh(World& world, std::string meshpath){
   ModelData data = loadModel(meshpath);
   assert(data.meshIdToMeshData.size() ==  1);
   auto meshData = data.meshIdToMeshData.begin() -> second;
-  world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData);     
+  world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData, loadTexture);     
   world.meshnameToBoneToParent[meshpath] = data.boneToParent;
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
@@ -342,7 +342,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             if (meshAlreadyLoaded){
               continue;
             }
-            world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData);    
+            world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData, loadTexture);    
             world.meshnameToBoneToParent[meshPath] = data.boneToParent;  
           } 
 

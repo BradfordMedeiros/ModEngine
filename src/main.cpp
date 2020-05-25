@@ -648,7 +648,7 @@ int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
-   ("t,texture", "Image to use as default texture", cxxopts::value<std::string>()->default_value("./res/textures/wood.jpg"))
+   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res/textures"))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::string>()->default_value("./res/scripts/game.scm"))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
@@ -684,7 +684,7 @@ int main(int argc, char* argv[]){
   bool showPhysicsColliders = result["bounds"].as<bool>();
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
-  const std::string texturePath = result["texture"].as<std::string>();
+  const std::string textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
@@ -782,7 +782,7 @@ int main(int argc, char* argv[]){
   unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl");
 
   fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
-  Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>());
+  Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>(), loadTexture);
 
   createStaticSchemeBindings(
     loadScene,

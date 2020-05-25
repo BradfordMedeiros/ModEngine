@@ -4,7 +4,7 @@ std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad){
     std::map<unsigned int, Mesh> fontmeshes;
     for ( const auto &[ascii, font]: fontToLoad.chars ) {
       assert(fontmeshes.find(ascii) == fontmeshes.end());
-      fontmeshes[ascii] = load2DMeshTexCoords(fontToLoad.image, font.x, font.y, font.width, font.height);
+      fontmeshes[ascii] = load2DMeshTexCoords(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture);
     }
     return fontmeshes;
 }

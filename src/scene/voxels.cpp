@@ -136,7 +136,7 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
   return info; 
 }
 Mesh generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth, VoxelRenderData& renderData){
-  Mesh mesh = loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies);
+  Mesh mesh = loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies, loadTexture);
   mesh.boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth);
   return mesh;
 }
