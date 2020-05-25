@@ -314,6 +314,47 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
   }
 }
 
+struct TextureAndName {
+  Texture texture;
+  std::string textureName;
+};
+std::vector<TextureAndName> worldTextures(World& world){
+  std::vector<TextureAndName> textures;
+  for (auto [textureName, texture] : world.textures){
+    textures.push_back(TextureAndName{
+      .texture = texture,
+      .textureName = textureName
+    });
+  }
+  return textures;
+}
+void maybeChangeTexture(int index){
+    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));
+    if (meshObj == NULL){
+      return;
+    }
+    Scene& scene =  world.scenes.at(world.idToScene.at(index)); 
+    auto groupId = scene.idToGameObjectsH.at(index).groupId;
+    auto ids = getIdsInGroup(scene, groupId);   
+
+    auto textures = worldTextures(world);
+    for (auto id : ids){
+      GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
+      assert(meshObj != NULL);
+      std::string currentOverload = meshObj -> textureOverloadName;
+      bool hasOverload = currentOverload != "";
+
+      int overloadId = 0;
+      for (int i = 0; i < textures.size(); i++){
+        if (meshObj -> textureOverloadId == textures.at(i).texture.textureId){
+          overloadId = (i + 1) % textures.size();
+        }
+      }
+      meshObj -> textureOverloadName = textures.at(overloadId).textureName;
+      meshObj -> textureOverloadId = textures.at(overloadId).texture.textureId;
+    }
+}
+
 int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
@@ -322,6 +363,10 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     float offsetAmount = yoffset * 0.001;
     maybeApplyTextureOffset(state.selectedIndex, glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
   }
+  if (!state.offsetTextureMode && state.selectedIndex != -1){
+    maybeChangeTexture(state.selectedIndex);
+  }
+
   if (voxelPtr == NULL){
     return;
   }

@@ -322,6 +322,9 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
   if (obj.textureoffset.x != 0.f && obj.textureoffset.y != 0.f){
     pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(obj.textureoffset)));
   }
+  if (obj.textureOverloadName != ""){
+    pairs.push_back(std::pair<std::string, std::string>("texture", obj.textureOverloadName));
+  }
   return pairs;  
 }
 std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj){
