@@ -259,7 +259,7 @@ short getSceneId(){
   return sceneId;
 }
 
-std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data){
+std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
   std::map<short, std::map<std::string, std::string>> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
     std::map<std::string, std::string> emptyFields;
@@ -279,6 +279,16 @@ std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std
       additionalFieldsMap.at(nodeId)["meshes"] = join(meshRefNames, ',');
     }
   }
+
+  for (auto &[_, fields] : additionalFieldsMap){
+    for (auto field : fieldsToCopy){
+      assert(fields.find(field) == fields.end());
+      if (additionalFields.find(field) != additionalFields.end()){
+        fields[field] = additionalFields.at(field);
+      }
+    }
+  }
+
   return additionalFieldsMap;
 }
 
@@ -319,7 +329,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  loadClip, 
-      [&world, &scene, loadClip, id, shouldLoadModel, getId](std::string meshName) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, loadClip, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -343,7 +353,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             data.childToParent, 
             data.nodeTransform, 
             data.names, 
-            generateAdditionalFields(meshName, data),
+            generateAdditionalFields(meshName, data, additionalFields, fieldsToCopy),
             getId
           );
           addObjects(world, scene, newSerialObjs, false, loadClip, getId);

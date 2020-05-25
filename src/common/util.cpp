@@ -99,6 +99,12 @@ glm::vec3 parseVec(std::string positionRaw){;
   in >> x >> y >> z;
   return glm::vec3(x, y, z);
 }
+glm::vec2 parseVec2(std::string positionRaw){;
+  float x, y;
+  std::istringstream in(positionRaw);
+  in >> x >> y;
+  return glm::vec2(x, y);
+}
 glm::quat parseQuat(std::string payload){
   glm::vec3 eulerAngles = parseVec(payload);
   glm::quat rotation = glm::quat(glm::vec3(eulerAngles.x + 0, eulerAngles.y + 0, (eulerAngles.z + M_PI)));
@@ -109,6 +115,9 @@ glm::vec3 quatToVec(glm::quat quat){
 }
 std::string serializeVec(glm::vec3 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
+}
+std::string serializeVec(glm::vec2 vec){
+  return std::to_string(vec.x) + " " + std::to_string(vec.y);
 }
 std::string serializeRotation(glm::quat rotation){
   float xx = rotation.x;

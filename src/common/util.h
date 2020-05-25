@@ -25,9 +25,11 @@ std::string print(glm::vec3 vec);
 std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
 glm::vec3 parseVec(std::string positionRaw);
+glm::vec2 parseVec2(std::string positionRaw);
 glm::quat parseQuat(std::string payload);
 glm::vec3 quatToVec(glm::quat quat);
 std::string serializeVec(glm::vec3 vec);
+std::string serializeVec(glm::vec2 vec);
 std::string serializeRotation(glm::quat rotation);
 
 

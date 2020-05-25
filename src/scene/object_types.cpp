@@ -5,9 +5,11 @@ std::map<short, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string)> ensureMeshLoaded){
+static std::vector<std::string> meshFieldsToCopy = { "textureoffset" };
+GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::string defaultMesh, std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded){
   std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
+  glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
 
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
@@ -15,7 +17,7 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
   if (usesMultipleMeshes){
     auto meshStrings = split(additionalFields.at("meshes"), ',');
     for (auto meshName : meshStrings){
-      bool loadedMesh = ensureMeshLoaded(meshName);
+      bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
       if (loadedMesh){
         meshNames.push_back(meshName);
         meshesToRender.push_back(meshes.at(meshName));  
@@ -24,7 +26,7 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
   }else{
     auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
     meshName = (meshName == "") ? defaultMesh : meshName;
-    bool loadedMesh = ensureMeshLoaded(meshName);
+    bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
     if (loadedMesh){
       meshNames.push_back(meshName);
       meshesToRender.push_back(meshes.at(meshName));   
@@ -36,7 +38,8 @@ GameObjectMesh createMesh(std::map<std::string, std::string> additionalFields, s
     .meshesToRender = meshesToRender,
     .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
     .nodeOnly = meshNames.size() == 0,
-    .rootMesh = rootMeshName
+    .rootMesh = rootMeshName,
+    .textureoffset = textureoffset
   };
   return obj;
 }
@@ -100,7 +103,7 @@ void addObject(
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
   std::function<void(std::string)> loadClip,
-  std::function<bool(std::string)> ensureMeshLoaded,
+  std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(short id, std::string from, std::string to)> addRail
 ){
@@ -149,6 +152,7 @@ void renderObject(
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
+
   if (meshObj != NULL && !meshObj -> isDisabled && !meshObj ->nodeOnly){
     for (auto meshToRender : meshObj -> meshesToRender){
       bool hasBones = false;
@@ -166,7 +170,9 @@ void renderObject(
 
       glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), showBoneWeight);
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
-      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);     
+      glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
+
+      glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
       drawMesh(meshToRender, shaderProgram);    
     }
     return;
@@ -175,13 +181,15 @@ void renderObject(
   if (meshObj != NULL && meshObj -> nodeOnly && showDebug) {
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);     
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
     drawMesh(nodeMesh, shaderProgram);    
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(cameraMesh, shaderProgram);
     return;
   }
@@ -189,6 +197,7 @@ void renderObject(
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showDebug){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);
     return;
   }
@@ -196,6 +205,7 @@ void renderObject(
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(voxelObj -> voxel.mesh, shaderProgram);
     return;
   }
@@ -203,6 +213,7 @@ void renderObject(
   auto channelObj = std::get_if<GameObjectChannel>(&toRender);
   if (channelObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);
     return;
   }
@@ -210,6 +221,7 @@ void renderObject(
   auto railObj = std::get_if<GameObjectRail>(&toRender);
   if (railObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);
     return; 
   }
@@ -295,6 +307,9 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
   }
   if (obj.isDisabled){
     pairs.push_back(std::pair<std::string, std::string>("disabled", "true"));
+  }
+  if (obj.textureoffset.x != 0.f && obj.textureoffset.y != 0.f){
+    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(obj.textureoffset)));
   }
   return pairs;  
 }

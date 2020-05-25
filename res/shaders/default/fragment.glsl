@@ -22,6 +22,7 @@ uniform bool enableDiffuse;
 uniform bool enableSpecular;
 uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
+uniform vec2 textureOffset;
 
 #define MAX_LIGHTS 32
 uniform int numlights;
@@ -43,9 +44,10 @@ void main(){
   if (tint.r < 0.1){
     FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
   }else{
-    vec4 diffuseColor = texture(maintexture, vec2(TexCoord.x, -TexCoord.y));
-    vec4 emissionColor = texture(emissionTexture, vec2(TexCoord.x, -TexCoord.y));
-    vec4 opacityColor = texture(opacityTexture, vec2(TexCoord.x, -TexCoord.y));
+    vec2 adjustedTexCoord = TexCoord + textureOffset;
+    vec4 diffuseColor = texture(maintexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
+    vec4 emissionColor = texture(emissionTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
+    vec4 opacityColor = texture(opacityTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
 
     bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
 
