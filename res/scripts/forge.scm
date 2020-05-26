@@ -10,7 +10,12 @@
 (define num 0)
 (define (getNextName)
   (set! num (+ num 1))
-  (string-append displayObjName (number->string num))
+  (let ((nextName (string-append displayObjName (number->string num))))
+    (if (not (equal? (lsobj-name nextName) #f))
+      (getNextName)
+      nextName
+    )
+  )
 )
 (define (select)
   (mk-obj (getNextName) (list-ref menu selectedIndex) '(0 0 0))
