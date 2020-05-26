@@ -704,7 +704,7 @@ int main(int argc, char* argv[]){
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res/textures"))
-   ("x,scriptpath", "Script file to use", cxxopts::value<std::string>()->default_value("./res/scripts/game.scm"))
+   ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,crosshair", "Icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
@@ -877,7 +877,10 @@ int main(int argc, char* argv[]){
   );
 
   schemeBindings = getSchemeCallbacks();
-  loadScript(result["scriptpath"].as<std::string>());
+
+  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
+    loadScript(script);
+  }
 
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
