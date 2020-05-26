@@ -67,6 +67,7 @@ glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+std::string textureFolderPath;
 float now = 0;
 
 AnimationState animations;
@@ -354,6 +355,15 @@ void maybeChangeTexture(int index){
       meshObj -> textureOverloadId = textures.at(overloadId).texture.textureId;
     }
 }
+
+// This is wasteful, as obviously I shouldn't be loading in all the textures on load, but ok for now. 
+// This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
+void loadAllTextures(){
+  for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
+    loadTextureWorld(world, texturePath);
+  }
+}
+
 
 int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
@@ -729,7 +739,7 @@ int main(int argc, char* argv[]){
   bool showPhysicsColliders = result["bounds"].as<bool>();
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
-  const std::string textureFolderPath = result["texture"].as<std::string>();
+  textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
@@ -873,6 +883,7 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
+  loadAllTextures();
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
