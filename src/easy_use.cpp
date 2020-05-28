@@ -122,10 +122,7 @@ glm::vec3 snapScaleDown(glm::vec3 currentScale, Axis translationAxis){
   return snapVector(currentScale, translationAxis, false, snapScales.at(currentScaleIndex));
 }
 
-float getSnapGridSize(ManipulatorMode mode){
-  if (mode == ROTATE || mode == SCALE){
-    return -1;  // sentinel value, doesn't make sense. 
-  }
+float getSnapTranslateSize(){
   return snapTranslates.at(currentTranslateIndex);
 }
 

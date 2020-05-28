@@ -634,10 +634,12 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
   }else{
     int numCells = 10;
-    float snapGridSize = getSnapGridSize(state.manipulatorMode);
-    if (snapGridSize > 0){
-      drawGrid3DCentered(numCells, snapGridSize, 0, 0, 0);  // 
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
+    if (state.manipulatorMode == TRANSLATE){
+      float snapGridSize = getSnapTranslateSize();
+      if (snapGridSize > 0){
+        drawGrid3DCentered(numCells, snapGridSize, 0, 0, 0);  // 
+        glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
+      }
     }
   }
   drawCoordinateSystem(100.f);
