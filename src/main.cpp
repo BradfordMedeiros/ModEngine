@@ -637,7 +637,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     if (state.manipulatorMode == TRANSLATE){
       float snapGridSize = getSnapTranslateSize();
       if (snapGridSize > 0){
-        drawGrid3DCentered(numCells, snapGridSize, 0, 0, 0);  // 
+        auto position = getGameObjectPosition(state.selectedIndex);
+        drawGrid3DCentered(numCells, snapGridSize, position.x, position.y, position.z);  
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
       }
     }
