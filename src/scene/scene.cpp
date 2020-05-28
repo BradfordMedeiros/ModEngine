@@ -145,6 +145,8 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
       .gravity = physicsOptions.gravity,
       .friction = physicsOptions.friction,
       .restitution = physicsOptions.restitution,
+      .mass = physicsOptions.mass,
+      .maxspeed = physicsOptions.maxspeed,
     };
 
     if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){

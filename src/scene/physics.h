@@ -30,6 +30,8 @@ struct rigidBodyOpts {
   glm::vec3 gravity;
   float friction;
   float restitution;
+  float mass;
+  float maxspeed;
 };
 
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling, rigidBodyOpts opts);

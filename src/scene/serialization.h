@@ -21,6 +21,8 @@ struct physicsOpts {
   glm::vec3 gravity;
   float friction;
   float restitution;
+  float mass;
+  float maxspeed;
 };
 
 struct Token {

@@ -34,7 +34,7 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
   transform.setOrigin(glmToBt(pos));   
   transform.setRotation(glmToBt(rot));
 
-  btScalar mass = isStatic ? btScalar(0.f) : btScalar(1.0f);
+  btScalar mass = isStatic ? btScalar(0.f) : btScalar(opts.mass);
   btDefaultMotionState* motionState = new btDefaultMotionState(transform);
 
   btVector3 inertia(0, 0, 0);
