@@ -134,10 +134,19 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
 
   GameObjectObj& toRender = world.objectMapping.at(id);
   bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
- 
+
   if (groupPhysicsInfo.isRoot){
     auto physicsOptions = groupPhysicsInfo.physicsOptions;
     auto physicsInfo = groupPhysicsInfo.physicsInfo;
+
+    rigidBodyOpts opts = {
+      .linear = physicsOptions.linearFactor,
+      .angular = physicsOptions.angularFactor,
+      .gravity = physicsOptions.gravity,
+      .friction = physicsOptions.friction,
+      .restitution = physicsOptions.restitution,
+    };
+
     if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
       std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
       rigidBody = addRigidBody(
@@ -149,9 +158,7 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
         physicsOptions.hasCollisions,
         !physicsInfo.boundInfo.isNotCentered,
         physicsInfo.collisionInfo, 
-        physicsOptions.linearFactor,
-        physicsOptions.angularFactor,
-        physicsOptions.gravity
+        opts
       );
     }else if (physicsOptions.shape == SPHERE){
       std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
@@ -163,9 +170,7 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
         physicsInfo.collisionInfo,
-        physicsOptions.linearFactor,
-        physicsOptions.angularFactor,
-        physicsOptions.gravity
+        opts
       );
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
@@ -177,9 +182,7 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
         initialScale,
-        physicsOptions.linearFactor,
-        physicsOptions.angularFactor,
-        physicsOptions.gravity
+        opts
       );
     }
   }

@@ -19,6 +19,8 @@ struct physicsOpts {
   glm::vec3 linearFactor;
   glm::vec3 angularFactor;
   glm::vec3 gravity;
+  float friction;
+  float restitution;
 };
 
 struct Token {
