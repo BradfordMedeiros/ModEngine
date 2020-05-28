@@ -249,6 +249,9 @@ void handleSerialization(){     // @todo handle serialization for multiple scene
 bool selectItemCalled = false;
 
 void selectItem(){
+  if (!showDebugInfo){
+    return;
+  }
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
 
@@ -652,14 +655,15 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
+  if (!showDebugInfo){
+    return;
+  }
   if (!state.isSelectionMode){
      drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
   }else if (!state.isRotateSelection){
      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
   }
-  if (!showDebugInfo){
-    return;
-  }
+
 
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
   std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
