@@ -55,7 +55,6 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
     body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
     body -> setActivationState(DISABLE_DEACTIVATION);
   }
-
   return body;
 }
 btRigidBody* createRigidBodyRect(glm::vec3 pos, float width, float height, float depth, glm::quat rot, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling, rigidBodyOpts opts){
@@ -191,6 +190,17 @@ void applyImpulse(btRigidBody* body, glm::vec3 force){
 }
 void clearImpulse(btRigidBody* body){
   body -> applyCentralImpulse(btVector3(0.f, 0.f, 0.f));
+}
+
+void clampMaxVelocity(btRigidBody* body, float maxspeed){
+  if (maxspeed <= 0){
+    return;
+  }
+  auto velocity = body -> getLinearVelocity();
+  auto xVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getX()));
+  auto yVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getY()));
+  auto zVelocity = fmax(-maxspeed, fmin(maxspeed, velocity.getZ()));
+  body -> setLinearVelocity(btVector3(xVelocity, yVelocity, zVelocity));
 }
 
 void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not

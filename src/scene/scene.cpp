@@ -146,7 +146,6 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
       .friction = physicsOptions.friction,
       .restitution = physicsOptions.restitution,
       .mass = physicsOptions.mass,
-      .maxspeed = physicsOptions.maxspeed,
     };
 
     if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
@@ -601,12 +600,13 @@ void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec
   }
 }
 
-void updatePhysicsPositions(World& world, std::map<short, btRigidBody*>& rigidbodys){
+void updatePhysicsPositionsAndClampVelocity(World& world, std::map<short, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     auto sceneId = world.idToScene.at(i);
     world.scenes.at(sceneId).idToGameObjects.at(i).transformation.rotation = getRotation(rigidBody);
     world.scenes.at(sceneId).idToGameObjects.at(i).transformation.position = getPosition(rigidBody);
     // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
+    clampMaxVelocity(rigidBody, world.scenes.at(sceneId).idToGameObjects.at(i).physicsOptions.maxspeed);
   }
 }
 
@@ -657,7 +657,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
       dumpPhysicsInfo(world.rigidbodys);
     }
     stepPhysicsSimulation(world.physicsEnvironment, timestep);
-    updatePhysicsPositions(world, world.rigidbodys);     
+    updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);     
   }
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
 }

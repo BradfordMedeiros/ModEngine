@@ -31,7 +31,6 @@ struct rigidBodyOpts {
   float friction;
   float restitution;
   float mass;
-  float maxspeed;
 };
 
 btRigidBody* addRigidBody(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling, rigidBodyOpts opts);
@@ -48,6 +47,8 @@ glm::vec3 getScale(btRigidBody* body);
 
 void applyImpulse(btRigidBody* body, glm::vec3 force);
 void clearImpulse(btRigidBody* body);
+
+void clampMaxVelocity(btRigidBody* body, float maxspeed);
 
 void printRigidBodyInfo(btRigidBody* body);
 
