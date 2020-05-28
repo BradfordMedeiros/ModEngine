@@ -21,4 +21,6 @@ void setSnapScaleDown();
 glm::vec3 snapScaleUp(glm::vec3 currentScale, Axis translationAxis);
 glm::vec3 snapScaleDown(glm::vec3 currentScale, Axis translationAxis);
 
+float getSnapGridSize(ManipulatorMode mode);
+
 #endif

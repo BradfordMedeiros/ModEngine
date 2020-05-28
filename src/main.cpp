@@ -627,17 +627,23 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
 
+  // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.chunkXWidth / 2) : 0;
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth, offset, offset, offset);
-
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
-    drawCoordinateSystem(100.f);
+  }else{
+    int numCells = 10;
+    float snapGridSize = getSnapGridSize(state.manipulatorMode);
+    if (snapGridSize > 0){
+      drawGrid3DCentered(numCells, snapGridSize, 0, 0, 0);  // 
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
+    }
   }
+  drawCoordinateSystem(100.f);
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
   if (permaLines.size() > 0){
-    drawLines(permaLines);
   }
   if (lines.size() > 0){
    drawLines(lines);
