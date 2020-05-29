@@ -29,7 +29,7 @@ void unloadScene(short sceneId);
 void saveScene();
 std::vector<short> listScenes();
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2);
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
 short getGameObjectByName(std::string name);

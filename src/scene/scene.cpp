@@ -242,7 +242,7 @@ void addMesh(World& world, std::string meshpath){
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
-World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
+World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   auto objectMapping = getObjectMapping();
   RailSystem rails;
   World world = {

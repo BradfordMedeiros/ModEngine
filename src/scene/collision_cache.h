@@ -2,24 +2,32 @@
 #define MOD_PHYSICS_CACHE
 
 #include <vector>
+#include <glm/glm.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 
+typedef void(*collisionPairPosFn)(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 typedef void(*collisionPairFn)(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
+struct CollisionInstance {
+  const btCollisionObject* obj1;
+  const btCollisionObject* obj2;
+  glm::vec3 pos;
+};
+
 bool collisionInList(
-  std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> currentCollisions,
-  std::pair<const btCollisionObject*, const btCollisionObject*> collisionPair
+  std::vector<CollisionInstance> currentCollisions,
+  CollisionInstance collisionPair
 );
 
 class CollisionCache {
   private:
-    collisionPairFn onObjectEnter;
+    collisionPairPosFn onObjectEnter;
     collisionPairFn onObjectLeave;
-    std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> oldCollisions;   
+    std::vector<CollisionInstance> oldCollisions;   
   public:
     CollisionCache();
-    CollisionCache(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave);
-    void onObjectsCollide(std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs);
+    CollisionCache(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave);
+    void onObjectsCollide(std::vector<CollisionInstance>& collisionPairs);
 };
 
 #endif 

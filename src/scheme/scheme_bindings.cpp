@@ -7,6 +7,21 @@ bool symbolDefined(const char* symbol){
   return symbolDefinedInModule(symbol, scm_current_module());
 }
 
+glm::vec3 listToVec3(SCM vecList){
+  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
+  return glm::vec3(x, y, z);
+}
+
+SCM vec3ToScmList(glm::vec3 vec){
+  SCM list = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(vec.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(vec.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(vec.z));
+  return list;
+}
+
 // Main Api
 short (*_loadScene)(std::string);
 SCM scm_loadScene(SCM value){
@@ -141,12 +156,7 @@ SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
 
 glm::vec3 (*getGameObjectPosn)(short index);
 SCM getGameObjectPosition(SCM value){
-  glm::vec3 pos = getGameObjectPosn(getGameobjId(value));
-  SCM list = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
-  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(pos.x));
-  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(pos.y));
-  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(pos.z));
-  return list;
+  return vec3ToScmList(getGameObjectPosn(getGameobjId(value)));
 }
 void (*setGameObjectPosn)(short index, glm::vec3 pos);
 SCM setGameObjectPosition(SCM value, SCM positon){
@@ -239,13 +249,6 @@ void (*_playAnimation)(short id, std::string animationName);
 SCM scmPlayAnimation(SCM value, SCM animationName){
   _playAnimation(getGameobjId(value), scm_to_locale_string(animationName));
   return SCM_UNSPECIFIED;
-}
-
-glm::vec3 listToVec3(SCM vecList){
-  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
-  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
-  auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
-  return glm::vec3(x, y, z);
 }
 
 void (*_applyImpulse)(short index, glm::vec3 impulse);
@@ -344,11 +347,11 @@ void onFrame(){
     scm_call_0(func_symbol);
   }
 }
-void onCollisionEnter(short obj1, short obj2){
+void onCollisionEnter(short obj1, short obj2, glm::vec3 contactPos){
   const char* function = "onCollideEnter";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, createGameObject(obj1), createGameObject(obj2));
+    scm_call_3(func_symbol, createGameObject(obj1), createGameObject(obj2), vec3ToScmList(contactPos));
   }
 }
 void onCollisionExit(short obj1, short obj2){

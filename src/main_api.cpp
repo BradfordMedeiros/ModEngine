@@ -86,8 +86,8 @@ std::vector<short> listScenes(){
   return sceneIds;
 }
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionEnter(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){
+  schemeBindings.onCollisionEnter(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2), contactPos);
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));

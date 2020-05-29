@@ -30,7 +30,7 @@ struct PhysicsInfo {
   glm::vec3 collisionInfo;
 };
 
-World createWorld(collisionPairFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
+World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 Texture loadTextureWorld(World& world, std::string texturepath);
 
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);

@@ -7,6 +7,7 @@
 #include "./scheme_bindings.h"
 
 typedef void(*func)();
+typedef void(*colposfun)(short obj1, short obj2, glm::vec3 pos);
 typedef void(*colfun)(short obj1, short obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos);
@@ -18,7 +19,7 @@ typedef void(*messagefunc)(std::vector<std::string>&);
 
 struct SchemeBindingCallbacks {
   func onFrame;
-  colfun onCollisionEnter;
+  colposfun onCollisionEnter;
   colfun onCollisionExit;
   mousecallback onMouseCallback;
   mousemovecallback onMouseMoveCallback;

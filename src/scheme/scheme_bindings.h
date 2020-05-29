@@ -49,7 +49,7 @@ void createStaticSchemeBindings(
 void defineFunctions();
 
 void onFrame();
-void onCollisionEnter(short obj1, short obj2);
+void onCollisionEnter(short obj1, short obj2, glm::vec3 contactPos);
 void onCollisionExit(short obj1, short obj2);
 void onMouseCallback(int button, int action, int mods);
 void onMouseMoveCallback(double xPos, double yPos);

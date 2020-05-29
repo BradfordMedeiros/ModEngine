@@ -30,10 +30,10 @@ void onFrameAllScripts(){
   }
 }
 
-void onCollisionEnterAllScripts(short obj1, short obj2){
+void onCollisionEnterAllScripts(short obj1, short obj2, glm::vec3 pos){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
-    onCollisionEnter(obj1, obj2);
+    onCollisionEnter(obj1, obj2, pos);
   }
 }
 void onCollisionExitAllScripts(short obj1, short obj2){

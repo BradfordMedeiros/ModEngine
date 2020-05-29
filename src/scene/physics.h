@@ -20,7 +20,7 @@ struct physicsEnv {
   bool hasDebugDrawer;
 };
 
-physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
+physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 void deinitPhysics(physicsEnv env);
 void stepPhysicsSimulation(physicsEnv& env, float timestep);
 

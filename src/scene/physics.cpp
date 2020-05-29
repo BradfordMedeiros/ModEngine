@@ -1,6 +1,6 @@
 #include "./physics.h"
 
-physicsEnv initPhysics(collisionPairFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
+physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
   auto dispatcher = new btCollisionDispatcher(colConfig);  
@@ -165,10 +165,21 @@ glm::vec3 getScale(btRigidBody* body){
     
 void checkCollisions(physicsEnv& env){   
   auto dispatcher = env.dynamicsWorld -> getDispatcher();
-  std::vector<std::pair<const btCollisionObject*, const btCollisionObject*>> collisionPairs;
+  std::vector<CollisionInstance> collisionPairs;
   for (int i = 0; i < dispatcher -> getNumManifolds(); i++) {
     btPersistentManifold* contactManifold = dispatcher -> getManifoldByIndexInternal(i);
-    collisionPairs.push_back(std::make_pair(contactManifold -> getBody0(), contactManifold -> getBody1()));
+
+    if (contactManifold -> getNumContacts() > 0){
+      /// @NOTE Internally there can be more than one contact point, but it's simpler to just report one of them (maybe expose more in future)
+      btManifoldPoint& point = contactManifold -> getContactPoint(0);  
+      btVector3 median = (point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f;
+
+      collisionPairs.push_back(    CollisionInstance {
+        .obj1 = contactManifold -> getBody0(),
+        .obj2 = contactManifold -> getBody1(),
+        .pos = btToGlm(median),
+      });     
+    }
   } 
   env.collisionCache.onObjectsCollide(collisionPairs);
 }
