@@ -294,7 +294,7 @@ std::vector<short> listObjInScene(Scene& scene){
 }
 
 void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(short, glm::mat4, glm::mat4)> onObject){
-  GameObject object = scene.idToGameObjects[objectH.id];
+  GameObject object = scene.idToGameObjects.at(objectH.id);
   glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
   modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
   
@@ -334,6 +334,35 @@ void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4,
       }
     }  
   }
+}
+
+Transformation getTransformationFromMatrix(glm::mat4 matrix){
+  glm::vec3 scale;
+  glm::quat rotation;
+  glm::vec3 translation;
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+  Transformation transform = {
+    .position = translation,
+    .scale = scale,
+    .rotation = rotation,
+  };
+  return transform;  
+}
+
+// TODO - this does a full traversal, but it really only needs to look at the parent hierarchy
+Transformation fullTransformation(Scene& scene, short id){
+  Transformation transformation = {};
+  bool foundId = false;
+  traverseScene(scene, [id, &foundId, &transformation](short traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho) -> void {
+    if (traversedId == id){
+      foundId = true;
+      transformation = getTransformationFromMatrix(model);
+    }
+  });
+  assert(foundId);
+  return transformation;
 }
 
 std::vector<short> getIdsInGroup(Scene& scene, short groupId){

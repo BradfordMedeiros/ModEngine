@@ -9,7 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -497,21 +496,11 @@ void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
   lines.push_back(line);
 }
 
-glm::vec3 getPositionFromMatrix(glm::mat4 matrix){
-  glm::vec3 scale;
-  glm::quat rotation;
-  glm::vec3 translation;
-  glm::vec3 skew;
-  glm::vec4 perspective;
-  glm::decompose(matrix, scale, rotation, translation, skew, perspective);
-  return translation;  
-}
-
 std::vector<glm::vec3> traversalPositions;
 std::vector<glm::vec3> parentTraversalPositions;
 void addPositionToRender(glm::mat4 modelMatrix, glm::mat4 parentMatrix){
-  traversalPositions.push_back(getPositionFromMatrix(modelMatrix));
-  parentTraversalPositions.push_back(getPositionFromMatrix(parentMatrix));
+  traversalPositions.push_back(getTransformationFromMatrix(modelMatrix).position);
+  parentTraversalPositions.push_back(getTransformationFromMatrix(parentMatrix).position);
 }
 void clearTraversalPositions(){
   traversalPositions.clear();
@@ -948,7 +937,10 @@ int main(int argc, char* argv[]){
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
     }else{
-      view = renderView(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation);   // this is position incorrect because this needs to traverse the object hierachy
+      auto cameraId = activeCameraObj -> id;
+      Scene& scene = world.scenes.at(world.idToScene.at(cameraId));
+      auto transformation = fullTransformation(scene, cameraId);
+      view = renderView(transformation.position, transformation.rotation);   // this is position incorrect because this needs to traverse the object hierachy
     }
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
 

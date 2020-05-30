@@ -8,6 +8,7 @@
 #include <functional>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include "./common/mesh.h"
 #include "../common/util.h"
 #include "./serialization.h"
@@ -74,9 +75,9 @@ std::vector<short> listObjInScene(Scene& scene);
 
 // @TODO code these functions
 void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4, bool)> onObject);  
-glm::vec3 getFullPosition(short id);
-glm::quat getFullRotation(short id);
-glm::vec3 getFullScale(short id);
+
+Transformation getTransformationFromMatrix(glm::mat4 matrix);
+Transformation fullTransformation(Scene& scene, short id);
 std::vector<short> getIdsInGroup(Scene& scene, short groupId);
 
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id);
