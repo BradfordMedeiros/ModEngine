@@ -26,8 +26,8 @@ struct World {
 
 struct PhysicsInfo {
   BoundInfo boundInfo;
-  GameObject gameobject;
   glm::vec3 collisionInfo;
+  Transformation transformation;
 };
 
 World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);

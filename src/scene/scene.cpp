@@ -5,7 +5,7 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
   std::cout << "y: [ " << info.yMin << ", " << info.yMax << "]" << std::endl;
   std::cout << "z: [ " << info.zMin << ", " << info.zMax << "]" << std::endl;
-  std::cout << "pos: (" << physicsInfo.gameobject.transformation.position.x << ", " << physicsInfo.gameobject.transformation.position.y << ", " << physicsInfo.gameobject.transformation.position.z << ")" << std::endl;
+  std::cout << "pos: (" << physicsInfo.transformation.position.x << ", " << physicsInfo.transformation.position.y << ", " << physicsInfo.transformation.position.z << ")" << std::endl;
   std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
 }
 
@@ -97,8 +97,8 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index)
 
   PhysicsInfo info = {
     .boundInfo = boundInfo,
-    .gameobject = obj,
-    .collisionInfo =  obj.transformation.scale
+    .collisionInfo =  obj.transformation.scale,
+    .transformation = obj.transformation,
   };
 
   return info;
@@ -128,6 +128,7 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, short id){
 }
 
 
+// TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
 void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, scene, id);
   btRigidBody* rigidBody = NULL;
@@ -152,9 +153,9 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
       std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
       rigidBody = addRigidBody(
         world.physicsEnvironment, 
-        physicsInfo.gameobject.transformation.position, 
+        physicsInfo.transformation.position, 
         (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
-        physicsInfo.gameobject.transformation.rotation,
+        physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
         !physicsInfo.boundInfo.isNotCentered,
@@ -165,9 +166,9 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
       std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
       rigidBody = addRigidBody(
         world.physicsEnvironment, 
-        physicsInfo.gameobject.transformation.position,
+        physicsInfo.transformation.position,
         maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
-        physicsInfo.gameobject.transformation.rotation,
+        physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
         physicsInfo.collisionInfo,
@@ -177,8 +178,8 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
       rigidBody = addRigidBody(
         world.physicsEnvironment, 
-        physicsInfo.gameobject.transformation.position,
-        physicsInfo.gameobject.transformation.rotation,
+        physicsInfo.transformation.position,
+        physicsInfo.transformation.rotation,
         getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
@@ -603,9 +604,11 @@ void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<short, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     auto sceneId = world.idToScene.at(i);
-    world.scenes.at(sceneId).idToGameObjects.at(i).transformation.rotation = getRotation(rigidBody);
+
+    // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
+    world.scenes.at(sceneId).idToGameObjects.at(i).transformation.rotation = getRotation(rigidBody);   
     world.scenes.at(sceneId).idToGameObjects.at(i).transformation.position = getPosition(rigidBody);
-    // @note -> for consistency I would get the scale as well, but physics won't be rescaling so pointless right?
+
     clampMaxVelocity(rigidBody, world.scenes.at(sceneId).idToGameObjects.at(i).physicsOptions.maxspeed);
   }
 }
