@@ -17,6 +17,7 @@ std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
 std::string join(std::vector<std::string> values, char delimeter);
+std::vector<std::string> filterWhitespace(std::vector<std::string> values);
 
 enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
 enum Axis { NOAXIS, XAXIS, YAXIS, ZAXIS };

@@ -77,6 +77,16 @@ std::string join(std::vector<std::string> values, char delimeter){
   }
   return value;
 }
+std::vector<std::string> filterWhitespace(std::vector<std::string> values){
+  std::vector<std::string> newStrings;
+  for (auto value : values){
+    auto newValue = trim(value);
+    if (newValue != ""){
+      newStrings.push_back(newValue);
+    }
+  }
+  return newStrings;
+}
 
 std::string print(glm::vec3 vec){
   std::stringstream stream;

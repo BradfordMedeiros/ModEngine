@@ -38,7 +38,8 @@
 #include "./colorselection.h"
 #include "./state.h"
 #include "./input.h"
-#include "./network.h"
+#include "./network/network.h"
+#include "./network/servers.h"
 #include "./scene/rails.h"
 #include "./easy_use.h"
 
@@ -715,7 +716,7 @@ int main(int argc, char* argv[]){
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
-   ("b,bounds", "Show bounds of colliders for physics entities", cxxopts::value<bool>()->default_value("false"))
+   ("b,bootstrapper", "Run the server as a server bootstrapper only", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
@@ -738,7 +739,14 @@ int main(int argc, char* argv[]){
     return 0;
   }
   bool enablePhysics = result["physics"].as<bool>();
-  bool showPhysicsColliders = result["bounds"].as<bool>();
+  bool bootStrapperMode = result["bootstrapper"].as<bool>();
+
+  if(bootStrapperMode){
+    std::cout << "INFO: running in server bootstrapper mode" << std::endl;
+    launchServer();
+    return 0;
+  }
+
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   textureFolderPath = result["texture"].as<std::string>();

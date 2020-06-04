@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <vector>
 #include <arpa/inet.h>
+#include <assert.h>
 
 // Server
 struct modsocket {
@@ -22,8 +23,8 @@ struct modsocket {
 };
       
 modsocket createServer();
-void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string));
-void cleanupSocket(modsocket socketInfo);
+void getDataFromSocket(modsocket& socketInfo, void (*onData)(std::string));
+void cleanupSocket(modsocket& socketInfo);
 
 // Client 
 void sendMessage(char* networkBuffer);

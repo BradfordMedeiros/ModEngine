@@ -44,32 +44,46 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
   int newSocket =  accept(socketInfo.socketFd, (struct sockaddr *)&socketInfo.socketin,  (socklen_t*)&addrlen); 
 
   if (newSocket < 0){  // @todo what other failure modes here?
-    if (errno != EWOULDBLOCK && errno != EAGAIN){
-      throw std::runtime_error(std::string("error accepting socket ") + strerror(errno));
+    if (errno == EWOULDBLOCK || errno == EAGAIN){
+      return false;
     }
+    throw std::runtime_error(std::string("error accepting socket ") + strerror(errno));
   }else{
     guard(fcntl(newSocket, F_SETFL, fcntl(newSocket, F_GETFL) | O_NONBLOCK), "error setting nonblocking mode for socket");
-   
+
+    std::cout << "network: maxFd is now: " << newSocket << std::endl;
     FD_SET(newSocket, &socketInfo.fds);     
     socketInfo.maxFd = newSocket;
-    
     return true;
   }
-  return false;
+  assert(false);
 }
 
 void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, void (*onData)(std::string)){
   FD_CLR(socketFd, &socketInfo.fds);
   char buffer[NETWORK_BUFFER_SIZE];
+
+  std::cout << "network: reading socket data" << std::endl;
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);
+  std::cout << "network: finished reading socket data" << std::endl;
+
   const char* okString = "ok";
+
+  std::cout << "network: sending socket data" << std::endl;
   send(socketFd, okString, strlen(okString), 0);
+  std::cout << "network: finished sending socket data" << std::endl;
+
+  std::cout << "network: closing socket" << std::endl;
   close(socketFd);
+  std::cout << "network: closed socket" << std::endl;
+
   onData(buffer);
 }
 
-void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string)){
-  while (acceptSocketAndMarkNonBlocking(socketInfo));
+void getDataFromSocket(modsocket& socketInfo, void (*onData)(std::string)){
+  std::cout << "INFO: trying to accept socket" << std::endl;
+  while (!acceptSocketAndMarkNonBlocking(socketInfo));
+  std::cout << "INFO: socket accepted" << std::endl;
 
   timeval timeout {
     .tv_sec = 0,
@@ -80,8 +94,9 @@ void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string)){
   if (hasData <= 0){
     if (hasData == -1){
       std::cout << errno << std::endl;
+      assert(false);
     }
-    return;
+    std::cout << "No data on socket" << std::endl;
   }
 
   std::vector<int> readySocketFds;
@@ -97,7 +112,7 @@ void getDataFromSocket(modsocket socketInfo, void (*onData)(std::string)){
   }
 }
 
-void cleanupSocket(modsocket socketInfo){
+void cleanupSocket(modsocket& socketInfo){
   close(socketInfo.socketFd);
 }
 
