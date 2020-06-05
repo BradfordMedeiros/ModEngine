@@ -22,7 +22,7 @@ ServerBrowser loadServerInfo(){
 }
 
 void onData(std::string data){
-  std::cout << "data is: " << data << std::endl;
+  std::cout << "network: data is: " << data << std::endl;
 }
 
 void launchServer(){
