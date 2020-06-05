@@ -21,8 +21,12 @@ ServerBrowser loadServerInfo(){
   return browser;
 }
 
-void onData(std::string data){
-  std::cout << "network: data is: " << data << std::endl;
+std::string handleListServer(ServerBrowser& browser){
+  std::string servers = "";
+  for (auto [serverName, serverIp] : browser.serverNameToIp){
+    servers = servers + serverName + " " + serverIp + "\n";
+  }
+  return servers;
 }
 
 void launchServer(){
@@ -33,6 +37,11 @@ void launchServer(){
   std::cout << "INFO: create server end" << std::endl;
 
   while(true){
-    getDataFromSocket(server, onData);
+    getDataFromSocket(server, [&browser](std::string request) -> std::string {
+      if (request == "list-servers"){
+        return handleListServer(browser);
+      }
+      return "ok";
+    });
   }
 }

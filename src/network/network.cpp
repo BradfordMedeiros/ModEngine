@@ -65,17 +65,19 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
   assert(false);
 }
 
-void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, void (*onData)(std::string)){
-  char buffer[NETWORK_BUFFER_SIZE];
+void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<std::string(std::string)> onData){
+  char buffer[NETWORK_BUFFER_SIZE] = {0};
 
   std::cout << "network: reading socket data" << std::endl;
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);
   std::cout << "network: finished reading socket data" << std::endl;
 
-  const char* okString = "ok";
+  std::string serverResponse = onData(buffer);
+
+  const char* responsep = serverResponse.c_str();
 
   std::cout << "network: sending socket data" << std::endl;
-  send(socketFd, okString, strlen(okString), 0);
+  send(socketFd, responsep, strlen(responsep), 0);
   std::cout << "network: finished sending socket data" << std::endl;
 
   std::cout << "network: closing socket" << std::endl;
@@ -83,10 +85,9 @@ void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, void (*onData)
   FD_CLR(socketFd, &socketInfo.fds);
   std::cout << "network: closed socket" << std::endl;
 
-  onData(buffer);
 }
 
-void getDataFromSocket(modsocket& socketInfo, void (*onData)(std::string)){
+void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)> onData){
   acceptSocketAndMarkNonBlocking(socketInfo);
 
   timeval timeout {
