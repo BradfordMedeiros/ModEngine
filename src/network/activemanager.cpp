@@ -28,15 +28,12 @@ void sendMessage(std::string ip, int port, const char* networkBuffer){
 std::map<std::string, std::string> listServers(){
   std::map<std::string, std::string> serverNameToIp;
 //  sendMessage(bootstrapperServer, bootstrapperPort, "list-servers");
-
-  serverNameToIp["no-mans-world"] = "1";
-  serverNameToIp["brads-server"] = "2";
+  serverNameToIp["smugs-world"] = "127.0.0.1";
   return serverNameToIp;
 }
 
-void connectServer(){
-
-
+void connectServer(std::string server){
+  std::cout << "connect server placeholder" << std::endl;
 }
 void disconnectServer(){
   isConnected = false;

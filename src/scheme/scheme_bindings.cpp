@@ -349,6 +349,11 @@ SCM scmListServers(){
   }
   return list;
 }
+void (*_connectServer)(std::string server);
+SCM scmConnectServer(SCM server){
+  _connectServer(scm_to_locale_string(server));
+  return SCM_UNSPECIFIED;
+}
 
 // Callbacks
 void onFrame(){
@@ -486,7 +491,7 @@ void defineFunctions(){
   scm_c_define_gsubr("save-scene", 0, 0, 0, (void*)scmSaveScene);
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
-
+  scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
 }
 
 
@@ -525,7 +530,8 @@ void createStaticSchemeBindings(
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
   void (*saveScene)(),
-  std::map<std::string, std::string> (*listServers)()
+  std::map<std::string, std::string> (*listServers)(),
+  void (*connectServer)(std::string server)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -570,4 +576,5 @@ void createStaticSchemeBindings(
   _saveScene = saveScene;
 
   _listServers = listServers;
+  _connectServer = connectServer;
 }

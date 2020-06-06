@@ -44,7 +44,8 @@ void createStaticSchemeBindings(
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
   void (*saveScene)(),
-  std::map<std::string, std::string> (*listServers)()
+  std::map<std::string, std::string> (*listServers)(),
+  void (*connectServer)(std::string server)
 );
 
 void defineFunctions();

@@ -885,7 +885,8 @@ int main(int argc, char* argv[]){
     unattachFromRail,
     timeSeconds,
     saveScene,
-    listServers
+    listServers,
+    connectServer
   );
 
   schemeBindings = getSchemeCallbacks();
