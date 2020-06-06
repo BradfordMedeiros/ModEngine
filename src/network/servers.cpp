@@ -41,6 +41,9 @@ void launchServer(){
       if (request == "list-servers"){
         return handleListServer(browser);
       }
+      if (request == "ping"){
+        return "pong";
+      }
       return "ok";
     });
   }

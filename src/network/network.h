@@ -6,7 +6,6 @@
 #include <netinet/in.h> 
 #include <fcntl.h>
 #include <iostream>
-#include <stdexcept>
 #include <unistd.h> 
 #include <cstring>
 #include <errno.h>
@@ -14,6 +13,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <functional>
+#include "./common.h"
 
 // Server
 struct modsocket {
@@ -26,17 +26,5 @@ struct modsocket {
 modsocket createServer();
 void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)>);
 void cleanupSocket(modsocket& socketInfo);
-
-// Client 
-void sendMessage(char* networkBuffer);
-
-/*
-  void onData(std::string data){
-    std::cout << "got data: " << data << std::endl;
-  }
-  void sendMoveObjectMessage(){
-    sendMessage((char*)"hello world");
-  }
-*/
 
 #endif 

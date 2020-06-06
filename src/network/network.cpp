@@ -3,12 +3,6 @@
 #define MAX_LISTENING_QUEUE 100
 #define NETWORK_BUFFER_SIZE 1024
 
-void guard(int value, const char* runtimeErrorMessage){
-  if (value < 0){
-    throw std::runtime_error(runtimeErrorMessage);
-  }
-}
-
 modsocket createServer(){
 	int socketFd = socket(AF_INET, SOCK_STREAM, 0);	
 	if (socketFd == -1){
@@ -121,24 +115,5 @@ void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::str
 
 void cleanupSocket(modsocket& socketInfo){
   close(socketInfo.socketFd);
-}
-
-void sendMessage(char* networkBuffer){
-  struct sockaddr_in address = {
-    .sin_family = AF_INET,
-    .sin_port = htons(8000),
-    .sin_addr = in_addr {
-      .s_addr = inet_addr("127.0.0.1"),
-    },
-  };
-
-  int sockFd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockFd == -1){
-    throw std::runtime_error("error creating socket");
-  }
-
-  guard(connect(sockFd, (struct sockaddr*) &address, sizeof(address)), "error connecting socket");
-  write(sockFd, networkBuffer, strlen(networkBuffer));
-  close(sockFd);
 }
 

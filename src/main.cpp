@@ -40,6 +40,7 @@
 #include "./input.h"
 #include "./network/network.h"
 #include "./network/servers.h"
+#include "./network/activemanager.h"
 #include "./scene/rails.h"
 #include "./easy_use.h"
 
@@ -883,7 +884,8 @@ int main(int argc, char* argv[]){
     attachToRail,
     unattachFromRail,
     timeSeconds,
-    saveScene
+    saveScene,
+    listServers
   );
 
   schemeBindings = getSchemeCallbacks();

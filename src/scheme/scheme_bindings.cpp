@@ -338,6 +338,18 @@ SCM scmSaveScene(){
   return SCM_UNSPECIFIED;
 }
 
+std::map<std::string, std::string> (*_listServers)();
+SCM scmListServers(){
+  auto servers = _listServers();
+  SCM list = scm_make_list(scm_from_unsigned_integer(servers.size()), scm_from_unsigned_integer(0));
+  int index = 0;
+  for (auto [serverName, _] : servers){
+    scm_list_set_x (list, scm_from_unsigned_integer(index), scm_from_locale_string(serverName.c_str()));
+    index = index + 1;
+  }
+  return list;
+}
+
 // Callbacks
 void onFrame(){
   const char* function = "onFrame";
@@ -472,6 +484,9 @@ void defineFunctions(){
 
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
   scm_c_define_gsubr("save-scene", 0, 0, 0, (void*)scmSaveScene);
+
+  scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
+
 }
 
 
@@ -509,7 +524,8 @@ void createStaticSchemeBindings(
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
-  void (*saveScene)()
+  void (*saveScene)(),
+  std::map<std::string, std::string> (*listServers)()
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -552,4 +568,6 @@ void createStaticSchemeBindings(
   _unattachFromRail = unattachFromRail;
   _timeSeconds = timeSeconds;
   _saveScene = saveScene;
+
+  _listServers = listServers;
 }
