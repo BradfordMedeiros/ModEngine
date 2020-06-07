@@ -1,7 +1,7 @@
 #include "./activemanager.h"
 
 static bool isConnected = false;
-static std::string currentServer = "";
+static std::string currentServerIp = "";
 static std::string bootstrapperServer = "127.0.0.1";
 static int bootstrapperPort = 8000;
 
@@ -29,7 +29,6 @@ std::string sendMessage(std::string ip, int port, const char* networkBuffer){
   return buffer;
 }
 
-
 std::map<std::string, std::string> parseListServerRequest(std::string response){
   std::map<std::string, std::string> serverNameToIp;
   auto servers = split(response, '\n');
@@ -45,13 +44,20 @@ std::map<std::string, std::string> listServers(){
 }
 
 void connectServer(std::string server){
-  auto response = sendMessage(listServers().at(server), 8000, "connect");
+  auto serverAddress = listServers().at(server);
+  auto response = sendMessage(serverAddress, 8000, "connect");
   assert(response == "ack");
   std::cout << "INFO: connection request succeeded" << std::endl;
   isConnected = true;
-  currentServer = server;
+  currentServerIp = serverAddress;
 }
 void disconnectServer(){
   isConnected = false;
-  currentServer = "";
+  currentServerIp = "";
+}
+
+std::string sendDataMessageToActiveServer(std::string data){
+  assert(isConnected);
+  std::string content = "type:data\n" + data;
+  return sendMessage(currentServerIp, 8000, content.c_str());
 }

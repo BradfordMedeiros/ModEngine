@@ -63,11 +63,10 @@ void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<
   char buffer[NETWORK_BUFFER_SIZE] = {0};
 
   std::cout << "network: reading socket data" << std::endl;
-  int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);
+  int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
   std::cout << "network: finished reading socket data" << std::endl;
 
   std::string serverResponse = onData(buffer);
-
   const char* responsep = serverResponse.c_str();
 
   std::cout << "network: sending socket data" << std::endl;
