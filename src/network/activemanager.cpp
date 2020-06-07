@@ -45,7 +45,11 @@ std::map<std::string, std::string> listServers(){
 }
 
 void connectServer(std::string server){
-  std::cout << "connect server placeholder" << std::endl;
+  auto response = sendMessage(listServers().at(server), 8000, "connect");
+  assert(response == "ack");
+  std::cout << "INFO: connection request succeeded" << std::endl;
+  isConnected = true;
+  currentServer = server;
 }
 void disconnectServer(){
   isConnected = false;

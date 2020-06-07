@@ -43,8 +43,8 @@ void launchServer(){
       std::string response = "ok";
       if (request == "list-servers"){
         response = handleListServer(browser);
-      } else if (request == "ping"){
-        response = "pong";
+      } else if (request == "connect"){
+        response = "ack";
       }
 
       std::cout << "response is: " << std::endl << response << std::endl;

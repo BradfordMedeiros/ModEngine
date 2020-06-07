@@ -1,2 +1,3 @@
-smugs_server localhost:5000
-another_smug localhost:5000
+smugs_server 127.0.0.1
+another_smug 127.0.0.1
+thing_smug 127.0.0.1
