@@ -78,7 +78,6 @@ void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<
   close(socketFd);
   FD_CLR(socketFd, &socketInfo.fds);
   std::cout << "network: closed socket" << std::endl;
-
 }
 
 void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)> onData){

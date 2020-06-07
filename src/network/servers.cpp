@@ -2,7 +2,7 @@
 
 std::map<std::string, std::string> parseConfigData(std::string serverConfig){
   std::map<std::string, std::string> serverNameToIp;
-  auto serverInfos = split(serverConfig, '\n');
+  auto serverInfos = filterWhitespace(split(serverConfig, '\n'));
 
   for (auto serverInfo : serverInfos){
     auto infos = filterWhitespace(split(serverInfo, ' '));
@@ -38,13 +38,17 @@ void launchServer(){
 
   while(true){
     getDataFromSocket(server, [&browser](std::string request) -> std::string {
+      std::cout << "request is: " << request << std::endl;
+
+      std::string response = "ok";
       if (request == "list-servers"){
-        return handleListServer(browser);
+        response = handleListServer(browser);
+      } else if (request == "ping"){
+        response = "pong";
       }
-      if (request == "ping"){
-        return "pong";
-      }
-      return "ok";
+
+      std::cout << "response is: " << std::endl << response << std::endl;
+      return response;
     });
   }
 }
