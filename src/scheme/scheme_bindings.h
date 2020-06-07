@@ -45,7 +45,8 @@ void createStaticSchemeBindings(
   double (*timeSeconds)(),
   void (*saveScene)(),
   std::map<std::string, std::string> (*listServers)(),
-  void (*connectServer)(std::string server)
+  void (*connectServer)(std::string server),
+  std::string (*sendMessageTcp)(std::string data)
 );
 
 void defineFunctions();

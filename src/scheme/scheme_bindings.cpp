@@ -338,6 +338,12 @@ SCM scmSaveScene(){
   return SCM_UNSPECIFIED;
 }
 
+std::string (*_sendMessageTcp)(std::string data);
+SCM scmSendMessageTcp(SCM topic){
+  _sendMessageTcp(scm_to_locale_string(topic));
+  return SCM_UNSPECIFIED;
+}
+
 std::map<std::string, std::string> (*_listServers)();
 SCM scmListServers(){
   auto servers = _listServers();
@@ -492,6 +498,7 @@ void defineFunctions(){
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
   scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
+  scm_c_define_gsubr("send-tcp", 1, 0, 0, (void*)scmSendMessageTcp);
 }
 
 
@@ -531,7 +538,8 @@ void createStaticSchemeBindings(
   double (*timeSeconds)(),
   void (*saveScene)(),
   std::map<std::string, std::string> (*listServers)(),
-  void (*connectServer)(std::string server)
+  void (*connectServer)(std::string server),
+  std::string (*sendMessageTcp)(std::string data)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -577,4 +585,5 @@ void createStaticSchemeBindings(
 
   _listServers = listServers;
   _connectServer = connectServer;
+  _sendMessageTcp = sendMessageTcp;
 }

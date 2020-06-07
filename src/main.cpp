@@ -886,7 +886,8 @@ int main(int argc, char* argv[]){
     timeSeconds,
     saveScene,
     listServers,
-    connectServer
+    connectServer,
+    sendMessageToActiveServer
   );
 
   schemeBindings = getSchemeCallbacks();

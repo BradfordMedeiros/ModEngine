@@ -56,7 +56,7 @@ void disconnectServer(){
   currentServerIp = "";
 }
 
-std::string sendDataMessageToActiveServer(std::string data){
+std::string sendMessageToActiveServer(std::string data){
   assert(isConnected);
   std::string content = "type:data\n" + data;
   return sendMessage(currentServerIp, 8000, content.c_str());
