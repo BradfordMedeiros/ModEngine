@@ -744,7 +744,9 @@ int main(int argc, char* argv[]){
 
   if(bootStrapperMode){
     std::cout << "INFO: running in server bootstrapper mode" << std::endl;
-    launchServer();
+    launchServer([](std::string message) -> void {
+      std::cout << "message is: " << message << std::endl;
+    });
     return 0;
   }
 
