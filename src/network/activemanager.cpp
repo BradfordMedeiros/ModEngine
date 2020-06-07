@@ -2,12 +2,21 @@
 
 static bool isConnected = false;
 static std::string currentServerIp = "";
+static int currentSocket = -1;
+
 static std::string bootstrapperServer = "127.0.0.1";
 static int bootstrapperPort = 8000;
 
 #define NETWORK_BUFFER_CLIENT_SIZE 1024
 
-std::string sendMessage(std::string ip, int port, const char* networkBuffer){
+std::string sendMessageWithConnection(int sockFd, const char* networkBuffer){
+  write(sockFd, networkBuffer, strlen(networkBuffer));
+  char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
+  guard(read(sockFd, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error reading message");   // @TODO -> read should just be threaded off and pump to an event loop
+  return buffer;
+}
+
+int socketConnection(std::string ip, int port){
   struct sockaddr_in address = {
     .sin_family = AF_INET,
     .sin_port = htons(port),
@@ -15,16 +24,17 @@ std::string sendMessage(std::string ip, int port, const char* networkBuffer){
       .s_addr = inet_addr(ip.c_str()),
     },
   };
-
   int sockFd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockFd == -1){
     throw std::runtime_error("error creating socket");
   }
   guard(connect(sockFd, (struct sockaddr*) &address, sizeof(address)), "error connecting socket");
-  write(sockFd, networkBuffer, strlen(networkBuffer));
+  return sockFd;
+}
 
-  char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
-  guard(read(sockFd, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error reading message");
+std::string sendMessageNewConnection(std::string ip, int port, const char* networkBuffer){
+  int sockFd = socketConnection(ip, port);
+  auto buffer = sendMessageWithConnection(sockFd, networkBuffer);
   close(sockFd);
   return buffer;
 }
@@ -40,16 +50,18 @@ std::map<std::string, std::string> parseListServerRequest(std::string response){
 }
 
 std::map<std::string, std::string> listServers(){
-  return parseListServerRequest(sendMessage(bootstrapperServer, bootstrapperPort, "list-servers"));
+  return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
 
 void connectServer(std::string server){
   auto serverAddress = listServers().at(server);
-  auto response = sendMessage(serverAddress, 8000, "connect");
+  auto sockFd = socketConnection(serverAddress, 8000);
+  auto response = sendMessageWithConnection(sockFd, "connect");
   assert(response == "ack");
   std::cout << "INFO: connection request succeeded" << std::endl;
   isConnected = true;
   currentServerIp = serverAddress;
+  currentSocket = sockFd;
 }
 void disconnectServer(){
   isConnected = false;
@@ -59,5 +71,5 @@ void disconnectServer(){
 std::string sendMessageToActiveServer(std::string data){
   assert(isConnected);
   std::string content = "type:data\n" + data;
-  return sendMessage(currentServerIp, 8000, content.c_str());
+ // return sendMessageW(currentServerIp, 8000, content.c_str());
 }
