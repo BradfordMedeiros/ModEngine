@@ -37,6 +37,21 @@ modsocket createServer(){
   return socketInfo;
 }
 
+ConnectionInfo getConnectionInfo(int sockfd){
+  char ipAddress[16];
+  struct sockaddr_in address;
+  bzero(&address, sizeof(address));
+  unsigned int addressSize = sizeof(address);
+  getsockname(sockfd, (struct sockaddr *) &address, &addressSize);
+  inet_ntop(AF_INET, &address.sin_addr, ipAddress, sizeof(ipAddress));
+  auto port = ntohs(address.sin_port);
+  ConnectionInfo info {
+    .ipAddress = ipAddress,
+    .port = port,
+  };
+  return info;
+}
+
 bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
   int addrlen = sizeof(socketInfo.socketin);
   int newSocket =  accept(socketInfo.socketFd, (struct sockaddr *)&socketInfo.socketin,  (socklen_t*)&addrlen); 
@@ -50,6 +65,10 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
     guard(fcntl(newSocket, F_SETFL, fcntl(newSocket, F_GETFL) | O_NONBLOCK), "error setting nonblocking mode for socket");
 
     std::cout << "socket accepted: " << newSocket << std::endl;
+
+    auto connectionInfo = getConnectionInfo(newSocket);
+    std::cout << "connection ip: " << connectionInfo.ipAddress << std::endl;
+    std::cout << "connection inbound port: " << connectionInfo.port << std::endl;
 
     std::cout << "network: maxFd is now: " << newSocket << std::endl;
     FD_SET(newSocket, &socketInfo.fds);     
@@ -113,19 +132,4 @@ void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::str
 
 void cleanupSocket(modsocket& socketInfo){
   close(socketInfo.socketFd);
-}
-
-ConnectionInfo getConnectionInfo(int sockfd){
-  char ipAddress[16];
-  struct sockaddr_in address;
-  bzero(&address, sizeof(address));
-  unsigned int addressSize = sizeof(address);
-  getsockname(sockfd, (struct sockaddr *) &address, &addressSize);
-  inet_ntop(AF_INET, &address.sin_addr, ipAddress, sizeof(ipAddress));
-  auto port = ntohs(address.sin_port);
-  ConnectionInfo info {
-    .ipAddress = ipAddress,
-    .port = port,
-  };
-  return info;
 }
