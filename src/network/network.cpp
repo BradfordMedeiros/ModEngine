@@ -115,3 +115,17 @@ void cleanupSocket(modsocket& socketInfo){
   close(socketInfo.socketFd);
 }
 
+ConnectionInfo getConnectionInfo(int sockfd){
+  char ipAddress[16];
+  struct sockaddr_in address;
+  bzero(&address, sizeof(address));
+  unsigned int addressSize = sizeof(address);
+  getsockname(sockfd, (struct sockaddr *) &address, &addressSize);
+  inet_ntop(AF_INET, &address.sin_addr, ipAddress, sizeof(ipAddress));
+  auto port = ntohs(address.sin_port);
+  ConnectionInfo info {
+    .ipAddress = ipAddress,
+    .port = port,
+  };
+  return info;
+}

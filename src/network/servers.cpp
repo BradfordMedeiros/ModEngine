@@ -15,8 +15,10 @@ std::map<std::string, std::string> parseConfigData(std::string serverConfig){
 }
 
 ServerBrowser loadServerInfo(){
+  std::vector<std::string> activeConnections;
   ServerBrowser browser {
     .serverNameToIp = parseConfigData(loadFile("./res/data/servers")),
+    .activeConnections = activeConnections,
   };
   return browser;
 }

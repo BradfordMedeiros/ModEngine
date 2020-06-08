@@ -27,4 +27,10 @@ modsocket createServer();
 void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)>);
 void cleanupSocket(modsocket& socketInfo);
 
+struct ConnectionInfo {
+  std::string ipAddress;
+  short unsigned int port;
+};
+ConnectionInfo getConnectionInfo(int sockfd);
+
 #endif 
