@@ -10,10 +10,17 @@
 #include <cstring>
 #include <errno.h>
 #include <vector>
+#include <map>
 #include <arpa/inet.h>
 #include <assert.h>
 #include <functional>
 #include "./common.h"
+
+struct ConnectionInfo {
+  std::string ipAddress;
+  short unsigned int port;
+};
+ConnectionInfo getConnectionInfo(int sockfd);
 
 // Server
 struct modsocket {
@@ -21,16 +28,12 @@ struct modsocket {
 	int socketFd;
 	fd_set fds;
 	int maxFd;
+  std::map<int, ConnectionInfo> activeConnections;
 };
       
 modsocket createServer();
 void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)>);
 void cleanupSocket(modsocket& socketInfo);
 
-struct ConnectionInfo {
-  std::string ipAddress;
-  short unsigned int port;
-};
-ConnectionInfo getConnectionInfo(int sockfd);
 
 #endif 

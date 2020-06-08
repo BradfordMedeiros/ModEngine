@@ -67,12 +67,10 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
     std::cout << "socket accepted: " << newSocket << std::endl;
 
     auto connectionInfo = getConnectionInfo(newSocket);
-    std::cout << "connection ip: " << connectionInfo.ipAddress << std::endl;
-    std::cout << "connection inbound port: " << connectionInfo.port << std::endl;
-
     std::cout << "network: maxFd is now: " << newSocket << std::endl;
     FD_SET(newSocket, &socketInfo.fds);     
     socketInfo.maxFd = socketInfo.maxFd > newSocket ? socketInfo.maxFd : newSocket;
+    socketInfo.activeConnections[newSocket] = connectionInfo;
     return true;
   }
   assert(false);
@@ -95,6 +93,7 @@ void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<
   std::cout << "network: closing socket" << std::endl;
   close(socketFd);
   FD_CLR(socketFd, &socketInfo.fds);
+  socketInfo.activeConnections.erase(socketFd);
   std::cout << "network: closed socket" << std::endl;
 }
 
