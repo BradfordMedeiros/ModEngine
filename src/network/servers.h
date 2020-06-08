@@ -12,6 +12,6 @@ struct ServerBrowser {
   std::map<std::string, std::string> serverNameToIp;
 };  
 
-void launchServer(std::function<void(std::string)> onTcpData);
+void launchServer();
 
 #endif

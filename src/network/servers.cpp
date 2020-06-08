@@ -29,7 +29,7 @@ std::string handleListServer(ServerBrowser& browser){
   return servers;
 }
 
-void launchServer(std::function<void(std::string)> onTcpData){
+void launchServer(){
   auto browser = loadServerInfo();
   
   std::cout << "INFO: create server start" << std::endl;
@@ -38,7 +38,7 @@ void launchServer(std::function<void(std::string)> onTcpData){
 
   std::map<std::string, ConnectionInfo> connections;
   while(true){
-    getDataFromSocket(server, [&browser, onTcpData, &connections](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
+    getDataFromSocket(server, [&browser, &connections](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
       auto requestLines = split(request, '\n');
       auto requestHeader = requestLines.at(0);
 
@@ -59,7 +59,6 @@ void launchServer(std::function<void(std::string)> onTcpData){
         }
       }else if (requestHeader == "type:data"){
         auto data = request.substr(10);
-        onTcpData(data);
         response = "ok";
       }
 
