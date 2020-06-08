@@ -40,7 +40,7 @@ void launchServer(){
   while(true){
     getDataFromSocket(server, [&browser, &connections](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
       auto requestLines = split(request, '\n');
-      auto requestHeader = requestLines.at(0);
+      auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
 
       std::string response = "ok";
       bool shouldCloseSocket = true;
