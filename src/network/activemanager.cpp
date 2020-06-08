@@ -52,7 +52,6 @@ std::map<std::string, std::string> parseListServerRequest(std::string response){
 std::map<std::string, std::string> listServers(){
   return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
-
 void connectServer(std::string server){
   auto serverAddress = listServers().at(server);
   auto sockFd = socketConnection(serverAddress, 8000);
@@ -67,9 +66,20 @@ void disconnectServer(){
   isConnected = false;
   currentServerIp = "";
 }
-
 std::string sendMessageToActiveServer(std::string data){
   assert(isConnected);
   std::string content = "type:data\n" + data;
- // return sendMessageW(currentServerIp, 8000, content.c_str());
+  return sendMessageWithConnection(currentSocket, content.c_str());
+}
+
+void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
+  if (isConnected){
+    char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
+    guard(read(currentSocket, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error get client message");
+    std::string message = buffer;
+    if (message != ""){
+      std::cout << "length: " << message.size() << std::endl;
+      onClientMessage(message);
+    }
+  }
 }

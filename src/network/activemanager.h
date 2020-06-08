@@ -23,5 +23,6 @@ std::map<std::string, std::string> listServers();
 void connectServer(std::string server);
 void disconnectServer();
 std::string sendMessageToActiveServer(std::string data);
+void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
 
 #endif

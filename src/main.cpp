@@ -368,7 +368,6 @@ void loadAllTextures(){
   }
 }
 
-
 int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
@@ -703,6 +702,10 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   drawText("using object id: -1" , 40, 190, 3);
 }
 
+void onClientMessage(std::string message){
+  std::cout << "client message received: " << message << std::endl;
+}
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -947,6 +950,7 @@ int main(int argc, char* argv[]){
     }
 
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
+    maybeGetClientMessage(onClientMessage);
 
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
