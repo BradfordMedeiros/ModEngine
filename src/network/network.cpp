@@ -70,20 +70,19 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
     std::cout << "network: maxFd is now: " << newSocket << std::endl;
     FD_SET(newSocket, &socketInfo.fds);     
     socketInfo.maxFd = socketInfo.maxFd > newSocket ? socketInfo.maxFd : newSocket;
-    socketInfo.activeConnections[newSocket] = connectionInfo;
     return true;
   }
   assert(false);
 }
 
-void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<std::string(std::string)> onData){
+void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<std::string(std::string, int)> onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
 
   std::cout << "network: reading socket data" << std::endl;
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
   std::cout << "network: finished reading socket data" << std::endl;
 
-  std::string serverResponse = onData(buffer);
+  std::string serverResponse = onData(buffer, socketFd);
   const char* responsep = serverResponse.c_str();
 
   std::cout << "network: sending socket data" << std::endl;
@@ -93,11 +92,10 @@ void sendDataAndCloseSocket (modsocket& socketInfo, int socketFd, std::function<
   std::cout << "network: closing socket" << std::endl;
   close(socketFd);
   FD_CLR(socketFd, &socketInfo.fds);
-  socketInfo.activeConnections.erase(socketFd);
   std::cout << "network: closed socket" << std::endl;
 }
 
-void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)> onData){
+void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string, int)> onData){
   acceptSocketAndMarkNonBlocking(socketInfo);
 
   timeval timeout {

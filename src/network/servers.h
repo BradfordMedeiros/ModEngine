@@ -1,7 +1,6 @@
 #ifndef MOD_SERVERS
 #define MOD_SERVERS
 
-#include <map>
 #include <vector>
 #include <string>
 #include <iostream>

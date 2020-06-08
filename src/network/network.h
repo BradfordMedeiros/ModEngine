@@ -28,12 +28,10 @@ struct modsocket {
 	int socketFd;
 	fd_set fds;
 	int maxFd;
-  std::map<int, ConnectionInfo> activeConnections;
 };
       
 modsocket createServer();
-void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string)>);
+void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string, int)>);
 void cleanupSocket(modsocket& socketInfo);
-
 
 #endif 
