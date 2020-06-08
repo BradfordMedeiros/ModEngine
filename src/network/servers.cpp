@@ -60,6 +60,9 @@ void launchServer(){
       }else if (requestHeader == "type:data"){
         auto data = request.substr(10);
         response = "ok";
+        for (auto [_, connection] : connections){
+          sendDataOnSocket(connection.socketFd, data.c_str());
+        }
       }
 
       std::cout << "response is: " << std::endl << response << std::endl;

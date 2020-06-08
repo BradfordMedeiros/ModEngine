@@ -48,6 +48,7 @@ ConnectionInfo getConnectionInfo(int sockfd){
   ConnectionInfo info {
     .ipAddress = ipAddress,
     .port = port,
+    .socketFd = sockfd,
   };
   return info;
 }
@@ -81,6 +82,11 @@ void closeSocket(modsocket& socketInfo, int socketFd){
   FD_CLR(socketFd, &socketInfo.fds);
   std::cout << "network: closed socket" << std::endl;
 }
+void sendDataOnSocket(int socketFd, const char* data){
+  std::cout << "network: sending socket data" << std::endl;
+  send(socketFd, data, strlen(data), 0);
+  std::cout << "network: finished sending socket data" << std::endl;
+}
 void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketResponse(std::string, int)> onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
 
@@ -90,10 +96,7 @@ void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketR
 
   auto socketResponse = onData(buffer, socketFd);
   const char* responsep = socketResponse.response.c_str();
-
-  std::cout << "network: sending socket data" << std::endl;
-  send(socketFd, responsep, strlen(responsep), 0);
-  std::cout << "network: finished sending socket data" << std::endl;
+  sendDataOnSocket(socketFd, responsep);
 
   if (socketResponse.shouldCloseSocket){
     closeSocket(socketInfo, socketFd);

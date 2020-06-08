@@ -19,6 +19,7 @@
 struct ConnectionInfo {
   std::string ipAddress;
   short unsigned int port;
+  int socketFd;
 };
 ConnectionInfo getConnectionInfo(int sockfd);
 
@@ -37,6 +38,7 @@ struct socketResponse {
   bool shouldCloseSocket;
 };
 void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)>);
+void sendDataOnSocket(int socketFd, const char* data);
 void cleanupSocket(modsocket& socketInfo);
 
 #endif 
