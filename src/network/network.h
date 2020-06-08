@@ -31,7 +31,12 @@ struct modsocket {
 };
       
 modsocket createServer();
-void getDataFromSocket(modsocket& socketInfo, std::function<std::string(std::string, int)>);
+
+struct socketResponse {
+  std::string response;
+  bool shouldCloseSocket;
+};
+void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)>);
 void cleanupSocket(modsocket& socketInfo);
 
 #endif 

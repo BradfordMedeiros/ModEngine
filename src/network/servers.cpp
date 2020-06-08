@@ -38,12 +38,13 @@ void launchServer(std::function<void(std::string)> onTcpData){
 
   std::map<std::string, ConnectionInfo> connections;
   while(true){
-    getDataFromSocket(server, [&browser, onTcpData, &connections](std::string request, int socketFd) -> std::string {      // @TODO probably use byte encoding for this instead of using string style comparisons
+    getDataFromSocket(server, [&browser, onTcpData, &connections](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
       auto requestLines = split(request, '\n');
       auto requestHeader = requestLines.at(0);
-      std::cout << "request is: " << request << std::endl;
 
       std::string response = "ok";
+      bool shouldCloseSocket = true;
+
       if (requestHeader == "list-servers"){
         response = handleListServer(browser);
       } else if (requestHeader == "connect"){
@@ -52,6 +53,7 @@ void launchServer(std::function<void(std::string)> onTcpData){
         if (connections.find(connectionHash) == connections.end()){
           response = "ack";
           connections[connectionHash] = connectionInfo;
+          shouldCloseSocket = false;
         }else{
           response = "nack";
         }
@@ -62,7 +64,11 @@ void launchServer(std::function<void(std::string)> onTcpData){
       }
 
       std::cout << "response is: " << std::endl << response << std::endl;
-      return response;
+      socketResponse serverResponse {
+        .response = response,
+        .shouldCloseSocket = shouldCloseSocket,
+      };
+      return serverResponse;
     });
   }
 }
