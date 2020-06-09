@@ -5,7 +5,7 @@ assimp:
 	@git submodule update --init --recursive
 
 modengine: build resourcefiles
-	@(cd ./build && cmake .. && make all)
+	@(cd ./build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make all)
 	@echo modengine output to ./build/modengine
 
 modengine_release: build resourcefiles
