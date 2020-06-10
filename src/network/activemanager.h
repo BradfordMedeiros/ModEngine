@@ -5,6 +5,7 @@
 #include <map>
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h> 
 #include <fcntl.h>
 #include <iostream>
@@ -22,7 +23,7 @@
 std::map<std::string, std::string> listServers();
 void connectServer(std::string server);
 void disconnectServer();
-std::string sendMessageToActiveServer(std::string data);
+void sendMessageToActiveServer(std::string data);
 void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
 
 #endif

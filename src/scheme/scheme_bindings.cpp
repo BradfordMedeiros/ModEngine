@@ -338,7 +338,7 @@ SCM scmSaveScene(){
   return SCM_UNSPECIFIED;
 }
 
-std::string (*_sendMessageTcp)(std::string data);
+void (*_sendMessageTcp)(std::string data);
 SCM scmSendMessageTcp(SCM topic){
   _sendMessageTcp(scm_to_locale_string(topic));
   return SCM_UNSPECIFIED;
@@ -539,7 +539,7 @@ void createStaticSchemeBindings(
   void (*saveScene)(),
   std::map<std::string, std::string> (*listServers)(),
   void (*connectServer)(std::string server),
-  std::string (*sendMessageTcp)(std::string data)
+  void (*sendMessageTcp)(std::string data)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);

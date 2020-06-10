@@ -43,32 +43,43 @@ void launchServer(){
       auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
 
       std::string response = "ok";
-      bool shouldCloseSocket = true;
+      bool shouldCloseSocket = false;
+      bool shouldSendData = false;
+
+      std::cout << "----request header: " << requestHeader << std::endl;
 
       if (requestHeader == "list-servers"){
         response = handleListServer(browser);
+        shouldCloseSocket = true;
+        shouldSendData = true;
       } else if (requestHeader == "connect"){
         auto connectionInfo = getConnectionInfo(socketFd);
         auto connectionHash = connectionInfo.ipAddress + "\\" + std::to_string(connectionInfo.port); 
+        std::cout << "connection hash: " << connectionHash << std::endl;
         if (connections.find(connectionHash) == connections.end()){
           response = "ack";
           connections[connectionHash] = connectionInfo;
-          shouldCloseSocket = false;
         }else{
           response = "nack";
+          shouldCloseSocket = true;
         }
+        shouldSendData = true;
       }else if (requestHeader == "type:data"){
         auto data = request.substr(10);
         response = "ok";
+        std::cout << "----$$$$ got data type request header$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
+
         for (auto [_, connection] : connections){
+          std::cout << "$$$$$$$$$ got data type request header$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
           sendDataOnSocket(connection.socketFd, data.c_str());
         }
+        shouldSendData = true;
       }
 
-      std::cout << "response is: " << std::endl << response << std::endl;
       socketResponse serverResponse {
         .response = response,
         .shouldCloseSocket = shouldCloseSocket,
+        .shouldSendData = shouldSendData,
       };
       return serverResponse;
     });

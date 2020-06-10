@@ -95,9 +95,11 @@ void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketR
   std::cout << "network: finished reading socket data" << std::endl;
 
   auto socketResponse = onData(buffer, socketFd);
-  const char* responsep = socketResponse.response.c_str();
-  sendDataOnSocket(socketFd, responsep);
 
+  if (socketResponse.shouldSendData){
+    const char* responsep = socketResponse.response.c_str();
+    sendDataOnSocket(socketFd, responsep);
+  }
   if (socketResponse.shouldCloseSocket){
     closeSocket(socketInfo, socketFd);
   }
@@ -122,10 +124,9 @@ void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::
   }
 
   std::vector<int> readySocketFds;
-  int selectedSocket = -1;
   for (int socketFd = 0; socketFd <= socketInfo.maxFd; socketFd++){
     if (FD_ISSET(socketFd, &socketInfo.fds)){
-      std::cout << "network: socket is set!" << std::endl;
+      std::cout << "network: socket is ready!" << std::endl;
       readySocketFds.push_back(socketFd);
     }
   }

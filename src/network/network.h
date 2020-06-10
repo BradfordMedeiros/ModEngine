@@ -36,6 +36,7 @@ modsocket createServer();
 struct socketResponse {
   std::string response;
   bool shouldCloseSocket;
+  bool shouldSendData;
 };
 void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)>);
 void sendDataOnSocket(int socketFd, const char* data);

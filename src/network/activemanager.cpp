@@ -9,8 +9,10 @@ static int bootstrapperPort = 8000;
 
 #define NETWORK_BUFFER_CLIENT_SIZE 1024
 
-std::string sendMessageWithConnection(int sockFd, const char* networkBuffer){
+void sendMessageWithConnection(int sockFd, const char* networkBuffer){
   write(sockFd, networkBuffer, strlen(networkBuffer));
+}
+std::string readMessageWithConnection(int sockFd){
   char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
   guard(read(sockFd, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error reading message");   // @TODO -> read should just be threaded off and pump to an event loop
   return buffer;
@@ -34,7 +36,8 @@ int socketConnection(std::string ip, int port){
 
 std::string sendMessageNewConnection(std::string ip, int port, const char* networkBuffer){
   int sockFd = socketConnection(ip, port);
-  auto buffer = sendMessageWithConnection(sockFd, networkBuffer);
+  sendMessageWithConnection(sockFd, networkBuffer);
+  auto buffer = readMessageWithConnection(sockFd);
   close(sockFd);
   return buffer;
 }
@@ -55,7 +58,8 @@ std::map<std::string, std::string> listServers(){
 void connectServer(std::string server){
   auto serverAddress = listServers().at(server);
   auto sockFd = socketConnection(serverAddress, 8000);
-  auto response = sendMessageWithConnection(sockFd, "connect");
+  sendMessageWithConnection(sockFd, "connect");
+  auto response = readMessageWithConnection(sockFd);
   assert(response == "ack");
   std::cout << "INFO: connection request succeeded" << std::endl;
   isConnected = true;
@@ -66,20 +70,31 @@ void disconnectServer(){
   isConnected = false;
   currentServerIp = "";
 }
-std::string sendMessageToActiveServer(std::string data){
+void sendMessageToActiveServer(std::string data){
   assert(isConnected);
   std::string content = "type:data\n" + data;
-  return sendMessageWithConnection(currentSocket, content.c_str());
+  std::cout << "Sending message to active server starting: " << data << std::endl;
+  sendMessageWithConnection(currentSocket, content.c_str());
+  std::cout << "Sending message to active server complete: " << data << std::endl;
+}
+
+bool socketHasDataToRead(int socketFd){
+  int count;
+  ioctl(currentSocket, FIONREAD, &count);
+  return count > 0;
 }
 
 void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
   if (isConnected){
-    char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
-    guard(read(currentSocket, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error get client message");
-    std::string message = buffer;
-    if (message != ""){
-      std::cout << "length: " << message.size() << std::endl;
-      onClientMessage(message);
+    if (socketHasDataToRead(currentSocket)){
+      char buffer[NETWORK_BUFFER_CLIENT_SIZE] = {0};
+      guard(read(currentSocket, buffer, NETWORK_BUFFER_CLIENT_SIZE), "error get client message");
+      std::cout << "reading client message: end" << std::endl;
+      std::string message = buffer;
+      if (message != ""){
+        std::cout << "length: " << message.size() << std::endl;
+        onClientMessage(message);
+      }
     }
   }
 }
