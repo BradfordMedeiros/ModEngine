@@ -56,6 +56,7 @@ std::map<std::string, std::string> listServers(){
   return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
 void connectServer(std::string server){
+  assert(!isConnected);
   auto serverAddress = listServers().at(server);
   auto sockFd = socketConnection(serverAddress, 8000);
   sendMessageWithConnection(sockFd, "connect");
@@ -67,6 +68,7 @@ void connectServer(std::string server){
   currentSocket = sockFd;
 }
 void disconnectServer(){
+  assert(isConnected);
   isConnected = false;
   currentServerIp = "";
 }

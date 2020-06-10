@@ -28,7 +28,6 @@ modsocket createServer(){
   FD_ZERO(&set);
 
   struct modsocket socketInfo  = {
-    .socketin = address,
     .socketFd = socketFd,
     .fds = set,
     .maxFd = 1,
@@ -36,30 +35,23 @@ modsocket createServer(){
 
   return socketInfo;
 }
-
-ConnectionInfo getConnectionInfo(int sockfd){
-  char ipAddress[16];
-  struct sockaddr_in address;
-  bzero(&address, sizeof(address));
-  unsigned int addressSize = sizeof(address);
-  getsockname(sockfd, (struct sockaddr *) &address, &addressSize);
-  inet_ntop(AF_INET, &address.sin_addr, ipAddress, sizeof(ipAddress));
-  auto port = ntohs(address.sin_port);
-  ConnectionInfo info {
-    .ipAddress = ipAddress,
-    .port = port,
-    .socketFd = sockfd,
-  };
-  return info;
+ConnectionInfo getConnectionInfo(modsocket& modsocket, int sockfd){
+  for (auto connectionInfo : modsocket.infos){
+    if (connectionInfo.socketFd == sockfd){
+      return connectionInfo;
+    }
+  }
+  assert(false);
 }
 
-bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
-  int addrlen = sizeof(socketInfo.socketin);
-  int newSocket =  accept(socketInfo.socketFd, (struct sockaddr *)&socketInfo.socketin,  (socklen_t*)&addrlen); 
+std::optional<ConnectionInfo> acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
+  sockaddr_in socketin;
+  int addrlen = sizeof(socketin);
+  int newSocket =  accept(socketInfo.socketFd, (struct sockaddr *)&socketin,  (socklen_t*)&addrlen); 
 
   if (newSocket < 0){  // @todo what other failure modes here?
     if (errno == EWOULDBLOCK || errno == EAGAIN){
-      return false;
+      return std::nullopt;
     }
     throw std::runtime_error(std::string("error accepting socket ") + strerror(errno));
   }else{
@@ -67,11 +59,20 @@ bool acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
 
     std::cout << "socket accepted: " << newSocket << std::endl;
 
-    auto connectionInfo = getConnectionInfo(newSocket);
+    short unsigned int inboundPort = ntohs(socketin.sin_port);
+    char ipAddress[16] = {0};
+    inet_ntop(AF_INET, &socketin.sin_addr, ipAddress, sizeof(ipAddress));
+
+    ConnectionInfo info {
+      .port = inboundPort,
+      .socketFd = newSocket,
+      .ipAddress = ipAddress,
+    };
+
     std::cout << "network: maxFd is now: " << newSocket << std::endl;
     FD_SET(newSocket, &socketInfo.fds);     
     socketInfo.maxFd = socketInfo.maxFd > newSocket ? socketInfo.maxFd : newSocket;
-    return true;
+    return info;
   }
   assert(false);
 }
@@ -81,6 +82,14 @@ void closeSocket(modsocket& socketInfo, int socketFd){
   close(socketFd);
   FD_CLR(socketFd, &socketInfo.fds);
   std::cout << "network: closed socket" << std::endl;
+
+  std::vector<ConnectionInfo> infos;
+  for (auto info : socketInfo.infos){
+    if (info.socketFd != socketFd){
+      infos.push_back(info);
+    }
+  }
+  socketInfo.infos = infos;
 }
 void sendDataOnSocket(int socketFd, const char* data){
   std::cout << "network: sending socket data" << std::endl;
@@ -106,7 +115,10 @@ void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketR
 }
 
 void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)> onData){
-  acceptSocketAndMarkNonBlocking(socketInfo);
+  auto optConnectionInfo = acceptSocketAndMarkNonBlocking(socketInfo);
+  if (optConnectionInfo.has_value()){
+    socketInfo.infos.push_back(optConnectionInfo.value());
+  }
 
   timeval timeout {
     .tv_sec = 0,
@@ -136,6 +148,3 @@ void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::
   }
 }
 
-void cleanupSocket(modsocket& socketInfo){
-  close(socketInfo.socketFd);
-}

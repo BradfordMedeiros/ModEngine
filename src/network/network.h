@@ -17,21 +17,22 @@
 #include "./common.h"
 
 struct ConnectionInfo {
-  std::string ipAddress;
   short unsigned int port;
   int socketFd;
+  std::string ipAddress;
 };
-ConnectionInfo getConnectionInfo(int sockfd);
 
 // Server
 struct modsocket {
-	sockaddr_in socketin;
 	int socketFd;
 	fd_set fds;
 	int maxFd;
+  std::vector<ConnectionInfo> infos;
 };
       
 modsocket createServer();
+ConnectionInfo getConnectionInfo(modsocket& modsocket, int sockfd);
+
 
 struct socketResponse {
   std::string response;
@@ -40,6 +41,5 @@ struct socketResponse {
 };
 void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)>);
 void sendDataOnSocket(int socketFd, const char* data);
-void cleanupSocket(modsocket& socketInfo);
 
 #endif 

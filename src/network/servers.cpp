@@ -38,7 +38,7 @@ void launchServer(){
 
   std::map<std::string, ConnectionInfo> connections;
   while(true){
-    getDataFromSocket(server, [&browser, &connections](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
+    getDataFromSocket(server, [&browser, &connections, &server](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
       auto requestLines = split(request, '\n');
       auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
 
@@ -46,15 +46,14 @@ void launchServer(){
       bool shouldCloseSocket = false;
       bool shouldSendData = false;
 
-      std::cout << "----request header: " << requestHeader << std::endl;
-
       if (requestHeader == "list-servers"){
         response = handleListServer(browser);
         shouldCloseSocket = true;
         shouldSendData = true;
       } else if (requestHeader == "connect"){
-        auto connectionInfo = getConnectionInfo(socketFd);
+        auto connectionInfo = getConnectionInfo(server, socketFd);
         auto connectionHash = connectionInfo.ipAddress + "\\" + std::to_string(connectionInfo.port); 
+   
         std::cout << "connection hash: " << connectionHash << std::endl;
         if (connections.find(connectionHash) == connections.end()){
           response = "ack";
@@ -67,10 +66,8 @@ void launchServer(){
       }else if (requestHeader == "type:data"){
         auto data = request.substr(10);
         response = "ok";
-        std::cout << "----$$$$ got data type request header$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
 
         for (auto [_, connection] : connections){
-          std::cout << "$$$$$$$$$ got data type request header$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
           sendDataOnSocket(connection.socketFd, data.c_str());
         }
         shouldSendData = true;
