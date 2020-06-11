@@ -703,7 +703,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 }
 
 void onClientMessage(std::string message){
-  std::cout << "client message received: " << message << std::endl;
+  schemeBindings.onTcpMessage(message);
 }
 
 int main(int argc, char* argv[]){

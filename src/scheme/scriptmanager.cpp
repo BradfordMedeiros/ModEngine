@@ -109,6 +109,7 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onKeyCharCallback = onKeyCharCallbackAllScripts,
     .onCameraSystemChange = onCameraSystemChangeAllScripts,
     .onMessage = onMessageAllScripts,
+    .onTcpMessage = onTcpMessageAllScripts,
   };
 
   return callbackFuncs;
