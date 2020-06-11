@@ -61,5 +61,6 @@ void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
 void onCameraSystemChange(bool usingBuiltInCamera);
 void onMessage(std::string message);
+void onTcpMessage(std::string message);
 
 #endif

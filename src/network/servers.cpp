@@ -54,8 +54,8 @@ void launchServer(){
         auto connectionInfo = getConnectionInfo(server, socketFd);
         auto connectionHash = connectionInfo.ipAddress + "\\" + std::to_string(connectionInfo.port); 
    
-        std::cout << "connection hash: " << connectionHash << std::endl;
         if (connections.find(connectionHash) == connections.end()){
+          std::cout << "INFO: connection hash: " << connectionHash << std::endl;
           response = "ack";
           connections[connectionHash] = connectionInfo;
         }else{

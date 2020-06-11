@@ -90,6 +90,13 @@ void onMessageAllScripts(std::vector<std::string>& messages){
   }
 }
 
+void onTcpMessageAllScripts(std::string message){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    onTcpMessage(message);
+  } 
+}
+
 SchemeBindingCallbacks getSchemeCallbacks(){
   SchemeBindingCallbacks callbackFuncs = {
     .onFrame = onFrameAllScripts,

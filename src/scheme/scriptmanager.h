@@ -16,6 +16,7 @@ typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(short index);
 typedef void(*boolfunc)(bool value);
 typedef void(*messagefunc)(std::vector<std::string>&);
+typedef void(*stringfunc)();
 
 struct SchemeBindingCallbacks {
   func onFrame;
@@ -28,6 +29,7 @@ struct SchemeBindingCallbacks {
   keycharcallback onKeyCharCallback;
   boolfunc onCameraSystemChange;
   messagefunc onMessage;
+  stringfunc onTcpMessage;
 };
 
 SchemeBindingCallbacks getSchemeCallbacks();
