@@ -42,4 +42,11 @@ struct socketResponse {
 void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::string, int)>);
 void sendDataOnSocket(int socketFd, const char* data);
 
+struct udpmodsocket {
+  int socketFd;
+};
+
+udpmodsocket createUdpServer();
+void getDataFromUdpSocket(udpmodsocket& socketInfo);
+
 #endif 

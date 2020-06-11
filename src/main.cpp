@@ -747,7 +747,8 @@ int main(int argc, char* argv[]){
 
   if(bootStrapperMode){
     std::cout << "INFO: running in server bootstrapper mode" << std::endl;
-    launchServer();
+    //launchServer();
+    launchUdpServer();
     return 0;
   }
 

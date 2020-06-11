@@ -82,3 +82,12 @@ void launchServer(){
     });
   }
 }
+
+void launchUdpServer(){
+  std::cout << "INFO: create udp server" << std::endl;
+
+  auto udpmodSocket = createUdpServer(); 
+  while(true){
+    getDataFromUdpSocket(udpmodSocket);
+  }
+}

@@ -9,7 +9,7 @@ modsocket createServer(){
 		throw std::runtime_error("error creating socket");
 	}
 
-  struct sockaddr_in address = {
+  sockaddr_in address = {
   	.sin_family = AF_INET,
   	.sin_port = htons(8000),
   	.sin_addr = in_addr {
@@ -27,7 +27,7 @@ modsocket createServer(){
   fd_set set;
   FD_ZERO(&set);
 
-  struct modsocket socketInfo  = {
+  modsocket socketInfo {
     .socketFd = socketFd,
     .fds = set,
     .maxFd = 1,
@@ -35,6 +35,7 @@ modsocket createServer(){
 
   return socketInfo;
 }
+
 ConnectionInfo getConnectionInfo(modsocket& modsocket, int sockfd){
   for (auto connectionInfo : modsocket.infos){
     if (connectionInfo.socketFd == sockfd){
@@ -148,3 +149,28 @@ void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::
   }
 }
 
+
+udpmodsocket createUdpServer(){
+  int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+  sockaddr_in address {
+    .sin_family = AF_INET,
+    .sin_port = htons(8001),
+    .sin_addr = in_addr{
+      .s_addr = htonl(INADDR_ANY),
+    }
+  };
+  guard(bind(sockfd, (struct sockaddr*)&address, sizeof(address)), "error binding socket");
+
+  if (sockfd == -1){
+    throw std::runtime_error("error creating socket");
+  }
+  udpmodsocket socketInfo {
+    .socketFd = sockfd,
+  };
+  return socketInfo;
+}
+
+void getDataFromUdpSocket(udpmodsocket& socketInfo){
+
+}

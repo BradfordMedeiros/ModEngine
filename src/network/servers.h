@@ -13,5 +13,6 @@ struct ServerBrowser {
 };  
 
 void launchServer();
+void launchUdpServer();
 
 #endif
