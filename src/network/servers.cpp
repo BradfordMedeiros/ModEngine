@@ -88,6 +88,8 @@ void launchUdpServer(){
 
   auto udpmodSocket = createUdpServer(); 
   while(true){
-    getDataFromUdpSocket(udpmodSocket);
+    getDataFromUdpSocket(udpmodSocket, [](std::string data) -> void {
+      std::cout << "message from udp socket: " << data << std::endl;
+    });
   }
 }

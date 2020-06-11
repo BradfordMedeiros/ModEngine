@@ -103,6 +103,7 @@ void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketR
   std::cout << "network: reading socket data" << std::endl;
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
   std::cout << "network: finished reading socket data" << std::endl;
+  assert(value != -1);
 
   auto socketResponse = onData(buffer, socketFd);
 
@@ -171,6 +172,13 @@ udpmodsocket createUdpServer(){
   return socketInfo;
 }
 
-void getDataFromUdpSocket(udpmodsocket& socketInfo){
-
+void getDataFromUdpSocket(udpmodsocket& socketInfo, std::function<void(std::string)> onData){
+  char buffer[NETWORK_BUFFER_SIZE] = {0};
+  sockaddr_in socketin;
+  int len = sizeof(socketin);
+  int value = recvfrom(socketInfo.socketFd, buffer, NETWORK_BUFFER_SIZE,  MSG_DONTWAIT, ( struct sockaddr *) &socketin, (socklen_t*)&len); 
+  
+  if (value > 0){
+    onData(buffer);
+  }
 }
