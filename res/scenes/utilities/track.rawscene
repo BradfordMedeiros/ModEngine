@@ -6,13 +6,16 @@ platform:position:0 -5 0
 box1:mesh:./res/models/box/box.obj
 box1:position:-10 -3 -20
 box2:mesh:./res/models/box/box.obj
-box2:position:10 -3 -20
+box2:position:15 10 -20
 box3:mesh:./res/models/box/box.obj
 box3:position:20 -3 -30
 
 ball:mesh:./res/models/box/box.obj
 ball:scale:0.5 0.5 0.5
 ball:position:-5 -3 -20
+
+>maincamera:position:-5 -3 -20
+
 
 ^rail:from:box1
 ^rail:to:box2

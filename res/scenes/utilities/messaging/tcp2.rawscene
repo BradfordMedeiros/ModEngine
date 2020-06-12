@@ -2,4 +2,4 @@
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
-platform:script:./res/scripts/tcp-test1.scm
+platform:script:./res/scripts/messaging/tcp-test2.scm
