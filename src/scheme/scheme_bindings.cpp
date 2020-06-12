@@ -343,6 +343,11 @@ SCM scmSendMessageTcp(SCM topic){
   _sendMessageTcp(scm_to_locale_string(topic));
   return SCM_UNSPECIFIED;
 }
+void (*_sendMessageUdp)(std::string data);
+SCM scmSendMessageUdp(SCM topic){
+  _sendMessageTcp(scm_to_locale_string(topic));
+  return SCM_UNSPECIFIED;
+}
 
 std::map<std::string, std::string> (*_listServers)();
 SCM scmListServers(){
@@ -513,6 +518,7 @@ void defineFunctions(){
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
   scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
   scm_c_define_gsubr("send-tcp", 1, 0, 0, (void*)scmSendMessageTcp);
+  scm_c_define_gsubr("send-udp", 1, 0, 0, (void*)scmSendMessageUdp);
 }
 
 
@@ -601,4 +607,5 @@ void createStaticSchemeBindings(
   _listServers = listServers;
   _connectServer = connectServer;
   _sendMessageTcp = sendMessageTcp;
+  _sendMessageUdp = sendMessageUdp;
 }
