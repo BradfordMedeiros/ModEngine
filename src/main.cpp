@@ -705,6 +705,9 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
+void onUdpClientMessage(std::string message){
+  schemeBindings.onUdpMessage(message);
+}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -951,6 +954,7 @@ int main(int argc, char* argv[]){
 
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     maybeGetClientMessage(onClientMessage);
+    maybeGetUdpClientMessage(onUdpClientMessage);
 
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);

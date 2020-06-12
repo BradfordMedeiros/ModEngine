@@ -123,3 +123,7 @@ void sendDataOnUdpSocket(std::string data){
 
     // recvfrom(sockfd, (char *)buffer, MAXLINE,   MSG_WAITALL, (struct sockaddr *) &servaddr,  &len); 
 }
+
+void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage){
+  
+}
