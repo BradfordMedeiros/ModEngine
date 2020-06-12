@@ -30,6 +30,7 @@ struct SchemeBindingCallbacks {
   boolfunc onCameraSystemChange;
   messagefunc onMessage;
   stringfunc onTcpMessage;
+  stringfunc onUdpMessage;
 };
 
 SchemeBindingCallbacks getSchemeCallbacks();

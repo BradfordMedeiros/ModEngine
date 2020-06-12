@@ -96,6 +96,13 @@ void onTcpMessageAllScripts(std::string message){
     onTcpMessage(message);
   } 
 }
+void onUdpMessageAllScripts(std::string message){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    onUdpMessage(message);
+  } 
+}
+
 
 SchemeBindingCallbacks getSchemeCallbacks(){
   SchemeBindingCallbacks callbackFuncs = {
@@ -110,6 +117,7 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onCameraSystemChange = onCameraSystemChangeAllScripts,
     .onMessage = onMessageAllScripts,
     .onTcpMessage = onTcpMessageAllScripts,
+    .onUdpMessage = onUdpMessageAllScripts,
   };
 
   return callbackFuncs;
