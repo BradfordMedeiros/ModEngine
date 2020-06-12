@@ -345,7 +345,7 @@ SCM scmSendMessageTcp(SCM topic){
 }
 void (*_sendMessageUdp)(std::string data);
 SCM scmSendMessageUdp(SCM topic){
-  _sendMessageTcp(scm_to_locale_string(topic));
+  _sendMessageUdp(scm_to_locale_string(topic));
   return SCM_UNSPECIFIED;
 }
 
