@@ -891,7 +891,8 @@ int main(int argc, char* argv[]){
     saveScene,
     listServers,
     connectServer,
-    sendMessageToActiveServer
+    sendMessageToActiveServer,
+    sendDataOnUdpSocket
   );
 
   schemeBindings = getSchemeCallbacks();

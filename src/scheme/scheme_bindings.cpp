@@ -553,7 +553,8 @@ void createStaticSchemeBindings(
   void (*saveScene)(),
   std::map<std::string, std::string> (*listServers)(),
   void (*connectServer)(std::string server),
-  void (*sendMessageTcp)(std::string data)
+  void (*sendMessageTcp)(std::string data),
+  void (*sendMessageUdp)(std::string data)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);

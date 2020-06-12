@@ -23,7 +23,11 @@
 std::map<std::string, std::string> listServers();
 void connectServer(std::string server);
 void disconnectServer();
+
 void sendMessageToActiveServer(std::string data);
 void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
+
+void sendDataOnUdpSocket(std::string data);
+
 
 #endif
