@@ -95,8 +95,11 @@ void launchServers(){
 
   while(true){
     processTcpServer(tserver);
-    getDataFromUdpSocket(udpmodSocket.socketFd, [](std::string data) -> void {
-      std::cout << "message from udp socket: " << data << std::endl;
+    getDataFromUdpSocket(udpmodSocket.socketFd, [](UdpPacket data) -> void {
+      //std::cout << "message from udp socket: " << data << std::endl;
+      std::cout << "id is: " << data.id << std::endl;
+      std::cout << "position is: " << print(data.position) << std::endl;
+      std::cout << "scale is: " << print(data.scale) << std::endl;
     });
   }
 }

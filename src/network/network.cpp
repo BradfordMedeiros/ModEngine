@@ -172,13 +172,16 @@ udpmodsocket createUdpServer(){
   return socketInfo;
 }
 
-void getDataFromUdpSocket(int socket, std::function<void(std::string)> onData){
+void getDataFromUdpSocket(int socket, std::function<void(UdpPacket)> onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
   sockaddr_in socketin;
   int len = sizeof(socketin);
-  int value = recvfrom(socket, buffer, NETWORK_BUFFER_SIZE,  MSG_DONTWAIT, ( struct sockaddr *) &socketin, (socklen_t*)&len); 
+
+  UdpPacket packet {};
+
+  int value = recvfrom(socket, &packet, sizeof(packet),  MSG_DONTWAIT, ( struct sockaddr *) &socketin, (socklen_t*)&len); 
   
   if (value > 0){
-    onData(buffer);
+    onData(packet);
   }
 }

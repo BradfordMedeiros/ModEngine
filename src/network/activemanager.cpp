@@ -148,17 +148,28 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
   }
 }
 
-void sendDataOnUdpSocket(std::string data){
+
+void sendDataOnUdpSocket(std::string data, UdpPacket packet){
   assert(isConnected);
   const char* networkBuffer = data.c_str();
-  int numBytes = sendto(setup.udpSocket, networkBuffer, strlen(networkBuffer),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr,   sizeof(setup.servaddr)); 
+
+  int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr,   sizeof(setup.servaddr)); 
   if (numBytes == -1){
     throw std::runtime_error("error sending udp data");
   }
 }
+void sendDataOnUdpSocket(std::string data){
+  UdpPacket packet {
+    .id = 5,
+    .position = glm::vec3(1.f, 1.f, 1.f),
+    .scale = glm::vec3(2.f, 2.f, 2.f),
+  };
+
+  sendDataOnUdpSocket(data, packet);
+}
 
 void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage){
   if (setup.udpSocket != -1){
-    getDataFromUdpSocket(setup.udpSocket, onClientMessage);
+   // getDataFromUdpSocket(setup.udpSocket, onClientMessage);
   }
 }

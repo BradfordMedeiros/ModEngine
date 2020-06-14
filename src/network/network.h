@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <functional>
 #include "./common.h"
+#include "../common/util.h"
 
 struct ConnectionInfo {
   short unsigned int port;
@@ -45,9 +46,14 @@ void sendDataOnSocket(int socketFd, const char* data);
 struct udpmodsocket {
   int socketFd;
 };
+struct UdpPacket {
+  short id;
+  glm::vec3 position;
+  glm::vec3 scale;
+};
 
 udpmodsocket createUdpServer();
-void getDataFromUdpSocket(int socket, std::function<void(std::string)> onData);
+void getDataFromUdpSocket(int socket, std::function<void(UdpPacket)> onData);
 void sendDataOnUdpSocket(const char* networkBuffer);
 
 #endif 
