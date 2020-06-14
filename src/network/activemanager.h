@@ -24,11 +24,12 @@
 std::map<std::string, std::string> listServers();
 void connectServer(std::string server);
 void disconnectServer();
+bool isConnectedToServer();
 
 void sendMessageToActiveServer(std::string data);
 void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
 
-void sendDataOnUdpSocket(std::string data, UdpPacket packet);
+void sendDataOnUdpSocket(UdpPacket packet);
 void sendDataOnUdpSocket(std::string data);
 void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage);
 

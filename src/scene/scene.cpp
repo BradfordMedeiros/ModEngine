@@ -243,13 +243,14 @@ void addMesh(World& world, std::string meshpath){
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
-World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
+World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, std::function<void(GameObject&)> onObjectUpdate, btIDebugDraw* debugDrawer){
   auto objectMapping = getObjectMapping();
   RailSystem rails;
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
     .rails = rails,
+    .onObjectUpdate = onObjectUpdate,
   };
 
   // Default meshes that are silently loaded in the background
@@ -653,6 +654,14 @@ void updateEntities(World& world){
   }
 }
 
+void callbackEntities(World& world){
+  for (auto &[_, scene] : world.scenes){
+    for (auto &[id, gameobj] : scene.idToGameObjects){
+      world.onObjectUpdate(gameobj);
+    }
+  }
+}
+
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics){
   updateEntities(world);  
   if (enablePhysics){
@@ -663,6 +672,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
     updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);     
   }
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
+  callbackEntities(world);
 }
 
 std::map<std::string, std::string> getAttributes(World& world, short id){

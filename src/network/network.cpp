@@ -93,17 +93,15 @@ void closeSocket(modsocket& socketInfo, int socketFd){
   socketInfo.infos = infos;
 }
 void sendDataOnSocket(int socketFd, const char* data){
-  std::cout << "network: sending socket data" << std::endl;
   send(socketFd, data, strlen(data), 0);
-  std::cout << "network: finished sending socket data" << std::endl;
 }
 void sendDataToSocket(modsocket& socketInfo, int socketFd, std::function<socketResponse(std::string, int)> onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
-
-  std::cout << "network: reading socket data" << std::endl;
   int value = read(socketFd, buffer, NETWORK_BUFFER_SIZE);      // @TODO -> read might still have more data?
-  std::cout << "network: finished reading socket data" << std::endl;
-  assert(value != -1);
+  //assert(value != -1);
+  if (value == -1){
+    return;
+  }
 
   auto socketResponse = onData(buffer, socketFd);
 
@@ -140,7 +138,6 @@ void getDataFromSocket(modsocket& socketInfo, std::function<socketResponse(std::
   std::vector<int> readySocketFds;
   for (int socketFd = 0; socketFd <= socketInfo.maxFd; socketFd++){
     if (FD_ISSET(socketFd, &socketInfo.fds)){
-      std::cout << "network: socket is ready!" << std::endl;
       readySocketFds.push_back(socketFd);
     }
   }

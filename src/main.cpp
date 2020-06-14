@@ -905,7 +905,23 @@ int main(int argc, char* argv[]){
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
-  world = createWorld(onObjectEnter, onObjectLeave, debuggerDrawer);
+  world = createWorld(
+    onObjectEnter, 
+    onObjectLeave, 
+    [](GameObject& obj) -> void { 
+      if (isConnectedToServer() && obj.name == "ball1"){
+        UdpPacket packet {
+          .id = obj.id,
+          .position = obj.transformation.position,
+          .scale = obj.transformation.scale,
+        };
+        std::cout << "sending packet update" << std::endl;
+        sendDataOnUdpSocket(packet);
+      }
+    }, 
+    debuggerDrawer
+  );
+
   loadAllTextures();
 
   dynamicLoading = createDynamicLoading(chunkSize);

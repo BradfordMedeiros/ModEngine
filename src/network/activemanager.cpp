@@ -119,6 +119,10 @@ void disconnectServer(){
   currentServerIp = "";
   setup.udpSocket = -1;
 }
+bool isConnectedToServer(){
+  return isConnected;
+}
+
 void sendMessageToActiveServer(std::string data){
   assert(isConnected);
   std::string content = "type:data\n" + data;
@@ -149,10 +153,8 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
 }
 
 
-void sendDataOnUdpSocket(std::string data, UdpPacket packet){
+void sendDataOnUdpSocket(UdpPacket packet){
   assert(isConnected);
-  const char* networkBuffer = data.c_str();
-
   int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr,   sizeof(setup.servaddr)); 
   if (numBytes == -1){
     throw std::runtime_error("error sending udp data");
@@ -164,8 +166,7 @@ void sendDataOnUdpSocket(std::string data){
     .position = glm::vec3(1.f, 1.f, 1.f),
     .scale = glm::vec3(2.f, 2.f, 2.f),
   };
-
-  sendDataOnUdpSocket(data, packet);
+  sendDataOnUdpSocket(packet);
 }
 
 void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage){
