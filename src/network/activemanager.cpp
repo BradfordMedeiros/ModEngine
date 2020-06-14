@@ -1,13 +1,24 @@
 #include "./activemanager.h"
 
+#define NETWORK_BUFFER_CLIENT_SIZE 1024
+
+struct udpSetup {
+  int udpSocket;
+  sockaddr_in servaddr; 
+};
+
 static bool isConnected = false;
 static std::string currentServerIp = "";
-static int currentSocket = -1;
 
 static std::string bootstrapperServer = "127.0.0.1";
 static int bootstrapperPort = 8000;
 
-#define NETWORK_BUFFER_CLIENT_SIZE 1024
+// TCP specific 
+static int currentSocket = -1;
+
+// UDP specific
+static udpSetup setup{ .udpSocket = -1 };
+
 
 void sendMessageWithConnection(int sockFd, const char* networkBuffer){
   write(sockFd, networkBuffer, strlen(networkBuffer));
@@ -55,22 +66,58 @@ std::map<std::string, std::string> parseListServerRequest(std::string response){
 std::map<std::string, std::string> listServers(){
   return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
-void connectServer(std::string server){
-  assert(!isConnected);
-  auto serverAddress = listServers().at(server);
+
+int connectTcp(std::string serverAddress){
   auto sockFd = socketConnection(serverAddress, 8000);
   sendMessageWithConnection(sockFd, "connect");
   auto response = readMessageWithConnection(sockFd);
   assert(response == "ack");
+  return sockFd;
+}
+
+udpSetup setupUdp(){
+  sockaddr_in servaddr {
+    .sin_family = AF_INET,
+    .sin_port = htons(8001),
+    .sin_addr = in_addr{
+      .s_addr = htonl(INADDR_ANY),
+    }
+  }; 
+    
+  int sockfd = socket(AF_INET, SOCK_DGRAM, 0);  
+  if (sockfd == -1){
+    throw std::runtime_error("error creating socket");
+  }
+  udpSetup setup {
+    .udpSocket = sockfd,
+    .servaddr = servaddr,
+  };
+  return setup;
+}
+
+void connectServer(std::string server){
+  assert(!isConnected);
+
+  auto serverAddress = listServers().at(server);
+
+  // TCP Connection 
+  currentSocket = connectTcp(serverAddress);
+
+  setup = setupUdp();
+
+
+  // Statekeeping
   std::cout << "INFO: connection request succeeded" << std::endl;
   isConnected = true;
   currentServerIp = serverAddress;
-  currentSocket = sockFd;
+  
 }
+
 void disconnectServer(){
   assert(isConnected);
   isConnected = false;
   currentServerIp = "";
+  setup.udpSocket = -1;
 }
 void sendMessageToActiveServer(std::string data){
   assert(isConnected);
@@ -102,28 +149,16 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
 }
 
 void sendDataOnUdpSocket(std::string data){
-    const char* networkBuffer = data.c_str();
-    sockaddr_in servaddr {
-      .sin_family = AF_INET,
-      .sin_port = htons(8001),
-      .sin_addr = in_addr{
-        .s_addr = htonl(INADDR_ANY),
-      }
-    }; 
-    
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);  
-    if (sockfd == -1){
-      throw std::runtime_error("error creating socket");
-    }
-
-    int numBytes = sendto(sockfd, networkBuffer, strlen(networkBuffer),  MSG_CONFIRM, (const struct sockaddr *) &servaddr,   sizeof(servaddr)); 
-    if (numBytes == -1){
-      throw std::runtime_error("error sending udp data");
-    }
-
-    // recvfrom(sockfd, (char *)buffer, MAXLINE,   MSG_WAITALL, (struct sockaddr *) &servaddr,  &len); 
+  assert(isConnected);
+  const char* networkBuffer = data.c_str();
+  int numBytes = sendto(setup.udpSocket, networkBuffer, strlen(networkBuffer),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr,   sizeof(setup.servaddr)); 
+  if (numBytes == -1){
+    throw std::runtime_error("error sending udp data");
+  }
 }
 
 void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage){
-  
+  if (setup.udpSocket != -1){
+    getDataFromUdpSocket(setup.udpSocket, onClientMessage);
+  }
 }

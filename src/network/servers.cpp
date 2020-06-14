@@ -29,67 +29,75 @@ std::string handleListServer(ServerBrowser& browser){
   return servers;
 }
 
-void launchServer(){
+tcpServer initTcpServer(){
   auto browser = loadServerInfo();
   
   std::cout << "INFO: create server start" << std::endl;
   auto server = createServer();
   std::cout << "INFO: create server end" << std::endl;
-
   std::map<std::string, ConnectionInfo> connections;
-  while(true){
-    getDataFromSocket(server, [&browser, &connections, &server](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
-      auto requestLines = split(request, '\n');
-      auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
+  tcpServer tserver {
+    .browser = browser,
+    .server = server,
+    .connections = connections,
+  };
+  return tserver;
+}
+void processTcpServer(tcpServer& tserver){
+  getDataFromSocket(tserver.server, [&tserver](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
+    auto requestLines = split(request, '\n');
+    auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
 
-      std::string response = "ok";
-      bool shouldCloseSocket = false;
-      bool shouldSendData = false;
+    std::string response = "ok";
+    bool shouldCloseSocket = false;
+    bool shouldSendData = false;
 
-      if (requestHeader == "list-servers"){
-        response = handleListServer(browser);
-        shouldCloseSocket = true;
-        shouldSendData = true;
-      } else if (requestHeader == "connect"){
-        auto connectionInfo = getConnectionInfo(server, socketFd);
-        auto connectionHash = connectionInfo.ipAddress + "\\" + std::to_string(connectionInfo.port); 
+    if (requestHeader == "list-servers"){
+      response = handleListServer(tserver.browser);
+      shouldCloseSocket = true;
+      shouldSendData = true;
+    } else if (requestHeader == "connect"){
+      auto connectionInfo = getConnectionInfo(tserver.server, socketFd);
+      auto connectionHash = connectionInfo.ipAddress + "\\" + std::to_string(connectionInfo.port); 
    
-        if (connections.find(connectionHash) == connections.end()){
-          std::cout << "INFO: connection hash: " << connectionHash << std::endl;
-          response = "ack";
-          connections[connectionHash] = connectionInfo;
-        }else{
-          response = "nack";
-          shouldCloseSocket = true;
-        }
-        shouldSendData = true;
-      }else if (requestHeader == "type:data"){
-        auto data = request.substr(10);
-        response = "ok";
-
-        for (auto [_, connection] : connections){
-          sendDataOnSocket(connection.socketFd, data.c_str());
-        }
-        shouldSendData = true;
+      if (tserver.connections.find(connectionHash) == tserver.connections.end()){
+        std::cout << "INFO: connection hash: " << connectionHash << std::endl;
+        response = "ack";
+        tserver.connections[connectionHash] = connectionInfo;
+      }else{
+        response = "nack";
+        shouldCloseSocket = true;
       }
+      shouldSendData = true;
+    }else if (requestHeader == "type:data"){
+      auto data = request.substr(10);
+      response = "ok";
 
-      socketResponse serverResponse {
-        .response = response,
-        .shouldCloseSocket = shouldCloseSocket,
-        .shouldSendData = shouldSendData,
-      };
-      return serverResponse;
-    });
-  }
+      for (auto [_, connection] : tserver.connections){
+        sendDataOnSocket(connection.socketFd, data.c_str());
+      }
+      shouldSendData = true;
+    }
+
+    socketResponse serverResponse {
+      .response = response,
+      .shouldCloseSocket = shouldCloseSocket,
+      .shouldSendData = shouldSendData,
+    };
+    return serverResponse;
+  });
 }
 
-void launchUdpServer(){
-  std::cout << "INFO: create udp server" << std::endl;
-
+void launchServers(){
+  std::cout << "INFO: running in server bootstrapper mode" << std::endl;
+  auto tserver = initTcpServer();
   auto udpmodSocket = createUdpServer(); 
+
   while(true){
-    getDataFromUdpSocket(udpmodSocket, [](std::string data) -> void {
+    processTcpServer(tserver);
+    getDataFromUdpSocket(udpmodSocket.socketFd, [](std::string data) -> void {
       std::cout << "message from udp socket: " << data << std::endl;
     });
   }
 }
+

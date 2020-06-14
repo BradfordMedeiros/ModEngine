@@ -47,7 +47,7 @@ struct udpmodsocket {
 };
 
 udpmodsocket createUdpServer();
-void getDataFromUdpSocket(udpmodsocket& socketInfo, std::function<void(std::string)> onData);
+void getDataFromUdpSocket(int socket, std::function<void(std::string)> onData);
 void sendDataOnUdpSocket(const char* networkBuffer);
 
 #endif 

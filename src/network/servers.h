@@ -12,7 +12,12 @@ struct ServerBrowser {
   std::map<std::string, std::string> serverNameToIp;
 };  
 
-void launchServer();
-void launchUdpServer();
+struct tcpServer {
+  ServerBrowser browser;
+  modsocket server;
+  std::map<std::string, ConnectionInfo> connections;
+};
+
+void launchServers();
 
 #endif

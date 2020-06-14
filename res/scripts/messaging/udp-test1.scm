@@ -7,6 +7,9 @@
   (if (and (= key 257) (= action 1))
     (send-udp "test message 1")
   )
+  (if (and (= key 67) (= action 1))
+    (connect-server (car (list-servers)))
+  )
 )
 
 
