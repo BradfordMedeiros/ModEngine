@@ -457,6 +457,19 @@ void onUdpMessage(std::string message){
   }
 }
 
+void maybeCallFunc(const char* function){
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_0(func_symbol);
+  }   
+}
+void onPlayerJoined(){
+  maybeCallFunc("on-player-join");
+}
+void onPlayerLeave(){
+  maybeCallFunc("on-player-leave");
+}
+
 ////////////
 void defineFunctions(){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);

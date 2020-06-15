@@ -753,10 +753,11 @@ int main(int argc, char* argv[]){
   if(bootStrapperMode){
     launchServers(
       []() -> void {
-        std::cout << "player joined" << std::endl;
+        schemeBindings.onPlayerJoined();
       }, 
       []() -> void {
-        std::cout << "player leaved" << std::endl;
+        // this isn't implemented yet
+        schemeBindings.onPlayerLeave();
       }
     );
     return 0;

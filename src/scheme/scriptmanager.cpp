@@ -103,6 +103,18 @@ void onUdpMessageAllScripts(std::string message){
   } 
 }
 
+void onPlayerJoinedAllScripts(){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    onPlayerJoined();
+  } 
+}
+void onPlayerLeaveAllScripts(){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    onPlayerLeave();
+  } 
+}
 
 SchemeBindingCallbacks getSchemeCallbacks(){
   SchemeBindingCallbacks callbackFuncs = {
@@ -118,6 +130,8 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onMessage = onMessageAllScripts,
     .onTcpMessage = onTcpMessageAllScripts,
     .onUdpMessage = onUdpMessageAllScripts,
+    .onPlayerJoined = onPlayerJoinedAllScripts,
+    .onPlayerLeave = onPlayerLeaveAllScripts,
   };
 
   return callbackFuncs;
