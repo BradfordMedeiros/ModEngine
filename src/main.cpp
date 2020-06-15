@@ -705,8 +705,9 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
-void onUdpClientMessage(std::string message){
-  schemeBindings.onUdpMessage(message);
+void onUdpClientMessage(UdpPacket packet){
+  std::cout << "udp client update: " << std::endl;
+  //schemeBindings.onUdpMessage(message);
 }
 
 int main(int argc, char* argv[]){
@@ -915,7 +916,6 @@ int main(int argc, char* argv[]){
           .position = obj.transformation.position,
           .scale = obj.transformation.scale,
         };
-        std::cout << "sending packet update" << std::endl;
         sendDataOnUdpSocket(packet);
       }
     }, 

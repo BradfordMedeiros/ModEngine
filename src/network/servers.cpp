@@ -92,8 +92,16 @@ void processTcpServer(tcpServer& tserver){
   });
 }
 
-void sendUdpPacketUpdateToAll(UdpPacket& packet){
-
+void sendUdpPacketUpdateToAllExcept(int socket, UdpPacket& packet, std::map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
+  for (auto [connectHash, addr] : udpConnections){
+    if (connectHash != excludeConnectionHash){
+      int numBytes = sendto(socket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &addr,   sizeof(addr)); 
+      if (numBytes == -1){
+        throw std::runtime_error("error sending udp data");
+      }     
+      std::cout << "sending udp packet to: " << connectHash << std::endl;
+    }
+  }
 }
 
 
@@ -101,19 +109,14 @@ void launchServers(){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
   auto tserver = initTcpServer();
   auto udpmodSocket = createUdpServer(); 
+  std::map<std::string, sockaddr_in> udpConnections;
 
   while(true){
     processTcpServer(tserver);
-    getDataFromUdpSocket(udpmodSocket.socketFd, [](UdpPacket data, sockaddr_in addr) -> void {
-      //std::cout << "message from udp socket: " << data << std::endl;
-
-      std::cout << "port is: " << getPortFromSocketIn(addr) << std::endl;
-      std::cout << "address is: " << getIpAddressFromSocketIn(addr) << std::endl << std::endl;
-      //std::cout << "id is: " << data.id << std::endl;
-      //std::cout << "position is: " << print(data.position) << std::endl;
-      //std::cout << "scale is: " << print(data.scale) << std::endl;
-
-      sendUdpPacketUpdateToAll(data);
+    getDataFromUdpSocket(udpmodSocket.socketFd, [&udpConnections, &udpmodSocket](UdpPacket data, sockaddr_in addr) -> void {
+      auto hash = getConnectionHash(getIpAddressFromSocketIn(addr), getPortFromSocketIn(addr));
+      udpConnections[hash] = addr;
+      sendUdpPacketUpdateToAllExcept(udpmodSocket.socketFd, data, udpConnections, hash);
     });
   }
 }

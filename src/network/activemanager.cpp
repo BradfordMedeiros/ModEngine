@@ -169,8 +169,10 @@ void sendDataOnUdpSocket(std::string data){
   sendDataOnUdpSocket(packet);
 }
 
-void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage){
+void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage){
   if (setup.udpSocket != -1){
-   // getDataFromUdpSocket(setup.udpSocket, onClientMessage);
+    getDataFromUdpSocket(setup.udpSocket, [onClientMessage](UdpPacket packet, sockaddr_in addr) -> void {
+      onClientMessage(packet);
+    });
   }
 }

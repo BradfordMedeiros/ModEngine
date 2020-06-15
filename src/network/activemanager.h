@@ -31,6 +31,6 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
 
 void sendDataOnUdpSocket(UdpPacket packet);
 void sendDataOnUdpSocket(std::string data);
-void maybeGetUdpClientMessage(std::function<void(std::string)> onClientMessage);
+void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage);
 
 #endif
