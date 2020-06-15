@@ -46,6 +46,7 @@ void sendDataOnSocket(int socketFd, const char* data);
 struct udpmodsocket {
   int socketFd;
 };
+
 struct UdpPacket {
   short id;
   glm::vec3 position;
@@ -53,7 +54,9 @@ struct UdpPacket {
 };
 
 udpmodsocket createUdpServer();
-void getDataFromUdpSocket(int socket, std::function<void(UdpPacket)> onData);
+void getDataFromUdpSocket(int socket, std::function<void(UdpPacket, sockaddr_in)> onData);
 void sendDataOnUdpSocket(const char* networkBuffer);
+short unsigned int getPortFromSocketIn(sockaddr_in& socketin);
+std::string getIpAddressFromSocketIn(sockaddr_in& socketin);
 
 #endif 

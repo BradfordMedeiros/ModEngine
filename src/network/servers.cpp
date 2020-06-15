@@ -43,6 +43,10 @@ tcpServer initTcpServer(){
   };
   return tserver;
 }
+
+std::string getConnectionHash(std::string ipAddress, int port){
+  return ipAddress + "\\" + std::to_string(port);
+}
 void processTcpServer(tcpServer& tserver){
   getDataFromSocket(tserver.server, [&tserver](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
     auto requestLines = split(request, '\n');
@@ -58,7 +62,7 @@ void processTcpServer(tcpServer& tserver){
       shouldSendData = true;
     } else if (requestHeader == "connect"){
       auto connectionInfo = getConnectionInfo(tserver.server, socketFd);
-      auto connectionHash = connectionInfo.ipAddress + "\\" + std::to_string(connectionInfo.port); 
+      auto connectionHash = getConnectionHash(connectionInfo.ipAddress, connectionInfo.port);
    
       if (tserver.connections.find(connectionHash) == tserver.connections.end()){
         std::cout << "INFO: connection hash: " << connectionHash << std::endl;
@@ -88,6 +92,11 @@ void processTcpServer(tcpServer& tserver){
   });
 }
 
+void sendUdpPacketUpdateToAll(UdpPacket& packet){
+
+}
+
+
 void launchServers(){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
   auto tserver = initTcpServer();
@@ -95,11 +104,16 @@ void launchServers(){
 
   while(true){
     processTcpServer(tserver);
-    getDataFromUdpSocket(udpmodSocket.socketFd, [](UdpPacket data) -> void {
+    getDataFromUdpSocket(udpmodSocket.socketFd, [](UdpPacket data, sockaddr_in addr) -> void {
       //std::cout << "message from udp socket: " << data << std::endl;
-      std::cout << "id is: " << data.id << std::endl;
-      std::cout << "position is: " << print(data.position) << std::endl;
-      std::cout << "scale is: " << print(data.scale) << std::endl;
+
+      std::cout << "port is: " << getPortFromSocketIn(addr) << std::endl;
+      std::cout << "address is: " << getIpAddressFromSocketIn(addr) << std::endl << std::endl;
+      //std::cout << "id is: " << data.id << std::endl;
+      //std::cout << "position is: " << print(data.position) << std::endl;
+      //std::cout << "scale is: " << print(data.scale) << std::endl;
+
+      sendUdpPacketUpdateToAll(data);
     });
   }
 }

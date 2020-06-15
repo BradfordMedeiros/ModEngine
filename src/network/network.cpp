@@ -45,6 +45,16 @@ ConnectionInfo getConnectionInfo(modsocket& modsocket, int sockfd){
   assert(false);
 }
 
+short unsigned int getPortFromSocketIn(sockaddr_in& socketin){
+  short unsigned int inboundPort = ntohs(socketin.sin_port);
+  return inboundPort;
+}
+std::string getIpAddressFromSocketIn(sockaddr_in& socketin){
+  char ipAddress[16] = {0};
+  inet_ntop(AF_INET, &socketin.sin_addr, ipAddress, sizeof(ipAddress));
+  return ipAddress;
+}
+
 std::optional<ConnectionInfo> acceptSocketAndMarkNonBlocking(modsocket& socketInfo){
   sockaddr_in socketin;
   int addrlen = sizeof(socketin);
@@ -60,14 +70,10 @@ std::optional<ConnectionInfo> acceptSocketAndMarkNonBlocking(modsocket& socketIn
 
     std::cout << "socket accepted: " << newSocket << std::endl;
 
-    short unsigned int inboundPort = ntohs(socketin.sin_port);
-    char ipAddress[16] = {0};
-    inet_ntop(AF_INET, &socketin.sin_addr, ipAddress, sizeof(ipAddress));
-
     ConnectionInfo info {
-      .port = inboundPort,
+      .port = getPortFromSocketIn(socketin),
       .socketFd = newSocket,
-      .ipAddress = ipAddress,
+      .ipAddress = getIpAddressFromSocketIn(socketin),
     };
 
     std::cout << "network: maxFd is now: " << newSocket << std::endl;
@@ -169,7 +175,7 @@ udpmodsocket createUdpServer(){
   return socketInfo;
 }
 
-void getDataFromUdpSocket(int socket, std::function<void(UdpPacket)> onData){
+void getDataFromUdpSocket(int socket, std::function<void(UdpPacket, sockaddr_in)> onData){
   char buffer[NETWORK_BUFFER_SIZE] = {0};
   sockaddr_in socketin;
   int len = sizeof(socketin);
@@ -177,8 +183,8 @@ void getDataFromUdpSocket(int socket, std::function<void(UdpPacket)> onData){
   UdpPacket packet {};
 
   int value = recvfrom(socket, &packet, sizeof(packet),  MSG_DONTWAIT, ( struct sockaddr *) &socketin, (socklen_t*)&len); 
-  
+
   if (value > 0){
-    onData(packet);
+    onData(packet, socketin);
   }
 }
