@@ -18,6 +18,6 @@ struct tcpServer {
   std::map<std::string, ConnectionInfo> connections;
 };
 
-void launchServers();
+void launchServers(std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected);
 
 #endif

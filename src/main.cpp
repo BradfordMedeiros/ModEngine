@@ -707,6 +707,7 @@ void onClientMessage(std::string message){
 }
 void onUdpClientMessage(UdpPacket packet){
   std::cout << "udp client update: " << std::endl;
+  //physicsTranslateSet(world, packet.id, packet.position);
   //schemeBindings.onUdpMessage(message);
 }
 
@@ -750,7 +751,14 @@ int main(int argc, char* argv[]){
   bool bootStrapperMode = result["bootstrapper"].as<bool>();
 
   if(bootStrapperMode){
-    launchServers();
+    launchServers(
+      []() -> void {
+        std::cout << "player joined" << std::endl;
+      }, 
+      []() -> void {
+        std::cout << "player leaved" << std::endl;
+      }
+    );
     return 0;
   }
 
