@@ -6,6 +6,12 @@ bool symbolDefinedInModule(const char* symbol, SCM module){
 bool symbolDefined(const char* symbol){
   return symbolDefinedInModule(symbol, scm_current_module());
 }
+void maybeCallFunc(const char* function){
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_0(func_symbol);
+  }   
+}
 
 glm::vec3 listToVec3(SCM vecList){
   auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
@@ -368,12 +374,7 @@ SCM scmConnectServer(SCM server){
 
 // Callbacks
 void onFrame(){
-  const char* function = "onFrame";
-
-  if (symbolDefined(function)){
-    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_0(func_symbol);
-  }
+  maybeCallFunc("onFrame");
 }
 void onCollisionEnter(short obj1, short obj2, glm::vec3 contactPos){
   const char* function = "onCollideEnter";
@@ -457,12 +458,6 @@ void onUdpMessage(std::string message){
   }
 }
 
-void maybeCallFunc(const char* function){
-  if (symbolDefined(function)){
-    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_0(func_symbol);
-  }   
-}
 void onPlayerJoined(){
   maybeCallFunc("on-player-join");
 }
