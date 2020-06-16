@@ -47,8 +47,8 @@ tcpServer initTcpServer(){
 std::string getConnectionHash(std::string ipAddress, int port){
   return ipAddress + "\\" + std::to_string(port);
 }
-void processTcpServer(tcpServer& tserver, std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected){
-  getDataFromSocket(tserver.server, [&tserver, &onPlayerConnected](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
+void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected){
+  getDataFromSocket(tserver.server, [&tserver, &udpConnections, &onPlayerConnected, &onPlayerDisconnected](std::string request, int socketFd) -> socketResponse {      
     auto requestLines = split(request, '\n');
     auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
 
@@ -74,7 +74,21 @@ void processTcpServer(tcpServer& tserver, std::function<void(std::string)> onPla
         shouldCloseSocket = true;
       }
       shouldSendData = true;
-    }else if (requestHeader == "type:data"){
+    }else if (requestHeader == "disconnect"){
+      auto connectionInfo = getConnectionInfo(tserver.server, socketFd);
+      auto connectionHash = getConnectionHash(connectionInfo.ipAddress, connectionInfo.port);
+      if (tserver.connections.find(connectionHash) == tserver.connections.end()){
+        response = "nack";
+      }else{
+        tserver.connections.erase(connectionHash);
+        udpConnections.erase(connectionHash);
+        response = "ack";
+        onPlayerDisconnected(connectionHash);  
+      }
+      shouldCloseSocket = true;
+      shouldSendData = true;
+    }
+    else if (requestHeader == "type:data"){
       auto data = request.substr(10);
       response = "ok";
 
@@ -118,8 +132,9 @@ NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::fun
   return netcode;
 }
 void tickNetCode(NetCode& netcode){
-  processTcpServer(netcode.tServer, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
+  processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
   getDataFromUdpSocket(netcode.udpModsocket.socketFd, [&netcode](UdpPacket data, sockaddr_in addr) -> void {
+    // @TODO - reject any update unless it has been connected
     auto hash = getConnectionHash(getIpAddressFromSocketIn(addr), getPortFromSocketIn(addr));
     netcode.udpConnections[hash] = addr;
     sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, hash);

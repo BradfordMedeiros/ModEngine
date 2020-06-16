@@ -114,6 +114,7 @@ void connectServer(std::string server){
 }
 
 void disconnectServer(){
+  assert(false); // - TODO actually send disconnect message to the server
   assert(isConnected);
   isConnected = false;
   currentServerIp = "";
