@@ -64,7 +64,7 @@ void onCameraSystemChange(bool usingBuiltInCamera);
 void onMessage(std::string message);
 void onTcpMessage(std::string message);
 void onUdpMessage(std::string message);
-void onPlayerJoined();
-void onPlayerLeave();
+void onPlayerJoined(std::string connectionHash);
+void onPlayerLeave(std::string connectionHash);
 
 #endif

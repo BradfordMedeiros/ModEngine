@@ -1,10 +1,13 @@
 
 
 
-(define (on-player-join playerip)
-  (display "player joined\n")
+(define (on-player-join connection-hash)
+  (display "scheme script -- player joined\n")
+  (display "connection: ")
+  (display connection-hash)
+  (display "\n")
 )
 
-(define (on-player-leave playerip)
-  (display "player leaved\n")
+(define (on-player-leave connection-hash)
+  (display "scheme script -- player leaved\n")
 )

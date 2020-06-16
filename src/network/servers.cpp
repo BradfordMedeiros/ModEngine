@@ -47,7 +47,7 @@ tcpServer initTcpServer(){
 std::string getConnectionHash(std::string ipAddress, int port){
   return ipAddress + "\\" + std::to_string(port);
 }
-void processTcpServer(tcpServer& tserver, std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected){
+void processTcpServer(tcpServer& tserver, std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected){
   getDataFromSocket(tserver.server, [&tserver, &onPlayerConnected](std::string request, int socketFd) -> socketResponse {      // @TODO probably use byte encoding for this instead of using string style comparisons
     auto requestLines = split(request, '\n');
     auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
@@ -68,7 +68,7 @@ void processTcpServer(tcpServer& tserver, std::function<void()> onPlayerConnecte
         std::cout << "INFO: connection hash: " << connectionHash << std::endl;
         response = "ack";
         tserver.connections[connectionHash] = connectionInfo;
-        onPlayerConnected();
+        onPlayerConnected(connectionHash);
       }else{
         response = "nack";
         shouldCloseSocket = true;
@@ -105,7 +105,7 @@ void sendUdpPacketUpdateToAllExcept(int socket, UdpPacket& packet, std::map<std:
   }
 }
 
-NetCode initNetCode(std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected){
+NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
   std::map<std::string, sockaddr_in> udpConnections;
   NetCode netcode {

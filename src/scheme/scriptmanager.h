@@ -31,8 +31,8 @@ struct SchemeBindingCallbacks {
   messagefunc onMessage;
   stringfunc onTcpMessage;
   stringfunc onUdpMessage;
-  func onPlayerJoined;
-  func onPlayerLeave;
+  stringfunc onPlayerJoined;
+  stringfunc onPlayerLeave;
 };
 
 SchemeBindingCallbacks getSchemeCallbacks();

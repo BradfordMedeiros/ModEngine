@@ -103,16 +103,16 @@ void onUdpMessageAllScripts(std::string message){
   } 
 }
 
-void onPlayerJoinedAllScripts(){
+void onPlayerJoinedAllScripts(std::string connectionHash){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
-    onPlayerJoined();
+    onPlayerJoined(connectionHash);
   } 
 }
-void onPlayerLeaveAllScripts(){
+void onPlayerLeaveAllScripts(std::string connectionHash){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
-    onPlayerLeave();
+    onPlayerLeave(connectionHash);
   } 
 }
 

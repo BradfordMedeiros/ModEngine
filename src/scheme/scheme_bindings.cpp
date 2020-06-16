@@ -12,6 +12,12 @@ void maybeCallFunc(const char* function){
     scm_call_0(func_symbol);
   }   
 }
+void maybeCallFuncString(const char* function, const char* payload){
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, scm_from_locale_string(payload));
+  }   
+}
 
 glm::vec3 listToVec3(SCM vecList){
   auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
@@ -458,11 +464,11 @@ void onUdpMessage(std::string message){
   }
 }
 
-void onPlayerJoined(){
-  maybeCallFunc("on-player-join");
+void onPlayerJoined(std::string connectionHash){
+  maybeCallFuncString("on-player-join", connectionHash.c_str());
 }
-void onPlayerLeave(){
-  maybeCallFunc("on-player-leave");
+void onPlayerLeave(std::string connectionHash){
+  maybeCallFuncString("on-player-leave", connectionHash.c_str());
 }
 
 ////////////
