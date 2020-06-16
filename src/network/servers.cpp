@@ -105,20 +105,23 @@ void sendUdpPacketUpdateToAllExcept(int socket, UdpPacket& packet, std::map<std:
   }
 }
 
-
-void launchServers(std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected){
+NetCode initNetCode(std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
-  auto tserver = initTcpServer();
-  auto udpmodSocket = createUdpServer(); 
   std::map<std::string, sockaddr_in> udpConnections;
-
-  while(true){
-    processTcpServer(tserver, onPlayerConnected, onPlayerDisconnected);
-    getDataFromUdpSocket(udpmodSocket.socketFd, [&udpConnections, &udpmodSocket](UdpPacket data, sockaddr_in addr) -> void {
-      auto hash = getConnectionHash(getIpAddressFromSocketIn(addr), getPortFromSocketIn(addr));
-      udpConnections[hash] = addr;
-      sendUdpPacketUpdateToAllExcept(udpmodSocket.socketFd, data, udpConnections, hash);
-    });
-  }
+  NetCode netcode {
+    .tServer = initTcpServer(),
+    .udpModsocket = createUdpServer(),
+    .udpConnections = udpConnections,
+    .onPlayerConnected = onPlayerConnected,
+    .onPlayerDisconnected = onPlayerDisconnected,
+  };
+  return netcode;
 }
-
+void tickNetCode(NetCode& netcode){
+  processTcpServer(netcode.tServer, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
+  getDataFromUdpSocket(netcode.udpModsocket.socketFd, [&netcode](UdpPacket data, sockaddr_in addr) -> void {
+    auto hash = getConnectionHash(getIpAddressFromSocketIn(addr), getPortFromSocketIn(addr));
+    netcode.udpConnections[hash] = addr;
+    sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, hash);
+  });
+}

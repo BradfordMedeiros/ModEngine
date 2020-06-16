@@ -18,6 +18,14 @@ struct tcpServer {
   std::map<std::string, ConnectionInfo> connections;
 };
 
-void launchServers(std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected);
+struct NetCode {
+  tcpServer tServer;
+  udpmodsocket udpModsocket;
+  std::map<std::string, sockaddr_in> udpConnections;
+  std::function<void()> onPlayerConnected;
+  std::function<void()> onPlayerDisconnected;
+};
+NetCode initNetCode(std::function<void()> onPlayerConnected, std::function<void()> onPlayerDisconnected);
+void tickNetCode(NetCode& netcode);
 
 #endif

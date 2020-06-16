@@ -707,7 +707,7 @@ void onClientMessage(std::string message){
 }
 void onUdpClientMessage(UdpPacket packet){
   std::cout << "udp client update: " << std::endl;
-  //physicsTranslateSet(world, packet.id, packet.position);
+  physicsTranslateSet(world, packet.id, packet.position);
   //schemeBindings.onUdpMessage(message);
 }
 
@@ -749,20 +749,6 @@ int main(int argc, char* argv[]){
   }
   bool enablePhysics = result["physics"].as<bool>();
   bool bootStrapperMode = result["bootstrapper"].as<bool>();
-
-  if(bootStrapperMode){
-    launchServers(
-      []() -> void {
-        schemeBindings.onPlayerJoined();
-      }, 
-      []() -> void {
-        // this isn't implemented yet
-        schemeBindings.onPlayerLeave();
-      }
-    );
-    return 0;
-  }
-
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   textureFolderPath = result["texture"].as<std::string>();
@@ -907,6 +893,10 @@ int main(int argc, char* argv[]){
   );
 
   schemeBindings = getSchemeCallbacks();
+  NetCode netcode { };
+  if(bootStrapperMode){
+    netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
+  }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadScript(script);
@@ -918,8 +908,8 @@ int main(int argc, char* argv[]){
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    [](GameObject& obj) -> void { 
-      if (isConnectedToServer() && obj.name == "ball1"){
+    [bootStrapperMode](GameObject& obj) -> void { 
+      if (!bootStrapperMode &&isConnectedToServer() && obj.name == "ball1"){
         UdpPacket packet {
           .id = obj.id,
           .position = obj.transformation.position,
@@ -978,6 +968,9 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     maybeGetClientMessage(onClientMessage);
     maybeGetUdpClientMessage(onUdpClientMessage);
+    if (bootStrapperMode){
+      tickNetCode(netcode);
+    }
 
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
