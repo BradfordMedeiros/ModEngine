@@ -1,0 +1,16 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+
+box1:mesh:./res/models/box/box.obj
+box1:position:5 1 -8
+box1:netallow:localhost:8000
+box2:netallow:localhost:5000
+
+box2:mesh:./res/models/box/box.obj
+box2:position:0 1 -8
+
+box3:mesh:./res/models/box/box.obj
+box3:position:-5 1 -8
