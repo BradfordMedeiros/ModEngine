@@ -80,7 +80,7 @@ SCM scmRotateCamera(SCM xoffset, SCM yoffset){
 }
 
 short (*makeObj)(std::string, std::string, float, float, float);
-SCM makeObject(SCM name, SCM mesh, SCM position, SCM rest){
+SCM makeObject(SCM name, SCM mesh, SCM position){
   auto xPos = scm_to_double(scm_list_ref(position, scm_from_int64(0)));
   auto yPos = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto zPos = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
@@ -482,7 +482,7 @@ void defineFunctions(){
   scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);    
   scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
-  scm_c_define_gsubr("mk-obj", 2, 1, 1, (void *)makeObject);
+  scm_c_define_gsubr("mk-obj", 3, 0, 0, (void *)makeObject);
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
   scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
   scm_c_define_gsubr("lsobj-name", 1, 0, 0, (void *)getGameObjByName);
