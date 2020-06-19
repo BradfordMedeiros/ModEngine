@@ -79,13 +79,13 @@ SCM scmRotateCamera(SCM xoffset, SCM yoffset){
   return SCM_UNSPECIFIED;
 }
 
-void (*makeObj)(std::string, std::string, float, float, float);
+short (*makeObj)(std::string, std::string, float, float, float);
 SCM makeObject(SCM name, SCM mesh, SCM position, SCM rest){
   auto xPos = scm_to_double(scm_list_ref(position, scm_from_int64(0)));
   auto yPos = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto zPos = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
-  makeObj(scm_to_locale_string(name), scm_to_locale_string(mesh), xPos, yPos, zPos);
-  return SCM_UNSPECIFIED;
+  auto objectId = makeObj(scm_to_locale_string(name), scm_to_locale_string(mesh), xPos, yPos, zPos);
+  return scm_from_short(objectId);
 }
 
 void (*removeObjById)(short id);
@@ -543,7 +543,7 @@ void createStaticSchemeBindings(
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(short id),
-	void (*makeObjectV)(std::string, std::string, float, float, float),
+	short (*makeObjectV)(std::string, std::string, float, float, float),
 	std::vector<short> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),

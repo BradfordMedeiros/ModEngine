@@ -114,7 +114,6 @@ void sendUdpPacketUpdateToAllExcept(int socket, UdpPacket& packet, std::map<std:
       if (numBytes == -1){
         throw std::runtime_error("error sending udp data");
       }     
-      std::cout << "sending udp packet to: " << connectHash << std::endl;
     }
   }
 }

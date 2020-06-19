@@ -49,7 +49,7 @@ glm::quat getGameObjectRotation(short index);
 void setGameObjectRotation(short index, glm::quat rotation);
 void setSelectionMode(bool enabled);
 
-void makeObject(std::string name, std::string meshName, float x, float y, float z);
+short makeObject(std::string name, std::string meshName, float x, float y, float z);
 void removeObjectById(short id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);

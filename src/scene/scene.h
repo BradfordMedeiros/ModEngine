@@ -36,7 +36,7 @@ Texture loadTextureWorld(World& world, std::string texturepath);
 
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
 void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip);
-void addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
+int addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
 void removeObject(World& world, short id, std::function<void(std::string)> unloadClip);
 
 std::string serializeScene(World& world, short sceneId);

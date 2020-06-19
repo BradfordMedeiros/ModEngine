@@ -152,8 +152,8 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
-void makeObject(std::string name, std::string meshName, float x, float y, float z){
-  addObject(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
+short makeObject(std::string name, std::string meshName, float x, float y, float z){
+  return addObject(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
 }
 void removeObjectById(short id){
   removeObject(world, id, unloadSoundState);

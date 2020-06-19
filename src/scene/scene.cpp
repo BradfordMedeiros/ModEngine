@@ -446,7 +446,7 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
   world.scenes.erase(sceneId);
 }
 
-void addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+int addObject(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
   std::vector<short> idsAdded;
   auto getId = [&idsAdded]() -> short {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -479,6 +479,7 @@ void addObject(World& world, short sceneId, std::string name, std::string meshNa
   if (gameobj.script != ""){
     loadScript(gameobj.script, gameobjId);
   }
+  return gameobjId;
 }
 void removeObject(World& world, short objectId, std::function<void(std::string)> unloadClip){  // this needs to also delete all children objects. 
   Scene& scene = world.scenes.at(world.idToScene.at(objectId));
