@@ -109,6 +109,12 @@ struct gameObject {
   short id;
 };
 SCM gameObjectType;   // this is modified during init
+SCM createGameObject(short id){
+  auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
+  obj->id = id;
+  return scm_make_foreign_object_1(gameObjectType, obj); 
+}
+
 std::vector<short> (*getObjByType)(std::string);
 SCM lsObjectsByType(SCM value){
   std::string objectType = scm_to_locale_string(value);
@@ -133,6 +139,12 @@ short getGameobjId(SCM value){
 std::string (*getGameObjNameForId)(short id);
 SCM getGameObjNameForIdFn(SCM value){
   return scm_from_locale_string(getGameObjNameForId(getGameobjId(value)).c_str());
+}
+
+SCM scmGetGameObjectById(SCM scmId){
+  auto id = scm_to_short(scmId);
+  getGameObjNameForId(id);          // this assert the object exists
+  return createGameObject(id);
 }
 
 std::map<std::string, std::string> (*_getGameObjectAttr)(short id);
@@ -282,11 +294,6 @@ SCM scm_clearImpulse(SCM value){
 
 SCM getGameObjectId(SCM value){
   return scm_from_short(getGameobjId(value));
-}
-SCM createGameObject(short id){
-  auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
-  obj->id = id;
-  return scm_make_foreign_object_1(gameObjectType, obj); 
 }
 
 short (*getGameObjName)(std::string name);
@@ -499,6 +506,7 @@ void defineFunctions(){
 
   scm_c_define_gsubr("gameobj-id", 1, 0, 0, (void *)getGameObjectId);
   scm_c_define_gsubr("gameobj-name", 1, 0, 0, (void *)getGameObjNameForIdFn);
+  scm_c_define_gsubr("gameobj-by-id", 1, 0, 0, (void *)scmGetGameObjectById);
 
   scm_c_define_gsubr("gameobj-animations", 1, 0, 0, (void *)scmListAnimations);
   scm_c_define_gsubr("gameobj-playanimation", 2, 0, 0, (void *)scmPlayAnimation);

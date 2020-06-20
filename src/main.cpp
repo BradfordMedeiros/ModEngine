@@ -400,7 +400,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     voxelPtr -> voxel.selectedVoxels.clear();
   } 
 
-  if (key == GLFW_KEY_LEFT && action == 1){
+  if (key == GLFW_KEY_LEFT && action == 1 && state.selectedIndex != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setGameObjectPosition(state.selectedIndex, snapTranslateUp(getGameObjectPosition(state.selectedIndex), state.manipulatorAxis));
     }else if (state.manipulatorMode == ROTATE){
@@ -409,7 +409,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       setGameObjectScale(state.selectedIndex, snapScaleDown(getGameObjectScale(state.selectedIndex), state.manipulatorAxis));
     }
   }
-  if (key == GLFW_KEY_RIGHT && action == 1){
+  if (key == GLFW_KEY_RIGHT && action == 1 && state.selectedIndex != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setGameObjectPosition(state.selectedIndex, snapTranslateDown(getGameObjectPosition(state.selectedIndex), state.manipulatorAxis));
     }else if (state.manipulatorMode == ROTATE){
@@ -418,7 +418,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       setGameObjectScale(state.selectedIndex, snapScaleUp(getGameObjectScale(state.selectedIndex), state.manipulatorAxis));
     }
   }
-  if (key == GLFW_KEY_UP && action == 1){
+  if (key == GLFW_KEY_UP && action == 1 && state.selectedIndex != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setSnapTranslateUp();
     }else if (state.manipulatorMode == ROTATE){
@@ -427,7 +427,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       setSnapScaleUp();
     }
   }
-  if (key == GLFW_KEY_DOWN && action == 1){
+  if (key == GLFW_KEY_DOWN && action == 1 && state.selectedIndex != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setSnapTranslateDown();
     }else if (state.manipulatorMode == ROTATE){
