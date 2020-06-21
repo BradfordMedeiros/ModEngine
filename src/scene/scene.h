@@ -23,6 +23,8 @@ struct World {
   std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
   RailSystem rails;
   std::function<void(GameObject&)> onObjectUpdate;
+  std::function<void(GameObject&)> onObjectCreate;
+  std::function<void(short)> onObjectDelete;
 };
 
 struct PhysicsInfo {
@@ -31,7 +33,14 @@ struct PhysicsInfo {
   Transformation transformation;
 };
 
-World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, std::function<void(GameObject&)> onObjectUpdate, btIDebugDraw* debugDrawer);
+World createWorld(
+  collisionPairPosFn onObjectEnter, 
+  collisionPairFn onObjectLeave, 
+  std::function<void(GameObject&)> onObjectUpdate, 
+  std::function<void(GameObject&)> onObjectCreate,
+  std::function<void(short)> onObjectDelete,
+  btIDebugDraw* debugDrawer
+);
 Texture loadTextureWorld(World& world, std::string texturepath);
 
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);

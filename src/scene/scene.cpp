@@ -243,7 +243,14 @@ void addMesh(World& world, std::string meshpath){
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
-World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave, std::function<void(GameObject&)> onObjectUpdate, btIDebugDraw* debugDrawer){
+World createWorld(
+  collisionPairPosFn onObjectEnter, 
+  collisionPairFn onObjectLeave, 
+  std::function<void(GameObject&)> onObjectUpdate,  
+  std::function<void(GameObject&)> onObjectCreate, 
+  std::function<void(short)> onObjectDelete, 
+  btIDebugDraw* debugDrawer
+){
   auto objectMapping = getObjectMapping();
   RailSystem rails;
   World world = {
@@ -251,6 +258,8 @@ World createWorld(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeav
     .objectMapping = objectMapping,
     .rails = rails,
     .onObjectUpdate = onObjectUpdate,
+    .onObjectCreate = onObjectCreate,
+    .onObjectDelete = onObjectDelete,
   };
 
   // Default meshes that are silently loaded in the background
@@ -479,6 +488,8 @@ int addObject(World& world, short sceneId, std::string name, std::string meshNam
   if (gameobj.script != ""){
     loadScript(gameobj.script, gameobjId);
   }
+
+  world.onObjectCreate(gameobj);
   return gameobjId;
 }
 void removeObject(World& world, short objectId, std::function<void(std::string)> unloadClip){  // this needs to also delete all children objects. 
@@ -493,6 +504,7 @@ void removeObject(World& world, short objectId, std::function<void(std::string)>
       removeObjectById(world, id, unloadClip);
     }
   }
+  world.onObjectDelete(objectId);
 }
 
 void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled){

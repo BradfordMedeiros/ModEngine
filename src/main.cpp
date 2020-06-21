@@ -918,6 +918,12 @@ int main(int argc, char* argv[]){
         sendDataOnUdpSocket(packet);
       }
     }, 
+    [](GameObject &obj) -> void {
+      std::cout << "created obj id: " << obj.id << std::endl;
+    },
+    [](short id) -> void {
+      std::cout << "deleted obj id: " << id << std::endl;
+    },
     debuggerDrawer
   );
 
