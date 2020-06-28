@@ -47,7 +47,7 @@ struct udpmodsocket {
   int socketFd;
 };
 
-enum PacketType { };
+enum PacketType { CREATE, DELETE, UPDATE };
 struct UdpPacket {
   short id;
   glm::vec3 position;
