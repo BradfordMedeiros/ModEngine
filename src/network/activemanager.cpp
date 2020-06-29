@@ -71,6 +71,7 @@ int connectTcp(std::string serverAddress){
   auto sockFd = socketConnection(serverAddress, 8000);
   sendMessageWithConnection(sockFd, "connect");
   auto response = readMessageWithConnection(sockFd);
+  std::cout << "response is: " << response << std::endl;
   assert(response == "ack");
   return sockFd;
 }
@@ -105,20 +106,26 @@ void connectServer(std::string server){
 
   setup = setupUdp();
 
-
   // Statekeeping
   std::cout << "INFO: connection request succeeded" << std::endl;
+
+  std::cout << "INFO: now connected" << std::endl;
   isConnected = true;
   currentServerIp = serverAddress;
   
 }
 
 void disconnectServer(){
-  assert(false); // - TODO actually send disconnect message to the server
   assert(isConnected);
+  
+  sendMessageWithConnection(currentSocket, "disconnect");
+  auto response = readMessageWithConnection(currentSocket);
+  assert(response == "ack");
+
   isConnected = false;
   currentServerIp = "";
   setup.udpSocket = -1;
+  currentSocket = -1;
 }
 bool isConnectedToServer(){
   return isConnected;
@@ -156,16 +163,15 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
 
 void sendDataOnUdpSocket(UdpPacket packet){
   assert(isConnected);
-  int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr,   sizeof(setup.servaddr)); 
+  int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr, sizeof(setup.servaddr)); 
   if (numBytes == -1){
     throw std::runtime_error("error sending udp data");
   }
 }
+
 void sendDataOnUdpSocket(std::string data){
   UdpPacket packet {
-    .id = 5,
-    .position = glm::vec3(1.f, 1.f, 1.f),
-    .scale = glm::vec3(2.f, 2.f, 2.f),
+    .type = CREATE,
   };
   sendDataOnUdpSocket(packet);
 }

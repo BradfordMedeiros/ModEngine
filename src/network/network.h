@@ -48,15 +48,27 @@ struct udpmodsocket {
 };
 
 enum PacketType { CREATE, DELETE, UPDATE };
-struct UdpPacket {
+struct CreatePacket {
   short id;
-  glm::vec3 position;
-  glm::vec3 scale;
+};
+struct DeletePacket {
+  short id;
+};
+struct UpdatePacket {
+  short id;
+};
+union PacketPayload {
+  CreatePacket createpacket;
+  DeletePacket deletepacket;
+  UpdatePacket updatepacket;
+};
+struct UdpPacket {
+  PacketType type;
+  PacketPayload payload;
 };
 
 udpmodsocket createUdpServer();
 void getDataFromUdpSocket(int socket, std::function<void(UdpPacket, sockaddr_in)> onData);
-void sendDataOnUdpSocket(const char* networkBuffer);
 short unsigned int getPortFromSocketIn(sockaddr_in& socketin);
 std::string getIpAddressFromSocketIn(sockaddr_in& socketin);
 

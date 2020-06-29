@@ -384,6 +384,11 @@ SCM scmConnectServer(SCM server){
   _connectServer(scm_to_locale_string(server));
   return SCM_UNSPECIFIED;
 }
+void (*_disconnectServer)();
+SCM scmDisconnectServer(){
+  _disconnectServer();
+  return SCM_UNSPECIFIED;
+}
 
 // Callbacks
 void onFrame(){
@@ -539,6 +544,7 @@ void defineFunctions(){
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
   scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
+  scm_c_define_gsubr("disconnect-server", 0, 0, 0, (void*)scmDisconnectServer);
   scm_c_define_gsubr("send-tcp", 1, 0, 0, (void*)scmSendMessageTcp);
   scm_c_define_gsubr("send-udp", 1, 0, 0, (void*)scmSendMessageUdp);
 }
@@ -581,6 +587,7 @@ void createStaticSchemeBindings(
   void (*saveScene)(),
   std::map<std::string, std::string> (*listServers)(),
   void (*connectServer)(std::string server),
+  void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data)
 ){
@@ -628,6 +635,7 @@ void createStaticSchemeBindings(
 
   _listServers = listServers;
   _connectServer = connectServer;
+  _disconnectServer = disconnectServer;
   _sendMessageTcp = sendMessageTcp;
   _sendMessageUdp = sendMessageUdp;
 }

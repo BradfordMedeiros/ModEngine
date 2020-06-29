@@ -46,6 +46,7 @@ void createStaticSchemeBindings(
   void (*saveScene)(),
   std::map<std::string, std::string> (*listServers)(),
   void (*connectServer)(std::string server),
+  void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data)
 );

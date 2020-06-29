@@ -706,8 +706,14 @@ void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
 void onUdpClientMessage(UdpPacket packet){
-  std::cout << "udp client update: " << std::endl;
-  physicsTranslateSet(world, packet.id, packet.position);
+  if (packet.type == UPDATE){
+    std::cout << "udp client update: " << std::endl;
+    //physicsTranslateSet(world, packet.id, packet.position);
+  }else if (packet.type == CREATE){
+    std::cout << "udp delete placeholder" << std::endl;
+  }else if (packet.type == DELETE){
+    std::cout << "udp create placeholder" << std::endl;
+  }
   //schemeBindings.onUdpMessage(message);
 }
 
@@ -888,6 +894,7 @@ int main(int argc, char* argv[]){
     saveScene,
     listServers,
     connectServer,
+    disconnectServer,
     sendMessageToActiveServer,
     sendDataOnUdpSocket
   );
@@ -909,20 +916,27 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     [bootStrapperMode](GameObject& obj) -> void { 
-      if (!bootStrapperMode &&isConnectedToServer() && obj.name == "ball1"){
+      std::cout << "update obj id: " << obj.id << std::endl;
+      /*if (!bootStrapperMode &&isConnectedToServer() && obj.name == "ball1"){
         UdpPacket packet {
-          .id = obj.id,
-          .position = obj.transformation.position,
-          .scale = obj.transformation.scale,
+          .type = UPDATE,
         };
         sendDataOnUdpSocket(packet);
-      }
+      }*/
     }, 
     [](GameObject &obj) -> void {
       std::cout << "created obj id: " << obj.id << std::endl;
+      /*UdpPacket packet {
+        .type = CREATE,
+      };
+      sendDataOnUdpSocket(packet);*/
     },
     [](short id) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
+      /*UdpPacket packet {
+        .type = DELETE,
+      };
+      sendDataOnUdpSocket(packet);*/
     },
     debuggerDrawer
   );
