@@ -927,25 +927,27 @@ int main(int argc, char* argv[]){
     [bootStrapperMode](GameObject& obj) -> void { 
       if (!bootStrapperMode &&isConnectedToServer() && obj.netsynchronize){
         std::cout << "update obj id: " << obj.id << std::endl;
-        UdpPacket packet {
-          .type = UPDATE,
-        };
+        UdpPacket packet { .type = UPDATE };
         sendDataOnUdpSocket(packet);
       }
     }, 
     [](GameObject &obj) -> void {
-      std::cout << "created obj id: " << obj.id << std::endl;
-      UdpPacket packet { .type = CREATE };
-      CreatePacket createpacket { .id = obj.id };
-      packet.payload.createpacket = createpacket;
-      sendDataOnUdpSocket(packet);
+      if (isConnectedToServer()){
+        std::cout << "created obj id: " << obj.id << std::endl;
+        UdpPacket packet { .type = CREATE };
+        CreatePacket createpacket { .id = obj.id };
+        packet.payload.createpacket = createpacket;
+        sendDataOnUdpSocket(packet);    
+      }
     },
     [](short id) -> void {
-      std::cout << "deleted obj id: " << id << std::endl;
-      UdpPacket packet { .type = DELETE };
-      DeletePacket deletepacket { .id = id };
-      packet.payload.deletepacket = deletepacket;
-      sendDataOnUdpSocket(packet);
+      if (isConnectedToServer()){
+        std::cout << "deleted obj id: " << id << std::endl;
+        UdpPacket packet { .type = DELETE };
+        DeletePacket deletepacket { .id = id };
+        packet.payload.deletepacket = deletepacket;
+        sendDataOnUdpSocket(packet);
+      }
     },
     debuggerDrawer
   );
