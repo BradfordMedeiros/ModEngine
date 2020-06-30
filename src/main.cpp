@@ -713,9 +713,15 @@ void onUdpClientMessage(UdpPacket packet){
   }else if (packet.type == CREATE){
     std::cout << "udp delete placeholder" << std::endl;
     auto create = packet.payload.createpacket;
+    auto id = create.id;    // currently id just verifies that the object has the same id as the create, but it really needs to allow the creation to be done out of order via some uuid function
+    auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, -5, 0); // this assumes always beingm made in scene 0
+    std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
+    assert(newObjId == id);
+
   }else if (packet.type == DELETE){
     std::cout << "udp create placeholder" << std::endl;
     auto deletep = packet.payload.deletepacket;
+    removeObjectById(deletep.id);
   }
   //schemeBindings.onUdpMessage(message);
 }
@@ -929,17 +935,17 @@ int main(int argc, char* argv[]){
     }, 
     [](GameObject &obj) -> void {
       std::cout << "created obj id: " << obj.id << std::endl;
-      /*UdpPacket packet {
-        .type = CREATE,
-      };
-      sendDataOnUdpSocket(packet);*/
+      UdpPacket packet { .type = CREATE };
+      CreatePacket createpacket { .id = obj.id };
+      packet.payload.createpacket = createpacket;
+      sendDataOnUdpSocket(packet);
     },
     [](short id) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
-      /*UdpPacket packet {
-        .type = DELETE,
-      };
-      sendDataOnUdpSocket(packet);*/
+      UdpPacket packet { .type = DELETE };
+      DeletePacket deletepacket { .id = id };
+      packet.payload.deletepacket = deletepacket;
+      sendDataOnUdpSocket(packet);
     },
     debuggerDrawer
   );
