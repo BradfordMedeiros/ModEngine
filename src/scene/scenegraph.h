@@ -21,6 +21,7 @@ struct GameObject {
   std::string lookat;
   std::string layer;
   std::string script;
+  bool netsynchronize;
 };
 struct GameObjectH {
   short id;

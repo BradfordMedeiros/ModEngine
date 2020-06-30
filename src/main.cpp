@@ -708,11 +708,14 @@ void onClientMessage(std::string message){
 void onUdpClientMessage(UdpPacket packet){
   if (packet.type == UPDATE){
     std::cout << "udp client update: " << std::endl;
+    auto update = packet.payload.updatepacket;
     //physicsTranslateSet(world, packet.id, packet.position);
   }else if (packet.type == CREATE){
     std::cout << "udp delete placeholder" << std::endl;
+    auto create = packet.payload.createpacket;
   }else if (packet.type == DELETE){
     std::cout << "udp create placeholder" << std::endl;
+    auto deletep = packet.payload.deletepacket;
   }
   //schemeBindings.onUdpMessage(message);
 }
@@ -916,13 +919,13 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     [bootStrapperMode](GameObject& obj) -> void { 
-      std::cout << "update obj id: " << obj.id << std::endl;
-      /*if (!bootStrapperMode &&isConnectedToServer() && obj.name == "ball1"){
+      if (!bootStrapperMode &&isConnectedToServer() && obj.netsynchronize){
+        std::cout << "update obj id: " << obj.id << std::endl;
         UdpPacket packet {
           .type = UPDATE,
         };
         sendDataOnUdpSocket(packet);
-      }*/
+      }
     }, 
     [](GameObject &obj) -> void {
       std::cout << "created obj id: " << obj.id << std::endl;

@@ -10,7 +10,7 @@ physicsOpts defaultPhysicsOpts(){
   return defaultOption;
 }
 
-GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer, std::string script){
+GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer, std::string script, bool netsynchronize){
   GameObject gameObject = {
     .id = id,
     .name = name,
@@ -23,12 +23,13 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id, std::st
     .lookat =  lookat,
     .layer = layer,
     .script = script,
+    .netsynchronize = netsynchronize,
   };
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId, std::string lookat, std::string layer, std::string script){
-  auto gameobjectObj = getGameObject(position, name, id, lookat, layer, script);
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId, std::string lookat, std::string layer, std::string script, bool netsynchronize){
+  auto gameobjectObj = getGameObject(position, name, id, lookat, layer, script, netsynchronize);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
@@ -54,7 +55,7 @@ SceneDeserialization createSceneFromParsedContent(
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
     short id = getNewObjectId();
-    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer, serialObj.script);
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.netsynchronize);
     scene.idToGameObjects.at(id).transformation.position = serialObj.position;
     scene.idToGameObjects.at(id).transformation.scale = serialObj.scale;
     scene.idToGameObjects.at(id).transformation.rotation = serialObj.rotation;
@@ -112,7 +113,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     nodeIdToRealId[nodeId] = id;
 
     auto layer = scene.idToGameObjects.at(rootId).layer;
-    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1, "", layer, "");
+    addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), names.at(nodeId), id, -1, "", layer, "", false);
     scene.idToGameObjectsH.at(id).groupId = rootId;
     scene.idToGameObjects.at(id).transformation.position = transform.position;
     scene.idToGameObjects.at(id).transformation.scale = transform.scale;
@@ -207,6 +208,9 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
     if (gameobject.script != ""){
        sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
     }
+    if (gameobject.netsynchronize){
+      sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
+    }
 
     for (auto additionalFields : getAdditionalFields(id)){
       sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
@@ -228,7 +232,7 @@ SerializationObject  makeObjectInScene(
 
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
-  addObjectToScene(scene, position, name, objectId, -1, "", layer, "");      
+  addObjectToScene(scene, position, name, objectId, -1, "", layer, "", false);      
 
   std::map<std::string, std::string> additionalFields;   // This is a hack, this needs to come from serialization
   additionalFields["mesh"] = mesh;  

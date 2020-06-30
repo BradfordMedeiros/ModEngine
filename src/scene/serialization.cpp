@@ -212,6 +212,9 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (token.attribute == "script"){
       objects.at(token.target).script = token.payload;
     }
+    if (token.attribute == "net" && token.payload == "sync"){
+      objects.at(token.target).netsynchronize = true;
+    }
 
     std::string type = getType(token.target, additionalFields);
     objects.at(token.target).type = type;
