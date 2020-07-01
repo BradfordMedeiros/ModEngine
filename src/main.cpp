@@ -712,15 +712,18 @@ void onUdpClientMessage(UdpPacket packet){
     auto update = packet.payload.updatepacket;
     //physicsTranslateSet(world, packet.id, packet.position);
   }else if (packet.type == CREATE){
-    std::cout << "udp delete placeholder" << std::endl;
+    std::cout << "udp create placeholder" << std::endl;
     auto create = packet.payload.createpacket;
     auto id = create.id;    // currently id just verifies that the object has the same id as the create, but it really needs to allow the creation to be done out of order via some uuid function
     if (idExists(world, id)){
       return;
     }
-    auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, -5, 0); // this assumes always beingm made in scene 0
+    auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, 5, 0); // this assumes always beingm made in scene 0
     std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
     assert(newObjId == id);
+
+    std::cout << "CREATE MESSAGE! " << std::endl;
+    assert(false);
 
   }else if (packet.type == DELETE){
     std::cout << "udp create placeholder" << std::endl;
@@ -728,6 +731,8 @@ void onUdpClientMessage(UdpPacket packet){
     if (idExists(world, deletep.id)){
       removeObjectById(deletep.id);
     }
+  }else if (packet.type == SETUP){
+    std::cout << "packet setup (noop)" << std::endl;
   }
   //schemeBindings.onUdpMessage(message);
 }
@@ -930,35 +935,34 @@ int main(int argc, char* argv[]){
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    [bootStrapperMode](GameObject& obj) -> void { 
+    [bootStrapperMode, &netcode](GameObject& obj) -> void { 
       if (obj.netsynchronize){
         std::cout << "update obj id: " << obj.id << std::endl;
         UdpPacket packet { .type = UPDATE };
         packet.payload.updatepacket = UpdatePacket { .id = obj.id };
         if (bootStrapperMode){
-          onUdpClientMessage(packet);
-          // sendToAllClients(packet)
+          sendUdpPacketToAllUdpClients(netcode, packet);
         }else if (isConnectedToServer()){
           sendDataOnUdpSocket(packet);
         }
       }
     }, 
-    [bootStrapperMode](GameObject &obj) -> void {
+    [bootStrapperMode, &netcode](GameObject &obj) -> void {
       std::cout << "created obj id: " << obj.id << std::endl;
       UdpPacket packet { .type = CREATE };
       packet.payload.createpacket = CreatePacket { .id = obj.id };
       if (bootStrapperMode){
-        onUdpClientMessage(packet);
+        sendUdpPacketToAllUdpClients(netcode, packet);
       }else if (isConnectedToServer()){
         sendDataOnUdpSocket(packet);
       }
     },
-    [bootStrapperMode](short id) -> void {
+    [bootStrapperMode, &netcode](short id) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
       UdpPacket packet { .type = DELETE };
       packet.payload.deletepacket =  DeletePacket { .id = id };
       if (bootStrapperMode){
-        onUdpClientMessage(packet);
+        sendUdpPacketToAllUdpClients(netcode, packet);
       }else if (isConnectedToServer()){
         sendDataOnUdpSocket(packet);
       }

@@ -98,3 +98,4 @@
 ;(define (get-player1)
 ;  (list (list 0 0) (list 0 0 0))
 ;)
+

@@ -27,5 +27,6 @@ struct NetCode {
 };
 NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected);
 void tickNetCode(NetCode& netcode);
+void sendUdpPacketToAllUdpClients(NetCode& netcode, UdpPacket data);
 
 #endif

@@ -67,6 +67,21 @@ std::map<std::string, std::string> listServers(){
   return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
 
+void sendDataOnUdpSocket(UdpPacket packet){
+  assert(isConnected);
+  int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr, sizeof(setup.servaddr)); 
+  if (numBytes == -1){
+    throw std::runtime_error("error sending udp data");
+  }
+}
+
+void sendDataOnUdpSocket(std::string data){
+  UdpPacket packet {
+    .type = CREATE,
+  };
+  sendDataOnUdpSocket(packet);
+}
+
 int connectTcp(std::string serverAddress){
   auto sockFd = socketConnection(serverAddress, 8000);
   sendMessageWithConnection(sockFd, "connect");
@@ -113,6 +128,11 @@ void connectServer(std::string server){
   isConnected = true;
   currentServerIp = serverAddress;
   
+  // This is hackey, but needed b/c the server only sends data if the client has first sent a udp message.  Probably should formalize this better.
+  UdpPacket setupPacket = {
+    .type = SETUP,
+  };  
+  sendDataOnUdpSocket(setupPacket);
 }
 
 void disconnectServer(){
@@ -160,21 +180,6 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
   }
 }
 
-
-void sendDataOnUdpSocket(UdpPacket packet){
-  assert(isConnected);
-  int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr, sizeof(setup.servaddr)); 
-  if (numBytes == -1){
-    throw std::runtime_error("error sending udp data");
-  }
-}
-
-void sendDataOnUdpSocket(std::string data){
-  UdpPacket packet {
-    .type = CREATE,
-  };
-  sendDataOnUdpSocket(packet);
-}
 
 void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage){
   if (setup.udpSocket != -1){

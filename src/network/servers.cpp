@@ -108,12 +108,16 @@ void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& ud
 }
 
 void sendUdpPacketUpdateToAllExcept(int socket, UdpPacket& packet, std::map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
+  std::cout << "INFO: NETWORK: sending data to all except: " << excludeConnectionHash << " num connections: " << udpConnections.size() << std::endl;
   for (auto [connectHash, addr] : udpConnections){
+    std::cout << "INFO: NETWORKING: sending udp datagram to " << connectHash << std::endl;
     if (connectHash != excludeConnectionHash){
       int numBytes = sendto(socket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &addr,   sizeof(addr)); 
       if (numBytes == -1){
         throw std::runtime_error("error sending udp data");
       }     
+    }else{
+      std::cout << "INFO: NETWORKING: sending udp datagram skipping" << std::endl;
     }
   }
 }
@@ -134,8 +138,15 @@ void tickNetCode(NetCode& netcode){
   processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
   getDataFromUdpSocket(netcode.udpModsocket.socketFd, [&netcode](UdpPacket data, sockaddr_in addr) -> void {
     // @TODO - reject any update unless it has been connected
+
+    std::cout << "INFO: TICK NETCODE: got data" << std::endl;
     auto hash = getConnectionHash(getIpAddressFromSocketIn(addr), getPortFromSocketIn(addr));
     netcode.udpConnections[hash] = addr;
-    sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, hash);
+    //sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, hash);  // TODO forward subset of udp messages, not all of them
   });
+}
+
+void sendUdpPacketToAllUdpClients(NetCode& netcode, UdpPacket data){
+  std::string value = "";
+  sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, value);
 }

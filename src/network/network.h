@@ -47,7 +47,7 @@ struct udpmodsocket {
   int socketFd;
 };
 
-enum PacketType { CREATE, DELETE, UPDATE };
+enum PacketType { CREATE, DELETE, UPDATE, SETUP };
 struct CreatePacket {
   short id;
 };
