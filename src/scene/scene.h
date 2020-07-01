@@ -51,15 +51,15 @@ void removeObject(World& world, short id, std::function<void(std::string)> unloa
 std::string serializeScene(World& world, short sceneId);
 
 void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled);
-void  physicsTranslateSet(World& world, short index, glm::vec3 pos);
-void  physicsRotate(World& world, short index, float x, float y, float z);
-void  physicsRotateSet(World& world, short index, glm::quat rotation);  // this sets to rotation
-void  physicsScale(World& world, short index, float x, float y, float z);
-void  physicsScaleSet(World& world, short index, glm::vec3 scale);
-void  applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
-void  applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
-void  applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
-void  onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
+void physicsTranslateSet(World& world, short index, glm::vec3 pos);
+void physicsRotate(World& world, short index, float x, float y, float z);
+void physicsRotateSet(World& world, short index, glm::quat rotation);  // this sets to rotation
+void physicsScale(World& world, short index, float x, float y, float z);
+void physicsScaleSet(World& world, short index, glm::vec3 scale);
+void applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
+void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
 short getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, short id);
 short getGameObjectByName(World& world, std::string name);
@@ -67,6 +67,7 @@ short getGameObjectByName(World& world, std::string name);
 std::map<std::string, std::string> getAttributes(World& world, short id);
 void setAttributes(World& world, short id, std::map<std::string, std::string> attr);
 bool idInGroup(World& world, short id, short groupId);
+bool idExists(World& world, short id);
 
 std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping);
 

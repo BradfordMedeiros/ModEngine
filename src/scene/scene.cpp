@@ -722,6 +722,9 @@ void setAttributes(World& world, short id, std::map<std::string, std::string> at
 bool idInGroup(World& world, short id, short groupId){
   return groupId == world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
 }
+bool idExists(World& world, short id){
+  return world.idToScene.find(id) != world.idToScene.end();
+}
 
 std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
