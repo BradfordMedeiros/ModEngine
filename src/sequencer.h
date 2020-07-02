@@ -7,9 +7,10 @@
   (define mainscript 
     (create-states
       (state closed
+        (attributes (color "blue"))     ; this should set the color attribute to blue, but then set it back when not in closed state
         (track "opening door" 
           (display "opening door")
-          (play-animation open-door-animation)
+          (play-animation open-door-animation)     
           (trigger "door-opened")
         )
         (track "play shake head"
