@@ -45,6 +45,12 @@ SCM scm_unloadScene(SCM value){
   _unloadScene(scm_to_short(value));
   return SCM_UNSPECIFIED;
 }
+void (*_unloadAllScenes)();
+SCM scm_unloadAllScenes(){
+  _unloadAllScenes();
+  return SCM_UNSPECIFIED;
+}
+
 std::vector<short> (*_listScenes)();
 SCM scm_listScenes(){
   auto scenes = _listScenes();
@@ -487,6 +493,7 @@ void onPlayerLeave(std::string connectionHash){
 void defineFunctions(){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
+  scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
 
@@ -553,6 +560,7 @@ void defineFunctions(){
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),  
   void (*unloadScene)(short id),  
+  void (*unloadAllScenes)(),
   std::vector<short> (*listScenes)(),  
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
@@ -596,6 +604,7 @@ void createStaticSchemeBindings(
 
   _loadScene = loadScene;
   _unloadScene = unloadScene;
+  _unloadAllScenes = unloadAllScenes;
   _listScenes = listScenes;
   selectionMode = setSelectionMode;
 	moveCam = moveCamera;

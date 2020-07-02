@@ -376,7 +376,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     float offsetAmount = yoffset * 0.001;
     maybeApplyTextureOffset(state.selectedIndex, glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
   }
-  if (!state.offsetTextureMode && state.selectedIndex != -1){
+  if (!state.offsetTextureMode && state.selectedIndex != -1 && world.idToScene.find(state.selectedIndex) != world.idToScene.end()){
     maybeChangeTexture(state.selectedIndex);
   }
 
@@ -721,10 +721,6 @@ void onUdpClientMessage(UdpPacket packet){
     auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, 5, 0); // this assumes always beingm made in scene 0
     std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
     assert(newObjId == id);
-
-    std::cout << "CREATE MESSAGE! " << std::endl;
-    assert(false);
-
   }else if (packet.type == DELETE){
     std::cout << "udp create placeholder" << std::endl;
     auto deletep = packet.payload.deletepacket;
@@ -880,6 +876,7 @@ int main(int argc, char* argv[]){
   createStaticSchemeBindings(
     loadScene,
     unloadScene,
+    unloadAllScenes,
     listScenes,
     moveCamera, 
     rotateCamera, 
@@ -959,6 +956,15 @@ int main(int argc, char* argv[]){
     },
     [bootStrapperMode, &netcode](short id) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
+
+      if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
+        activeCameraObj = NULL;
+        std::cout << "active camera reset" << std::endl;
+      }
+      if (id == state.selectedIndex){
+        state.selectedIndex = -1;
+      }
+
       UdpPacket packet { .type = DELETE };
       packet.payload.deletepacket =  DeletePacket { .id = id };
       if (bootStrapperMode){
@@ -1114,7 +1120,7 @@ int main(int argc, char* argv[]){
 
     renderUI(crosshairSprite, currentFramerate);
 
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, makeObject, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
+    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);

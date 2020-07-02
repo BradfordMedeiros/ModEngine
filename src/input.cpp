@@ -69,7 +69,6 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*rotate)(float, float, float),
   void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
   void (*setObjectDimensions)(short index, float width, float height, float depth),
-  short (*makeObject)(std::string name, std::string meshName, float x, float y, float z),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
@@ -89,9 +88,6 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
     state.enableSpecular = !state.enableSpecular;
   }
 
-  if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
-     makeObject("testobject", "./res/models/cone/cone.obj", 0, 10, 0);
-  }
   if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
     setObjectDimensions(1, 10, 5, 10);
   }

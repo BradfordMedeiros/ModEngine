@@ -26,6 +26,7 @@ void clearImpulse(short index);
 
 short loadScene(std::string sceneFile);
 void unloadScene(short sceneId);
+void unloadAllScenes();
 void saveScene();
 std::vector<short> listScenes();
 

@@ -69,6 +69,9 @@ void unloadScene(short sceneId){
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId, unloadSoundState);
 }
+void unloadAllScenes(){
+  removeAllScenesFromWorld(world, unloadSoundState);
+}
 
 // @TODO - save all the scenes in the world
 void saveScene(){
@@ -153,10 +156,10 @@ void setSelectionMode(bool enabled){
 }
 
 short makeObject(std::string name, std::string meshName, float x, float y, float z){
-  return addObject(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
+  return addObjectToScene(world, 0, name, meshName, glm::vec3(x, y, z), loadSoundState, loadScriptFromWorld);
 }
 void removeObjectById(short id){
-  removeObject(world, id, unloadSoundState);
+  removeObjectFromScene(world, id, unloadSoundState);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){
