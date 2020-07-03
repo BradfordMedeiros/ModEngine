@@ -91,11 +91,13 @@ std::vector<short> listScenes(){
   return sceneIds;
 }
 
-void sendLoadScene(std::string sceneData){
-  if (!bootStrapperMode){
+void sendLoadScene(short id){
+  /*if (!bootStrapperMode){
     std::cout << "ERROR: cannot send load scene in not-server mode" << std::endl;
     assert(false);
   }
+
+  std::string sceneData = "hello";
   UdpPacket packet { .type = LOAD };
 
   auto data = sceneData.c_str();
@@ -105,7 +107,8 @@ void sendLoadScene(std::string sceneData){
   strncpy(loadpacket.sceneData, data, sizeof(loadpacket.sceneData));
   assert(loadpacket.sceneData[sizeof(loadpacket.sceneData -1)] == '\0');
   packet.payload.loadpacket = loadpacket; 
-  sendUdpPacketToAllUdpClients(netcode, packet);
+  sendUdpPacketToAllUdpClients(netcode, packet);*/
+  std::cout << "send load scene: " << id << std::endl;
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){

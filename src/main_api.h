@@ -30,7 +30,7 @@ void unloadScene(short sceneId);
 void unloadAllScenes();
 void saveScene();
 std::vector<short> listScenes();
-void sendLoadScene(std::string sceneData);
+void sendLoadScene(short sceneId);
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);

@@ -883,6 +883,7 @@ int main(int argc, char* argv[]){
     unloadScene,
     unloadAllScenes,
     listScenes,
+    sendLoadScene,
     moveCamera, 
     rotateCamera, 
     removeObjectById, 
