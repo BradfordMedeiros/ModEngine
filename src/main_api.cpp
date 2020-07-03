@@ -123,12 +123,8 @@ void sendLoadScene(short id){
     "box2:mesh:./res/models/box/box.obj \n"
  ;
 
-  std::cout << sceneData << std::endl;
-
   UdpPacket packet { .type = LOAD };
-
   auto data = sceneData.c_str();
-
   LoadPacket loadpacket {};
   assert((sizeof(data) + 1 ) < sizeof(loadpacket.sceneData));
   strncpy(loadpacket.sceneData, data, sizeof(loadpacket.sceneData));
