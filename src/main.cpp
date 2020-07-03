@@ -61,6 +61,8 @@ int numChunkingGridCells = 0;
 float chunkSize = 100;
 bool useChunkingSystem = false;
 std::string rawSceneFile;
+bool bootStrapperMode = false;
+NetCode netcode { };
 
 GameObjectVoxel* voxelPtr;
 short voxelPtrId = -1;
@@ -707,7 +709,10 @@ void onClientMessage(std::string message){
 }
 void onUdpClientMessage(UdpPacket packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
-  if (packet.type == UPDATE){
+  if (packet.type == LOAD){
+    std::string sceneData = packet.payload.loadpacket.sceneData;
+    std::cout << "trying to load scene packet!" << std::endl;
+  }else if (packet.type == UPDATE){
     std::cout << "udp client update: " << std::endl;
     auto update = packet.payload.updatepacket;
     //physicsTranslateSet(world, packet.id, packet.position);
@@ -770,7 +775,7 @@ int main(int argc, char* argv[]){
     return 0;
   }
   bool enablePhysics = result["physics"].as<bool>();
-  bool bootStrapperMode = result["bootstrapper"].as<bool>();
+  bootStrapperMode = result["bootstrapper"].as<bool>();
 
   const std::string shaderFolderPath = result["shader"].as<std::string>();
   textureFolderPath = result["texture"].as<std::string>();
@@ -917,7 +922,6 @@ int main(int argc, char* argv[]){
   );
 
   schemeBindings = getSchemeCallbacks();
-  NetCode netcode { };
   if(bootStrapperMode){
     netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
   }
@@ -932,7 +936,7 @@ int main(int argc, char* argv[]){
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    [bootStrapperMode, &netcode](GameObject& obj) -> void { 
+    [](GameObject& obj) -> void { 
       if (obj.netsynchronize){
         std::cout << "update obj id: " << obj.id << std::endl;
         UdpPacket packet { .type = UPDATE };
@@ -944,7 +948,7 @@ int main(int argc, char* argv[]){
         }
       }
     }, 
-    [bootStrapperMode, &netcode](GameObject &obj) -> void {
+    [](GameObject &obj) -> void {
       std::cout << "created obj id: " << obj.id << std::endl;
       UdpPacket packet { .type = CREATE };
       packet.payload.createpacket = CreatePacket { .id = obj.id };
@@ -954,7 +958,7 @@ int main(int argc, char* argv[]){
         sendDataOnUdpSocket(packet);
       }
     },
-    [bootStrapperMode, &netcode](short id) -> void {
+    [](short id) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
 
       if (activeCameraObj != NULL &&  id == activeCameraObj -> id){

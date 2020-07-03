@@ -13,6 +13,8 @@ extern std::vector<short> playbacksToRemove;
 extern std::vector<std::string> channelMessages;
 extern float now;
 extern std::string rawSceneFile;
+extern bool bootStrapperMode;
+extern NetCode netcode;
 
 
 void setActiveCamera(short cameraId){
@@ -87,6 +89,23 @@ std::vector<short> listScenes(){
     sceneIds.push_back(id);
   }
   return sceneIds;
+}
+
+void sendLoadScene(std::string sceneData){
+  if (!bootStrapperMode){
+    std::cout << "ERROR: cannot send load scene in not-server mode" << std::endl;
+    assert(false);
+  }
+  UdpPacket packet { .type = LOAD };
+
+  auto data = sceneData.c_str();
+
+  LoadPacket loadpacket {};
+  assert((sizeof(data) + 1 ) < sizeof(loadpacket.sceneData));
+  strncpy(loadpacket.sceneData, data, sizeof(loadpacket.sceneData));
+  assert(loadpacket.sceneData[sizeof(loadpacket.sceneData -1)] == '\0');
+  packet.payload.loadpacket = loadpacket; 
+  sendUdpPacketToAllUdpClients(netcode, packet);
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){
@@ -215,7 +234,7 @@ void playAnimation(short id, std::string animationToPlay){
 }
 
 std::vector<std::string> listModels(){
-  return listFilesWithExtensions("./res/models", { "obj", "dae" });
+  return listFilesWithExtensions("../gameresources", { "obj", "dae" });
 }
 
 void sendEventMessage(std::string message){

@@ -10,6 +10,7 @@
 #include "./scene/animation/playback.h"
 #include "./scene/animation/timeplayback.h"
 #include "./sounds/soundmanager.h"
+#include "./network/servers.h"
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
@@ -29,6 +30,7 @@ void unloadScene(short sceneId);
 void unloadAllScenes();
 void saveScene();
 std::vector<short> listScenes();
+void sendLoadScene(std::string sceneData);
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
