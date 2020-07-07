@@ -44,6 +44,7 @@ World createWorld(
 Texture loadTextureWorld(World& world, std::string texturepath);
 
 short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
+short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
 void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip);
 void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip);
 

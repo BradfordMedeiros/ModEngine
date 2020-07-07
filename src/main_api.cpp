@@ -67,6 +67,11 @@ short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   return addSceneToWorld(world, sceneFile, loadSoundState, loadScriptFromWorld);
 }
+short loadSceneData(std::string sceneData){
+  std::cout << "INFO: SCENE LOADING: loading from scene data" << std::endl;
+  return addSceneToWorldFromData(world, sceneData, loadSoundState, loadScriptFromWorld);
+}
+
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId, unloadSoundState);

@@ -712,6 +712,8 @@ void onUdpClientMessage(UdpPacket packet){
   if (packet.type == LOAD){
     std::string sceneData = packet.payload.loadpacket.sceneData;
     std::cout << "trying to load scene packet!" << std::endl;
+    unloadAllScenes();
+    loadSceneData(sceneData);
   }else if (packet.type == UPDATE){
     std::cout << "udp client update: " << std::endl;
     auto update = packet.payload.updatepacket;

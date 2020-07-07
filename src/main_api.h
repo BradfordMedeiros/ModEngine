@@ -26,6 +26,7 @@ void applyImpulseRel(short index, glm::vec3 impulse);
 void clearImpulse(short index);
 
 short loadScene(std::string sceneFile);
+short loadSceneData(std::string sceneData);
 void unloadScene(short sceneId);
 void unloadAllScenes();
 void saveScene();

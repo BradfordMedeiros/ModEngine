@@ -103,14 +103,14 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
     moveCamera(glm::vec3(40.0f * deltaTime, 0.0, 0.0f));
   }
-  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+  if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
     nextCamera();
   }
    
-  if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
+  /*if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
     state.visualizeNormals = !state.visualizeNormals;
     std::cout << "visualizeNormals: " << state.visualizeNormals << std::endl;
-  }
+  }*/ 
   if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
     state.showCameras = !state.showCameras;
     std::cout << "show cameras: " << state.showCameras << std::endl;

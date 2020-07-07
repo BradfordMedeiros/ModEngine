@@ -429,6 +429,9 @@ short addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   }
   return sceneId;
 }
+short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+  return -1;
+}
 
 void removeObjectById(World& world, short objectId, std::function<void(std::string)> unloadClip){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
