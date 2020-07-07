@@ -412,9 +412,9 @@ std::string serializeScene(World& world, short sceneId){
   });
 }
 
-short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   auto sceneId = getSceneId();
-  SceneDeserialization deserializedScene = deserializeScene(loadFile(sceneFile), fields, getObjectId);
+  SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getObjectId);
   world.scenes[sceneId] = deserializedScene.scene;
   addObjects(world, world.scenes.at(sceneId), deserializedScene.serialObjs, true, loadClip, getObjectId);
 
@@ -429,9 +429,10 @@ short addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   }
   return sceneId;
 }
-short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
-  return -1;
+short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+  return addSceneToWorldFromData(world, loadFile(sceneFile), loadClip, loadScript);
 }
+
 
 void removeObjectById(World& world, short objectId, std::function<void(std::string)> unloadClip){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
