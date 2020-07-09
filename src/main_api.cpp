@@ -102,32 +102,7 @@ void sendLoadScene(short id){
     assert(false);
   }
 
-  std::string sceneData = 
-    ">camtest:position:-74.500000 -59.000000 -37.000000 \n"
-    ">camtest:scale:1.000000 1.000000 1.000000 \n"
-    ">camtest:rotation:-2.152896 0.802106 -2.312180 \n"
-
-    "collisionobj:position:1.000000 1.000000 1.000000 \n"
-    "collisionobj:scale:1.000000 1.000000 1.000000 \n"
-    "collisionobj:rotation:0.000000 -0.000000 -6.283185 \n"
-    "collisionobj:mesh:./res/models/boundingbox/boundingbox.obj \n"
-    "maincolumn:position:-0.199997 0.000000 0.699997 \n"
-    "maincolumn:scale:20.000000 1.000000 20.000000 \n"
-    "maincolumn:rotation:0.000000 -0.000000 -6.283185 \n"
-    "maincolumn:mesh:./res/models/box/box.obj \n"
-    "box1:position:-1.099991 -2.000000 7.100005 \n"
-    "box1:scale:0.699995 7.699995 8.799994 \n"
-    "box1:rotation:0.000000 -0.000000 -6.283185 \n"
-    "box1:mesh:./res/models/box/box.obj \n"
-    "!light:position:34.000000 -7.000000 16.000000 \n"
-    "!light:scale:1.000000 1.000000 1.000000 \n"
-    "!light:rotation:0.000000 -1.343909 -6.283185 \n"
-    "box2:position:-14.599991 -8.000000 1.100006 \n"
-    "box2:scale:1.100002 16.800028 16.400028 \n"
-    "box2:rotation:0.000000 -0.000000 -6.283185 \n"
-    "box2:mesh:./res/models/box/box.obj \n"
- ;
-
+  std::string sceneData = serializeScene(world, id);
   UdpPacket packet { .type = LOAD };
   auto data = sceneData.c_str();
   LoadPacket loadpacket {};

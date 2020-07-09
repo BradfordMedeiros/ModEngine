@@ -344,7 +344,7 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight 
 }  
 std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj){
   std::vector<std::pair<std::string, std::string>> pairs;
-  std::cout << "NOT YET IMPLEMENTED" << std::endl;
+  std::cout << "WARNING: SERIALIZATION - VOXEL - NOT YET IMPLEMENTED" << std::endl;
   assert(false);
   return pairs;
 }  
