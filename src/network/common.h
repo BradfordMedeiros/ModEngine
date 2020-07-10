@@ -5,11 +5,6 @@
 
 void guard(int value, const char* runtimeErrorMessage);
 
-struct NetworkPacket {
-  void* packet;
-  unsigned int packetSize;
-};
-
 // Move this out of the networking code, it doesnt belong here
 enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
 struct CreatePacket {
@@ -38,5 +33,13 @@ struct UdpPacket {
 };
 
 //////////////////////
+
+struct NetworkPacket {
+  void* packet;
+  unsigned int packetSize;
+};
+
+NetworkPacket toNetworkPacket(UdpPacket& packet);
+
 
 #endif

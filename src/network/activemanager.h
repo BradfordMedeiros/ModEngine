@@ -29,8 +29,7 @@ bool isConnectedToServer();
 void sendMessageToActiveServer(std::string data);
 void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
 
-void sendDataOnUdpSocket(UdpPacket packet);
-void sendDataOnUdpSocket(std::string data);
+void sendDataOnUdpSocket(NetworkPacket packet);
 
 void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage);
 

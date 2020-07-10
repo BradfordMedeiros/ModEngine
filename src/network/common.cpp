@@ -6,3 +6,10 @@ void guard(int value, const char* runtimeErrorMessage){
   }
 }
 
+NetworkPacket toNetworkPacket(UdpPacket& packet){
+  NetworkPacket netpacket {
+    .packet = &packet,
+    .packetSize = sizeof(packet),
+  };
+  return netpacket;
+}

@@ -921,7 +921,7 @@ int main(int argc, char* argv[]){
     connectServer,
     disconnectServer,
     sendMessageToActiveServer,
-    sendDataOnUdpSocket
+    sendDataUdp
   );
 
   schemeBindings = getSchemeCallbacks();
@@ -947,7 +947,7 @@ int main(int argc, char* argv[]){
         if (bootStrapperMode){
           sendUdpPacketToAllUdpClients(netcode, packet);
         }else if (isConnectedToServer()){
-          sendDataOnUdpSocket(packet);
+          sendDataOnUdpSocket(toNetworkPacket(packet));
         }
       }
     }, 
@@ -958,7 +958,7 @@ int main(int argc, char* argv[]){
       if (bootStrapperMode){
         sendUdpPacketToAllUdpClients(netcode, packet);
       }else if (isConnectedToServer()){
-        sendDataOnUdpSocket(packet);
+        sendDataOnUdpSocket(toNetworkPacket(packet));
       }
     },
     [](short id) -> void {
@@ -977,7 +977,7 @@ int main(int argc, char* argv[]){
       if (bootStrapperMode){
         sendUdpPacketToAllUdpClients(netcode, packet);
       }else if (isConnectedToServer()){
-        sendDataOnUdpSocket(packet);
+        sendDataOnUdpSocket(toNetworkPacket(packet));
       }
     },
     debuggerDrawer

@@ -67,19 +67,12 @@ std::map<std::string, std::string> listServers(){
   return parseListServerRequest(sendMessageNewConnection(bootstrapperServer, bootstrapperPort, "list-servers"));
 }
 
-void sendDataOnUdpSocket(UdpPacket packet){
+void sendDataOnUdpSocket(NetworkPacket packet){
   assert(isConnected);
   int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr, sizeof(setup.servaddr)); 
   if (numBytes == -1){
     throw std::runtime_error("error sending udp data");
   }
-}
-
-void sendDataOnUdpSocket(std::string data){
-  UdpPacket packet {
-    .type = CREATE,
-  };
-  sendDataOnUdpSocket(packet);
 }
 
 int connectTcp(std::string serverAddress){
@@ -132,7 +125,7 @@ void connectServer(std::string server){
   UdpPacket setupPacket = {
     .type = SETUP,
   };  
-  sendDataOnUdpSocket(setupPacket);
+  sendDataOnUdpSocket(toNetworkPacket(setupPacket));
 }
 
 void disconnectServer(){

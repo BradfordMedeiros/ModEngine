@@ -262,3 +262,11 @@ void unattachFromRail(short id){
 double timeSeconds(){
   return now;
 }
+
+
+void sendDataUdp(std::string data){
+  UdpPacket packet {
+    .type = CREATE,
+  };
+  sendDataOnUdpSocket(toNetworkPacket(packet));
+}

@@ -11,6 +11,7 @@
 #include "./scene/animation/timeplayback.h"
 #include "./sounds/soundmanager.h"
 #include "./network/servers.h"
+#include "./network/activemanager.h"
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
@@ -73,5 +74,7 @@ void sendEventMessage(std::string message);
 void attachToRail(short id, std::string rail);
 void unattachFromRail(short id);
 double timeSeconds();
+
+void sendDataUdp(std::string data);
 
 #endif
