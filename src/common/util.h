@@ -37,4 +37,7 @@ std::string serializeRotation(glm::quat rotation);
 float maxvalue(float x, float y, float z);
 int maxvalue(int x, int y, int z);
 
+typedef short objid;
+objid getUniqueObjId();
+
 #endif

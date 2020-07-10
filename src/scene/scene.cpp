@@ -271,13 +271,6 @@ World createWorld(
   return world;
 }
 
-////////////////  need unique values for these, there are probably better ways to pick these (maybe based on value of ptr?)
-static short id = -1;
-short getObjectId(){
-  id++;
-  return id;
-}
-
 static short sceneId = -1;
 short getSceneId(){
   sceneId++;
@@ -414,9 +407,9 @@ std::string serializeScene(World& world, short sceneId){
 
 short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
   auto sceneId = getSceneId();
-  SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getObjectId);
+  SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
-  addObjects(world, world.scenes.at(sceneId), deserializedScene.serialObjs, true, loadClip, getObjectId);
+  addObjects(world, world.scenes.at(sceneId), deserializedScene.serialObjs, true, loadClip, getUniqueObjId);
 
   addPhysicsBodies(world, world.scenes.at(sceneId));
   for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
@@ -477,7 +470,7 @@ int addObjectToScene(World& world, short sceneId, std::string name, std::string 
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
   std::vector<short> idsAdded;
   auto getId = [&idsAdded]() -> short {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = getObjectId();
+    auto newId = getUniqueObjId();
     idsAdded.push_back(newId);
     return newId;
   };

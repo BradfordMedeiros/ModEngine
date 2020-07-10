@@ -157,3 +157,10 @@ int maxvalue(int x, int y, int z){
   return z;
 }
 
+
+static objid objIdIndex = -1;
+objid getUniqueObjId(){
+  objIdIndex++;
+  return objIdIndex;
+}
+
