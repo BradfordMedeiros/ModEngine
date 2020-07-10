@@ -136,14 +136,13 @@ NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::fun
 }
 void tickNetCode(NetCode& netcode){
   processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
-  getDataFromUdpSocket(netcode.udpModsocket.socketFd, [&netcode](UdpPacket data, sockaddr_in addr) -> void {
-    // @TODO - reject any update unless it has been connected
-
+  UdpPacket packet {};
+  UdpSocketData response = getDataFromUdpSocket(netcode.udpModsocket.socketFd, &packet, sizeof(packet));
+  if (response.hasData){
     std::cout << "INFO: TICK NETCODE: got data" << std::endl;
-    auto hash = getConnectionHash(getIpAddressFromSocketIn(addr), getPortFromSocketIn(addr));
-    netcode.udpConnections[hash] = addr;
-    //sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, hash);  // TODO forward subset of udp messages, not all of them
-  });
+    auto hash = getConnectionHash(getIpAddressFromSocketIn(response.socketin), getPortFromSocketIn(response.socketin));
+    netcode.udpConnections[hash] = response.socketin;
+  }
 }
 
 void sendUdpPacketToAllUdpClients(NetCode& netcode, UdpPacket data){

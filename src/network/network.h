@@ -47,34 +47,14 @@ struct udpmodsocket {
   int socketFd;
 };
 
-enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
-struct CreatePacket {
-  short id;
-};
-struct DeletePacket {
-  short id;
-};
-struct UpdatePacket {
-  short id;
-};
-
-// @TODO this should optimize so only send the size necessary, not max size since scnee file needs to be larger
-struct LoadPacket {
-  char sceneData[4000]; // this makes every message 4k, which is probably way bigger than each packet needs to be, optimize this
-};
-union PacketPayload {
-  CreatePacket createpacket;
-  DeletePacket deletepacket;
-  UpdatePacket updatepacket;
-  LoadPacket loadpacket;
-};
-struct UdpPacket {
-  PacketType type;
-  PacketPayload payload;
-};
-
 udpmodsocket createUdpServer();
-void getDataFromUdpSocket(int socket, std::function<void(UdpPacket, sockaddr_in)> onData);
+
+struct UdpSocketData {
+  bool hasData;
+  sockaddr_in socketin;
+};
+UdpSocketData getDataFromUdpSocket(int socket, void* _packet, unsigned int packetSize);
+
 short unsigned int getPortFromSocketIn(sockaddr_in& socketin);
 std::string getIpAddressFromSocketIn(sockaddr_in& socketin);
 

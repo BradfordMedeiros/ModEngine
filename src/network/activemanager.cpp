@@ -183,8 +183,10 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
 
 void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage){
   if (setup.udpSocket != -1){
-    getDataFromUdpSocket(setup.udpSocket, [onClientMessage](UdpPacket packet, sockaddr_in addr) -> void {
+    UdpPacket packet {};
+    auto udpData = getDataFromUdpSocket(setup.udpSocket, &packet, sizeof(packet));
+    if (udpData.hasData){
       onClientMessage(packet);
-    });
+    }
   }
 }

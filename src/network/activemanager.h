@@ -20,6 +20,7 @@
 #include "./common.h"
 #include "../common/util.h"
 #include "./network.h"
+#include "./servers.h"
 
 std::map<std::string, std::string> listServers();
 void connectServer(std::string server);
