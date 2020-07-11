@@ -174,12 +174,12 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage){
 }
 
 
-void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage){
+bool maybeGetUdpClientMessage(void* _packet, unsigned int packetSize){
   if (setup.udpSocket != -1){
-    UdpPacket packet {};
-    auto udpData = getDataFromUdpSocket(setup.udpSocket, &packet, sizeof(packet));
+    auto udpData = getDataFromUdpSocket(setup.udpSocket, _packet, packetSize);
     if (udpData.hasData){
-      onClientMessage(packet);
+      return true;
     }
   }
+  return false;
 }

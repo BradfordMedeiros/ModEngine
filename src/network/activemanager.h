@@ -31,6 +31,6 @@ void maybeGetClientMessage(std::function<void(std::string)> onClientMessage);
 
 void sendDataOnUdpSocket(NetworkPacket packet);
 
-void maybeGetUdpClientMessage(std::function<void(UdpPacket)> onClientMessage);
+bool maybeGetUdpClientMessage(void* _packet, unsigned int packetSize);
 
 #endif

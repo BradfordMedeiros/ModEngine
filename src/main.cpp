@@ -1029,7 +1029,13 @@ int main(int argc, char* argv[]){
 
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     maybeGetClientMessage(onClientMessage);
-    maybeGetUdpClientMessage(onUdpClientMessage);
+
+    UdpPacket udpPacket { };
+    auto hasClientMessage = maybeGetUdpClientMessage(&udpPacket, sizeof(udpPacket));
+    if (hasClientMessage){
+      onUdpClientMessage(udpPacket);
+    }
+
     if (bootStrapperMode){
       tickNetCode(netcode);
     }
