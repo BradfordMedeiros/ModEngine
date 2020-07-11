@@ -110,7 +110,7 @@ void sendLoadScene(short id){
   strncpy(loadpacket.sceneData, data, sizeof(loadpacket.sceneData));
   assert(loadpacket.sceneData[sizeof(loadpacket.sceneData) -1] == '\0');
   packet.payload.loadpacket = loadpacket; 
-  sendUdpPacketToAllUdpClients(netcode, packet);
+  sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
 }
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){

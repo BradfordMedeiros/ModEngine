@@ -945,7 +945,7 @@ int main(int argc, char* argv[]){
         UdpPacket packet { .type = UPDATE };
         packet.payload.updatepacket = UpdatePacket { .id = obj.id };
         if (bootStrapperMode){
-          sendUdpPacketToAllUdpClients(netcode, packet);
+          sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
         }else if (isConnectedToServer()){
           sendDataOnUdpSocket(toNetworkPacket(packet));
         }
@@ -956,7 +956,7 @@ int main(int argc, char* argv[]){
       UdpPacket packet { .type = CREATE };
       packet.payload.createpacket = CreatePacket { .id = obj.id };
       if (bootStrapperMode){
-        sendUdpPacketToAllUdpClients(netcode, packet);
+        sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
       }else if (isConnectedToServer()){
         sendDataOnUdpSocket(toNetworkPacket(packet));
       }
@@ -975,7 +975,7 @@ int main(int argc, char* argv[]){
       UdpPacket packet { .type = DELETE };
       packet.payload.deletepacket =  DeletePacket { .id = id };
       if (bootStrapperMode){
-        sendUdpPacketToAllUdpClients(netcode, packet);
+        sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
       }else if (isConnectedToServer()){
         sendDataOnUdpSocket(toNetworkPacket(packet));
       }
