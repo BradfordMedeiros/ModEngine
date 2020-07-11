@@ -16,7 +16,7 @@ struct RailNode {
   std::string to;
 };
 struct ActiveRail {
-  short id;
+  objid id;
   std::string rail;
 };
 
@@ -28,8 +28,8 @@ struct RailSystem {
 RailSystem createRailSystem();
 void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std::string nodeTo);
 void removeRail(RailSystem& rails, std::string railName);
-void addEntity(RailSystem& rails, short id, std::string railName);
-void removeEntity(RailSystem& rails, short id);
+void addEntity(RailSystem& rails, objid id, std::string railName);
+void removeEntity(RailSystem& rails, objid id);
 void updateEntities(RailSystem& rails);
 
 std::vector<std::string> railnames(RailSystem& rails);

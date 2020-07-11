@@ -52,7 +52,7 @@ struct RailConnection {
   std::string to;
 };
 struct GameObjectRail {
-  short id;
+  objid id;
   RailConnection connection;
 };
 
@@ -102,26 +102,26 @@ static Field railField {
 
 static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField };
 
-std::map<short, GameObjectObj> getObjectMapping();
+std::map<objid, GameObjectObj> getObjectMapping();
 
 void addObject(
-  short id, 
+  objid id, 
   std::string objectType, 
   std::map<std::string, std::string> additionalFields,
-  std::map<short, GameObjectObj>& mapping, 
+  std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
   std::function<void(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(short id, std::string from, std::string to)> onRail
+  std::function<void(objid id, std::string from, std::string to)> onRail
 );
 
-void removeObject(std::map<short, GameObjectObj>& mapping, short id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail);
+void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail);
 void renderObject(
   GLint shaderProgram, 
-  short id, 
-  std::map<short, GameObjectObj>& mapping,
+  objid id, 
+  std::map<objid, GameObjectObj>& mapping,
   Mesh& nodeMesh,
   Mesh& cameraMesh, 
   bool showDebug, 
@@ -129,13 +129,13 @@ void renderObject(
   bool useBoneTransform
 );
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(short id, std::map<short, GameObjectObj>& mapping);
-std::map<std::string, std::string> objectAttributes(std::map<short, GameObjectObj>& mapping, short id);
-void setObjectAttributes(std::map<short, GameObjectObj>& mapping, short id, std::map<std::string, std::string> attributes);
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping);
+std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id);
+void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std::map<std::string, std::string> attributes);
 
 template<typename T>
-std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){   // putting templates have to be in header?
-  std::vector<short> indicies;
+std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?
+  std::vector<objid> indicies;
   for (auto [id, gameobject]: mapping){
     auto gameobjectP = std::get_if<T>(&gameobject);
     if (gameobjectP != NULL){
@@ -145,10 +145,10 @@ std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping){
   return indicies;
 }
 
-std::vector<short> getGameObjectsIndex(std::map<short, GameObjectObj>& mapping);
-NameAndMesh getMeshesForId(std::map<short, GameObjectObj>& mapping, short id);
-std::vector<std::string> getMeshNames(std::map<short, GameObjectObj>& mapping, short id);
-std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<short, GameObjectObj>& mapping);
-std::map<short, RailConnection> getRails(std::map<short, GameObjectObj>& mapping);
+std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
+NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
+std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
+std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid, GameObjectObj>& mapping);
+std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping);
 
 #endif 

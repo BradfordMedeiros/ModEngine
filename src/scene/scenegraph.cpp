@@ -10,7 +10,7 @@ physicsOpts defaultPhysicsOpts(){
   return defaultOption;
 }
 
-GameObject getGameObject(glm::vec3 position, std::string name, short id, std::string lookat, std::string layer, std::string script, bool netsynchronize){
+GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, bool netsynchronize){
   GameObject gameObject = {
     .id = id,
     .name = name,
@@ -28,7 +28,7 @@ GameObject getGameObject(glm::vec3 position, std::string name, short id, std::st
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short id, short parentId, std::string lookat, std::string layer, std::string script, bool netsynchronize){
+void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, objid id, objid parentId, std::string lookat, std::string layer, std::string script, bool netsynchronize){
   auto gameobjectObj = getGameObject(position, name, id, lookat, layer, script, netsynchronize);
 
   auto gameobjectH = GameObjectH {
@@ -45,7 +45,7 @@ void addObjectToScene(Scene& scene, glm::vec3 position, std::string name, short 
 SceneDeserialization createSceneFromParsedContent(
   ParsedContent parsedContent,  
   std::vector<Field> fields,
-  std::function<short()> getNewObjectId
+  std::function<objid()> getNewObjectId
 ){
   Scene scene;
   auto tokens = parsedContent.tokens;
@@ -54,7 +54,7 @@ SceneDeserialization createSceneFromParsedContent(
 
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
-    short id = getNewObjectId();
+    objid id = getNewObjectId();
     addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.netsynchronize);
     scene.idToGameObjects.at(id).transformation.position = serialObj.position;
     scene.idToGameObjects.at(id).transformation.scale = serialObj.scale;
@@ -86,7 +86,7 @@ SceneDeserialization createSceneFromParsedContent(
 SceneDeserialization deserializeScene(
   std::string content,  
   std::vector<Field> fields,  
-  std::function<short()> getNewObjectId
+  std::function<objid()> getNewObjectId
 ){
   std::cout << "INFO: Deserialization: " << std::endl;
   return createSceneFromParsedContent(parseFormat(content), fields, getNewObjectId);
@@ -94,22 +94,22 @@ SceneDeserialization deserializeScene(
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
-  short rootId, 
-  short rootIdNode, 
-  std::map<short, short> childToParent, 
-  std::map<short, Transformation> gameobjTransforms, 
-  std::map<short, std::string> names,
-  std::map<short, std::map<std::string, std::string>> additionalFields,
-  std::function<short()> getNewObjectId
+  objid rootId, 
+  objid rootIdNode, 
+  std::map<objid, objid> childToParent, 
+  std::map<objid, Transformation> gameobjTransforms, 
+  std::map<objid, std::string> names,
+  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::function<objid()> getNewObjectId
 ){
 
   std::map<std::string, SerializationObject> serialObjs;
-  std::map<short, short> nodeIdToRealId;
+  std::map<objid, objid> nodeIdToRealId;
   for (auto [nodeId, transform] : gameobjTransforms){
     if (nodeId == rootIdNode){
       continue;
     }
-    short id = getNewObjectId();
+    objid id = getNewObjectId();
     nodeIdToRealId[nodeId] = id;
 
     auto layer = scene.idToGameObjects.at(rootId).layer;
@@ -155,7 +155,7 @@ bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }
 
-std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields){
+std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){
     if (gameobjecth.groupId != id){
@@ -225,7 +225,7 @@ SerializationObject  makeObjectInScene(
   std::string mesh, 
   glm::vec3 position, 
   std::string layer,
-  std::function<short()> getNewObjectId,
+  std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 ){
   auto objectId = getNewObjectId();
@@ -258,25 +258,25 @@ SerializationObject  makeObjectInScene(
 }
 
 
-void traverseNodes(Scene& scene, short id, std::function<void(short)> onAddObject){
+void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
   auto parentObjH = scene.idToGameObjectsH.at(id);
   onAddObject(parentObjH.id);
-  for (short id : parentObjH.children){
+  for (objid id : parentObjH.children){
     traverseNodes(scene, id, onAddObject);
   }
 }
 
-std::vector<short> getChildrenIdsAndParent(Scene& scene, short id){
-  std::vector<short> objectIds;
-  auto onAddObject = [&objectIds](short id) -> void {
+std::vector<objid> getChildrenIdsAndParent(Scene& scene, objid id){
+  std::vector<objid> objectIds;
+  auto onAddObject = [&objectIds](objid id) -> void {
     objectIds.push_back(id);
   };
   traverseNodes(scene, id, onAddObject);
   return objectIds;
 }
 
-std::vector<short> removeObjectFromScene(Scene& scene, short id){  // it might make sense to check if any layers here are not present and then 
-  std::vector<short> removedIds;
+std::vector<objid> removeObjectFromScene(Scene& scene, objid id){  // it might make sense to check if any layers here are not present and then 
+  std::vector<objid> removedIds;
   auto objects = getChildrenIdsAndParent(scene, id);
   for (auto id : objects){
     std::string objectName = scene.idToGameObjects.at(id).name;
@@ -289,15 +289,15 @@ std::vector<short> removeObjectFromScene(Scene& scene, short id){  // it might m
   return removedIds;
 }
 
-std::vector<short> listObjInScene(Scene& scene){
-  std::vector<short> allObjects;
+std::vector<objid> listObjInScene(Scene& scene){
+  std::vector<objid> allObjects;
   for (auto const&[id, _] : scene.idToGameObjects){
     allObjects.push_back(id);
   }
   return allObjects;
 }
 
-void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(short, glm::mat4, glm::mat4)> onObject){
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4)> onObject){
   GameObject object = scene.idToGameObjects.at(objectH.id);
   glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
   modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
@@ -307,22 +307,22 @@ void traverseScene(short id, GameObjectH objectH, Scene& scene, glm::mat4 model,
 
   onObject(id, scaledModelMatrix, model);
 
-  for (short id: objectH.children){
+  for (objid id: objectH.children){
     traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject);
   }
 }
 
 struct traversalData {
-  short id;
+  objid id;
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4, bool)> onObject){
+void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
   std::vector<traversalData> datum;
 
   for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
-    short id = scene.rootGameObjectsH.at(i);
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), [&datum](short id, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
+    objid id = scene.rootGameObjectsH.at(i);
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), [&datum](objid id, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
       datum.push_back(traversalData{
         .id = id,
         .modelMatrix = modelMatrix,
@@ -356,10 +356,10 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
 }
 
 // TODO - this does a full traversal, but it really only needs to look at the parent hierarchy
-Transformation fullTransformation(Scene& scene, short id){
+Transformation fullTransformation(Scene& scene, objid id){
   Transformation transformation = {};
   bool foundId = false;
-  traverseScene(scene, [id, &foundId, &transformation](short traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho) -> void {
+  traverseScene(scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho) -> void {
     if (traversedId == id){
       foundId = true;
       transformation = getTransformationFromMatrix(model);
@@ -369,8 +369,8 @@ Transformation fullTransformation(Scene& scene, short id){
   return transformation;
 }
 
-std::vector<short> getIdsInGroup(Scene& scene, short groupId){
-  std::vector<short> ids;
+std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
+  std::vector<objid> ids;
   for (auto [_, gameobj] : scene.idToGameObjectsH){
     if (gameobj.groupId == groupId){
       ids.push_back(gameobj.id);
@@ -379,7 +379,7 @@ std::vector<short> getIdsInGroup(Scene& scene, short groupId){
   return ids;
 }
 
-std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id){
+std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id){
   std::map<std::string, std::string> attributes;
 
   auto gameobj = scene.idToGameObjects.at(id);
@@ -401,7 +401,7 @@ std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id){
   }
   return attributes;
 }
-void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string> attributes){
+void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes){
   GameObject& obj = scene.idToGameObjects.at(id);
 
   if (attributes.find("position") != attributes.end()){

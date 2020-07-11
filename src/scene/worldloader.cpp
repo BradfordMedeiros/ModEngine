@@ -79,7 +79,7 @@ std::string chunkAddressToSceneFile(ChunkAddress chunk){
   return std::string("./res/scenes/chunks/") + std::to_string(chunk.x)  + "." + std::to_string(chunk.y) + "." + std::to_string(chunk.z);
 }
 
-void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, short(*loadScene)(std::string sceneFile), void(*unloadScene)(short sceneId)){
+void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId)){
   loadingInfo.entityPosX = x;
   loadingInfo.entityPosY = y;
   loadingInfo.entityPosZ = z;
@@ -90,7 +90,7 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
   for (auto &chunk : chunkLoading.chunksToUnload){
     std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = chunkAddressToSceneFile(chunk);
-    short sceneId = loadingInfo.sceneFileToId.at(sceneFile);
+    objid sceneId = loadingInfo.sceneFileToId.at(sceneFile);
     std::cout << "INFO: CHUNK MANAGEMENT: want to unload id: " << sceneId << std::endl;
     unloadScene(sceneId);
     loadingInfo.sceneFileToId.erase(sceneFile);

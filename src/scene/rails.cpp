@@ -72,7 +72,7 @@ NextRail nextPosition(
   return rail;
 }
 
-bool entityExists(RailSystem& rails, short id){
+bool entityExists(RailSystem& rails, objid id){
   for (auto entity : rails.activeRails){
     if (entity.id == id){
       return true;
@@ -88,7 +88,7 @@ bool railExists(RailSystem& rails, std::string railName){
   }
   return false;
 }
-void addEntity(RailSystem& rails, short id, std::string railName){
+void addEntity(RailSystem& rails, objid id, std::string railName){
   if(entityExists(rails, id)){
     removeEntity(rails, id);
   }
@@ -98,7 +98,7 @@ void addEntity(RailSystem& rails, short id, std::string railName){
     .rail = railName,
   });
 }
-void removeEntity(RailSystem& rails, short id){
+void removeEntity(RailSystem& rails, objid id){
   if (entityExists(rails, id)){
     std::vector<ActiveRail> newRails;
     for (auto activeRail : rails.activeRails){

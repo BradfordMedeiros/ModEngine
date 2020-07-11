@@ -14,7 +14,7 @@
 #include "./serialization.h"
 
 struct GameObject {
-  short id;
+  objid id;
   std::string name;
   Transformation transformation;
   physicsOpts physicsOptions;
@@ -24,17 +24,17 @@ struct GameObject {
   bool netsynchronize;
 };
 struct GameObjectH {
-  short id;
-  short parentId;
-  std::set<short> children;
-  short groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
+  objid id;
+  objid parentId;
+  std::set<objid> children;
+  objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
 };
 
 struct Scene {
-  std::vector<short> rootGameObjectsH;
-  std::map<short, GameObject> idToGameObjects;
-  std::map<short, GameObjectH> idToGameObjectsH;
-  std::map<std::string, short> nameToId;
+  std::vector<objid> rootGameObjectsH;
+  std::map<objid, GameObject> idToGameObjects;
+  std::map<objid, GameObjectH> idToGameObjectsH;
+  std::map<std::string, objid> nameToId;
   std::vector<LayerInfo> layers;
 };
 
@@ -43,11 +43,11 @@ struct SceneDeserialization {
   std::map<std::string, SerializationObject> serialObjs;
 };
 
-std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(short)> getAdditionalFields);
+std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields);
 SceneDeserialization deserializeScene(
   std::string content, 
   std::vector<Field> fields,
-  std::function<short()> getNewObjectId
+  std::function<objid()> getNewObjectId
 );
 
 SerializationObject makeObjectInScene(
@@ -56,32 +56,32 @@ SerializationObject makeObjectInScene(
   std::string mesh, 
   glm::vec3 position, 
   std::string layer,
-  std::function<short()> getNewObjectId,
+  std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 );
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
-  short rootId,
-  short rootIdNode, 
-  std::map<short, short> childToParent, 
-  std::map<short, Transformation> gameobjTransforms, 
-  std::map<short, std::string> names, 
-  std::map<short, std::map<std::string, std::string>> additionalFields,
-  std::function<short()> getNewObjectId
+  objid rootId,
+  objid rootIdNode, 
+  std::map<objid, objid> childToParent, 
+  std::map<objid, Transformation> gameobjTransforms, 
+  std::map<objid, std::string> names, 
+  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::function<objid()> getNewObjectId
 );
 
-std::vector<short> removeObjectFromScene(Scene& scene, short id);
-std::vector<short> listObjInScene(Scene& scene);
+std::vector<objid> removeObjectFromScene(Scene& scene, objid id);
+std::vector<objid> listObjInScene(Scene& scene);
 
 // @TODO code these functions
-void traverseScene(Scene& scene, std::function<void(short, glm::mat4, glm::mat4, bool)> onObject);  
+void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject);  
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
-Transformation fullTransformation(Scene& scene, short id);
-std::vector<short> getIdsInGroup(Scene& scene, short groupId);
+Transformation fullTransformation(Scene& scene, objid id);
+std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 
-std::map<std::string, std::string> scenegraphAttributes(Scene& scene, short id);
-void setScenegraphAttributes(Scene& scene, short id, std::map<std::string, std::string> attributes);
+std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);
+void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes);
 
 #endif
