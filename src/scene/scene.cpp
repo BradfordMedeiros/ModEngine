@@ -9,7 +9,7 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
 }
 
-void dumpPhysicsInfo(std::map<short, btRigidBody*>& rigidbodys){
+void dumpPhysicsInfo(std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     std::cout << "PHYSICS:" << std::to_string(i) << ":" <<  print(getPosition(rigidBody));
   }
@@ -27,7 +27,7 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes
   return boundings.at(0);
 }
 
-NameAndMesh getMeshesForGroupId(World& world, short groupId){
+NameAndMesh getMeshesForGroupId(World& world, objid groupId){
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
   NameAndMesh nameAndMeshes = {
@@ -44,7 +44,7 @@ NameAndMesh getMeshesForGroupId(World& world, short groupId){
   return nameAndMeshes;
 }
 
-short getGameObjectByName(World& world, std::string name){
+objid getGameObjectByName(World& world, std::string name){
   for (int i = 0; i < world.scenes.size(); i++){
     for (auto [id, gameObj]: world.scenes.at(i).idToGameObjects){
       if (gameObj.name == name){
@@ -56,7 +56,7 @@ short getGameObjectByName(World& world, std::string name){
 }
 
 
-PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, short index){   // should be "for group id"
+PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, objid index){   // should be "for group id"
   GameObject obj = scene.idToGameObjects.at(index);
   auto gameObjV = world.objectMapping.at(index); 
 
@@ -110,7 +110,7 @@ struct GroupPhysicsInfo {
   physicsOpts physicsOptions;
 };
 
-GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, short id){
+GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
   auto groupId = scene.idToGameObjectsH.at(id).groupId;
   bool isRoot = groupId == id;
   if (!isRoot){
@@ -129,7 +129,7 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, short id){
 
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale){
+void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, scene, id);
   btRigidBody* rigidBody = NULL;
 
@@ -193,14 +193,14 @@ void addPhysicsBody(World& world, Scene& scene, short id, glm::vec3 initialScale
     world.rigidbodys[id] = rigidBody;   
   }
 }
-void rmRigidBody(World& world, short id){
+void rmRigidBody(World& world, objid id){
   auto rigidBodyPtr = world.rigidbodys.at(id);
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
   world.rigidbodys.erase(id);
 }
 
-void updatePhysicsBody(World& world, Scene& scene, short id){
+void updatePhysicsBody(World& world, Scene& scene, objid id){
   auto rigidBody = world.rigidbodys.at(id);
   assert(rigidBody != NULL);
   glm::vec3 oldScale = getScale(rigidBody);
@@ -215,7 +215,7 @@ void addPhysicsBodies(World& world, Scene& scene){
   }
 }
 
-short getIdForCollisionObject(World& world, const btCollisionObject* body){
+objid getIdForCollisionObject(World& world, const btCollisionObject* body){
   for (auto const&[id, rigidbody] : world.rigidbodys){
     if (rigidbody == body){
       return id;
@@ -248,7 +248,7 @@ World createWorld(
   collisionPairFn onObjectLeave, 
   std::function<void(GameObject&)> onObjectUpdate,  
   std::function<void(GameObject&)> onObjectCreate, 
-  std::function<void(short)> onObjectDelete, 
+  std::function<void(objid)> onObjectDelete, 
   btIDebugDraw* debugDrawer
 ){
   auto objectMapping = getObjectMapping();
@@ -271,14 +271,14 @@ World createWorld(
   return world;
 }
 
-static short sceneId = -1;
-short getSceneId(){
+static objid sceneId = -1;
+objid getSceneId(){
   sceneId++;
   return sceneId;
 }
 
-std::map<short, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
-  std::map<short, std::map<std::string, std::string>> additionalFieldsMap;
+std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
+  std::map<objid, std::map<std::string, std::string>> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
     std::map<std::string, std::string> emptyFields;
     additionalFieldsMap[nodeId] = emptyFields;
@@ -317,12 +317,12 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
 }
 
 
-glm::vec3 positionFromScene(Scene& scene, short id){
+glm::vec3 positionFromScene(Scene& scene, objid id){
   return scene.idToGameObjects.at(id).transformation.position;
 } 
 
 // Need to take account proper dimensions of the mesh used obj -> should be derivable from mesh boundInfo
-void setRailSizing(Scene& scene, BoundInfo info, short id, std::string from, std::string to){
+void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std::string to){
   auto zLength = info.zMax - info.zMin;
   auto fromPosition = positionFromScene(scene, scene.nameToId.at(from));
   auto toPosition = positionFromScene(scene, scene.nameToId.at(to));
@@ -337,7 +337,7 @@ void setRailSizing(Scene& scene, BoundInfo info, short id, std::string from, std
   obj.transformation.rotation = orientation;
 
 }
-void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<short()> getId){
+void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
   for (auto [_, serialObj] : serialObjs){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
@@ -388,7 +388,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(sceneId), id);
       },
-      [&world, &scene](short id, std::string from, std::string to) -> void {
+      [&world, &scene](objid id, std::string from, std::string to) -> void {
         addRail(world.rails, scene.idToGameObjects.at(id).name, from, to);
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
@@ -397,15 +397,15 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
   }
 }
 
-std::string serializeScene(World& world, short sceneId){
+std::string serializeScene(World& world, objid sceneId){
   std::cout << "scene size: " << world.scenes.size() << std::endl;
   Scene& scene = world.scenes.at(sceneId);
-  return serializeScene(scene, [&world](short objectId)-> std::vector<std::pair<std::string, std::string>> {
+  return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping);
   });
 }
 
-short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   auto sceneId = getSceneId();
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
@@ -422,12 +422,12 @@ short addSceneToWorldFromData(World& world, std::string sceneData, std::function
   }
   return sceneId;
 }
-short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   return addSceneToWorldFromData(world, loadFile(sceneFile), loadClip, loadScript);
 }
 
 
-void removeObjectById(World& world, short objectId, std::function<void(std::string)> unloadClip){
+void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId);
     assert(rigidBody != NULL);
@@ -444,7 +444,7 @@ void removeObjectById(World& world, short objectId, std::function<void(std::stri
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
   std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
 }
-void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip){
+void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip){
   if (world.scenes.find(sceneId) == world.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
@@ -457,7 +457,7 @@ void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::s
   world.scenes.erase(sceneId);
 }
 void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip){
-  std::vector<short> sceneIds; 
+  std::vector<objid> sceneIds; 
   for (auto [sceneId, _] : world.scenes){
     sceneIds.push_back(sceneId);
   }
@@ -466,10 +466,10 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
   }
 }
 
-int addObjectToScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript){
+objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
-  std::vector<short> idsAdded;
-  auto getId = [&idsAdded]() -> short {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+  std::vector<objid> idsAdded;
+  auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
     auto newId = getUniqueObjId();
     idsAdded.push_back(newId);
     return newId;
@@ -503,7 +503,9 @@ int addObjectToScene(World& world, short sceneId, std::string name, std::string 
   world.onObjectCreate(gameobj);
   return gameobjId;
 }
-void removeObjectFromScene(World& world, short objectId, std::function<void(std::string)> unloadClip){  // this needs to also delete all children objects. 
+
+// this needs to also delete all children objects. 
+void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip){  
   Scene& scene = world.scenes.at(world.idToScene.at(objectId));
   auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
   for (auto gameobjId : getIdsInGroup(scene, groupId)){
@@ -517,7 +519,7 @@ void removeObjectFromScene(World& world, short objectId, std::function<void(std:
   }
 }
 
-void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled){
+void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
 
   const int SPEED = 5;
@@ -537,7 +539,7 @@ void physicsTranslate(World& world, short index, float x, float y, float z, bool
     setPosition(body, newPosition);
   }
 }
-void physicsTranslateSet(World& world, short index, glm::vec3 pos){
+void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   scene.idToGameObjects.at(index).transformation.position = pos;
 
@@ -547,7 +549,7 @@ void physicsTranslateSet(World& world, short index, glm::vec3 pos){
   }
 }
 
-void physicsRotate(World& world, short index, float x, float y, float z){
+void physicsRotate(World& world, objid index, float x, float y, float z){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   glm::quat rotation = setFrontDelta(scene.idToGameObjects.at(index).transformation.rotation, x, y, z, 5);
   scene.idToGameObjects.at(index).transformation.rotation  = rotation;
@@ -557,7 +559,7 @@ void physicsRotate(World& world, short index, float x, float y, float z){
     setRotation(body, rotation);
   }
 }
-void physicsRotateSet(World& world, short index, glm::quat rotation){
+void physicsRotateSet(World& world, objid index, glm::quat rotation){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   scene.idToGameObjects.at(index).transformation.rotation = rotation;
 
@@ -568,7 +570,7 @@ void physicsRotateSet(World& world, short index, glm::quat rotation){
 }
 
 
-void physicsScale(World& world, short index, float x, float y, float z){
+void physicsScale(World& world, objid index, float x, float y, float z){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto oldScale = scene.idToGameObjects.at(index).transformation.scale;
   glm::vec3 newScale = glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z);
@@ -580,7 +582,7 @@ void physicsScale(World& world, short index, float x, float y, float z){
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
 }
-void physicsScaleSet(World& world, short index, glm::vec3 scale){
+void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   scene.idToGameObjects.at(index).transformation.scale = scale;
 
@@ -591,7 +593,7 @@ void physicsScaleSet(World& world, short index, glm::vec3 scale){
   }
 }
 
-void applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
+void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newPosition = applyTranslation(position, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.position = newPosition;
@@ -602,7 +604,7 @@ void applyPhysicsTranslation(World& world, short index, glm::vec3 position, floa
   }
 }
 
-void applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
+void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.rotation = newRotation;
@@ -613,7 +615,7 @@ void applyPhysicsRotation(World& world, short index, glm::quat currentOrientatio
   }
 }
 
-void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
+void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
   auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
   scene.idToGameObjects.at(index).transformation.scale = newScale;
@@ -625,7 +627,7 @@ void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec
   }
 }
 
-void updatePhysicsPositionsAndClampVelocity(World& world, std::map<short, btRigidBody*>& rigidbodys){
+void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     auto sceneId = world.idToScene.at(i);
 
@@ -645,7 +647,7 @@ void enforceLookAt(World& world){
         continue;
       }
       if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
-        short lookatId = scene.nameToId.at(lookAt);
+        objid lookatId = scene.nameToId.at(lookAt);
         glm::vec3 fromPos = gameobj.transformation.position;
         glm::vec3 targetPosition = scene.idToGameObjects.at(lookatId).transformation.position;
         gameobj.transformation.rotation =  orientationFromPos(fromPos, targetPosition);;
@@ -698,7 +700,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
   callbackEntities(world);
 }
 
-std::map<std::string, std::string> getAttributes(World& world, short id){
+std::map<std::string, std::string> getAttributes(World& world, objid id){
   // @TODO handle types better
   std::map<std::string, std::string> attr;
   auto objAttrs = objectAttributes(world.objectMapping, id);
@@ -723,23 +725,23 @@ std::map<std::string, std::string> extractAttributes(std::map<std::string, std::
   return attrToSet;
 }
 
-void setAttributes(World& world, short id, std::map<std::string, std::string> attr){
+void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
   // @TODO create complete lists for attributes. 
   setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
   setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
 }
 
-bool idInGroup(World& world, short id, short groupId){
+bool idInGroup(World& world, objid id, objid groupId){
   return groupId == world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
 }
-bool idExists(World& world, short id){
+bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
 }
 
-std::string getDotInfoForNode(std::string nodeName, int nodeId, short groupId, std::vector<std::string> meshes){
+std::string getDotInfoForNode(std::string nodeName, int nodeId, objid groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }
-std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping){
+std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& objectMapping){
   std::string graph = "";
   std::string prefix = "strict graph {\n";
   std::string suffix = "}"; 

@@ -13,18 +13,18 @@
 
 struct World {
   physicsEnv physicsEnvironment;
-  std::map<short, btRigidBody*> rigidbodys;
-  std::map<short, GameObjectObj> objectMapping;
+  std::map<objid, btRigidBody*> rigidbodys;
+  std::map<objid, GameObjectObj> objectMapping;
   std::map<std::string, Mesh> meshes;
   std::map<std::string, Texture> textures;
-  std::map<short, std::vector<Animation>> animations;
-  std::map<short, Scene> scenes;
-  std::map<short, short> idToScene;
+  std::map<objid, std::vector<Animation>> animations;
+  std::map<objid, Scene> scenes;
+  std::map<objid, objid> idToScene;
   std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
   RailSystem rails;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
-  std::function<void(short)> onObjectDelete;
+  std::function<void(objid)> onObjectDelete;
 };
 
 struct PhysicsInfo {
@@ -38,41 +38,41 @@ World createWorld(
   collisionPairFn onObjectLeave, 
   std::function<void(GameObject&)> onObjectUpdate, 
   std::function<void(GameObject&)> onObjectCreate,
-  std::function<void(short)> onObjectDelete,
+  std::function<void(objid)> onObjectDelete,
   btIDebugDraw* debugDrawer
 );
 Texture loadTextureWorld(World& world, std::string texturepath);
 
-short addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
-short addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
-void removeSceneFromWorld(World& world, short sceneId, std::function<void(std::string)> unloadClip);
+objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
+objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
+void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip);
 void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip);
 
-int addObjectToScene(World& world, short sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, short)> loadScript);
-void removeObjectFromScene(World& world, short id, std::function<void(std::string)> unloadClip);
+objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
+void removeObjectFromScene(World& world, objid id, std::function<void(std::string)> unloadClip);
 
-std::string serializeScene(World& world, short sceneId);
+std::string serializeScene(World& world, objid sceneId);
 
-void physicsTranslate(World& world, short index, float x, float y, float z, bool moveRelativeEnabled);
-void physicsTranslateSet(World& world, short index, glm::vec3 pos);
-void physicsRotate(World& world, short index, float x, float y, float z);
-void physicsRotateSet(World& world, short index, glm::quat rotation);  // this sets to rotation
-void physicsScale(World& world, short index, float x, float y, float z);
-void physicsScaleSet(World& world, short index, glm::vec3 scale);
-void applyPhysicsTranslation(World& world, short index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
-void applyPhysicsRotation(World& world, short index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
-void applyPhysicsScaling(World& world, short index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
+void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled);
+void physicsTranslateSet(World& world, objid index, glm::vec3 pos);
+void physicsRotate(World& world, objid index, float x, float y, float z);
+void physicsRotateSet(World& world, objid index, glm::quat rotation);  // this sets to rotation
+void physicsScale(World& world, objid index, float x, float y, float z);
+void physicsScaleSet(World& world, objid index, glm::vec3 scale);
+void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
-short getIdForCollisionObject(World& world,  const btCollisionObject* body);
-NameAndMesh getMeshesForGroupId(World& world, short id);
-short getGameObjectByName(World& world, std::string name);
+objid getIdForCollisionObject(World& world,  const btCollisionObject* body);
+NameAndMesh getMeshesForGroupId(World& world, objid id);
+objid getGameObjectByName(World& world, std::string name);
 
-std::map<std::string, std::string> getAttributes(World& world, short id);
-void setAttributes(World& world, short id, std::map<std::string, std::string> attr);
-bool idInGroup(World& world, short id, short groupId);
-bool idExists(World& world, short id);
+std::map<std::string, std::string> getAttributes(World& world, objid id);
+void setAttributes(World& world, objid id, std::map<std::string, std::string> attr);
+bool idInGroup(World& world, objid id, objid groupId);
+bool idExists(World& world, objid id);
 
-std::string scenegraphAsDotFormat(Scene& scene, std::map<short, GameObjectObj>& objectMapping);
+std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& objectMapping);
 
 void updateEntities(World& world);
 

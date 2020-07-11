@@ -158,6 +158,10 @@ int maxvalue(int x, int y, int z){
 }
 
 
+// Chance of collision for id is 
+// (n^2) / (2^k) 
+// n = number of objects
+// k = number of bits
 static objid objIdIndex = -1;
 objid getUniqueObjId(){
   objIdIndex++;
