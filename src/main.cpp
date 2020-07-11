@@ -1037,7 +1037,8 @@ int main(int argc, char* argv[]){
     }
 
     if (bootStrapperMode){
-      tickNetCode(netcode);
+      UdpPacket packet { };
+      tickNetCode(netcode, toNetworkPacket(packet));
     }
 
     if (state.useDefaultCamera || activeCameraObj == NULL){

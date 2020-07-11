@@ -13,6 +13,35 @@
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 
+enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
+struct CreatePacket {
+  short id;
+};
+struct DeletePacket {
+  short id;
+};
+struct UpdatePacket {
+  short id;
+};
+
+// @TODO this should optimize so only send the size necessary, not max size since scnee file needs to be larger
+struct LoadPacket {
+  char sceneData[4000]; // this makes every message 4k, which is probably way bigger than each packet needs to be, optimize this
+};
+union PacketPayload {
+  CreatePacket createpacket;
+  DeletePacket deletepacket;
+  UpdatePacket updatepacket;
+  LoadPacket loadpacket;
+};
+struct UdpPacket {
+  PacketType type;
+  PacketPayload payload;
+};
+
+NetworkPacket toNetworkPacket(UdpPacket& packet);
+
+
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
 // Should trim down when it becomes clear what the core api should.

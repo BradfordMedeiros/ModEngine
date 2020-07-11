@@ -107,7 +107,7 @@ void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& ud
   });
 }
 
-void sendUdpPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
+void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
   std::cout << "INFO: NETWORK: sending data to all except: " << excludeConnectionHash << " num connections: " << udpConnections.size() << std::endl;
   for (auto [connectHash, addr] : udpConnections){
     std::cout << "INFO: NETWORKING: sending udp datagram to " << connectHash << std::endl;
@@ -134,10 +134,9 @@ NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::fun
   };
   return netcode;
 }
-void tickNetCode(NetCode& netcode){
+void tickNetCode(NetCode& netcode, NetworkPacket packet){
   processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
-  UdpPacket packet {};
-  UdpSocketData response = getDataFromUdpSocket(netcode.udpModsocket.socketFd, &packet, sizeof(packet));
+  UdpSocketData response = getDataFromUdpSocket(netcode.udpModsocket.socketFd, packet.packet, packet.packetSize);
   if (response.hasData){
     std::cout << "INFO: TICK NETCODE: got data" << std::endl;
     auto hash = getConnectionHash(getIpAddressFromSocketIn(response.socketin), getPortFromSocketIn(response.socketin));
@@ -147,5 +146,5 @@ void tickNetCode(NetCode& netcode){
 
 void sendUdpPacketToAllUdpClients(NetCode& netcode, NetworkPacket data){
   std::string value = "";
-  sendUdpPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, value);
+  sendNetworkPacketUpdateToAllExcept(netcode.udpModsocket.socketFd, data, netcode.udpConnections, value);
 }

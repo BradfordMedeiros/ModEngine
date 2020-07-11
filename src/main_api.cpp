@@ -16,6 +16,13 @@ extern std::string rawSceneFile;
 extern bool bootStrapperMode;
 extern NetCode netcode;
 
+NetworkPacket toNetworkPacket(UdpPacket& packet){
+  NetworkPacket netpacket {
+    .packet = &packet,
+    .packetSize = sizeof(packet),
+  };
+  return netpacket;
+}
 
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
