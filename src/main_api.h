@@ -76,5 +76,6 @@ void unattachFromRail(short id);
 double timeSeconds();
 
 void sendDataUdp(std::string data);
+void connectServer(std::string server);
 
 #endif

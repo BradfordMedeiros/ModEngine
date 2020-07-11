@@ -22,7 +22,7 @@
 #include "./network.h"
 
 std::map<std::string, std::string> listServers();
-void connectServer(std::string server);
+void connectServer(std::string server, NetworkPacket connectPacket);
 void disconnectServer();
 bool isConnectedToServer();
 

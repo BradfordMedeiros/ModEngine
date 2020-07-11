@@ -263,10 +263,16 @@ double timeSeconds(){
   return now;
 }
 
-
 void sendDataUdp(std::string data){
   UdpPacket packet {
     .type = CREATE,
   };
   sendDataOnUdpSocket(toNetworkPacket(packet));
+}
+
+void connectServer(std::string data){
+  UdpPacket setupPacket = {
+    .type = SETUP,
+  };  
+  connectServer(data, toNetworkPacket(setupPacket));
 }
