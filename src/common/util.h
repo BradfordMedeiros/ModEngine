@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <sstream>
 #include <glm/gtc/quaternion.hpp>
+#include <stdlib.h>    
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);

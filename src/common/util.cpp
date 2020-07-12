@@ -157,14 +157,35 @@ int maxvalue(int x, int y, int z){
   return z;
 }
 
-
 // Chance of collision for id is 
 // (n^2) / (2^k) 
 // n = number of objects
 // k = number of bits
-static objid objIdIndex = -1;
-objid getUniqueObjId(){
-  objIdIndex++;
-  return objIdIndex;
+
+// Generates a uuid of size bits(objid) - 1 (doesn't use the highest bit). 
+// Probably not very random
+
+// Currently 
+// (n ^ 2) / (2 ^16)
+// n^2 / 65536
+
+// WARNING: this will probably collide, but let's actually hit it and accept the short for now.
+// 10000 objects => 15% chance of collision
+static bool seeded = false;
+objid getUniqueObjId(){   
+  if (!seeded){
+    srand(time(NULL));
+    seeded = true;
+  }
+
+  int numBits = sizeof(objid) * 8;
+  objid randId = 0;
+
+  for (int i = 0; i < (numBits - 1); i++){   // -1 so always produces positive value.  Wastes 1 bit of space for unsigned values
+    auto randomValue = rand() % 2; 
+    bool bitHigh = randomValue > 0;
+    randId =  randId | (bitHigh << i);
+  }
+  return randId;
 }
 
