@@ -256,7 +256,7 @@ void selectItem(){
     return;
   }
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-  auto selectedId = getIdFromColor(pixelColor.r, pixelColor.g, pixelColor.b);
+  auto selectedId = getIdFromColor(pixelColor);
 
   if (world.idToScene.find(selectedId) == world.idToScene.end()){
     std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
@@ -570,7 +570,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     
     GameObject object = scene.idToGameObjects.at(id);
     bool objectSelected = idInGroup(world, id, state.selectedIndex);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object, useSelectionColor, objectSelected)));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object.id, useSelectionColor, objectSelected)));
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));

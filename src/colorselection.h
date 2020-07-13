@@ -3,7 +3,7 @@
 #include <math.h>     
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include "./scene/scenegraph.h"
+#include "./common/util.h"
 
 struct Color {
   GLfloat r;
@@ -12,7 +12,7 @@ struct Color {
 };
 
 Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight);
-glm::vec3 getColorFromGameobject(GameObject object, bool useSelectionColor, bool isSelected);
-unsigned int getIdFromColor(float r, float g, float b);
+glm::vec3 getColorFromGameobject(objid id, bool useSelectionColor, bool isSelected);
+unsigned int getIdFromColor(Color color);
 
 #endif

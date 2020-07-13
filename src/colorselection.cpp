@@ -6,18 +6,28 @@ Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight) {
     return color;
 }
 
-glm::vec3 getColorFromGameobject(GameObject object, bool useSelectionColor, bool isSelected){
+glm::vec3 getColorFromGameobject(objid id, bool useSelectionColor, bool isSelected){
   if (isSelected){
     return glm::vec3(1.0f, 0.0f, 0.0f);
   }
   if (!useSelectionColor){
     return glm::vec3(1.0f, 1.0f, 1.0f);
   }
-  float blueChannel = object.id * 0.01;
-  return glm::vec3(0.0f, 0.0f, blueChannel);
+
+  int redChannel = id % 255;
+  int greenChannel = (id / 255) % 255;
+  int blueChannel = (id / (255 * 255)) % (255 * 255); // so order of 255^3 ~ 16581375
+
+  int sumValue = redChannel + (greenChannel * 255) + (blueChannel * 255 * 255);
+  assert(blueChannel < 255);
+  assert(sumValue == id);
+
+  // since the max value of r/g/b should be 255, this needs a resolution of 1/255.f which is 
+  // 0.00392156862745098 which should be fine. Still kind of hackey feeling
+  return glm::vec3(redChannel / 255.f, greenChannel / 255.f, blueChannel / 255.f);
 }
 
-unsigned int getIdFromColor(float r, float g, float b){
-  short objectId = round(b / 0.01);
+unsigned int getIdFromColor(Color color){
+  short objectId = 255 * (color.r + (color.g * 255) + (color.b * 255 * 255));
   return objectId;
 }
