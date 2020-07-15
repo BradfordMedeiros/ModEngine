@@ -730,10 +730,12 @@ void onUdpClientMessage(UdpPacket packet){
     std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
     assert(newObjId == id);
   }else if (packet.type == DELETE){
-    std::cout << "udp create placeholder" << std::endl;
     auto deletep = packet.payload.deletepacket;
     if (idExists(world, deletep.id)){
+      std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
       removeObjectById(deletep.id);
+    }else{
+      std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
     }
   }else if (packet.type == SETUP){
     std::cout << "packet setup (noop)" << std::endl;
@@ -964,7 +966,6 @@ int main(int argc, char* argv[]){
     },
     [](short id) -> void {
       std::cout << "deleted obj id: " << id << std::endl;
-
       if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
         activeCameraObj = NULL;
         std::cout << "active camera reset" << std::endl;
