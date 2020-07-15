@@ -343,6 +343,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
     auto type = serialObj.type;
     auto additionalFields = serialObj.additionalFields;
 
+    assert(world.idToScene.find(id) == world.idToScene.end());
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
@@ -466,11 +467,19 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
   }
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
   std::vector<objid> idsAdded;
-  auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = getUniqueObjId();
+  
+  int numIdsGenerated = 0;
+  auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+    auto newId = -1;
+    if (numIdsGenerated == 0 && useObjId){
+      newId = id;
+    }else{
+      newId = getUniqueObjId();
+    }
+    numIdsGenerated++;
     idsAdded.push_back(newId);
     return newId;
   };
