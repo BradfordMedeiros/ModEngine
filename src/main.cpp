@@ -723,9 +723,10 @@ void onUdpClientMessage(UdpPacket packet){
     auto create = packet.payload.createpacket;
     auto id = create.id;    // currently id just verifies that the object has the same id as the create, but it really needs to allow the creation to be done out of order via some uuid function
     if (idExists(world, id)){
-      return;
+      std::cout << "id already exits: " << id << std::endl;
+      assert(false);
     }
-    auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, 5, 0); // this assumes always beingm made in scene 0
+    auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, 5, 0, id, true); // this assumes always beingm made in scene 0
     std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
     assert(newObjId == id);
   }else if (packet.type == DELETE){
