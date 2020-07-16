@@ -10,7 +10,7 @@
 (define (create-player name)
   (let ((objectid (mk-obj name "./res/models/box/box.obj" (list (* 10 (length players)) 0 0))))
     (set! players (cons (cons name objectid) players))
-    (display (string-append "player created: " name))
+    (display (string-append "player created: " name "\n"))
   )
 )
 
@@ -22,6 +22,7 @@
 
 (define (on-player-join connection-hash)
   (create-player connection-hash)
+  (send-load-scene 0)     ; obviously forcing a load scene to all clients for each connection is jank
 )
 (define (on-player-leave connection-hash)
   (delete-player connection-hash)
@@ -61,13 +62,13 @@
   (if (and (= key 257) (= action 1))
     (send-tcp "test message 1")
   )
-  (if (and (= key 67) (= action 1))  ; c
+  (if (and (= key 46) (= action 1))  ; .
     (begin
       (display "connect server\n")
       (connect-server (car (list-servers)))
     )
   )
-  (if (and (= key 88) (= action 1))   ; x 
+  (if (and (= key 44) (= action 1))   ; ,
     (begin
       (display "disconnect server \n")
       (disconnect-server)
