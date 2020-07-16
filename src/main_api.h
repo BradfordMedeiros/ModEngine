@@ -59,7 +59,7 @@ short loadScene(std::string sceneFile);
 short loadSceneData(std::string sceneData);
 void unloadScene(short sceneId);
 void unloadAllScenes();
-void saveScene();
+void saveScene(bool includeIds);
 std::vector<short> listScenes();
 void sendLoadScene(short sceneId);
 

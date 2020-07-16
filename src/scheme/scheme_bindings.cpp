@@ -363,9 +363,9 @@ double (*_timeSeconds)();
 SCM scmTimeSeconds(){
   return scm_from_double(_timeSeconds());
 }
-void (*_saveScene)();
-SCM scmSaveScene(){
-  _saveScene();
+void (*_saveScene)(bool includeIds);
+SCM scmSaveScene(SCM includeIds){
+  _saveScene(includeIds == SCM_UNDEFINED ? false : scm_to_bool(includeIds));
   return SCM_UNSPECIFIED;
 }
 
@@ -555,7 +555,7 @@ void defineFunctions(){
   scm_c_define_gsubr("unattach-rail", 1, 0, 0, (void*)scmUnattachFromRail);
 
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
-  scm_c_define_gsubr("save-scene", 0, 0, 0, (void*)scmSaveScene);
+  scm_c_define_gsubr("save-scene", 0, 1, 0, (void*)scmSaveScene);
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
   scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
@@ -601,7 +601,7 @@ void createStaticSchemeBindings(
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
-  void (*saveScene)(),
+  void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
   void (*connectServer)(std::string server),
   void (*disconnectServer)(),

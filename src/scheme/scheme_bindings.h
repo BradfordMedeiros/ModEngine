@@ -46,7 +46,7 @@ void createStaticSchemeBindings(
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
-  void (*saveScene)(),
+  void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
   void (*connectServer)(std::string server),
   void (*disconnectServer)(),

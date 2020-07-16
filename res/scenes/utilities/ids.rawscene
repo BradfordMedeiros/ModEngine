@@ -1,0 +1,11 @@
+# Generated scene 
+platform2:id:19253
+platform2:position:0.000000 -5.000000 0.000000
+platform2:scale:100.000000 1.000000 100.000000
+platform2:rotation:0.000000 0.316815 -5.241593
+platform2:mesh:./res/models/box/box.obj
+platform:id:26666
+platform:position:0.000000 -5.000000 0.000000
+platform:scale:100.000000 1.000000 100.000000
+platform:rotation:0.000000 0.000000 -3.141593
+platform:mesh:./res/models/box/box.obj
