@@ -109,7 +109,7 @@ void sendLoadScene(short id){
     assert(false);
   }
 
-  std::string sceneData = serializeScene(world, id);
+  std::string sceneData = serializeScene(world, id, true);
   UdpPacket packet { .type = LOAD };
   auto data = sceneData.c_str();
   LoadPacket loadpacket {};
