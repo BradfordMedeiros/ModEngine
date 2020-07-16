@@ -39,6 +39,8 @@ struct Field {
 };
 
 struct SerializationObject {
+  bool hasId;
+  int id;
   std::string name;
   glm::vec3 position;
   glm::vec3 scale;

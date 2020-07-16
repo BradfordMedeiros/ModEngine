@@ -398,12 +398,12 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
   }
 }
 
-std::string serializeScene(World& world, objid sceneId){
+std::string serializeScene(World& world, objid sceneId, bool includeIds){
   std::cout << "scene size: " << world.scenes.size() << std::endl;
   Scene& scene = world.scenes.at(sceneId);
   return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping);
-  });
+  }, includeIds);
 }
 
 objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){

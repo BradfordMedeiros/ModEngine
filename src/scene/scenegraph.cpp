@@ -54,7 +54,7 @@ SceneDeserialization createSceneFromParsedContent(
 
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
-    objid id = getNewObjectId();
+    objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
     addObjectToScene(scene, glm::vec3(1.f, 1.f, 1.f), serialObj.name, id, -1, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.netsynchronize);
     scene.idToGameObjects.at(id).transformation.position = serialObj.position;
     scene.idToGameObjects.at(id).transformation.scale = serialObj.scale;
@@ -155,7 +155,7 @@ bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }
 
-std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields){
+std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, gameobjecth]: scene.idToGameObjectsH){
     if (gameobjecth.groupId != id){
@@ -170,6 +170,9 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
       }
     }
 
+    if (includeIds){
+      sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
+    }
     if (!isDefaultPosition(gameobject.transformation.position)){
       sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
     }

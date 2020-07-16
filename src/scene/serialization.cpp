@@ -107,6 +107,8 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .maxspeed = -1.f,
   };
   SerializationObject newObject {
+    .hasId = false,
+    .id = -1,
     .name = name,
     .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
@@ -150,6 +152,11 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       }
       objects.at(token.target).hasParent = true;
       objects.at(token.target).parentName = token.payload;
+    }
+
+    if (token.attribute == "id"){
+      objects.at(token.target).id = std::atoi(token.payload.c_str());   
+      objects.at(token.target).hasId = true;
     }
     if (token.attribute == "position"){
       objects.at(token.target).position = parseVec(token.payload);
