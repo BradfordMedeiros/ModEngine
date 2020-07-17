@@ -111,7 +111,7 @@ udpSetup setupUdp(){
   return setup;
 }
 
-void connectServer(std::string server, NetworkPacket connectPacket){
+void connectServer(std::string server, std::function<NetworkPacket(std::string)> getConnectPacket){
   assert(!isConnected);
 
   auto serverAddress = listServers().at(server);
@@ -131,7 +131,7 @@ void connectServer(std::string server, NetworkPacket connectPacket){
   currentServerIp = serverAddress;
 
   // This is hackey, but needed b/c the server only sends data if the client has first sent a udp message.  Probably should formalize this better.
-  sendDataOnUdpSocket(connectPacket);
+  sendDataOnUdpSocket(getConnectPacket(response.connectionHash));
 }
 
 void disconnectServer(){

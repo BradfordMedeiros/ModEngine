@@ -278,8 +278,19 @@ void sendDataUdp(std::string data){
 }
 
 void connectServer(std::string data){
-  UdpPacket setupPacket = {
+  UdpPacket setup = {
     .type = SETUP,
   };  
-  connectServer(data, toNetworkPacket(setupPacket));
+
+  SetupPacket setupPacket {};
+  auto packet = toNetworkPacket(setup);
+
+  connectServer(data, [&setup, &setupPacket, &packet](std::string connectionHash) -> NetworkPacket {
+    auto data = connectionHash.c_str();
+    assert((sizeof(data) + 1 ) < sizeof(setupPacket.connectionHash));
+    strncpy(setupPacket.connectionHash, data, sizeof(setupPacket.connectionHash));
+    assert(setupPacket.connectionHash[sizeof(setupPacket.connectionHash) -1] == '\0');
+    setup.payload.setuppacket = setupPacket;
+    return packet;
+  });
 }
