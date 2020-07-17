@@ -66,7 +66,7 @@ void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& ud
    
       if (tserver.connections.find(connectionHash) == tserver.connections.end()){
         std::cout << "INFO: connection hash: " << connectionHash << std::endl;
-        response = "ack";
+        response = connectionHash;
         tserver.connections[connectionHash] = connectionInfo;
         onPlayerConnected(connectionHash);
       }else{

@@ -75,13 +75,20 @@ void sendDataOnUdpSocket(NetworkPacket packet){
   }
 }
 
-int connectTcp(std::string serverAddress){
+struct connectResponse {
+  int sockFd;
+  std::string connectionHash;
+};
+connectResponse connectTcp(std::string serverAddress){
   auto sockFd = socketConnection(serverAddress, 8000);
   sendMessageWithConnection(sockFd, "connect");
   auto response = readMessageWithConnection(sockFd);
-  std::cout << "response is: " << response << std::endl;
-  assert(response == "ack");
-  return sockFd;
+  assert(response != "nack");
+  connectResponse resp {
+    .sockFd = sockFd,
+    .connectionHash = response,
+  };
+  return resp;
 }
 
 udpSetup setupUdp(){
@@ -110,7 +117,9 @@ void connectServer(std::string server, NetworkPacket connectPacket){
   auto serverAddress = listServers().at(server);
 
   // TCP Connection 
-  currentSocket = connectTcp(serverAddress);
+  auto response = connectTcp(serverAddress);
+  currentSocket = response.sockFd;
+  std::cout << "connect hash is: " << response.connectionHash << std::endl;
 
   setup = setupUdp();
 
