@@ -134,7 +134,7 @@ NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::fun
   };
   return netcode;
 }
-void tickNetCode(NetCode& netcode, NetworkPacket packet){
+bool tickNetCode(NetCode& netcode, NetworkPacket& packet){
   processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
   UdpSocketData response = getDataFromUdpSocket(netcode.udpModsocket.socketFd, packet.packet, packet.packetSize);
   if (response.hasData){
@@ -142,6 +142,7 @@ void tickNetCode(NetCode& netcode, NetworkPacket packet){
     auto hash = getConnectionHash(getIpAddressFromSocketIn(response.socketin), getPortFromSocketIn(response.socketin));
     netcode.udpConnections[hash] = response.socketin;
   }
+  return response.hasData;
 }
 
 void sendUdpPacketToAllUdpClients(NetCode& netcode, NetworkPacket data){

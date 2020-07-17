@@ -707,7 +707,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
-void onUdpClientMessage(UdpPacket packet){
+void onUdpClientMessage(UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
   if (packet.type == LOAD){
     std::string sceneData = packet.payload.loadpacket.sceneData;
@@ -737,10 +737,25 @@ void onUdpClientMessage(UdpPacket packet){
     }else{
       std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
     }
-  }else if (packet.type == SETUP){
-    std::cout << "packet setup (noop)" << std::endl;
   }
   //schemeBindings.onUdpMessage(message);
+}
+void onUdpServerMessage(UdpPacket& packet){
+  std::cout << "INFO: on udp server message!, type: " << packet.type  << std::endl;
+  if (packet.type == SETUP){
+    std::cout << "WARNING: SETUP message server, ignoring" << std::endl;
+  }else if (packet.type == LOAD){
+    std::cout << "WARNING: LOAD message server, ignoring" << std::endl;
+  }else if (packet.type == UPDATE){
+    std::cout << "WARNING: UPDATE message server, ignoring" << std::endl;
+  }else if (packet.type == CREATE){
+    std::cout << "WARNING: CREATE message server, ignoring" << std::endl;
+  }else if (packet.type == DELETE){
+    std::cout << "WARNING: DELETE message server, ignoring" << std::endl;
+  }else {
+    std::cout << "ERROR: unknown packet type" << std::endl;
+    assert(false);
+  }
 }
 
 int main(int argc, char* argv[]){
@@ -1040,7 +1055,11 @@ int main(int argc, char* argv[]){
 
     if (bootStrapperMode){
       UdpPacket packet { };
-      tickNetCode(netcode, toNetworkPacket(packet));
+      auto networkPacket = toNetworkPacket(packet);
+      bool udpPacketHasData = tickNetCode(netcode, networkPacket);
+      if (udpPacketHasData){
+        onUdpServerMessage(packet);
+      }
     }
 
     if (state.useDefaultCamera || activeCameraObj == NULL){
