@@ -47,8 +47,8 @@ tcpServer initTcpServer(){
 std::string getConnectionHash(std::string ipAddress, int port){
   return ipAddress + "\\" + std::to_string(port);
 }
-void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected){
-  getDataFromSocket(tserver.server, [&tserver, &udpConnections, &onPlayerConnected, &onPlayerDisconnected](std::string request, int socketFd) -> socketResponse {      
+void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string)> onPlayerDisconnected){
+  getDataFromSocket(tserver.server, [&tserver, &udpConnections, &onPlayerDisconnected](std::string request, int socketFd) -> socketResponse {      
     auto requestLines = split(request, '\n');
     auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
 
@@ -68,7 +68,6 @@ void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& ud
         std::cout << "INFO: connection hash: " << connectionHash << std::endl;
         response = connectionHash;
         tserver.connections[connectionHash] = connectionInfo;
-        onPlayerConnected(connectionHash);
       }else{
         response = "nack";
         shouldCloseSocket = true;
@@ -80,7 +79,7 @@ void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& ud
       if (tserver.connections.find(connectionHash) == tserver.connections.end()){
         response = "nack";
       }else{
-        tserver.connections.erase(connectionHash);
+        tserver.connections.erase(connectionHash);      
         udpConnections.erase(connectionHash);
         response = "ack";
         onPlayerDisconnected(connectionHash);  
@@ -134,13 +133,17 @@ NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::fun
   };
   return netcode;
 }
-bool tickNetCode(NetCode& netcode, NetworkPacket& packet){
-  processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerConnected, netcode.onPlayerDisconnected);
+bool tickNetCode(NetCode& netcode, NetworkPacket& packet, std::function<std::string()> maybeGetSetupConnectionHash){
+  processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerDisconnected);
   UdpSocketData response = getDataFromUdpSocket(netcode.udpModsocket.socketFd, packet.packet, packet.packetSize);
   if (response.hasData){
     std::cout << "INFO: TICK NETCODE: got data" << std::endl;
-    auto hash = getConnectionHash(getIpAddressFromSocketIn(response.socketin), getPortFromSocketIn(response.socketin));
-    netcode.udpConnections[hash] = response.socketin;
+    auto setupConnectionHash = maybeGetSetupConnectionHash();
+    if (setupConnectionHash != ""){
+      assert(netcode.udpConnections.find(setupConnectionHash) == netcode.udpConnections.end());
+      netcode.udpConnections[setupConnectionHash] = response.socketin;
+      netcode.onPlayerConnected(setupConnectionHash);   // need to relate the mapping between the udp and tcp connection
+    }
   }
   return response.hasData;
 }

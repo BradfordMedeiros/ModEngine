@@ -740,10 +740,11 @@ void onUdpClientMessage(UdpPacket& packet){
   }
   //schemeBindings.onUdpMessage(message);
 }
+
 void onUdpServerMessage(UdpPacket& packet){
   std::cout << "INFO: on udp server message!, type: " << packet.type  << std::endl;
   if (packet.type == SETUP){
-    std::cout << "WARNING: SETUP message server, ignoring, connection hash: " << packet.payload.setuppacket.connectionHash << std::endl;
+    std::cout << "INFO: SETUP PACKET HANDLED IN SERVER CODE" << packet.payload.setuppacket.connectionHash << std::endl;
   }else if (packet.type == LOAD){
     std::cout << "WARNING: LOAD message server, ignoring" << std::endl;
   }else if (packet.type == UPDATE){
@@ -1055,7 +1056,12 @@ int main(int argc, char* argv[]){
     if (bootStrapperMode){
       UdpPacket packet { };
       auto networkPacket = toNetworkPacket(packet);
-      bool udpPacketHasData = tickNetCode(netcode, networkPacket);
+      bool udpPacketHasData = tickNetCode(netcode, networkPacket, [&packet]() -> std::string {
+        if (packet.type == SETUP){
+          return packet.payload.setuppacket.connectionHash;          
+        }
+        return "";
+      });
       if (udpPacketHasData){
         onUdpServerMessage(packet);
       }
