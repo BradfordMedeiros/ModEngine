@@ -521,7 +521,7 @@ void removeObjectFromScene(World& world, objid objectId, std::function<void(std:
     if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
       continue;
     }
-    auto removedObjects = removeObjectFromScene(scene, gameobjId);  
+    auto removedObjects = removeObjectFromScenegraph(scene, gameobjId);  
     for (auto id : removedObjects){
       removeObjectById(world, id, unloadClip);
     }
