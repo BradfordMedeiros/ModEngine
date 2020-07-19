@@ -743,7 +743,7 @@ void onUdpClientMessage(UdpPacket& packet){
 void onUdpServerMessage(UdpPacket& packet){
   std::cout << "INFO: on udp server message!, type: " << packet.type  << std::endl;
   if (packet.type == SETUP){
-    std::cout << "WARNING: SETUP message server, ignoring" << std::endl;
+    std::cout << "WARNING: SETUP message server, ignoring, connection hash: " << packet.payload.setuppacket.connectionHash << std::endl;
   }else if (packet.type == LOAD){
     std::cout << "WARNING: LOAD message server, ignoring" << std::endl;
   }else if (packet.type == UPDATE){
@@ -754,7 +754,6 @@ void onUdpServerMessage(UdpPacket& packet){
     std::cout << "WARNING: DELETE message server, ignoring" << std::endl;
   }else {
     std::cout << "ERROR: unknown packet type" << std::endl;
-    assert(false);
   }
 }
 

@@ -69,7 +69,7 @@ std::map<std::string, std::string> listServers(){
 
 void sendDataOnUdpSocket(NetworkPacket packet){
   assert(isConnected);
-  int numBytes = sendto(setup.udpSocket, (char*)&packet, sizeof(packet),  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr, sizeof(setup.servaddr)); 
+  int numBytes = sendto(setup.udpSocket, packet.packet, packet.packetSize,  MSG_CONFIRM, (const struct sockaddr *) &setup.servaddr, sizeof(setup.servaddr)); 
   if (numBytes == -1){
     throw std::runtime_error("error sending udp data");
   }
