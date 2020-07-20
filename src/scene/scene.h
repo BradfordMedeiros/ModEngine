@@ -49,9 +49,11 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
 void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip);
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId);
 void removeObjectFromScene(World& world, objid id, std::function<void(std::string)> unloadClip);
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
+std::string serializeObject(World& world, objid id);
 
 void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled);
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos);

@@ -405,6 +405,10 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
     return getAdditionalFields(objectId, world.objectMapping);
   }, includeIds);
 }
+std::string serializeObject(World& world, objid id){
+  std::cout << "WARNING: serialize object not yet implemented returning empty object" << std::endl;
+  return "";
+}
 
 objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   auto sceneId = getSceneId();
@@ -511,6 +515,9 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
 
   world.onObjectCreate(gameobj);
   return gameobjId;
+}
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
+  std::cout << "WARNING: addObjectToScene no-op" << std::endl;
 }
 
 // this needs to also delete all children objects. 

@@ -189,6 +189,9 @@ void setSelectionMode(bool enabled){
 short makeObject(std::string name, std::string meshName, float x, float y, float z, objid id, bool useObjId){
   return addObjectToScene(world, 0, name, meshName, glm::vec3(x, y, z), id, useObjId, loadSoundState, loadScriptFromWorld);
 }
+short makeObject(std::string serializedobj, objid id, bool useObjId){
+  return addObjectToScene(world, 0, serializedobj, id, useObjId);
+}
 void removeObjectById(short id){
   removeObjectFromScene(world, id, unloadSoundState);
 }
@@ -277,8 +280,11 @@ void sendDataUdp(std::string data){
   sendDataOnUdpSocket(toNetworkPacket(packet));
 }
 
-void copyToCharArray(std::string& data){
-
+void copyStr(std::string& data, char* copyTo, int size){
+  auto strdata = data.c_str();
+  assert((sizeof(strdata) + 1 ) < size);
+  strncpy(copyTo, strdata, size);
+  assert(copyTo[size -1] == '\0');
 }
 
 void connectServer(std::string data){

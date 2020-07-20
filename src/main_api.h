@@ -20,7 +20,7 @@ struct SetupPacket {
 struct CreatePacket {
   short id;
   char name[1000];
-  char meshname[1000];
+  char serialobj[3000];
 };
 struct DeletePacket {
   short id;
@@ -90,6 +90,7 @@ void setGameObjectRotation(short index, glm::quat rotation);
 void setSelectionMode(bool enabled);
 
 short makeObject(std::string name, std::string meshName, float x, float y, float z, objid id = -1, bool useObjId = false);
+short makeObject(std::string serializedobj, objid id, bool useObjId);
 void removeObjectById(short id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
@@ -113,6 +114,6 @@ double timeSeconds();
 void sendDataUdp(std::string data);
 void connectServer(std::string server);
 
-void copyToCharArray(std::string& data);
+void copyStr(std::string& data, char* copyTo, int size);
 
 #endif

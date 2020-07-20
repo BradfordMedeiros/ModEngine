@@ -724,25 +724,16 @@ void onUdpClientMessage(UdpPacket& packet){
 
     std::cout << "CREATE PACKET: received "  << std::endl;
     std::cout << "CREATE PACKET: name: " << create.name << std::endl;
-    std::cout << "CREATE PACKET: meshname: " << create.meshname << std::endl;
+    std::cout << "CREATE PACKET: serializedobj: " << create.serialobj << std::endl;
 
     auto id = create.id;   
     if (idExists(world, id)){
       std::cout << "ERROR id already exits: " << id << std::endl;
       assert(false);
     }
-    /*auto newObjId = makeObject(
-      create.name, 
-      create.meshname, 
-      0, 
-      5, 
-      0, 
-      id, 
-      true
-    ); 
+    auto newObjId = makeObject(create.serialobj, create.id, true);
     std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
-    assert(newObjId == id);*/
-
+    assert(newObjId == id);
   }else if (packet.type == DELETE){
     auto deletep = packet.payload.deletepacket;
     if (idExists(world, deletep.id)){
@@ -987,17 +978,11 @@ int main(int argc, char* argv[]){
       std::cout << "created obj id: " << obj.id << std::endl;
       UdpPacket packet { .type = CREATE };
 
+      packet.payload.createpacket = CreatePacket { .id = obj.id };
+      auto serialobj = serializeObject(world, obj.id);
 
-      packet.payload.createpacket = CreatePacket { 
-        .id = obj.id,
-        //.name = "somename", //obj.name.c_str(),
-      };
-
-      auto data = obj.name.c_str();
-      assert((sizeof(data) + 1 ) < sizeof(packet.payload.createpacket.name));
-      strncpy(packet.payload.createpacket.name, data, sizeof(packet.payload.createpacket.name));
-      assert(packet.payload.createpacket.name[sizeof(packet.payload.createpacket.name) -1] == '\0');
-      copyToCharArray(obj.name);
+      copyStr(obj.name, packet.payload.createpacket.name, sizeof(packet.payload.createpacket.name));
+      copyStr(serialobj, packet.payload.createpacket.serialobj, sizeof(packet.payload.createpacket.serialobj));
 
       if (bootStrapperMode){
         sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
