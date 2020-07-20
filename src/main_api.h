@@ -19,6 +19,8 @@ struct SetupPacket {
 };
 struct CreatePacket {
   short id;
+  char name[1000];
+  char meshname[1000];
 };
 struct DeletePacket {
   short id;
@@ -110,5 +112,7 @@ double timeSeconds();
 
 void sendDataUdp(std::string data);
 void connectServer(std::string server);
+
+void copyToCharArray(std::string& data);
 
 #endif

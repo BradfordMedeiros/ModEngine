@@ -277,6 +277,10 @@ void sendDataUdp(std::string data){
   sendDataOnUdpSocket(toNetworkPacket(packet));
 }
 
+void copyToCharArray(std::string& data){
+
+}
+
 void connectServer(std::string data){
   UdpPacket setup = {
     .type = SETUP,

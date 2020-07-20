@@ -719,16 +719,30 @@ void onUdpClientMessage(UdpPacket& packet){
     auto update = packet.payload.updatepacket;
     //physicsTranslateSet(world, packet.id, packet.position);
   }else if (packet.type == CREATE){
-    std::cout << "udp create placeholder" << std::endl;
+    // this assumes always beingm made in scene 0
     auto create = packet.payload.createpacket;
-    auto id = create.id;    // currently id just verifies that the object has the same id as the create, but it really needs to allow the creation to be done out of order via some uuid function
+
+    std::cout << "CREATE PACKET: received "  << std::endl;
+    std::cout << "CREATE PACKET: name: " << create.name << std::endl;
+    std::cout << "CREATE PACKET: meshname: " << create.meshname << std::endl;
+
+    auto id = create.id;   
     if (idExists(world, id)){
-      std::cout << "id already exits: " << id << std::endl;
+      std::cout << "ERROR id already exits: " << id << std::endl;
       assert(false);
     }
-    auto newObjId = makeObject("testthing", "./res/models/box/box.obj", 0, 5, 0, id, true); // this assumes always beingm made in scene 0
+    /*auto newObjId = makeObject(
+      create.name, 
+      create.meshname, 
+      0, 
+      5, 
+      0, 
+      id, 
+      true
+    ); 
     std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
-    assert(newObjId == id);
+    assert(newObjId == id);*/
+
   }else if (packet.type == DELETE){
     auto deletep = packet.payload.deletepacket;
     if (idExists(world, deletep.id)){
@@ -972,7 +986,19 @@ int main(int argc, char* argv[]){
     [](GameObject &obj) -> void {
       std::cout << "created obj id: " << obj.id << std::endl;
       UdpPacket packet { .type = CREATE };
-      packet.payload.createpacket = CreatePacket { .id = obj.id };
+
+
+      packet.payload.createpacket = CreatePacket { 
+        .id = obj.id,
+        //.name = "somename", //obj.name.c_str(),
+      };
+
+      auto data = obj.name.c_str();
+      assert((sizeof(data) + 1 ) < sizeof(packet.payload.createpacket.name));
+      strncpy(packet.payload.createpacket.name, data, sizeof(packet.payload.createpacket.name));
+      assert(packet.payload.createpacket.name[sizeof(packet.payload.createpacket.name) -1] == '\0');
+      copyToCharArray(obj.name);
+
       if (bootStrapperMode){
         sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
       }else if (isConnectedToServer()){
