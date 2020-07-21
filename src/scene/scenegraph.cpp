@@ -155,69 +155,76 @@ bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }
 
+std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id){
+  std::string sceneData = "";
+  auto gameobjecth = scene.idToGameObjectsH.at(id);
+  if (gameobjecth.groupId != id){
+    return sceneData;
+  }
+  GameObject gameobject = scene.idToGameObjects.at(id);
+  std::string gameobjectName = gameobject.name;
+  if (!(scene.idToGameObjects.find(gameobjecth.parentId) == scene.idToGameObjects.end())){
+    std::string parentName = scene.idToGameObjects.at(gameobjecth.parentId).name;
+    if (parentName != ""){
+      sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
+    }
+  }
+
+  if (includeIds){
+    sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
+  }
+  if (!isDefaultPosition(gameobject.transformation.position)){
+    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
+  }
+  if (!isIdentityVec(gameobject.transformation.scale)){
+    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
+  }
+  sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
+
+  if (!gameobject.physicsOptions.enabled){
+    sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
+  }
+  if (!gameobject.physicsOptions.isStatic){
+    sceneData = sceneData + gameobjectName + ":physics:dynamic" + "\n"; 
+  }
+  if (!gameobject.physicsOptions.hasCollisions){
+    sceneData = sceneData + gameobjectName + ":physics:nocollide" + "\n"; 
+  }
+  if (gameobject.physicsOptions.shape == BOX){
+    sceneData = sceneData + gameobjectName + ":physics:shape_box" + "\n"; 
+  }
+  if (gameobject.physicsOptions.shape == SPHERE){
+    sceneData = sceneData + gameobjectName + ":physics:shape_sphere" + "\n"; 
+  }
+  if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
+    sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
+  }
+  if (!isIdentityVec(gameobject.physicsOptions.angularFactor)){
+    sceneData = sceneData + gameobjectName + ":physics_angle:" + serializeVec(gameobject.physicsOptions.angularFactor) + "\n"; 
+  }
+  if (!isDefaultGravity(gameobject.physicsOptions.gravity)){
+    sceneData = sceneData + gameobjectName + ":physics_gravity:" + serializeVec(gameobject.physicsOptions.gravity) + "\n"; 
+  }
+  if (gameobject.lookat != ""){
+    sceneData = sceneData + gameobjectName + ":lookat:" + gameobject.lookat + "\n"; 
+  }
+  if (gameobject.script != ""){
+    sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
+  }
+  if (gameobject.netsynchronize){
+    sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
+  }
+
+  for (auto additionalFields : getAdditionalFields(id)){
+    sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
+  }
+  return sceneData;
+}
+
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
   std::string sceneData = "# Generated scene \n";
-  for (auto [id, gameobjecth]: scene.idToGameObjectsH){
-    if (gameobjecth.groupId != id){
-      continue;
-    }
-    GameObject gameobject = scene.idToGameObjects.at(id);
-    std::string gameobjectName = gameobject.name;
-    if (!(scene.idToGameObjects.find(gameobjecth.parentId) == scene.idToGameObjects.end())){
-      std::string parentName = scene.idToGameObjects.at(gameobjecth.parentId).name;
-      if (parentName != ""){
-        sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
-      }
-    }
-
-    if (includeIds){
-      sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
-    }
-    if (!isDefaultPosition(gameobject.transformation.position)){
-      sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
-    }
-    if (!isIdentityVec(gameobject.transformation.scale)){
-      sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
-    }
-    sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
-
-    if (!gameobject.physicsOptions.enabled){
-      sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
-    }
-    if (!gameobject.physicsOptions.isStatic){
-      sceneData = sceneData + gameobjectName + ":physics:dynamic" + "\n"; 
-    }
-    if (!gameobject.physicsOptions.hasCollisions){
-      sceneData = sceneData + gameobjectName + ":physics:nocollide" + "\n"; 
-    }
-    if (gameobject.physicsOptions.shape == BOX){
-      sceneData = sceneData + gameobjectName + ":physics:shape_box" + "\n"; 
-    }
-    if (gameobject.physicsOptions.shape == SPHERE){
-      sceneData = sceneData + gameobjectName + ":physics:shape_sphere" + "\n"; 
-    }
-    if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
-      sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
-    }
-    if (!isIdentityVec(gameobject.physicsOptions.angularFactor)){
-      sceneData = sceneData + gameobjectName + ":physics_angle:" + serializeVec(gameobject.physicsOptions.angularFactor) + "\n"; 
-    }
-    if (!isDefaultGravity(gameobject.physicsOptions.gravity)){
-      sceneData = sceneData + gameobjectName + ":physics_gravity:" + serializeVec(gameobject.physicsOptions.gravity) + "\n"; 
-    }
-    if (gameobject.lookat != ""){
-      sceneData = sceneData + gameobjectName + ":lookat:" + gameobject.lookat + "\n"; 
-    }
-    if (gameobject.script != ""){
-       sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
-    }
-    if (gameobject.netsynchronize){
-      sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
-    }
-
-    for (auto additionalFields : getAdditionalFields(id)){
-      sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
-    }
+  for (auto [id, _]: scene.idToGameObjectsH){
+    sceneData = sceneData + serializeObject(scene, getAdditionalFields, includeIds, id);
   }
   return sceneData;
 }
