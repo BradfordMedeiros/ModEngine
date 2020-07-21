@@ -405,9 +405,13 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
     return getAdditionalFields(objectId, world.objectMapping);
   }, includeIds);
 }
+
 std::string serializeObject(World& world, objid id){
   std::cout << "WARNING: serialize object not yet implemented returning empty object" << std::endl;
-  return "";
+  Scene& scene = world.scenes.at(world.idToScene.at(id));
+  return serializeObject(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
+    return getAdditionalFields(objectId, world.objectMapping);
+  }, true, id);
 }
 
 objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
