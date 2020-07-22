@@ -271,10 +271,10 @@ SerializationObject makeObjectInScene(
   Scene& scene,
   std::string serializedObj
 ){
-  SerializationObject serialObj {
+  SerializationObject serialObject {
 
   };
-  return serialObj;
+  return serialObject;
 }
 
 

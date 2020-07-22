@@ -208,13 +208,6 @@ void updatePhysicsBody(World& world, Scene& scene, objid id){
   addPhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id, oldScale);
 }
 
-// @todo - this currently adds a physics body for every single object, probably should default to this not being the case (I think)
-void addPhysicsBodies(World& world, Scene& scene){
-  for (auto &[id, _] : scene.idToGameObjects){
-    addPhysicsBody(world, scene, id, glm::vec3(1.f, 1.f, 1.f));
-  }
-}
-
 objid getIdForCollisionObject(World& world, const btCollisionObject* body){
   for (auto const&[id, rigidbody] : world.rigidbodys){
     if (rigidbody == body){
@@ -397,7 +390,6 @@ void addObjectToWorld(World& world, Scene& scene, SerializationObject& serialObj
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
       }
     );
-  
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
@@ -423,8 +415,9 @@ objid addSceneToWorldFromData(World& world, std::string sceneData, std::function
   for (auto &[_, serialObj] : deserializedScene.serialObjs){
     addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getUniqueObjId);
   }
-
-  addPhysicsBodies(world, world.scenes.at(sceneId));
+  for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
+    addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
+  }
   for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
     if (obj.script != ""){
       loadScript(obj.script, id);
