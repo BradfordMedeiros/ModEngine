@@ -407,7 +407,6 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
 }
 
 std::string serializeObject(World& world, objid id){
-  std::cout << "WARNING: serialize object not yet implemented returning empty object" << std::endl;
   Scene& scene = world.scenes.at(world.idToScene.at(id));
   return serializeObject(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping);
@@ -522,6 +521,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
 }
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
   std::cout << "WARNING: addObjectToScene no-op" << std::endl;
+  return id;
 }
 
 // this needs to also delete all children objects. 
