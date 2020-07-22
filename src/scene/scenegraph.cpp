@@ -267,6 +267,16 @@ SerializationObject  makeObjectInScene(
   return serialObj;
 }
 
+SerializationObject makeObjectInScene(
+  Scene& scene,
+  std::string serializedObj
+){
+  SerializationObject serialObj {
+
+  };
+  return serialObj;
+}
+
 
 void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
   auto parentObjH = scene.idToGameObjectsH.at(id);

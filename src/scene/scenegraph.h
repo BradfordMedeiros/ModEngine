@@ -51,6 +51,7 @@ SceneDeserialization deserializeScene(
   std::function<objid()> getNewObjectId
 );
 
+
 SerializationObject makeObjectInScene(
   Scene& scene, 
   std::string name, 
@@ -60,6 +61,12 @@ SerializationObject makeObjectInScene(
   std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 );
+
+SerializationObject makeObjectInScene(
+  Scene& scene,
+  std::string serializedObj
+);
+
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
