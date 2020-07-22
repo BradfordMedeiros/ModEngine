@@ -337,8 +337,7 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
   obj.transformation.rotation = orientation;
 
 }
-void addObjects(World& world, Scene& scene, std::map<std::string, SerializationObject>& serialObjs, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
-  for (auto [_, serialObj] : serialObjs){
+void addObjectToWorld(World& world, Scene& scene, SerializationObject& serialObj, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
     auto additionalFields = serialObj.additionalFields;
@@ -377,7 +376,10 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
             generateAdditionalFields(meshName, data, additionalFields, fieldsToCopy),
             getId
           );
-          addObjects(world, scene, newSerialObjs, false, loadClip, getId);
+
+          for (auto &[_, newSerialObj] : newSerialObjs){
+            addObjectToWorld(world, scene, newSerialObj, false, loadClip, getId);
+          }
           return hasMesh;
         }
         return true;   // This is basically ensure model loaded so by definition this was already loaded. 
@@ -395,7 +397,7 @@ void addObjects(World& world, Scene& scene, std::map<std::string, SerializationO
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
       }
     );
-  }
+  
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
@@ -417,7 +419,10 @@ objid addSceneToWorldFromData(World& world, std::string sceneData, std::function
   auto sceneId = getSceneId();
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
-  addObjects(world, world.scenes.at(sceneId), deserializedScene.serialObjs, true, loadClip, getUniqueObjId);
+
+  for (auto &[_, serialObj] : deserializedScene.serialObjs){
+    addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getUniqueObjId);
+  }
 
   addPhysicsBodies(world, world.scenes.at(sceneId));
   for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
@@ -433,7 +438,6 @@ objid addSceneToWorldFromData(World& world, std::string sceneData, std::function
 objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   return addSceneToWorldFromData(world, loadFile(sceneFile), loadClip, loadScript);
 }
-
 
 void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
@@ -504,7 +508,9 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[name] = serialObj;
 
-  addObjects(world, world.scenes.at(sceneId), serialObjs, true, loadClip, getId);
+  for (auto &[_, serialObj] : serialObjs){
+    addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getId);
+  }
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
   
@@ -521,6 +527,10 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
 }
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
   std::cout << "WARNING: addObjectToScene no-op" << std::endl;
+  auto serialObj = makeObjectInScene(
+    world.scenes.at(sceneId),
+    serializedObj
+  );
   return id;
 }
 
