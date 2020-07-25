@@ -28,8 +28,8 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, objid id, objid parentId, std::string lookat, std::string layer, std::string script, bool netsynchronize, SerializationObject& serialObj){
-  auto gameobjectObj = getGameObject(serialObj.position, serialObj.name, id, lookat, layer, script, netsynchronize);
+void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObject& serialObj){
+  auto gameobjectObj = getGameObject(serialObj.position, serialObj.name, id, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.netsynchronize);
   gameobjectObj.transformation.position = serialObj.position;
   gameobjectObj.transformation.scale = serialObj.scale;
   gameobjectObj.transformation.rotation = serialObj.rotation;
@@ -59,7 +59,7 @@ SceneDeserialization createSceneFromParsedContent(
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   for (auto [_, serialObj] : serialObjs){
     objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-    addObjectToScene(scene, id, -1, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.netsynchronize, serialObj);
+    addObjectToScene(scene, id, -1, serialObj);
   }
 
   for (auto [_, serialObj] : serialObjs){
@@ -122,12 +122,15 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .parentName = "-",
       .physics = defaultPhysicsOpts(),
       .type = "default",
+      .lookat = "",
       .layer = layer,
+      .script = "",
+      .netsynchronize = false,
       .additionalFields = additionalFields.at(nodeId)
     };
     serialObjs[names.at(nodeId)] = obj;
 
-    addObjectToScene(scene, id, -1, "", layer, "", false, obj);
+    addObjectToScene(scene, id, -1, obj);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -250,12 +253,13 @@ SerializationObject  makeObjectInScene(
     .lookat = "",
     .layer =  layer,
     .script = "",
+    .netsynchronize = false,
     .additionalFields = additionalFields,
   };
 
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
-  addObjectToScene(scene, objectId, -1, "", layer, "", false, serialObj);      
+  addObjectToScene(scene, objectId, -1, serialObj);      
   scene.rootGameObjectsH.push_back(objectId);
 
   return serialObj;
