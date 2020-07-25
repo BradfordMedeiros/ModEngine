@@ -522,7 +522,8 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   std::cout << "WARNING: addObjectToScene no-op" << std::endl;
   auto serialObj = makeObjectInScene(
     world.scenes.at(sceneId),
-    serializedObj
+    serializedObj,
+    fields
   );
   return id;
 }
