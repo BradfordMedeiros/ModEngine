@@ -64,7 +64,8 @@ SerializationObject makeObjectInScene(
 
 SerializationObject makeObjectInScene(
   Scene& scene,
-  std::string serializedObj
+  std::string serializedObj,
+  std::vector<Field> fields
 );
 
 
