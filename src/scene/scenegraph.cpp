@@ -228,6 +228,7 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
+
 SerializationObject  makeObjectInScene(
   Scene& scene, 
   std::string name, 
@@ -261,13 +262,13 @@ SerializationObject  makeObjectInScene(
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   addObjectToScene(scene, objectId, -1, serialObj);      
   scene.rootGameObjectsH.push_back(objectId);
-
   return serialObj;
 }
 
 SerializationObject makeObjectInScene(
   Scene& scene,
   std::string serializedObj,
+  std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 ){
 
@@ -275,8 +276,9 @@ SerializationObject makeObjectInScene(
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   assert(serialObjs.size() == 1);
-  // todo call addObjectToScene w/ the serial obj
   // todo enforce parent relationships
+
+  addObjectToScene(scene, getNewObjectId(), -1, serialObjs.at(0));
 
   return serialObjs.at(0);
 }

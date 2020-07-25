@@ -520,9 +520,11 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
 }
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
   std::cout << "WARNING: addObjectToScene no-op" << std::endl;
+  assert(useObjId == false);  // @TODO -- need to use the id passed in
   auto serialObj = makeObjectInScene(
     world.scenes.at(sceneId),
     serializedObj,
+    getUniqueObjId,   
     fields
   );
   return id;
