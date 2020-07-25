@@ -263,11 +263,17 @@ SerializationObject  makeObjectInScene(
 
 SerializationObject makeObjectInScene(
   Scene& scene,
-  std::string serializedObj
+  std::string serializedObj,
+  std::vector<Field> fields
 ){
-  SerializationObject serialObject {
 
-  };
+  ParsedContent content = parseFormat(serializedObj);
+  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
+  assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
+ 
+  // todo call addObjectToScene w/ the serial obj
+  // todo enforce parent relationships
+
   return serialObject;
 }
 
