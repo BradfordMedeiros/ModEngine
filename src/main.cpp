@@ -707,6 +707,33 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
 void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
+
+// this assumes always beingm made in scene 0
+void handleCreate(UdpPacket& packet){
+  auto create = packet.payload.createpacket;
+
+  std::cout << "CREATE PACKET: received "  << std::endl;
+  std::cout << "CREATE PACKET: name: " << create.name << std::endl;
+  std::cout << "CREATE PACKET: serializedobj: " << create.serialobj << std::endl;
+
+  auto id = create.id;   
+  if (idExists(world, id)){
+    // could conceptually do a comparison to see if it changed, but probably not
+    std::cout << "INFO: id already exits: " << id << std::endl;
+    return;
+  }
+
+  std::string serialobj = create.serialobj;
+
+  std::cout << "INFO: net - start make object " << std::endl;
+  std::cout << "serial object: " << std::endl;
+  std::cout << serialobj << std::endl;
+  std::cout << "---------------------" << std::endl;
+  assert(serialobj.size() > 0);
+  auto newObjId = makeObject(serialobj, create.id, true);
+  std::cout << "INFO: net - stop make object - new object id to make: " << id << ", actual id: " << newObjId << std::endl;
+  assert(newObjId == id);
+}
 void onUdpClientMessage(UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
   if (packet.type == LOAD){
@@ -719,23 +746,7 @@ void onUdpClientMessage(UdpPacket& packet){
     auto update = packet.payload.updatepacket;
     //physicsTranslateSet(world, packet.id, packet.position);
   }else if (packet.type == CREATE){
-    // this assumes always beingm made in scene 0
-    auto create = packet.payload.createpacket;
-
-    std::cout << "CREATE PACKET: received "  << std::endl;
-    std::cout << "CREATE PACKET: name: " << create.name << std::endl;
-    std::cout << "CREATE PACKET: serializedobj: " << create.serialobj << std::endl;
-
-    auto id = create.id;   
-    if (idExists(world, id)){
-      std::cout << "ERROR id already exits: " << id << std::endl;
-      assert(false);
-    }
-
-    std::cout << "INFO: net - start make object " << std::endl;
-    auto newObjId = makeObject(create.serialobj, create.id, true);
-    std::cout << "INFO: net - stop make object - new object id to make: " << id << ", actual id: " << newObjId << std::endl;
-    assert(newObjId == id);
+    handleCreate(packet);
   }else if (packet.type == DELETE){
     auto deletep = packet.payload.deletepacket;
     if (idExists(world, deletep.id)){
@@ -758,6 +769,7 @@ void onUdpServerMessage(UdpPacket& packet){
     std::cout << "WARNING: UPDATE message server, ignoring" << std::endl;
   }else if (packet.type == CREATE){
     std::cout << "WARNING: CREATE message server, ignoring" << std::endl;
+    handleCreate(packet);
   }else if (packet.type == DELETE){
     std::cout << "WARNING: DELETE message server, ignoring" << std::endl;
   }else {
@@ -982,6 +994,9 @@ int main(int argc, char* argv[]){
 
       packet.payload.createpacket = CreatePacket { .id = obj.id };
       auto serialobj = serializeObject(world, obj.id);
+      if (serialobj == ""){
+        return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit
+      }
 
       copyStr(obj.name, packet.payload.createpacket.name, sizeof(packet.payload.createpacket.name));
       copyStr(serialobj, packet.payload.createpacket.serialobj, sizeof(packet.payload.createpacket.serialobj));
