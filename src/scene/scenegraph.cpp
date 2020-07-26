@@ -229,6 +229,18 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
 }
 
 
+void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
+  if (parentName == ""){
+    assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
+    scene.rootGameObjectsH.push_back(id);
+  }else{
+    auto gameobj = scene.idToGameObjectsH.at(id);
+    auto parentId = scene.nameToId.at(parentName);
+    scene.idToGameObjectsH.at(id).parentId = parentId;
+    scene.idToGameObjectsH.at(parentId).children.insert(id);
+  }
+}
+
 SerializationObject  makeObjectInScene(
   Scene& scene, 
   std::string name, 
@@ -278,8 +290,9 @@ SerializationObject makeObjectInScene(
   assert(serialObjs.size() == 1);
   // todo enforce parent relationships
 
-  addObjectToScene(scene, getNewObjectId(), -1, serialObjs.at(0));
-
+  auto objectId = getNewObjectId();
+  addObjectToScene(scene, objectId, -1, serialObjs.at(0));
+  enforceParentRelationship(scene, objectId, serialObjs.at(0).parentName);
   return serialObjs.at(0);
 }
 
