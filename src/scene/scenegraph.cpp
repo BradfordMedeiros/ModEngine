@@ -228,19 +228,6 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
-
-void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
-  if (parentName == ""){
-    assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
-    scene.rootGameObjectsH.push_back(id);
-  }else{
-    auto gameobj = scene.idToGameObjectsH.at(id);
-    auto parentId = scene.nameToId.at(parentName);
-    scene.idToGameObjectsH.at(id).parentId = parentId;
-    scene.idToGameObjectsH.at(parentId).children.insert(id);
-  }
-}
-
 SerializationObject  makeObjectInScene(
   Scene& scene, 
   std::string name, 
@@ -277,6 +264,18 @@ SerializationObject  makeObjectInScene(
   return serialObj;
 }
 
+void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
+  if (parentName == ""){
+    assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
+    scene.rootGameObjectsH.push_back(id);
+  }else{
+    auto gameobj = scene.idToGameObjectsH.at(id);
+    auto parentId = scene.nameToId.at(parentName);
+    scene.idToGameObjectsH.at(id).parentId = parentId;
+    scene.idToGameObjectsH.at(parentId).children.insert(id);
+  }
+}
+
 SerializationObject makeObjectInScene(
   Scene& scene,
   std::string serializedObj,
@@ -288,12 +287,12 @@ SerializationObject makeObjectInScene(
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   assert(serialObjs.size() == 1);
-  // todo enforce parent relationships
-
+  
+  SerializationObject& serialObj = serialObjs.at(0);
   auto objectId = getNewObjectId();
-  addObjectToScene(scene, objectId, -1, serialObjs.at(0));
+  addObjectToScene(scene, objectId, -1, serialObj);
   enforceParentRelationship(scene, objectId, serialObjs.at(0).parentName);
-  return serialObjs.at(0);
+  return serialObj;
 }
 
 
