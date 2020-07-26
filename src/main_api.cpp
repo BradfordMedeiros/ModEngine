@@ -190,7 +190,7 @@ short makeObject(std::string name, std::string meshName, float x, float y, float
   return addObjectToScene(world, 0, name, meshName, glm::vec3(x, y, z), id, useObjId, loadSoundState, loadScriptFromWorld);
 }
 short makeObject(std::string serializedobj, objid id, bool useObjId){
-  return addObjectToScene(world, 0, serializedobj, id, useObjId);
+  return addObjectToScene(world, 0, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
 }
 void removeObjectById(short id){
   removeObjectFromScene(world, id, unloadSoundState);

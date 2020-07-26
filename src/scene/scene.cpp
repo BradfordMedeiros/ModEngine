@@ -471,6 +471,7 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
   }
 }
 
+// @TODO remove this code since (makeObject deserialized can express this)
 objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
   std::vector<objid> idsAdded;
@@ -513,15 +514,41 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
   world.onObjectCreate(gameobj);
   return gameobjId;
 }
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
-  std::cout << "WARNING: addObjectToScene no-op" << std::endl;
-  assert(useObjId == false);  // @TODO -- need to use the id passed in
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+  std::vector<objid> idsAdded;
+  
+  int numIdsGenerated = 0;
+  auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+    auto newId = -1;
+    if (numIdsGenerated == 0 && useObjId){
+      newId = id;
+    }else{
+      newId = getUniqueObjId();
+    }
+    numIdsGenerated++;
+    idsAdded.push_back(newId);
+    return newId;
+  };
+
   auto serialObj = makeObjectInScene(
     world.scenes.at(sceneId),
     serializedObj,
-    getUniqueObjId,   
+    getId,   
     fields
   );
+  addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getUniqueObjId);
+  auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
+  GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
+
+  for (auto id : idsAdded){
+    std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
+    addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
+  }
+
+  if (gameobj.script != ""){
+    loadScript(gameobj.script, gameobj.id);
+  }
+
   return id;
 }
 
