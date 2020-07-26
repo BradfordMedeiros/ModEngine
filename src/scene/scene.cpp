@@ -498,12 +498,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
     fields
   );
 
-  std::map<std::string, SerializationObject> serialObjs;
-  serialObjs[name] = serialObj;
-
-  for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getId);
-  }
+  addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getId);
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
   
