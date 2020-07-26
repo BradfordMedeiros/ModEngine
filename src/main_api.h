@@ -19,7 +19,6 @@ struct SetupPacket {
 };
 struct CreatePacket {
   short id;
-  char name[1000];
   char serialobj[3000];
 };
 struct DeletePacket {

@@ -713,7 +713,6 @@ void handleCreate(UdpPacket& packet){
   auto create = packet.payload.createpacket;
 
   std::cout << "CREATE PACKET: received "  << std::endl;
-  std::cout << "CREATE PACKET: name: " << create.name << std::endl;
   std::cout << "CREATE PACKET: serializedobj: " << create.serialobj << std::endl;
 
   auto id = create.id;   
@@ -998,7 +997,6 @@ int main(int argc, char* argv[]){
         return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit
       }
 
-      copyStr(obj.name, packet.payload.createpacket.name, sizeof(packet.payload.createpacket.name));
       copyStr(serialobj, packet.payload.createpacket.serialobj, sizeof(packet.payload.createpacket.serialobj));
 
       if (bootStrapperMode){
