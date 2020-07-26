@@ -269,6 +269,10 @@ objid getSceneId(){
   sceneId++;
   return sceneId;
 }
+void resetSceneId(World& world){
+  assert(world.scenes.size() == 0);
+  sceneId = -1;
+}
 
 std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
   std::map<objid, std::map<std::string, std::string>> additionalFieldsMap;
@@ -461,13 +465,16 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
   }
   world.scenes.erase(sceneId);
 }
-void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip){
+void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, bool resetScenes){
   std::vector<objid> sceneIds; 
   for (auto [sceneId, _] : world.scenes){
     sceneIds.push_back(sceneId);
   }
   for (auto sceneId : sceneIds){
     removeSceneFromWorld(world, sceneId, unloadClip);
+  }
+  if (resetScenes){
+    resetSceneId(world);
   }
 }
 
@@ -530,21 +537,25 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     return newId;
   };
 
+  std::cout << "INFO: SCENE - addObjectToScene - start deserialize object, scene id: " << sceneId << std::endl;
   auto serialObj = makeObjectInScene(
     world.scenes.at(sceneId),
     serializedObj,
     getId,   
     fields
   );
+  std::cout << "INFO: SCENE - addObjectToScene - start add object to world" << std::endl;
   addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getUniqueObjId);
   auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
 
+  std::cout << "INFO: SCENE - addObjectToScene - start add physics bodys" << std::endl;
   for (auto id : idsAdded){
     std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
     addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
   }
 
+  std::cout << "INFO: SCENE - addObjectToScene - load scripts" << std::endl;
   if (gameobj.script != ""){
     loadScript(gameobj.script, gameobj.id);
   }

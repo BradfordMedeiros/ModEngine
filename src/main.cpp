@@ -731,8 +731,10 @@ void onUdpClientMessage(UdpPacket& packet){
       std::cout << "ERROR id already exits: " << id << std::endl;
       assert(false);
     }
+
+    std::cout << "INFO: net - start make object " << std::endl;
     auto newObjId = makeObject(create.serialobj, create.id, true);
-    std::cout << "new object id to make: " << id << ", actual id: " << newObjId << std::endl;
+    std::cout << "INFO: net - stop make object - new object id to make: " << id << ", actual id: " << newObjId << std::endl;
     assert(newObjId == id);
   }else if (packet.type == DELETE){
     auto deletep = packet.payload.deletepacket;

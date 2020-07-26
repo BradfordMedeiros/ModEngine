@@ -46,7 +46,7 @@ Texture loadTextureWorld(World& world, std::string texturepath);
 objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip);
-void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip);
+void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, bool resetScenes);
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);

@@ -282,16 +282,32 @@ SerializationObject makeObjectInScene(
   std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 ){
-
+  std::cout << "INFO: scenegraph - parse format" << std::endl;
   ParsedContent content = parseFormat(serializedObj);
+
+  std::cout << "INFO: scenegraph - deserialize tokens" << std::endl;
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
-  assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
-  assert(serialObjs.size() == 1);
   
-  SerializationObject& serialObj = serialObjs.at(0);
+  std::cout << "INFO: scenegraph - deserialize tokens finished" << std::endl;
+  
+  assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
+  std::cout << "INFO: scenegraph - asserted layer name" << std::endl;
+
+  assert(serialObjs.size() == 1);
+  std::cout << "INFO: scenegraph - asserted num objects" << std::endl;
+  
+  SerializationObject& serialObj = serialObjs.begin() -> second;
+  std::cout << "INFO: scenegraph - got object" << std::endl;
+
   auto objectId = getNewObjectId();
+  std::cout << "INFO: scenegraph - object id: " << objectId << std::endl;
+  
+  std::cout << "INFO: scenegraph - adding to scenegraph" << std::endl;
   addObjectToScene(scene, objectId, -1, serialObj);
-  enforceParentRelationship(scene, objectId, serialObjs.at(0).parentName);
+
+  std::cout << "INFO: scenegraph - adding parent relations" << std::endl;
+  enforceParentRelationship(scene, objectId, serialObj.parentName);
+
   return serialObj;
 }
 
