@@ -733,6 +733,15 @@ void handleCreate(UdpPacket& packet){
   std::cout << "INFO: net - stop make object - new object id to make: " << id << ", actual id: " << newObjId << std::endl;
   assert(newObjId == id);
 }
+void handleDelete(UdpPacket& packet){
+  auto deletep = packet.payload.deletepacket;
+  if (idExists(world, deletep.id)){
+    std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
+    removeObjectById(deletep.id);
+  }else{
+    std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
+  }
+}
 void onUdpClientMessage(UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
   if (packet.type == LOAD){
@@ -747,13 +756,7 @@ void onUdpClientMessage(UdpPacket& packet){
   }else if (packet.type == CREATE){
     handleCreate(packet);
   }else if (packet.type == DELETE){
-    auto deletep = packet.payload.deletepacket;
-    if (idExists(world, deletep.id)){
-      std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
-      removeObjectById(deletep.id);
-    }else{
-      std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
-    }
+    handleDelete(packet);
   }
   //schemeBindings.onUdpMessage(message);
 }
@@ -767,10 +770,9 @@ void onUdpServerMessage(UdpPacket& packet){
   }else if (packet.type == UPDATE){
     std::cout << "WARNING: UPDATE message server, ignoring" << std::endl;
   }else if (packet.type == CREATE){
-    std::cout << "WARNING: CREATE message server, ignoring" << std::endl;
     handleCreate(packet);
   }else if (packet.type == DELETE){
-    std::cout << "WARNING: DELETE message server, ignoring" << std::endl;
+    handleDelete(packet);
   }else {
     std::cout << "ERROR: unknown packet type" << std::endl;
   }
