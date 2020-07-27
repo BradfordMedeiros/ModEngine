@@ -579,12 +579,18 @@ void removeObjectFromScene(World& world, objid objectId, std::function<void(std:
   }
 }
 
+GameObject& getGameObject(World& world, objid id){
+  return world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id);
+}
+
 Properties getProperties(World& world, objid id){
-  Properties properties { };
+  Properties properties {
+    .transformation = getGameObject(world, id).transformation,
+  };
   return properties;
 }
 void setProperties(World& world, objid id, Properties& properties){
-
+  getGameObject(world, id).transformation = properties.transformation;
 }
 
 void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
@@ -750,7 +756,9 @@ void updateEntities(World& world){
 void callbackEntities(World& world){
   for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
-      world.onObjectUpdate(gameobj);
+      if (id == scene.idToGameObjectsH.at(id).groupId){
+        world.onObjectUpdate(gameobj);
+      }
     }
   }
 }

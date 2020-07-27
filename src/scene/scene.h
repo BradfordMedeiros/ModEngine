@@ -34,7 +34,7 @@ struct PhysicsInfo {
 };
 
 struct Properties {
-
+  Transformation transformation;
 };
 
 World createWorld(

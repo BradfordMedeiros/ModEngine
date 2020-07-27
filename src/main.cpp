@@ -744,9 +744,14 @@ void handleDelete(UdpPacket& packet){
 }
 
 void handleUpdate(UdpPacket& packet){
-  std::cout << "udp client update: " << std::endl;
   auto update = packet.payload.updatepacket;
-  setProperties(world, update.id, update.properties);
+
+  if (idExists(world, update.id)){
+    std::cout << "Udp client update: " << update.id << std::endl;
+    setProperties(world, update.id, update.properties);
+  }else{
+    std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
+  }
 }
 void onUdpClientMessage(UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
@@ -985,11 +990,11 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     [](GameObject& obj) -> void { 
-      if (obj.netsynchronize){
+      if (true || obj.netsynchronize){    // Maybe should limit to only netsync objects?
         std::cout << "update obj id: " << obj.id << std::endl;
         UdpPacket packet { .type = UPDATE };
         packet.payload.updatepacket = UpdatePacket { 
-          .id = obj.id ,
+          .id = obj.id,
           .properties = getProperties(world, obj.id),
         };
         if (bootStrapperMode){
