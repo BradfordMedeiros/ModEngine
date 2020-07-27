@@ -521,6 +521,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
   world.onObjectCreate(gameobj);
   return gameobjId;
 }
+
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   std::vector<objid> idsAdded;
   
@@ -576,6 +577,14 @@ void removeObjectFromScene(World& world, objid objectId, std::function<void(std:
       removeObjectById(world, id, unloadClip);
     }
   }
+}
+
+Properties getProperties(World& world, objid id){
+  Properties properties { };
+  return properties;
+}
+void setProperties(World& world, objid id, Properties& properties){
+
 }
 
 void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){

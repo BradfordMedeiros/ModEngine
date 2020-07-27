@@ -33,6 +33,10 @@ struct PhysicsInfo {
   Transformation transformation;
 };
 
+struct Properties {
+
+};
+
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 
@@ -51,6 +55,9 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
 objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 void removeObjectFromScene(World& world, objid id, std::function<void(std::string)> unloadClip);
+
+Properties getProperties(World& world, objid id);
+void setProperties(World& world, objid id, Properties& properties);
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
 std::string serializeObject(World& world, objid id);

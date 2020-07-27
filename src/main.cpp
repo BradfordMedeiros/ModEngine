@@ -742,17 +742,24 @@ void handleDelete(UdpPacket& packet){
     std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
   }
 }
+
+void handleUpdate(UdpPacket& packet){
+  std::cout << "udp client update: " << std::endl;
+  auto update = packet.payload.updatepacket;
+  setProperties(world, update.id, update.properties);
+}
 void onUdpClientMessage(UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
-  if (packet.type == LOAD){
+  if (packet.type == SETUP){
+    std::cout << "WARNING: should not get setup packet type" << std::endl;
+  }
+  else if (packet.type == LOAD){
     std::string sceneData = packet.payload.loadpacket.sceneData;
     std::cout << "trying to load scene packet!" << std::endl;
     unloadAllScenes();
     loadSceneData(sceneData);  
   }else if (packet.type == UPDATE){
-    std::cout << "udp client update: " << std::endl;
-    auto update = packet.payload.updatepacket;
-    //physicsTranslateSet(world, packet.id, packet.position);
+    handleUpdate(packet);
   }else if (packet.type == CREATE){
     handleCreate(packet);
   }else if (packet.type == DELETE){
@@ -768,7 +775,7 @@ void onUdpServerMessage(UdpPacket& packet){
   }else if (packet.type == LOAD){
     std::cout << "WARNING: LOAD message server, ignoring" << std::endl;
   }else if (packet.type == UPDATE){
-    std::cout << "WARNING: UPDATE message server, ignoring" << std::endl;
+    handleUpdate(packet);
   }else if (packet.type == CREATE){
     handleCreate(packet);
   }else if (packet.type == DELETE){
@@ -981,7 +988,10 @@ int main(int argc, char* argv[]){
       if (obj.netsynchronize){
         std::cout << "update obj id: " << obj.id << std::endl;
         UdpPacket packet { .type = UPDATE };
-        packet.payload.updatepacket = UpdatePacket { .id = obj.id };
+        packet.payload.updatepacket = UpdatePacket { 
+          .id = obj.id ,
+          .properties = getProperties(world, obj.id),
+        };
         if (bootStrapperMode){
           sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
         }else if (isConnectedToServer()){

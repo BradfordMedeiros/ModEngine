@@ -26,6 +26,7 @@ struct DeletePacket {
 };
 struct UpdatePacket {
   short id;
+  Properties properties;
 };
 
 // @TODO this should optimize so only send the size necessary, not max size since scnee file needs to be larger
