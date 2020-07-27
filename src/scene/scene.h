@@ -25,6 +25,7 @@ struct World {
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid)> onObjectDelete;
+
 };
 
 struct PhysicsInfo {
@@ -71,10 +72,12 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
 void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
 void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
+
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
 objid getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, objid id);
 objid getGameObjectByName(World& world, std::string name);
+GameObject& getGameObject(World& world, objid id);
 
 std::map<std::string, std::string> getAttributes(World& world, objid id);
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr);

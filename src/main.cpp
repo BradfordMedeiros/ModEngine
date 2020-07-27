@@ -275,7 +275,7 @@ void selectItem(){
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && !(world.idToScene.find(state.selectedIndex) == world.idToScene.end())){
     auto sceneId = world.idToScene.at(state.selectedIndex);
-    auto selectObject = world.scenes.at(sceneId).idToGameObjects.at(state.selectedIndex);
+    auto selectObject = getGameObject(world, state.selectedIndex); 
     if (state.manipulatorMode == TRANSLATE){
       applyPhysicsTranslation(world, state.selectedIndex, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
@@ -689,7 +689,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
   drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
   if (state.selectedIndex != -1){
-    auto obj = world.scenes.at(world.idToScene.at(state.selectedIndex)).idToGameObjects.at(state.selectedIndex);
+    auto obj = getGameObject(world, state.selectedIndex);
     drawText("position: " + print(obj.transformation.position), 10, 100, 3);
     drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
     drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
@@ -1125,7 +1125,7 @@ int main(int argc, char* argv[]){
     auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
     std::vector<LightInfo> lights;
     for (int i = 0; i < lightsIndexs.size(); i++){
-      auto lightObj = world.scenes.at(world.idToScene.at(lightsIndexs.at(i))).idToGameObjects.at(lightsIndexs.at(i));
+      auto lightObj = getGameObject(world, lightsIndexs.at(i));
       auto objectLight = world.objectMapping.at(lightsIndexs.at(i));
       auto lightObject = std::get_if<GameObjectLight>(&objectLight);
 
