@@ -615,6 +615,7 @@ void physicsTranslate(World& world, objid index, float x, float y, float z, bool
     auto body =  world.rigidbodys.at(index);
     setPosition(body, newPosition);
   }
+  world.entitiesToUpdate.insert(index);
 }
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
@@ -624,6 +625,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
     auto body =  world.rigidbodys.at(index);
     setPosition(body, pos);
   }
+  world.entitiesToUpdate.insert(index);
 }
 
 void physicsRotate(World& world, objid index, float x, float y, float z){
@@ -635,6 +637,7 @@ void physicsRotate(World& world, objid index, float x, float y, float z){
     auto body =  world.rigidbodys.at(index);
     setRotation(body, rotation);
   }
+  world.entitiesToUpdate.insert(index);
 }
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
@@ -644,6 +647,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation){
     auto body =  world.rigidbodys.at(index);
     setRotation(body, rotation);
   }
+  world.entitiesToUpdate.insert(index);
 }
 
 
@@ -658,6 +662,7 @@ void physicsScale(World& world, objid index, float x, float y, float z){
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
+  world.entitiesToUpdate.insert(index);
 }
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
@@ -668,6 +673,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
+  world.entitiesToUpdate.insert(index);
 }
 
 void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
@@ -679,6 +685,7 @@ void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, floa
     auto body =  world.rigidbodys.at(index);
     setPosition(body, newPosition);
   }
+  world.entitiesToUpdate.insert(index);
 }
 
 void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
@@ -690,6 +697,7 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
     auto body =  world.rigidbodys.at(index);
     setRotation(body, newRotation);
   }
+  world.entitiesToUpdate.insert(index);
 }
 
 void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
@@ -702,6 +710,7 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
+  world.entitiesToUpdate.insert(index);
 }
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
@@ -719,7 +728,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
 void enforceLookAt(World& world){
  for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
-      std::string lookAt = gameobj.lookat;                          // @TODO this id could be calculated on loading the scene to save extra lookups
+      std::string lookAt = gameobj.lookat;                      
       if (lookAt == "" || lookAt == gameobj.name){
         continue;
       }
