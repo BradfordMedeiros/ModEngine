@@ -25,7 +25,7 @@ struct World {
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid)> onObjectDelete;
-
+  std::set<objid> entitiesToUpdate;
 };
 
 struct PhysicsInfo {

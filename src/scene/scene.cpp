@@ -246,6 +246,8 @@ World createWorld(
 ){
   auto objectMapping = getObjectMapping();
   RailSystem rails;
+  std::set<objid> entitiesToUpdate;
+
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
@@ -253,6 +255,7 @@ World createWorld(
     .onObjectUpdate = onObjectUpdate,
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
+    .entitiesToUpdate = entitiesToUpdate,
   };
 
   // Default meshes that are silently loaded in the background
@@ -756,11 +759,12 @@ void updateEntities(World& world){
 void callbackEntities(World& world){
   for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
-      if (id == scene.idToGameObjectsH.at(id).groupId){
+      if (id == scene.idToGameObjectsH.at(id).groupId && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
         world.onObjectUpdate(gameobj);
       }
     }
   }
+  world.entitiesToUpdate.clear();
 }
 
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics){
