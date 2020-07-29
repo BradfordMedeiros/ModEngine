@@ -86,7 +86,5 @@ bool idExists(World& world, objid id);
 
 std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& objectMapping);
 
-void updateEntities(World& world);
-
 #endif
 
