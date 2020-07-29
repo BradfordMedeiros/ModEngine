@@ -19,4 +19,8 @@ struct Transformation {
   glm::quat rotation;
 };
 
+struct Properties {
+  Transformation transformation;
+};
+
 #endif

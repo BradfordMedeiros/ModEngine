@@ -34,10 +34,6 @@ struct PhysicsInfo {
   Transformation transformation;
 };
 
-struct Properties {
-  Transformation transformation;
-};
-
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 
