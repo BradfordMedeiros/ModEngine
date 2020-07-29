@@ -596,6 +596,37 @@ void setProperties(World& world, objid id, Properties& properties){
   getGameObject(world, id).transformation = properties.transformation;
 }
 
+std::map<std::string, std::string> getAttributes(World& world, objid id){
+  // @TODO handle types better
+  std::map<std::string, std::string> attr;
+  auto objAttrs = objectAttributes(world.objectMapping, id);
+  auto sceneAttrs = scenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id);
+
+  for (auto [attrName, attrValue] : objAttrs){
+    attr[attrName] = attrValue;
+  }
+  for (auto [attrName, attrValue] : sceneAttrs){
+    attr[attrName] = attrValue;
+  }
+  return attr;
+}
+
+std::map<std::string, std::string> extractAttributes(std::map<std::string, std::string>& attr,  std::vector<std::string> attributes){
+  std::map<std::string, std::string> attrToSet;
+  for (auto attribute : attributes){
+    if (attr.find(attribute) != attr.end()){
+      attrToSet[attribute] = attr.at(attribute);
+    }    
+  }
+  return attrToSet;
+}
+
+void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
+  // @TODO create complete lists for attributes. 
+  setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
+  setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
+}
+
 void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
   Scene& scene = world.scenes.at(world.idToScene.at(index));
 
@@ -787,37 +818,6 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
   }
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   callbackEntities(world);
-}
-
-std::map<std::string, std::string> getAttributes(World& world, objid id){
-  // @TODO handle types better
-  std::map<std::string, std::string> attr;
-  auto objAttrs = objectAttributes(world.objectMapping, id);
-  auto sceneAttrs = scenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id);
-
-  for (auto [attrName, attrValue] : objAttrs){
-    attr[attrName] = attrValue;
-  }
-  for (auto [attrName, attrValue] : sceneAttrs){
-    attr[attrName] = attrValue;
-  }
-  return attr;
-}
-
-std::map<std::string, std::string> extractAttributes(std::map<std::string, std::string>& attr,  std::vector<std::string> attributes){
-  std::map<std::string, std::string> attrToSet;
-  for (auto attribute : attributes){
-    if (attr.find(attribute) != attr.end()){
-      attrToSet[attribute] = attr.at(attribute);
-    }    
-  }
-  return attrToSet;
-}
-
-void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
-  // @TODO create complete lists for attributes. 
-  setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
-  setScenegraphAttributes(world.scenes.at(world.idToScene.at(id)), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
 }
 
 bool idInGroup(World& world, objid id, objid groupId){
