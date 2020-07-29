@@ -1,6 +1,24 @@
 #ifndef MOD_SEQUENCER
 #define MOD_SEQUENCER
 
+#include <string>
+#include <vector>
+#include <map>
+#include <functional>
+
+struct Track {
+  std::string name;
+  std::vector<std::function<void()>> trackFns;
+};
+
+struct StateMachine {
+  std::string currentState;
+  std::string initialState;
+  std::map<std::string, std::string> attributes;
+  std::vector<Track> tracks;
+};
+
+
 /*
  
 

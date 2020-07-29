@@ -44,6 +44,7 @@
 #include "./scene/rails.h"
 #include "./easy_use.h"
 #include "./scene/recorder.h"
+#include "./sequencer.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
