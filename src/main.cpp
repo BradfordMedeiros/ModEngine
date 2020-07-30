@@ -519,11 +519,6 @@ void drawTraversalPositions(){
   }
 }
 
-struct LightInfo {
-  glm::vec3 pos;
-  glm::quat rotation;
-  glm::vec3 color;
-};
 
 void displayRails(std::map<short, RailConnection> railPairs){
   for (auto [id, rail] : railPairs){
@@ -1124,20 +1119,7 @@ int main(int argc, char* argv[]){
 
     glfwSwapBuffers(window);
     
-    auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
-    std::vector<LightInfo> lights;
-    for (int i = 0; i < lightsIndexs.size(); i++){
-      auto lightObj = getGameObject(world, lightsIndexs.at(i));
-      auto objectLight = world.objectMapping.at(lightsIndexs.at(i));
-      auto lightObject = std::get_if<GameObjectLight>(&objectLight);
-
-      LightInfo light {
-        .pos = lightObj.transformation.position,
-        .rotation = lightObj.transformation.rotation,
-        .color = lightObject -> color,
-      };
-      lights.push_back(light);
-    }
+    std::vector<LightInfo> lights = getLightInfo(world);
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 

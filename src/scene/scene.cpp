@@ -851,3 +851,21 @@ std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& 
   return graph;
 }
 
+// @TODO - this is wrong, needs to get the lights in world space, relative to the parent
+std::vector<LightInfo> getLightInfo(World& world){
+  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
+  std::vector<LightInfo> lights;
+  for (int i = 0; i < lightsIndexs.size(); i++){
+    auto lightObj = getGameObject(world, lightsIndexs.at(i));
+    auto objectLight = world.objectMapping.at(lightsIndexs.at(i));
+    auto lightObject = std::get_if<GameObjectLight>(&objectLight);
+
+    LightInfo light {
+      .pos = lightObj.transformation.position,
+      .rotation = lightObj.transformation.rotation,
+      .color = lightObject -> color,
+    };
+    lights.push_back(light);
+  }
+  return lights;
+}

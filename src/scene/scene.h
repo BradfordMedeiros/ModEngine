@@ -83,5 +83,14 @@ bool idExists(World& world, objid id);
 
 std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& objectMapping);
 
+
+struct LightInfo {
+  glm::vec3 pos;
+  glm::quat rotation;
+  glm::vec3 color;
+};
+
+std::vector<LightInfo> getLightInfo(World& world);
+
 #endif
 
