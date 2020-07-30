@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 #include "./common/util/types.h"
+#include "../common/util.h"
 
 struct Record {
   float time;
-  Properties property;
+  Properties properties;
 };
 
 struct Recording {
-  float length;
   std::vector<Record> keyframes;
 };
 
