@@ -7,15 +7,18 @@
 #include <functional>
 
 struct Track {
-  std::string name;
   std::vector<std::function<void()>> trackFns;
+};
+
+struct State {
+  std::map<std::string, std::string> attributes;
+  std::map<std::string, Track> tracks;
 };
 
 struct StateMachine {
   std::string currentState;
   std::string initialState;
-  std::map<std::string, std::string> attributes;
-  std::vector<Track> tracks;
+  std::map<std::string, State> states;
 };
 
 
@@ -24,7 +27,7 @@ struct StateMachine {
 
   (define mainscript 
     (create-states
-      (state closed
+      (state closed 
         (attributes (color "blue"))     ; this should set the color attribute to blue, but then set it back when not in closed state
         (track "opening door" 
           (display "opening door")
