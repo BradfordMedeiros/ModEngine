@@ -856,13 +856,14 @@ std::vector<LightInfo> getLightInfo(World& world){
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   std::vector<LightInfo> lights;
   for (int i = 0; i < lightsIndexs.size(); i++){
-    auto lightObj = getGameObject(world, lightsIndexs.at(i));
-    auto objectLight = world.objectMapping.at(lightsIndexs.at(i));
+    auto objectId =  lightsIndexs.at(i);
+    auto objectLight = world.objectMapping.at(objectId);
     auto lightObject = std::get_if<GameObjectLight>(&objectLight);
 
+    auto lightTransform = fullTransformation(world.scenes.at(world.idToScene.at(objectId)), objectId);
     LightInfo light {
-      .pos = lightObj.transformation.position,
-      .rotation = lightObj.transformation.rotation,
+      .pos = lightTransform.position,
+      .rotation = lightTransform.rotation,
       .color = lightObject -> color,
     };
     lights.push_back(light);
