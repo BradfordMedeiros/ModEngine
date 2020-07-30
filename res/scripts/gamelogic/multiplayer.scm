@@ -8,7 +8,7 @@
   (display "\n")
 )
 (define (create-player name)
-  (let ((objectid (mk-obj name "./res/models/box/box.obj" (list (* 10 (length players)) 0 0))))
+  (let ((objectid (mk-obj name "./res/models/electricbox/electricbox.obj" (list (* 10 (length players)) 0 0))))
     (set! players (cons (cons name objectid) players))
     (display (string-append "player created: " name "\n"))
   )
@@ -59,9 +59,9 @@
   (if (not (= active-index -1))
     (move-player (active-player-id) (dir-from-key key))
   )
-  (if (and (= key 257) (= action 1))
-    (send-tcp "test message 1")
-  )
+  ;(if (and (= key 257) (= action 1))
+  ;  (send-tcp "test message 1")
+  ;)
   (if (and (= key 46) (= action 1))  ; .
     (begin
       (display "connect server\n")
