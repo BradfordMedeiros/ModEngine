@@ -2,9 +2,11 @@
 #define MOD_SEQUENCER
 
 #include <string>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <functional>
+#include <variant>
 
 struct Track {
   std::vector<std::function<void()>> trackFns;
@@ -21,6 +23,10 @@ struct StateMachine {
   std::map<std::string, State> states;
 };
 
+typedef std::variant<Track, std::function<void()>> StateMachineItem;
+
+Track createTrack(std::function<void()> fns);
+void playbackTrack(Track& track);
 
 /*
  

@@ -9,6 +9,7 @@
 #include <limits>       
 #include <map>
 #include "../common/util.h"
+#include "../sequencer.h"
 
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),  
@@ -51,7 +52,9 @@ void createStaticSchemeBindings(
   void (*connectServer)(std::string server),
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
-  void (*sendMessageUdp)(std::string data)
+  void (*sendMessageUdp)(std::string data),
+  Track (*createTrack)(std::function<void()> fns),
+  void (*playbackTrack)(Track& track)
 );
 
 void defineFunctions();

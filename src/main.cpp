@@ -968,7 +968,9 @@ int main(int argc, char* argv[]){
     connectServer,
     disconnectServer,
     sendMessageToActiveServer,
-    sendDataUdp
+    sendDataUdp,
+    createTrack,
+    playbackTrack
   );
 
   schemeBindings = getSchemeCallbacks();

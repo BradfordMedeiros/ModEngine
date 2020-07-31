@@ -402,6 +402,31 @@ SCM scmDisconnectServer(){
   return SCM_UNSPECIFIED;
 }
 
+// State machine functions
+SCM scmAttributes(){
+  return SCM_UNSPECIFIED;
+}
+
+
+SCM trackType; // this is modified during init
+Track (*_createTrack)(std::function<void()> fns);
+SCM scmCreateTrack(){
+  auto obj = (Track*)scm_gc_malloc(sizeof(Track), "track");
+  return scm_make_foreign_object_1(trackType, obj);
+}
+
+void (*_playbackTrack)(Track& track);
+SCM scmPlayTrack(SCM track){
+  return SCM_UNSPECIFIED;
+}
+SCM scmState(){
+  return SCM_UNSPECIFIED;
+}
+SCM scmStateMachine(){
+  return SCM_UNSPECIFIED;
+}
+
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -562,6 +587,12 @@ void defineFunctions(){
   scm_c_define_gsubr("disconnect-server", 0, 0, 0, (void*)scmDisconnectServer);
   scm_c_define_gsubr("send-tcp", 1, 0, 0, (void*)scmSendMessageTcp);
   scm_c_define_gsubr("send-udp", 1, 0, 0, (void*)scmSendMessageUdp);
+
+  scm_c_define_gsubr("attributes", 0, 0, 0, (void*)scmAttributes);
+  scm_c_define_gsubr("create-track", 0, 0, 0, (void*)scmCreateTrack);
+  scm_c_define_gsubr("play-track", 0, 0, 0, (void*)scmPlayTrack);
+  scm_c_define_gsubr("state", 0, 0, 0, (void*)scmState);
+  scm_c_define_gsubr("state-machine", 0, 0, 0, (void*)scmStateMachine);
 }
 
 
@@ -606,10 +637,13 @@ void createStaticSchemeBindings(
   void (*connectServer)(std::string server),
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
-  void (*sendMessageUdp)(std::string data)
+  void (*sendMessageUdp)(std::string data),
+  Track (*createTrack)(std::function<void()> fns),
+  void (*playbackTrack)(Track& track)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
+  trackType = scm_make_foreign_object_type(scm_from_utf8_symbol("track"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
 
   _loadScene = loadScene;
   _unloadScene = unloadScene;
@@ -658,4 +692,8 @@ void createStaticSchemeBindings(
   _disconnectServer = disconnectServer;
   _sendMessageTcp = sendMessageTcp;
   _sendMessageUdp = sendMessageUdp;
+
+  // state machine
+  _createTrack = createTrack;
+  _playbackTrack = playbackTrack;
 }
