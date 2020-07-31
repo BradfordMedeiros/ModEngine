@@ -68,6 +68,9 @@
       )
     )
   )
+  (if (and (= key 331) (= action 1))
+    (save-scene)
+  )
 )
 
 
