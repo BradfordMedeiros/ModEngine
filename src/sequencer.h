@@ -25,7 +25,7 @@ struct StateMachine {
 
 typedef std::variant<Track, std::function<void()>> StateMachineItem;
 
-Track createTrack(std::function<void()> fns);
+Track createTrack(std::vector<std::function<void()>> fns);
 void playbackTrack(Track& track);
 
 /*
