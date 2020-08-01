@@ -411,10 +411,11 @@ SCM scmAttributes(){
 SCM trackType; // this is modified during init
 Track (*_createTrack)(std::string name, std::vector<std::function<void()>> fns);
 SCM scmCreateTrack(SCM name, SCM funcs){
-  auto obj = (Track*)scm_gc_malloc(sizeof(Track), "track");
+  auto trackobj = (Track*)scm_gc_malloc(sizeof(Track), "track");
   std::vector<std::function<void()>> tracks;
-  *obj = _createTrack(scm_to_locale_string(name), tracks);
-  return scm_make_foreign_object_1(trackType, obj);
+  auto track = createTrack(scm_to_locale_string(name), tracks);
+  *trackobj = track;
+  return scm_make_foreign_object_1(trackType, trackobj);
 }
 Track* getTrackFromScmType(SCM value){
   Track* obj;
