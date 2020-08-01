@@ -1,10 +1,10 @@
 #include "./sequencer.h"
 
 
-Track createTrack(std::vector<std::function<void()>> fns){
+Track createTrack(std::string name, std::vector<std::function<void()>> fns){
   std::vector<std::function<void()>> trackFns;
-
   Track track {
+    .name = name,
     .trackFns = trackFns,
   };
   return track;

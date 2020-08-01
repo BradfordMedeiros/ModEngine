@@ -409,11 +409,11 @@ SCM scmAttributes(){
 
 
 SCM trackType; // this is modified during init
-Track (*_createTrack)(std::vector<std::function<void()>> fns);
-SCM scmCreateTrack(){
+Track (*_createTrack)(std::string name, std::vector<std::function<void()>> fns);
+SCM scmCreateTrack(SCM name, SCM funcs){
   auto obj = (Track*)scm_gc_malloc(sizeof(Track), "track");
   std::vector<std::function<void()>> tracks;
-  *obj = _createTrack(tracks);
+  *obj = _createTrack(scm_to_locale_string(name), tracks);
   return scm_make_foreign_object_1(trackType, obj);
 }
 Track* getTrackFromScmType(SCM value){
@@ -597,7 +597,7 @@ void defineFunctions(){
   scm_c_define_gsubr("send-udp", 1, 0, 0, (void*)scmSendMessageUdp);
 
   scm_c_define_gsubr("attributes", 0, 0, 0, (void*)scmAttributes);
-  scm_c_define_gsubr("create-track", 0, 0, 0, (void*)scmCreateTrack);
+  scm_c_define_gsubr("create-track", 2, 0, 0, (void*)scmCreateTrack);
   scm_c_define_gsubr("play-track", 1, 0, 0, (void*)scmPlayTrack);
   scm_c_define_gsubr("state", 0, 0, 0, (void*)scmState);
   scm_c_define_gsubr("state-machine", 0, 0, 0, (void*)scmStateMachine);
@@ -646,7 +646,7 @@ void createStaticSchemeBindings(
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
-  Track (*createTrack)(std::vector<std::function<void()>> fns),
+  Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
   void (*playbackTrack)(Track& track)
 ){
   scm_init_guile();

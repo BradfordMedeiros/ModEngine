@@ -9,6 +9,7 @@
 #include <variant>
 
 struct Track {
+  std::string name;
   std::vector<std::function<void()>> trackFns;
 };
 
@@ -25,7 +26,7 @@ struct StateMachine {
 
 typedef std::variant<Track, std::function<void()>> StateMachineItem;
 
-Track createTrack(std::vector<std::function<void()>> fns);
+Track createTrack(std::string name, std::vector<std::function<void()>> fns);
 void playbackTrack(Track& track);
 
 /*

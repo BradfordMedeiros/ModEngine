@@ -53,7 +53,7 @@ void createStaticSchemeBindings(
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
-  Track (*createTrack)(std::vector<std::function<void()>> fns),
+  Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
   void (*playbackTrack)(Track& track)
 );
 
