@@ -7,6 +7,7 @@
 #include <map>
 #include <functional>
 #include <variant>
+#include <assert.h>
 
 struct Track {
   std::string name;
@@ -14,13 +15,14 @@ struct Track {
 };
 
 struct State {
+  std::string name;
   std::map<std::string, std::string> attributes;
   std::map<std::string, Track> tracks;
 };
 
 struct StateMachine {
-  std::string currentState;
   std::string initialState;
+  std::string currentState;
   std::map<std::string, State> states;
 };
 
@@ -28,6 +30,8 @@ typedef std::variant<Track, std::function<void()>> StateMachineItem;
 
 Track createTrack(std::string name, std::vector<std::function<void()>> fns);
 void playbackTrack(Track& track);
+
+StateMachine createStateMachine(std::vector<State> states);
 
 /*
  
