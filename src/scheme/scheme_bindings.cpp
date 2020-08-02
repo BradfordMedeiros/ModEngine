@@ -407,8 +407,22 @@ SCM scmAttributes(){
   return SCM_UNSPECIFIED;
 }
 
-
 SCM trackType; // this is modified during init
+struct scmTrack {
+  Track track;
+  std::vector<SCM> funcRefs;
+};
+
+Track* getTrackFromScmType(SCM value){
+  Track* obj;
+  scm_assert_foreign_object_type (trackType, value);
+  obj = (Track*)scm_foreign_object_ref(value, 0);
+  return obj; 
+}
+void finalizeTrack (SCM trackobj){
+  auto track = getTrackFromScmType(trackobj);
+  std::cout << "finalizer called for track: " << track -> name  << std::endl;
+}
 Track (*_createTrack)(std::string name, std::vector<std::function<void()>> fns);
 SCM scmCreateTrack(SCM name, SCM funcs){
   std::cout << "create track, body length: " << scm_length(funcs) << std::endl;
@@ -433,19 +447,14 @@ SCM scmCreateTrack(SCM name, SCM funcs){
     tracks.push_back([func]() -> void{
       scm_call_0(func);  
     });
-      std::cout << "hello track!" << std::endl;  
   }
   
   
   auto track = createTrack(scm_to_locale_string(name), tracks);
   *trackobj = track;
+
+  scm_t_struct_finalize finalizer = finalizeTrack;
   return scm_make_foreign_object_1(trackType, trackobj);
-}
-Track* getTrackFromScmType(SCM value){
-  Track* obj;
-  scm_assert_foreign_object_type (trackType, value);
-  obj = (Track*)scm_foreign_object_ref(value, 0);
-  return obj; 
 }
 void (*_playbackTrack)(Track& track);
 SCM scmPlayTrack(SCM track){
@@ -676,7 +685,7 @@ void createStaticSchemeBindings(
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
-  trackType = scm_make_foreign_object_type(scm_from_utf8_symbol("track"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
+  trackType = scm_make_foreign_object_type(scm_from_utf8_symbol("track"), scm_list_1(scm_from_utf8_symbol("data")), finalizeTrack);
 
   _loadScene = loadScene;
   _unloadScene = unloadScene;
