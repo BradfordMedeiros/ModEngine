@@ -8,8 +8,6 @@ Track createTrack(std::string name, std::vector<std::function<void()>> fns){
   return track;
 }
 void playbackTrack(Track& track){
-  std::cout << "playback track name: " << track.name << std::endl;
-  std::cout << "playback track, number fns: " << track.trackFns.size() << std::endl; 
   for (auto trackFn : track.trackFns){
     trackFn();
   }
@@ -27,4 +25,8 @@ StateMachine createStateMachine(std::vector<State> states){
     .states = stateMapping,
   };
   return machine;
+}
+
+void playStateMachine(StateMachine& machine){
+  std::cout << "PLAY STATE MACHINE PLACEHOLDER" << std::endl;
 }

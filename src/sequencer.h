@@ -32,6 +32,7 @@ Track createTrack(std::string name, std::vector<std::function<void()>> fns);
 void playbackTrack(Track& track);
 
 StateMachine createStateMachine(std::vector<State> states);
+void playStateMachine(StateMachine& machine);
 
 /*
  

@@ -970,7 +970,9 @@ int main(int argc, char* argv[]){
     sendMessageToActiveServer,
     sendDataUdp,
     createTrack,
-    playbackTrack
+    playbackTrack,
+    createStateMachine,
+    playStateMachine
   );
 
   schemeBindings = getSchemeCallbacks();

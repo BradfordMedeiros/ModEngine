@@ -430,8 +430,6 @@ void finalizeTrack (SCM trackobj){  // test bvy invoking [gc]
 }
 Track (*_createTrack)(std::string name, std::vector<std::function<void()>> fns);
 SCM scmCreateTrack(SCM name, SCM funcs){
-  std::cout << "create track, body length: " << scm_length(funcs) << std::endl;
-
   auto trackobj = (scmTrack*)scm_gc_malloc(sizeof(scmTrack), "track");
 
   std::vector<std::function<void()>> tracks;
@@ -465,7 +463,33 @@ SCM scmPlayTrack(SCM track){
 SCM scmState(){
   return SCM_UNSPECIFIED;
 }
-SCM scmStateMachine(){
+
+std::vector<State> fromScmStateList(SCM statesList){
+  std::vector<State> states;
+  std::map<std::string, std::string> attributes;
+  std::map<std::string, Track> tracks;
+  State mockState {
+    .name = "mock",
+    .attributes = attributes,
+    .tracks = tracks,
+  };
+  states.push_back(mockState);
+  return states;
+}
+
+SCM stateMachineType; // this is modified during init
+StateMachine (*_createStateMachine)(std::vector<State> states);
+SCM scmStateMachine(SCM states){
+  auto statemachineobj = (StateMachine*)scm_gc_malloc(sizeof(StateMachine), "statemachine");
+  *statemachineobj = _createStateMachine(fromScmStateList(states));
+  return scm_make_foreign_object_1(stateMachineType, statemachineobj);
+}
+
+void (*_playStateMachine)(StateMachine& machine);
+SCM scmPlayStateMachine(SCM machine){
+  std::vector<State> mockStates;
+  auto mockMachine = _createStateMachine(mockStates);
+  _playStateMachine(mockMachine);
   return SCM_UNSPECIFIED;
 }
 
@@ -635,7 +659,8 @@ void defineFunctions(){
   scm_c_define_gsubr("create-track", 2, 0, 0, (void*)scmCreateTrack);
   scm_c_define_gsubr("play-track", 1, 0, 0, (void*)scmPlayTrack);
   scm_c_define_gsubr("state", 0, 0, 0, (void*)scmState);
-  scm_c_define_gsubr("state-machine", 0, 0, 0, (void*)scmStateMachine);
+  scm_c_define_gsubr("machine", 1, 0, 0, (void*)scmStateMachine);
+  scm_c_define_gsubr("play-machine", 1, 0, 0, (void*)scmPlayStateMachine);
 }
 
 
@@ -682,11 +707,14 @@ void createStaticSchemeBindings(
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
   Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
-  void (*playbackTrack)(Track& track)
+  void (*playbackTrack)(Track& track),
+  StateMachine (*createStateMachine)(std::vector<State> states),
+  void playStateMachine(StateMachine& machine)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
   trackType = scm_make_foreign_object_type(scm_from_utf8_symbol("track"), scm_list_1(scm_from_utf8_symbol("data")), finalizeTrack);
+  stateMachineType = scm_make_foreign_object_type(scm_from_utf8_symbol("statemachine"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
 
   _loadScene = loadScene;
   _unloadScene = unloadScene;
@@ -739,4 +767,6 @@ void createStaticSchemeBindings(
   // state machine
   _createTrack = createTrack;
   _playbackTrack = playbackTrack;
+  _createStateMachine = createStateMachine;
+  _playStateMachine = playStateMachine;
 }

@@ -54,7 +54,9 @@ void createStaticSchemeBindings(
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
   Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
-  void (*playbackTrack)(Track& track)
+  void (*playbackTrack)(Track& track),
+  StateMachine (*createStateMachine)(std::vector<State> states),
+  void playStateMachine(StateMachine& machine)
 );
 
 void defineFunctions();
