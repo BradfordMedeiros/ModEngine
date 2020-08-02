@@ -412,53 +412,51 @@ struct scmTrack {
   Track track;
   std::vector<SCM> funcRefs;
 };
-
-Track* getTrackFromScmType(SCM value){
-  Track* obj;
+scmTrack* getTrackFromScmType(SCM value){
+  scmTrack* obj;
   scm_assert_foreign_object_type (trackType, value);
-  obj = (Track*)scm_foreign_object_ref(value, 0);
+  obj = (scmTrack*)scm_foreign_object_ref(value, 0);
   return obj; 
 }
-void finalizeTrack (SCM trackobj){
+void finalizeTrack (SCM trackobj){  // test bvy invoking [gc]
   auto track = getTrackFromScmType(trackobj);
-  std::cout << "finalizer called for track: " << track -> name  << std::endl;
+  for (auto scmFn : track -> funcRefs){
+    scm_gc_unprotect_object(scmFn);
+  }
 }
 Track (*_createTrack)(std::string name, std::vector<std::function<void()>> fns);
 SCM scmCreateTrack(SCM name, SCM funcs){
   std::cout << "create track, body length: " << scm_length(funcs) << std::endl;
 
-  auto trackobj = (Track*)scm_gc_malloc(sizeof(Track), "track");
+  auto trackobj = (scmTrack*)scm_gc_malloc(sizeof(scmTrack), "track");
+
   std::vector<std::function<void()>> tracks;
+  std::vector<SCM> funcRefs;
 
   auto numTrackFns = scm_to_unsigned_integer(scm_length(funcs), std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max());
 
   for (int i = 0; i < numTrackFns; i++){
-    SCM func = scm_list_ref(funcs, scm_from_unsigned_integer(i));  // scm_gc_protect_object (SCM obj) do I need to protect this from gc? 
-
-    // This is needed because if not, the reference to func in the vector below can be garbage collected if the value of that variable goes out of scope
-    // elsewhere in scheme.  This seems to add a reference to the count which prevents it from being garbage collected.
-    // This is effectively reference counting, so multiple calls are fine (since we just need to incr/decr by one, not be responsible for it reaching zero)
-  
-    //scm_gc_protect_object(func); 
-    //scm_gc_unprotect_object  // <- put tthis in a finalizer:  https://www.gnu.org/software/guile/manual/html_node/Foreign-Object-Memory-Management.html
-
+    SCM func = scm_list_ref(funcs, scm_from_unsigned_integer(i));  
     bool isThunk = scm_to_bool(scm_procedure_p(func));
     assert(isThunk);
     tracks.push_back([func]() -> void{
       scm_call_0(func);  
     });
+
+    scm_gc_protect_object(func); // ref counting to prevent garbage collection, decrement happens in finalizer 
+    funcRefs.push_back(func);
   }
-  
-  
+
   auto track = createTrack(scm_to_locale_string(name), tracks);
-  *trackobj = track;
+  trackobj -> track = track;
+  trackobj -> funcRefs = funcRefs;
 
   scm_t_struct_finalize finalizer = finalizeTrack;
   return scm_make_foreign_object_1(trackType, trackobj);
 }
 void (*_playbackTrack)(Track& track);
 SCM scmPlayTrack(SCM track){
-  _playbackTrack(*getTrackFromScmType(track));
+  _playbackTrack(getTrackFromScmType(track) -> track);
   return SCM_UNSPECIFIED;
 }
 SCM scmState(){
