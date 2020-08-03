@@ -460,8 +460,20 @@ SCM scmPlayTrack(SCM track){
   _playbackTrack(getTrackFromScmType(track) -> track);
   return SCM_UNSPECIFIED;
 }
-SCM scmState(){
-  return SCM_UNSPECIFIED;
+
+
+SCM stateType; // this is modified during init
+SCM scmState(SCM name){
+  auto stateobj = (State*)scm_gc_malloc(sizeof(State), "state");
+  std::map<std::string, std::string> attributes;
+  std::map<std::string, Track> tracks;
+  State state {
+    .name = scm_to_locale_string(name),
+    .attributes = attributes,
+    .tracks = tracks,
+  };
+  *stateobj = state;
+  return scm_make_foreign_object_1(stateType, stateobj);
 }
 
 std::vector<State> fromScmStateList(SCM statesList){
@@ -726,6 +738,7 @@ void createStaticSchemeBindings(
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
   trackType = scm_make_foreign_object_type(scm_from_utf8_symbol("track"), scm_list_1(scm_from_utf8_symbol("data")), finalizeTrack);
+  stateType = scm_make_foreign_object_type(scm_from_utf8_symbol("state"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
   stateMachineType = scm_make_foreign_object_type(scm_from_utf8_symbol("statemachine"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
 
   _loadScene = loadScene;
