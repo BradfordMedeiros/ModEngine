@@ -43,6 +43,5 @@ std::vector<StateMachine> activeMachines;
 void processStateMachines(){
   for (auto machine : activeMachines){
     State& activeState = machine.states.at(machine.currentState);
-    for 
   }
 } 
