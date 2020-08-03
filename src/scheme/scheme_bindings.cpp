@@ -478,18 +478,23 @@ std::vector<State> fromScmStateList(SCM statesList){
 }
 
 SCM stateMachineType; // this is modified during init
+StateMachine* getMachineFromScmType(SCM value){
+  StateMachine* obj;
+  scm_assert_foreign_object_type (stateMachineType, value);
+  obj = (StateMachine*)scm_foreign_object_ref(value, 0);
+  return obj; 
+}
 StateMachine (*_createStateMachine)(std::vector<State> states);
 SCM scmStateMachine(SCM states){
   auto statemachineobj = (StateMachine*)scm_gc_malloc(sizeof(StateMachine), "statemachine");
-  *statemachineobj = _createStateMachine(fromScmStateList(states));
+  auto machine = _createStateMachine(fromScmStateList(states));
+  *statemachineobj = machine;
   return scm_make_foreign_object_1(stateMachineType, statemachineobj);
 }
 
 void (*_playStateMachine)(StateMachine& machine);
-SCM scmPlayStateMachine(SCM machine){
-  std::vector<State> mockStates;
-  auto mockMachine = _createStateMachine(mockStates);
-  _playStateMachine(mockMachine);
+SCM scmPlayStateMachine(SCM scmMachine){
+  _playStateMachine(*getMachineFromScmType(scmMachine));
   return SCM_UNSPECIFIED;
 }
 

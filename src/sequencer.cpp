@@ -28,5 +28,8 @@ StateMachine createStateMachine(std::vector<State> states){
 }
 
 void playStateMachine(StateMachine& machine){
-  std::cout << "PLAY STATE MACHINE PLACEHOLDER" << std::endl;
+  std::cout << "states in machine: " << machine.states.size() << std::endl;
+  for (auto [name, state] : machine.states){
+    std::cout << "state name:  " << name << std::endl;
+  }
 }
