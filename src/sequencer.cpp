@@ -39,7 +39,6 @@ void playStateMachine(StateMachine& machine){
   activeMachines.push_back(machine);
 }
 
-
 void processStateMachines(){
   for (auto machine : activeMachines){
     State& activeState = machine.states.at(machine.currentState);

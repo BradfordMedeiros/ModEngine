@@ -467,6 +467,21 @@ SCM scmState(SCM name){
   auto stateobj = (State*)scm_gc_malloc(sizeof(State), "state");
   std::map<std::string, std::string> attributes;
   std::map<std::string, Track> tracks;
+
+  Track defaultTrack {
+    .name = "default",
+  };
+  defaultTrack.trackFns.push_back([]() -> void {
+    std::cout << "track step 0" << std::endl;
+  });
+  defaultTrack.trackFns.push_back([]() -> void {
+    std::cout << "track step 1" << std::endl;
+  });
+  defaultTrack.trackFns.push_back([]() -> void {
+    std::cout << "track step 2" << std::endl;
+  });
+  tracks[defaultTrack.name] = defaultTrack; 
+
   State state {
     .name = scm_to_locale_string(name),
     .attributes = attributes,
@@ -478,29 +493,13 @@ SCM scmState(SCM name){
 
 std::vector<State> fromScmStateList(SCM statesList){
   std::vector<State> states;
-  std::map<std::string, std::string> attributes;
-  std::map<std::string, Track> tracks;
-  Track defaultTrack {
-    .name = "default",
-  };
-
-  defaultTrack.trackFns.push_back([]() -> void {
-    std::cout << "track step 0" << std::endl;
-  });
-  defaultTrack.trackFns.push_back([]() -> void {
-    std::cout << "track step 1" << std::endl;
-  });
-  defaultTrack.trackFns.push_back([]() -> void {
-    std::cout << "track step 2" << std::endl;
-  });
-
-  tracks[defaultTrack.name] = defaultTrack; 
-  State mockState {
-    .name = "mock",
-    .attributes = attributes,
-    .tracks = tracks,
-  };
-  states.push_back(mockState);
+  auto listLength = toUnsignedInt(scm_length(statesList));
+  for (unsigned int i = 0; i < listLength; i++){
+    SCM scmValue = scm_list_ref(statesList, scm_from_int64(i));
+    scm_assert_foreign_object_type(stateType, scmValue);
+    State* obj = (State*)scm_foreign_object_ref(scmValue, 0);
+    states.push_back(*obj);
+  }
   return states;
 }
 
