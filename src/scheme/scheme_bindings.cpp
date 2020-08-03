@@ -480,6 +480,21 @@ std::vector<State> fromScmStateList(SCM statesList){
   std::vector<State> states;
   std::map<std::string, std::string> attributes;
   std::map<std::string, Track> tracks;
+  Track defaultTrack {
+    .name = "default",
+  };
+
+  defaultTrack.trackFns.push_back([]() -> void {
+    std::cout << "track step 0" << std::endl;
+  });
+  defaultTrack.trackFns.push_back([]() -> void {
+    std::cout << "track step 1" << std::endl;
+  });
+  defaultTrack.trackFns.push_back([]() -> void {
+    std::cout << "track step 2" << std::endl;
+  });
+
+  tracks[defaultTrack.name] = defaultTrack; 
   State mockState {
     .name = "mock",
     .attributes = attributes,

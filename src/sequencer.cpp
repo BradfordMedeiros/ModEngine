@@ -20,8 +20,9 @@ StateMachine createStateMachine(std::vector<State> states){
     stateMapping[state.name] = state;
   }
   StateMachine machine {
-    .initialState = states.at(0).name,
     .currentState = states.at(0).name,
+    .currentTrack = states.at(0).tracks.at("default").name,
+    .trackIndex = 0,
     .states = stateMapping,
   };
   return machine;
@@ -43,5 +44,11 @@ std::vector<StateMachine> activeMachines;
 void processStateMachines(){
   for (auto machine : activeMachines){
     State& activeState = machine.states.at(machine.currentState);
+    Track& currentTrack = activeState.tracks.at(machine.currentTrack);
+    for (int i = machine.trackIndex; i < currentTrack.trackFns.size(); i++){
+       auto fn = currentTrack.trackFns.at(i);
+       fn();
+       machine.trackIndex++;
+    }
   }
 } 

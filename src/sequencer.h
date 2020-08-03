@@ -21,8 +21,9 @@ struct State {
 };
 
 struct StateMachine {
-  std::string initialState;
   std::string currentState;
+  std::string currentTrack;
+  int trackIndex;
   std::map<std::string, State> states;
 };
 
