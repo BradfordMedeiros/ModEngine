@@ -680,7 +680,7 @@ void defineFunctions(){
   scm_c_define_gsubr("attributes", 0, 0, 0, (void*)scmAttributes);
   scm_c_define_gsubr("create-track", 2, 0, 0, (void*)scmCreateTrack);
   scm_c_define_gsubr("play-track", 1, 0, 0, (void*)scmPlayTrack);
-  scm_c_define_gsubr("state", 0, 0, 0, (void*)scmState);
+  scm_c_define_gsubr("state", 1, 0, 0, (void*)scmState);
   scm_c_define_gsubr("machine", 1, 0, 0, (void*)scmStateMachine);
   scm_c_define_gsubr("play-machine", 1, 0, 0, (void*)scmPlayStateMachine);
   scm_c_define_gsubr("set-machine", 2, 0, 0, (void*)scmSetStateMachine);
