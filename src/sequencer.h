@@ -35,11 +35,20 @@ StateMachine createStateMachine(std::vector<State> states);
 void playStateMachine(StateMachine& machine);
 void setStateMachine(StateMachine& machine, std::string newState);
 
+
+void processStateMachines();
+
+
 /*
+
+(machine (list 
+  (state "open")
+  (state "closed")
+))
  
 
-  (define mainscript 
-    (create-states
+  (define mainmachine 
+    (create-machine
       (state closed 
         (attributes (color "blue"))     ; this should set the color attribute to blue, but then set it back when not in closed state
         (track "opening door" 
@@ -63,6 +72,8 @@ void setStateMachine(StateMachine& machine, std::string newState);
       )
     )
   )
+
+  (play-machine mainmachine)
 */
 
 #endif

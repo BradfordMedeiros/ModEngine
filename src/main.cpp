@@ -1089,6 +1089,7 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
+    processStateMachines();
     onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     maybeGetClientMessage(onClientMessage);
 

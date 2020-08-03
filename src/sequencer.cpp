@@ -37,3 +37,12 @@ void playStateMachine(StateMachine& machine){
 void setStateMachine(StateMachine& machine, std::string newState){
   machine.currentState = newState;
 }
+
+
+std::vector<StateMachine> activeMachines;
+void processStateMachines(){
+  for (auto machine : activeMachines){
+    State& activeState = machine.states.at(machine.currentState);
+    for 
+  }
+} 
