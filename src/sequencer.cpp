@@ -27,20 +27,19 @@ StateMachine createStateMachine(std::vector<State> states){
   };
   return machine;
 }
-
-void playStateMachine(StateMachine& machine){
-  std::cout << "states in machine: " << machine.states.size() << std::endl;
-  for (auto [name, state] : machine.states){
-    std::cout << "state name:  " << name << std::endl;
-  }
-}
-
 void setStateMachine(StateMachine& machine, std::string newState){
   machine.currentState = newState;
+  machine.currentTrack = "default";
+  machine.trackIndex = 0;
+}
+
+std::vector<StateMachine> activeMachines;
+
+void playStateMachine(StateMachine& machine){
+  activeMachines.push_back(machine);
 }
 
 
-std::vector<StateMachine> activeMachines;
 void processStateMachines(){
   for (auto machine : activeMachines){
     State& activeState = machine.states.at(machine.currentState);
