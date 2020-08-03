@@ -461,27 +461,18 @@ SCM scmPlayTrack(SCM track){
   return SCM_UNSPECIFIED;
 }
 
-
 SCM stateType; // this is modified during init
-SCM scmState(SCM name){
+SCM scmState(SCM name, SCM scmTracks){                  
   auto stateobj = (State*)scm_gc_malloc(sizeof(State), "state");
   std::map<std::string, std::string> attributes;
   std::map<std::string, Track> tracks;
 
-  Track defaultTrack {
-    .name = "default",
-  };
-  defaultTrack.trackFns.push_back([]() -> void {
-    std::cout << "track step 0" << std::endl;
-  });
-  defaultTrack.trackFns.push_back([]() -> void {
-    std::cout << "track step 1" << std::endl;
-  });
-  defaultTrack.trackFns.push_back([]() -> void {
-    std::cout << "track step 2" << std::endl;
-  });
-  tracks[defaultTrack.name] = defaultTrack; 
-
+  auto listLength = toUnsignedInt(scm_length(scmTracks));
+  for (unsigned int i = 0; i < listLength; i++){
+    SCM trackValue = scm_list_ref(scmTracks, scm_from_int64(i));
+    scmTrack* track = getTrackFromScmType(trackValue);
+    tracks[track -> track.name] = track -> track;  // @TODO - probably need to add extra track scm gc lock here + finalize, since making copy of the track
+  }
   State state {
     .name = scm_to_locale_string(name),
     .attributes = attributes,
@@ -694,7 +685,7 @@ void defineFunctions(){
   scm_c_define_gsubr("attributes", 0, 0, 0, (void*)scmAttributes);
   scm_c_define_gsubr("create-track", 2, 0, 0, (void*)scmCreateTrack);
   scm_c_define_gsubr("play-track", 1, 0, 0, (void*)scmPlayTrack);
-  scm_c_define_gsubr("state", 1, 0, 0, (void*)scmState);
+  scm_c_define_gsubr("state", 2, 0, 0, (void*)scmState);
   scm_c_define_gsubr("machine", 1, 0, 0, (void*)scmStateMachine);
   scm_c_define_gsubr("play-machine", 1, 0, 0, (void*)scmPlayStateMachine);
   scm_c_define_gsubr("set-machine", 2, 0, 0, (void*)scmSetStateMachine);
