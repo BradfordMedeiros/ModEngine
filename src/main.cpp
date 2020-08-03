@@ -972,7 +972,8 @@ int main(int argc, char* argv[]){
     createTrack,
     playbackTrack,
     createStateMachine,
-    playStateMachine
+    playStateMachine,
+    setStateMachine
   );
 
   schemeBindings = getSchemeCallbacks();

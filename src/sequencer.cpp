@@ -33,3 +33,7 @@ void playStateMachine(StateMachine& machine){
     std::cout << "state name:  " << name << std::endl;
   }
 }
+
+void setStateMachine(StateMachine& machine, std::string newState){
+  machine.currentState = newState;
+}

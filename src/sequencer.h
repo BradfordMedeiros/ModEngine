@@ -33,6 +33,7 @@ void playbackTrack(Track& track);
 
 StateMachine createStateMachine(std::vector<State> states);
 void playStateMachine(StateMachine& machine);
+void setStateMachine(StateMachine& machine, std::string newState);
 
 /*
  
