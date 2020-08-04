@@ -509,14 +509,14 @@ SCM scmStateMachine(SCM states){
   return scm_make_foreign_object_1(stateMachineType, statemachineobj);
 }
 
-void (*_playStateMachine)(StateMachine& machine);
+void (*_playStateMachine)(StateMachine* machine);
 SCM scmPlayStateMachine(SCM scmMachine){
-  _playStateMachine(*getMachineFromScmType(scmMachine));
+  _playStateMachine(getMachineFromScmType(scmMachine));
   return SCM_UNSPECIFIED;
 }
-void (*_setStateMachine)(StateMachine& machine, std::string newState);
+void (*_setStateMachine)(StateMachine* machine, std::string newState);
 SCM scmSetStateMachine(SCM scmMachine, SCM state){
-  _setStateMachine(*getMachineFromScmType(scmMachine), scm_to_locale_string(state));
+  _setStateMachine(getMachineFromScmType(scmMachine), scm_to_locale_string(state));
   return SCM_UNSPECIFIED;
 }
 
@@ -737,8 +737,8 @@ void createStaticSchemeBindings(
   Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
   void (*playbackTrack)(Track& track),
   StateMachine (*createStateMachine)(std::vector<State> states),
-  void (*playStateMachine)(StateMachine& machine),
-  void (*setStateMachine)(StateMachine& machine, std::string newState)
+  void (*playStateMachine)(StateMachine* machine),
+  void (*setStateMachine)(StateMachine* machine, std::string newState)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);

@@ -33,17 +33,19 @@ Track createTrack(std::string name, std::vector<std::function<void()>> fns);
 void playbackTrack(Track& track);
 
 StateMachine createStateMachine(std::vector<State> states);
-void playStateMachine(StateMachine& machine);
-void setStateMachine(StateMachine& machine, std::string newState);
-
+void playStateMachine(StateMachine* machine);
+void setStateMachine(StateMachine* machine, std::string newState);
 
 void processStateMachines();
 
 
 /*
 
+
 (machine (list 
-  (state "open")
+  (state "open (list 
+    (track "sometrack" (list + + +))
+  ))
   (state "closed")
 ))
  

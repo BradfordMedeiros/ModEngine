@@ -27,26 +27,28 @@ StateMachine createStateMachine(std::vector<State> states){
   };
   return machine;
 }
-void setStateMachine(StateMachine& machine, std::string newState){
-  machine.currentState = newState;
-  machine.currentTrack = "default";
-  machine.trackIndex = 0;
+
+std::vector<StateMachine*> activeMachines;
+
+void setStateMachine(StateMachine* machine, std::string newState){
+  machine -> currentState = newState;
+  machine -> currentTrack = "default";
+  machine -> trackIndex = 0;
 }
 
-std::vector<StateMachine> activeMachines;
 
-void playStateMachine(StateMachine& machine){
+void playStateMachine(StateMachine* machine){
   activeMachines.push_back(machine);
 }
 
 void processStateMachines(){
   for (auto machine : activeMachines){
-    State& activeState = machine.states.at(machine.currentState);
-    Track& currentTrack = activeState.tracks.at(machine.currentTrack);
-    for (int i = machine.trackIndex; i < currentTrack.trackFns.size(); i++){
+    State& activeState = machine -> states.at(machine -> currentState);
+    Track& currentTrack = activeState.tracks.at(machine -> currentTrack);
+    for (int i = machine -> trackIndex; i < currentTrack.trackFns.size(); i++){
        auto fn = currentTrack.trackFns.at(i);
        fn();
-       machine.trackIndex++;
+       machine -> trackIndex++;
     }
   }
 } 
