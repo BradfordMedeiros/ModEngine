@@ -984,7 +984,7 @@ int main(int argc, char* argv[]){
   }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadScript(script);
+    loadScript(script, -1);
   }
 
   BulletDebugDrawer drawer(addLineNextCycle);

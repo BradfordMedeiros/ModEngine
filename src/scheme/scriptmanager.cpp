@@ -5,7 +5,7 @@ static std::map<std::string, SCM> scriptnameToModule;
 // IMPORTANT BUG --> the create/destroy of modules probably a huge memory leak. 
 // Need to figure out how to properly bring the up/down (global module tree?)
 
-void loadScript(std::string script){ 
+void loadScript(std::string script, objid id){ 
   std::cout << "loading script: " << script << std::endl;
   assert(scriptnameToModule.find(script) == scriptnameToModule.end());
   SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
