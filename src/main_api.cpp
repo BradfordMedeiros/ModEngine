@@ -81,10 +81,10 @@ short loadSceneData(std::string sceneData){
 
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  removeSceneFromWorld(world, sceneId, unloadSoundState);
+  removeSceneFromWorld(world, sceneId, unloadSoundState, unloadScript);
 }
 void unloadAllScenes(){
-  removeAllScenesFromWorld(world, unloadSoundState, true);
+  removeAllScenesFromWorld(world, unloadSoundState, true, unloadScript);
 }
 
 // @TODO - save all the scenes in the world
@@ -193,7 +193,7 @@ short makeObject(std::string serializedobj, objid id, bool useObjId){
   return addObjectToScene(world, 0, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
 }
 void removeObjectById(short id){
-  removeObjectFromScene(world, id, unloadSoundState);
+  removeObjectFromScene(world, id, unloadSoundState, unloadScript);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

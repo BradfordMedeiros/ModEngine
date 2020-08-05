@@ -37,6 +37,6 @@ struct SchemeBindingCallbacks {
 
 SchemeBindingCallbacks getSchemeCallbacks();
 void loadScript(std::string script, objid id);
-void unloadScript(std::string script);
+void unloadScript(std::string script, objid id);
 
 #endif

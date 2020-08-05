@@ -18,7 +18,7 @@ void loadScript(std::string script, objid id){
 
 // @TODO -- need to figure out how to really unload a module.
 // I don't think this actually causes this module to be garbage collected.
-void unloadScript(std::string script){
+void unloadScript(std::string script, objid id){
   assert(scriptnameToModule.find(script) != scriptnameToModule.end());
   scriptnameToModule.erase(script);
 }

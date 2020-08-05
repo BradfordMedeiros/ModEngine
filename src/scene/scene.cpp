@@ -456,7 +456,7 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
   std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
 }
-void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip){
+void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){
   if (world.scenes.find(sceneId) == world.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
@@ -468,13 +468,13 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
   }
   world.scenes.erase(sceneId);
 }
-void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, bool resetScenes){
+void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, bool resetScenes, std::function<void(std::string, objid)> unloadScript){
   std::vector<objid> sceneIds; 
   for (auto [sceneId, _] : world.scenes){
     sceneIds.push_back(sceneId);
   }
   for (auto sceneId : sceneIds){
-    removeSceneFromWorld(world, sceneId, unloadClip);
+    removeSceneFromWorld(world, sceneId, unloadClip, unloadScript);
   }
   if (resetScenes){
     resetSceneId(world);
@@ -485,7 +485,6 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
 objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   // @TODO consolidate with addSceneToWorld.  Duplicate code.
   std::vector<objid> idsAdded;
-  
   int numIdsGenerated = 0;
   auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
     auto newId = -1;
@@ -568,7 +567,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 }
 
 // this needs to also delete all children objects. 
-void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip){  
+void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){  
   Scene& scene = world.scenes.at(world.idToScene.at(objectId));
   auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
   for (auto gameobjId : getIdsInGroup(scene, groupId)){
