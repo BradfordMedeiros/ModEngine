@@ -6,7 +6,31 @@ std::string recordingPath(std::string name){
 
 
 Recording loadRecording(std::string name){
+  std::string serializedData = loadFile(std::string("./res/recordings/" + name));
+  auto properties = split(serializedData, '\n');
 
+  std::vector<Record> keyframes;
+  int index = 0;
+  for (auto property : properties){
+    auto attributeLine = split(property, ':');
+    if (attributeLine.at(0) == "position"){
+      Transformation transformation {
+        .position = parseVec(attributeLine.at(1)),
+      };
+      Properties properties {
+        .transformation = transformation,
+      };
+      Record record {
+        time : index, 
+        properties : properties,
+      };
+    }
+  }
+
+  Recording recording  {
+    .keyframes = keyframes,
+  };
+  return recording;
 }
 
 std::string serializeProperties(Properties& properties){
@@ -46,3 +70,5 @@ Properties propertiesForRecording(Recording& recording, float time){
 void recordPropertiesToRecording(Recording& recording, Properties& properties){
   
 }
+
+void startRecording()
