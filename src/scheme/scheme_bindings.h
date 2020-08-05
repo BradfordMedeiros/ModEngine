@@ -57,7 +57,9 @@ void createStaticSchemeBindings(
   void (*playbackTrack)(Track& track),
   StateMachine (*createStateMachine)(std::vector<State> states),
   void (*playStateMachine)(StateMachine* machine),
-  void (*setStateMachine)(StateMachine* machine, std::string newState)
+  void (*setStateMachine)(StateMachine* machine, std::string newState),
+  void (*startRecording)(objid id, std::string recordingPath),
+  void (*playRecording)(objid id, std::string recordingPath)
 );
 
 void defineFunctions();

@@ -71,4 +71,6 @@ void recordPropertiesToRecording(Recording& recording, Properties& properties){
   
 }
 
-void startRecording()
+void startRecording(){
+  
+}

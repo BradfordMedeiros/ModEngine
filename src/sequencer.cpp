@@ -36,7 +36,6 @@ void setStateMachine(StateMachine* machine, std::string newState){
   machine -> trackIndex = 0;
 }
 
-
 void playStateMachine(StateMachine* machine){
   activeMachines.push_back(machine);
 }

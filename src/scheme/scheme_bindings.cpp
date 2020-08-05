@@ -520,6 +520,17 @@ SCM scmSetStateMachine(SCM scmMachine, SCM state){
   return SCM_UNSPECIFIED;
 }
 
+void (*_startRecording)(objid id, std::string recordingPath);
+SCM scmStartRecording(SCM id, SCM recordingPath){
+  _startRecording(scm_to_short(id), scm_to_locale_string(recordingPath));
+  return SCM_UNSPECIFIED;
+}
+void (*_playRecording)(objid id, std::string recordingPath);
+SCM scmPlayRecording(SCM id, SCM recordingPath){
+  _playRecording(scm_to_short(id), scm_to_locale_string(recordingPath));
+  return SCM_UNSPECIFIED;
+}
+
 
 // Callbacks
 void onFrame(){
@@ -689,6 +700,11 @@ void defineFunctions(){
   scm_c_define_gsubr("machine", 1, 0, 0, (void*)scmStateMachine);
   scm_c_define_gsubr("play-machine", 1, 0, 0, (void*)scmPlayStateMachine);
   scm_c_define_gsubr("set-machine", 2, 0, 0, (void*)scmSetStateMachine);
+
+  // state-on-event
+  // state-on-exit
+  scm_c_define_gsubr("start-recording", 2, 0, 0, (void*)scmStartRecording);
+  scm_c_define_gsubr("play-recording", 2, 0, 0, (void*)scmPlayRecording);
 }
 
 
@@ -738,7 +754,9 @@ void createStaticSchemeBindings(
   void (*playbackTrack)(Track& track),
   StateMachine (*createStateMachine)(std::vector<State> states),
   void (*playStateMachine)(StateMachine* machine),
-  void (*setStateMachine)(StateMachine* machine, std::string newState)
+  void (*setStateMachine)(StateMachine* machine, std::string newState),
+  void (*startRecording)(objid id, std::string recordingPath),
+  void (*playRecording)(objid id, std::string recordingPath)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -800,4 +818,7 @@ void createStaticSchemeBindings(
   _createStateMachine = createStateMachine;
   _playStateMachine = playStateMachine;
   _setStateMachine = setStateMachine;
+
+  _startRecording = startRecording;
+  _playRecording = playRecording;
 }

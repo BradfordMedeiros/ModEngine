@@ -114,6 +114,9 @@ double timeSeconds();
 void sendDataUdp(std::string data);
 void connectServer(std::string server);
 
+void startRecording(objid id, std::string recordingPath);
+void playRecording(objid id, std::string recordingPath);
+
 void copyStr(std::string& data, char* copyTo, int size);
 
 #endif

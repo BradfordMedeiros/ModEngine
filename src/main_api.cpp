@@ -304,3 +304,10 @@ void connectServer(std::string data){
     return packet;
   });
 }
+
+void startRecording(objid id, std::string recordingPath){
+  std::cout << "start recording placeholder" << std::endl;
+}
+void playRecording(objid id, std::string recordingPath){
+  std::cout << "play recording placeholder" << std::endl;
+}
