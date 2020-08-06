@@ -439,12 +439,21 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   return addSceneToWorldFromData(world, loadFile(sceneFile), loadClip, loadScript);
 }
 
-void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip){
+GameObject& getGameObject(World& world, objid id){
+  return world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id);
+}
+
+void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId);
     assert(rigidBody != NULL);
     rmRigidBody(world.physicsEnvironment, rigidBody);
     world.rigidbodys.erase(objectId);
+  }
+
+  auto scriptName = getGameObject(world, objectId).script;
+  if (scriptName != ""){
+    unloadScript(scriptName, objectId);
   }
   removeObject(world.objectMapping, objectId, unloadClip, []() -> void {
     std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
@@ -464,7 +473,7 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
 
   Scene& scene = world.scenes.at(sceneId);
   for (auto objectId : listObjInScene(scene)){
-    removeObjectById(world, objectId, unloadClip);
+    removeObjectById(world, objectId, unloadClip, unloadScript);
   }
   world.scenes.erase(sceneId);
 }
@@ -576,14 +585,11 @@ void removeObjectFromScene(World& world, objid objectId, std::function<void(std:
     }
     auto removedObjects = removeObjectFromScenegraph(scene, gameobjId);  
     for (auto id : removedObjects){
-      removeObjectById(world, id, unloadClip);
+      removeObjectById(world, id, unloadClip, unloadScript);
     }
   }
 }
 
-GameObject& getGameObject(World& world, objid id){
-  return world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id);
-}
 
 Properties getProperties(World& world, objid id){
   Properties properties {

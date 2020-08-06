@@ -6,7 +6,7 @@ static std::map<std::string, SCM> scriptnameToModule;
 // Need to figure out how to properly bring the up/down (global module tree?)
 
 void loadScript(std::string script, objid id){ 
-  std::cout << "loading script: " << script << std::endl;
+  std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) == scriptnameToModule.end());
   SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
   scriptnameToModule[script] = module;                                  // This probably will be per entity not 1:1 with script paths
@@ -19,6 +19,7 @@ void loadScript(std::string script, objid id){
 // @TODO -- need to figure out how to really unload a module.
 // I don't think this actually causes this module to be garbage collected.
 void unloadScript(std::string script, objid id){
+  std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) != scriptnameToModule.end());
   scriptnameToModule.erase(script);
 }
