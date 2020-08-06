@@ -808,7 +808,7 @@ int main(int argc, char* argv[]){
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("e,chunksize", "Size of worlds chunks", cxxopts::value<float>()->default_value("100"))
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
-   ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::string>()->default_value("./res/scenes/example.rawscene"))
+   ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -817,7 +817,9 @@ int main(int argc, char* argv[]){
   numChunkingGridCells = result["grid"].as<int>();
   useChunkingSystem = result["world"].as<bool>();
   chunkSize = result["chunksize"].as<float>();
-  rawSceneFile = result["rawscene"].as<std::string>();
+
+  auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
+  rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
@@ -1051,7 +1053,10 @@ int main(int argc, char* argv[]){
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
-    loadScene(rawSceneFile);
+    std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
+    for (auto rawScene : rawScenes){
+      loadScene(rawScene);
+    }
   }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 
