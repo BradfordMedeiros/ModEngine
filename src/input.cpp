@@ -125,7 +125,6 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   }
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
     state.moveRelativeEnabled = !state.moveRelativeEnabled;
-    std::cout << "Move relative: " << state.moveRelativeEnabled << std::endl;
   }
   if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
     state.toggleFov = !state.toggleFov;

@@ -255,6 +255,7 @@ void sendEventMessage(std::string message){
   auto channelMapping = getChannelMapping(world.objectMapping);
   if (channelMapping.find(message) != channelMapping.end()){
     for (auto to : channelMapping.at(message)){
+      std::cout << "SYSYSTEM INFO: channel: (" << message << ", " << to << ")" << std::endl;
       channelMessages.push_back(to);
     }
   }

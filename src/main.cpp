@@ -997,7 +997,7 @@ int main(int argc, char* argv[]){
     onObjectLeave, 
     [](GameObject& obj) -> void { 
       if (true || obj.netsynchronize){    // Maybe should limit to only netsync objects?
-        std::cout << "update obj id: " << obj.id << std::endl;
+        //std::cout << "update obj id: " << obj.id << std::endl;
         UdpPacket packet { .type = UPDATE };
         packet.payload.updatepacket = UpdatePacket { 
           .id = obj.id,
