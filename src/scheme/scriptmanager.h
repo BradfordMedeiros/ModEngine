@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <queue>          
 #include "./scheme_bindings.h"
 
 typedef void(*func)();
@@ -15,7 +16,7 @@ typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(short index);
 typedef void(*boolfunc)(bool value);
-typedef void(*messagefunc)(std::vector<std::string>&);
+typedef void(*messagefunc)(std::queue<std::string>&);
 typedef void(*stringfunc)(std::string);
 
 struct SchemeBindingCallbacks {

@@ -79,13 +79,12 @@ void onCameraSystemChangeAllScripts(bool usingBuiltInCamera){
     onCameraSystemChange(usingBuiltInCamera);
   }
 }
-void onMessageAllScripts(std::vector<std::string>& messages){
-  if (messages.size() <= 0){
-    return;
-  }
-  for (auto &[name, module] : scriptnameToModule){
-    scm_set_current_module(module);
-    for (auto message : messages){
+void onMessageAllScripts(std::queue<std::string>& messages){
+  while (!messages.empty()){
+    auto message = messages.front();
+    messages.pop();
+    for (auto &[name, module] : scriptnameToModule){
+      scm_set_current_module(module);
       onMessage(message);
     }
   }

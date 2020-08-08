@@ -94,7 +94,8 @@ glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
-std::vector<std::string> channelMessages;
+std::queue<std::string> channelMessages;
+
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -1203,8 +1204,7 @@ int main(int argc, char* argv[]){
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
     schemeBindings.onFrame();
-    schemeBindings.onMessage(channelMessages);
-    channelMessages.clear();
+    schemeBindings.onMessage(channelMessages);  // modifies the queue
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 

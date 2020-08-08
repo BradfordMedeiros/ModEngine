@@ -2,6 +2,7 @@
 #define MOD_MAINAPI
 
 #include <GLFW/glfw3.h>
+#include <queue>          
 #include "./scene/scene.h"
 #include "./state.h"
 #include "./scene/physics.h"
