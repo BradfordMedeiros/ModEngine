@@ -21,7 +21,7 @@ StateMachine createStateMachine(std::vector<State> states){
   }
   StateMachine machine {
     .currentState = states.at(0).name,
-    .currentTrack = states.at(0).tracks.at("default").name,
+    .currentTrack = states.at(0).tracks.at(states.at(0).defaultTrack).name,
     .trackIndex = 0,
     .states = stateMapping,
   };
@@ -31,8 +31,11 @@ StateMachine createStateMachine(std::vector<State> states){
 std::vector<StateMachine*> activeMachines;
 
 void setStateMachine(StateMachine* machine, std::string newState){
+  if (machine -> currentState == newState){
+    return;
+  }
   machine -> currentState = newState;
-  machine -> currentTrack = "default";
+  machine -> currentTrack = machine -> states.at(newState).defaultTrack;
   machine -> trackIndex = 0;
 }
 

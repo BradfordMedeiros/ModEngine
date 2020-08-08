@@ -16,6 +16,7 @@ struct Track {
 
 struct State {
   std::string name;
+  std::string defaultTrack;
   std::map<std::string, std::string> attributes;
   std::map<std::string, Track> tracks;
 };

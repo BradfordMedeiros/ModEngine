@@ -468,13 +468,21 @@ SCM scmState(SCM name, SCM scmTracks){
   std::map<std::string, Track> tracks;
 
   auto listLength = toUnsignedInt(scm_length(scmTracks));
+
+  std::string defaultTrack;
   for (unsigned int i = 0; i < listLength; i++){
     SCM trackValue = scm_list_ref(scmTracks, scm_from_int64(i));
     scmTrack* track = getTrackFromScmType(trackValue);
     tracks[track -> track.name] = track -> track;  // @TODO - probably need to add extra track scm gc lock here + finalize, since making copy of the track
+    if (i == 0){
+      defaultTrack = track -> track.name;
+    }
   }
+  assert(listLength > 0);
+
   State state {
     .name = scm_to_locale_string(name),
+    .defaultTrack = defaultTrack,
     .attributes = attributes,
     .tracks = tracks,
   };
