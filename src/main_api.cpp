@@ -44,7 +44,6 @@ void nextCamera(){
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
   short activeCameraId = cameraIndexs.at(state.activeCamera);
   setActiveCamera(activeCameraId);
-  std::cout << "active camera is: " << state.activeCamera << std::endl;
 }
 void moveCamera(glm::vec3 offset){
   defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
