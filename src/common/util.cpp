@@ -88,6 +88,17 @@ std::vector<std::string> filterWhitespace(std::vector<std::string> values){
   return newStrings;
 }
 
+std::vector<std::string> filterComments(std::vector<std::string> values){
+  std::vector<std::string> newStrings;
+  for (auto value : values){
+    auto parts = split(value, '#');
+    if (parts.size() > 0){
+      newStrings.push_back(parts.at(0));
+    }
+  }
+  return newStrings;
+}
+
 std::string print(glm::vec3 vec){
   std::stringstream stream;
   stream << vec.x << " " << vec.y << " " << vec.z;

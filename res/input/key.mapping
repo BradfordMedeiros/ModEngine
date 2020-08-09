@@ -1,7 +1,10 @@
 # Comments can go here
 
-'A' 'D'
-'D' 'A'
-4 'S'
-5 'T'
-6 'R'
+
+'A' > 'D'
+'D' > 'A'
+
+'H' > 65
+
+# > means to remap the value
+# > this remapping happens one way
