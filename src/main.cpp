@@ -45,6 +45,7 @@
 #include "./easy_use.h"
 #include "./scene/recorder.h"
 #include "./sequencer.h"
+#include "./keymapper.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
@@ -810,6 +811,7 @@ int main(int argc, char* argv[]){
    ("e,chunksize", "Size of worlds chunks", cxxopts::value<float>()->default_value("100"))
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -821,6 +823,8 @@ int main(int argc, char* argv[]){
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
+
+  auto keyMapping = readMapping(result["mapping"].as<std::string>());
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
