@@ -16,6 +16,6 @@ struct KeyRemapper {
 };
 
 KeyRemapper readMapping(std::string filemapping);
-
+int getKeyRemapping(KeyRemapper& keymapper, int key);
 
 #endif

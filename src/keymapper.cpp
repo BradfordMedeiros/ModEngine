@@ -44,3 +44,14 @@ KeyRemapper readMapping(std::string filemapping){
   };
   return remapper;
 }
+
+int getKeyRemapping(KeyRemapper& keymapper, int key){
+  int remappedKey = key;
+  for (auto remapping : keymapper.mapping){
+    if (remapping.sourceKey == key){
+      remappedKey = remapping.destinationKey;
+      break;
+    }
+  }
+  return remappedKey;  
+}

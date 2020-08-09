@@ -400,19 +400,8 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   }
 }
 
-int getKeyRemapping(int key){
-  int remappedKey = key;
-  for (auto remapping : keyMapper.mapping){
-    if (remapping.sourceKey == key){
-      remappedKey = remapping.destinationKey;
-      break;
-    }
-  }
-  return remappedKey;  
-}
-
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
-  schemeBindings.onKeyCallback(getKeyRemapping(key), scancode, action, mods);
+  schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
   if (key == 261 && voxelPtr != NULL){  // delete
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
