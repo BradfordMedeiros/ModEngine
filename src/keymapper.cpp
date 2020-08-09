@@ -1,15 +1,11 @@
 #include "./keymapper.h"
 
 KeyRemapper readMapping(std::string filemapping){
-  std::vector<KeyMapping> mapping;
-  KeyRemapper remapper {
-    .mapping = mapping,
-  };
   if (filemapping == ""){
-    return remapper;
+    return KeyRemapper{};
   }
 
-  // swap A and D
+  std::vector<KeyMapping> mapping;
   mapping.push_back(KeyMapping{
     .sourceKey = 65,
     .destinationKey = 68,
@@ -18,6 +14,9 @@ KeyRemapper readMapping(std::string filemapping){
     .sourceKey = 68,
     .destinationKey = 65,
   });
-
+  
+  KeyRemapper remapper {
+    .mapping = mapping,
+  };
   return remapper;
 }
