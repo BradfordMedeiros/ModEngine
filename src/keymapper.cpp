@@ -1,10 +1,23 @@
 #include "./keymapper.h"
 
-std::vector<KeyRemapping> readMapping(std::string filemapping){
-  std::vector<KeyRemapping> mapping;
+KeyRemapper readMapping(std::string filemapping){
+  std::vector<KeyMapping> mapping;
+  KeyRemapper remapper {
+    .mapping = mapping,
+  };
   if (filemapping == ""){
-    return mapping;
+    return remapper;
   }
 
-  return mapping;
+  // swap A and D
+  mapping.push_back(KeyMapping{
+    .sourceKey = 65,
+    .destinationKey = 68,
+  });
+  mapping.push_back(KeyMapping{
+    .sourceKey = 68,
+    .destinationKey = 65,
+  });
+
+  return remapper;
 }

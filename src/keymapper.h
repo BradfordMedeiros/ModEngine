@@ -4,11 +4,16 @@
 #include <vector>
 #include <string>
 
-struct KeyRemapping {
+struct KeyMapping {
   int sourceKey;
   int destinationKey;
 };
 
-std::vector<KeyRemapping> readMapping(std::string filemapping);
+struct KeyRemapper {
+  std::vector<KeyMapping> mapping;
+};
+
+KeyRemapper readMapping(std::string filemapping);
+
 
 #endif

@@ -96,7 +96,7 @@ unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
 std::queue<std::string> channelMessages;
-
+KeyRemapper keyMapper;
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -399,8 +399,20 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
   }
 }
+
+int getKeyRemapping(int key){
+  int remappedKey = key;
+  for (auto remapping : keyMapper.mapping){
+    if (remapping.sourceKey == key){
+      remappedKey = remapping.destinationKey;
+      break;
+    }
+  }
+  return remappedKey;  
+}
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
-  schemeBindings.onKeyCallback(key, scancode, action, mods);
+  schemeBindings.onKeyCallback(getKeyRemapping(key), scancode, action, mods);
   if (key == 261 && voxelPtr != NULL){  // delete
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
@@ -824,7 +836,7 @@ int main(int argc, char* argv[]){
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
-  auto keyMapping = readMapping(result["mapping"].as<std::string>());
+  keyMapper = readMapping(result["mapping"].as<std::string>());
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
