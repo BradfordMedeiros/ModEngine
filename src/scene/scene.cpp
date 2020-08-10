@@ -572,6 +572,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     loadScript(gameobj.script, gameobj.id);
   }
 
+  world.onObjectCreate(gameobj);
   return id;
 }
 
