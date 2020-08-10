@@ -82,10 +82,7 @@ GameObject& getGameObject(World& world, objid id);
 bool idInGroup(World& world, objid id, objid groupId);
 bool idExists(World& world, objid id);
 
-struct HitObject {
-  objid id;
-};
-std::vector<HitObject> raycast(glm::vec3 posFrom, glm::quat direction, glm::vec3 maxDistance);
+std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, glm::vec3 maxDistance);
 
 std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& objectMapping);
 

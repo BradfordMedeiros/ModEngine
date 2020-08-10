@@ -7,6 +7,7 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include "./collision_cache.h"
 #include "./common/util/types.h"
+#include "../common/util.h"
 #include "./bulletdebug.h"
 #include "./physics_common.h"
 
@@ -51,5 +52,10 @@ void clearImpulse(btRigidBody* body);
 void clampMaxVelocity(btRigidBody* body, float maxspeed);
 
 void printRigidBodyInfo(btRigidBody* body);
+
+struct HitObject {
+  objid id;
+};
+std::vector<HitObject> physicsRaycast(physicsEnv& env, glm::vec3 posFrom, glm::quat direction, glm::vec3 maxDistance);
 
 #endif 
