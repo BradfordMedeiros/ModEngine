@@ -838,6 +838,11 @@ bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
 }
 
+std::vector<HitObject> raycast(glm::vec3 posFrom, glm::quat direction, glm::vec3 maxDistance){
+  std::vector<HitObject> hitobjects;
+  return hitobjects;
+}
+
 std::string getDotInfoForNode(std::string nodeName, int nodeId, objid groupId, std::vector<std::string> meshes){
   return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }
