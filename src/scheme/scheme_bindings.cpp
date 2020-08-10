@@ -104,6 +104,13 @@ SCM makeObject(SCM name, SCM mesh, SCM position){
   return scm_from_short(objectId);
 }
 
+objid (*_makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes);
+SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
+  std::map<std::string, std::string> attributes;
+  _makeObjectAttr("test", attributes);
+  return SCM_UNSPECIFIED;
+}
+
 void (*removeObjById)(short id);
 SCM removeObject(SCM value){
   removeObjById(scm_to_short(value));
@@ -713,6 +720,8 @@ void defineFunctions(){
   // state-on-exit
   scm_c_define_gsubr("start-recording", 2, 0, 0, (void*)scmStartRecording);
   scm_c_define_gsubr("play-recording", 2, 0, 0, (void*)scmPlayRecording);
+
+  scm_c_define_gsubr("mk-obj-attr", 2, 0, 0, (void*)scmMakeObjectAttr);
 }
 
 
@@ -764,7 +773,8 @@ void createStaticSchemeBindings(
   void (*playStateMachine)(StateMachine* machine),
   void (*setStateMachine)(StateMachine* machine, std::string newState),
   void (*startRecording)(objid id, std::string recordingPath),
-  void (*playRecording)(objid id, std::string recordingPath)
+  void (*playRecording)(objid id, std::string recordingPath),
+  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -829,4 +839,6 @@ void createStaticSchemeBindings(
 
   _startRecording = startRecording;
   _playRecording = playRecording;
+
+  _makeObjectAttr = makeObjectAttr;
 }

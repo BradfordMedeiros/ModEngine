@@ -59,7 +59,8 @@ void createStaticSchemeBindings(
   void (*playStateMachine)(StateMachine* machine),
   void (*setStateMachine)(StateMachine* machine, std::string newState),
   void (*startRecording)(objid id, std::string recordingPath),
-  void (*playRecording)(objid id, std::string recordingPath)
+  void (*playRecording)(objid id, std::string recordingPath),
+  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes)
 );
 
 void defineFunctions();

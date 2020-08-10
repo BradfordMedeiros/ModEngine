@@ -983,7 +983,8 @@ int main(int argc, char* argv[]){
     playStateMachine,
     setStateMachine,
     startRecording,
-    playRecording
+    playRecording,
+    makeObjectAttr
   );
 
   schemeBindings = getSchemeCallbacks();

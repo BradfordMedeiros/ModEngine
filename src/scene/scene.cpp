@@ -575,6 +575,11 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return id;
 }
 
+objid addObjectToScene(World& world, objid sceneId, std::map<std::string, std::string> attributes){
+  std::cout << "make object placeholder" << std::endl;
+  return -1;
+}
+
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){  
   Scene& scene = world.scenes.at(world.idToScene.at(objectId));
