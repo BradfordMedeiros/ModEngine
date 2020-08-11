@@ -30,7 +30,7 @@ void createStaticSchemeBindings(
   glm::vec3 (*getGameObjectPos)(short index, bool world),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
-  glm::quat (*getGameObjectRot)(short index),
+  glm::quat (*getGameObjectRotation)(short index, bool world),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   short (*getGameObjectByName)(std::string name),

@@ -180,8 +180,11 @@ void setGameObjectRotation(short index, glm::quat rotation){
   auto sceneId = world.idToScene.at(index);
   physicsRotateSet(world, index, rotation);
 }
-glm::quat getGameObjectRotation(short index){
+glm::quat getGameObjectRotation(short index, bool isWorld){
   auto sceneId = world.idToScene.at(index);
+  if (isWorld){
+    return fullTransformation(world.scenes.at(sceneId), index).rotation;
+  }
   return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.rotation;
 }
 

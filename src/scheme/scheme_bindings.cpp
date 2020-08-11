@@ -249,12 +249,12 @@ SCM setGameObjectPositionRelXZ(SCM value, SCM position){
   return SCM_UNSPECIFIED;
 }
 
-glm::quat (*getGameObjectRotn)(short index);
-SCM getGameObjectRotation(SCM value){
-  return scmQuatToSCM(getGameObjectRotn(getGameobjId(value)));
+glm::quat (*_getGameObjectRotation)(short index, bool world);
+SCM scmGetGameObjectRotation(SCM value){
+  return scmQuatToSCM(_getGameObjectRotation(getGameobjId(value), false));
 }
 SCM getGameObjectRotationWorld(SCM value){
-  return scmQuatToSCM(getGameObjectRotn(getGameobjId(value)));
+  return scmQuatToSCM(_getGameObjectRotation(getGameobjId(value), true));
 }
 void (*setGameObjectRotn)(short index, glm::quat rotation);
 SCM setGameObjectRotation(SCM value, SCM rotation){
@@ -265,7 +265,7 @@ SCM setGameObjectRotation(SCM value, SCM rotation){
 glm::quat (*_setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
 SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
   short id = getGameobjId(value);
-  glm::quat rot = getGameObjectRotn(id);
+  glm::quat rot = _getGameObjectRotation(id, false);
 
   auto deltaY = scm_to_double(deltaYaw);
   auto deltaP = scm_to_double(deltaPitch);
@@ -679,7 +679,7 @@ void defineFunctions(){
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
   scm_c_define_gsubr("gameobj-setpos-relxz!", 2, 0, 0, (void *)setGameObjectPositionRelXZ);
   
-  scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)getGameObjectRotation);
+  scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)scmGetGameObjectRotation);
   scm_c_define_gsubr("gameobj-rot-world", 1, 0, 0, (void *)getGameObjectRotationWorld);
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
   scm_c_define_gsubr("gameobj-setrotd!", 4, 0, 0, (void *)setGameObjectRotationDelta);
@@ -760,7 +760,7 @@ void createStaticSchemeBindings(
   glm::vec3 (*getGameObjectPos)(short index, bool world),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
-  glm::quat (*getGameObjectRot)(short index),
+  glm::quat (*getGameObjectRotation)(short index, bool world),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   short (*getGameObjectByName)(std::string name),
@@ -820,7 +820,7 @@ void createStaticSchemeBindings(
   _getGameObjectPos = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
   setGameObjectPosnRel = setGameObjectPosRelative;
-  getGameObjectRotn = getGameObjectRot;
+  _getGameObjectRotation = getGameObjectRotation;
   setGameObjectRotn = setGameObjectRot;
   _setFrontDelta = setFrontDelta;
 
