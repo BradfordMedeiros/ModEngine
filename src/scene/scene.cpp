@@ -844,12 +844,17 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   auto posTo = moveRelative(posFrom, direction, glm::vec3(0.f, 0.f, maxDistance), false);
   world.physicsEnvironment.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posTo), result);
 
-  std::cout << "INFO: RAYCAST: NUM OBJECT HIT: " << result.m_hitFractions.size() << std::endl;
   for (int i = 0; i < result.m_hitFractions.size(); i++){
-    hitobjects.push_back(HitObject{
-      .id = -1,
-    });
+    const btCollisionObject* obj = result.m_collisionObjects[i];
+    for (auto [objid, rigidbody] : world.rigidbodys){
+      if (rigidbody == obj){
+        hitobjects.push_back(HitObject{
+          .id = objid,
+        });
+      }
+    }
   } 
+  assert(hitobjects.size() == result.m_hitFractions.size());
   return hitobjects;
 }
 
