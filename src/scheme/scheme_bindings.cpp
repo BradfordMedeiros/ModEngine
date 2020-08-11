@@ -548,8 +548,15 @@ SCM scmPlayRecording(SCM id, SCM recordingPath){
 
 std::vector<objid> (*_raycast)(glm::vec3 pos, glm::quat direction, glm::vec3 maxDistance);
 SCM scmRaycast(SCM pos, SCM direction, SCM distance){
-  std::cout << "SCHEME BINDINGS: raycast placeholder" << std::endl;
-  return SCM_UNDEFINED;
+  std::vector<objid> ids;
+  ids.push_back(2);
+  ids.push_back(3);
+
+  SCM list = scm_make_list(scm_from_unsigned_integer(ids.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < ids.size(); i++){
+    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_short(ids.at(i)));
+  }
+  return list;
 }
 
 // Callbacks
