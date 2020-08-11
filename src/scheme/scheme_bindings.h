@@ -61,7 +61,7 @@ void createStaticSchemeBindings(
   void (*startRecording)(objid id, std::string recordingPath),
   void (*playRecording)(objid id, std::string recordingPath),
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes),
-  std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, glm::vec3 maxDistance)
+  std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance)
 );
 
 void defineFunctions();

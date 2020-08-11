@@ -838,8 +838,17 @@ bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
 }
 
-std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, glm::vec3 maxDistance){
-  return physicsRaycast(world.physicsEnvironment, posFrom, direction, maxDistance);
+std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
+  std::vector<HitObject> hitobjects;
+  btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
+  world.physicsEnvironment.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posFrom), result);
+
+  for (int i = 0; i < result.m_hitFractions.size(); i++){
+    hitobjects.push_back(HitObject{
+      .id = -1,
+    });
+  } 
+  return hitobjects;
 }
 
 std::string getDotInfoForNode(std::string nodeName, int nodeId, objid groupId, std::vector<std::string> meshes){

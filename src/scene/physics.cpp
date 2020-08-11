@@ -222,17 +222,3 @@ void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too b
   delete env.dispatcher;
   delete env.colConfig;
 }
-
-std::vector<HitObject> physicsRaycast(physicsEnv& env, glm::vec3 posFrom, glm::quat direction, glm::vec3 maxDistance){
-  std::vector<HitObject> hitobjects;
-  btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
-  env.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posFrom), result);
-
-  for (int i = 0; i < result.m_hitFractions.size(); i++){
-    hitobjects.push_back(HitObject{
-      .id = -1,
-    });
-  } 
-
-  return hitobjects;
-}
