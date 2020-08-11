@@ -409,7 +409,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   if (key == GLFW_KEY_LEFT && action == 1 && state.selectedIndex != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setGameObjectPosition(state.selectedIndex, snapTranslateUp(getGameObjectPosition(state.selectedIndex), state.manipulatorAxis));
+      setGameObjectPosition(state.selectedIndex, snapTranslateUp(getGameObjectPosition(state.selectedIndex, false), state.manipulatorAxis));
     }else if (state.manipulatorMode == ROTATE){
       setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
     }else if (state.manipulatorMode == SCALE){
@@ -418,7 +418,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
   if (key == GLFW_KEY_RIGHT && action == 1 && state.selectedIndex != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setGameObjectPosition(state.selectedIndex, snapTranslateDown(getGameObjectPosition(state.selectedIndex), state.manipulatorAxis));
+      setGameObjectPosition(state.selectedIndex, snapTranslateDown(getGameObjectPosition(state.selectedIndex, false), state.manipulatorAxis));
     }else if (state.manipulatorMode == ROTATE){
       setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex), state.manipulatorAxis));
     }else if (state.manipulatorMode == SCALE){
@@ -629,7 +629,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     if (state.manipulatorMode == TRANSLATE){
       float snapGridSize = getSnapTranslateSize();
       if (snapGridSize > 0){
-        auto position = getGameObjectPosition(state.selectedIndex);
+        auto position = getGameObjectPosition(state.selectedIndex, false);
         drawGrid3DCentered(numCells, snapGridSize, position.x, position.y, position.z);  
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
       }

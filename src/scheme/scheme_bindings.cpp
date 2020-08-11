@@ -216,10 +216,14 @@ SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
   return SCM_UNSPECIFIED;
 }
 
-glm::vec3 (*getGameObjectPosn)(short index);
-SCM getGameObjectPosition(SCM value){
-  return vec3ToScmList(getGameObjectPosn(getGameobjId(value)));
+glm::vec3 (*_getGameObjectPos)(short index, bool isWorld);
+SCM scmGetGameObjectPos(SCM value){
+  return vec3ToScmList(_getGameObjectPos(getGameobjId(value), false));
 }
+SCM scmGetGameObjectPosWorld(SCM value){
+  return vec3ToScmList(_getGameObjectPos(getGameobjId(value), true));
+}
+
 void (*setGameObjectPosn)(short index, glm::vec3 pos);
 SCM setGameObjectPosition(SCM value, SCM positon){
   auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   
@@ -247,6 +251,9 @@ SCM setGameObjectPositionRelXZ(SCM value, SCM position){
 
 glm::quat (*getGameObjectRotn)(short index);
 SCM getGameObjectRotation(SCM value){
+  return scmQuatToSCM(getGameObjectRotn(getGameobjId(value)));
+}
+SCM getGameObjectRotationWorld(SCM value){
   return scmQuatToSCM(getGameObjectRotn(getGameobjId(value)));
 }
 void (*setGameObjectRotn)(short index, glm::quat rotation);
@@ -666,12 +673,14 @@ void defineFunctions(){
   scm_c_define_gsubr("lsobj-name", 1, 0, 0, (void *)getGameObjByName);
   scm_c_define_gsubr("draw-text", 4, 0, 0, (void *)drawTextWords);
  
-  scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)getGameObjectPosition);
+  scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)scmGetGameObjectPos);
+  scm_c_define_gsubr("gameobj-pos-world", 1, 0, 0, (void*)scmGetGameObjectPosWorld);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
   scm_c_define_gsubr("gameobj-setpos-relxz!", 2, 0, 0, (void *)setGameObjectPositionRelXZ);
   
   scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)getGameObjectRotation);
+  scm_c_define_gsubr("gameobj-rot-world", 1, 0, 0, (void *)getGameObjectRotationWorld);
   scm_c_define_gsubr("gameobj-setrot!", 2, 0, 0, (void *)setGameObjectRotation);
   scm_c_define_gsubr("gameobj-setrotd!", 4, 0, 0, (void *)setGameObjectRotationDelta);
 
@@ -748,7 +757,7 @@ void createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   std::map<std::string, std::string> getGameObjectAttr(short id),
   void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
-  glm::vec3 (*getGameObjectPos)(short index),
+  glm::vec3 (*getGameObjectPos)(short index, bool world),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
   glm::quat (*getGameObjectRot)(short index),
@@ -808,7 +817,7 @@ void createStaticSchemeBindings(
   _getGameObjectAttr = getGameObjectAttr;
   _setGameObjectAttr = setGameObjectAttr;
 
-  getGameObjectPosn = getGameObjectPos;
+  _getGameObjectPos = getGameObjectPos;
   setGameObjectPosn = setGameObjectPos;
   setGameObjectPosnRel = setGameObjectPosRelative;
   getGameObjectRotn = getGameObjectRot;

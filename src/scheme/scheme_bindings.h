@@ -27,7 +27,7 @@ void createStaticSchemeBindings(
   std::string (*getGameObjectNameForId)(short id),
   std::map<std::string, std::string> getGameObjectAttr(short id),
   void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
-  glm::vec3 (*getGameObjectPos)(short index),
+  glm::vec3 (*getGameObjectPos)(short index, bool world),
   void (*setGameObjectPos)(short index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
   glm::quat (*getGameObjectRot)(short index),

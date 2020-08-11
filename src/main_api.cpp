@@ -153,8 +153,11 @@ void setGameObjectAttr(short id, std::map<std::string, std::string> attr){
   setAttributes(world, id, attr);
 }
 
-glm::vec3 getGameObjectPosition(short index){
+glm::vec3 getGameObjectPosition(short index, bool isWorld){
   auto sceneId = world.idToScene.at(index);
+  if (isWorld){
+    return fullTransformation(world.scenes.at(sceneId), index).position;
+  }
   return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
