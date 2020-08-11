@@ -841,8 +841,10 @@ bool idExists(World& world, objid id){
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
   std::vector<HitObject> hitobjects;
   btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
-  world.physicsEnvironment.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posFrom), result);
+  auto posTo = moveRelative(posFrom, direction, glm::vec3(0.f, 0.f, maxDistance), false);
+  world.physicsEnvironment.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posTo), result);
 
+  std::cout << "INFO: RAYCAST: NUM OBJECT HIT: " << result.m_hitFractions.size() << std::endl;
   for (int i = 0; i < result.m_hitFractions.size(); i++){
     hitobjects.push_back(HitObject{
       .id = -1,
