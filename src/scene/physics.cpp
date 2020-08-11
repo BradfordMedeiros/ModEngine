@@ -227,5 +227,12 @@ std::vector<HitObject> physicsRaycast(physicsEnv& env, glm::vec3 posFrom, glm::q
   std::vector<HitObject> hitobjects;
   btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
   env.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posFrom), result);
+
+  for (int i = 0; i < result.m_hitFractions.size(); i++){
+    hitobjects.push_back(HitObject{
+      .id = -1,
+    });
+  } 
+
   return hitobjects;
 }

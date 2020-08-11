@@ -546,6 +546,11 @@ SCM scmPlayRecording(SCM id, SCM recordingPath){
   return SCM_UNSPECIFIED;
 }
 
+std::vector<objid> (*_raycast)(glm::vec3 pos, glm::quat direction, glm::vec3 maxDistance);
+SCM scmRaycast(SCM pos, SCM direction, SCM distance){
+  std::cout << "SCHEME BINDINGS: raycast placeholder" << std::endl;
+  return SCM_UNDEFINED;
+}
 
 // Callbacks
 void onFrame(){
@@ -722,6 +727,7 @@ void defineFunctions(){
   scm_c_define_gsubr("play-recording", 2, 0, 0, (void*)scmPlayRecording);
 
   scm_c_define_gsubr("mk-obj-attr", 2, 0, 0, (void*)scmMakeObjectAttr);
+  scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
 }
 
 
@@ -774,7 +780,8 @@ void createStaticSchemeBindings(
   void (*setStateMachine)(StateMachine* machine, std::string newState),
   void (*startRecording)(objid id, std::string recordingPath),
   void (*playRecording)(objid id, std::string recordingPath),
-  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes)
+  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes),
+  std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, glm::vec3 maxDistance)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -841,4 +848,5 @@ void createStaticSchemeBindings(
   _playRecording = playRecording;
 
   _makeObjectAttr = makeObjectAttr;
+  _raycast = raycast;
 }

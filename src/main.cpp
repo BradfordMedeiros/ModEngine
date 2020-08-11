@@ -984,7 +984,8 @@ int main(int argc, char* argv[]){
     setStateMachine,
     startRecording,
     playRecording,
-    makeObjectAttr
+    makeObjectAttr,
+    raycast
   );
 
   schemeBindings = getSchemeCallbacks();
