@@ -3,6 +3,28 @@
 unsigned int toUnsignedInt(SCM value){
   return scm_to_unsigned_integer(value, std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max());
 }
+glm::quat scmListToQuat(SCM rotation){
+  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
+  auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
+  auto y = scm_to_double(scm_list_ref(rotation, scm_from_int64(2)));
+  auto z = scm_to_double(scm_list_ref(rotation, scm_from_int64(3)));  
+  return  glm::quat(w, x, y, z);
+}
+SCM scmQuatToSCM(glm::quat rotation){
+  SCM list = scm_make_list(scm_from_unsigned_integer(4), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(rotation.w));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(rotation.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(rotation.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(rotation.z));
+  return list;
+}
+
+glm::vec3 listToVec3(SCM vecList){
+  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
+  return glm::vec3(x, y, z);
+}
 
 bool symbolDefinedInModule(const char* symbol, SCM module){
   return scm_to_bool(scm_defined_p(scm_string_to_symbol(scm_from_locale_string(symbol)), module));
@@ -21,13 +43,6 @@ void maybeCallFuncString(const char* function, const char* payload){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_1(func_symbol, scm_from_locale_string(payload));
   }   
-}
-
-glm::vec3 listToVec3(SCM vecList){
-  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
-  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
-  auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
-  return glm::vec3(x, y, z);
 }
 
 SCM vec3ToScmList(glm::vec3 vec){
@@ -228,23 +243,6 @@ SCM setGameObjectPositionRel(SCM value, SCM position){
 SCM setGameObjectPositionRelXZ(SCM value, SCM position){
   setPosition(value, position, true);
   return SCM_UNSPECIFIED;
-}
-
-
-glm::quat scmListToQuat(SCM rotation){
-  auto w = scm_to_double(scm_list_ref(rotation, scm_from_int64(0)));  
-  auto x = scm_to_double(scm_list_ref(rotation, scm_from_int64(1)));
-  auto y = scm_to_double(scm_list_ref(rotation, scm_from_int64(2)));
-  auto z = scm_to_double(scm_list_ref(rotation, scm_from_int64(3)));  
-  return  glm::quat(w, x, y, z);
-}
-SCM scmQuatToSCM(glm::quat rotation){
-  SCM list = scm_make_list(scm_from_unsigned_integer(4), scm_from_unsigned_integer(0));
-  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(rotation.w));
-  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(rotation.x));
-  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(rotation.y));
-  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(rotation.z));
-  return list;
 }
 
 glm::quat (*getGameObjectRotn)(short index);
@@ -545,13 +543,9 @@ SCM scmPlayRecording(SCM id, SCM recordingPath){
   _playRecording(scm_to_short(id), scm_to_locale_string(recordingPath));
   return SCM_UNSPECIFIED;
 }
-
 std::vector<objid> (*_raycast)(glm::vec3 pos, glm::quat direction, glm::vec3 maxDistance);
 SCM scmRaycast(SCM pos, SCM direction, SCM distance){
-  std::vector<objid> ids;
-  ids.push_back(2);
-  ids.push_back(3);
-
+  std::vector<objid> ids = _raycast(listToVec3(pos), glm::quat(), listToVec3(distance));
   SCM list = scm_make_list(scm_from_unsigned_integer(ids.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < ids.size(); i++){
     scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_short(ids.at(i)));
