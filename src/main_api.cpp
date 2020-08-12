@@ -331,3 +331,8 @@ std::vector<objid> raycast(glm::vec3 pos, glm::quat direction, float maxDistance
   }
   return ids;
 }
+
+glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance){
+  return moveRelative(posFrom, orientation, glm::vec3(0.f, 0.f, distance), false);
+}
+

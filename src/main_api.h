@@ -119,6 +119,7 @@ void connectServer(std::string server);
 void startRecording(objid id, std::string recordingPath);
 void playRecording(objid id, std::string recordingPath);
 std::vector<objid> raycast(glm::vec3 pos, glm::quat direction, float maxDistance);
+glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 
 void copyStr(std::string& data, char* copyTo, int size);
 

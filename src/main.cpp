@@ -934,7 +934,7 @@ int main(int argc, char* argv[]){
 
   fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>(), loadTexture);
-
+ 
   createStaticSchemeBindings(
     loadScene,
     unloadScene,
@@ -958,6 +958,7 @@ int main(int argc, char* argv[]){
     getGameObjectRotation,
     setGameObjectRotation,
     setFrontDelta,
+    moveRelative,
     getGameObjectByName,
     setSelectionMode,
     applyImpulse,

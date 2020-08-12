@@ -282,12 +282,18 @@ SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM delt
 
   return SCM_UNSPECIFIED;
 }
-SCM scm_setFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
+SCM scmSetFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
   glm::quat intialOrientation = scmListToQuat(orientation);
   auto deltaY = scm_to_double(deltaYaw);
   auto deltaP = scm_to_double(deltaPitch);
   auto deltaR = scm_to_double(deltaRoll); 
   return scmQuatToSCM(_setFrontDelta(intialOrientation, deltaY, deltaP, deltaR, 1));
+}
+
+glm::vec3 (*_moveRelative)(glm::vec3 pos, glm::quat orientation, float distance);
+SCM scmMoveRelative(SCM pos, SCM orientation, SCM distance){
+  _moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance));
+  return SCM_UNSPECIFIED;
 }
 
 std::vector<std::string>(*_listAnimations)(short id);
@@ -704,7 +710,8 @@ void defineFunctions(){
 
 
   // UTILITY FUNCTIONS
-  scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void *)scm_setFrontDelta);
+  scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void*)scmSetFrontDelta);
+  scm_c_define_gsubr("move-relative", 3, 0, 0, (void*)scmMoveRelative);
 
   // physics functions
   scm_c_define_gsubr("applyimpulse", 2, 0, 0, (void *)scm_applyImpulse);
@@ -772,6 +779,7 @@ void createStaticSchemeBindings(
   glm::quat (*getGameObjectRotation)(short index, bool world),
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
+  glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   short (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(short index, glm::vec3 impulse),
@@ -834,8 +842,10 @@ void createStaticSchemeBindings(
   setGameObjectPosnRel = setGameObjectPosRelative;
   _getGameObjectRotation = getGameObjectRotation;
   setGameObjectRotn = setGameObjectRot;
+  
   _setFrontDelta = setFrontDelta;
-
+  _moveRelative = moveRelative;
+  
   _applyImpulse = applyImpulse;
   _applyImpulseRel = applyImpulseRel;
   _clearImpulse = clearImpulse;
