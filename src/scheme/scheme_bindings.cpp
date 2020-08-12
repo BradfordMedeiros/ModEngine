@@ -665,7 +665,7 @@ void onPlayerLeave(std::string connectionHash){
 }
 
 ////////////
-void defineFunctions(){
+void defineFunctions(objid id){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
@@ -752,6 +752,8 @@ void defineFunctions(){
 
   scm_c_define_gsubr("mk-obj-attr", 2, 0, 0, (void*)scmMakeObjectAttr);
   scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
+
+  scm_c_define("mainobj", createGameObject(id));
 }
 
 

@@ -11,7 +11,7 @@ void loadScript(std::string script, objid id){
   SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
   scriptnameToModule[script] = module;                                  // This probably will be per entity not 1:1 with script paths
   scm_set_current_module(module);
-  defineFunctions();
+  defineFunctions(id);
   scm_c_primitive_load(script.c_str());
   onFrame();
 }
