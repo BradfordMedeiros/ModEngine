@@ -292,8 +292,7 @@ SCM scmSetFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRol
 
 glm::vec3 (*_moveRelative)(glm::vec3 pos, glm::quat orientation, float distance);
 SCM scmMoveRelative(SCM pos, SCM orientation, SCM distance){
-  _moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance));
-  return SCM_UNSPECIFIED;
+  return vec3ToScmList(_moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance)));
 }
 
 std::vector<std::string>(*_listAnimations)(short id);
