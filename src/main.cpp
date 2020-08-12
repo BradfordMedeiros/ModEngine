@@ -948,6 +948,7 @@ int main(int argc, char* argv[]){
     getObjectsByType, 
     setActiveCamera,
     drawText,
+    addLineNextCycle,
     getGameObjectName,
     getGameObjectAttr,
     setGameObjectAttr,

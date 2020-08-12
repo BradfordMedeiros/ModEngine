@@ -132,14 +132,20 @@ SCM removeObject(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void (*drawTextV)(std::string word, float left, float top, unsigned int fontSize);
-SCM drawTextWords(SCM word, SCM left, SCM top, SCM fontSize){
-  drawTextV(
+void (*_drawText)(std::string word, float left, float top, unsigned int fontSize);
+SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize){
+  _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
     scm_to_double(top), 
     toUnsignedInt(fontSize)
   );
+  return SCM_UNSPECIFIED;
+}
+
+void (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo);
+SCM scmDrawLine(SCM posFrom, SCM posTo){
+  _drawLine(listToVec3(posFrom), listToVec3(posTo));
   return SCM_UNSPECIFIED;
 }
 
@@ -671,8 +677,10 @@ void defineFunctions(){
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
   scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
   scm_c_define_gsubr("lsobj-name", 1, 0, 0, (void *)getGameObjByName);
-  scm_c_define_gsubr("draw-text", 4, 0, 0, (void *)drawTextWords);
  
+  scm_c_define_gsubr("draw-text", 4, 0, 0, (void*)scmDrawText);
+  scm_c_define_gsubr("draw-line", 2, 0, 0, (void*)scmDrawLine);
+
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)scmGetGameObjectPos);
   scm_c_define_gsubr("gameobj-pos-world", 1, 0, 0, (void*)scmGetGameObjectPosWorld);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
@@ -754,6 +762,7 @@ void createStaticSchemeBindings(
 	std::vector<short> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
+  void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),
   std::string (*getGameObjectNameForId)(short id),
   std::map<std::string, std::string> getGameObjectAttr(short id),
   void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
@@ -812,7 +821,10 @@ void createStaticSchemeBindings(
 	makeObj = makeObjectV;
 	getObjByType = getObjectsByType;
 	setActCamera = setActiveCamera;
-  drawTextV = drawText;
+  
+  _drawText = drawText;
+  _drawLine = drawLine;
+
   getGameObjNameForId = getGameObjectNameForId;
   _getGameObjectAttr = getGameObjectAttr;
   _setGameObjectAttr = setGameObjectAttr;

@@ -24,6 +24,7 @@ void createStaticSchemeBindings(
   std::vector<short> (*getObjectsByType)(std::string),
   void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
+  void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),  
   std::string (*getGameObjectNameForId)(short id),
   std::map<std::string, std::string> getGameObjectAttr(short id),
   void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
