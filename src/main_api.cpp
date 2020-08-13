@@ -84,7 +84,7 @@ void unloadScene(short sceneId){
   removeSceneFromWorld(world, sceneId, unloadSoundState, unloadScript);
 }
 void unloadAllScenes(){
-  removeAllScenesFromWorld(world, unloadSoundState, true, unloadScript);
+  removeAllScenesFromWorld(world, unloadSoundState, unloadScript);
 }
 
 // @TODO - save all the scenes in the world

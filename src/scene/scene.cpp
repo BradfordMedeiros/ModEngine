@@ -45,8 +45,8 @@ NameAndMesh getMeshesForGroupId(World& world, objid groupId){
 }
 
 objid getGameObjectByName(World& world, std::string name){
-  for (int i = 0; i < world.scenes.size(); i++){
-    for (auto [id, gameObj]: world.scenes.at(i).idToGameObjects){
+  for (auto [sceneId, _] : world.scenes){
+    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
       if (gameObj.name == name){
         return id;
       }
@@ -267,16 +267,6 @@ World createWorld(
   return world;
 }
 
-static objid nextSceneId = -1;
-objid getSceneId(){
-  nextSceneId++;
-  return nextSceneId;
-}
-void resetSceneId(World& world){
-  assert(world.scenes.size() == 0);
-  nextSceneId = -1;
-}
-
 std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
   std::map<objid, std::map<std::string, std::string>> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
@@ -415,7 +405,9 @@ std::string serializeObject(World& world, objid id){
 }
 
 objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
-  auto sceneId = getSceneId();
+  auto sceneId = getUniqueObjId();
+  assert(world.scenes.find(sceneId) == world.scenes.end());
+
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
 
@@ -477,16 +469,13 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
   }
   world.scenes.erase(sceneId);
 }
-void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, bool resetScenes, std::function<void(std::string, objid)> unloadScript){
+void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){
   std::vector<objid> sceneIds; 
   for (auto [sceneId, _] : world.scenes){
     sceneIds.push_back(sceneId);
   }
   for (auto sceneId : sceneIds){
     removeSceneFromWorld(world, sceneId, unloadClip, unloadScript);
-  }
-  if (resetScenes){
-    resetSceneId(world);
   }
 }
 
