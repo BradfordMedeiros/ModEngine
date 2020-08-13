@@ -32,6 +32,7 @@ struct UpdatePacket {
 
 // @TODO this should optimize so only send the size necessary, not max size since scnee file needs to be larger
 struct LoadPacket {
+  objid sceneId;
   char sceneData[4000]; // this makes every message 4k, which is probably way bigger than each packet needs to be, optimize this
 };
 union PacketPayload {
@@ -63,7 +64,7 @@ void applyImpulseRel(short index, glm::vec3 impulse);
 void clearImpulse(short index);
 
 short loadScene(std::string sceneFile);
-short loadSceneData(std::string sceneData);
+short loadSceneData(std::string sceneData, objid sceneId);
 void unloadScene(short sceneId);
 void unloadAllScenes();
 void saveScene(bool includeIds);

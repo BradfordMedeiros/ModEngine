@@ -747,7 +747,6 @@ void handleUpdate(UdpPacket& packet){
   auto update = packet.payload.updatepacket;
 
   if (idExists(world, update.id)){
-    std::cout << "Udp client update: " << update.id << std::endl;
     setProperties(world, update.id, update.properties);
   }else{
     std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
@@ -762,7 +761,7 @@ void onUdpClientMessage(UdpPacket& packet){
     std::string sceneData = packet.payload.loadpacket.sceneData;
     std::cout << "trying to load scene packet!" << std::endl;
     unloadAllScenes();
-    loadSceneData(sceneData);  
+    loadSceneData(sceneData, packet.payload.loadpacket.sceneId);  
   }else if (packet.type == UPDATE){
     handleUpdate(packet);
   }else if (packet.type == CREATE){

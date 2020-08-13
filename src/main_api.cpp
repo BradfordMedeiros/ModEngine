@@ -74,9 +74,9 @@ short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   return addSceneToWorld(world, sceneFile, loadSoundState, loadScriptFromWorld);
 }
-short loadSceneData(std::string sceneData){
+short loadSceneData(std::string sceneData, objid sceneId){
   std::cout << "INFO: SCENE LOADING: loading from scene data" << std::endl;
-  return addSceneToWorldFromData(world, sceneData, loadSoundState, loadScriptFromWorld);
+  return addSceneToWorldFromData(world, sceneId, sceneData, loadSoundState, loadScriptFromWorld);
 }
 
 void unloadScene(short sceneId){  
@@ -112,7 +112,9 @@ void sendLoadScene(short id){
   std::string sceneData = serializeScene(world, id, true);
   UdpPacket packet { .type = LOAD };
   auto data = sceneData.c_str();
-  LoadPacket loadpacket {};
+  LoadPacket loadpacket {
+    .sceneId = id,
+  };
   assert((sizeof(data) + 1 ) < sizeof(loadpacket.sceneData));
   strncpy(loadpacket.sceneData, data, sizeof(loadpacket.sceneData));
   assert(loadpacket.sceneData[sizeof(loadpacket.sceneData) -1] == '\0');

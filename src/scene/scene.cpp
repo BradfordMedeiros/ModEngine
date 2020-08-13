@@ -404,8 +404,7 @@ std::string serializeObject(World& world, objid id){
   }, true, id);
 }
 
-objid addSceneToWorldFromData(World& world, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
-  auto sceneId = getUniqueObjId();
+objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   assert(world.scenes.find(sceneId) == world.scenes.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
@@ -428,7 +427,7 @@ objid addSceneToWorldFromData(World& world, std::string sceneData, std::function
   return sceneId;
 }
 objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
-  return addSceneToWorldFromData(world, loadFile(sceneFile), loadClip, loadScript);
+  return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadClip, loadScript);
 }
 
 GameObject& getGameObject(World& world, objid id){
