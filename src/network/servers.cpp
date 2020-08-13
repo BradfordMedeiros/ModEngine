@@ -107,9 +107,9 @@ void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& ud
 }
 
 void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::map<std::string, sockaddr_in>& udpConnections, std::string& excludeConnectionHash){
-  std::cout << "INFO: NETWORK: sending data to all except: " << excludeConnectionHash << " num connections: " << udpConnections.size() << std::endl;
+  //std::cout << "INFO: NETWORK: sending data to all except: " << excludeConnectionHash << " num connections: " << udpConnections.size() << std::endl;
   for (auto [connectHash, addr] : udpConnections){
-    std::cout << "INFO: NETWORKING: sending udp datagram to " << connectHash << std::endl;
+    //std::cout << "INFO: NETWORKING: sending udp datagram to " << connectHash << std::endl;
     if (connectHash != excludeConnectionHash){
       int numBytes = sendto(socket, (char*)packet.packet, packet.packetSize,  MSG_CONFIRM, (const struct sockaddr *) &addr,   sizeof(addr)); 
       if (numBytes == -1){
