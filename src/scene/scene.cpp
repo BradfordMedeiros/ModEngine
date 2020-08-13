@@ -267,14 +267,14 @@ World createWorld(
   return world;
 }
 
-static objid sceneId = -1;
+static objid nextSceneId = -1;
 objid getSceneId(){
-  sceneId++;
-  return sceneId;
+  nextSceneId++;
+  return nextSceneId;
 }
 void resetSceneId(World& world){
   assert(world.scenes.size() == 0);
-  sceneId = -1;
+  nextSceneId = -1;
 }
 
 std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
@@ -337,7 +337,7 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
   obj.transformation.rotation = orientation;
 
 }
-void addObjectToWorld(World& world, Scene& scene, SerializationObject& serialObj, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
+void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationObject& serialObj, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
     auto additionalFields = serialObj.additionalFields;
@@ -347,7 +347,7 @@ void addObjectToWorld(World& world, Scene& scene, SerializationObject& serialObj
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  loadClip, 
-      [&world, &scene, loadClip, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, loadClip, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -378,7 +378,7 @@ void addObjectToWorld(World& world, Scene& scene, SerializationObject& serialObj
           );
 
           for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, newSerialObj, false, loadClip, getId);
+            addObjectToWorld(world, scene, sceneId, newSerialObj, false, loadClip, getId);
           }
           return hasMesh;
         }
@@ -389,7 +389,7 @@ void addObjectToWorld(World& world, Scene& scene, SerializationObject& serialObj
         return loadTextureWorld(world, texturepath).textureId;
       },
       [&world, localSceneId, id]() -> void {
-        updatePhysicsBody(world, world.scenes.at(sceneId), id);
+        updatePhysicsBody(world, world.scenes.at(localSceneId), id);
       },
       [&world, &scene](objid id, std::string from, std::string to) -> void {
         addRail(world.rails, scene.idToGameObjects.at(id).name, from, to);
@@ -420,7 +420,7 @@ objid addSceneToWorldFromData(World& world, std::string sceneData, std::function
   world.scenes[sceneId] = deserializedScene.scene;
 
   for (auto &[_, serialObj] : deserializedScene.serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getUniqueObjId);
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
   }
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
@@ -517,7 +517,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, std::strin
     fields
   );
 
-  addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getId);
+  addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getId);
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
   
@@ -557,7 +557,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     fields
   );
   std::cout << "INFO: SCENE - addObjectToScene - start add object to world" << std::endl;
-  addObjectToWorld(world, world.scenes.at(sceneId), serialObj, true, loadClip, getUniqueObjId);
+  addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
   auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
 
