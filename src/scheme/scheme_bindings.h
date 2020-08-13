@@ -66,7 +66,7 @@ void createStaticSchemeBindings(
   std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance)
 );
 
-void defineFunctions(objid id);
+void defineFunctions(objid id, bool isServer);
 
 void onFrame();
 void onCollisionEnter(short obj1, short obj2, glm::vec3 contactPos);

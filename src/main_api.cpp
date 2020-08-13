@@ -68,7 +68,7 @@ void clearImpulse(short index){
 void loadScriptFromWorld(std::string script, short id){
   auto name = world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id).name;
   std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-  loadScript(script, id);
+  loadScript(script, id, bootStrapperMode);
 }
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
