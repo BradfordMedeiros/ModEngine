@@ -154,9 +154,17 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
       numAttributes[attrName] = scm_to_double(attrValue);
     }else if (isString){
       stringAttributes[attrName] = scm_to_locale_string(attrValue);
+    }else{
+      auto vec3ListLength = toUnsignedInt(scm_length(attrValue));
+      assert(vec3ListLength == 3);
+
+      double values[] = {0, 0, 0};
+      for (int j = 0; j < vec3ListLength; j++){
+        auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
+        values[j] = scm_to_double(vecValue);
+      }
+      vecAttributes[attrName] = glm::vec3(values[0], values[1], values[2]);
     }
-
-
   }
 
   _makeObjectAttr(scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
