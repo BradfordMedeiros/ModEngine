@@ -119,10 +119,47 @@ SCM makeObject(SCM name, SCM mesh, SCM position){
   return scm_from_short(objectId);
 }
 
-objid (*_makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes);
+objid (*_makeObjectAttr)(
+  std::string name, 
+  std::map<std::string, std::string> stringAttributes,
+  std::map<std::string, double> numAttributes,
+  std::map<std::string, glm::vec3> vecAttributes
+);
 SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
-  std::map<std::string, std::string> attributes;
-  _makeObjectAttr("test", attributes);
+  std::map<std::string, double> numAttributes;
+  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, glm::vec3> vecAttributes;
+
+
+  auto numElements = toUnsignedInt(scm_length(scmAttributes));
+  std::cout << "scm, num elements: " << numElements << std::endl;
+  for (int i = 0; i < numElements; i++){
+    auto propertyPair = scm_list_ref(scmAttributes, scm_from_unsigned_integer(i));
+    auto pairLength = toUnsignedInt(scm_length(propertyPair));
+    assert(pairLength == 2);
+    auto attrName = scm_to_locale_string(scm_list_ref(propertyPair, scm_from_unsigned_integer(0)));
+    assert(
+      stringAttributes.find(attrName) == stringAttributes.end() &&
+      vecAttributes.find(attrName) == vecAttributes.end()
+    );
+
+    auto attrValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(1));
+
+    bool isNumber = scm_is_number(attrValue);
+    bool isString = scm_is_string(attrValue);
+    bool isList = scm_to_bool(scm_list_p(attrValue));
+    assert(isNumber || isString || isList);
+
+    if (isNumber){
+      numAttributes[attrName] = scm_to_double(attrValue);
+    }else if (isString){
+      stringAttributes[attrName] = scm_to_locale_string(attrValue);
+    }
+
+
+  }
+
+  _makeObjectAttr(scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
   return SCM_UNSPECIFIED;
 }
 
@@ -809,7 +846,7 @@ void createStaticSchemeBindings(
   void (*setStateMachine)(StateMachine* machine, std::string newState),
   void (*startRecording)(objid id, std::string recordingPath),
   void (*playRecording)(objid id, std::string recordingPath),
-  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> attributes),
+  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
   std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance)
 ){
   scm_init_guile();

@@ -93,7 +93,8 @@ void setSelectionMode(bool enabled);
 
 short makeObject(std::string name, std::string meshName, float x, float y, float z, objid id = -1, bool useObjId = false);
 short makeObject(std::string serializedobj, objid id, bool useObjId);
-objid makeObjectAttr(std::string name, std::map<std::string, std::string> attributes);
+objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
+
 void removeObjectById(short id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
