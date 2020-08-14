@@ -51,7 +51,7 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, std::string meshName, glm::vec3 pos, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
-objid addObjectToScene(  World& world, objid sceneId, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
+objid addObjectToScene(World& world, objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
 
 void removeObjectFromScene(World& world, objid id, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript);
 

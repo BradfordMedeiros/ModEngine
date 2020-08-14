@@ -567,10 +567,17 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 objid addObjectToScene(
   World& world, 
   objid sceneId, 
+  std::string name, 
   std::map<std::string, std::string> stringAttributes,
   std::map<std::string, double> numAttributes, 
   std::map<std::string, glm::vec3> vecAttributes
 ){
+  objid id = -1;
+  auto meshName = stringAttributes.find("mesh") != stringAttributes.end() ? stringAttributes.at("mesh") : "";
+  auto pos = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f);
+
+  //addObjectToScene(world, sceneId, name, meshName, pos, id, false, 
+   // std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript)
   std::cout << "make object placeholder" << std::endl;
   return -1;
 }

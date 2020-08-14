@@ -20,7 +20,7 @@ void createStaticSchemeBindings(
   void (*moveCamera)(glm::vec3),  
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(short id),
-  short (*makeObjectV)(std::string, std::string, float, float, float, objid, bool),
+  short (*makeObjectV)(std::string, std::string, float, float, float),
   std::vector<short> (*getObjectsByType)(std::string),
   void (*setActiveCamera)(short cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
