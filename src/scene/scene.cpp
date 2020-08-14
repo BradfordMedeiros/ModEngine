@@ -570,16 +570,15 @@ objid addObjectToScene(
   std::string name, 
   std::map<std::string, std::string> stringAttributes,
   std::map<std::string, double> numAttributes, 
-  std::map<std::string, glm::vec3> vecAttributes
+  std::map<std::string, glm::vec3> vecAttributes,
+  std::function<void(std::string)> loadClip, 
+  std::function<void(std::string, objid)> loadScript
 ){
-  objid id = -1;
   auto meshName = stringAttributes.find("mesh") != stringAttributes.end() ? stringAttributes.at("mesh") : "";
   auto pos = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f);
-
-  //addObjectToScene(world, sceneId, name, meshName, pos, id, false, 
-   // std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript)
-  std::cout << "make object placeholder" << std::endl;
-  return -1;
+  int overrideId = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
+  bool useId = numAttributes.find("id") != numAttributes.end();
+  return addObjectToScene(world, sceneId, name, meshName, pos, overrideId, useId, loadClip, loadScript);
 }
 
 // this needs to also delete all children objects. 

@@ -195,13 +195,13 @@ void setSelectionMode(bool enabled){
 }
 
 short makeObject(std::string name, std::string meshName, float x, float y, float z){
-  return addObjectToScene(world, 0, name, meshName, glm::vec3(x, y, z), -1, false, loadSoundState, loadScriptFromWorld);
+  return addObjectToScene(world, world.scenes.begin() -> first, name, meshName, glm::vec3(x, y, z), -1, false, loadSoundState, loadScriptFromWorld);
 }
 short makeObject(std::string serializedobj, objid id, bool useObjId){
-  return addObjectToScene(world, 0, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
+  return addObjectToScene(world, world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
-  return addObjectToScene(world, 0, name, stringAttributes, numAttributes, vecAttributes);
+  return addObjectToScene(world, world.scenes.begin() -> first, name, stringAttributes, numAttributes, vecAttributes, loadSoundState, loadScriptFromWorld);
 }
 
 void removeObjectById(short id){

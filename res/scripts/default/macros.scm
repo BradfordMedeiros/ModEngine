@@ -53,13 +53,11 @@
 (define defaultState 
   (state 
     "door-closed"
-    (list 
-      (create-track "default" 
-        (list 
-          (getprint "100")
-          (getprint "101")
-          (getprint "102")
-        )
+    (create-track "default" 
+      (list 
+        (getprint "100")
+        (getprint "101")
+        (getprint "102")
       )
     )
   )
@@ -68,24 +66,28 @@
 
 (machine (list defaultState defaultState defaultState))
 
+
 (machine 
-  (state "door-opened"
+  (state "runnign"
+    ;(state-on-event "gunshot"
+    ;  (play-animation "duck")
+    ;)
     (create-track "default"
-      (list
-        (getprint "100")
-        (getprint "101")
-        (getprint "102")  
-      )
+      (getprint "100")
+      (getprint "101")
+      (getprint "102")
+      (display "hello world\n")
     )
+    ;(state-on-exit
+    ;  (stop-sound)
+    ;)
   )
-  (state "door closed" 
+  (state "door-closed" 
     (create-track
       "default"
-      (list
-        (getprint "100")
-        (getprint "101")
-        (getprint "102")
-      )
+      (getprint "100")
+      (getprint "101")
+      (getprint "102")
     )
   )
 )

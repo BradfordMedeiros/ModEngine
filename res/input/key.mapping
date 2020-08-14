@@ -1,10 +1,4 @@
 # Comments can go here
 
-
-'A' > 'D'
-'D' > 'A'
-
-'H' > 65
-
-# > means to remap the value
-# > this remapping happens one way
+'F' > 'Q'
+'Q' > 'F'
