@@ -567,7 +567,9 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 objid addObjectToScene(
   World& world, 
   objid sceneId, 
-  std::map<std::string, std::string> stringAttributes
+  std::map<std::string, std::string> stringAttributes,
+  std::map<std::string, double> numAttributes, 
+  std::map<std::string, glm::vec3> vecAttributes
 ){
   std::cout << "make object placeholder" << std::endl;
   return -1;

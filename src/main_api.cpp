@@ -201,7 +201,7 @@ short makeObject(std::string serializedobj, objid id, bool useObjId){
   return addObjectToScene(world, 0, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
-  return addObjectToScene(world, 0, stringAttributes);
+  return addObjectToScene(world, 0, stringAttributes, numAttributes, vecAttributes);
 }
 
 void removeObjectById(short id){
