@@ -1,0 +1,8 @@
+
+# Demonstrates makeobject attributes
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+platform:script:./res/scripts/makeobject.scm
+
