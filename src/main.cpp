@@ -760,7 +760,6 @@ void onUdpClientMessage(UdpPacket& packet){
   else if (packet.type == LOAD){
     std::string sceneData = packet.payload.loadpacket.sceneData;
     std::cout << "trying to load scene packet!" << std::endl;
-    unloadAllScenes();
     loadSceneData(sceneData, packet.payload.loadpacket.sceneId);  
   }else if (packet.type == UPDATE){
     handleUpdate(packet);
@@ -1005,8 +1004,7 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     [](GameObject& obj) -> void { 
-      if (true || obj.netsynchronize){    // Maybe should limit to only netsync objects?
-        //std::cout << "update obj id: " << obj.id << std::endl;
+      if (obj.netsynchronize){   
         UdpPacket packet { .type = UPDATE };
         packet.payload.updatepacket = UpdatePacket { 
           .id = obj.id,
