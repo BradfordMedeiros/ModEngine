@@ -58,46 +58,47 @@ struct GameObjectRail {
 
 typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail> GameObjectObj;
 
+// attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
   .prefix = '@', 
   .type = "default",
-  .additionalFields = { "mesh", "disabled", "textureoffset", "texture" }
 };
 
+// attributes: none
 static Field camera = {
   .prefix = '>',
   .type = "camera",
   .additionalFields = { },
 };
 
+// attributes: clip
 static Field sound = {
   .prefix = '&',
   .type = "sound",
-  .additionalFields = { "clip" },
 };
 
+// attributes: color
 static Field light = {
   .prefix = '!',
   .type = "light",
-  .additionalFields = { "color" },
 };
 
+// attributes: from
 static Field voxelField = {
   .prefix = ']',
   .type = "voxel",
-  .additionalFields = { "from" },
 };
 
+// attributes: from, to
 static Field channelField {
   .prefix = '%',
   .type = "channel",
-  .additionalFields = { "from", "to" },
 };
 
+// attributes: from, to
 static Field railField {
   .prefix = '^',
   .type = "rail",
-  .additionalFields = { "from", "to" },
 };
 
 static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField };
