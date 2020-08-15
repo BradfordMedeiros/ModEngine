@@ -91,7 +91,6 @@ glm::quat getGameObjectRotation(short index, bool isWorld);
 void setGameObjectRotation(short index, glm::quat rotation);
 void setSelectionMode(bool enabled);
 
-short makeObject(std::string name, std::string meshName, float x, float y, float z);
 short makeObject(std::string serializedobj, objid id, bool useObjId);
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
 

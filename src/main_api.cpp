@@ -194,9 +194,6 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
-short makeObject(std::string name, std::string meshName, float x, float y, float z){
-  return addObjectToScene(world, world.scenes.begin() -> first, name, meshName, glm::vec3(x, y, z), -1, false, loadSoundState, loadScriptFromWorld);
-}
 short makeObject(std::string serializedobj, objid id, bool useObjId){
   return addObjectToScene(world, world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
 }

@@ -942,7 +942,6 @@ int main(int argc, char* argv[]){
     moveCamera, 
     rotateCamera, 
     removeObjectById, 
-    makeObject, 
     getObjectsByType, 
     setActiveCamera,
     drawText,
