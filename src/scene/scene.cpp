@@ -478,50 +478,6 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
   }
 }
 
-
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
-  std::vector<objid> idsAdded;
-  
-  int numIdsGenerated = 0;
-  auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = -1;
-    if (numIdsGenerated == 0 && useObjId){
-      newId = id;
-    }else{
-      newId = getUniqueObjId();
-    }
-    numIdsGenerated++;
-    idsAdded.push_back(newId);
-    return newId;
-  };
-
-  std::cout << "INFO: SCENE - addObjectToScene - start deserialize object, scene id: " << sceneId << std::endl;
-  auto serialObj = makeObjectInScene(
-    world.scenes.at(sceneId),
-    serializedObj,
-    getId,   
-    fields
-  );
-  std::cout << "INFO: SCENE - addObjectToScene - start add object to world" << std::endl;
-  addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
-  auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
-  GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
-
-  std::cout << "INFO: SCENE - addObjectToScene - start add physics bodys" << std::endl;
-  for (auto id : idsAdded){
-    std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
-    addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
-  }
-
-  std::cout << "INFO: SCENE - addObjectToScene - load scripts" << std::endl;
-  if (gameobj.script != ""){
-    loadScript(gameobj.script, gameobj.id);
-  }
-
-  world.onObjectCreate(gameobj);
-  return id;
-}
-
 objid addObjectToScene(
   World& world, 
   objid sceneId, 
@@ -576,6 +532,53 @@ objid addObjectToScene(
   world.onObjectCreate(gameobj);
   return gameobjId;
 }
+
+
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+  std::vector<objid> idsAdded;
+  
+  int numIdsGenerated = 0;
+  auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+    auto newId = -1;
+    if (numIdsGenerated == 0 && useObjId){
+      newId = id;
+    }else{
+      newId = getUniqueObjId();
+    }
+    numIdsGenerated++;
+    idsAdded.push_back(newId);
+    return newId;
+  };
+
+  std::cout << "INFO: SCENE - addObjectToScene - start deserialize object, scene id: " << sceneId << std::endl;
+
+  std::cout << "num scenes: " << world.scenes.size() << std::endl;
+  auto serialObj = makeObjectInScene(
+    world.scenes.at(sceneId),
+    serializedObj,
+    getId,   
+    fields
+  );
+  std::cout << "INFO: SCENE - addObjectToScene - start add object to world" << std::endl;
+  addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
+  auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
+  GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
+
+  std::cout << "INFO: SCENE - addObjectToScene - start add physics bodys" << std::endl;
+  for (auto id : idsAdded){
+    std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
+    addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
+  }
+
+  std::cout << "INFO: SCENE - addObjectToScene - load scripts" << std::endl;
+  if (gameobj.script != ""){
+    loadScript(gameobj.script, gameobj.id);
+  }
+
+  world.onObjectCreate(gameobj);
+  return id;
+}
+
 
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){  

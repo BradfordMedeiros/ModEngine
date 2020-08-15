@@ -122,21 +122,6 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
   return newObject;
 }
 
-void populateAdditionalFields(std::map<std::string, SerializationObject>& objects, Token token, std::string type, std::vector<Field> additionalFields){
-  for (Field field : additionalFields){
-    if (field.type == type){
-      for (std::string fieldName : field.additionalFields){
-        if (token.attribute == fieldName){
-          objects.at(token.target).additionalFields[token.attribute] = token.payload;
-          return;
-        }
-      }
-      return;
-    }
-  }
-}
-
-
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
@@ -145,27 +130,35 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
 
     if (objects.find(token.target) == objects.end()) {
       objects[token.target] = getDefaultObject(token.target, additionalFields, token.layer);
+      objects.at(token.target).type = getType(token.target, additionalFields);
     }
+
     if (token.attribute == "parent"){   // parent is special case that creates the other object as default if it does not yet exist, inherits layer declared in
       if (objects.find(token.payload) == objects.end()){
         objects[token.payload] = getDefaultObject(token.payload, additionalFields, token.layer);
+        objects.at(token.payload).type = getType(token.payload, additionalFields);
       }
       objects.at(token.target).hasParent = true;
       objects.at(token.target).parentName = token.payload;
+      continue;
     }
 
     if (token.attribute == "id"){
       objects.at(token.target).id = std::atoi(token.payload.c_str());   
       objects.at(token.target).hasId = true;
+      continue;
     }
     if (token.attribute == "position"){
       objects.at(token.target).position = parseVec(token.payload);
+      continue;
     }
     if (token.attribute == "scale"){
       objects.at(token.target).scale = parseVec(token.payload);
+      continue;
     }
     if (token.attribute == "rotation"){
       objects.at(token.target).rotation = parseQuat(token.payload);
+      continue;
     }
 
     if (token.attribute == "physics"){
@@ -190,42 +183,50 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       if (token.payload == "shape_auto"){
         objects.at(token.target).physics.shape = AUTOSHAPE;
       }
+      continue;
     }
     if (token.attribute == "physics_angle"){
       objects.at(token.target).physics.angularFactor = parseVec(token.payload);
+      continue;
     }
     if (token.attribute == "physics_linear"){
       objects.at(token.target).physics.linearFactor = parseVec(token.payload);
+      continue;
     }
     if (token.attribute == "physics_gravity"){
       objects.at(token.target).physics.gravity = parseVec(token.payload);
+      continue;
     }
     if (token.attribute == "physics_friction"){
       objects.at(token.target).physics.friction = std::atof(token.payload.c_str());
+      continue;
     }
     if (token.attribute == "physics_restitution"){
       objects.at(token.target).physics.restitution = std::atof(token.payload.c_str());
+      continue;
     }
     if (token.attribute == "physics_mass"){
       objects.at(token.target).physics.mass =  std::atof(token.payload.c_str());
+      continue;
     }
     if (token.attribute == "physics_maxspeed"){
       objects.at(token.target).physics.maxspeed = std::atof(token.payload.c_str());
+      continue;
     }
 
     if (token.attribute == "lookat"){
       objects.at(token.target).lookat = token.payload;
+      continue;
     }
     if (token.attribute == "script"){
       objects.at(token.target).script = token.payload;
+      continue;
     }
     if (token.attribute == "net" && token.payload == "sync"){
       objects.at(token.target).netsynchronize = true;
+      continue;
     }
-
-    std::string type = getType(token.target, additionalFields);
-    objects.at(token.target).type = type;
-    populateAdditionalFields(objects, token, type, additionalFields);
+    objects.at(token.target).additionalFields[token.attribute] = token.payload;
   }
   return objects;
 }
