@@ -55,11 +55,11 @@ SceneDeserialization deserializeScene(
 SerializationObject makeObjectInScene(
   Scene& scene, 
   std::string name, 
-  std::string mesh, 
   glm::vec3 position, 
   std::string layer,
   std::function<objid()> getNewObjectId,
-  std::vector<Field> fields
+  std::vector<Field> fields,
+  std::map<std::string, std::string> additionalFields
 );
 
 SerializationObject makeObjectInScene(

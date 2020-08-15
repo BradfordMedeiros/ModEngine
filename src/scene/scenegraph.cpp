@@ -231,15 +231,13 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
 SerializationObject  makeObjectInScene(
   Scene& scene, 
   std::string name, 
-  std::string mesh, 
   glm::vec3 position, 
   std::string layer,
   std::function<objid()> getNewObjectId,
-  std::vector<Field> fields
+  std::vector<Field> fields,
+  std::map<std::string, std::string> additionalFields
 ){
   auto objectId = getNewObjectId();
-  std::map<std::string, std::string> additionalFields;   // This is a hack, this needs to come from serialization
-  additionalFields["mesh"] = mesh;  
 
   SerializationObject serialObj {
     .name = name,

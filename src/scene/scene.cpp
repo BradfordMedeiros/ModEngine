@@ -507,14 +507,17 @@ objid addObjectToScene(
     return newId;
   };
 
+  std::map<std::string, std::string> additionalFields;   // This is a hack, this needs to come from serialization
+  additionalFields["mesh"] = meshName;  
+
   auto serialObj = makeObjectInScene(
     world.scenes.at(sceneId), 
     name, 
-    meshName, 
     pos, 
     "default",
     getId,
-    fields
+    fields,
+    additionalFields
   );
 
   addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getId);
