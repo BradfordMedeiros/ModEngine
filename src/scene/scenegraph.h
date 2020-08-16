@@ -53,10 +53,10 @@ SceneDeserialization deserializeScene(
 
 SerializationObject serialObjectFromFields(
   std::string name, 
-  glm::vec3 position, 
   std::string layer,
   std::vector<Field> fields,
-  std::map<std::string, std::string> additionalFields
+  std::map<std::string, std::string> stringAttributes,
+  std::map<std::string, glm::vec3> vecAttributes
 );
 
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);

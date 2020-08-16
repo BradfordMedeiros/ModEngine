@@ -228,27 +228,37 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
+std::string attributeOrEmpty(std::map<std::string, std::string>& stringAttributes, std::string field){
+  if (stringAttributes.find(field) != stringAttributes.end()){
+    return stringAttributes.at(field);
+  }
+  return "";
+}
+
+// @TODO - fill in the rest of these fields 
+// affects mk-obj-attr 
 SerializationObject serialObjectFromFields(
   std::string name, 
-  glm::vec3 position, 
   std::string layer,
   std::vector<Field> fields,
-  std::map<std::string, std::string> additionalFields
+  std::map<std::string, std::string> stringAttributes,
+  std::map<std::string, glm::vec3> vecAttributes
 ){
+  auto parent = attributeOrEmpty(stringAttributes, "parent");
   SerializationObject serialObj {
     .name = name,
-    .position = position,
-    .scale = glm::vec3(1.0f, 1.0f, 1.0),
+    .position = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
+    .scale = vecAttributes.find("scale") != vecAttributes.end() ? vecAttributes.at("scale") : glm::vec3(0.f, 0.f, 0.f),
     .rotation =  glm::identity<glm::quat>(),
-    .hasParent = false, 
-    .parentName = "",
+    .hasParent = parent != "", 
+    .parentName = parent,
     .physics = defaultPhysicsOpts(),
     .type = getType(name, fields),
-    .lookat = "",
+    .lookat = attributeOrEmpty(stringAttributes,"lookat"),
     .layer =  layer,
-    .script = "",
-    .netsynchronize = false,
-    .additionalFields = additionalFields,
+    .script = attributeOrEmpty(stringAttributes,"script"),
+    .netsynchronize = (stringAttributes.find("net") != stringAttributes.end()) && (stringAttributes.at("net") == "sync"),
+    .additionalFields = stringAttributes, 
   };
   return serialObj;
 }

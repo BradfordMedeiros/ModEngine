@@ -520,10 +520,9 @@ objid addObjectToScene(
   std::function<void(std::string, objid)> loadScript
 ){
   auto meshName = stringAttributes.find("mesh") != stringAttributes.end() ? stringAttributes.at("mesh") : "";
-  auto pos = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f);
   int id = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
   bool useObjId = numAttributes.find("id") != numAttributes.end();
-  auto serialObj = serialObjectFromFields(name, pos, "default", fields, stringAttributes);
+  auto serialObj = serialObjectFromFields(name, "default", fields, stringAttributes, vecAttributes);
   return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip ,loadScript);
 }
 
