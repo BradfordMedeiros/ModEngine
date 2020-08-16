@@ -478,22 +478,7 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
   }
 }
 
-objid addObjectToScene(
-  World& world, 
-  objid sceneId, 
-  std::string name, 
-  std::map<std::string, std::string> stringAttributes,
-  std::map<std::string, double> numAttributes, 
-  std::map<std::string, glm::vec3> vecAttributes,
-  std::function<void(std::string)> loadClip, 
-  std::function<void(std::string, objid)> loadScript
-){
-  auto meshName = stringAttributes.find("mesh") != stringAttributes.end() ? stringAttributes.at("mesh") : "";
-  auto pos = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f);
-  int id = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
-  bool useObjId = numAttributes.find("id") != numAttributes.end();
-  auto serialObj = serialObjectFromFields(name, pos, "default", fields, stringAttributes);
-
+objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj,  std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   std::vector<objid> idsAdded;
   int numIdsGenerated = 0;
   auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -510,8 +495,7 @@ objid addObjectToScene(
 
   addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
   addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getId);
- 
-  auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
+  auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
   
   for (auto id : idsAdded){
@@ -525,6 +509,24 @@ objid addObjectToScene(
   return gameobjId;
 }
 
+objid addObjectToScene(
+  World& world, 
+  objid sceneId, 
+  std::string name, 
+  std::map<std::string, std::string> stringAttributes,
+  std::map<std::string, double> numAttributes, 
+  std::map<std::string, glm::vec3> vecAttributes,
+  std::function<void(std::string)> loadClip, 
+  std::function<void(std::string, objid)> loadScript
+){
+  auto meshName = stringAttributes.find("mesh") != stringAttributes.end() ? stringAttributes.at("mesh") : "";
+  auto pos = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f);
+  int id = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
+  bool useObjId = numAttributes.find("id") != numAttributes.end();
+  auto serialObj = serialObjectFromFields(name, pos, "default", fields, stringAttributes);
+  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip ,loadScript);
+}
+
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   ParsedContent content = parseFormat(serializedObj);
@@ -532,37 +534,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   assert(serialObjs.size() == 1);
   SerializationObject& serialObj = serialObjs.begin() -> second;
-
-  std::vector<objid> idsAdded;
-  
-  int numIdsGenerated = 0;
-  auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = -1;
-    if (numIdsGenerated == 0 && useObjId){
-      newId = id;
-    }else{
-      newId = getUniqueObjId();
-    }
-    numIdsGenerated++;
-    idsAdded.push_back(newId);
-    return newId;
-  };
-
-  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
-  addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
-  auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
-  GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
-
-  for (auto id : idsAdded){
-    addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
-  }
-
-  if (gameobj.script != ""){
-    loadScript(gameobj.script, gameobj.id);
-  }
-
-  world.onObjectCreate(gameobj);
-  return id;
+  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip, loadScript);
 }
 
 

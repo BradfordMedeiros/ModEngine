@@ -17,8 +17,14 @@
     )
   )
 )
+
 (define (select)
-  (mk-obj (getNextName) (list-ref menu selectedIndex) '(0 0 0))
+  (mk-obj-attr (getNextName) (
+    list 
+      (list "position" '(0 0 0))
+      (list "mesh" (list-ref menu selectedIndex))
+    )
+  )
 )
 
 (define selectedIndex 0)
