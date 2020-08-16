@@ -228,17 +228,13 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
   return sceneData;
 }
 
-SerializationObject  makeObjectInScene(
-  Scene& scene, 
+SerializationObject serialObjectFromFields(
   std::string name, 
   glm::vec3 position, 
   std::string layer,
-  std::function<objid()> getNewObjectId,
   std::vector<Field> fields,
   std::map<std::string, std::string> additionalFields
 ){
-  auto objectId = getNewObjectId();
-
   SerializationObject serialObj {
     .name = name,
     .position = position,
@@ -254,6 +250,21 @@ SerializationObject  makeObjectInScene(
     .netsynchronize = false,
     .additionalFields = additionalFields,
   };
+  return serialObj;
+}
+
+SerializationObject  makeObjectInScene(
+  Scene& scene, 
+  std::string name, 
+  glm::vec3 position, 
+  std::string layer,
+  std::function<objid()> getNewObjectId,
+  std::vector<Field> fields,
+  std::map<std::string, std::string> additionalFields
+){
+
+  auto serialObj = serialObjectFromFields(name, position, layer, fields, additionalFields);
+  auto objectId = getNewObjectId();
 
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
