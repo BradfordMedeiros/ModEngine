@@ -492,6 +492,7 @@ objid addObjectToScene(
   auto pos = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f);
   int id = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
   bool useObjId = numAttributes.find("id") != numAttributes.end();
+  auto serialObj = serialObjectFromFields(name, pos, "default", fields, stringAttributes);
 
   std::vector<objid> idsAdded;
   int numIdsGenerated = 0;
@@ -507,25 +508,13 @@ objid addObjectToScene(
     return newId;
   };
 
-  std::map<std::string, std::string> additionalFields;   // This is a hack, this needs to come from serialization
-  additionalFields["mesh"] = meshName;  
-
-  auto serialObj = makeObjectInScene(
-    world.scenes.at(sceneId), 
-    name, 
-    pos, 
-    "default",
-    getId,
-    fields,
-    additionalFields
-  );
-
+  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
   addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getId);
+ 
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
   
   for (auto id : idsAdded){
-    std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
     addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
   }
   if (gameobj.script != ""){
@@ -538,6 +527,12 @@ objid addObjectToScene(
 
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+  ParsedContent content = parseFormat(serializedObj);
+  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
+  assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
+  assert(serialObjs.size() == 1);
+  SerializationObject& serialObj = serialObjs.begin() -> second;
+
   std::vector<objid> idsAdded;
   
   int numIdsGenerated = 0;
@@ -553,27 +548,15 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     return newId;
   };
 
-  std::cout << "INFO: SCENE - addObjectToScene - start deserialize object, scene id: " << sceneId << std::endl;
-
-  std::cout << "num scenes: " << world.scenes.size() << std::endl;
-  auto serialObj = makeObjectInScene(
-    world.scenes.at(sceneId),
-    serializedObj,
-    getId,   
-    fields
-  );
-  std::cout << "INFO: SCENE - addObjectToScene - start add object to world" << std::endl;
+  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
   addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
   auto serialObjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   GameObject& gameobj = world.scenes.at(sceneId).idToGameObjects.at(serialObjId);
 
-  std::cout << "INFO: SCENE - addObjectToScene - start add physics bodys" << std::endl;
   for (auto id : idsAdded){
-    std::cout << "adding physics body for id: " << std::to_string(id) << std::endl;
     addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
   }
 
-  std::cout << "INFO: SCENE - addObjectToScene - load scripts" << std::endl;
   if (gameobj.script != ""){
     loadScript(gameobj.script, gameobj.id);
   }

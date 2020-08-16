@@ -275,20 +275,6 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
   enforceParentRelationship(scene, objectId, serialObj.parentName);
 }
 
-SerializationObject  makeObjectInScene(
-  Scene& scene, 
-  std::string name, 
-  glm::vec3 position, 
-  std::string layer,
-  std::function<objid()> getNewObjectId,
-  std::vector<Field> fields,
-  std::map<std::string, std::string> additionalFields
-){
-  auto serialObj = serialObjectFromFields(name, position, layer, fields, additionalFields);
-  addSerialObjectToScene(scene, serialObj, getNewObjectId);
-  return serialObj;
-}
-
 SerializationObject makeObjectInScene(
   Scene& scene,
   std::string serializedObj,

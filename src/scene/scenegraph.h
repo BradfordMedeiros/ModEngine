@@ -59,15 +59,7 @@ SerializationObject serialObjectFromFields(
   std::map<std::string, std::string> additionalFields
 );
 
-SerializationObject makeObjectInScene(
-  Scene& scene, 
-  std::string name, 
-  glm::vec3 position, 
-  std::string layer,
-  std::function<objid()> getNewObjectId,
-  std::vector<Field> fields,
-  std::map<std::string, std::string> additionalFields
-);
+void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
 
 SerializationObject makeObjectInScene(
   Scene& scene,
@@ -75,7 +67,6 @@ SerializationObject makeObjectInScene(
   std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 );
-
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
