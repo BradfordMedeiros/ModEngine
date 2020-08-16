@@ -158,8 +158,8 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
     }
   }
 
-  _makeObjectAttr(scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
-  return SCM_UNSPECIFIED;
+  objid id = _makeObjectAttr(scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
+  return scm_from_short(id);
 }
 
 void (*removeObjById)(short id);
