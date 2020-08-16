@@ -253,26 +253,6 @@ SerializationObject serialObjectFromFields(
   return serialObj;
 }
 
-SerializationObject  makeObjectInScene(
-  Scene& scene, 
-  std::string name, 
-  glm::vec3 position, 
-  std::string layer,
-  std::function<objid()> getNewObjectId,
-  std::vector<Field> fields,
-  std::map<std::string, std::string> additionalFields
-){
-
-  auto serialObj = serialObjectFromFields(name, position, layer, fields, additionalFields);
-  auto objectId = getNewObjectId();
-
-   // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
-  // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
-  addObjectToScene(scene, objectId, -1, serialObj);      
-  scene.rootGameObjectsH.push_back(objectId);
-  return serialObj;
-}
-
 void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
   if (parentName == ""){
     assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
@@ -285,38 +265,43 @@ void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
   }
 }
 
+void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId){
+   // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
+  // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
+  auto objectId = getNewObjectId();
+  std::cout << "INFO: scenegraph - adding to scenegraph" << std::endl;
+  addObjectToScene(scene, objectId, -1, serialObj);      
+  std::cout << "INFO: scenegraph - adding parent relations" << std::endl;
+  enforceParentRelationship(scene, objectId, serialObj.parentName);
+}
+
+SerializationObject  makeObjectInScene(
+  Scene& scene, 
+  std::string name, 
+  glm::vec3 position, 
+  std::string layer,
+  std::function<objid()> getNewObjectId,
+  std::vector<Field> fields,
+  std::map<std::string, std::string> additionalFields
+){
+  auto serialObj = serialObjectFromFields(name, position, layer, fields, additionalFields);
+  addSerialObjectToScene(scene, serialObj, getNewObjectId);
+  return serialObj;
+}
+
 SerializationObject makeObjectInScene(
   Scene& scene,
   std::string serializedObj,
   std::function<objid()> getNewObjectId,
   std::vector<Field> fields
 ){
-  std::cout << "INFO: scenegraph - parse format" << std::endl;
   ParsedContent content = parseFormat(serializedObj);
-
-  std::cout << "INFO: scenegraph - deserialize tokens" << std::endl;
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
-  
-  std::cout << "INFO: scenegraph - deserialize tokens finished" << std::endl;
-  
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
-  std::cout << "INFO: scenegraph - asserted layer name" << std::endl;
-
   assert(serialObjs.size() == 1);
-  std::cout << "INFO: scenegraph - asserted num objects" << std::endl;
-  
   SerializationObject& serialObj = serialObjs.begin() -> second;
-  std::cout << "INFO: scenegraph - got object" << std::endl;
 
-  auto objectId = getNewObjectId();
-  std::cout << "INFO: scenegraph - object id: " << objectId << std::endl;
-  
-  std::cout << "INFO: scenegraph - adding to scenegraph" << std::endl;
-  addObjectToScene(scene, objectId, -1, serialObj);
-
-  std::cout << "INFO: scenegraph - adding parent relations" << std::endl;
-  enforceParentRelationship(scene, objectId, serialObj.parentName);
-
+  addSerialObjectToScene(scene, serialObj, getNewObjectId);
   return serialObj;
 }
 
