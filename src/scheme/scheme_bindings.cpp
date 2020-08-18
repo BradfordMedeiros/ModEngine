@@ -454,10 +454,9 @@ SCM scmListServers(){
   }
   return list;
 }
-void (*_connectServer)(std::string server);
+std::string (*_connectServer)(std::string server);
 SCM scmConnectServer(SCM server){
-  _connectServer(scm_to_locale_string(server));
-  return SCM_UNSPECIFIED;
+  return scm_from_locale_string(_connectServer(scm_to_locale_string(server)).c_str());
 }
 void (*_disconnectServer)();
 SCM scmDisconnectServer(){
@@ -832,7 +831,7 @@ void createStaticSchemeBindings(
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
-  void (*connectServer)(std::string server),
+  std::string (*connectServer)(std::string server),
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),

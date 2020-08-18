@@ -299,7 +299,7 @@ void copyStr(std::string& data, char* copyTo, int size){
   assert(copyTo[size -1] == '\0');
 }
 
-void connectServer(std::string data){
+std::string connectServer(std::string data){
   UdpPacket setup = {
     .type = SETUP,
   };  
@@ -307,7 +307,7 @@ void connectServer(std::string data){
   SetupPacket setupPacket {};
   auto packet = toNetworkPacket(setup);
 
-  connectServer(data, [&setup, &setupPacket, &packet](std::string connectionHash) -> NetworkPacket {
+  return connectServer(data, [&setup, &setupPacket, &packet](std::string connectionHash) -> NetworkPacket {
     auto data = connectionHash.c_str();
     assert((sizeof(data) + 1 ) < sizeof(setupPacket.connectionHash));
     strncpy(setupPacket.connectionHash, data, sizeof(setupPacket.connectionHash));

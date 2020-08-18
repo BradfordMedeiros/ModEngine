@@ -50,7 +50,7 @@ void createStaticSchemeBindings(
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
-  void (*connectServer)(std::string server),
+  std::string (*connectServer)(std::string server),
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
