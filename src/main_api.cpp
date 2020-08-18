@@ -271,6 +271,9 @@ void sendEventMessage(std::string message){
     }
   }
 }
+void sendNotifyMessage(std::string message){
+  channelMessages.push(message);
+}
 
 void attachToRail(short id, std::string rail){
   addEntity(world.rails, id, rail);

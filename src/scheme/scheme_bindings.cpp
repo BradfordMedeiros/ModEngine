@@ -411,6 +411,12 @@ SCM scmSendEventMessage(SCM channelFrom){
   return SCM_UNSPECIFIED;
 }
 
+void (*_sendNotifyMessage)(std::string message);
+SCM scmSendNotify(SCM message){
+  _sendNotifyMessage(scm_to_locale_string(message));
+  return SCM_UNSPECIFIED;
+}
+
 void (*_attachToRail)(short id, std::string rail);
 SCM scmAttachToRail(SCM obj, SCM rail){
   _attachToRail(getGameobjId(obj), scm_to_locale_string(rail));
@@ -757,6 +763,7 @@ void defineFunctions(objid id, bool isServer){
 
   // event system
   scm_c_define_gsubr("sendmessage", 1, 0, 0, (void*)scmSendEventMessage);
+  scm_c_define_gsubr("sendnotify", 1, 0, 0, (void*)scmSendNotify);
 
   // rails
   scm_c_define_gsubr("attach-rail", 2, 0, 0, (void*)scmAttachToRail);
@@ -826,6 +833,7 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
+  void (*sendNotifyMessage)(std::string message),
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
@@ -891,7 +899,10 @@ void createStaticSchemeBindings(
   _listClips = listClips;
   _playClip = playClip;
   _listModels = listModels;
+
   _sendEventMessage = sendEventMessage;
+  _sendNotifyMessage = sendNotifyMessage;
+
   _attachToRail = attachToRail;
   _unattachFromRail = unattachFromRail;
   _timeSeconds = timeSeconds;

@@ -958,6 +958,7 @@ int main(int argc, char* argv[]){
     playSoundState,
     listModels,
     sendEventMessage,
+    sendNotifyMessage,
     attachToRail,
     unattachFromRail,
     timeSeconds,

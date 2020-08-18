@@ -45,6 +45,7 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
+  void (*sendNotifyMessage)(std::string message),
   void (*attachToRail)(short id, std::string rail),
   void (*unattachFromRail)(short id),
   double (*timeSeconds)(),
