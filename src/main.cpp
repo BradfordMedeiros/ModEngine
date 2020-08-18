@@ -719,7 +719,7 @@ void handleCreate(UdpPacket& packet){
   }
   std::string serialobj = create.serialobj;
   assert(serialobj.size() > 0);
-  auto newObjId = makeObject(serialobj, create.id, true);                        
+  auto newObjId = makeObject(serialobj, create.id, true, packet.payload.createpacket.sceneId, true);                        
   assert(newObjId == id);
 }
 void handleDelete(UdpPacket& packet){
@@ -1008,7 +1008,10 @@ int main(int argc, char* argv[]){
       std::cout << "created obj id: " << obj.id << std::endl;
       UdpPacket packet { .type = CREATE };
 
-      packet.payload.createpacket = CreatePacket { .id = obj.id };
+      packet.payload.createpacket = CreatePacket { 
+        .id = obj.id,
+        .sceneId = world.idToScene.at(obj.id),
+      };
       auto serialobj = serializeObject(world, obj.id);
       if (serialobj == ""){
         return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit

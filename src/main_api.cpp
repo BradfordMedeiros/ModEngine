@@ -194,9 +194,8 @@ void setSelectionMode(bool enabled){
   state.isSelectionMode = enabled;
 }
 
-short makeObject(std::string serializedobj, objid id, bool useObjId){
-  assert(world.scenes.size() > 0);
-  return addObjectToScene(world, world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
+short makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
+  return addObjectToScene(world, useSceneId ? sceneId : world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
   assert(world.scenes.size() > 0); 

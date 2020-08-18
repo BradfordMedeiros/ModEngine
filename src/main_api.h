@@ -20,6 +20,7 @@ struct SetupPacket {
 };
 struct CreatePacket {
   short id;
+  objid sceneId;
   char serialobj[3000];
 };
 struct DeletePacket {
@@ -91,7 +92,7 @@ glm::quat getGameObjectRotation(short index, bool isWorld);
 void setGameObjectRotation(short index, glm::quat rotation);
 void setSelectionMode(bool enabled);
 
-short makeObject(std::string serializedobj, objid id, bool useObjId);
+short makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId = -1, bool useSceneId = false);
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
 
 void removeObjectById(short id);
