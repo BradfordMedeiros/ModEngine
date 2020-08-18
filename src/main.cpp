@@ -1033,8 +1033,8 @@ int main(int argc, char* argv[]){
         sendDataOnUdpSocket(toNetworkPacket(packet));
       }
     },
-    [](short id) -> void {
-      if (!obj.netsynchronize){
+    [](short id, bool isNet) -> void {
+      if (!isNet){
         return;
       }
       std::cout << "deleted obj id: " << id << std::endl;

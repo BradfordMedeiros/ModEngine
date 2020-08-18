@@ -24,7 +24,7 @@ struct World {
   RailSystem rails;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
-  std::function<void(objid)> onObjectDelete;
+  std::function<void(objid, bool)> onObjectDelete;
   std::set<objid> entitiesToUpdate;
 };
 
@@ -39,7 +39,7 @@ World createWorld(
   collisionPairFn onObjectLeave, 
   std::function<void(GameObject&)> onObjectUpdate, 
   std::function<void(GameObject&)> onObjectCreate,
-  std::function<void(objid)> onObjectDelete,
+  std::function<void(objid, bool)> onObjectDelete,
   btIDebugDraw* debugDrawer
 );
 Texture loadTextureWorld(World& world, std::string texturepath);

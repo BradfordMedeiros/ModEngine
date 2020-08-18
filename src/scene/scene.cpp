@@ -241,7 +241,7 @@ World createWorld(
   collisionPairFn onObjectLeave, 
   std::function<void(GameObject&)> onObjectUpdate,  
   std::function<void(GameObject&)> onObjectCreate, 
-  std::function<void(objid)> onObjectDelete, 
+  std::function<void(objid, bool)> onObjectDelete, 
   btIDebugDraw* debugDrawer
 ){
   auto objectMapping = getObjectMapping();
@@ -442,7 +442,9 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
     world.rigidbodys.erase(objectId);
   }
 
-  auto scriptName = getGameObject(world, objectId).script;
+  auto gameobj = getGameObject(world, objectId);
+  auto scriptName = gameobj.script;
+  auto netsynchronized = gameobj.netsynchronize;
   if (scriptName != ""){
     unloadScript(scriptName, objectId);
   }
@@ -450,8 +452,9 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
     std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
     assert(false);
   });
+  
   world.idToScene.erase(objectId);
-  world.onObjectDelete(objectId);
+  world.onObjectDelete(objectId, netsynchronized);
 
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
   std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
