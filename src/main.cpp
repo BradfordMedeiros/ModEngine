@@ -708,29 +708,18 @@ void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
 
-// this assumes always beingm made in scene 0
+ // @TODO --  this needs to makeObject in the right scene
 void handleCreate(UdpPacket& packet){
   auto create = packet.payload.createpacket;
 
-  std::cout << "CREATE PACKET: received "  << std::endl;
-  std::cout << "CREATE PACKET: serializedobj: " << create.serialobj << std::endl;
-
   auto id = create.id;   
-  if (idExists(world, id)){
-    // could conceptually do a comparison to see if it changed, but probably not
+  if (idExists(world, id)){     // could conceptually do a comparison to see if it changed, but probably not
     std::cout << "INFO: id already exits: " << id << std::endl;
     return;
   }
-
   std::string serialobj = create.serialobj;
-
-  std::cout << "INFO: net - start make object " << std::endl;
-  std::cout << "serial object: " << std::endl;
-  std::cout << serialobj << std::endl;
-  std::cout << "---------------------" << std::endl;
   assert(serialobj.size() > 0);
-  auto newObjId = makeObject(serialobj, create.id, true);
-  std::cout << "INFO: net - stop make object - new object id to make: " << id << ", actual id: " << newObjId << std::endl;
+  auto newObjId = makeObject(serialobj, create.id, true);                        
   assert(newObjId == id);
 }
 void handleDelete(UdpPacket& packet){
@@ -772,7 +761,6 @@ void onUdpClientMessage(UdpPacket& packet){
 }
 
 void onUdpServerMessage(UdpPacket& packet){
-  std::cout << "INFO: on udp server message!, type: " << packet.type  << std::endl;
   if (packet.type == SETUP){
     std::cout << "INFO: SETUP PACKET HANDLED IN SERVER CODE" << packet.payload.setuppacket.connectionHash << std::endl;
   }else if (packet.type == LOAD){

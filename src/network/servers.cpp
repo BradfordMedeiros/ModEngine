@@ -137,7 +137,6 @@ bool tickNetCode(NetCode& netcode, NetworkPacket& packet, std::function<std::str
   processTcpServer(netcode.tServer, netcode.udpConnections, netcode.onPlayerDisconnected);
   UdpSocketData response = getDataFromUdpSocket(netcode.udpModsocket.socketFd, packet.packet, packet.packetSize);
   if (response.hasData){
-    std::cout << "INFO: TICK NETCODE: got data" << std::endl;
     auto setupConnectionHash = maybeGetSetupConnectionHash();
     if (setupConnectionHash != ""){
       assert(netcode.udpConnections.find(setupConnectionHash) == netcode.udpConnections.end());
