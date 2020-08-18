@@ -711,6 +711,9 @@ void onClientMessage(std::string message){
  // @TODO --  this needs to makeObject in the right scene
 void handleCreate(UdpPacket& packet){
   auto create = packet.payload.createpacket;
+  if (world.scenes.find(packet.payload.createpacket.sceneId) == world.scenes.end()){
+    return;
+  }
 
   auto id = create.id;   
   if (idExists(world, id)){     // could conceptually do a comparison to see if it changed, but probably not
@@ -991,20 +994,25 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     [](GameObject& obj) -> void { 
-      if (obj.netsynchronize){   
-        UdpPacket packet { .type = UPDATE };
-        packet.payload.updatepacket = UpdatePacket { 
-          .id = obj.id,
-          .properties = getProperties(world, obj.id),
-        };
-        if (bootStrapperMode){
-          sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-        }else if (isConnectedToServer()){
-          sendDataOnUdpSocket(toNetworkPacket(packet));
-        }
+      if (!obj.netsynchronize){   
+        return;
+      }
+      UdpPacket packet { .type = UPDATE };
+      packet.payload.updatepacket = UpdatePacket { 
+        .id = obj.id,
+        .properties = getProperties(world, obj.id),
+      };
+      if (bootStrapperMode){
+        sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+      }else if (isConnectedToServer()){
+        sendDataOnUdpSocket(toNetworkPacket(packet));
       }
     }, 
     [](GameObject &obj) -> void {
+      if (!obj.netsynchronize){
+        return;
+      }
+
       std::cout << "created obj id: " << obj.id << std::endl;
       UdpPacket packet { .type = CREATE };
 
@@ -1026,6 +1034,9 @@ int main(int argc, char* argv[]){
       }
     },
     [](short id) -> void {
+      if (!obj.netsynchronize){
+        return;
+      }
       std::cout << "deleted obj id: " << id << std::endl;
       if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
         activeCameraObj = NULL;
