@@ -148,15 +148,6 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).parentName = token.payload;
       continue;
     }
-    if (token.attribute == "children"){
-      auto children = parseChildren(token.payload);
-      objects.at(token.target).children = children;
-      for(auto child : children){
-        if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject(child, additionalFields, token.layer);
-        }
-      }
-    }
 
     if (token.attribute == "id"){
       objects.at(token.target).id = std::atoi(token.payload.c_str());   
