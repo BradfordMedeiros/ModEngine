@@ -46,6 +46,18 @@ void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObjec
   scene.nameToId[serialObj.name] = gameobjectObj.id;
 }
 
+void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
+  if (parentName == ""){
+    assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
+    scene.rootGameObjectsH.push_back(id);
+  }else{
+    auto gameobj = scene.idToGameObjectsH.at(id);
+    auto parentId = scene.nameToId.at(parentName);
+    scene.idToGameObjectsH.at(id).parentId = parentId;
+    scene.idToGameObjectsH.at(parentId).children.insert(id);
+  }
+}
+
 SceneDeserialization createSceneFromParsedContent(
   ParsedContent parsedContent,  
   std::vector<Field> fields,
@@ -63,16 +75,7 @@ SceneDeserialization createSceneFromParsedContent(
   }
 
   for (auto [_, serialObj] : serialObjs){
-    if (serialObj.hasParent){
-      scene.idToGameObjectsH.at(scene.nameToId.at(serialObj.name)).parentId = scene.nameToId.at(serialObj.parentName);
-      scene.idToGameObjectsH.at(scene.nameToId.at(serialObj.parentName)).children.insert(scene.idToGameObjectsH.at(scene.nameToId.at(serialObj.name)).id);
-    }
-  }
-
-  for( auto const& [id, gameobjectH] : scene.idToGameObjectsH ){
-    if (gameobjectH.parentId == -1){
-      scene.rootGameObjectsH.push_back(gameobjectH.id);
-    }
+    enforceParentRelationship(scene, scene.nameToId.at(serialObj.name), serialObj.parentName);
   }
 
   SceneDeserialization deserializedScene {
@@ -261,18 +264,6 @@ SerializationObject serialObjectFromFields(
     .additionalFields = stringAttributes, 
   };
   return serialObj;
-}
-
-void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
-  if (parentName == ""){
-    assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
-    scene.rootGameObjectsH.push_back(id);
-  }else{
-    auto gameobj = scene.idToGameObjectsH.at(id);
-    auto parentId = scene.nameToId.at(parentName);
-    scene.idToGameObjectsH.at(id).parentId = parentId;
-    scene.idToGameObjectsH.at(parentId).children.insert(id);
-  }
 }
 
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId){
