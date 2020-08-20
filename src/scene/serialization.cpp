@@ -9,6 +9,7 @@ std::optional<Token> parseToken(std::string content, std::string layer) {
     .payload = (validToken.size() > 2) ? trim(validToken.at(2)) : "",
     .layer = layer,
   };
+  assert(token.target.find(',') == std::string::npos);
   if (token.target.length() > 0 && token.attribute.length() > 0 && token.payload.length() > 0){
     return token;
   }
@@ -122,6 +123,11 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
   return newObject;
 }
 
+std::vector<std::string> parseChildren(std::string payload){
+  std::vector<std::string> children;
+  return children;
+}
+
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
@@ -141,6 +147,10 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).hasParent = true;
       objects.at(token.target).parentName = token.payload;
       continue;
+    }
+    if (token.attribute == "children"){
+      auto children = parseChildren(token.payload);
+      objects.at(token.target).children = children;
     }
 
     if (token.attribute == "id"){
