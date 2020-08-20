@@ -35,7 +35,6 @@ struct Token {
 struct Field {
   char prefix;
   std::string type;
-  std::vector<std::string> additionalFields;
 };
 
 struct SerializationObject {

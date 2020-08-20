@@ -68,7 +68,6 @@ static Field obj = {
 static Field camera = {
   .prefix = '>',
   .type = "camera",
-  .additionalFields = { },
 };
 
 // attributes: clip

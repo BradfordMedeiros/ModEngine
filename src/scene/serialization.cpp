@@ -123,9 +123,9 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
   return newObject;
 }
 
-std::vector<std::string> parseChildren(std::string payload){
+std::vector<std::string> parseChildren(std::string payload){  // TODO - redundant children ? 
   std::vector<std::string> children;
-  return children;
+  return split(payload, ',');
 }
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
@@ -151,6 +151,11 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (token.attribute == "children"){
       auto children = parseChildren(token.payload);
       objects.at(token.target).children = children;
+      for(auto child : children){
+        if (objects.find(child) == objects.end()){
+          objects[child] = getDefaultObject(child, additionalFields, token.layer);
+        }
+      }
     }
 
     if (token.attribute == "id"){
