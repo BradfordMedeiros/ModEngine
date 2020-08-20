@@ -123,11 +123,6 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
   return newObject;
 }
 
-std::vector<std::string> parseChildren(std::string payload){  // TODO - redundant children ? 
-  std::vector<std::string> children;
-  return split(payload, ',');
-}
-
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
   std::map<std::string, SerializationObject> objects;
 
