@@ -713,7 +713,6 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
-// @TODO - this is wrong, needs to get the lights in world space, relative to the parent
 std::vector<LightInfo> getLightInfo(World& world){
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   std::vector<LightInfo> lights;
