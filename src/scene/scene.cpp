@@ -618,15 +618,7 @@ void physicsRotate(World& world, objid index, float x, float y, float z){
   physicsRotateSet(world, index, setFrontDelta(getGameObject(world, index).transformation.rotation, x, y, z, 5));
 }
 void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
-  Scene& scene = sceneForId(world, index);
-  auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
-  scene.idToGameObjects.at(index).transformation.rotation = newRotation;
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    setRotation(body, newRotation);
-  }
-  world.entitiesToUpdate.insert(index);
+  physicsRotateSet(world, index, applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis));
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
