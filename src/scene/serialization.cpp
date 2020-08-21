@@ -161,20 +161,15 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).rotation = parseQuat(token.payload);
       continue;
     }
-
     if (token.attribute == "physics"){
-      if (token.payload == "enabled"){
-        objects.at(token.target).physics.enabled = true;
-      }
-      if (token.payload == "disabled"){
-        objects.at(token.target).physics.enabled = false;
-      }
-      if (token.payload == "dynamic"){
-        objects.at(token.target).physics.isStatic = false;
-      }
-      if (token.payload == "nocollide"){
-        objects.at(token.target).physics.hasCollisions = false;
-      }
+      objects.at(token.target).physics.enabled = token.payload == "enabled";
+      continue;
+    }
+    if (token.attribute == "physics_type"){
+      objects.at(token.target).physics.isStatic = token.payload != "dynamic";
+      continue;
+    }
+    if (token.attribute == "physics_shape"){
       if (token.payload == "shape_sphere"){
         objects.at(token.target).physics.shape = SPHERE;
       }
@@ -184,6 +179,10 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       if (token.payload == "shape_auto"){
         objects.at(token.target).physics.shape = AUTOSHAPE;
       }
+      continue;
+    }
+    if (token.attribute == "physics_collision" && token.payload == "nocollide"){
+      objects.at(token.target).physics.hasCollisions = false;
       continue;
     }
     if (token.attribute == "physics_angle"){

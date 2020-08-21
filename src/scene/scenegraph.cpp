@@ -187,16 +187,16 @@ std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<st
     sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
   }
   if (!gameobject.physicsOptions.isStatic){
-    sceneData = sceneData + gameobjectName + ":physics:dynamic" + "\n"; 
+    sceneData = sceneData + gameobjectName + ":physics_type:dynamic" + "\n"; 
   }
   if (!gameobject.physicsOptions.hasCollisions){
-    sceneData = sceneData + gameobjectName + ":physics:nocollide" + "\n"; 
+    sceneData = sceneData + gameobjectName + ":physics_collision:nocollide" + "\n"; 
   }
   if (gameobject.physicsOptions.shape == BOX){
-    sceneData = sceneData + gameobjectName + ":physics:shape_box" + "\n"; 
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_box" + "\n"; 
   }
   if (gameobject.physicsOptions.shape == SPHERE){
-    sceneData = sceneData + gameobjectName + ":physics:shape_sphere" + "\n"; 
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_sphere" + "\n"; 
   }
   if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
     sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
