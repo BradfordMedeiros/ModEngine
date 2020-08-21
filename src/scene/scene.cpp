@@ -617,6 +617,17 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation){
 void physicsRotate(World& world, objid index, float x, float y, float z){
   physicsRotateSet(world, index, setFrontDelta(getGameObject(world, index).transformation.rotation, x, y, z, 5));
 }
+void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
+  Scene& scene = sceneForId(world, index);
+  auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
+  scene.idToGameObjects.at(index).transformation.rotation = newRotation;
+
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    setRotation(body, newRotation);
+  }
+  world.entitiesToUpdate.insert(index);
+}
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   Scene& scene = sceneForId(world, index);
@@ -629,10 +640,12 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   }
   world.entitiesToUpdate.insert(index);
 }
-
 void physicsScale(World& world, objid index, float x, float y, float z){
   auto oldScale = getGameObject(world, index).transformation.scale;
   physicsScaleSet(world, index, glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z));
+}
+void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
+  physicsScaleSet(world, index, applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
 }
 
 void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
@@ -647,30 +660,6 @@ void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, floa
   world.entitiesToUpdate.insert(index);
 }
 
-void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
-  Scene& scene = sceneForId(world, index);
-  auto newRotation = applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis);
-  scene.idToGameObjects.at(index).transformation.rotation = newRotation;
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    setRotation(body, newRotation);
-  }
-  world.entitiesToUpdate.insert(index);
-}
-
-void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
-  Scene& scene = sceneForId(world, index);
-  auto newScale = applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis);
-  scene.idToGameObjects.at(index).transformation.scale = newScale;
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
-    auto body =  world.rigidbodys.at(index);
-    setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
-  }
-  world.entitiesToUpdate.insert(index);
-}
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
