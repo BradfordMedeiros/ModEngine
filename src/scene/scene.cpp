@@ -4,26 +4,33 @@
 Scene& sceneForId(World& world, objid id){
   return world.scenes.at(world.idToScene.at(id));
 }
-
 GameObject& getGameObject(World& world, objid id){
   return sceneForId(world, id).idToGameObjects.at(id);
 }
 GameObject& getGameObject(Scene& scene, objid id){
   return scene.idToGameObjects.at(id);
 }
-
-glm::vec3 getScaledCollisionBounds(BoundInfo boundInfo, glm::vec3 scale){
-  float x = scale.x * (boundInfo.xMax - boundInfo.xMin);
-  float y = scale.y * (boundInfo.yMax - boundInfo.yMin);
-  float z = scale.z * (boundInfo.zMax - boundInfo.zMin);
-  return glm::vec3(x, y, z);
+bool idInGroup(World& world, objid id, objid groupId){
+  return groupId == sceneForId(world, id).idToGameObjectsH.at(id).groupId;
+}
+bool idExists(World& world, objid id){
+  return world.idToScene.find(id) != world.idToScene.end();
+}
+objid getGameObjectByName(World& world, std::string name){
+  for (auto [sceneId, _] : world.scenes){
+    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
+      if (gameObj.name == name){
+        return id;
+      }
+    }
+  }
+  return -1; 
 }
 
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes the biggest, assuming one physics object per collision.  Can be inaccurate with
   //assert(boundings.size() == 1);
   return boundings.at(0);
 }
-
 NameAndMesh getMeshesForGroupId(World& world, objid groupId){
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
@@ -40,18 +47,6 @@ NameAndMesh getMeshesForGroupId(World& world, objid groupId){
   }
   return nameAndMeshes;
 }
-
-objid getGameObjectByName(World& world, std::string name){
-  for (auto [sceneId, _] : world.scenes){
-    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
-      if (gameObj.name == name){
-        return id;
-      }
-    }
-  }
-  return -1; 
-}
-
 
 PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, objid index){   // should be "for group id"
   GameObject obj = getGameObject(scene, index);
@@ -771,13 +766,6 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
   }
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   callbackEntities(world);
-}
-
-bool idInGroup(World& world, objid id, objid groupId){
-  return groupId == sceneForId(world, id).idToGameObjectsH.at(id).groupId;
-}
-bool idExists(World& world, objid id){
-  return world.idToScene.find(id) != world.idToScene.end();
 }
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
