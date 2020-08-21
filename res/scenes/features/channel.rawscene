@@ -6,7 +6,7 @@ platform:position:0 -5 0
 platform:script:./res/scripts/enterkeyevent.scm
 
 door:mesh:./res/models/box/box.obj
-door:script:./res/scripts/movement/toggle-up-down.scm
+door:script:./res/scripts/multiplayer/toggle-up-down.scm
 
 %enterOpensDoor:from:enterpressed
 %enterOpensDoor:to:closedoor

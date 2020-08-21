@@ -1,0 +1,14 @@
+
+# TODO - Collision object callback rawscene test 
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+box:mesh:./res/models/box/box.obj
+box:physics_collision:nocollide
+box:scale:5 5 5
+box:position:0 5 0
+
+box2:mesh:./res/models/box/box.obj
+box2:physics_type:dynamic
