@@ -658,7 +658,7 @@ void enforceLookAt(World& world){
         objid lookatId = scene.nameToId.at(lookAt);
         glm::vec3 fromPos = gameobj.transformation.position;
         glm::vec3 targetPosition = scene.idToGameObjects.at(lookatId).transformation.position;
-        gameobj.transformation.rotation =  orientationFromPos(fromPos, targetPosition);;
+        physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
       }
     }
   }
