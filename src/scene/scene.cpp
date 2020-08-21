@@ -10,6 +10,9 @@ GameObject& getGameObject(World& world, objid id){
 GameObject& getGameObject(Scene& scene, objid id){
   return scene.idToGameObjects.at(id);
 }
+GameObject& getGameObject(Scene& scene, std::string name){
+  return scene.idToGameObjects.at(scene.nameToId.at(name));
+}
 bool idInGroup(World& world, objid id, objid groupId){
   return groupId == sceneForId(world, id).idToGameObjectsH.at(id).groupId;
 }
@@ -295,15 +298,14 @@ std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std
 // Need to take account proper dimensions of the mesh used obj -> should be derivable from mesh boundInfo
 void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std::string to){
   auto zLength = info.zMax - info.zMin;
-  auto fromPosition = getGameObject(scene, scene.nameToId.at(from)).transformation.position;
-  auto toPosition = getGameObject(scene, scene.nameToId.at(to)).transformation.position;
+  auto fromPosition = getGameObject(scene, from).transformation.position;
+  auto toPosition = getGameObject(scene, to).transformation.position;
   auto distance = glm::distance(fromPosition, toPosition);
   auto orientation = orientationFromPos(fromPosition, toPosition);
   GameObject& obj = getGameObject(scene, id);
-
-  glm::vec3 scale = glm::vec3(1.f, 1.f, distance / zLength);
-  obj.transformation.scale = scale;
   glm::vec3 meshOffset = orientation * (glm::vec3(0.f, 0.f, 1.f) * distance * 0.5f);
+
+  obj.transformation.scale = glm::vec3(1.f, 1.f, distance / zLength);
   obj.transformation.position = fromPosition - meshOffset;  
   obj.transformation.rotation = orientation;
 }
@@ -655,7 +657,7 @@ void enforceLookAt(World& world){
       }
       if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
         glm::vec3 fromPos = gameobj.transformation.position;
-        glm::vec3 targetPosition = getGameObject(scene,scene.nameToId.at(lookAt)).transformation.position;
+        glm::vec3 targetPosition = getGameObject(scene, lookAt).transformation.position;
         physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
       }
     }
