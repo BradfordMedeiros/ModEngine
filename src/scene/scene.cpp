@@ -605,17 +605,6 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   world.entitiesToUpdate.insert(index);
 }
 
-void physicsRotate(World& world, objid index, float x, float y, float z){
-  Scene& scene = sceneForId(world, index);
-  glm::quat rotation = setFrontDelta(getGameObject(scene, index).transformation.rotation, x, y, z, 5);
-  getGameObject(scene, index).transformation.rotation  = rotation;
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    setRotation(body, rotation);
-  }
-  world.entitiesToUpdate.insert(index);
-}
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
   getGameObject(world, index).transformation.rotation = rotation;
 
@@ -625,7 +614,9 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation){
   }
   world.entitiesToUpdate.insert(index);
 }
-
+void physicsRotate(World& world, objid index, float x, float y, float z){
+  physicsRotateSet(world, index, setFrontDelta(getGameObject(world, index).transformation.rotation, x, y, z, 5));
+}
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   Scene& scene = sceneForId(world, index);
