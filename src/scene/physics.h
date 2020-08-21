@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <glm/gtc/quaternion.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include "./collision_cache.h"
 #include "./common/util/types.h"
 #include "../common/util.h"
+#include "../translations.h"
 #include "./bulletdebug.h"
 #include "./physics_common.h"
 
@@ -53,6 +55,9 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed);
 
 void printRigidBodyInfo(btRigidBody* body);
 
-
+struct HitObject {
+  objid id;
+};
+std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 
 #endif 

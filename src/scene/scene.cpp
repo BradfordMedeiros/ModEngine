@@ -711,23 +711,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
 }
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
-  std::vector<HitObject> hitobjects;
-  btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
-  auto posTo = moveRelative(posFrom, direction, glm::vec3(0.f, 0.f, -1 * maxDistance), false);
-  world.physicsEnvironment.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posTo), result);
-
-  for (int i = 0; i < result.m_hitFractions.size(); i++){
-    const btCollisionObject* obj = result.m_collisionObjects[i];
-    for (auto [objid, rigidbody] : world.rigidbodys){
-      if (rigidbody == obj){
-        hitobjects.push_back(HitObject{
-          .id = objid,
-        });
-      }
-    }
-  } 
-  assert(hitobjects.size() == result.m_hitFractions.size());
-  return hitobjects;
+  return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
 // @TODO - this is wrong, needs to get the lights in world space, relative to the parent
