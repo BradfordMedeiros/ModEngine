@@ -436,6 +436,22 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
   std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
 }
+// this needs to also delete all children objects. 
+void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){  
+  Scene& scene = sceneForId(world, objectId);
+  auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
+  for (auto gameobjId : getIdsInGroup(scene, groupId)){
+    if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
+      continue;
+    }
+    auto removedObjects = removeObjectFromScenegraph(scene, gameobjId);  
+    for (auto id : removedObjects){
+      removeObjectById(world, id, unloadClip, unloadScript);
+    }
+  }
+}
+
+
 void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){
   if (world.scenes.find(sceneId) == world.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
@@ -506,7 +522,6 @@ objid addObjectToScene(
   return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip ,loadScript);
 }
 
-
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   ParsedContent content = parseFormat(serializedObj);
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
@@ -514,22 +529,6 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   assert(serialObjs.size() == 1);
   SerializationObject& serialObj = serialObjs.begin() -> second;
   return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip, loadScript);
-}
-
-
-// this needs to also delete all children objects. 
-void removeObjectFromScene(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){  
-  Scene& scene = sceneForId(world, objectId);
-  auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
-  for (auto gameobjId : getIdsInGroup(scene, groupId)){
-    if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
-      continue;
-    }
-    auto removedObjects = removeObjectFromScenegraph(scene, gameobjId);  
-    for (auto id : removedObjects){
-      removeObjectById(world, id, unloadClip, unloadScript);
-    }
-  }
 }
 
 
