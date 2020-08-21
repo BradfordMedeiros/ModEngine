@@ -5,20 +5,28 @@ static std::map<std::string, SCM> scriptnameToModule;
 // IMPORTANT BUG --> the create/destroy of modules probably a huge memory leak. 
 // Need to figure out how to properly bring the up/down (global module tree?)
 
-void loadScript(std::string script, objid id, bool isServer){ 
+std::string getScriptName(std::string scriptpath, objid id){
+  return scriptpath + ":" + std::to_string(id);
+}
+
+void loadScript(std::string scriptpath, objid id, bool isServer){ 
+  auto script = getScriptName(scriptpath, id);
+
   std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) == scriptnameToModule.end());
   SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
   scriptnameToModule[script] = module;                                  // This probably will be per entity not 1:1 with script paths
   scm_set_current_module(module);
   defineFunctions(id, isServer);
-  scm_c_primitive_load(script.c_str());
+  scm_c_primitive_load(scriptpath.c_str());
   onFrame();
 }
 
 // @TODO -- need to figure out how to really unload a module.
 // I don't think this actually causes this module to be garbage collected.
-void unloadScript(std::string script, objid id){
+void unloadScript(std::string scriptpath, objid id){
+  auto script = getScriptName(scriptpath, id);
+
   std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) != scriptnameToModule.end());
   scriptnameToModule.erase(script);
