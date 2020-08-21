@@ -292,22 +292,11 @@ std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
-glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
-  // @TODO consider extracting a better up direction from current orientation
-  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
-  return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
-}
-
-
-glm::vec3 positionFromScene(Scene& scene, objid id){
-  return getGameObject(scene, id).transformation.position;
-} 
-
 // Need to take account proper dimensions of the mesh used obj -> should be derivable from mesh boundInfo
 void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std::string to){
   auto zLength = info.zMax - info.zMin;
-  auto fromPosition = positionFromScene(scene, scene.nameToId.at(from));
-  auto toPosition = positionFromScene(scene, scene.nameToId.at(to));
+  auto fromPosition = getGameObject(scene, scene.nameToId.at(from)).transformation.position;
+  auto toPosition = getGameObject(scene, scene.nameToId.at(to)).transformation.position;
   auto distance = glm::distance(fromPosition, toPosition);
   auto orientation = orientationFromPos(fromPosition, toPosition);
   GameObject& obj = getGameObject(scene, id);
@@ -317,8 +306,8 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
   glm::vec3 meshOffset = orientation * (glm::vec3(0.f, 0.f, 1.f) * distance * 0.5f);
   obj.transformation.position = fromPosition - meshOffset;  
   obj.transformation.rotation = orientation;
-
 }
+
 void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationObject& serialObj, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;

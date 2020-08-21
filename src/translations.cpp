@@ -70,3 +70,9 @@ glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float curs
   glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
   return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
 }
+
+glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
+  // @TODO consider extracting a better up direction from current orientation
+  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
+  return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
+}

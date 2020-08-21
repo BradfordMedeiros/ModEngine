@@ -19,4 +19,6 @@ glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offse
 
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight);
 
+glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition);
+
 #endif 
