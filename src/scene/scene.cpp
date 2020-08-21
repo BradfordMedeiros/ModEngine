@@ -574,27 +574,6 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   setScenegraphAttributes(sceneForId(world, id), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
 }
 
-void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
-  Scene& scene = sceneForId(world, index);
-
-  const int SPEED = 5;
-  auto offset = glm::vec3(x * SPEED, y * SPEED, z * SPEED);
-
-  glm::vec3 newPosition;
-  if (moveRelativeEnabled){
-    auto oldGameObject = getGameObject(scene, index);
-    newPosition = moveRelative(oldGameObject.transformation.position, oldGameObject.transformation.rotation, offset, false);
-  }else{
-    newPosition = move(getGameObject(scene, index).transformation.position, offset);   
-  }
-  getGameObject(scene, index).transformation.position = newPosition;
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    setPosition(body, newPosition);
-  }
-  world.entitiesToUpdate.insert(index);
-}
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   getGameObject(world, index).transformation.position = pos;
 
@@ -603,6 +582,22 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
     setPosition(body, pos);
   }
   world.entitiesToUpdate.insert(index);
+}
+void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
+  const int SPEED = 5;
+  auto offset = glm::vec3(x * SPEED, y * SPEED, z * SPEED);
+
+  glm::vec3 newPosition;
+  if (moveRelativeEnabled){
+    auto oldGameObject = getGameObject(world, index);
+    newPosition = moveRelative(oldGameObject.transformation.position, oldGameObject.transformation.rotation, offset, false);
+  }else{
+    newPosition = move(getGameObject(world, index).transformation.position, offset);   
+  }
+  physicsTranslateSet(world, index, newPosition);
+}
+void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
+  physicsTranslateSet(world, index, applyTranslation(position, offsetX, offsetY, manipulatorAxis));
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
@@ -639,19 +634,6 @@ void physicsScale(World& world, objid index, float x, float y, float z){
 void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
   physicsScaleSet(world, index, applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
 }
-
-void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
-  Scene& scene = sceneForId(world, index);
-  auto newPosition = applyTranslation(position, offsetX, offsetY, manipulatorAxis);
-  scene.idToGameObjects.at(index).transformation.position = newPosition;
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    setPosition(body, newPosition);
-  }
-  world.entitiesToUpdate.insert(index);
-}
-
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
