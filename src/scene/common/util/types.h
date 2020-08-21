@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "./boundinfo.h"
 
 struct Line {
   glm::vec3 fromPos;
@@ -20,6 +21,12 @@ struct Transformation {
 };
 
 struct Properties {
+  Transformation transformation;
+};
+
+struct PhysicsInfo {
+  BoundInfo boundInfo;
+  glm::vec3 collisionInfo;
   Transformation transformation;
 };
 

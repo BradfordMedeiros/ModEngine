@@ -7,6 +7,7 @@
 #include "./physics.h"
 #include "./object_types.h"
 #include "./rails.h"
+#include "./scene_debug.h"
 #include "./common/mesh.h"
 #include "../translations.h"
 #include "../common/util.h"
@@ -26,12 +27,6 @@ struct World {
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;
   std::set<objid> entitiesToUpdate;
-};
-
-struct PhysicsInfo {
-  BoundInfo boundInfo;
-  glm::vec3 collisionInfo;
-  Transformation transformation;
 };
 
 World createWorld(
