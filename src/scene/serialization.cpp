@@ -9,7 +9,6 @@ std::optional<Token> parseToken(std::string content, std::string layer) {
     .payload = (validToken.size() > 2) ? trim(validToken.at(2)) : "",
     .layer = layer,
   };
-  assert(token.target.find(',') == std::string::npos);
   if (token.target.length() > 0 && token.attribute.length() > 0 && token.payload.length() > 0){
     return token;
   }
@@ -94,6 +93,8 @@ std::string getType(std::string name, std::vector<Field> additionalFields){
 }
 
 SerializationObject getDefaultObject(std::string name, std::vector<Field> additionalFields, std::string layer){
+  assert(name.find(',') == std::string::npos);
+
   physicsOpts physics {
     .enabled = true,
     .isStatic = true,
@@ -107,6 +108,7 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .mass = 1.f,
     .maxspeed = -1.f,
   };
+
   SerializationObject newObject {
     .hasId = false,
     .id = -1,
@@ -114,13 +116,15 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = glm::identity<glm::quat>(),
-    .hasParent = false,
-    .parentName = "",
     .physics = physics,
     .type = getType(name, additionalFields),
     .layer = layer
   };
   return newObject;
+}
+
+std::vector<std::string> parseChildren(std::string payload){
+  return split(payload, ',');
 }
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
@@ -134,13 +138,15 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).type = getType(token.target, additionalFields);
     }
 
-    if (token.attribute == "parent"){   // parent is special case that creates the other object as default if it does not yet exist, inherits layer declared in
-      if (objects.find(token.payload) == objects.end()){
-        objects[token.payload] = getDefaultObject(token.payload, additionalFields, token.layer);
-        objects.at(token.payload).type = getType(token.payload, additionalFields);
+    if (token.attribute == "child"){
+      auto children = parseChildren(token.payload);
+      for (auto child : children){
+        if (objects.find(child) == objects.end()){
+          objects[child] = getDefaultObject(child, additionalFields, token.layer);
+          objects.at(child).type = getType(child, additionalFields);
+        }
       }
-      objects.at(token.target).hasParent = true;
-      objects.at(token.target).parentName = token.payload;
+      objects.at(token.target).children = children;
       continue;
     }
 

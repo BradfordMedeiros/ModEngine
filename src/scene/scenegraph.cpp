@@ -46,16 +46,23 @@ void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObjec
   scene.nameToId[serialObj.name] = gameobjectObj.id;
 }
 
+
+// @TODO - bug around having multiple children in common.  Currently assertion error
 void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
-  if (parentName == ""){
-    assert(std::find(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id) == scene.rootGameObjectsH.end());
-    scene.rootGameObjectsH.push_back(id);
-  }else{
-    auto gameobj = scene.idToGameObjectsH.at(id);
-    auto parentId = scene.nameToId.at(parentName);
-    scene.idToGameObjectsH.at(id).parentId = parentId;
-    assert(scene.idToGameObjectsH.at(parentId).children.find(id) == scene.idToGameObjectsH.at(parentId).children.end());
-    scene.idToGameObjectsH.at(parentId).children.insert(id);
+  auto gameobj = scene.idToGameObjectsH.at(id);
+  auto parentId = scene.nameToId.at(parentName);
+  assert(scene.idToGameObjectsH.at(id).parentId == -1);
+  scene.idToGameObjectsH.at(id).parentId = parentId;
+  assert(scene.idToGameObjectsH.at(parentId).children.find(id) == scene.idToGameObjectsH.at(parentId).children.end());
+  scene.idToGameObjectsH.at(parentId).children.insert(id);
+}
+
+void enforceRootObjects(Scene& scene){
+  scene.rootGameObjectsH.clear();
+  for (auto &[id, objh] : scene.idToGameObjectsH){
+    if (objh.parentId == -1){
+      scene.rootGameObjectsH.push_back(id);
+    }
   }
 }
 
@@ -76,8 +83,11 @@ SceneDeserialization createSceneFromParsedContent(
   }
 
   for (auto [_, serialObj] : serialObjs){
-    enforceParentRelationship(scene, scene.nameToId.at(serialObj.name), serialObj.parentName);
+    for (auto childName : serialObj.children){
+      enforceParentRelationship(scene, scene.nameToId.at(childName), serialObj.name);
+    }
   }
+  enforceRootObjects(scene);
 
   SceneDeserialization deserializedScene {
     .scene = scene,
@@ -122,8 +132,6 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .position = transform.position,
       .scale = transform.scale,
       .rotation = transform.rotation,
-      .hasParent = false,
-      .parentName = "-",
       .physics = defaultPhysicsOpts(),
       .type = "default",
       .lookat = "",
@@ -143,6 +151,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     auto realParentId = parentId == rootIdNode ? rootId : nodeIdToRealId.at(parentId);
     enforceParentRelationship(scene, realChildId, scene.idToGameObjects.at(realParentId).name);
   }
+  enforceRootObjects(scene);
 
   return serialObjs;
 } 
@@ -165,11 +174,13 @@ std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<st
   }
   GameObject gameobject = scene.idToGameObjects.at(id);
   std::string gameobjectName = gameobject.name;
-  if (!(scene.idToGameObjects.find(gameobjecth.parentId) == scene.idToGameObjects.end())){
-    std::string parentName = scene.idToGameObjects.at(gameobjecth.parentId).name;
-    if (parentName != ""){
-      sceneData =  sceneData + gameobjectName + ":parent:" + parentName + "\n";
+  
+  if (gameobjecth.children.size() > 0){
+    std::vector<std::string> childnames;
+    for (auto childid : gameobjecth.children){
+      childnames.push_back(scene.idToGameObjects.at(childid).name);
     }
+    sceneData = sceneData + gameobjectName + ":child:" + join(childnames, ',') + "\n";
   }
 
   if (includeIds){
@@ -253,8 +264,6 @@ SerializationObject serialObjectFromFields(
     .position = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
     .scale = vecAttributes.find("scale") != vecAttributes.end() ? vecAttributes.at("scale") : glm::vec3(0.f, 0.f, 0.f),
     .rotation =  glm::identity<glm::quat>(),
-    .hasParent = parent != "", 
-    .parentName = parent,
     .physics = defaultPhysicsOpts(),
     .type = getType(name, fields),
     .lookat = attributeOrEmpty(stringAttributes,"lookat"),
@@ -273,7 +282,15 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
   std::cout << "INFO: scenegraph - adding to scenegraph" << std::endl;
   addObjectToScene(scene, objectId, -1, serialObj);      
   std::cout << "INFO: scenegraph - adding parent relations" << std::endl;
-  enforceParentRelationship(scene, objectId, serialObj.parentName);
+  for (auto child : serialObj.children){
+    if (scene.nameToId.find(child) == scene.nameToId.end()){
+       // @TODO - shouldn't be an error should automatically create instead
+      std::cout << "ERROR: NOT YET IMPLEMENTED : ADDING OBJECT WITH CHILD THAT DOES NOT EXIST IN THE SCENE" << std::endl;
+      assert(false);
+    }
+    enforceParentRelationship(scene, scene.nameToId.at(child), serialObj.name);  
+  }
+  enforceRootObjects(scene);
 }
 
 SerializationObject makeObjectInScene(

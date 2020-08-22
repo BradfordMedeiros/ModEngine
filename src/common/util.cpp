@@ -197,6 +197,10 @@ objid getUniqueObjId(){
     bool bitHigh = randomValue > 0;
     randId =  randId | (bitHigh << i);
   }
+
+  if (randId == -1){              // TODO - hack, -1 used as sentinel, need to eliminate those and then can get rid of this (scenegraph mostly)
+    return getUniqueObjId();
+  }
   return randId;
 }
 

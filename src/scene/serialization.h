@@ -44,8 +44,7 @@ struct SerializationObject {
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;
-  bool hasParent;
-  std::string parentName;
+  std::vector<std::string> children;
   physicsOpts physics;
   std::string type;
   std::string lookat;
