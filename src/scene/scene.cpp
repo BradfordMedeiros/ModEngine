@@ -387,28 +387,75 @@ std::string serializeObject(World& world, objid id){
   }, true, id);
 }
 
+void addSerialObjectsToWorld(
+  World& world, 
+  objid sceneId, 
+  std::map<std::string, SerializationObject>& serialObjs,
+  std::vector<objid> idsAdded,
+  std::function<void(std::string)> loadClip, 
+  std::function<void(std::string, objid)> loadScript,
+  std::function<objid()> getNewObjectId
+){
+  for (auto &[_, serialObj] : serialObjs){
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getNewObjectId);
+  }
+  for (auto id : idsAdded){
+    addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
+  }
+
+  for (auto id : idsAdded){
+    auto obj = world.scenes.at(sceneId).idToGameObjects.at(id);
+    if (obj.script != ""){
+      loadScript(obj.script, id);
+    }
+  }
+
+  for (auto id : idsAdded){
+    auto obj = world.scenes.at(sceneId).idToGameObjects.at(id);
+    world.onObjectCreate(obj);
+  }
+}
+
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   assert(world.scenes.find(sceneId) == world.scenes.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
-
-  for (auto &[_, serialObj] : deserializedScene.serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getUniqueObjId);
-  }
+  std::vector<objid> idsAdded;
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
-    addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
+    idsAdded.push_back(id);
   }
-  for (auto &[id, obj] : world.scenes.at(sceneId).idToGameObjects){
-    if (obj.script != ""){
-      loadScript(obj.script, id);
-    }
-  }
-  for (auto &[_, gameobj] : world.scenes.at(sceneId).idToGameObjects){
-    world.onObjectCreate(gameobj);
-  }
+  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, loadClip, loadScript, getUniqueObjId);
   return sceneId;
 }
+
+
+
+objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj,  std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+  std::vector<objid> idsAdded;
+  int numIdsGenerated = 0;
+  auto getId = [&idsAdded, &numIdsGenerated, id, useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+    auto newId = -1;
+    if (numIdsGenerated == 0 && useObjId){
+      newId = id;
+    }else{
+      newId = getUniqueObjId();
+    }
+    numIdsGenerated++;
+    idsAdded.push_back(newId);
+    return newId;
+  };
+
+  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
+
+  std::map<std::string, SerializationObject> serialObjs;
+  serialObjs[serialObj.name] = serialObj;
+  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, loadClip, loadScript, getId);
+
+  auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
+  return gameobjId;
+}
+
 objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadClip, loadScript);
 }
@@ -476,36 +523,6 @@ void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unl
   }
 }
 
-objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj,  std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
-  std::vector<objid> idsAdded;
-  int numIdsGenerated = 0;
-  auto getId = [&idsAdded, &numIdsGenerated, &id, &useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = -1;
-    if (numIdsGenerated == 0 && useObjId){
-      newId = id;
-    }else{
-      newId = getUniqueObjId();
-    }
-    numIdsGenerated++;
-    idsAdded.push_back(newId);
-    return newId;
-  };
-
-  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
-  addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getId);
-  auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
-  auto gameobj = world.scenes.at(sceneId).idToGameObjects.at(gameobjId);
-  
-  for (auto id : idsAdded){
-    addPhysicsBody(world, world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));
-  }
-  if (gameobj.script != ""){
-    loadScript(gameobj.script, gameobjId);
-  }
-
-  world.onObjectCreate(gameobj);
-  return gameobjId;
-}
 
 objid addObjectToScene(
   World& world, 
