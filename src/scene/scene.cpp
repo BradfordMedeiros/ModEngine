@@ -429,8 +429,6 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
   return sceneId;
 }
 
-
-
 objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj,  std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
   std::vector<objid> idsAdded;
   int numIdsGenerated = 0;

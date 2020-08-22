@@ -54,6 +54,7 @@ void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
     auto gameobj = scene.idToGameObjectsH.at(id);
     auto parentId = scene.nameToId.at(parentName);
     scene.idToGameObjectsH.at(id).parentId = parentId;
+    assert(scene.idToGameObjectsH.at(parentId).children.find(id) == scene.idToGameObjectsH.at(parentId).children.end());
     scene.idToGameObjectsH.at(parentId).children.insert(id);
   }
 }
@@ -140,8 +141,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   for (auto [childId, parentId] : childToParent){
     auto realChildId = nodeIdToRealId.at(childId);
     auto realParentId = parentId == rootIdNode ? rootId : nodeIdToRealId.at(parentId);
-    scene.idToGameObjectsH.at(realChildId).parentId = realParentId;
-    scene.idToGameObjectsH.at(realParentId).children.insert(realChildId);
+    enforceParentRelationship(scene, realChildId, scene.idToGameObjects.at(realParentId).name);
   }
 
   return serialObjs;
