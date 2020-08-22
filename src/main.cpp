@@ -17,7 +17,6 @@
 #include "./scene/physics.h"
 #include "./scene/collision_cache.h"
 #include "./scene/scenegraph.h"
-#include "./scene/worldloader.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
 #include "./scene/common/vectorgfx.h"
@@ -46,6 +45,7 @@
 #include "./scene/recorder.h"
 #include "./sequencer.h"
 #include "./keymapper.h"
+#include "./worldloader.h"
 
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {

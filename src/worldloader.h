@@ -4,8 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "./common/util/types.h"
-#include "../common/util.h"
+#include "./common/util.h"
 
 struct ChunkAddress {
   int x;
