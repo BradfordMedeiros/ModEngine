@@ -156,7 +156,7 @@ void setGameObjectAttr(short id, std::map<std::string, std::string> attr){
 
 glm::vec3 getGameObjectPosition(short index, bool isWorld){
   if (isWorld){
-    return fullTransformation(world.scenes.at(world.idToScene.at(index)), index).position;
+    return fullTransformation(world, index).position;
   }
   return getGameObject(world, index).transformation.position;
 }
@@ -179,7 +179,7 @@ void setGameObjectRotation(short index, glm::quat rotation){
 }
 glm::quat getGameObjectRotation(short index, bool isWorld){
   if (isWorld){
-    return fullTransformation(world.scenes.at(world.idToScene.at(index)), index).rotation;
+    return fullTransformation(world, index).rotation;
   }
   return getGameObject(world, index).transformation.rotation;
 }

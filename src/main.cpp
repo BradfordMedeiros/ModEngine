@@ -1078,9 +1078,7 @@ int main(int argc, char* argv[]){
     if (state.useDefaultCamera || activeCameraObj == NULL){
       view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
     }else{
-      auto cameraId = activeCameraObj -> id;
-      Scene& scene = world.scenes.at(world.idToScene.at(cameraId));
-      auto transformation = fullTransformation(scene, cameraId);
+      auto transformation = fullTransformation(world, activeCameraObj -> id);
       view = renderView(transformation.position, transformation.rotation);   // this is position incorrect because this needs to traverse the object hierachy
     }
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 

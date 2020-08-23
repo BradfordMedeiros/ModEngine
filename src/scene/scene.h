@@ -76,6 +76,7 @@ NameAndMesh getMeshesForGroupId(World& world, objid id);
 objid getGameObjectByName(World& world, std::string name);
 GameObject& getGameObject(World& world, std::string name);
 GameObject& getGameObject(World& world, objid id);
+Transformation fullTransformation(World& world, objid id);
 
 bool idInGroup(World& world, objid id, objid groupId);
 bool idExists(World& world, objid id);
