@@ -262,7 +262,7 @@ void selectItem(){
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor);
 
-  if (world.idToScene.find(selectedId) == world.idToScene.end()){
+  if (!idExists(world, selectedId)){
     std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
     return;
   }
@@ -270,15 +270,14 @@ void selectItem(){
   Scene& scene = world.scenes.at(world.idToScene.at(selectedId));
   auto actualSelectedObject = scene.idToGameObjectsH.at(selectedId);
   auto selectedObject = scene.idToGameObjects.at(actualSelectedObject.groupId);
-  state.selectedIndex = actualSelectedObject.groupId;
+  state.selectedIndex =  actualSelectedObject.groupId;
 
   state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
-  if (state.enableManipulator && state.selectedIndex != -1 && !(world.idToScene.find(state.selectedIndex) == world.idToScene.end())){
-    auto sceneId = world.idToScene.at(state.selectedIndex);
+  if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
     auto selectObject = getGameObject(world, state.selectedIndex); 
     if (state.manipulatorMode == TRANSLATE){
       applyPhysicsTranslation(world, state.selectedIndex, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
@@ -382,7 +381,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     float offsetAmount = yoffset * 0.001;
     maybeApplyTextureOffset(state.selectedIndex, glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
   }
-  if (!state.offsetTextureMode && state.selectedIndex != -1 && world.idToScene.find(state.selectedIndex) != world.idToScene.end()){
+  if (!state.offsetTextureMode && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
     maybeChangeTexture(state.selectedIndex);
   }
 
@@ -448,27 +447,25 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint); 
 }
 void translate(float x, float y, float z){
-  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
+  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
     return;
   }
   physicsTranslate(world, state.selectedIndex, x, y, z, state.moveRelativeEnabled);
 }
 void scale(float x, float y, float z){
-  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
+  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
     return;
   }
-  auto sceneId = world.idToScene.at(state.selectedIndex);
   physicsScale(world, state.selectedIndex, x, y, z);
 }
 void rotate(float x, float y, float z){
-  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
+  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
     return;
   }
-  auto sceneId = world.idToScene.at(state.selectedIndex);
   physicsRotate(world, state.selectedIndex, x, y, z);
 }
 void setObjectDimensions(short index, float width, float height, float depth){
-  if (state.selectedIndex == -1 || world.idToScene.find(state.selectedIndex) == world.idToScene.end()){
+  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
     return;
   }
   auto gameObjV = world.objectMapping.at(state.selectedIndex);  // todo this is bs, need a wrapper around objectmappping + scene
@@ -477,8 +474,7 @@ void setObjectDimensions(short index, float width, float height, float depth){
     // @TODO this is resizing based upon first mesh only, which is questionable
     auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-    auto sceneId = world.idToScene.at(state.selectedIndex);
-    world.scenes.at(sceneId).idToGameObjects.at(state.selectedIndex).transformation.scale = newScale;
+    getGameObject(world, state.selectedIndex).transformation.scale = newScale;
   } 
 }
 void updateVoxelPtr(){
