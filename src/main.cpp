@@ -525,10 +525,9 @@ void drawTraversalPositions(){
 
 void displayRails(std::map<short, RailConnection> railPairs){
   for (auto [id, rail] : railPairs){
-    auto scene = world.scenes.at(world.idToScene.at(id));
     bluelines.push_back(Line {
-      .fromPos = scene.idToGameObjects.at(scene.nameToId.at(rail.from)).transformation.position,
-      .toPos = scene.idToGameObjects.at(scene.nameToId.at(rail.to)).transformation.position
+      .fromPos = getGameObject(world, rail.from).transformation.position,
+      .toPos = getGameObject(world, rail.to).transformation.position
     });
   }
 }

@@ -13,22 +13,28 @@ GameObject& getGameObject(Scene& scene, objid id){
 GameObject& getGameObject(Scene& scene, std::string name){
   return scene.idToGameObjects.at(scene.nameToId.at(name));
 }
+GameObject& getGameObject(World& world, std::string name){
+  for (auto [sceneId, _] : world.scenes){
+    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
+      if (gameObj.name == name){
+        return gameObj;
+      }
+    }
+  }
+  std::cout << "gameobject : " << name << " does not exist" << std::endl;
+  assert(false);
+}
+objid getGameObjectByName(World& world, std::string name){
+  return getGameObject(world, name).id;
+}
+
 bool idInGroup(World& world, objid id, objid groupId){
   return groupId == sceneForId(world, id).idToGameObjectsH.at(id).groupId;
 }
 bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
 }
-objid getGameObjectByName(World& world, std::string name){
-  for (auto [sceneId, _] : world.scenes){
-    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
-      if (gameObj.name == name){
-        return id;
-      }
-    }
-  }
-  return -1; 
-}
+
 
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes the biggest, assuming one physics object per collision.  Can be inaccurate with
   //assert(boundings.size() == 1);

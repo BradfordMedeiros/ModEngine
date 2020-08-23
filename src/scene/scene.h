@@ -72,7 +72,9 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics);
 objid getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, objid id);
+
 objid getGameObjectByName(World& world, std::string name);
+GameObject& getGameObject(World& world, std::string name);
 GameObject& getGameObject(World& world, objid id);
 
 bool idInGroup(World& world, objid id, objid groupId);
