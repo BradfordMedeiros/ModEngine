@@ -225,10 +225,11 @@ void selectItem(){
 
   auto groupid = getGroupId(world, selectedId);
   auto selectedObject =  getGameObject(world, groupid);
-  state.selectedIndex =  groupid
 
+  state.selectedIndex =  groupid;
   state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
+  
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 void processManipulator(){
