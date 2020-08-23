@@ -293,23 +293,6 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
   enforceRootObjects(scene);
 }
 
-SerializationObject makeObjectInScene(
-  Scene& scene,
-  std::string serializedObj,
-  std::function<objid()> getNewObjectId,
-  std::vector<Field> fields
-){
-  ParsedContent content = parseFormat(serializedObj);
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
-  assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
-  assert(serialObjs.size() == 1);
-  SerializationObject& serialObj = serialObjs.begin() -> second;
-
-  addSerialObjectToScene(scene, serialObj, getNewObjectId);
-  return serialObj;
-}
-
-
 void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
   auto parentObjH = scene.idToGameObjectsH.at(id);
   onAddObject(parentObjH.id);

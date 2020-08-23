@@ -61,13 +61,6 @@ SerializationObject serialObjectFromFields(
 
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
 
-SerializationObject makeObjectInScene(
-  Scene& scene,
-  std::string serializedObj,
-  std::function<objid()> getNewObjectId,
-  std::vector<Field> fields
-);
-
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
   objid rootId,
