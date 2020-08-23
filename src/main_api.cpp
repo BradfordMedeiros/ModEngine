@@ -206,7 +206,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 
 std::vector<std::string> listAnimations(short id){
   std::vector<std::string> animationNames;
-  auto groupId =  world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
+  auto groupId = getGroupId(world, id);
   if (world.animations.find(groupId) == world.animations.end()){
     return animationNames;
   }

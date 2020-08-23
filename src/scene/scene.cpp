@@ -34,10 +34,14 @@ bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
 }
 Transformation fullTransformation(World& world, objid id){
-  Scene& scene = world.scenes.at(world.idToScene.at(id));
-  return fullTransformation(scene, id);
+  return fullTransformation(sceneForId(world, id), id);
 }
-
+objid getGroupId(World& world, objid id){
+  return sceneForId(world, id).idToGameObjectsH.at(id).groupId; 
+}
+std::vector<objid> getIdsInGroup(World& world, objid index){
+  return getIdsInGroup(sceneForId(world, index), getGroupId(world, index));
+}
 
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes the biggest, assuming one physics object per collision.  Can be inaccurate with
   //assert(boundings.size() == 1);

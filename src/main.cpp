@@ -223,10 +223,9 @@ void selectItem(){
     return;
   }
 
-  Scene& scene = world.scenes.at(world.idToScene.at(selectedId));
-  auto actualSelectedObject = scene.idToGameObjectsH.at(selectedId);
-  auto selectedObject = scene.idToGameObjects.at(actualSelectedObject.groupId);
-  state.selectedIndex =  actualSelectedObject.groupId;
+  auto groupid = getGroupId(world, selectedId);
+  auto selectedObject =  getGameObject(world, groupid);
+  state.selectedIndex =  groupid
 
   state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
@@ -268,11 +267,7 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
     return;
   }
 
-  Scene& scene =  world.scenes.at(world.idToScene.at(index)); 
-  auto groupId = scene.idToGameObjectsH.at(index).groupId;
-  auto ids = getIdsInGroup(scene, groupId);
-
-  for (auto id : ids){
+  for (auto id : getIdsInGroup(world, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     assert(meshObj != NULL);
     meshObj -> textureoffset = meshObj -> textureoffset + offset;
@@ -298,12 +293,9 @@ void maybeChangeTexture(int index){
     if (meshObj == NULL){
       return;
     }
-    Scene& scene =  world.scenes.at(world.idToScene.at(index)); 
-    auto groupId = scene.idToGameObjectsH.at(index).groupId;
-    auto ids = getIdsInGroup(scene, groupId);   
 
     auto textures = worldTextures(world);
-    for (auto id : ids){
+    for (auto id : getIdsInGroup(world, index)){
       GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
       assert(meshObj != NULL);
 
