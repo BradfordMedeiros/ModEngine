@@ -176,7 +176,6 @@ udpmodsocket createUdpServer(){
 }
 
 UdpSocketData getDataFromUdpSocket(int socket, void* _packet, unsigned int packetSize){
-  char buffer[NETWORK_BUFFER_SIZE] = {0};
   sockaddr_in socketin;
   int len = sizeof(socketin);
   int value = recvfrom(socket, _packet, packetSize, MSG_DONTWAIT, ( struct sockaddr *) &socketin, (socklen_t*)&len); 

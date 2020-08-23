@@ -1,6 +1,5 @@
 #include "./scene.h"
 
-
 Scene& sceneForId(World& world, objid id){
   return world.scenes.at(world.idToScene.at(id));
 }

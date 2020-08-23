@@ -6,6 +6,6 @@
 #include <stdexcept>
 #include "./common/util.h"
 
-unsigned int loadShader(std::string fragmentShaderFilepath, std::string vertexShaderFilepath);
+unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 
 #endif 

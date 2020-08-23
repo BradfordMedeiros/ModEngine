@@ -1,14 +1,5 @@
 #include "./rails.h"
 
-
-RailSystem createRailSystem(){
-  std::map<std::string, RailNode> defaultRails;
-  RailSystem rails { 
-    .rails = defaultRails,
-  };
-  return rails;
-}
-
 void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std::string nodeTo){
   assert (rails.rails.find(railName) == rails.rails.end());
   rails.rails[railName] = RailNode {
@@ -20,14 +11,6 @@ void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std:
 void removeRail(RailSystem& rails, std::string railName){
   assert(rails.rails.find(railName) != rails.rails.end());
   rails.rails.erase(railName);
-}
-
-std::vector<std::string> railnames(RailSystem& rails){
-  std::vector<std::string> railNames;
-  for (auto [name, _] : rails.rails){
-    railNames.push_back(name);
-  }
-  return railNames;
 }
 
 // return first rail found that has a rail connecting it

@@ -107,7 +107,6 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
   glVertexAttribPointer(1, textureWidth, GL_FLOAT, GL_FALSE, sizeof(float) *  bufferWidth, (void*)(sizeof(float) * vertexWidth));
   glEnableVertexAttribArray(1);
  
-  Texture noTexture;
   BoundInfo boundInfo { };
   std::vector<Bone> bones;
   Mesh mesh = {
@@ -115,9 +114,7 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
     .VBOPointer = VBO,
     .texture = texture,
     .hasEmissionTexture = false,
-    .emissionTexture = noTexture,
     .hasOpacityTexture = false,
-    .opacityTexture = noTexture,
     .numElements = numIndices,
     .boundInfo = boundInfo,
     .bones = bones,

@@ -25,14 +25,11 @@ struct RailSystem {
   std::vector<ActiveRail> activeRails;
 };
 
-RailSystem createRailSystem();
 void addRail(RailSystem& rails, std::string railName, std::string nodeFrom, std::string nodeTo);
 void removeRail(RailSystem& rails, std::string railName);
 void addEntity(RailSystem& rails, objid id, std::string railName);
 void removeEntity(RailSystem& rails, objid id);
 void updateEntities(RailSystem& rails);
-
-std::vector<std::string> railnames(RailSystem& rails);
 
 struct NextRail {
   glm::vec3 position;

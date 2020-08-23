@@ -316,7 +316,6 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
   auto groupId = scene.idToGameObjectsH.at(index).groupId;
   auto ids = getIdsInGroup(scene, groupId);
 
-  bool rootIdHasMesh = false;
   for (auto id : ids){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     assert(meshObj != NULL);
@@ -351,8 +350,6 @@ void maybeChangeTexture(int index){
     for (auto id : ids){
       GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
       assert(meshObj != NULL);
-      std::string currentOverload = meshObj -> textureOverloadName;
-      bool hasOverload = currentOverload != "";
 
       int overloadId = 0;
       for (int i = 0; i < textures.size(); i++){
@@ -563,9 +560,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       voxelPtrModelMatrix = modelMatrix;
     }
     
-    GameObject object = scene.idToGameObjects.at(id);
     bool objectSelected = idInGroup(world, id, state.selectedIndex);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(object.id, useSelectionColor, objectSelected)));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(id, useSelectionColor, objectSelected)));
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -620,12 +616,11 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth, offset, offset, offset);
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
   }else{
-    int numCells = 10;
     if (state.manipulatorMode == TRANSLATE){
       float snapGridSize = getSnapTranslateSize();
       if (snapGridSize > 0){
         auto position = getGameObjectPosition(state.selectedIndex, false);
-        drawGrid3DCentered(numCells, snapGridSize, position.x, position.y, position.z);  
+        drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
       }
     }
