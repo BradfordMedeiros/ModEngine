@@ -193,64 +193,20 @@ void expandVoxelRight(){
 }
 
 void onArrowKey(int key){
-  if (key == GLFW_KEY_LEFT){
-    //expandVoxelLeft();
-  }
-  if (key == GLFW_KEY_RIGHT){
-    //expandVoxelRight();
-  }
-  if (key == GLFW_KEY_UP){
-    //expandVoxelUp();
-  }
-  if (key == GLFW_KEY_DOWN){
-    //expandVoxelDown();
-  }
 }
+
+void onMouseButton(){    
+  //for (auto [id, scene] : world.scenes){
+  //  std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
+  //}
+}
+
 void onDelete(){
   if (state.selectedIndex != -1){
     std::cout << "OnDelete object id: " << state.selectedIndex << std::endl;
     removeObjectById(state.selectedIndex);
     state.selectedIndex = -1;
   }
-}
-
-void handleSerialization(){     // @todo handle serialization for multiple scenes.  Probably be smart about which scene to serialize and then save that chunk  
-  for (auto [id, scene] : world.scenes){
-    std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
-  }
-/*
-  auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
-
-  Line line = {
-    .fromPos = defaultCamera.transformation.position,
-    .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
-  };
- 
-  permaLines.clear();
-  permaLines.push_back(line);
-
-  if (voxelPtr == NULL){
-    return;
-  }
-
-  glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
-  glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
-  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
-  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
-
-  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
-  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
-  std::cout << "length is: " << collidedVoxels.size() << std::endl;
-  if (collidedVoxels.size() > 0){
-    auto collision = collidedVoxels[0];
-    voxelPtr -> voxel.selectedVoxels.push_back(collision);
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
-  }
-
-  std::cout << "num voxels selected: " << voxelPtr -> voxel.selectedVoxels.size() << "(" << voxelPtr << ")" << std::endl;
-  */
-  // TODO - serialization is broken since didn't keep up with it   use to be here but obviously this needs to have a real api
-
 }
 
 bool selectItemCalled = false;
@@ -294,7 +250,7 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   processManipulator();
 }
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
-  mouse_button_callback(disableInput, window, state, button, action, mods, handleSerialization);
+  mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
   }
