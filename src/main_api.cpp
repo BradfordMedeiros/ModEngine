@@ -32,7 +32,7 @@ void setActiveCamera(short cameraId){
     return;
   }
   auto sceneId = world.idToScene.at(cameraId);
-  activeCameraObj = &world.scenes.at(sceneId).idToGameObjects.at(cameraId);
+  activeCameraObj = &getGameObject(world, cameraId);
   state.selectedIndex = cameraId;
 }
 void nextCamera(){
@@ -57,7 +57,7 @@ void applyImpulse(short index, glm::vec3 impulse){
   applyImpulse(world.rigidbodys.at(index), impulse);
 }
 void applyImpulseRel(short index, glm::vec3 impulse){
-  glm::vec3 relativeImpulse = calculateRelativeOffset(world.scenes.at(world.idToScene.at(index)).idToGameObjects.at(index).transformation.rotation, impulse, true);
+  glm::vec3 relativeImpulse = calculateRelativeOffset(getGameObject(world, index).transformation.rotation, impulse, true);
   applyImpulse(world.rigidbodys.at(index), relativeImpulse);
 }
 
@@ -66,7 +66,7 @@ void clearImpulse(short index){
 }
 
 void loadScriptFromWorld(std::string script, short id){
-  auto name = world.scenes.at(world.idToScene.at(id)).idToGameObjects.at(id).name;
+  auto name = getGameObject(world, id).name;
   std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
   loadScript(script, id, bootStrapperMode);
 }
@@ -144,8 +144,7 @@ std::vector<short> getObjectsByType(std::string type){
   return getGameObjectsIndex(world.objectMapping);
 }
 std::string getGameObjectName(short index){
-  auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).idToGameObjects.at(index).name;
+  return getGameObject(world, index).name;
 }
 
 std::map<std::string, std::string> getGameObjectAttr(short id){
@@ -156,38 +155,33 @@ void setGameObjectAttr(short id, std::map<std::string, std::string> attr){
 }
 
 glm::vec3 getGameObjectPosition(short index, bool isWorld){
-  auto sceneId = world.idToScene.at(index);
   if (isWorld){
-    return fullTransformation(world.scenes.at(sceneId), index).position;
+    return fullTransformation(world.scenes.at(world.idToScene.at(index)), index).position;
   }
-  return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.position;
+  return getGameObject(world, index).transformation.position;
 }
 void setGameObjectPosition(short index, glm::vec3 pos){
   physicsTranslateSet(world, index, pos);
 }
 void setGameObjectPositionRelative(short index, float x, float y, float z, bool xzPlaneOnly){
-  auto sceneId = world.idToScene.at(index);
-  auto transformation = world.scenes.at(sceneId).idToGameObjects.at(index).transformation;
+  auto transformation = getGameObject(world, index).transformation;
   glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z), xzPlaneOnly);
   physicsTranslateSet(world, index, pos);
 }
 glm::vec3 getGameObjectScale(short index){
-  auto sceneId = world.idToScene.at(index);
-  return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.scale;
+  return getGameObject(world, index).transformation.scale;
 }
 void setGameObjectScale(short index, glm::vec3 scale){
   physicsScaleSet(world, index, scale);
 }
 void setGameObjectRotation(short index, glm::quat rotation){
-  auto sceneId = world.idToScene.at(index);
   physicsRotateSet(world, index, rotation);
 }
 glm::quat getGameObjectRotation(short index, bool isWorld){
-  auto sceneId = world.idToScene.at(index);
   if (isWorld){
-    return fullTransformation(world.scenes.at(sceneId), index).rotation;
+    return fullTransformation(world.scenes.at(world.idToScene.at(index)), index).rotation;
   }
-  return world.scenes.at(sceneId).idToGameObjects.at(index).transformation.rotation;
+  return getGameObject(world, index).transformation.rotation;
 }
 
 void setSelectionMode(bool enabled){
