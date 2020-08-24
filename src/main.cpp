@@ -133,8 +133,6 @@ void setActiveDepthTexture(int index){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 }
 
-//////////
-
 std::vector<short> playbacksToRemove;
 void tickAnimations(AnimationState& animationState, float elapsedTime){
   for (auto &[_, playback] : animationState.playbacks){
@@ -253,6 +251,8 @@ void setObjectDimensions(short index, float width, float height, float depth){
     getGameObject(world, state.selectedIndex).transformation.scale = newScale;
   } 
 }
+
+
 void updateVoxelPtr(){
   auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
   if (voxelIndexes.size() > 0){
@@ -695,6 +695,7 @@ int main(int argc, char* argv[]){
  
   createStaticSchemeBindings(
     loadScene,
+    loadSceneObj,
     unloadScene,
     unloadAllScenes,
     listScenes,

@@ -12,7 +12,8 @@
 #include "../sequencer.h"
 
 void createStaticSchemeBindings(
-  short (*loadScene)(std::string),  
+  short (*loadScene)(std::string),
+  objid(*loadSceneObj)(std::string, objid),  
   void (*unloadScene)(short id),  
   void (*unloadAllScenes)(),
   std::vector<short> (*listScenes)(),  

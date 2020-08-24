@@ -59,6 +59,13 @@ SCM scm_loadScene(SCM value){
   auto sceneId = _loadScene(scm_to_locale_string(value));
   return scm_from_short(sceneId);
 }
+
+objid (*_loadSceneObj)(std::string, objid);
+SCM scm_loadSceneObj(SCM sceneFile, SCM sceneId){
+  _loadSceneObj(scm_to_locale_string(sceneFile), scm_to_short(sceneId));
+  return SCM_UNSPECIFIED;
+}
+
 void (*_unloadScene)(short id);
 SCM scm_unloadScene(SCM value){
   _unloadScene(scm_to_short(value));
@@ -708,6 +715,8 @@ void onPlayerLeave(std::string connectionHash){
 ////////////
 void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
+  scm_c_define_gsubr("load-subscene", 2, 0, 0, (void *)scm_loadSceneObj);
+
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
@@ -801,6 +810,7 @@ void defineFunctions(objid id, bool isServer){
 
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),  
+  objid(*loadSceneObj)(std::string, objid),
   void (*unloadScene)(short id),  
   void (*unloadAllScenes)(),
   std::vector<short> (*listScenes)(),  
@@ -860,6 +870,8 @@ void createStaticSchemeBindings(
   stateMachineType = scm_make_foreign_object_type(scm_from_utf8_symbol("statemachine"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
 
   _loadScene = loadScene;
+  _loadSceneObj = loadSceneObj;
+
   _unloadScene = unloadScene;
   _unloadAllScenes = unloadAllScenes;
   _listScenes = listScenes;
