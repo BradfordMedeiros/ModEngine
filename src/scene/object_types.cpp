@@ -105,6 +105,15 @@ GameObjectRail createRail(objid id, std::map<std::string, std::string> additiona
   return obj;
 }
 
+GameObjectScene createScene(objid id, std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadScene){
+  auto scenefile = additionalFields.at("scene");
+  loadScene(scenefile);
+  GameObjectScene obj {
+    .scenefile = scenefile,
+  };
+  return obj;
+}
+
 void addObject(
   objid id, 
   std::string objectType, 
@@ -116,7 +125,8 @@ void addObject(
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(objid id, std::string from, std::string to)> addRail
+  std::function<void(objid id, std::string from, std::string to)> addRail,
+  std::function<void(std::string)> loadScene
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
@@ -132,6 +142,8 @@ void addObject(
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "rail"){
     mapping[id] = createRail(id, additionalFields, addRail);
+  }else if(objectType == "scene"){
+    mapping[id] = createScene(id, additionalFields, loadScene);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -148,6 +160,13 @@ void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
   if (railObj != NULL){
     removeRail();
   }
+
+  auto sceneObj = std::get_if<GameObjectScene>(&Object);
+  if (sceneObj != NULL){
+    std::cout << "ERROR: scene - remove scene obj not yet implemented" << std::endl;
+    assert(false);
+  }
+
   mapping.erase(id);
 }
 

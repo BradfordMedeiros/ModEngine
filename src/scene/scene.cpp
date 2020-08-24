@@ -381,6 +381,9 @@ void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationOb
         addRail(world.rails, getGameObject(scene, id).name, from, to);
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
+      },
+      [](std::string sceneToLoad) -> void {
+        std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
       }
     );
 }

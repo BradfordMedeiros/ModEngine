@@ -56,7 +56,11 @@ struct GameObjectRail {
   RailConnection connection;
 };
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail> GameObjectObj;
+struct GameObjectScene {
+  std::string scenefile;
+};
+
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene> GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
@@ -100,7 +104,12 @@ static Field railField {
   .type = "rail",
 };
 
-static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField };
+static Field sceneField {
+  .prefix = '$',
+  .type = "scene",
+};
+
+static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField, sceneField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
@@ -114,7 +123,8 @@ void addObject(
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(objid id, std::string from, std::string to)> onRail
+  std::function<void(objid id, std::string from, std::string to)> onRail,
+  std::function<void(std::string)> loadScene
 );
 
 void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail);
