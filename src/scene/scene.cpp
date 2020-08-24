@@ -323,7 +323,10 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
   obj.transformation.rotation = orientation;
 }
 
-void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationObject& serialObj, bool shouldLoadModel, std::function<void(std::string)> loadClip, std::function<objid()> getId){
+void addObjectToWorld(
+  World& world, Scene& scene, objid sceneId, SerializationObject& serialObj, bool shouldLoadModel, 
+  std::function<void(std::string)> loadClip,  std::function<void(std::string, objid)> loadScript, std::function<objid()> getId
+){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
     auto additionalFields = serialObj.additionalFields;
@@ -333,7 +336,7 @@ void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationOb
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  loadClip, 
-      [&world, &scene, sceneId, loadClip, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, &loadClip, &loadScript, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -364,7 +367,7 @@ void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationOb
           );
 
           for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, newSerialObj, false, loadClip, getId);
+            addObjectToWorld(world, scene, sceneId, newSerialObj, false, loadClip, loadScript, getId);
           }
           return hasMesh;
         }
@@ -382,8 +385,9 @@ void addObjectToWorld(World& world, Scene& scene, objid sceneId, SerializationOb
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
       },
-      [](std::string sceneToLoad) -> void {
+      [&world, &loadClip, &loadScript](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
+        addSceneToWorld(world, sceneToLoad, loadClip, loadScript);
       }
     );
 }
@@ -413,7 +417,7 @@ void addSerialObjectsToWorld(
   std::function<objid()> getNewObjectId
 ){
   for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, getNewObjectId);
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, loadScript, getNewObjectId);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
