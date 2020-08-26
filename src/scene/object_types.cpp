@@ -259,11 +259,11 @@ void renderObject(
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
-  if (rootObj != NULL){
-    // Do nothing for now (maybe visualize in unique way?)
+  if (rootObj != NULL && showDebug){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    drawMesh(nodeMesh, shaderProgram);
   }
-
-
 }
 
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
