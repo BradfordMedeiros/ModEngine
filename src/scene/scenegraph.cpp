@@ -77,11 +77,11 @@ SceneDeserialization createSceneFromParsedContent(
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
   
   auto rootId = getNewObjectId();
-  auto rootName = "root:" + std::to_string(rootId);
+  auto rootName = "~root:" + std::to_string(rootId);
   scene.rootId = rootId;
   assert(serialObjs.find(rootName) == serialObjs.end());
-  std::vector<Field> additionalFields;
-  serialObjs[rootName] = getDefaultObject(rootName, additionalFields, "default");
+
+  serialObjs[rootName] = getDefaultObject(rootName, fields, "default");
 
   for (auto [_, serialObj] : serialObjs){
     if (serialObj.name != rootName){

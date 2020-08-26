@@ -144,6 +144,8 @@ void addObject(
     mapping[id] = createRail(id, additionalFields, addRail);
   }else if(objectType == "scene"){
     mapping[id] = createScene(id, additionalFields, loadScene);
+  }else if (objectType == "root"){
+    mapping[id] = GameObjectRoot{};
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -255,6 +257,13 @@ void renderObject(
     drawMesh(nodeMesh, shaderProgram);
     return; 
   }
+
+  auto rootObj = std::get_if<GameObjectRoot>(&toRender);
+  if (rootObj != NULL){
+    // Do nothing for now (maybe visualize in unique way?)
+  }
+
+
 }
 
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){

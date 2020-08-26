@@ -60,7 +60,9 @@ struct GameObjectScene {
   std::string scenefile;
 };
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene> GameObjectObj;
+struct GameObjectRoot {};
+
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene, GameObjectRoot > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
@@ -109,7 +111,12 @@ static Field sceneField {
   .type = "scene",
 };
 
-static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField, sceneField };
+static Field rootField {
+  .prefix = '~',
+  .type = "root",
+};
+
+static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField, sceneField, rootField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
