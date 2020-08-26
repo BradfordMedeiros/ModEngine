@@ -51,17 +51,15 @@ void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObjec
 void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
   auto gameobj = scene.idToGameObjectsH.at(id);
   auto parentId = scene.nameToId.at(parentName);
-  assert(scene.idToGameObjectsH.at(id).parentId == -1);
   scene.idToGameObjectsH.at(id).parentId = parentId;
-  assert(scene.idToGameObjectsH.at(parentId).children.find(id) == scene.idToGameObjectsH.at(parentId).children.end());
   scene.idToGameObjectsH.at(parentId).children.insert(id);
 }
 
 void enforceRootObjects(Scene& scene){
-  scene.rootGameObjectsH.clear();
+  scene.idToGameObjectsH.at(scene.rootId).children.clear();
   for (auto &[id, objh] : scene.idToGameObjectsH){
-    if (objh.parentId == -1){
-      scene.rootGameObjectsH.push_back(id);
+    if ((objh.parentId == -1 || objh.parentId == scene.rootId) && id != scene.rootId){
+      enforceParentRelationship(scene, id, scene.idToGameObjects.at(scene.rootId).name);
     }
   }
 }
@@ -77,9 +75,21 @@ SceneDeserialization createSceneFromParsedContent(
   scene.layers = parsedContent.layers;
 
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
+  
+  auto rootId = getNewObjectId();
+  auto rootName = "root:" + std::to_string(rootId);
+  scene.rootId = rootId;
+  assert(serialObjs.find(rootName) == serialObjs.end());
+  std::vector<Field> additionalFields;
+  serialObjs[rootName] = getDefaultObject(rootName, additionalFields, "default");
+
   for (auto [_, serialObj] : serialObjs){
-    objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-    addObjectToScene(scene, id, -1, serialObj);
+    if (serialObj.name != rootName){
+      objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
+      addObjectToScene(scene, id, -1, serialObj);
+    }else{
+      addObjectToScene(scene, scene.rootId, -1, serialObj);
+    }
   }
 
   for (auto [_, serialObj] : serialObjs){
@@ -279,9 +289,7 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto objectId = getNewObjectId();
-  std::cout << "INFO: scenegraph - adding to scenegraph" << std::endl;
   addObjectToScene(scene, objectId, -1, serialObj);      
-  std::cout << "INFO: scenegraph - adding parent relations" << std::endl;
   for (auto child : serialObj.children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
@@ -316,9 +324,10 @@ std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id){  // it mi
   std::vector<objid> removedIds;
   auto objects = getChildrenIdsAndParent(scene, id);
 
+  assert(id != scene.rootId);
+
   for (auto id : objects){
     std::string objectName = scene.idToGameObjects.at(id).name;
-    scene.rootGameObjectsH.erase(std::remove(scene.rootGameObjectsH.begin(), scene.rootGameObjectsH.end(), id), scene.rootGameObjectsH.end());  
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
     scene.nameToId.erase(objectName);
@@ -361,16 +370,15 @@ struct traversalData {
 void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
   std::vector<traversalData> datum;
 
-  for (unsigned int i = 0; i < scene.rootGameObjectsH.size(); i++){
-    objid id = scene.rootGameObjectsH.at(i);
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), [&datum](objid id, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
-      datum.push_back(traversalData{
-        .id = id,
-        .modelMatrix = modelMatrix,
-        .parentMatrix = parentMatrix,
-      });
+  objid id = scene.rootId;;
+  traverseScene(id, scene.idToGameObjectsH.at(id), scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
+    datum.push_back(traversalData{
+      .id = foundId,
+      .modelMatrix = modelMatrix,
+      .parentMatrix = parentMatrix,
     });
-  }
+  });
+  
 
   for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
@@ -400,12 +408,14 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
 Transformation fullTransformation(Scene& scene, objid id){
   Transformation transformation = {};
   bool foundId = false;
+
   traverseScene(scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho) -> void {
     if (traversedId == id){
       foundId = true;
       transformation = getTransformationFromMatrix(model);
     }
   });
+
   assert(foundId);
   return transformation;
 }

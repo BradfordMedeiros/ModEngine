@@ -31,7 +31,7 @@ struct GameObjectH {
 };
 
 struct Scene {
-  std::vector<objid> rootGameObjectsH;
+  objid rootId;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<std::string, objid> nameToId;
