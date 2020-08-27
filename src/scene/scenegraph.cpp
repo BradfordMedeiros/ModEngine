@@ -301,6 +301,11 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
   enforceRootObjects(scene);
 }
 
+void addChildLink(Scene& scene, objid childId, objid parentId){
+  std::cout << "ERROR: add child link not yet implemented" << std::endl;
+  assert(false);
+}
+
 void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
   auto parentObjH = scene.idToGameObjectsH.at(id);
   onAddObject(parentObjH.id);
@@ -347,7 +352,11 @@ std::vector<objid> listObjInScene(Scene& scene){
   return allObjects;
 }
 
-void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4)> onObject){
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4)> onObject, std::function<void(objid)> traverseLink){
+  if (objectH.linkOnly){
+    traverseLink(id);
+  }
+
   GameObject object = scene.idToGameObjects.at(objectH.id);
   glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
   modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
@@ -358,7 +367,7 @@ void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model,
   onObject(id, scaledModelMatrix, model);
 
   for (objid id: objectH.children){
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject);
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject, traverseLink);
   }
 }
 
@@ -367,7 +376,7 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
+void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject, std::function<void(objid)> traverseLink){
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;;
@@ -377,7 +386,7 @@ void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4,
       .modelMatrix = modelMatrix,
       .parentMatrix = parentMatrix,
     });
-  });
+  }, traverseLink);
   
 
   for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame
@@ -405,7 +414,7 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
 }
 
 // TODO - this does a full traversal, but it really only needs to look at the parent hierarchy
-Transformation fullTransformation(Scene& scene, objid id){
+Transformation fullTransformation(Scene& scene, objid id, std::function<void(objid)> traverseLink){
   Transformation transformation = {};
   bool foundId = false;
 
@@ -414,7 +423,7 @@ Transformation fullTransformation(Scene& scene, objid id){
       foundId = true;
       transformation = getTransformationFromMatrix(model);
     }
-  });
+  }, traverseLink);
 
   assert(foundId);
   return transformation;

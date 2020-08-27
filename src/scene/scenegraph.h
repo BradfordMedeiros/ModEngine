@@ -28,6 +28,7 @@ struct GameObjectH {
   objid parentId;
   std::set<objid> children;
   objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
+  bool linkOnly;
 };
 
 struct Scene {
@@ -60,6 +61,7 @@ SerializationObject serialObjectFromFields(
 );
 
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
+void addChildLink(Scene& scene, objid childId, objid parentId);
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
   Scene& scene, 
@@ -76,10 +78,10 @@ std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id);
 std::vector<objid> listObjInScene(Scene& scene);
 
 // @TODO code these functions
-void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject);  
+void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject, std::function<void(objid)> traverseLink);  
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
-Transformation fullTransformation(Scene& scene, objid id);
+Transformation fullTransformation(Scene& scene, objid id, std::function<void(objid)> traverseLink);
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);

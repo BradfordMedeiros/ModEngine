@@ -768,3 +768,16 @@ std::vector<LightInfo> getLightInfo(World& world){
   }
   return lights;
 }
+
+void traverseLink(objid id){
+  std::cout << "ERROR: LINKS NOT YET IMPLEMENTED" << std::endl;
+  assert(false);
+}
+
+void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
+  traverseScene(scene, onObject, traverseLink);
+}
+
+Transformation fullTransformation(Scene& scene, objid id){
+  fullTransformation(scene, id, traverseLink);
+}
