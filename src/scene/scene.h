@@ -94,8 +94,8 @@ struct LightInfo {
 
 std::vector<LightInfo> getLightInfo(World& world);
 
-void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject);
-Transformation fullTransformation(Scene& scene, objid id);
+void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject);
+Transformation fullTransformation(World& world, Scene& scene, objid id);
 
 #endif
 

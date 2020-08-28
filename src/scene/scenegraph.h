@@ -33,6 +33,7 @@ struct GameObjectH {
 
 struct Scene {
   objid rootId;
+  bool isNested;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<std::string, objid> nameToId;
@@ -78,10 +79,10 @@ std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id);
 std::vector<objid> listObjInScene(Scene& scene);
 
 // @TODO code these functions
-void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject, std::function<void(objid)> traverseLink);  
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
-Transformation fullTransformation(Scene& scene, objid id, std::function<void(objid)> traverseLink);
+
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);

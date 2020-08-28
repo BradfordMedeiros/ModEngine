@@ -33,9 +33,7 @@ bool idInGroup(World& world, objid id, objid groupId){
 bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
 }
-Transformation fullTransformation(World& world, objid id){
-  return fullTransformation(sceneForId(world, id), id);
-}
+
 objid getGroupId(World& world, objid id){
   return sceneForId(world, id).idToGameObjectsH.at(id).groupId; 
 }
@@ -385,9 +383,12 @@ void addObjectToWorld(
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
       },
-      [&world, &loadClip, &loadScript](std::string sceneToLoad) -> void {
+      [&world, &loadClip, &loadScript, sceneId, id](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
-        addSceneToWorld(world, sceneToLoad, loadClip, loadScript);
+        auto childSceneId = addSceneToWorld(world, sceneToLoad, loadClip, loadScript);
+        auto rootId = world.scenes.at(childSceneId).rootId;
+        addChildLink(world.scenes.at(sceneId), rootId, id);
+        world.scenes.at(childSceneId).isNested = true;
       }
     );
 }
@@ -758,7 +759,7 @@ std::vector<LightInfo> getLightInfo(World& world){
     auto objectLight = world.objectMapping.at(objectId);
     auto lightObject = std::get_if<GameObjectLight>(&objectLight);
 
-    auto lightTransform = fullTransformation(sceneForId(world, objectId), objectId);
+    auto lightTransform = fullTransformation(world, objectId);
     LightInfo light {
       .pos = lightTransform.position,
       .rotation = lightTransform.rotation,
@@ -769,15 +770,32 @@ std::vector<LightInfo> getLightInfo(World& world){
   return lights;
 }
 
-void traverseLink(objid id){
-  std::cout << "ERROR: LINKS NOT YET IMPLEMENTED" << std::endl;
-  assert(false);
+void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
+  traverseScene(scene, initialModel, scale, onObject, [&world, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
+      Scene& linkScene = world.scenes.at(world.idToScene.at(id));
+      traverseScene(world, linkScene, modelMatrix, scale, onObject);
+  });
 }
 
-void traverseScene(Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
-  traverseScene(scene, onObject, traverseLink);
+void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
+  traverseScene(world, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
 }
 
-Transformation fullTransformation(Scene& scene, objid id){
-  fullTransformation(scene, id, traverseLink);
+Transformation fullTransformation(World& world, objid id){
+  Scene& scene = sceneForId(world, id);
+  while(scene.isNested){
+    scene = sceneForId(world, scene.idToGameObjectsH.at(scene.rootId).parentId);
+  }
+  
+  Transformation transformation = {};
+  bool foundId = false;
+  
+  traverseScene(world, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho) -> void {
+    if (traversedId == id){
+      foundId = true;
+      transformation = getTransformationFromMatrix(model);
+    }
+  });
+  assert(foundId);
+  return transformation;
 }

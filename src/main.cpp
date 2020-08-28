@@ -305,6 +305,9 @@ void displayRails(std::map<short, RailConnection> railPairs){
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights){
+  if (scene.isNested){
+    return;
+  }
   glUseProgram(shaderProgram);
   
   glUniform1i(glGetUniformLocation(shaderProgram, "maintexture"), 0);        
@@ -327,7 +330,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   clearTraversalPositions();
-  traverseScene(scene, [useSelectionColor, shaderProgram, &scene, projection](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
+  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
     if (orthographic){
      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
     }else{
