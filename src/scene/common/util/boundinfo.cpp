@@ -49,3 +49,29 @@ glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float d
 
   return glm::vec3(ratio.xratio, ratio.yratio, ratio.zratio);
 }
+
+BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
+  BoundInfo info = infos.at(0);
+  for (int i = 1; i < infos.size(); i++){
+    auto currInfo = infos.at(i);
+    if (currInfo.xMin < info.xMin){
+      info.xMin = currInfo.xMin;
+    }
+    if (currInfo.yMin < info.yMin){
+      info.yMin = currInfo.yMin;
+    }
+    if (currInfo.zMin < info.zMax){
+      info.zMin = currInfo.zMin;
+    }
+    if (currInfo.xMax > info.xMax){
+      info.xMax = currInfo.xMax;
+    }
+    if (currInfo.yMax > info.yMax){
+      info.yMax = currInfo.yMax;
+    }
+    if (currInfo.zMax > info.zMax){
+      info.zMax = currInfo.zMax;
+    }
+  }
+  return info;
+}

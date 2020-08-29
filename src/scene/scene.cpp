@@ -41,10 +41,6 @@ std::vector<objid> getIdsInGroup(World& world, objid index){
   return getIdsInGroup(sceneForId(world, index), getGroupId(world, index));
 }
 
-BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> boundings){    // Takes the biggest, assuming one physics object per collision.  Can be inaccurate with
-  //assert(boundings.size() == 1);
-  return boundings.at(0);
-}
 NameAndMesh getMeshesForGroupId(World& world, objid groupId){
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
@@ -128,7 +124,7 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
   GroupPhysicsInfo groupInfo {
     .isRoot = isRoot,
     .physicsInfo = getPhysicsInfoForGameObject(world, scene, groupId),
-    .physicsOptions = getGameObject(scene, id).physicsOptions,
+    .physicsOptions = getGameObject(scene, groupId).physicsOptions,
   };  
   return groupInfo;
 }
