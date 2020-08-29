@@ -137,11 +137,15 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
 void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, scene, id);
+  if (!groupPhysicsInfo.physicsOptions.enabled){
+    return;
+  }
+
   btRigidBody* rigidBody = NULL;
 
   GameObjectObj& toRender = world.objectMapping.at(id);
   bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
-
+  
   if (groupPhysicsInfo.isRoot){
     auto physicsOptions = groupPhysicsInfo.physicsOptions;
     auto physicsInfo = groupPhysicsInfo.physicsInfo;
