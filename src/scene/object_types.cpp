@@ -57,6 +57,10 @@ GameObjectCamera createCamera(){
   GameObjectCamera obj {};
   return obj;
 }
+GameObjectPortal createPortal(){
+  GameObjectPortal obj {};
+  return obj;
+}
 GameObjectSound createSound(std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadClip){
   GameObjectSound obj {
     .clip = additionalFields.at("clip")
@@ -133,7 +137,7 @@ void addObject(
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if (objectType == "portal"){
-    assert(false);
+    mapping[id] = createPortal();
   }else if(objectType == "sound"){
     mapping[id] = createSound(additionalFields, loadClip);
   }else if(objectType == "light"){
@@ -229,8 +233,10 @@ void renderObject(
   }
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
-  if (portalObj != NULL){
-    assert(false);
+  if (portalObj != NULL && showDebug){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    drawMesh(nodeMesh, shaderProgram);
     return;
   }
 
