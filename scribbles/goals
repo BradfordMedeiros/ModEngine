@@ -3,7 +3,6 @@
 August : Basic Multiplayer 
 
 - Have a crappy multiplayer FPS working
-- Scenegraph, child element, able to reference file subscene
 - Fix guile bugs (segfault b/c garbage collection)
 
 Top level concepts:

@@ -1,0 +1,7 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+$emission_scene:scene:./res/scenes/features/emission.rawscene
+$emission_scene:position:0 5 0

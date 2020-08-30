@@ -219,25 +219,6 @@ void loadAllTextures(){
   }
 }
 
-
-void translate(float x, float y, float z){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
-    return;
-  }
-  physicsTranslate(world, state.selectedIndex, x, y, z, state.moveRelativeEnabled);
-}
-void scale(float x, float y, float z){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
-    return;
-  }
-  physicsScale(world, state.selectedIndex, x, y, z);
-}
-void rotate(float x, float y, float z){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
-    return;
-  }
-  physicsRotate(world, state.selectedIndex, x, y, z);
-}
 void setObjectDimensions(short index, float width, float height, float depth){
   if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
     return;
@@ -879,7 +860,6 @@ int main(int argc, char* argv[]){
     }
 
     processStateMachines();
-    onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
     maybeGetClientMessage(onClientMessage);
 
     UdpPacket udpPacket { };
@@ -980,7 +960,8 @@ int main(int argc, char* argv[]){
 
     renderUI(crosshairSprite, currentFramerate);
 
-    handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
+    onWorldFrame(world, deltaTime, enablePhysics, dumpPhysics); 
+    handleInput(disableInput, window, deltaTime, state, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue

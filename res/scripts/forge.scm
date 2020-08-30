@@ -23,6 +23,7 @@
     list 
       (list "position" '(0 0 0))
       (list "mesh" (list-ref menu selectedIndex))
+      (list "net" "sync")
     )
   )
 )

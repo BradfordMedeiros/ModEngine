@@ -10,13 +10,13 @@ extern bool useYAxis;
 
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
-    auto selectObject = getGameObject(world, state.selectedIndex); 
+    auto selectObject = fullTransformation(world, state.selectedIndex); 
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(world, state.selectedIndex, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(world, state.selectedIndex, selectObject.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(world, state.selectedIndex, selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(world, state.selectedIndex, selectObject.position, selectObject.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(world, state.selectedIndex, selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(world, state.selectedIndex, selectObject.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }

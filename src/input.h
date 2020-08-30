@@ -12,9 +12,6 @@ void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, dou
 
 void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
 	engineState& state, 
-	void (*translate)(float, float, float), 
-  void (*scale)(float, float, float), 
-  void (*rotate)(float, float, float),
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
 	void (*setObjectDimensions)(short index, float width, float height, float depth),
   void (*onDebugKey)(),

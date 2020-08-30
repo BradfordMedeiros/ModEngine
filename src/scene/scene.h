@@ -27,6 +27,8 @@ struct World {
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;
   std::set<objid> entitiesToUpdate;
+  
+  std::map<objid, glm::mat4> idToParentModel; 
 };
 
 World createWorld(
@@ -59,11 +61,8 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
 std::string serializeObject(World& world, objid id);
 
-void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled);
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos);
-void physicsRotate(World& world, objid index, float x, float y, float z);
 void physicsRotateSet(World& world, objid index, glm::quat rotation);  // this sets to rotation
-void physicsScale(World& world, objid index, float x, float y, float z);
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
 void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
