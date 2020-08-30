@@ -616,7 +616,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   auto parentPosition = getTransformationFromMatrix(parentMatrix).position;
   auto relativePos =  pos - parentPosition;
 
-  getGameObject(world, index).transformation.position = pos;
+ // getGameObject(world, index).transformation.position = pos;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -666,10 +666,16 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
     
     auto parentMatrix = world.idToParentModel.at(i);
     auto parentPosition = getTransformationFromMatrix(parentMatrix).position;
-    auto relativePos =  getPosition(rigidBody) - parentPosition;
 
-    getGameObject(scene, i).transformation.rotation = getRotation(rigidBody);   
-    getGameObject(scene, i).transformation.position = relativePos;
+    //auto relativePos =  getPosition(rigidBody) - parentPosition;
+    //auto relativePos =  getTransformationFromMatrix(getMatrix(rigidBody)).position  - parentPosition;
+     
+    // parent * relative = world 
+    auto relativeMatrix = glm::inverse(parentMatrix) * getMatrix(rigidBody);
+    auto transformation  =  getTransformationFromMatrix(relativeMatrix);
+
+    getGameObject(scene, i).transformation.rotation = transformation.rotation;  
+    getGameObject(scene, i).transformation.position = transformation.position;
     
 
     clampMaxVelocity(rigidBody, getGameObject(scene, i).physicsOptions.maxspeed);

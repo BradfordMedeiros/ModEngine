@@ -47,6 +47,7 @@ void setRotation(btRigidBody* body, glm::quat rotation);
 glm::quat getRotation(btRigidBody* body);
 void setScale(btRigidBody* body, float width, float height, float depth);
 glm::vec3 getScale(btRigidBody* body);
+glm::mat4 getMatrix(btRigidBody* body);
 
 void applyImpulse(btRigidBody* body, glm::vec3 force);
 void clearImpulse(btRigidBody* body);

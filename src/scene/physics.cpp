@@ -162,6 +162,13 @@ void setScale(btRigidBody* body, float width, float height, float depth){
 glm::vec3 getScale(btRigidBody* body){
   return btToGlm(body -> getCollisionShape() -> getLocalScaling());
 }
+
+glm::mat4 getMatrix(btRigidBody* body){
+  glm::mat4 modelMatrix = glm::translate(glm::mat4(1.f), getPosition(body));
+  modelMatrix = modelMatrix * glm::toMat4(getRotation(body));
+  glm::mat4 finalMatrix = modelMatrix * glm::scale(glm::mat4(1.f), getScale(body));
+  return finalMatrix;
+}
     
 void checkCollisions(physicsEnv& env){   
   auto dispatcher = env.dynamicsWorld -> getDispatcher();
