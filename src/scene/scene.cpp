@@ -662,15 +662,7 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
   for (auto [i, rigidBody]: rigidbodys){
     Scene& scene = world.scenes.at(world.idToScene.at(i));
 
-    // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
-    
     auto parentMatrix = world.idToParentModel.at(i);
-    auto parentPosition = getTransformationFromMatrix(parentMatrix).position;
-
-    //auto relativePos =  getPosition(rigidBody) - parentPosition;
-    //auto relativePos =  getTransformationFromMatrix(getMatrix(rigidBody)).position  - parentPosition;
-     
-    // parent * relative = world 
     auto relativeMatrix = glm::inverse(parentMatrix) * getMatrix(rigidBody);
     auto transformation  =  getTransformationFromMatrix(relativeMatrix);
 
