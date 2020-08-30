@@ -132,6 +132,8 @@ void addObject(
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
+  }else if (objectType == "portal"){
+    assert(false);
   }else if(objectType == "sound"){
     mapping[id] = createSound(additionalFields, loadClip);
   }else if(objectType == "light"){
@@ -223,6 +225,12 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(cameraMesh, shaderProgram);
+    return;
+  }
+
+  auto portalObj = std::get_if<GameObjectPortal>(&toRender);
+  if (portalObj != NULL){
+    assert(false);
     return;
   }
 

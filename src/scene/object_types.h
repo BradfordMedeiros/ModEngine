@@ -29,6 +29,7 @@ struct GameObjectMesh {
   int textureOverloadId;;
 };
 struct GameObjectCamera {};
+struct GameObjectPortal {};
 struct GameObjectSound{
   std::string clip;  
 };
@@ -62,11 +63,11 @@ struct GameObjectScene {
 
 struct GameObjectRoot {};
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene, GameObjectRoot > GameObjectObj;
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectPortal, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene, GameObjectRoot > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
-  .prefix = '@', 
+  .prefix = '`', 
   .type = "default",
 };
 
@@ -74,6 +75,12 @@ static Field obj = {
 static Field camera = {
   .prefix = '>',
   .type = "camera",
+};
+
+// attributes: none
+static Field portal = {
+  .prefix = '@',
+  .type = "portal",
 };
 
 // attributes: clip
@@ -116,7 +123,7 @@ static Field rootField {
   .type = "root",
 };
 
-static std::vector fields = { obj, camera, sound, light, voxelField, channelField, railField, sceneField, rootField };
+static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
