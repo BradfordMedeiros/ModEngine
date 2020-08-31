@@ -194,7 +194,8 @@ void renderObject(
   Mesh& cameraMesh, 
   bool showDebug, 
   bool showBoneWeight,
-  bool useBoneTransform
+  bool useBoneTransform,
+  unsigned int portalTexture
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -244,7 +245,7 @@ void renderObject(
   if (portalObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    drawMesh(nodeMesh, shaderProgram);
+    drawMesh(nodeMesh, shaderProgram, portalTexture);
     return;
   }
 

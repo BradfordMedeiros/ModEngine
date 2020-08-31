@@ -153,7 +153,8 @@ void renderObject(
   Mesh& cameraMesh, 
   bool showDebug, 
   bool showBoneWeight,
-  bool useBoneTransform
+  bool useBoneTransform,
+  unsigned int portalTexture
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping);

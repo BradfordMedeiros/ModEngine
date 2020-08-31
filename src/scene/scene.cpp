@@ -269,6 +269,7 @@ World createWorld(
   addMesh(world, "./res/models/boundingbox/boundingbox.obj");
   addMesh(world, "./res/models/cone/cone.obj");
   addMesh(world, "./res/models/camera/camera.dae");
+  addMesh(world, "./res/models/box/plane.dae");
 
   return world;
 }
