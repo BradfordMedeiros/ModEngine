@@ -380,7 +380,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
-      framebufferTexture
+      portalTexture
     );
 
     addPositionToRender(modelMatrix, parentModelMatrix);
@@ -554,6 +554,10 @@ void onUdpServerMessage(UdpPacket& packet){
   }else {
     std::cout << "ERROR: unknown packet type" << std::endl;
   }
+}
+
+glm::mat4 renderPortalView(PortalInfo info){
+  return renderView(info.pos, info.rotation);  
 }
 
 int main(int argc, char* argv[]){
@@ -1001,12 +1005,17 @@ int main(int argc, char* argv[]){
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
 
+    renderUI(crosshairSprite, currentFramerate);
+
     // new code
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTexture, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    //////
+    glClearColor(1.0, 0.1, 0.1, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    renderUI(crosshairSprite, currentFramerate);
+    for (auto &[_, scene] : world.scenes){
+      renderScene(scene, shaderProgram, projection, renderPortalView(portals.at(0)), glm::mat4(1.0f), false, lights);
+    }
+    //////
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();

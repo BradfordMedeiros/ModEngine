@@ -242,7 +242,7 @@ void renderObject(
   }
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
-  if (portalObj != NULL && showDebug){
+  if (portalObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram, portalTexture);
