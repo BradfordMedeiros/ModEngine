@@ -397,9 +397,7 @@ void addObjectToWorld(
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
       },
-      [](std::string cameraToBind) -> void {
-        std::cout << "bind camera: " << cameraToBind << std::endl;
-      }
+      bindCamera
     );
 }
 

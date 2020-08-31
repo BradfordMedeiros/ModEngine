@@ -18,7 +18,7 @@ extern bool bootStrapperMode;
 extern NetCode netcode;
 
 void bindPortalCamera(std::string camera){
-
+  std::cout << "BIND CAMERA PLACEHOLDER: " << camera << std::endl;
 }
 
 
