@@ -764,25 +764,6 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
-std::vector<LightInfo> getLightInfo(World& world){
-  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
-  std::vector<LightInfo> lights;
-  for (int i = 0; i < lightsIndexs.size(); i++){
-    auto objectId =  lightsIndexs.at(i);
-    auto objectLight = world.objectMapping.at(objectId);
-    auto lightObject = std::get_if<GameObjectLight>(&objectLight);
-
-    auto lightTransform = fullTransformation(world, objectId);
-    LightInfo light {
-      .pos = lightTransform.position,
-      .rotation = lightTransform.rotation,
-      .color = lightObject -> color,
-    };
-    lights.push_back(light);
-  }
-  return lights;
-}
-
 void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
   traverseScene(scene, initialModel, scale, onObject, [&world, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
       Scene& linkScene = world.scenes.at(world.idToScene.at(id));
@@ -811,4 +792,41 @@ Transformation fullTransformation(World& world, objid id){
   });
   assert(foundId);
   return transformation;
+}
+
+std::vector<LightInfo> getLightInfo(World& world){
+  auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
+  std::vector<LightInfo> lights;
+  for (int i = 0; i < lightsIndexs.size(); i++){
+    auto objectId =  lightsIndexs.at(i);
+    auto objectLight = world.objectMapping.at(objectId);
+    auto lightObject = std::get_if<GameObjectLight>(&objectLight);
+
+    auto lightTransform = fullTransformation(world, objectId);
+    LightInfo light {
+      .pos = lightTransform.position,
+      .rotation = lightTransform.rotation,
+      .color = lightObject -> color,
+    };
+    lights.push_back(light);
+  }
+  return lights;
+}
+
+std::vector<PortalInfo> getPortalInfo(World& world){ 
+  auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping);
+  std::vector<PortalInfo> portals;
+  for (int i = 0; i < portalIndexes.size(); i++){
+    auto objectId = portalIndexes.at(i);
+    auto objectPortal = world.objectMapping.at(objectId);
+    auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
+    auto transform = getGameObject(world, portalObject -> camera).transformation;
+      
+    PortalInfo info {
+      .pos = transform.position,
+      .rotation = transform.rotation,
+    };
+    portals.push_back(info);
+  }
+  return portals;
 }
