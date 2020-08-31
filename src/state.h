@@ -39,6 +39,7 @@ struct engineState {
   bool useBoneTransform;
   float discardAmount;
   bool offsetTextureMode;
+  int portalTextureIndex;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

@@ -151,6 +151,18 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       setSnapScaleDown();
     }
   }
+
+  if (key == GLFW_KEY_K && action == 1){
+    state.portalTextureIndex--;
+    if (state.portalTextureIndex < 0){
+      state.portalTextureIndex = 0;
+    }
+    std::cout << "portal index: " << state.portalTextureIndex << std::endl;
+  }
+  if (key == GLFW_KEY_L && action == 1){
+    state.portalTextureIndex++;
+    std::cout << "portal index: " << state.portalTextureIndex << std::endl;
+  }
 }
 
 void expandVoxelUp(){

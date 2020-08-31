@@ -34,7 +34,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.showBoneWeight = false,
   	.useBoneTransform = true,
   	.discardAmount = 0.5,
-  	.offsetTextureMode = false
+  	.offsetTextureMode = false,
+  	.portalTextureIndex = 0
 	};
 	return state;
 }

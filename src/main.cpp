@@ -91,6 +91,10 @@ unsigned int framebufferTexture;
 unsigned int fbo;
 unsigned int depthTextures[32];
 
+/// new code
+unsigned int portalTexture;
+///
+
 glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
 
@@ -639,6 +643,17 @@ int main(int argc, char* argv[]){
   glBindTexture(GL_TEXTURE_2D, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
+  /// new portal texture
+  glGenTextures(1, &portalTexture);
+  glBindTexture(GL_TEXTURE_2D, portalTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTexture, 0);
+
+  //////////////////
+
   generateDepthTextures();
   setActiveDepthTexture(0);
 
@@ -666,6 +681,11 @@ int main(int argc, char* argv[]){
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
      updateDepthTexturesSize();
+
+    // new code
+     glBindTexture(GL_TEXTURE_2D, portalTexture);
+     glTexImage2D(GL_TEXTURE_2D, 0,  GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    // 
 
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -926,6 +946,7 @@ int main(int argc, char* argv[]){
     auto lightView = renderView(lightPosition, lightRotation);
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glEnable(GL_DEPTH_TEST);
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -979,6 +1000,11 @@ int main(int argc, char* argv[]){
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
 
+    // new code
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTexture, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    //////
+
     renderUI(crosshairSprite, currentFramerate);
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
@@ -993,7 +1019,12 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     
     glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
+
+    if (state.portalTextureIndex == 0){
+      glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
+    }else{
+      glBindTexture(GL_TEXTURE_2D, portalTexture);  // new code
+    }
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
