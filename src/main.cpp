@@ -913,6 +913,7 @@ int main(int argc, char* argv[]){
     glfwSwapBuffers(window);
     
     std::vector<LightInfo> lights = getLightInfo(world);
+    std::vector<PortalInfo> portals = getPortalInfo(world);
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
