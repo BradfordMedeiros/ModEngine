@@ -329,7 +329,8 @@ void addObjectToWorld(
   bool shouldLoadModel, 
   std::function<void(std::string)> loadClip, 
   std::function<void(std::string, objid)> loadScript, 
-  std::function<objid()> getId
+  std::function<objid()> getId,
+  std::function<void(std::string)> bindCamera
 ){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
@@ -340,7 +341,7 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  loadClip, 
-      [&world, &scene, sceneId, &loadClip, &loadScript, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, &loadClip, &loadScript, &bindCamera, id, shouldLoadModel, getId, &additionalFields](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -371,7 +372,7 @@ void addObjectToWorld(
           );
 
           for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, newSerialObj, false, loadClip, loadScript, getId);
+            addObjectToWorld(world, scene, sceneId, newSerialObj, false, loadClip, loadScript, getId, bindCamera);
           }
           return hasMesh;
         }
@@ -389,9 +390,9 @@ void addObjectToWorld(
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
       },
-      [&world, &loadClip, &loadScript, sceneId, id](std::string sceneToLoad) -> void {
+      [&world, &loadClip, &loadScript, &bindCamera, sceneId, id](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
-        auto childSceneId = addSceneToWorld(world, sceneToLoad, loadClip, loadScript);
+        auto childSceneId = addSceneToWorld(world, sceneToLoad, loadClip, loadScript, bindCamera);
         auto rootId = world.scenes.at(childSceneId).rootId;
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
@@ -424,10 +425,11 @@ void addSerialObjectsToWorld(
   std::vector<objid> idsAdded,
   std::function<void(std::string)> loadClip, 
   std::function<void(std::string, objid)> loadScript,
-  std::function<objid()> getNewObjectId
+  std::function<objid()> getNewObjectId,
+  std::function<void(std::string)> bindCamera
 ){
   for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, loadScript, getNewObjectId);
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadClip, loadScript, getNewObjectId, bindCamera);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
@@ -446,7 +448,7 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera){
   assert(world.scenes.find(sceneId) == world.scenes.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
@@ -455,11 +457,11 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
   }
-  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, loadClip, loadScript, getUniqueObjId);
+  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, loadClip, loadScript, getUniqueObjId, bindCamera);
   return sceneId;
 }
 
-objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj,  std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj,  std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera){
   std::vector<objid> idsAdded;
   int numIdsGenerated = 0;
   auto getId = [&idsAdded, &numIdsGenerated, id, useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -478,14 +480,14 @@ objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, Seri
 
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[serialObj.name] = serialObj;
-  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, loadClip, loadScript, getId);
+  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, loadClip, loadScript, getId, bindCamera);
 
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   return gameobjId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
-  return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadClip, loadScript);
+objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera){
+  return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadClip, loadScript, bindCamera);
 }
 
 void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){
@@ -563,22 +565,23 @@ objid addObjectToScene(
   std::map<std::string, double> numAttributes, 
   std::map<std::string, glm::vec3> vecAttributes,
   std::function<void(std::string)> loadClip, 
-  std::function<void(std::string, objid)> loadScript
+  std::function<void(std::string, objid)> loadScript,
+  std::function<void(std::string)> bindCamera
 ){
   auto meshName = stringAttributes.find("mesh") != stringAttributes.end() ? stringAttributes.at("mesh") : "";
   int id = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
   bool useObjId = numAttributes.find("id") != numAttributes.end();
   auto serialObj = serialObjectFromFields(name, "default", fields, stringAttributes, vecAttributes);
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip ,loadScript);
+  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip, loadScript, bindCamera);
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript){
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera){
   ParsedContent content = parseFormat(serializedObj);
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   assert(serialObjs.size() == 1);
   SerializationObject& serialObj = serialObjs.begin() -> second;
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip, loadScript);
+  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip, loadScript, bindCamera);
 }
 
 
