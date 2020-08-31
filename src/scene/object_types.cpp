@@ -57,8 +57,15 @@ GameObjectCamera createCamera(){
   GameObjectCamera obj {};
   return obj;
 }
-GameObjectPortal createPortal(){
-  GameObjectPortal obj {};
+GameObjectPortal createPortal(std::function<void(std::string)> bindCamera, std::map<std::string, std::string> additionalFields){
+  bool hasCamera =  additionalFields.find("camera") != additionalFields.end();
+  auto camera = hasCamera ? additionalFields.at("camera") : "";
+  if (camera != ""){
+    bindCamera(camera);
+  }
+  GameObjectPortal obj {
+    .camera = camera,
+  };
   return obj;
 }
 GameObjectSound createSound(std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadClip){
@@ -130,14 +137,15 @@ void addObject(
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
-  std::function<void(std::string)> loadScene
+  std::function<void(std::string)> loadScene,
+  std::function<void(std::string)> bindCamera
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if (objectType == "portal"){
-    mapping[id] = createPortal();
+    mapping[id] = createPortal(bindCamera, additionalFields);
   }else if(objectType == "sound"){
     mapping[id] = createSound(additionalFields, loadClip);
   }else if(objectType == "light"){
@@ -157,7 +165,7 @@ void addObject(
     assert(false);
   }
 }
-void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail){
+void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail, std::function<void(std::string)> unbindCamera){
   // @TODO - handle resource cleanup better here eg unload meshes
   auto Object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&Object);

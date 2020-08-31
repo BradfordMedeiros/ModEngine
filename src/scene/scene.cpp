@@ -322,8 +322,14 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
 }
 
 void addObjectToWorld(
-  World& world, Scene& scene, objid sceneId, SerializationObject& serialObj, bool shouldLoadModel, 
-  std::function<void(std::string)> loadClip,  std::function<void(std::string, objid)> loadScript, std::function<objid()> getId
+  World& world, 
+  Scene& scene, 
+  objid sceneId, 
+  SerializationObject& serialObj, 
+  bool shouldLoadModel, 
+  std::function<void(std::string)> loadClip, 
+  std::function<void(std::string, objid)> loadScript, 
+  std::function<objid()> getId
 ){
     auto id =  scene.nameToId.at(serialObj.name);
     auto type = serialObj.type;
@@ -389,6 +395,9 @@ void addObjectToWorld(
         auto rootId = world.scenes.at(childSceneId).rootId;
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
+      },
+      [](std::string cameraToBind) -> void {
+        std::cout << "bind camera: " << cameraToBind << std::endl;
       }
     );
 }
@@ -495,6 +504,9 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
   }
   removeObject(world.objectMapping, objectId, unloadClip, []() -> void {
     std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
+    assert(false);
+  }, [](std::string cameraName) -> void {
+    std::cout << "remove camera not yet implemented" << std::endl;
     assert(false);
   });
   
