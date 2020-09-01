@@ -826,6 +826,7 @@ std::vector<PortalInfo> getPortalInfo(World& world){
     PortalInfo info {
       .pos = transform.position,
       .rotation = transform.rotation,
+      .portalPos = getGameObject(world, objectId).transformation.position,
     };
     portals.push_back(info);
   }

@@ -103,6 +103,7 @@ std::vector<LightInfo> getLightInfo(World& world);
 struct PortalInfo {
   glm::vec3 pos;
   glm::quat rotation;
+  glm::vec3 portalPos;
 };
 std::vector<PortalInfo> getPortalInfo(World& world);
 
