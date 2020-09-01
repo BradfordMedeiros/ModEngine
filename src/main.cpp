@@ -556,8 +556,13 @@ void onUdpServerMessage(UdpPacket& packet){
   }
 }
 
-glm::mat4 renderPortalView(PortalInfo info){
-  return renderView(info.pos, info.rotation);  
+glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
+  if (!info.perspective){
+    return renderView(info.pos, info.rotation);
+  }
+  auto cameraToPortalOffset = transform.position - info.portalPos;
+  auto newCameraPosition = info.pos - cameraToPortalOffset;
+  return renderView(newCameraPosition, transform.rotation * info.rotation);  
 }
 
 int main(int argc, char* argv[]){
@@ -927,12 +932,9 @@ int main(int argc, char* argv[]){
       }
     }
 
-    if (state.useDefaultCamera || activeCameraObj == NULL){
-      view = renderView(defaultCamera.transformation.position, defaultCamera.transformation.rotation);
-    }else{
-      auto transformation = fullTransformation(world, activeCameraObj -> id);
-      view = renderView(transformation.position, transformation.rotation);   // this is position incorrect because this needs to traverse the object hierachy
-    }
+    auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world, activeCameraObj -> id);
+    view = renderView(viewTransform.position, viewTransform.rotation);
+
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
 
     glfwSwapBuffers(window);
@@ -1009,11 +1011,11 @@ int main(int argc, char* argv[]){
 
     // new code
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTexture, 0);
-    glClearColor(1.0, 0.1, 0.1, 1.0f);
+    glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, shaderProgram, projection, renderPortalView(portals.at(0)), glm::mat4(1.0f), false, lights);
+      renderScene(scene, shaderProgram, projection, renderPortalView(portals.at(0), viewTransform), glm::mat4(1.0f), false, lights);
     }
     //////
 

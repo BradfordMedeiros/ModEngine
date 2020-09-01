@@ -31,6 +31,7 @@ struct GameObjectMesh {
 struct GameObjectCamera {};
 struct GameObjectPortal {
   std::string camera;
+  bool perspective;
 };
 struct GameObjectSound{
   std::string clip;  
@@ -79,7 +80,7 @@ static Field camera = {
   .type = "camera",
 };
 
-// attributes: none
+// attributes: camera, perspective
 static Field portal = {
   .prefix = '@',
   .type = "portal",

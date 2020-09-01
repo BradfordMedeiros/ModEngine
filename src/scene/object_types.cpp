@@ -60,11 +60,13 @@ GameObjectCamera createCamera(){
 GameObjectPortal createPortal(std::function<void(std::string)> bindCamera, std::map<std::string, std::string> additionalFields){
   bool hasCamera =  additionalFields.find("camera") != additionalFields.end();
   auto camera = hasCamera ? additionalFields.at("camera") : "";
+  auto perspective = additionalFields.find("perspective") != additionalFields.end() ? additionalFields.at("perspective") == "true" : false;
   if (camera != ""){
     bindCamera(camera);
   }
   GameObjectPortal obj {
     .camera = camera,
+    .perspective = perspective,
   };
   return obj;
 }
