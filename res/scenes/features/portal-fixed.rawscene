@@ -1,0 +1,10 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+>maincamera:position:0 5 150
+
+@mainportal:position: 0 2 0
+@mainportal:camera:>maincamera
+@mainportal:scale:10 10 4
+@mainportal:rotation:0 0 0 1
