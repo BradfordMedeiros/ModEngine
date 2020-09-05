@@ -57,13 +57,11 @@ GameObjectCamera createCamera(){
   GameObjectCamera obj {};
   return obj;
 }
-GameObjectPortal createPortal(std::function<void(std::string)> bindCamera, std::map<std::string, std::string> additionalFields){
+GameObjectPortal createPortal(std::map<std::string, std::string> additionalFields){
   bool hasCamera =  additionalFields.find("camera") != additionalFields.end();
   auto camera = hasCamera ? additionalFields.at("camera") : "";
   auto perspective = additionalFields.find("perspective") != additionalFields.end() ? additionalFields.at("perspective") == "true" : false;
-  if (camera != ""){
-    bindCamera(camera);
-  }
+
   GameObjectPortal obj {
     .camera = camera,
     .perspective = perspective,
@@ -139,15 +137,14 @@ void addObject(
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
-  std::function<void(std::string)> loadScene,
-  std::function<void(std::string)> bindCamera
+  std::function<void(std::string)> loadScene
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if (objectType == "portal"){
-    mapping[id] = createPortal(bindCamera, additionalFields);
+    mapping[id] = createPortal(additionalFields);
   }else if(objectType == "sound"){
     mapping[id] = createSound(additionalFields, loadClip);
   }else if(objectType == "light"){

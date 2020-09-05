@@ -39,13 +39,13 @@ World createWorld(
 );
 Texture loadTextureWorld(World& world, std::string texturepath);
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera);
-objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera);
+objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
+objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript);
 void removeAllScenesFromWorld(World& world, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript);
 
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera);
-objid addObjectToScene(World& world, objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<void(std::string)> bindCamera);
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
+objid addObjectToScene(World& world, objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript);
 
 void removeObjectFromScene(World& world, objid id, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript);
 
