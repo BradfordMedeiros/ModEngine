@@ -105,6 +105,7 @@ struct PortalInfo {
   glm::quat rotation;
   glm::vec3 portalPos;
   bool perspective;
+  objid id;
 };
 std::vector<PortalInfo> getPortalInfo(World& world);
 

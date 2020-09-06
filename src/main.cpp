@@ -93,6 +93,7 @@ unsigned int depthTextures[32];
 
 const int numPortalTextures = 16;
 unsigned int portalTextures[16];
+std::map<objid, unsigned int> portalIdCache;
 
 glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
@@ -387,6 +388,9 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
+
+    // if id in portal textures, pass in
+
     renderObject(
       shaderProgram, 
       id, 
@@ -396,7 +400,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
-      portalTextures[0]
+      portalIdCache.find(id) != portalIdCache.end() ? portalIdCache.at(id) : -1
     );
 
     addPositionToRender(modelMatrix, parentModelMatrix);
@@ -1012,15 +1016,20 @@ int main(int argc, char* argv[]){
 
     renderUI(crosshairSprite, currentFramerate);
 
-    // portal rendering code
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[0], 0);
-    glClearColor(0.1, 0.1, 0.1, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    portalIdCache.clear();
+    assert(portals.size() <= numPortalTextures);
+    for (int i = 0; i < portals.size(); i++){
+      auto portal = portals.at(i);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
+      glClearColor(0.1, 0.1, 0.1, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto &[_, scene] : world.scenes){
-      renderScene(scene, shaderProgram, projection, renderPortalView(portals.at(0), viewTransform), glm::mat4(1.0f), false, lights);
+      for (auto &[_, scene] : world.scenes){
+        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights);
+      }
+      portalIdCache[portal.id] = portalTextures[i];
     }
-    //////
+
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
