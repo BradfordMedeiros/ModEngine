@@ -91,9 +91,8 @@ unsigned int framebufferTexture;
 unsigned int fbo;
 unsigned int depthTextures[32];
 
-/// new code
-unsigned int portalTexture;
-///
+const int numPortalTextures = 16;
+unsigned int portalTextures[16];
 
 glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
@@ -135,6 +134,23 @@ void setActiveDepthTexture(int index){
   unsigned int texture = depthTextures[index];
   glBindTexture(GL_TEXTURE_2D, texture);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+}
+
+
+void updatePortalTexturesSize(){
+  for (int i = 0; i < numPortalTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);   
+  }
+}
+void generatePortalTextures(){
+  glGenTextures(numPortalTextures, portalTextures);
+  for (int i = 0; i < numPortalTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    updatePortalTexturesSize();
+  }
 }
 
 std::vector<short> playbacksToRemove;
@@ -380,7 +396,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
-      portalTexture
+      portalTextures[0]
     );
 
     addPositionToRender(modelMatrix, parentModelMatrix);
@@ -653,18 +669,8 @@ int main(int argc, char* argv[]){
   glBindTexture(GL_TEXTURE_2D, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
-  /// new portal texture
-  glGenTextures(1, &portalTexture);
-  glBindTexture(GL_TEXTURE_2D, portalTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTexture, 0);
-
-  //////////////////
-
   generateDepthTextures();
+  generatePortalTextures();
   setActiveDepthTexture(0);
 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
@@ -691,11 +697,7 @@ int main(int argc, char* argv[]){
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
      updateDepthTexturesSize();
-
-    // new code
-     glBindTexture(GL_TEXTURE_2D, portalTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0,  GL_RGB, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    // 
+     updatePortalTexturesSize();
 
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -941,6 +943,7 @@ int main(int argc, char* argv[]){
     
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
+    assert(portals.size() <= numPortalTextures);
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
@@ -1009,8 +1012,8 @@ int main(int argc, char* argv[]){
 
     renderUI(crosshairSprite, currentFramerate);
 
-    // new code
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTexture, 0);
+    // portal rendering code
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[0], 0);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1035,7 +1038,8 @@ int main(int argc, char* argv[]){
     if (state.portalTextureIndex == 0){
       glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
     }else{
-      glBindTexture(GL_TEXTURE_2D, portalTexture);  // new code
+      assert(state.portalTextureIndex <= numPortalTextures);
+      glBindTexture(GL_TEXTURE_2D, portalTextures[state.portalTextureIndex - 1]);  // new code
     }
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
