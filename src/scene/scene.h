@@ -101,9 +101,10 @@ std::vector<LightInfo> getLightInfo(World& world);
 
 
 struct PortalInfo {
-  glm::vec3 pos;
-  glm::quat rotation;
+  glm::vec3 cameraPos;
+  glm::quat cameraRotation;
   glm::vec3 portalPos;
+  glm::quat portalRotation;
   bool perspective;
   objid id;
 };

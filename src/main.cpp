@@ -578,11 +578,11 @@ void onUdpServerMessage(UdpPacket& packet){
 
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
   if (!info.perspective){
-    return renderView(info.pos, info.rotation);
+    return renderView(info.cameraPos, info.cameraRotation);
   }
   auto cameraToPortalOffset = transform.position - info.portalPos;
-  auto newCameraPosition = info.pos + cameraToPortalOffset;
-  return renderView(newCameraPosition, info.rotation * transform.rotation);  
+  auto newCameraPosition = info.cameraPos + cameraToPortalOffset;
+  return renderView(cameraToPortalOffset, transform.rotation) * renderView(info.cameraPos, info.cameraRotation);
 }
 
 int main(int argc, char* argv[]){

@@ -818,11 +818,13 @@ std::vector<PortalInfo> getPortalInfo(World& world){
     auto objectPortal = world.objectMapping.at(objectId);
     auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
     auto transform = getGameObject(world, portalObject -> camera).transformation;
-      
+    auto portalGameObject = getGameObject(world, objectId);
+
     PortalInfo info {
-      .pos = transform.position,
-      .rotation = transform.rotation,
-      .portalPos = getGameObject(world, objectId).transformation.position,
+      .cameraPos = transform.position,
+      .cameraRotation = transform.rotation,
+      .portalPos = portalGameObject.transformation.position,
+      .portalRotation = portalGameObject.transformation.rotation,
       .perspective = portalObject -> perspective,
       .id = objectId
     };
