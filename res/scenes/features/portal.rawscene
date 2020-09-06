@@ -3,9 +3,34 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 
 >maincamera:position:0 5 150
+>secondcamera:position:0 10 150
 
-@mainportal:position: 0 2 0
+@mainportal:position:0 2 0
 @mainportal:camera:>maincamera
 @mainportal:scale:10 10 4
-@mainportal:rotation:0 0 0 1
+@mainportal:rotation:0 3.1412 0
 @mainportal:perspective:true
+lmainframeleft:mesh:./res/models/box/box.obj
+lmainframeleft:scale:1 10 1
+lmainframeleft:position:-10 0 0
+lmainframeright:mesh:./res/models/box/box.obj
+lmainframeright:scale:1 10 1
+lmainframeright:position:10 0 0
+lmainframetop:position:0 10 0
+lmainframetop:scale:12 2 2
+lmainframetop:mesh:./res/models/box/box.obj
+
+
+@secondaryportal:position:25 2 0
+@secondaryportal:camera:>secondcamera
+@secondaryportal:scale:10 10 4
+@secondaryportal:rotation:0 3.1412 0 
+rmainframeleft:mesh:./res/models/box/box.obj
+rmainframeleft:scale:1 10 1
+rmainframeleft:position:15 0 0
+rmainframeright:mesh:./res/models/box/box.obj
+rmainframeright:scale:1 10 1
+rmainframeright:position:35 0 0
+rmainframetop:position:25 10 0
+rmainframetop:scale:12 2 2
+rmainframetop:mesh:./res/models/box/box.obj
