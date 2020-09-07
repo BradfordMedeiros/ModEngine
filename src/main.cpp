@@ -329,7 +329,7 @@ void displayRails(std::map<short, RailConnection> railPairs){
   }
 }
 
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights, std::vector<objid> portalIds){
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals){
   if (scene.isNested){
     return;
   }
@@ -355,7 +355,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   clearTraversalPositions();
-  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portalIds](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
+  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portals](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
     if (orthographic){
      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
     }else{
@@ -393,7 +393,18 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
 
-    bool isPortal = std::find(portalIds.begin(), portalIds.end(), id) != portalIds.end();
+    bool isPortal = false;
+    bool isPerspectivePortal = false;
+
+    for (auto portal : portals){
+      if (id == portal.id){
+        isPortal = true;
+        isPerspectivePortal = portal.perspective;
+        break;
+      }
+    }
+
+
     bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
 
@@ -406,11 +417,11 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
-      -1
+      (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1
     );
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
-    if (isPortal && portalTextureInCache){
+    if (isPortal && portalTextureInCache && isPerspectivePortal){
       glUseProgram(framebufferProgram); 
       glDisable(GL_DEPTH_TEST);
       glBindVertexArray(quadVAO);
@@ -423,7 +434,6 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     }
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
-
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
   if (state.showCameras){
@@ -968,10 +978,6 @@ int main(int argc, char* argv[]){
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
-    std::vector<objid> portalIds;
-    for (auto portal : portals){
-      portalIds.push_back(portal.id);
-    }
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
@@ -989,7 +995,7 @@ int main(int argc, char* argv[]){
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), true, lights, portalIds);    // selection program since it's lightweight and we just care about depth buffer
+      renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), true, lights, portals);    // selection program since it's lightweight and we just care about depth buffer
     }
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldtolight"), 1, GL_FALSE, glm::value_ptr(lightView));  // leftover from shadow mapping attempt, will revisit
@@ -1003,7 +1009,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights, portalIds);
+      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights, portals);
     }
     if (selectItemCalled){
       selectItem();
@@ -1026,7 +1032,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       for (auto &[_, scene] : world.scenes){
-        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights, portalIds);
+        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights, portals);
       }
       nextPortalCache[portal.id] = portalTextures[i];
     }
@@ -1056,7 +1062,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights, portalIds);
+      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights, portals);
     }
     portalIdCache.clear();
     glDisable(GL_STENCIL_TEST);
