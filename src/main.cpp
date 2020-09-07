@@ -984,20 +984,10 @@ int main(int argc, char* argv[]){
       selectItem();
       selectItemCalled = false;
     }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(framebufferProgram); 
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-        
+      
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
-
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -1017,7 +1007,15 @@ int main(int argc, char* argv[]){
       nextPortalCache[portal.id] = portalTextures[i];
     }
     portalIdCache = nextPortalCache;
-  
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glUseProgram(framebufferProgram); 
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glBindVertexArray(quadVAO);
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // 2ND pass renders what we care about to the screen.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -1047,7 +1045,7 @@ int main(int argc, char* argv[]){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     
     glBindVertexArray(quadVAO);
