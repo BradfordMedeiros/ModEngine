@@ -997,9 +997,33 @@ int main(int argc, char* argv[]){
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
+
+
+    // Each portal requires a render pass
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    portalIdCache.clear();
+    assert(portals.size() <= numPortalTextures);
+
+    std::map<objid, unsigned int> nextPortalCache;
+    for (int i = 0; i < portals.size(); i++){
+      auto portal = portals.at(i);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
+      glClearColor(0.1, 0.1, 0.1, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      for (auto &[_, scene] : world.scenes){
+        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights);
+      }
+      nextPortalCache[portal.id] = portalTextures[i];
+    }
+    portalIdCache = nextPortalCache;
   
+
     // 2ND pass renders what we care about to the screen.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1014,21 +1038,6 @@ int main(int argc, char* argv[]){
     }
 
     renderUI(crosshairSprite, currentFramerate);
-
-    portalIdCache.clear();
-    assert(portals.size() <= numPortalTextures);
-    for (int i = 0; i < portals.size(); i++){
-      auto portal = portals.at(i);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
-      glClearColor(0.1, 0.1, 0.1, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      for (auto &[_, scene] : world.scenes){
-        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights);
-      }
-      portalIdCache[portal.id] = portalTextures[i];
-    }
-
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
