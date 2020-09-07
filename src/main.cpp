@@ -118,7 +118,8 @@ int activeDepthTexture = 0;
 void updateDepthTexturesSize(){
   for (int i = 0; i < numTextures; i++){
     glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_COMPONENT32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    // GL_DEPTH_COMPONENT32F
+    glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_STENCIL, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   }
 }
 void generateDepthTextures(){
@@ -134,9 +135,9 @@ void setActiveDepthTexture(int index){
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
   unsigned int texture = depthTextures[index];
   glBindTexture(GL_TEXTURE_2D, texture);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+  // GL_DEPTH_ATTACHMENT
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 }
-
 
 void updatePortalTexturesSize(){
   for (int i = 0; i < numPortalTextures; i++){
@@ -325,7 +326,7 @@ void displayRails(std::map<short, RailConnection> railPairs){
   }
 }
 
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights){
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights, std::vector<objid> portalIds){
   if (scene.isNested){
     return;
   }
@@ -351,7 +352,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   clearTraversalPositions();
-  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
+  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portalIds](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
     if (orthographic){
      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
     }else{
@@ -389,8 +390,13 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
 
-    // if id in portal textures, pass in
-
+    bool isPortal = std::find(portalIds.begin(), portalIds.end(), id) != portalIds.end();
+    glStencilMask(isPortal ? 0xFF : 0x00);
+    if (isPortal){
+      glStencilFunc(GL_NEVER, 1, 0xFF);
+    }else{
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    }
     renderObject(
       shaderProgram, 
       id, 
@@ -947,6 +953,10 @@ int main(int argc, char* argv[]){
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
+    std::vector<objid> portalIds;
+    for (auto portal : portals){
+      portalIds.push_back(portal.id);
+    }
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
@@ -964,7 +974,7 @@ int main(int argc, char* argv[]){
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), true, lights);    // selection program since it's lightweight and we just care about depth buffer
+      renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), true, lights, portalIds);    // selection program since it's lightweight and we just care about depth buffer
     }
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldtolight"), 1, GL_FALSE, glm::value_ptr(lightView));  // leftover from shadow mapping attempt, will revisit
@@ -978,7 +988,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights);
+      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), true, lights, portalIds);
     }
     if (selectItemCalled){
       selectItem();
@@ -1002,7 +1012,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       for (auto &[_, scene] : world.scenes){
-        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights);
+        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights, portalIds);
       }
       nextPortalCache[portal.id] = portalTextures[i];
     }
@@ -1023,12 +1033,18 @@ int main(int argc, char* argv[]){
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
     glClearColor(0.1, 0.1, 0.1, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights);
+      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights, portalIds);
     }
+    glDisable(GL_STENCIL_TEST);
 
     if (showDebugInfo){
       displayRails(getRails(world.objectMapping));
@@ -1046,7 +1062,7 @@ int main(int argc, char* argv[]){
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
     
     glBindVertexArray(quadVAO);
 
