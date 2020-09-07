@@ -47,6 +47,9 @@
 #include "./keymapper.h"
 #include "./worldloader.h"
 
+unsigned int framebufferProgram;
+unsigned int quadVAO;
+
 GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
@@ -391,12 +394,9 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
 
     bool isPortal = std::find(portalIds.begin(), portalIds.end(), id) != portalIds.end();
+    bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
-    if (isPortal){
-      glStencilFunc(GL_NEVER, 1, 0xFF);
-    }else{
-      glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    }
+
     renderObject(
       shaderProgram, 
       id, 
@@ -406,8 +406,23 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
-      portalIdCache.find(id) != portalIdCache.end() ? portalIdCache.at(id) : -1
+      -1
     );
+
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
+    if (isPortal && portalTextureInCache){
+      glUseProgram(framebufferProgram); 
+      glDisable(GL_DEPTH_TEST);
+      glBindVertexArray(quadVAO);
+      loadTextureWorld(world, "./res/textures/wood.jpg");
+      auto textureId = world.textures.at("./res/textures/wood.jpg").textureId;
+      glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glEnable(GL_DEPTH_TEST);
+      glUseProgram(shaderProgram); 
+
+    }
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
@@ -586,7 +601,7 @@ glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
   if (!info.perspective){
     return renderView(info.cameraPos, info.cameraRotation);
   }
-  auto cameraToPortalOffset = transform.position - info.portalPos;
+  auto cameraToPortalOffset = transform.position + info.portalPos;
   return renderView(cameraToPortalOffset, transform.rotation) * renderView(info.cameraPos, info.cameraRotation);
 }
 
@@ -687,7 +702,7 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
-  unsigned int quadVAO, quadVBO;
+  unsigned int quadVBO;
   glGenVertexArrays(1, &quadVAO);
   glGenBuffers(1, &quadVBO);
   glBindVertexArray(quadVAO);
@@ -721,7 +736,7 @@ int main(int argc, char* argv[]){
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");
   
   std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
-  unsigned int framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
+  framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
 
   std::string depthShaderPath = "./res/shaders/depth";
   std::cout << "INFO: depth file path is " << depthShaderPath << std::endl;
@@ -1001,7 +1016,6 @@ int main(int argc, char* argv[]){
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    portalIdCache.clear();
     assert(portals.size() <= numPortalTextures);
 
     std::map<objid, unsigned int> nextPortalCache;
@@ -1044,7 +1058,9 @@ int main(int argc, char* argv[]){
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights, portalIds);
     }
+    portalIdCache.clear();
     glDisable(GL_STENCIL_TEST);
+
 
     if (showDebugInfo){
       displayRails(getRails(world.objectMapping));
