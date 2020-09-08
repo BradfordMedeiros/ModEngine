@@ -97,6 +97,7 @@ unsigned int depthTextures[32];
 const int numPortalTextures = 16;
 unsigned int portalTextures[16];
 std::map<objid, unsigned int> portalIdCache;
+std::map<objid, glm::mat4> portalViewMatrixCache;
 
 glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
@@ -180,6 +181,7 @@ TimePlayback timePlayback(
 ); 
 
 
+
 bool useYAxis = true;
 void onDebugKey(){
   useYAxis = !useYAxis;
@@ -222,6 +224,19 @@ void selectItem(){
   schemeBindings.onObjectSelected(state.selectedIndex);
 }
 
+
+objid teleportId = -1;
+
+void teleportObject(objid objectToTeleport){
+  std::cout << "teleporting object: " << teleportId << std::endl;
+  auto portalView = glm::inverse(portalViewMatrixCache.at(teleportId));
+  auto newTransform = getTransformationFromMatrix(portalView);
+  auto newPosition = newTransform.position;
+  std::cout << "new position: " << print(newPosition) << std::endl;
+  defaultCamera.transformation.position = newTransform.position;
+  defaultCamera.transformation.rotation = newTransform.rotation;
+}
+
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
@@ -233,6 +248,13 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   if (button == 0 && voxelPtr != NULL){
     voxelPtr -> voxel.selectedVoxels.clear();
   }
+
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
+    teleportObject(-1);
+  }
+}
+void setActiveTeleportObject(PortalInfo portal){
+  teleportId = portal.id;
 }
 
 
@@ -1032,12 +1054,15 @@ int main(int argc, char* argv[]){
       glClearColor(0.1, 0.1, 0.1, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      auto portalViewMatrix = renderPortalView(portal, viewTransform);
       for (auto &[_, scene] : world.scenes){
-        renderScene(scene, shaderProgram, projection, renderPortalView(portal, viewTransform), glm::mat4(1.0f), false, lights, portals);
+        renderScene(scene, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), false, lights, portals);
       }
       nextPortalCache[portal.id] = portalTextures[i];
+      portalViewMatrixCache[portal.id] = portalViewMatrix;
     }
     portalIdCache = nextPortalCache;
+    setActiveTeleportObject(portals.at(0));
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(framebufferProgram); 
@@ -1065,21 +1090,22 @@ int main(int argc, char* argv[]){
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), false, lights, portals);
     }
-    portalIdCache.clear();
-    glDisable(GL_STENCIL_TEST);
 
+    glDisable(GL_STENCIL_TEST);
 
     if (showDebugInfo){
       displayRails(getRails(world.objectMapping));
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
-
     renderUI(crosshairSprite, currentFramerate);
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     glfwPollEvents();
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
+
+    portalIdCache.clear();
+    portalViewMatrixCache.clear();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
