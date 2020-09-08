@@ -611,7 +611,7 @@ glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
   if (!info.perspective){
     return renderView(info.cameraPos, info.cameraRotation);
   }
-  auto cameraToPortalOffset = transform.position + info.portalPos;
+  auto cameraToPortalOffset = transform.position - info.portalPos;
   return renderView(cameraToPortalOffset, transform.rotation) * renderView(info.cameraPos, info.cameraRotation);
 }
 
