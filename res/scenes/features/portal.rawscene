@@ -7,7 +7,6 @@ platform:position:0 -5 0
 @mainportal:position:0 2 0
 @mainportal:camera:>maincamera
 @mainportal:scale:10 10 4
-@mainportal:rotation:0 3.1412 0
 @mainportal:perspective:true
 lmainframeleft:mesh:./res/models/box/box.obj
 lmainframeleft:scale:1 10 1

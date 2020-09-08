@@ -612,7 +612,7 @@ glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
     return renderView(info.cameraPos, info.cameraRotation);
   }
   auto cameraToPortalOffset = transform.position - info.portalPos;
-  return renderView(cameraToPortalOffset, transform.rotation) * renderView(info.cameraPos, info.cameraRotation);
+  return glm::inverse(renderView(glm::vec3(0.f, 0.f, 0.f), info.portalRotation) *  glm::inverse(renderView(cameraToPortalOffset, transform.rotation))) * renderView(info.cameraPos, info.cameraRotation);
 }
 
 int main(int argc, char* argv[]){
