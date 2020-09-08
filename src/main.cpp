@@ -434,6 +434,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     }
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glClear(GL_STENCIL_BUFFER_BIT);
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
   if (state.showCameras){
