@@ -77,8 +77,12 @@ GameObjectSound createSound(std::map<std::string, std::string> additionalFields,
 }
 GameObjectLight createLight(std::map<std::string, std::string> additionalFields){
   auto color = additionalFields.find("color") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("color"));
+  auto lightType = (additionalFields.find("maxangle") == additionalFields.end()) ? LIGHT_SPOTLIGHT : LIGHT_POINT;
+
   GameObjectLight obj {
     .color = color,
+    .type = lightType,
+    .maxangle = lightType == LIGHT_SPOTLIGHT ? 30.f : 0.f,
   };
   return obj;
 }

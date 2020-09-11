@@ -36,11 +36,15 @@ struct GameObjectPortal {
 struct GameObjectSound{
   std::string clip;  
 };
+
+enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT };
 struct GameObjectLight {
   /*!light:type:directional
   !light:type:directional 
   !light:maxangle:50*/
   glm::vec3 color;
+  LightType type;
+  float maxangle;
 };
 struct GameObjectVoxel {
   Voxels voxel;

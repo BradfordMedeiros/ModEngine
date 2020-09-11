@@ -803,7 +803,7 @@ std::vector<LightInfo> getLightInfo(World& world){
     LightInfo light {
       .pos = lightTransform.position,
       .rotation = lightTransform.rotation,
-      .color = lightObject -> color,
+      .light = *lightObject,
     };
     lights.push_back(light);
   }

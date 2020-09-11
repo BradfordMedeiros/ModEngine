@@ -94,7 +94,7 @@ Transformation fullTransformation(World& world, Scene& scene, objid id);
 struct LightInfo {
   glm::vec3 pos;
   glm::quat rotation;
-  glm::vec3 color;
+  GameObjectLight light;
 };
 
 std::vector<LightInfo> getLightInfo(World& world);
