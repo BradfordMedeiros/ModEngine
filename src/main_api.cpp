@@ -5,7 +5,6 @@ extern AnimationState animations;
 extern GameObject* activeCameraObj;
 extern engineState state;
 extern GameObject defaultCamera;
-extern SchemeBindingCallbacks schemeBindings;
 extern std::map<unsigned int, Mesh> fontMeshes;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
@@ -124,13 +123,6 @@ void sendLoadScene(short id){
   assert(loadpacket.sceneData[sizeof(loadpacket.sceneData) -1] == '\0');
   packet.payload.loadpacket = loadpacket; 
   sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-}
-
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){
-  schemeBindings.onCollisionEnter(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2), contactPos);
-}
-void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
 }
 
 short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.

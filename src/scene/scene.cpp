@@ -810,25 +810,34 @@ std::vector<LightInfo> getLightInfo(World& world){
   return lights;
 }
 
+PortalInfo getPortalInfo(World& world, objid id){
+  auto objectPortal = world.objectMapping.at(id);
+  auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
+  auto transform = getGameObject(world, portalObject -> camera).transformation;
+  auto portalGameObject = getGameObject(world, id);
+
+  PortalInfo info {
+    .cameraPos = transform.position,
+    .cameraRotation = transform.rotation,
+    .portalPos = portalGameObject.transformation.position,
+    .portalRotation = portalGameObject.transformation.rotation,
+    .perspective = portalObject -> perspective,
+    .id = id
+  };
+  return info;
+}
+
 std::vector<PortalInfo> getPortalInfo(World& world){ 
   auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping);
   std::vector<PortalInfo> portals;
   for (int i = 0; i < portalIndexes.size(); i++){
-    auto objectId = portalIndexes.at(i);
-    auto objectPortal = world.objectMapping.at(objectId);
-    auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
-    auto transform = getGameObject(world, portalObject -> camera).transformation;
-    auto portalGameObject = getGameObject(world, objectId);
-
-    PortalInfo info {
-      .cameraPos = transform.position,
-      .cameraRotation = transform.rotation,
-      .portalPos = portalGameObject.transformation.position,
-      .portalRotation = portalGameObject.transformation.rotation,
-      .perspective = portalObject -> perspective,
-      .id = objectId
-    };
-    portals.push_back(info);
+    portals.push_back(getPortalInfo(world, portalIndexes.at(i)));
   }
   return portals;
+}
+
+bool isPortal(World& world, objid id){
+  auto objectPortal = world.objectMapping.at(id);
+  auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
+  return portalObject != NULL;
 }

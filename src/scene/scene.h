@@ -108,7 +108,9 @@ struct PortalInfo {
   bool perspective;
   objid id;
 };
+PortalInfo getPortalInfo(World& world, objid id);
 std::vector<PortalInfo> getPortalInfo(World& world);
+bool isPortal(World& world, objid id);
 
 #endif
 
