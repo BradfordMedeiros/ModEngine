@@ -396,6 +396,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     glm::vec3 position = lights.at(i).pos;
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
     glUniform3fv(glGetUniformLocation(shaderProgram, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
+    glUniform3fv(glGetUniformLocation(shaderProgram, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
   }
 
   clearTraversalPositions();

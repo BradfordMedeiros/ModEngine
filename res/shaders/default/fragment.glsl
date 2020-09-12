@@ -28,12 +28,13 @@ uniform vec2 textureOffset;
 uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
+uniform vec3 lightsdir[MAX_LIGHTS];
 
 uniform bool hasBones;
 uniform mat4 bones[100];
 
-const float constant = 0.6;
-const float linear = 0.2;
+const float constant = 0.1;
+const float linear = 0.1;
 const float quadratic = 0.0;
 
 const float emissionAmount = 1;
@@ -62,14 +63,19 @@ void main(){
       discard;
     }
 
-    vec3 ambient = vec3(0.6, 0.6, 0.6);     
-    vec3 totalSpecular = vec3(0, 0, 0);
-    vec3 totalDiffuse  = vec3(0, 0, 0);
+    vec3 ambient = vec3(0.1, 0.1, 0.1);     
+    vec3 totalSpecular = vec3(0.2, 0.2, 0.2);
+    vec3 totalDiffuse  = vec3(0.2, 0.2, 0.2);
     
     for (int i = 0; i < min(numlights, MAX_LIGHTS); i++){
         vec3 lightPos = lights[i];
         vec3 lightDir = normalize(lightPos - FragPos);
         vec3 normal = normalize(Normal);
+
+        float angle = dot(lightDir, normalize(-lightsdir[i]));
+        if (angle < 0.1){
+            continue;
+        }
 
         vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
 
@@ -80,8 +86,8 @@ void main(){
         float distanceToLight = length(lightPos - FragPos);
         float attenuation = 1.0 / (constant + linear * distanceToLight + quadratic * (distanceToLight * distanceToLight));  
 
-        totalDiffuse = totalDiffuse + (attenuation * diffuse);
-        totalSpecular = totalSpecular + (attenuation * specular);
+        totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
+        totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
     }
 
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);

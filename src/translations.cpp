@@ -76,3 +76,7 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
   return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
 }
+
+glm::vec3 directionFromQuat(glm::quat direction){
+  return direction * glm::vec3(0, 1, 0);
+}
