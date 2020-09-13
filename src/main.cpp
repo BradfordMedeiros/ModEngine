@@ -400,7 +400,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   }
 
   clearTraversalPositions();
-  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portals](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic) -> void {
+  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portals](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
+    std::cout << "shader is: " << shader << std::endl;
     if (orthographic){
      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
     }else{
@@ -476,7 +477,6 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glEnable(GL_DEPTH_TEST);
       glUseProgram(shaderProgram); 
-
     }
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glClear(GL_STENCIL_BUFFER_BIT);

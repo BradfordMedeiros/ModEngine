@@ -10,7 +10,7 @@ physicsOpts defaultPhysicsOpts(){
   return defaultOption;
 }
 
-GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, bool netsynchronize){
+GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize){
   GameObject gameObject = {
     .id = id,
     .name = name,
@@ -23,13 +23,14 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
     .lookat =  lookat,
     .layer = layer,
     .script = script,
+    .fragshader = fragshader,
     .netsynchronize = netsynchronize,
   };
   return gameObject;
 }
 
 void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObject& serialObj){
-  auto gameobjectObj = getGameObject(serialObj.position, serialObj.name, id, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.netsynchronize);
+  auto gameobjectObj = getGameObject(serialObj.position, serialObj.name, id, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.fragshader, serialObj.netsynchronize);
   gameobjectObj.transformation.position = serialObj.position;
   gameobjectObj.transformation.scale = serialObj.scale;
   gameobjectObj.transformation.rotation = serialObj.rotation;
@@ -150,6 +151,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .lookat = "",
       .layer = layer,
       .script = "",
+      .fragshader = "",
       .netsynchronize = false,
       .additionalFields = additionalFields.at(nodeId)
     };
@@ -237,6 +239,9 @@ std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<st
   if (gameobject.script != ""){
     sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
   }
+  if (gameobject.fragshader != ""){
+    sceneData = sceneData + gameobjectName + ":fragshader:" + gameobject.fragshader + "\n";
+  }
   if (gameobject.netsynchronize){
     sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
   }
@@ -282,6 +287,7 @@ SerializationObject serialObjectFromFields(
     .lookat = attributeOrEmpty(stringAttributes,"lookat"),
     .layer =  layer,
     .script = attributeOrEmpty(stringAttributes,"script"),
+    .fragshader = attributeOrEmpty(stringAttributes, "fragshader"),
     .netsynchronize = (stringAttributes.find("net") != stringAttributes.end()) && (stringAttributes.at("net") == "sync"),
     .additionalFields = stringAttributes, 
   };
@@ -360,7 +366,7 @@ std::vector<objid> listObjInScene(Scene& scene){
   return allObjects;
 }
 
-void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
   if (objectH.linkOnly){
     traverseLink(id, model, totalScale);
     return;
@@ -373,7 +379,7 @@ void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model,
   glm::vec3 scaling = object.transformation.scale * totalScale;  // having trouble with doing the scaling here so putting out of band.   Anyone in the ether please help if more elegant. 
   glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
 
-  onObject(id, scaledModelMatrix, model);
+  onObject(id, scaledModelMatrix, model, "");
 
   for (objid id: objectH.children){
     traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject, traverseLink);
@@ -385,11 +391,11 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
   std::vector<traversalData> datum;
 
-  objid id = scene.rootId;;
-  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix) -> void {
+  objid id = scene.rootId;
+  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string) -> void {
     datum.push_back(traversalData{
       .id = foundId,
       .modelMatrix = modelMatrix,
@@ -400,8 +406,9 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
 
   for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
-      if (scene.idToGameObjects.at(data.id).layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic);
+      auto gameobject = scene.idToGameObjects.at(data.id);
+      if (gameobject.layer == layer.name){
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, gameobject.fragshader);
       }
     }  
   }
@@ -451,6 +458,9 @@ std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id){
   }
   if (gameobj.script != ""){
     attributes["script"] = gameobj.script;
+  }
+  if (gameobj.fragshader != ""){
+    attributes["fragshader"] = gameobj.fragshader;
   }
   return attributes;
 }

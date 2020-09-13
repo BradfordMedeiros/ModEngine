@@ -761,14 +761,14 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
-void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
+void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
   traverseScene(scene, initialModel, scale, onObject, [&world, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
       Scene& linkScene = world.scenes.at(world.idToScene.at(id));
       traverseScene(world, linkScene, modelMatrix, scale, onObject);
   });
 }
 
-void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject){
+void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
   traverseScene(world, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
 }
 
@@ -781,7 +781,7 @@ Transformation fullTransformation(World& world, objid id){
   Transformation transformation = {};
   bool foundId = false;
   
-  traverseScene(world, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho) -> void {
+  traverseScene(world, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, std::string fragshader) -> void {
     if (traversedId == id){
       foundId = true;
       transformation = getTransformationFromMatrix(model);

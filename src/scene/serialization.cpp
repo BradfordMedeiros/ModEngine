@@ -228,6 +228,10 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).script = token.payload;
       continue;
     }
+    if (token.attribute == "fragshader"){
+      objects.at(token.target).fragshader = token.payload;
+      continue;
+    }
     if (token.attribute == "net" && token.payload == "sync"){
       objects.at(token.target).netsynchronize = true;
       continue;

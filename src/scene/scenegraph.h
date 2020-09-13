@@ -21,6 +21,7 @@ struct GameObject {
   std::string lookat;
   std::string layer;
   std::string script;
+  std::string fragshader;
   bool netsynchronize;
 };
 struct GameObjectH {
@@ -79,7 +80,7 @@ std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id);
 std::vector<objid> listObjInScene(Scene& scene);
 
 // @TODO code these functions
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 
