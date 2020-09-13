@@ -125,7 +125,7 @@ void sendLoadScene(short id){
   sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
 }
 
-short getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
+std::optional<objid> getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByName(world, name);
 }
 

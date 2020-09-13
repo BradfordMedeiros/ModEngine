@@ -76,7 +76,7 @@ void sendLoadScene(short sceneId);
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
-short getGameObjectByName(std::string name);
+std::optional<objid> getGameObjectByName(std::string name);
 std::vector<short> getObjectsByType(std::string type);
 std::string getGameObjectName(short index);
 std::map<std::string, std::string> getGameObjectAttr(short id);

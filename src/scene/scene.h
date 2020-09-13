@@ -75,7 +75,7 @@ void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhy
 objid getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, objid id);
 
-objid getGameObjectByName(World& world, std::string name);
+std::optional<objid> getGameObjectByName(World& world, std::string name);
 GameObject& getGameObject(World& world, std::string name);
 GameObject& getGameObject(World& world, objid id);
 Transformation fullTransformation(World& world, objid id);

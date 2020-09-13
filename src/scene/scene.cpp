@@ -23,7 +23,7 @@ GameObject& getGameObject(World& world, std::string name){
   std::cout << "gameobject : " << name << " does not exist" << std::endl;
   assert(false);
 }
-objid getGameObjectByName(World& world, std::string name){
+std::optional<objid> getGameObjectByName(World& world, std::string name){
   return getGameObject(world, name).id;
 }
 
@@ -721,7 +721,8 @@ void updateEntities(World& world){
         world.rails, 
         [&world](std::string value) -> glm::vec3 { 
           auto objectId = getGameObjectByName(world, value);
-          return getGameObject(world, objectId).transformation.position;
+          assert(objectId.has_value());
+          return getGameObject(world, objectId.value()).transformation.position;
         }, 
         activeRail.rail, 
         entityPosition, 

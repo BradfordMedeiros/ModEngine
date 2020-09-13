@@ -378,13 +378,13 @@ SCM getGameObjectId(SCM value){
   return scm_from_short(getGameobjId(value));
 }
 
-short (*getGameObjName)(std::string name);
+std::optional<objid> (*_getGameObjectByName)(std::string name);
 SCM getGameObjByName(SCM value){
-  short id = getGameObjName(scm_to_locale_string(value));
-  if (id == -1){
+  auto id = _getGameObjectByName(scm_to_locale_string(value));
+  if (!id.has_value()){
     return scm_from_bool(false);
   }
-  return createGameObject(id);
+  return createGameObject(id.value());
 }
 
 std::vector<std::string> (*_listClips)();
@@ -832,7 +832,7 @@ void createStaticSchemeBindings(
   void (*setGameObjectRot)(short index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
-  short (*getGameObjectByName)(std::string name),
+  std::optional<objid> (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(short index, glm::vec3 impulse),
   void (*applyImpulseRel)(short index, glm::vec3 impulse),
@@ -905,7 +905,7 @@ void createStaticSchemeBindings(
   _clearImpulse = clearImpulse;
 
 
-  getGameObjName = getGameObjectByName;
+  _getGameObjectByName = getGameObjectByName;
   _listAnimations = listAnimations;
   _playAnimation = playAnimation;
   _listClips = listClips;
