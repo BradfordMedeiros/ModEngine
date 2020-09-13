@@ -62,6 +62,8 @@ GameObject defaultCamera = GameObject {
 };
 
 bool showDebugInfo = false;
+std::string shaderFolderPath;
+
 bool disableInput = false;
 int numChunkingGridCells = 0;
 float chunkSize = 100;
@@ -373,6 +375,22 @@ void displayRails(std::map<short, RailConnection> railPairs){
   }
 }
 
+std::map<std::string, GLint> shaderNameToId;
+GLint useShaderByName(std::string fragShaderName, GLint shaderProgram){
+  std::cout << "shader is: " << fragShaderName << std::endl;
+  if (fragShaderName == ""){
+    glUseProgram(shaderProgram);
+    return shaderProgram;
+  }
+  if (shaderNameToId.find(fragShaderName) == shaderNameToId.end()){
+    auto shaderId = loadShader(shaderFolderPath + "/vertex.glsl", fragShaderName);
+    shaderNameToId[fragShaderName] = shaderId;   
+  }
+  auto shaderId = shaderNameToId.at(fragShaderName);
+  glUseProgram(shaderId);
+  return shaderId;
+}
+
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals){
   if (scene.isNested){
     return;
@@ -401,7 +419,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
   clearTraversalPositions();
   traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portals](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
-    std::cout << "shader is: " << shader << std::endl;
+    //GLint shaderProgram = useShaderByName(shader, shaderProgram);
     if (orthographic){
      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
     }else{
@@ -697,7 +715,7 @@ int main(int argc, char* argv[]){
   bool enablePhysics = result["physics"].as<bool>();
   bootStrapperMode = result["bootstrapper"].as<bool>();
 
-  const std::string shaderFolderPath = result["shader"].as<std::string>();
+  shaderFolderPath = result["shader"].as<std::string>();
   textureFolderPath = result["texture"].as<std::string>();
   const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
   const std::string uiShaderPath = result["uishader"].as<std::string>();
