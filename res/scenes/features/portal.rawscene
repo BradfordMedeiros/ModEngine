@@ -1,13 +1,17 @@
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
-platform:position:0 -5 0
+platform:position:0 -10 0
+platform:rotation:0.2 0 0
 
->maincamera:position:0 0 30
+>maincamera:position:0 30 30
 
 @mainportal:position:0 2 0
 @mainportal:camera:>maincamera
 @mainportal:scale:10 10 4
 @mainportal:perspective:true
+@mainportal:physics_collision:nocollide
+
+
 lmainframeleft:mesh:./res/models/box/box.obj
 lmainframeleft:scale:1 10 1
 lmainframeleft:position:-10 0 0
@@ -18,4 +22,22 @@ lmainframetop:position:0 10 0
 lmainframetop:scale:12 2 2
 lmainframetop:mesh:./res/models/box/box.obj
 
+>box:mesh:./res/models/box/box.obj
+>box:position:0 5 20
+>box:physics_type:dynamic
+#>box:physics_shape:shape_sphere
+
+#@2mainportal:position:40 2 0
+#@2mainportal:camera:>maincamera
+#@2mainportal:scale:10 10 4
+#@2mainportal:perspective:true
+#2lmainframeleft:mesh:./res/models/box/box.obj
+#2lmainframeleft:scale:1 10 1
+#2lmainframeleft:position:30 0 0
+#2lmainframeright:mesh:./res/models/box/box.obj
+#2lmainframeright:scale:1 10 1
+#2lmainframeright:position:50 0 0
+#2lmainframetop:position:40 10 0
+#2lmainframetop:scale:12 2 2
+#2lmainframetop:mesh:./res/models/box/box.obj
 

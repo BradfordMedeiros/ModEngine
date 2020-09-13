@@ -2,11 +2,16 @@
 
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
-platform:position:0 -1 0
+platform:position:0 -5 0
 
 !flashlight:position:0 -2 0 
+!flashlight:maxangle:30
 
 flashbox:mesh:./res/models/box/box.obj
 flashbox:child:!flashlight
 flashbox:scale:0.5 2 0.5
 flashbox:position:0 5 0
+
+flashbox:physics_type:dynamic
+flashbox:physics:enabled
+flashbox:shader:./res/
