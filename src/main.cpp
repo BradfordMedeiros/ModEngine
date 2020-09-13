@@ -376,67 +376,67 @@ void displayRails(std::map<short, RailConnection> railPairs){
 }
 
 std::map<std::string, GLint> shaderNameToId;
-GLint useShaderByName(std::string fragShaderName, GLint shaderProgram){
-  std::cout << "shader is: " << fragShaderName << std::endl;
+GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
   if (fragShaderName == ""){
-    glUseProgram(shaderProgram);
     return shaderProgram;
   }
   if (shaderNameToId.find(fragShaderName) == shaderNameToId.end()){
     auto shaderId = loadShader(shaderFolderPath + "/vertex.glsl", fragShaderName);
     shaderNameToId[fragShaderName] = shaderId;   
   }
-  auto shaderId = shaderNameToId.at(fragShaderName);
-  glUseProgram(shaderId);
-  return shaderId;
+  return shaderNameToId.at(fragShaderName);
 }
+void setShaderData(GLint shader, glm::mat4 projection, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color){
+  glUseProgram(shader);
+  glUniform1i(glGetUniformLocation(shader, "maintexture"), 0);        
+  glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
+  glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
+  glActiveTexture(GL_TEXTURE0); 
+
+  glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+  glUniformMatrix4fv(glGetUniformLocation(shader, "view"),  1, GL_FALSE, glm::value_ptr(view));
+  glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, glm::value_ptr(defaultCamera.transformation.position));
+  glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
+  glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
+
+  glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
+  for (int i = 0; i < lights.size(); i++){
+    glm::vec3 position = lights.at(i).pos;
+    glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
+    glUniform3fv(glGetUniformLocation(shader, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
+    glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
+  }
+  if (orthographic){
+    glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
+  }else{
+    glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
+  }
+  glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
+}
+
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, bool useSelectionColor, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals){
   if (scene.isNested){
     return;
   }
   glUseProgram(shaderProgram);
-  
-  glUniform1i(glGetUniformLocation(shaderProgram, "maintexture"), 0);        
-  glUniform1i(glGetUniformLocation(shaderProgram, "emissionTexture"), 1);
-  glUniform1i(glGetUniformLocation(shaderProgram, "opacityTexture"), 2);
-
-  glActiveTexture(GL_TEXTURE0); 
-
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, glm::value_ptr(defaultCamera.transformation.position));
-  glUniform1i(glGetUniformLocation(shaderProgram, "enableDiffuse"), state.enableDiffuse);
-  glUniform1i(glGetUniformLocation(shaderProgram, "enableSpecular"), state.enableSpecular);
-
-  glUniform1i(glGetUniformLocation(shaderProgram, "numlights"), lights.size());
-  for (int i = 0; i < lights.size(); i++){
-    glm::vec3 position = lights.at(i).pos;
-    glUniform3fv(glGetUniformLocation(shaderProgram, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
-    glUniform3fv(glGetUniformLocation(shaderProgram, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
-    glUniform3fv(glGetUniformLocation(shaderProgram, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
-  }
 
   clearTraversalPositions();
-  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, &portals](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
-    //GLint shaderProgram = useShaderByName(shader, shaderProgram);
-    if (orthographic){
-     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
-    }else{
-     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-    }
-
+  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, view, &portals, &lights](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
     }
     
     bool objectSelected = idInGroup(world, id, state.selectedIndex);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(getColorFromGameobject(id, useSelectionColor, objectSelected)));
+
+    auto newShader = getShaderByName(shader, shaderProgram);
+    std::cout << "Using shader id: " << newShader << " (" << shader << ")" <<  (newShader == shaderProgram ? "- default shader" : "") << std::endl;
+    setShaderData(newShader, projection, view, lights, orthographic, getColorFromGameobject(id, useSelectionColor, objectSelected));
 
     if (state.visualizeNormals){
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      drawMesh(world.meshes.at("./res/models/cone/cone.obj"), shaderProgram); 
+      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+      drawMesh(world.meshes.at("./res/models/cone/cone.obj"), newShader); 
     }
 
     // bounding code //////////////////////
@@ -445,17 +445,17 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
       auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
+      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(getMatrixForBoundRatio(bounding, modelMatrix)));
 
       if (objectSelected){
-        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), shaderProgram);
+        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), newShader);
       }
     }
     /////////////////////////////// end bounding code
 
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), state.discardAmount);
+    glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), state.discardAmount);
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
@@ -473,7 +473,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     glStencilMask(isPortal ? 0xFF : 0x00);
 
     renderObject(
-      shaderProgram, 
+      newShader, 
       id, 
       world.objectMapping, 
       world.meshes.at("./res/models/box/plane.dae"),
@@ -494,7 +494,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glEnable(GL_DEPTH_TEST);
-      glUseProgram(shaderProgram); 
+      glUseProgram(newShader); 
     }
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glClear(GL_STENCIL_BUFFER_BIT);

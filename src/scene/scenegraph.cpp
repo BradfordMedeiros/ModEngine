@@ -140,7 +140,8 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     objid id = getNewObjectId();
     nodeIdToRealId[nodeId] = id;
 
-    auto layer = scene.idToGameObjects.at(rootId).layer;
+    auto rootObj = scene.idToGameObjects.at(rootId);
+  
     SerializationObject obj {
       .name = names.at(nodeId),  // @TODO this is probably not unique name so probably will be bad
       .position = transform.position,
@@ -149,9 +150,9 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .physics = defaultPhysicsOpts(),
       .type = "default",
       .lookat = "",
-      .layer = layer,
+      .layer = rootObj.layer,
       .script = "",
-      .fragshader = "",
+      .fragshader = rootObj.fragshader,
       .netsynchronize = false,
       .additionalFields = additionalFields.at(nodeId)
     };
