@@ -1,0 +1,15 @@
+
+# Demonstrates object with custom shader
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+normalbox:mesh:./res/models/box/box.obj
+normalbox:scale:2 2 2
+normalbox:position:-5 -2 -20
+
+custombox:mesh:./res/models/box/box.obj
+custombox:scale:2 2 2
+custombox:position:5 -2 -20
+custombox:fragshader:./res/shaders/discard_lowintensity/fragment.glsl
