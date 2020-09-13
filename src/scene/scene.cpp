@@ -24,7 +24,14 @@ GameObject& getGameObject(World& world, std::string name){
   assert(false);
 }
 std::optional<objid> getGameObjectByName(World& world, std::string name){
-  return getGameObject(world, name).id;
+  for (auto [sceneId, _] : world.scenes){
+    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
+      if (gameObj.name == name){
+        return id;
+      }
+    }
+  }
+  return std::nullopt;
 }
 
 bool idInGroup(World& world, objid id, objid groupId){

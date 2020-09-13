@@ -431,7 +431,6 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     bool objectSelected = idInGroup(world, id, state.selectedIndex);
 
     auto newShader = getShaderByName(shader, shaderProgram);
-    std::cout << "Using shader id: " << newShader << " (" << shader << ")" <<  (newShader == shaderProgram ? "- default shader" : "") << std::endl;
     setShaderData(newShader, projection, view, lights, orthographic, getColorFromGameobject(id, useSelectionColor, objectSelected));
 
     if (state.visualizeNormals){
