@@ -130,7 +130,6 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
 
 
   auto numElements = toUnsignedInt(scm_length(scmAttributes));
-  std::cout << "scm, num elements: " << numElements << std::endl;
   for (int i = 0; i < numElements; i++){
     auto propertyPair = scm_list_ref(scmAttributes, scm_from_unsigned_integer(i));
     auto pairLength = toUnsignedInt(scm_length(propertyPair));

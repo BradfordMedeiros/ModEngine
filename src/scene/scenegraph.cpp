@@ -281,7 +281,7 @@ SerializationObject serialObjectFromFields(
   SerializationObject serialObj {
     .name = name,
     .position = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
-    .scale = vecAttributes.find("scale") != vecAttributes.end() ? vecAttributes.at("scale") : glm::vec3(0.f, 0.f, 0.f),
+    .scale = vecAttributes.find("scale") != vecAttributes.end() ? vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
     .rotation =  glm::identity<glm::quat>(),
     .physics = defaultPhysicsOpts(),
     .type = getType(name, fields),
