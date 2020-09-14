@@ -256,6 +256,9 @@ std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<st
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
   std::string sceneData = "# Generated scene \n";
   for (auto [id, _]: scene.idToGameObjectsH){
+    if (id == scene.rootId){
+      continue;
+    }
     sceneData = sceneData + serializeObject(scene, getAdditionalFields, includeIds, id);
   }
   return sceneData;

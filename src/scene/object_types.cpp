@@ -453,6 +453,11 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     return serializeRail(*railObject);
   }
 
+  auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
+  if (rootObject != NULL){
+    return {};
+  }
+
   assert(false);  
   return {};
 }

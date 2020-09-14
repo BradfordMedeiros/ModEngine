@@ -92,7 +92,7 @@ void unloadAllScenes(){
 
 // @TODO - save all the scenes in the world
 void saveScene(bool includeIds){
-  auto id = 0;
+  auto id = world.scenes.begin() -> first;
   auto fileToSave = rawSceneFile;
   std::cout << "saving scene id: " << id << " to file: " << fileToSave << std::endl;
   saveFile(fileToSave, serializeScene(world, id, includeIds));
