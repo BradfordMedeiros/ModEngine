@@ -7,6 +7,7 @@
 #include "./physics.h"
 #include "./object_types.h"
 #include "./rails.h"
+#include "./emitter.h"
 #include "./scene_debug.h"
 #include "./common/mesh.h"
 #include "../translations.h"
@@ -23,6 +24,7 @@ struct World {
   std::map<objid, objid> idToScene;
   std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
   RailSystem rails;
+  EmitterSystem emitters;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;

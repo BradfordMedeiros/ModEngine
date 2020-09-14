@@ -259,12 +259,14 @@ World createWorld(
 ){
   auto objectMapping = getObjectMapping();
   RailSystem rails;
+  EmitterSystem emitters;
   std::set<objid> entitiesToUpdate;
 
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
     .rails = rails,
+    .emitters = emitters,
     .onObjectUpdate = onObjectUpdate,
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
@@ -403,6 +405,10 @@ void addObjectToWorld(
         auto rootId = world.scenes.at(childSceneId).rootId;
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
+      },
+      [&world](void) -> void {
+        std::cout << "placeholder add emitter stuff here " << std::endl;
+        addEmitter(world.emitters, "placeholder-name", 0);  
       }
     );
 }

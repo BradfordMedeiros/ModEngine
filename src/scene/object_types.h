@@ -70,7 +70,9 @@ struct GameObjectScene {
 
 struct GameObjectRoot {};
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectPortal, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene, GameObjectRoot > GameObjectObj;
+struct GameObjectEmitter{};
+
+typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectPortal, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene, GameObjectRoot, GameObjectEmitter> GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
@@ -130,7 +132,12 @@ static Field rootField {
   .type = "root",
 };
 
-static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField };
+static Field emitterField {
+  .prefix = '+',
+  .type = "emitter",
+};
+
+static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
@@ -145,7 +152,8 @@ void addObject(
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> onRail,
-  std::function<void(std::string)> loadScene
+  std::function<void(std::string)> loadScene,
+  std::function<void(void)> addEmitter
 );
 
 void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail, std::function<void(std::string)> unbindCamera);

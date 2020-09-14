@@ -129,6 +129,12 @@ GameObjectScene createScene(objid id, std::map<std::string, std::string> additio
   return obj;
 }
 
+GameObjectEmitter createEmitter(std::function<void(void)> addEmitter){
+  GameObjectEmitter obj {};
+  addEmitter();
+  return obj;
+}
+
 void addObject(
   objid id, 
   std::string objectType, 
@@ -141,7 +147,8 @@ void addObject(
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
-  std::function<void(std::string)> loadScene
+  std::function<void(std::string)> loadScene,
+  std::function<void(void)> addEmitter
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
@@ -163,6 +170,8 @@ void addObject(
     mapping[id] = createScene(id, additionalFields, loadScene);
   }else if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
+  }else if (objectType == "emitter"){
+    mapping[id] = createEmitter(addEmitter);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -290,6 +299,13 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);
   }
+
+  auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
+  if (emitterObj != NULL && showDebug){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    drawMesh(nodeMesh, shaderProgram);   
+  }
 }
 
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
@@ -319,6 +335,7 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
     // not yet implemented
+    assert(false);
     return attributes;
   }
 
@@ -334,8 +351,16 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
     attributes["to"] = channelObj -> to;
     return attributes;
   }
+
+  auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
+  if (emitterObj != NULL){
+    assert(false);
+    return attributes;
+  }
+
   return attributes;
 }
+
 void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std::map<std::string, std::string> attributes){
  GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -362,7 +387,7 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std:
     lightObj -> color = parseVec(attributes.at("color"));
     return;
   }
-
+  assert(false);
 }
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
@@ -455,6 +480,11 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 
   auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
   if (rootObject != NULL){
+    return {};
+  }
+
+  auto emitterObj = std::get_if<GameObjectEmitter>(&objectToSerialize);
+  if (emitterObj != NULL){
     return {};
   }
 
