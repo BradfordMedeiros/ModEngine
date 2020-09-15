@@ -53,10 +53,11 @@ bool emitterTimeExpired(Emitter& emitter, float currentTime){
 
 void updateEmitters(EmitterSystem& system, float currentTime){   
   std::vector<std::string> emitterToRemove;
-  for (auto emitter : system.emitters){
+  for (auto &emitter : system.emitters){
     if (emitterTimeExpired(emitter, currentTime)){
       std::cout << "INFO: emitter: removing particle from emitter: " << emitter.name << std::endl;
       emitter.currentParticles-= 1;
+      emitter.initTime = currentTime;
     }
   }
 

@@ -24,6 +24,10 @@ NetworkPacket toNetworkPacket(UdpPacket& packet){
   return netpacket;
 }
 
+float getTotalTime(){
+  return now - initialTime;
+}
+
 void setActiveCamera(short cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
@@ -71,7 +75,7 @@ void loadScriptFromWorld(std::string script, short id){
 }
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-  return addSceneToWorld(world, sceneFile, loadSoundState, loadScriptFromWorld);
+  return addSceneToWorld(world, sceneFile, loadSoundState, loadScriptFromWorld, getTotalTime);
 }
 short loadSceneObj(std::string sceneFile, short sceneId){
   std::cout << "INFO: SCENE LOADING: loading subscene" << sceneFile << std::endl;
@@ -79,7 +83,7 @@ short loadSceneObj(std::string sceneFile, short sceneId){
 
 short loadSceneData(std::string sceneData, objid sceneId){
   std::cout << "INFO: SCENE LOADING: loading from scene data" << std::endl;
-  return addSceneToWorldFromData(world, sceneId, sceneData, loadSoundState, loadScriptFromWorld);
+  return addSceneToWorldFromData(world, sceneId, sceneData, loadSoundState, loadScriptFromWorld, getTotalTime);
 }
 
 void unloadScene(short sceneId){  
@@ -185,11 +189,11 @@ void setSelectionMode(bool enabled){
 }
 
 short makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
-  return addObjectToScene(world, useSceneId ? sceneId : world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld);
+  return addObjectToScene(world, useSceneId ? sceneId : world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld, getTotalTime);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
   assert(world.scenes.size() > 0); 
-  return addObjectToScene(world, world.scenes.begin() -> first, name, stringAttributes, numAttributes, vecAttributes, loadSoundState, loadScriptFromWorld);
+  return addObjectToScene(world, world.scenes.begin() -> first, name, stringAttributes, numAttributes, vecAttributes, loadSoundState, loadScriptFromWorld, getTotalTime);
 }
 
 void removeObjectById(short id){

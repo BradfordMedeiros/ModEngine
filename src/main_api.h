@@ -50,6 +50,7 @@ struct UdpPacket {
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
+float getTotalTime();
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
