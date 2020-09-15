@@ -9,12 +9,14 @@ struct Emitter {
   float initTime;
   int targetParticles;
   int currentParticles;
+  std::function<void()> addParticle;
+  std::function<void()> rmParticle;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime);
+void addEmitter(EmitterSystem& system, std::string name, float currentTime, std::function<void()> addParticle, std::function<void()> rmParticle);
 void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(EmitterSystem& system, float currentTime);
 

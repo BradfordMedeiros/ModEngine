@@ -331,6 +331,13 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
   obj.transformation.rotation = orientation;
 }
 
+void addEmitterObject(std::string name){
+  std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
+}
+void rmEmitterObject(std::string name){
+  std::cout << "INFO: emitter: removing particle from emitter: " << name << std::endl;
+}
+
 void addObjectToWorld(
   World& world, 
   Scene& scene, 
@@ -409,7 +416,14 @@ void addObjectToWorld(
         world.scenes.at(childSceneId).isNested = true;
       },
       [&world, &getCurrentTime, name]() -> void {
-        addEmitter(world.emitters, name, getCurrentTime());  
+        addEmitter(world.emitters, name, getCurrentTime(), 
+          [name]() -> void {
+            addEmitterObject(name);
+          },
+          [name]() -> void {
+            rmEmitterObject(name);
+          }
+        );  
       }
     );
 }

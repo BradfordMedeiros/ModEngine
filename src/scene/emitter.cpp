@@ -1,12 +1,14 @@
 #include "./emitter.h"
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime){
+void addEmitter(EmitterSystem& system, std::string name, float currentTime, std::function<void()> addParticle, std::function<void()> rmParticle){
   std::cout << "INFO: emitter: adding emitter -  " << name << std::endl;
   Emitter emitter {
     .name = name,
     .initTime = currentTime,
     .targetParticles = 1,
     .currentParticles = 0,
+    .addParticle = addParticle,
+    .rmParticle = rmParticle,
   };
   system.emitters.push_back(emitter);
 }
@@ -55,16 +57,16 @@ void updateEmitters(EmitterSystem& system, float currentTime){
   std::vector<std::string> emitterToRemove;
   for (auto &emitter : system.emitters){
     if (emitterTimeExpired(emitter, currentTime)){
-      std::cout << "INFO: emitter: removing particle from emitter: " << emitter.name << std::endl;
       emitter.currentParticles-= 1;
       emitter.initTime = currentTime;
+      emitter.rmParticle();
     }
   }
 
   for (auto &emitter : system.emitters){
     if (emitter.currentParticles < emitter.targetParticles){
-      std::cout << "INFO: emitter: creating particle from emitter: " << emitter.name << std::endl;
       emitter.currentParticles+= 1;
+      emitter.addParticle();
     }
   }
 }
