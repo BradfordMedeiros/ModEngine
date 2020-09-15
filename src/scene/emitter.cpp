@@ -55,15 +55,9 @@ void updateEmitters(EmitterSystem& system, float currentTime){
   std::vector<std::string> emitterToRemove;
   for (auto emitter : system.emitters){
     if (emitterTimeExpired(emitter, currentTime)){
-      emitterToRemove.push_back(emitter.name);
+      std::cout << "INFO: emitter: removing particle from emitter: " << emitter.name << std::endl;
+      emitter.currentParticles-= 1;
     }
-  }
-
-  auto sortedEmitters = filterEmitters(system, emitterToRemove);
-  system.emitters = sortedEmitters.remainingEmitters;
-
-  for (auto &emitter : sortedEmitters.removedEmitters){
-    std::cout << "INFO: emitter:  removing emitter -  " << emitter.name << std::endl;
   }
 
   for (auto &emitter : system.emitters){
