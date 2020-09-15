@@ -407,7 +407,6 @@ void addObjectToWorld(
         world.scenes.at(childSceneId).isNested = true;
       },
       [&world](void) -> void {
-        std::cout << "placeholder add emitter stuff here " << std::endl;
         addEmitter(world.emitters, "placeholder-name", 0);  
       }
     );
@@ -758,6 +757,8 @@ void callbackEntities(World& world){
 }
 
 void onWorldFrame(World& world, float timestep, bool enablePhysics, bool dumpPhysics){
+  updateEmitters(world.emitters, 0);  // need to make 0 be total elapsed time   
+
   updateEntities(world);  
   if (enablePhysics){
     if (dumpPhysics){
