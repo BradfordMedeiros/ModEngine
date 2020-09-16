@@ -65,6 +65,7 @@ void applyImpulse(short index, glm::vec3 impulse);
 void applyImpulseRel(short index, glm::vec3 impulse);
 void clearImpulse(short index);
 
+void loadScriptFromWorld(std::string script, short id);
 short loadScene(std::string sceneFile);
 short loadSceneObj(std::string sceneFile, short sceneId);
 short loadSceneData(std::string sceneData, objid sceneId);

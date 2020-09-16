@@ -1000,7 +1000,12 @@ int main(int argc, char* argv[]){
     }
 
     processStateMachines();
-    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics); 
+    onWorldFrame(
+      world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, 
+      loadSoundState, loadScriptFromWorld, getTotalTime,
+      unloadSoundState, unloadScript
+    );
+
     maybeGetClientMessage(onClientMessage);
 
     UdpPacket udpPacket { };

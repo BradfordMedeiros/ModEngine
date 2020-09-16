@@ -1,14 +1,12 @@
 #include "./emitter.h"
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime, std::function<void()> addParticle, std::function<void()> rmParticle){
+void addEmitter(EmitterSystem& system, std::string name, float currentTime){
   std::cout << "INFO: emitter: adding emitter -  " << name << std::endl;
   Emitter emitter {
     .name = name,
     .initTime = currentTime,
-    .targetParticles = 1,
+    .targetParticles = 10,
     .currentParticles = 0,
-    .addParticle = addParticle,
-    .rmParticle = rmParticle,
   };
   system.emitters.push_back(emitter);
 }
@@ -50,23 +48,33 @@ void removeEmitter(EmitterSystem& system, std::string name){
 }
 
 bool emitterTimeExpired(Emitter& emitter, float currentTime){
-  return (currentTime - emitter.initTime) > 1;                  
+  return (currentTime - emitter.initTime) > 0.2;                  
 }
 
-void updateEmitters(EmitterSystem& system, float currentTime){   
+void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName)> addParticle, std::function<void(objid)> rmParticle){   
   std::vector<std::string> emitterToRemove;
   for (auto &emitter : system.emitters){
     if (emitterTimeExpired(emitter, currentTime)){
       emitter.currentParticles-= 1;
       emitter.initTime = currentTime;
-      emitter.rmParticle();
+
+      if (emitter.particles.size() > 0){
+        auto particleId = emitter.particles.front();
+        emitter.particles.pop();
+        rmParticle(particleId);
+        std::cout << "removing particle" << std::endl;
+      }
+
     }
   }
 
   for (auto &emitter : system.emitters){
     if (emitter.currentParticles < emitter.targetParticles){
-      emitter.currentParticles+= 1;
-      emitter.addParticle();
+      emitter.currentParticles+= 1; 
+      std::cout << "num particles: " << emitter.currentParticles << std::endl;
+      auto particleId = addParticle(emitter.name);
+      std::cout << "adding particle" << std::endl;
+      emitter.particles.push(particleId);
     }
   }
 }

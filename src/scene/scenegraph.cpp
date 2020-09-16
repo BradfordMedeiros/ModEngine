@@ -1,16 +1,25 @@
 #include "./scenegraph.h"
 
-physicsOpts defaultPhysicsOpts(){
+physicsOpts defaultPhysicsOpts(std::map<std::string, std::string> stringAttributes){
+  // TODO this should use a standardized way to parse these in common with serialization
   physicsOpts defaultOption = {
-    .enabled = false,
-    .isStatic = true,
-    .hasCollisions = false,
+    .enabled = stringAttributes.find("physics") == stringAttributes.end() ? false : (stringAttributes.at("physics") == "enabled"),
+    .isStatic = stringAttributes.find("physics_type") == stringAttributes.end() ? true : !(stringAttributes.at("physics_type") == "dynamic"),
+    .hasCollisions = true,
     .shape = BOX,
+    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
+    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
+    .gravity = glm::vec3(0.f, -9.81f, 0.f),
+    .friction = 1.0f,
+    .restitution = 0.f,
+    .mass = 1.f,
+    .maxspeed = -1.f,
   };
   return defaultOption;
 }
 
 GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize){
+  std::map<std::string, std::string> stringAttributes;
   GameObject gameObject = {
     .id = id,
     .name = name,
@@ -19,7 +28,7 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
       .scale = glm::vec3(1.0f, 1.0f, 1.0f),
       .rotation = glm::identity<glm::quat>(),
     },
-    .physicsOptions = defaultPhysicsOpts(),
+    .physicsOptions = defaultPhysicsOpts(stringAttributes),
     .lookat =  lookat,
     .layer = layer,
     .script = script,
@@ -142,12 +151,13 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
 
     auto rootObj = scene.idToGameObjects.at(rootId);
   
+    std::map<std::string, std::string> stringAttributes;
     SerializationObject obj {
       .name = names.at(nodeId),  // @TODO this is probably not unique name so probably will be bad
       .position = transform.position,
       .scale = transform.scale,
       .rotation = transform.rotation,
-      .physics = defaultPhysicsOpts(),
+      .physics = defaultPhysicsOpts(stringAttributes),
       .type = "default",
       .lookat = "",
       .layer = rootObj.layer,
@@ -286,7 +296,7 @@ SerializationObject serialObjectFromFields(
     .position = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
     .scale = vecAttributes.find("scale") != vecAttributes.end() ? vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
     .rotation =  glm::identity<glm::quat>(),
-    .physics = defaultPhysicsOpts(),
+    .physics = defaultPhysicsOpts(stringAttributes),
     .type = getType(name, fields),
     .lookat = attributeOrEmpty(stringAttributes,"lookat"),
     .layer =  layer,
