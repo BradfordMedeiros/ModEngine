@@ -76,7 +76,8 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   std::function<objid()> getNewObjectId
 );
 
-std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id);
+std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
+void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
 std::vector<objid> listObjInScene(Scene& scene);
 
 // @TODO code these functions

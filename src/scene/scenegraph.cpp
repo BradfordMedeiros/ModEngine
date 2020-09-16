@@ -351,14 +351,15 @@ std::vector<objid> getChildrenIdsAndParent(Scene& scene, objid id){
   return objectIds;
 }
 
-std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id){  // it might make sense to check if any layers here are not present and then 
+std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid id){
   assert(scene.idToGameObjects.find(id) != scene.idToGameObjects.end());
-  
   std::vector<objid> removedIds;
   auto objects = getChildrenIdsAndParent(scene, id);
-
   assert(id != scene.rootId);
+ return objects;
+}
 
+void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects){  // it might make sense to check if any layers here are not present and then 
   for (auto id : objects){
     std::string objectName = scene.idToGameObjects.at(id).name;
     scene.idToGameObjects.erase(id);
@@ -367,9 +368,7 @@ std::vector<objid> removeObjectFromScenegraph(Scene& scene, objid id){  // it mi
     for (auto &[_, objh] : scene.idToGameObjectsH){
       objh.children.erase(id);
     }
-    removedIds.push_back(id);
   }
-  return removedIds;
 }
 
 std::vector<objid> listObjInScene(Scene& scene){

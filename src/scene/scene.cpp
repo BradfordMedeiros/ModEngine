@@ -501,7 +501,7 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadClip, loadScript, getCurrentTime);
 }
 
-void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript){
+void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript, std::string scriptName, bool netsynchronized){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId);
     assert(rigidBody != NULL);
@@ -509,9 +509,6 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
     world.rigidbodys.erase(objectId);
   }
 
-  auto gameobj = getGameObject(world, objectId);
-  auto scriptName = gameobj.script;
-  auto netsynchronized = gameobj.netsynchronize;
   if (scriptName != ""){
     unloadScript(scriptName, objectId);
   }
@@ -537,10 +534,15 @@ void removeObjectFromScene(World& world, objid objectId, std::function<void(std:
     if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
       continue;
     }
-    auto removedObjects = removeObjectFromScenegraph(scene, gameobjId);  
-    for (auto id : removedObjects){
-      removeObjectById(world, id, unloadClip, unloadScript);
+
+    auto idsToRemove = idsToRemoveFromScenegraph(scene, gameobjId);
+    for (auto id : idsToRemove){
+      auto gameobj = getGameObject(world, id);
+      auto scriptName = gameobj.script;
+      auto netsynchronized = gameobj.netsynchronize;
+      removeObjectById(world, id, unloadClip, unloadScript, scriptName, netsynchronized);
     }
+    removeObjectsFromScenegraph(scene, idsToRemove);  
   }
 }
 
@@ -553,7 +555,10 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
 
   Scene& scene = world.scenes.at(sceneId);
   for (auto objectId : listObjInScene(scene)){
-    removeObjectById(world, objectId, unloadClip, unloadScript);
+    auto gameobj = getGameObject(world, objectId);
+    auto scriptName = gameobj.script;
+    auto netsynchronized = gameobj.netsynchronize;
+    removeObjectById(world, objectId, unloadClip, unloadScript, scriptName, netsynchronized);
   }
   world.scenes.erase(sceneId);
 }
@@ -789,7 +794,7 @@ void onWorldFrame(
     }, 
     [&world, unloadClip, unloadScript](objid id) -> void { 
       std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
-      
+      removeObjectFromScene(world, id, unloadClip, unloadScript);
     }
   );  // need to make 0 be total elapsed time   
 

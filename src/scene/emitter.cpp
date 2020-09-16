@@ -48,7 +48,7 @@ void removeEmitter(EmitterSystem& system, std::string name){
 }
 
 bool emitterTimeExpired(Emitter& emitter, float currentTime){
-  return (currentTime - emitter.initTime) > 0.2;                  
+  return (currentTime - emitter.initTime) > 1;                  
 }
 
 void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName)> addParticle, std::function<void(objid)> rmParticle){   
