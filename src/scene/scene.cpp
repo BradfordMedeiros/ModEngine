@@ -412,8 +412,8 @@ void addObjectToWorld(
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
       },
-      [&world, &getCurrentTime, name, &getId, &loadClip, &loadScript](float spawnrate, float lifetime) -> void {
-        addEmitter(world.emitters, name, getCurrentTime(), 20, spawnrate, lifetime);
+      [&world, &getCurrentTime, name, &getId, &loadClip, &loadScript](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
+        addEmitter(world.emitters, name, getCurrentTime(), limit, spawnrate, lifetime, particleFields);
       }
     );
 }
@@ -777,23 +777,17 @@ void onWorldFrame(
   updateEmitters(
     world.emitters, 
     timeElapsed, 
-    [&world, loadClip, loadScript, getCurrentTime](std::string name) -> objid {      
+    [&world, loadClip, loadScript, getCurrentTime](std::string name, std::map<std::string, std::string> particleFields) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       auto id = getGameObject(world, name).id;
       auto sceneId = world.idToScene.at(id);
 
-      std::map<std::string, std::string> stringAttributes;
       std::map<std::string, double> numAttributes;
       std::map<std::string, glm::vec3> vecAttributes;
-
-      stringAttributes["mesh"] = "./res/models/box/box.obj";
-      stringAttributes["physics_type"] = "dynamic";
-      stringAttributes["physics"] = "enabled";
       vecAttributes["scale"] = glm::vec3(0.1f, 0.1f, 0.1f);
 
-
       // TODO need to parent this:
-      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), stringAttributes, numAttributes, vecAttributes, loadClip, loadScript, getCurrentTime);
+      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), particleFields, numAttributes, vecAttributes, loadClip, loadScript, getCurrentTime);
       return objectAdded;
     }, 
     [&world, unloadClip, unloadScript](objid id) -> void { 

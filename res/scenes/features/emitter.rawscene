@@ -3,3 +3,10 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 
 +particles:position:0 2 0
++particles:limit:3
++particles:rate:1
++particles:duration:2
+
++particles:+mesh:./res/models/electricbox/electricbox.obj
+
+

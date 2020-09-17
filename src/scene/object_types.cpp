@@ -129,11 +129,19 @@ GameObjectScene createScene(objid id, std::map<std::string, std::string> additio
   return obj;
 }
 
-GameObjectEmitter createEmitter(std::function<void(float, float)> addEmitter, std::map<std::string, std::string> additionalFields){
+std::map<std::string, std::string> particleFields(std::map<std::string, std::string> additionalFields){
+  std::map<std::string, std::string> particleFields;
+  return particleFields;
+}
+
+GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter, std::map<std::string, std::string> additionalFields){
   GameObjectEmitter obj {};
   float spawnrate = additionalFields.find("rate") != additionalFields.end() ? std::atof(additionalFields.at("rate").c_str()) : 1.f;
   float lifetime = additionalFields.find("duration") != additionalFields.end() ? std::atof(additionalFields.at("duration").c_str()) : 10.f;
-  addEmitter(spawnrate, lifetime);
+  int limit = additionalFields.find("limit") != additionalFields.end() ? std::atoi(additionalFields.at("limit").c_str()) : 10;
+  assert(limit >= 0);
+
+  addEmitter(spawnrate, lifetime, limit, particleFields(additionalFields));
   return obj;
 }
 
@@ -150,7 +158,7 @@ void addObject(
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float)> addEmitter
+  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);

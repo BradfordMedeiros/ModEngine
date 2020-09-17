@@ -153,7 +153,7 @@ void addObject(
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> onRail,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float)> addEmitter
+  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter
 );
 
 void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail, std::function<void(std::string)> unbindCamera);
