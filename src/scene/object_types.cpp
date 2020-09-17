@@ -131,9 +131,12 @@ GameObjectScene createScene(objid id, std::map<std::string, std::string> additio
 
 std::map<std::string, std::string> particleFields(std::map<std::string, std::string> additionalFields){
   std::map<std::string, std::string> particleAttributes;
-  particleAttributes["mesh"] = "./res/models/electricbox/electricbox.obj";
-  particleAttributes["physics_type"] = "dynamic";
-  particleAttributes["physics"] = "enabled";
+  for (auto [key, value] : additionalFields){
+    if (key.at(0) == '+' && key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      particleAttributes[newKey] = value;
+    }
+  }
   return particleAttributes;
 }
 
