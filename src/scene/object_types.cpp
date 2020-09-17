@@ -130,8 +130,11 @@ GameObjectScene createScene(objid id, std::map<std::string, std::string> additio
 }
 
 std::map<std::string, std::string> particleFields(std::map<std::string, std::string> additionalFields){
-  std::map<std::string, std::string> particleFields;
-  return particleFields;
+  std::map<std::string, std::string> particleAttributes;
+  particleAttributes["mesh"] = "./res/models/electricbox/electricbox.obj";
+  particleAttributes["physics_type"] = "dynamic";
+  particleAttributes["physics"] = "enabled";
+  return particleAttributes;
 }
 
 GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter, std::map<std::string, std::string> additionalFields){

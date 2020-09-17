@@ -10,6 +10,7 @@ void addEmitter(EmitterSystem& system, std::string name, float currentTime, unsi
     .currentParticles = 0,
     .spawnrate = spawnrate,
     .lifetime = lifetime,
+    .particleAttributes = particleAttributes,
   };
   system.emitters.push_back(emitter);
 }
@@ -58,13 +59,6 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
 }
 
 void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes)> addParticle, std::function<void(objid)> rmParticle){   
- // get from template in the emitter
-  std::map<std::string, std::string> particleAttributes;
-  particleAttributes["mesh"] = "./res/models/electricbox/electricbox.obj";
-  particleAttributes["physics_type"] = "dynamic";
-  particleAttributes["physics"] = "enabled";
-  //
-
   std::vector<std::string> emitterToRemove;
   for (auto &emitter : system.emitters){
     if (emitterTimeExpired(emitter, currentTime)){
@@ -84,7 +78,7 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
   for (auto &emitter : system.emitters){
     if (shouldSpawnParticle(emitter, currentTime)){
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, particleAttributes);
+      auto particleId = addParticle(emitter.name, emitter.particleAttributes);
       emitter.particles.push(particleId);
       emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
       std::cout << "adding particle" << std::endl;

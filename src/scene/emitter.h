@@ -14,6 +14,7 @@ struct Emitter {
   std::queue<objid> particles;
   float spawnrate;
   float lifetime;
+  std::map<std::string, std::string> particleAttributes;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
