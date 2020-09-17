@@ -347,7 +347,11 @@ void addObjectToWorld(
     auto additionalFields = serialObj.additionalFields;
     auto name = serialObj.name;
 
-    assert(world.idToScene.find(id) == world.idToScene.end());
+    if (world.idToScene.find(id) != world.idToScene.end()){
+      std::cout << "id already in the scene: " << id << std::endl;
+      assert(false);
+    }
+
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
@@ -408,8 +412,8 @@ void addObjectToWorld(
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
       },
-      [&world, &getCurrentTime, name, &getId, &loadClip, &loadScript]() -> void {
-        addEmitter(world.emitters, name, getCurrentTime());
+      [&world, &getCurrentTime, name, &getId, &loadClip, &loadScript](float spawnrate, float lifetime) -> void {
+        addEmitter(world.emitters, name, getCurrentTime(), 20, spawnrate, lifetime);
       }
     );
 }

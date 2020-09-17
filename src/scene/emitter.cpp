@@ -1,12 +1,15 @@
 #include "./emitter.h"
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime){
+void addEmitter(EmitterSystem& system, std::string name, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime){
   std::cout << "INFO: emitter: adding emitter -  " << name << std::endl;
   Emitter emitter {
     .name = name,
     .initTime = currentTime,
-    .targetParticles = 10,
+    .lastSpawnTime = currentTime,
+    .targetParticles = targetParticles,
     .currentParticles = 0,
+    .spawnrate = spawnrate,
+    .lifetime = lifetime,
   };
   system.emitters.push_back(emitter);
 }
@@ -48,7 +51,10 @@ void removeEmitter(EmitterSystem& system, std::string name){
 }
 
 bool emitterTimeExpired(Emitter& emitter, float currentTime){
-  return (currentTime - emitter.initTime) > 1;                  
+  return (currentTime - emitter.lastSpawnTime) > emitter.lifetime;                  
+}
+bool shouldSpawnParticle(Emitter& emitter, float currentTime){
+  return (emitter.currentParticles < emitter.targetParticles) && ((currentTime - emitter.lastSpawnTime) > emitter.spawnrate) ;
 }
 
 void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName)> addParticle, std::function<void(objid)> rmParticle){   
@@ -69,12 +75,12 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
   }
 
   for (auto &emitter : system.emitters){
-    if (emitter.currentParticles < emitter.targetParticles){
+    if (shouldSpawnParticle(emitter, currentTime)){
       emitter.currentParticles+= 1; 
-      std::cout << "num particles: " << emitter.currentParticles << std::endl;
       auto particleId = addParticle(emitter.name);
-      std::cout << "adding particle" << std::endl;
       emitter.particles.push(particleId);
+      emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
+      std::cout << "adding particle" << std::endl;
     }
   }
 }

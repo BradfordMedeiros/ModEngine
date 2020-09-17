@@ -8,15 +8,18 @@
 struct Emitter {
   std::string name;
   float initTime;
-  int targetParticles;
-  int currentParticles;
+  float lastSpawnTime;
+  unsigned int targetParticles;
+  unsigned int currentParticles;
   std::queue<objid> particles;
+  float spawnrate;
+  float lifetime;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime);
+void addEmitter(EmitterSystem& system, std::string name, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime);
 void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName)> addParticle, std::function<void(objid)> rmParticle);
 

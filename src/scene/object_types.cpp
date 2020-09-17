@@ -129,9 +129,11 @@ GameObjectScene createScene(objid id, std::map<std::string, std::string> additio
   return obj;
 }
 
-GameObjectEmitter createEmitter(std::function<void(void)> addEmitter){
+GameObjectEmitter createEmitter(std::function<void(float, float)> addEmitter, std::map<std::string, std::string> additionalFields){
   GameObjectEmitter obj {};
-  addEmitter();
+  float spawnrate = additionalFields.find("rate") != additionalFields.end() ? std::atof(additionalFields.at("rate").c_str()) : 1.f;
+  float lifetime = additionalFields.find("duration") != additionalFields.end() ? std::atof(additionalFields.at("duration").c_str()) : 10.f;
+  addEmitter(spawnrate, lifetime);
   return obj;
 }
 
@@ -148,7 +150,7 @@ void addObject(
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
   std::function<void(std::string)> loadScene,
-  std::function<void(void)> addEmitter
+  std::function<void(float, float)> addEmitter
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
@@ -171,7 +173,7 @@ void addObject(
   }else if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
-    mapping[id] = createEmitter(addEmitter);
+    mapping[id] = createEmitter(addEmitter, additionalFields);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
