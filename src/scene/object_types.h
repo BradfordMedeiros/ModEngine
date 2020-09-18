@@ -156,7 +156,15 @@ void addObject(
   std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter
 );
 
-void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail, std::function<void(std::string)> unbindCamera);
+void removeObject(
+  std::map<objid, GameObjectObj>& mapping, 
+  objid id, 
+  std::function<void(std::string)> unloadClip, 
+  std::function<void()> removeRail, 
+  std::function<void(std::string)> unbindCamera,
+  std::function<void()> rmEmitter
+);
+
 void renderObject(
   GLint shaderProgram, 
   objid id, 

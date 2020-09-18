@@ -193,7 +193,14 @@ void addObject(
     assert(false);
   }
 }
-void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> unloadClip, std::function<void()> removeRail, std::function<void(std::string)> unbindCamera){
+void removeObject(
+  std::map<objid, GameObjectObj>& mapping, 
+  objid id, 
+  std::function<void(std::string)> unloadClip, 
+  std::function<void()> removeRail, 
+  std::function<void(std::string)> unbindCamera,
+  std::function<void()> rmEmitter
+){
   // @TODO - handle resource cleanup better here eg unload meshes
   auto Object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&Object);
@@ -209,6 +216,11 @@ void removeObject(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
   if (sceneObj != NULL){
     std::cout << "ERROR: scene - remove scene obj not yet implemented" << std::endl;
     assert(false);
+  }
+
+  auto emitterObj = std::get_if<GameObjectEmitter>(&Object);
+  if (emitterObj != NULL){
+    rmEmitter();
   }
 
   mapping.erase(id);

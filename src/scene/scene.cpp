@@ -505,7 +505,7 @@ objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(st
   return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadClip, loadScript, getCurrentTime);
 }
 
-void removeObjectById(World& world, objid objectId, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript, std::string scriptName, bool netsynchronized){
+void removeObjectById(World& world, objid objectId, std::string name, std::function<void(std::string)> unloadClip, std::function<void(std::string, objid)> unloadScript, std::string scriptName, bool netsynchronized){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId);
     assert(rigidBody != NULL);
@@ -516,13 +516,22 @@ void removeObjectById(World& world, objid objectId, std::function<void(std::stri
   if (scriptName != ""){
     unloadScript(scriptName, objectId);
   }
-  removeObject(world.objectMapping, objectId, unloadClip, []() -> void {
-    std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
-    assert(false);
-  }, [](std::string cameraName) -> void {
-    std::cout << "remove camera not yet implemented" << std::endl;
-    assert(false);
-  });
+  removeObject(
+    world.objectMapping, 
+    objectId, 
+    unloadClip, 
+    []() -> void {
+      std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
+      assert(false);
+    }, 
+    [](std::string cameraName) -> void {
+      std::cout << "remove camera not yet implemented" << std::endl;
+      assert(false);
+    },
+    [&world, name]() -> void {
+      removeEmitter(world.emitters, name);
+    }
+  );
   
   world.idToScene.erase(objectId);
   world.onObjectDelete(objectId, netsynchronized);
@@ -542,9 +551,10 @@ void removeObjectFromScene(World& world, objid objectId, std::function<void(std:
     auto idsToRemove = idsToRemoveFromScenegraph(scene, gameobjId);
     for (auto id : idsToRemove){
       auto gameobj = getGameObject(world, id);
+      auto name = gameobj.name;
       auto scriptName = gameobj.script;
       auto netsynchronized = gameobj.netsynchronize;
-      removeObjectById(world, id, unloadClip, unloadScript, scriptName, netsynchronized);
+      removeObjectById(world, id, name, unloadClip, unloadScript, scriptName, netsynchronized);
     }
     removeObjectsFromScenegraph(scene, idsToRemove);  
   }
@@ -560,9 +570,10 @@ void removeSceneFromWorld(World& world, objid sceneId, std::function<void(std::s
   Scene& scene = world.scenes.at(sceneId);
   for (auto objectId : listObjInScene(scene)){
     auto gameobj = getGameObject(world, objectId);
+    auto name = gameobj.name;
     auto scriptName = gameobj.script;
     auto netsynchronized = gameobj.netsynchronize;
-    removeObjectById(world, objectId, unloadClip, unloadScript, scriptName, netsynchronized);
+    removeObjectById(world, objectId, name, unloadClip, unloadScript, scriptName, netsynchronized);
   }
   world.scenes.erase(sceneId);
 }
