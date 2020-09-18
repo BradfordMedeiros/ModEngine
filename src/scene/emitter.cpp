@@ -1,7 +1,8 @@
 #include "./emitter.h"
 
 void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes){
-  std::cout << "INFO: emitter: adding emitter -  " << name << std::endl;
+  std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
+
   Emitter emitter {
     .name = name,
     .emitterNodeId = emitterNodeId,
@@ -56,13 +57,17 @@ bool emitterTimeExpired(Emitter& emitter, float currentTime){
   return (currentTime - emitter.lastSpawnTime) > emitter.lifetime;                  
 }
 bool shouldSpawnParticle(Emitter& emitter, float currentTime){
-  return (emitter.currentParticles < emitter.targetParticles) && ((currentTime - emitter.lastSpawnTime) > emitter.spawnrate) ;
+  auto countUnderTarget = emitter.currentParticles < emitter.targetParticles;
+  auto enoughTimePassed = (currentTime - emitter.lastSpawnTime) > emitter.spawnrate;
+  // std::cout << "INFO: particles: count(" << (countUnderTarget ? "true" : "false") << " -- " << emitter.currentParticles << " / " << emitter.targetParticles << ")"  <<  " time(" << (enoughTimePassed ? "true" : "false") << ")" << std::endl;
+  return countUnderTarget && enoughTimePassed;
 }
 
 void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, std::function<void(objid)> rmParticle){   
+ 
   std::vector<std::string> emitterToRemove;
   for (auto &emitter : system.emitters){
-    if (emitterTimeExpired(emitter, currentTime)){
+    if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
       emitter.currentParticles-= 1;
       emitter.initTime = currentTime;
 
