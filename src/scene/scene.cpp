@@ -786,7 +786,7 @@ void onWorldFrame(
       std::map<std::string, glm::vec3> vecAttributes;
       vecAttributes["scale"] = glm::vec3(0.4f, 0.4f, 0.4f);
       vecAttributes["physics_gravity"] = glm::vec3(0.f, -1.f, 0.f);
-      vecAttributes["position"] = getGameObject(world, emitterNodeId).transformation.position;
+      vecAttributes["position"] = fullTransformation(world, emitterNodeId).position;
 
       // TODO need to parent this:
       objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), particleFields, numAttributes, vecAttributes, loadClip, loadScript, getCurrentTime);
