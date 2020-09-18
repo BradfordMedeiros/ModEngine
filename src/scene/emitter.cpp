@@ -70,7 +70,7 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
         auto particleId = emitter.particles.front();
         emitter.particles.pop();
         rmParticle(particleId);
-        std::cout << "removing particle" << std::endl;
+        std::cout << "INFO: particles: removing particle" << std::endl;
       }
 
     }
@@ -82,7 +82,7 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
       auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
       emitter.particles.push(particleId);
       emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
-      std::cout << "adding particle" << std::endl;
+      std::cout << "INFO: particles: adding particle" << std::endl;
     }
   }
 }
