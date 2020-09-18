@@ -7,6 +7,7 @@
 
 struct Emitter {
   std::string name;
+  objid emitterNodeId;
   float initTime;
   float lastSpawnTime;
   unsigned int targetParticles;
@@ -20,9 +21,14 @@ struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes);
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes);
 void removeEmitter(EmitterSystem& system, std::string name);
-void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string, std::map<std::string, std::string>)> addParticle, std::function<void(objid)> rmParticle);
+void updateEmitters(
+  EmitterSystem& system, 
+  float currentTime, 
+  std::function<objid(std::string, std::map<std::string, std::string>, objid)> addParticle, 
+  std::function<void(objid)> rmParticle
+);
 
 #endif
 

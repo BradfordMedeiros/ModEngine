@@ -1,9 +1,10 @@
 #include "./emitter.h"
 
-void addEmitter(EmitterSystem& system, std::string name, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes){
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes){
   std::cout << "INFO: emitter: adding emitter -  " << name << std::endl;
   Emitter emitter {
     .name = name,
+    .emitterNodeId = emitterNodeId,
     .initTime = currentTime,
     .lastSpawnTime = currentTime,
     .targetParticles = targetParticles,
@@ -58,7 +59,7 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
   return (emitter.currentParticles < emitter.targetParticles) && ((currentTime - emitter.lastSpawnTime) > emitter.spawnrate) ;
 }
 
-void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes)> addParticle, std::function<void(objid)> rmParticle){   
+void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, std::function<void(objid)> rmParticle){   
   std::vector<std::string> emitterToRemove;
   for (auto &emitter : system.emitters){
     if (emitterTimeExpired(emitter, currentTime)){
@@ -78,7 +79,7 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
   for (auto &emitter : system.emitters){
     if (shouldSpawnParticle(emitter, currentTime)){
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, emitter.particleAttributes);
+      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
       emitter.particles.push(particleId);
       emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
       std::cout << "adding particle" << std::endl;

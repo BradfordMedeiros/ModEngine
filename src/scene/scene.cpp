@@ -412,8 +412,8 @@ void addObjectToWorld(
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
       },
-      [&world, &getCurrentTime, name, &getId, &loadClip, &loadScript](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
-        addEmitter(world.emitters, name, getCurrentTime(), limit, spawnrate, lifetime, particleFields);
+      [&world, &getCurrentTime, name, &getId, &loadClip, &loadScript, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
+        addEmitter(world.emitters, name, id, getCurrentTime(), limit, spawnrate, lifetime, particleFields);
       }
     );
 }
@@ -777,7 +777,7 @@ void onWorldFrame(
   updateEmitters(
     world.emitters, 
     timeElapsed, 
-    [&world, loadClip, loadScript, getCurrentTime](std::string name, std::map<std::string, std::string> particleFields) -> objid {      
+    [&world, loadClip, loadScript, getCurrentTime](std::string name, std::map<std::string, std::string> particleFields, objid emitterNodeId) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       auto id = getGameObject(world, name).id;
       auto sceneId = world.idToScene.at(id);
@@ -786,6 +786,7 @@ void onWorldFrame(
       std::map<std::string, glm::vec3> vecAttributes;
       vecAttributes["scale"] = glm::vec3(0.4f, 0.4f, 0.4f);
       vecAttributes["physics_gravity"] = glm::vec3(0.f, -1.f, 0.f);
+      vecAttributes["position"] = getGameObject(world, emitterNodeId).transformation.position;
 
       // TODO need to parent this:
       objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), particleFields, numAttributes, vecAttributes, loadClip, loadScript, getCurrentTime);
