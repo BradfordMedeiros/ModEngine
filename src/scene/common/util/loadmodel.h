@@ -25,7 +25,7 @@ struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 texCoords;
-  short boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
+  int32_t boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
   float boneWeights[NUM_BONES_PER_VERTEX]; 
 };
 
@@ -65,11 +65,11 @@ struct MeshData {
 };
 
 struct ModelData {
-  std::map<short, MeshData> meshIdToMeshData;
-  std::map<short, std::vector<int>> nodeToMeshId;
-  std::map<short, short> childToParent;
-  std::map<short, Transformation> nodeTransform;
-  std::map<short, std::string> names;
+  std::map<int32_t, MeshData> meshIdToMeshData;
+  std::map<int32_t, std::vector<int>> nodeToMeshId;
+  std::map<int32_t, int32_t> childToParent;
+  std::map<int32_t, Transformation> nodeTransform;
+  std::map<int32_t, std::string> names;
   std::vector<Animation> animations;
   std::map<std::string, std::string> boneToParent;  // @TODO - multiple meshes can share same bone hierchy, but this map is copied by value, so easy optimization here
 };

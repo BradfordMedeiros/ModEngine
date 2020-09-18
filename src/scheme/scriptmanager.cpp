@@ -39,13 +39,13 @@ void onFrameAllScripts(){
   }
 }
 
-void onCollisionEnterAllScripts(short obj1, short obj2, glm::vec3 pos){
+void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onCollisionEnter(obj1, obj2, pos);
   }
 }
-void onCollisionExitAllScripts(short obj1, short obj2){
+void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onCollisionExit(obj1, obj2);
@@ -63,7 +63,7 @@ void onMouseMoveCallbackAllScripts(double xPos, double yPos){
     onMouseMoveCallback(xPos, yPos);
   }
 }
-void onObjectSelectedAllScripts(short index){
+void onObjectSelectedAllScripts(int32_t index){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
     onObjectSelected(index);

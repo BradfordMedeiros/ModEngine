@@ -73,7 +73,7 @@ bool bootStrapperMode = false;
 NetCode netcode { };
 
 GameObjectVoxel* voxelPtr;
-short voxelPtrId = -1;
+int32_t voxelPtrId = -1;
 glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
@@ -160,7 +160,7 @@ void generatePortalTextures(){
   }
 }
 
-std::vector<short> playbacksToRemove;
+std::vector<int32_t> playbacksToRemove;
 void tickAnimations(AnimationState& animationState, float elapsedTime){
   for (auto &[_, playback] : animationState.playbacks){
     playback.setElapsedTime(elapsedTime);
@@ -309,7 +309,7 @@ void rotate(float x, float y, float z){
   }
   physicsRotate(world, state.selectedIndex, x, y, z);
 }
-void setObjectDimensions(short index, float width, float height, float depth){
+void setObjectDimensions(int32_t index, float width, float height, float depth){
   if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
     return;
   }
@@ -327,7 +327,7 @@ void setObjectDimensions(short index, float width, float height, float depth){
 void updateVoxelPtr(){
   auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
   if (voxelIndexes.size() > 0){
-    short id = voxelIndexes.at(0);
+    int32_t id = voxelIndexes.at(0);
     GameObjectObj& toRender = world.objectMapping.at(id);
     auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
     assert(voxelObj != NULL);
@@ -366,7 +366,7 @@ void drawTraversalPositions(){
 }
 
 
-void displayRails(std::map<short, RailConnection> railPairs){
+void displayRails(std::map<int32_t, RailConnection> railPairs){
   for (auto [id, rail] : railPairs){
     bluelines.push_back(Line {
       .fromPos = getGameObject(world, rail.from).transformation.position,
@@ -422,7 +422,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
   glUseProgram(shaderProgram);
 
   clearTraversalPositions();
-  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, view, &portals, &lights](short id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
+  traverseScene(world, scene, [useSelectionColor, shaderProgram, &scene, projection, view, &portals, &lights](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
@@ -928,7 +928,7 @@ int main(int argc, char* argv[]){
         sendDataOnUdpSocket(toNetworkPacket(packet));
       }
     },
-    [](short id, bool isNet) -> void {
+    [](int32_t id, bool isNet) -> void {
       if (!isNet){
         return;
       }

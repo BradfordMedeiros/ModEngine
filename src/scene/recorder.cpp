@@ -10,7 +10,6 @@ Recording loadRecording(std::string name){
   auto properties = split(serializedData, '\n');
 
   std::vector<Record> keyframes;
-  int index = 0;
   for (auto property : properties){
     auto attributeLine = split(property, ':');
     if (attributeLine.at(0) == "position"){
@@ -21,7 +20,7 @@ Recording loadRecording(std::string name){
         .transformation = transformation,
       };
       Record record {
-        time : index, 
+        time : 0.f, 
         properties : properties,
       };
     }

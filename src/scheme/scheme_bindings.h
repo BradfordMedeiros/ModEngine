@@ -12,43 +12,43 @@
 #include "../sequencer.h"
 
 void createStaticSchemeBindings(
-  short (*loadScene)(std::string),
+  int32_t (*loadScene)(std::string),
   objid(*loadSceneObj)(std::string, objid),  
-  void (*unloadScene)(short id),  
+  void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
-  std::vector<short> (*listScenes)(),  
-  void (*sendLoadScene)(short id),
+  std::vector<int32_t> (*listScenes)(),  
+  void (*sendLoadScene)(int32_t id),
   void (*moveCamera)(glm::vec3),  
   void (*rotateCamera)(float xoffset, float yoffset),
-  void (*removeObjectById)(short id),
-  std::vector<short> (*getObjectsByType)(std::string),
-  void (*setActiveCamera)(short cameraId),
+  void (*removeObjectById)(int32_t id),
+  std::vector<int32_t> (*getObjectsByType)(std::string),
+  void (*setActiveCamera)(int32_t cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),  
-  std::string (*getGameObjectNameForId)(short id),
-  std::map<std::string, std::string> getGameObjectAttr(short id),
-  void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
-  glm::vec3 (*getGameObjectPos)(short index, bool world),
-  void (*setGameObjectPos)(short index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
-  glm::quat (*getGameObjectRotation)(short index, bool world),
-  void (*setGameObjectRot)(short index, glm::quat rotation),
+  std::string (*getGameObjectNameForId)(int32_t id),
+  std::map<std::string, std::string> getGameObjectAttr(int32_t id),
+  void (*setGameObjectAttr)(int32_t id, std::map<std::string, std::string> attr),
+  glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
+  void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
+  void (*setGameObjectPosRelative)(int32_t index, float x, float y, float z, bool xzPlaneOnly),
+  glm::quat (*getGameObjectRotation)(int32_t index, bool world),
+  void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   std::optional<objid> (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
-  void (*applyImpulse)(short index, glm::vec3 impulse),
-  void (*applyImpulseRel)(short index, glm::vec3 impulse),
-  void (*clearImpulse)(short index),
-  std::vector<std::string> (*listAnimations)(short id),
-  void playAnimation(short id, std::string animationToPlay),
+  void (*applyImpulse)(int32_t index, glm::vec3 impulse),
+  void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
+  void (*clearImpulse)(int32_t index),
+  std::vector<std::string> (*listAnimations)(int32_t id),
+  void playAnimation(int32_t id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message),
-  void (*attachToRail)(short id, std::string rail),
-  void (*unattachFromRail)(short id),
+  void (*attachToRail)(int32_t id, std::string rail),
+  void (*unattachFromRail)(int32_t id),
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
@@ -70,11 +70,11 @@ void createStaticSchemeBindings(
 void defineFunctions(objid id, bool isServer);
 
 void onFrame();
-void onCollisionEnter(short obj1, short obj2, glm::vec3 contactPos);
-void onCollisionExit(short obj1, short obj2);
+void onCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos);
+void onCollisionExit(int32_t obj1, int32_t obj2);
 void onMouseCallback(int button, int action, int mods);
 void onMouseMoveCallback(double xPos, double yPos);
-void onObjectSelected(short index);
+void onObjectSelected(int32_t index);
 void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
 void onCameraSystemChange(bool usingBuiltInCamera);

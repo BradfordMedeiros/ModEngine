@@ -19,7 +19,7 @@ glm::vec3 getColorFromGameobject(objid id, bool useSelectionColor, bool isSelect
   int blueChannel = (id / (255 * 255)) % (255 * 255); // so order of 255^3 ~ 16581375
 
   int sumValue = redChannel + (greenChannel * 255) + (blueChannel * 255 * 255);
-  assert(blueChannel < 255);
+  //assert(blueChannel < 255);
   assert(sumValue == id);
 
   // since the max value of r/g/b should be 255, this needs a resolution of 1/255.f which is 
@@ -28,6 +28,6 @@ glm::vec3 getColorFromGameobject(objid id, bool useSelectionColor, bool isSelect
 }
 
 unsigned int getIdFromColor(Color color){
-  short objectId = 255 * (color.r + (color.g * 255) + (color.b * 255 * 255));
+  int32_t objectId = 255 * (color.r + (color.g * 255) + (color.b * 255 * 255));
   return objectId;
 }

@@ -54,21 +54,21 @@ SCM vec3ToScmList(glm::vec3 vec){
 }
 
 // Main Api
-short (*_loadScene)(std::string);
+int32_t (*_loadScene)(std::string);
 SCM scm_loadScene(SCM value){
   auto sceneId = _loadScene(scm_to_locale_string(value));
-  return scm_from_short(sceneId);
+  return scm_from_int32(sceneId);
 }
 
 objid (*_loadSceneObj)(std::string, objid);
 SCM scm_loadSceneObj(SCM sceneFile, SCM sceneId){
-  _loadSceneObj(scm_to_locale_string(sceneFile), scm_to_short(sceneId));
+  _loadSceneObj(scm_to_locale_string(sceneFile), scm_to_int32(sceneId));
   return SCM_UNSPECIFIED;
 }
 
-void (*_unloadScene)(short id);
+void (*_unloadScene)(int32_t id);
 SCM scm_unloadScene(SCM value){
-  _unloadScene(scm_to_short(value));
+  _unloadScene(scm_to_int32(value));
   return SCM_UNSPECIFIED;
 }
 void (*_unloadAllScenes)();
@@ -77,19 +77,19 @@ SCM scm_unloadAllScenes(){
   return SCM_UNSPECIFIED;
 }
 
-std::vector<short> (*_listScenes)();
+std::vector<int32_t> (*_listScenes)();
 SCM scm_listScenes(){
   auto scenes = _listScenes();
   SCM list = scm_make_list(scm_from_unsigned_integer(scenes.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < scenes.size(); i++){
-    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_short(scenes[i])); 
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_int32(scenes[i])); 
   }
   return list;
 }
 
-void (*_sendLoadScene)(short id);
+void (*_sendLoadScene)(int32_t id);
 SCM scm_sendLoadScene(SCM sceneId){
-  _sendLoadScene(scm_to_short(sceneId));
+  _sendLoadScene(scm_to_int32(sceneId));
   return SCM_UNSPECIFIED;
 }
 
@@ -99,9 +99,9 @@ SCM setSelectionMod(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void (*setActCamera)(short id);
+void (*setActCamera)(int32_t id);
 SCM setActiveCam(SCM value){
-  setActCamera(scm_to_short(value));
+  setActCamera(scm_to_int32(value));
   return SCM_UNSPECIFIED;
 }
 
@@ -165,12 +165,12 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
   }
 
   objid id = _makeObjectAttr(scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
-  return scm_from_short(id);
+  return scm_from_int32(id);
 }
 
-void (*removeObjById)(short id);
+void (*removeObjById)(int32_t id);
 SCM removeObject(SCM value){
-  removeObjById(scm_to_short(value));
+  removeObjById(scm_to_int32(value));
   return SCM_UNSPECIFIED;
 }
 
@@ -192,16 +192,16 @@ SCM scmDrawLine(SCM posFrom, SCM posTo){
 }
 
 struct gameObject {
-  short id;
+  int32_t id;
 };
 SCM gameObjectType;   // this is modified during init
-SCM createGameObject(short id){
+SCM createGameObject(int32_t id){
   auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
   obj->id = id;
   return scm_make_foreign_object_1(gameObjectType, obj); 
 }
 
-std::vector<short> (*getObjByType)(std::string);
+std::vector<int32_t> (*getObjByType)(std::string);
 SCM lsObjectsByType(SCM value){
   std::string objectType = scm_to_locale_string(value);
   std::vector indexes = getObjByType(objectType);
@@ -215,25 +215,25 @@ SCM lsObjectsByType(SCM value){
   return list;
 }
 
-short getGameobjId(SCM value){
+int32_t getGameobjId(SCM value){
   gameObject *obj;
   scm_assert_foreign_object_type (gameObjectType, value);
   obj = (gameObject*)scm_foreign_object_ref (value, 0);
   return obj->id;  
 }
 
-std::string (*getGameObjNameForId)(short id);
+std::string (*getGameObjNameForId)(int32_t id);
 SCM getGameObjNameForIdFn(SCM value){
   return scm_from_locale_string(getGameObjNameForId(getGameobjId(value)).c_str());
 }
 
 SCM scmGetGameObjectById(SCM scmId){
-  auto id = scm_to_short(scmId);
+  auto id = scm_to_int32(scmId);
   getGameObjNameForId(id);          // this assert the object exists
   return createGameObject(id);
 }
 
-std::map<std::string, std::string> (*_getGameObjectAttr)(short id);
+std::map<std::string, std::string> (*_getGameObjectAttr)(int32_t id);
 SCM scmGetGameObjectAttr(SCM gameobj){
   std::map<std::string, std::string> attributes = _getGameObjectAttr(getGameobjId(gameobj));
   SCM list = scm_make_list(scm_from_unsigned_integer(attributes.size()), scm_from_unsigned_integer(0));
@@ -249,7 +249,7 @@ SCM scmGetGameObjectAttr(SCM gameobj){
 }
 
 // @TODO -> add types around this
-void (*_setGameObjectAttr)(short id, std::map<std::string, std::string> attr);
+void (*_setGameObjectAttr)(int32_t id, std::map<std::string, std::string> attr);
 SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
   auto id = getGameobjId(gameobj);
   std::map<std::string, std::string> newAttributes;
@@ -264,7 +264,7 @@ SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
   return SCM_UNSPECIFIED;
 }
 
-glm::vec3 (*_getGameObjectPos)(short index, bool isWorld);
+glm::vec3 (*_getGameObjectPos)(int32_t index, bool isWorld);
 SCM scmGetGameObjectPos(SCM value){
   return vec3ToScmList(_getGameObjectPos(getGameobjId(value), false));
 }
@@ -272,7 +272,7 @@ SCM scmGetGameObjectPosWorld(SCM value){
   return vec3ToScmList(_getGameObjectPos(getGameobjId(value), true));
 }
 
-void (*setGameObjectPosn)(short index, glm::vec3 pos);
+void (*setGameObjectPosn)(int32_t index, glm::vec3 pos);
 SCM setGameObjectPosition(SCM value, SCM positon){
   auto x = scm_to_double(scm_list_ref(positon, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(positon, scm_from_int64(1)));
@@ -281,7 +281,7 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   return SCM_UNSPECIFIED;
 }
 
-void (*setGameObjectPosnRel)(short index, float x, float y, float z, bool xzPlaneOnly);
+void (*setGameObjectPosnRel)(int32_t index, float x, float y, float z, bool xzPlaneOnly);
 void setPosition(SCM value, SCM position, bool xzOnly){
   auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
@@ -297,14 +297,14 @@ SCM setGameObjectPositionRelXZ(SCM value, SCM position){
   return SCM_UNSPECIFIED;
 }
 
-glm::quat (*_getGameObjectRotation)(short index, bool world);
+glm::quat (*_getGameObjectRotation)(int32_t index, bool world);
 SCM scmGetGameObjectRotation(SCM value){
   return scmQuatToSCM(_getGameObjectRotation(getGameobjId(value), false));
 }
 SCM getGameObjectRotationWorld(SCM value){
   return scmQuatToSCM(_getGameObjectRotation(getGameobjId(value), true));
 }
-void (*setGameObjectRotn)(short index, glm::quat rotation);
+void (*setGameObjectRotn)(int32_t index, glm::quat rotation);
 SCM setGameObjectRotation(SCM value, SCM rotation){
   setGameObjectRotn(getGameobjId(value), scmListToQuat(rotation));
   return SCM_UNSPECIFIED;
@@ -312,7 +312,7 @@ SCM setGameObjectRotation(SCM value, SCM rotation){
 
 glm::quat (*_setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
 SCM setGameObjectRotationDelta(SCM value, SCM deltaYaw, SCM deltaPitch, SCM deltaRoll){
-  short id = getGameobjId(value);
+  int32_t id = getGameobjId(value);
   glm::quat rot = _getGameObjectRotation(id, false);
 
   auto deltaY = scm_to_double(deltaYaw);
@@ -337,7 +337,7 @@ SCM scmMoveRelative(SCM pos, SCM orientation, SCM distance){
   return vec3ToScmList(_moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance)));
 }
 
-std::vector<std::string>(*_listAnimations)(short id);
+std::vector<std::string>(*_listAnimations)(int32_t id);
 SCM scmListAnimations(SCM value){
   auto animations = _listAnimations(getGameobjId(value));
   int numAnimations = animations.size();
@@ -350,31 +350,31 @@ SCM scmListAnimations(SCM value){
   return list;
 }
 
-void (*_playAnimation)(short id, std::string animationName);
+void (*_playAnimation)(int32_t id, std::string animationName);
 SCM scmPlayAnimation(SCM value, SCM animationName){
   _playAnimation(getGameobjId(value), scm_to_locale_string(animationName));
   return SCM_UNSPECIFIED;
 }
 
-void (*_applyImpulse)(short index, glm::vec3 impulse);
+void (*_applyImpulse)(int32_t index, glm::vec3 impulse);
 SCM scm_applyImpulse(SCM value, SCM impulse){
   _applyImpulse(getGameobjId(value), listToVec3(impulse));
   return SCM_UNSPECIFIED;
 }
-void (*_applyImpulseRel)(short index, glm::vec3 impulse);
+void (*_applyImpulseRel)(int32_t index, glm::vec3 impulse);
 SCM scm_applyImpulseRel(SCM value, SCM impulse){
   _applyImpulseRel(getGameobjId(value), listToVec3(impulse));
   return SCM_UNSPECIFIED;
 }
 
-void (*_clearImpulse)(short index);
+void (*_clearImpulse)(int32_t index);
 SCM scm_clearImpulse(SCM value){
   _clearImpulse(getGameobjId(value));
   return SCM_UNSPECIFIED;
 }
 
 SCM getGameObjectId(SCM value){
-  return scm_from_short(getGameobjId(value));
+  return scm_from_int32(getGameobjId(value));
 }
 
 std::optional<objid> (*_getGameObjectByName)(std::string name);
@@ -423,12 +423,12 @@ SCM scmSendNotify(SCM message){
   return SCM_UNSPECIFIED;
 }
 
-void (*_attachToRail)(short id, std::string rail);
+void (*_attachToRail)(int32_t id, std::string rail);
 SCM scmAttachToRail(SCM obj, SCM rail){
   _attachToRail(getGameobjId(obj), scm_to_locale_string(rail));
   return SCM_UNSPECIFIED;
 }
-void (*_unattachFromRail)(short id);
+void (*_unattachFromRail)(int32_t id);
 SCM scmUnattachFromRail(SCM obj){
   _unattachFromRail(getGameobjId(obj));
   return SCM_UNSPECIFIED;
@@ -600,12 +600,12 @@ SCM scmSetStateMachine(SCM scmMachine, SCM state){
 
 void (*_startRecording)(objid id, std::string recordingPath);
 SCM scmStartRecording(SCM id, SCM recordingPath){
-  _startRecording(scm_to_short(id), scm_to_locale_string(recordingPath));
+  _startRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
   return SCM_UNSPECIFIED;
 }
 void (*_playRecording)(objid id, std::string recordingPath);
 SCM scmPlayRecording(SCM id, SCM recordingPath){
-  _playRecording(scm_to_short(id), scm_to_locale_string(recordingPath));
+  _playRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
   return SCM_UNSPECIFIED;
 }
 std::vector<objid> (*_raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
@@ -613,7 +613,7 @@ SCM scmRaycast(SCM pos, SCM direction, SCM distance){
   std::vector<objid> ids = _raycast(listToVec3(pos), scmListToQuat(direction), scm_to_double(distance));
   SCM list = scm_make_list(scm_from_unsigned_integer(ids.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < ids.size(); i++){
-    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_short(ids.at(i)));
+    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_int32(ids.at(i)));
   }
   return list;
 }
@@ -622,14 +622,14 @@ SCM scmRaycast(SCM pos, SCM direction, SCM distance){
 void onFrame(){
   maybeCallFunc("onFrame");
 }
-void onCollisionEnter(short obj1, short obj2, glm::vec3 contactPos){
+void onCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos){
   const char* function = "onCollideEnter";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
     scm_call_3(func_symbol, createGameObject(obj1), createGameObject(obj2), vec3ToScmList(contactPos));
   }
 }
-void onCollisionExit(short obj1, short obj2){
+void onCollisionExit(int32_t obj1, int32_t obj2){
   const char* function = "onCollideExit";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
@@ -650,7 +650,7 @@ void onMouseMoveCallback(double xPos, double yPos){
     scm_call_2(func_symbol, scm_from_double(xPos), scm_from_double(yPos));
   }
 }
-void onObjectSelected(short index){
+void onObjectSelected(int32_t index){
   const char* function = "onObjSelected";
   if (symbolDefined(function)){
     auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
@@ -808,43 +808,43 @@ void defineFunctions(objid id, bool isServer){
 
 
 void createStaticSchemeBindings(
-  short (*loadScene)(std::string),  
+  int32_t (*loadScene)(std::string),  
   objid(*loadSceneObj)(std::string, objid),
-  void (*unloadScene)(short id),  
+  void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
-  std::vector<short> (*listScenes)(),  
-  void (*sendLoadScene)(short id),
+  std::vector<int32_t> (*listScenes)(),  
+  void (*sendLoadScene)(int32_t id),
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
-	void (*removeObjectById)(short id),
-	std::vector<short> (*getObjectsByType)(std::string),
-	void (*setActiveCamera)(short cameraId),
+	void (*removeObjectById)(int32_t id),
+	std::vector<int32_t> (*getObjectsByType)(std::string),
+	void (*setActiveCamera)(int32_t cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),
-  std::string (*getGameObjectNameForId)(short id),
-  std::map<std::string, std::string> getGameObjectAttr(short id),
-  void (*setGameObjectAttr)(short id, std::map<std::string, std::string> attr),
-  glm::vec3 (*getGameObjectPos)(short index, bool world),
-  void (*setGameObjectPos)(short index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(short index, float x, float y, float z, bool xzPlaneOnly),
-  glm::quat (*getGameObjectRotation)(short index, bool world),
-  void (*setGameObjectRot)(short index, glm::quat rotation),
+  std::string (*getGameObjectNameForId)(int32_t id),
+  std::map<std::string, std::string> getGameObjectAttr(int32_t id),
+  void (*setGameObjectAttr)(int32_t id, std::map<std::string, std::string> attr),
+  glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
+  void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
+  void (*setGameObjectPosRelative)(int32_t index, float x, float y, float z, bool xzPlaneOnly),
+  glm::quat (*getGameObjectRotation)(int32_t index, bool world),
+  void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   std::optional<objid> (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
-  void (*applyImpulse)(short index, glm::vec3 impulse),
-  void (*applyImpulseRel)(short index, glm::vec3 impulse),
-  void (*clearImpulse)(short index),
-  std::vector<std::string> (*listAnimations)(short id),
-  void playAnimation(short id, std::string animationToPlay),
+  void (*applyImpulse)(int32_t index, glm::vec3 impulse),
+  void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
+  void (*clearImpulse)(int32_t index),
+  std::vector<std::string> (*listAnimations)(int32_t id),
+  void playAnimation(int32_t id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message),
-  void (*attachToRail)(short id, std::string rail),
-  void (*unattachFromRail)(short id),
+  void (*attachToRail)(int32_t id, std::string rail),
+  void (*unattachFromRail)(int32_t id),
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),

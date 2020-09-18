@@ -177,8 +177,7 @@ int maxvalue(int x, int y, int z){
 // (n ^ 2) / (2 ^16)
 // n^2 / 65536
 
-// WARNING: this will probably collide, but let's actually hit it and accept the short for now.
-// 10000 objects => 15% chance of collision
+// WARNING: this will probably collide, but let's actually hit it and accept the int32_t for now.
 static bool seeded = false;
 objid getUniqueObjId(){   
   if (!seeded){
