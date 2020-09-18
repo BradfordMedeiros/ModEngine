@@ -5,7 +5,7 @@ physicsOpts defaultPhysicsOpts(std::map<std::string, std::string> stringAttribut
   physicsOpts defaultOption = {
     .enabled = stringAttributes.find("physics") == stringAttributes.end() ? false : (stringAttributes.at("physics") == "enabled"),
     .isStatic = stringAttributes.find("physics_type") == stringAttributes.end() ? true : !(stringAttributes.at("physics_type") == "dynamic"),
-    .hasCollisions = true,
+    .hasCollisions = stringAttributes.find("physics_collision") == stringAttributes.end() ? false : !(stringAttributes.at("physics_collision") == "nocollide"),
     .shape = BOX,
     .linearFactor = glm::vec3(1.f, 1.f, 1.f),
     .angularFactor = glm::vec3(1.f, 1.f, 1.f),
