@@ -273,23 +273,22 @@ SerializationObject serialObjectFromFields(
   std::string name, 
   std::string layer,
   std::vector<Field> fields,
-  std::map<std::string, std::string> stringAttributes,
-  std::map<std::string, glm::vec3> vecAttributes
+  GameobjAttributes attributes
 ){
-  auto parent = attributeOrEmpty(stringAttributes, "parent");
+  auto parent = attributeOrEmpty(attributes.stringAttributes, "parent");
   SerializationObject serialObj {
     .name = name,
-    .position = vecAttributes.find("position") != vecAttributes.end() ? vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
-    .scale = vecAttributes.find("scale") != vecAttributes.end() ? vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
+    .position = attributes.vecAttributes.find("position") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
+    .scale = attributes.vecAttributes.find("scale") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
     .rotation =  glm::identity<glm::quat>(),
-    .physics = defaultPhysicsOpts(stringAttributes, vecAttributes),
+    .physics = defaultPhysicsOpts(attributes.stringAttributes, attributes.vecAttributes),
     .type = getType(name, fields),
-    .lookat = attributeOrEmpty(stringAttributes,"lookat"),
+    .lookat = attributeOrEmpty(attributes.stringAttributes,"lookat"),
     .layer =  layer,
-    .script = attributeOrEmpty(stringAttributes,"script"),
-    .fragshader = attributeOrEmpty(stringAttributes, "fragshader"),
-    .netsynchronize = (stringAttributes.find("net") != stringAttributes.end()) && (stringAttributes.at("net") == "sync"),
-    .additionalFields = stringAttributes, 
+    .script = attributeOrEmpty(attributes.stringAttributes,"script"),
+    .fragshader = attributeOrEmpty(attributes.stringAttributes, "fragshader"),
+    .netsynchronize = (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()) && (attributes.stringAttributes.at("net") == "sync"),
+    .additionalFields = attributes.stringAttributes, 
   };
   return serialObj;
 }

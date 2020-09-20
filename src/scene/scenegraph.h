@@ -58,8 +58,7 @@ SerializationObject serialObjectFromFields(
   std::string name, 
   std::string layer,
   std::vector<Field> fields,
-  std::map<std::string, std::string> stringAttributes,
-  std::map<std::string, glm::vec3> vecAttributes
+  GameobjAttributes attributes
 );
 
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
