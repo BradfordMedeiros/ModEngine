@@ -241,3 +241,20 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
   return objects;
 }
 
+physicsOpts defaultPhysicsOpts(std::map<std::string, std::string> stringAttributes, std::map<std::string, glm::vec3> vecAttributes){
+  // TODO this should use a standardized way to parse these in common with serialization
+  physicsOpts defaultOption = {
+    .enabled = stringAttributes.find("physics") == stringAttributes.end() ? false : (stringAttributes.at("physics") == "enabled"),
+    .isStatic = stringAttributes.find("physics_type") == stringAttributes.end() ? true : !(stringAttributes.at("physics_type") == "dynamic"),
+    .hasCollisions = stringAttributes.find("physics_collision") == stringAttributes.end() ? false : !(stringAttributes.at("physics_collision") == "nocollide"),
+    .shape = BOX,
+    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
+    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
+    .gravity = vecAttributes.find("physics_gravity") == vecAttributes.end() ? glm::vec3(0.f, -9.81f, 0.f) : vecAttributes.at("physics_gravity"),
+    .friction = 1.0f,
+    .restitution = 0.f,
+    .mass = 1.f,
+    .maxspeed = -1.f,
+  };
+  return defaultOption;
+}

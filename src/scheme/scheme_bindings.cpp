@@ -128,7 +128,6 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, glm::vec3> vecAttributes;
 
-
   auto numElements = toUnsignedInt(scm_length(scmAttributes));
   for (int i = 0; i < numElements; i++){
     auto propertyPair = scm_list_ref(scmAttributes, scm_from_unsigned_integer(i));
