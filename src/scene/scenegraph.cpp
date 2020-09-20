@@ -76,14 +76,14 @@ SceneDeserialization createSceneFromParsedContent(
   std::sort(std::begin(parsedContent.layers), std::end(parsedContent.layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
   scene.layers = parsedContent.layers;
 
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens, fields);
+  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(tokens);
   
   auto rootId = getNewObjectId();
   auto rootName = "~root:" + std::to_string(rootId);
   scene.rootId = rootId;
   assert(serialObjs.find(rootName) == serialObjs.end());
 
-  serialObjs[rootName] = getDefaultObject(rootName, fields, "default");
+  serialObjs[rootName] = getDefaultObject(rootName, "default");
   serialObjs[rootName].physics.enabled = false;
 
   for (auto [_, serialObj] : serialObjs){
@@ -158,7 +158,6 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .scale = transform.scale,
       .rotation = transform.rotation,
       .physics = defaultPhysicsOpts(attributes),
-      .type = "default",
       .lookat = "",
       .layer = rootObj.layer,
       .script = "",
@@ -296,7 +295,6 @@ SerializationObject serialObjectFromFields(
     .scale = attributes.vecAttributes.find("scale") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
     .rotation =  glm::identity<glm::quat>(),
     .physics = defaultPhysicsOpts(attributes),
-    .type = getType(name, fields),
     .lookat = attributeOrEmpty(attributes.stringAttributes,"lookat"),
     .layer =  layer,
     .script = attributeOrEmpty(attributes.stringAttributes,"script"),

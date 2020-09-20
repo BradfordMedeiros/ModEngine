@@ -82,17 +82,8 @@ ParsedContent parseFormat(std::string content) {
   return parsedContent;
 }
 
-std::string getType(std::string name, std::vector<Field> additionalFields){
-  std::string type = "default";
-  for (Field field : additionalFields){
-    if (name[0] == field.prefix){
-      type = field.type;
-    }
-  }
-  return type;
-}
 
-SerializationObject getDefaultObject(std::string name, std::vector<Field> additionalFields, std::string layer){
+SerializationObject getDefaultObject(std::string name, std::string layer){
   assert(name.find(',') == std::string::npos);
 
   physicsOpts physics {
@@ -117,7 +108,6 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = glm::identity<glm::quat>(),
     .physics = physics,
-    .type = getType(name, additionalFields),
     .layer = layer
   };
   return newObject;
@@ -127,23 +117,21 @@ std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
-std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields){
+std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, SerializationObject> objects;
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject(token.target, additionalFields, token.layer);
-      objects.at(token.target).type = getType(token.target, additionalFields);
+      objects[token.target] = getDefaultObject(token.target, token.layer);
     }
 
     if (token.attribute == "child"){
       auto children = parseChildren(token.payload);
       for (auto child : children){
         if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject(child, additionalFields, token.layer);
-          objects.at(child).type = getType(child, additionalFields);
+          objects[child] = getDefaultObject(child, token.layer);
         }
       }
       objects.at(token.target).children = children;

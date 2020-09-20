@@ -304,7 +304,7 @@ std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std
     }
   }
 
-  for (auto &[_, fields] : additionalFieldsMap){
+  for (auto &[_, fields] : additionalFieldsMap){    // @TODO - this looks wrong, shouldn't we copy all fields? 
     for (auto field : fieldsToCopy){
       assert(fields.find(field) == fields.end());
       if (additionalFields.find(field) != additionalFields.end()){
@@ -331,6 +331,16 @@ void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std
   obj.transformation.rotation = orientation;
 }
 
+std::string getType(std::string name, std::vector<Field> additionalFields){
+  std::string type = "default";
+  for (Field field : additionalFields){
+    if (name[0] == field.prefix){
+      type = field.type;
+    }
+  }
+  return type;
+}
+
 void addObjectToWorld(
   World& world, 
   Scene& scene, 
@@ -343,7 +353,7 @@ void addObjectToWorld(
   std::function<float()> getCurrentTime
 ){
     auto id =  scene.nameToId.at(serialObj.name);
-    auto type = serialObj.type;
+    auto type = getType(serialObj.name, fields);
     auto additionalFields = serialObj.additionalFields;
     auto name = serialObj.name;
 
@@ -605,7 +615,7 @@ objid addObjectToScene(
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string)> loadClip, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime){
   ParsedContent content = parseFormat(serializedObj);
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens, fields);
+  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   assert(serialObjs.size() == 1);
   SerializationObject& serialObj = serialObjs.begin() -> second;
