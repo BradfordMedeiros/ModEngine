@@ -21,8 +21,9 @@
 )
 
 (define (on-player-join connection-hash)
-  (create-player connection-hash)
-  (send-load-scene 0)     ; obviously forcing a load scene to all clients for each connection is jank
+  ;(create-player connection-hash)
+  (display "scheme: send load scene\n")
+  (send-load-scene (car (list-scenes)))     ; obviously forcing a load scene to all clients for each connection is jank
 )
 (define (on-player-leave connection-hash)
   (delete-player connection-hash)
