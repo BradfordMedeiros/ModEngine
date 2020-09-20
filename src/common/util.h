@@ -41,5 +41,6 @@ int maxvalue(int x, int y, int z);
 
 typedef short objid;
 objid getUniqueObjId();
+std::string getUniqueObjectName();
 
 #endif

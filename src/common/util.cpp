@@ -201,3 +201,6 @@ objid getUniqueObjId(){
   return randId;
 }
 
+std::string getUniqueObjectName(){
+  return std::string("name(") + std::to_string(getUniqueObjId()) + ")";
+}

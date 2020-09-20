@@ -788,14 +788,14 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         .vecAttributes = vecAttributes,
       };
 
-      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), attributes, interface);
+      objid objectAdded = addObjectToScene(world, sceneId, getUniqueObjectName(), attributes, interface);
       return objectAdded;
     }, 
     [&world, &interface](objid id) -> void { 
       std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
       removeObjectFromScene(world, id, interface);
     }
-  );  // need to make 0 be total elapsed time   
+  );  
 
   updateEntities(world);  
   if (enablePhysics){
