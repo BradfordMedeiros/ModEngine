@@ -9,7 +9,7 @@
 #include <limits>       
 #include <map>
 #include "../common/util.h"
-#include "../sequencer.h"
+#include "../gizmo/sequencer.h"   // TODO -  don't depend on this directly 
 
 void createStaticSchemeBindings(
   short (*loadScene)(std::string),

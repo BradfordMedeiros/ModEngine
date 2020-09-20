@@ -8,7 +8,7 @@
 #include "./main_api.h"
 #include "./input.h"
 #include "./easy_use.h"
-#include "./keymapper.h"
+#include "./gizmo/keymapper.h"
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onArrowKey(int key);

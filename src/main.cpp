@@ -41,9 +41,9 @@
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./scene/recorder.h"
-#include "./sequencer.h"
-#include "./keymapper.h"
 #include "./worldloader.h"
+#include "./gizmo/sequencer.h"
+#include "./gizmo/keymapper.h"
 
 unsigned int framebufferProgram;
 unsigned int quadVAO;
