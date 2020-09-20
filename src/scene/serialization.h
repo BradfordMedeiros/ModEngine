@@ -7,6 +7,7 @@
 #include <sstream>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "./common/util/types.h"
 #include "../common/util.h"
 
 enum ColliderShape { BOX, SPHERE, AUTOSHAPE };
@@ -70,7 +71,7 @@ SerializationObject getDefaultObject(std::string name, std::vector<Field> additi
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens, std::vector<Field> additionalFields);
 std::string getType(std::string name, std::vector<Field> additionalFields);
 
-physicsOpts defaultPhysicsOpts(std::map<std::string, std::string> stringAttributes, std::map<std::string, glm::vec3> vecAttributes);
+physicsOpts defaultPhysicsOpts(GameobjAttributes attributes);
 
 
 #endif

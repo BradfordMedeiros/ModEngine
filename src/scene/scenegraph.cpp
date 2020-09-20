@@ -2,7 +2,14 @@
 
 GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize){
   std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, double> numAttributes;
   std::map<std::string, glm::vec3> vecAttributes;
+
+  GameobjAttributes attributes {
+    .stringAttributes = stringAttributes,
+    .numAttributes = numAttributes,
+    .vecAttributes = vecAttributes,
+  };
 
   GameObject gameObject = {
     .id = id,
@@ -12,7 +19,7 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
       .scale = glm::vec3(1.0f, 1.0f, 1.0f),
       .rotation = glm::identity<glm::quat>(),
     },
-    .physicsOptions = defaultPhysicsOpts(stringAttributes, vecAttributes),
+    .physicsOptions = defaultPhysicsOpts(attributes),
     .lookat =  lookat,
     .layer = layer,
     .script = script,
@@ -136,14 +143,21 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     auto rootObj = scene.idToGameObjects.at(rootId);
   
     std::map<std::string, std::string> stringAttributes;
-    std::map<std::string, glm::vec3> vecAttributes;
+    std::map<std::string, double> numAttributes;
+    std::map<std::string, glm::vec3> vecAttributes;  
+
+    GameobjAttributes attributes {
+      .stringAttributes = stringAttributes,
+      .numAttributes = numAttributes,
+      .vecAttributes = vecAttributes,
+    };
 
     SerializationObject obj {
       .name = names.at(nodeId),  // @TODO this is probably not unique name so probably will be bad
       .position = transform.position,
       .scale = transform.scale,
       .rotation = transform.rotation,
-      .physics = defaultPhysicsOpts(stringAttributes, vecAttributes),
+      .physics = defaultPhysicsOpts(attributes),
       .type = "default",
       .lookat = "",
       .layer = rootObj.layer,
@@ -281,7 +295,7 @@ SerializationObject serialObjectFromFields(
     .position = attributes.vecAttributes.find("position") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
     .scale = attributes.vecAttributes.find("scale") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
     .rotation =  glm::identity<glm::quat>(),
-    .physics = defaultPhysicsOpts(attributes.stringAttributes, attributes.vecAttributes),
+    .physics = defaultPhysicsOpts(attributes),
     .type = getType(name, fields),
     .lookat = attributeOrEmpty(attributes.stringAttributes,"lookat"),
     .layer =  layer,
