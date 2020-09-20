@@ -670,6 +670,10 @@ void onUdpServerMessage(UdpPacket& packet){
   }
 }
 
+float getTotalTime(){
+  return now - initialTime;
+}
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -955,6 +959,9 @@ int main(int argc, char* argv[]){
   interface = SysInterface {
     .loadClip = loadSoundState,
     .unloadClip = unloadSoundState,
+    .loadScript = loadScriptFromWorld,
+    .unloadScript = unloadScript,
+    .getCurrentTime = getTotalTime,
   };
 
   loadAllTextures();
@@ -1004,13 +1011,9 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
+
     processStateMachines();
-    onWorldFrame(
-      world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, 
-      loadScriptFromWorld, getTotalTime,
-      unloadScript,
-      interface
-    );
+    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
 
     maybeGetClientMessage(onClientMessage);
 

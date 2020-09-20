@@ -347,9 +347,7 @@ void addObjectToWorld(
   objid sceneId, 
   SerializationObject& serialObj, 
   bool shouldLoadModel, 
-  std::function<void(std::string, objid)> loadScript, 
   std::function<objid()> getId,
-  std::function<float()> getCurrentTime,
   SysInterface interface
 ){
     auto id =  scene.nameToId.at(serialObj.name);
@@ -366,7 +364,7 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
-      [&world, &scene, sceneId, &loadScript, id, shouldLoadModel, getId, &additionalFields, &getCurrentTime, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -397,7 +395,7 @@ void addObjectToWorld(
           );
 
           for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, newSerialObj, false, loadScript, getId, getCurrentTime, interface);
+            addObjectToWorld(world, scene, sceneId, newSerialObj, false, getId, interface);
           }
           return hasMesh;
         }
@@ -415,15 +413,15 @@ void addObjectToWorld(
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
         setRailSizing(scene, railMesh.boundInfo, id, from, to);
       },
-      [&world, &loadScript, &getCurrentTime, sceneId, id, &interface](std::string sceneToLoad) -> void {
+      [&world, sceneId, id, &interface](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
-        auto childSceneId = addSceneToWorld(world, sceneToLoad, loadScript, getCurrentTime, interface);
+        auto childSceneId = addSceneToWorld(world, sceneToLoad, interface);
         auto rootId = world.scenes.at(childSceneId).rootId;
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
       },
-      [&world, &getCurrentTime, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
-        addEmitter(world.emitters, name, id, getCurrentTime(), limit, spawnrate, lifetime, particleFields);
+      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
+        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields);
       }
     );
 }
@@ -448,13 +446,11 @@ void addSerialObjectsToWorld(
   objid sceneId, 
   std::map<std::string, SerializationObject>& serialObjs,
   std::vector<objid> idsAdded,
-  std::function<void(std::string, objid)> loadScript,
   std::function<objid()> getNewObjectId,
-  std::function<float()> getCurrentTime,
   SysInterface interface
 ){
   for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, loadScript, getNewObjectId, getCurrentTime, interface);
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, getNewObjectId, interface);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
@@ -463,7 +459,7 @@ void addSerialObjectsToWorld(
   for (auto id : idsAdded){
     auto obj = world.scenes.at(sceneId).idToGameObjects.at(id);
     if (obj.script != ""){
-      loadScript(obj.script, id);
+      interface.loadScript(obj.script, id);
     }
   }
 
@@ -473,7 +469,7 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface){
+objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
   assert(world.scenes.find(sceneId) == world.scenes.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
@@ -482,11 +478,11 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
   }
-  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, loadScript, getUniqueObjId, getCurrentTime, interface);
+  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, getUniqueObjId, interface);
   return sceneId;
 }
 
-objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface){
+objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj, SysInterface interface){
   std::vector<objid> idsAdded;
   int numIdsGenerated = 0;
   auto getId = [&idsAdded, &numIdsGenerated, id, useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -505,17 +501,17 @@ objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, Seri
 
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[serialObj.name] = serialObj;
-  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, loadScript, getId, getCurrentTime, interface);
+  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, getId, interface);
 
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   return gameobjId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface){
-  return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), loadScript, getCurrentTime, interface);
+objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface){
+  return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), interface);
 }
 
-void removeObjectById(World& world, objid objectId, std::string name, SysInterface interface, std::function<void(std::string, objid)> unloadScript, std::string scriptName, bool netsynchronized){
+void removeObjectById(World& world, objid objectId, std::string name, SysInterface interface, std::string scriptName, bool netsynchronized){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId);
     assert(rigidBody != NULL);
@@ -524,7 +520,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   }
 
   if (scriptName != ""){
-    unloadScript(scriptName, objectId);
+    interface.unloadScript(scriptName, objectId);
   }
   removeObject(
     world.objectMapping, 
@@ -550,7 +546,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
 }
 // this needs to also delete all children objects. 
-void removeObjectFromScene(World& world, objid objectId, SysInterface interface, std::function<void(std::string, objid)> unloadScript){  
+void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
   Scene& scene = sceneForId(world, objectId);
   auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
   for (auto gameobjId : getIdsInGroup(scene, groupId)){
@@ -564,14 +560,14 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface,
       auto name = gameobj.name;
       auto scriptName = gameobj.script;
       auto netsynchronized = gameobj.netsynchronize;
-      removeObjectById(world, id, name, interface, unloadScript, scriptName, netsynchronized);
+      removeObjectById(world, id, name, interface, scriptName, netsynchronized);
     }
     removeObjectsFromScenegraph(scene, idsToRemove);  
   }
 }
 
 
-void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface, std::function<void(std::string, objid)> unloadScript){
+void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
   if (world.scenes.find(sceneId) == world.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
@@ -583,17 +579,17 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface, s
     auto name = gameobj.name;
     auto scriptName = gameobj.script;
     auto netsynchronized = gameobj.netsynchronize;
-    removeObjectById(world, objectId, name, interface, unloadScript, scriptName, netsynchronized);
+    removeObjectById(world, objectId, name, interface, scriptName, netsynchronized);
   }
   world.scenes.erase(sceneId);
 }
-void removeAllScenesFromWorld(World& world, SysInterface interface, std::function<void(std::string, objid)> unloadScript){
+void removeAllScenesFromWorld(World& world, SysInterface interface){
   std::vector<objid> sceneIds; 
   for (auto [sceneId, _] : world.scenes){
     sceneIds.push_back(sceneId);
   }
   for (auto sceneId : sceneIds){
-    removeSceneFromWorld(world, sceneId, interface, unloadScript);
+    removeSceneFromWorld(world, sceneId, interface);
   }
 }
 
@@ -603,23 +599,21 @@ objid addObjectToScene(
   objid sceneId, 
   std::string name, 
   GameobjAttributes attributes,
-  std::function<void(std::string, objid)> loadScript,
-  std::function<float()> getCurrentTime,
   SysInterface interface
 ){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
   auto serialObj = serialObjectFromFields(name, "default", fields, attributes);
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadScript, getCurrentTime, interface);
+  return addSerialObject(world, sceneId, id, useObjId, serialObj, interface);
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface){
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
   ParsedContent content = parseFormat(serializedObj);
   std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   assert(serialObjs.size() == 1);
   SerializationObject& serialObj = serialObjs.begin() -> second;
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, loadScript, getCurrentTime, interface);
+  return addSerialObject(world, sceneId, id, useObjId, serialObj, interface);
 }
 
 
@@ -788,15 +782,11 @@ void callbackEntities(World& world){
   world.entitiesToUpdate.clear();
 }
 
-void onWorldFrame(
-  World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, 
-  std::function<void(std::string, objid)> loadScript,  std::function<objid()> getCurrentTime,
-  std::function<void(std::string, objid)> unloadScript, SysInterface interface
-){
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
   updateEmitters(
     world.emitters, 
     timeElapsed, 
-    [&world, loadScript, getCurrentTime, &interface](std::string name, std::map<std::string, std::string> particleFields, objid emitterNodeId) -> objid {      
+    [&world, &interface](std::string name, std::map<std::string, std::string> particleFields, objid emitterNodeId) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       auto id = getGameObject(world, name).id;
       auto sceneId = world.idToScene.at(id);
@@ -813,12 +803,12 @@ void onWorldFrame(
         .vecAttributes = vecAttributes,
       };
 
-      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), attributes, loadScript, getCurrentTime, interface);
+      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), attributes, interface);
       return objectAdded;
     }, 
-    [&world, &interface, unloadScript](objid id) -> void { 
+    [&world, &interface](objid id) -> void { 
       std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
-      removeObjectFromScene(world, id, interface, unloadScript);
+      removeObjectFromScene(world, id, interface);
     }
   );  // need to make 0 be total elapsed time   
 

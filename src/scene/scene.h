@@ -42,16 +42,16 @@ World createWorld(
 );
 Texture loadTextureWorld(World& world, std::string texturepath);
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface);
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface);
-objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface);
-void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface, std::function<void(std::string, objid)> unloadScript);
-void removeAllScenesFromWorld(World& world, SysInterface interface, std::function<void(std::string, objid)> unloadScript);
+objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface);
+objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface);
+void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
+void removeAllScenesFromWorld(World& world, SysInterface interface);
 
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, std::function<void(std::string, objid)> loadScript, std::function<float()> getCurrentTime, SysInterface interface);
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface);
 
-void removeObjectFromScene(World& world, objid id, SysInterface interface, std::function<void(std::string, objid)> unloadScript);
+void removeObjectFromScene(World& world, objid id, SysInterface interface);
 
 Properties getProperties(World& world, objid id);
 void setProperties(World& world, objid id, Properties& properties);
@@ -75,12 +75,7 @@ void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, floa
 void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
 void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
 
-void onWorldFrame(
-  World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, 
-  std::function<void(std::string, objid)> loadScript, std::function<objid()> getCurrentTime,
-  std::function<void(std::string, objid)> unloadScript,
-  SysInterface interface
-);
+void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, SysInterface interface);
 
 objid getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, objid id);
