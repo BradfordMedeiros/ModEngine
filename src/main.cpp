@@ -44,6 +44,7 @@
 #include "./worldloader.h"
 #include "./gizmo/sequencer.h"
 #include "./gizmo/keymapper.h"
+#include "./common/sysinterface.h"
 
 unsigned int framebufferProgram;
 unsigned int quadVAO;
@@ -76,6 +77,7 @@ glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+SysInterface interface;
 std::string textureFolderPath;
 float now = 0;
 
@@ -950,6 +952,11 @@ int main(int argc, char* argv[]){
     debuggerDrawer
   );
 
+  interface = SysInterface {
+    .loadClip = loadSoundState,
+    .unloadClip = unloadSoundState,
+  };
+
   loadAllTextures();
 
   dynamicLoading = createDynamicLoading(chunkSize);
@@ -1000,8 +1007,9 @@ int main(int argc, char* argv[]){
     processStateMachines();
     onWorldFrame(
       world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, 
-      loadSoundState, loadScriptFromWorld, getTotalTime,
-      unloadSoundState, unloadScript
+      loadScriptFromWorld, getTotalTime,
+      unloadScript,
+      interface
     );
 
     maybeGetClientMessage(onClientMessage);

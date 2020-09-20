@@ -1,6 +1,7 @@
 #include "./main_api.h"
 
 extern World world;
+extern SysInterface interface;
 extern AnimationState animations;
 extern GameObject* activeCameraObj;
 extern engineState state;
@@ -75,7 +76,7 @@ void loadScriptFromWorld(std::string script, short id){
 }
 short loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-  return addSceneToWorld(world, sceneFile, loadSoundState, loadScriptFromWorld, getTotalTime);
+  return addSceneToWorld(world, sceneFile, loadScriptFromWorld, getTotalTime, interface);
 }
 short loadSceneObj(std::string sceneFile, short sceneId){
   std::cout << "INFO: SCENE LOADING: loading subscene" << sceneFile << std::endl;
@@ -83,15 +84,15 @@ short loadSceneObj(std::string sceneFile, short sceneId){
 
 short loadSceneData(std::string sceneData, objid sceneId){
   std::cout << "INFO: SCENE LOADING: loading from scene data" << std::endl;
-  return addSceneToWorldFromData(world, sceneId, sceneData, loadSoundState, loadScriptFromWorld, getTotalTime);
+  return addSceneToWorldFromData(world, sceneId, sceneData, loadScriptFromWorld, getTotalTime, interface);
 }
 
 void unloadScene(short sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  removeSceneFromWorld(world, sceneId, unloadSoundState, unloadScript);
+  removeSceneFromWorld(world, sceneId, interface, unloadScript);
 }
 void unloadAllScenes(){
-  removeAllScenesFromWorld(world, unloadSoundState, unloadScript);
+  removeAllScenesFromWorld(world, interface, unloadScript);
 }
 
 // @TODO - save all the scenes in the world
@@ -189,7 +190,7 @@ void setSelectionMode(bool enabled){
 }
 
 short makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
-  return addObjectToScene(world, useSceneId ? sceneId : world.scenes.begin() -> first, serializedobj, id, useObjId, loadSoundState, loadScriptFromWorld, getTotalTime);
+  return addObjectToScene(world, useSceneId ? sceneId : world.scenes.begin() -> first, serializedobj, id, useObjId, loadScriptFromWorld, getTotalTime, interface);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
   assert(world.scenes.size() > 0); 
@@ -199,11 +200,11 @@ objid makeObjectAttr(std::string name, std::map<std::string, std::string> string
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
   };
-  return addObjectToScene(world, world.scenes.begin() -> first, name, attributes, loadSoundState, loadScriptFromWorld, getTotalTime);
+  return addObjectToScene(world, world.scenes.begin() -> first, name, attributes, loadScriptFromWorld, getTotalTime, interface);
 }
 
 void removeObjectById(short id){
-  removeObjectFromScene(world, id, unloadSoundState, unloadScript);
+  removeObjectFromScene(world, id, interface, unloadScript);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

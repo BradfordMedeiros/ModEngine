@@ -13,6 +13,7 @@
 #include "./sounds/soundmanager.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
+#include "./common/sysinterface.h"
 
 enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
 struct SetupPacket {
