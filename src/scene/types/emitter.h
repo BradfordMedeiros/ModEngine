@@ -2,8 +2,11 @@
 #define MOD_EMITTER
 
 #include <vector>
-#include "./common/mesh.h"
 #include <queue>
+#include <iostream>
+#include <functional>
+#include <map>
+#include "../../common/util.h"
 
 struct Emitter {
   std::string name;

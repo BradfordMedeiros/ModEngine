@@ -8,7 +8,7 @@
 #include <variant>
 #include "./common/mesh.h"
 #include "./scenegraph.h"
-#include "./voxels.h"
+#include "./types//voxels.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

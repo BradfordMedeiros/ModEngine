@@ -6,8 +6,8 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <functional>
-#include "./common/mesh.h"
-#include "../common/util.h"
+#include "../common/mesh.h"
+#include "../../common/util.h"
 
 // @TODO instancing/gpu rendering/marching cubes etc all good stuff, but just want an implementation for now
 
