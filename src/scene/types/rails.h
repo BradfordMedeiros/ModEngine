@@ -8,7 +8,9 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <iostream>
+#include "../common/util/types.h"
 #include "../../common/util.h"
+#include "../../translations.h"
 
 struct RailNode {
   std::string from;
@@ -36,5 +38,6 @@ struct NextRail {
 };
 
 NextRail nextPosition(RailSystem& rails, std::function<glm::vec3(std::string)> positionForRail, std::string railName, glm::vec3 position, glm::quat direction); 
+Transformation calcRailSizing(BoundInfo info, Transformation fromTransform, Transformation toTransform);
 
 #endif

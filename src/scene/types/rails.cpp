@@ -92,3 +92,20 @@ void removeEntity(RailSystem& rails, objid id){
     rails.activeRails = newRails;
   }
 }
+
+
+Transformation calcRailSizing(BoundInfo info, Transformation fromTransform, Transformation toTransform){
+  auto fromPosition = fromTransform.position;
+  auto toPosition = toTransform.position;
+  auto zLength = info.zMax - info.zMin;
+  auto distance = glm::distance(fromPosition, toPosition);
+  auto orientation = orientationFromPos(fromPosition, toPosition);
+  glm::vec3 meshOffset = orientation * (glm::vec3(0.f, 0.f, 1.f) * distance * 0.5f);
+
+  Transformation transform {
+    .position = fromPosition - meshOffset,
+    .scale = glm::vec3(1.f, 1.f, distance / zLength),
+    .rotation = orientation,
+  };
+  return transform;
+}

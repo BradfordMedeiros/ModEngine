@@ -316,21 +316,6 @@ std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std
   return additionalFieldsMap;
 }
 
-// Need to take account proper dimensions of the mesh used obj -> should be derivable from mesh boundInfo
-void setRailSizing(Scene& scene, BoundInfo info, objid id, std::string from, std::string to){
-  auto zLength = info.zMax - info.zMin;
-  auto fromPosition = getGameObject(scene, from).transformation.position;
-  auto toPosition = getGameObject(scene, to).transformation.position;
-  auto distance = glm::distance(fromPosition, toPosition);
-  auto orientation = orientationFromPos(fromPosition, toPosition);
-  GameObject& obj = getGameObject(scene, id);
-  glm::vec3 meshOffset = orientation * (glm::vec3(0.f, 0.f, 1.f) * distance * 0.5f);
-
-  obj.transformation.scale = glm::vec3(1.f, 1.f, distance / zLength);
-  obj.transformation.position = fromPosition - meshOffset;  
-  obj.transformation.rotation = orientation;
-}
-
 std::string getType(std::string name, std::vector<Field> additionalFields){
   std::string type = "default";
   for (Field field : additionalFields){
@@ -411,7 +396,7 @@ void addObjectToWorld(
       [&world, &scene](objid id, std::string from, std::string to) -> void {
         addRail(world.rails, getGameObject(scene, id).name, from, to);
         auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
-        setRailSizing(scene, railMesh.boundInfo, id, from, to);
+        getGameObject(scene, id).transformation = calcRailSizing(railMesh.boundInfo, getGameObject(scene, from).transformation, getGameObject(scene, to).transformation);
       },
       [&world, sceneId, id, &interface](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
