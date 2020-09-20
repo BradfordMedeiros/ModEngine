@@ -592,16 +592,14 @@ objid addObjectToScene(
   World& world, 
   objid sceneId, 
   std::string name, 
-  std::map<std::string, std::string> stringAttributes,
-  std::map<std::string, double> numAttributes, 
-  std::map<std::string, glm::vec3> vecAttributes,
+  GameobjAttributes attributes,
   std::function<void(std::string)> loadClip, 
   std::function<void(std::string, objid)> loadScript,
   std::function<float()> getCurrentTime
 ){
-  int id = numAttributes.find("id") != numAttributes.end() ? numAttributes.at("id") : -1;
-  bool useObjId = numAttributes.find("id") != numAttributes.end();
-  auto serialObj = serialObjectFromFields(name, "default", fields, stringAttributes, vecAttributes);
+  int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
+  bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
+  auto serialObj = serialObjectFromFields(name, "default", fields, attributes.stringAttributes, attributes.vecAttributes);
   return addSerialObject(world, sceneId, id, useObjId, serialObj, loadClip, loadScript, getCurrentTime);
 }
 
@@ -799,8 +797,13 @@ void onWorldFrame(
       vecAttributes["physics_gravity"] = glm::vec3(0.f, -1.f, 0.f);
       vecAttributes["position"] = fullTransformation(world, emitterNodeId).position;
 
-      // TODO need to parent this:
-      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), particleFields, numAttributes, vecAttributes, loadClip, loadScript, getCurrentTime);
+      GameobjAttributes attributes {
+        .stringAttributes = particleFields,
+        .numAttributes = numAttributes,
+        .vecAttributes = vecAttributes,
+      };
+
+      objid objectAdded = addObjectToScene(world, sceneId, std::string("basicname") + "--" + std::to_string(id), attributes, loadClip, loadScript, getCurrentTime);
       return objectAdded;
     }, 
     [&world, unloadClip, unloadScript](objid id) -> void { 

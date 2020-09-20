@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <map>
 #include "./boundinfo.h"
 
 struct Line {
@@ -28,6 +29,12 @@ struct PhysicsInfo {
   BoundInfo boundInfo;
   glm::vec3 collisionInfo;
   Transformation transformation;
+};
+
+struct GameobjAttributes {
+  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, double> numAttributes;
+  std::map<std::string, glm::vec3> vecAttributes;
 };
 
 #endif

@@ -193,7 +193,13 @@ short makeObject(std::string serializedobj, objid id, bool useObjId, objid scene
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
   assert(world.scenes.size() > 0); 
-  return addObjectToScene(world, world.scenes.begin() -> first, name, stringAttributes, numAttributes, vecAttributes, loadSoundState, loadScriptFromWorld, getTotalTime);
+
+  GameobjAttributes attributes {
+    .stringAttributes = stringAttributes,
+    .numAttributes = numAttributes,
+    .vecAttributes = vecAttributes,
+  };
+  return addObjectToScene(world, world.scenes.begin() -> first, name, attributes, loadSoundState, loadScriptFromWorld, getTotalTime);
 }
 
 void removeObjectById(short id){

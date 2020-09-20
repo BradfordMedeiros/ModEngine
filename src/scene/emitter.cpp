@@ -64,7 +64,6 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
 }
 
 void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, std::function<void(objid)> rmParticle){   
-  std::vector<std::string> emitterToRemove;
   for (auto &emitter : system.emitters){
     if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
       emitter.currentParticles-= 1;
