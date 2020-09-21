@@ -35,6 +35,9 @@ struct GameobjAttributes {
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, double> numAttributes;
   std::map<std::string, glm::vec3> vecAttributes;
+
+  std::map<std::string, std::string> additionalAttributes;
+
 };
 
 #endif

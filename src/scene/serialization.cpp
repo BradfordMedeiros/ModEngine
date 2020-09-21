@@ -113,8 +113,65 @@ SerializationObject getDefaultObject(std::string name, std::string layer){
   return newObject;
 }
 
+GameobjAttributes getDefaultAttributes(){
+  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, double> numAttributes;
+  std::map<std::string, glm::vec3> vecAttributes;
+  std::map<std::string, std::string> additionalAttributes;
+  GameobjAttributes attributes { 
+    .stringAttributes = stringAttributes,
+    .numAttributes = numAttributes,
+    .vecAttributes = vecAttributes,
+
+    .additionalAttributes = additionalAttributes,
+  };
+  return attributes;
+}
+
 std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
+}
+  
+// TODO move id to integer attributes
+std::vector<std::string> stringAttributes { "id", "physics", "physics_type", "physics_shape", "physics_collision", "lookat", "script", "fragshader", "net"};
+std::vector<std::string> numAttributes { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed" };
+std::vector<std::string> vecAttributes { "position", "scale", "rotation", "physics_angle", "physics_linear", "physics_gravity" };
+
+std::map<std::string, GameobjAttributes> deserializeScene(std::vector<Token> tokens){
+  std::map<std::string, GameobjAttributes> objects;
+  for (Token token : tokens){
+    assert(token.target != "" && token.attribute != "" && token.payload != "");
+    if (objects.find(token.target) == objects.end()) {
+      objects[token.target] = getDefaultAttributes();
+    }
+    if (token.attribute == "child"){                    // special case to make sure all child objects have a part in the mapping
+      auto children = parseChildren(token.payload);
+      for (auto child : children){
+        if (objects.find(child) == objects.end()){
+          objects[child] = getDefaultAttributes();
+        }
+      }
+      continue;
+    }
+
+    auto isStringAttribute = std::find(stringAttributes.begin(), stringAttributes.end(), token.attribute) != stringAttributes.end();
+    if (isStringAttribute){
+      objects.at(token.target).stringAttributes[token.attribute] = token.payload;
+      continue;
+    }
+    auto isNumAttribute = std::find(numAttributes.begin(), numAttributes.end(), token.attribute) != numAttributes.end();
+    if (isNumAttribute){
+      objects.at(token.target).numAttributes[token.attribute] = std::atof(token.payload.c_str());
+      continue;
+    }
+    auto isVecAttribute = std::find(vecAttributes.begin(), vecAttributes.end(), token.attribute) != vecAttributes.end();
+    if (isVecAttribute){
+      objects.at(token.target).vecAttributes[token.attribute] = parseVec(token.payload);
+      continue;
+    }
+    objects.at(token.target).additionalAttributes[token.attribute] = token.payload;
+  }
+  return objects;
 }
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
