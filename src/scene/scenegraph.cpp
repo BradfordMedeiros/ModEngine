@@ -311,9 +311,9 @@ SerializationObject serialObjectFromFields(
   return serialObj;
 }
 
+// @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
+// Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId){
-   // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
-  // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto objectId = getNewObjectId();
   addObjectToScene(scene, objectId, -1, serialObj.name, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj), serialObj.physics);      
   for (auto child : serialObj.children){
