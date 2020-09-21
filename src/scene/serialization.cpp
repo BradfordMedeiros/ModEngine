@@ -137,7 +137,7 @@ std::vector<std::string> stringAttributes { "id", "physics", "physics_type", "ph
 std::vector<std::string> numAttributes { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed" };
 std::vector<std::string> vecAttributes { "position", "scale", "rotation", "physics_angle", "physics_linear", "physics_gravity" };
 
-std::map<std::string, GameobjAttributes> deserializeScene(std::vector<Token> tokens){
+std::map<std::string, GameobjAttributes> deserializeSceneIntoAttributes(std::vector<Token> tokens){
   std::map<std::string, GameobjAttributes> objects;
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");

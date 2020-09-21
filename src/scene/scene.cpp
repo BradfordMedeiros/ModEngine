@@ -330,15 +330,13 @@ void addObjectToWorld(
   World& world, 
   Scene& scene, 
   objid sceneId, 
-  SerializationObject& serialObj, 
   bool shouldLoadModel, 
   std::function<objid()> getId,
-  SysInterface interface
+  SysInterface interface,
+  std::string name,
+  std::map<std::string, std::string> additionalFields
 ){
-    auto id =  scene.nameToId.at(serialObj.name);
-    auto type = getType(serialObj.name, fields);
-    auto additionalFields = serialObj.additionalFields;
-    auto name = serialObj.name;
+    auto id =  scene.nameToId.at(name);
 
     if (world.idToScene.find(id) != world.idToScene.end()){
       std::cout << "id already in the scene: " << id << std::endl;
@@ -348,7 +346,7 @@ void addObjectToWorld(
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
+    addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
       [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
@@ -380,7 +378,7 @@ void addObjectToWorld(
           );
 
           for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, newSerialObj, false, getId, interface);
+            addObjectToWorld(world, scene, sceneId, false, getId, interface, newSerialObj.name, newSerialObj.additionalFields);
           }
           return hasMesh;
         }
@@ -435,7 +433,7 @@ void addSerialObjectsToWorld(
   SysInterface interface
 ){
   for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, getNewObjectId, interface);
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, true, getNewObjectId, interface, serialObj.name, serialObj.additionalFields);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
