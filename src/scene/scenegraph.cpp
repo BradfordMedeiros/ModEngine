@@ -1,6 +1,25 @@
 #include "./scenegraph.h"
 
-GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize){
+GameObject getGameObject(std::string name, objid id, bool netsynchronize, GameobjAttributes attributes, physicsOpts physics){
+  GameObject gameObject = {
+    .id = id,
+    .name = name,
+    .transformation = Transformation {
+      .position = attributes.vecAttributes.find("position") == attributes.vecAttributes.end() ? glm::vec3(0.f, 0.f, 0.f) :  attributes.vecAttributes.at("position"),
+      .scale = attributes.vecAttributes.find("scale") == attributes.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attributes.vecAttributes.at("scale"),
+      .rotation = glm::identity<glm::quat>(),
+    },
+    .physicsOptions =  physics, //defaultPhysicsOpts(attributes),
+    .lookat = attributes.stringAttributes.at("lookat"),
+    .layer = attributes.stringAttributes.at("layer"),
+    .script = attributes.stringAttributes.at("script"),
+    .fragshader = attributes.stringAttributes.at("fragshader"),
+    .netsynchronize = netsynchronize,
+  };
+  return gameObject;
+}
+
+void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObject& serialObj, glm::quat rotation){
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, double> numAttributes;
   std::map<std::string, glm::vec3> vecAttributes;
@@ -10,31 +29,15 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
   };
+  attributes.vecAttributes["position"] = serialObj.position;
+  attributes.vecAttributes["scale"] = serialObj.scale;
+  attributes.stringAttributes["layer"] = serialObj.layer;
+  attributes.stringAttributes["lookat"] = serialObj.lookat;
+  attributes.stringAttributes["script"] = serialObj.script;
+  attributes.stringAttributes["fragshader"] = serialObj.fragshader;
 
-  GameObject gameObject = {
-    .id = id,
-    .name = name,
-    .transformation = Transformation {
-      .position = position,
-      .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-      .rotation = glm::identity<glm::quat>(),
-    },
-    .physicsOptions = defaultPhysicsOpts(attributes),
-    .lookat =  lookat,
-    .layer = layer,
-    .script = script,
-    .fragshader = fragshader,
-    .netsynchronize = netsynchronize,
-  };
-  return gameObject;
-}
-
-void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObject& serialObj){
-  auto gameobjectObj = getGameObject(serialObj.position, serialObj.name, id, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.fragshader, serialObj.netsynchronize);
-  gameobjectObj.transformation.position = serialObj.position;
-  gameobjectObj.transformation.scale = serialObj.scale;
-  gameobjectObj.transformation.rotation = serialObj.rotation;
-  gameobjectObj.physicsOptions = serialObj.physics;
+  auto gameobjectObj = getGameObject(serialObj.name, id, serialObj.netsynchronize, attributes, serialObj.physics);
+  gameobjectObj.transformation.rotation = rotation;
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
@@ -89,9 +92,9 @@ SceneDeserialization createSceneFromParsedContent(
   for (auto [_, serialObj] : serialObjs){
     if (serialObj.name != rootName){
       objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-      addObjectToScene(scene, id, -1, serialObj);
+      addObjectToScene(scene, id, -1, serialObj, serialObj.rotation);
     }else{
-      addObjectToScene(scene, scene.rootId, -1, serialObj);
+      addObjectToScene(scene, scene.rootId, -1, serialObj, serialObj.rotation);
     }
   }
 
@@ -167,7 +170,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     };
     serialObjs[names.at(nodeId)] = obj;
 
-    addObjectToScene(scene, id, -1, obj);
+    addObjectToScene(scene, id, -1, obj, obj.rotation);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -309,7 +312,7 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto objectId = getNewObjectId();
-  addObjectToScene(scene, objectId, -1, serialObj);      
+  addObjectToScene(scene, objectId, -1, serialObj, serialObj.rotation);      
   for (auto child : serialObj.children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
