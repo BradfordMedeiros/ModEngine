@@ -427,13 +427,13 @@ std::string serializeObject(World& world, objid id){
 void addSerialObjectsToWorld(
   World& world, 
   objid sceneId, 
-  std::map<std::string, SerializationObject>& serialObjs,
   std::vector<objid> idsAdded,
   std::function<objid()> getNewObjectId,
-  SysInterface interface
+  SysInterface interface,
+  std::map<std::string, std::map<std::string, std::string>> additionalFields
 ){
-  for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, true, getNewObjectId, interface, serialObj.name, serialObj.additionalFields);
+  for (auto &[name, fields] : additionalFields){
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, true, getNewObjectId, interface, name, fields);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
@@ -461,7 +461,13 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
   }
-  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, getUniqueObjId, interface);
+
+  std::map<std::string, std::map<std::string, std::string>> additionalFieldsObjs;
+  for (auto [name, serialObj] : deserializedScene.serialObjs){
+    additionalFieldsObjs[name] = serialObj.additionalFields;
+  }
+
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getUniqueObjId, interface, additionalFieldsObjs);
   return sceneId;
 }
 
@@ -484,7 +490,11 @@ objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, Seri
 
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[serialObj.name] = serialObj;
-  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, getId, interface);
+
+  std::map<std::string, std::map<std::string, std::string>> additionalFieldsObjs;
+  additionalFieldsObjs[serialObj.name] = serialObj.additionalFields;
+
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsObjs);
 
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
   return gameobjId;
