@@ -1,6 +1,6 @@
 #include "./scenegraph.h"
 
-GameObject getGameObject(std::string name, objid id, bool netsynchronize, GameobjAttributes attributes, physicsOpts physics, glm::quat rotation){
+GameObject getGameObject(std::string name, objid id, GameobjAttributes attributes, physicsOpts physics, glm::quat rotation){
   GameObject gameObject = {
     .id = id,
     .name = name,
@@ -14,7 +14,7 @@ GameObject getGameObject(std::string name, objid id, bool netsynchronize, Gameob
     .layer = attributes.stringAttributes.at("layer"),
     .script = attributes.stringAttributes.at("script"),
     .fragshader = attributes.stringAttributes.at("fragshader"),
-    .netsynchronize = netsynchronize,
+    .netsynchronize = attributes.stringAttributes.find("net") != attributes.stringAttributes.end() &&  attributes.stringAttributes.at("net") == "sync",
   };
   return gameObject;
 }
@@ -43,8 +43,7 @@ GameobjAttributes someAttributesFromObj(SerializationObject& serialObj){
 
 
 void addObjectToScene(Scene& scene, objid id, objid parentId, std::string name, glm::quat rotation, GameobjAttributes attributes, physicsOpts physics){
-  bool netsynchronize = attributes.stringAttributes.find("net") != attributes.stringAttributes.end() &&  attributes.stringAttributes.at("net") == "sync";
-  auto gameobjectObj = getGameObject(name, id, netsynchronize, attributes, physics, rotation);
+  auto gameobjectObj = getGameObject(name, id, attributes, physics, rotation);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
