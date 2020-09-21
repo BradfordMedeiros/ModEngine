@@ -1,13 +1,13 @@
 #include "./scenegraph.h"
 
-GameObject getGameObject(std::string name, objid id, bool netsynchronize, GameobjAttributes attributes, physicsOpts physics){
+GameObject getGameObject(std::string name, objid id, bool netsynchronize, GameobjAttributes attributes, physicsOpts physics, glm::quat rotation){
   GameObject gameObject = {
     .id = id,
     .name = name,
     .transformation = Transformation {
       .position = attributes.vecAttributes.find("position") == attributes.vecAttributes.end() ? glm::vec3(0.f, 0.f, 0.f) :  attributes.vecAttributes.at("position"),
       .scale = attributes.vecAttributes.find("scale") == attributes.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attributes.vecAttributes.at("scale"),
-      .rotation = glm::identity<glm::quat>(),
+      .rotation = rotation,
     },
     .physicsOptions =  physics, //defaultPhysicsOpts(attributes),
     .lookat = attributes.stringAttributes.at("lookat"),
@@ -19,7 +19,7 @@ GameObject getGameObject(std::string name, objid id, bool netsynchronize, Gameob
   return gameObject;
 }
 
-void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObject& serialObj, glm::quat rotation){
+GameobjAttributes someAttributesFromObj(SerializationObject& serialObj){
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, double> numAttributes;
   std::map<std::string, glm::vec3> vecAttributes;
@@ -35,9 +35,12 @@ void addObjectToScene(Scene& scene, objid id, objid parentId, SerializationObjec
   attributes.stringAttributes["lookat"] = serialObj.lookat;
   attributes.stringAttributes["script"] = serialObj.script;
   attributes.stringAttributes["fragshader"] = serialObj.fragshader;
+  return attributes;
+}
 
-  auto gameobjectObj = getGameObject(serialObj.name, id, serialObj.netsynchronize, attributes, serialObj.physics);
-  gameobjectObj.transformation.rotation = rotation;
+
+void addObjectToScene(Scene& scene, objid id, objid parentId, std::string name, SerializationObject& serialObj, glm::quat rotation, bool netsynchronize, GameobjAttributes attributes){
+  auto gameobjectObj = getGameObject(name, id, netsynchronize, attributes, serialObj.physics, rotation);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
@@ -92,9 +95,9 @@ SceneDeserialization createSceneFromParsedContent(
   for (auto [_, serialObj] : serialObjs){
     if (serialObj.name != rootName){
       objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-      addObjectToScene(scene, id, -1, serialObj, serialObj.rotation);
+      addObjectToScene(scene, id, -1, serialObj.name, serialObj, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj));
     }else{
-      addObjectToScene(scene, scene.rootId, -1, serialObj, serialObj.rotation);
+      addObjectToScene(scene, scene.rootId, -1, serialObj.name, serialObj, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj));
     }
   }
 
@@ -170,7 +173,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     };
     serialObjs[names.at(nodeId)] = obj;
 
-    addObjectToScene(scene, id, -1, obj, obj.rotation);
+    addObjectToScene(scene, id, -1, obj.name, obj, obj.rotation, obj.netsynchronize, someAttributesFromObj(obj));
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -312,7 +315,7 @@ void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::f
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto objectId = getNewObjectId();
-  addObjectToScene(scene, objectId, -1, serialObj, serialObj.rotation);      
+  addObjectToScene(scene, objectId, -1, serialObj.name, serialObj, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj));      
   for (auto child : serialObj.children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
