@@ -35,11 +35,15 @@ GameobjAttributes someAttributesFromObj(SerializationObject& serialObj){
   attributes.stringAttributes["lookat"] = serialObj.lookat;
   attributes.stringAttributes["script"] = serialObj.script;
   attributes.stringAttributes["fragshader"] = serialObj.fragshader;
+  if (serialObj.netsynchronize){
+    attributes.stringAttributes["net"] = "sync";
+  }
   return attributes;
 }
 
 
-void addObjectToScene(Scene& scene, objid id, objid parentId, std::string name, glm::quat rotation, bool netsynchronize, GameobjAttributes attributes, physicsOpts physics){
+void addObjectToScene(Scene& scene, objid id, objid parentId, std::string name, glm::quat rotation, GameobjAttributes attributes, physicsOpts physics){
+  bool netsynchronize = attributes.stringAttributes.find("net") != attributes.stringAttributes.end() &&  attributes.stringAttributes.at("net") == "sync";
   auto gameobjectObj = getGameObject(name, id, netsynchronize, attributes, physics, rotation);
 
   auto gameobjectH = GameObjectH {
@@ -95,9 +99,9 @@ SceneDeserialization createSceneFromParsedContent(
   for (auto [_, serialObj] : serialObjs){
     if (serialObj.name != rootName){
       objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-      addObjectToScene(scene, id, -1, serialObj.name, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj), serialObj.physics);
+      addObjectToScene(scene, id, -1, serialObj.name, serialObj.rotation, someAttributesFromObj(serialObj), serialObj.physics);
     }else{
-      addObjectToScene(scene, scene.rootId, -1, serialObj.name, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj), serialObj.physics);
+      addObjectToScene(scene, scene.rootId, -1, serialObj.name, serialObj.rotation, someAttributesFromObj(serialObj), serialObj.physics);
     }
   }
 
@@ -173,7 +177,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     };
     serialObjs[names.at(nodeId)] = obj;
 
-    addObjectToScene(scene, id, -1, obj.name, obj.rotation, obj.netsynchronize, someAttributesFromObj(obj), obj.physics);
+    addObjectToScene(scene, id, -1, obj.name, obj.rotation, someAttributesFromObj(obj), obj.physics);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -315,7 +319,7 @@ SerializationObject serialObjectFromFields(
 // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
 void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId){
   auto objectId = getNewObjectId();
-  addObjectToScene(scene, objectId, -1, serialObj.name, serialObj.rotation, serialObj.netsynchronize, someAttributesFromObj(serialObj), serialObj.physics);      
+  addObjectToScene(scene, objectId, -1, serialObj.name, serialObj.rotation, someAttributesFromObj(serialObj), serialObj.physics);      
   for (auto child : serialObj.children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
