@@ -336,7 +336,6 @@ void addObjectToWorld(
   SysInterface interface
 ){
     auto id =  scene.nameToId.at(serialObj.name);
-    auto type = getType(serialObj.name, fields);
     auto additionalFields = serialObj.additionalFields;
     auto name = serialObj.name;
 
@@ -348,7 +347,7 @@ void addObjectToWorld(
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    addObject(id, type, additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
+    addObject(id, getType(serialObj.name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
       [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
