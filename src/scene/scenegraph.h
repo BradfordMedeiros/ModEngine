@@ -61,7 +61,8 @@ SerializationObject serialObjectFromFields(
   GameobjAttributes attributes
 );
 
-void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
+GameobjAttributes someAttributesFromObj(SerializationObject& serialObj);
+void addSerialObjectToScene(Scene& scene, std::function<objid()> getNewObjectId, std::string name, std::vector<std::string> children, GameobjAttributes attributes, glm::quat rotation, physicsOpts physics);
 void addChildLink(Scene& scene, objid childId, objid parentId);
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(

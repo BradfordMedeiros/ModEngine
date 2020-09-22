@@ -486,7 +486,7 @@ objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, Seri
     return newId;
   };
 
-  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
+  addSerialObjectToScene(world.scenes.at(sceneId), getId, serialObj.name, serialObj.children, someAttributesFromObj(serialObj), serialObj.rotation, serialObj.physics);
 
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[serialObj.name] = serialObj;

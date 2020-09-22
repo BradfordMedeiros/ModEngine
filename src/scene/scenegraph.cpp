@@ -316,16 +316,16 @@ SerializationObject serialObjectFromFields(
 
 // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
 // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
-void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId){
+void addSerialObjectToScene(Scene& scene, std::function<objid()> getNewObjectId, std::string name, std::vector<std::string> children, GameobjAttributes attributes, glm::quat rotation, physicsOpts physics){
   auto objectId = getNewObjectId();
-  addObjectToScene(scene, objectId, -1, serialObj.name, serialObj.rotation, someAttributesFromObj(serialObj), serialObj.physics);      
-  for (auto child : serialObj.children){
+  addObjectToScene(scene, objectId, -1, name, rotation, attributes, physics);      
+  for (auto child : children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
       std::cout << "ERROR: NOT YET IMPLEMENTED : ADDING OBJECT WITH CHILD THAT DOES NOT EXIST IN THE SCENE" << std::endl;
       assert(false);
     }
-    enforceParentRelationship(scene, scene.nameToId.at(child), serialObj.name);  
+    enforceParentRelationship(scene, scene.nameToId.at(child), name);  
   }
   enforceRootObjects(scene);
 }
