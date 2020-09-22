@@ -33,10 +33,8 @@ const float emissionAmount = 1;
 uniform float discardTexAmount;
 
 void main(){
-  if (tint.r < 0.1){
-    FragColor = vec4(tint.r, tint.g, tint.b, 1.0);
-  }else{
-    vec2 adjustedTexCoord = TexCoord + textureOffset;
+
+vec2 adjustedTexCoord = TexCoord + textureOffset;
     vec4 diffuseColor = texture(maintexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
     vec4 emissionColor = texture(emissionTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
     vec4 opacityColor = texture(opacityTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
@@ -85,5 +83,5 @@ void main(){
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
     FragColor = color * vec4(tint.x, tint.y, tint.z, 1.0);
-  }
+  
 }

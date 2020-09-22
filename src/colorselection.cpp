@@ -6,14 +6,7 @@ Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight) {
     return color;
 }
 
-glm::vec3 getColorFromGameobject(objid id, bool useSelectionColor, bool isSelected){
-  if (isSelected){
-    return glm::vec3(1.0f, 0.0f, 0.0f);
-  }
-  if (!useSelectionColor){
-    return glm::vec3(1.0f, 1.0f, 1.0f);
-  }
-
+glm::vec3 getColorFromGameobject(objid id){
   int redChannel = id % 255;
   int greenChannel = (id / 255) % 255;
   int blueChannel = (id / (255 * 255)) % (255 * 255); // so order of 255^3 ~ 16581375

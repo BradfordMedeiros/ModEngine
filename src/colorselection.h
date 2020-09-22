@@ -12,7 +12,7 @@ struct Color {
 };
 
 Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight);
-glm::vec3 getColorFromGameobject(objid id, bool useSelectionColor, bool isSelected);
+glm::vec3 getColorFromGameobject(objid id);
 unsigned int getIdFromColor(Color color);
 
 #endif
