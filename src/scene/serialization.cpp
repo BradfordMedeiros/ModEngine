@@ -83,11 +83,11 @@ ParsedContent parseFormat(std::string content) {
 }
 
 
-SerializationObject getDefaultObject(std::string name, std::string layer){
+SerializationObject getDefaultObject(std::string name, std::string layer, bool enablePhysics){
   assert(name.find(',') == std::string::npos);
 
   physicsOpts physics {
-    .enabled = true,
+    .enabled = enablePhysics,
     .isStatic = true,
     .hasCollisions = true,
     .shape = AUTOSHAPE,
@@ -124,14 +124,14 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject(token.target, token.layer);
+      objects[token.target] = getDefaultObject(token.target, token.layer, true);
     }
 
     if (token.attribute == "child"){
       auto children = parseChildren(token.payload);
       for (auto child : children){
         if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject(child, token.layer);
+          objects[child] = getDefaultObject(child, token.layer, true);
         }
       }
       objects.at(token.target).children = children;

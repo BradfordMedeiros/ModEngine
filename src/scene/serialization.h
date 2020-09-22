@@ -65,7 +65,7 @@ struct ParsedContent {
   std::vector<LayerInfo> layers;
 };
 ParsedContent parseFormat(std::string content);
-SerializationObject getDefaultObject(std::string name, std::string layer);
+SerializationObject getDefaultObject(std::string name, std::string layer, bool enablePhysics);
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
 physicsOpts defaultPhysicsOpts(GameobjAttributes attributes);
 

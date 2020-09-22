@@ -83,8 +83,7 @@ SceneDeserialization createSceneFromParsedContent(
   scene.rootId = rootId;
   assert(serialObjs.find(rootName) == serialObjs.end());
 
-  serialObjs[rootName] = getDefaultObject(rootName, "default");
-  serialObjs[rootName].physics.enabled = false;
+  serialObjs[rootName] = getDefaultObject(rootName, "default", false);
 
   for (auto [_, serialObj] : serialObjs){
     if (serialObj.name != rootName){
