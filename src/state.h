@@ -19,7 +19,7 @@ struct engineState {
   unsigned int currentScreenHeight;
   int cursorLeft;
   int cursorTop;
-  short selectedIndex;
+  int32_t selectedIndex;
   unsigned int activeCamera;
   std::string additionalText;
   bool enableManipulator;

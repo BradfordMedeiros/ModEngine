@@ -8,13 +8,13 @@
 #include "./scheme_bindings.h"
 
 typedef void(*func)();
-typedef void(*colposfun)(short obj1, short obj2, glm::vec3 pos);
-typedef void(*colfun)(short obj1, short obj2);
+typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos);
+typedef void(*colfun)(int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
-typedef void(*onobjectSelectedFunc)(short index);
+typedef void(*onobjectSelectedFunc)(int32_t index);
 typedef void(*boolfunc)(bool value);
 typedef void(*messagefunc)(std::queue<std::string>&);
 typedef void(*stringfunc)(std::string);

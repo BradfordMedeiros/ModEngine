@@ -170,7 +170,7 @@ BoneInfo processBones(aiMesh* mesh){
   return info;
 }
 
-void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeighting>>&  vertexBoneWeight, int vertexId, short* indices, float* weights, int size){
+void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeighting>>&  vertexBoneWeight, int vertexId, int32_t* indices, float* weights, int size){
   std::vector<BoneWeighting> weighting;
   if (vertexBoneWeight.find(vertexId) != vertexBoneWeight.end()){
     weighting = vertexBoneWeight.at(vertexId);
@@ -212,7 +212,7 @@ void dumpVerticesData(std::string modelPath, MeshData& model){
   }
 } 
 
-int getIndexByName(std::map<short, std::string>& names, std::string name){
+int getIndexByName(std::map<int32_t, std::string>& names, std::string name){
   for (auto &[id, nameInNames] : names){
     if (nameInNames == name){
       return id;
@@ -228,7 +228,7 @@ bool hasBone(std::vector<Bone>&bones, std::string boneName){
   }
   return false;
 }
-std::map<std::string, std::string> getBoneHierarchy(std::map<short, std::string>& names, std::map<short, short>& childToParent, std::map<short, MeshData>& meshIdToMeshData){
+std::map<std::string, std::string> getBoneHierarchy(std::map<int32_t, std::string>& names, std::map<int32_t, int32_t>& childToParent, std::map<int32_t, MeshData>& meshIdToMeshData){
   std::map<std::string, std::string> boneToParent;
   for (auto &[_, meshData] : meshIdToMeshData){
     for (auto &bone : meshData.bones){
@@ -359,11 +359,11 @@ ModelData loadModel(std::string modelPath){
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist?");
    } 
 
-   std::map<short, MeshData> meshIdToMeshData;
-   std::map<short, std::vector<int>> nodeToMeshId;
-   std::map<short, short> childToParent;
-   std::map<short, Transformation> nodeTransform;
-   std::map<short, std::string> names;
+   std::map<int32_t, MeshData> meshIdToMeshData;
+   std::map<int32_t, std::vector<int>> nodeToMeshId;
+   std::map<int32_t, int32_t> childToParent;
+   std::map<int32_t, Transformation> nodeTransform;
+   std::map<int32_t, std::string> names;
 
    auto animations = processAnimations(scene);
 
