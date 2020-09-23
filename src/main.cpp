@@ -1001,7 +1001,7 @@ int main(int argc, char* argv[]){
   }
 
   //glEnable(GL_CULL_FACE);  
-  //glEnable(GL_BLEND);
+  glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   while (!glfwWindowShouldClose(window)){
@@ -1083,6 +1083,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1, 0.1, 0.1, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_BLEND);
     
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals);
@@ -1098,6 +1099,7 @@ int main(int argc, char* argv[]){
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glEnable(GL_BLEND);
     assert(portals.size() <= numPortalTextures);
 
     std::map<objid, unsigned int> nextPortalCache;
