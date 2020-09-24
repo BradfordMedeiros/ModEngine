@@ -151,6 +151,11 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
   return obj;
 }
 
+GameObjectHeightmap createHeightmap(){
+  GameObjectHeightmap obj{};
+  return obj;
+}
+
 void addObject(
   objid id, 
   std::string objectType, 
@@ -188,6 +193,8 @@ void addObject(
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
     mapping[id] = createEmitter(addEmitter, additionalFields);
+  }else if (objectType == "heightmap"){
+    mapping[id] = createHeightmap();
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -334,6 +341,12 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);   
   }
+
+  auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
+  if (heightmapObj != NULL){
+    std::cout << "INFO: PLACEHOLDER RENDER HEIGHTMAP" << std::endl;
+    assert(false);
+  }
 }
 
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
@@ -382,6 +395,12 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL){
+    assert(false);
+    return attributes;
+  }
+
+  auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
+  if (heightmapObj != NULL){
     assert(false);
     return attributes;
   }
@@ -513,6 +532,11 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&objectToSerialize);
   if (emitterObj != NULL){
+    return {};
+  }
+
+  auto heightmapObj = std::get_if<GameObjectHeightmap>(&objectToSerialize);
+  if (heightmapObj != NULL){
     return {};
   }
 

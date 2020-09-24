@@ -71,8 +71,22 @@ struct GameObjectScene {
 struct GameObjectRoot {};
 
 struct GameObjectEmitter{};
+struct GameObjectHeightmap{};
 
-typedef std::variant<GameObjectMesh, GameObjectCamera, GameObjectPortal, GameObjectSound, GameObjectLight, GameObjectVoxel, GameObjectChannel, GameObjectRail, GameObjectScene, GameObjectRoot, GameObjectEmitter> GameObjectObj;
+typedef std::variant<
+  GameObjectMesh, 
+  GameObjectCamera, 
+  GameObjectPortal, 
+  GameObjectSound, 
+  GameObjectLight, 
+  GameObjectVoxel, 
+  GameObjectChannel, 
+  GameObjectRail, 
+  GameObjectScene, 
+  GameObjectRoot, 
+  GameObjectEmitter,
+  GameObjectHeightmap
+> GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
@@ -137,7 +151,12 @@ static Field emitterField {
   .type = "emitter",
 };
 
-static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField };
+static Field heightmap {
+  .prefix = '-',
+  .type = "heightmap",
+};
+
+static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
