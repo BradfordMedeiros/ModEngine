@@ -343,8 +343,7 @@ void renderObject(
   }
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
-  if (heightmapObj != NULL){
-    std::cout << "INFO: PLACEHOLDER RENDER HEIGHTMAP" << std::endl;
+  if (heightmapObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);   

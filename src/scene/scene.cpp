@@ -165,7 +165,6 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
     };
 
     if (isHeightmapObj){
-      std::cout << "adding heightmap obj" << std::endl;
       rigidBody = addRigidBodyHeightmap(
         world.physicsEnvironment,
         physicsInfo.transformation.position,

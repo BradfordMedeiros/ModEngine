@@ -89,8 +89,17 @@ btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vec
   return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
 }
 btRigidBody* createRigidBodyHeightmap(glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts){
-  return  createRigidBodySphere(pos, 10, rotation, isStatic, true, glm::vec3(1.f, 1.f, 1.f), opts);
+
+  float* data = (float*)malloc(sizeof(float) * 400);
+  for (int i =0 ; i < 80; i++){
+    for (int j =0; j < 5; j++){
+      data[(i * 5) + j] = 0.2f + j * 0.1 + ((i * 5) + j) * 0.01;
+    }
+  }
+  btHeightfieldTerrainShape * shape = new btHeightfieldTerrainShape  (20, 20, data, 1, 0, 10, 1, PHY_FLOAT, false);
+  return createRigidBody(pos, shape, rotation, isStatic, true, glm::vec3(1.f, 1.f, 1.f), opts);
 }
+
 
 void cleanupRigidBody(btRigidBody* body){
   delete body -> getMotionState();
