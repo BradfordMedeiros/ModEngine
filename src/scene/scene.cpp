@@ -148,6 +148,8 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
 
   GameObjectObj& toRender = world.objectMapping.at(id);
   bool isVoxelObj = std::get_if<GameObjectVoxel>(&toRender) != NULL;
+  bool isHeightmapObj = std::get_if<GameObjectHeightmap>(&toRender) != NULL;
+
   
   if (groupPhysicsInfo.isRoot){
     auto physicsOptions = groupPhysicsInfo.physicsOptions;
@@ -162,9 +164,17 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
       .mass = physicsOptions.mass,
     };
 
-    if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
+    if (isHeightmapObj){
+      std::cout << "adding heightmap obj" << std::endl;
+      rigidBody = addRigidBodyHeightmap(
+        world.physicsEnvironment,
+        physicsInfo.transformation.position,
+        physicsInfo.transformation.rotation,
+        opts
+      );
+    }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
       std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
-      rigidBody = addRigidBody(
+      rigidBody = addRigidBodyRect(
         world.physicsEnvironment, 
         physicsInfo.transformation.position, 
         (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
@@ -177,7 +187,7 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
       );
     }else if (physicsOptions.shape == SPHERE){
       std::cout << "INFO: PHYSICS: ADDING SPHERE RIGID BODY" << std::endl;
-      rigidBody = addRigidBody(
+      rigidBody = addRigidBodySphere(
         world.physicsEnvironment, 
         physicsInfo.transformation.position,
         maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
@@ -189,7 +199,7 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
       );
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
-      rigidBody = addRigidBody(
+      rigidBody = addRigidBodyVoxel(
         world.physicsEnvironment, 
         physicsInfo.transformation.position,
         physicsInfo.transformation.rotation,
