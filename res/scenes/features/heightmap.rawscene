@@ -1,0 +1,9 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+-terrain:position:0 0 0
+-terrain:physics:enabled
+-terrain:physics_type:dynamic
+-terrain:map:./res/heightmaps/test.hmap

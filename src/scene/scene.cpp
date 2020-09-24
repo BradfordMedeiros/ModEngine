@@ -170,6 +170,7 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
         world.physicsEnvironment,
         physicsInfo.transformation.position,
         physicsInfo.transformation.rotation,
+        physicsOptions.isStatic,
         opts
       );
     }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
