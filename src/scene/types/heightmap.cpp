@@ -2,18 +2,36 @@
 
 HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath){
   std::cout << "INFO: LOADING HEIGHTMAP: " << heightmapFilePath << std::endl;
-  int width = 20;
-  int height = 20;
-  float *data = new float[400];
-  for (int i =0 ; i < 80; i++){
-    for (int j =0; j < 5; j++){
-      data[(i * 5) + j] = 0.2f + j * 0.1 + ((i * 5) + j) * 0.01;
+  
+  std::cout << "Event: loading file: " << heightmapFilePath << std::endl;
+  int textureWidth, textureHeight, numChannels;
+
+  // https://github.com/nothings/stb/blob/master/stb_image.h
+  unsigned char* imageData = stbi_load(heightmapFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 4);
+  if (!imageData ){
+    throw std::runtime_error("failed loading texture " + heightmapFilePath + ", reason: " + stbi_failure_reason());
+  }
+  
+  float* newData = new float[textureWidth * textureHeight];
+  assert(numChannels == 3);
+
+  // 4 components = 4 bytes (4 components, 1 byte per component -> RGBA)
+  for (int i = 0; i < textureWidth; i++){
+    for (int j = 0; j < textureHeight; j++){
+      int byteOffset = ((i * textureHeight) + j) * 4;
+      char r = imageData[byteOffset];
+      //char g = imageData[byteOffset + 1];
+      //char b = imageData[byteOffset + 2];
+      //char a = imageData[byteOffset + 3];
+      newData[(i * textureHeight) + j] = r;
     }
   }
+  stbi_image_free(imageData);
+
   HeightMapData heightmapData {
-    .data = data,
-    .width = width,
-    .height = height,
+    .data = newData,
+    .width = textureWidth,
+    .height = textureHeight,
   };
   return heightmapData;
 }

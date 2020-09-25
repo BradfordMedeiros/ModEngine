@@ -3,6 +3,8 @@
 
 #include <string>
 #include <iostream>
+#include <stb_image.h>
+#include <cassert>
 
 struct HeightMapData {
   float* data;
