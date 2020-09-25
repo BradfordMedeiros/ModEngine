@@ -71,7 +71,11 @@ struct GameObjectScene {
 struct GameObjectRoot {};
 
 struct GameObjectEmitter{};
-struct GameObjectHeightmap{};
+struct GameObjectHeightmap{
+  float* data;
+  int width;
+  int height;
+};
 
 typedef std::variant<
   GameObjectMesh, 

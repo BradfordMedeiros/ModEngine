@@ -152,7 +152,19 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
 }
 
 GameObjectHeightmap createHeightmap(){
-  GameObjectHeightmap obj{};
+  int width = 20;
+  int height = 20;
+  float *data = new float[400];
+  for (int i =0 ; i < 80; i++){
+    for (int j =0; j < 5; j++){
+      data[(i * 5) + j] = 0.2f + j * 0.1 + ((i * 5) + j) * 0.01;
+    }
+  }
+  GameObjectHeightmap obj{
+    .data = data,
+    .width = width,
+    .height = height,
+  };
   return obj;
 }
 
@@ -228,6 +240,11 @@ void removeObject(
   auto emitterObj = std::get_if<GameObjectEmitter>(&Object);
   if (emitterObj != NULL){
     rmEmitter();
+  }
+
+  auto heightmapObj = std::get_if<GameObjectHeightmap>(&Object);
+  if (heightmapObj !=NULL){
+    delete heightmapObj -> data;
   }
 
   mapping.erase(id);
