@@ -2,6 +2,7 @@
 #define MOD_HEIGHTMAP
 
 #include <string>
+#include <iostream>
 
 struct HeightMapData {
   float* data;

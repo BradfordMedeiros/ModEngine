@@ -1,6 +1,7 @@
 #include "./heightmap.h"
 
 HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath){
+  std::cout << "INFO: LOADING HEIGHTMAP: " << heightmapFilePath << std::endl;
   int width = 20;
   int height = 20;
   float *data = new float[400];

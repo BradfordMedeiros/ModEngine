@@ -151,8 +151,9 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
   return obj;
 }
 
-GameObjectHeightmap createHeightmap(){
-  auto heightmap = loadAndAllocateHeightmap("");
+GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields){
+  auto mapName = additionalFields.find("map") != additionalFields.end() ? additionalFields.at("map") : "";
+  auto heightmap = loadAndAllocateHeightmap(mapName);
   GameObjectHeightmap obj{
     .data = heightmap.data,
     .width = heightmap.width,
@@ -199,7 +200,7 @@ void addObject(
   }else if (objectType == "emitter"){
     mapping[id] = createEmitter(addEmitter, additionalFields);
   }else if (objectType == "heightmap"){
-    mapping[id] = createHeightmap();
+    mapping[id] = createHeightmap(additionalFields);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
