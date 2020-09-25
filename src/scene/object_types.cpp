@@ -153,7 +153,8 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
 
 GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields){
   auto mapName = additionalFields.find("map") != additionalFields.end() ? additionalFields.at("map") : "";
-  auto heightmap = loadAndAllocateHeightmap(mapName);
+  auto dim = additionalFields.find("dim") != additionalFields.end() ? std::atoi(additionalFields.at("dim").c_str()) : -1;
+  auto heightmap = loadAndAllocateHeightmap(mapName, dim);
   GameObjectHeightmap obj{
     .data = heightmap.data,
     .width = heightmap.width,
@@ -354,7 +355,7 @@ void renderObject(
   }
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
-  if (heightmapObj != NULL && showDebug){
+  if (heightmapObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     drawMesh(nodeMesh, shaderProgram);   

@@ -13,6 +13,6 @@ struct HeightMapData {
 };
 
 // have to free this data (probably should just use vectors)
-HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath);  
+HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim);  
 
 #endif
