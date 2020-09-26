@@ -151,7 +151,6 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
   GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   bool isHeightmapObj = heightmapObj != NULL;
 
-  
   if (groupPhysicsInfo.isRoot){
     auto physicsOptions = groupPhysicsInfo.physicsOptions;
     auto physicsInfo = groupPhysicsInfo.physicsInfo;
@@ -421,6 +420,12 @@ void addObjectToWorld(
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields);
+      },
+      [&world](MeshData& meshdata) -> Mesh {
+        std::cout << "HEIGHTMAP PLACEHOLDER LOAD MESH! -- just loading box mesh for now!" << std::endl;
+        ModelData data = loadModel("./res/models/box/box.obj");
+        auto meshData = data.meshIdToMeshData.begin() -> second;
+        return loadMesh("./res/textures/default.jpg", meshData, loadTexture);
       }
     );
 }

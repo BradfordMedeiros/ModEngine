@@ -151,14 +151,16 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
   return obj;
 }
 
-GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields){
+GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields, std::function<Mesh(MeshData&)> loadMesh){
   auto mapName = additionalFields.find("map") != additionalFields.end() ? additionalFields.at("map") : "";
   auto dim = additionalFields.find("dim") != additionalFields.end() ? std::atoi(additionalFields.at("dim").c_str()) : -1;
   auto heightmap = loadAndAllocateHeightmap(mapName, dim);
+  auto meshData = generateHeightmapMeshdata(heightmap);
   GameObjectHeightmap obj{
     .data = heightmap.data,
     .width = heightmap.width,
     .height = heightmap.height,
+    .mesh = loadMesh(meshData),
   };
   return obj;
 }
@@ -176,7 +178,8 @@ void addObject(
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter
+  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter,
+  std::function<Mesh(MeshData&)> loadMesh
 ){
   if (objectType == "default"){
     mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
@@ -201,7 +204,7 @@ void addObject(
   }else if (objectType == "emitter"){
     mapping[id] = createEmitter(addEmitter, additionalFields);
   }else if (objectType == "heightmap"){
-    mapping[id] = createHeightmap(additionalFields);
+    mapping[id] = createHeightmap(additionalFields, loadMesh);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -358,7 +361,7 @@ void renderObject(
   if (heightmapObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    drawMesh(nodeMesh, shaderProgram);   
+    drawMesh(heightmapObj -> mesh, shaderProgram);   
   }
 }
 

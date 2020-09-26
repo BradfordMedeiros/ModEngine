@@ -50,3 +50,20 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   };
   return heightmapData;
 }
+
+MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
+  std::vector<Vertex> vertices;
+  std::vector<unsigned int> indices;
+  BoundInfo boundInfo{};
+  std::vector<Bone> bones;
+  MeshData data {
+    .vertices = vertices,
+    .indices = indices,
+    .hasDiffuseTexture = false,
+    .hasEmissionTexture = false,
+    .hasOpacityTexture = false,
+    .boundInfo = boundInfo,
+    .bones = bones,
+  };
+  return data;
+}

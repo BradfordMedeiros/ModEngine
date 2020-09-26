@@ -76,6 +76,7 @@ struct GameObjectHeightmap{
   float* data;
   int width;
   int height;
+  Mesh mesh;
 };
 
 typedef std::variant<
@@ -177,7 +178,8 @@ void addObject(
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> onRail,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter
+  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter,
+  std::function<Mesh(MeshData&)> loadMesh
 );
 
 void removeObject(
