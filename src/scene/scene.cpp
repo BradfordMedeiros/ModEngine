@@ -422,10 +422,9 @@ void addObjectToWorld(
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields);
       },
       [&world](MeshData& meshdata) -> Mesh {
-        std::cout << "HEIGHTMAP PLACEHOLDER LOAD MESH! -- just loading box mesh for now!" << std::endl;
-        ModelData data = loadModel("./res/models/box/box.obj");
-        auto meshData = data.meshIdToMeshData.begin() -> second;
-        return loadMesh("./res/textures/default.jpg", meshData, loadTexture);
+        return loadMesh("./res/textures/default.jpg", meshdata, [&world](std::string texture) -> Texture {
+          return loadTextureWorld(world, texture);
+        });    
       }
     );
 }

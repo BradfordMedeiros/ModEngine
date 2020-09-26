@@ -52,7 +52,7 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
 }
 
 MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
-  std::vector<Vertex> vertices;
+  /*std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
   BoundInfo boundInfo{};
   std::vector<Bone> bones;
@@ -65,5 +65,8 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
     .boundInfo = boundInfo,
     .bones = bones,
   };
-  return data;
+  return data;*/
+  std::cout << "HEIGHTMAP PLACEHOLDER LOAD MESH! -- just loading box mesh for now!" << std::endl;
+  ModelData data = loadModel("./res/models/box/box.obj");
+  return data.meshIdToMeshData.begin() -> second;
 }
