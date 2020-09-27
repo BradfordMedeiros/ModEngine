@@ -51,6 +51,10 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   return heightmapData;
 }
 
+int indexFromCoords(HeightMapData& heightmap, int vertexX, int vertexY){
+  return (vertexY * heightmap.width + vertexX);
+}
+
 // heightmap can share extra indicies for connected squares (they dont)
 MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   std::vector<Vertex> vertices;
@@ -65,47 +69,37 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   for (int h = 0; h < heightmap.height; h++){
     for (int w = 0; w < heightmap.width; w++){
       auto height = heightmap.data[(h * heightmap.width) + w];
-      Vertex vertex1 {
+      Vertex vertex {
         .position = glm::vec3(w - (heightmap.width / 2.f), height, h - (heightmap.height / 2.f)),
         .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
-        .texCoords = glm::vec2(0.f, 0.f),   // todo 
+        .texCoords = glm::vec2(w * 1.f / heightmap.width, h * 1.f / heightmap.height),   // todo 
       };  
-      Vertex vertex2 {
-        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), height, h - (heightmap.height / 2.f)),
-        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
-        .texCoords = glm::vec2(0.f, 0.f),   // todo 
-      };  
-      Vertex vertex3 {
-        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), height, 1.f + h - (heightmap.height / 2.f)),
-        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
-        .texCoords = glm::vec2(0.f, 0.f),   // todo 
-      };  
-      Vertex vertex4 {
-        .position = glm::vec3(w - (heightmap.width / 2.f), height, 1.f + h - (heightmap.height / 2.f)),
-        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
-        .texCoords = glm::vec2(0.f, 0.f),   // todo 
-      };  
-
-      vertices.push_back(vertex1);    
-      vertices.push_back(vertex2);
-      vertices.push_back(vertex3);
-      vertices.push_back(vertex4);
-
-      indices.push_back((h * heightmap.width * 4) + (w * 4));   
-      indices.push_back((h * heightmap.width * 4) + (w * 4) + 1);
-      indices.push_back((h * heightmap.width * 4) + (w * 4) + 2);
-      indices.push_back((h * heightmap.width * 4) + (w * 4) + 2);
-      indices.push_back((h * heightmap.width * 4) + (w * 4) + 3);
-      indices.push_back((h * heightmap.width * 4) + (w * 4));
+      vertices.push_back(vertex);    
     }
   }
+  // Remember CCW winding order (for face culling)  -- see ./misc/hmtriangles.png
+  for (int h = 1; h < heightmap.height; h++){
+    for (int w = 1; w < heightmap.width; w++){
+      // first triangle
+      indices.push_back(indexFromCoords(heightmap, w-1, h));
+      indices.push_back(indexFromCoords(heightmap, w, h));      
+      indices.push_back(indexFromCoords(heightmap, w, h - 1));      
+
+      // second triangle
+      indices.push_back(indexFromCoords(heightmap, w, h - 1));      
+      indices.push_back(indexFromCoords(heightmap, w - 1, h - 1));      
+      indices.push_back(indexFromCoords(heightmap, w - 1, h));      
+    }
+  }
+
 
   BoundInfo boundInfo{};
   std::vector<Bone> bones;
   MeshData data {
     .vertices = vertices,
     .indices = indices,
-    .hasDiffuseTexture = false,
+    .diffuseTexturePath = "./res/textures/grass.jpeg",
+    .hasDiffuseTexture = true,
     .hasEmissionTexture = false,
     .hasOpacityTexture = false,
     .boundInfo = boundInfo,
