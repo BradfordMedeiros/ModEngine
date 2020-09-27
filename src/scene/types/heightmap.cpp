@@ -64,23 +64,24 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
 
   for (int h = 0; h < heightmap.height; h++){
     for (int w = 0; w < heightmap.width; w++){
+      auto height = heightmap.data[(h * heightmap.width) + w];
       Vertex vertex1 {
-        .position = glm::vec3(w - (heightmap.width / 2.f), 0.f, h - (heightmap.height / 2.f)),
+        .position = glm::vec3(w - (heightmap.width / 2.f), height, h - (heightmap.height / 2.f)),
         .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
         .texCoords = glm::vec2(0.f, 0.f),   // todo 
       };  
       Vertex vertex2 {
-        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), 0.f, h - (heightmap.height / 2.f)),
+        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), height, h - (heightmap.height / 2.f)),
         .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
         .texCoords = glm::vec2(0.f, 0.f),   // todo 
       };  
       Vertex vertex3 {
-        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), 0.f, 1.f + h - (heightmap.height / 2.f)),
+        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), height, 1.f + h - (heightmap.height / 2.f)),
         .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
         .texCoords = glm::vec2(0.f, 0.f),   // todo 
       };  
       Vertex vertex4 {
-        .position = glm::vec3(w - (heightmap.width / 2.f), 0.f, 1.f + h - (heightmap.height / 2.f)),
+        .position = glm::vec3(w - (heightmap.width / 2.f), height, 1.f + h - (heightmap.height / 2.f)),
         .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
         .texCoords = glm::vec2(0.f, 0.f),   // todo 
       };  
