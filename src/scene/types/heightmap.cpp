@@ -51,9 +51,54 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   return heightmapData;
 }
 
+// heightmap can share extra indicies for connected squares (they dont)
 MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
-  /*std::vector<Vertex> vertices;
+  std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
+
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 texCoords;
+  int32_t boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
+  float boneWeights[NUM_BONES_PER_VERTEX]; 
+
+  for (int h = 0; h < heightmap.height; h++){
+    for (int w = 0; w < heightmap.width; w++){
+      Vertex vertex1 {
+        .position = glm::vec3(w - (heightmap.width / 2.f), 0.f, h - (heightmap.height / 2.f)),
+        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
+        .texCoords = glm::vec2(0.f, 0.f),   // todo 
+      };  
+      Vertex vertex2 {
+        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), 0.f, h - (heightmap.height / 2.f)),
+        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
+        .texCoords = glm::vec2(0.f, 0.f),   // todo 
+      };  
+      Vertex vertex3 {
+        .position = glm::vec3(1.f + w - (heightmap.width / 2.f), 0.f, 1.f + h - (heightmap.height / 2.f)),
+        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
+        .texCoords = glm::vec2(0.f, 0.f),   // todo 
+      };  
+      Vertex vertex4 {
+        .position = glm::vec3(w - (heightmap.width / 2.f), 0.f, 1.f + h - (heightmap.height / 2.f)),
+        .normal = glm::vec3(0.f, 0.f, 0.f), // todo 
+        .texCoords = glm::vec2(0.f, 0.f),   // todo 
+      };  
+
+      vertices.push_back(vertex1);    
+      vertices.push_back(vertex2);
+      vertices.push_back(vertex3);
+      vertices.push_back(vertex4);
+
+      indices.push_back((h * heightmap.width * 4) + (w * 4));   
+      indices.push_back((h * heightmap.width * 4) + (w * 4) + 1);
+      indices.push_back((h * heightmap.width * 4) + (w * 4) + 2);
+      indices.push_back((h * heightmap.width * 4) + (w * 4) + 2);
+      indices.push_back((h * heightmap.width * 4) + (w * 4) + 3);
+      indices.push_back((h * heightmap.width * 4) + (w * 4));
+    }
+  }
+
   BoundInfo boundInfo{};
   std::vector<Bone> bones;
   MeshData data {
@@ -65,8 +110,5 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
     .boundInfo = boundInfo,
     .bones = bones,
   };
-  return data;*/
-  std::cout << "HEIGHTMAP PLACEHOLDER LOAD MESH! -- just loading box mesh for now!" << std::endl;
-  ModelData data = loadModel("./res/models/box/box.obj");
-  return data.meshIdToMeshData.begin() -> second;
+  return data;
 }
