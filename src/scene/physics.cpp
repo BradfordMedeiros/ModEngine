@@ -88,8 +88,8 @@ btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vec
   }
   return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
 }
-btRigidBody* createRigidBodyHeightmap(glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling){
-  btHeightfieldTerrainShape * shape = new btHeightfieldTerrainShape  (width, height, data, 1, 0, 10, 1, PHY_FLOAT, false);
+btRigidBody* createRigidBodyHeightmap(glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
+  btHeightfieldTerrainShape * shape = new btHeightfieldTerrainShape(width, height, data, 1, minHeight, maxHeight, 1, PHY_FLOAT, false);
   return createRigidBody(pos, shape, rotation, isStatic, true, scaling, opts);
 }
 
@@ -136,8 +136,8 @@ btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotatio
   return rigidBodyPtr;
 }
 
-btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling){
-  auto rigidBodyPtr = createRigidBodyHeightmap(pos, rotation, isStatic, opts, data, width, height, scaling);
+btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
+  auto rigidBodyPtr = createRigidBodyHeightmap(pos, rotation, isStatic, opts, data, width, height, scaling, minHeight, maxHeight);
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;

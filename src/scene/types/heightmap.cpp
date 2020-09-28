@@ -29,12 +29,19 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   float* newData = new float[dataWidth * dataHeight];
   assert(numChannels == 3);
 
+  float minHeight = 0;
+  float maxHeight = 0;
   // 4 components = 4 bytes (4 components, 1 byte per component -> RGBA)
   for (int i = 0; i < dataWidth; i++){
     for (int j = 0; j < dataHeight; j++){
       int byteOffset = (int)(((i * dataHeight * heightMultiplier) + j * widthMultiplier) * 4);
       assert(byteOffset < (textureWidth * textureHeight * 4));
       char r = imageData[byteOffset];
+      if (r < minHeight){
+        minHeight = r;
+      }else if (r > maxHeight){
+        maxHeight = r;
+      }
       //char g = imageData[byteOffset + 1];
       //char b = imageData[byteOffset + 2];
       //char a = imageData[byteOffset + 3];
@@ -47,6 +54,8 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
     .data = newData,
     .width = dataWidth,
     .height = dataHeight,
+    .minHeight = minHeight,
+    .maxHeight = maxHeight,
   };
   return heightmapData;
 }

@@ -160,6 +160,8 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
     .data = heightmap.data,
     .width = heightmap.width,
     .height = heightmap.height,
+    .minHeight = heightmap.minHeight,
+    .maxHeight = heightmap.maxHeight,
     .mesh = loadMesh(meshData),
   };
   return obj;

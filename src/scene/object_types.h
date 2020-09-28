@@ -76,6 +76,8 @@ struct GameObjectHeightmap{
   float* data;
   int width;
   int height;
+  float minHeight;
+  float maxHeight;
   Mesh mesh;
 };
 
