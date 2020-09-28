@@ -71,7 +71,7 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
     for (int w = 0; w < heightmap.width; w++){
       auto height = heightmap.data[(h * heightmap.width) + w];
       Vertex vertex {
-        .position = glm::vec3(w - (heightmap.width / 2.f), height, h - (heightmap.height / 2.f)),
+        .position = glm::vec3(w - ((heightmap.width  - 1)/ 2.f), height, h - ((heightmap.height - 1) / 2.f)),
         .normal = glm::vec3(0.f, 1.f, 0.f), // todo 
         .texCoords = glm::vec2(w * 1.f / heightmap.width, h * 1.f / heightmap.height),   // todo 
       };  
@@ -120,8 +120,6 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   for (int i = 0; i < vertices.size(); i++){
     vertices.at(i).normal /= ((float)frequency.at(i));
   }
-
-
 
   BoundInfo boundInfo{};
   std::vector<Bone> bones;
