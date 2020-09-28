@@ -2,10 +2,7 @@
 
 HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   assert(dim > 0);
-
   std::cout << "INFO: LOADING HEIGHTMAP: " << heightmapFilePath << std::endl;
-  
-  std::cout << "Event: loading file: " << heightmapFilePath << std::endl;
   int textureWidth, textureHeight, numChannels;
 
   // https://github.com/nothings/stb/blob/master/stb_image.h
@@ -19,12 +16,6 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
 
   float widthMultiplier = textureWidth / ((float)dim);
   float heightMultiplier = textureHeight / ((float)dim);
-
-  std::cout << "texture width:" << textureWidth << std::endl;
-  std::cout << "texture height: " << textureHeight << std::endl;
-  std::cout << "w multiplier: " << widthMultiplier << std::endl;
-  std::cout << "h multiplier: " << heightMultiplier << std::endl;  
-
 
   float* newData = new float[dataWidth * dataHeight];
   assert(numChannels == 3);
@@ -49,6 +40,14 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
     }
   }
   stbi_image_free(imageData);
+
+  // Subtracting midpoint puts heights around the center 
+  float midpointHeight = (maxHeight - minHeight) / 2.f;    
+  for (int i = 0; i < (dataHeight * dataWidth); i++){
+    newData[i] -= midpointHeight;
+  }
+  minHeight -= midpointHeight;
+  maxHeight -= midpointHeight;
 
   HeightMapData heightmapData {
     .data = newData,
