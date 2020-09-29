@@ -42,10 +42,11 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   stbi_image_free(imageData);
 
   // Subtracting midpoint puts heights around the center 
-  float midpointHeight = (maxHeight - minHeight) / 2.f;    
+  float midpointHeight = (maxHeight + minHeight) / 2.f;    
   for (int i = 0; i < (dataHeight * dataWidth); i++){
     newData[i] -= midpointHeight;
   }
+
   minHeight -= midpointHeight;
   maxHeight -= midpointHeight;
 

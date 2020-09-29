@@ -535,14 +535,14 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
   drawCoordinateSystem(100.f);
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 1.f, 0.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
   if (permaLines.size() > 0){
   }
   if (lines.size() > 0){
    drawLines(lines);
   }
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05f, 0.f, 1.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
   if (bluelines.size() > 0){
    drawLines(bluelines);
   }
