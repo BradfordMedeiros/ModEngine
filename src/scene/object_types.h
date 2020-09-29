@@ -19,16 +19,20 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+struct TextureInformation {
+  glm::vec2 textureoffset;
+  glm::vec2 texturetiling;
+  std::string textureOverloadName;
+  int textureOverloadId;
+};
+
 struct GameObjectMesh {
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
   bool isDisabled;
   bool nodeOnly;
   std::string rootMesh;
-  glm::vec2 textureoffset;
-  glm::vec2 texturetiling;
-  std::string textureOverloadName;
-  int textureOverloadId;;
+  TextureInformation texture;
 };
 struct GameObjectCamera {};
 struct GameObjectPortal {

@@ -42,16 +42,20 @@ GameObjectMesh createMesh(
     }
   }
 
+  TextureInformation texture {
+    .textureoffset = textureoffset,
+    .texturetiling = texturetiling,
+    .textureOverloadName = textureOverloadName,
+    .textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName)
+  };
+
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
     .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
-    .textureoffset = textureoffset,
-    .texturetiling = texturetiling,
-    .textureOverloadName = textureOverloadName,
-    .textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName)
+    .texture = texture,
   };
   return obj;
 }
@@ -285,9 +289,9 @@ void renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
 
-      glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
-      glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texturetiling));
-      drawMesh(meshToRender, shaderProgram, meshObj -> textureOverloadId);    
+      glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
+      glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
+      drawMesh(meshToRender, shaderProgram, meshObj -> texture.textureOverloadId);    
     }
     return;
   }
@@ -296,9 +300,9 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texturetiling));
-    drawMesh(nodeMesh, shaderProgram, meshObj -> textureOverloadId);    
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
+    drawMesh(nodeMesh, shaderProgram, meshObj -> texture.textureOverloadId);    
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
@@ -476,11 +480,11 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
   if (obj.isDisabled){
     pairs.push_back(std::pair<std::string, std::string>("disabled", "true"));
   }
-  if (obj.textureoffset.x != 0.f && obj.textureoffset.y != 0.f){
-    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(obj.textureoffset)));
+  if (obj.texture.textureoffset.x != 0.f && obj.texture.textureoffset.y != 0.f){
+    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(obj.texture.textureoffset)));
   }
-  if (obj.textureOverloadName != ""){
-    pairs.push_back(std::pair<std::string, std::string>("texture", obj.textureOverloadName));
+  if (obj.texture.textureOverloadName != ""){
+    pairs.push_back(std::pair<std::string, std::string>("texture", obj.texture.textureOverloadName));
   }
   return pairs;  
 }
@@ -563,11 +567,15 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&objectToSerialize);
   if (emitterObj != NULL){
+    std::cout << "ERROR: EMITTER SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
     return {};
   }
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&objectToSerialize);
   if (heightmapObj != NULL){
+    std::cout << "ERROR: HEIGHTMAP SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
     return {};
   }
 

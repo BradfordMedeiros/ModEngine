@@ -38,7 +38,7 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
   for (auto id : getIdsInGroup(world, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     assert(meshObj != NULL);
-    meshObj -> textureoffset = meshObj -> textureoffset + offset;
+    meshObj -> texture.textureoffset = meshObj -> texture.textureoffset + offset;
   }
 }
 
@@ -69,12 +69,12 @@ void maybeChangeTexture(int index){
 
       int overloadId = 0;
       for (int i = 0; i < textures.size(); i++){
-        if (meshObj -> textureOverloadId == textures.at(i).texture.textureId){
+        if (meshObj -> texture.textureOverloadId == textures.at(i).texture.textureId){
           overloadId = (i + 1) % textures.size();
         }
       }
-      meshObj -> textureOverloadName = textures.at(overloadId).textureName;
-      meshObj -> textureOverloadId = textures.at(overloadId).texture.textureId;
+      meshObj -> texture.textureOverloadName = textures.at(overloadId).textureName;
+      meshObj -> texture.textureOverloadId = textures.at(overloadId).texture.textureId;
     }
 }
 
