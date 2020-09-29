@@ -26,6 +26,7 @@ struct GameObjectMesh {
   bool nodeOnly;
   std::string rootMesh;
   glm::vec2 textureoffset;
+  glm::vec2 texturetiling;
   std::string textureOverloadName;
   int textureOverloadId;;
 };

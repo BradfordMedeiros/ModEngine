@@ -18,6 +18,7 @@ uniform bool enableSpecular;
 uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
 uniform vec2 textureOffset;
+uniform vec2 textureTiling;
 
 #define MAX_LIGHTS 32
 uniform int numlights;
@@ -25,16 +26,16 @@ uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
 
-const float constant = 0.1;
-const float linear = 0.1;
-const float quadratic = 0.0;
+const float constant = 1.0;
+const float linear = 0.007;
+const float quadratic = 0.0002;
 
 const float emissionAmount = 1;
 uniform float discardTexAmount;
 
 void main(){
+    vec2 adjustedTexCoord = (TexCoord * textureTiling) + textureOffset;
 
-vec2 adjustedTexCoord = TexCoord + textureOffset;
     vec4 diffuseColor = texture(maintexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
     vec4 emissionColor = texture(emissionTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
     vec4 opacityColor = texture(opacityTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
@@ -62,9 +63,9 @@ vec2 adjustedTexCoord = TexCoord + textureOffset;
         vec3 normal = normalize(Normal);
 
         float angle = dot(lightDir, normalize(-lightsdir[i]));
-        if (angle < 0.1){
-            continue;
-        }
+        //if (angle < 0.1){
+        //    continue;
+        //}
 
         vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
 
@@ -73,8 +74,10 @@ vec2 adjustedTexCoord = TexCoord + textureOffset;
         vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
  
         float distanceToLight = length(lightPos - FragPos);
-        float attenuation = 1.0 / (constant + linear * distanceToLight + quadratic * (distanceToLight * distanceToLight));  
+        float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
 
+        //totalDiffuse = totalDiffuse + ( diffuse * lightscolor[i]);
+        //totalSpecular = totalSpecular + (specular * lightscolor[i]);
         totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
         totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
     }

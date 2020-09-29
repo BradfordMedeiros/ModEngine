@@ -5,7 +5,7 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texture" };
+static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texture" };
 GameObjectMesh createMesh(
   std::map<std::string, std::string> additionalFields, 
   std::map<std::string, Mesh>& meshes, 
@@ -16,6 +16,7 @@ GameObjectMesh createMesh(
   std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
   glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
+  glm::vec2 texturetiling = additionalFields.find("texturetiling") == additionalFields.end() ? glm::vec2(1.f, 1.f) : parseVec2(additionalFields.at("texturetiling"));
   std::string textureOverloadName = additionalFields.find("texture") == additionalFields.end() ? "" : additionalFields.at("texture");
   std::cout << "texture overload name" << textureOverloadName << std::endl;
 
@@ -48,6 +49,7 @@ GameObjectMesh createMesh(
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
     .textureoffset = textureoffset,
+    .texturetiling = texturetiling,
     .textureOverloadName = textureOverloadName,
     .textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName)
   };
@@ -284,6 +286,7 @@ void renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
 
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
+      glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texturetiling));
       drawMesh(meshToRender, shaderProgram, meshObj -> textureOverloadId);    
     }
     return;
@@ -294,6 +297,7 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> textureoffset));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texturetiling));
     drawMesh(nodeMesh, shaderProgram, meshObj -> textureOverloadId);    
   }
 
@@ -301,6 +305,7 @@ void renderObject(
   if (cameraObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(cameraMesh, shaderProgram);
     return;
   }
@@ -309,6 +314,7 @@ void renderObject(
   if (portalObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram, portalTexture);
     return;
   }
@@ -317,6 +323,7 @@ void renderObject(
   if (lightObj != NULL && showDebug){   // @TODO SH0W CAMERAS SHOULD BE SHOW DEBUG, AND WE SHOULD HAVE SEPERATE MESH TYPE FOR LIGHTS AND NOT REUSE THE CAMERA
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
     return;
   }
@@ -325,6 +332,7 @@ void renderObject(
   if (voxelObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(voxelObj -> voxel.mesh, shaderProgram);
     return;
   }
@@ -333,6 +341,7 @@ void renderObject(
   if (channelObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
     return;
   }
@@ -340,7 +349,8 @@ void renderObject(
   auto railObj = std::get_if<GameObjectRail>(&toRender);
   if (railObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));  
     drawMesh(nodeMesh, shaderProgram);
     return; 
   }
@@ -349,6 +359,7 @@ void renderObject(
   if (rootObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
   }
 
@@ -356,6 +367,7 @@ void renderObject(
   if (emitterObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);   
   }
 
@@ -363,6 +375,7 @@ void renderObject(
   if (heightmapObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(heightmapObj -> mesh, shaderProgram);   
   }
 }
