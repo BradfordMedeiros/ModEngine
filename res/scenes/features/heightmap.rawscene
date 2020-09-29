@@ -1,9 +1,8 @@
 
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
-platform:position:0 -5 0
-
--terrain:position:0 0 0
+-terrain:scale:100 0 100
 -terrain:physics:enabled
--terrain:physics_type:dynamic
--terrain:map:./res/heightmaps/test.hmap
+-terrain:position:0 -5 0
+-terrain:map:./res/heightmaps/dunes.jpg
+-terrain:dim:10
+-terrain:texturetiling:10 10
+-terrain:texture:./res/textures/grass.jpg
