@@ -210,4 +210,8 @@ void drawLines(std::vector<Line> allLines){
   glEnableVertexAttribArray(0);
   glLineWidth(2);
   glDrawElements(GL_LINES, indicies.size() , GL_UNSIGNED_INT, 0);
+
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &EBO);
+  glDeleteBuffers(1, &VBO);
 }
