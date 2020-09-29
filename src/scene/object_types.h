@@ -84,6 +84,7 @@ struct GameObjectHeightmap{
   float minHeight;
   float maxHeight;
   Mesh mesh;
+  TextureInformation texture;
 };
 
 typedef std::variant<

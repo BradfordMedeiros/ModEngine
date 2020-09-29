@@ -5,6 +5,21 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
+TextureInformation texinfoFromFields(std::map<std::string, std::string>& additionalFields, std::function<int(std::string)> ensureTextureLoaded){
+  glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
+  glm::vec2 texturetiling = additionalFields.find("texturetiling") == additionalFields.end() ? glm::vec2(1.f, 1.f) : parseVec2(additionalFields.at("texturetiling"));
+  std::string textureOverloadName = additionalFields.find("texture") == additionalFields.end() ? "" : additionalFields.at("texture");
+  int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName);
+
+  TextureInformation info {
+    .textureoffset = textureoffset,
+    .texturetiling = texturetiling,
+    .textureOverloadName = textureOverloadName,
+    .textureOverloadId = textureOverloadId,
+  };
+  return info;
+}
+
 static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texture" };
 GameObjectMesh createMesh(
   std::map<std::string, std::string> additionalFields, 
@@ -15,10 +30,7 @@ GameObjectMesh createMesh(
 ){
   std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
-  glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
-  glm::vec2 texturetiling = additionalFields.find("texturetiling") == additionalFields.end() ? glm::vec2(1.f, 1.f) : parseVec2(additionalFields.at("texturetiling"));
-  std::string textureOverloadName = additionalFields.find("texture") == additionalFields.end() ? "" : additionalFields.at("texture");
-  std::cout << "texture overload name" << textureOverloadName << std::endl;
+
 
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
@@ -42,12 +54,6 @@ GameObjectMesh createMesh(
     }
   }
 
-  TextureInformation texture {
-    .textureoffset = textureoffset,
-    .texturetiling = texturetiling,
-    .textureOverloadName = textureOverloadName,
-    .textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName)
-  };
 
   GameObjectMesh obj {
     .meshNames = meshNames,
@@ -55,7 +61,7 @@ GameObjectMesh createMesh(
     .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
-    .texture = texture,
+    .texture = texinfoFromFields(additionalFields, ensureTextureLoaded),
   };
   return obj;
 }
@@ -157,7 +163,7 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
   return obj;
 }
 
-GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields, std::function<Mesh(MeshData&)> loadMesh){
+GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields, std::function<Mesh(MeshData&)> loadMesh, std::function<int(std::string)> ensureTextureLoaded){
   auto mapName = additionalFields.find("map") != additionalFields.end() ? additionalFields.at("map") : "";
   auto dim = additionalFields.find("dim") != additionalFields.end() ? std::atoi(additionalFields.at("dim").c_str()) : -1;
   auto heightmap = loadAndAllocateHeightmap(mapName, dim);
@@ -169,6 +175,7 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
     .minHeight = heightmap.minHeight,
     .maxHeight = heightmap.maxHeight,
     .mesh = loadMesh(meshData),
+    .texture = texinfoFromFields(additionalFields, ensureTextureLoaded),
   };
   return obj;
 }
@@ -212,7 +219,7 @@ void addObject(
   }else if (objectType == "emitter"){
     mapping[id] = createEmitter(addEmitter, additionalFields);
   }else if (objectType == "heightmap"){
-    mapping[id] = createHeightmap(additionalFields, loadMesh);
+    mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -378,9 +385,9 @@ void renderObject(
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   if (heightmapObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(heightmapObj -> mesh, shaderProgram);   
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(heightmapObj -> texture.textureoffset));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(heightmapObj -> texture.texturetiling));
+    drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.textureOverloadId);   
   }
 }
 
