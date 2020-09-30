@@ -173,17 +173,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   if (key == GLFW_KEY_Q && action == 1){
     std::cout << "apply masking up: " << std::endl;
-    HeightMapData& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
-    applyMasking(hm, hm.width / 2, hm.height / 2, mask, 1.f, []() -> void { 
+    GameObjectHeightmap& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
+    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, 1.f, []() -> void { 
       std::cout << "recalc physics placeholder" << std::endl;
-    });
+    }, hm.mesh);
   }
   if (key == GLFW_KEY_E && action == 1){
     std::cout << "apply masking down: " << std::endl;
-    HeightMapData& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
-    applyMasking(hm, hm.width / 2, hm.height / 2, mask, -1.f, []() -> void {
+    GameObjectHeightmap& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
+    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, -1.f, []() -> void {
       std::cout << "recalc physics placeholder" << std::endl;
-    });
+    }, hm.mesh);
   }
 }
 

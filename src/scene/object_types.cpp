@@ -657,12 +657,12 @@ std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping
   return connections;
 }
 
-std::map<objid, HeightMapData*> getHeightmaps(std::map<objid, GameObjectObj>& mapping){
-  std::map<objid, HeightMapData*> maps;
+std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping){
+  std::map<objid, GameObjectHeightmap*> maps;
   for (auto &[id, obj] : mapping){
     auto heightmap = std::get_if<GameObjectHeightmap>(&obj);
     if (heightmap != NULL){
-      maps[id] = &(heightmap -> heightmap);
+      maps[id] = heightmap;
     }
   }
   return maps;  

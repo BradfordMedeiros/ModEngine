@@ -24,6 +24,14 @@ struct HeightmapMask {
   int width;
   int height;
 };
-void applyMasking(HeightMapData& heightmap, int x, int y, HeightmapMask mask, float amount, std::function<void()> recalcPhysics);
+void applyMasking(
+  HeightMapData& heightmap, 
+  int x, 
+  int y, 
+  HeightmapMask mask, 
+  float amount, 
+  std::function<void()> recalcPhysics,
+  Mesh& mesh 
+);
 
 #endif

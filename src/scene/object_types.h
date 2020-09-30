@@ -228,6 +228,6 @@ NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
 std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid, GameObjectObj>& mapping);
 std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping);
-std::map<objid, HeightMapData*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
+std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 
 #endif 
