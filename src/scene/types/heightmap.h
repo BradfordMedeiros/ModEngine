@@ -19,4 +19,11 @@ struct HeightMapData {
 HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim);  
 MeshData generateHeightmapMeshdata(HeightMapData& heightmap);
 
+struct HeightmapMask {
+  float* values;
+  int width;
+  int height;
+};
+void applyMasking(HeightMapData& heightmap, int x, int y, HeightmapMask mask, float amount, std::function<void()> recalcPhysics);
+
 #endif

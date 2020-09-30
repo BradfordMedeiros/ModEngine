@@ -171,12 +171,12 @@ void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         opts,
-        heightmapObj -> data,
-        heightmapObj -> width, 
-        heightmapObj -> height,
+        heightmapObj -> heightmap.data,
+        heightmapObj -> heightmap.width, 
+        heightmapObj -> heightmap.height,
         physicsInfo.collisionInfo,
-        heightmapObj -> minHeight,
-        heightmapObj -> maxHeight
+        heightmapObj -> heightmap.minHeight,
+        heightmapObj -> heightmap.maxHeight
       );
     }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
       std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;

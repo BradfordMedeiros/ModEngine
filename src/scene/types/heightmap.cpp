@@ -144,3 +144,30 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   };
   return data;
 }
+
+void applyMasking(HeightMapData& heightmap, int x, int y, HeightmapMask mask, float amount, std::function<void()> recalcPhysics){
+  std::cout << "INFO: APPLY MASKING PLACEHOLDER" << std::endl;
+
+  int hCenter = x;
+  int wCenter = y;
+
+  auto maxIndex = heightmap.width * heightmap.height;
+  for (int h = 0; h < mask.height; h++){
+    for (int w = 0; w < mask.width; w++){
+      auto maskIndex = (h * mask.width) + w;
+      auto hIndex = hCenter + h;
+      auto wIndex = wCenter + w;
+
+      auto targetIndex= (hIndex * heightmap.width) + wIndex;
+      auto maskAmount = (hIndex * mask.width) + wIndex;
+
+      if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
+        heightmap.data[targetIndex] += (maskAmount * amount);
+        std::cout << "applying to index: " << targetIndex << std::endl;
+      }
+
+    }
+  }
+
+  recalcPhysics();
+}

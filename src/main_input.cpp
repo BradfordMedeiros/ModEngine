@@ -8,6 +8,13 @@ extern GameObjectVoxel* voxelPtr;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
 
+float maskValues[] { 10.f };
+HeightmapMask mask {
+  .values = maskValues,
+  .width = 1,
+  .height = 1,
+};
+
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
     auto selectObject = getGameObject(world, state.selectedIndex); 
@@ -162,6 +169,21 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == GLFW_KEY_L && action == 1){
     state.portalTextureIndex++;
     std::cout << "portal index: " << state.portalTextureIndex << std::endl;
+  }
+
+  if (key == GLFW_KEY_Q && action == 1){
+    std::cout << "apply masking up: " << std::endl;
+    HeightMapData& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
+    applyMasking(hm, hm.width / 2, hm.height / 2, mask, 1.f, []() -> void { 
+      std::cout << "recalc physics placeholder" << std::endl;
+    });
+  }
+  if (key == GLFW_KEY_E && action == 1){
+    std::cout << "apply masking down: " << std::endl;
+    HeightMapData& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
+    applyMasking(hm, hm.width / 2, hm.height / 2, mask, -1.f, []() -> void {
+      std::cout << "recalc physics placeholder" << std::endl;
+    });
   }
 }
 
