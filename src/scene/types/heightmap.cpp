@@ -173,6 +173,8 @@ void applyMasking(
         std::cout << "applying to index: " << targetIndex << " - " << effectiveAmount << std::endl;
       }
 
+      setVertexPosition(mesh,  targetIndex, glm::vec3(0.0f, 5.f, 0.0f));
+
     }
   }
 

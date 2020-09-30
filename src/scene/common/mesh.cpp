@@ -1,5 +1,10 @@
 #include "./mesh.h"
 
+void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos){
+  std::cout << "set vertex placeholder" << std::endl;
+  std::cout << "new position: " << print(pos) << std::endl;
+}
+
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.
 Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Texture(std::string)> ensureLoadTexture){
