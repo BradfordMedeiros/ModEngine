@@ -67,6 +67,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   
   Mesh mesh = {
     .VAOPointer = VAO,
+    .EBOPointer = EBO,
     .VBOPointer = VBO,
     .texture = texture,
     .hasEmissionTexture = meshData.hasEmissionTexture,
@@ -111,6 +112,7 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
   std::vector<Bone> bones;
   Mesh mesh = {
     .VAOPointer = VAO,
+    .EBOPointer = EBO,
     .VBOPointer = VBO,
     .texture = texture,
     .hasEmissionTexture = false,

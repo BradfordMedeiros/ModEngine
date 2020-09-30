@@ -14,6 +14,7 @@
 
 struct Mesh {
   unsigned int VAOPointer;
+  unsigned int EBOPointer;
   unsigned int VBOPointer;
   Texture texture; 
   bool hasEmissionTexture;
