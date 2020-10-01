@@ -85,7 +85,7 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
     for (int w = 0; w < heightmap.width; w++){
       Vertex vertex {
         .position = positionForVertex(heightmap, h, w),
-        .normal = glm::vec3(0.f, 1.f, 0.f), // todo 
+        .normal = glm::vec3(0.f, 0.f, 0.f),  // This is just the init, gets filled in below
         .texCoords = glm::vec2(w * 1.f / heightmap.width, h * 1.f / heightmap.height),   // todo 
       };  
       vertices.push_back(vertex);    
