@@ -64,6 +64,11 @@ int indexFromCoords(HeightMapData& heightmap, int vertexX, int vertexY){
   return (vertexY * heightmap.width + vertexX);
 }
 
+glm::vec3 positionForVertex(HeightMapData& heightmap, int h, int w){
+  auto height = heightmap.data[(h * heightmap.width) + w];
+  return glm::vec3(w - ((heightmap.width  - 1)/ 2.f), height, h - ((heightmap.height - 1) / 2.f));
+}
+
 // heightmap can share extra indicies for connected squares (they dont)
 MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   std::vector<Vertex> vertices;
@@ -78,9 +83,8 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
 
   for (int h = 0; h < heightmap.height; h++){
     for (int w = 0; w < heightmap.width; w++){
-      auto height = heightmap.data[(h * heightmap.width) + w];
       Vertex vertex {
-        .position = glm::vec3(w - ((heightmap.width  - 1)/ 2.f), height, h - ((heightmap.height - 1) / 2.f)),
+        .position = positionForVertex(heightmap, h, w),
         .normal = glm::vec3(0.f, 1.f, 0.f), // todo 
         .texCoords = glm::vec2(w * 1.f / heightmap.width, h * 1.f / heightmap.height),   // todo 
       };  
@@ -172,7 +176,7 @@ void applyMasking(
         heightmap.data[targetIndex] += effectiveAmount;
         std::cout << "applying to index: " << targetIndex << " - " << effectiveAmount << std::endl;
 
-        setVertexPosition(mesh,  targetIndex, glm::vec3(0.0f, 50.f, 0.0f), glm::vec3(0.f, 1.f, 0.f));  // @TODO calculate the normal properly
+        setVertexPosition(mesh,  targetIndex, positionForVertex(heightmap, hIndex, wIndex), glm::vec3(0.f, 1.f, 0.f));  // @TODO calculate the normal properly
       }
     }
   }

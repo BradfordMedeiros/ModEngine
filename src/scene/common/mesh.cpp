@@ -1,10 +1,6 @@
 #include "./mesh.h"
 
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal){
-  std::cout << "set vertex placeholder" << std::endl;
-  std::cout << "new position: " << print(pos) << std::endl; 
-
-  glBindVertexArray(mesh.VAOPointer); 
   glBindBuffer(GL_ARRAY_BUFFER, mesh.VBOPointer);
   glBufferSubData(GL_ARRAY_BUFFER, (sizeof(Vertex) * vertexIndex) + offsetof(Vertex, position), sizeof(pos), &pos);
   glBufferSubData(GL_ARRAY_BUFFER, (sizeof(Vertex) * vertexIndex) + offsetof(Vertex, normal), sizeof(normal), &normal);
