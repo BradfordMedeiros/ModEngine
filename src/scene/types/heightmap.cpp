@@ -176,9 +176,11 @@ void applyMasking(
         heightmap.data[targetIndex] += effectiveAmount;
         std::cout << "applying to index: " << targetIndex << " - " << effectiveAmount << std::endl;
 
-        setVertexPosition(mesh,  targetIndex, positionForVertex(heightmap, hIndex, wIndex), glm::vec3(0.f, 1.f, 0.f));  // @TODO calculate the normal properly
-      }
-    }
+        // TODO recalculate normals better
+        // Neeed to calculate the new normals for this vertices
+        // + since that changes the whole edge, that would affect the neighorborind vertices as well and those would also need
+        // vertex normal updates
+        setVertexPosition(mesh,  targetIndex, positionForVertex(heightmap, hIndex, wIndex), glm::vec3(0.f, 1.f, 0.f));  
   }
 
   recalcPhysics();
