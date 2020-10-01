@@ -171,10 +171,9 @@ void applyMasking(
       if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
         heightmap.data[targetIndex] += effectiveAmount;
         std::cout << "applying to index: " << targetIndex << " - " << effectiveAmount << std::endl;
+
+        setVertexPosition(mesh,  targetIndex, glm::vec3(0.0f, 50.f, 0.0f), glm::vec3(0.f, 1.f, 0.f));  // @TODO calculate the normal properly
       }
-
-      setVertexPosition(mesh,  targetIndex, glm::vec3(0.0f, 5.f, 0.0f));
-
     }
   }
 
