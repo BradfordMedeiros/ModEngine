@@ -181,6 +181,8 @@ void applyMasking(
         // + since that changes the whole edge, that would affect the neighorborind vertices as well and those would also need
         // vertex normal updates
         setVertexPosition(mesh,  targetIndex, positionForVertex(heightmap, hIndex, wIndex), glm::vec3(0.f, 1.f, 0.f));  
+      }
+    }
   }
 
   recalcPhysics();
