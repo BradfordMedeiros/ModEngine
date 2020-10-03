@@ -202,23 +202,28 @@ void onDelete(){
   }
 }
 
-bool selectItemCalled = false;
+void applyPainting(objid id, UVCoord coords){
+  std::cout << "APPLY PAINTING PLACEHOLDER" << std::endl;
+  std::cout << "for id: " << id << std::endl;
+  std::cout << "uv x: " << coords.x << std::endl;
+  std::cout << "uv y: " << coords.y << std::endl;
+}
 
+bool selectItemCalled = false;
 void selectItem(){
   if (!showDebugInfo){
     return;
   }
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor);
-
   auto uvCoords = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-  std::cout << "uv x: " << uvCoords.x << std::endl;
-  std::cout << "uv y: " << uvCoords.y << std::endl;
 
   if (!idExists(world, selectedId)){
     std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
     return;
   }
+
+  applyPainting(selectedId, uvCoords);
 
   auto groupid = getGroupId(world, selectedId);
   auto selectedObject =  getGameObject(world, groupid);
