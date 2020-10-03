@@ -1,6 +1,7 @@
 #include "./colorselection.h"
 
 Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight) {
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
   Color color;
   glReadPixels(x, currentScreenHeight - y, 1, 1, GL_RGBA, GL_FLOAT, &color); 
   return color;
@@ -31,3 +32,9 @@ glm::vec4 getColorFromGameobject(objid id){
   return idColor;
 }
 
+UVData getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight){
+  glReadBuffer(GL_COLOR_ATTACHMENT1);
+  UVData uvdata; 
+  glReadPixels(x, currentScreenHeight - y, 1, 1, GL_RG, GL_FLOAT, &uvdata); 
+  return uvdata;
+}

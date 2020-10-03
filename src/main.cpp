@@ -93,6 +93,7 @@ std::map<unsigned int, Mesh> fontMeshes;
 glm::mat4 projection;
 glm::mat4 view;
 unsigned int framebufferTexture;
+unsigned int framebufferTexture2;
 unsigned int fbo;
 unsigned int depthTextures[32];
 
@@ -209,6 +210,10 @@ void selectItem(){
   }
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor);
+
+  auto uvCoords = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+  std::cout << "uv x: " << uvCoords.x << std::endl;
+  std::cout << "uv y: " << uvCoords.y << std::endl;
 
   if (!idExists(world, selectedId)){
     std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
@@ -769,6 +774,15 @@ int main(int argc, char* argv[]){
   glBindTexture(GL_TEXTURE_2D, 0);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
+
+  glGenTextures(1, &framebufferTexture2);
+  glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+
   generateDepthTextures();
   generatePortalTextures();
   setActiveDepthTexture(0);
@@ -794,6 +808,9 @@ int main(int argc, char* argv[]){
      state.currentScreenWidth = width;
      state.currentScreenHeight = height;
      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+     glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
      updateDepthTexturesSize();
@@ -996,6 +1013,9 @@ int main(int argc, char* argv[]){
   unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+  glDrawBuffers(2,buffers_to_render);
+  
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -1067,9 +1087,11 @@ int main(int argc, char* argv[]){
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(255.0, 255.0, 255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), lights, portals);    // selection program since it's lightweight and we just care about depth buffer
     }
