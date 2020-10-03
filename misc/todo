@@ -1,0 +1,28 @@
+
+next:
+  - more voxel work
+    - get block select working again
+    - single texture per block?
+    - create brush to expand up down
+    - create brush to expand left right
+    - create option to connect the blocks?
+
+musts:
+
+- fix animation and make sure it's good 
+  - set poses in game
+  - ragdoll?
+
+- voxel for world creation
+  - different brushes to help with world creation
+
+- ai 
+  - navmeshes
+  - navmeshes have transitions to allow special actions to make the transition
+
+
+nice to have/less immediate:
+  - shadow mapping
+  - lightmaps 
+  - movie playback textures
+  - better font rendering

@@ -1,0 +1,6 @@
+heightmaps:
+1. recalculate vertex normals for when update heightmap 
+2. heightmaps have arbitrary limits for height 
+
+potential solutions for heightmap clipping thing:
+create sphere thing , determine clipping, get position, and then math to figure out which element of heightmap 
