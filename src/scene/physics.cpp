@@ -88,8 +88,13 @@ btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vec
   }
   return createRigidBody(pos, shape, rotation, isStatic, hasCollision, scaling, opts);
 }
+
+float MIN_HEIGHTMAP_HEIGHT = -2000.f;
+float MAX_HEIGHTMAP_HEIGHT =  2000.f;
 btRigidBody* createRigidBodyHeightmap(glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
-  btHeightfieldTerrainShape * shape = new btHeightfieldTerrainShape(width, height, data, 1, minHeight, maxHeight, 1, PHY_FLOAT, false);
+  assert(minHeight >= MIN_HEIGHTMAP_HEIGHT);
+  assert(maxHeight <= MAX_HEIGHTMAP_HEIGHT); 
+  btHeightfieldTerrainShape * shape = new btHeightfieldTerrainShape(width, height, data, 1, MIN_HEIGHTMAP_HEIGHT, MAX_HEIGHTMAP_HEIGHT, 1, PHY_FLOAT, false);
   return createRigidBody(pos, shape, rotation, isStatic, true, scaling, opts);
 }
 

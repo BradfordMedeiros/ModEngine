@@ -174,7 +174,13 @@ void applyMasking(
 
       if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
         heightmap.data[targetIndex] += effectiveAmount;
-        std::cout << "applying to index: " << targetIndex << " - " << effectiveAmount << std::endl;
+        auto newAmount = heightmap.data[targetIndex];
+
+        if (newAmount > heightmap.maxHeight){
+          heightmap.maxHeight = newAmount;
+        }else if (newAmount < heightmap.minHeight){
+          heightmap.minHeight = newAmount;
+        }
 
         // TODO recalculate normals better
         // Neeed to calculate the new normals for this vertices

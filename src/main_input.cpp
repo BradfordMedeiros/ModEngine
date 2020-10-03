@@ -173,16 +173,26 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   if (key == GLFW_KEY_Q && action == 1){
     std::cout << "apply masking up: " << std::endl;
-    GameObjectHeightmap& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
-    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, 1.f, []() -> void { 
-      std::cout << "recalc physics placeholder" << std::endl;
+    auto hmObject = getHeightmaps(world.objectMapping).begin();
+    auto id = hmObject -> first;
+    GameObjectHeightmap& hm = *(hmObject-> second);
+    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, 1.f, [id]() -> void { 
+      // We change *data fed to bullet.
+      // This can be dynamic, however according to docs min + maxHeight must fall in range. 
+      // Recreating simply ensures that the min/max height is always valid. 
+      updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
     }, hm.mesh);
   }
   if (key == GLFW_KEY_E && action == 1){
-    std::cout << "apply masking down: " << std::endl;
-    GameObjectHeightmap& hm = *(getHeightmaps(world.objectMapping).begin() -> second);
-    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, -1.f, []() -> void {
-      std::cout << "recalc physics placeholder" << std::endl;
+    std::cout << "apply masking up: " << std::endl;
+    auto hmObject = getHeightmaps(world.objectMapping).begin();
+    auto id = hmObject -> first;
+    GameObjectHeightmap& hm = *(hmObject-> second);
+    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, -1.f, [id]() -> void { 
+      // We change *data fed to bullet.
+      // This can be dynamic, however according to docs min + maxHeight must fall in range. 
+      // Recreating simply ensures that the min/max height is always valid. 
+      updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
     }, hm.mesh);
   }
 }
