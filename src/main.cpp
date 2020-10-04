@@ -226,6 +226,11 @@ void handlePainting(){
   }
   std::cout << "painting: texture: " << textureToPaint << std::endl;
   shouldPaint = false;
+
+  glUseProgram(framebufferProgram); 
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
+  drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), framebufferProgram);
 }
 
 bool selectItemCalled = false;
@@ -1214,11 +1219,17 @@ int main(int argc, char* argv[]){
     
     glBindVertexArray(quadVAO);
 
-    if (state.portalTextureIndex == 0){
+
+
+    if (state.portalTextureIndex == 0 || (state.textureDisplayMode && textureToPaint == -1)){
       glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
     }else{
-      assert(state.portalTextureIndex <= numPortalTextures);
-      glBindTexture(GL_TEXTURE_2D, portalTextures[state.portalTextureIndex - 1]);  // new code
+      if (state.textureDisplayMode){
+        glBindTexture(GL_TEXTURE_2D, textureToPaint);
+      }else{
+        assert(state.portalTextureIndex <= numPortalTextures);
+        glBindTexture(GL_TEXTURE_2D, portalTextures[state.portalTextureIndex - 1]);  // new code
+      }
     }
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }

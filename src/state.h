@@ -40,6 +40,7 @@ struct engineState {
   float discardAmount;
   bool offsetTextureMode;
   int portalTextureIndex;
+  bool textureDisplayMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
