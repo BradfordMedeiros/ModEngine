@@ -119,5 +119,7 @@ PortalInfo getPortalInfo(World& world, objid id);
 std::vector<PortalInfo> getPortalInfo(World& world);
 bool isPortal(World& world, objid id);
 
+std::optional<Texture> textureForId(World& world, objid id);
+
 #endif
 

@@ -913,3 +913,7 @@ bool isPortal(World& world, objid id){
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
   return portalObject != NULL;
 }
+
+std::optional<Texture> textureForId(World& world, objid id){
+  return textureForId(world.objectMapping, id);
+}

@@ -229,5 +229,6 @@ std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, o
 std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid, GameObjectObj>& mapping);
 std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping);
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
+std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
 
 #endif 

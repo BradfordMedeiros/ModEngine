@@ -202,11 +202,30 @@ void onDelete(){
   }
 }
 
+unsigned int textureToPaint = -1;
+bool shouldPaint = false;
+UVCoord uvsToPaint;
+
 void applyPainting(objid id, UVCoord coords){
   std::cout << "APPLY PAINTING PLACEHOLDER" << std::endl;
   std::cout << "for id: " << id << std::endl;
   std::cout << "uv x: " << coords.x << std::endl;
   std::cout << "uv y: " << coords.y << std::endl;
+  auto texture = textureForId(world, id);
+  if (texture.has_value()){
+    textureToPaint = texture.value().textureId;
+    shouldPaint = true;
+    uvsToPaint = coords;
+  }
+  //std::cout << "texture id is: " << texture.textureId << std::endl;
+}
+
+void handlePainting(){
+  if (!shouldPaint){
+    return;
+  }
+  std::cout << "painting: texture: " << textureToPaint << std::endl;
+  shouldPaint = false;
 }
 
 bool selectItemCalled = false;
@@ -224,6 +243,7 @@ void selectItem(){
   }
 
   applyPainting(selectedId, uvCoords);
+  handlePainting();
 
   auto groupid = getGroupId(world, selectedId);
   auto selectedObject =  getGameObject(world, groupid);

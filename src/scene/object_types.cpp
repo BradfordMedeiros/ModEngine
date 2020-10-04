@@ -667,3 +667,13 @@ std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectOb
   }
   return maps;  
 }
+
+std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id){
+  auto Object = mapping.at(id); 
+  auto heightmapObj = std::get_if<GameObjectHeightmap>(&Object);
+  if (heightmapObj !=NULL){
+    return heightmapObj -> mesh.texture;
+  }
+
+  return std::nullopt;
+}

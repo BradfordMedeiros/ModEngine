@@ -17,12 +17,12 @@ Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight);
 objid getIdFromColor(Color color);
 glm::vec4 getColorFromGameobject(objid id);
 
-struct UVData {
+struct UVCoord {
   GLfloat x;
   GLfloat y;
 };
 
-UVData getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight);
+UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight);
 
 
 #endif
