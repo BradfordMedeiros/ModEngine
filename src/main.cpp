@@ -47,6 +47,7 @@
 #include "./common/sysinterface.h"
 
 unsigned int framebufferProgram;
+unsigned int drawingProgram;
 unsigned int quadVAO;
 
 GameObject* activeCameraObj;
@@ -220,6 +221,12 @@ void applyPainting(objid id, UVCoord coords){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
+glm::vec3 uvToOffset(UVCoord coord){
+  auto xCoord = convertBase(coord.x, 0, 1, -1, 1);
+  auto yCoord = convertBase(coord.y, 0, 1, -1, 1);
+  return glm::vec3(xCoord, -yCoord, 0.f);
+}
+
 void handlePainting(){
   if (!shouldPaint){
     return;
@@ -227,10 +234,13 @@ void handlePainting(){
   std::cout << "painting: texture: " << textureToPaint << std::endl;
   shouldPaint = false;
 
-  glUseProgram(framebufferProgram); 
+  glUseProgram(drawingProgram); 
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
-  drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), framebufferProgram);
+  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.f), uvToOffset(uvsToPaint)), glm::vec3(0.01f, 0.01f, 0.01f))));
+  glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/default.jpg").textureId);
+  glBindVertexArray(quadVAO);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 bool selectItemCalled = false;
@@ -446,7 +456,7 @@ void setShaderData(GLint shader, glm::mat4 projection, glm::mat4 view, std::vect
   }else{
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   }
-  glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
+  //glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
 }
 
@@ -871,6 +881,10 @@ int main(int argc, char* argv[]){
   std::string selectionShaderPath = "./res/shaders/selection";
   std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
   unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl");
+
+  std::string drawingShaderPath = "./res/shaders/drawing";
+  std::cout << "INFO: drawing shader path is: " << drawingShaderPath << std::endl;
+  drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl");
 
   fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>(), loadTexture);

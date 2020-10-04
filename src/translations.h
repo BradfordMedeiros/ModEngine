@@ -17,6 +17,8 @@ glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, Axi
 glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
 glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
 
+float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh);
+
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight);
 
 glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition);
