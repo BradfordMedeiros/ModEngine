@@ -222,9 +222,10 @@ void applyPainting(objid id, UVCoord coords){
 }
 
 glm::vec3 uvToOffset(UVCoord coord){
-  auto xCoord = convertBase(coord.x, 0, 1, -1, 1);
-  auto yCoord = convertBase(coord.y, 0, 1, -1, 1);
-  return glm::vec3(xCoord, -yCoord, 0.f);
+  //auto xCoord = convertBase(coord.x, 0, 1, -1, 1);
+  //auto yCoord = convertBase(coord.y, 0, 1, -1, 1);
+  //return glm::vec3(xCoord, yCoord, 0.f);
+  return glm::vec3(0.f, 0.f, 0.f);
 }
 
 void handlePainting(){
@@ -236,10 +237,26 @@ void handlePainting(){
 
   glUseProgram(drawingProgram); 
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_STENCIL_TEST);
+  glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+
+  unsigned int quadVAO2;
+  unsigned int quadVBO2;
+  glGenVertexArrays(1, &quadVAO2);
+  glGenBuffers(1, &quadVBO2);
+  glBindVertexArray(quadVAO2);
+  glBindBuffer(GL_ARRAY_BUFFER, quadVBO2);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0); 
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
-  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.f), uvToOffset(uvsToPaint)), glm::vec3(0.01f, 0.01f, 0.01f))));
-  glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/default.jpg").textureId);
-  glBindVertexArray(quadVAO);
+  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), glm::vec3(1.f, 1.f, 1.f))));
+  glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/blacktop.jpg").textureId);
+  glBindVertexArray(quadVAO2);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -467,6 +484,9 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
+float getTotalTime(){
+  return now - initialTime;
+}
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals){
   if (scene.isNested){
     return;
@@ -507,6 +527,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
     glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), state.discardAmount);
+    glUniform1f(glGetUniformLocation(newShader, "time"), getTotalTime());
 
     bool isPortal = false;
     bool isPerspectivePortal = false;
@@ -722,9 +743,6 @@ void onUdpServerMessage(UdpPacket& packet){
   }
 }
 
-float getTotalTime(){
-  return now - initialTime;
-}
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
