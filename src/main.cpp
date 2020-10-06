@@ -204,7 +204,7 @@ void onDelete(){
 }
 
 unsigned int textureToPaint = -1;
-bool shouldPaint = false;
+bool canPaint = false;
 UVCoord uvsToPaint;
 
 void applyPainting(objid id, UVCoord coords){
@@ -215,49 +215,46 @@ void applyPainting(objid id, UVCoord coords){
   auto texture = textureForId(world, id);
   if (texture.has_value()){
     textureToPaint = texture.value().textureId;
-    shouldPaint = true;
+    canPaint = true;
     uvsToPaint = coords;
   }
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
 glm::vec3 uvToOffset(UVCoord coord){
-  //auto xCoord = convertBase(coord.x, 0, 1, -1, 1);
-  //auto yCoord = convertBase(coord.y, 0, 1, -1, 1);
-  //return glm::vec3(xCoord, yCoord, 0.f);
-  return glm::vec3(0.f, 0.f, 0.f);
+  float xCoord = convertBase(coord.x, 0, 1, -1, 1);
+  float yCoord = convertBase(coord.y, 0, 1, -1, 1);
+  return glm::vec3(xCoord, yCoord, 0.f);
 }
 
 void handlePainting(){
-  if (!shouldPaint){
+  if (!canPaint){
     return;
   }
   std::cout << "painting: texture: " << textureToPaint << std::endl;
-  shouldPaint = false;
 
   glUseProgram(drawingProgram); 
+
+  glBindTexture(GL_TEXTURE_2D, textureToPaint);
+  int w, h;
+  int miplevel = 0;
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
+
+  glViewport(0, 0, w, h);
+
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_STENCIL_TEST);
-  glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-
-  unsigned int quadVAO2;
-  unsigned int quadVBO2;
-  glGenVertexArrays(1, &quadVAO2);
-  glGenBuffers(1, &quadVBO2);
-  glBindVertexArray(quadVAO2);
-  glBindBuffer(GL_ARRAY_BUFFER, quadVBO2);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-  glEnableVertexAttribArray(0); 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
-  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), glm::vec3(1.f, 1.f, 1.f))));
+
+  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), glm::vec3(0.01f, 0.01f, 0.01f))));
   glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/blacktop.jpg").textureId);
-  glBindVertexArray(quadVAO2);
+  glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
+  glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+}
+
+void maybeApplyPaint(){
+  std::cout << "apply paint placeholder" << std::endl;
 }
 
 bool selectItemCalled = false;
@@ -473,7 +470,7 @@ void setShaderData(GLint shader, glm::mat4 projection, glm::mat4 view, std::vect
   }else{
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   }
-  //glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
+  glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
 }
 
@@ -1237,7 +1234,10 @@ int main(int argc, char* argv[]){
     renderUI(crosshairSprite, currentFramerate);
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
+    
     glfwPollEvents();
+    maybeApplyPaint();
+    
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
 

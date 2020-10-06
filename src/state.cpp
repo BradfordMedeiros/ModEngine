@@ -37,6 +37,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.offsetTextureMode = false,
   	.portalTextureIndex = 0,
   	.textureDisplayMode = true,
+  	.shouldPaint = false,
 	};
 	return state;
 }

@@ -41,6 +41,7 @@ struct engineState {
   bool offsetTextureMode;
   int portalTextureIndex;
   bool textureDisplayMode;
+  bool shouldPaint;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

@@ -195,6 +195,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
     }, hm.mesh);
   }
+
+  if (key == GLFW_KEY_P && action == 1){
+    state.shouldPaint = !state.shouldPaint;
+  }
 }
 
 void expandVoxelUp(){
