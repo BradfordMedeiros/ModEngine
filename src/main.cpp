@@ -252,6 +252,7 @@ void handlePainting(){
     )
   );
   glUniform1f(glGetUniformLocation(drawingProgram, "opacity"), drawParams.opacity);
+  glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
   glBindTexture(GL_TEXTURE_2D, world.textures.at(activeTextureName()).textureId);
   glBindVertexArray(quadVAO);

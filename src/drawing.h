@@ -6,6 +6,7 @@
 struct DrawingParams{
   float opacity;
   glm::vec3 scale;
+  glm::vec3 tint;
 };
 
 DrawingParams getDefaultDrawingParams();
