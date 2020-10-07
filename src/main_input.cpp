@@ -27,6 +27,7 @@ std::string activeTextureName(){
         std::cout << "active texture name: " << name << std::endl;
       return name;
     }
+    currentTextureIndex++;
   }
   assert(false);
 }
@@ -63,7 +64,14 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   processManipulator();
 }
 
-void onArrowKey(int key){}
+void onArrowKey(int key){
+  if (key == 262){
+    nextTexture();
+  }
+  if (key == 263){
+    previousTexture();
+  }
+}
 
 void maybeApplyTextureOffset(int index, glm::vec2 offset){
   GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));

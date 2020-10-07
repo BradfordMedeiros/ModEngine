@@ -1159,6 +1159,11 @@ int main(int argc, char* argv[]){
     for (auto &[_, scene] : world.scenes){
       renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals);
     }
+
+    // Each portal requires a render pass
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glEnable(GL_BLEND);
+
     if (selectItemCalled){
       selectItem();
       selectItemCalled = false;
@@ -1168,10 +1173,7 @@ int main(int argc, char* argv[]){
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
-
-    // Each portal requires a render pass
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glEnable(GL_BLEND);
+    
     assert(portals.size() <= numPortalTextures);
 
     std::map<objid, unsigned int> nextPortalCache;
