@@ -221,13 +221,14 @@ glm::vec3 uvToOffset(UVCoord coord){
   return glm::vec3(xCoord, yCoord, 0.f);
 }
 
+
 void handlePainting(){
-  std::cout << "handle painting called" << std::endl;
   if (!canPaint || !state.shouldPaint){
     return;
   }
-  std::cout << "handle painting being called" << std::endl;
   auto uvsToPaint = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+  std::cout << "uv x: " << uvsToPaint.x << std::endl;
+  std::cout << "uv y: " << uvsToPaint.y << std::endl;
   glUseProgram(drawingProgram); 
 
   glBindTexture(GL_TEXTURE_2D, textureToPaint);
@@ -242,7 +243,7 @@ void handlePainting(){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
 
   glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), glm::vec3(0.01f, 0.01f, 0.01f))));
-  glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/blacktop.jpg").textureId);
+  glBindTexture(GL_TEXTURE_2D, world.textures.at(activeTextureName()).textureId);
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);

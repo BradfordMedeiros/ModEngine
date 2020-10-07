@@ -15,6 +15,35 @@ HeightmapMask mask {
   .height = 1,
 };
 
+int activeTextureIndex = 0;
+std::string activeTextureName(){
+  if (activeTextureIndex >= world.textures.size()){
+    activeTextureIndex = 0;
+  }
+
+  int currentTextureIndex = 0;
+  for (auto [name, _] : world.textures){
+    if (currentTextureIndex >= activeTextureIndex){
+        std::cout << "active texture name: " << name << std::endl;
+      return name;
+    }
+  }
+  assert(false);
+}
+
+void nextTexture(){
+  activeTextureIndex = (activeTextureIndex + 1) % world.textures.size();
+  std::cout << "INFO: next texture: texture painting selection"  << activeTextureIndex << std::endl;
+}
+void previousTexture(){
+  activeTextureIndex = activeTextureIndex - 1;
+  if (activeTextureIndex < 0){
+    activeTextureIndex = 0;
+  }
+  std::cout << "INFO: previous texture: texture painting selection"  << activeTextureIndex << std::endl;
+}
+
+
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
     auto selectObject = getGameObject(world, state.selectedIndex); 

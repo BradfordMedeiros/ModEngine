@@ -10,6 +10,7 @@
 #include "./easy_use.h"
 #include "./gizmo/keymapper.h"
 
+std::string activeTextureName();
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onArrowKey(int key);
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
