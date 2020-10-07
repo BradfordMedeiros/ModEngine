@@ -9,6 +9,7 @@
 #include "./input.h"
 #include "./easy_use.h"
 #include "./gizmo/keymapper.h"
+#include "./drawing.h"
 
 std::string activeTextureName();
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);

@@ -7,6 +7,7 @@ extern bool disableInput;
 extern GameObjectVoxel* voxelPtr;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
+extern DrawingParams drawParams;
 
 float maskValues[] { 10.f };
 HeightmapMask mask {
@@ -15,15 +16,10 @@ HeightmapMask mask {
   .height = 1,
 };
 
-int activeTextureIndex = 0;
 std::string activeTextureName(){
-  if (activeTextureIndex >= world.textures.size()){
-    activeTextureIndex = 0;
-  }
-
   int currentTextureIndex = 0;
   for (auto [name, _] : world.textures){
-    if (currentTextureIndex >= activeTextureIndex){
+    if (currentTextureIndex >= drawParams.activeTextureIndex){
         std::cout << "active texture name: " << name << std::endl;
       return name;
     }
@@ -31,19 +27,6 @@ std::string activeTextureName(){
   }
   assert(false);
 }
-
-void nextTexture(){
-  activeTextureIndex = (activeTextureIndex + 1) % world.textures.size();
-  std::cout << "INFO: next texture: texture painting selection"  << activeTextureIndex << std::endl;
-}
-void previousTexture(){
-  activeTextureIndex = activeTextureIndex - 1;
-  if (activeTextureIndex < 0){
-    activeTextureIndex = 0;
-  }
-  std::cout << "INFO: previous texture: texture painting selection"  << activeTextureIndex << std::endl;
-}
-
 
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
@@ -66,10 +49,10 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 
 void onArrowKey(int key){
   if (key == 262){
-    nextTexture();
+    nextTexture(drawParams, world.textures.size());
   }
   if (key == 263){
-    previousTexture();
+    previousTexture(drawParams);
   }
 }
 
