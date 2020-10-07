@@ -45,6 +45,7 @@
 #include "./gizmo/sequencer.h"
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
+#include "./drawing.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -121,6 +122,8 @@ float quadVertices[] = {
 
 const int numTextures = 32;
 int activeDepthTexture = 0;
+
+DrawingParams drawParams = getDefaultDrawingParams();
 
 void updateDepthTexturesSize(){
   for (int i = 0; i < numTextures; i++){
@@ -242,7 +245,14 @@ void handlePainting(){
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToPaint, 0);
 
-  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), glm::vec3(0.01f, 0.01f, 0.01f))));
+  glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
+    glm::scale(
+      glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), 
+      glm::vec3(0.01f, 0.01f, 0.01f) * drawParams.scale)
+    )
+  );
+  glUniform1f(glGetUniformLocation(drawingProgram, "opacity"), drawParams.opacity);
+
   glBindTexture(GL_TEXTURE_2D, world.textures.at(activeTextureName()).textureId);
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1173,7 +1183,7 @@ int main(int argc, char* argv[]){
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
-    
+
     assert(portals.size() <= numPortalTextures);
 
     std::map<objid, unsigned int> nextPortalCache;
