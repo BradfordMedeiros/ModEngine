@@ -11,7 +11,7 @@
 #include "./gizmo/keymapper.h"
 #include "./drawing.h"
 
-std::string activeTextureName();
+std::string activeTextureName(std::map<std::string, Texture> worldTextures);
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onArrowKey(int key);
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset);

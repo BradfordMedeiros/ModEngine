@@ -23,3 +23,15 @@ void previousTexture(DrawingParams& params){
   }
   std::cout << "INFO: previous texture: texture painting selection"  << params.activeTextureIndex << std::endl;
 }
+
+std::string activeTextureName(DrawingParams& params, std::map<std::string, Texture> worldTextures){
+  int currentTextureIndex = 0;
+  for (auto [name, _] : worldTextures){
+    if (currentTextureIndex >= params.activeTextureIndex){
+        std::cout << "active texture name: " << name << std::endl;
+      return name;
+    }
+    currentTextureIndex++;
+  }
+  assert(false);
+}

@@ -16,18 +16,6 @@ HeightmapMask mask {
   .height = 1,
 };
 
-std::string activeTextureName(){
-  int currentTextureIndex = 0;
-  for (auto [name, _] : world.textures){
-    if (currentTextureIndex >= drawParams.activeTextureIndex){
-        std::cout << "active texture name: " << name << std::endl;
-      return name;
-    }
-    currentTextureIndex++;
-  }
-  assert(false);
-}
-
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
     auto selectObject = getGameObject(world, state.selectedIndex); 

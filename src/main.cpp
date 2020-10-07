@@ -224,6 +224,9 @@ glm::vec3 uvToOffset(UVCoord coord){
   return glm::vec3(xCoord, yCoord, 0.f);
 }
 
+std::vector<std::string> getTextures(){
+  std::vector<std::string> textureNames;
+}
 
 void handlePainting(){
   if (!canPaint || !state.shouldPaint){
@@ -254,7 +257,7 @@ void handlePainting(){
   glUniform1f(glGetUniformLocation(drawingProgram, "opacity"), drawParams.opacity);
   glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
-  glBindTexture(GL_TEXTURE_2D, world.textures.at(activeTextureName()).textureId);
+  glBindTexture(GL_TEXTURE_2D, world.textures.at(activeTextureName(drawParams, world.textures)).textureId);
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);

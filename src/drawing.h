@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 #include <iostream>
+#include <map>
+#include "./scene/common/texture.h"
 
 struct DrawingParams{
   float opacity;
@@ -15,5 +17,6 @@ struct DrawingParams{
 DrawingParams getDefaultDrawingParams();
 void nextTexture(DrawingParams&, int numTotalTextures);
 void previousTexture(DrawingParams&);
+std::string activeTextureName(DrawingParams& params, std::map<std::string, Texture> worldTextures);
 
 #endif
