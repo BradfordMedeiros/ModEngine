@@ -205,18 +205,13 @@ void onDelete(){
 
 unsigned int textureToPaint = -1;
 bool canPaint = false;
-UVCoord uvsToPaint;
 
-void applyPainting(objid id, UVCoord coords){
-  std::cout << "APPLY PAINTING PLACEHOLDER" << std::endl;
-  std::cout << "for id: " << id << std::endl;
-  std::cout << "uv x: " << coords.x << std::endl;
-  std::cout << "uv y: " << coords.y << std::endl;
+void applyPainting(objid id){
   auto texture = textureForId(world, id);
   if (texture.has_value()){
     textureToPaint = texture.value().textureId;
     canPaint = true;
-    uvsToPaint = coords;
+    state.shouldPaint = true;
   }
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
@@ -228,11 +223,12 @@ glm::vec3 uvToOffset(UVCoord coord){
 }
 
 void handlePainting(){
-  if (!canPaint){
+  std::cout << "handle painting called" << std::endl;
+  if (!canPaint || !state.shouldPaint){
     return;
   }
-  std::cout << "painting: texture: " << textureToPaint << std::endl;
-
+  std::cout << "handle painting being called" << std::endl;
+  auto uvsToPaint = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   glUseProgram(drawingProgram); 
 
   glBindTexture(GL_TEXTURE_2D, textureToPaint);
@@ -253,10 +249,6 @@ void handlePainting(){
   glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 }
 
-void maybeApplyPaint(){
-  std::cout << "apply paint placeholder" << std::endl;
-}
-
 bool selectItemCalled = false;
 void selectItem(){
   if (!showDebugInfo){
@@ -264,15 +256,13 @@ void selectItem(){
   }
   Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   auto selectedId = getIdFromColor(pixelColor);
-  auto uvCoords = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
 
   if (!idExists(world, selectedId)){
     std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
     return;
   }
 
-  applyPainting(selectedId, uvCoords);
-  handlePainting();
+  applyPainting(selectedId);
 
   auto groupid = getGroupId(world, selectedId);
   auto selectedObject =  getGameObject(world, groupid);
@@ -1173,7 +1163,8 @@ int main(int argc, char* argv[]){
       selectItem();
       selectItemCalled = false;
     }
-      
+    handlePainting();
+     
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
     }
@@ -1236,7 +1227,6 @@ int main(int argc, char* argv[]){
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     
     glfwPollEvents();
-    maybeApplyPaint();
     
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
