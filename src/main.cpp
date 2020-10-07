@@ -211,7 +211,6 @@ void applyPainting(objid id){
   if (texture.has_value()){
     textureToPaint = texture.value().textureId;
     canPaint = true;
-    state.shouldPaint = true;
   }
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
