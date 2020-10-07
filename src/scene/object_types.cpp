@@ -675,5 +675,22 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
     return heightmapObj -> mesh.texture;
   }
 
+  auto meshObj = std::get_if<GameObjectMesh>(&Object);
+  if (meshObj != NULL){
+    for (int i = 0; i < meshObj -> meshNames.size(); i++){
+      if (meshObj -> meshNames.at(i) == meshObj -> rootMesh){
+        return meshObj -> meshesToRender.at(i).texture;
+      }
+    }
+    std::cout << "WARNING: " << id << " is mesh obj and does not have a mesh" << std::endl;
+  }
+
+  /*
+    std::vector<std::string> meshNames;
+  std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
+  bool isDisabled;
+  bool nodeOnly;
+  std::string rootMesh;*/
+
   return std::nullopt;
 }
