@@ -176,6 +176,15 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
   return obj;
 }
 
+GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes){
+  auto type = additionalFields.find("type") != additionalFields.end() ? additionalFields.at("type") : "button";
+
+  GameObjectUI obj { 
+    .mesh = meshes.at("./res/models/controls/input.obj"),
+  };
+  return obj;
+}
+
 void addObject(
   objid id, 
   std::string objectType, 
@@ -216,6 +225,8 @@ void addObject(
     mapping[id] = createEmitter(addEmitter, additionalFields);
   }else if (objectType == "heightmap"){
     mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
+  }else if (objectType == "ui"){
+    mapping[id] = createUI(additionalFields, meshes);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -364,7 +375,7 @@ void renderObject(
 
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
   if (rootObj != NULL && showDebug){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
@@ -372,7 +383,7 @@ void renderObject(
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL && showDebug){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);   
@@ -380,10 +391,18 @@ void renderObject(
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   if (heightmapObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(heightmapObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(heightmapObj -> texture.texturetiling));
     drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.textureOverloadId);   
+  }
+
+  auto uiObj = std::get_if<GameObjectUI>(&toRender);
+  if (uiObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawMesh(uiObj -> mesh, shaderProgram);    
   }
 }
 

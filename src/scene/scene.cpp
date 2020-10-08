@@ -295,7 +295,7 @@ World createWorld(
   addMesh(world, "./res/models/cone/cone.obj");
   addMesh(world, "./res/models/camera/camera.dae");
   addMesh(world, "./res/models/box/plane.dae");
-
+  addMesh(world, "./res/models/controls/input.obj");
   return world;
 }
 

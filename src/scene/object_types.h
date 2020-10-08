@@ -83,6 +83,10 @@ struct GameObjectHeightmap{
   TextureInformation texture;
 };
 
+struct GameObjectUI {
+  Mesh mesh;
+};
+
 typedef std::variant<
   GameObjectMesh, 
   GameObjectCamera, 
@@ -95,7 +99,8 @@ typedef std::variant<
   GameObjectScene, 
   GameObjectRoot, 
   GameObjectEmitter,
-  GameObjectHeightmap
+  GameObjectHeightmap,
+  GameObjectUI
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
@@ -166,7 +171,12 @@ static Field heightmap {
   .type = "heightmap",
 };
 
-static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap };
+static Field uiField {
+  .prefix = '*',
+  .type = "ui",
+};
+
+static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, uiField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
