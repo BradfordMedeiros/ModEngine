@@ -188,6 +188,7 @@ GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::
     .onFocus = onFocus,
     .onBlur = onBlur,
     .sliderPercentage = 0.f,
+    .toggleOn = false,
   };
   return obj;
 }

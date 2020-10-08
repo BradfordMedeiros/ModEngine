@@ -90,6 +90,7 @@ struct GameObjectUI {
   std::string onFocus;
   std::string onBlur;
   float sliderPercentage;
+  bool toggleOn;
 };
 
 typedef std::variant<
