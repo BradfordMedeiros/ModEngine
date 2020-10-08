@@ -121,7 +121,9 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint); 
-  applyKey(world.objectMapping, codepoint);
+  applyKey(world.objectMapping, codepoint, [](std::string text) -> void {
+    std::cout << "set text placeholder: " << text << std::endl;
+  });
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){

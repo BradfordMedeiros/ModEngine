@@ -725,12 +725,13 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
   }
 }
 
-void applyKey(std::map<objid, GameObjectObj>& mapping, char key){
+void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUI>(&obj);
     if (uiControl != NULL && uiControl -> isFocused){
       auto oldText = uiControl -> text;
       uiControl -> text = oldText + key;
+      applyText(uiControl -> text);
     }
   }
 }

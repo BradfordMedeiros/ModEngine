@@ -243,6 +243,6 @@ std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
 void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id);
-void applyKey(std::map<objid, GameObjectObj>& mapping, char key);
+void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText);
 
 #endif 
