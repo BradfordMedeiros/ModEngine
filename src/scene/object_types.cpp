@@ -181,6 +181,7 @@ GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::
 
   GameObjectUI obj { 
     .mesh = meshes.at("./res/models/controls/input.obj"),
+    .isFocused = false,
   };
   return obj;
 }
@@ -712,4 +713,21 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   std::string rootMesh;*/
 
   return std::nullopt;
+}
+
+void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
+  for (auto &[uiId, obj] : mapping){
+    auto uiControl = std::get_if<GameObjectUI>(&obj);
+    if (uiControl != NULL){
+      if (uiControl -> isFocused && id != uiId){
+        std::cout << "id: " << id << " is now not focused" << std::endl;
+        uiControl -> isFocused = false;
+      }
+
+      if (!uiControl -> isFocused && id == uiId){
+        std::cout << "id: " << id << " is now focused" << std::endl;
+        uiControl -> isFocused = true;
+      }
+    }
+  }
 }
