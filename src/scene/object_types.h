@@ -87,6 +87,8 @@ struct GameObjectUI {
   Mesh mesh;
   bool isFocused;
   std::string text;
+  std::string onFocus;
+  std::string onBlur;
 };
 
 typedef std::variant<
@@ -242,7 +244,7 @@ std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid
 std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping);
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
-void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id);
+void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> sendNotify);
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText);
 
 #endif 

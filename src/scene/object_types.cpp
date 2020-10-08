@@ -178,11 +178,15 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
 
 GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes){
   auto type = additionalFields.find("type") != additionalFields.end() ? additionalFields.at("type") : "button";
+  auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
+  auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";;
 
   GameObjectUI obj { 
     .mesh = meshes.at("./res/models/controls/input.obj"),
     .isFocused = false,
     .text = "",
+    .onFocus = onFocus,
+    .onBlur = onBlur,
   };
   return obj;
 }
@@ -708,7 +712,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   return std::nullopt;
 }
 
-void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
+void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> sendNotify){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUI>(&obj);
     if (uiControl != NULL){
@@ -716,11 +720,17 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
       if (uiControl -> isFocused && id != uiId){
         std::cout << "id: " << id << " is now not focused" << std::endl;
         uiControl -> isFocused = false;
+        if (uiControl -> onBlur != ""){
+          sendNotify(uiControl -> onBlur);
+        }
       }
 
       if (!uiControl -> isFocused && id == uiId){
         std::cout << "id: " << id << " is now focused" << std::endl;
         uiControl -> isFocused = true;
+        if (uiControl -> onFocus != ""){
+          sendNotify(uiControl -> onFocus);
+        }
       }
     }
   }
