@@ -1,0 +1,17 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:10 1 10
+
+*textinput:type:input
+*textinput:text:helloworld
+*textinput:focus:textfocused
+*textinput:blur:textblurred
+
+*toggle:type:toggle
+*toggle:on:enable_lights
+*toggle:off:disable_lights
+
+*slider:type:slider
+*slider:min:0
+*slider:max:10
+
+*slider:type:colorselection

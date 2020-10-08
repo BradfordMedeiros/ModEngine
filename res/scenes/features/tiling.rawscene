@@ -1,0 +1,6 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+#platform:texture:./res/textures/blacktop.jpg
+platform:texturetiling:150 150           
