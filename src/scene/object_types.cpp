@@ -704,14 +704,6 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
     }
     std::cout << "WARNING: " << id << " is mesh obj and does not have a mesh" << std::endl;
   }
-
-  /*
-    std::vector<std::string> meshNames;
-  std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
-  bool isDisabled;
-  bool nodeOnly;
-  std::string rootMesh;*/
-
   return std::nullopt;
 }
 
