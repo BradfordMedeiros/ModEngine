@@ -182,6 +182,7 @@ GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::
   GameObjectUI obj { 
     .mesh = meshes.at("./res/models/controls/input.obj"),
     .isFocused = false,
+    .text = "",
   };
   return obj;
 }
@@ -725,5 +726,11 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
 }
 
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key){
-  std::cout << "object types: apply key called: " << key << std::endl;
+  for (auto &[uiId, obj] : mapping){
+    auto uiControl = std::get_if<GameObjectUI>(&obj);
+    if (uiControl != NULL && uiControl -> isFocused){
+      auto oldText = uiControl -> text;
+      uiControl -> text = oldText + key;
+    }
+  }
 }

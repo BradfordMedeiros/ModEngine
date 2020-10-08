@@ -86,6 +86,7 @@ struct GameObjectHeightmap{
 struct GameObjectUI {
   Mesh mesh;
   bool isFocused;
+  std::string text;
 };
 
 typedef std::variant<
