@@ -187,6 +187,7 @@ GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::
     .text = "",
     .onFocus = onFocus,
     .onBlur = onBlur,
+    .sliderPercentage = 0.f,
   };
   return obj;
 }
@@ -735,7 +736,6 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     }
   }
 }
-
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUI>(&obj);
