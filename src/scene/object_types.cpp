@@ -723,3 +723,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
     }
   }
 }
+
+void applyKey(std::map<objid, GameObjectObj>& mapping, char key){
+  std::cout << "object types: apply key called: " << key << std::endl;
+}
