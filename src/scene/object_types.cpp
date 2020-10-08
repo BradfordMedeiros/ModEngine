@@ -712,6 +712,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUI>(&obj);
     if (uiControl != NULL){
+      std::cout << "id: " << id << " was clicked" << std::endl;
       if (uiControl -> isFocused && id != uiId){
         std::cout << "id: " << id << " is now not focused" << std::endl;
         uiControl -> isFocused = false;
