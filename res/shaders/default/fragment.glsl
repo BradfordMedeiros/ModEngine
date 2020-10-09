@@ -4,7 +4,8 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BloomColor;
 
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
@@ -32,13 +33,14 @@ const float quadratic = 0.0002;
 
 const float emissionAmount = 1;
 uniform float discardTexAmount;
+uniform float time;
 
 void main(){
     vec2 adjustedTexCoord = (TexCoord * textureTiling) + textureOffset;
 
-    vec4 diffuseColor = texture(maintexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
-    vec4 emissionColor = texture(emissionTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
-    vec4 opacityColor = texture(opacityTexture, vec2(adjustedTexCoord.x, -adjustedTexCoord.y));
+    vec4 diffuseColor = texture(maintexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
+    vec4 emissionColor = texture(emissionTexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
+    vec4 opacityColor = texture(opacityTexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
 
     bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
 
@@ -85,6 +87,15 @@ void main(){
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
-    FragColor = color * vec4(tint.x, tint.y, tint.z, 1.0);
-  
+    FragColor = color;
+
+    // TODO -> what would be a better thesholding function? 
+    float brightness = FragColor.r + FragColor.g + FragColor.b;
+    if(brightness > 2.0){
+      BloomColor = vec4(FragColor.rgb, 1.0);
+    }else{
+      BloomColor = vec4(0.0, 0.0, 0.0, 0.0);    
+    }
+
+       
 }
