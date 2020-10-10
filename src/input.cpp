@@ -268,4 +268,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
    if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS){
       onDelete();
    }
+
+   if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
+      state.enableBloom = !state.enableBloom;
+   }
 }

@@ -91,7 +91,7 @@ void main(){
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;
-    if(brightness > 2.0){
+    if(brightness > 2.7){
       BloomColor = vec4(FragColor.rgb, 1.0);
     }else{
       BloomColor = vec4(0.0, 0.0, 0.0, 0.0);    

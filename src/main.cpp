@@ -1171,7 +1171,7 @@ int main(int argc, char* argv[]){
     // 1ST pass draws selection program shader to be able to handle selection 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.1, 0.1, 0.1, 1.0f);
+    glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
     
@@ -1199,7 +1199,7 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < portals.size(); i++){
       auto portal = portals.at(i);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
-      glClearColor(0.1, 0.1, 0.1, 1.0f);
+      glClearColor(0.0, 0.0, 0.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       auto portalViewMatrix = renderPortalView(portal, viewTransform);
@@ -1230,7 +1230,7 @@ int main(int argc, char* argv[]){
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-    glClearColor(0.1, 0.1, 0.1, 1.0f);
+    glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     for (auto &[_, scene] : world.scenes){
@@ -1289,9 +1289,10 @@ int main(int argc, char* argv[]){
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
     glActiveTexture(GL_TEXTURE1);
+    glUniform1i(glGetUniformLocation(framebufferProgram, "enableBloom"), state.enableBloom);
+    glUniform1f(glGetUniformLocation(framebufferProgram, "bloomAmount"), state.bloomAmount);
     glUniform1i(glGetUniformLocation(framebufferProgram, "bloomTexture"), 1);
     glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
-
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(framebufferProgram, "framebufferTexture"), 0);
 

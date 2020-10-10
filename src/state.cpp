@@ -38,6 +38,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.portalTextureIndex = 0,
   	.textureDisplayMode = true,
   	.shouldPaint = false,
+  	.enableBloom = true,
+  	.bloomAmount = 1.f,
 	};
 	return state;
 }

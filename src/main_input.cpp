@@ -38,9 +38,11 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 void onArrowKey(int key){
   if (key == 262){
     nextTexture(drawParams, world.textures.size());
+    state.bloomAmount += 0.1f;
   }
   if (key == 263){
     previousTexture(drawParams);
+    state.bloomAmount -= 0.1f;
   }
 }
 

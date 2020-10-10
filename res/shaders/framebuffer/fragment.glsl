@@ -5,10 +5,11 @@ uniform sampler2D framebufferTexture;
 uniform sampler2D bloomTexture;
 
 uniform bool enableBloom;
+uniform float bloomAmount;
 
 void main(){
   if (enableBloom){
-    FragColor = texture(framebufferTexture, TexCoords) + texture(bloomTexture, TexCoords);
+    FragColor = texture(framebufferTexture, TexCoords) + (bloomAmount * texture(bloomTexture, TexCoords));
   }else{
     FragColor = texture(framebufferTexture, TexCoords);
   }

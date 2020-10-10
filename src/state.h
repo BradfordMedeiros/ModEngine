@@ -42,6 +42,8 @@ struct engineState {
   int portalTextureIndex;
   bool textureDisplayMode;
   bool shouldPaint;
+  bool enableBloom;
+  float bloomAmount;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
