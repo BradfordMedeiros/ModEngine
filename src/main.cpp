@@ -49,6 +49,7 @@
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
+unsigned int blurProgram;
 unsigned int quadVAO;
 
 GameObject* activeCameraObj;
@@ -898,6 +899,10 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: drawing shader path is: " << drawingShaderPath << std::endl;
   drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl");
 
+  std::string blurShaderPath = "./res/shaders/blur";
+  std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
+  blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
+
   fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
   Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>(), loadTexture);
  
@@ -1249,6 +1254,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
     
     glBindVertexArray(quadVAO);
+
 
 
 
