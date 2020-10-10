@@ -43,6 +43,9 @@ void onArrowKey(int key){
   if (key == 263){
     previousTexture(drawParams);
     state.bloomAmount -= 0.1f;
+    if (state.bloomAmount < 0.f){
+      state.bloomAmount = 0.f;
+    }
   }
 }
 
