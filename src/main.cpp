@@ -97,6 +97,7 @@ glm::mat4 projection;
 glm::mat4 view;
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
+unsigned int framebufferTexture3;
 unsigned int fbo;
 unsigned int depthTextures[32];
 
@@ -836,6 +837,8 @@ int main(int argc, char* argv[]){
   genFramebufferTexture(&framebufferTexture2);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
+  genFramebufferTexture(&framebufferTexture3);
+
   generateDepthTextures();
   generatePortalTextures();
   setActiveDepthTexture(0);
@@ -864,6 +867,9 @@ int main(int argc, char* argv[]){
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+     glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
      updateDepthTexturesSize();
@@ -1247,16 +1253,20 @@ int main(int argc, char* argv[]){
 
     portalIdCache.clear();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
+
+    glUseProgram(blurProgram);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
+
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
-    
     glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-
-
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
     if (state.portalTextureIndex == 0 || (state.textureDisplayMode && textureToPaint == -1)){
       glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
