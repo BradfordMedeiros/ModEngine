@@ -1154,6 +1154,7 @@ int main(int argc, char* argv[]){
     
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(255.0, 255.0, 255.0, 1.0f);
@@ -1254,19 +1255,45 @@ int main(int argc, char* argv[]){
     portalIdCache.clear();
 
 
+    // depends on framebuffer texture, outputs to framebuffer texture 2
+    // Blurring draws the framebuffer texture 
+    // The blur program blurs it one in one direction and saves in framebuffer texture 3 
+    // then we take framebuffer texture 3, and use that like the original framebuffer texture
+    // run it through again, blurring in other fucking direction 
+    // We swap to attachment 2 which was just the old bloom attachment for final render pass
     glUseProgram(blurProgram);
+    glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture3, 0);
 
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
+
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+   
+    glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    ///
 
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+
+    glActiveTexture(GL_TEXTURE1);
+    glUniform1i(glGetUniformLocation(framebufferProgram, "bloomTexture"), 1);
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(framebufferProgram, "framebufferTexture"), 0);
 
     if (state.portalTextureIndex == 0 || (state.textureDisplayMode && textureToPaint == -1)){
       glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
