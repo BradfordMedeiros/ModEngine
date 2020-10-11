@@ -614,6 +614,13 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     return {};
   }
 
+  auto uiControlObj = std::get_if<GameObjectUI>(&objectToSerialize);
+  if (uiControlObj != NULL){
+    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};    
+  }
+
   assert(false);  
   return {};
 }
