@@ -743,6 +743,25 @@ void onUdpServerMessage(UdpPacket& packet){
   }
 }
 
+void takeScreenshot(){
+  state.takeScreenshot = true;
+}
+void saveScreenshot(){
+  std::cout << "screenshot placeholder here" << std::endl;
+  int w, h;
+  int miplevel = 0;
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
+  std::cout << "texture width: " << w << std::endl;
+  std::cout << "texture height: " << h << std::endl;
+
+  char* data = new char[w * h * 4];
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+  saveTextureData(data, w, h);
+  delete data;
+}
+
+
 void genFramebufferTexture(unsigned int *texture){
   glGenTextures(1, texture);
   glBindTexture(GL_TEXTURE_2D, *texture);
@@ -1307,6 +1326,10 @@ int main(int argc, char* argv[]){
       }
     }
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    if (state.takeScreenshot){
+      state.takeScreenshot = false;
+      saveScreenshot();
+    }
   }
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;

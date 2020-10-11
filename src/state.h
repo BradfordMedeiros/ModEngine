@@ -44,6 +44,7 @@ struct engineState {
   bool shouldPaint;
   bool enableBloom;
   float bloomAmount;
+  bool takeScreenshot;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

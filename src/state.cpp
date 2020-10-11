@@ -40,6 +40,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.shouldPaint = false,
   	.enableBloom = false,
   	.bloomAmount = 1.f,
+  	.takeScreenshot = false,
 	};
 	return state;
 }
