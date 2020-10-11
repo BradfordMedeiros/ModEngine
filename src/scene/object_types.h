@@ -91,6 +91,8 @@ struct GameObjectUI {
   std::string onBlur;
   float sliderPercentage;
   bool toggleOn;
+  int onTexture;
+  int offTexture;
 };
 
 typedef std::variant<

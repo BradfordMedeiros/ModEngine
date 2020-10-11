@@ -176,10 +176,10 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
   return obj;
 }
 
-GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes){
+GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
   auto type = additionalFields.find("type") != additionalFields.end() ? additionalFields.at("type") : "button";
   auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
-  auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";;
+  auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";
 
   GameObjectUI obj { 
     .mesh = meshes.at("./res/models/controls/input.obj"),
@@ -189,6 +189,8 @@ GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::
     .onBlur = onBlur,
     .sliderPercentage = 0.f,
     .toggleOn = false,
+    .onTexture = ensureTextureLoaded("./res/models/controls/on.png"),
+    .offTexture = ensureTextureLoaded("./res/models/controls/off.png"),
   };
   return obj;
 }
@@ -234,7 +236,7 @@ void addObject(
   }else if (objectType == "heightmap"){
     mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
   }else if (objectType == "ui"){
-    mapping[id] = createUI(additionalFields, meshes);
+    mapping[id] = createUI(additionalFields, meshes, ensureTextureLoaded);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -410,7 +412,8 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(uiObj -> mesh, shaderProgram);    
+    auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
+    drawMesh(uiObj -> mesh, shaderProgram, textureOverloadId);    
   }
 }
 
@@ -719,6 +722,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     auto uiControl = std::get_if<GameObjectUI>(&obj);
     if (uiControl != NULL){
       std::cout << "id: " << id << " was clicked" << std::endl;
+      uiControl -> toggleOn = !uiControl -> toggleOn;
       if (uiControl -> isFocused && id != uiId){
         std::cout << "id: " << id << " is now not focused" << std::endl;
         uiControl -> isFocused = false;
