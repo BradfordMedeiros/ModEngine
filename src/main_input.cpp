@@ -47,9 +47,6 @@ void onArrowKey(int key){
       state.bloomAmount = 0.f;
     }
   }
-  if (key == 264){
-    state.takeScreenshot = true;
-  }
 }
 
 void maybeApplyTextureOffset(int index, glm::vec2 offset){
