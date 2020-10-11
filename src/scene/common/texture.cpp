@@ -35,6 +35,6 @@ Texture loadTexture(std::string textureFilePath){
   return tex;
 }
 
-void saveTextureData(char* data, int width, int height){
-  stbi_write_png("./res/textures/screenshot.png", width, height, 3, data, width * 3); 
+void saveTextureData(std::string filepath, char* data, int width, int height){
+  stbi_write_png(filepath.c_str(), width, height, 3, data, width * 3); 
 }

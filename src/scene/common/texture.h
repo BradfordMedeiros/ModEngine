@@ -15,6 +15,6 @@ struct Texture {
 };
 
 Texture loadTexture(std::string textureFilePath);
-void saveTextureData(char* data, int width, int height);
+void saveTextureData(std::string filepath, char* data, int width, int height);
 
 #endif

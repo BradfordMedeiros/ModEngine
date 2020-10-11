@@ -617,6 +617,12 @@ SCM scmRaycast(SCM pos, SCM direction, SCM distance){
   return list;
 }
 
+void (*_saveScreenshot)(std::string filepath);
+SCM scmSaveScreenshot(SCM filepath){
+  _saveScreenshot(scm_to_locale_string(filepath));
+  return SCM_UNSPECIFIED;
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -803,6 +809,8 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define("mainobj", createGameObject(id));
   scm_c_define("is-server", scm_from_bool(isServer));
+
+  scm_c_define_gsubr("ss", 1, 0, 0, (void*)scmSaveScreenshot);
 }
 
 
@@ -859,7 +867,8 @@ void createStaticSchemeBindings(
   void (*startRecording)(objid id, std::string recordingPath),
   void (*playRecording)(objid id, std::string recordingPath),
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
-  std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance)
+  std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
+  void (*saveScreenshot)(std::string)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -936,4 +945,6 @@ void createStaticSchemeBindings(
 
   _makeObjectAttr = makeObjectAttr;
   _raycast = raycast;
+
+  _saveScreenshot = saveScreenshot;
 }

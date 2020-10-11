@@ -743,8 +743,10 @@ void onUdpServerMessage(UdpPacket& packet){
   }
 }
 
-void takeScreenshot(){
+std::string screenshotPath = "./res/textures/screenshot.png";
+void takeScreenshot(std::string filepath){
   state.takeScreenshot = true;
+  screenshotPath = filepath;
 }
 void saveScreenshot(){
   std::cout << "screenshot placeholder here" << std::endl;
@@ -757,7 +759,7 @@ void saveScreenshot(){
 
   char* data = new char[w * h * 4];
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-  saveTextureData(data, w, h);
+  saveTextureData(screenshotPath, data, w, h);
   delete data;
 }
 
@@ -984,7 +986,8 @@ int main(int argc, char* argv[]){
     startRecording,
     playRecording,
     makeObjectAttr,
-    raycast
+    raycast,
+    takeScreenshot
   );
 
   schemeBindings = getSchemeCallbacks();
