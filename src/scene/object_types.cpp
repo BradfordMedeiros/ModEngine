@@ -179,7 +179,9 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
 GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
   auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
   auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";
-
+  auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "./res/models/controls/on.png";
+  auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "./res/models/controls/off.png";
+  auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
   GameObjectUICommon common {
     .mesh = meshes.at("./res/models/controls/input.obj"),
     .isFocused = false,
@@ -188,9 +190,9 @@ GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::
   };
   GameObjectUI obj { 
     .common = common,
-    .toggleOn = false,
-    .onTexture = ensureTextureLoaded("./res/models/controls/on.png"),
-    .offTexture = ensureTextureLoaded("./res/models/controls/off.png"),
+    .toggleOn = toggleOn,
+    .onTexture = ensureTextureLoaded(onTexture),
+    .offTexture = ensureTextureLoaded(offTexture),
   };
   return obj;
 }
@@ -722,8 +724,12 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     auto uiControl = std::get_if<GameObjectUI>(&obj);
     if (uiControl != NULL){
       std::cout << "id: " << id << " was clicked" << std::endl;
-      uiControl -> toggleOn = !uiControl -> toggleOn;
+      if (id == uiId){
+        uiControl -> toggleOn = !uiControl -> toggleOn;
+      }
+
       if (uiControl -> common.isFocused && id != uiId){
+
         std::cout << "id: " << id << " is now not focused" << std::endl;
         uiControl -> common.isFocused = false;
         if (uiControl -> common.onBlur != ""){
