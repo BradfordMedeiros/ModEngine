@@ -83,13 +83,15 @@ struct GameObjectHeightmap{
   TextureInformation texture;
 };
 
-struct GameObjectUI {
+struct GameObjectUICommon {
   Mesh mesh;
   bool isFocused;
-  std::string text;
   std::string onFocus;
   std::string onBlur;
-  float sliderPercentage;
+};
+
+struct GameObjectUI {
+  GameObjectUICommon common;
   bool toggleOn;
   int onTexture;
   int offTexture;

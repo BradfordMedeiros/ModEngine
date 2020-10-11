@@ -177,17 +177,17 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
 }
 
 GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
-  auto type = additionalFields.find("type") != additionalFields.end() ? additionalFields.at("type") : "button";
   auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
   auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";
 
-  GameObjectUI obj { 
+  GameObjectUICommon common {
     .mesh = meshes.at("./res/models/controls/input.obj"),
     .isFocused = false,
-    .text = "",
     .onFocus = onFocus,
     .onBlur = onBlur,
-    .sliderPercentage = 0.f,
+  };
+  GameObjectUI obj { 
+    .common = common,
     .toggleOn = false,
     .onTexture = ensureTextureLoaded("./res/models/controls/on.png"),
     .offTexture = ensureTextureLoaded("./res/models/controls/off.png"),
@@ -413,7 +413,7 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
-    drawMesh(uiObj -> mesh, shaderProgram, textureOverloadId);    
+    drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId);    
   }
 }
 
@@ -723,31 +723,31 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     if (uiControl != NULL){
       std::cout << "id: " << id << " was clicked" << std::endl;
       uiControl -> toggleOn = !uiControl -> toggleOn;
-      if (uiControl -> isFocused && id != uiId){
+      if (uiControl -> common.isFocused && id != uiId){
         std::cout << "id: " << id << " is now not focused" << std::endl;
-        uiControl -> isFocused = false;
-        if (uiControl -> onBlur != ""){
-          sendNotify(uiControl -> onBlur);
+        uiControl -> common.isFocused = false;
+        if (uiControl -> common.onBlur != ""){
+          sendNotify(uiControl -> common.onBlur);
         }
       }
 
-      if (!uiControl -> isFocused && id == uiId){
+      if (!uiControl -> common.isFocused && id == uiId){
         std::cout << "id: " << id << " is now focused" << std::endl;
-        uiControl -> isFocused = true;
-        if (uiControl -> onFocus != ""){
-          sendNotify(uiControl -> onFocus);
+        uiControl -> common.isFocused = true;
+        if (uiControl -> common.onFocus != ""){
+          sendNotify(uiControl -> common.onFocus);
         }
       }
     }
   }
 }
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText){
-  for (auto &[uiId, obj] : mapping){
+  /*for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUI>(&obj);
     if (uiControl != NULL && uiControl -> isFocused){
       auto oldText = uiControl -> text;
       uiControl -> text = oldText + key;
       applyText(uiControl -> text);
     }
-  }
+  }*/
 }
