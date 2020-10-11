@@ -107,7 +107,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
     nextCamera();
   }
    
-  if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
+  if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
     state.visualizeNormals = !state.visualizeNormals;
     std::cout << "visualizeNormals: " << state.visualizeNormals << std::endl;
   } 
