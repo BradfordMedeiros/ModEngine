@@ -201,9 +201,13 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes){
+GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
   GameObjectUISlider obj {
     .common = parseCommon(additionalFields, meshes),
+    .min = 0.f,
+    .max = 100.f,
+    .percentage = 20.f,
+    .texture = ensureTextureLoaded("./res/models/controls/slider.png"),
   };
   return obj;
 }
@@ -251,7 +255,7 @@ void addObject(
   }else if (objectType == "ui"){
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
-    mapping[id] = createUISlider(additionalFields, meshes);
+    mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -436,7 +440,7 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(uiSliderObj -> common.mesh, shaderProgram);    
+    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture);    
   }
 }
 
