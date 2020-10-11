@@ -37,7 +37,7 @@ Mesh load2DMesh(std::string imagePath, std::function<Texture(std::string)> ensur
 Mesh load2DMeshTexCoords(std::string imagePath, float offsetx, float offsety, float width, float height, std::function<Texture(std::string)> ensureLoadTexture); // 2DMesh with subimage selection
 Mesh loadMeshFrom3Vert2TexCoords(std::string imagePath, std::vector<float> vertices, std::vector<unsigned int> indicies, std::function<Texture(std::string)> ensureLoadTexture);
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1);  						 // draws mesh and related texture info (no shader data supplied)
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1, unsigned int customOpacityTextureId = -1);  						 // draws mesh and related texture info (no shader data supplied)
 void drawLines(std::vector<Line> allLines);
 
 #endif 

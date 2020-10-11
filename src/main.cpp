@@ -526,7 +526,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
 
     glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), state.discardAmount);
+    glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), state.discardAmount);  // TODO - remove this global discard tex amount
     glUniform1f(glGetUniformLocation(newShader, "time"), getTotalTime());
 
     bool isPortal = false;

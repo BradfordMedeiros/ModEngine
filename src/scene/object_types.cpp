@@ -206,8 +206,9 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
     .common = parseCommon(additionalFields, meshes),
     .min = 0.f,
     .max = 100.f,
-    .percentage = 20.f,
+    .percentage = 80.f,
     .texture = ensureTextureLoaded("./res/models/controls/slider.png"),
+    .opacityTexture = ensureTextureLoaded("./res/models/controls/slider_opacity.png"),
   };
   return obj;
 }
@@ -440,7 +441,8 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture);    
+    //glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 1 - uiSliderObj -> percentage);  
+    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture, uiSliderObj -> opacityTexture);    
   }
 }
 

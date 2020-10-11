@@ -165,7 +165,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
   return load2DMeshHelper(imagePath, uiVerts, indices, 20, 6, 3, 2, ensureLoadTexture);  
 }
 
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId){
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId){
   glBindVertexArray(mesh.VAOPointer);
  
   glActiveTexture(GL_TEXTURE0); 
@@ -177,9 +177,11 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId){
   glActiveTexture(GL_TEXTURE0 + 1);
   glBindTexture(GL_TEXTURE_2D, mesh.emissionTexture.textureId);
 
-  glUniform1i(glGetUniformLocation(shaderProgram, "hasOpacityTexture"), mesh.hasOpacityTexture);
+  auto opacityTextureId = customOpacityTextureId == -1 ? mesh.opacityTexture.textureId : customOpacityTextureId;
+  bool hasOpacityTexture = mesh.hasOpacityTexture || (customOpacityTextureId != -1);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasOpacityTexture"), hasOpacityTexture);
   glActiveTexture(GL_TEXTURE0 + 2);
-  glBindTexture(GL_TEXTURE_2D, mesh.opacityTexture.textureId);
+  glBindTexture(GL_TEXTURE_2D, opacityTextureId);
 
   glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);

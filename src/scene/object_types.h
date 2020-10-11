@@ -103,6 +103,7 @@ struct GameObjectUISlider {
   float max;
   float percentage;
   int texture;
+  int opacityTexture;
 };
 
 typedef std::variant<
