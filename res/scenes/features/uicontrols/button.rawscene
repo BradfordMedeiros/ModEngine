@@ -5,3 +5,7 @@
 *basicbutton2:offtexture:./res/textures/window.png
 *basicbutton2:position:0 0 2
 *basicbutton2:state:on
+
+*colorselection:position:0 0 5
+*colorselection:offtexture:./res/models/controls/color.png
+*colorselection:fragshader:./res/shaders/simple3d/fragment.glsl
