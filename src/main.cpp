@@ -757,8 +757,9 @@ void saveScreenshot(){
   std::cout << "texture width: " << w << std::endl;
   std::cout << "texture height: " << h << std::endl;
 
-  char* data = new char[w * h * 4];
-  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+  char* data = new char[w * h * 3];
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
   saveTextureData(screenshotPath, data, w, h);
   delete data;
 }
