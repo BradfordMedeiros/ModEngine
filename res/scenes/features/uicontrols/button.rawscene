@@ -1,4 +1,7 @@
 *basicbutton:on:enable_lights
 *basicbutton:off:disable_lights
-*basicbutton:ontexture:./res/textures/wood.jpg
-*basicbutton:offtexture:./res/textures/window.png
+
+*basicbutton2:ontexture:./res/textures/wood.jpg
+*basicbutton2:offtexture:./res/textures/window.png
+*basicbutton2:position:0 0 2
+*basicbutton2:state:on
