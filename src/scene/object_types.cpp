@@ -176,23 +176,34 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
   return obj;
 }
 
-GameObjectUI createUI(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
+GameObjectUICommon parseCommon(std::map<std::string, std::string>& additionalFields, std::map<std::string, Mesh>& meshes){
   auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
   auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";
-  auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "./res/models/controls/on.png";
-  auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "./res/models/controls/off.png";
-  auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
   GameObjectUICommon common {
     .mesh = meshes.at("./res/models/controls/input.obj"),
     .isFocused = false,
     .onFocus = onFocus,
     .onBlur = onBlur,
   };
-  GameObjectUI obj { 
-    .common = common,
+  return common;
+}
+GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
+  auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "./res/models/controls/on.png";
+  auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "./res/models/controls/off.png";
+  auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
+
+  GameObjectUIButton obj { 
+    .common = parseCommon(additionalFields, meshes),
     .toggleOn = toggleOn,
     .onTexture = ensureTextureLoaded(onTexture),
     .offTexture = ensureTextureLoaded(offTexture),
+  };
+  return obj;
+}
+
+GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes){
+  GameObjectUISlider obj {
+    .common = parseCommon(additionalFields, meshes),
   };
   return obj;
 }
@@ -238,7 +249,9 @@ void addObject(
   }else if (objectType == "heightmap"){
     mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
   }else if (objectType == "ui"){
-    mapping[id] = createUI(additionalFields, meshes, ensureTextureLoaded);
+    mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
+  }else if (objectType == "slider"){
+    mapping[id] = createUISlider(additionalFields, meshes);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -409,13 +422,21 @@ void renderObject(
     drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.textureOverloadId);   
   }
 
-  auto uiObj = std::get_if<GameObjectUI>(&toRender);
+  auto uiObj = std::get_if<GameObjectUIButton>(&toRender);
   if (uiObj != NULL){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
     drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId);    
+  }
+
+  auto uiSliderObj = std::get_if<GameObjectUISlider>(&toRender);
+  if (uiSliderObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawMesh(uiSliderObj -> common.mesh, shaderProgram);    
   }
 }
 
@@ -475,6 +496,7 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
     return attributes;
   }
 
+  assert(false);
   return attributes;
 }
 
@@ -614,7 +636,14 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     return {};
   }
 
-  auto uiControlObj = std::get_if<GameObjectUI>(&objectToSerialize);
+  auto uiControlObj = std::get_if<GameObjectUIButton>(&objectToSerialize);
+  if (uiControlObj != NULL){
+    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};    
+  }
+  
+  auto uiControlSliderObj = std::get_if<GameObjectUISlider>(&objectToSerialize);
   if (uiControlObj != NULL){
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
@@ -728,7 +757,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
 
 void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> sendNotify){
   for (auto &[uiId, obj] : mapping){
-    auto uiControl = std::get_if<GameObjectUI>(&obj);
+    auto uiControl = std::get_if<GameObjectUIButton>(&obj);
     if (uiControl != NULL){
       std::cout << "id: " << id << " was clicked" << std::endl;
       if (id == uiId){

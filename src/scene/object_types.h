@@ -90,11 +90,18 @@ struct GameObjectUICommon {
   std::string onBlur;
 };
 
-struct GameObjectUI {
+struct GameObjectUIButton {
   GameObjectUICommon common;
   bool toggleOn;
   int onTexture;
   int offTexture;
+};
+
+struct GameObjectUISlider {
+  GameObjectUICommon common;
+  float min;
+  float max;
+  float percentage;
 };
 
 typedef std::variant<
@@ -110,7 +117,8 @@ typedef std::variant<
   GameObjectRoot, 
   GameObjectEmitter,
   GameObjectHeightmap,
-  GameObjectUI
+  GameObjectUIButton,
+  GameObjectUISlider
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
@@ -181,12 +189,17 @@ static Field heightmap {
   .type = "heightmap",
 };
 
-static Field uiField {
+static Field uiButtonField {
   .prefix = '*',
   .type = "ui",
 };
 
-static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, uiField };
+static Field uiSliderField {
+  .prefix = '/',
+  .type = "slider",
+};
+
+static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, uiButtonField, uiSliderField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
