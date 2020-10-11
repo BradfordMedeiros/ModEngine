@@ -749,14 +749,10 @@ void takeScreenshot(std::string filepath){
   screenshotPath = filepath;
 }
 void saveScreenshot(){
-  std::cout << "screenshot placeholder here" << std::endl;
   int w, h;
   int miplevel = 0;
   glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
   glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
-  std::cout << "texture width: " << w << std::endl;
-  std::cout << "texture height: " << h << std::endl;
-
   char* data = new char[w * h * 3];
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
