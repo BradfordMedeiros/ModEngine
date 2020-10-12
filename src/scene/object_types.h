@@ -93,6 +93,7 @@ struct GameObjectUICommon {
 struct GameObjectUIButton {
   GameObjectUICommon common;
   bool toggleOn;
+  bool canToggle;
   int onTexture;
   int offTexture;
 };

@@ -191,10 +191,12 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
   auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "./res/models/controls/on.png";
   auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "./res/models/controls/off.png";
   auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
+  auto canToggle = additionalFields.find("cantoggle") == additionalFields.end() || !(additionalFields.at("cantoggle") == "false");
 
   GameObjectUIButton obj { 
     .common = parseCommon(additionalFields, meshes),
     .toggleOn = toggleOn,
+    .canToggle = canToggle,
     .onTexture = ensureTextureLoaded(onTexture),
     .offTexture = ensureTextureLoaded(offTexture),
   };
@@ -766,7 +768,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     auto uiControl = std::get_if<GameObjectUIButton>(&obj);
     if (uiControl != NULL){
       std::cout << "id: " << id << " was clicked" << std::endl;
-      if (id == uiId){
+      if (id == uiId && uiControl -> canToggle){
         uiControl -> toggleOn = !uiControl -> toggleOn;
       }
 
