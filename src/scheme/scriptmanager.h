@@ -14,7 +14,7 @@ typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
-typedef void(*onobjectSelectedFunc)(int32_t index);
+typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
 typedef void(*boolfunc)(bool value);
 typedef void(*messagefunc)(std::queue<std::string>&);
 typedef void(*stringfunc)(std::string);

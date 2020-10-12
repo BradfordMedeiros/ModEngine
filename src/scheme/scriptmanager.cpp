@@ -63,10 +63,10 @@ void onMouseMoveCallbackAllScripts(double xPos, double yPos){
     onMouseMoveCallback(xPos, yPos);
   }
 }
-void onObjectSelectedAllScripts(int32_t index){
+void onObjectSelectedAllScripts(int32_t index, glm::vec3 color){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
-    onObjectSelected(index);
+    onObjectSelected(index, color);
   }
 }
 void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){

@@ -284,7 +284,7 @@ void selectItem(){
   state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   
-  schemeBindings.onObjectSelected(state.selectedIndex);
+  schemeBindings.onObjectSelected(state.selectedIndex, glm::vec3(1.f, 2.f, 3.f));
 }
 
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform){

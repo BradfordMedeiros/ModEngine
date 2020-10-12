@@ -655,7 +655,7 @@ void onMouseMoveCallback(double xPos, double yPos){
     scm_call_2(func_symbol, scm_from_double(xPos), scm_from_double(yPos));
   }
 }
-void onObjectSelected(int32_t index){
+void onObjectSelected(int32_t index, glm::vec3 color){
   const char* function = "onObjSelected";
   if (symbolDefined(function)){
     auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
@@ -663,7 +663,7 @@ void onObjectSelected(int32_t index){
     SCM gameobject = scm_make_foreign_object_1(gameObjectType, obj);
 
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_1(func_symbol, gameobject);
+    scm_call_2(func_symbol, gameobject, vec3ToScmList(color));
   }
 }
 void onKeyCallback(int key, int scancode, int action, int mods){
