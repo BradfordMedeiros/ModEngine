@@ -262,6 +262,7 @@ void handlePainting(){
 }
 
 bool selectItemCalled = false;
+bool shouldCallItemSelected = false;
 void selectItem(){
   if (!showDebugInfo){
     return;
@@ -284,7 +285,7 @@ void selectItem(){
   state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
   
-  schemeBindings.onObjectSelected(state.selectedIndex, glm::vec3(1.f, 2.f, 3.f));
+  shouldCallItemSelected = true;
 }
 
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
@@ -616,7 +617,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   bluelines.clear();
 }
 
-void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
+void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
@@ -659,7 +660,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate){
     drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
   }
     
-  Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
   drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 140, 3);
   drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 150, 3);
 
@@ -1256,13 +1256,19 @@ int main(int argc, char* argv[]){
       renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals);
     }
 
+    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    if (shouldCallItemSelected){
+      schemeBindings.onObjectSelected(state.selectedIndex, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      shouldCallItemSelected = false;
+    }
+
     glDisable(GL_STENCIL_TEST);
 
     if (showDebugInfo){
       displayRails(getRails(world.objectMapping));
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
-    renderUI(crosshairSprite, currentFramerate);
+    renderUI(crosshairSprite, currentFramerate, pixelColor);
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     
