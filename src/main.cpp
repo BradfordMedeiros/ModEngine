@@ -226,13 +226,14 @@ glm::vec3 uvToOffset(UVCoord coord){
   return glm::vec3(xCoord, yCoord, 0.f);
 }
 
-void handlePainting(){
+void handlePainting(UVCoord uvsToPaint){
+  std::cout << "uv x: " << uvsToPaint.x << std::endl;
+  std::cout << "uv y: " << uvsToPaint.y << std::endl;
+
   if (!canPaint || !state.shouldPaint){
     return;
   }
-  auto uvsToPaint = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-  std::cout << "uv x: " << uvsToPaint.x << std::endl;
-  std::cout << "uv y: " << uvsToPaint.y << std::endl;
+
   glUseProgram(drawingProgram); 
 
   glBindTexture(GL_TEXTURE_2D, textureToPaint);
@@ -1207,7 +1208,10 @@ int main(int argc, char* argv[]){
       selectItem();
       selectItemCalled = false;
     }
-    handlePainting();
+
+    auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    handlePainting(uvCoord);
+    applyUICoord(world.objectMapping, state.selectedIndex, uvCoord.x, uvCoord.y);
      
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);

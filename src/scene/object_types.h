@@ -268,5 +268,6 @@ std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectOb
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
 void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> sendNotify);
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText);
+void applyUICoord(std::map<objid, GameObjectObj>& mapping, objid id, float uvx, float uvy);
 
 #endif 
