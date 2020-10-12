@@ -16,6 +16,7 @@ extern float now;
 extern std::string rawSceneFile;
 extern bool bootStrapperMode;
 extern NetCode netcode;
+extern DrawingParams drawParams;
 
 NetworkPacket toNetworkPacket(UdpPacket& packet){
   NetworkPacket netpacket {
@@ -336,3 +337,6 @@ glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance)
   return moveRelative(posFrom, orientation, glm::vec3(0.f, 0.f, -1 * distance), false);
 }
 
+void setDrawParams(glm::vec3 tint){
+  drawParams.tint = tint;
+}

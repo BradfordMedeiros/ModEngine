@@ -984,7 +984,8 @@ int main(int argc, char* argv[]){
     playRecording,
     makeObjectAttr,
     raycast,
-    takeScreenshot
+    takeScreenshot,
+    setDrawParams
   );
 
   schemeBindings = getSchemeCallbacks();

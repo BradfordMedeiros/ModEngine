@@ -14,6 +14,7 @@
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./common/sysinterface.h"
+#include "./drawing.h"
 
 enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
 struct SetupPacket {
@@ -126,6 +127,8 @@ void startRecording(objid id, std::string recordingPath);
 void playRecording(objid id, std::string recordingPath);
 std::vector<objid> raycast(glm::vec3 pos, glm::quat direction, float maxDistance);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
+
+void setDrawParams(glm::vec3 tint);
 
 void copyStr(std::string& data, char* copyTo, int size);
 
