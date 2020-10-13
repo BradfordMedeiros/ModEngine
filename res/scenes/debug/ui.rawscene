@@ -1,0 +1,17 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:position:0 -4 0
+platform:scale:50 0.1 50
+
+*diffuse:position:0 0 0
+*diffuse:on:diffuse_on
+*diffuse:off:diffuse_off
+*diffuse:script:./res/scenes/debug/ui.scm
+
+*paint:position:1 0 0
+*paint:on:paint_on
+*paint:off:paint_off
+
+*bloom:position:2 0 0
+*bloom:on:bloom_on
+*bloom:off:bloom_off
