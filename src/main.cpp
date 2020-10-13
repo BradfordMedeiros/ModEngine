@@ -1204,14 +1204,13 @@ int main(int argc, char* argv[]){
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
 
+    auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     if (selectItemCalled){
       selectItem();
       selectItemCalled = false;
+      applyUICoord(world.objectMapping, state.selectedIndex, uvCoord.x, uvCoord.y);
     }
-
-    auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     handlePainting(uvCoord);
-    applyUICoord(world.objectMapping, state.selectedIndex, uvCoord.x, uvCoord.y);
      
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
