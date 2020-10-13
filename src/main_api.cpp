@@ -342,5 +342,17 @@ void setDrawParams(glm::vec3 tint){
 }
 
 void setState(std::string stateName){
-
+  if (stateName == "diffuse_on"){
+    state.enableDiffuse = true;
+  }else if (stateName == "diffuse_off"){
+    state.enableDiffuse = false;
+  }else if (stateName == "paint_on"){
+    state.shouldPaint = true;
+  }else if (stateName == "paint_off"){
+    state.shouldPaint = false;
+  }else if (stateName == "bloom_on"){
+    state.enableBloom = true;
+  }else if (stateName == "bloom_off"){
+    state.enableBloom = false;
+  }
 }
