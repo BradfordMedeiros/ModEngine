@@ -227,9 +227,6 @@ glm::vec3 uvToOffset(UVCoord coord){
 }
 
 void handlePainting(UVCoord uvsToPaint){
-  std::cout << "uv x: " << uvsToPaint.x << std::endl;
-  std::cout << "uv y: " << uvsToPaint.y << std::endl;
-
   if (!canPaint || !state.shouldPaint){
     return;
   }

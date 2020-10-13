@@ -96,6 +96,8 @@ struct GameObjectUIButton {
   bool canToggle;
   int onTexture;
   int offTexture;
+  std::string onToggleOn;
+  std::string onToggleOff;
 };
 
 struct GameObjectUISlider {
