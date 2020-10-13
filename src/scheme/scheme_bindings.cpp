@@ -629,6 +629,12 @@ SCM scmSetDrawParams(SCM tint){
   return SCM_UNSPECIFIED;
 }
 
+void (*_setState)(std::string);
+SCM scmSetState(SCM value){
+  _setState(scm_to_locale_string(value));
+  return SCM_UNSPECIFIED;
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -818,6 +824,7 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("ss", 1, 0, 0, (void*)scmSaveScreenshot);
   scm_c_define_gsubr("set-draw", 1, 0, 0, (void*)scmSetDrawParams);
+  scm_c_define_gsubr("set-state", 1, 0, 0, (void*)scmSetState);
 }
 
 
@@ -876,7 +883,8 @@ void createStaticSchemeBindings(
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
   std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
-  void (*setDrawParams)(glm::vec3)
+  void (*setDrawParams)(glm::vec3),
+  void (*setState)(std::string)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -956,4 +964,5 @@ void createStaticSchemeBindings(
 
   _saveScreenshot = saveScreenshot;
   _setDrawParams = setDrawParams;
+  _setState = setState;
 }

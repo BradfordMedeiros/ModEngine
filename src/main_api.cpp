@@ -340,3 +340,7 @@ glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance)
 void setDrawParams(glm::vec3 tint){
   drawParams.tint = tint;
 }
+
+void setState(std::string stateName){
+
+}
