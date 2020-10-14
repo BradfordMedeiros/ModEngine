@@ -354,6 +354,7 @@ void addObjectToWorld(
     auto id =  scene.nameToId.at(serialObj.name);
     auto additionalFields = serialObj.additionalFields;
     auto name = serialObj.name;
+    auto tint = serialObj.tint;
 
     if (world.idToScene.find(id) != world.idToScene.end()){
       std::cout << "id already in the scene: " << id << std::endl;
@@ -364,7 +365,7 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, getType(serialObj.name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
-      [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface, tint](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -391,7 +392,8 @@ void addObjectToWorld(
             data.nodeTransform, 
             data.names, 
             generateAdditionalFields(meshName, data, additionalFields, fieldsToCopy),
-            getId
+            getId,
+            tint
           );
 
           for (auto &[_, newSerialObj] : newSerialObjs){
@@ -833,14 +835,14 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
-void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject){
   traverseScene(scene, initialModel, scale, onObject, [&world, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
       Scene& linkScene = world.scenes.at(world.idToScene.at(id));
       traverseScene(world, linkScene, modelMatrix, scale, onObject);
   });
 }
 
-void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject){
   traverseScene(world, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
 }
 
@@ -853,7 +855,7 @@ Transformation fullTransformation(World& world, objid id){
   Transformation transformation = {};
   bool foundId = false;
   
-  traverseScene(world, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, std::string fragshader) -> void {
+  traverseScene(world, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, std::string fragshader, glm::vec3 tint) -> void {
     if (traversedId == id){
       foundId = true;
       transformation = getTransformationFromMatrix(model);

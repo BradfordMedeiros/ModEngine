@@ -52,6 +52,7 @@ struct SerializationObject {
   std::string script;
   std::string fragshader;
   bool netsynchronize;
+  glm::vec3 tint;
   std::map<std::string, std::string> additionalFields;
 };
 

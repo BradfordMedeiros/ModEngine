@@ -95,7 +95,7 @@ bool idExists(World& world, objid id);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 
-void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
+void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject);
 Transformation fullTransformation(World& world, Scene& scene, objid id);
 
 struct LightInfo {

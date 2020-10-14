@@ -87,7 +87,7 @@ void main(){
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
-    FragColor = color;
+    FragColor = vec4(tint, 1.0) * color;
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;

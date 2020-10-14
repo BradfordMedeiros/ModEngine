@@ -23,6 +23,7 @@ struct GameObject {
   std::string script;
   std::string fragshader;
   bool netsynchronize;
+  glm::vec3 tint;
 };
 struct GameObjectH {
   objid id;
@@ -72,15 +73,15 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
-  std::function<objid()> getNewObjectId
+  std::function<objid()> getNewObjectId,
+  glm::vec3 parentTint
 );
 
 std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
 void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
 std::vector<objid> listObjInScene(Scene& scene);
 
-// @TODO code these functions
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 

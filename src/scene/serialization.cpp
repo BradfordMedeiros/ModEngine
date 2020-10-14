@@ -108,7 +108,8 @@ SerializationObject getDefaultObject(std::string name, std::string layer, bool e
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = glm::identity<glm::quat>(),
     .physics = physics,
-    .layer = layer
+    .layer = layer,
+    .tint = glm::vec3(1.f, 1.f, 1.f),
   };
   return newObject;
 }
@@ -222,6 +223,10 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     }
     if (token.attribute == "net" && token.payload == "sync"){
       objects.at(token.target).netsynchronize = true;
+      continue;
+    }
+    if (token.attribute == "tint"){
+      objects.at(token.target).tint = parseVec(token.payload);
       continue;
     }
     objects.at(token.target).additionalFields[token.attribute] = token.payload;
