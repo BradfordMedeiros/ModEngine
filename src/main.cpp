@@ -1207,7 +1207,15 @@ int main(int argc, char* argv[]){
     if (selectItemCalled){
       selectItem();
       selectItemCalled = false;
-      applyUICoord(world.objectMapping, state.selectedIndex, uvCoord.x, uvCoord.y);
+      applyUICoord(
+        world.objectMapping, 
+        [](std::string topic, float value) -> void { 
+          std::cout << "publish: " << topic << " with value: " << value << std::endl;
+        }, 
+        state.selectedIndex, 
+        uvCoord.x, 
+        uvCoord.y
+      );
     }
     handlePainting(uvCoord);
      

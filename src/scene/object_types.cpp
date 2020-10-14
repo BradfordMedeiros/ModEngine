@@ -208,13 +208,16 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
 }
 
 GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
+  auto onSlide = additionalFields.find("onslide") != additionalFields.end() ? additionalFields.at("onslide") : "";
+
   GameObjectUISlider obj {
     .common = parseCommon(additionalFields, meshes),
     .min = 0.f,
     .max = 100.f,
-    .percentage = 80.f,
+    .percentage = 100.f,
     .texture = ensureTextureLoaded("./res/models/controls/slider.png"),
     .opacityTexture = ensureTextureLoaded("./res/models/controls/slider_opacity.png"),
+    .onSlide = onSlide,
   };
   return obj;
 }
@@ -811,11 +814,14 @@ void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<v
   }*/
 }
 
-void applyUICoord(std::map<objid, GameObjectObj>& mapping, objid id, float uvx, float uvy){
+void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUISlider>(&obj);
     if (uiControl != NULL && uiId == id){
       uiControl -> percentage = uvx;
+      if (uiControl -> onSlide != ""){
+        onSliderPercentage(uiControl -> onSlide, uiControl -> percentage);
+      }
     }
     
   }
