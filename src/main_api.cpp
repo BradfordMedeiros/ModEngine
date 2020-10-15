@@ -26,6 +26,10 @@ NetworkPacket toNetworkPacket(UdpPacket& packet){
   return netpacket;
 }
 
+std::optional<objid> getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
+  return getGameObjectByName(world, name);
+}
+
 void setActiveCamera(int32_t cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
@@ -36,6 +40,15 @@ void setActiveCamera(int32_t cameraId){
   activeCameraObj = &getGameObject(world, cameraId);
   state.selectedIndex = cameraId;
 }
+void setActiveCamera(std::string name){
+  auto object = getGameObjectByName(name);
+  if (!object.has_value()){
+    std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
+    assert(false);
+  }
+  setActiveCamera(object.value());
+}
+
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
@@ -125,10 +138,6 @@ void sendLoadScene(int32_t id){
   assert(loadpacket.sceneData[sizeof(loadpacket.sceneData) -1] == '\0');
   packet.payload.loadpacket = loadpacket; 
   sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-}
-
-std::optional<objid> getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
-  return getGameObjectByName(world, name);
 }
 
 std::vector<int32_t> getObjectsByType(std::string type){

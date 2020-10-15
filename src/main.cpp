@@ -777,7 +777,7 @@ int main(int argc, char* argv[]){
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
-   ("c,crosshair", "Icon to use for crosshair", cxxopts::value<std::string>()->default_value("./res/textures/crosshairs/crosshair029.png"))
+   ("c,camera", "Camera to use after initial load", cxxopts::value<std::string>()->default_value(""))
    ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
@@ -928,7 +928,7 @@ int main(int argc, char* argv[]){
   blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
 
   fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
-  Mesh crosshairSprite = loadSpriteMesh(result["crosshair"].as<std::string>(), loadTexture);
+  Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
  
   createStaticSchemeBindings(
     loadScene,
@@ -1084,6 +1084,11 @@ int main(int argc, char* argv[]){
     for (auto rawScene : rawScenes){
       loadScene(rawScene);
     }
+  }
+
+  auto defaultCameraName = result["camera"].as<std::string>();
+  if (defaultCameraName != ""){
+    setActiveCamera(defaultCameraName);
   }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 

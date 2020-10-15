@@ -57,6 +57,7 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 // Should trim down when it becomes clear what the core api should.
 
 void setActiveCamera(int32_t cameraId);
+void setActiveCamera(std::string name);
 void nextCamera();
 void moveCamera(glm::vec3 offset);  
 void rotateCamera(float xoffset, float yoffset);
