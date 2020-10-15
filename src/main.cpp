@@ -110,6 +110,7 @@ unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
 std::queue<std::string> channelMessages;
+std::queue<StringFloat> channelFloatMessages;
 KeyRemapper keyMapper;
 
 float quadVertices[] = {
@@ -1210,7 +1211,11 @@ int main(int argc, char* argv[]){
       applyUICoord(
         world.objectMapping, 
         [](std::string topic, float value) -> void { 
-          std::cout << "publish: " << topic << " with value: " << value << std::endl;
+          StringFloat message {
+            .strValue = topic,
+            .floatValue = value,
+          };
+          channelFloatMessages.push(message);
         }, 
         state.selectedIndex, 
         uvCoord.x, 
@@ -1287,6 +1292,7 @@ int main(int argc, char* argv[]){
     
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
+    schemeBindings.onFloatMessage(channelFloatMessages);
 
     portalIdCache.clear();
 

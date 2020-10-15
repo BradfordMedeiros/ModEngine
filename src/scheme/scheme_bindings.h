@@ -82,6 +82,7 @@ void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
 void onCameraSystemChange(bool usingBuiltInCamera);
 void onMessage(std::string message);
+void onFloatMessage(StringFloat message);
 void onTcpMessage(std::string message);
 void onUdpMessage(std::string message);
 void onPlayerJoined(std::string connectionHash);

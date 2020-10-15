@@ -43,4 +43,9 @@ typedef int32_t objid;
 objid getUniqueObjId();
 std::string getUniqueObjectName();
 
+struct StringFloat {
+  std::string strValue;
+  float floatValue;
+};
+
 #endif

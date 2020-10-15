@@ -706,6 +706,13 @@ void onMessage(std::string message){
     scm_call_1(func_symbol, scm_from_locale_string(message.c_str()));
   }
 }
+void onFloatMessage(StringFloat message){
+  const char* function = "onFloatMessage";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_2(func_symbol, scm_from_locale_string(message.strValue.c_str()), scm_from_double(message.floatValue));
+  }
+}
 void onTcpMessage(std::string message){
   const char* function = "onTcpMessage";
   if (symbolDefined(function)){

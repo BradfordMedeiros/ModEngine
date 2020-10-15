@@ -269,6 +269,7 @@ void sendEventMessage(std::string message){
     }
   }
 }
+
 void sendNotifyMessage(std::string message){
   channelMessages.push(message);
 }
