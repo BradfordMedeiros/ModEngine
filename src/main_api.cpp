@@ -61,10 +61,19 @@ void nextCamera(){
   setActiveCamera(activeCameraId);
 }
 void moveCamera(glm::vec3 offset){
-  defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
+  if (activeCameraObj == NULL){
+    std::cout << "default camera!" << std::endl;
+    defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
+  }else{
+    activeCameraObj -> transformation.position = moveRelative(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation, glm::vec3(offset), false);
+  }
 }
 void rotateCamera(float xoffset, float yoffset){
-  defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
+  if (activeCameraObj == NULL){
+    defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
+  }else{
+    activeCameraObj -> transformation.rotation = setFrontDelta(activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1);
+  }
 }
 
 void applyImpulse(int32_t index, glm::vec3 impulse){
