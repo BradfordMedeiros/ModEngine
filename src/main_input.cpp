@@ -9,13 +9,6 @@ extern KeyRemapper keyMapper;
 extern bool useYAxis;
 extern DrawingParams drawParams;
 
-float maskValues[] { 10.f };
-HeightmapMask mask {
-  .values = maskValues,
-  .width = 1,
-  .height = 1,
-};
-
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
     auto selectObject = getGameObject(world, state.selectedIndex); 
@@ -131,6 +124,7 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   });
 }
 
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
   if (key == 261 && voxelPtr != NULL){  // delete
@@ -188,32 +182,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_Q && action == 1){
-    auto id = state.selectedIndex;
-    auto heightmaps = getHeightmaps(world.objectMapping);
-    if (heightmaps.find(id) == heightmaps.end()){
-      return;
-    }
-    GameObjectHeightmap& hm = *heightmaps.at(id);
-    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, 1.f, [id]() -> void { 
-      // We change *data fed to bullet.
-      // This can be dynamic, however according to docs min + maxHeight must fall in range. 
-      // Recreating simply ensures that the min/max height is always valid. 
-      updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
-    }, hm.mesh);
+    applyHeightmapMasking(world, state.selectedIndex, 1.f);
   }
   if (key == GLFW_KEY_E && action == 1){
-    auto id = state.selectedIndex;
-    auto heightmaps = getHeightmaps(world.objectMapping);
-    if (heightmaps.find(id) == heightmaps.end()){
-      return;
-    }
-    GameObjectHeightmap& hm = *heightmaps.at(id);
-    applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, -1.f, [id]() -> void { 
-      // We change *data fed to bullet.
-      // This can be dynamic, however according to docs min + maxHeight must fall in range. 
-      // Recreating simply ensures that the min/max height is always valid. 
-      updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
-    }, hm.mesh);
+    applyHeightmapMasking(world, state.selectedIndex, -1.f);
   }
 
   if (key == GLFW_KEY_P && action == 1){

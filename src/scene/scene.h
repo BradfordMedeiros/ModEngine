@@ -121,5 +121,7 @@ bool isPortal(World& world, objid id);
 
 std::optional<Texture> textureForId(World& world, objid id);
 
+void applyHeightmapMasking(World& world, objid id, float amount);
+
 #endif
 

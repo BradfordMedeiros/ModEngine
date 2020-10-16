@@ -919,3 +919,24 @@ bool isPortal(World& world, objid id){
 std::optional<Texture> textureForId(World& world, objid id){
   return textureForId(world.objectMapping, id);
 }
+
+float maskValues[] { 10.f };
+HeightmapMask mask {
+  .values = maskValues,
+  .width = 1,
+  .height = 1,
+};
+
+void applyHeightmapMasking(World& world, objid id, float amount){
+  auto heightmaps = getHeightmaps(world.objectMapping);
+  if (heightmaps.find(id) == heightmaps.end()){
+    return;
+  }
+  GameObjectHeightmap& hm = *heightmaps.at(id);
+  applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, amount, [&world, id]() -> void { 
+      // We change *data fed to bullet.
+      // This can be dynamic, however according to docs min + maxHeight must fall in range. 
+      // Recreating simply ensures that the min/max height is always valid. 
+    updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
+  }, hm.mesh);
+}
