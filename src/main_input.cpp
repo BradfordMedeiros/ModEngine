@@ -188,10 +188,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_Q && action == 1){
-    std::cout << "apply masking up: " << std::endl;
-    auto hmObject = getHeightmaps(world.objectMapping).begin();
-    auto id = hmObject -> first;
-    GameObjectHeightmap& hm = *(hmObject-> second);
+    auto id = state.selectedIndex;
+    auto heightmaps = getHeightmaps(world.objectMapping);
+    if (heightmaps.find(id) == heightmaps.end()){
+      return;
+    }
+    GameObjectHeightmap& hm = *heightmaps.at(id);
     applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, 1.f, [id]() -> void { 
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
@@ -200,10 +202,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }, hm.mesh);
   }
   if (key == GLFW_KEY_E && action == 1){
-    std::cout << "apply masking up: " << std::endl;
-    auto hmObject = getHeightmaps(world.objectMapping).begin();
-    auto id = hmObject -> first;
-    GameObjectHeightmap& hm = *(hmObject-> second);
+    auto id = state.selectedIndex;
+    auto heightmaps = getHeightmaps(world.objectMapping);
+    if (heightmaps.find(id) == heightmaps.end()){
+      return;
+    }
+    GameObjectHeightmap& hm = *heightmaps.at(id);
     applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, -1.f, [id]() -> void { 
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
