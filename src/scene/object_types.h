@@ -92,9 +92,12 @@ struct GameObjectUICommon {
 
 struct GameObjectUIButton {
   GameObjectUICommon common;
+  bool initialState;
   bool toggleOn;
   bool canToggle;
+  std::string onTextureString;
   int onTexture;
+  std::string offTextureString;
   int offTexture;
   std::string onToggleOn;
   std::string onToggleOff;

@@ -188,8 +188,8 @@ GameObjectUICommon parseCommon(std::map<std::string, std::string>& additionalFie
   return common;
 }
 GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
-  auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "./res/models/controls/on.png";
-  auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "./res/models/controls/off.png";
+  auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "";
+  auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "";
   auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
   auto canToggle = additionalFields.find("cantoggle") == additionalFields.end() || !(additionalFields.at("cantoggle") == "false");
   auto onToggleOn = additionalFields.find("on") != additionalFields.end() ? additionalFields.at("on") : "";
@@ -197,10 +197,13 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
 
   GameObjectUIButton obj { 
     .common = parseCommon(additionalFields, meshes),
+    .initialState = toggleOn,
     .toggleOn = toggleOn,
     .canToggle = canToggle,
-    .onTexture = ensureTextureLoaded(onTexture),
-    .offTexture = ensureTextureLoaded(offTexture),
+    .onTextureString = onTexture,
+    .onTexture = ensureTextureLoaded(onTexture == "" ? "./res/models/controls/on.png" : onTexture),
+    .offTextureString = offTexture,
+    .offTexture = ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture),
     .onToggleOn = onToggleOn,
     .onToggleOff = onToggleOff,
   };
@@ -601,6 +604,29 @@ std::vector<std::pair<std::string, std::string>> serializeRail(GameObjectRail ob
   }
   return pairs;
 }
+std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  if (obj.canToggle != true){
+    pairs.push_back(std::pair<std::string, std::string>("cantoggle", "false"));
+  }
+  if (obj.onTextureString != ""){
+    pairs.push_back(std::pair<std::string, std::string>("ontexture", obj.onTextureString));
+  }
+  if (obj.offTextureString != ""){
+    pairs.push_back(std::pair<std::string, std::string>("offtexture", obj.offTextureString));
+  }
+  if (obj.onToggleOn != ""){
+    pairs.push_back(std::pair<std::string, std::string>("on", obj.onToggleOn));
+  }
+  if (obj.onToggleOff != ""){
+    pairs.push_back(std::pair<std::string, std::string>("off", obj.onToggleOff));
+  }
+  if (obj.initialState == true){
+    pairs.push_back(std::pair<std::string, std::string>("state", "on"));
+  }
+  return pairs;
+}
+
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping){
   GameObjectObj objectToSerialize = mapping.at(id);
   auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
@@ -653,19 +679,22 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 
   auto uiControlObj = std::get_if<GameObjectUIButton>(&objectToSerialize);
   if (uiControlObj != NULL){
-    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};    
+    return serializeButton(*uiControlObj);
   }
   
   auto uiControlSliderObj = std::get_if<GameObjectUISlider>(&objectToSerialize);
   if (uiControlObj != NULL){
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
+   // assert(false);
     return {};    
   }
 
-  assert(false);  
+  auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);
+  if (rootObj != NULL){
+    return {};
+  }
+
+  //assert(false);  
   return {};
 }
 
