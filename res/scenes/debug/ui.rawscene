@@ -1,17 +1,33 @@
+# Generated scene 
+*togglepaint:position:-1.920000 -0.750000 -2.000000
+*togglepaint:scale:0.100000 0.100000 1.000000
+*togglepaint:rotation:0.000000 0.000000 -3.141593
+*togglepaint:ontexture:./res/models/controls/paint.png
+*togglepaint:offtexture:./res/models/controls/paint.png
+*togglepaint:on:paint_on
+*togglepaint:off:paint_off
+>uicamera:child:*togglepaint,*makelight,*makecamera,/paint-opacity
+>uicamera:position:-2.618924 -0.000001 167.109009
+>uicamera:rotation:0.000000 0.000000 -3.141593
+>uicamera:script:./res/scenes/debug/ui.scm
+*makelight:position:-1.920000 0.270000 -2.000000
+*makelight:scale:0.100000 0.100000 1.000000
+*makelight:rotation:0.000000 0.000000 -3.141593
+*makelight:ontexture:./res/models/controls/light.png
+*makelight:offtexture:./res/models/controls/light.png
+*makelight:on:makelight
+*makelight:off:makelight
+*makecamera:position:-1.920000 0.400000 -2.000000
+*makecamera:scale:0.100000 0.100000 1.000000
+*makecamera:rotation:0.000000 0.000000 -3.141593
+*makecamera:ontexture:./res/models/controls/camera.png
+*makecamera:offtexture:./res/models/controls/camera.png
+*makecamera:on:makecamera
+*makecamera:off:makecamera
+/paint-opacity:position:-0.700000 -0.370000 -1.000000
+/paint-opacity:scale:0.400000 -0.030000 1.000000
+/paint-opacity:rotation:0.000000 -0.000000 -3.141593
+/paint-opacity:onslide:drawopacity
 
 platform:mesh:./res/models/box/box.obj
-platform:position:0 -4 0
-platform:scale:50 0.1 50
-
-*diffuse:position:0 0 0
-*diffuse:on:diffuse_on
-*diffuse:off:diffuse_off
-*diffuse:script:./res/scenes/debug/ui.scm
-
-*paint:position:1 0 0
-*paint:on:paint_on
-*paint:off:paint_off
-
-*bloom:position:2 0 0
-*bloom:on:bloom_on
-*bloom:off:bloom_off
+platform:scale:100 1 100
