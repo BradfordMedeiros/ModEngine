@@ -604,8 +604,18 @@ std::vector<std::pair<std::string, std::string>> serializeRail(GameObjectRail ob
   }
   return pairs;
 }
+
+void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
+  if (common.onFocus != ""){
+    pairs.push_back(std::pair<std::string, std::string>("focus", common.onFocus));
+  }
+  if (common.onBlur != ""){
+    pairs.push_back(std::pair<std::string, std::string>("blur", common.onBlur));
+  }
+}
 std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton obj){
   std::vector<std::pair<std::string, std::string>> pairs;
+  addSerializeCommon(pairs, obj.common);
   if (obj.canToggle != true){
     pairs.push_back(std::pair<std::string, std::string>("cantoggle", "false"));
   }
@@ -623,6 +633,14 @@ std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIBut
   }
   if (obj.initialState == true){
     pairs.push_back(std::pair<std::string, std::string>("state", "on"));
+  }
+  return pairs;
+}
+std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider obj){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  addSerializeCommon(pairs, obj.common);
+  if (obj.onSlide != ""){
+    pairs.push_back(std::pair<std::string, std::string>("onslide", obj.onSlide));
   }
   return pairs;
 }
@@ -683,10 +701,9 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   }
   
   auto uiControlSliderObj = std::get_if<GameObjectUISlider>(&objectToSerialize);
-  if (uiControlObj != NULL){
+  if (uiControlSliderObj != NULL){
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-   // assert(false);
-    return {};    
+    return serializeSlider(*uiControlSliderObj);    
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);
