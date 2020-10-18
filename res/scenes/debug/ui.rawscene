@@ -1,22 +1,4 @@
 # Generated scene 
-*togglepaint:position:-1.920000 -0.750000 -2.000000
-*togglepaint:scale:0.100000 0.100000 1.000000
-*togglepaint:rotation:0.000000 0.000000 -3.141593
-*togglepaint:ontexture:./res/models/controls/paint.png
-*togglepaint:offtexture:./res/models/controls/paint.png
-*togglepaint:on:paint_on
-*togglepaint:off:paint_off
->uicamera:child:*togglepaint,*makelight,*makecamera,/paint-opacity
->uicamera:position:-2.618924 -0.000001 167.109009
->uicamera:rotation:0.000000 0.000000 -3.141593
->uicamera:script:./res/scenes/debug/ui.scm
-*makelight:position:-1.920000 0.270000 -2.000000
-*makelight:scale:0.100000 0.100000 1.000000
-*makelight:rotation:0.000000 0.000000 -3.141593
-*makelight:ontexture:./res/models/controls/light.png
-*makelight:offtexture:./res/models/controls/light.png
-*makelight:on:makelight
-*makelight:off:makelight
 *makecamera:position:-1.920000 0.400000 -2.000000
 *makecamera:scale:0.100000 0.100000 1.000000
 *makecamera:rotation:0.000000 0.000000 -3.141593
@@ -24,10 +6,46 @@
 *makecamera:offtexture:./res/models/controls/camera.png
 *makecamera:on:makecamera
 *makecamera:off:makecamera
+*togglepaint:position:-1.920000 -0.750000 -2.000000
+*togglepaint:scale:0.100000 0.100000 1.000000
+*togglepaint:rotation:0.000000 0.000000 -3.141593
+*togglepaint:ontexture:./res/models/controls/paint.png
+*togglepaint:offtexture:./res/models/controls/paint.png
+*togglepaint:on:paint_on
+*togglepaint:off:paint_off
+*makelight:position:-1.920000 0.270000 -2.000000
+*makelight:scale:0.100000 0.100000 1.000000
+*makelight:rotation:0.000000 0.000000 -3.141593
+*makelight:ontexture:./res/models/controls/light.png
+*makelight:offtexture:./res/models/controls/light.png
+*makelight:on:makelight
+*makelight:off:makelight
+zplatform:scale:100.000000 1.000000 100.000000
+zplatform:rotation:0.000000 0.000000 -3.141593
+zplatform:mesh:./res/models/box/box.obj
+>uicamera:child:*makecamera,*togglepaint,*makelight,*enable-diffuse,*enable-bloom,/paint-opacity
+>uicamera:position:-53.176361 0.000016 354.533447
+>uicamera:rotation:0.000000 0.000000 -3.141593
+>uicamera:script:./res/scenes/debug/ui.scm
+
+*enable-diffuse:position:1.950000 0.770000 -2.000000
+*enable-diffuse:scale:0.080000 0.080000 1.000000
+*enable-diffuse:rotation:0.000000 0.000000 -3.141593
+*enable-diffuse:ontexture:./res/models/controls/light.png
+*enable-diffuse:offtexture:./res/models/controls/light.png
+*enable-diffuse:tint:0.8 0.8 1
+*enable-diffuse:on:diffuse_on
+*enable-diffuse:off:diffuse_off
+*enable-bloom:position:1.860000 0.770000 -2.000000
+*enable-bloom:scale:0.080000 0.080000 1.000000
+*enable-bloom:rotation:0.000000 0.000000 -3.141593
+*enable-bloom:ontexture:./res/models/controls/light.png
+*enable-bloom:offtexture:./res/models/controls/light.png
+*enable-bloom:tint:0.8 0.8 1
+*enable-bloom:on:bloom_on
+*enable-bloom:off:bloom_off
+
 /paint-opacity:position:-0.700000 -0.370000 -1.000000
 /paint-opacity:scale:0.400000 -0.030000 1.000000
-/paint-opacity:rotation:0.000000 -0.000000 -3.141593
+/paint-opacity:rotation:0.000000 0.000000 -3.141593
 /paint-opacity:onslide:drawopacity
-
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
