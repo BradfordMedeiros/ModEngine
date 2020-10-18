@@ -356,10 +356,6 @@ glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance)
   return moveRelative(posFrom, orientation, glm::vec3(0.f, 0.f, -1 * distance), false);
 }
 
-void setDrawParams(glm::vec3 tint){
-  drawParams.tint = tint;
-}
-
 void setState(std::string stateName){
   if (stateName == "diffuse_on"){
     state.enableDiffuse = true;
@@ -377,5 +373,20 @@ void setState(std::string stateName){
     state.highlight = true;
   }else if (stateName == "highlight_off"){
     state.highlight = false;
+  }
+}
+
+void setFloatState(std::string stateName, float value){
+  if (stateName == "opacity"){
+    drawParams.opacity = value;
+  }
+  if (stateName == "drawcolor-r"){
+    drawParams.tint.x = value;
+  }
+  if (stateName == "drawcolor-g"){
+    drawParams.tint.y = value;
+  }
+  if (stateName == "drawcolor-b"){
+    drawParams.tint.z = value;
   }
 }

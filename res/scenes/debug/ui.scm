@@ -22,9 +22,7 @@
   (list "makelight"  makelight)
 ))
 
-(define (setdrawopacity opacity)
-  (display (string-append "set draw opacity placeholder: " (number->string opacity) "\n"))
-)
+(define (setdrawopacity opacity) (set-fstate "opacity" opacity))
 (define fnFloatMessages (list
   (list "drawopacity" setdrawopacity)
 ))

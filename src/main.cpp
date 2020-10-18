@@ -985,8 +985,8 @@ int main(int argc, char* argv[]){
     makeObjectAttr,
     raycast,
     takeScreenshot,
-    setDrawParams,
-    setState
+    setState,
+    setFloatState
   );
 
   schemeBindings = getSchemeCallbacks();
