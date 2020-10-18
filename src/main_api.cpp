@@ -373,5 +373,9 @@ void setState(std::string stateName){
     state.enableBloom = true;
   }else if (stateName == "bloom_off"){
     state.enableBloom = false;
+  }else if (stateName == "highlight_on"){
+    state.highlight = true;
+  }else if (stateName == "highlight_off"){
+    state.highlight = false;
   }
 }
