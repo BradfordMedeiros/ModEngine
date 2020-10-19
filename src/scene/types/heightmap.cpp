@@ -1,7 +1,6 @@
 #include "./heightmap.h"
 
 HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
-  assert(dim > 0);
   std::cout << "INFO: LOADING HEIGHTMAP: " << heightmapFilePath << std::endl;
   int textureWidth, textureHeight, numChannels;
 
@@ -11,11 +10,11 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
     throw std::runtime_error("failed loading texture " + heightmapFilePath + ", reason: " + stbi_failure_reason());
   }
 
-  int dataWidth = textureWidth > dim ? dim : textureWidth;
-  int dataHeight = textureHeight > dim ? dim : textureHeight;
+  int dataWidth = (textureWidth > dim && dim > 0) ? dim : textureWidth;
+  int dataHeight = (textureHeight > dim  && dim > 0 )? dim : textureHeight;
 
-  float widthMultiplier = textureWidth / ((float)dim);
-  float heightMultiplier = textureHeight / ((float)dim);
+  float widthMultiplier = textureWidth / ((float)dataWidth);
+  float heightMultiplier = textureHeight / ((float)dataHeight);
 
   float* newData = new float[dataWidth * dataHeight];
   assert(numChannels == 3);

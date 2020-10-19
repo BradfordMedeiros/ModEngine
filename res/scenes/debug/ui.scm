@@ -20,7 +20,9 @@
   (mk-obj-attr "!randomlight" (list))
 )
 (define (makeheightmap) 
-  (mk-obj-attr "-randomhm" (list))
+  (mk-obj-attr "-randomhm" (list
+    (list "map" "./res/heightmaps/dunes.jpg")
+  ))
 )
 
 (define shouldBePainting #f)

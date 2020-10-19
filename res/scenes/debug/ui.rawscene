@@ -67,7 +67,6 @@ zplatform:mesh:./res/models/box/box.obj
 *enable-bloom:ontint:1 1 1
 
 
-
 ## PAINTING OPTIONS  ##
 *togglepaint:position:-1.950000 -0.770000 -2.000000
 *togglepaint:scale:0.100000 0.100000 1.000000
