@@ -1,6 +1,8 @@
 (define allowed-messages '(
     "diffuse_on" 
     "diffuse_off"
+    "specular_on"
+    "specular_off"
     "bloom_on"
     "bloom_off"
     "highlight_on"

@@ -361,6 +361,10 @@ void setState(std::string stateName){
     state.enableDiffuse = true;
   }else if (stateName == "diffuse_off"){
     state.enableDiffuse = false;
+  }else if (stateName == "specular_on"){
+    state.enableSpecular = true;
+  }else if (stateName == "specular_off"){
+    state.enableSpecular = false;
   }else if (stateName == "paint_on"){
     state.shouldPaint = true;
   }else if (stateName == "paint_off"){
