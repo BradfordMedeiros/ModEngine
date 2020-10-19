@@ -1,8 +1,6 @@
 (define allowed-messages '(
     "diffuse_on" 
     "diffuse_off"
-    "paint_on"
-    "paint_off"
     "bloom_on"
     "bloom_off"
     "highlight_on"
@@ -17,9 +15,26 @@
   (display "make light placeholder\n")
 )
 
+(define shouldBePainting #f)
+(define (onMouse button action mods) 
+  (if (and (equal? button 0) (equal? action 0))
+    (set-state "paint_off")
+  )
+  (if (and (equal? button 0) (equal? action 1) shouldBePainting)
+    (set-state "paint_on")
+  )
+)
+(define (paint_on)  (set! shouldBePainting #t))
+(define (paint_off) 
+  (set! shouldBePainting #f)
+  (set-state "paint_off")
+)
+
 (define fnMessages (list
   (list "makecamera" makecamera)
   (list "makelight"  makelight)
+  (list "paint_on"   paint_on)
+  (list "paint_off"  paint_off)
 ))
 
 (define (setdrawopacity opacity) (set-fstate "opacity" opacity))
@@ -38,11 +53,20 @@
   )
 )
 
-
 (define (onFloatMessage message val)
   (define fnToCall (assoc-ref fnFloatMessages message))
   (if fnToCall
     ((car fnToCall) val)
+  )
+)
+
+(define (onObjSelected obj color)
+  (if (equal? (gameobj-id obj) (gameobj-id mainobj))
+    (begin
+      (set-fstate "drawcolor-r" (car   color))
+      (set-fstate "drawcolor-g" (cadr  color))
+      (set-fstate "drawcolor-b" (caddr color))
+    )
   )
 )
 
