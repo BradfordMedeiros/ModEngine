@@ -3,10 +3,11 @@ zplatform:scale:100.000000 1.000000 100.000000
 zplatform:rotation:0.000000 0.000000 -3.141593
 zplatform:mesh:./res/models/box/box.obj
 
->uicamera:child:*makecamera,*togglepaint,*makelight,*enable-diffuse,*enable-bloom,/paint-opacity,*colorselection
+>uicamera:child:*makecamera,*togglepaint,*makelight,*enable-diffuse,*enable-bloom,/paint-opacity,*colorselection,*translate,*scale,*rotate
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:rotation:0.000000 0.000000 -3.141593
 
+## OBJECT MANIPULATION  ##
 *makecamera:position:-1.920000 0.400000 -2.000000
 *makecamera:scale:0.100000 0.100000 1.000000
 *makecamera:rotation:0.000000 0.000000 -3.141593
@@ -30,6 +31,7 @@ zplatform:mesh:./res/models/box/box.obj
 *makelight:on:makelight
 *makelight:off:makelight
 
+## LIGHTING TOGGLE  ##
 *enable-diffuse:position:1.950000 0.770000 -2.000000
 *enable-diffuse:scale:0.080000 0.080000 1.000000
 *enable-diffuse:rotation:0.000000 0.000000 -3.141593
@@ -47,6 +49,7 @@ zplatform:mesh:./res/models/box/box.obj
 *enable-bloom:on:bloom_on
 *enable-bloom:off:bloom_off
 
+## PAINTING OPTIONS  ##
 /paint-opacity:position:-0.770000 -0.350000 -1.000000
 /paint-opacity:scale:0.450000 -0.020000 1.000000
 /paint-opacity:rotation:0.000000 0.000000 -3.141593
@@ -59,3 +62,22 @@ zplatform:mesh:./res/models/box/box.obj
 *colorselection:cantoggle:false
 *colorselection:offtexture:./res/models/controls/color.png
 *colorselection:script:./res/scenes/debug/ui.scm
+
+## OBJECT MANIPULATION ##
+*translate:position:1.740000 -0.760000 -2.000000
+*translate:scale:0.080000 0.080000 1.000000
+*translate:rotation:0.000000 0.000000 -3.141593
+*translate:on:translate
+*translate:off:translate
+
+*scale:position:1.840000 -0.760000 -2.000000
+*scale:scale:0.080000 0.080000 1.000000
+*scale:rotation:0.000000 0.000000 -3.141593
+*scale:on:scale
+*scale:off:scale
+
+*rotate:position:1.940000 -0.760000 -2.000000
+*rotate:scale:0.080000 0.080000 1.000000
+*rotate:rotation:0.000000 0.000000 -3.141593
+*rotate:on:rotate
+*rotate:off:rotate

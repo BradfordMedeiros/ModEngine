@@ -373,6 +373,12 @@ void setState(std::string stateName){
     state.highlight = true;
   }else if (stateName == "highlight_off"){
     state.highlight = false;
+  }else if (stateName == "translate"){
+    state.manipulatorMode = TRANSLATE;
+  }else if (stateName == "scale"){
+    state.manipulatorMode = SCALE;
+  }else if (stateName == "rotate"){
+    state.manipulatorMode = ROTATE;
   }
 }
 

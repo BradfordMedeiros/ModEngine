@@ -5,6 +5,9 @@
     "bloom_off"
     "highlight_on"
     "highlight_off"
+    "translate"
+    "scale"
+    "rotate"
   )
 )
 
