@@ -64,20 +64,26 @@ zplatform:mesh:./res/models/box/box.obj
 *colorselection:script:./res/scenes/debug/ui.scm
 
 ## OBJECT MANIPULATION ##
-*translate:position:1.740000 -0.760000 -2.000000
+*translate:position:1.750000 -0.770000 -2.000000
 *translate:scale:0.080000 0.080000 1.000000
 *translate:rotation:0.000000 0.000000 -3.141593
+*translate:ontexture:./res/models/controls/translate.png
+*translate:offtexture:./res/models/controls/translate.png
 *translate:on:translate
 *translate:off:translate
 
-*scale:position:1.840000 -0.760000 -2.000000
+*scale:position:1.850000 -0.770000 -2.000000
 *scale:scale:0.080000 0.080000 1.000000
 *scale:rotation:0.000000 0.000000 -3.141593
+*scale:ontexture:./res/models/controls/scale.png
+*scale:offtexture:./res/models/controls/scale.png
 *scale:on:scale
 *scale:off:scale
 
-*rotate:position:1.940000 -0.760000 -2.000000
+*rotate:position:1.950000 -0.770000 -2.000000
 *rotate:scale:0.080000 0.080000 1.000000
 *rotate:rotation:0.000000 0.000000 -3.141593
+*rotate:ontexture:./res/models/controls/rotate.png
+*rotate:offtexture:./res/models/controls/rotate.png
 *rotate:on:rotate
 *rotate:off:rotate
