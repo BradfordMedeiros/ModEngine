@@ -3,7 +3,7 @@ zplatform:scale:100.000000 1.000000 100.000000
 zplatform:rotation:0.000000 0.000000 -3.141593
 zplatform:mesh:./res/models/box/box.obj
 
->uicamera:child:*makecamera,*togglepaint,*makelight,*enable-diffuse,*enable-bloom,/paint-opacity,*colorselection,*translate,*scale,*rotate
+>uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,/paint-opacity,*colorselection,*translate,*scale,*rotate
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:rotation:0.000000 0.000000 -3.141593
 
@@ -15,13 +15,6 @@ zplatform:mesh:./res/models/box/box.obj
 *makecamera:offtexture:./res/models/controls/camera.png
 *makecamera:on:makecamera
 *makecamera:off:makecamera
-*togglepaint:position:-1.950000 -0.770000 -2.000000
-*togglepaint:scale:0.100000 0.100000 1.000000
-*togglepaint:rotation:0.000000 0.000000 -3.141593
-*togglepaint:ontexture:./res/models/controls/paint.png
-*togglepaint:offtexture:./res/models/controls/paint.png
-*togglepaint:on:paint_on
-*togglepaint:off:paint_off
 
 *makelight:position:-1.920000 0.270000 -2.000000
 *makelight:scale:0.100000 0.100000 1.000000
@@ -30,6 +23,15 @@ zplatform:mesh:./res/models/box/box.obj
 *makelight:offtexture:./res/models/controls/light.png
 *makelight:on:makelight
 *makelight:off:makelight
+
+*makeheightmap:position:-1.920000 0.140000 -2.000000
+*makeheightmap:scale:0.100000 0.100000 1.000000
+*makeheightmap:rotation:0.000000 0.000000 -3.141593
+*makeheightmap:ontexture:./res/models/controls/light.png
+*makeheightmap:offtexture:./res/models/controls/light.png
+*makeheightmap:on:makeheightmap
+*makeheightmap:off:makeheightmap
+
 
 ## LIGHTING TOGGLE  ##
 *enable-diffuse:position:1.950000 0.770000 -2.000000
@@ -50,6 +52,14 @@ zplatform:mesh:./res/models/box/box.obj
 *enable-bloom:off:bloom_off
 
 ## PAINTING OPTIONS  ##
+*togglepaint:position:-1.950000 -0.770000 -2.000000
+*togglepaint:scale:0.100000 0.100000 1.000000
+*togglepaint:rotation:0.000000 0.000000 -3.141593
+*togglepaint:ontexture:./res/models/controls/paint.png
+*togglepaint:offtexture:./res/models/controls/paint.png
+*togglepaint:on:paint_on
+*togglepaint:off:paint_off
+
 /paint-opacity:position:-0.770000 -0.350000 -1.000000
 /paint-opacity:scale:0.450000 -0.020000 1.000000
 /paint-opacity:rotation:0.000000 0.000000 -3.141593

@@ -12,10 +12,13 @@
 )
 
 (define (makecamera) 
-  (display "make camera placeholder\n")
+  (mk-obj-attr ">randomcamera" (list))
 )
 (define (makelight)
-  (display "make light placeholder\n")
+  (mk-obj-attr "!randomlight" (list))
+)
+(define (makeheightmap) 
+  (mk-obj-attr "-randomhm" (list))
 )
 
 (define shouldBePainting #f)
@@ -36,6 +39,7 @@
 (define fnMessages (list
   (list "makecamera" makecamera)
   (list "makelight"  makelight)
+  (list "makeheightmap" makeheightmap)
   (list "paint_on"   paint_on)
   (list "paint_off"  paint_off)
 ))
