@@ -22,6 +22,8 @@
 (define (makeheightmap) 
   (mk-obj-attr "-randomhm" (list
     (list "map" "./res/heightmaps/dunes.jpg")
+    (list "physics" "enabled")
+    (list "dim" "10")
   ))
 )
 
