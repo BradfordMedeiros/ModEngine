@@ -46,9 +46,11 @@
   (list "paint_off"  paint_off)
 ))
 
-(define (setdrawopacity opacity) (set-fstate "opacity" opacity))
+(define (setdrawopacity opacity)     (set-fstate "opacity"  opacity))
+(define (setdrawsize        size)    (set-fstate "drawsize" size))
 (define fnFloatMessages (list
   (list "drawopacity" setdrawopacity)
+  (list "drawsize"    setdrawsize)
 ))
 
 

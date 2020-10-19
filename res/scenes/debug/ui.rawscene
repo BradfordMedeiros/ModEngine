@@ -3,7 +3,7 @@ zplatform:scale:100.000000 1.000000 100.000000
 zplatform:rotation:0.000000 0.000000 -3.141593
 zplatform:mesh:./res/models/box/box.obj
 
->uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,*colorselection,*translate,*scale,*rotate
+>uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:rotation:0.000000 0.000000 -3.141593
 
@@ -42,6 +42,8 @@ zplatform:mesh:./res/models/box/box.obj
 *enable-diffuse:tint:0.8 0.8 1
 *enable-diffuse:on:diffuse_on
 *enable-diffuse:off:diffuse_off
+*enable-diffuse:ontint:1 1 1
+*enable-diffuse:state:on
 
 *enable-specular:position:1.870000 0.770000 -2.000000
 *enable-specular:scale:0.080000 0.080000 1.000000
@@ -51,6 +53,8 @@ zplatform:mesh:./res/models/box/box.obj
 *enable-specular:offtexture:./res/models/controls/light.png
 *enable-specular:on:specular_on
 *enable-specular:off:specular_off
+*enable-specular:ontint:1 1 1
+*enable-specular:state:on
 
 *enable-bloom:position:1.790000 0.770000 -2.000000
 *enable-bloom:scale:0.080000 0.080000 1.000000
@@ -60,6 +64,8 @@ zplatform:mesh:./res/models/box/box.obj
 *enable-bloom:offtexture:./res/models/controls/light.png
 *enable-bloom:on:bloom_on
 *enable-bloom:off:bloom_off
+*enable-bloom:ontint:1 1 1
+
 
 
 ## PAINTING OPTIONS  ##
@@ -75,6 +81,11 @@ zplatform:mesh:./res/models/box/box.obj
 /paint-opacity:scale:0.450000 -0.020000 1.000000
 /paint-opacity:rotation:0.000000 0.000000 -3.141593
 /paint-opacity:onslide:drawopacity
+
+/paint-size:position:-0.770000 -0.330000 -1.000000
+/paint-size:scale:0.450000 -0.020000 1.000000
+/paint-size:rotation:0.000000 0.000000 -3.141593
+/paint-size:onslide:drawsize
 
 *colorselection:position:-1.490000 -0.770000 -2.000000
 *colorselection:scale:0.800000 0.100000 1.000000

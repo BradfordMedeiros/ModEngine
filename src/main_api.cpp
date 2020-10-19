@@ -390,6 +390,9 @@ void setFloatState(std::string stateName, float value){
   if (stateName == "opacity"){
     drawParams.opacity = value;
   }
+  if (stateName == "drawsize"){
+    drawParams.scale = glm::vec3(1.f, 1.f, 1.f) * value;
+  }
   if (stateName == "drawcolor-r"){
     drawParams.tint.x = value;
   }
