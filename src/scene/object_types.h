@@ -101,6 +101,8 @@ struct GameObjectUIButton {
   int offTexture;
   std::string onToggleOn;
   std::string onToggleOff;
+  bool hasOnTint;
+  glm::vec3 onTint;
 };
 
 struct GameObjectUISlider {

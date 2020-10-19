@@ -193,7 +193,9 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
   auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
   auto canToggle = additionalFields.find("cantoggle") == additionalFields.end() || !(additionalFields.at("cantoggle") == "false");
   auto onToggleOn = additionalFields.find("on") != additionalFields.end() ? additionalFields.at("on") : "";
-  auto onToggleOff = additionalFields.find("off") != additionalFields.end() ? additionalFields.at("off") : "";;
+  auto onToggleOff = additionalFields.find("off") != additionalFields.end() ? additionalFields.at("off") : "";
+  auto hasOnTint  = additionalFields.find("ontint") != additionalFields.end();
+  auto onTint = hasOnTint ? parseVec(additionalFields.at("ontint")) : glm::vec3(1.f, 1.f, 1.f);
 
   GameObjectUIButton obj { 
     .common = parseCommon(additionalFields, meshes),
@@ -206,6 +208,8 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
     .offTexture = ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture),
     .onToggleOn = onToggleOn,
     .onToggleOff = onToggleOff,
+    .hasOnTint = hasOnTint,
+    .onTint = onTint,
   };
   return obj;
 }
@@ -444,6 +448,9 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    if (uiObj -> hasOnTint && uiObj -> toggleOn){
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> onTint));
+    }
     auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
     drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId);    
   }

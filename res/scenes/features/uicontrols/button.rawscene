@@ -1,5 +1,7 @@
 *basicbutton:on:enable_lights
 *basicbutton:off:disable_lights
+*basicbutton:ontint:0 0 1
+*basicbutton:tint:0 1 0
 
 *basicbutton2:ontexture:./res/textures/wood.jpg
 *basicbutton2:offtexture:./res/textures/window.png
@@ -8,8 +10,5 @@
 
 *colorselection:position:0 0 5
 *colorselection:offtexture:./res/models/controls/color.png
-#*colorselection:fragshader:./res/shaders/simple3d/fragment.glsl
 *colorselection:focus:colorselected
 *colorselection:cantoggle:false
-
-*colorselection:script:./res/scripts/color.scm
