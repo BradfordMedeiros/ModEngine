@@ -75,6 +75,7 @@ zplatform:mesh:./res/models/box/box.obj
 *togglepaint:offtexture:./res/models/controls/paint.png
 *togglepaint:on:paint_on
 *togglepaint:off:paint_off
+*togglepaint:ontint:2 2 2
 
 /paint-opacity:position:-0.770000 -0.350000 -1.000000
 /paint-opacity:scale:0.450000 -0.020000 1.000000
