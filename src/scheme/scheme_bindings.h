@@ -78,6 +78,8 @@ void onCollisionExit(int32_t obj1, int32_t obj2);
 void onMouseCallback(int button, int action, int mods);
 void onMouseMoveCallback(double xPos, double yPos);
 void onObjectSelected(int32_t index, glm::vec3 color);
+void onObjectHover(int32_t index);
+void onObjectUnhover(int32_t index);
 void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
 void onCameraSystemChange(bool usingBuiltInCamera);

@@ -15,6 +15,7 @@ typedef void(*mousemovecallback)(double xPos, double yPos);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
+typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*boolfunc)(bool value);
 typedef void(*messagefunc)(std::queue<std::string>&);
 typedef void(*messagefloatfunc)(std::queue<StringFloat>&);
@@ -27,6 +28,7 @@ struct SchemeBindingCallbacks {
   mousecallback onMouseCallback;
   mousemovecallback onMouseMoveCallback;
   onobjectSelectedFunc onObjectSelected;
+  onobjectHoverFunc onObjectHover;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
   boolfunc onCameraSystemChange;

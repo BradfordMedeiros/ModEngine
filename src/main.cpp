@@ -262,15 +262,8 @@ void handlePainting(UVCoord uvsToPaint){
 
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
-void selectItem(){
+void selectItem(objid selectedId, Color pixelColor){
   if (!showDebugInfo){
-    return;
-  }
-  Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-  auto selectedId = getIdFromColor(pixelColor);
-
-  if (!idExists(world, selectedId)){
-    std::cout << "ERROR: Color management: selected a color id that isn't in the scene" << std::endl;
     return;
   }
 
@@ -1208,8 +1201,18 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
 
     auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    auto hoveredId= getIdFromColor(hoveredItemColor);
+    
+    state.lastHoveredIdInScene = state.hoveredIdInScene;
+    state.hoveredIdInScene = idExists(world, hoveredId);
+    state.lastHoverIndex = state.currentHoverIndex;
+    state.currentHoverIndex = hoveredId;
+
     if (selectItemCalled){
-      selectItem();
+      if (state.hoveredIdInScene){
+        selectItem(hoveredId, hoveredItemColor);
+      }
       selectItemCalled = false;
       applyUICoord(
         world.objectMapping, 
@@ -1280,6 +1283,16 @@ int main(int argc, char* argv[]){
       schemeBindings.onObjectSelected(state.selectedIndex, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       shouldCallItemSelected = false;
     }
+
+    if (state.lastHoverIndex != state.currentHoverIndex){
+      if (state.lastHoveredIdInScene){
+        schemeBindings.onObjectHover(state.lastHoverIndex, false);
+      }
+      if (state.hoveredIdInScene){
+        schemeBindings.onObjectHover(state.currentHoverIndex, true);
+      }
+    }
+   
 
     glDisable(GL_STENCIL_TEST);
 

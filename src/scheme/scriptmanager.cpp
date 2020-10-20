@@ -69,6 +69,16 @@ void onObjectSelectedAllScripts(int32_t index, glm::vec3 color){
     onObjectSelected(index, color);
   }
 }
+void onObjectHoverAllScripts(int32_t index, bool isHover){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    if (isHover){
+      onObjectHover(index);
+    }else{
+      onObjectUnhover(index);
+    }
+  }  
+}
 void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
@@ -144,6 +154,7 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onMouseCallback = onMouseCallbackAllScripts,
     .onMouseMoveCallback = onMouseMoveCallbackAllScripts,
     .onObjectSelected = onObjectSelectedAllScripts,
+    .onObjectHover = onObjectHoverAllScripts,
     .onKeyCallback = onKeyCallbackAllScripts,
     .onKeyCharCallback = onKeyCharCallbackAllScripts,
     .onCameraSystemChange = onCameraSystemChangeAllScripts,

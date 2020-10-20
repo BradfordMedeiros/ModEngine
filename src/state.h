@@ -19,6 +19,10 @@ struct engineState {
   int cursorLeft;
   int cursorTop;
   int32_t selectedIndex;
+  int32_t currentHoverIndex;
+  int32_t lastHoverIndex;
+  bool hoveredIdInScene;
+  bool lastHoveredIdInScene;
   unsigned int activeCamera;
   std::string additionalText;
   bool enableManipulator;

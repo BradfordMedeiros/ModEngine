@@ -678,6 +678,25 @@ void onObjectSelected(int32_t index, glm::vec3 color){
     scm_call_2(func_symbol, gameobject, vec3ToScmList(color));
   }
 }
+
+void callObjIdFunc(const char* function, objid index){
+  if (symbolDefined(function)){
+    auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
+    obj->id = index;
+    SCM gameobject = scm_make_foreign_object_1(gameObjectType, obj);
+
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, gameobject);
+  }
+}
+void onObjectHover(int32_t index){
+  const char* function = "onObjHover";
+  callObjIdFunc(function, index);
+}
+void onObjectUnhover(int32_t index){
+  const char* function = "onObjUnhover";
+  callObjIdFunc(function, index);
+}
 void onKeyCallback(int key, int scancode, int action, int mods){
   const char* function = "onKey";
   if (symbolDefined(function)){
