@@ -30,11 +30,11 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 
 void onArrowKey(int key){
   if (key == 262){
-    nextTexture(drawParams, world.textures.size());
+    nextTexture();
     state.bloomAmount += 0.1f;
   }
   if (key == 263){
-    previousTexture(drawParams);
+    previousTexture();
     state.bloomAmount -= 0.1f;
     if (state.bloomAmount < 0.f){
       state.bloomAmount = 0.f;
@@ -55,41 +55,6 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
   }
 }
 
-struct TextureAndName {
-  Texture texture;
-  std::string textureName;
-};
-std::vector<TextureAndName> worldTextures(World& world){
-  std::vector<TextureAndName> textures;
-  for (auto [textureName, texture] : world.textures){
-    textures.push_back(TextureAndName{
-      .texture = texture,
-      .textureName = textureName
-    });
-  }
-  return textures;
-}
-void maybeChangeTexture(int index){
-    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));
-    if (meshObj == NULL){
-      return;
-    }
-
-    auto textures = worldTextures(world);
-    for (auto id : getIdsInGroup(world, index)){
-      GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
-      assert(meshObj != NULL);
-
-      int overloadId = 0;
-      for (int i = 0; i < textures.size(); i++){
-        if (meshObj -> texture.textureOverloadId == textures.at(i).texture.textureId){
-          overloadId = (i + 1) % textures.size();
-        }
-      }
-      meshObj -> texture.textureOverloadName = textures.at(overloadId).textureName;
-      meshObj -> texture.textureOverloadId = textures.at(overloadId).texture.textureId;
-    }
-}
 
 int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
@@ -189,7 +154,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_P && action == 1){
-    state.shouldPaint = !state.shouldPaint;
   }
 }
 

@@ -129,6 +129,10 @@ void playRecording(objid id, std::string recordingPath);
 std::vector<objid> raycast(glm::vec3 pos, glm::quat direction, float maxDistance);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 
+void nextTexture();
+void previousTexture();
+void maybeChangeTexture(int index);
+
 void setState(std::string stateName);
 void setFloatState(std::string stateName, float value);
 

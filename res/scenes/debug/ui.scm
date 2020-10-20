@@ -10,6 +10,7 @@
     "translate"
     "scale"
     "rotate"
+    "set_texture"
   )
 )
 
@@ -41,6 +42,12 @@
   (set! shouldBePainting #f)
   (set-state "paint_off")
 )
+(define (next_texture)
+  (set-state "next_texture")
+)
+(define (prev_texture)
+  (set-state "prev_texture")
+)
 
 (define fnMessages (list
   (list "makecamera" makecamera)
@@ -48,6 +55,8 @@
   (list "makeheightmap" makeheightmap)
   (list "paint_on"   paint_on)
   (list "paint_off"  paint_off)
+  (list "nexttexture" next_texture)
+  (list "prevtexture" prev_texture)
 ))
 
 (define (setdrawopacity opacity)     (set-fstate "opacity"  opacity))

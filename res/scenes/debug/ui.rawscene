@@ -3,7 +3,7 @@ zplatform:scale:100.000000 1.000000 100.000000
 zplatform:rotation:0.000000 0.000000 -3.141593
 zplatform:mesh:./res/models/box/box.obj
 
->uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate
+>uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate,*activetexture,*prevtexture,*nexttexture
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:rotation:0.000000 0.000000 -3.141593
 
@@ -95,6 +95,30 @@ zplatform:mesh:./res/models/box/box.obj
 *colorselection:offtexture:./res/models/controls/color.png
 *colorselection:script:./res/scenes/debug/ui.scm
 
+## TEXTURE OPTIONS ##
+*activetexture:position:-1.000000 -0.770000 -2.000000
+*activetexture:scale:0.100000 0.100000 1.000000
+*activetexture:rotation:0.000000 0.000000 -3.141593
+*activetexture:ontexture:./res/textures/wood.jpg
+*activetexture:offtexture:./res/textures/wood.jpg
+*activetexture:on:set_texture
+*activetexture:off:set_texture
+
+*prevtexture:position:-0.900000 -0.770000 -2.000000
+*prevtexture:scale:0.100000 0.100000 1.000000
+*prevtexture:rotation:3.141593 0.000000 -6.283185
+*prevtexture:ontexture:./res/models/controls/rotate.png
+*prevtexture:offtexture:./res/models/controls/rotate.png
+*prevtexture:on:prevtexture
+*prevtexture:off:prevtexture
+
+*nexttexture:position:-0.800000 -0.770000 -2.000000
+*nexttexture:scale:0.100000 0.100000 1.000000
+*nexttexture:rotation:0.000000 0.000000 -3.141593
+*nexttexture:ontexture:./res/models/controls/rotate.png
+*nexttexture:offtexture:./res/models/controls/rotate.png
+*nexttexture:on:nexttexture
+*nexttexture:off:nexttexture
 
 ## OBJECT MANIPULATION ##
 *translate:position:1.750000 -0.770000 -2.000000

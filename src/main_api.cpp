@@ -356,6 +356,50 @@ glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, float distance)
   return moveRelative(posFrom, orientation, glm::vec3(0.f, 0.f, -1 * distance), false);
 }
 
+void nextTexture(){
+  nextTexture(drawParams, world.textures.size());
+}
+void previousTexture(){
+  previousTexture(drawParams);
+}
+
+struct TextureAndName {
+  Texture texture;
+  std::string textureName;
+};
+std::vector<TextureAndName> worldTextures(World& world){
+  std::vector<TextureAndName> textures;
+  for (auto [textureName, texture] : world.textures){
+    textures.push_back(TextureAndName{
+      .texture = texture,
+      .textureName = textureName
+    });
+  }
+  return textures;
+}
+
+void maybeChangeTexture(int index){
+    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));
+    if (meshObj == NULL){
+      return;
+    }
+
+    auto textures = worldTextures(world);
+    for (auto id : getIdsInGroup(world, index)){
+      GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
+      assert(meshObj != NULL);
+
+      int overloadId = 0;
+      for (int i = 0; i < textures.size(); i++){
+        if (meshObj -> texture.textureOverloadId == textures.at(i).texture.textureId){
+          overloadId = (i + 1) % textures.size();
+        }
+      }
+      meshObj -> texture.textureOverloadName = textures.at(overloadId).textureName;
+      meshObj -> texture.textureOverloadId = textures.at(overloadId).texture.textureId;
+    }
+}
+
 void setState(std::string stateName){
   if (stateName == "diffuse_on"){
     state.enableDiffuse = true;
@@ -383,6 +427,12 @@ void setState(std::string stateName){
     state.manipulatorMode = SCALE;
   }else if (stateName == "rotate"){
     state.manipulatorMode = ROTATE;
+  }else if (stateName == "next_texture"){
+    nextTexture();
+  }else if (stateName == "prev_texture"){
+    previousTexture();
+  }else if (stateName == "set_texture"){
+    maybeChangeTexture(state.selectedIndex);
   }
 }
 
