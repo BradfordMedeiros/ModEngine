@@ -201,7 +201,7 @@ glm::quat getGameObjectRotation(int32_t index, bool isWorld){
 }
 
 void setSelectionMode(bool enabled){
-  state.isSelectionMode = enabled;
+  // todo allow toggle for this 
 }
 
 int32_t makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){

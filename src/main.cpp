@@ -624,12 +624,10 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   if (!showDebugInfo){
     return;
   }
-  if (!state.isSelectionMode){
-     drawSpriteAround(uiShaderProgram, crosshairSprite, state.currentScreenWidth/2, state.currentScreenHeight/2, 40, 40);
-  }else if (!state.isRotateSelection){
+
+  if(!state.isRotateSelection){
      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
   }
-
 
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
   std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 

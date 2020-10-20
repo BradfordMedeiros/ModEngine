@@ -4,7 +4,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 	engineState state = {
 		.visualizeNormals = false,
 		.showCameras = false,
-		.isSelectionMode = true,
 		.isRotateSelection = false,
 		.selectedName = "no object selected",
 		.useDefaultCamera = false,

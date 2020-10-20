@@ -8,7 +8,6 @@
 struct engineState {
   bool visualizeNormals;
   bool showCameras;
-  bool isSelectionMode;
   bool isRotateSelection;
   std::string selectedName;
   bool useDefaultCamera;
