@@ -49,6 +49,7 @@ struct engineState {
   float bloomAmount;
   bool takeScreenshot;
   bool highlight;
+  bool shouldSelect;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

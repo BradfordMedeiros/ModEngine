@@ -271,13 +271,16 @@ void selectItem(objid selectedId, Color pixelColor){
 
   auto groupid = getGroupId(world, selectedId);
   auto selectedObject =  getGameObject(world, groupid);
-
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
+
+  shouldCallItemSelected = true;
+
+  if (!state.shouldSelect){
+    return;
+  }
   state.selectedIndex =  groupid;
   state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
-  
-  shouldCallItemSelected = true;
 }
 
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
