@@ -67,7 +67,8 @@ void createStaticSchemeBindings(
   std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
-  void (*setFloatState)(std::string stateName, float value)
+  void (*setFloatState)(std::string stateName, float value),
+  void (*setIntState)(std::string stateName, int value)
 );
 
 void defineFunctions(objid id, bool isServer);

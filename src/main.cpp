@@ -977,7 +977,8 @@ int main(int argc, char* argv[]){
     raycast,
     takeScreenshot,
     setState,
-    setFloatState
+    setFloatState,
+    setIntState
   );
 
   schemeBindings = getSchemeCallbacks();

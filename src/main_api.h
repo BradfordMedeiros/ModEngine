@@ -135,6 +135,7 @@ void maybeChangeTexture(int index);
 
 void setState(std::string stateName);
 void setFloatState(std::string stateName, float value);
+void setIntState(std::string stateName, int value);
 
 void copyStr(std::string& data, char* copyTo, int size);
 

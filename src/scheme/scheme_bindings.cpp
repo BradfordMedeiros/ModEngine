@@ -635,6 +635,12 @@ SCM scmSetFloatState(SCM value, SCM amount){
   return SCM_UNSPECIFIED;
 }
 
+void (*_setIntState)(std::string, int);
+SCM scmSetIntState(SCM value, SCM amount){
+  _setIntState(scm_to_locale_string(value), scm_to_int32(amount));
+  return SCM_UNSPECIFIED;
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -851,6 +857,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("ss", 1, 0, 0, (void*)scmSaveScreenshot);
   scm_c_define_gsubr("set-state", 1, 0, 0, (void*)scmSetState);
   scm_c_define_gsubr("set-fstate", 2, 0, 0, (void*)scmSetFloatState);
+  scm_c_define_gsubr("set-istate", 2, 0, 0, (void*)scmSetIntState);
 }
 
 
@@ -910,7 +917,8 @@ void createStaticSchemeBindings(
   std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
-  void (*setFloatState)(std::string stateName, float value)
+  void (*setFloatState)(std::string stateName, float value),
+  void (*setIntState)(std::string stateName, int value)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -991,4 +999,5 @@ void createStaticSchemeBindings(
   _saveScreenshot = saveScreenshot;
   _setState = setState;
   _setFloatState = setFloatState;
+  _setIntState = setIntState;
 }

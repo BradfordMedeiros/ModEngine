@@ -449,10 +449,11 @@ void setFloatState(std::string stateName, float value){
   else if (stateName == "drawcolor-b"){
     drawParams.tint.z = value;
   }
-  else if (stateName == "set_texture"){
-    auto id = (objid)value;
+}
+
+void setIntState(std::string stateName, int value){
+  if (stateName == "set_texture"){
     std::cout << "value is: " << value << std::endl;
-    std::cout << "set id for: " << id << std::endl;
     maybeChangeTexture(value);
-  }
+  }  
 }
