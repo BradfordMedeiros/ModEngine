@@ -379,11 +379,6 @@ std::vector<TextureAndName> worldTextures(World& world){
 }
 
 void maybeChangeTexture(int index){
-    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));
-    if (meshObj == NULL){
-      return;
-    }
-
     auto textures = worldTextures(world);
     auto overloadId = drawParams.activeTextureIndex;
     auto textureName = textures.at(overloadId).textureName;
@@ -394,8 +389,17 @@ void maybeChangeTexture(int index){
       if (meshObj != NULL){
         meshObj -> texture.textureOverloadName = textureName;
         meshObj -> texture.textureOverloadId = textureId;       
+        return;
       }
 
+      GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
+      if (buttonObj != NULL){
+        buttonObj -> onTextureString = textureName;
+        buttonObj -> onTexture = textureId;
+        buttonObj -> offTextureString = textureName;
+        buttonObj -> offTexture = textureId;
+        return;
+      }
     }
 }
 
