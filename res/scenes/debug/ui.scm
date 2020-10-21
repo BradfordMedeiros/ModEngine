@@ -10,7 +10,6 @@
     "translate"
     "scale"
     "rotate"
-    "set_texture"
   )
 )
 
@@ -42,11 +41,21 @@
   (set! shouldBePainting #f)
   (set-state "paint_off")
 )
+
+(define selectedObject -1)
 (define (next_texture)
   (set-state "next_texture")
+  (set-istate "set_texture" (gameobj-id (lsobj-name "*activetexture")))
+
 )
 (define (prev_texture)
   (set-state "prev_texture")
+  (set-istate "set_texture" (gameobj-id (lsobj-name "*activetexture")))
+)
+(define (set_texture)
+  (if (not (equal? selectedObject -1))
+    (set-istate "set_texture" selectedObject)
+  )
 )
 
 (define fnMessages (list
@@ -57,6 +66,7 @@
   (list "paint_off"  paint_off)
   (list "nexttexture" next_texture)
   (list "prevtexture" prev_texture)
+  (list "set_texture"  set_texture)
 ))
 
 (define (setdrawopacity opacity)     (set-fstate "opacity"  opacity))
@@ -85,6 +95,7 @@
 )
 
 (define (onObjSelected obj color)
+  (set! selectedObject (gameobj-id obj))
   (if (equal? (gameobj-id obj) (gameobj-id mainobj))
     (begin
       (set-fstate "drawcolor-r" (car   color))
