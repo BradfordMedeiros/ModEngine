@@ -385,18 +385,17 @@ void maybeChangeTexture(int index){
     }
 
     auto textures = worldTextures(world);
+    auto overloadId = drawParams.activeTextureIndex;
+    auto textureName = textures.at(overloadId).textureName;
+    auto textureId = textures.at(overloadId).texture.textureId;
+
     for (auto id : getIdsInGroup(world, index)){
       GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
-      assert(meshObj != NULL);
-
-      int overloadId = 0;
-      for (int i = 0; i < textures.size(); i++){
-        if (meshObj -> texture.textureOverloadId == textures.at(i).texture.textureId){
-          overloadId = (i + 1) % textures.size();
-        }
+      if (meshObj != NULL){
+        meshObj -> texture.textureOverloadName = textureName;
+        meshObj -> texture.textureOverloadId = textureId;       
       }
-      meshObj -> texture.textureOverloadName = textures.at(overloadId).textureName;
-      meshObj -> texture.textureOverloadId = textures.at(overloadId).texture.textureId;
+
     }
 }
 
@@ -431,8 +430,6 @@ void setState(std::string stateName){
     nextTexture();
   }else if (stateName == "prev_texture"){
     previousTexture();
-  }else if (stateName == "set_texture"){
-    maybeChangeTexture(state.selectedIndex);
   }
 }
 
@@ -440,16 +437,22 @@ void setFloatState(std::string stateName, float value){
   if (stateName == "opacity"){
     drawParams.opacity = value;
   }
-  if (stateName == "drawsize"){
+  else if (stateName == "drawsize"){
     drawParams.scale = glm::vec3(1.f, 1.f, 1.f) * value;
   }
-  if (stateName == "drawcolor-r"){
+  else if (stateName == "drawcolor-r"){
     drawParams.tint.x = value;
   }
-  if (stateName == "drawcolor-g"){
+  else if (stateName == "drawcolor-g"){
     drawParams.tint.y = value;
   }
-  if (stateName == "drawcolor-b"){
+  else if (stateName == "drawcolor-b"){
     drawParams.tint.z = value;
+  }
+  else if (stateName == "set_texture"){
+    auto id = (objid)value;
+    std::cout << "value is: " << value << std::endl;
+    std::cout << "set id for: " << id << std::endl;
+    maybeChangeTexture(value);
   }
 }
