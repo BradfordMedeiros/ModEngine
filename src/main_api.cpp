@@ -389,7 +389,6 @@ void maybeChangeTexture(int index){
       if (meshObj != NULL){
         meshObj -> texture.textureOverloadName = textureName;
         meshObj -> texture.textureOverloadId = textureId;       
-        return;
       }
 
       GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
@@ -398,7 +397,6 @@ void maybeChangeTexture(int index){
         buttonObj -> onTexture = textureId;
         buttonObj -> offTextureString = textureName;
         buttonObj -> offTexture = textureId;
-        return;
       }
     }
 }
