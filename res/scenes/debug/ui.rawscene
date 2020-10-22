@@ -3,7 +3,8 @@ zplatform:scale:100.000000 1.000000 100.000000
 zplatform:rotation:0.000000 0.000000 -3.141593
 zplatform:mesh:./res/models/box/box.obj
 
->uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate,*activetexture,*prevtexture,*nexttexture
+>uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate,*activetexture,*prevtexture,*nexttexture,*modelviewer
+>uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:rotation:0.000000 0.000000 -3.141593
 
@@ -144,3 +145,37 @@ zplatform:mesh:./res/models/box/box.obj
 *rotate:offtexture:./res/models/controls/rotate.png
 *rotate:on:rotate
 *rotate:off:rotate
+
+
+## MODEL VIEWER ##
+
+*pickmodel1:position:-0.450000 0.400000 0.500000
+*pickmodel1:scale:0.400000 0.100000 1.000000
+*pickmodel1:rotation:0.000000 0.000000 -3.141593
+*pickmodel1:ontexture:./res/models/controls/on.png
+*pickmodel1:offtexture:./res/models/controls/on.png
+
+*pickmodel2:position:-0.450000 0.200000 0.500000
+*pickmodel2:scale:0.400000 0.100000 1.000000
+*pickmodel2:rotation:0.000000 0.000000 -3.141593
+*pickmodel2:ontexture:./res/models/controls/on.png
+*pickmodel2:offtexture:./res/models/controls/on.png
+
+*pickmodel3:position:-0.450000 0.00000 0.500000
+*pickmodel3:scale:0.400000 0.100000 1.000000
+*pickmodel3:rotation:0.000000 0.000000 -3.141593
+*pickmodel3:ontexture:./res/models/controls/on.png
+*pickmodel3:offtexture:./res/models/controls/on.png
+
+*pickmodel4:position:-0.450000 -0.200000 0.500000
+*pickmodel4:scale:0.400000 0.100000 1.000000
+*pickmodel4:rotation:0.000000 0.000000 -3.141593
+*pickmodel4:ontexture:./res/models/controls/on.png
+*pickmodel4:offtexture:./res/models/controls/on.png
+
+*modelviewer:position:1.810000 0.010000 -2.00100000
+*modelviewer:scale:0.400000 1.400000 2.000000
+*modelviewer:rotation:0.000000 0.000000 -3.141593
+*modelviewer:cantoggle:false
+*modelviewer:offtexture:./res/textures/blacktop.jpg
+*modelviewer:child:*pickmodel1,*pickmodel2,*pickmodel3,*pickmodel4

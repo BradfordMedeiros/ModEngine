@@ -105,3 +105,28 @@
   )
 )
 
+(define onModelViewer #f)
+(define modelSelectorId (gameobj-id (lsobj-name "*modelviewer")))
+(define (onObjHover obj)
+  (if (equal? (gameobj-id obj) modelSelectorId)
+    (set! onModelViewer #t)
+  )
+)
+(define (onObjUnhover obj)
+  (if (equal? (gameobj-id obj) modelSelectorId)
+    (set! onModelViewer #f)
+  )
+)
+
+
+(define allModels (ls-models))
+(define modelIndex 0)
+(define numModels  (length allModels))
+(define (onScroll amount)
+  (if onModelViewer
+    (begin
+      (set! modelIndex (min numModels (max 0 (+ modelIndex (if (> amount 0) 1 -1)))))
+      (display (string-append "model index is: " (number->string modelIndex) "\n"))
+    )
+  )
+)
