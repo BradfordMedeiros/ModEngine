@@ -275,7 +275,7 @@ void playAnimation(int32_t id, std::string animationToPlay){
 }
 
 std::vector<std::string> listModels(){
-  return listFilesWithExtensions("../gameresources", { "obj", "dae" });
+  return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }
 
 void sendEventMessage(std::string message){
