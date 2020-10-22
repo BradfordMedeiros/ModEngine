@@ -59,7 +59,8 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
 int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
-
+  schemeBindings.onScrollCallback(yoffset);
+  
   if (state.offsetTextureMode && state.selectedIndex != -1){
     float offsetAmount = yoffset * 0.001;
     maybeApplyTextureOffset(state.selectedIndex, glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));

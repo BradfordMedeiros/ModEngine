@@ -63,6 +63,13 @@ void onMouseMoveCallbackAllScripts(double xPos, double yPos){
     onMouseMoveCallback(xPos, yPos);
   }
 }
+void onScrollCallbackAllScripts(double amount){
+  for (auto &[_, module] : scriptnameToModule){
+    scm_set_current_module(module);
+    onScrollCallback(amount);
+  }
+}
+
 void onObjectSelectedAllScripts(int32_t index, glm::vec3 color){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
@@ -153,6 +160,7 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onCollisionExit = onCollisionExitAllScripts,
     .onMouseCallback = onMouseCallbackAllScripts,
     .onMouseMoveCallback = onMouseMoveCallbackAllScripts,
+    .onScrollCallback = onScrollCallbackAllScripts,
     .onObjectSelected = onObjectSelectedAllScripts,
     .onObjectHover = onObjectHoverAllScripts,
     .onKeyCallback = onKeyCallbackAllScripts,

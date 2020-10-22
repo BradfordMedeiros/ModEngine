@@ -827,7 +827,6 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUIButton>(&obj);
     if (uiControl != NULL){
-      std::cout << "id: " << id << " was clicked" << std::endl;
       if (id == uiId && uiControl -> canToggle){
         uiControl -> toggleOn = !uiControl -> toggleOn;
         if (uiControl -> toggleOn && uiControl -> onToggleOn != ""){

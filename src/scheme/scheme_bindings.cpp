@@ -673,6 +673,13 @@ void onMouseMoveCallback(double xPos, double yPos){
     scm_call_2(func_symbol, scm_from_double(xPos), scm_from_double(yPos));
   }
 }
+void onScrollCallback(double amount){
+  const char* function = "onScroll";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, scm_from_double(amount));
+  }  
+}
 void onObjectSelected(int32_t index, glm::vec3 color){
   const char* function = "onObjSelected";
   if (symbolDefined(function)){
