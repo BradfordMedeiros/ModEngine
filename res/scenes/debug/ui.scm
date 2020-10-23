@@ -105,28 +105,62 @@
   )
 )
 
-(define onModelViewer #f)
+(define onModelViewer #t)
 (define modelSelectorId (gameobj-id (lsobj-name "*modelviewer")))
-(define (onObjHover obj)
-  (if (equal? (gameobj-id obj) modelSelectorId)
-    (set! onModelViewer #t)
-  )
-)
-(define (onObjUnhover obj)
-  (if (equal? (gameobj-id obj) modelSelectorId)
-    (set! onModelViewer #f)
-  )
-)
+;(define (onObjHover obj)
+;  (if (equal? (gameobj-id obj) modelSelectorId)
+;    (set! onModelViewer #t)
+;  )
+;)
+;(define (onObjUnhover obj)
+;  (if (equal? (gameobj-id obj) modelSelectorId)
+;    (set! onModelViewer #f)
+;  )
+;)
 
 
 (define allModels (ls-models))
 (define modelIndex 0)
 (define numModels  (length allModels))
+
+(define (getmodels index)
+  (define backlist (list-tail (ls-models) index))
+  (if (<= (length backlist) 4)
+    backlist
+    (list-head backlist 4)
+  )
+)
+
+
+(define (modelToTexture modelpath)
+  (define elements (reverse (string-split modelpath #\/)))
+  (define firstelement (car elements))
+  (string-join (append (reverse (cdr elements)) (list (string-append firstelement "-tex.png"))) "/")
+)
+(define (listtextures index) (map modelToTexture (getmodels index)))
+
+(define (setTexIfExists objname texture)
+  (define objid (gameobj-id (lsobj-name "*pickmodel1")))
+  (display (string-append "[placeholder] - set: " objname "(" (number->string objid) ") with tex: " texture "\n"))
+)
+
+(define (setObjTextures textures index)
+  (if (> (length textures) 0)
+    (begin 
+      (setTexIfExists (string-append "*pickmodel" (number->string index)) (car textures))
+      (setObjTextures (cdr textures) (+ index 1))
+    )
+  )
+)
+
 (define (onScroll amount)
   (if onModelViewer
     (begin
-      (set! modelIndex (min numModels (max 0 (+ modelIndex (if (> amount 0) 1 -1)))))
-      (display (string-append "model index is: " (number->string modelIndex) "\n"))
+      (set! modelIndex 
+      (min numModels (max 0 (+ modelIndex (if (> amount 0) 1 -1)))))
+      ;(display (string-append "model index is: " (number->string modelIndex) "\n"))
+      (setObjTextures (listtextures modelIndex) 1)
+      (display "\n")
     )
   )
 )
