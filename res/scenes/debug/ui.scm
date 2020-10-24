@@ -107,16 +107,16 @@
 
 (define onModelViewer #t)
 (define modelSelectorId (gameobj-id (lsobj-name "*modelviewer")))
-;(define (onObjHover obj)
-;  (if (equal? (gameobj-id obj) modelSelectorId)
-;    (set! onModelViewer #t)
-;  )
-;)
-;(define (onObjUnhover obj)
-;  (if (equal? (gameobj-id obj) modelSelectorId)
-;    (set! onModelViewer #f)
-;  )
-;)
+(define (onObjHover obj)
+  (if (equal? (gameobj-id obj) modelSelectorId)
+    (set! onModelViewer #t)
+  )
+)
+(define (onObjUnhover obj)
+  (if (equal? (gameobj-id obj) modelSelectorId)
+    (set! onModelViewer #f)
+  )
+)
 
 
 (define allModels (ls-models))
@@ -164,3 +164,4 @@
 )
 
 (onScroll 0)
+(set! onModelViewer #f)
