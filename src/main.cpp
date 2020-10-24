@@ -767,7 +767,7 @@ int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
-   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res/textures"))
+   ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res"))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
@@ -981,7 +981,8 @@ int main(int argc, char* argv[]){
     takeScreenshot,
     setState,
     setFloatState,
-    setIntState
+    setIntState,
+    setTexture
   );
 
   schemeBindings = getSchemeCallbacks();

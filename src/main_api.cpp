@@ -379,6 +379,10 @@ std::vector<TextureAndName> worldTextures(World& world){
 }
 
 void setTexture(objid index, std::string textureName){
+  if (world.textures.find(textureName) == world.textures.end()){
+    textureName = "./res/textures/default.jpg"; // if the texture does not exist, we just use default texture
+  }
+
   auto textureId = world.textures.at(textureName).textureId;
   for (auto id : getIdsInGroup(world, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));

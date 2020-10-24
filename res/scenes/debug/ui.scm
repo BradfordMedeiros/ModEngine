@@ -140,8 +140,8 @@
 (define (listtextures index) (map modelToTexture (getmodels index)))
 
 (define (setTexIfExists objname texture)
-  (define objid (gameobj-id (lsobj-name "*pickmodel1")))
-  (display (string-append "[placeholder] - set: " objname "(" (number->string objid) ") with tex: " texture "\n"))
+  (define objid (gameobj-id (lsobj-name objname)))
+  (set-texture objid texture)
 )
 
 (define (setObjTextures textures index)
@@ -158,9 +158,9 @@
     (begin
       (set! modelIndex 
       (min numModels (max 0 (+ modelIndex (if (> amount 0) 1 -1)))))
-      ;(display (string-append "model index is: " (number->string modelIndex) "\n"))
       (setObjTextures (listtextures modelIndex) 1)
-      (display "\n")
     )
   )
 )
+
+(onScroll 0)

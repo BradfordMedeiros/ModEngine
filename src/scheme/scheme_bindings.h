@@ -68,7 +68,8 @@ void createStaticSchemeBindings(
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
   void (*setFloatState)(std::string stateName, float value),
-  void (*setIntState)(std::string stateName, int value)
+  void (*setIntState)(std::string stateName, int value),
+  void (*setTexture)(objid id, std::string texture)
 );
 
 void defineFunctions(objid id, bool isServer);
