@@ -378,27 +378,27 @@ std::vector<TextureAndName> worldTextures(World& world){
   return textures;
 }
 
-void maybeChangeTexture(int index){
-    auto textures = worldTextures(world);
-    auto overloadId = drawParams.activeTextureIndex;
-    auto textureName = textures.at(overloadId).textureName;
-    auto textureId = textures.at(overloadId).texture.textureId;
-
-    for (auto id : getIdsInGroup(world, index)){
-      GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
-      if (meshObj != NULL){
-        meshObj -> texture.textureOverloadName = textureName;
-        meshObj -> texture.textureOverloadId = textureId;       
-      }
-
-      GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
-      if (buttonObj != NULL){
-        buttonObj -> onTextureString = textureName;
-        buttonObj -> onTexture = textureId;
-        buttonObj -> offTextureString = textureName;
-        buttonObj -> offTexture = textureId;
-      }
+void setTexture(objid index, std::string textureName){
+  auto textureId = world.textures.at(textureName).textureId;
+  for (auto id : getIdsInGroup(world, index)){
+    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
+    if (meshObj != NULL){
+      meshObj -> texture.textureOverloadName = textureName;
+      meshObj -> texture.textureOverloadId = textureId;       
     }
+
+    GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
+    if (buttonObj != NULL){
+      buttonObj -> onTextureString = textureName;
+      buttonObj -> onTexture = textureId;
+      buttonObj -> offTextureString = textureName;
+      buttonObj -> offTexture = textureId;
+    }
+  }
+}
+void maybeChangeTexture(int index){
+  auto textureName = worldTextures(world).at(drawParams.activeTextureIndex).textureName;
+  setTexture(index, textureName);
 }
 
 void setState(std::string stateName){
