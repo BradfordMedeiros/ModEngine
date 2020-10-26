@@ -3,7 +3,7 @@ zplatform:scale:100.000000 1.000000 100.000000
 zplatform:rotation:0.000000 0.000000 -3.141593
 zplatform:mesh:./res/models/box/box.obj
 
->uicamera:child:*makecamera,*makelight,*makeheightmap,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate,*activetexture,*prevtexture,*nexttexture,*modelviewer
+>uicamera:child:*makecamera,*makelight,*makeheightmap,*makeobject,*togglepaint,*enable-diffuse,*enable-bloom,*enable-specular,/paint-opacity,/paint-size,*colorselection,*translate,*scale,*rotate,*activetexture,*prevtexture,*nexttexture,*modelviewer
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:position:-53.176361 0.000016 354.533447
 >uicamera:rotation:0.000000 0.000000 -3.141593
@@ -33,6 +33,13 @@ zplatform:mesh:./res/models/box/box.obj
 *makeheightmap:on:makeheightmap
 *makeheightmap:off:makeheightmap
 
+*makeobject:position:-1.920000 0.000000 -2.000000
+*makeobject:scale:0.100000 0.100000 1.000000
+*makeobject:rotation:0.000000 0.000000 -3.141593
+*makeobject:ontexture:./res/models/controls/camera.png
+*makeobject:offtexture:./res/models/controls/camera.png
+*makeobject:on:makeobject
+*makeobject:off:makeobject
 
 ## LIGHTING TOGGLE  ##
 *enable-diffuse:position:1.950000 0.770000 -2.000000

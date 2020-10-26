@@ -27,6 +27,17 @@
   ))
 )
 
+(define (activemodel)
+  (car (getmodels modelIndex))
+)
+(define (makeobject)
+  (define modelToMake (activemodel))
+  (display (string-append "model to make: " modelToMake "\n"))
+  (mk-obj-attr "randomobject" (list
+    (list "mesh" modelToMake)
+  ))
+)
+
 (define shouldBePainting #f)
 (define (onMouse button action mods) 
   (if (and (equal? button 0) (equal? action 0))
@@ -62,6 +73,7 @@
   (list "makecamera" makecamera)
   (list "makelight"  makelight)
   (list "makeheightmap" makeheightmap)
+  (list "makeobject" makeobject)
   (list "paint_on"   paint_on)
   (list "paint_off"  paint_off)
   (list "nexttexture" next_texture)
