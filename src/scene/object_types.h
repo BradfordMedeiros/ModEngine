@@ -83,6 +83,8 @@ struct GameObjectHeightmap{
   TextureInformation texture;
 };
 
+struct GameObjectNavmesh {};
+
 struct GameObjectUICommon {
   Mesh mesh;
   bool isFocused;
@@ -128,6 +130,7 @@ typedef std::variant<
   GameObjectRoot, 
   GameObjectEmitter,
   GameObjectHeightmap,
+  GameObjectNavmesh,
   GameObjectUIButton,
   GameObjectUISlider
 > GameObjectObj;
@@ -200,6 +203,11 @@ static Field heightmap {
   .type = "heightmap",
 };
 
+static Field navmeshField {
+  .prefix = ';',
+  .type = "navmesh",
+};
+
 static Field uiButtonField {
   .prefix = '*',
   .type = "ui",
@@ -210,7 +218,8 @@ static Field uiSliderField {
   .type = "slider",
 };
 
-static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, uiButtonField, uiSliderField };
+
+static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, navmeshField, uiButtonField, uiSliderField };
 
 std::map<objid, GameObjectObj> getObjectMapping();
 

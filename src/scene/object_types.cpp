@@ -176,6 +176,11 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
   return obj;
 }
 
+GameObjectNavmesh createNavmesh(){
+  GameObjectNavmesh obj{};
+  return obj;
+}
+
 GameObjectUICommon parseCommon(std::map<std::string, std::string>& additionalFields, std::map<std::string, Mesh>& meshes){
   auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
   auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";
@@ -269,6 +274,8 @@ void addObject(
     mapping[id] = createEmitter(addEmitter, additionalFields);
   }else if (objectType == "heightmap"){
     mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
+  }else if (objectType == "navmesh"){
+    mapping[id] = createNavmesh();
   }else if (objectType == "ui"){
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
