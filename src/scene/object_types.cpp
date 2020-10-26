@@ -176,8 +176,10 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
   return obj;
 }
 
-GameObjectNavmesh createNavmesh(){
-  GameObjectNavmesh obj{};
+GameObjectNavmesh createNavmesh(Mesh& navmesh){
+  GameObjectNavmesh obj{
+    .mesh = navmesh,
+  };
   return obj;
 }
 
@@ -275,7 +277,7 @@ void addObject(
   }else if (objectType == "heightmap"){
     mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
   }else if (objectType == "navmesh"){
-    mapping[id] = createNavmesh();
+    mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj"));
   }else if (objectType == "ui"){
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){

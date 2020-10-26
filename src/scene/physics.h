@@ -63,4 +63,6 @@ struct HitObject {
 };
 std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 
+bool pointInsideBody(btRigidBody* body, glm::vec3 point);
+
 #endif 

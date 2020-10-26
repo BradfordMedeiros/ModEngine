@@ -83,7 +83,9 @@ struct GameObjectHeightmap{
   TextureInformation texture;
 };
 
-struct GameObjectNavmesh {};
+struct GameObjectNavmesh {
+  Mesh mesh;
+};
 
 struct GameObjectUICommon {
   Mesh mesh;

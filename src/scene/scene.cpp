@@ -104,6 +104,11 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, objid index)
     boundInfo = getMaxUnionBoundingInfo(infos);
   }
 
+  auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
+  if (navmeshObj != NULL){
+    boundInfo = navmeshObj -> mesh.boundInfo;
+  }
+
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .collisionInfo =  obj.transformation.scale,
