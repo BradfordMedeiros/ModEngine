@@ -709,6 +709,13 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     return {};
   }
 
+  auto navmeshObj = std::get_if<GameObjectNavmesh>(&objectToSerialize);
+  if (navmeshObj != NULL){
+    std::cout << "ERROR: NAVMESH SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};
+  }
+
   auto uiControlObj = std::get_if<GameObjectUIButton>(&objectToSerialize);
   if (uiControlObj != NULL){
     return serializeButton(*uiControlObj);
