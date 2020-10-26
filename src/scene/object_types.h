@@ -256,6 +256,7 @@ void renderObject(
   std::map<objid, GameObjectObj>& mapping,
   Mesh& nodeMesh,
   Mesh& cameraMesh, 
+  Mesh& portalMesh, 
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,
