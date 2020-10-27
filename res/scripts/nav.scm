@@ -1,0 +1,17 @@
+
+(display "nav scm loaded\n")
+
+(define (onMouse button action mods)
+  (define nextpos (navpos (gameobj-id mainobj) (gameobj-pos mainobj)))
+  (display "on mouse called: ")
+  (display button)
+  (display " ")
+  (display action)
+  (display " ")
+  (display mods)
+  (display "\n")
+  (display "next pos: ")
+  (display nextpos)
+  (display "\n")
+  (gameobj-setpos! mainobj nextpos)
+)
