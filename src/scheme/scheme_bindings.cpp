@@ -336,6 +336,11 @@ SCM scmMoveRelative(SCM pos, SCM orientation, SCM distance){
   return vec3ToScmList(_moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance)));
 }
 
+glm::quat (*_orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos);
+SCM scmOrientationFromPos(SCM fromPos, SCM toPos){
+  return scmQuatToSCM(_orientationFromPos(listToVec3(fromPos), listToVec3(toPos)));
+}
+
 std::vector<std::string>(*_listAnimations)(int32_t id);
 SCM scmListAnimations(SCM value){
   auto animations = _listAnimations(getGameobjId(value));
@@ -803,7 +808,7 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)scmGetGameObjectPos);
   scm_c_define_gsubr("gameobj-pos-world", 1, 0, 0, (void*)scmGetGameObjectPosWorld);
-  scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
+  scm_c_define_gsubr("gameobj-setpozs!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
   scm_c_define_gsubr("gameobj-setpos-relxz!", 2, 0, 0, (void *)setGameObjectPositionRelXZ);
   
@@ -826,6 +831,7 @@ void defineFunctions(objid id, bool isServer){
   // UTILITY FUNCTIONS
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void*)scmSetFrontDelta);
   scm_c_define_gsubr("move-relative", 3, 0, 0, (void*)scmMoveRelative);
+  scm_c_define_gsubr("orientation-from-pos", 2, 0, 0, (void*)scmOrientationFromPos);
 
   // physics functions
   scm_c_define_gsubr("applyimpulse", 2, 0, 0, (void *)scm_applyImpulse);
@@ -907,6 +913,7 @@ void createStaticSchemeBindings(
   void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
+  glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
   std::optional<objid> (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
@@ -980,7 +987,8 @@ void createStaticSchemeBindings(
   
   _setFrontDelta = setFrontDelta;
   _moveRelative = moveRelative;
-  
+  _orientationFromPos = orientationFromPos;  
+
   _applyImpulse = applyImpulse;
   _applyImpulseRel = applyImpulseRel;
   _clearImpulse = clearImpulse;

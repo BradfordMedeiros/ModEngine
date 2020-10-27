@@ -954,6 +954,7 @@ int main(int argc, char* argv[]){
     setGameObjectRotation,
     setFrontDelta,
     moveRelative,
+    orientationFromPos,
     getGameObjectByName,
     setSelectionMode,
     applyImpulse,

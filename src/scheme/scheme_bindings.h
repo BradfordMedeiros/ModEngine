@@ -35,6 +35,7 @@ void createStaticSchemeBindings(
   void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
+  glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
   std::optional<objid> (*getGameObjectByName)(std::string name),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
