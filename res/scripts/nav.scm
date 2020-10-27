@@ -2,7 +2,10 @@
 (display "nav scm loaded\n")
 
 (define (onMouse button action mods)
-  (define nextpos (navpos (gameobj-id mainobj) (gameobj-pos mainobj)))
+  (define frompos (gameobj-pos mainobj))
+  (define nextpos (navpos (gameobj-id mainobj) frompos))
+  (define orientation (orientation-from-pos frompos nextpos))
+
   (display "on mouse called: ")
   (display button)
   (display " ")
@@ -13,5 +16,9 @@
   (display "next pos: ")
   (display nextpos)
   (display "\n")
-  (gameobj-setpos! mainobj nextpos)
+  ;(gameobj-setpos! mainobj nextpos)
+  (display "orientation: ")
+  (display orientation)
+  (display "\n")
+  (gameobj-setpos! mainobj (move-relative frompos orientation 3))
 )
