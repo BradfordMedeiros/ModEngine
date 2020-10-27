@@ -647,6 +647,11 @@ SCM scmSetTexture(SCM obj, SCM texture){
   return SCM_UNSPECIFIED;
 }
 
+glm::vec3 (*_navPosition)(objid, glm::vec3 pos);
+SCM scmNavPosition(SCM obj, SCM pos){
+  return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -873,6 +878,8 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("set-istate", 2, 0, 0, (void*)scmSetIntState);
 
   scm_c_define_gsubr("set-texture", 2, 0, 0, (void*)scmSetTexture);
+
+  scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 }
 
 
@@ -934,7 +941,8 @@ void createStaticSchemeBindings(
   void (*setState)(std::string),
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
-  void (*setTexture)(objid id, std::string texture)
+  void (*setTexture)(objid id, std::string texture),
+  glm::vec3 (*navPosition)(objid, glm::vec3 pos)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -1018,4 +1026,5 @@ void createStaticSchemeBindings(
   _setIntState = setIntState;
 
   _setTexture = setTexture;
+  _navPosition = navPosition;
 }

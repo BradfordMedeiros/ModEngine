@@ -764,6 +764,11 @@ void genFramebufferTexture(unsigned int *texture){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+glm::vec3 navPosition(objid id, glm::vec3 target){
+  std::cout << "INFO: TARGET NAV POSITION CALLED" << std::endl;
+  return target + glm::vec3(0.2f, 0.f, 0.f);
+}
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -983,7 +988,8 @@ int main(int argc, char* argv[]){
     setState,
     setFloatState,
     setIntState,
-    setTexture
+    setTexture,
+    navPosition
   );
 
   schemeBindings = getSchemeCallbacks();
