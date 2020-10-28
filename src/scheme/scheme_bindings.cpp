@@ -612,9 +612,19 @@ SCM scmPlayRecording(SCM id, SCM recordingPath){
   _playRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
   return SCM_UNSPECIFIED;
 }
-std::vector<objid> (*_raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
+
+std::vector<HitObject> (*_raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
+std::vector<objid> doraycast(glm::vec3 pos, glm::quat direction, float maxDistance){
+  std::vector<objid> ids;
+  auto hitobjects = _raycast( pos, direction, maxDistance);
+  for (auto hitobject : hitobjects){
+    ids.push_back(hitobject.id);
+  }
+  return ids;
+}
+
 SCM scmRaycast(SCM pos, SCM direction, SCM distance){
-  std::vector<objid> ids = _raycast(listToVec3(pos), scmListToQuat(direction), scm_to_double(distance));
+  std::vector<objid> ids = doraycast(listToVec3(pos), scmListToQuat(direction), scm_to_double(distance));
   SCM list = scm_make_list(scm_from_unsigned_integer(ids.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < ids.size(); i++){
     scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_int32(ids.at(i)));
@@ -943,7 +953,7 @@ void createStaticSchemeBindings(
   void (*startRecording)(objid id, std::string recordingPath),
   void (*playRecording)(objid id, std::string recordingPath),
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
-  std::vector<objid> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
+  std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
   void (*setFloatState)(std::string stateName, float value),

@@ -248,10 +248,12 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
 
   for (int i = 0; i < result.m_hitFractions.size(); i++){
     const btCollisionObject* obj = result.m_collisionObjects[i];
+    auto hitPoint = btToGlm(result.m_hitPointWorld[i]);
     for (auto [objid, rigidbody] : rigidbodys){
       if (rigidbody == obj){
         hitobjects.push_back(HitObject{
           .id = objid,
+          .point = hitPoint,
         });
       }
     }

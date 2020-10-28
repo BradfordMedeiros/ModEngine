@@ -48,4 +48,9 @@ struct StringFloat {
   float floatValue;
 };
 
+struct HitObject {
+  objid id;
+  glm::vec3 point;
+};
+
 #endif
