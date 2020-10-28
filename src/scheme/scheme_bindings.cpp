@@ -617,17 +617,19 @@ std::vector<HitObject> (*_raycast)(glm::vec3 pos, glm::quat direction, float max
 std::vector<objid> doraycast(glm::vec3 pos, glm::quat direction, float maxDistance){
   std::vector<objid> ids;
   auto hitobjects = _raycast( pos, direction, maxDistance);
-  for (auto hitobject : hitobjects){
-    ids.push_back(hitobject.id);
-  }
+
   return ids;
 }
 
 SCM scmRaycast(SCM pos, SCM direction, SCM distance){
-  std::vector<objid> ids = doraycast(listToVec3(pos), scmListToQuat(direction), scm_to_double(distance));
-  SCM list = scm_make_list(scm_from_unsigned_integer(ids.size()), scm_from_unsigned_integer(0));
-  for (int i = 0; i < ids.size(); i++){
-    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_int32(ids.at(i)));
+  auto hitObjects = _raycast(listToVec3(pos), scmListToQuat(direction), scm_to_double(distance));
+  SCM list = scm_make_list(scm_from_unsigned_integer(hitObjects.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < hitObjects.size(); i++){
+    auto hitObject = hitObjects.at(i);
+    auto idAndHitPoint = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(0), scm_from_int32(hitObject.id));
+    scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(1), vec3ToScmList(hitObject.point));
+    scm_list_set_x(list, scm_from_unsigned_integer(i), idAndHitPoint);
   }
   return list;
 }
