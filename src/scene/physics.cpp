@@ -244,16 +244,18 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
   std::vector<HitObject> hitobjects;
   btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
   auto posTo = moveRelative(posFrom, direction, glm::vec3(0.f, 0.f, -1 * maxDistance), false);
-  env.dynamicsWorld -> rayTest(glmToBt(posFrom), glmToBt(posTo), result);
+  auto btPosFrom = glmToBt(posFrom);
+  auto btPosTo = glmToBt(posTo);
+  env.dynamicsWorld -> rayTest(btPosFrom, btPosTo, result);
 
   for (int i = 0; i < result.m_hitFractions.size(); i++){
     const btCollisionObject* obj = result.m_collisionObjects[i];
-    auto hitPoint = btToGlm(result.m_hitPointWorld[i]);
+    auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     for (auto [objid, rigidbody] : rigidbodys){
       if (rigidbody == obj){
         hitobjects.push_back(HitObject{
           .id = objid,
-          .point = hitPoint,
+          .point = btToGlm(hitPoint),  
         });
       }
     }
