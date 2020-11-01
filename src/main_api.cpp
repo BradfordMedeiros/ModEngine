@@ -30,52 +30,6 @@ std::optional<objid> getGameObjectByName(std::string name){    // @todo : odd be
   return getGameObjectByName(world, name);
 }
 
-void setActiveCamera(int32_t cameraId){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
-  if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
-    std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
-    return;
-  }
-  auto sceneId = world.idToScene.at(cameraId);
-  activeCameraObj = &getGameObject(world, cameraId);
-  state.selectedIndex = cameraId;
-}
-void setActiveCamera(std::string name){
-  auto object = getGameObjectByName(name);
-  if (!object.has_value()){
-    std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
-    assert(false);
-  }
-  setActiveCamera(object.value());
-}
-
-void nextCamera(){
-  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
-  if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
-    activeCameraObj = NULL;
-    return;
-  }
-
-  state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
-  int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
-  setActiveCamera(activeCameraId);
-}
-void moveCamera(glm::vec3 offset){
-  if (activeCameraObj == NULL){
-    std::cout << "default camera!" << std::endl;
-    defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
-  }else{
-    activeCameraObj -> transformation.position = moveRelative(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation, glm::vec3(offset), false);
-  }
-}
-void rotateCamera(float xoffset, float yoffset){
-  if (activeCameraObj == NULL){
-    defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
-  }else{
-    activeCameraObj -> transformation.rotation = setFrontDelta(activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1);
-  }
-}
-
 void applyImpulse(int32_t index, glm::vec3 impulse){
   applyImpulse(world.rigidbodys.at(index), impulse);
 }
@@ -457,4 +411,50 @@ void setIntState(std::string stateName, int value){
     std::cout << "value is: " << value << std::endl;
     maybeChangeTexture(value);
   }  
+}
+
+void setActiveCamera(int32_t cameraId){
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+  if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
+    std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
+    return;
+  }
+  auto sceneId = world.idToScene.at(cameraId);
+  activeCameraObj = &getGameObject(world, cameraId);
+  state.selectedIndex = cameraId;
+}
+void setActiveCamera(std::string name){
+  auto object = getGameObjectByName(name);
+  if (!object.has_value()){
+    std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
+    assert(false);
+  }
+  setActiveCamera(object.value());
+}
+
+void nextCamera(){
+  auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
+  if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
+    activeCameraObj = NULL;
+    return;
+  }
+
+  state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
+  int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
+  setActiveCamera(activeCameraId);
+}
+void moveCamera(glm::vec3 offset){
+  if (activeCameraObj == NULL){
+    std::cout << "default camera!" << std::endl;
+    defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
+  }else{
+    setGameObjectPosition(activeCameraObj ->id, moveRelative(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
+  }
+}
+void rotateCamera(float xoffset, float yoffset){
+  if (activeCameraObj == NULL){
+    defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
+  }else{
+    setGameObjectRotation(activeCameraObj ->id, setFrontDelta(activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
+  }
 }
