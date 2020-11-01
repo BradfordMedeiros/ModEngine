@@ -126,7 +126,7 @@ std::string connectServer(std::string server);
 
 void startRecording(objid id, std::string recordingPath);
 void playRecording(objid id, std::string recordingPath);
-std::vector<HitObject> raycast(glm::vec3 pos, glm::quat direction, float maxDistance);
+std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 
 void nextTexture();

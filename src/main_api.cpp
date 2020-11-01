@@ -297,7 +297,7 @@ void playRecording(objid id, std::string recordingPath){
   std::cout << "play recording placeholder" << std::endl;
 }
 
-std::vector<HitObject> raycast(glm::vec3 pos, glm::quat direction, float maxDistance){
+std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance){
   return raycast(world, pos, direction, maxDistance);
 }
 

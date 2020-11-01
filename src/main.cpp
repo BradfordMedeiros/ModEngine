@@ -46,6 +46,7 @@
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
+#include "./ainav.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -765,25 +766,11 @@ void genFramebufferTexture(unsigned int *texture){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+NavGraph navgraph = createNavGraph();
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  // This code is hackey, can fail for objects close together since will return multiple w/ out checking order closer 
-  // (so the selected object might be not be the closest one)
-  auto abitAbove = glm::vec3(target.x, target.y + 1, target.z);
-  auto direction = orientationFromPos(abitAbove, target);
-  auto hitObjects = raycast(abitAbove, direction, 1.1);
-
-  auto objectPosition = getGameObjectPosition(id, true);
-  if (hitObjects.size() == 0){
-    return objectPosition;
-  }
-
-  auto targetObject = hitObjects.at(0);
-  if (isNavmesh(world.objectMapping, targetObject.id)){
-    std::cout << "selected navmesh id: " << targetObject.id << std::endl;
-    auto directionTowardPoint = orientationFromPos(objectPosition, targetObject.point);
-    return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.1f), false);
-  }
-  return objectPosition;
+  return aiNavPosition(id, target, getGameObjectPosition, raycastW, [](objid id) -> bool {
+    return isNavmesh(world.objectMapping, id);
+  });
 }
 
 int main(int argc, char* argv[]){
@@ -1001,7 +988,7 @@ int main(int argc, char* argv[]){
     startRecording,
     playRecording,
     makeObjectAttr,
-    raycast,
+    raycastW,
     takeScreenshot,
     setState,
     setFloatState,
