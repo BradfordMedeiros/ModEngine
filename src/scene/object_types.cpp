@@ -376,7 +376,7 @@ void renderObject(
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
-  if (cameraObj != NULL && showDebug){
+  if (cameraObj != NULL && showDebug && false){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
@@ -827,6 +827,12 @@ std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectOb
     }
   }
   return maps;  
+}
+
+bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id){
+  auto object = mapping.at(id); 
+  auto navmesh = std::get_if<GameObjectNavmesh>(&object);
+  return navmesh != NULL;
 }
 
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id){

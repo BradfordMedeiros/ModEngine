@@ -601,6 +601,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
   if (permaLines.size() > 0){
+   drawLines(permaLines);
   }
   if (lines.size() > 0){
    drawLines(lines);
@@ -765,8 +766,24 @@ void genFramebufferTexture(unsigned int *texture){
 }
 
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  std::cout << "INFO: TARGET NAV POSITION CALLED" << std::endl;
-  return target + glm::vec3(0.2f, 0.f, 0.f);
+  // This code is hackey, can fail for objects close together since will return multiple w/ out checking order closer 
+  // (so the selected object might be not be the closest one)
+  auto abitAbove = glm::vec3(target.x, target.y + 1, target.z);
+  auto direction = orientationFromPos(abitAbove, target);
+  auto hitObjects = raycast(abitAbove, direction, 1.1);
+
+  auto objectPosition = getGameObjectPosition(id, true);
+  if (hitObjects.size() == 0){
+    return objectPosition;
+  }
+
+  auto targetObject = hitObjects.at(0);
+  if (isNavmesh(world.objectMapping, targetObject.id)){
+    std::cout << "selected navmesh id: " << targetObject.id << std::endl;
+    auto directionTowardPoint = orientationFromPos(objectPosition, targetObject.point);
+    return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.1f), false);
+  }
+  return objectPosition;
 }
 
 int main(int argc, char* argv[]){

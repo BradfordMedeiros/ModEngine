@@ -15,7 +15,7 @@
   closestpoint
 )
 
-(define (onMouse button action mods)
+(define (ai-nav)
   (define frompos (gameobj-pos camera))
   (define ray (raycast frompos (gameobj-rot camera) 500))
   (if (> (length ray) 0)
@@ -26,3 +26,10 @@
   )
 )
 
+(define (onMouse button action mods)
+  (ai-nav)
+)
+
+(define (onFrame)
+  (ai-nav)
+)
