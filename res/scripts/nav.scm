@@ -19,15 +19,9 @@
   (define frompos (gameobj-pos camera))
   (define ray (raycast frompos (gameobj-rot camera) 500))
   (if (> (length ray) 0)
-    (begin
-      (let* ((collision (car ray)) (hitpoint (cadr collision)))
-        (begin
-          (gameobj-setpos! 
-            mainobj 
-            (navpos (gameobj-id mainobj) (closest-hitpoint (map pos-from-collision ray) frompos))
-          )
-        )
-      )
+    (gameobj-setpos! 
+      mainobj 
+      (navpos (gameobj-id mainobj) (closest-hitpoint (map pos-from-collision ray) frompos))
     )
   )
 )
