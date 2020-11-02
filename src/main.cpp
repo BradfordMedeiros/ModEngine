@@ -768,11 +768,11 @@ void genFramebufferTexture(unsigned int *texture){
 
 NavGraph navgraph = createNavGraph();
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  auto paths = aiNavSearchPath(navgraph, ";navmesh1", ";navmesh2");
+  auto searchResult = aiNavSearchPath(navgraph, ";navmesh1", ";navmesh2");
 
   std::cout << "search path is: [ ";
-  for (auto path : paths){
-    std::cout << path << " ";
+  for (auto node : searchResult.path){
+    std::cout << node << " ";
   }
   std::cout << "]" << std::endl;
 

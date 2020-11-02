@@ -19,11 +19,16 @@ struct NavConnection {
 };
 
 struct NavGraph {
-  std::map<std::string, NavConnection> connections;
+  std::map<std::string, std::vector<NavConnection>> connections;
+};
+
+struct aiSearchResult {
+  bool found;
+  std::vector<std::string> path;
 };
 
 NavGraph createNavGraph();
-std::vector<std::string> aiNavSearchPath(NavGraph& connections, std::string from, std::string to);
+aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string to);
 glm::vec3 aiNavPosition(
   objid id, 
   glm::vec3 target,

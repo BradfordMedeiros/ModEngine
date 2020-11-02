@@ -2,37 +2,41 @@
 
 
 // TODO this is hardcoded for the example, needs to be based off serializable data
-void addDefaultConnections(std::map<std::string, NavConnection>& connections){  
-  connections[";navmesh1"] = NavConnection {
-    .destination = ";navmesh2",
-    .points = {
-      NavPointConnection { 
-        .fromPoint = glm::vec3(0.f, 0.f, 0.f),
-        .toPoint = glm::vec3(0.f, 0.f, 0.f),
-      },
-      NavPointConnection { 
-        .fromPoint = glm::vec3(1.f, 0.f, 0.f),
-        .toPoint = glm::vec3(1.f, 0.f, 0.f),
+void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& connections){  
+  connections[";navmesh1"] = {
+    NavConnection {
+      .destination = ";navmesh2",
+      .points = {
+        NavPointConnection { 
+          .fromPoint = glm::vec3(0.f, 0.f, 0.f),
+          .toPoint = glm::vec3(0.f, 0.f, 0.f),
+        },
+        NavPointConnection { 
+          .fromPoint = glm::vec3(1.f, 0.f, 0.f),
+          .toPoint = glm::vec3(1.f, 0.f, 0.f),
+        },
       },
     },
   };
-  connections[";navmesh2"] = NavConnection {
-    .destination = ";navmesh1",
-    .points = {
-      NavPointConnection { 
-        .fromPoint = glm::vec3(0.f, 0.f, 0.f),
-        .toPoint = glm::vec3(0.f, 0.f, 0.f),
-      },
-      NavPointConnection { 
-        .fromPoint = glm::vec3(1.f, 0.f, 0.f),
-        .toPoint = glm::vec3(1.f, 0.f, 0.f),
+  connections[";navmesh2"] = {
+    NavConnection {
+      .destination = ";navmesh1",
+      .points = {
+        NavPointConnection { 
+          .fromPoint = glm::vec3(0.f, 0.f, 0.f),
+          .toPoint = glm::vec3(0.f, 0.f, 0.f),
+        },
+        NavPointConnection { 
+          .fromPoint = glm::vec3(1.f, 0.f, 0.f),
+          .toPoint = glm::vec3(1.f, 0.f, 0.f),
+        },
       },
     },
   };
 }
 
 NavGraph createNavGraph(){
-  std::map<std::string, NavConnection> connections;
+  std::map<std::string, std::vector<NavConnection>> connections;
   addDefaultConnections(connections);
   NavGraph graph {
     .connections = connections,
@@ -40,12 +44,31 @@ NavGraph createNavGraph(){
   return graph;
 }
 
-std::vector<std::string> aiNavSearchPath(NavGraph& connections, std::string from, std::string to){
+aiSearchResult searchPath(std::map<std::string, std::vector<NavConnection>>& connections, std::string from, std::string to, std::vector<std::string>& visited, std::vector<std::string> path){
+  if (std::find(visited.begin(), visited.end(), from) != visited.end()){
+    return aiSearchResult{ .found = false, .path = {} };
+  }
+  visited.push_back(from);
+
+  path.push_back(from);
+  if (from == to){
+    return aiSearchResult { .found = true, .path = path };
+  } 
+  auto meshConnections = connections.at(from);
+  for (auto connection : meshConnections){
+    auto result = searchPath(connections, connection.destination, to, visited, path);
+    if (result.found){
+      return result;
+    }
+  }
+  return aiSearchResult { .found = false, .path = {} };
+}
+
+aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string to){
   std::vector<std::string> path;
-  path.push_back("a");
-  path.push_back("b");
-  path.push_back("c");
-  return path;
+  std::vector<std::string> visitedNodes;
+  auto searchResult = searchPath(navgraph.connections, from, to, visitedNodes, path);
+  return searchResult;
 }
 
 glm::vec3 aiNavPosition(
