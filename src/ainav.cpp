@@ -74,14 +74,18 @@ aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string
 std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh, std::function<std::string(objid)> getName){
   auto abitAbove = glm::vec3(target.x, target.y + 1, target.z);
   auto direction = orientationFromPos(abitAbove, target);
-  auto hitObjects = raycast(abitAbove, direction, 1.1);
+  auto hitObjects = raycast(abitAbove, direction, 5);
   if (hitObjects.size() == 0){
+    assert(false);
     return "";
   }
-  auto targetObject = hitObjects.at(0);
-  if (isNavmesh(targetObject.id)){
-    return getName(targetObject.id);
+
+  for (auto targetObject : hitObjects){
+    if (isNavmesh(targetObject.id)){
+      return getName(targetObject.id);
+    }
   }
+  assert(false);
   return "";
 }
 

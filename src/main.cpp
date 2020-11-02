@@ -773,6 +773,8 @@ bool isNav(objid id){
 NavGraph navgraph = createNavGraph();
 glm::vec3 navPosition(objid id, glm::vec3 target){
   auto startingMesh = ";navmesh1";
+
+  auto currentMesh = targetNavmesh(getGameObjectPosition(id, true), raycastW, isNav, getGameObjectName);
   auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);
   auto searchResult = aiNavSearchPath(navgraph, startingMesh, destinationMesh);
 
