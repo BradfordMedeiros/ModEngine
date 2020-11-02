@@ -1,11 +1,51 @@
 #include "./ainav.h"
 
+
+// TODO this is hardcoded for the example, needs to be based off serializable data
+void addDefaultConnections(std::map<std::string, NavConnection>& connections){  
+  connections[";navmesh1"] = NavConnection {
+    .destination = ";navmesh2",
+    .points = {
+      NavPointConnection { 
+        .fromPoint = glm::vec3(0.f, 0.f, 0.f),
+        .toPoint = glm::vec3(0.f, 0.f, 0.f),
+      },
+      NavPointConnection { 
+        .fromPoint = glm::vec3(1.f, 0.f, 0.f),
+        .toPoint = glm::vec3(1.f, 0.f, 0.f),
+      },
+    },
+  };
+  connections[";navmesh2"] = NavConnection {
+    .destination = ";navmesh1",
+    .points = {
+      NavPointConnection { 
+        .fromPoint = glm::vec3(0.f, 0.f, 0.f),
+        .toPoint = glm::vec3(0.f, 0.f, 0.f),
+      },
+      NavPointConnection { 
+        .fromPoint = glm::vec3(1.f, 0.f, 0.f),
+        .toPoint = glm::vec3(1.f, 0.f, 0.f),
+      },
+    },
+  };
+}
+
 NavGraph createNavGraph(){
   std::map<std::string, NavConnection> connections;
+  addDefaultConnections(connections);
   NavGraph graph {
     .connections = connections,
   };
   return graph;
+}
+
+std::vector<std::string> aiNavSearchPath(NavGraph& connections, std::string from, std::string to){
+  std::vector<std::string> path;
+  path.push_back("a");
+  path.push_back("b");
+  path.push_back("c");
+  return path;
 }
 
 glm::vec3 aiNavPosition(

@@ -23,6 +23,7 @@ struct NavGraph {
 };
 
 NavGraph createNavGraph();
+std::vector<std::string> aiNavSearchPath(NavGraph& connections, std::string from, std::string to);
 glm::vec3 aiNavPosition(
   objid id, 
   glm::vec3 target,
@@ -30,5 +31,6 @@ glm::vec3 aiNavPosition(
   std::function<std::vector<HitObject>(glm::vec3 pos, glm::quat direction, float maxDistance)> raycast,
   std::function<bool(objid)> isNavmesh
 );
+
 
 #endif
