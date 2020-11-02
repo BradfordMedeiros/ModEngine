@@ -766,19 +766,22 @@ void genFramebufferTexture(unsigned int *texture){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+bool isNav(objid id){
+  return isNavmesh(world.objectMapping, id);
+}
+
 NavGraph navgraph = createNavGraph();
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  auto searchResult = aiNavSearchPath(navgraph, ";navmesh1", ";navmesh2");
+  auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);
+  auto searchResult = aiNavSearchPath(navgraph, ";navmesh1", destinationMesh);
 
+  std::cout << "target navmesh is: " << destinationMesh << std::endl;
   std::cout << "search path is: [ ";
   for (auto node : searchResult.path){
     std::cout << node << " ";
   }
   std::cout << "]" << std::endl;
-
-  return aiNavPosition(id, target, getGameObjectPosition, raycastW, [](objid id) -> bool {
-    return isNavmesh(world.objectMapping, id);
-  });
+  return aiNavPosition(id, target, getGameObjectPosition, raycastW, isNav);
 }
 
 int main(int argc, char* argv[]){
