@@ -8,12 +8,12 @@ void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& co
       .destination = ";navmesh2",
       .points = {
         NavPointConnection { 
-          .fromPoint = glm::vec3(0.f, 0.f, 0.f),
-          .toPoint = glm::vec3(0.f, 0.f, 0.f),
+          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
+          .toPoint = glm::vec3(100.f, 0.f, 0.f),
         },
         NavPointConnection { 
-          .fromPoint = glm::vec3(1.f, 0.f, 0.f),
-          .toPoint = glm::vec3(1.f, 0.f, 0.f),
+          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
+          .toPoint = glm::vec3(100.f, 0.f, 0.f),
         },
       },
     },
@@ -23,12 +23,12 @@ void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& co
       .destination = ";navmesh1",
       .points = {
         NavPointConnection { 
-          .fromPoint = glm::vec3(0.f, 0.f, 0.f),
-          .toPoint = glm::vec3(0.f, 0.f, 0.f),
+          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
+          .toPoint = glm::vec3(100.f, 0.f, 0.f),
         },
         NavPointConnection { 
-          .fromPoint = glm::vec3(1.f, 0.f, 0.f),
-          .toPoint = glm::vec3(1.f, 0.f, 0.f),
+          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
+          .toPoint = glm::vec3(100.f, 0.f, 0.f),
         },
       },
     },
@@ -85,20 +85,20 @@ std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<boo
   return "";
 }
 
-glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid, bool)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh){
-  auto abitAbove = glm::vec3(target.x, target.y + 1, target.z);
-  auto direction = orientationFromPos(abitAbove, target);
-  auto hitObjects = raycast(abitAbove, direction, 1.1);
+glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to){
+  std::cout << "target link: " << from << " - " << to << std::endl;
+  for (auto connection : navgraph.connections.at(from)){
+    if (connection.destination == to){
+      return connection.points.at(0).fromPoint;
+    }
+  }
+  assert(false);
+  return glm::vec3(0.f, 0.f, 0.f);
+}
 
+glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid, bool)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh){
   auto objectPosition = position(id, true);
-  if (hitObjects.size() == 0){
-    return objectPosition;
-  }
-  auto targetObject = hitObjects.at(0);
-  if (isNavmesh(targetObject.id)){
-    auto directionTowardPoint = orientationFromPos(objectPosition, targetObject.point);
-    return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.1f), false);
-  }
-  return objectPosition;
+  auto directionTowardPoint = orientationFromPos(objectPosition, target);
+  return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.1f), false);
 }
 

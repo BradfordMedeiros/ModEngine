@@ -31,6 +31,7 @@ typedef std::function<std::vector<HitObject>(glm::vec3 pos, glm::quat direction,
 NavGraph createNavGraph();
 aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string to);
 std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh, std::function<std::string(objid)> getName);
+glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to);
 glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid, bool)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh);
 
 
