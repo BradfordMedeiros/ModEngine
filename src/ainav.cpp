@@ -11,10 +11,6 @@ void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& co
           .fromPoint = glm::vec3(100.f, 0.f, 0.f),
           .toPoint = glm::vec3(100.f, 0.f, 0.f),
         },
-        NavPointConnection { 
-          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
-          .toPoint = glm::vec3(100.f, 0.f, 0.f),
-        },
       },
     },
   };
@@ -23,9 +19,25 @@ void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& co
       .destination = ";navmesh1",
       .points = {
         NavPointConnection { 
-          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
-          .toPoint = glm::vec3(100.f, 0.f, 0.f),
+          .fromPoint = glm::vec3(0.f, 0.f, 0.f),
+          .toPoint = glm::vec3(0.f, 0.f, 0.f),
         },
+      },
+    },
+    NavConnection {
+      .destination = ";navmesh3",
+      .points = {
+        NavPointConnection { 
+          .fromPoint = glm::vec3(200.f, 0.f, 0.f),
+          .toPoint = glm::vec3(200.f, 0.f, 0.f),
+        },
+      },
+    },
+  };
+  connections[";navmesh3"] = {
+    NavConnection {
+      .destination = ";navmesh2",
+      .points = {
         NavPointConnection { 
           .fromPoint = glm::vec3(100.f, 0.f, 0.f),
           .toPoint = glm::vec3(100.f, 0.f, 0.f),
@@ -50,12 +62,12 @@ aiSearchResult searchPath(std::map<std::string, std::vector<NavConnection>>& con
   }
   visited.push_back(from);
 
-  path.push_back(from);
   if (from == to){
     return aiSearchResult { .found = true, .path = path };
   } 
   auto meshConnections = connections.at(from);
   for (auto connection : meshConnections){
+    path.push_back(connection.destination);
     auto result = searchPath(connections, connection.destination, to, visited, path);
     if (result.found){
       return result;
