@@ -61,13 +61,13 @@ aiSearchResult searchPath(std::map<std::string, std::vector<NavConnection>>& con
     return aiSearchResult{ .found = false, .path = {} };
   }
   visited.push_back(from);
+  path.push_back(from);
 
   if (from == to){
     return aiSearchResult { .found = true, .path = path };
   } 
   auto meshConnections = connections.at(from);
   for (auto connection : meshConnections){
-    path.push_back(connection.destination);
     auto result = searchPath(connections, connection.destination, to, visited, path);
     if (result.found){
       return result;
@@ -79,8 +79,7 @@ aiSearchResult searchPath(std::map<std::string, std::vector<NavConnection>>& con
 aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string to){
   std::vector<std::string> path;
   std::vector<std::string> visitedNodes;
-  auto searchResult = searchPath(navgraph.connections, from, to, visitedNodes, path);
-  return searchResult;
+  return searchPath(navgraph.connections, from, to, visitedNodes, path);
 }
 
 std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh, std::function<std::string(objid)> getName){
@@ -115,6 +114,6 @@ glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to){
 glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid, bool)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh){
   auto objectPosition = position(id, true);
   auto directionTowardPoint = orientationFromPos(objectPosition, target);
-  return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.1f), false);
+  return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.5f), false);
 }
 

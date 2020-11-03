@@ -776,11 +776,11 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);
   auto searchResult = aiNavSearchPath(navgraph, currentMesh, destinationMesh);
 
-  if (!searchResult.found || searchResult.path.size() == 0){
+  if (!searchResult.found || searchResult.path.size() < 2){
     return getGameObjectPosition(id, true);
   }
 
-  auto targetNav = searchResult.path.at(0);
+  auto targetNav = searchResult.path.at(1);
   auto targetLink = aiTargetLink(navgraph, currentMesh, targetNav);
 
   std::cout << "path is: [ ";
@@ -788,8 +788,6 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
     std::cout << node << " ";
   }
   std::cout << " ]" << std::endl;
-  std::cout << "going from: " << currentMesh << " to " << targetNav << std::endl;
-  std::cout << "to link: " << print(targetLink) << std::endl;
   return aiNavPosition(id, targetLink, getGameObjectPosition, raycastW, isNav);
 }
 
