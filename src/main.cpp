@@ -770,7 +770,7 @@ bool isNav(objid id){
   return isNavmesh(world.objectMapping, id);
 }
 
-NavGraph navgraph = createNavGraph();
+NavGraph navgraph = parseNavGraph();
 glm::vec3 navPosition(objid id, glm::vec3 target){
   auto currentMesh = targetNavmesh(getGameObjectPosition(id, true), raycastW, isNav, getGameObjectName);
   auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);

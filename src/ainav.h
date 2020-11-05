@@ -29,6 +29,7 @@ struct aiSearchResult {
 
 typedef std::function<std::vector<HitObject>(glm::vec3 pos, glm::quat direction, float maxDistance)> raycastFn;
 NavGraph createNavGraph();
+NavGraph parseNavGraph();
 aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string to);
 std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh, std::function<std::string(objid)> getName);
 glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to);

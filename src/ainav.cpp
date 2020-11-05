@@ -47,6 +47,14 @@ void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& co
   };
 }
 
+NavGraph parseNavGraph(){
+  std::map<std::string, std::vector<NavConnection>> connections;
+  NavGraph graph {
+    .connections = connections,
+  };
+  return graph;
+}
+
 NavGraph createNavGraph(){
   std::map<std::string, std::vector<NavConnection>> connections;
   addDefaultConnections(connections);
@@ -58,6 +66,10 @@ NavGraph createNavGraph(){
 
 aiSearchResult searchPath(std::map<std::string, std::vector<NavConnection>>& connections, std::string from, std::string to, std::vector<std::string>& visited, std::vector<std::string> path){
   if (std::find(visited.begin(), visited.end(), from) != visited.end()){
+    return aiSearchResult{ .found = false, .path = {} };
+  }
+  if (connections.find(from) == connections.end()){
+    std::cout << "WARNING: node: " << from  << " not in connection graph" << std::endl;
     return aiSearchResult{ .found = false, .path = {} };
   }
   visited.push_back(from);
