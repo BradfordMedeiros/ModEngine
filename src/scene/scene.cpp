@@ -945,3 +945,41 @@ void applyHeightmapMasking(World& world, objid id, float amount){
     updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
   }, hm.mesh);
 }
+
+std::map<std::string, std::string> getNavFields(){
+  std::map<std::string, std::string> navFields;
+  navFields[";navmesh1 > ;navmesh2"] = "100 0 0, 100 0 0; 100 5 0, 100 5 0";
+  navFields[";navmesh2 > ;navmesh1"] = "100 0 0, 0 0 0";
+  navFields[";navmesh2 > ;navmesh3"] = "200 0 0, 200 0 0";
+  navFields[";navmesh3 >;navmesh2"] = "100 0 0, 100 0 0;";  
+  return navFields;
+}
+
+NavGraph navgraph = createNavGraph(getNavFields());
+glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
+  auto getName = [&world](objid id) -> std::string {
+    return getGameObject(world, id).name;
+  };
+  auto raycastWorld = [&world] (glm::vec3 posFrom, glm::quat direction, float maxDistance) -> std::vector<HitObject> {
+    return raycast(world, posFrom, direction, maxDistance);
+  };
+  auto isNavmeshWorld = [&world](objid id) -> bool{ 
+    return isNavmesh(world.objectMapping, id);
+  };
+  auto position = [&world](objid id) -> glm::vec3 {
+    return fullTransformation(world, id).position;
+  };
+
+  auto currentMesh = targetNavmesh(position(id), raycastWorld, isNavmeshWorld, getName);
+  auto destinationMesh = targetNavmesh(target, raycastWorld, isNavmeshWorld, getName);
+  if (currentMesh != destinationMesh){
+    auto searchResult = aiNavSearchPath(navgraph, currentMesh, destinationMesh);
+    if (!searchResult.found || searchResult.path.size() < 2){
+      return position(id);
+    }
+    auto targetNav = searchResult.path.at(1);
+    auto targetLink = aiTargetLink(navgraph, currentMesh, targetNav);
+    return aiNavPosition(id, targetLink, position, raycastWorld, isNavmeshWorld);
+  }
+  return aiNavPosition(id, target, position, raycastWorld, isNavmeshWorld);
+}

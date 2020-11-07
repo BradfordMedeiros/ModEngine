@@ -13,6 +13,7 @@
 #include "../translations.h"
 #include "../common/util.h"
 #include "../common/sysinterface.h"
+#include "./types/ainav.h"
 
 struct World {
   physicsEnv physicsEnvironment;
@@ -122,6 +123,8 @@ bool isPortal(World& world, objid id);
 std::optional<Texture> textureForId(World& world, objid id);
 
 void applyHeightmapMasking(World& world, objid id, float amount);
+
+glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 
 #endif
 

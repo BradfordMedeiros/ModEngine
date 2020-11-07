@@ -766,41 +766,8 @@ void genFramebufferTexture(unsigned int *texture){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-bool isNav(objid id){
-  return isNavmesh(world.objectMapping, id);
-}
-
-std::map<std::string, std::string> getNavFields(){
-  std::map<std::string, std::string> navFields;
-  navFields[";navmesh1 > ;navmesh2"] = "100 0 0, 100 0 0; 100 5 0, 100 5 0";
-  navFields[";navmesh2 > ;navmesh1"] = "100 0 0, 0 0 0";
-  navFields[";navmesh2 > ;navmesh3"] = "200 0 0, 200 0 0";
-  navFields[";navmesh3 >;navmesh2"] = "100 0 0, 100 0 0;";  
-  return navFields;
-}
-
-NavGraph navgraph = createNavGraph(getNavFields());
-
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  auto currentMesh = targetNavmesh(getGameObjectPosition(id, true), raycastW, isNav, getGameObjectName);
-  auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);
-
-  if (currentMesh != destinationMesh){
-    auto searchResult = aiNavSearchPath(navgraph, currentMesh, destinationMesh);
-    if (!searchResult.found || searchResult.path.size() < 2){
-      return getGameObjectPosition(id, true);
-    }
-    auto targetNav = searchResult.path.at(1);
-    auto targetLink = aiTargetLink(navgraph, currentMesh, targetNav);
-
-    std::cout << "path is: [ ";
-    for (auto node : searchResult.path){
-      std::cout << node << " ";
-    }
-    std::cout << " ]" << std::endl;
-    return aiNavPosition(id, targetLink, getGameObjectPosition, raycastW, isNav);
-  }
-  return aiNavPosition(id, target, getGameObjectPosition, raycastW, isNav);
+  return aiNavigate(world, id, target);
 }
 
 int main(int argc, char* argv[]){

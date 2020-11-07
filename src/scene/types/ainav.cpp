@@ -168,8 +168,8 @@ glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to){
   return glm::vec3(0.f, 0.f, 0.f);
 }
 
-glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid, bool)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh){
-  auto objectPosition = position(id, true);
+glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh){
+  auto objectPosition = position(id);
   auto directionTowardPoint = orientationFromPos(objectPosition, target);
   return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.5f), false);
 }
