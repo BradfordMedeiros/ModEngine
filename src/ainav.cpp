@@ -47,10 +47,69 @@ void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& co
   };
 }
 
-NavGraph parseNavGraph(){
+struct NavTarget {
+  bool valid;
+  std::string from;
+  std::string to;
+};
+
+NavTarget fieldNameToNavTarget(std::string field){
+  auto values = filterWhitespace(split(field, '>'));
+  assert(values.size() == 2);
+  NavTarget target {
+    .valid = true,
+    .from = values.at(0),
+    .to = values.at(1),
+  };
+  return target;
+}
+
+NavPointConnection parsePointExpression(std::string pointExpression){
+  auto points = filterWhitespace(split(pointExpression, ','));
+  assert(points.size() == 2);
+  NavPointConnection point {
+    .fromPoint = parseVec(points.at(0)),
+    .toPoint = parseVec(points.at(1)),
+  };
+  return point;
+}
+
+std::vector<NavPointConnection> valueNameToNavPoints(std::string value){
+  std::vector<NavPointConnection> points;
+  auto pointExpressions = filterWhitespace(split(value, ';'));
+  for (auto pointExpression : pointExpressions){
+    points.push_back(parsePointExpression(pointExpression));
+  }
+  return points;
+}
+
+std::map<std::string, std::vector<NavConnection>> fieldsToConnections(std::map<std::string, std::string> fields){
   std::map<std::string, std::vector<NavConnection>> connections;
+  for (auto [field, value] : fields){
+    auto navTarget = fieldNameToNavTarget(field);
+    auto navPoints = valueNameToNavPoints(value);
+    if (connections.find(navTarget.from) == connections.end()){
+      connections[navTarget.from] = {};
+    }
+    connections[navTarget.from].push_back(NavConnection{
+      .destination = navTarget.to,
+      .points = valueNameToNavPoints(value),
+    });
+    assert(navTarget.valid);
+  }
+
+  return connections;
+}
+
+
+NavGraph parseNavGraph(){
+  std::map<std::string, std::string> fields;
+  fields[";navmesh1 > ;navmesh2"] = "100 0 0, 100 0 0; 100 5 0, 100 5 0";
+  fields[";navmesh2 > ;navmesh1"] = "100 0 0, 0 0 0";
+  fields[";navmesh2 > ;navmesh3"] = "200 0 0, 200 0 0";
+  fields[";navmesh3 >;navmesh2"] = "100 0 0, 100 0 0;";
   NavGraph graph {
-    .connections = connections,
+    .connections = fieldsToConnections(fields),
   };
   return graph;
 }
@@ -116,7 +175,7 @@ glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to){
   std::cout << "target link: " << from << " - " << to << std::endl;
   for (auto connection : navgraph.connections.at(from)){
     if (connection.destination == to){
-      return connection.points.at(0).fromPoint;
+      return connection.points.at(0).toPoint;
     }
   }
   assert(false);
