@@ -5,8 +5,8 @@
 #include <vector>
 #include <functional>
 #include <glm/glm.hpp>
-#include "./common/util.h"
-#include "./translations.h"
+#include "../../common/util.h"
+#include "../../translations.h"
 
 struct NavPointConnection {
   glm::vec3 fromPoint;
@@ -28,12 +28,10 @@ struct aiSearchResult {
 };
 
 typedef std::function<std::vector<HitObject>(glm::vec3 pos, glm::quat direction, float maxDistance)> raycastFn;
-NavGraph createNavGraph();
-NavGraph parseNavGraph();
+NavGraph createNavGraph(std::map<std::string, std::string> fields);
 aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string to);
 std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh, std::function<std::string(objid)> getName);
 glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to);
 glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid, bool)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh);
-
 
 #endif

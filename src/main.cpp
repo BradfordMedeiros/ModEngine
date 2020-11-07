@@ -28,6 +28,7 @@
 #include "./scene/animation/timeplayback.h"
 #include "./scene/animation/animation.h"
 #include "./scene/animation/playback.h"
+#include "./scene/types/ainav.h"
 #include "./scheme/scheme_bindings.h"
 #include "./scheme/scriptmanager.h"
 #include "./shaders.h"
@@ -46,7 +47,6 @@
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
-#include "./ainav.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -770,7 +770,17 @@ bool isNav(objid id){
   return isNavmesh(world.objectMapping, id);
 }
 
-NavGraph navgraph = parseNavGraph();
+std::map<std::string, std::string> getNavFields(){
+  std::map<std::string, std::string> navFields;
+  navFields[";navmesh1 > ;navmesh2"] = "100 0 0, 100 0 0; 100 5 0, 100 5 0";
+  navFields[";navmesh2 > ;navmesh1"] = "100 0 0, 0 0 0";
+  navFields[";navmesh2 > ;navmesh3"] = "200 0 0, 200 0 0";
+  navFields[";navmesh3 >;navmesh2"] = "100 0 0, 100 0 0;";  
+  return navFields;
+}
+
+NavGraph navgraph = createNavGraph(getNavFields());
+
 glm::vec3 navPosition(objid id, glm::vec3 target){
   auto currentMesh = targetNavmesh(getGameObjectPosition(id, true), raycastW, isNav, getGameObjectName);
   auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);

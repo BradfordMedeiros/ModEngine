@@ -102,23 +102,9 @@ std::map<std::string, std::vector<NavConnection>> fieldsToConnections(std::map<s
 }
 
 
-NavGraph parseNavGraph(){
-  std::map<std::string, std::string> fields;
-  fields[";navmesh1 > ;navmesh2"] = "100 0 0, 100 0 0; 100 5 0, 100 5 0";
-  fields[";navmesh2 > ;navmesh1"] = "100 0 0, 0 0 0";
-  fields[";navmesh2 > ;navmesh3"] = "200 0 0, 200 0 0";
-  fields[";navmesh3 >;navmesh2"] = "100 0 0, 100 0 0;";
+NavGraph createNavGraph(std::map<std::string, std::string> fields){
   NavGraph graph {
     .connections = fieldsToConnections(fields),
-  };
-  return graph;
-}
-
-NavGraph createNavGraph(){
-  std::map<std::string, std::vector<NavConnection>> connections;
-  addDefaultConnections(connections);
-  NavGraph graph {
-    .connections = connections,
   };
   return graph;
 }
