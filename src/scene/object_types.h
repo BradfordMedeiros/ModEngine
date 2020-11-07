@@ -87,6 +87,10 @@ struct GameObjectNavmesh {
   Mesh mesh;
 };
 
+struct GameObjectNavConns {
+
+};
+
 struct GameObjectUICommon {
   Mesh mesh;
   bool isFocused;
@@ -133,6 +137,7 @@ typedef std::variant<
   GameObjectEmitter,
   GameObjectHeightmap,
   GameObjectNavmesh,
+  GameObjectNavConns,
   GameObjectUIButton,
   GameObjectUISlider
 > GameObjectObj;
@@ -210,6 +215,11 @@ static Field navmeshField {
   .type = "navmesh",
 };
 
+static Field navconnectionField {
+  .prefix = '\'',
+  .type = "navconnection",
+};
+
 static Field uiButtonField {
   .prefix = '*',
   .type = "ui",
@@ -219,6 +229,8 @@ static Field uiSliderField {
   .prefix = '/',
   .type = "slider",
 };
+
+
 
 
 static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, navmeshField, uiButtonField, uiSliderField };
