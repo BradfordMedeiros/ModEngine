@@ -177,9 +177,14 @@ GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additiona
 }
 
 GameObjectNavmesh createNavmesh(Mesh& navmesh){
-  GameObjectNavmesh obj{
+  GameObjectNavmesh obj {
     .mesh = navmesh,
   };
+  return obj;
+}
+
+GameObjectNavConns createNavConns(){
+  GameObjectNavConns obj {};
   return obj;
 }
 
@@ -278,6 +283,8 @@ void addObject(
     mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
   }else if (objectType == "navmesh"){
     mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj"));
+  }else if (objectType == "navconnection"){
+    mapping[id] = createNavConns();
   }else if (objectType == "ui"){
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
@@ -459,6 +466,15 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
+  }
+
+  auto navconnObj = std::get_if<GameObjectNavConns>(&toRender);
+  if (navconnObj != NULL & showDebug){
+    // todo should draw all the points here
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawMesh(nodeMesh, shaderProgram); 
   }
 
   auto uiObj = std::get_if<GameObjectUIButton>(&toRender);
@@ -723,6 +739,13 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&objectToSerialize);
   if (navmeshObj != NULL){
     std::cout << "ERROR: NAVMESH SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};
+  }
+
+  auto navconnObj = std::get_if<GameObjectNavConns>(&objectToSerialize);
+  if (navconnObj != NULL){
+    std::cout << "ERROR: NAVCONN SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};
   }
