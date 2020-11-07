@@ -774,21 +774,23 @@ NavGraph navgraph = parseNavGraph();
 glm::vec3 navPosition(objid id, glm::vec3 target){
   auto currentMesh = targetNavmesh(getGameObjectPosition(id, true), raycastW, isNav, getGameObjectName);
   auto destinationMesh = targetNavmesh(target, raycastW, isNav, getGameObjectName);
-  auto searchResult = aiNavSearchPath(navgraph, currentMesh, destinationMesh);
 
-  if (!searchResult.found || searchResult.path.size() < 2){
-    return getGameObjectPosition(id, true);
+  if (currentMesh != destinationMesh){
+    auto searchResult = aiNavSearchPath(navgraph, currentMesh, destinationMesh);
+    if (!searchResult.found || searchResult.path.size() < 2){
+      return getGameObjectPosition(id, true);
+    }
+    auto targetNav = searchResult.path.at(1);
+    auto targetLink = aiTargetLink(navgraph, currentMesh, targetNav);
+
+    std::cout << "path is: [ ";
+    for (auto node : searchResult.path){
+      std::cout << node << " ";
+    }
+    std::cout << " ]" << std::endl;
+    return aiNavPosition(id, targetLink, getGameObjectPosition, raycastW, isNav);
   }
-
-  auto targetNav = searchResult.path.at(1);
-  auto targetLink = aiTargetLink(navgraph, currentMesh, targetNav);
-
-  std::cout << "path is: [ ";
-  for (auto node : searchResult.path){
-    std::cout << node << " ";
-  }
-  std::cout << " ]" << std::endl;
-  return aiNavPosition(id, targetLink, getGameObjectPosition, raycastW, isNav);
+  return aiNavPosition(id, target, getGameObjectPosition, raycastW, isNav);
 }
 
 int main(int argc, char* argv[]){
