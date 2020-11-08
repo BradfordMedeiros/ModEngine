@@ -472,7 +472,6 @@ void renderObject(
 
   auto navconnObj = std::get_if<GameObjectNavConns>(&toRender);
   if (navconnObj != NULL & showDebug){
-    // todo should draw all the points here
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
@@ -480,7 +479,6 @@ void renderObject(
 
     auto navPoints = aiAllPoints(navconnObj -> navgraph);
 
-    std::cout << "begin render points: " << std::endl;
     for (auto navPoint : navPoints){
       std::cout << "points: " << print(navPoint.fromPoint) << ", " << print(navPoint.toPoint) << std::endl;
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
@@ -494,7 +492,7 @@ void renderObject(
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
       glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(
-          glm::scale(glm::translate(glm::mat4(1.0f), navPoint.toPoint), glm::vec3(10.f, 1.f, 10.f))
+          glm::scale(glm::translate(glm::mat4(1.0f), navPoint.toPoint), glm::vec3(5.f, 2.f, 10.f))
         )
       );
       drawMesh(nodeMesh, shaderProgram);

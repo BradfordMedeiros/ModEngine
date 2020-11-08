@@ -176,9 +176,15 @@ glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(obji
 
 std::vector<NavPointConnection> aiAllPoints(NavGraph& navgraph){
   std::vector<NavPointConnection> points;
-  points.push_back(NavPointConnection{
-    .fromPoint = glm::vec3(0.f, 0.f, 0.f),
-    .toPoint = glm::vec3(0.f, 1.f, 0.f),
-  });
+  for (auto [name, navConnections] : navgraph.connections){
+    for (auto conn : navConnections){
+      for (auto point : conn.points){
+        points.push_back(NavPointConnection{
+          .fromPoint = point.fromPoint,
+          .toPoint = point.toPoint,
+        });
+      }
+    }
+  }
   return points;
 }
