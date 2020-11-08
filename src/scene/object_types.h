@@ -232,9 +232,24 @@ static Field uiSliderField {
 };
 
 
-
-
-static std::vector fields = { obj, camera, portal, sound, light, voxelField, channelField, railField, sceneField, rootField, emitterField, heightmap, navmeshField, navconnectionField, uiButtonField, uiSliderField };
+static std::vector fields = { 
+  obj, 
+  camera, 
+  portal, 
+  sound, 
+  light, 
+  voxelField, 
+  channelField, 
+  railField, 
+  sceneField, 
+  rootField, 
+  emitterField, 
+  heightmap, 
+  navmeshField, 
+  navconnectionField, 
+  uiButtonField, 
+  uiSliderField,
+};
 
 std::map<objid, GameObjectObj> getObjectMapping();
 
