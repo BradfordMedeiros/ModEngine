@@ -476,6 +476,13 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    auto navPoints = aiAllPoints(navconnObj -> navgraph);
+
+    std::cout << "begin render points: " << std::endl;
+    for (auto navPoint : navPoints){
+      std::cout << "points: " << print(navPoint.fromPoint) << ", " << print(navPoint.toPoint) << std::endl;
+    }
+    std::cout << std::endl;
     drawMesh(nodeMesh, shaderProgram); 
   }
 

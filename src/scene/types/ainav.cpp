@@ -174,3 +174,11 @@ glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(obji
   return moveRelative(objectPosition, directionTowardPoint, glm::vec3(0.f, 0.f, -0.5f), false);
 }
 
+std::vector<NavPointConnection> aiAllPoints(NavGraph& navgraph){
+  std::vector<NavPointConnection> points;
+  points.push_back(NavPointConnection{
+    .fromPoint = glm::vec3(0.f, 0.f, 0.f),
+    .toPoint = glm::vec3(0.f, 1.f, 0.f),
+  });
+  return points;
+}

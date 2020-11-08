@@ -33,5 +33,6 @@ aiSearchResult aiNavSearchPath(NavGraph& navgraph, std::string from, std::string
 std::string targetNavmesh(glm::vec3 target, raycastFn raycast, std::function<bool(objid)> isNavmesh, std::function<std::string(objid)> getName);
 glm::vec3 aiTargetLink(NavGraph& navgraph, std::string from, std::string to);
 glm::vec3 aiNavPosition(objid id, glm::vec3 target, std::function<glm::vec3(objid)> position, raycastFn raycast, std::function<bool(objid)> isNavmesh);
+std::vector<NavPointConnection> aiAllPoints(NavGraph& navgraph);
 
 #endif
