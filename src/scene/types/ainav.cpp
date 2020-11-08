@@ -1,52 +1,5 @@
 #include "./ainav.h"
 
-
-// TODO this is hardcoded for the example, needs to be based off serializable data
-void addDefaultConnections(std::map<std::string, std::vector<NavConnection>>& connections){  
-  connections[";navmesh1"] = {
-    NavConnection {
-      .destination = ";navmesh2",
-      .points = {
-        NavPointConnection { 
-          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
-          .toPoint = glm::vec3(100.f, 0.f, 0.f),
-        },
-      },
-    },
-  };
-  connections[";navmesh2"] = {
-    NavConnection {
-      .destination = ";navmesh1",
-      .points = {
-        NavPointConnection { 
-          .fromPoint = glm::vec3(0.f, 0.f, 0.f),
-          .toPoint = glm::vec3(0.f, 0.f, 0.f),
-        },
-      },
-    },
-    NavConnection {
-      .destination = ";navmesh3",
-      .points = {
-        NavPointConnection { 
-          .fromPoint = glm::vec3(200.f, 0.f, 0.f),
-          .toPoint = glm::vec3(200.f, 0.f, 0.f),
-        },
-      },
-    },
-  };
-  connections[";navmesh3"] = {
-    NavConnection {
-      .destination = ";navmesh2",
-      .points = {
-        NavPointConnection { 
-          .fromPoint = glm::vec3(100.f, 0.f, 0.f),
-          .toPoint = glm::vec3(100.f, 0.f, 0.f),
-        },
-      },
-    },
-  };
-}
-
 struct NavTarget {
   bool valid;
   std::string from;
