@@ -955,8 +955,19 @@ std::map<std::string, std::string> getNavFields(){
   return navFields;
 }
 
-NavGraph navgraph = createNavGraph(getNavFields());
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
+  NavGraph  navgraph { };
+
+  bool found = false;
+  for (auto &[_, obj] : world.objectMapping){
+    auto navConn = std::get_if<GameObjectNavConns>(&obj);
+    if (navConn != NULL){
+      navgraph = navConn -> navgraph;
+      found = true;
+    }
+  }
+  assert(found);
+
   auto getName = [&world](objid id) -> std::string {
     return getGameObject(world, id).name;
   };

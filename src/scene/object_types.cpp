@@ -183,8 +183,10 @@ GameObjectNavmesh createNavmesh(Mesh& navmesh){
   return obj;
 }
 
-GameObjectNavConns createNavConns(){
-  GameObjectNavConns obj {};
+GameObjectNavConns createNavConns(std::map<std::string, std::string>& additionalFields){
+  GameObjectNavConns obj {
+    .navgraph = createNavGraph(additionalFields),
+  };
   return obj;
 }
 
@@ -284,7 +286,7 @@ void addObject(
   }else if (objectType == "navmesh"){
     mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj"));
   }else if (objectType == "navconnection"){
-    mapping[id] = createNavConns();
+    mapping[id] = createNavConns(additionalFields);
   }else if (objectType == "ui"){
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
@@ -929,6 +931,5 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(st
         onSliderPercentage(uiControl -> onSlide, uiControl -> percentage);
       }
     }
-    
   }
 }

@@ -10,6 +10,7 @@
 #include "./scenegraph.h"
 #include "./types/voxels.h"
 #include "./types/heightmap.h"
+#include "./types/ainav.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -88,7 +89,7 @@ struct GameObjectNavmesh {
 };
 
 struct GameObjectNavConns {
-
+  NavGraph navgraph;
 };
 
 struct GameObjectUICommon {
