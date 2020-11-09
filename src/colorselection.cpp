@@ -38,3 +38,15 @@ UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight){
   glReadPixels(x, currentScreenHeight - y, 1, 1, GL_RG, GL_FLOAT, &uvdata); 
   return uvdata;
 }
+
+void saveScreenshot(std::string filepath){
+  int w, h;
+  int miplevel = 0;
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
+  char* data = new char[w * h * 3];
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+  saveTextureData(filepath, data, w, h);
+  delete data;
+}

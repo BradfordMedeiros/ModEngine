@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include "./common/util.h"
+#include "./scene/common/texture.h"
 
 struct Color {
   GLfloat r;
@@ -24,5 +25,6 @@ struct UVCoord {
 
 UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight);
 
+void saveScreenshot(std::string filepath);
 
 #endif

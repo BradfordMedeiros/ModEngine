@@ -745,18 +745,6 @@ void takeScreenshot(std::string filepath){
   state.takeScreenshot = true;
   screenshotPath = filepath;
 }
-void saveScreenshot(){
-  int w, h;
-  int miplevel = 0;
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &h);
-  char* data = new char[w * h * 3];
-  glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
-  saveTextureData(screenshotPath, data, w, h);
-  delete data;
-}
-
 
 void genFramebufferTexture(unsigned int *texture){
   glGenTextures(1, texture);
@@ -1381,7 +1369,7 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (state.takeScreenshot){
       state.takeScreenshot = false;
-      saveScreenshot();
+      saveScreenshot(screenshotPath);
     }
   }
 
