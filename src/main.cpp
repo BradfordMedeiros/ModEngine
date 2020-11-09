@@ -33,7 +33,6 @@
 #include "./scheme/scriptmanager.h"
 #include "./shaders.h"
 #include "./translations.h"
-#include "./sounds/soundmanager.h"
 #include "./common/util.h"
 #include "./colorselection.h"
 #include "./state.h"
@@ -1062,8 +1061,6 @@ int main(int argc, char* argv[]){
   );
 
   interface = SysInterface {
-    .loadClip = loadSoundState,
-    .unloadClip = unloadSoundState,
     .loadScript = loadScriptFromWorld,
     .unloadScript = unloadScript,
     .getCurrentTime = getTotalTime,

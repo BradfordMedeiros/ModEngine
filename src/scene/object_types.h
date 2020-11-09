@@ -11,7 +11,7 @@
 #include "./types/voxels.h"
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
-#include "../sounds/sound.h"
+#include "./types/sounds/soundmanager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -261,7 +261,6 @@ void addObject(
   std::map<std::string, std::string> additionalFields,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
-  std::function<ALuint(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
@@ -274,7 +273,6 @@ void addObject(
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
-  std::function<void(std::string)> unloadClip, 
   std::function<void()> removeRail, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter

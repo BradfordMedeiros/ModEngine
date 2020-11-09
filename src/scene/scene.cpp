@@ -369,7 +369,7 @@ void addObjectToWorld(
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    addObject(id, getType(serialObj.name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",  interface.loadClip, 
+    addObject(id, getType(serialObj.name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
       [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface, tint](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
@@ -537,7 +537,6 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   removeObject(
     world.objectMapping, 
     objectId, 
-    interface.unloadClip, 
     []() -> void {
       std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
       assert(false);

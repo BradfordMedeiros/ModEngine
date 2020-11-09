@@ -80,9 +80,9 @@ GameObjectPortal createPortal(std::map<std::string, std::string> additionalField
   };
   return obj;
 }
-GameObjectSound createSound(std::map<std::string, std::string> additionalFields, std::function<ALuint(std::string)> loadClip){
+GameObjectSound createSound(std::map<std::string, std::string> additionalFields){
   auto clip = additionalFields.at("clip");
-  auto source = loadClip(clip);
+  auto source = loadSoundState(clip);
   GameObjectSound obj {
     .clip = clip,
     .source = source,
@@ -252,7 +252,6 @@ void addObject(
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
-  std::function<ALuint(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
@@ -268,7 +267,7 @@ void addObject(
   }else if (objectType == "portal"){
     mapping[id] = createPortal(additionalFields);
   }else if(objectType == "sound"){
-    mapping[id] = createSound(additionalFields, loadClip);
+    mapping[id] = createSound(additionalFields);
   }else if(objectType == "light"){
     mapping[id] = createLight(additionalFields);
   }else if(objectType == "voxel"){
@@ -301,7 +300,6 @@ void addObject(
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
-  std::function<void(std::string)> unloadClip, 
   std::function<void()> removeRail, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter
@@ -310,7 +308,7 @@ void removeObject(
   auto Object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&Object);
   if (soundObj != NULL){
-    unloadClip(soundObj -> clip); 
+    unloadSoundState(soundObj -> clip); 
   }
   auto railObj = std::get_if<GameObjectRail>(&Object);
   if (railObj != NULL){
@@ -970,7 +968,6 @@ void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3
   auto object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
-    std::cout << "should update sound position for: " << id << " " << print(position) << std::endl;
     setSoundPosition(soundObj -> source, position.x, position.y, position.z);
   }
 }

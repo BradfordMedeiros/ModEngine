@@ -10,7 +10,7 @@
 #include "./scene/sprites/sprites.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/timeplayback.h"
-#include "./sounds/soundmanager.h"
+#include "./scene/types/sounds/soundmanager.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./common/sysinterface.h"
