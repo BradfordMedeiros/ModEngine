@@ -26,3 +26,26 @@ nice to have/less immediate:
   - lightmaps 
   - movie playback textures
   - better font rendering
+
+separate scenegraph from object rendering
+fix voxel rendering
+voxels can use any texture
+fix animation system
+allow model posing
+network attributes
+heightmap brushes
+recorder working
+improve networking code
+sounds use positional data
+fix memory reference incorrectness for scheme
+emitter system upgrades (more movement types)
+automatic world chunking
+ai system goals 
+windows build
+openvr integration
+c++ plugin system 
+shadowmapping
+lightmapping
+movie playback
+
+ease of use - multi-select, copy pasta, mirror
