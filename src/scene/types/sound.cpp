@@ -24,6 +24,11 @@ void setSoundPosition(ALuint source, float x, float y, float z){
   alSource3f(source, AL_POSITION, x, y, z);
 }
 
+void setListenerPosition(float x, float y, float z){
+  alListener3f(AL_POSITION, x, y, z); 
+}
+
+
 int getUsages(std::string filepath){
   if (soundUsages.find(filepath) == soundUsages.end()){
     return 0;

@@ -754,7 +754,8 @@ void genFramebufferTexture(unsigned int *texture){
 }
 
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  return aiNavigate(world, id, target);
+  //return aiNavigate(world, id, target);
+  return target;
 }
 
 int main(int argc, char* argv[]){
@@ -1148,6 +1149,8 @@ int main(int argc, char* argv[]){
     }
 
     auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world, activeCameraObj -> id);
+    
+    setListenerPosition(viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
     view = renderView(viewTransform.position, viewTransform.rotation);
 
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 

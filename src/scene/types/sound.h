@@ -18,7 +18,9 @@ void stopSoundSystem();
 ALuint loadSoundState(std::string filepath);
 void unloadSoundState(ALuint source, std::string filepath);
 void playSource(ALuint source);
+
 std::vector<std::string> listSounds();
 void setSoundPosition(ALuint source, float x, float y, float z);
+void setListenerPosition(float x, float y, float z);
 
 #endif
