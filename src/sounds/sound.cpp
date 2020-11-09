@@ -38,3 +38,7 @@ void unloadSound(SoundInfo sound){
   alDeleteSources(1, &sound.source);
   alDeleteBuffers(1, &sound.buffer);
 }
+
+void setSoundPosition(ALuint source, float x, float y, float z){
+  alSource3f(source, AL_POSITION, x, y, z);
+}

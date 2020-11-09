@@ -743,6 +743,14 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
   }
 }
 
+void updateSoundPositions(World& world){
+  for (auto &[_, scene] : world.scenes){
+    for (auto &[id, gameobj] : scene.idToGameObjects){
+      updatePosition(world.objectMapping, id, gameobj.transformation.position);
+    }
+  }  
+}
+
 void enforceLookAt(World& world){
  for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
@@ -832,6 +840,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     stepPhysicsSimulation(world.physicsEnvironment, timestep);
     updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);     
   }
+  updateSoundPositions(world);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   callbackEntities(world);
 }

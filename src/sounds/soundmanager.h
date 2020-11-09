@@ -6,7 +6,7 @@
 #include <assert.h>
 #include "./sound.h"
 
-void loadSoundState(std::string filepath);
+ALuint loadSoundState(std::string filepath);
 void unloadSoundState(std::string filepath);
 void playSoundState(std::string filepath);
 std::vector<std::string> listSounds();

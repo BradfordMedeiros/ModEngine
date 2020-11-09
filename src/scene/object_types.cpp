@@ -80,11 +80,13 @@ GameObjectPortal createPortal(std::map<std::string, std::string> additionalField
   };
   return obj;
 }
-GameObjectSound createSound(std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadClip){
+GameObjectSound createSound(std::map<std::string, std::string> additionalFields, std::function<ALuint(std::string)> loadClip){
+  auto clip = additionalFields.at("clip");
+  auto source = loadClip(clip);
   GameObjectSound obj {
-    .clip = additionalFields.at("clip")
+    .clip = clip,
+    .source = source,
   };
-  loadClip(obj.clip);
   return obj;
 }
 GameObjectLight createLight(std::map<std::string, std::string> additionalFields){
@@ -250,7 +252,7 @@ void addObject(
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
-  std::function<void(std::string)> loadClip,
+  std::function<ALuint(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
@@ -961,5 +963,14 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(st
         onSliderPercentage(uiControl -> onSlide, uiControl -> percentage);
       }
     }
+  }
+}
+
+void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position){
+  auto object = mapping.at(id); 
+  auto soundObj = std::get_if<GameObjectSound>(&object);
+  if (soundObj != NULL){
+    std::cout << "should update sound position for: " << id << " " << print(position) << std::endl;
+    setSoundPosition(soundObj -> source, position.x, position.y, position.z);
   }
 }

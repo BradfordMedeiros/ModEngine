@@ -11,6 +11,7 @@
 #include "./types/voxels.h"
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
+#include "../sounds/sound.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -42,6 +43,7 @@ struct GameObjectPortal {
 };
 struct GameObjectSound{
   std::string clip;  
+  ALuint source;
 };
 
 enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT };
@@ -259,7 +261,7 @@ void addObject(
   std::map<std::string, std::string> additionalFields,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
-  std::function<void(std::string)> loadClip,
+  std::function<ALuint(std::string)> loadClip,
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<int(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
@@ -318,5 +320,6 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
 void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> sendNotify);
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText);
 void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy);
+void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position);
 
 #endif 

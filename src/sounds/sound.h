@@ -8,6 +8,8 @@
 #include <cerrno>
 #include <cstring>
 
+// https://www.openal.org/documentation/OpenAL_Programmers_Guide.pdf
+
 struct SoundInfo {
   ALuint source;
   ALuint buffer;
@@ -17,5 +19,6 @@ void stopSoundSystem();
 SoundInfo loadSound(std::string filepath);
 void unloadSound(SoundInfo sound);
 void playSound(SoundInfo sound);
+void setSoundPosition(ALuint source, float x, float y, float z);
 
 #endif 

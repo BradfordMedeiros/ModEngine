@@ -10,7 +10,7 @@ int getUsages(std::string filepath){
   return soundUsages.at(filepath);
 }
 
-void loadSoundState(std::string filepath){
+ALuint loadSoundState(std::string filepath){
   int usages = getUsages(filepath);
   if (usages == 0){
     SoundInfo sound = loadSound(filepath);
@@ -20,6 +20,7 @@ void loadSoundState(std::string filepath){
     soundUsages[filepath] = 0;
   }
   soundUsages[filepath] = soundUsages[filepath] + 1;
+  return managedSounds.at(filepath).source;
 }
 void unloadSoundState(std::string filepath){
   int usages = getUsages(filepath);
