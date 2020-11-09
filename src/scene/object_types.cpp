@@ -308,7 +308,7 @@ void removeObject(
   auto Object = mapping.at(id); 
   auto soundObj = std::get_if<GameObjectSound>(&Object);
   if (soundObj != NULL){
-    unloadSoundState(soundObj -> clip); 
+    unloadSoundState(soundObj -> source, soundObj -> clip); 
   }
   auto railObj = std::get_if<GameObjectRail>(&Object);
   if (railObj != NULL){
@@ -969,5 +969,15 @@ void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3
   auto soundObj = std::get_if<GameObjectSound>(&object);
   if (soundObj != NULL){
     setSoundPosition(soundObj -> source, position.x, position.y, position.z);
+  }
+}
+
+void playSoundState(std::map<objid, GameObjectObj>& mapping, std::string source){
+  for (auto &[uiId, obj] : mapping){
+    auto soundObj = std::get_if<GameObjectSound>(&obj);
+    if (soundObj != NULL && soundObj -> clip == source){
+      playSource(soundObj -> source);
+      return;
+    }
   }
 }

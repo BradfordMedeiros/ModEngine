@@ -10,7 +10,7 @@
 #include "./scene/sprites/sprites.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/timeplayback.h"
-#include "./scene/types/sounds/soundmanager.h"
+#include "./scene/types/sound.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./common/sysinterface.h"
@@ -139,5 +139,7 @@ void setFloatState(std::string stateName, float value);
 void setIntState(std::string stateName, int value);
 
 void copyStr(std::string& data, char* copyTo, int size);
+
+void playSoundState(std::string source);
 
 #endif

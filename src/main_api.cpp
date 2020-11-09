@@ -458,3 +458,7 @@ void rotateCamera(float xoffset, float yoffset){
     setGameObjectRotation(activeCameraObj ->id, setFrontDelta(activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
   }
 }
+
+void playSoundState(std::string source){
+  playSoundState(world.objectMapping, source);
+}
