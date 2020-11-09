@@ -972,12 +972,12 @@ void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3
   }
 }
 
-void playSoundState(std::map<objid, GameObjectObj>& mapping, std::string source){
-  for (auto &[uiId, obj] : mapping){
-    auto soundObj = std::get_if<GameObjectSound>(&obj);
-    if (soundObj != NULL && soundObj -> clip == source){
-      playSource(soundObj -> source);
-      return;
-    }
+void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
+  auto object = mapping.at(id);
+  auto soundObj = std::get_if<GameObjectSound>(&object);
+  if (soundObj != NULL){
+    playSource(soundObj -> source);
+  }else{
+    std::cout << "WARNING: " << id << " is not a sound object" << std::endl;
   }
 }

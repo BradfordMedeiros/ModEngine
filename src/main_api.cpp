@@ -460,5 +460,8 @@ void rotateCamera(float xoffset, float yoffset){
 }
 
 void playSoundState(std::string source){
-  playSoundState(world.objectMapping, source);
+  auto gameobj = getGameObjectByName(world, source);
+  if (gameobj.has_value()){
+    playSoundState(world.objectMapping, gameobj.value()); 
+  }
 }

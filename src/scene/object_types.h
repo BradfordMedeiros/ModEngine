@@ -319,6 +319,6 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText);
 void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy);
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position);
-void playSoundState(std::map<objid, GameObjectObj>& mapping, std::string source);
+void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
 
 #endif 
