@@ -344,7 +344,8 @@ void renderObject(
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,
-  unsigned int portalTexture
+  unsigned int portalTexture,
+  glm::mat4 model
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -422,10 +423,17 @@ void renderObject(
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
-    /*glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelObj -> voxel.mesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(voxelObj -> voxel.mesh, shaderProgram);*/
+
+
+    auto voxelBodies = getVoxelBodies(voxelObj -> voxel);
+    for (int i = 0; i < voxelBodies.size(); i++){
+      auto voxelBody = voxelBodies.at(i);
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, voxelBody.position)));
+      drawMesh(nodeMesh, shaderProgram);    
+    }
     return;
   }
 

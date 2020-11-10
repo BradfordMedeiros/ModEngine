@@ -288,7 +288,8 @@ void renderObject(
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,
-  unsigned int portalTexture
+  unsigned int portalTexture,
+  glm::mat4 model
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping);
