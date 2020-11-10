@@ -252,7 +252,7 @@ std::vector<VoxelAddress> expandVoxels(Voxels& chunk, std::vector<VoxelAddress> 
 }
 
 void expandVoxels(Voxels& voxel, int x, int y, int z){
-  applyTextureToCube(voxel, voxel.selectedVoxels, 1);
+  applyTextureToCube(voxel, voxel.selectedVoxels, voxel.defaultTextureId);
   voxel.selectedVoxels = expandVoxels(voxel, voxel.selectedVoxels, x, y, z);
   addVoxel(voxel, voxel.selectedVoxels);
 }
