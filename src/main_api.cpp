@@ -465,3 +465,7 @@ void playSoundState(std::string source){
     playSoundState(world.objectMapping, gameobj.value()); 
   }
 }
+
+unsigned int activeTextureId(){
+  return world.textures.at(activeTextureName(drawParams, world.textures)).textureId;
+}

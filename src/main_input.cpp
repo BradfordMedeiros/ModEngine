@@ -33,18 +33,60 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   processManipulator();
 }
 
+void expandVoxelUp(){
+  if (voxelPtr == NULL){
+    return;
+  }
+  std::cout << "voxels: expand voxel up" << std::endl;
+  expandVoxels(voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
+}
+void expandVoxelDown(){
+  if (voxelPtr == NULL){
+    return;
+  }
+  std::cout << "voxels: expand voxel down" << std::endl;
+  expandVoxels(voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
+}
+void expandVoxelLeft(){
+  if (voxelPtr == NULL){
+    return;
+  }
+  std::cout << "voxels: expand voxel left" << std::endl;
+  expandVoxels(voxelPtr -> voxel, -1, 0, 0);
+}
+void expandVoxelRight(){
+  if (voxelPtr == NULL){
+    return;
+  }
+  std::cout << "voxels: expand voxel right" << std::endl;
+  expandVoxels(voxelPtr -> voxel, 1, 0, 0);
+}
+
 void onArrowKey(int key){
-  if (key == 262){
+  if (key == 262){ // right
+    std::cout << "next texture" << std::endl;
     nextTexture();
     state.bloomAmount += 0.1f;
+    expandVoxelRight();
   }
-  if (key == 263){
+  if (key == 263){ // left
+    std::cout << "previous texture" << std::endl;
     previousTexture();
     state.bloomAmount -= 0.1f;
     if (state.bloomAmount < 0.f){
       state.bloomAmount = 0.f;
     }
+    expandVoxelLeft();
   }
+
+  if (key == 265){ // up
+    expandVoxelUp();
+  }
+  if (key == 264){ // down
+    expandVoxelDown();
+  }
+
+  std::cout << "key: " << key << std::endl;
 }
 
 void maybeApplyTextureOffset(int index, glm::vec2 offset){
@@ -61,7 +103,6 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
 }
 
 
-int textureId = 0;
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
   schemeBindings.onScrollCallback(yoffset);
@@ -78,13 +119,14 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     return;
   }
   
-  if (yoffset > 0){
-    textureId += 1;
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
-  }
-  if (yoffset < 0){
-    textureId -= 1;
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
+  auto activeTexture = activeTextureId();
+  if (activeTexture != -1){
+    if (yoffset > 0){
+      applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, activeTexture);
+    }
+    if (yoffset < 0){
+      applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, activeTexture);
+    }
   }
 }
 
@@ -98,7 +140,8 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
-  if (key == 261 && voxelPtr != NULL){  // delete
+  std::cout << "key is: -- " << key << std::endl;
+  if (key == 259 && voxelPtr != NULL){  // backspace
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
   } 
@@ -163,32 +206,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     state.shouldSelect = !state.shouldSelect;
   }
 }
-
-void expandVoxelUp(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  expandVoxels(voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
-}
-void expandVoxelDown(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  expandVoxels(voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
-}
-void expandVoxelLeft(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  expandVoxels(voxelPtr -> voxel, -1, 0, 0);
-}
-void expandVoxelRight(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  expandVoxels(voxelPtr -> voxel, 1, 0, 0);
-}
-
 
 void onMouseButton(){    
   //for (auto [id, scene] : world.scenes){

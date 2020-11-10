@@ -254,7 +254,7 @@ void handlePainting(UVCoord uvsToPaint){
   glUniform1f(glGetUniformLocation(drawingProgram, "opacity"), drawParams.opacity);
   glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
-  glBindTexture(GL_TEXTURE_2D, world.textures.at(activeTextureName(drawParams, world.textures)).textureId);
+  glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);

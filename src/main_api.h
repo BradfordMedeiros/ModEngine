@@ -142,4 +142,6 @@ void copyStr(std::string& data, char* copyTo, int size);
 
 void playSoundState(std::string source);
 
+unsigned int activeTextureId();
+
 #endif

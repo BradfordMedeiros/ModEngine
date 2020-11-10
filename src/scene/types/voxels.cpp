@@ -113,7 +113,8 @@ VoxelState parseVoxelState(std::string voxelState){
 }
 
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
-  std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ")" << std::endl;
+  std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ") -- " << textureId << std::endl;
+  chunk.defaultTextureId = textureId;
 }
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId){
   for (auto voxel : voxels){
@@ -123,7 +124,7 @@ void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int tex
 
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged){    
   chunk.cubes.at(x).at(y).at(z) = 1;
-  applyTextureToCube(chunk, x, y, z, 1);
+  applyTextureToCube(chunk, x, y, z, chunk.defaultTextureId);
   chunk.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
   if (callOnChanged){
     chunk.onVoxelBoundInfoChanged();
