@@ -101,8 +101,8 @@ GameObjectLight createLight(std::map<std::string, std::string> additionalFields)
   return obj;
 }
 
-GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged, std::function<Texture(std::string)> ensureLoadTexture){
-  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged, ensureLoadTexture);
+GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged){
+  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged);
   GameObjectVoxel obj {
     .voxel = voxel,
   };
@@ -271,7 +271,7 @@ void addObject(
   }else if(objectType == "light"){
     mapping[id] = createLight(additionalFields);
   }else if(objectType == "voxel"){
-    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, ensureTextureLoaded);
+    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "rail"){

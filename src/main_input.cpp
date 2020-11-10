@@ -5,9 +5,14 @@ extern engineState state;
 extern SchemeBindingCallbacks schemeBindings;
 extern bool disableInput;
 extern GameObjectVoxel* voxelPtr;
+extern glm::mat4 voxelPtrModelMatrix;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
 extern DrawingParams drawParams;
+extern glm::mat4 projection;
+extern glm::mat4 view;
+extern GameObject defaultCamera;
+extern std::vector<Line> permaLines;
 
 void processManipulator(){
   if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
@@ -189,4 +194,27 @@ void onMouseButton(){
   //for (auto [id, scene] : world.scenes){
   //  std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
   //}
+  auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  Line line = {
+    .fromPos = defaultCamera.transformation.position,
+    .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
+  };
+ 
+  permaLines.clear();
+  permaLines.push_back(line);
+  if (voxelPtr == NULL){
+    return;
+  }
+  glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
+  glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
+  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
+  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
+  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
+  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
+  std::cout << "length is: " << collidedVoxels.size() << std::endl;
+  if (collidedVoxels.size() > 0){
+    auto collision = collidedVoxels[0];
+    voxelPtr -> voxel.selectedVoxels.push_back(collision);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
+  }
 }

@@ -44,7 +44,7 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
   return info; 
 }
 
-Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, std::function<Texture(std::string)> ensureLoadTexture){
+Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged){
   int numWidth = initialState.numWidth;
   int numHeight = initialState.numHeight;
   int numDepth = initialState.numDepth;
@@ -267,3 +267,5 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
   }
   return bodies;
 }
+
+
