@@ -112,10 +112,6 @@ VoxelState parseVoxelState(std::string voxelState){
   return state;
 }
 
-int getVoxelLinearIndex (Voxels& voxels, int x, int y, int z){
-  return (x * voxels.numHeight * voxels.numDepth) + (y * voxels.numDepth) + z;
-}
-
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
   std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ")" << std::endl;
 }
