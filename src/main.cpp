@@ -551,7 +551,8 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
-      (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1
+      (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
+      modelMatrix
     );
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
@@ -580,13 +581,13 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 0.f, 1.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.chunkXWidth / 2) : 0;
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth, offset, offset, offset);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   }else{
     if (state.manipulatorMode == TRANSLATE){
       float snapGridSize = getSnapTranslateSize();
@@ -599,15 +600,16 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
   drawCoordinateSystem(100.f);
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
   if (permaLines.size() > 0){
    drawLines(permaLines);
   }
+
   if (lines.size() > 0){
    drawLines(lines);
   }
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
   if (bluelines.size() > 0){
    drawLines(bluelines);
   }
