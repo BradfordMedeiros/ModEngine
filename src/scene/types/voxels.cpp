@@ -44,12 +44,6 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
   return info; 
 }
 
-std::vector<Mesh> generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth, std::function<Texture(std::string)> ensureLoadTexture){
-  Mesh mesh = load2DMesh("./res/textures/wood.jpg", ensureLoadTexture); 
-  mesh.boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth);
-  return { mesh } ;
-}
-
 Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, std::function<Texture(std::string)> ensureLoadTexture){
   int numWidth = initialState.numWidth;
   int numHeight = initialState.numHeight;
@@ -57,14 +51,12 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
   auto cubes = initialState.cubes;
 
   std::vector<VoxelAddress> selectedVoxels;
-  Mesh mesh = generateVoxelMesh(cubes, numWidth, numHeight, numDepth, ensureLoadTexture).at(0);
-
   Voxels vox = {
     .cubes = cubes,
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
-    .mesh = mesh,
+    .boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth),
     .selectedVoxels = selectedVoxels,
     .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged
   };
@@ -135,7 +127,7 @@ void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int tex
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged){    
   chunk.cubes.at(x).at(y).at(z) = 1;
   applyTextureToCube(chunk, x, y, z, 1);
-  chunk.mesh.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
+  chunk.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
   if (callOnChanged){
     chunk.onVoxelBoundInfoChanged();
   }
@@ -149,7 +141,7 @@ void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
 void removeVoxel(Voxels& chunk, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
   applyTextureToCube(chunk, x, y, z, 0);
-  chunk.mesh.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
+  chunk.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
   chunk.onVoxelBoundInfoChanged();
 }
 

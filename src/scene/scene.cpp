@@ -93,7 +93,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, objid index)
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&gameObjV);
   if (voxelObj != NULL){
-    boundInfo = voxelObj -> voxel.mesh.boundInfo;
+    boundInfo = voxelObj -> voxel.boundInfo;
   }
 
   auto railObj = std::get_if<GameObjectRail>(&gameObjV);

@@ -23,7 +23,7 @@ struct Voxels {
   int numWidth;
   int numHeight;
   int numDepth;
-  Mesh mesh;
+  BoundInfo boundInfo;
   std::vector<VoxelAddress> selectedVoxels;
   std::function<void()> onVoxelBoundInfoChanged;
 };
