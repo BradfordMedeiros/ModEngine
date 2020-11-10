@@ -297,6 +297,7 @@ World createWorld(
   // Default meshes that are silently loaded in the background
   addMesh(world, "./res/models/ui/node.obj");
   addMesh(world, "./res/models/boundingbox/boundingbox.obj");
+  addMesh(world, "./res/models/unit_rect/unit_rect.obj");
   addMesh(world, "./res/models/cone/cone.obj");
   addMesh(world, "./res/models/camera/camera.dae");
   addMesh(world, "./res/models/box/plane.dae");

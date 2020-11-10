@@ -285,6 +285,7 @@ void renderObject(
   Mesh& nodeMesh,
   Mesh& cameraMesh, 
   Mesh& portalMesh, 
+  Mesh& voxelCubeMesh,
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,

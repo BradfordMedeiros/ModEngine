@@ -548,6 +548,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       world.meshes.at("./res/models/ui/node.obj"),
       world.meshes.at("./res/models/camera/camera.dae"),
       world.meshes.at("./res/models/box/plane.dae"),
+      world.meshes.at("./res/models/unit_rect/unit_rect.obj"),
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
