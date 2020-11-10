@@ -408,9 +408,9 @@ void addObjectToWorld(
         }
         return true;   // This is basically ensure model loaded so by definition this was already loaded. 
       }, 
-      [&world](std::string texturepath) -> int {
+      [&world](std::string texturepath) -> Texture {
         std::cout << "Custom texture loading: " << texturepath << std::endl;
-        return loadTextureWorld(world, texturepath).textureId;
+        return loadTextureWorld(world, texturepath);
       },
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(localSceneId), id);

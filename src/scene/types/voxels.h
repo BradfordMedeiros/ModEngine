@@ -24,15 +24,8 @@ struct Voxels {
   int numHeight;
   int numDepth;
   Mesh mesh;
-  float texturePadding;
   std::vector<VoxelAddress> selectedVoxels;
   std::function<void()> onVoxelBoundInfoChanged;
-};
-
-struct VoxelRenderData {
-  std::vector<float> verticesAndTexCoords;    
-  std::vector<unsigned int> indicies;
-  std::string textureFilePath;
 };
 
 struct VoxelState {
@@ -42,7 +35,7 @@ struct VoxelState {
   std::vector<std::vector<std::vector<int>>> cubes;
 };
 
-Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged);
+Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, std::function<Texture(std::string)> ensureLoadTexture);
 VoxelState parseVoxelState(std::string voxelState);
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged = true);
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   

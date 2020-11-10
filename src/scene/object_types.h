@@ -262,7 +262,7 @@ void addObject(
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
-  std::function<int(std::string)> ensureTextureLoaded,
+  std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> onRail,
   std::function<void(std::string)> loadScene,

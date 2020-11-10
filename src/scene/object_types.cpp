@@ -5,11 +5,11 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-TextureInformation texinfoFromFields(std::map<std::string, std::string>& additionalFields, std::function<int(std::string)> ensureTextureLoaded){
+TextureInformation texinfoFromFields(std::map<std::string, std::string>& additionalFields, std::function<Texture(std::string)> ensureTextureLoaded){
   glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
   glm::vec2 texturetiling = additionalFields.find("texturetiling") == additionalFields.end() ? glm::vec2(1.f, 1.f) : parseVec2(additionalFields.at("texturetiling"));
   std::string textureOverloadName = additionalFields.find("texture") == additionalFields.end() ? "" : additionalFields.at("texture");
-  int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName);
+  int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName).textureId;
 
   TextureInformation info {
     .textureoffset = textureoffset,
@@ -26,7 +26,7 @@ GameObjectMesh createMesh(
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
-  std::function<int(std::string)> ensureTextureLoaded
+  std::function<Texture(std::string)> ensureTextureLoaded
 ){
   std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
   bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
@@ -101,8 +101,8 @@ GameObjectLight createLight(std::map<std::string, std::string> additionalFields)
   return obj;
 }
 
-GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged){
-  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged);
+GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged, std::function<Texture(std::string)> ensureLoadTexture){
+  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged, ensureLoadTexture);
   GameObjectVoxel obj {
     .voxel = voxel,
   };
@@ -165,7 +165,7 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<s
   return obj;
 }
 
-GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields, std::function<Mesh(MeshData&)> loadMesh, std::function<int(std::string)> ensureTextureLoaded){
+GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields, std::function<Mesh(MeshData&)> loadMesh, std::function<Texture(std::string)> ensureTextureLoaded){
   auto mapName = additionalFields.find("map") != additionalFields.end() ? additionalFields.at("map") : "";
   auto dim = additionalFields.find("dim") != additionalFields.end() ? std::atoi(additionalFields.at("dim").c_str()) : -1;
   auto heightmap = loadAndAllocateHeightmap(mapName, dim);
@@ -203,7 +203,7 @@ GameObjectUICommon parseCommon(std::map<std::string, std::string>& additionalFie
   };
   return common;
 }
-GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
+GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
   auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "";
   auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "";
   auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
@@ -219,9 +219,9 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
     .toggleOn = toggleOn,
     .canToggle = canToggle,
     .onTextureString = onTexture,
-    .onTexture = ensureTextureLoaded(onTexture == "" ? "./res/models/controls/on.png" : onTexture),
+    .onTexture = ensureTextureLoaded(onTexture == "" ? "./res/models/controls/on.png" : onTexture).textureId,
     .offTextureString = offTexture,
-    .offTexture = ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture),
+    .offTexture = ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture).textureId,
     .onToggleOn = onToggleOn,
     .onToggleOff = onToggleOff,
     .hasOnTint = hasOnTint,
@@ -230,7 +230,7 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<int(std::string)> ensureTextureLoaded){
+GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
   auto onSlide = additionalFields.find("onslide") != additionalFields.end() ? additionalFields.at("onslide") : "";
 
   GameObjectUISlider obj {
@@ -238,8 +238,8 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
     .min = 0.f,
     .max = 100.f,
     .percentage = 100.f,
-    .texture = ensureTextureLoaded("./res/models/controls/slider.png"),
-    .opacityTexture = ensureTextureLoaded("./res/models/controls/slider_opacity.png"),
+    .texture = ensureTextureLoaded("./res/models/controls/slider.png").textureId,
+    .opacityTexture = ensureTextureLoaded("./res/models/controls/slider_opacity.png").textureId,
     .onSlide = onSlide,
   };
   return obj;
@@ -253,7 +253,7 @@ void addObject(
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
-  std::function<int(std::string)> ensureTextureLoaded,
+  std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
   std::function<void(std::string)> loadScene,
@@ -271,7 +271,7 @@ void addObject(
   }else if(objectType == "light"){
     mapping[id] = createLight(additionalFields);
   }else if(objectType == "voxel"){
-    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
+    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, ensureTextureLoaded);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "rail"){

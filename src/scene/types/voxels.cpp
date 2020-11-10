@@ -1,97 +1,5 @@
 #include "./voxels.h"
 
-static const float TEXTURE_PADDING_PERCENT = 0.02f;
-
-// Currently assumes 1 5x5 voxel sheet (resolution independent)
-// front(0) back(1) left(2) right(3) bottom(4) top(5)
-static const int numElements = 180;     
-static float cubes[numElements] = {    
-  -0.5f, 0.5f, -0.5f, 0, 0.2f,     
-  -0.5f, -0.5f, -0.5f, 0, 0,
-  0.5f, -0.5f, -0.5f, 0.2f, 0.f,
-  -0.5f, 0.5f, -0.5f, 0, 0.2f,
-  0.5f, -0.5f, -0.5f, 0.2f, 0,
-  0.5f, 0.5f, -0.5f, 0.2f, 0.2f,
-
-  -0.5f, 0.5f, 0.5f, 0, 0.2f, 
-  -0.5f, -0.5f, 0.5f, 0, 0,
-  0.5f, -0.5f, 0.5f, 0.2f, 0.f,
-  -0.5f, 0.5f, 0.5f, 0, 0.2f,
-  0.5f, -0.5f, 0.5f, 0.2f, 0,
-  0.5f, 0.5f, 0.5f, 0.2f, 0.2f,
-
-  -0.5f, 0.5f, -0.5f, 0, 0.2f, 
-  -0.5f, -0.5f, -0.5f, 0, 0,
-  -0.5f, -0.5f, 0.5f, 0.2f, 0.f,
-  -0.5f, 0.5f,  -0.5f, 0, 0.2f,
-  -0.5f, -0.5f, 0.5f, 0.2f, 0,
-  -0.5f, 0.5f, 0.5f, 0.2f, 0.2f,
-
-  0.5f, 0.5f, -0.5f, 0, 0.2f, 
-  0.5f, -0.5f, -0.5f, 0, 0,
-  0.5f, -0.5f, 0.5f, 0.2f, 0.f,
-  0.5f, 0.5f,  -0.5f, 0, 0.2f,
-  0.5f, -0.5f, 0.5f, 0.2f, 0,
-  0.5f, 0.5f, 0.5f, 0.2f, 0.2f,
-
-  0.5f, 0.5f, -0.5f, 0, 0.2f, 
-  -0.5f, 0.5f, -0.5f, 0, 0,
-  -0.5f, 0.5f, 0.5f, 0.2f, 0.f,
-  0.5f, 0.5f,  -0.5f, 0, 0.2f,
-  -0.5f, 0.5f, 0.5f, 0.2f, 0,
-  0.5f, 0.5f, 0.5f, 0.2f, 0.2f,
-
-  0.5f, -0.5f, -0.5f, 0, 0.2f, 
-  -0.5f, -0.5f, -0.5f, 0, 0,
-  -0.5f, -0.5f, 0.5f, 0.2f, 0.f,
-  0.5f, -0.5f,  -0.5f, 0, 0.2f,
-  -0.5f, -0.5f, 0.5f, 0.2f, 0,
-  0.5f, -0.5f, 0.5f, 0.2f, 0.2f,
-};
-
-void addCube(std::vector<float>& vertexData, std::vector<unsigned int>& indicies, float offsetX, float offsetY, float offsetZ, float texturePadding){
-  int originalVertexLength  = vertexData.size();
-  for (int i = 0; i < numElements; i++){
-    if (i % 5 == 3 || i % 5 == 4){
-      vertexData.push_back(cubes[i] == 0.2f ? (cubes[i] - texturePadding) : cubes[i] + texturePadding);
-    }else{
-      vertexData.push_back(cubes[i]);
-    }
-  }
-  for (int i = originalVertexLength; i < (originalVertexLength + numElements); i+=5){
-    vertexData[i] += offsetX;
-  }
-  for (int i = 1 + originalVertexLength; i < (originalVertexLength + numElements); i+=5){
-    vertexData[i] += offsetY;
-  }
-  for (int i = 2 + originalVertexLength; i < (originalVertexLength + numElements); i+=5){
-    vertexData[i] += offsetZ;
-  }
-
-  int originalIndexLength = indicies.size();
-  for (int i = originalIndexLength; i < (originalIndexLength + numElements); i++){
-    indicies.push_back(i);
-  }
-}
-
-VoxelRenderData generateRenderData(int numWidth, int numHeight, int numDepth, float padding){
-  std::vector<float> vertexData;
-  std::vector<unsigned int> indicies;
-  for (int x = 0; x < numWidth; x++){
-    for (int y = 0; y < numHeight; y++){
-      for (int z = 0; z < numDepth; z++){
-        addCube(vertexData, indicies, x + 0.5f, y + 0.5f, z + 0.5f, padding);
-      }
-    }
-  }
-  VoxelRenderData data = {
-    .verticesAndTexCoords = vertexData,    
-    .indicies = indicies,
-    .textureFilePath = "./res/textures/voxelsheet.png",
-  };
-  return data;
-}
-
 BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth){  
   float xMin = 0;
   float xMax = 0;
@@ -135,23 +43,21 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
   };
   return info; 
 }
-Mesh generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth, VoxelRenderData& renderData){
-  Mesh mesh = loadMeshFrom3Vert2TexCoords(renderData.textureFilePath, renderData.verticesAndTexCoords, renderData.indicies, loadTexture);
+
+std::vector<Mesh> generateVoxelMesh(std::vector<std::vector<std::vector<int>>>& cubes, int numWidth, int numHeight, int numDepth, std::function<Texture(std::string)> ensureLoadTexture){
+  Mesh mesh = load2DMesh("./res/textures/wood.jpg", ensureLoadTexture); 
   mesh.boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth);
-  return mesh;
+  return { mesh } ;
 }
 
-Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged){
+Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, std::function<Texture(std::string)> ensureLoadTexture){
   int numWidth = initialState.numWidth;
   int numHeight = initialState.numHeight;
   int numDepth = initialState.numDepth;
   auto cubes = initialState.cubes;
 
-  float texturePadding = TEXTURE_PADDING_PERCENT;
-  VoxelRenderData renderData = generateRenderData(numWidth, numHeight, numDepth, texturePadding);
-
   std::vector<VoxelAddress> selectedVoxels;
-  Mesh mesh = generateVoxelMesh(cubes, numWidth, numHeight, numDepth, renderData);
+  Mesh mesh = generateVoxelMesh(cubes, numWidth, numHeight, numDepth, ensureLoadTexture).at(0);
 
   Voxels vox = {
     .cubes = cubes,
@@ -159,7 +65,6 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
     .numHeight = numHeight,
     .numDepth = numDepth,
     .mesh = mesh,
-    .texturePadding = texturePadding,
     .selectedVoxels = selectedVoxels,
     .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged
   };
@@ -218,43 +123,8 @@ int getVoxelLinearIndex (Voxels& voxels, int x, int y, int z){
   return (x * voxels.numHeight * voxels.numDepth) + (y * voxels.numDepth) + z;
 }
 
-void applyTexture(Voxels& chunk, int x, int y, int z, int face, int textureId){
-  assert(x < chunk.numWidth);
-  assert(y < chunk.numHeight);
-  assert(z < chunk.numDepth);
-  assert(face < 6);
-  assert(textureId < 25);
-
-  glBindBuffer(GL_ARRAY_BUFFER, chunk.mesh.VBOPointer);
-  int voxelNumber = getVoxelLinearIndex(chunk, x, y, z);
-  int voxelOffset = voxelNumber * (sizeof(float) * numElements);
-  int faceOffset = (sizeof(float) * 5 * 6) * face;
-  int textureOffset = (sizeof(float) * 3);
-  int fullOffset = voxelOffset + faceOffset + textureOffset;
-
-  float textureX = textureId % 5;
-  float textureY = textureId / 5;
-  float textureNdiX = textureX * 0.2f;
-  float textureNdiY = textureY * 0.2f;
-
-  float newTextureCoords0[2] = { textureNdiX + chunk.texturePadding, textureNdiY + 0.2f - chunk.texturePadding };
-  float newTextureCoords1[2] = { textureNdiX + chunk.texturePadding, textureNdiY + chunk.texturePadding };
-  float newTextureCoords2[2] = { textureNdiX + 0.2f - chunk.texturePadding, textureNdiY + chunk.texturePadding };
-  float newTextureCoords3[2] = { textureNdiX + chunk.texturePadding, textureNdiY + 0.2f - chunk.texturePadding };
-  float newTextureCoords4[2] = { textureNdiX + 0.2f - chunk.texturePadding, textureNdiY + chunk.texturePadding };
-  float newTextureCoords5[2] = { textureNdiX + 0.2f - chunk.texturePadding, textureNdiY + 0.2f - chunk.texturePadding };
-
-  glBufferSubData(GL_ARRAY_BUFFER, fullOffset, sizeof(newTextureCoords0), &newTextureCoords0); 
-  glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 5, sizeof(newTextureCoords1), &newTextureCoords1); 
-  glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 10, sizeof(newTextureCoords2), &newTextureCoords2);
-  glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 15, sizeof(newTextureCoords3), &newTextureCoords3); 
-  glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 20, sizeof(newTextureCoords4), &newTextureCoords4); 
-  glBufferSubData(GL_ARRAY_BUFFER, fullOffset + sizeof(float) * 25, sizeof(newTextureCoords5), &newTextureCoords5); 
-}
-void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){
-  for (int i = 0; i < 6; i++){
-    applyTexture(chunk, x, y, z, i, textureId);
-  }
+void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
+  std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ")" << std::endl;
 }
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId){
   for (auto voxel : voxels){
