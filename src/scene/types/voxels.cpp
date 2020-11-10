@@ -44,7 +44,7 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
   return info; 
 }
 
-Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged){
+Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture){
   int numWidth = initialState.numWidth;
   int numHeight = initialState.numHeight;
   int numDepth = initialState.numDepth;
@@ -58,7 +58,8 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
     .numDepth = numDepth,
     .boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth),
     .selectedVoxels = selectedVoxels,
-    .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged
+    .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged,
+    .defaultTextureId = defaultTexture,
   };
 
   for (int row = 0; row < numWidth; row++){
@@ -259,6 +260,7 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
         if (voxels.cubes.at(x).at(y).at(z) == 1){
           VoxelBody body = {
             .position = glm::vec3(x, y, z),
+            .textureId = voxels.defaultTextureId,
           };
           bodies.push_back(body);
         }

@@ -26,6 +26,7 @@ struct Voxels {
   BoundInfo boundInfo;
   std::vector<VoxelAddress> selectedVoxels;
   std::function<void()> onVoxelBoundInfoChanged;
+  unsigned int defaultTextureId;
 };
 
 struct VoxelState {
@@ -35,7 +36,7 @@ struct VoxelState {
   std::vector<std::vector<std::vector<int>>> cubes;
 };
 
-Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged);
+Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture);
 VoxelState parseVoxelState(std::string voxelState);
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged = true);
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   

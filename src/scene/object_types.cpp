@@ -101,8 +101,8 @@ GameObjectLight createLight(std::map<std::string, std::string> additionalFields)
   return obj;
 }
 
-GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged){
-  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged);
+GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture){
+  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from")), onVoxelBoundInfoChanged, defaultTexture);
   GameObjectVoxel obj {
     .voxel = voxel,
   };
@@ -271,7 +271,8 @@ void addObject(
   }else if(objectType == "light"){
     mapping[id] = createLight(additionalFields);
   }else if(objectType == "voxel"){
-    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged);
+    auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
+    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, defaultVoxelTexture.textureId);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "rail"){
@@ -427,12 +428,11 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
 
-
     auto voxelBodies = getVoxelBodies(voxelObj -> voxel);
     for (int i = 0; i < voxelBodies.size(); i++){
       auto voxelBody = voxelBodies.at(i);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, voxelBody.position)));
-      drawMesh(nodeMesh, shaderProgram);    
+      drawMesh(nodeMesh, shaderProgram, voxelBody.textureId);    
     }
     return;
   }

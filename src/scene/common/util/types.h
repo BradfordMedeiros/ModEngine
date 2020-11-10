@@ -13,6 +13,7 @@ struct Line {
 
 struct VoxelBody {
   glm::vec3 position;
+  unsigned int textureId;
 };
 
 struct Transformation {
