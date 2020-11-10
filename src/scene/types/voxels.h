@@ -20,6 +20,7 @@ struct VoxelAddress {
 
 struct Voxels {
   std::vector<std::vector<std::vector<int>>> cubes;
+  std::vector<std::vector<std::vector<unsigned int>>> textures;
   int numWidth;
   int numHeight;
   int numDepth;
@@ -34,10 +35,11 @@ struct VoxelState {
   int numHeight;
   int numDepth;
   std::vector<std::vector<std::vector<int>>> cubes;
+  std::vector<std::vector<std::vector<unsigned int>>> textures;
 };
 
 Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture);
-VoxelState parseVoxelState(std::string voxelState);
+VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture);
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged = true);
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId);

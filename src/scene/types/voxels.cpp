@@ -49,17 +49,18 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
   int numHeight = initialState.numHeight;
   int numDepth = initialState.numDepth;
   auto cubes = initialState.cubes;
+  auto textures = initialState.textures;
 
   std::vector<VoxelAddress> selectedVoxels;
   Voxels vox = {
     .cubes = cubes,
+    .textures = textures,
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
     .boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth),
     .selectedVoxels = selectedVoxels,
     .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged,
-    .defaultTextureId = defaultTexture,
   };
 
   for (int row = 0; row < numWidth; row++){
@@ -74,8 +75,9 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
   }
   return vox;
 }
-VoxelState parseVoxelState(std::string voxelState){
+VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
   std::vector<std::vector<std::vector<int>>> cubes;
+  std::vector<std::vector<std::vector<unsigned int>>> textures;
 
   auto voxelStrings = split(voxelState, '|');
   int numWidth = std::stoi(voxelStrings.at(0));
@@ -91,30 +93,36 @@ VoxelState parseVoxelState(std::string voxelState){
 
   for (int row = 0; row < numWidth; row++){
     std::vector<std::vector<int>> cubestack;
+    std::vector<std::vector<unsigned int>> texturestack;
     for (int col = 0; col < numHeight; col++){
       std::vector<int> cuberow;
+      std::vector<unsigned int> texturerow;
       for (int depth = 0; depth < numDepth; depth++){
         auto flattenedIndex = (row * numHeight * numDepth) + (col * numDepth) + depth;  
         auto value = textureValues.at(flattenedIndex);
         cuberow.push_back(value == 0 ? 0 : 1);
+        texturerow.push_back(defaultTexture);
       }
       cubestack.push_back(cuberow);
+      texturestack.push_back(texturerow);
     }
     cubes.push_back(cubestack);
+    textures.push_back(texturestack);
   }
 
   VoxelState state {
     .numWidth = numWidth,
     .numHeight = numHeight,
     .numDepth = numDepth,
-    .cubes = cubes
+    .cubes = cubes,
+    .textures = textures,
   };
   return state;
 }
 
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
   std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ") -- " << textureId << std::endl;
-  chunk.defaultTextureId = textureId;
+  chunk.textures.at(x).at(y).at(z) = textureId;
 }
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId){
   for (auto voxel : voxels){
@@ -257,7 +265,7 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
         if (voxels.cubes.at(x).at(y).at(z) == 1){
           VoxelBody body = {
             .position = glm::vec3(x, y, z),
-            .textureId = voxels.defaultTextureId,
+            .textureId = voxels.textures.at(x).at(y).at(z),
           };
           bodies.push_back(body);
         }
