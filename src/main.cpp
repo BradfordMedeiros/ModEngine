@@ -46,6 +46,7 @@
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
+#include "./video.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -786,6 +787,8 @@ int main(int argc, char* argv[]){
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("h,help", "Print help")
   ;        
+
+  testvideo();
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
