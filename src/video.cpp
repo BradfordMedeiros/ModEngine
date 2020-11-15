@@ -18,7 +18,6 @@ StreamIndexs getStreamIndexs(AVFormatContext *formatContext) {
       assert(false);
     }
   }
-
   assert(videoStream != -1);
   assert(audioStream != -1);
   StreamIndexs streams {
@@ -26,6 +25,35 @@ StreamIndexs getStreamIndexs(AVFormatContext *formatContext) {
     .audio = audioStream,
   };  
   return streams;
+}
+
+AVCodecContext* alloc_codec(AVFormatContext* formatContext, int index){
+  AVCodecParameters* codecParameters = formatContext -> streams[index] -> codecpar;
+  std::cout << "bit rate: " << codecParameters -> bit_rate << std::endl;
+  std::cout << "width: " << codecParameters -> width << std::endl;
+  std::cout << "height: " << codecParameters -> height << std::endl;
+  AVCodec* localCodec = avcodec_find_decoder(codecParameters -> codec_id);
+  assert(localCodec != NULL);
+  std::cout << "INFO: video: found decoder for codec: " << codecParameters -> codec_id << std::endl;
+  AVCodecContext *codecContext = avcodec_alloc_context3(localCodec);
+  assert(codecContext);
+  auto paramsValue = avcodec_parameters_to_context(codecContext, codecParameters);
+  assert(paramsValue >= 0);
+  auto codecValue = avcodec_open2(codecContext, localCodec, NULL);
+  assert(codecValue == 0);
+  return codecContext;
+}
+
+StreamCodecs getCodecs(AVFormatContext* formatContext, StreamIndexs& streamIndexs){
+  StreamCodecs codecs {
+    .videoCodec = alloc_codec(formatContext, streamIndexs.video),
+    .audioCodec = alloc_codec(formatContext, streamIndexs.audio),
+  };
+  return codecs;
+}
+void freeCodecs(StreamCodecs& codecs){
+  avcodec_free_context(&codecs.videoCodec);
+  avcodec_free_context(&codecs.audioCodec);
 }
 
 void printFrameInfo(AVFrame* avFrame){
@@ -76,7 +104,7 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
 
 bool initialized = false;
 
-void loadVideo(std::function<bool(AVFrame* frame)> onFrame){
+VideoContent loadVideo(){
   if (!initialized){
     av_register_all();
     initialized = true;
@@ -106,64 +134,35 @@ void loadVideo(std::function<bool(AVFrame* frame)> onFrame){
 
   auto numStreams = formatContext -> nb_streams;
   AVFrame* avFrame = av_frame_alloc();
+  assert(avFrame);
+
+  auto streamIndexs = getStreamIndexs(formatContext);
+
+  AVPacket *avPacket = av_packet_alloc();
+  assert(avPacket);
 
   VideoContent videoContent {
     .formatContext = formatContext,
     .avFrame = avFrame,
-    .streamIndexs = getStreamIndexs(formatContext),
-    .videoCodec = NULL,
-    .audioCodec = NULL,
+    .avPacket = avPacket,
+    .streamIndexs = streamIndexs,
+    .codecs = getCodecs(formatContext, streamIndexs),
   };
-
   std::cout << "video: " << videopath << " is: " << videoContent.formatContext -> duration << std::endl;
   std::cout << "number video streams: " << numStreams << std::endl;
   std::cout << "video index: " << videoContent.streamIndexs.video << ", audio index:" << videoContent.streamIndexs.audio << std::endl;
+  nextFrame(videoContent);
+  return videoContent;
+}
 
-  for (int i = 0; i < numStreams; i++){
-    AVCodecParameters* codecParameters = formatContext -> streams[i] -> codecpar;
-    std::cout << "bit rate: " << codecParameters -> bit_rate << std::endl;
-    std::cout << "width: " << codecParameters -> width << std::endl;
-    std::cout << "height: " << codecParameters -> height << std::endl;
-
-    AVCodec* localCodec = avcodec_find_decoder(codecParameters -> codec_id);
-    assert(localCodec != NULL);
-    std::cout << "INFO: video: found decoder for codec: " << codecParameters -> codec_id << std::endl;
-
-    assert(avFrame);
-
-    AVPacket *avPacket = av_packet_alloc();
-    assert(avPacket);
-
-    AVCodecContext *codecContext = avcodec_alloc_context3(localCodec);
-    assert(codecContext);
-
-    auto paramsValue = avcodec_parameters_to_context(codecContext, codecParameters);
-    assert(paramsValue >= 0);
-
-    auto codecValue = avcodec_open2(codecContext, localCodec, NULL);
-    assert(codecValue == 0);
-
-    if (i == videoContent.streamIndexs.video){
-      for (int j = 0; j < 100; j++){
-        readFrame(formatContext, avPacket, codecContext, avFrame, videoContent.streamIndexs);
-        bool keepReading = onFrame(avFrame);
-        if (!keepReading){
-          i = numStreams + 1;
-          j = 101;
-          break;
-        }
-      }
-    }
-    avcodec_free_context(&codecContext);
-    av_packet_free(&avPacket);
-    std::cout << std::endl;
-  }
-
-  freeVideoContent(videoContent);
-  std::cout << "INFO: VIDEO: FINISHED VIDEO" << std::endl;
+AVFrame* nextFrame(VideoContent& content){
+  readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.avFrame, content.streamIndexs);
+  return content.avFrame;
 }
 
 void freeVideoContent(VideoContent& content){
+  av_packet_free(&content.avPacket);
+  freeCodecs(content.codecs);
   av_frame_free(&content.avFrame);
   avformat_close_input(&content.formatContext);
 }

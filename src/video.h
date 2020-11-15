@@ -15,16 +15,21 @@ struct StreamIndexs {
   int audio;
 };
 
-struct VideoContent {
-  AVFormatContext* formatContext;
-  AVFrame* avFrame;
-  StreamIndexs streamIndexs;
+struct StreamCodecs {
   AVCodecContext *videoCodec;
   AVCodecContext *audioCodec;
 };
 
-void loadVideo(std::function<bool(AVFrame* frame)> onFrame);
-AVFrame* nextFrame(VideoContent* content);
+struct VideoContent {
+  AVFormatContext* formatContext;
+  AVFrame* avFrame;
+  AVPacket *avPacket;
+  StreamIndexs streamIndexs;
+  StreamCodecs codecs;
+};
+
+VideoContent loadVideo();
+AVFrame* nextFrame(VideoContent& content);
 void freeVideoContent(VideoContent& content);
 
 #endif

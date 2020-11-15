@@ -1086,17 +1086,14 @@ int main(int argc, char* argv[]){
   loadAllTextures();
   
   int numFrames = 0;
-  loadVideo([&numFrames](AVFrame* avFrame) -> bool {
-    numFrames++;
-    std::cout << "num frame: " << numFrames << std::endl;
-    //world.textures["./res/textures/default.jpg"] =  loadTexture("./res/textures/default.jpg");
-    
-    std::cout << "info: saving frame!!!!!!!!!!!!!!!!!" << std::endl;
-
-    save_frame(avFrame -> data[0], avFrame -> linesize[0], avFrame -> width, avFrame -> height, "./res/data/video.pgm");
-    world.textures["./res/videos/bunny.avi"] = loadTextureData(avFrame -> data[0], avFrame -> width, avFrame -> height, 3);
-    return numFrames < 10;
-  });
+  auto videoContent = loadVideo();
+  world.textures["./res/videos/bunny.avi"] = loadTextureData(
+    videoContent.avFrame -> data[0], 
+    videoContent.avFrame -> width, 
+    videoContent.avFrame -> height, 
+    3
+  );
+  freeVideoContent(videoContent);
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
