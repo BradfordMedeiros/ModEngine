@@ -126,6 +126,8 @@ struct GameObjectUISlider {
   std::string onSlide;
 };
 
+struct GameObjectVideo {};
+
 typedef std::variant<
   GameObjectMesh, 
   GameObjectCamera, 
@@ -142,7 +144,8 @@ typedef std::variant<
   GameObjectNavmesh,
   GameObjectNavConns,
   GameObjectUIButton,
-  GameObjectUISlider
+  GameObjectUISlider,
+  GameObjectVideo
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
@@ -233,6 +236,10 @@ static Field uiSliderField {
   .type = "slider",
 };
 
+static Field videoField {
+  .prefix = '=',
+  .type = "video",
+};
 
 static std::vector fields = { 
   obj, 
@@ -251,6 +258,7 @@ static std::vector fields = {
   navconnectionField, 
   uiButtonField, 
   uiSliderField,
+  videoField,
 };
 
 std::map<objid, GameObjectObj> getObjectMapping();

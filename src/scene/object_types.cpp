@@ -245,6 +245,11 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
   return obj;
 }
 
+GameObjectVideo createVideo(){
+  GameObjectVideo obj {};
+  return obj;
+}
+
 void addObject(
   objid id, 
   std::string objectType, 
@@ -293,6 +298,8 @@ void addObject(
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
     mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
+  }else if (objectType == "video"){
+    mapping[id] = createVideo();
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -462,6 +469,7 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
+    return;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
@@ -469,7 +477,8 @@ void renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(nodeMesh, shaderProgram);   
+    drawMesh(nodeMesh, shaderProgram);  
+    return; 
   }
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
@@ -478,6 +487,7 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(heightmapObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(heightmapObj -> texture.texturetiling));
     drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.textureOverloadId);   
+    return;
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
@@ -486,6 +496,7 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
+    return;
   }
 
   auto navconnObj = std::get_if<GameObjectNavConns>(&toRender);
@@ -516,6 +527,7 @@ void renderObject(
       drawMesh(nodeMesh, shaderProgram);
     }
     std::cout << std::endl;
+    return;
   }
 
   auto uiObj = std::get_if<GameObjectUIButton>(&toRender);
@@ -527,7 +539,8 @@ void renderObject(
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> onTint));
     }
     auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
-    drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId);    
+    drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId); 
+    return;   
   }
 
   auto uiSliderObj = std::get_if<GameObjectUISlider>(&toRender);
@@ -536,7 +549,17 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 1 - uiSliderObj -> percentage);  
-    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture, uiSliderObj -> opacityTexture);    
+    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture, uiSliderObj -> opacityTexture);  
+    return;  
+  }
+
+  auto videoObj = std::get_if<GameObjectVideo>(&toRender);
+  if (videoObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawMesh(nodeMesh, shaderProgram);   
+    return;
   }
 }
 
@@ -799,7 +822,15 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   auto uiControlSliderObj = std::get_if<GameObjectUISlider>(&objectToSerialize);
   if (uiControlSliderObj != NULL){
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
     return serializeSlider(*uiControlSliderObj);    
+  }
+
+  auto uiVideoObj = std::get_if<GameObjectVideo>(&objectToSerialize);
+  if (uiVideoObj != NULL){
+    std::cout << "ERROR: VIDEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);
