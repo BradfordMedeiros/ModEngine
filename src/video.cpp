@@ -44,18 +44,6 @@ void printFrameInfo(AVFrame* avFrame){
   std::cout << "------------------------------" << std::endl;
 }
 
-void save_frame(unsigned char *buf, int wrap, int xsize, int ysize, const char *filename){
-    FILE *f;
-    int i;
-    f = fopen(filename,"w");
-    fprintf(f, "P5\n%d %d\n%d\n", xsize, ysize, 255);
-
-    // writing line by line
-    for (i = 0; i < ysize; i++)
-        fwrite(buf + i * wrap, 1, xsize, f);
-    fclose(f);
-}
-
 void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVFrame* avFrame, StreamIndexs& streams){
   auto readValue = av_read_frame(formatContext, avPacket);
   std::cout << "INFO: VIDEO: read frame: " << readValue << std::endl;

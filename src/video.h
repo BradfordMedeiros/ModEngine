@@ -10,7 +10,6 @@ extern "C" {
   #include <libavformat/avformat.h>
 }
 
-void save_frame(unsigned char *buf, int wrap, int xsize, int ysize, const char *filename);
 void testvideo(std::function<bool(AVFrame* frame)> onFrame);
 
 #endif
