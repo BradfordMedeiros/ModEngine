@@ -10,6 +10,21 @@ extern "C" {
   #include <libavformat/avformat.h>
 }
 
-void testvideo(std::function<bool(AVFrame* frame)> onFrame);
+struct StreamIndexs {
+  int video;
+  int audio;
+};
+
+struct VideoContent {
+  AVFormatContext* formatContext;
+  AVFrame* avFrame;
+  StreamIndexs streamIndexs;
+  AVCodecContext *videoCodec;
+  AVCodecContext *audioCodec;
+};
+
+void loadVideo(std::function<bool(AVFrame* frame)> onFrame);
+AVFrame* nextFrame(VideoContent* content);
+void freeVideoContent(VideoContent& content);
 
 #endif

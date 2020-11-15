@@ -762,6 +762,18 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return target;
 }
 
+void save_frame(unsigned char *buf, int wrap, int xsize, int ysize, const char *filename){
+    FILE *f;
+    int i;
+    f = fopen(filename,"w");
+    fprintf(f, "P5\n%d %d\n%d\n", xsize, ysize, 255);
+
+    // writing line by line
+    for (i = 0; i < ysize; i++)
+        fwrite(buf + i * wrap, 1, xsize, f);
+    fclose(f);
+}
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -1074,12 +1086,15 @@ int main(int argc, char* argv[]){
   loadAllTextures();
   
   int numFrames = 0;
-  testvideo([&numFrames](AVFrame* avFrame) -> bool {
-    save_frame(avFrame -> data[0], avFrame -> linesize[0], avFrame -> width, avFrame -> height, "./res/data/video.pgm");
+  loadVideo([&numFrames](AVFrame* avFrame) -> bool {
     numFrames++;
     std::cout << "num frame: " << numFrames << std::endl;
     //world.textures["./res/textures/default.jpg"] =  loadTexture("./res/textures/default.jpg");
-    world.textures["./res/textures/default.jpg"] = loadTextureData(avFrame -> data[0], avFrame -> width, avFrame -> height, 3);
+    
+    std::cout << "info: saving frame!!!!!!!!!!!!!!!!!" << std::endl;
+
+    save_frame(avFrame -> data[0], avFrame -> linesize[0], avFrame -> width, avFrame -> height, "./res/data/video.pgm");
+    world.textures["./res/videos/bunny.avi"] = loadTextureData(avFrame -> data[0], avFrame -> width, avFrame -> height, 3);
     return numFrames < 10;
   });
 
