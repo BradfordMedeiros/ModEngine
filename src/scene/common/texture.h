@@ -16,6 +16,7 @@ struct Texture {
 
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels);
 Texture loadTexture(std::string textureFilePath);
+void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, int textureHeight);
 void saveTextureData(std::string filepath, char* data, int width, int height);
 
 #endif

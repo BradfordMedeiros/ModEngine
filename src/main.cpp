@@ -1087,13 +1087,13 @@ int main(int argc, char* argv[]){
   
   int numFrames = 0;
   auto videoContent = loadVideo();
+
   world.textures["./res/videos/bunny.avi"] = loadTextureData(
     videoContent.avFrame -> data[0], 
     videoContent.avFrame -> width, 
     videoContent.avFrame -> height, 
     3
   );
-  freeVideoContent(videoContent);
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
@@ -1148,6 +1148,13 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
+    nextFrame(videoContent);
+    updateTextureData(
+      world.textures.at("./res/videos/bunny.avi"),
+      videoContent.avFrame -> data[0], 
+      videoContent.avFrame -> width, 
+      videoContent.avFrame -> height
+    );
 
     processStateMachines();
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
@@ -1401,7 +1408,8 @@ int main(int argc, char* argv[]){
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   
-  cleanup:    
+  cleanup:   
+    freeVideoContent(videoContent);
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
     glfwTerminate(); 

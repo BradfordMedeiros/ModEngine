@@ -37,6 +37,11 @@ Texture loadTexture(std::string textureFilePath){
   return texture;
 }
 
+void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, int textureHeight){
+  glBindTexture(GL_TEXTURE_2D, texture.textureId);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureWidth, textureHeight, GL_RGB, GL_UNSIGNED_BYTE, data);
+}
+
 void saveTextureData(std::string filepath, char* data, int width, int height){
   stbi_flip_vertically_on_write(1);
   stbi_write_png(filepath.c_str(), width, height, 3, data, 0); 

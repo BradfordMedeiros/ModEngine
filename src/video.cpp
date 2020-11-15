@@ -66,7 +66,6 @@ void printFrameInfo(AVFrame* avFrame){
   std::cout << "frame line size: " << avFrame -> linesize[0] << std::endl;
   std::cout << "------------------------------" << std::endl;
 }
-
 void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVFrame* avFrame, StreamIndexs& streams){
   auto readValue = av_read_frame(formatContext, avPacket);
   std::cout << "INFO: VIDEO: read frame: " << readValue << std::endl;
@@ -103,7 +102,6 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
 }
 
 bool initialized = false;
-
 VideoContent loadVideo(){
   if (!initialized){
     av_register_all();
