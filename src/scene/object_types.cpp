@@ -245,8 +245,18 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectVideo createVideo(){
-  GameObjectVideo obj {};
+GameObjectVideo createVideo(std::map<std::string, std::string> additionalFields){
+  std::cout << "INFO: OBJECT TYPE: CREATE VIDEO" << std::endl;
+
+  /*world.textures["./res/videos/bunny.avi"] = loadTextureData(
+    videoContent.avFrame -> data[0], 
+    videoContent.avFrame -> width, 
+    videoContent.avFrame -> height, 
+    3
+  );*/
+  GameObjectVideo obj {
+    .video = loadVideo(),
+  };
   return obj;
 }
 
@@ -299,7 +309,7 @@ void addObject(
   }else if (objectType == "slider"){
     mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "video"){
-    mapping[id] = createVideo();
+    mapping[id] = createVideo(additionalFields);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);

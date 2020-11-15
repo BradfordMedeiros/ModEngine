@@ -12,6 +12,7 @@
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
 #include "./types/sound.h"
+#include "./types/video.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -126,7 +127,9 @@ struct GameObjectUISlider {
   std::string onSlide;
 };
 
-struct GameObjectVideo {};
+struct GameObjectVideo {
+  VideoContent video;
+};
 
 typedef std::variant<
   GameObjectMesh, 
