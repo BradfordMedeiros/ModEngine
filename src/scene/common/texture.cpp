@@ -1,17 +1,9 @@
 #include "./texture.h"
 
-Texture loadTexture(std::string textureFilePath){
-  std::cout << "Event: loading texture: " << textureFilePath << std::endl;
-
-  int textureWidth, textureHeight, numChannels;
+Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels){
   unsigned int texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
-  
-  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
-  if (!data){
-    throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
-  }
   
   GLint format = GL_RGB;
   if (numChannels == 4) {
@@ -26,13 +18,23 @@ Texture loadTexture(std::string textureFilePath){
   glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
   
-  stbi_image_free(data);
-
   Texture tex {
     .textureId = texture,
   };
-
   return tex;
+}
+
+Texture loadTexture(std::string textureFilePath){
+  std::cout << "Event: loading texture: " << textureFilePath << std::endl;
+
+  int textureWidth, textureHeight, numChannels;
+  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
+  if (!data){
+    throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
+  }
+  auto texture = loadTextureData(data, textureWidth, textureHeight, numChannels);
+  stbi_image_free(data);
+  return texture;
 }
 
 void saveTextureData(std::string filepath, char* data, int width, int height){

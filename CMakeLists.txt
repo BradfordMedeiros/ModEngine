@@ -10,6 +10,8 @@ set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(AVCODEC     REQUIRED libavcodec)
 pkg_check_modules(AVFORMAT    REQUIRED libavformat)
+pkg_check_modules(AVUTIL      REQUIRED libavutil)
+
 
 file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
 
@@ -60,6 +62,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "/usr/include/guile/2.2")
 
 target_link_libraries(${PROJECT_NAME} ${AVFORMAT_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${AVCODEC_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${AVUTIL_LIBRARIES})
 
 # Command line parsing - CXXopts 
 set(CXX_DIR "${LIB_DIR}/cxxopts")

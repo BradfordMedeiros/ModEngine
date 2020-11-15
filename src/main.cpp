@@ -788,8 +788,6 @@ int main(int argc, char* argv[]){
    ("h,help", "Print help")
   ;        
 
-  testvideo();
-
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
@@ -1074,6 +1072,16 @@ int main(int argc, char* argv[]){
   };
 
   loadAllTextures();
+  
+  int numFrames = 0;
+  testvideo([&numFrames](AVFrame* avFrame) -> bool {
+    save_frame(avFrame -> data[0], avFrame -> linesize[0], avFrame -> width, avFrame -> height, "./res/data/video.pgm");
+    numFrames++;
+    std::cout << "num frame: " << numFrames << std::endl;
+    //world.textures["./res/textures/default.jpg"] =  loadTexture("./res/textures/default.jpg");
+    world.textures["./res/textures/default.jpg"] = loadTextureData(avFrame -> data[0], avFrame -> width, avFrame -> height, 3);
+    return numFrames < 10;
+  });
 
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){

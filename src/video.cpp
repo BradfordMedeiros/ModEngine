@@ -91,7 +91,7 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
   av_packet_unref(avPacket);
 }
 
-void testvideo(){
+void testvideo(std::function<bool(AVFrame* frame)> onFrame){
   av_register_all();
 
   // https://ffmpeg.org/doxygen/trunk/structAVFormatContext.html
@@ -151,20 +151,20 @@ void testvideo(){
     if (i == streamIndexs.video){
       for (int j = 0; j < 100; j++){
         readFrame(formatContext, avPacket, codecContext, avFrame, streamIndexs);
-        save_frame(avFrame -> data[0], avFrame -> linesize[0], avFrame -> width, avFrame -> height, "./res/data/video.pgm");
-        std::string value;
-        std::cin >> value;
+        bool keepReading = onFrame(avFrame);
+        if (!keepReading){
+          i = numStreams + 1;
+          j = 101;
+          break;
+        }
       }
     }
-
-
     avcodec_free_context(&codecContext);
     av_packet_free(&avPacket);
     av_frame_free(&avFrame);
     std::cout << std::endl;
   }
   avformat_close_input(&formatContext);
-
-  assert(false);
+  std::cout << "INFO: VIDEO: FINISHED VIDEO" << std::endl;
 }
 
