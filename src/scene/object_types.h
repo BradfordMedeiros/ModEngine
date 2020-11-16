@@ -334,5 +334,6 @@ void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<v
 void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy);
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position);
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
+void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData);
 
 #endif 

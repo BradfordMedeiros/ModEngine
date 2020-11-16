@@ -267,6 +267,9 @@ Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned cha
   world.textures[texturepath] = texture;
   return texture;  
 }
+void updateTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight){
+  updateTextureData(world.textures.at(texturepath), data, textureWidth, textureHeight);
+}
 
 void addMesh(World& world, std::string meshpath){
   ModelData data = loadModel(meshpath);
@@ -855,6 +858,10 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updateSoundPositions(world);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   callbackEntities(world);
+
+  onObjectFrame(world.objectMapping, [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {
+    updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
+  });
 }
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){

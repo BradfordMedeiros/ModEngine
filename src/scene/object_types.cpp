@@ -355,6 +355,11 @@ void removeObject(
     delete heightmapObj -> heightmap.data;
   }
 
+  auto videoObj = std::get_if<GameObjectVideo>(&Object);
+  if (videoObj != NULL){
+    freeVideoContent(videoObj -> video);
+  }
+
   mapping.erase(id);
 }
 
@@ -1035,5 +1040,20 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
     playSource(soundObj -> source);
   }else{
     std::cout << "WARNING: " << id << " is not a sound object" << std::endl;
+  }
+}
+
+void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData){
+  for (auto &[_, obj] : mapping){
+    auto videoObj = std::get_if<GameObjectVideo>(&obj);
+    if (videoObj != NULL){
+      nextFrame(videoObj -> video);
+      updateTextureData( 
+        "./res/videos/bunny2.avi",
+        videoObj -> video.avFrame -> data[0], 
+        videoObj -> video.avFrame -> width, 
+        videoObj -> video.avFrame -> height
+      );
+    }
   }
 }

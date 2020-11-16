@@ -46,7 +46,6 @@
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
-#include "./scene/types/video.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -1085,16 +1084,6 @@ int main(int argc, char* argv[]){
 
   loadAllTextures();
   
-  int numFrames = 0;
-  auto videoContent = loadVideo("./res/videos/bunny.avi");
-
-  world.textures["./res/videos/bunny.avi"] = loadTextureData(
-    videoContent.avFrame -> data[0], 
-    videoContent.avFrame -> width, 
-    videoContent.avFrame -> height, 
-    3
-  );
-
   dynamicLoading = createDynamicLoading(chunkSize);
   if (!useChunkingSystem){
     std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
@@ -1147,14 +1136,6 @@ int main(int argc, char* argv[]){
       last60 = now;
       currentFramerate = (int)60/(timedelta);
     }
-
-    nextFrame(videoContent);
-    updateTextureData(
-      world.textures.at("./res/videos/bunny.avi"),
-      videoContent.avFrame -> data[0], 
-      videoContent.avFrame -> width, 
-      videoContent.avFrame -> height
-    );
 
     processStateMachines();
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
@@ -1409,7 +1390,6 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program exiting" << std::endl;
   
   cleanup:   
-    freeVideoContent(videoContent);
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
     glfwTerminate(); 
