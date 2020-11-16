@@ -28,7 +28,7 @@ struct VideoContent {
   StreamCodecs codecs;
 };
 
-VideoContent loadVideo();
+VideoContent loadVideo(const char* videopath);
 AVFrame* nextFrame(VideoContent& content);
 void freeVideoContent(VideoContent& content);
 

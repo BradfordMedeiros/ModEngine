@@ -102,7 +102,7 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
 }
 
 bool initialized = false;
-VideoContent loadVideo(){
+VideoContent loadVideo(const char* videopath){
   if (!initialized){
     av_register_all();
     initialized = true;
@@ -115,7 +115,6 @@ VideoContent loadVideo(){
     assert(false);
   }
   
-  auto videopath = "./res/videos/bunny.avi";
   auto openValue = avformat_open_input(&formatContext, videopath, NULL, NULL);
   if (openValue != 0){
     std::cout << "ERROR: could not open video: " << videopath << std::endl;

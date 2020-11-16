@@ -1086,7 +1086,7 @@ int main(int argc, char* argv[]){
   loadAllTextures();
   
   int numFrames = 0;
-  auto videoContent = loadVideo();
+  auto videoContent = loadVideo("./res/videos/bunny.avi");
 
   world.textures["./res/videos/bunny.avi"] = loadTextureData(
     videoContent.avFrame -> data[0], 

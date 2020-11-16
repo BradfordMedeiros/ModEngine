@@ -245,17 +245,22 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectVideo createVideo(std::map<std::string, std::string> additionalFields){
+GameObjectVideo createVideo(
+  std::map<std::string, std::string> additionalFields, 
+  std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded
+){
+  auto video = loadVideo("./res/videos/bunny.avi");
   std::cout << "INFO: OBJECT TYPE: CREATE VIDEO" << std::endl;
 
-  /*world.textures["./res/videos/bunny.avi"] = loadTextureData(
-    videoContent.avFrame -> data[0], 
-    videoContent.avFrame -> width, 
-    videoContent.avFrame -> height, 
+  ensureTextureDataLoaded(
+    "./res/videos/bunny2.avi",
+    video.avFrame -> data[0], 
+    video.avFrame -> width, 
+    video.avFrame -> height, 
     3
-  );*/
+  );
   GameObjectVideo obj {
-    .video = loadVideo(),
+    .video = video,
   };
   return obj;
 }
@@ -269,6 +274,7 @@ void addObject(
   std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
+  std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(objid id, std::string from, std::string to)> addRail,
   std::function<void(std::string)> loadScene,
@@ -309,7 +315,7 @@ void addObject(
   }else if (objectType == "slider"){
     mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "video"){
-    mapping[id] = createVideo(additionalFields);
+    mapping[id] = createVideo(additionalFields, ensureTextureDataLoaded);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);

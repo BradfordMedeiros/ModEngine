@@ -259,6 +259,15 @@ Texture loadTextureWorld(World& world, std::string texturepath){
   world.textures[texturepath] = texture;
   return texture;
 }
+Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels){
+  if (world.textures.find(texturepath) != world.textures.end()){
+    return world.textures.at(texturepath);
+  }
+  Texture texture = loadTextureData(data, textureWidth, textureHeight, numChannels);
+  world.textures[texturepath] = texture;
+  return texture;  
+}
+
 void addMesh(World& world, std::string meshpath){
   ModelData data = loadModel(meshpath);
   assert(data.meshIdToMeshData.size() ==  1);
@@ -412,6 +421,9 @@ void addObjectToWorld(
       [&world](std::string texturepath) -> Texture {
         std::cout << "Custom texture loading: " << texturepath << std::endl;
         return loadTextureWorld(world, texturepath);
+      },
+      [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels) -> Texture {
+        return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels);
       },
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(localSceneId), id);
