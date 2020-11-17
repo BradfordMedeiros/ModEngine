@@ -15,14 +15,14 @@ extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
 
 void processManipulator(){
-  if (state.enableManipulator && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
-    auto selectObject = getGameObject(world, state.selectedIndex); 
+  if (state.enableManipulator && selected(state.editor) != -1 && idExists(world, selected(state.editor))){
+    auto selectObject = getGameObject(world, selected(state.editor)); 
     if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(world, state.selectedIndex, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsTranslation(world, selected(state.editor), selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(world, state.selectedIndex, selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsScaling(world, selected(state.editor), selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
     }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(world, state.selectedIndex, selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+      applyPhysicsRotation(world, selected(state.editor), selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
     }
   }
 }
@@ -107,12 +107,12 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
   schemeBindings.onScrollCallback(yoffset);
   
-  if (state.offsetTextureMode && state.selectedIndex != -1){
+  if (state.offsetTextureMode && selected(state.editor) != -1){
     float offsetAmount = yoffset * 0.001;
-    maybeApplyTextureOffset(state.selectedIndex, glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
+    maybeApplyTextureOffset(selected(state.editor), glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
   }
-  if (!state.offsetTextureMode && state.selectedIndex != -1 && idExists(world, state.selectedIndex)){
-    maybeChangeTexture(state.selectedIndex);
+  if (!state.offsetTextureMode && selected(state.editor) != -1 && idExists(world, selected(state.editor))){
+    maybeChangeTexture(selected(state.editor));
   }
 
   if (voxelPtr == NULL){
@@ -140,31 +140,30 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
-  std::cout << "key is: -- " << key << std::endl;
   if (key == 259 && voxelPtr != NULL){  // backspace
     removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
     voxelPtr -> voxel.selectedVoxels.clear();
   } 
 
-  if (key == GLFW_KEY_LEFT && action == 1 && state.selectedIndex != -1){
+  if (key == GLFW_KEY_LEFT && action == 1 && selected(state.editor) != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setGameObjectPosition(state.selectedIndex, snapTranslateUp(getGameObjectPosition(state.selectedIndex, false), state.manipulatorAxis));
+      setGameObjectPosition(selected(state.editor), snapTranslateUp(getGameObjectPosition(selected(state.editor), false), state.manipulatorAxis));
     }else if (state.manipulatorMode == ROTATE){
-      setGameObjectRotation(state.selectedIndex, snapAngleDown(getGameObjectRotation(state.selectedIndex, false), state.manipulatorAxis));
+      setGameObjectRotation(selected(state.editor), snapAngleDown(getGameObjectRotation(selected(state.editor), false), state.manipulatorAxis));
     }else if (state.manipulatorMode == SCALE){
-      setGameObjectScale(state.selectedIndex, snapScaleDown(getGameObjectScale(state.selectedIndex), state.manipulatorAxis));
+      setGameObjectScale(selected(state.editor), snapScaleDown(getGameObjectScale(selected(state.editor)), state.manipulatorAxis));
     }
   }
-  if (key == GLFW_KEY_RIGHT && action == 1 && state.selectedIndex != -1){
+  if (key == GLFW_KEY_RIGHT && action == 1 && selected(state.editor) != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setGameObjectPosition(state.selectedIndex, snapTranslateDown(getGameObjectPosition(state.selectedIndex, false), state.manipulatorAxis));
+      setGameObjectPosition(selected(state.editor), snapTranslateDown(getGameObjectPosition(selected(state.editor), false), state.manipulatorAxis));
     }else if (state.manipulatorMode == ROTATE){
-      setGameObjectRotation(state.selectedIndex, snapAngleUp(getGameObjectRotation(state.selectedIndex, false), state.manipulatorAxis));
+      setGameObjectRotation(selected(state.editor), snapAngleUp(getGameObjectRotation(selected(state.editor), false), state.manipulatorAxis));
     }else if (state.manipulatorMode == SCALE){
-      setGameObjectScale(state.selectedIndex, snapScaleUp(getGameObjectScale(state.selectedIndex), state.manipulatorAxis));
+      setGameObjectScale(selected(state.editor), snapScaleUp(getGameObjectScale(selected(state.editor)), state.manipulatorAxis));
     }
   }
-  if (key == GLFW_KEY_UP && action == 1 && state.selectedIndex != -1){
+  if (key == GLFW_KEY_UP && action == 1 && selected(state.editor) != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setSnapTranslateUp();
     }else if (state.manipulatorMode == ROTATE){
@@ -173,7 +172,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       setSnapScaleUp();
     }
   }
-  if (key == GLFW_KEY_DOWN && action == 1 && state.selectedIndex != -1){
+  if (key == GLFW_KEY_DOWN && action == 1 && selected(state.editor) != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setSnapTranslateDown();
     }else if (state.manipulatorMode == ROTATE){
@@ -196,10 +195,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_Q && action == 1){
-    applyHeightmapMasking(world, state.selectedIndex, 1.f);
+    applyHeightmapMasking(world, selected(state.editor), 1.f);
   }
   if (key == GLFW_KEY_E && action == 1){
-    applyHeightmapMasking(world, state.selectedIndex, -1.f);
+    applyHeightmapMasking(world, selected(state.editor), -1.f);
   }
 
   if (key == GLFW_KEY_P && action == 1){
@@ -217,9 +216,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
   if (key == 269 && action == 1){   // end
     clearSelectedIndexs(state.editor);
-
   }
-  std::cout << "key here is: " << key << std::endl;
 }
 
 void onMouseButton(){    

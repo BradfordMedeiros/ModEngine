@@ -14,7 +14,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.currentScreenHeight = initialScreenHeight,
 		.cursorLeft = initialScreenWidth / 2,
 		.cursorTop  = initialScreenHeight / 2,
-		.selectedIndex = -1,
     .currentHoverIndex = -1,
     .lastHoverIndex = -1,
     .hoveredIdInScene = false,
@@ -46,7 +45,12 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.takeScreenshot = false,
     .highlight = false,
     .shouldSelect = true,
-    .editor = EditorContent{}
+    .editor = EditorContent{
+      .selectedObj = EditorItem { 
+        .id = -1,
+        .name = "",
+      },
+    },
 	};
 	return state;
 }

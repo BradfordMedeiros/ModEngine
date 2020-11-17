@@ -19,7 +19,6 @@ struct engineState {
   unsigned int currentScreenHeight;
   int cursorLeft;
   int cursorTop;
-  int32_t selectedIndex;
   int32_t currentHoverIndex;
   int32_t lastHoverIndex;
   bool hoveredIdInScene;

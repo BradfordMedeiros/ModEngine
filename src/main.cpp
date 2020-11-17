@@ -203,10 +203,11 @@ void onDebugKey(){
 }
 
 void onDelete(){
-  if (state.selectedIndex != -1){
-    std::cout << "OnDelete object id: " << state.selectedIndex << std::endl;
-    removeObjectById(state.selectedIndex);
-    state.selectedIndex = -1;
+  if (state.editor.selectedObj.id != -1){
+    std::cout << "OnDelete object id: " << state.editor.selectedObj.id << std::endl;
+    removeObjectById(state.editor.selectedObj.id);
+    state.editor.selectedObj.id = -1;
+    clearSelectedIndexs(state.editor);
   }
 }
 
@@ -279,8 +280,8 @@ void selectItem(objid selectedId, Color pixelColor){
   if (!state.shouldSelect){
     return;
   }
-  state.selectedIndex =  groupid;
-  state.selectedName = selectedObject.name + "(" + std::to_string(state.selectedIndex) + ")";
+  addSelectedIndex(state.editor, groupid, selectedObject.name);
+  state.selectedName = selectedObject.name + "(" + std::to_string(state.editor.selectedObj.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
 
@@ -351,34 +352,38 @@ void loadAllTextures(){
 
 
 void translate(float x, float y, float z){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
+  auto selected = state.editor.selectedObj.id;
+  if (selected == -1 || !idExists(world, selected)){
     return;
   }
-  physicsTranslate(world, state.selectedIndex, x, y, z, state.moveRelativeEnabled);
+  physicsTranslate(world, selected, x, y, z, state.moveRelativeEnabled);
 }
 void scale(float x, float y, float z){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
+  auto selected = state.editor.selectedObj.id;
+  if (selected == -1 || !idExists(world, selected)){
     return;
   }
-  physicsScale(world, state.selectedIndex, x, y, z);
+  physicsScale(world, selected, x, y, z);
 }
 void rotate(float x, float y, float z){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
+  auto selected = state.editor.selectedObj.id;
+  if (selected == -1 || !idExists(world, selected)){
     return;
   }
-  physicsRotate(world, state.selectedIndex, x, y, z);
+  physicsRotate(world, selected, x, y, z);
 }
 void setObjectDimensions(int32_t index, float width, float height, float depth){
-  if (state.selectedIndex == -1 || !idExists(world, state.selectedIndex)){
+  auto selected = state.editor.selectedObj.id;
+  if (selected == -1 || !idExists(world, selected)){
     return;
   }
-  auto gameObjV = world.objectMapping.at(state.selectedIndex);  // todo this is bs, need a wrapper around objectmappping + scene
+  auto gameObjV = world.objectMapping.at(selected);  // todo this is bs, need a wrapper around objectmappping + scene
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
   if (meshObj != NULL){
     // @TODO this is resizing based upon first mesh only, which is questionable
     auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-    getGameObject(world, state.selectedIndex).transformation.scale = newScale;
+    getGameObject(world, selected).transformation.scale = newScale;
   } 
 }
 
@@ -498,7 +503,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       voxelPtrModelMatrix = modelMatrix;
     }
     
-    bool objectSelected = idInGroup(world, id, state.selectedIndex);
+    bool objectSelected = idInGroup(world, id, state.editor.selectedObj.id);
 
     auto newShader = getShaderByName(shader, shaderProgram);
     setShaderData(newShader, projection, view, lights, orthographic, getTintIfSelected(objectSelected, tint), id);
@@ -594,7 +599,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     if (state.manipulatorMode == TRANSLATE){
       float snapGridSize = getSnapTranslateSize();
       if (snapGridSize > 0){
-        auto position = getGameObjectPosition(state.selectedIndex, false);
+        auto position = getGameObjectPosition(state.editor.selectedObj.id, false);
         drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
       }
@@ -653,8 +658,8 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("fov: " + std::to_string(state.fov), 10, 80, 3);
   drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
-  if (state.selectedIndex != -1){
-    auto obj = getGameObject(world, state.selectedIndex);
+  if (selected(state.editor) != -1){
+    auto obj = getGameObject(world, selected(state.editor));
     drawText("position: " + print(obj.transformation.position), 10, 100, 3);
     drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
     drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
@@ -1062,8 +1067,11 @@ int main(int argc, char* argv[]){
         activeCameraObj = NULL;
         std::cout << "active camera reset" << std::endl;
       }
-      if (id == state.selectedIndex){
-        state.selectedIndex = -1;
+      if (id == selected(state.editor)){
+        state.editor.selectedObj = EditorItem {
+          .id = -1,
+          .name = "",
+        };
       }
 
       UdpPacket packet { .type = DELETE };
@@ -1240,7 +1248,7 @@ int main(int argc, char* argv[]){
           };
           channelFloatMessages.push(message);
         }, 
-        state.selectedIndex, 
+        selected(state.editor), 
         uvCoord.x, 
         uvCoord.y
       );
@@ -1297,7 +1305,7 @@ int main(int argc, char* argv[]){
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     if (shouldCallItemSelected){
-      schemeBindings.onObjectSelected(state.selectedIndex, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      schemeBindings.onObjectSelected(selected(state.editor), glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       shouldCallItemSelected = false;
     }
 
