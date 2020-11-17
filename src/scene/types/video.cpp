@@ -92,8 +92,8 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
     }
     printFrameInfo(avFrame);
     std::cout << "video: frame index: " << codecContext -> frame_number << std::endl;  
-  }else if (avPacket -> stream_index != streams.video){
-    std::cout << "INFO: video: not video, skipping (" << avPacket -> stream_index << ")" << std::endl;
+  }else if (avPacket -> stream_index == streams.audio){
+    std::cout << "INFO: video: audio -- not yet implemented" << std::endl;
   }else{
     std::cout << "INFO: video: READ error or end of video" << std::endl;
     assert(false);
