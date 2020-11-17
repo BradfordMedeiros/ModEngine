@@ -10,6 +10,7 @@
 #include "./easy_use.h"
 #include "./gizmo/keymapper.h"
 #include "./drawing.h"
+#include "./editor.h"
 
 std::string activeTextureName(std::map<std::string, Texture> worldTextures);
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);

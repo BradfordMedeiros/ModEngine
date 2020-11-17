@@ -205,6 +205,21 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == GLFW_KEY_P && action == 1){
     state.shouldSelect = !state.shouldSelect;
   }
+
+  if (key == 260 && action == 1){   // ins
+
+  }
+  if (key == 261 && action == 1){   // del
+    rmAllObjects(state.editor);
+  }
+  if (key == 268 && action == 1){   // home
+    mirrorAllObjects(state.editor);
+  }
+  if (key == 269 && action == 1){   // end
+    clearSelectedIndexs(state.editor);
+
+  }
+  std::cout << "key here is: " << key << std::endl;
 }
 
 void onMouseButton(){    

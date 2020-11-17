@@ -4,6 +4,7 @@
 #include <string>
 #include "./scene/scenegraph.h"
 #include "./common/util.h"
+#include "./editor.h"
 
 struct engineState {
   bool visualizeNormals;
@@ -50,6 +51,7 @@ struct engineState {
   bool takeScreenshot;
   bool highlight;
   bool shouldSelect;
+  EditorContent editor;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

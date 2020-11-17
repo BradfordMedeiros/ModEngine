@@ -1,6 +1,7 @@
 #ifndef MOD_EDITOR
 #define MOD_EDITOR
 
+#include <iostream>
 #include "./common/util.h"
 
 struct EditorContent {
