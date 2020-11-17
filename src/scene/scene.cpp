@@ -34,8 +34,14 @@ std::optional<objid> getGameObjectByName(World& world, std::string name){
   return std::nullopt;
 }
 
-bool idInGroup(World& world, objid id, objid groupId){
-  return groupId == sceneForId(world, id).idToGameObjectsH.at(id).groupId;
+bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
+  auto groupId = sceneForId(world, id).idToGameObjectsH.at(id).groupId;
+  for (auto gId : groupIds){
+    if (groupId == gId){
+      return true;
+    }
+  }
+  return false;
 }
 bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();

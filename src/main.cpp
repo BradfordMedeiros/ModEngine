@@ -279,7 +279,7 @@ void selectItem(objid selectedId, Color pixelColor){
   if (!state.shouldSelect){
     return;
   }
-  setSelectedIndex(state.editor, groupid, selectedObject.name);
+  setSelectedIndex(state.editor, groupid, selectedObject.name, state.multiselectMode);
   state.selectedName = selectedObject.name + "(" + std::to_string(state.editor.selectedObj.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
@@ -502,7 +502,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
       voxelPtrModelMatrix = modelMatrix;
     }
     
-    bool objectSelected = idInGroup(world, id, state.editor.selectedObj.id);
+    bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
 
     auto newShader = getShaderByName(shader, shaderProgram);
     setShaderData(newShader, projection, view, lights, orthographic, getTintIfSelected(objectSelected, tint), id);

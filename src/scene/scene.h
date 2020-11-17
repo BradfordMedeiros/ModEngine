@@ -90,7 +90,7 @@ Transformation fullTransformation(World& world, objid id);
 objid getGroupId(World& world, objid id);
 std::vector<objid> getIdsInGroup(World& world, objid index);
 
-bool idInGroup(World& world, objid id, objid groupId);
+bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 bool idExists(World& world, objid id);
 
 
