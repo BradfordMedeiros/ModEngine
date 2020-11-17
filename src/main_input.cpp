@@ -206,7 +206,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == 260 && action == 1){   // ins
-
+    state.multiselectMode = !state.multiselectMode;
+    std::cout << "INFO: multi select mode: " << state.multiselectMode << std::endl;
   }
   if (key == 261 && action == 1){   // del
     rmAllObjects(state.editor);

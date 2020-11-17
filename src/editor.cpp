@@ -1,6 +1,6 @@
 #include "./editor.h"
 
-void addSelectedIndex(EditorContent& editor, objid id, std::string name){
+void setSelectedIndex(EditorContent& editor, objid id, std::string name){
   std::cout << "INFO: EDITOR: ADD SELECTED INDEX" << std::endl;
   editor.selectedObj = EditorItem {
     .id = id,

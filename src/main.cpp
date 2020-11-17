@@ -206,7 +206,6 @@ void onDelete(){
   if (state.editor.selectedObj.id != -1){
     std::cout << "OnDelete object id: " << state.editor.selectedObj.id << std::endl;
     removeObjectById(state.editor.selectedObj.id);
-    state.editor.selectedObj.id = -1;
     clearSelectedIndexs(state.editor);
   }
 }
@@ -280,7 +279,7 @@ void selectItem(objid selectedId, Color pixelColor){
   if (!state.shouldSelect){
     return;
   }
-  addSelectedIndex(state.editor, groupid, selectedObject.name);
+  setSelectedIndex(state.editor, groupid, selectedObject.name);
   state.selectedName = selectedObject.name + "(" + std::to_string(state.editor.selectedObj.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }

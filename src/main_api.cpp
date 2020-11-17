@@ -421,9 +421,7 @@ void setActiveCamera(int32_t cameraId){
   }
   auto sceneId = world.idToScene.at(cameraId);
   activeCameraObj = &getGameObject(world, cameraId);
-  state.editor.selectedObj.id = cameraId;
-  state.editor.selectedObj.name = activeCameraObj -> name;
-
+  setSelectedIndex(state.editor, cameraId, activeCameraObj -> name);
 }
 void setActiveCamera(std::string name){
   auto object = getGameObjectByName(name);

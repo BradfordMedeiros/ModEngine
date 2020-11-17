@@ -51,6 +51,7 @@ struct engineState {
   bool highlight;
   bool shouldSelect;
   EditorContent editor;
+  bool multiselectMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

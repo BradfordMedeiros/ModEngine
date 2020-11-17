@@ -51,6 +51,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
         .name = "",
       },
     },
+    .multiselectMode = false,
 	};
 	return state;
 }
