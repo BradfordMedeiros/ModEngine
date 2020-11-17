@@ -5,7 +5,6 @@ DrawingParams getDefaultDrawingParams(){
     .opacity = 1,
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
     .tint = glm::vec3(1.f, 1.f, 1.f),
-  
     .activeTextureIndex = 0,
   };
   return params;

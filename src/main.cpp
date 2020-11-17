@@ -46,6 +46,7 @@
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
+#include "./editor.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
