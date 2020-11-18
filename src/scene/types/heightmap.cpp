@@ -154,10 +154,8 @@ void applyMasking(
   int hCenter = x;
   int wCenter = y;
 
-  auto maxIndex = heightmap.width * heightmap.height;
   for (int h = 0; h < mask.height; h++){
     for (int w = 0; w < mask.width; w++){
-      auto maskIndex = (h * mask.width) + w;
       auto hIndex = hCenter + h;
       auto wIndex = wCenter + w;
 
