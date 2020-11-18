@@ -121,19 +121,6 @@ GameObjectChannel createChannel(std::map<std::string, std::string> additionalFie
   return obj;
 }
 
-GameObjectRail createRail(objid id, std::map<std::string, std::string> additionalFields, std::function<void(objid id, std::string from, std::string to)> createRail){
-  RailConnection connection {
-    .from = additionalFields.at("from"),
-    .to = additionalFields.at("to")
-  };
-  GameObjectRail obj {
-    .id = id,
-    .connection = connection,
-  };
-  createRail(id, connection.from, connection.to);
-  return obj;
-}
-
 GameObjectScene createScene(objid id, std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadScene){
   auto scenefile = additionalFields.at("scene");
   loadScene(scenefile);
@@ -276,7 +263,6 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(objid id, std::string from, std::string to)> addRail,
   std::function<void(std::string)> loadScene,
   std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
@@ -296,8 +282,6 @@ void addObject(
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, defaultVoxelTexture.textureId);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
-  }else if(objectType == "rail"){
-    mapping[id] = createRail(id, additionalFields, addRail);
   }else if(objectType == "scene"){
     mapping[id] = createScene(id, additionalFields, loadScene);
   }else if (objectType == "root"){
@@ -324,7 +308,6 @@ void addObject(
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
-  std::function<void()> removeRail, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter
 ){
@@ -333,10 +316,6 @@ void removeObject(
   auto soundObj = std::get_if<GameObjectSound>(&Object);
   if (soundObj != NULL){
     unloadSoundState(soundObj -> source, soundObj -> clip); 
-  }
-  auto railObj = std::get_if<GameObjectRail>(&Object);
-  if (railObj != NULL){
-    removeRail();
   }
 
   auto sceneObj = std::get_if<GameObjectScene>(&Object);
@@ -473,15 +452,6 @@ void renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawMesh(nodeMesh, shaderProgram);
     return;
-  }
-
-  auto railObj = std::get_if<GameObjectRail>(&toRender);
-  if (railObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));  
-    drawMesh(nodeMesh, shaderProgram);
-    return; 
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
@@ -720,16 +690,6 @@ std::vector<std::pair<std::string, std::string>> serializeChannel(GameObjectChan
   }
   return pairs;
 }
-std::vector<std::pair<std::string, std::string>> serializeRail(GameObjectRail obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.connection.from != ""){
-    pairs.push_back(std::pair<std::string, std::string>("from", obj.connection.from));
-  }
-  if (obj.connection.to != ""){
-    pairs.push_back(std::pair<std::string, std::string>("to", obj.connection.to));
-  }
-  return pairs;
-}
 
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
   if (common.onFocus != ""){
@@ -796,10 +756,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   auto channelObject = std::get_if<GameObjectChannel>(&objectToSerialize);
   if (channelObject != NULL){
     return serializeChannel(*channelObject);
-  }
-  auto railObject = std::get_if<GameObjectRail>(&objectToSerialize);
-  if (railObject != NULL){
-    return serializeRail(*railObject);
   }
 
   auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
@@ -920,18 +876,6 @@ std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid
     } 
   }
   return channelMapping;
-}
-
-
-std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping){
-  std::map<objid, RailConnection> connections;
-  for (auto [_, obj] : mapping){
-    auto railObj = std::get_if<GameObjectRail>(&obj);
-    if (railObj != NULL){
-      connections[railObj -> id] = railObj -> connection;
-    }
-  }
-  return connections;
 }
 
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping){

@@ -48,8 +48,6 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message),
-  void (*attachToRail)(int32_t id, std::string rail),
-  void (*unattachFromRail)(int32_t id),
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),

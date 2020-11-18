@@ -250,14 +250,6 @@ void sendNotifyMessage(std::string message){
   channelMessages.push(message);
 }
 
-void attachToRail(int32_t id, std::string rail){
-  addEntity(world.rails, id, rail);
-}
-
-void unattachFromRail(int32_t id){
-  removeEntity(world.rails, id);
-}
-
 double timeSeconds(){
   return now;
 }

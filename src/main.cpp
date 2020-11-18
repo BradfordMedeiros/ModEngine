@@ -427,16 +427,6 @@ void drawTraversalPositions(){
   }
 }
 
-
-void displayRails(std::map<int32_t, RailConnection> railPairs){
-  for (auto [id, rail] : railPairs){
-    bluelines.push_back(Line {
-      .fromPos = getGameObject(world, rail.from).transformation.position,
-      .toPos = getGameObject(world, rail.to).transformation.position
-    });
-  }
-}
-
 std::map<std::string, GLint> shaderNameToId;
 GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
   if (fragShaderName == ""){
@@ -963,8 +953,6 @@ int main(int argc, char* argv[]){
     listModels,
     sendEventMessage,
     sendNotifyMessage,
-    attachToRail,
-    unattachFromRail,
     timeSeconds,
     saveScene,
     listServers,
@@ -1308,7 +1296,6 @@ int main(int argc, char* argv[]){
     glDisable(GL_STENCIL_TEST);
 
     if (showDebugInfo){
-      displayRails(getRails(world.objectMapping));
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
     renderUI(crosshairSprite, currentFramerate, pixelColor);

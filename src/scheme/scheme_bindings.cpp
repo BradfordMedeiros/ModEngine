@@ -427,17 +427,6 @@ SCM scmSendNotify(SCM message){
   return SCM_UNSPECIFIED;
 }
 
-void (*_attachToRail)(int32_t id, std::string rail);
-SCM scmAttachToRail(SCM obj, SCM rail){
-  _attachToRail(getGameobjId(obj), scm_to_locale_string(rail));
-  return SCM_UNSPECIFIED;
-}
-void (*_unattachFromRail)(int32_t id);
-SCM scmUnattachFromRail(SCM obj){
-  _unattachFromRail(getGameobjId(obj));
-  return SCM_UNSPECIFIED;
-}
-
 double (*_timeSeconds)();
 SCM scmTimeSeconds(){
   return scm_from_double(_timeSeconds());
@@ -858,10 +847,6 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("sendmessage", 1, 0, 0, (void*)scmSendEventMessage);
   scm_c_define_gsubr("sendnotify", 1, 0, 0, (void*)scmSendNotify);
 
-  // rails
-  scm_c_define_gsubr("attach-rail", 2, 0, 0, (void*)scmAttachToRail);
-  scm_c_define_gsubr("unattach-rail", 1, 0, 0, (void*)scmUnattachFromRail);
-
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
   scm_c_define_gsubr("save-scene", 0, 1, 0, (void*)scmSaveScene);
 
@@ -938,8 +923,6 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message),
-  void (*attachToRail)(int32_t id, std::string rail),
-  void (*unattachFromRail)(int32_t id),
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
@@ -1016,8 +999,6 @@ void createStaticSchemeBindings(
   _sendEventMessage = sendEventMessage;
   _sendNotifyMessage = sendNotifyMessage;
 
-  _attachToRail = attachToRail;
-  _unattachFromRail = unattachFromRail;
   _timeSeconds = timeSeconds;
   _saveScene = saveScene;
 

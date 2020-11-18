@@ -65,15 +65,6 @@ struct GameObjectChannel {
   bool complete;
 };
 
-struct RailConnection {
-  std::string from;
-  std::string to;
-};
-struct GameObjectRail {
-  objid id;
-  RailConnection connection;
-};
-
 struct GameObjectScene {
   std::string scenefile;
 };
@@ -139,7 +130,6 @@ typedef std::variant<
   GameObjectLight, 
   GameObjectVoxel, 
   GameObjectChannel, 
-  GameObjectRail, 
   GameObjectScene, 
   GameObjectRoot, 
   GameObjectEmitter,
@@ -191,12 +181,6 @@ static Field voxelField = {
 static Field channelField {
   .prefix = '%',
   .type = "channel",
-};
-
-// attributes: from, to
-static Field railField {
-  .prefix = '^',
-  .type = "rail",
 };
 
 static Field sceneField {
@@ -252,7 +236,6 @@ static std::vector fields = {
   light, 
   voxelField, 
   channelField, 
-  railField, 
   sceneField, 
   rootField, 
   emitterField, 
@@ -276,7 +259,6 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(objid id, std::string from, std::string to)> onRail,
   std::function<void(std::string)> loadScene,
   std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
@@ -285,7 +267,6 @@ void addObject(
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
-  std::function<void()> removeRail, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter
 );
@@ -325,7 +306,6 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
 NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
 std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid, GameObjectObj>& mapping);
-std::map<objid, RailConnection> getRails(std::map<objid, GameObjectObj>& mapping);
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);

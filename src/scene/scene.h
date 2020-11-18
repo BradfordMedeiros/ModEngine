@@ -6,7 +6,6 @@
 #include "./scenegraph.h"
 #include "./physics.h"
 #include "./object_types.h"
-#include "./types/rails.h"
 #include "./types/emitter.h"
 #include "./scene_debug.h"
 #include "./common/mesh.h"
@@ -25,7 +24,6 @@ struct World {
   std::map<objid, Scene> scenes;
   std::map<objid, objid> idToScene;
   std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
-  RailSystem rails;
   EmitterSystem emitters;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;

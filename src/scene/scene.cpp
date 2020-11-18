@@ -102,14 +102,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, objid index)
     boundInfo = voxelObj -> voxel.boundInfo;
   }
 
-  auto railObj = std::get_if<GameObjectRail>(&gameObjV);
-  if (railObj != NULL){
-    auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
-    std::vector<BoundInfo> infos;
-    infos.push_back(railMesh.boundInfo);
-    boundInfo = getMaxUnionBoundingInfo(infos);
-  }
-
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&gameObjV);
   if (navmeshObj != NULL){
     boundInfo = navmeshObj -> mesh.boundInfo;
@@ -297,14 +289,12 @@ World createWorld(
   btIDebugDraw* debugDrawer
 ){
   auto objectMapping = getObjectMapping();
-  RailSystem rails;
   EmitterSystem emitters;
   std::set<objid> entitiesToUpdate;
 
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
-    .rails = rails,
     .emitters = emitters,
     .onObjectUpdate = onObjectUpdate,
     .onObjectCreate = onObjectCreate,
@@ -437,11 +427,6 @@ void addObjectToWorld(
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, world.scenes.at(localSceneId), id);
       },
-      [&world, &scene](objid id, std::string from, std::string to) -> void {
-        addRail(world.rails, getGameObject(scene, id).name, from, to);
-        auto railMesh =  world.meshes.at("./res/models/ui/node.obj");
-        getGameObject(scene, id).transformation = calcRailSizing(railMesh.boundInfo, getGameObject(scene, from).transformation, getGameObject(scene, to).transformation);
-      },
       [&world, sceneId, id, &interface](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
         auto childSceneId = addSceneToWorld(world, sceneToLoad, interface);
@@ -559,10 +544,6 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   removeObject(
     world.objectMapping, 
     objectId, 
-    []() -> void {
-      std::cout << "INFO: remove rail -- not yet implemented" << std::endl;
-      assert(false);
-    }, 
     [](std::string cameraName) -> void {
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
@@ -797,30 +778,6 @@ void enforceLookAt(World& world){
   }
 }
 
-void updateEntities(World& world){
-  for (auto &activeRail : world.rails.activeRails){
-    auto entityId = activeRail.id;
-    auto entityPosition = getGameObject(world, entityId).transformation.position;
-    auto entityOrientation = getGameObject(world, entityId).transformation.rotation;
-
-    if (activeRail.rail != ""){
-      auto nextRail = nextPosition(
-        world.rails, 
-        [&world](std::string value) -> glm::vec3 { 
-          auto objectId = getGameObjectByName(world, value);
-          assert(objectId.has_value());
-          return getGameObject(world, objectId.value()).transformation.position;
-        }, 
-        activeRail.rail, 
-        entityPosition, 
-        entityOrientation
-      ); 
-      activeRail.rail = nextRail.rail;
-      physicsTranslateSet(world, entityId, nextRail.position);
-    }
-  }
-}
-
 void callbackEntities(World& world){
   for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
@@ -862,7 +819,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     }
   );  
 
-  updateEntities(world);  
   if (enablePhysics){
     if (dumpPhysics){
       dumpPhysicsInfo(world.rigidbodys);
