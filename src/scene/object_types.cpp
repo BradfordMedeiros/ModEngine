@@ -352,7 +352,7 @@ void removeObject(
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&Object);
   if (heightmapObj !=NULL){
-    delete heightmapObj -> heightmap.data;
+    delete[] heightmapObj -> heightmap.data;
   }
 
   auto videoObj = std::get_if<GameObjectVideo>(&Object);
