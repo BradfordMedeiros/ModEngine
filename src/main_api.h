@@ -98,8 +98,8 @@ void setSelectionMode(bool enabled);
 
 int32_t makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId = -1, bool useSceneId = false);
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
-
 void removeObjectById(int32_t id);
+void copyObject(int32_t id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 

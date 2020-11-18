@@ -32,10 +32,13 @@ void clearSelectedIndexs(EditorContent& editor){
   };
   editor.selectedObjs = {};
 }
-void copyAllObjects(EditorContent& editor, glm::vec3 offset){
+void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject){
   std::cout << "INFO: EDITOR: COPY ALL OBJECTS" << std::endl;
+  for (auto item : editor.selectedObjs){
+    copyObject(item.id);
+  }
 }
-void mirrorAllObjects(EditorContent& editor){
+void mirrorAllObjects(EditorContent& editor, std::function<Transformation(objid)> getTransform){
   std::cout << "INFO: EDITOR: MIRROR ALL OBJECTS" << std::endl;
 }
 void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById){

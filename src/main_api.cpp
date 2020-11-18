@@ -176,6 +176,11 @@ void removeObjectById(objid id){
   removeObjectFromScene(world, id, interface);
 }
 
+void copyObject(int32_t id){
+  std::cout << "copy object: " << id << std::endl;
+  
+}
+
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
 }
