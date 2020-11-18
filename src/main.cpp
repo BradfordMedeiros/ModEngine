@@ -595,10 +595,11 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth, offset, offset, offset);
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   }else{
-    if (state.manipulatorMode == TRANSLATE){
+    auto selectedObj = state.editor.selectedObj.id;
+    if (state.manipulatorMode == TRANSLATE && selectedObj != -1){
       float snapGridSize = getSnapTranslateSize();
       if (snapGridSize > 0){
-        auto position = getGameObjectPosition(state.editor.selectedObj.id, false);
+        auto position = getGameObjectPosition(selectedObj, false);
         drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
       }

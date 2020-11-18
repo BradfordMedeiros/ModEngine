@@ -229,13 +229,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     std::cout << "INFO: multi select mode: " << state.multiselectMode << std::endl;
   }
   if (key == 261 && action == 1){   // del
-    rmAllObjects(state.editor);
   }
   if (key == 268 && action == 1){   // home
     mirrorAllObjects(state.editor);
   }
   if (key == 269 && action == 1){   // end
-    clearSelectedIndexs(state.editor);
+    rmAllObjects(state.editor, removeObjectById);
   }
 }
 

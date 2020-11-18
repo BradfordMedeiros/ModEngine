@@ -172,7 +172,7 @@ objid makeObjectAttr(std::string name, std::map<std::string, std::string> string
   return addObjectToScene(world, world.scenes.begin() -> first, name, attributes, interface);
 }
 
-void removeObjectById(int32_t id){
+void removeObjectById(objid id){
   removeObjectFromScene(world, id, interface);
 }
 

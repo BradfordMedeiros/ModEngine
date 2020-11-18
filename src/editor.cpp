@@ -38,8 +38,17 @@ void copyAllObjects(EditorContent& editor, glm::vec3 offset){
 void mirrorAllObjects(EditorContent& editor){
   std::cout << "INFO: EDITOR: MIRROR ALL OBJECTS" << std::endl;
 }
-void rmAllObjects(EditorContent& editor){
+void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById){
   std::cout << "INFO: EDITOR: RM ALL OBJECTS" << std::endl;
+  editor.selectedObj = EditorItem {
+    .id = -1,
+    .name = "",
+  };
+
+  for (auto item : editor.selectedObjs){
+    rmObjectById(item.id);
+  }
+  editor.selectedObjs = {};
 }
 
 bool isSelected(EditorContent& editor, objid id){
