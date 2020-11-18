@@ -989,15 +989,6 @@ void applyHeightmapMasking(World& world, objid id, float amount){
   }, hm.mesh);
 }
 
-std::map<std::string, std::string> getNavFields(){
-  std::map<std::string, std::string> navFields;
-  navFields[";navmesh1 > ;navmesh2"] = "100 0 0, 100 0 0; 100 5 0, 100 5 0";
-  navFields[";navmesh2 > ;navmesh1"] = "100 0 0, 0 0 0";
-  navFields[";navmesh2 > ;navmesh3"] = "200 0 0, 200 0 0";
-  navFields[";navmesh3 >;navmesh2"] = "100 0 0, 100 0 0;";  
-  return navFields;
-}
-
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
   NavGraph  navgraph { };
 

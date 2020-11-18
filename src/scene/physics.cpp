@@ -263,8 +263,3 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
   assert(hitobjects.size() == result.m_hitFractions.size());
   return hitobjects;
 }
-
-bool pointInsideBody(btRigidBody* body, glm::vec3 point){
-  assert(false);
-  return false;
-}

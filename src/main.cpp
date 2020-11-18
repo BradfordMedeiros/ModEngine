@@ -40,7 +40,6 @@
 #include "./network/network.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
-#include "./scene/recorder.h"
 #include "./worldloader.h"
 #include "./gizmo/sequencer.h"
 #include "./gizmo/keymapper.h"
@@ -763,20 +762,7 @@ void genFramebufferTexture(unsigned int *texture){
 }
 
 glm::vec3 navPosition(objid id, glm::vec3 target){
-  //return aiNavigate(world, id, target);
-  return target;
-}
-
-void save_frame(unsigned char *buf, int wrap, int xsize, int ysize, const char *filename){
-    FILE *f;
-    int i;
-    f = fopen(filename,"w");
-    fprintf(f, "P5\n%d %d\n%d\n", xsize, ysize, 255);
-
-    // writing line by line
-    for (i = 0; i < ysize; i++)
-        fwrite(buf + i * wrap, 1, xsize, f);
-    fclose(f);
+  return aiNavigate(world, id, target);
 }
 
 int main(int argc, char* argv[]){

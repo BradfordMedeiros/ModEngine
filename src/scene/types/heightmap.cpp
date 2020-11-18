@@ -74,12 +74,6 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   std::vector<int> frequency;
   std::vector<unsigned int> indices;
 
-  glm::vec3 position;
-  glm::vec3 normal;
-  glm::vec2 texCoords;
-  int32_t boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
-  float boneWeights[NUM_BONES_PER_VERTEX]; 
-
   for (int h = 0; h < heightmap.height; h++){
     for (int w = 0; w < heightmap.width; w++){
       Vertex vertex {

@@ -48,5 +48,5 @@ void saveScreenshot(std::string filepath){
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
   saveTextureData(filepath, data, w, h);
-  delete data;
+  delete[] data;
 }
