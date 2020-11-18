@@ -14,15 +14,24 @@ extern glm::mat4 view;
 extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
 
+void processManipulatorForId(objid id){
+  if (id == -1 || !idExists(world, id)){
+    return;
+  }
+  auto selectObject = getGameObject(world, id); 
+  if (state.manipulatorMode == TRANSLATE){
+    applyPhysicsTranslation(world, id, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+  }else if (state.manipulatorMode == SCALE){
+    applyPhysicsScaling(world, id, selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+  }else if (state.manipulatorMode == ROTATE){
+    applyPhysicsRotation(world, id, selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+  } 
+}
+
 void processManipulator(){
-  if (state.enableManipulator && selected(state.editor) != -1 && idExists(world, selected(state.editor))){
-    auto selectObject = getGameObject(world, selected(state.editor)); 
-    if (state.manipulatorMode == TRANSLATE){
-      applyPhysicsTranslation(world, selected(state.editor), selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
-    }else if (state.manipulatorMode == SCALE){
-      applyPhysicsScaling(world, selected(state.editor), selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
-    }else if (state.manipulatorMode == ROTATE){
-      applyPhysicsRotation(world, selected(state.editor), selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+  if (state.enableManipulator){
+    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+      processManipulatorForId(id);
     }
   }
 }
@@ -137,6 +146,24 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   });
 }
 
+void handleSnapEasyLeft(objid id){
+  if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
+    setGameObjectPosition(id, snapTranslateUp(getGameObjectPosition(id, false), state.manipulatorAxis));
+  }else if (state.manipulatorMode == ROTATE){
+    setGameObjectRotation(id, snapAngleDown(getGameObjectRotation(id, false), state.manipulatorAxis));
+  }else if (state.manipulatorMode == SCALE){
+    setGameObjectScale(id, snapScaleDown(getGameObjectScale(id), state.manipulatorAxis));
+  }
+}
+void handleSnapEasyRight(objid id){
+  if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
+    setGameObjectPosition(id, snapTranslateDown(getGameObjectPosition(id, false), state.manipulatorAxis));
+  }else if (state.manipulatorMode == ROTATE){
+    setGameObjectRotation(id, snapAngleUp(getGameObjectRotation(id, false), state.manipulatorAxis));
+  }else if (state.manipulatorMode == SCALE){
+    setGameObjectScale(id, snapScaleUp(getGameObjectScale(id), state.manipulatorAxis));
+  }
+}
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
@@ -146,21 +173,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   } 
 
   if (key == GLFW_KEY_LEFT && action == 1 && selected(state.editor) != -1){
-    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setGameObjectPosition(selected(state.editor), snapTranslateUp(getGameObjectPosition(selected(state.editor), false), state.manipulatorAxis));
-    }else if (state.manipulatorMode == ROTATE){
-      setGameObjectRotation(selected(state.editor), snapAngleDown(getGameObjectRotation(selected(state.editor), false), state.manipulatorAxis));
-    }else if (state.manipulatorMode == SCALE){
-      setGameObjectScale(selected(state.editor), snapScaleDown(getGameObjectScale(selected(state.editor)), state.manipulatorAxis));
+    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+      handleSnapEasyLeft(id);
     }
   }
   if (key == GLFW_KEY_RIGHT && action == 1 && selected(state.editor) != -1){
-    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setGameObjectPosition(selected(state.editor), snapTranslateDown(getGameObjectPosition(selected(state.editor), false), state.manipulatorAxis));
-    }else if (state.manipulatorMode == ROTATE){
-      setGameObjectRotation(selected(state.editor), snapAngleUp(getGameObjectRotation(selected(state.editor), false), state.manipulatorAxis));
-    }else if (state.manipulatorMode == SCALE){
-      setGameObjectScale(selected(state.editor), snapScaleUp(getGameObjectScale(selected(state.editor)), state.manipulatorAxis));
+    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+      handleSnapEasyRight(id);
     }
   }
   if (key == GLFW_KEY_UP && action == 1 && selected(state.editor) != -1){
