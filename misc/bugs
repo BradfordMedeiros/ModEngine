@@ -1,6 +1,16 @@
-heightmaps:
-1. recalculate vertex normals for when update heightmap 
-2. heightmaps have arbitrary limits for height 
 
-potential solutions for heightmap clipping thing:
-create sphere thing , determine clipping, get position, and then math to figure out which element of heightmap 
+general:
+- name scoping fucked up
+- timing in general
+
+horrible but "correct"
+- full scene traverse to get position (fix with simple object representation, hierachy is just opt constraint graph)
+
+object specific:
+heightmaps:
+- need to recalculate vertex normals for when update heightmap 
+- heightmaps have arbitrary limits for height 
+
+portals:
+- portals dont handle occulusion culling 
+

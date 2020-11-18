@@ -1,51 +1,50 @@
+Features:
 
-next:
-  - more voxel work
-    - get block select working again
-    - single texture per block?
-    - create brush to expand up down
-    - create brush to expand left right
-    - create option to connect the blocks?
+easy
+11/18
+- emitter system upgrades (more movement types)
 
-musts:
+11/19
+* heightmap brushes
 
-- fix animation and make sure it's good 
-  - set poses in game
-  - ragdoll?
+11/20
+* automatic world chunking
 
-- voxel for world creation
-  - different brushes to help with world creation
+med
+* fix memory reference incorrectness for scheme
+* ai system goals 
+- recorder working
+* shadowmapping
+- better movie playback
+  - add audio 
 
-- ai 
-  - navmeshes
-  - navmeshes have transitions to allow special actions to make the transition
+hard
+* separate scenegraph from object rendering
+* fix animation system
+  - allow model posing
+  - inverse kinematics
+  - cleanup physics code
+- fix networking code
 
 
-nice to have/less immediate:
-  - shadow mapping
-  - lightmaps 
-  - movie playback textures
-  - better font rendering
+todo
+- better framepacing
+- performance profiling
+- heighmaps don't recalculate normals
+- serialization of attributes incomplete/ broken
+- scoping of scenes (all objects are in shared namespace)
+ - copy/pasta  => these are harder b/c serialization bugs 
+  - mirror
 
-separate scenegraph from object rendering
-fix voxel rendering
-voxels can use any texture
-fix animation system
-allow model posing
-network attributes
-heightmap brushes
-recorder working
-improve networking code
-sounds use positional data
-fix memory reference incorrectness for scheme
-emitter system upgrades (more movement types)
-automatic world chunking
-ai system goals 
-windows build
-openvr integration
-c++ plugin system 
-shadowmapping
-lightmapping
-movie playback
-
-ease of use - multi-select, copy pasta, mirror
+eventually:
+- c++ plugin system 
+- lightmapping
+- triplanar mapping
+- normal mapping
+- pbr 
+- destructable voxels
+- cool physics toys
+- windows build
+- openvr integration
+- ragdoll
+- better fonts

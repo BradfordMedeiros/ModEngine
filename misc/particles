@@ -3,16 +3,16 @@ A particle system in my view is about:
 
 - spawning objects
 - unspawning objects
-   - based on time
-   - based on max count
-   - how fast?
-- should work with "any" object type (why only 2D quads?)
-- resource efficient (reuse objects vs destroying them)
-- be able to call events on there lifecycle (eg if it hits the ground, spawn another particle?)
+   - [X] based on time
+   - [X] based on max count
+   - [X] how fast?
+- [X] should work with "any" object type (why only 2D quads?)
+- [O] resource efficient (reuse objects vs destroying them)
+- [O] be able to call events on there lifecycle (eg if it hits the ground, spawn another particle?)
     - eg rain causes a rainsplatter effect on the ground
 - be able to vary some attribute values (scale? position?) 
-    - linearly
-    - random
-    - according to a distribution?
+    - [O] linearly
+    - [O] random
+    - [O] according to a distribution?
 
-- spawn objects w/ custom attribute overrides!
+- [X] spawn objects w/ custom attribute overrides!
