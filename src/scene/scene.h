@@ -51,8 +51,8 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
 void removeAllScenesFromWorld(World& world, SysInterface interface);
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface);
-
 void removeObjectFromScene(World& world, objid id, SysInterface interface);
+void copyObjectToScene(World& world, objid id, SysInterface interface);
 
 Properties getProperties(World& world, objid id);
 void setProperties(World& world, objid id, Properties& properties);
@@ -61,7 +61,7 @@ std::map<std::string, std::string> getAttributes(World& world, objid id);
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr);
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
-std::string serializeObject(World& world, objid id);
+std::string serializeObject(World& world, objid id, std::string overridename = "");
 
 void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled);
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos);
@@ -107,7 +107,6 @@ struct LightInfo {
 
 std::vector<LightInfo> getLightInfo(World& world);
 
-
 struct PortalInfo {
   glm::vec3 cameraPos;
   glm::quat cameraRotation;
@@ -127,4 +126,3 @@ void applyHeightmapMasking(World& world, objid id, float amount);
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 
 #endif
-

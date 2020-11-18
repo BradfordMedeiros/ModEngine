@@ -177,8 +177,7 @@ void removeObjectById(objid id){
 }
 
 void copyObject(int32_t id){
-  std::cout << "copy object: " << id << std::endl;
-  
+  copyObjectToScene(world, id, interface);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){

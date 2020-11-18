@@ -47,7 +47,7 @@ struct SceneDeserialization {
   std::map<std::string, SerializationObject> serialObjs;
 };
 
-std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id);
+std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id, std::string name = "");
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 SceneDeserialization deserializeScene(
   std::string content, 

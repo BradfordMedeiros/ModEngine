@@ -193,14 +193,14 @@ bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }
 
-std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id){
+std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id, std::string name){
   std::string sceneData = "";
   auto gameobjecth = scene.idToGameObjectsH.at(id);
   if (gameobjecth.groupId != id){
     return sceneData;
   }
   GameObject gameobject = scene.idToGameObjects.at(id);
-  std::string gameobjectName = gameobject.name;
+  std::string gameobjectName = name == "" ? gameobject.name : name;
   
   if (gameobjecth.children.size() > 0){
     std::vector<std::string> childnames;
@@ -273,7 +273,7 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
     if (id == scene.rootId){
       continue;
     }
-    sceneData = sceneData + serializeObject(scene, getAdditionalFields, includeIds, id);
+    sceneData = sceneData + serializeObject(scene, getAdditionalFields, includeIds, id, "");
   }
   return sceneData;
 }
