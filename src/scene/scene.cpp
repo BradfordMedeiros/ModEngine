@@ -797,19 +797,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       auto id = getGameObject(world, name).id;
       auto sceneId = world.idToScene.at(id);
-
-      std::map<std::string, double> numAttributes;
-      std::map<std::string, glm::vec3> vecAttributes;
-      vecAttributes["scale"] = glm::vec3(0.4f, 0.4f, 0.4f);
-      vecAttributes["physics_gravity"] = glm::vec3(0.f, -1.f, 0.f);
-      vecAttributes["position"] = fullTransformation(world, emitterNodeId).position;
-
-      GameobjAttributes attributes {
-        .stringAttributes = particleFields,
-        .numAttributes = numAttributes,
-        .vecAttributes = vecAttributes,
-      };
-
+      std::cout << "INFO: WARNING: EMITTER NOT SPONSORING TEMPLATE ATTRIBUTES PROPERLY!" << std::endl;
+      auto attributes = fieldsToAttributes(particleFields);
+      attributes.vecAttributes["position"] = fullTransformation(world, emitterNodeId).position;
       objid objectAdded = addObjectToScene(world, sceneId, getUniqueObjectName(), attributes, interface);
       return objectAdded;
     }, 

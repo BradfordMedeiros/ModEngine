@@ -13,6 +13,11 @@ void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, fl
     .spawnrate = spawnrate,
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
+    .delta =  EmitterDelta {
+      .hasDelta = false,
+      .attributeName = "position",
+      .value = glm::vec3(0.1f, 0.f, 0.f),
+    }
   };
   system.emitters.push_back(emitter);
 }
@@ -63,7 +68,19 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
   return countUnderTarget && enoughTimePassed;
 }
 
-void updateEmitters(EmitterSystem& system, float currentTime, std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, std::function<void(objid)> rmParticle){   
+void updateEmitters(
+  EmitterSystem& system, 
+  float currentTime, 
+  std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, 
+  std::function<void(objid)> rmParticle
+){   
+  for (auto &emitter : system.emitters){
+    for (auto particleId : emitter.particles){
+      std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
+    }
+  }
+
+
   for (auto &emitter : system.emitters){
     if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
       emitter.currentParticles-= 1;
@@ -71,11 +88,10 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
 
       if (emitter.particles.size() > 0){
         auto particleId = emitter.particles.front();
-        emitter.particles.pop();
+        emitter.particles.pop_front();
         rmParticle(particleId);
         std::cout << "INFO: particles: removing particle" << std::endl;
       }
-
     }
   }
 
@@ -83,7 +99,7 @@ void updateEmitters(EmitterSystem& system, float currentTime, std::function<obji
     if (shouldSpawnParticle(emitter, currentTime)){
       emitter.currentParticles+= 1; 
       auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
-      emitter.particles.push(particleId);
+      emitter.particles.push_back(particleId);
       emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
       std::cout << "INFO: particles: adding particle" << std::endl;
     }

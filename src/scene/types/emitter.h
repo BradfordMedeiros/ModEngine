@@ -6,7 +6,16 @@
 #include <iostream>
 #include <functional>
 #include <map>
+#include <variant>
 #include "../../common/util.h"
+
+typedef std::variant<glm::vec3, std::string, float> EmitterValue;
+struct EmitterDelta {
+  bool hasDelta;
+  std::string attributeName;
+  EmitterValue value;
+};
+
 
 struct Emitter {
   std::string name;
@@ -15,10 +24,11 @@ struct Emitter {
   float lastSpawnTime;
   unsigned int targetParticles;
   unsigned int currentParticles;
-  std::queue<objid> particles;
+  std::deque<objid> particles;
   float spawnrate;
   float lifetime;
   std::map<std::string, std::string> particleAttributes;
+  EmitterDelta delta;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;

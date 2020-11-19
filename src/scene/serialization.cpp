@@ -251,3 +251,17 @@ physicsOpts defaultPhysicsOpts(GameobjAttributes attributes){
   };
   return defaultOption;
 }
+
+GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
+  std::cout << "INFO: SERIALIZATION WARNING: -- FIELD TO ATTRIBUTES NOT YET IMPLEMENTED" << std::endl;
+  std::map<std::string, double> numAttributes;
+  std::map<std::string, glm::vec3> vecAttributes;
+  vecAttributes["physics_gravity"] = glm::vec3(0.f, -1.f, 0.f);
+  vecAttributes["position"] = glm::vec3(0.f, 0.f, 0.f);
+  GameobjAttributes attributes {
+    .stringAttributes = fields,
+    .numAttributes = numAttributes,
+    .vecAttributes = vecAttributes,
+  };
+  return attributes; 
+}

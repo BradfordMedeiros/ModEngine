@@ -69,5 +69,6 @@ ParsedContent parseFormat(std::string content);
 SerializationObject getDefaultObject(std::string name, std::string layer, bool enablePhysics);
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
 physicsOpts defaultPhysicsOpts(GameobjAttributes attributes);
+GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields);
 
 #endif
