@@ -121,8 +121,6 @@ SerializationObject getDefaultObject2(std::string name, std::string layer, bool 
     .isStatic = true,
     .hasCollisions = true,
     .shape = AUTOSHAPE,
-    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
-    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
     .gravity = glm::vec3(0.f, -9.81f, 0.f),
     .friction = 1.0f,
     .restitution = 0.f,
@@ -134,7 +132,6 @@ SerializationObject getDefaultObject2(std::string name, std::string layer, bool 
     .hasId = false,
     .id = -1,
     .name = name,
-    .scale = glm::vec3(1.f, 1.f, 1.f),
     .physics = physics,
     .layer = layer,
   };
@@ -208,16 +205,16 @@ void safeStringSet(std::string* value, const char* key, GameobjAttributes& attri
   }
 }
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
+  auto identityVec = glm::vec3(1.f, 1.f, 1.f);
   auto defaultPosition = glm::vec3(0.f, 0.f, 0.f);
   safeVecSet(&object.position, "position", attributes, &defaultPosition);
-  
-  safeVecSet(&object.scale, "scale", attributes, NULL);
-  safeVecSet(&object.physics.angularFactor, "physics_angle", attributes, NULL);
-  safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, NULL);
+
+  safeVecSet(&object.scale, "scale", attributes, &identityVec);
+  safeVecSet(&object.physics.angularFactor, "physics_angle", attributes, &identityVec);
+  safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, &identityVec);
   safeVecSet(&object.physics.gravity, "physics_gravity", attributes, NULL);
 
-  auto defaultTint = glm::vec3(1.f, 1.f, 1.f);
-  safeVecSet(&object.tint, "tint", attributes, &defaultTint);
+  safeVecSet(&object.tint, "tint", attributes, &identityVec);
 
   safeFloatSet(&object.physics.friction, "physics_friction", attributes);
   safeFloatSet(&object.physics.restitution, "physics_restitution", attributes);
