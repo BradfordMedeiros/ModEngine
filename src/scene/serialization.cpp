@@ -128,13 +128,21 @@ bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::str
   }
   return false;
 }
-
-
 bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
   auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed" };
   for (auto field : fields){
     if (attribute == field){
       attributes.numAttributes[attribute] = std::atof(payload.c_str());
+      return true;
+    }
+  }
+  return false;
+}
+bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "lookat", "script", "fragshader" };
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.stringAttributes[attribute] = payload;
       return true;
     }
   }
@@ -150,6 +158,11 @@ void safeFloatSet(float* value, const char* key, GameobjAttributes& attributes){
     *value = attributes.numAttributes.at(key);
   }
 }
+void safeStringSet(std::string* value, const char* key, GameobjAttributes& attributes){
+  if (attributes.stringAttributes.find(key) != attributes.stringAttributes.end()){
+    *value = attributes.stringAttributes.at(key);
+  }
+}
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
   safeVecSet(&object.position, "position", attributes);
   safeVecSet(&object.scale, "scale", attributes);
@@ -163,11 +176,12 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeFloatSet(&object.physics.mass, "physics_mass", attributes);
   safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes);
 
-
+  safeStringSet(&object.lookat, "lookat", attributes);
+  safeStringSet(&object.script, "script", attributes);
+  safeStringSet(&object.fragshader, "fragshader", attributes);
 
 
 }
-
 
 
 GameobjAttributes getDefaultAttributes() {
@@ -221,9 +235,12 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (addedVecField){
       continue;
     }
-
     bool addedFloatField = addFloatFields(objectAttributes.at(token.target), token.attribute, token.payload);
     if (addedFloatField){
+      continue;
+    }
+    bool addedStringField = addStringFields(objectAttributes.at(token.target), token.attribute, token.payload);
+    if (addedStringField){
       continue;
     }
 
@@ -256,18 +273,6 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       continue;
     }
 
-    if (token.attribute == "lookat"){
-      objects.at(token.target).lookat = token.payload;
-      continue;
-    }
-    if (token.attribute == "script"){
-      objects.at(token.target).script = token.payload;
-      continue;
-    }
-    if (token.attribute == "fragshader"){
-      objects.at(token.target).fragshader = token.payload;
-      continue;
-    }
     if (token.attribute == "net" && token.payload == "sync"){
       objects.at(token.target).netsynchronize = true;
       continue;
