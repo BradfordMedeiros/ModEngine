@@ -139,7 +139,7 @@ bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::s
   return false;
 }
 bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "net"};
+  auto fields = { "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net"};
   for (auto field : fields){
     if (attribute == field){
       attributes.stringAttributes[attribute] = payload;
@@ -213,11 +213,24 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
     object.physics.isStatic = true;
   }
 
+  if (attributes.stringAttributes.find("physics_shape") != attributes.stringAttributes.end()){
+    auto value = attributes.stringAttributes.at("physics_shape");
+    if (value == "shape_sphere"){
+      object.physics.shape = SPHERE;
+    }else if (value == "shape_box"){
+      object.physics.shape = BOX;
+    }else if (value == "shape_auto"){
+      object.physics.shape = AUTOSHAPE;
+    }
+  }
+
   if (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()){
     object.netsynchronize = attributes.stringAttributes.at("net") == "sync";
   }
 
 }
+
+
 
 
 
@@ -261,19 +274,6 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       continue;
     }
   
-    if (token.attribute == "physics_shape"){
-      if (token.payload == "shape_sphere"){
-        objects.at(token.target).physics.shape = SPHERE;
-      }
-      if (token.payload == "shape_box"){
-        objects.at(token.target).physics.shape = BOX;
-      }
-      if (token.payload == "shape_auto"){
-        objects.at(token.target).physics.shape = AUTOSHAPE;
-      }
-      continue;
-    }
-
     objects.at(token.target).additionalFields[token.attribute] = token.payload;
   }
 
