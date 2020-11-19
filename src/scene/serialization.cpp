@@ -118,12 +118,38 @@ std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
+bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "tint"};
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.vecAttributes[attribute] = parseVec(payload);
+      return true;
+    }
+  }
+  return false;
+}
+
+
+bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed" };
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.numAttributes[attribute] = std::atof(payload.c_str());
+      return true;
+    }
+  }
+  return false;
+}
 void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes){
   if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
     *value = attributes.vecAttributes.at(key);
   }
 }
-
+void safeFloatSet(float* value, const char* key, GameobjAttributes& attributes){
+  if (attributes.numAttributes.find(key) != attributes.numAttributes.end()){
+    *value = attributes.numAttributes.at(key);
+  }
+}
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
   safeVecSet(&object.position, "position", attributes);
   safeVecSet(&object.scale, "scale", attributes);
@@ -131,7 +157,17 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeVecSet(&object.physics.linearFactor, "physics_linear", attributes);
   safeVecSet(&object.physics.gravity, "physics_gravity", attributes);
   safeVecSet(&object.tint, "tint", attributes);
+
+  safeFloatSet(&object.physics.friction, "physics_friction", attributes);
+  safeFloatSet(&object.physics.restitution, "physics_restitution", attributes);
+  safeFloatSet(&object.physics.mass, "physics_mass", attributes);
+  safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes);
+
+
+
+
 }
+
 
 
 GameobjAttributes getDefaultAttributes() {
@@ -148,16 +184,8 @@ GameobjAttributes getDefaultAttributes() {
 
 }
 
-bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "tint"};
-  for (auto field : fields){
-    if (attribute == field){
-      attributes.vecAttributes[attribute] = parseVec(payload);
-      return true;
-    }
-  }
-  return false;
-}
+
+
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, SerializationObject> objects;
@@ -189,8 +217,13 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       continue;
     }
 
-    bool addedField = addVecFields(objectAttributes.at(token.target), token.attribute, token.payload);
-    if (addedField){
+    bool addedVecField = addVecFields(objectAttributes.at(token.target), token.attribute, token.payload);
+    if (addedVecField){
+      continue;
+    }
+
+    bool addedFloatField = addFloatFields(objectAttributes.at(token.target), token.attribute, token.payload);
+    if (addedFloatField){
       continue;
     }
 
@@ -220,23 +253,6 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     }
     if (token.attribute == "physics_collision" && token.payload == "nocollide"){
       objects.at(token.target).physics.hasCollisions = false;
-      continue;
-    }
-
-    if (token.attribute == "physics_friction"){
-      objects.at(token.target).physics.friction = std::atof(token.payload.c_str());
-      continue;
-    }
-    if (token.attribute == "physics_restitution"){
-      objects.at(token.target).physics.restitution = std::atof(token.payload.c_str());
-      continue;
-    }
-    if (token.attribute == "physics_mass"){
-      objects.at(token.target).physics.mass =  std::atof(token.payload.c_str());
-      continue;
-    }
-    if (token.attribute == "physics_maxspeed"){
-      objects.at(token.target).physics.maxspeed = std::atof(token.payload.c_str());
       continue;
     }
 
