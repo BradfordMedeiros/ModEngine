@@ -113,6 +113,35 @@ SerializationObject getDefaultObject(std::string name, std::string layer, bool e
   };
   return newObject;
 }
+SerializationObject getDefaultObject2(std::string name, std::string layer, bool enablePhysics){
+  assert(name.find(',') == std::string::npos);
+
+  physicsOpts physics {
+    .enabled = enablePhysics,
+    .isStatic = true,
+    .hasCollisions = true,
+    .shape = AUTOSHAPE,
+    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
+    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
+    .gravity = glm::vec3(0.f, -9.81f, 0.f),
+    .friction = 1.0f,
+    .restitution = 0.f,
+    .mass = 1.f,
+    .maxspeed = -1.f,
+  };
+
+  SerializationObject newObject {
+    .hasId = false,
+    .id = -1,
+    .name = name,
+    .position = glm::vec3(0.f, 0.f, 0.f),
+    .scale = glm::vec3(1.f, 1.f, 1.f),
+    .rotation = glm::identity<glm::quat>(),
+    .physics = physics,
+    .layer = layer,
+  };
+  return newObject;
+}
 
 std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
@@ -163,9 +192,11 @@ bool addFields(GameobjAttributes& attributes, std::string attribute, std::string
   }
   return false;
 }
-void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes){
+void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes, glm::vec3* defaultValue){
   if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
     *value = attributes.vecAttributes.at(key);
+  }else if (defaultValue != NULL){
+    *value = *defaultValue;
   }
 }
 void safeFloatSet(float* value, const char* key, GameobjAttributes& attributes){
@@ -179,12 +210,14 @@ void safeStringSet(std::string* value, const char* key, GameobjAttributes& attri
   }
 }
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
-  safeVecSet(&object.position, "position", attributes);
-  safeVecSet(&object.scale, "scale", attributes);
-  safeVecSet(&object.physics.angularFactor, "physics_angle", attributes);
-  safeVecSet(&object.physics.linearFactor, "physics_linear", attributes);
-  safeVecSet(&object.physics.gravity, "physics_gravity", attributes);
-  safeVecSet(&object.tint, "tint", attributes);
+  safeVecSet(&object.position, "position", attributes, NULL);
+  safeVecSet(&object.scale, "scale", attributes, NULL);
+  safeVecSet(&object.physics.angularFactor, "physics_angle", attributes, NULL);
+  safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, NULL);
+  safeVecSet(&object.physics.gravity, "physics_gravity", attributes, NULL);
+
+  auto defaultTint = glm::vec3(1.f, 1.f, 1.f);
+  safeVecSet(&object.tint, "tint", attributes, &defaultTint);
 
   safeFloatSet(&object.physics.friction, "physics_friction", attributes);
   safeFloatSet(&object.physics.restitution, "physics_restitution", attributes);
@@ -251,7 +284,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject(token.target, token.layer, true);
+      objects[token.target] = getDefaultObject2(token.target, token.layer, true);
       objectAttributes[token.target] = GameobjAttributes {};
     }
 
@@ -259,7 +292,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       auto children = parseChildren(token.payload);
       for (auto child : children){
         if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject(child, token.layer, true);
+          objects[child] = getDefaultObject2(child, token.layer, true);
           objectAttributes[child] = GameobjAttributes {};
         }
       }
