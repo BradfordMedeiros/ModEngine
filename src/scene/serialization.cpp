@@ -139,7 +139,7 @@ bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::s
   return false;
 }
 bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "lookat", "script", "fragshader" };
+  auto fields = { "lookat", "script", "fragshader", "physics", "physics_collision"};
   for (auto field : fields){
     if (attribute == field){
       attributes.stringAttributes[attribute] = payload;
@@ -180,6 +180,17 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeStringSet(&object.script, "script", attributes);
   safeStringSet(&object.fragshader, "fragshader", attributes);
 
+  if (attributes.stringAttributes.find("physics") != attributes.stringAttributes.end()){
+    object.physics.enabled = attributes.stringAttributes.at("physics") == "enabled";
+  }else{
+    object.physics.enabled = true;
+  }
+  
+  if (attributes.stringAttributes.find("physics_collision") != attributes.stringAttributes.end()){
+    object.physics.hasCollisions = !(attributes.stringAttributes.at("physics_collision") == "nocollide");
+  }else{
+    object.physics.hasCollisions = true;
+  }
 
 }
 
@@ -248,10 +259,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).rotation = parseQuat(token.payload);
       continue;
     }
-    if (token.attribute == "physics"){
-      objects.at(token.target).physics.enabled = token.payload == "enabled";
-      continue;
-    }
+  
     if (token.attribute == "physics_type"){
       objects.at(token.target).physics.isStatic = token.payload != "dynamic";
       continue;
@@ -266,10 +274,6 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       if (token.payload == "shape_auto"){
         objects.at(token.target).physics.shape = AUTOSHAPE;
       }
-      continue;
-    }
-    if (token.attribute == "physics_collision" && token.payload == "nocollide"){
-      objects.at(token.target).physics.hasCollisions = false;
       continue;
     }
 
