@@ -139,7 +139,7 @@ bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::s
   return false;
 }
 bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net"};
+  auto fields = { "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net", "id"};
   for (auto field : fields){
     if (attribute == field){
       attributes.stringAttributes[attribute] = payload;
@@ -228,6 +228,11 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
     object.netsynchronize = attributes.stringAttributes.at("net") == "sync";
   }
 
+  if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
+    object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
+    object.hasId = true;
+  }
+
 }
 
 
@@ -258,11 +263,6 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       continue;
     }
 
-    if (token.attribute == "id"){
-      objects.at(token.target).id = std::atoi(token.payload.c_str());   
-      objects.at(token.target).hasId = true;
-      continue;
-    }
 
     bool addedField = addFields(objectAttributes.at(token.target), token.attribute, token.payload);
     if (addedField){
