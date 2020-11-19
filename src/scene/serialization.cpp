@@ -118,14 +118,57 @@ std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
+void safeSet(glm::vec3* value, const char* key, GameobjAttributes& attributes){
+  if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
+    *value = attributes.vecAttributes.at(key);
+  }
+}
+
+void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
+  safeSet(&object.position, "position", attributes);
+  safeSet(&object.scale, "scale", attributes);
+  safeSet(&object.physics.angularFactor, "physics_angle", attributes);
+  safeSet(&object.physics.linearFactor, "physics_linear", attributes);
+  safeSet(&object.physics.gravity, "physics_gravity", attributes);
+  safeSet(&object.tint, "tint", attributes);
+}
+
+
+GameobjAttributes getDefaultAttributes() {
+  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, double> numAttributes;
+  std::map<std::string, glm::vec3> vecAttributes; 
+
+  GameobjAttributes attributes {
+    .stringAttributes = stringAttributes,
+    .numAttributes = numAttributes,
+    .vecAttributes = vecAttributes,
+  };
+  return attributes;
+
+}
+
+bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "tint"};
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.vecAttributes[attribute] = parseVec(payload);
+      return true;
+    }
+  }
+  return false;
+}
+
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, SerializationObject> objects;
+  std::map<std::string, GameobjAttributes> objectAttributes;
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
       objects[token.target] = getDefaultObject(token.target, token.layer, true);
+      objectAttributes[token.target] = getDefaultAttributes();
     }
 
     if (token.attribute == "child"){
@@ -133,6 +176,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       for (auto child : children){
         if (objects.find(child) == objects.end()){
           objects[child] = getDefaultObject(child, token.layer, true);
+          objectAttributes[child] = getDefaultAttributes();
         }
       }
       objects.at(token.target).children = children;
@@ -144,14 +188,12 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).hasId = true;
       continue;
     }
-    if (token.attribute == "position"){
-      objects.at(token.target).position = parseVec(token.payload);
+
+    bool addedField = addVecFields(objectAttributes.at(token.target), token.attribute, token.payload);
+    if (addedField){
       continue;
     }
-    if (token.attribute == "scale"){
-      objects.at(token.target).scale = parseVec(token.payload);
-      continue;
-    }
+
     if (token.attribute == "rotation"){
       objects.at(token.target).rotation = parseQuat(token.payload);
       continue;
@@ -180,18 +222,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).physics.hasCollisions = false;
       continue;
     }
-    if (token.attribute == "physics_angle"){
-      objects.at(token.target).physics.angularFactor = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "physics_linear"){
-      objects.at(token.target).physics.linearFactor = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "physics_gravity"){
-      objects.at(token.target).physics.gravity = parseVec(token.payload);
-      continue;
-    }
+
     if (token.attribute == "physics_friction"){
       objects.at(token.target).physics.friction = std::atof(token.payload.c_str());
       continue;
@@ -225,11 +256,11 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       objects.at(token.target).netsynchronize = true;
       continue;
     }
-    if (token.attribute == "tint"){
-      objects.at(token.target).tint = parseVec(token.payload);
-      continue;
-    }
     objects.at(token.target).additionalFields[token.attribute] = token.payload;
+  }
+
+  for (auto &[name, serialObj] : objects){
+    setSerialObjFromAttr(serialObj, objectAttributes.at(name));
   }
   return objects;
 }
