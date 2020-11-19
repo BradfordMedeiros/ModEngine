@@ -6,16 +6,13 @@
 #include <iostream>
 #include <functional>
 #include <map>
-#include <variant>
 #include "../../common/util.h"
 
-typedef std::variant<glm::vec3, std::string, float> EmitterValue;
 struct EmitterDelta {
   bool hasDelta;
   std::string attributeName;
-  EmitterValue value;
+  AttributeValue value;
 };
-
 
 struct Emitter {
   std::string name;

@@ -11,6 +11,7 @@
 #include <sstream>
 #include <glm/gtc/quaternion.hpp>
 #include <stdlib.h>    
+#include <variant>
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
@@ -53,5 +54,7 @@ struct HitObject {
   objid id;
   glm::vec3 point;
 };
+
+typedef std::variant<glm::vec3, std::string, float> AttributeValue;
 
 #endif
