@@ -118,19 +118,19 @@ std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
-void safeSet(glm::vec3* value, const char* key, GameobjAttributes& attributes){
+void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes){
   if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
     *value = attributes.vecAttributes.at(key);
   }
 }
 
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
-  safeSet(&object.position, "position", attributes);
-  safeSet(&object.scale, "scale", attributes);
-  safeSet(&object.physics.angularFactor, "physics_angle", attributes);
-  safeSet(&object.physics.linearFactor, "physics_linear", attributes);
-  safeSet(&object.physics.gravity, "physics_gravity", attributes);
-  safeSet(&object.tint, "tint", attributes);
+  safeVecSet(&object.position, "position", attributes);
+  safeVecSet(&object.scale, "scale", attributes);
+  safeVecSet(&object.physics.angularFactor, "physics_angle", attributes);
+  safeVecSet(&object.physics.linearFactor, "physics_linear", attributes);
+  safeVecSet(&object.physics.gravity, "physics_gravity", attributes);
+  safeVecSet(&object.tint, "tint", attributes);
 }
 
 
