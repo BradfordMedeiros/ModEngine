@@ -134,9 +134,7 @@ SerializationObject getDefaultObject2(std::string name, std::string layer, bool 
     .hasId = false,
     .id = -1,
     .name = name,
-    .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
-    .rotation = glm::identity<glm::quat>(),
     .physics = physics,
     .layer = layer,
   };
@@ -210,7 +208,9 @@ void safeStringSet(std::string* value, const char* key, GameobjAttributes& attri
   }
 }
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
-  safeVecSet(&object.position, "position", attributes, NULL);
+  auto defaultPosition = glm::vec3(0.f, 0.f, 0.f);
+  safeVecSet(&object.position, "position", attributes, &defaultPosition);
+  
   safeVecSet(&object.scale, "scale", attributes, NULL);
   safeVecSet(&object.physics.angularFactor, "physics_angle", attributes, NULL);
   safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, NULL);
@@ -268,6 +268,8 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
 
   if (attributes.stringAttributes.find("rotation") != attributes.stringAttributes.end()){
     object.rotation = parseQuat(attributes.stringAttributes.at("rotation"));
+  }else{
+    object.rotation = glm::identity<glm::quat>();
   }
 
 }
