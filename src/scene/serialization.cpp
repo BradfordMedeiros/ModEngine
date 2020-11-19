@@ -148,6 +148,21 @@ bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::
   }
   return false;
 }
+bool addFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  bool addedVecField = addVecFields(attributes, attribute, payload);
+  if (addedVecField){
+    return true;
+  }
+  bool addedFloatField = addFloatFields(attributes, attribute, payload);
+  if (addedFloatField){
+    return true;
+  }
+  bool addedStringField = addStringFields(attributes, attribute, payload);
+  if (addedStringField){
+    return true;
+  }
+  return false;
+}
 void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes){
   if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
     *value = attributes.vecAttributes.at(key);
@@ -204,23 +219,6 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
 
 }
 
- 
-
-GameobjAttributes getDefaultAttributes() {
-  std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, double> numAttributes;
-  std::map<std::string, glm::vec3> vecAttributes; 
-
-  GameobjAttributes attributes {
-    .stringAttributes = stringAttributes,
-    .numAttributes = numAttributes,
-    .vecAttributes = vecAttributes,
-  };
-  return attributes;
-
-}
-
-
 
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
@@ -232,7 +230,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
 
     if (objects.find(token.target) == objects.end()) {
       objects[token.target] = getDefaultObject(token.target, token.layer, true);
-      objectAttributes[token.target] = getDefaultAttributes();
+      objectAttributes[token.target] = GameobjAttributes {};
     }
 
     if (token.attribute == "child"){
@@ -240,7 +238,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       for (auto child : children){
         if (objects.find(child) == objects.end()){
           objects[child] = getDefaultObject(child, token.layer, true);
-          objectAttributes[child] = getDefaultAttributes();
+          objectAttributes[child] = GameobjAttributes {};
         }
       }
       objects.at(token.target).children = children;
@@ -253,16 +251,8 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       continue;
     }
 
-    bool addedVecField = addVecFields(objectAttributes.at(token.target), token.attribute, token.payload);
-    if (addedVecField){
-      continue;
-    }
-    bool addedFloatField = addFloatFields(objectAttributes.at(token.target), token.attribute, token.payload);
-    if (addedFloatField){
-      continue;
-    }
-    bool addedStringField = addStringFields(objectAttributes.at(token.target), token.attribute, token.payload);
-    if (addedStringField){
+    bool addedField = addFields(objectAttributes.at(token.target), token.attribute, token.payload);
+    if (addedField){
       continue;
     }
 
