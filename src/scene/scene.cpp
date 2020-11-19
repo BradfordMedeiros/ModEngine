@@ -789,6 +789,17 @@ void callbackEntities(World& world){
   world.entitiesToUpdate.clear();
 }
 
+// TODO generalize this function
+void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
+  auto value = std::get_if<glm::vec3>(&delta);
+  auto v = value == NULL ? "" : print(*value);
+  std::cout << "Update particle diff: (" << attribute << ") - " << v << std::endl;
+  if (attribute == "position" && value != NULL){
+    auto newPosition = getGameObject(world, id).transformation.position +  *value;
+    physicsTranslateSet(world, id, newPosition);
+  }
+}
+
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
   updateEmitters(
     world.emitters, 
@@ -806,6 +817,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     [&world, &interface](objid id) -> void { 
       std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
       removeObjectFromScene(world, id, interface);
+    },
+    [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
+      updateAttributeDelta(world, id, attribute, delta);
     }
   );  
 

@@ -72,11 +72,13 @@ void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
   std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, 
-  std::function<void(objid)> rmParticle
+  std::function<void(objid)> rmParticle,
+  std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
   for (auto &emitter : system.emitters){
     for (auto particleId : emitter.particles){
       std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
+      updateParticle(particleId, emitter.delta.attributeName, emitter.delta.value);
     }
   }
 

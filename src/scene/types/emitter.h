@@ -37,7 +37,8 @@ void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
   std::function<objid(std::string, std::map<std::string, std::string>, objid)> addParticle, 
-  std::function<void(objid)> rmParticle
+  std::function<void(objid)> rmParticle,
+  std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
 
 #endif
