@@ -83,9 +83,7 @@ ParsedContent parseFormat(std::string content) {
 }
 
 
-SerializationObject getDefaultObject(std::string name, std::string layer, bool enablePhysics){
-  assert(name.find(',') == std::string::npos);
-
+SerializationObject getDefaultObject(std::string layer, bool enablePhysics){
   physicsOpts physics {
     .enabled = enablePhysics,
     .isStatic = true,
@@ -103,7 +101,6 @@ SerializationObject getDefaultObject(std::string name, std::string layer, bool e
   SerializationObject newObject {
     .hasId = false,
     .id = -1,
-    .name = name,
     .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.f, 1.f, 1.f),
     .rotation = glm::identity<glm::quat>(),
@@ -113,13 +110,8 @@ SerializationObject getDefaultObject(std::string name, std::string layer, bool e
   };
   return newObject;
 }
-SerializationObject getDefaultObject2(std::string name, std::string layer){
-  assert(name.find(',') == std::string::npos);
-
+SerializationObject getDefaultObject2(std::string layer){
   SerializationObject newObject {
-    .hasId = false,
-    .id = -1,
-    .name = name,
     .layer = layer,
   };
   return newObject;
@@ -255,6 +247,9 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
     object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
     object.hasId = true;
+  }else{
+    object.id  = -1;
+    object.hasId = false;
   }
 
   if (attributes.stringAttributes.find("rotation") != attributes.stringAttributes.end()){
@@ -277,7 +272,8 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject2(token.target, token.layer);
+      assert(token.target.find(',') == std::string::npos);
+      objects[token.target] = getDefaultObject2(token.layer);
       objectAttributes[token.target] = GameobjAttributes {};
     }
 
@@ -285,7 +281,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       auto children = parseChildren(token.payload);
       for (auto child : children){
         if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject2(child, token.layer);
+          objects[child] = getDefaultObject2(token.layer);
           objectAttributes[child] = GameobjAttributes {};
         }
       }

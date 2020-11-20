@@ -56,13 +56,12 @@ SceneDeserialization deserializeScene(
 );
 
 SerializationObject serialObjectFromFields(
-  std::string name, 
   std::string layer,
   std::vector<Field> fields,
   GameobjAttributes attributes
 );
 
-void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
+void addSerialObjectToScene(Scene& scene, std::string name, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
 void addChildLink(Scene& scene, objid childId, objid parentId);
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(

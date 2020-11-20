@@ -360,14 +360,14 @@ void addObjectToWorld(
   World& world, 
   Scene& scene, 
   objid sceneId, 
+  std::string name,
   SerializationObject& serialObj, 
   bool shouldLoadModel, 
   std::function<objid()> getId,
   SysInterface interface
 ){
-    auto id =  scene.nameToId.at(serialObj.name);
+    auto id =  scene.nameToId.at(name);
     auto additionalFields = serialObj.additionalFields;
-    auto name = serialObj.name;
     auto tint = serialObj.tint;
 
     if (world.idToScene.find(id) != world.idToScene.end()){
@@ -378,7 +378,7 @@ void addObjectToWorld(
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    addObject(id, getType(serialObj.name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
+    addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
       [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface, tint](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
@@ -410,8 +410,8 @@ void addObjectToWorld(
             tint
           );
 
-          for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, newSerialObj, false, getId, interface);
+          for (auto &[name, newSerialObj] : newSerialObjs){
+            addObjectToWorld(world, scene, sceneId, name, newSerialObj, false, getId, interface);
           }
           return hasMesh;
         }
@@ -468,8 +468,8 @@ void addSerialObjectsToWorld(
   std::function<objid()> getNewObjectId,
   SysInterface interface
 ){
-  for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, getNewObjectId, interface);
+  for (auto &[name, serialObj] : serialObjs){
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, serialObj, true, getNewObjectId, interface);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
@@ -501,7 +501,7 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
   return sceneId;
 }
 
-objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj, SysInterface interface){
+objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, std::string name, SerializationObject& serialObj, SysInterface interface){
   std::vector<objid> idsAdded;
   int numIdsGenerated = 0;
   auto getId = [&idsAdded, &numIdsGenerated, id, useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -516,13 +516,13 @@ objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, Seri
     return newId;
   };
 
-  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
+  addSerialObjectToScene(world.scenes.at(sceneId), name, serialObj, getId);
 
   std::map<std::string, SerializationObject> serialObjs;
-  serialObjs[serialObj.name] = serialObj;
+  serialObjs[name] = serialObj;
   addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, getId, interface);
 
-  auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
+  auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   return gameobjId;
 }
 
@@ -623,8 +623,8 @@ objid addObjectToScene(
 ){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  auto serialObj = serialObjectFromFields(name, "default", fields, attributes);
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, interface);
+  auto serialObj = serialObjectFromFields("default", fields, attributes);
+  return addSerialObject(world, sceneId, id, useObjId, name, serialObj, interface);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
@@ -635,8 +635,9 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   std::cout << "size: " << serialObjs.size() << std::endl;
   std::cout << serializedObj << std::endl;
   assert(serialObjs.size() == 1);
+  auto name = serialObjs.begin() -> first;
   SerializationObject& serialObj = serialObjs.begin() -> second;
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, interface);
+  return addSerialObject(world, sceneId, id, useObjId, name, serialObj, interface);
 }
 
 

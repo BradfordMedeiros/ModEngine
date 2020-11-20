@@ -41,7 +41,6 @@ struct Field {
 struct SerializationObject {
   bool hasId;
   int id;
-  std::string name;
   glm::vec3 position;
   glm::vec3 scale;
   glm::quat rotation;
@@ -66,7 +65,7 @@ struct ParsedContent {
   std::vector<LayerInfo> layers;
 };
 ParsedContent parseFormat(std::string content);
-SerializationObject getDefaultObject(std::string name, std::string layer, bool enablePhysics);
+SerializationObject getDefaultObject(std::string layer, bool enablePhysics);
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
 physicsOpts defaultPhysicsOpts(GameobjAttributes attributes);
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields);
