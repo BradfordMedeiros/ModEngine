@@ -257,12 +257,8 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   }else{
     object.rotation = glm::identity<glm::quat>();
   }
-
+  object.additionalFields = attributes.additionalFields;
 }
-
-
-
-
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, SerializationObject> objects;
@@ -274,7 +270,9 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (objects.find(token.target) == objects.end()) {
       assert(token.target.find(',') == std::string::npos);
       objects[token.target] = getDefaultObject2(token.layer);
-      objectAttributes[token.target] = GameobjAttributes {};
+      objectAttributes[token.target] = GameobjAttributes { 
+        .layer = token.layer,
+      };
     }
 
     if (token.attribute == "child"){
@@ -282,7 +280,9 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       for (auto child : children){
         if (objects.find(child) == objects.end()){
           objects[child] = getDefaultObject2(token.layer);
-          objectAttributes[child] = GameobjAttributes {};
+          objectAttributes[child] = GameobjAttributes { 
+            .layer = token.layer,
+          };
         }
       }
       objects.at(token.target).children = children;
@@ -293,7 +293,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (addedField){
       continue;
     }  
-    objects.at(token.target).additionalFields[token.attribute] = token.payload;
+    objectAttributes.at(token.target).additionalFields[token.attribute] = token.payload;
   }
 
   for (auto &[name, serialObj] : objects){
