@@ -121,10 +121,7 @@ SerializationObject getDefaultObject2(std::string name, std::string layer, bool 
     .isStatic = true,
     .hasCollisions = true,
     .shape = AUTOSHAPE,
-    .gravity = glm::vec3(0.f, -9.81f, 0.f),
-    .friction = 1.0f,
     .restitution = 0.f,
-    .mass = 1.f,
     .maxspeed = -1.f,
   };
 
@@ -194,9 +191,11 @@ void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes
     *value = *defaultValue;
   }
 }
-void safeFloatSet(float* value, const char* key, GameobjAttributes& attributes){
+void safeFloatSet(float* value, const char* key, GameobjAttributes& attributes, float* defaultValue){
   if (attributes.numAttributes.find(key) != attributes.numAttributes.end()){
     *value = attributes.numAttributes.at(key);
+  }else if (defaultValue != NULL){
+    *value = *defaultValue;
   }
 }
 void safeStringSet(std::string* value, const char* key, GameobjAttributes& attributes){
@@ -206,20 +205,21 @@ void safeStringSet(std::string* value, const char* key, GameobjAttributes& attri
 }
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
   auto identityVec = glm::vec3(1.f, 1.f, 1.f);
-  auto defaultPosition = glm::vec3(0.f, 0.f, 0.f);
-  safeVecSet(&object.position, "position", attributes, &defaultPosition);
+  auto zeroVec = glm::vec3(0.f, 0.f, 0.f);
+  auto defaultGravity = glm::vec3(0.f, -9.81f, 0.f);
 
+  safeVecSet(&object.position, "position", attributes, &zeroVec);
   safeVecSet(&object.scale, "scale", attributes, &identityVec);
   safeVecSet(&object.physics.angularFactor, "physics_angle", attributes, &identityVec);
   safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, &identityVec);
-  safeVecSet(&object.physics.gravity, "physics_gravity", attributes, NULL);
-
+  safeVecSet(&object.physics.gravity, "physics_gravity", attributes, &defaultGravity);
   safeVecSet(&object.tint, "tint", attributes, &identityVec);
 
-  safeFloatSet(&object.physics.friction, "physics_friction", attributes);
-  safeFloatSet(&object.physics.restitution, "physics_restitution", attributes);
-  safeFloatSet(&object.physics.mass, "physics_mass", attributes);
-  safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes);
+  auto oneValue = 1.f;
+  safeFloatSet(&object.physics.friction, "physics_friction", attributes, &oneValue);
+  safeFloatSet(&object.physics.restitution, "physics_restitution", attributes, NULL);
+  safeFloatSet(&object.physics.mass, "physics_mass", attributes, &oneValue);
+  safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes, NULL);
 
   safeStringSet(&object.lookat, "lookat", attributes);
   safeStringSet(&object.script, "script", attributes);
