@@ -121,8 +121,6 @@ SerializationObject getDefaultObject2(std::string name, std::string layer, bool 
     .isStatic = true,
     .hasCollisions = true,
     .shape = AUTOSHAPE,
-    .restitution = 0.f,
-    .maxspeed = -1.f,
   };
 
   SerializationObject newObject {
@@ -216,10 +214,12 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeVecSet(&object.tint, "tint", attributes, &identityVec);
 
   auto oneValue = 1.f;
+  auto negOneValue = -1.f;
+  auto zeroValue = 0.f;
   safeFloatSet(&object.physics.friction, "physics_friction", attributes, &oneValue);
-  safeFloatSet(&object.physics.restitution, "physics_restitution", attributes, NULL);
+  safeFloatSet(&object.physics.restitution, "physics_restitution", attributes, &zeroValue);
   safeFloatSet(&object.physics.mass, "physics_mass", attributes, &oneValue);
-  safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes, NULL);
+  safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes, &negOneValue); // -1 ?  does sign matter? 
 
   safeStringSet(&object.lookat, "lookat", attributes);
   safeStringSet(&object.script, "script", attributes);
