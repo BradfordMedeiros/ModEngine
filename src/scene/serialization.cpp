@@ -118,9 +118,6 @@ SerializationObject getDefaultObject2(std::string name, std::string layer, bool 
 
   physicsOpts physics {
     .enabled = enablePhysics,
-    .isStatic = true,
-    .hasCollisions = true,
-    .shape = AUTOSHAPE,
   };
 
   SerializationObject newObject {
@@ -250,6 +247,8 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
     }else if (value == "shape_box"){
       object.physics.shape = BOX;
     }else if (value == "shape_auto"){
+      object.physics.shape = AUTOSHAPE;
+    }else{
       object.physics.shape = AUTOSHAPE;
     }
   }
