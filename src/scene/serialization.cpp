@@ -258,18 +258,18 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
     object.rotation = glm::identity<glm::quat>();
   }
   object.additionalFields = attributes.additionalFields;
+  object.children = attributes.children;
+  object.layer = attributes.layer;
 }
 
-std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
-  std::map<std::string, SerializationObject> objects;
+std::map<std::string, GameobjAttributes> deserializeSceneTokens2(std::vector<Token> tokens){
   std::map<std::string, GameobjAttributes> objectAttributes;
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
-    if (objects.find(token.target) == objects.end()) {
+    if (objectAttributes.find(token.target) == objectAttributes.end()) {
       assert(token.target.find(',') == std::string::npos);
-      objects[token.target] = getDefaultObject2(token.layer);
       objectAttributes[token.target] = GameobjAttributes { 
         .layer = token.layer,
       };
@@ -278,14 +278,13 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     if (token.attribute == "child"){
       auto children = parseChildren(token.payload);
       for (auto child : children){
-        if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject2(token.layer);
+        if (objectAttributes.find(child) == objectAttributes.end()){
           objectAttributes[child] = GameobjAttributes { 
             .layer = token.layer,
           };
         }
       }
-      objects.at(token.target).children = children;
+      objectAttributes.at(token.target).children = children;
       continue;
     }
 
@@ -296,8 +295,17 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     objectAttributes.at(token.target).additionalFields[token.attribute] = token.payload;
   }
 
-  for (auto &[name, serialObj] : objects){
-    setSerialObjFromAttr(serialObj, objectAttributes.at(name));
+  return objectAttributes;
+}
+
+std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
+  std::map<std::string, SerializationObject> objects;
+  auto objectAttributes = deserializeSceneTokens2(tokens);
+
+  for (auto &[name, attributes] : objectAttributes){
+    SerializationObject object { };
+    setSerialObjFromAttr(object, attributes);
+    objects[name] = object;
   }
   return objects;
 }
