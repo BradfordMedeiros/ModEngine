@@ -83,34 +83,6 @@ ParsedContent parseFormat(std::string content) {
 }
 
 
-SerializationObject getDefaultObject(std::string layer, bool enablePhysics){
-  physicsOpts physics {
-    .enabled = enablePhysics,
-    .isStatic = true,
-    .hasCollisions = true,
-    .shape = AUTOSHAPE,
-    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
-    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
-    .gravity = glm::vec3(0.f, -9.81f, 0.f),
-    .friction = 1.0f,
-    .restitution = 0.f,
-    .mass = 1.f,
-    .maxspeed = -1.f,
-  };
-
-  SerializationObject newObject {
-    .hasId = false,
-    .id = -1,
-    .position = glm::vec3(0.f, 0.f, 0.f),
-    .scale = glm::vec3(1.f, 1.f, 1.f),
-    .rotation = glm::identity<glm::quat>(),
-    .physics = physics,
-    .layer = layer,
-    .tint = glm::vec3(1.f, 1.f, 1.f),
-  };
-  return newObject;
-}
-
 std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
@@ -307,9 +279,16 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
   return objects;
 }
 
+SerializationObject getDefaultObject(std::string layer){
+  GameobjAttributes attr{ .layer = layer };
+  SerializationObject obj{};
+  setSerialObjFromAttr(obj, attr);
+  return obj;
+}
+
 // see notes around nocollide + physics enabled 
 physicsOpts defaultPhysicsOpts(GameobjAttributes attributes){
-  GameobjAttributes attr { };
+  GameobjAttributes attr { .layer = "default" };
   SerializationObject obj{ };
   setSerialObjFromAttr(obj, attr);
   return obj.physics;

@@ -85,7 +85,8 @@ SceneDeserialization createSceneFromParsedContent(
   assert(serialObjs.find(rootName) == serialObjs.end());
 
   assert(rootName.find(',') == std::string::npos);
-  serialObjs[rootName] = getDefaultObject("default", false);
+  serialObjs[rootName] = getDefaultObject("default");
+  serialObjs[rootName].physics.enabled = false; // todo see if this can be removed
 
   for (auto [name, serialObj] : serialObjs){
     if (name != rootName){
