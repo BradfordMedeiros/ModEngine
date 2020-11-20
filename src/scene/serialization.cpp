@@ -113,18 +113,13 @@ SerializationObject getDefaultObject(std::string name, std::string layer, bool e
   };
   return newObject;
 }
-SerializationObject getDefaultObject2(std::string name, std::string layer, bool enablePhysics){
+SerializationObject getDefaultObject2(std::string name, std::string layer){
   assert(name.find(',') == std::string::npos);
-
-  physicsOpts physics {
-    .enabled = enablePhysics,
-  };
 
   SerializationObject newObject {
     .hasId = false,
     .id = -1,
     .name = name,
-    .physics = physics,
     .layer = layer,
   };
   return newObject;
@@ -282,7 +277,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject2(token.target, token.layer, true);
+      objects[token.target] = getDefaultObject2(token.target, token.layer);
       objectAttributes[token.target] = GameobjAttributes {};
     }
 
@@ -290,7 +285,7 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
       auto children = parseChildren(token.payload);
       for (auto child : children){
         if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject2(child, token.layer, true);
+          objects[child] = getDefaultObject2(child, token.layer);
           objectAttributes[child] = GameobjAttributes {};
         }
       }
