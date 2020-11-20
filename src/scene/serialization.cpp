@@ -110,12 +110,6 @@ SerializationObject getDefaultObject(std::string layer, bool enablePhysics){
   };
   return newObject;
 }
-SerializationObject getDefaultObject2(std::string layer){
-  SerializationObject newObject {
-    .layer = layer,
-  };
-  return newObject;
-}
 
 std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
@@ -185,6 +179,7 @@ void safeStringSet(std::string* value, const char* key, GameobjAttributes& attri
     *value = attributes.stringAttributes.at(key);
   }
 }
+
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes){
   auto identityVec = glm::vec3(1.f, 1.f, 1.f);
   auto zeroVec = glm::vec3(0.f, 0.f, 0.f);
@@ -209,12 +204,14 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeStringSet(&object.script, "script", attributes);
   safeStringSet(&object.fragshader, "fragshader", attributes);
 
+  // old default in getDefaultPhysics was false
   if (attributes.stringAttributes.find("physics") != attributes.stringAttributes.end()){
     object.physics.enabled = attributes.stringAttributes.at("physics") == "enabled";
   }else{
     object.physics.enabled = true;
   }
 
+  // old default in getDefaultPhysics was false
   if (attributes.stringAttributes.find("physics_collision") != attributes.stringAttributes.end()){
     object.physics.hasCollisions = !(attributes.stringAttributes.at("physics_collision") == "nocollide");
   }else{
@@ -310,22 +307,12 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
   return objects;
 }
 
+// see notes around nocollide + physics enabled 
 physicsOpts defaultPhysicsOpts(GameobjAttributes attributes){
-  // TODO this should use a standardized way to parse these in common with serialization
-  physicsOpts defaultOption = {
-    .enabled = attributes.stringAttributes.find("physics") == attributes.stringAttributes.end() ? false : (attributes.stringAttributes.at("physics") == "enabled"),
-    .isStatic = attributes.stringAttributes.find("physics_type") == attributes.stringAttributes.end() ? true : !(attributes.stringAttributes.at("physics_type") == "dynamic"),
-    .hasCollisions = attributes.stringAttributes.find("physics_collision") == attributes.stringAttributes.end() ? false : !(attributes.stringAttributes.at("physics_collision") == "nocollide"),
-    .shape = BOX,
-    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
-    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
-    .gravity = attributes.vecAttributes.find("physics_gravity") == attributes.vecAttributes.end() ? glm::vec3(0.f, -9.81f, 0.f) : attributes.vecAttributes.at("physics_gravity"),
-    .friction = 1.0f,
-    .restitution = 0.f,
-    .mass = 1.f,
-    .maxspeed = -1.f,
-  };
-  return defaultOption;
+  GameobjAttributes attr { };
+  SerializationObject obj{ };
+  setSerialObjFromAttr(obj, attr);
+  return obj.physics;
 }
 
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
