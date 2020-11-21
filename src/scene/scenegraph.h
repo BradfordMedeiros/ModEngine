@@ -12,23 +12,7 @@
 #include "./common/mesh.h"
 #include "../common/util.h"
 #include "./serialization.h"
-
-struct SerializationObject {
-  bool hasId;
-  int id;
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::quat rotation;
-  std::vector<std::string> children;
-  physicsOpts physics;
-  std::string lookat;
-  std::string layer;
-  std::string script;
-  std::string fragshader;
-  bool netsynchronize;
-  glm::vec3 tint;
-  std::map<std::string, std::string> additionalFields;
-};
+#include "./serialobject.h"
 
 struct GameObject {
   objid id;

@@ -10,22 +10,6 @@
 #include "./common/util/types.h"
 #include "../common/util.h"
 
-enum ColliderShape { BOX, SPHERE, AUTOSHAPE };
-
-struct physicsOpts {
-  bool enabled;
-  bool isStatic;
-  bool hasCollisions;
-  ColliderShape shape;
-  glm::vec3 linearFactor;
-  glm::vec3 angularFactor;
-  glm::vec3 gravity;
-  float friction;
-  float restitution;
-  float mass;
-  float maxspeed;
-};
-
 struct Token {
   std::string target;
   std::string attribute;
