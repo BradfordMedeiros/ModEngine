@@ -1,12 +1,5 @@
 #include "./scenegraph.h"
 
-SerializationObject getDefaultObject(std::string layer){
-  GameobjAttributes attr{ .layer = layer };
-  SerializationObject obj{};
-  setSerialObjFromAttr(obj, attr);
-  return obj;
-}
-
 void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes, glm::vec3* defaultValue){
   if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
     *value = attributes.vecAttributes.at(key);
@@ -105,6 +98,13 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   object.children = attributes.children;
   object.layer = attributes.layer;
 }
+SerializationObject getDefaultObject(std::string layer){
+  GameobjAttributes attr{ .layer = layer };
+  SerializationObject obj{};
+  setSerialObjFromAttr(obj, attr);
+  return obj;
+}
+
 
 GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize, glm::vec3 tint){
   std::map<std::string, std::string> stringAttributes;

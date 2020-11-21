@@ -105,11 +105,7 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);
 void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes);
-
-
 std::map<std::string, SerializationObject> deserializeSerialObjs(std::vector<Token> tokens);
-SerializationObject getDefaultObject(std::string layer);
-void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
 
 #endif
 
