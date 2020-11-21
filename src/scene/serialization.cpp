@@ -133,7 +133,7 @@ bool addFields(GameobjAttributes& attributes, std::string attribute, std::string
   return false;
 }
 
-std::map<std::string, GameobjAttributes> deserializeSceneTokens2(std::vector<Token> tokens){
+std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, GameobjAttributes> objectAttributes;
 
   for (Token token : tokens){

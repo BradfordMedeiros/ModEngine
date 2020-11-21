@@ -629,7 +629,7 @@ objid addObjectToScene(
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
   ParsedContent content = parseFormat(serializedObj);
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens);
+  std::map<std::string, SerializationObject>  serialObjs = deserializeSerialObjs(content.tokens);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
   
   std::cout << "size: " << serialObjs.size() << std::endl;

@@ -38,23 +38,6 @@ struct Field {
   std::string type;
 };
 
-struct SerializationObject {
-  bool hasId;
-  int id;
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::quat rotation;
-  std::vector<std::string> children;
-  physicsOpts physics;
-  std::string lookat;
-  std::string layer;
-  std::string script;
-  std::string fragshader;
-  bool netsynchronize;
-  glm::vec3 tint;
-  std::map<std::string, std::string> additionalFields;
-};
-
 struct LayerInfo {
   std::string name;
   int zIndex;
@@ -66,6 +49,6 @@ struct ParsedContent {
 };
 ParsedContent parseFormat(std::string content);
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields);
-std::map<std::string, GameobjAttributes> deserializeSceneTokens2(std::vector<Token> tokens);
+std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens);
 
 #endif

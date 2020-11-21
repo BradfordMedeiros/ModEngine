@@ -13,6 +13,23 @@
 #include "../common/util.h"
 #include "./serialization.h"
 
+struct SerializationObject {
+  bool hasId;
+  int id;
+  glm::vec3 position;
+  glm::vec3 scale;
+  glm::quat rotation;
+  std::vector<std::string> children;
+  physicsOpts physics;
+  std::string lookat;
+  std::string layer;
+  std::string script;
+  std::string fragshader;
+  bool netsynchronize;
+  glm::vec3 tint;
+  std::map<std::string, std::string> additionalFields;
+};
+
 struct GameObject {
   objid id;
   std::string name;
@@ -90,7 +107,7 @@ std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);
 void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes);
 
 
-std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
+std::map<std::string, SerializationObject> deserializeSerialObjs(std::vector<Token> tokens);
 SerializationObject getDefaultObject(std::string layer);
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
 
