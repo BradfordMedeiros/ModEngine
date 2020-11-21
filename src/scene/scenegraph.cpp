@@ -508,3 +508,10 @@ std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<To
   }
   return objects;
 }
+
+SerializationObject getDefaultObject(std::string layer){
+  GameobjAttributes attr{ .layer = layer };
+  SerializationObject obj{};
+  setSerialObjFromAttr(obj, attr);
+  return obj;
+}

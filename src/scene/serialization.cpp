@@ -267,13 +267,6 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens2(std::vector<Tok
   return objectAttributes;
 }
 
-SerializationObject getDefaultObject(std::string layer){
-  GameobjAttributes attr{ .layer = layer };
-  SerializationObject obj{};
-  setSerialObjFromAttr(obj, attr);
-  return obj;
-}
-
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
   std::cout << "INFO: SERIALIZATION WARNING: -- FIELD TO ATTRIBUTES NOT YET IMPLEMENTED" << std::endl;
   std::map<std::string, double> numAttributes;
