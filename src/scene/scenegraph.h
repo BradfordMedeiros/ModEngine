@@ -92,6 +92,7 @@ void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::
 
 std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
 SerializationObject getDefaultObject(std::string layer);
+void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
 
 #endif
 
