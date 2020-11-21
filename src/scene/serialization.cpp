@@ -267,18 +267,6 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens2(std::vector<Tok
   return objectAttributes;
 }
 
-std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
-  std::map<std::string, SerializationObject> objects;
-  auto objectAttributes = deserializeSceneTokens2(tokens);
-
-  for (auto &[name, attributes] : objectAttributes){
-    SerializationObject object { };
-    setSerialObjFromAttr(object, attributes);
-    objects[name] = object;
-  }
-  return objects;
-}
-
 SerializationObject getDefaultObject(std::string layer){
   GameobjAttributes attr{ .layer = layer };
   SerializationObject obj{};

@@ -89,4 +89,9 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);
 void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes);
 
+
+std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
+
+
 #endif
+

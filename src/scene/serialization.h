@@ -67,7 +67,7 @@ struct ParsedContent {
 ParsedContent parseFormat(std::string content);
 SerializationObject getDefaultObject(std::string layer);
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
-std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens);
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields);
+std::map<std::string, GameobjAttributes> deserializeSceneTokens2(std::vector<Token> tokens);
 
 #endif
