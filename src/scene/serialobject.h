@@ -6,6 +6,7 @@
 #include <map>
 #include <glm/gtx/quaternion.hpp>
 #include "../common/util.h"
+#include "./common/util/types.h"
 
 enum ColliderShape { BOX, SPHERE, AUTOSHAPE };
 
@@ -40,5 +41,6 @@ struct SerializationObject {
   std::map<std::string, std::string> additionalFields;
 };
 
+void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
 
 #endif
