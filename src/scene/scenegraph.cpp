@@ -10,6 +10,8 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
   };
+  auto defaultObject = getDefaultObject(layer);
+  setSerialObjFromAttr(defaultObject, attributes);
 
   GameObject gameObject = {
     .id = id,
@@ -19,7 +21,7 @@ GameObject getGameObject(glm::vec3 position, std::string name, objid id, std::st
       .scale = glm::vec3(1.0f, 1.0f, 1.0f),
       .rotation = glm::identity<glm::quat>(),
     },
-    .physicsOptions = defaultPhysicsOpts(attributes),
+    .physicsOptions = defaultObject.physics, // see notes around nocollide + physics enabled 
     .lookat =  lookat,
     .layer = layer,
     .script = script,
@@ -155,11 +157,14 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .vecAttributes = vecAttributes,
     };
 
+    auto defaultObject = getDefaultObject("default");
+    setSerialObjFromAttr(defaultObject, attributes);
+
     SerializationObject obj {
       .position = transform.position,
       .scale = transform.scale,
       .rotation = transform.rotation,
-      .physics = defaultPhysicsOpts(attributes),
+      .physics = defaultObject.physics, // see notes around nocollide + physics enabled 
       .lookat = "",
       .layer = rootObj.layer,
       .script = "",
@@ -293,12 +298,15 @@ SerializationObject serialObjectFromFields(
   std::vector<Field> fields,
   GameobjAttributes attributes
 ){
+
+  auto defaultObject = getDefaultObject(layer);
+  setSerialObjFromAttr(defaultObject, attributes);
   auto parent = attributeOrEmpty(attributes.stringAttributes, "parent");
   SerializationObject serialObj {
     .position = attributes.vecAttributes.find("position") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
     .scale = attributes.vecAttributes.find("scale") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
     .rotation =  glm::identity<glm::quat>(),
-    .physics = defaultPhysicsOpts(attributes),
+    .physics = defaultObject.physics, // see notes around nocollide + physics enabled 
     .lookat = attributeOrEmpty(attributes.stringAttributes,"lookat"),
     .layer =  layer,
     .script = attributeOrEmpty(attributes.stringAttributes,"script"),

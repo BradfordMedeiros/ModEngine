@@ -286,14 +286,6 @@ SerializationObject getDefaultObject(std::string layer){
   return obj;
 }
 
-// see notes around nocollide + physics enabled 
-physicsOpts defaultPhysicsOpts(GameobjAttributes attributes){
-  GameobjAttributes attr { .layer = "default" };
-  SerializationObject obj{ };
-  setSerialObjFromAttr(obj, attr);
-  return obj.physics;
-}
-
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
   std::cout << "INFO: SERIALIZATION WARNING: -- FIELD TO ATTRIBUTES NOT YET IMPLEMENTED" << std::endl;
   std::map<std::string, double> numAttributes;
