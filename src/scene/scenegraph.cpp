@@ -7,12 +7,10 @@ void addObjectToScene(Scene& scene, objid parentId, std::string name, GameObject
     .groupId = gameobjectObj.id,
     .linkOnly = false
   };
-
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
   scene.nameToId[name] = gameobjectObj.id;
 }
-
 
 // @TODO - bug around having multiple children in common.  Currently assertion error
 void enforceParentRelationship(Scene& scene, objid id, std::string parentName){
@@ -52,15 +50,21 @@ SceneDeserialization createSceneFromParsedContent(
   serialObjs[rootName] = getDefaultObject("default");
   serialObjs[rootName].physics.enabled = false; // todo see if this can be removed
 
+  std::map<std::string, GameObject> gameobjs;
+
   for (auto [name, serialObj] : serialObjs){
     if (name != rootName){
       objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
       auto gameobjectObj = gameObjectFromParam(name, id, serialObj);
-      addObjectToScene(scene, -1, name, gameobjectObj);
+      gameobjs[name] = gameobjectObj;
     }else{
       auto gameobjectObj = gameObjectFromParam(name, scene.rootId, serialObj);
-      addObjectToScene(scene, -1, name, gameobjectObj);
+      gameobjs[name] = gameobjectObj;
     }
+  }
+
+  for (auto [name, gameobjectObj] : gameobjs){
+    addObjectToScene(scene, -1, name, gameobjectObj);
   }
 
   for (auto [name, serialObj] : serialObjs){
@@ -78,7 +82,6 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-
 SceneDeserialization deserializeScene(std::string content,  std::vector<Field> fields, std::function<objid()> getNewObjectId){
   std::cout << "INFO: Deserialization: " << std::endl;
   return createSceneFromParsedContent(parseFormat(content), fields, getNewObjectId);
@@ -95,7 +98,6 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   std::function<objid()> getNewObjectId,
   glm::vec3 parentTint
 ){
-
   std::map<std::string, SerializationObject> serialObjs;
   std::map<objid, objid> nodeIdToRealId;
   for (auto [nodeId, transform] : gameobjTransforms){
