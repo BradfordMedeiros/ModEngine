@@ -623,7 +623,7 @@ objid addObjectToScene(
 ){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  auto serialObj = serialObjectFromFields("default", fields, attributes);
+  auto serialObj = serialObjectFromFields("default", attributes);
   return addSerialObject(world, sceneId, id, useObjId, name, serialObj, interface);
 }
 

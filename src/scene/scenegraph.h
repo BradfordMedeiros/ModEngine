@@ -46,7 +46,6 @@ SceneDeserialization deserializeScene(
 
 SerializationObject serialObjectFromFields(
   std::string layer,
-  std::vector<Field> fields,
   GameobjAttributes attributes
 );
 

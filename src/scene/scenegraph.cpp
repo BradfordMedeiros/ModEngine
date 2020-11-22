@@ -260,7 +260,6 @@ std::string attributeOrEmpty(std::map<std::string, std::string>& stringAttribute
 // affects mk-obj-attr 
 SerializationObject serialObjectFromFields(
   std::string layer,
-  std::vector<Field> fields,
   GameobjAttributes attributes
 ){
 
