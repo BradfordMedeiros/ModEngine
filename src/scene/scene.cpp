@@ -361,14 +361,13 @@ void addObjectToWorld(
   Scene& scene, 
   objid sceneId, 
   std::string name,
-  SerializationObject& serialObj, 
   bool shouldLoadModel, 
   std::function<objid()> getId,
-  SysInterface interface
+  SysInterface interface,
+  glm::vec3 tint,
+  std::map<std::string, std::string> additionalFields
 ){
     auto id =  scene.nameToId.at(name);
-    auto additionalFields = serialObj.additionalFields;
-    auto tint = serialObj.tint;
 
     if (world.idToScene.find(id) != world.idToScene.end()){
       std::cout << "id already in the scene: " << id << std::endl;
@@ -411,7 +410,7 @@ void addObjectToWorld(
           );
 
           for (auto &[name, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, name, newSerialObj, false, getId, interface);
+            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, newSerialObj.tint, newSerialObj.additionalFields);
           }
           return hasMesh;
         }
@@ -469,7 +468,7 @@ void addSerialObjectsToWorld(
   SysInterface interface
 ){
   for (auto &[name, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, serialObj, true, getNewObjectId, interface);
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, serialObj.tint, serialObj.additionalFields);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
