@@ -490,7 +490,7 @@ void addSerialObjectsToWorld(
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
   assert(world.scenes.find(sceneId) == world.scenes.end());
 
-  SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
+  SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
   std::vector<objid> idsAdded;
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){

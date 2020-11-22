@@ -31,7 +31,6 @@ void enforceRootObjects(Scene& scene){
 
 SceneDeserialization createSceneFromParsedContent(
   ParsedContent parsedContent,  
-  std::vector<Field> fields,
   std::function<objid()> getNewObjectId
 ){
   Scene scene;
@@ -82,9 +81,9 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-SceneDeserialization deserializeScene(std::string content,  std::vector<Field> fields, std::function<objid()> getNewObjectId){
+SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromParsedContent(parseFormat(content), fields, getNewObjectId);
+  return createSceneFromParsedContent(parseFormat(content), getNewObjectId);
 }
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
