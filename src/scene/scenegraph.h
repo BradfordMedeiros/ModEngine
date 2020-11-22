@@ -40,7 +40,7 @@ std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<st
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 SceneDeserialization deserializeScene(std::string content, std::vector<Field> fields, std::function<objid()> getNewObjectId);
 
-void addSerialObjectToScene(Scene& scene, std::string name, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
+void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 void addChildLink(Scene& scene, objid childId, objid parentId);
 
 std::map<std::string, SerializationObject> addSubsceneToRoot(
