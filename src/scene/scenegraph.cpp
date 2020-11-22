@@ -79,11 +79,7 @@ SceneDeserialization createSceneFromParsedContent(
 }
 
 
-SceneDeserialization deserializeScene(
-  std::string content,  
-  std::vector<Field> fields,  
-  std::function<objid()> getNewObjectId
-){
+SceneDeserialization deserializeScene(std::string content,  std::vector<Field> fields, std::function<objid()> getNewObjectId){
   std::cout << "INFO: Deserialization: " << std::endl;
   return createSceneFromParsedContent(parseFormat(content), fields, getNewObjectId);
 }
@@ -247,39 +243,6 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
     sceneData = sceneData + serializeObject(scene, getAdditionalFields, includeIds, id, "");
   }
   return sceneData;
-}
-
-std::string attributeOrEmpty(std::map<std::string, std::string>& stringAttributes, std::string field){
-  if (stringAttributes.find(field) != stringAttributes.end()){
-    return stringAttributes.at(field);
-  }
-  return "";
-}
-
-// @TODO - fill in the rest of these fields 
-// affects mk-obj-attr 
-SerializationObject serialObjectFromFields(
-  std::string layer,
-  GameobjAttributes attributes
-){
-
-  auto defaultObject = getDefaultObject(layer);
-  setSerialObjFromAttr(defaultObject, attributes);
-  auto parent = attributeOrEmpty(attributes.stringAttributes, "parent");
-  SerializationObject serialObj {
-    .position = attributes.vecAttributes.find("position") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
-    .scale = attributes.vecAttributes.find("scale") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
-    .rotation =  glm::identity<glm::quat>(),
-    .physics = defaultObject.physics, // see notes around nocollide + physics enabled 
-    .lookat = attributeOrEmpty(attributes.stringAttributes,"lookat"),
-    .layer =  layer,
-    .script = attributeOrEmpty(attributes.stringAttributes,"script"),
-    .fragshader = attributeOrEmpty(attributes.stringAttributes, "fragshader"),
-    .netsynchronize = (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()) && (attributes.stringAttributes.at("net") == "sync"),
-    .tint = attributes.vecAttributes.find("tint") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("tint") : glm::vec3(1.f, 1.f, 1.f),
-    .additionalFields = attributes.stringAttributes, 
-  };
-  return serialObj;
 }
 
 void addSerialObjectToScene(Scene& scene, std::string name, SerializationObject& serialObj, std::function<objid()> getNewObjectId){

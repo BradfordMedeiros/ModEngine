@@ -38,16 +38,7 @@ struct SceneDeserialization {
 
 std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id, std::string name = "");
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
-SceneDeserialization deserializeScene(
-  std::string content, 
-  std::vector<Field> fields,
-  std::function<objid()> getNewObjectId
-);
-
-SerializationObject serialObjectFromFields(
-  std::string layer,
-  GameobjAttributes attributes
-);
+SceneDeserialization deserializeScene(std::string content, std::vector<Field> fields, std::function<objid()> getNewObjectId);
 
 void addSerialObjectToScene(Scene& scene, std::string name, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
 void addChildLink(Scene& scene, objid childId, objid parentId);
