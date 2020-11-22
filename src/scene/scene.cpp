@@ -462,13 +462,14 @@ std::string serializeObject(World& world, objid id, std::string overridename){
 void addSerialObjectsToWorld(
   World& world, 
   objid sceneId, 
-  std::map<std::string, SerializationObject>& serialObjs,
   std::vector<objid> idsAdded,
   std::function<objid()> getNewObjectId,
-  SysInterface interface
+  SysInterface interface,
+  std::map<std::string, std::map<std::string, std::string>> additionalFields,
+  std::map<std::string, glm::vec3> tint
 ){
-  for (auto &[name, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, serialObj.tint, serialObj.additionalFields);
+  for (auto &[name, additionalField] : additionalFields){
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, tint.at(name), additionalField);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
@@ -496,7 +497,15 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
   }
-  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, getUniqueObjId, interface);
+
+  std::map<std::string, std::map<std::string, std::string>> additionalFields;
+  std::map<std::string, glm::vec3> tints;
+  for (auto &[name, serialObj] : deserializedScene.serialObjs){
+    additionalFields[name] = serialObj.additionalFields;
+    tints[name] = serialObj.tint;
+  }
+
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getUniqueObjId, interface, additionalFields, tints);
   return sceneId;
 }
 
@@ -520,7 +529,13 @@ objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, std:
 
   std::map<std::string, SerializationObject> serialObjs;
   serialObjs[name] = serialObj;
-  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, getId, interface);
+
+  std::map<std::string, std::map<std::string, std::string>> additionalFields;
+  std::map<std::string, glm::vec3> tints;
+  additionalFields[name] = serialObj.additionalFields;
+  tints[name] = serialObj.tint;
+
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFields, tints);
 
   auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   return gameobjId;
