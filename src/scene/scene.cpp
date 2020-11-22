@@ -498,14 +498,7 @@ objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData
     idsAdded.push_back(id);
   }
 
-  std::map<std::string, std::map<std::string, std::string>> additionalFields;
-  std::map<std::string, glm::vec3> tints;
-  for (auto &[name, serialObj] : deserializedScene.serialObjs){
-    additionalFields[name] = serialObj.additionalFields;
-    tints[name] = serialObj.tint;
-  }
-
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getUniqueObjId, interface, additionalFields, tints);
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getUniqueObjId, interface, deserializedScene.additionalFields, deserializedScene.tints);
   return sceneId;
 }
 

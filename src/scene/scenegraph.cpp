@@ -74,9 +74,18 @@ SceneDeserialization createSceneFromParsedContent(
   enforceRootObjects(scene);
 
   scene.isNested = false;
+
+  std::map<std::string, std::map<std::string, std::string>> additionalFields;
+  std::map<std::string, glm::vec3>  tints; 
+  for (auto &[name, serialObj] : serialObjs){
+    additionalFields[name] = serialObj.additionalFields;
+    tints[name] = serialObj.tint;
+  }
+
   SceneDeserialization deserializedScene {
     .scene = scene,
-    .serialObjs = serialObjs
+    .additionalFields = additionalFields,
+    .tints = tints,
   };
   return deserializedScene;
 }

@@ -33,7 +33,9 @@ struct Scene {
 
 struct SceneDeserialization {
   Scene scene;
-  std::map<std::string, SerializationObject> serialObjs;
+  std::map<std::string, std::map<std::string, std::string>>  additionalFields;
+  std::map<std::string, glm::vec3>  tints;  // todo --> this is odd, should be removed
+
 };
 
 std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id, std::string name = "");
