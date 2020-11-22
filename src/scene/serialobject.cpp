@@ -106,7 +106,7 @@ SerializationObject getDefaultObject(std::string layer){
   return obj;
 }
 
-GameObject gameObjectFromParam(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize, glm::vec3 tint){
+GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& serialObj){
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, double> numAttributes;
   std::map<std::string, glm::vec3> vecAttributes;
@@ -116,24 +116,25 @@ GameObject gameObjectFromParam(glm::vec3 position, std::string name, objid id, s
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
   };
-  auto defaultObject = getDefaultObject(layer);
+  auto defaultObject = getDefaultObject(serialObj.layer);
   setSerialObjFromAttr(defaultObject, attributes);
 
   GameObject gameObject = {
     .id = id,
     .name = name,
     .transformation = Transformation {
-      .position = position,
-      .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-      .rotation = glm::identity<glm::quat>(),
+      .position = serialObj.position,
+      .scale = serialObj.scale,
+      .rotation = serialObj.rotation,
     },
-    .physicsOptions = defaultObject.physics, // see notes around nocollide + physics enabled 
-    .lookat =  lookat,
-    .layer = layer,
-    .script = script,
-    .fragshader = fragshader,
-    .netsynchronize = netsynchronize,
-    .tint = tint,
+    .physicsOptions = serialObj.physics,
+    .lookat =  serialObj.lookat, 
+    .layer = serialObj.layer,
+    .script = serialObj.script,
+    .fragshader = serialObj.fragshader,
+    .netsynchronize = serialObj.netsynchronize,
+    .tint = serialObj.tint,
   };
+
   return gameObject;
 }

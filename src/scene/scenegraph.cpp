@@ -1,11 +1,7 @@
 #include "./scenegraph.h"
 
 void addObjectToScene(Scene& scene, objid id, objid parentId, std::string name, SerializationObject& serialObj){
-  auto gameobjectObj = gameObjectFromParam(serialObj.position, name, id, serialObj.lookat, serialObj.layer, serialObj.script, serialObj.fragshader, serialObj.netsynchronize, serialObj.tint);
-  gameobjectObj.transformation.position = serialObj.position;
-  gameobjectObj.transformation.scale = serialObj.scale;
-  gameobjectObj.transformation.rotation = serialObj.rotation;
-  gameobjectObj.physicsOptions = serialObj.physics;
+  auto gameobjectObj = gameObjectFromParam(name, id, serialObj);
 
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,

@@ -57,7 +57,7 @@ struct GameObject {
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
 SerializationObject getDefaultObject(std::string layer);
 
-GameObject gameObjectFromParam(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize, glm::vec3 tint);
+GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& serialObj);
 
 
 #endif
