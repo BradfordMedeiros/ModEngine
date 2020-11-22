@@ -14,18 +14,6 @@
 #include "./serialization.h"
 #include "./serialobject.h"
 
-struct GameObject {
-  objid id;
-  std::string name;
-  Transformation transformation;
-  physicsOpts physicsOptions;
-  std::string lookat;
-  std::string layer;
-  std::string script;
-  std::string fragshader;
-  bool netsynchronize;
-  glm::vec3 tint;
-};
 struct GameObjectH {
   objid id;
   objid parentId;

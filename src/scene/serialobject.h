@@ -41,6 +41,23 @@ struct SerializationObject {
   std::map<std::string, std::string> additionalFields;
 };
 
+struct GameObject {
+  objid id;
+  std::string name;
+  Transformation transformation;
+  physicsOpts physicsOptions;
+  std::string lookat;
+  std::string layer;
+  std::string script;
+  std::string fragshader;
+  bool netsynchronize;
+  glm::vec3 tint;
+};
+
 void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
+SerializationObject getDefaultObject(std::string layer);
+
+GameObject gameObjectFromParam(glm::vec3 position, std::string name, objid id, std::string lookat, std::string layer, std::string script, std::string fragshader, bool netsynchronize, glm::vec3 tint);
+
 
 #endif
