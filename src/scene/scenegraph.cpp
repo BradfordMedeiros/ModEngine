@@ -1,8 +1,6 @@
 #include "./scenegraph.h"
 
-void addObjectToScene(Scene& scene, objid id, objid parentId, std::string name, SerializationObject& serialObj){
-  auto gameobjectObj = gameObjectFromParam(name, id, serialObj);
-
+void addObjectToScene(Scene& scene, objid parentId, std::string name, GameObject& gameobjectObj){
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
     .parentId = parentId,
@@ -57,9 +55,11 @@ SceneDeserialization createSceneFromParsedContent(
   for (auto [name, serialObj] : serialObjs){
     if (name != rootName){
       objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-      addObjectToScene(scene, id, -1, name, serialObj);
+      auto gameobjectObj = gameObjectFromParam(name, id, serialObj);
+      addObjectToScene(scene, -1, name, gameobjectObj);
     }else{
-      addObjectToScene(scene, scene.rootId, -1, name, serialObj);
+      auto gameobjectObj = gameObjectFromParam(name, scene.rootId, serialObj);
+      addObjectToScene(scene, -1, name, gameobjectObj);
     }
   }
 
@@ -139,7 +139,8 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     };
     serialObjs[names.at(nodeId)] = obj;
 
-    addObjectToScene(scene, id, -1, names.at(nodeId), obj);
+    auto gameobjectObj = gameObjectFromParam(names.at(nodeId), id, obj);
+    addObjectToScene(scene, -1, names.at(nodeId), gameobjectObj);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -286,7 +287,8 @@ void addSerialObjectToScene(Scene& scene, std::string name, SerializationObject&
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto objectId = getNewObjectId();
-  addObjectToScene(scene, objectId, -1, name, serialObj);      
+  auto gameobjectObj = gameObjectFromParam(name, objectId, serialObj);
+  addObjectToScene(scene, -1, name, gameobjectObj);      
   for (auto child : serialObj.children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
