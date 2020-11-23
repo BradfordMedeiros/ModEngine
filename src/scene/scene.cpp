@@ -629,16 +629,13 @@ objid addObjectToScene(
 ){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  
-  auto serialObj = serialObjectFromFields("default", attributes);
-  auto attributeFields = attributes.stringAttributes; // but also have additionalFields so yikes should reconcile
-  auto children = serialObj.children;
 
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
-  return addSerialObject(world, sceneId, name, interface, attributeFields, children, gameobjectObj, idsAdded);
+  // attributes.stringAttributes or additionalFields?
+  return addSerialObject(world, sceneId, name, interface, attributes.stringAttributes, attributes.children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
