@@ -640,22 +640,20 @@ objid addObjectToScene(
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
   ParsedContent content = parseFormat(serializedObj);
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSerialObjs(content.tokens);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
+
+  auto serialAttrs = deserializeSceneTokens(content.tokens);
+  assert(serialAttrs.size() == 1);
   
-  std::cout << "size: " << serialObjs.size() << std::endl;
-  std::cout << serializedObj << std::endl;
-  assert(serialObjs.size() == 1);
-  auto name = serialObjs.begin() -> first;
-  SerializationObject& serialObj = serialObjs.begin() -> second;
-  auto attributeFields = serialObj.additionalFields;
-  auto children = serialObj.children;
+  auto name = serialAttrs.begin() -> first;
+  GameobjAttributes& attrObj = serialAttrs.begin() -> second;
 
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
-  auto gameobjectObj = gameObjectFromParam(name, idToAdd, serialObj);
-  return addSerialObject(world, sceneId, name, interface, attributeFields, children, gameobjectObj, idsAdded);
+
+  auto gameobj = gameObjectFromFields(name, content.layers.at(0).name, idToAdd, attrObj);
+  return addSerialObject(world, sceneId, name, interface, attrObj.additionalFields, attrObj.children, gameobj, idsAdded);
 }
 
 
