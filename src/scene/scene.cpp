@@ -511,7 +511,7 @@ objid addSerialObject(
   std::map<std::string, std::string> additionalFields, 
   glm::vec3 tint, 
   std::vector<std::string> children, 
-  std::function<GameObject(std::string, objid)> gameobject, 
+  GameObject gameobjectObj, 
   std::vector<objid>& idsAdded
 ){
   auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
@@ -520,7 +520,6 @@ objid addSerialObject(
     return newId;
   };
 
-  auto gameobjectObj = gameobject(name, idsAdded.at(0));
   addGameObjectToScene(world.scenes.at(sceneId), name, gameobjectObj, children);
 
   std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
@@ -639,6 +638,7 @@ objid addObjectToScene(
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
+  auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
 
   return addSerialObject(
     world, 
@@ -648,9 +648,7 @@ objid addObjectToScene(
     attributeFields,  // but also have additionalFields so yikes should reconcile
     tint, 
     children, 
-    [&serialObj, &attributes](std::string name, objid id) -> GameObject {
-      return gameObjectFromFields(name, "default", id, attributes);
-    },
+    gameobjectObj,
     idsAdded
   );
 }
@@ -672,6 +670,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
+  auto gameobjectObj = gameObjectFromParam(name, idToAdd, serialObj);
 
   return addSerialObject(
     world, 
@@ -681,9 +680,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     attributeFields, 
     tint, 
     children,
-    [&serialObj](std::string name, objid id) -> GameObject {
-      return gameObjectFromParam(name, id, serialObj);
-    },
+    gameobjectObj,
     idsAdded
   );
 }
