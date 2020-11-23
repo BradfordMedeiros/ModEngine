@@ -631,7 +631,7 @@ objid addObjectToScene(
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
   auto serialObj = serialObjectFromFields("default", attributes);
-  auto attributeFields = attributes.stringAttributes;
+  auto attributeFields = attributes.stringAttributes; // but also have additionalFields so yikes should reconcile
   auto tint = serialObj.tint;
   auto children = serialObj.children;
 
@@ -639,18 +639,7 @@ objid addObjectToScene(
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
-
-  return addSerialObject(
-    world, 
-    sceneId, 
-    name, 
-    interface, 
-    attributeFields,  // but also have additionalFields so yikes should reconcile
-    tint, 
-    children, 
-    gameobjectObj,
-    idsAdded
-  );
+  return addSerialObject(world, sceneId, name, interface, attributeFields, tint, children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
@@ -671,18 +660,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromParam(name, idToAdd, serialObj);
-
-  return addSerialObject(
-    world, 
-    sceneId, 
-    name, 
-    interface, 
-    attributeFields, 
-    tint, 
-    children,
-    gameobjectObj,
-    idsAdded
-  );
+  return addSerialObject(world, sceneId, name, interface, attributeFields, tint, children, gameobjectObj, idsAdded);
 }
 
 
