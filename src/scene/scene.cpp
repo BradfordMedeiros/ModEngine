@@ -629,6 +629,10 @@ objid addObjectToScene(
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
   auto serialObj = serialObjectFromFields("default", attributes);
+  auto attributeFields = attributes.stringAttributes;
+  auto tint = serialObj.tint;
+  auto children = serialObj.children;
+
   return addSerialObject(
     world, 
     sceneId, 
@@ -636,11 +640,11 @@ objid addObjectToScene(
     useObjId, 
     name, 
     interface, 
-    serialObj.additionalFields, 
-    serialObj.tint, 
-    serialObj.children, 
-    [&serialObj](std::string name, objid id) -> GameObject {
-      return gameObjectFromParam(name, id, serialObj);
+    attributeFields,  // but also have additionalFields so yikes should reconcile
+    tint, 
+    children, 
+    [&serialObj, &attributes](std::string name, objid id) -> GameObject {
+      return gameObjectFromFields(name, "default", id, attributes);
     }
   );
 }
@@ -655,6 +659,10 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   assert(serialObjs.size() == 1);
   auto name = serialObjs.begin() -> first;
   SerializationObject& serialObj = serialObjs.begin() -> second;
+  auto attributeFields = serialObj.additionalFields;
+  auto tint = serialObj.tint;
+  auto children = serialObj.children;
+
   return addSerialObject(
     world, 
     sceneId, 
@@ -662,9 +670,9 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     useObjId, 
     name, 
     interface, 
-    serialObj.additionalFields, 
-    serialObj.tint, 
-    serialObj.children,
+    attributeFields, 
+    tint, 
+    children,
     [&serialObj](std::string name, objid id) -> GameObject {
       return gameObjectFromParam(name, id, serialObj);
     }

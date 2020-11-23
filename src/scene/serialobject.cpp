@@ -167,3 +167,8 @@ SerializationObject serialObjectFromFields(std::string layer, GameobjAttributes 
   };
   return serialObj;
 }
+
+GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes){
+  auto serialObj = serialObjectFromFields(layer, attributes);
+  return gameObjectFromParam(name, id, serialObj);
+}
