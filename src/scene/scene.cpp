@@ -509,7 +509,6 @@ objid addSerialObject(
   std::string name, 
   SysInterface interface, 
   std::map<std::string, std::string> additionalFields, 
-  glm::vec3 tint, 
   std::vector<std::string> children, 
   GameObject gameobjectObj, 
   std::vector<objid>& idsAdded
@@ -525,7 +524,7 @@ objid addSerialObject(
   std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
   std::map<std::string, glm::vec3> tints;
   additionalFieldsMap[name] = additionalFields;
-  tints[name] = tint;
+  tints[name] = gameobjectObj.tint;
 
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap, tints);
 
@@ -630,16 +629,16 @@ objid addObjectToScene(
 ){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
+  
   auto serialObj = serialObjectFromFields("default", attributes);
   auto attributeFields = attributes.stringAttributes; // but also have additionalFields so yikes should reconcile
-  auto tint = serialObj.tint;
   auto children = serialObj.children;
 
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
-  return addSerialObject(world, sceneId, name, interface, attributeFields, tint, children, gameobjectObj, idsAdded);
+  return addSerialObject(world, sceneId, name, interface, attributeFields, children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
@@ -653,14 +652,13 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   auto name = serialObjs.begin() -> first;
   SerializationObject& serialObj = serialObjs.begin() -> second;
   auto attributeFields = serialObj.additionalFields;
-  auto tint = serialObj.tint;
   auto children = serialObj.children;
 
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromParam(name, idToAdd, serialObj);
-  return addSerialObject(world, sceneId, name, interface, attributeFields, tint, children, gameobjectObj, idsAdded);
+  return addSerialObject(world, sceneId, name, interface, attributeFields, children, gameobjectObj, idsAdded);
 }
 
 
