@@ -45,7 +45,12 @@ SceneDeserialization deserializeScene(std::string content, std::function<objid()
 void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 void addChildLink(Scene& scene, objid childId, objid parentId);
 
-std::map<std::string, SerializationObject> addSubsceneToRoot(
+struct SubsceneInfo {
+  glm::vec3 tint;
+  std::map<std::string, std::string> additionalFields;
+};
+
+std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   Scene& scene, 
   objid rootId,
   objid rootIdNode, 

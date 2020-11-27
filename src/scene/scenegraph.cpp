@@ -104,7 +104,7 @@ SceneDeserialization deserializeScene(std::string content, std::function<objid()
   return createSceneFromParsedContent(parseFormat(content), getNewObjectId);
 }
 
-std::map<std::string, SerializationObject> addSubsceneToRoot(
+std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   Scene& scene, 
   objid rootId, 
   objid rootIdNode, 
@@ -115,7 +115,8 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   std::function<objid()> getNewObjectId,
   glm::vec3 parentTint
 ){
-  std::map<std::string, SerializationObject> serialObjs;
+  std::map<std::string, SubsceneInfo> subsceneInfos;
+
   std::map<objid, objid> nodeIdToRealId;
   for (auto [nodeId, transform] : gameobjTransforms){
     if (nodeId == rootIdNode){
@@ -125,16 +126,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
     nodeIdToRealId[nodeId] = id;
 
     auto rootObj = scene.idToGameObjects.at(rootId);
-  
-    std::map<std::string, std::string> stringAttributes;
-    std::map<std::string, double> numAttributes;
-    std::map<std::string, glm::vec3> vecAttributes;  
-
-    GameobjAttributes attributes {
-      .stringAttributes = stringAttributes,
-      .numAttributes = numAttributes,
-      .vecAttributes = vecAttributes,
-    };
+    GameobjAttributes attributes {};
 
     auto defaultObject = getDefaultObject("default");
     setSerialObjFromAttr(defaultObject, attributes);
@@ -152,7 +144,10 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
       .tint = parentTint,
       .additionalFields = additionalFields.at(nodeId)
     };
-    serialObjs[names.at(nodeId)] = obj;
+    subsceneInfos[names.at(nodeId)] = {
+      .tint = parentTint,
+      .additionalFields = additionalFields.at(nodeId),
+    };
 
     auto gameobjectObj = gameObjectFromParam(names.at(nodeId), id, obj);
     addObjectToScene(scene, -1, names.at(nodeId), gameobjectObj);
@@ -166,7 +161,7 @@ std::map<std::string, SerializationObject> addSubsceneToRoot(
   }
   enforceRootObjects(scene);
 
-  return serialObjs;
+  return subsceneInfos;
 } 
 
 bool isDefaultPosition(glm::vec3 pos){
