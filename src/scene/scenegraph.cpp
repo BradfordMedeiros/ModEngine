@@ -29,18 +29,6 @@ void enforceRootObjects(Scene& scene){
   }
 }
 
-std::map<std::string, SerializationObject> deserializeSerialObjs(std::vector<Token> tokens){
-  std::map<std::string, SerializationObject> objects;
-  auto objectAttributes = deserializeSceneTokens(tokens);
-
-  for (auto &[name, attributes] : objectAttributes){
-    SerializationObject object { };
-    setSerialObjFromAttr(object, attributes);
-    objects[name] = object;
-  }
-  return objects;
-}
-
 std::string layerForObject(ParsedContent& parseFormat, std::string objname){
   for (auto token : parseFormat.tokens){
     if (token.target == objname){
