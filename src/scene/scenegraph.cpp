@@ -41,6 +41,15 @@ std::map<std::string, SerializationObject> deserializeSerialObjs(std::vector<Tok
   return objects;
 }
 
+std::string layerForObject(ParsedContent& parseFormat, std::string objname){
+  for (auto token : parseFormat.tokens){
+    if (token.target == objname){
+      return token.layer;
+    }
+  }
+  return "default";
+}
+
 SceneDeserialization createSceneFromParsedContent(
   ParsedContent parsedContent,  
   std::function<objid()> getNewObjectId
@@ -50,27 +59,26 @@ SceneDeserialization createSceneFromParsedContent(
   std::sort(std::begin(parsedContent.layers), std::end(parsedContent.layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
   scene.layers = parsedContent.layers;
 
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSerialObjs(tokens);
-  
+  auto serialGameAttrs = deserializeSceneTokens(tokens);
+
   auto rootId = getNewObjectId();
   auto rootName = "~root:" + std::to_string(rootId);
   scene.rootId = rootId;
-  assert(serialObjs.find(rootName) == serialObjs.end());
 
+  assert(serialGameAttrs.find(rootName) == serialGameAttrs.end());
   assert(rootName.find(',') == std::string::npos);
-  serialObjs[rootName] = getDefaultObject("default");
-  serialObjs[rootName].physics.enabled = false; // todo see if this can be removed
+  serialGameAttrs[rootName] = GameobjAttributes{ .stringAttributes = {{"physics", "disabled"}}};
 
   std::map<std::string, GameObject> gameobjs;
 
-  for (auto [name, serialObj] : serialObjs){
+  for (auto [name, gameAttr] : serialGameAttrs){
     if (name != rootName){
-      objid id = serialObj.hasId ? serialObj.id : getNewObjectId();
-      auto gameobjectObj = gameObjectFromParam(name, id, serialObj);
-      gameobjs[name] = gameobjectObj;
+      objid id = (gameAttr.stringAttributes.find("id") != gameAttr.stringAttributes.end()) ? 
+        std::atoi(gameAttr.stringAttributes.at("id").c_str()) : 
+        getNewObjectId();
+      gameobjs[name] = gameObjectFromFields(name, layerForObject(parsedContent, name), id, gameAttr);
     }else{
-      auto gameobjectObj = gameObjectFromParam(name, scene.rootId, serialObj);
-      gameobjs[name] = gameobjectObj;
+      gameobjs[name] = gameObjectFromFields(name, layerForObject(parsedContent, name), scene.rootId, gameAttr); 
     }
   }
 
@@ -78,8 +86,8 @@ SceneDeserialization createSceneFromParsedContent(
     addObjectToScene(scene, -1, name, gameobjectObj);
   }
 
-  for (auto [name, serialObj] : serialObjs){
-    for (auto childName : serialObj.children){
+  for (auto [name, gameobj] : serialGameAttrs){
+    for (auto childName : gameobj.children){
       enforceParentRelationship(scene, scene.nameToId.at(childName), name);
     }
   }
@@ -89,9 +97,10 @@ SceneDeserialization createSceneFromParsedContent(
 
   std::map<std::string, std::map<std::string, std::string>> additionalFields;
   std::map<std::string, glm::vec3>  tints; 
-  for (auto &[name, serialObj] : serialObjs){
-    additionalFields[name] = serialObj.additionalFields;
-    tints[name] = serialObj.tint;
+
+  for (auto &[name, gameobj] : serialGameAttrs){
+    additionalFields[name] = gameobj.additionalFields;
+    tints[name] = gameobjs.at(name).tint;  
   }
 
   SceneDeserialization deserializedScene {
