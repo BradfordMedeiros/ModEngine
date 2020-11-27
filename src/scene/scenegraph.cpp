@@ -29,6 +29,18 @@ void enforceRootObjects(Scene& scene){
   }
 }
 
+std::map<std::string, SerializationObject> deserializeSerialObjs(std::vector<Token> tokens){
+  std::map<std::string, SerializationObject> objects;
+  auto objectAttributes = deserializeSceneTokens(tokens);
+
+  for (auto &[name, attributes] : objectAttributes){
+    SerializationObject object { };
+    setSerialObjFromAttr(object, attributes);
+    objects[name] = object;
+  }
+  return objects;
+}
+
 SceneDeserialization createSceneFromParsedContent(
   ParsedContent parsedContent,  
   std::function<objid()> getNewObjectId
@@ -431,16 +443,4 @@ void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::
     obj.transformation.scale = parseVec(attributes.at("scale"));
   }
   // @TODO add more overrideable fields
-}
-
-std::map<std::string, SerializationObject> deserializeSerialObjs(std::vector<Token> tokens){
-  std::map<std::string, SerializationObject> objects;
-  auto objectAttributes = deserializeSceneTokens(tokens);
-
-  for (auto &[name, attributes] : objectAttributes){
-    SerializationObject object { };
-    setSerialObjFromAttr(object, attributes);
-    objects[name] = object;
-  }
-  return objects;
 }
