@@ -101,7 +101,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
 
 SerializationObject getDefaultObject(std::string layer){
   GameobjAttributes attr{ .layer = layer };
-  SerializationObject obj{};
+  SerializationObject obj{ .layer = layer };
   setSerialObjFromAttr(obj, attr);
   return obj;
 }
@@ -146,29 +146,14 @@ std::string attributeOrEmpty(std::map<std::string, std::string>& stringAttribute
   return "";
 }
 
-// @TODO - fill in the rest of these fields 
-// affects mk-obj-attr 
 SerializationObject serialObjectFromFields(std::string layer, GameobjAttributes attributes){
   auto defaultObject = getDefaultObject(layer);
-  setSerialObjFromAttr(defaultObject, attributes);
-  auto parent = attributeOrEmpty(attributes.stringAttributes, "parent");
-  SerializationObject serialObj {
-    .position = attributes.vecAttributes.find("position") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("position") : glm::vec3(0.f, 0.f, 0.f),
-    .scale = attributes.vecAttributes.find("scale") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("scale") : glm::vec3(1.f, 1.f, 1.f),
-    .rotation =  glm::identity<glm::quat>(),
-    .physics = defaultObject.physics, // see notes around nocollide + physics enabled 
-    .lookat = attributeOrEmpty(attributes.stringAttributes,"lookat"),
-    .layer =  layer,
-    .script = attributeOrEmpty(attributes.stringAttributes,"script"),
-    .fragshader = attributeOrEmpty(attributes.stringAttributes, "fragshader"),
-    .netsynchronize = (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()) && (attributes.stringAttributes.at("net") == "sync"),
-    .tint = attributes.vecAttributes.find("tint") != attributes.vecAttributes.end() ? attributes.vecAttributes.at("tint") : glm::vec3(1.f, 1.f, 1.f),
-    .additionalFields = attributes.stringAttributes, 
-  };
-  return serialObj;
+  setSerialObjFromAttr(defaultObject, attributes); 
+  return defaultObject;
 }
 
 GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes){
   auto serialObj = serialObjectFromFields(layer, attributes);
+  serialObj.layer = layer;
   return gameObjectFromParam(name, id, serialObj);
 }

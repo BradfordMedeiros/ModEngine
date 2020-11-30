@@ -126,31 +126,26 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
     nodeIdToRealId[nodeId] = id;
 
     auto rootObj = scene.idToGameObjects.at(rootId);
-    GameobjAttributes attributes {};
-
-    auto defaultObject = getDefaultObject("default");
-    setSerialObjFromAttr(defaultObject, attributes);
-
-    SerializationObject obj {
-      .position = transform.position,
-      .scale = transform.scale,
-      .rotation = transform.rotation,
-      .physics = defaultObject.physics, // see notes around nocollide + physics enabled 
-      .lookat = "",
-      .layer = rootObj.layer,
-      .script = "",
-      .fragshader = rootObj.fragshader,
-      .netsynchronize = false,
-      .tint = parentTint,
-      .additionalFields = additionalFields.at(nodeId)
+    GameobjAttributes attributes {
+      .stringAttributes = {
+        {"fragshader", rootObj.fragshader},
+      },
+      .vecAttributes = {
+        {"position", transform.position },
+        {"scale",    transform.scale    },
+        {"tint",     parentTint         },
+      },
     };
+
     subsceneInfos[names.at(nodeId)] = {
       .tint = parentTint,
       .additionalFields = additionalFields.at(nodeId),
     };
 
-    auto gameobjectObj = gameObjectFromParam(names.at(nodeId), id, obj);
-    addObjectToScene(scene, -1, names.at(nodeId), gameobjectObj);
+    auto gameobj = gameObjectFromFields(names.at(nodeId), rootObj.layer, id, attributes);
+    gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
+
+    addObjectToScene(scene, -1, names.at(nodeId), gameobj);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
