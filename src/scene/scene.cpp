@@ -360,15 +360,14 @@ void addObjectToWorld(
   World& world, 
   Scene& scene, 
   objid sceneId, 
-  SerializationObject& serialObj, 
+  std::string name,
   bool shouldLoadModel, 
   std::function<objid()> getId,
-  SysInterface interface
+  SysInterface interface,
+  glm::vec3 tint,
+  std::map<std::string, std::string> additionalFields
 ){
-    auto id =  scene.nameToId.at(serialObj.name);
-    auto additionalFields = serialObj.additionalFields;
-    auto name = serialObj.name;
-    auto tint = serialObj.tint;
+    auto id =  scene.nameToId.at(name);
 
     if (world.idToScene.find(id) != world.idToScene.end()){
       std::cout << "id already in the scene: " << id << std::endl;
@@ -378,7 +377,7 @@ void addObjectToWorld(
     world.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
-    addObject(id, getType(serialObj.name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
+    addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
       [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface, tint](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
@@ -410,8 +409,8 @@ void addObjectToWorld(
             tint
           );
 
-          for (auto &[_, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, newSerialObj, false, getId, interface);
+          for (auto &[name, newSerialObj] : newSerialObjs){
+            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, newSerialObj.tint, newSerialObj.additionalFields);
           }
           return hasMesh;
         }
@@ -463,13 +462,15 @@ std::string serializeObject(World& world, objid id, std::string overridename){
 void addSerialObjectsToWorld(
   World& world, 
   objid sceneId, 
-  std::map<std::string, SerializationObject>& serialObjs,
   std::vector<objid> idsAdded,
   std::function<objid()> getNewObjectId,
-  SysInterface interface
+  SysInterface interface,
+  std::map<std::string, std::map<std::string, std::string>> additionalFields,
+  std::map<std::string, glm::vec3> tint
 ){
-  for (auto &[_, serialObj] : serialObjs){
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, serialObj, true, getNewObjectId, interface);
+  for (auto &[name, additionalField] : additionalFields){
+    // Warning: getNewObjectId will mutate the idsAdded.  
+    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, tint.at(name), additionalField);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
@@ -491,38 +492,43 @@ void addSerialObjectsToWorld(
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
   assert(world.scenes.find(sceneId) == world.scenes.end());
 
-  SceneDeserialization deserializedScene = deserializeScene(sceneData, fields, getUniqueObjId);
+  SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId);
   world.scenes[sceneId] = deserializedScene.scene;
   std::vector<objid> idsAdded;
   for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
   }
-  addSerialObjectsToWorld(world, sceneId, deserializedScene.serialObjs, idsAdded, getUniqueObjId, interface);
+
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getUniqueObjId, interface, deserializedScene.additionalFields, deserializedScene.tints);
   return sceneId;
 }
 
-objid addSerialObject(World& world, objid sceneId, objid id, bool useObjId, SerializationObject& serialObj, SysInterface interface){
-  std::vector<objid> idsAdded;
-  int numIdsGenerated = 0;
-  auto getId = [&idsAdded, &numIdsGenerated, id, useObjId]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = -1;
-    if (numIdsGenerated == 0 && useObjId){
-      newId = id;
-    }else{
-      newId = getUniqueObjId();
-    }
-    numIdsGenerated++;
+objid addSerialObject(
+  World& world, 
+  objid sceneId, 
+  std::string name, 
+  SysInterface interface, 
+  std::map<std::string, std::string> additionalFields, 
+  std::vector<std::string> children, 
+  GameObject gameobjectObj, 
+  std::vector<objid>& idsAdded
+){
+  auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+    auto newId = getUniqueObjId();
     idsAdded.push_back(newId);
     return newId;
   };
 
-  addSerialObjectToScene(world.scenes.at(sceneId), serialObj, getId);
+  addGameObjectToScene(world.scenes.at(sceneId), name, gameobjectObj, children);
 
-  std::map<std::string, SerializationObject> serialObjs;
-  serialObjs[serialObj.name] = serialObj;
-  addSerialObjectsToWorld(world, sceneId, serialObjs, idsAdded, getId, interface);
+  std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
+  std::map<std::string, glm::vec3> tints;
+  additionalFieldsMap[name] = additionalFields;
+  tints[name] = gameobjectObj.tint;
 
-  auto gameobjId = world.scenes.at(sceneId).nameToId.at(serialObj.name);
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap, tints);
+
+  auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
   return gameobjId;
 }
 
@@ -623,20 +629,31 @@ objid addObjectToScene(
 ){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-  auto serialObj = serialObjectFromFields(name, "default", fields, attributes);
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, interface);
+
+  std::vector<objid> idsAdded;
+  auto idToAdd = useObjId ? id : getUniqueObjId();
+  idsAdded.push_back(idToAdd);
+  auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
+  // attributes.stringAttributes or additionalFields?
+  return addSerialObject(world, sceneId, name, interface, attributes.stringAttributes, attributes.children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
   ParsedContent content = parseFormat(serializedObj);
-  std::map<std::string, SerializationObject>  serialObjs = deserializeSceneTokens(content.tokens);
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
+
+  auto serialAttrs = deserializeSceneTokens(content.tokens);
+  assert(serialAttrs.size() == 1);
   
-  std::cout << "size: " << serialObjs.size() << std::endl;
-  std::cout << serializedObj << std::endl;
-  assert(serialObjs.size() == 1);
-  SerializationObject& serialObj = serialObjs.begin() -> second;
-  return addSerialObject(world, sceneId, id, useObjId, serialObj, interface);
+  auto name = serialAttrs.begin() -> first;
+  GameobjAttributes& attrObj = serialAttrs.begin() -> second;
+
+  std::vector<objid> idsAdded;
+  auto idToAdd = useObjId ? id : getUniqueObjId();
+  idsAdded.push_back(idToAdd);
+
+  auto gameobj = gameObjectFromFields(name, content.layers.at(0).name, idToAdd, attrObj);
+  return addSerialObject(world, sceneId, name, interface, attrObj.additionalFields, attrObj.children, gameobj, idsAdded);
 }
 
 

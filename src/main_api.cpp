@@ -441,7 +441,6 @@ void nextCamera(){
 }
 void moveCamera(glm::vec3 offset){
   if (activeCameraObj == NULL){
-    std::cout << "default camera!" << std::endl;
     defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
     setGameObjectPosition(activeCameraObj ->id, moveRelative(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation, glm::vec3(offset), false));

@@ -83,173 +83,90 @@ ParsedContent parseFormat(std::string content) {
 }
 
 
-SerializationObject getDefaultObject(std::string name, std::string layer, bool enablePhysics){
-  assert(name.find(',') == std::string::npos);
-
-  physicsOpts physics {
-    .enabled = enablePhysics,
-    .isStatic = true,
-    .hasCollisions = true,
-    .shape = AUTOSHAPE,
-    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
-    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
-    .gravity = glm::vec3(0.f, -9.81f, 0.f),
-    .friction = 1.0f,
-    .restitution = 0.f,
-    .mass = 1.f,
-    .maxspeed = -1.f,
-  };
-
-  SerializationObject newObject {
-    .hasId = false,
-    .id = -1,
-    .name = name,
-    .position = glm::vec3(0.f, 0.f, 0.f),
-    .scale = glm::vec3(1.f, 1.f, 1.f),
-    .rotation = glm::identity<glm::quat>(),
-    .physics = physics,
-    .layer = layer,
-    .tint = glm::vec3(1.f, 1.f, 1.f),
-  };
-  return newObject;
-}
-
 std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
-std::map<std::string, SerializationObject> deserializeSceneTokens(std::vector<Token> tokens){
-  std::map<std::string, SerializationObject> objects;
+bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "tint"};
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.vecAttributes[attribute] = parseVec(payload);
+      return true;
+    }
+  }
+  return false;
+}
+bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed" };
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.numAttributes[attribute] = std::atof(payload.c_str());
+      return true;
+    }
+  }
+  return false;
+}
+bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net", "id", "rotation"};
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.stringAttributes[attribute] = payload;
+      return true;
+    }
+  }
+  return false;
+}
+bool addFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  bool addedVecField = addVecFields(attributes, attribute, payload);
+  if (addedVecField){
+    return true;
+  }
+  bool addedFloatField = addFloatFields(attributes, attribute, payload);
+  if (addedFloatField){
+    return true;
+  }
+  bool addedStringField = addStringFields(attributes, attribute, payload);
+  if (addedStringField){
+    return true;
+  }
+  return false;
+}
+
+std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
+  std::map<std::string, GameobjAttributes> objectAttributes;
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
-    if (objects.find(token.target) == objects.end()) {
-      objects[token.target] = getDefaultObject(token.target, token.layer, true);
+    if (objectAttributes.find(token.target) == objectAttributes.end()) {
+      assert(token.target.find(',') == std::string::npos);
+      objectAttributes[token.target] = GameobjAttributes { 
+        .layer = token.layer,
+      };
     }
 
     if (token.attribute == "child"){
       auto children = parseChildren(token.payload);
       for (auto child : children){
-        if (objects.find(child) == objects.end()){
-          objects[child] = getDefaultObject(child, token.layer, true);
+        if (objectAttributes.find(child) == objectAttributes.end()){
+          objectAttributes[child] = GameobjAttributes { 
+            .layer = token.layer,
+          };
         }
       }
-      objects.at(token.target).children = children;
+      objectAttributes.at(token.target).children = children;
       continue;
     }
 
-    if (token.attribute == "id"){
-      objects.at(token.target).id = std::atoi(token.payload.c_str());   
-      objects.at(token.target).hasId = true;
+    bool addedField = addFields(objectAttributes.at(token.target), token.attribute, token.payload);
+    if (addedField){
       continue;
-    }
-    if (token.attribute == "position"){
-      objects.at(token.target).position = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "scale"){
-      objects.at(token.target).scale = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "rotation"){
-      objects.at(token.target).rotation = parseQuat(token.payload);
-      continue;
-    }
-    if (token.attribute == "physics"){
-      objects.at(token.target).physics.enabled = token.payload == "enabled";
-      continue;
-    }
-    if (token.attribute == "physics_type"){
-      objects.at(token.target).physics.isStatic = token.payload != "dynamic";
-      continue;
-    }
-    if (token.attribute == "physics_shape"){
-      if (token.payload == "shape_sphere"){
-        objects.at(token.target).physics.shape = SPHERE;
-      }
-      if (token.payload == "shape_box"){
-        objects.at(token.target).physics.shape = BOX;
-      }
-      if (token.payload == "shape_auto"){
-        objects.at(token.target).physics.shape = AUTOSHAPE;
-      }
-      continue;
-    }
-    if (token.attribute == "physics_collision" && token.payload == "nocollide"){
-      objects.at(token.target).physics.hasCollisions = false;
-      continue;
-    }
-    if (token.attribute == "physics_angle"){
-      objects.at(token.target).physics.angularFactor = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "physics_linear"){
-      objects.at(token.target).physics.linearFactor = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "physics_gravity"){
-      objects.at(token.target).physics.gravity = parseVec(token.payload);
-      continue;
-    }
-    if (token.attribute == "physics_friction"){
-      objects.at(token.target).physics.friction = std::atof(token.payload.c_str());
-      continue;
-    }
-    if (token.attribute == "physics_restitution"){
-      objects.at(token.target).physics.restitution = std::atof(token.payload.c_str());
-      continue;
-    }
-    if (token.attribute == "physics_mass"){
-      objects.at(token.target).physics.mass =  std::atof(token.payload.c_str());
-      continue;
-    }
-    if (token.attribute == "physics_maxspeed"){
-      objects.at(token.target).physics.maxspeed = std::atof(token.payload.c_str());
-      continue;
-    }
-
-    if (token.attribute == "lookat"){
-      objects.at(token.target).lookat = token.payload;
-      continue;
-    }
-    if (token.attribute == "script"){
-      objects.at(token.target).script = token.payload;
-      continue;
-    }
-    if (token.attribute == "fragshader"){
-      objects.at(token.target).fragshader = token.payload;
-      continue;
-    }
-    if (token.attribute == "net" && token.payload == "sync"){
-      objects.at(token.target).netsynchronize = true;
-      continue;
-    }
-    if (token.attribute == "tint"){
-      objects.at(token.target).tint = parseVec(token.payload);
-      continue;
-    }
-    objects.at(token.target).additionalFields[token.attribute] = token.payload;
+    }  
+    objectAttributes.at(token.target).additionalFields[token.attribute] = token.payload;
   }
-  return objects;
-}
 
-physicsOpts defaultPhysicsOpts(GameobjAttributes attributes){
-  // TODO this should use a standardized way to parse these in common with serialization
-  physicsOpts defaultOption = {
-    .enabled = attributes.stringAttributes.find("physics") == attributes.stringAttributes.end() ? false : (attributes.stringAttributes.at("physics") == "enabled"),
-    .isStatic = attributes.stringAttributes.find("physics_type") == attributes.stringAttributes.end() ? true : !(attributes.stringAttributes.at("physics_type") == "dynamic"),
-    .hasCollisions = attributes.stringAttributes.find("physics_collision") == attributes.stringAttributes.end() ? false : !(attributes.stringAttributes.at("physics_collision") == "nocollide"),
-    .shape = BOX,
-    .linearFactor = glm::vec3(1.f, 1.f, 1.f),
-    .angularFactor = glm::vec3(1.f, 1.f, 1.f),
-    .gravity = attributes.vecAttributes.find("physics_gravity") == attributes.vecAttributes.end() ? glm::vec3(0.f, -9.81f, 0.f) : attributes.vecAttributes.at("physics_gravity"),
-    .friction = 1.0f,
-    .restitution = 0.f,
-    .mass = 1.f,
-    .maxspeed = -1.f,
-  };
-  return defaultOption;
+  return objectAttributes;
 }
 
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){

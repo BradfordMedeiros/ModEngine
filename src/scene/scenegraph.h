@@ -12,19 +12,8 @@
 #include "./common/mesh.h"
 #include "../common/util.h"
 #include "./serialization.h"
+#include "./serialobject.h"
 
-struct GameObject {
-  objid id;
-  std::string name;
-  Transformation transformation;
-  physicsOpts physicsOptions;
-  std::string lookat;
-  std::string layer;
-  std::string script;
-  std::string fragshader;
-  bool netsynchronize;
-  glm::vec3 tint;
-};
 struct GameObjectH {
   objid id;
   objid parentId;
@@ -44,28 +33,24 @@ struct Scene {
 
 struct SceneDeserialization {
   Scene scene;
-  std::map<std::string, SerializationObject> serialObjs;
+  std::map<std::string, std::map<std::string, std::string>>  additionalFields;
+  std::map<std::string, glm::vec3>  tints;  // todo --> this is odd, should be removed
+
 };
 
 std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id, std::string name = "");
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
-SceneDeserialization deserializeScene(
-  std::string content, 
-  std::vector<Field> fields,
-  std::function<objid()> getNewObjectId
-);
+SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId);
 
-SerializationObject serialObjectFromFields(
-  std::string name, 
-  std::string layer,
-  std::vector<Field> fields,
-  GameobjAttributes attributes
-);
-
-void addSerialObjectToScene(Scene& scene, SerializationObject& serialObj, std::function<objid()> getNewObjectId);
+void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 void addChildLink(Scene& scene, objid childId, objid parentId);
 
-std::map<std::string, SerializationObject> addSubsceneToRoot(
+struct SubsceneInfo {
+  glm::vec3 tint;
+  std::map<std::string, std::string> additionalFields;
+};
+
+std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   Scene& scene, 
   objid rootId,
   objid rootIdNode, 
@@ -91,3 +76,4 @@ std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);
 void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes);
 
 #endif
+
