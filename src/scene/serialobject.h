@@ -54,10 +54,6 @@ struct GameObject {
   glm::vec3 tint;
 };
 
-void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attributes);
-SerializationObject getDefaultObject(std::string layer);
-GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& serialObj);
-SerializationObject serialObjectFromFields(std::string layer, GameobjAttributes attributes);
 GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes);
 
 #endif
