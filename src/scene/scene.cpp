@@ -684,7 +684,27 @@ std::map<std::string, std::string> getAttributes(World& world, objid id){
   // @TODO handle types better
   std::map<std::string, std::string> attr;
   auto objAttrs = objectAttributes(world.objectMapping, id);
-  auto sceneAttrs = scenegraphAttributes(sceneForId(world, id), id);
+
+  std::map<std::string, std::string> sceneAttrs;
+  auto gameobj = sceneForId(world, id).idToGameObjects.at(id);
+
+  // todo missing physics   TODO I should expose the real types here not strings
+  sceneAttrs["position"] = print(gameobj.transformation.position);
+  sceneAttrs["scale"] = print(gameobj.transformation.scale);
+  sceneAttrs["rotation"] = print(gameobj.transformation.rotation);
+
+  if (gameobj.lookat != ""){
+    sceneAttrs["lookat"] = gameobj.lookat;
+  }
+  if (gameobj.layer != ""){
+    sceneAttrs["layer"] = gameobj.layer;
+  }
+  if (gameobj.script != ""){
+    sceneAttrs["script"] = gameobj.script;
+  }
+  if (gameobj.fragshader != ""){
+    sceneAttrs["fragshader"] = gameobj.fragshader;
+  }
 
   for (auto [attrName, attrValue] : objAttrs){
     attr[attrName] = attrValue;
@@ -708,7 +728,16 @@ std::map<std::string, std::string> extractAttributes(std::map<std::string, std::
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
   // @TODO create complete lists for attributes. 
   setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
-  setScenegraphAttributes(sceneForId(world, id), id, extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" }));
+  
+  auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });
+  GameObject& obj = sceneForId(world, id).idToGameObjects.at(id);
+
+  if (attributes.find("position") != attributes.end()){
+    obj.transformation.position = parseVec(attributes.at("position"));
+  }
+  if (attributes.find("scale") != attributes.end()){
+    obj.transformation.scale = parseVec(attributes.at("scale"));
+  }
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){

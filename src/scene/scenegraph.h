@@ -72,8 +72,5 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix);
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 
-std::map<std::string, std::string> scenegraphAttributes(Scene& scene, objid id);
-void setScenegraphAttributes(Scene& scene, objid id, std::map<std::string, std::string> attributes);
-
 #endif
 
