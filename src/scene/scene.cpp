@@ -454,9 +454,15 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
 
 std::string serializeObject(World& world, objid id, std::string overridename){
   Scene& scene = sceneForId(world, id);
-  return serializeObject(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, world.objectMapping);
-  }, true, id, overridename);
+  return serializeObject(
+    scene, 
+    id, 
+    [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
+      return getAdditionalFields(objectId, world.objectMapping);
+    }, 
+    false,
+    overridename
+  );
 }
 
 void addSerialObjectsToWorld(
@@ -588,8 +594,10 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
 
 void copyObjectToScene(World& world, objid id, SysInterface interface){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
-
-  addObjectToScene(world, world.idToScene.at(id), serializeObject(world, id, getGameObject(world, id).name + "-copy"), -1, false, interface);
+  auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy");
+  std::cout << "copy object: serialized object is: " << std::endl;
+  std::cout << serializedObject << std::endl << std::endl;
+  addObjectToScene(world, world.idToScene.at(id), serializedObject, -1, false, interface);
 }
 
 
@@ -643,6 +651,11 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
 
   auto serialAttrs = deserializeSceneTokens(content.tokens);
+
+  std::cout << "SERIAL ATTR SIZE: " << serialAttrs.size() << std::endl;
+  if (serialAttrs.size() > 1){
+    std::cout << "SERIALIZATION GOT MORE THAN 1 OBJECT.  Either bad data or has child element" << std::endl;
+  }
   assert(serialAttrs.size() == 1);
   
   auto name = serialAttrs.begin() -> first;

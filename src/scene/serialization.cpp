@@ -182,3 +182,90 @@ GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
   };
   return attributes; 
 }
+
+bool isDefaultPosition(glm::vec3 pos){
+  return pos.x == 0 && pos.y == 0 && pos.z == 0;
+}
+bool isIdentityVec(glm::vec3 scale){
+  return scale.x = 1 && scale.y == 1 && scale.z == 1;
+}
+bool isDefaultGravity(glm::vec3 gravity){
+  return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
+}
+
+std::string serializeObj(
+  objid id, 
+  objid groupId, 
+  GameObject& gameobject, 
+  std::vector<std::string> children, 
+  bool includeIds, 
+  std::vector<std::pair<std::string, std::string>> additionalFields, 
+  std::string name
+){
+  std::string sceneData = "";
+  if (groupId != id){
+    return sceneData;
+  }
+  std::string gameobjectName = name == "" ? gameobject.name : name;
+
+  if (children.size() > 0){
+    sceneData = sceneData + gameobjectName + ":child:" + join(children, ',') + "\n";  
+  }
+
+  if (includeIds){
+    sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
+  }
+
+  if (!isDefaultPosition(gameobject.transformation.position)){
+    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
+  }
+  if (!isIdentityVec(gameobject.transformation.scale)){
+    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
+  }
+  sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
+
+  if (!gameobject.physicsOptions.enabled){
+    sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
+  }
+  if (!gameobject.physicsOptions.isStatic){
+    sceneData = sceneData + gameobjectName + ":physics_type:dynamic" + "\n"; 
+  }
+  if (!gameobject.physicsOptions.hasCollisions){
+    sceneData = sceneData + gameobjectName + ":physics_collision:nocollide" + "\n"; 
+  }
+  if (gameobject.physicsOptions.shape == BOX){
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_box" + "\n"; 
+  }
+  if (gameobject.physicsOptions.shape == SPHERE){
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_sphere" + "\n"; 
+  }
+  if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
+    sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
+  }
+  if (!isIdentityVec(gameobject.physicsOptions.angularFactor)){
+    sceneData = sceneData + gameobjectName + ":physics_angle:" + serializeVec(gameobject.physicsOptions.angularFactor) + "\n"; 
+  }
+  if (!isDefaultGravity(gameobject.physicsOptions.gravity)){
+    sceneData = sceneData + gameobjectName + ":physics_gravity:" + serializeVec(gameobject.physicsOptions.gravity) + "\n"; 
+  }
+  if (gameobject.lookat != ""){
+    sceneData = sceneData + gameobjectName + ":lookat:" + gameobject.lookat + "\n"; 
+  }
+  if (gameobject.script != ""){
+    sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
+  }
+  if (gameobject.fragshader != ""){
+    sceneData = sceneData + gameobjectName + ":fragshader:" + gameobject.fragshader + "\n";
+  }
+  if (gameobject.netsynchronize){
+    sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
+  }
+  if (!isIdentityVec(gameobject.tint)){
+    sceneData = sceneData + gameobjectName + ":tint:" + serializeVec(gameobject.tint) + "\n";
+  }
+
+  for (auto additionalField : additionalFields){
+    sceneData = sceneData + gameobjectName + ":" + additionalField.first + ":" + additionalField.second + "\n";
+  }
+  return sceneData;  
+}

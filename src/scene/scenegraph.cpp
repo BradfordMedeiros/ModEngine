@@ -159,88 +159,30 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   return subsceneInfos;
 } 
 
-bool isDefaultPosition(glm::vec3 pos){
-  return pos.x == 0 && pos.y == 0 && pos.z == 0;
-}
-bool isIdentityVec(glm::vec3 scale){
-  return scale.x = 1 && scale.y == 1 && scale.z == 1;
-}
-bool isDefaultGravity(glm::vec3 gravity){
-  return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
-}
-
-std::string serializeObject(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, objid id, std::string name){
-  std::string sceneData = "";
-  auto gameobjecth = scene.idToGameObjectsH.at(id);
-  if (gameobjecth.groupId != id){
-    return sceneData;
-  }
-  GameObject gameobject = scene.idToGameObjects.at(id);
-  std::string gameobjectName = name == "" ? gameobject.name : name;
-  
-  if (gameobjecth.children.size() > 0){
-    std::vector<std::string> childnames;
-    for (auto childid : gameobjecth.children){
+std::vector<std::string> childnames(Scene& scene, GameObjectH& gameobjecth){   
+  std::vector<std::string> childnames;
+  for (auto childid : gameobjecth.children){
+    auto childH = scene.idToGameObjectsH.at(childid);
+    if (childH.groupId == childid){
       childnames.push_back(scene.idToGameObjects.at(childid).name);
     }
-    sceneData = sceneData + gameobjectName + ":child:" + join(childnames, ',') + "\n";
   }
+  return childnames;
+}
 
-  if (includeIds){
-    sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
-  }
-  if (!isDefaultPosition(gameobject.transformation.position)){
-    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
-  }
-  if (!isIdentityVec(gameobject.transformation.scale)){
-    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
-  }
-  sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
-
-  if (!gameobject.physicsOptions.enabled){
-    sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
-  }
-  if (!gameobject.physicsOptions.isStatic){
-    sceneData = sceneData + gameobjectName + ":physics_type:dynamic" + "\n"; 
-  }
-  if (!gameobject.physicsOptions.hasCollisions){
-    sceneData = sceneData + gameobjectName + ":physics_collision:nocollide" + "\n"; 
-  }
-  if (gameobject.physicsOptions.shape == BOX){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_box" + "\n"; 
-  }
-  if (gameobject.physicsOptions.shape == SPHERE){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_sphere" + "\n"; 
-  }
-  if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
-    sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
-  }
-  if (!isIdentityVec(gameobject.physicsOptions.angularFactor)){
-    sceneData = sceneData + gameobjectName + ":physics_angle:" + serializeVec(gameobject.physicsOptions.angularFactor) + "\n"; 
-  }
-  if (!isDefaultGravity(gameobject.physicsOptions.gravity)){
-    sceneData = sceneData + gameobjectName + ":physics_gravity:" + serializeVec(gameobject.physicsOptions.gravity) + "\n"; 
-  }
-  if (gameobject.lookat != ""){
-    sceneData = sceneData + gameobjectName + ":lookat:" + gameobject.lookat + "\n"; 
-  }
-  if (gameobject.script != ""){
-    sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
-  }
-  if (gameobject.fragshader != ""){
-    sceneData = sceneData + gameobjectName + ":fragshader:" + gameobject.fragshader + "\n";
-  }
-  if (gameobject.netsynchronize){
-    sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
-  }
-  if (!isIdentityVec(gameobject.tint)){
-    sceneData = sceneData + gameobjectName + ":tint:" + serializeVec(gameobject.tint) + "\n";
-  }
-
-  for (auto additionalFields : getAdditionalFields(id)){
-    sceneData = sceneData + gameobjectName + ":" + additionalFields.first + ":" + additionalFields.second + "\n";
-  }
-  return sceneData;
+std::string serializeObject(Scene& scene, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overridename){
+  auto gameobjecth = scene.idToGameObjectsH.at(id);
+  auto gameobj = scene.idToGameObjects.at(id);
+  auto objectSerialization = serializeObj(
+    id, 
+    gameobjecth.groupId, 
+    gameobj, 
+    childnames(scene, gameobjecth), 
+    includeIds, 
+    getAdditionalFields(id), 
+    overridename
+  );
+  return objectSerialization;
 }
 
 std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
@@ -249,7 +191,7 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
     if (id == scene.rootId){
       continue;
     }
-    sceneData = sceneData + serializeObject(scene, getAdditionalFields, includeIds, id, "");
+    sceneData = sceneData + serializeObject(scene, id, getAdditionalFields, includeIds, "");
   }
   return sceneData;
 }
