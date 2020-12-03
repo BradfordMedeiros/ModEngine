@@ -669,17 +669,6 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return addSerialObject(world, sceneId, name, interface, attrObj.additionalFields, attrObj.children, gameobj, idsAdded);
 }
 
-
-Properties getProperties(World& world, objid id){
-  Properties properties {
-    .transformation = getGameObject(world, id).transformation,
-  };
-  return properties;
-}
-void setProperties(World& world, objid id, Properties& properties){
-  getGameObject(world, id).transformation = properties.transformation;
-}
-
 std::map<std::string, std::string> getAttributes(World& world, objid id){
   // @TODO handle types better
   std::map<std::string, std::string> attr;

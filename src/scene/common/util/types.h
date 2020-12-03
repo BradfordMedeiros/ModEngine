@@ -23,10 +23,6 @@ struct Transformation {
   glm::quat rotation;
 };
 
-struct Properties {
-  Transformation transformation;
-};
-
 struct PhysicsInfo {
   BoundInfo boundInfo;
   glm::vec3 collisionInfo;

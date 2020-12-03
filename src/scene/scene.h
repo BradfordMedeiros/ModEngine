@@ -52,9 +52,6 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 void removeObjectFromScene(World& world, objid id, SysInterface interface);
 void copyObjectToScene(World& world, objid id, SysInterface interface);
 
-Properties getProperties(World& world, objid id);
-void setProperties(World& world, objid id, Properties& properties);
-
 std::map<std::string, std::string> getAttributes(World& world, objid id);
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr);
 

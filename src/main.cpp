@@ -662,6 +662,16 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("using object id: -1" , 40, 190, 3);
 }
 
+Properties getProperties(World& world, objid id){
+  Properties properties {
+    .transformation = getGameObject(world, id).transformation,
+  };
+  return properties;
+}
+void setProperties(World& world, objid id, Properties& properties){
+  getGameObject(world, id).transformation = properties.transformation;
+}
+
 void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }

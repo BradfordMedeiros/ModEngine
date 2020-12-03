@@ -16,6 +16,9 @@
 #include "./common/sysinterface.h"
 #include "./drawing.h"
 
+struct Properties {
+  Transformation transformation;
+};
 enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
 struct SetupPacket {
   char connectionHash[4000];
