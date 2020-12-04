@@ -785,13 +785,11 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
-    Scene& scene = world.scenes.at(world.idToScene.at(i));
-
+    GameObject& gameobj = getGameObject(world, i);
     // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
-    getGameObject(scene, i).transformation.rotation = getRotation(rigidBody);   
-    getGameObject(scene, i).transformation.position = getPosition(rigidBody);
-    
-    clampMaxVelocity(rigidBody, getGameObject(scene, i).physicsOptions.maxspeed);
+    gameobj.transformation.rotation = getRotation(rigidBody);   
+    gameobj.transformation.position = getPosition(rigidBody);
+    clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
   }
 }
 
@@ -986,7 +984,7 @@ void applyHeightmapMasking(World& world, objid id, float amount){
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
       // Recreating simply ensures that the min/max height is always valid. 
-    updatePhysicsBody(world, world.scenes.at(world.idToScene.at(id)), id); 
+    updatePhysicsBody(world, sceneForId(world, id), id); 
   }, hm.mesh);
 }
 
