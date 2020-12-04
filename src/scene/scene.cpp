@@ -117,7 +117,7 @@ struct GroupPhysicsInfo {
 };
 
 GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
-  auto groupId = scene.idToGameObjectsH.at(id).groupId;
+  auto groupId = getGroupId(scene, id);
   bool isRoot = groupId == id;
   if (!isRoot){
     return GroupPhysicsInfo {
@@ -568,7 +568,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
   Scene& scene = sceneForId(world, objectId);
-  auto groupId = scene.idToGameObjectsH.at(objectId).groupId;
+  auto groupId = getGroupId(scene, objectId);
   for (auto gameobjId : getIdsInGroup(scene, groupId)){
     if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
       continue;
@@ -823,7 +823,7 @@ void enforceLookAt(World& world){
 void callbackEntities(World& world){
   for (auto &[_, scene] : world.scenes){
     for (auto &[id, gameobj] : scene.idToGameObjects){
-      if (id == scene.idToGameObjectsH.at(id).groupId && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
+      if (id == getGroupId(scene, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
         world.onObjectUpdate(gameobj);
       }
     }
