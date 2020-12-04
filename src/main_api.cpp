@@ -225,7 +225,7 @@ void addAnimation(AnimationState& animationState, int32_t groupId, std::string a
 }
 
 void playAnimation(int32_t id, std::string animationToPlay){
-  auto groupId =  world.scenes.at(world.idToScene.at(id)).idToGameObjectsH.at(id).groupId;
+  auto groupId = getGroupId(world, id);
   if (animations.playbacks.find(groupId) != animations.playbacks.end()){
     animations.playbacks.erase(groupId);
   }

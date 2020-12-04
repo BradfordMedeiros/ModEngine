@@ -4,13 +4,7 @@ Scene& sceneForId(World& world, objid id){
   return world.scenes.at(world.idToScene.at(id));
 }
 GameObject& getGameObject(World& world, objid id){
-  return sceneForId(world, id).idToGameObjects.at(id);
-}
-GameObject& getGameObject(Scene& scene, objid id){
-  return scene.idToGameObjects.at(id);
-}
-GameObject& getGameObject(Scene& scene, std::string name){
-  return scene.idToGameObjects.at(scene.nameToId.at(name));
+  return getGameObject(sceneForId(world, id), id);
 }
 GameObject& getGameObject(World& world, std::string name){
   for (auto [sceneId, _] : world.scenes){
@@ -34,8 +28,15 @@ std::optional<objid> getGameObjectByName(World& world, std::string name){
   return std::nullopt;
 }
 
+objid getGroupId(World& world, objid id){
+  return getGroupId(sceneForId(world, id), id); 
+}
+std::vector<objid> getIdsInGroup(World& world, objid index){
+  return getIdsInGroup(sceneForId(world, index), getGroupId(world, index));
+}
+
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
-  auto groupId = sceneForId(world, id).idToGameObjectsH.at(id).groupId;
+  auto groupId = getGroupId(world, id);
   for (auto gId : groupIds){
     if (groupId == gId){
       return true;
@@ -45,13 +46,6 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
 }
 bool idExists(World& world, objid id){
   return world.idToScene.find(id) != world.idToScene.end();
-}
-
-objid getGroupId(World& world, objid id){
-  return sceneForId(world, id).idToGameObjectsH.at(id).groupId; 
-}
-std::vector<objid> getIdsInGroup(World& world, objid index){
-  return getIdsInGroup(sceneForId(world, index), getGroupId(world, index));
 }
 
 NameAndMesh getMeshesForGroupId(World& world, objid groupId){

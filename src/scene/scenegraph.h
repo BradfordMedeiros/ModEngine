@@ -35,7 +35,6 @@ struct SceneDeserialization {
   Scene scene;
   std::map<std::string, std::map<std::string, std::string>>  additionalFields;
   std::map<std::string, glm::vec3>  tints;  // todo --> this is odd, should be removed
-
 };
 
 std::string serializeObject(Scene& scene, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
@@ -71,6 +70,9 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
+GameObject& getGameObject(Scene& scene, objid id);
+GameObject& getGameObject(Scene& scene, std::string name);
+objid getGroupId(Scene& scene, objid id);
 
 #endif
 

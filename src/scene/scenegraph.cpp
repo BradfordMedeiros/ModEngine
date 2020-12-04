@@ -336,3 +336,13 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
   }
   return ids;
 }
+
+GameObject& getGameObject(Scene& scene, objid id){
+  return scene.idToGameObjects.at(id);
+}
+GameObject& getGameObject(Scene& scene, std::string name){
+  return scene.idToGameObjects.at(scene.nameToId.at(name));
+}
+objid getGroupId(Scene& scene, objid id){
+  return scene.idToGameObjectsH.at(id).groupId; 
+}
