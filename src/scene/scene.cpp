@@ -477,14 +477,14 @@ void addSerialObjectsToWorld(
   }
 
   for (auto id : idsAdded){
-    auto obj = world.scenes.at(sceneId).idToGameObjects.at(id);
+    auto obj = getGameObject(world, id);
     if (obj.script != ""){
       interface.loadScript(obj.script, id);
     }
   }
 
   for (auto id : idsAdded){
-    auto obj = world.scenes.at(sceneId).idToGameObjects.at(id);
+    auto obj = getGameObject(world, id); 
     world.onObjectCreate(obj);
   }
 }
@@ -668,7 +668,7 @@ std::map<std::string, std::string> getAttributes(World& world, objid id){
   auto objAttrs = objectAttributes(world.objectMapping, id);
 
   std::map<std::string, std::string> sceneAttrs;
-  auto gameobj = sceneForId(world, id).idToGameObjects.at(id);
+  auto gameobj = getGameObject(world, id); 
 
   // todo missing physics   TODO I should expose the real types here not strings
   sceneAttrs["position"] = print(gameobj.transformation.position);
@@ -712,7 +712,7 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
   
   auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });
-  GameObject& obj = sceneForId(world, id).idToGameObjects.at(id);
+  GameObject& obj = getGameObject(world, id);
 
   if (attributes.find("position") != attributes.end()){
     obj.transformation.position = parseVec(attributes.at("position"));
