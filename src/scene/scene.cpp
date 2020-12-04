@@ -570,10 +570,9 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
   Scene& scene = sceneForId(world, objectId);
   auto groupId = getGroupId(scene, objectId);
   for (auto gameobjId : getIdsInGroup(scene, groupId)){
-    if (scene.idToGameObjects.find(gameobjId) == scene.idToGameObjects.end()){
+    if (!idExists(scene, gameobjId)){
       continue;
     }
-
     auto idsToRemove = idsToRemoveFromScenegraph(scene, gameobjId);
     for (auto id : idsToRemove){
       auto gameobj = getGameObject(world, id);
@@ -899,7 +898,7 @@ void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::ma
 Transformation fullTransformation(World& world, objid id){
   Scene& scene = sceneForId(world, id);
   while(scene.isNested){
-    scene = sceneForId(world, scene.idToGameObjectsH.at(scene.rootId).parentId);
+    scene = sceneForId(world, parentId(scene, scene.rootId));
   }
   
   Transformation transformation = {};

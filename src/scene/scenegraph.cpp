@@ -346,3 +346,9 @@ GameObject& getGameObject(Scene& scene, std::string name){
 objid getGroupId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).groupId; 
 }
+bool idExists(Scene& scene, objid id){
+  return scene.idToGameObjects.find(id) != scene.idToGameObjects.end();
+}
+objid parentId(Scene& scene, objid id){
+  return scene.idToGameObjectsH.at(id).parentId;
+}

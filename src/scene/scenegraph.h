@@ -73,6 +73,8 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 GameObject& getGameObject(Scene& scene, objid id);
 GameObject& getGameObject(Scene& scene, std::string name);
 objid getGroupId(Scene& scene, objid id);
+bool idExists(Scene& scene, objid id);
+objid parentId(Scene& scene, objid id);
 
 #endif
 
