@@ -1,5 +1,13 @@
 #include "./scene.h"
 
+void forEveryGameobj(World& world, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement){
+  for (auto &[_, scene] : world.scenes){
+    for (auto [id, gameObj]: scene.idToGameObjects){
+      onElement(id, scene, gameObj);
+    }
+  }
+}
+
 Scene& sceneForId(World& world, objid id){
   return world.scenes.at(world.idToScene.at(id));
 }
@@ -794,37 +802,31 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
 }
 
 void updateSoundPositions(World& world){
-  for (auto &[_, scene] : world.scenes){
-    for (auto &[id, gameobj] : scene.idToGameObjects){
-      updatePosition(world.objectMapping, id, gameobj.transformation.position);
-    }
-  }  
+  forEveryGameobj(world, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+    updatePosition(world.objectMapping, id, gameobj.transformation.position);
+  });
 }
 
 void enforceLookAt(World& world){
- for (auto &[_, scene] : world.scenes){
-    for (auto &[id, gameobj] : scene.idToGameObjects){
-      std::string lookAt = gameobj.lookat;                      
-      if (lookAt == "" || lookAt == gameobj.name){
-        continue;
-      }
-      if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
-        glm::vec3 fromPos = gameobj.transformation.position;
-        glm::vec3 targetPosition = getGameObject(scene, lookAt).transformation.position;
-        physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
-      }
+  forEveryGameobj(world, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+    std::string lookAt = gameobj.lookat;                      
+    if (lookAt == "" || lookAt == gameobj.name){
+      return;
     }
-  }
+    if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
+      glm::vec3 fromPos = gameobj.transformation.position;
+      glm::vec3 targetPosition = getGameObject(scene, lookAt).transformation.position;
+      physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
+    }
+  });  
 }
 
 void callbackEntities(World& world){
-  for (auto &[_, scene] : world.scenes){
-    for (auto &[id, gameobj] : scene.idToGameObjects){
-      if (id == getGroupId(scene, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
-        world.onObjectUpdate(gameobj);
-      }
+  forEveryGameobj(world, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+    if (id == getGroupId(scene, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
+      world.onObjectUpdate(gameobj);
     }
-  }
+  });  
   world.entitiesToUpdate.clear();
 }
 
