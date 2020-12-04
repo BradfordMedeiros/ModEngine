@@ -14,10 +14,10 @@ std::string scenegraphAsDotFormat(Scene& scene, std::map<objid, GameObjectObj>& 
     auto childId = id;
     auto parentId = obj.parentId;
     auto groupId = obj.groupId;
-    auto parentGroupId = parentId != - 1 ? scene.idToGameObjectsH.at(parentId).groupId : -1;
+    auto parentGroupId = parentId != - 1 ? getGroupId(scene, parentId) : -1;
 
-    auto childName = scene.idToGameObjects.at(childId).name;
-    auto parentName = parentId == -1 ? "root" : scene.idToGameObjects.at(parentId).name;
+    auto childName = getGameObject(scene, childId).name;
+    auto parentName = parentId == -1 ? "root" : getGameObject(scene, parentId).name;
         
     relations = relations + getDotInfoForNode(parentName, parentId, parentGroupId, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId, groupId, getMeshNames(objectMapping, childId)) + "\n";
   }
