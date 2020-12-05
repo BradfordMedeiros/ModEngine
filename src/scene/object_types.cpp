@@ -147,6 +147,7 @@ std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> addit
       deltas.push_back(EmitterDelta{
         .attributeName = newKey,
         .value = parseVec(value),
+        .variance = glm::vec3(0.f, 0.1f, 0.f),
       });
     }
   }

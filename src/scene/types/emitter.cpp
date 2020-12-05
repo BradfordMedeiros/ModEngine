@@ -85,7 +85,16 @@ void updateEmitters(
     for (auto particleId : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
       for (auto delta : emitter.deltas){
-        updateParticle(particleId, delta.attributeName, delta.value);
+        auto value = std::get_if<glm::vec3>(&delta.value);
+        auto variance = std::get_if<glm::vec3>(&delta.variance);
+        if (value != NULL && variance != NULL){
+          auto randomFloatX = ((float)rand() * variance -> x) / RAND_MAX;
+          auto randomFloatY = ((float)rand() * variance -> y) / RAND_MAX;
+          auto randomFloatZ = ((float)rand() * variance -> z) / RAND_MAX;
+          updateParticle(particleId, delta.attributeName, *value + glm::vec3(randomFloatX, randomFloatY, randomFloatZ));
+        }else{
+          updateParticle(particleId, delta.attributeName, delta.value);
+        }
       }
     }
   }

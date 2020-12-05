@@ -12,6 +12,7 @@
 struct EmitterDelta {
   std::string attributeName;
   AttributeValue value;
+  AttributeValue variance;
 };
 
 struct Emitter {
