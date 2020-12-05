@@ -141,11 +141,15 @@ std::map<std::string, std::string> particleFields(std::map<std::string, std::str
 }
 std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> additionalFields){
   std::vector<EmitterDelta> deltas;
-  deltas.push_back(
-    EmitterDelta {
-      .attributeName = "position",
-      .value = glm::vec3(0.f, 0.1f, 0.f),
-  });
+  for (auto [key, value] : additionalFields){
+    if (key.at(0) == '!' && key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      deltas.push_back(EmitterDelta{
+        .attributeName = newKey,
+        .value = parseVec(value),
+      });
+    }
+  }
   return deltas;
 }
 
