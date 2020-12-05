@@ -447,7 +447,23 @@ void addObjectToWorld(
         world.scenes.at(childSceneId).isNested = true;
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
-        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields));
+        std::vector<EmitterDelta> deltas;
+        deltas.push_back(
+          EmitterDelta {
+            .attributeName = "position",
+            .value = glm::vec3(0.f, 0.1f, 0.f),
+        });
+        deltas.push_back(
+          EmitterDelta {
+            .attributeName = "scale",
+            .value = glm::vec3(0.01f, 0.01f, 0.01f),
+        });
+        deltas.push_back(
+          EmitterDelta {
+            .attributeName = "tint",
+            .value = glm::vec3(0.05f, 0.0f, 0.0f),
+        });
+        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas);
       },
       [&world](MeshData& meshdata) -> Mesh {
         return loadMesh("./res/textures/default.jpg", meshdata, [&world](std::string texture) -> Texture {
@@ -838,13 +854,11 @@ void callbackEntities(World& world){
 
 // TODO generalize this function
 void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
-  auto value = std::get_if<glm::vec3>(&delta);
-  auto v = value == NULL ? "" : print(*value);
   //std::cout << "Update particle diff: (" << attribute << ") - " << v << std::endl;
-  if (attribute == "position" && value != NULL){
-    auto newPosition = getGameObject(world, id).transformation.position +  *value;
-    physicsTranslateSet(world, id, newPosition);
-  }
+  GameObject& gameobj = getGameObject(world, id);
+  applyAttribute(gameobj, attribute, delta);
+  physicsTranslateSet(world, id, gameobj.transformation.position);
+  physicsScaleSet(world, id, gameobj.transformation.scale);
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){

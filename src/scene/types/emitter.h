@@ -10,7 +10,6 @@
 #include "../common/util/types.h"
 
 struct EmitterDelta {
-  bool hasDelta;
   std::string attributeName;
   AttributeValue value;
 };
@@ -26,13 +25,13 @@ struct Emitter {
   float spawnrate;
   float lifetime;
   GameobjAttributes particleAttributes;
-  EmitterDelta delta;
+  std::vector<EmitterDelta> deltas;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes);
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::vector<EmitterDelta> deltas);
 void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 

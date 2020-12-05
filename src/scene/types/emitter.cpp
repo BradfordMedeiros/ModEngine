@@ -1,6 +1,16 @@
 #include "./emitter.h"
 
-void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes){
+void addEmitter(
+  EmitterSystem& system, 
+  std::string name, 
+  objid emitterNodeId, 
+  float currentTime, 
+  unsigned int targetParticles,
+  float spawnrate, 
+  float lifetime, 
+  GameobjAttributes particleAttributes, 
+  std::vector<EmitterDelta> deltas
+){
   std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
 
   Emitter emitter {
@@ -13,11 +23,7 @@ void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, fl
     .spawnrate = spawnrate,
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
-    .delta =  EmitterDelta {
-      .hasDelta = false,
-      .attributeName = "position",
-      .value = glm::vec3(0.1f, 0.f, 0.f),
-    }
+    .deltas =  deltas,
   };
   system.emitters.push_back(emitter);
 }
@@ -78,7 +84,9 @@ void updateEmitters(
   for (auto &emitter : system.emitters){
     for (auto particleId : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
-      updateParticle(particleId, emitter.delta.attributeName, emitter.delta.value);
+      for (auto delta : emitter.deltas){
+        updateParticle(particleId, delta.attributeName, delta.value);
+      }
     }
   }
 

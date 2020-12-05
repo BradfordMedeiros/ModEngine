@@ -157,3 +157,53 @@ GameObject gameObjectFromFields(std::string name, std::string layer, objid id, G
   serialObj.layer = layer;
   return gameObjectFromParam(name, id, serialObj);
 }
+
+// TODO -> eliminate all the strings in the fields and use some sort of symbol system
+void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta){
+  auto value = std::get_if<glm::vec3>(&delta);
+  if (field == "position" && value != NULL){
+     gameobj.transformation.position = gameobj.transformation.position +  *value;
+     return;
+  }
+  if (field == "scale" && value != NULL){
+     gameobj.transformation.scale = gameobj.transformation.scale +  *value;
+     return;
+  } 
+  if (field == "physics_angle" && value != NULL){
+     gameobj.physicsOptions.angularFactor = gameobj.physicsOptions.angularFactor +  *value;
+     return;
+  } 
+  if (field == "physics_linear" && value != NULL){
+     gameobj.physicsOptions.linearFactor = gameobj.physicsOptions.linearFactor +  *value;
+     return;
+  } 
+  if (field == "physics_gravity" && value != NULL){
+     gameobj.physicsOptions.gravity = gameobj.physicsOptions.gravity +  *value;
+     return;
+  }   
+  if (field == "tint" && value != NULL){
+     gameobj.tint = gameobj.tint +  *value;
+     return;
+  }  
+
+  auto fValue = std::get_if<float>(&delta);
+  if (field == "physics_friction" && fValue != NULL){
+    gameobj.physicsOptions.friction = *fValue;
+    return;
+  }
+  if (field == "physics_restitution" && fValue != NULL){
+    gameobj.physicsOptions.restitution = *fValue;
+    return;
+  }
+  if (field == "physics_mass" && fValue != NULL){
+    gameobj.physicsOptions.mass = *fValue;
+    return;
+  }
+  if (field == "physics_maxspeed" && fValue != NULL){
+    gameobj.physicsOptions.maxspeed = *fValue;
+    return;
+  }
+
+  std::cout << "attribute not yet supported: " << field << std::endl;
+  assert(false);
+}

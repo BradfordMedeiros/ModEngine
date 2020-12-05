@@ -55,5 +55,6 @@ struct GameObject {
 };
 
 GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes);
+void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta);
 
 #endif
