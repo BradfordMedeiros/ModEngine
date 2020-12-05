@@ -446,23 +446,7 @@ void addObjectToWorld(
         addChildLink(world.scenes.at(sceneId), rootId, id);
         world.scenes.at(childSceneId).isNested = true;
       },
-      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
-        std::vector<EmitterDelta> deltas;
-        deltas.push_back(
-          EmitterDelta {
-            .attributeName = "position",
-            .value = glm::vec3(0.f, 0.1f, 0.f),
-        });
-        deltas.push_back(
-          EmitterDelta {
-            .attributeName = "scale",
-            .value = glm::vec3(0.01f, 0.01f, 0.01f),
-        });
-        deltas.push_back(
-          EmitterDelta {
-            .attributeName = "tint",
-            .value = glm::vec3(0.05f, 0.0f, 0.0f),
-        });
+      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas);
       },
       [&world](MeshData& meshdata) -> Mesh {

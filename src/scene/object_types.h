@@ -13,6 +13,7 @@
 #include "./types/ainav.h"
 #include "./types/sound.h"
 #include "./types/video.h"
+#include "./types/emitter.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -260,7 +261,7 @@ void addObject(
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float, int, std::map<std::string, std::string>)> addEmitter,
+  std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta> deltas)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 );
 
