@@ -54,7 +54,6 @@ GameObjectMesh createMesh(
     }
   }
 
-
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,

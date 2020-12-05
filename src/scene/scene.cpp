@@ -7,33 +7,44 @@ void forEveryGameobj(World& world, std::function<void(objid id, Scene& scene, Ga
     }
   }
 }
-
 Scene& sceneForId(World& world, objid id){
   return world.scenes.at(world.idToScene.at(id));
 }
+std::vector<objid> allSceneIds(World& world){
+  std::vector<objid> sceneIds;
+  for (auto [sceneId, _] : world.scenes){
+    sceneIds.push_back(sceneId);
+  }
+  return sceneIds;
+} 
+
 GameObject& getGameObject(World& world, objid id){
   return getGameObject(sceneForId(world, id), id);
 }
-GameObject& getGameObject(World& world, std::string name){
+std::optional<GameObject*> maybeGetGameObjectByName(World& world, std::string name){
   for (auto [sceneId, _] : world.scenes){
-    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
+    for (auto &[id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
       if (gameObj.name == name){
-        return gameObj;
-      }
-    }
-  }
-  std::cout << "gameobject : " << name << " does not exist" << std::endl;
-  assert(false);
-}
-std::optional<objid> getGameObjectByName(World& world, std::string name){
-  for (auto [sceneId, _] : world.scenes){
-    for (auto [id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
-      if (gameObj.name == name){
-        return id;
+       return &gameObj;
       }
     }
   }
   return std::nullopt;
+}
+std::optional<objid> getGameObjectByName(World& world, std::string name){
+  auto obj = maybeGetGameObjectByName(world, name);
+  if (obj.has_value()){
+    return obj.value() -> id;
+  }
+  return std::nullopt;
+}
+GameObject& getGameObject(World& world, std::string name){
+  auto obj = maybeGetGameObjectByName(world, name);
+  if (obj.has_value()){
+    return *obj.value();
+  }
+  std::cout << "gameobject : " << name << " does not exist" << std::endl;
+  assert(false);
 }
 
 objid getGroupId(World& world, objid id){
@@ -436,7 +447,7 @@ void addObjectToWorld(
         world.scenes.at(childSceneId).isNested = true;
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields) -> void {
-        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields);
+        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields));
       },
       [&world](MeshData& meshdata) -> Mesh {
         return loadMesh("./res/textures/default.jpg", meshdata, [&world](std::string texture) -> Texture {
@@ -619,11 +630,7 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
   world.scenes.erase(sceneId);
 }
 void removeAllScenesFromWorld(World& world, SysInterface interface){
-  std::vector<objid> sceneIds; 
-  for (auto [sceneId, _] : world.scenes){
-    sceneIds.push_back(sceneId);
-  }
-  for (auto sceneId : sceneIds){
+  for (auto sceneId : allSceneIds(world)){
     removeSceneFromWorld(world, sceneId, interface);
   }
 }
@@ -643,8 +650,7 @@ objid addObjectToScene(
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
-  // attributes.stringAttributes or additionalFields?
-  return addSerialObject(world, sceneId, name, interface, attributes.stringAttributes, attributes.children, gameobjectObj, idsAdded);
+  return addSerialObject(world, sceneId, name, interface, attributes.additionalFields, attributes.children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
@@ -834,7 +840,7 @@ void callbackEntities(World& world){
 void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
   auto value = std::get_if<glm::vec3>(&delta);
   auto v = value == NULL ? "" : print(*value);
-  std::cout << "Update particle diff: (" << attribute << ") - " << v << std::endl;
+  //std::cout << "Update particle diff: (" << attribute << ") - " << v << std::endl;
   if (attribute == "position" && value != NULL){
     auto newPosition = getGameObject(world, id).transformation.position +  *value;
     physicsTranslateSet(world, id, newPosition);
@@ -845,14 +851,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updateEmitters(
     world.emitters, 
     timeElapsed, 
-    [&world, &interface](std::string name, std::map<std::string, std::string> particleFields, objid emitterNodeId) -> objid {      
+    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-      auto id = getGameObject(world, name).id;
-      auto sceneId = world.idToScene.at(id);
-      std::cout << "INFO: WARNING: EMITTER NOT SPONSORING TEMPLATE ATTRIBUTES PROPERLY!" << std::endl;
-      auto attributes = fieldsToAttributes(particleFields);
       attributes.vecAttributes["position"] = fullTransformation(world, emitterNodeId).position;
-      objid objectAdded = addObjectToScene(world, sceneId, getUniqueObjectName(), attributes, interface);
+      objid objectAdded = addObjectToScene(
+        world, world.idToScene.at(getGameObject(world, name).id), getUniqueObjectName(), attributes, interface
+      );
       return objectAdded;
     }, 
     [&world, &interface](objid id) -> void { 

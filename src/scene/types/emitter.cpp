@@ -1,6 +1,6 @@
 #include "./emitter.h"
 
-void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes){
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes){
   std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
 
   Emitter emitter {
@@ -71,13 +71,13 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, std::map<std::string, std::string> particleAttributes, objid emitterNodeId)> addParticle, 
+  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
   for (auto &emitter : system.emitters){
     for (auto particleId : emitter.particles){
-      std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
+      //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
       updateParticle(particleId, emitter.delta.attributeName, emitter.delta.value);
     }
   }
@@ -92,7 +92,7 @@ void updateEmitters(
         auto particleId = emitter.particles.front();
         emitter.particles.pop_front();
         rmParticle(particleId);
-        std::cout << "INFO: particles: removing particle" << std::endl;
+        //std::cout << "INFO: particles: removing particle" << std::endl;
       }
     }
   }

@@ -415,7 +415,6 @@ void setActiveCamera(int32_t cameraId){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     return;
   }
-  auto sceneId = world.idToScene.at(cameraId);
   activeCameraObj = &getGameObject(world, cameraId);
   setSelectedIndex(state.editor, cameraId, activeCameraObj -> name);
 }

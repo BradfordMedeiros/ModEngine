@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include "../../common/util.h"
+#include "../common/util/types.h"
 
 struct EmitterDelta {
   bool hasDelta;
@@ -24,19 +25,19 @@ struct Emitter {
   std::deque<objid> particles;
   float spawnrate;
   float lifetime;
-  std::map<std::string, std::string> particleAttributes;
+  GameobjAttributes particleAttributes;
   EmitterDelta delta;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, std::map<std::string, std::string> particleAttributes);
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes);
 void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string, std::map<std::string, std::string>, objid)> addParticle, 
+  std::function<objid(std::string, GameobjAttributes, objid)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
