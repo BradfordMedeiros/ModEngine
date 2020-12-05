@@ -139,17 +139,39 @@ std::map<std::string, std::string> particleFields(std::map<std::string, std::str
   }
   return particleAttributes;
 }
+
+struct ValueVariance {
+  glm::vec3 value;
+  glm::vec3 variance;
+};
 std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> additionalFields){
-  std::vector<EmitterDelta> deltas;
+  std::map<std::string, ValueVariance> values;
   for (auto [key, value] : additionalFields){
-    if (key.at(0) == '!' && key.size() > 1){
+    if ((key.at(0) == '!' || key.at(0) == '?') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      deltas.push_back(EmitterDelta{
-        .attributeName = newKey,
-        .value = parseVec(value),
-        .variance = glm::vec3(0.f, 0.1f, 0.f),
-      });
+      values[newKey] = ValueVariance {
+        .value = glm::vec3(0.f, 0.f, 0.f),
+        .variance = glm::vec3(0.f, 0.f, 0.f),
+      };
     }
+  }
+  for (auto [key, value] : additionalFields){
+    if (key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      if (key.at(0) == '!'){
+        values.at(newKey).value = parseVec(value);
+      }else if (key.at(0) == '?'){
+        values.at(newKey).variance = parseVec(value);
+      }
+    }
+  }
+  std::vector<EmitterDelta> deltas;
+  for (auto [key, value] : values){
+    deltas.push_back(EmitterDelta{
+      .attributeName = key,
+      .value = value.value,
+      .variance = value.variance,
+    });
   }
   return deltas;
 }
