@@ -160,7 +160,7 @@ void applyMasking(
       auto wIndex = wCenter + w;
 
       auto targetIndex= (hIndex * heightmap.width) + wIndex;
-      auto maskAmount = mask.values[(h * mask.width) + w];
+      auto maskAmount = mask.values.at((h * mask.width) + w);
       auto effectiveAmount = maskAmount * amount;
 
       if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
@@ -183,4 +183,32 @@ void applyMasking(
   }
 
   recalcPhysics();
+}
+
+HeightmapMask loadMask(std::string brushFile){
+  int textureWidth, textureHeight, numChannels;
+
+  unsigned char* imageData = stbi_load(brushFile.c_str(), &textureWidth, &textureHeight, &numChannels, 4);
+  if (!imageData ){
+    throw std::runtime_error("failed loading brush file " + brushFile + ", reason: " + stbi_failure_reason());
+  }
+  assert(numChannels == 3);
+
+  std::cout << "INFO: Brush: " << brushFile << "(" << textureWidth << ", " << textureHeight << ")" << std::endl;
+
+  std::vector<float> values;
+  for (int i = 0; i < textureHeight; i++){
+    for (int j = 0; j < textureWidth; j++){
+      int byteOffset = (int)(((i * textureWidth) + j) * 4);
+      float r = imageData[byteOffset] / 255.f;    // rgb values go to 255 here, so i just divide to make it go to about 1 
+      values.push_back(r);
+    }
+  }
+  stbi_image_free(imageData);
+  HeightmapMask mask {
+    .values = values,
+    .width = textureWidth,
+    .height = textureHeight,
+  };
+  return mask;
 }

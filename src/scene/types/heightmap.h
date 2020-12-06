@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stb_image.h>
 #include <cassert>
+#include <map>
 #include "../common/mesh.h"
 
 struct HeightMapData {
@@ -20,7 +21,7 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim);
 MeshData generateHeightmapMeshdata(HeightMapData& heightmap);
 
 struct HeightmapMask {
-  float* values;
+  std::vector<float> values;
   int width;
   int height;
 };
@@ -33,5 +34,7 @@ void applyMasking(
   std::function<void()> recalcPhysics,
   Mesh& mesh 
 );
+
+HeightmapMask loadMask(std::string brushFile);
 
 #endif
