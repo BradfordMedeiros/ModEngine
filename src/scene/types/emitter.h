@@ -13,6 +13,7 @@ struct EmitterDelta {
   std::string attributeName;
   AttributeValue value;
   AttributeValue variance;
+  std::vector<float> lifetimeEffect;
 };
 
 struct Emitter {

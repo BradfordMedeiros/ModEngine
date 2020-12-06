@@ -126,6 +126,14 @@ glm::vec2 parseVec2(std::string positionRaw){;
   in >> x >> y;
   return glm::vec2(x, y);
 }
+std::vector<float> parseFloatVec(std::string value){
+  std::vector<float> floats;
+  auto values = filterWhitespace(split(value, ' '));
+  for (auto value : values){
+    floats.push_back(std::atof(value.c_str()));
+  }
+  return floats;
+}
 
 glm::quat eulerToQuat(glm::vec3 eulerAngles){
   return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, (eulerAngles.z + M_PI)));

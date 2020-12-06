@@ -74,6 +74,13 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
   return countUnderTarget && enoughTimePassed;
 }
 
+float calcLifetimeEffect(float timeElapsed, std::vector<float>& lifetimeEffect){
+  if (lifetimeEffect.size() == 0){
+    return 1.f;
+  }
+  return lifetimeEffect.at(0);
+}
+
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
@@ -87,11 +94,12 @@ void updateEmitters(
       for (auto delta : emitter.deltas){
         auto value = std::get_if<glm::vec3>(&delta.value);
         auto variance = std::get_if<glm::vec3>(&delta.variance);
+        auto lifetimeEffect = calcLifetimeEffect(0.f, delta.lifetimeEffect);
         if (value != NULL && variance != NULL){
           auto randomFloatX = (((float)rand() * variance -> x) / RAND_MAX) * 2 - variance -> x;
           auto randomFloatY = (((float)rand() * variance -> y) / RAND_MAX) * 2 - variance -> y;
           auto randomFloatZ = (((float)rand() * variance -> z) / RAND_MAX) * 2 - variance -> z;
-          updateParticle(particleId, delta.attributeName, *value + glm::vec3(randomFloatX, randomFloatY, randomFloatZ));
+          updateParticle(particleId, delta.attributeName, *value + (lifetimeEffect * glm::vec3(randomFloatX, randomFloatY, randomFloatZ)));
         }else{
           updateParticle(particleId, delta.attributeName, delta.value);
         }

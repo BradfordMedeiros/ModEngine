@@ -143,6 +143,7 @@ std::map<std::string, std::string> particleFields(std::map<std::string, std::str
 struct ValueVariance {
   glm::vec3 value;
   glm::vec3 variance;
+  std::vector<float> lifetimeEffect;
 };
 std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> additionalFields){
   std::map<std::string, ValueVariance> values;
@@ -162,6 +163,8 @@ std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> addit
         values.at(newKey).value = parseVec(value);
       }else if (key.at(0) == '?'){
         values.at(newKey).variance = parseVec(value);
+      }else if (key.at(0) == '%'){
+        values.at(newKey).lifetimeEffect = parseFloatVec(value);
       }
     }
   }
@@ -171,6 +174,7 @@ std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> addit
       .attributeName = key,
       .value = value.value,
       .variance = value.variance,
+      .lifetimeEffect = value.lifetimeEffect,
     });
   }
   return deltas;

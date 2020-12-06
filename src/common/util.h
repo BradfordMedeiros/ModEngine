@@ -12,6 +12,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <stdlib.h>    
 #include <variant>
+#include <iostream>
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
@@ -30,6 +31,7 @@ std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec2 parseVec2(std::string positionRaw);
+std::vector<float> parseFloatVec(std::string value);
 glm::quat eulerToQuat(glm::vec3 eulerAngles);
 glm::quat parseQuat(std::string payload);
 glm::vec3 quatToVec(glm::quat quat);
