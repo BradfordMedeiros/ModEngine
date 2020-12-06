@@ -74,11 +74,13 @@ bool shouldSpawnParticle(Emitter& emitter, float currentTime){
   return countUnderTarget && enoughTimePassed;
 }
 
-float calcLifetimeEffect(float timeElapsed, std::vector<float>& lifetimeEffect){
+float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<float>& lifetimeEffect){
   if (lifetimeEffect.size() == 0){
     return 1.f;
   }
-  return lifetimeEffect.at(0);
+  auto index = 1 + (int)((timeElapsed / totalDuration) * lifetimeEffect.size());  // round up, down, or interpolate?  or different for first run?
+  index = index >= lifetimeEffect.size() ? (lifetimeEffect.size() - 1) : index;   // Do I actually need this?  Fix despawing and this probably goes away
+  return lifetimeEffect.at(timeElapsed == 0 ? 0 : index);
 }
 
 void updateEmitters(
@@ -89,24 +91,23 @@ void updateEmitters(
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
   for (auto &emitter : system.emitters){
-    for (auto particleId : emitter.particles){
+    for (auto particle : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
       for (auto delta : emitter.deltas){
         auto value = std::get_if<glm::vec3>(&delta.value);
         auto variance = std::get_if<glm::vec3>(&delta.variance);
-        auto lifetimeEffect = calcLifetimeEffect(0.f, delta.lifetimeEffect);
+        auto lifetimeEffect = calcLifetimeEffect(currentTime - particle.spawntime, emitter.lifetime, delta.lifetimeEffect);
         if (value != NULL && variance != NULL){
           auto randomFloatX = (((float)rand() * variance -> x) / RAND_MAX) * 2 - variance -> x;
           auto randomFloatY = (((float)rand() * variance -> y) / RAND_MAX) * 2 - variance -> y;
           auto randomFloatZ = (((float)rand() * variance -> z) / RAND_MAX) * 2 - variance -> z;
-          updateParticle(particleId, delta.attributeName, *value + (lifetimeEffect * glm::vec3(randomFloatX, randomFloatY, randomFloatZ)));
+          updateParticle(particle.id, delta.attributeName, *value + (lifetimeEffect * glm::vec3(randomFloatX, randomFloatY, randomFloatZ)));
         }else{
-          updateParticle(particleId, delta.attributeName, delta.value);
+          updateParticle(particle.id, delta.attributeName, delta.value);
         }
       }
     }
   }
-
 
   for (auto &emitter : system.emitters){
     if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
@@ -114,7 +115,7 @@ void updateEmitters(
       emitter.initTime = currentTime;
 
       if (emitter.particles.size() > 0){
-        auto particleId = emitter.particles.front();
+        auto particleId = emitter.particles.front().id;
         emitter.particles.pop_front();
         rmParticle(particleId);
         //std::cout << "INFO: particles: removing particle" << std::endl;
@@ -126,7 +127,10 @@ void updateEmitters(
     if (shouldSpawnParticle(emitter, currentTime)){
       emitter.currentParticles+= 1; 
       auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
-      emitter.particles.push_back(particleId);
+      emitter.particles.push_back(ActiveParticle {
+        .id = particleId,
+        .spawntime = currentTime,
+      });
       emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
       std::cout << "INFO: particles: adding particle" << std::endl;
     }

@@ -16,6 +16,10 @@ struct EmitterDelta {
   std::vector<float> lifetimeEffect;
 };
 
+struct ActiveParticle {
+  objid id;
+  float spawntime;
+};
 struct Emitter {
   std::string name;
   objid emitterNodeId;
@@ -23,7 +27,7 @@ struct Emitter {
   float lastSpawnTime;
   unsigned int targetParticles;
   unsigned int currentParticles;
-  std::deque<objid> particles;
+  std::deque<ActiveParticle> particles;
   float spawnrate;
   float lifetime;
   GameobjAttributes particleAttributes;
