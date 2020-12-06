@@ -78,6 +78,8 @@ GameObjectVoxel* voxelPtr;
 int32_t voxelPtrId = -1;
 glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
+UVCoord lastUVCoord { .x = 0, .y  = 0 };
+
 engineState state = getDefaultState(1920, 1080);
 World world;
 SysInterface interface;
@@ -1210,6 +1212,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
 
     auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    lastUVCoord = uvCoord;
     Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     auto hoveredId= getIdFromColor(hoveredItemColor);
     

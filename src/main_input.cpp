@@ -5,6 +5,7 @@ extern engineState state;
 extern SchemeBindingCallbacks schemeBindings;
 extern bool disableInput;
 extern GameObjectVoxel* voxelPtr;
+extern UVCoord lastUVCoord;
 extern glm::mat4 voxelPtrModelMatrix;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
@@ -214,10 +215,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_Q && action == 1){
-    applyHeightmapMasking(world, selected(state.editor), 1.f);
+    applyHeightmapMasking(world, selected(state.editor), 1.f, lastUVCoord.x, lastUVCoord.y);
   }
   if (key == GLFW_KEY_E && action == 1){
-    applyHeightmapMasking(world, selected(state.editor), -1.f);
+    applyHeightmapMasking(world, selected(state.editor), -1.f, lastUVCoord.x, lastUVCoord.y);
   }
 
   if (key == GLFW_KEY_P && action == 1){

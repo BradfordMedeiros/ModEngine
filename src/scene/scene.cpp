@@ -978,13 +978,18 @@ HeightmapMask mask {
   .height = 1,
 };
 
-void applyHeightmapMasking(World& world, objid id, float amount){
+void applyHeightmapMasking(World& world, objid id, float amount, float uvx, float uvy){
   auto heightmaps = getHeightmaps(world.objectMapping);
   if (heightmaps.find(id) == heightmaps.end()){
     return;
   }
   GameObjectHeightmap& hm = *heightmaps.at(id);
-  applyMasking(hm.heightmap, hm.heightmap.width / 2, hm.heightmap.height / 2, mask, amount, [&world, id]() -> void { 
+
+  int cellX = uvx * hm.heightmap.width;
+  int cellY = uvy * hm.heightmap.height;
+  //std::cout << "cell (" << cellX << ", " << cellY << " )" << std::endl;
+  //std::cout << "uv: ( " << uvx << ", " << uvy << " )" << std::endl;  
+  applyMasking(hm.heightmap, cellX, cellY, mask, amount, [&world, id]() -> void { 
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
       // Recreating simply ensures that the min/max height is always valid. 

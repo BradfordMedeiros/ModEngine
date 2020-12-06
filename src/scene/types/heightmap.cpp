@@ -151,8 +151,8 @@ void applyMasking(
   std::function<void()> recalcPhysics,
   Mesh& mesh
 ){
-  int hCenter = x;
-  int wCenter = y;
+  int hCenter = y;
+  int wCenter = x;
 
   for (int h = 0; h < mask.height; h++){
     for (int w = 0; w < mask.width; w++){
