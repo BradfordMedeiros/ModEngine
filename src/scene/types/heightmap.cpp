@@ -142,6 +142,26 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   return data;
 }
 
+float calcAverageValue(HeightMapData& heightmap, int x, int y, HeightmapMask& mask){
+  int hCenter = y;
+  int wCenter = x;
+
+  float amount = 0.f;
+  int numElements = 0;
+  for (int h = 0; h < mask.height; h++){
+    for (int w = 0; w < mask.width; w++){
+      auto hIndex = hCenter + h;
+      auto wIndex = wCenter + w;
+      auto targetIndex= (hIndex * heightmap.width) + wIndex;
+      if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
+        amount += heightmap.data[targetIndex];
+        numElements += 1;
+      }
+    }
+  }
+  return numElements == 0 ? 0.f : (amount / numElements);
+}
+
 void applyMasking(
   HeightMapData& heightmap, 
   int x, 
@@ -149,10 +169,15 @@ void applyMasking(
   HeightmapMask mask,
   float amount, 
   std::function<void()> recalcPhysics,
-  Mesh& mesh
+  Mesh& mesh,
+  bool shouldAverage
 ){
+  auto oldAverageValue = calcAverageValue(heightmap, x, y, mask);
+
   int hCenter = y;
   int wCenter = x;
+
+  std::cout << "applying painting!" << random() << std::endl;
 
   for (int h = 0; h < mask.height; h++){
     for (int w = 0; w < mask.width; w++){
@@ -164,7 +189,11 @@ void applyMasking(
       auto effectiveAmount = maskAmount * amount;
 
       if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
-        heightmap.data[targetIndex] += effectiveAmount;
+        if (shouldAverage && maskAmount > 0.f){
+          heightmap.data[targetIndex] = oldAverageValue + effectiveAmount;
+        }else{
+          heightmap.data[targetIndex] += effectiveAmount;
+        }
         auto newAmount = heightmap.data[targetIndex];
 
         if (newAmount > heightmap.maxHeight){

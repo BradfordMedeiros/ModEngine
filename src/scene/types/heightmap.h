@@ -32,7 +32,8 @@ void applyMasking(
   HeightmapMask mask, 
   float amount, 
   std::function<void()> recalcPhysics,
-  Mesh& mesh 
+  Mesh& mesh,
+  bool shouldAverage
 );
 
 HeightmapMask loadMask(std::string brushFile);

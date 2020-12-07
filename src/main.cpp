@@ -261,7 +261,7 @@ void handlePainting(UVCoord uvsToPaint){
 }
 void handleTerrainPainting(UVCoord uvCoord){
   if (state.shouldTerrainPaint && state.mouseIsDown){
-    applyHeightmapMasking(world, selected(state.editor), state.terrainPaintDown ? -1.f : 1.f, uvCoord.x, uvCoord.y);
+    applyHeightmapMasking(world, selected(state.editor), state.terrainPaintDown ? -10.f : 10.f, uvCoord.x, uvCoord.y, true);
   }
 }
 
