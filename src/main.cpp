@@ -78,8 +78,6 @@ GameObjectVoxel* voxelPtr;
 int32_t voxelPtrId = -1;
 glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
 
-UVCoord lastUVCoord { .x = 0, .y  = 0 };
-
 engineState state = getDefaultState(1920, 1080);
 World world;
 SysInterface interface;
@@ -261,6 +259,11 @@ void handlePainting(UVCoord uvsToPaint){
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 }
+void handleTerrainPainting(UVCoord uvCoord){
+  if (state.shouldTerrainPaint && state.mouseIsDown){
+    applyHeightmapMasking(world, selected(state.editor), state.terrainPaintDown ? -1.f : 1.f, uvCoord.x, uvCoord.y);
+  }
+}
 
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
@@ -329,6 +332,12 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 
 
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
+  if (button == 0 && action == 1){
+    state.mouseIsDown = true;
+  }else if (button == 0 && action == 0){
+    state.mouseIsDown = false;
+  }
+
   mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
@@ -1212,7 +1221,6 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
 
     auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-    lastUVCoord = uvCoord;
     Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     auto hoveredId= getIdFromColor(hoveredItemColor);
     
@@ -1241,6 +1249,7 @@ int main(int argc, char* argv[]){
       );
     }
     handlePainting(uvCoord);
+    handleTerrainPainting(uvCoord);
      
     if (useChunkingSystem){
       handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
@@ -1315,6 +1324,7 @@ int main(int argc, char* argv[]){
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
     
+
     glfwPollEvents();
     
     schemeBindings.onFrame();

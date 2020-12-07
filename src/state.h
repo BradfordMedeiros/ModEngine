@@ -33,6 +33,7 @@ struct engineState {
   float lastY;
   float offsetX;
   float offsetY;
+  bool mouseIsDown;
   bool enableDiffuse;
   bool enableSpecular;
   bool showDepthBuffer;
@@ -45,6 +46,8 @@ struct engineState {
   int portalTextureIndex;
   bool textureDisplayMode;
   bool shouldPaint;
+  bool shouldTerrainPaint;
+  bool terrainPaintDown;
   bool enableBloom;
   float bloomAmount;
   bool takeScreenshot;

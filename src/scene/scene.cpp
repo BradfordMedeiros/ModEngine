@@ -982,7 +982,7 @@ void applyHeightmapMasking(World& world, objid id, float amount, float uvx, floa
   int cellY = uvy * hm.heightmap.height;
   //std::cout << "cell (" << cellX << ", " << cellY << " )" << std::endl;
   //std::cout << "uv: ( " << uvx << ", " << uvy << " )" << std::endl;  
-  applyMasking(hm.heightmap, cellX, cellY, loadMask("./res/brush/ramp_5x5.png"), amount, [&world, id]() -> void { 
+  applyMasking(hm.heightmap, cellX, cellY, loadMask("./res/brush/border_5x5.png"), amount, [&world, id]() -> void { 
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
       // Recreating simply ensures that the min/max height is always valid. 
