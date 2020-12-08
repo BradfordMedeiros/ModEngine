@@ -59,4 +59,9 @@ struct HitObject {
 
 typedef std::variant<glm::vec3, std::string, float> AttributeValue;
 
+struct Property {
+  std::string propertyName;
+  AttributeValue value;
+};
+
 #endif

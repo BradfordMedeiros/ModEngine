@@ -28,6 +28,7 @@
 #include "./scene/animation/timeplayback.h"
 #include "./scene/animation/animation.h"
 #include "./scene/animation/playback.h"
+#include "./scene/animation/recorder.h"
 #include "./scene/types/ainav.h"
 #include "./scheme/scheme_bindings.h"
 #include "./scheme/scriptmanager.h"
@@ -1080,6 +1081,8 @@ int main(int argc, char* argv[]){
     debuggerDrawer
   );
 
+  auto basicRecording = loadRecording("./res/recordings/move.rec", parsePropertySuffix);
+
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,
     .unloadScript = unloadScript,
@@ -1143,6 +1146,11 @@ int main(int argc, char* argv[]){
 
     processStateMachines();
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
+    auto gameobject = getGameObjectByName(world, "boxfront");
+    if (gameobject.has_value()){
+      auto properties = recordingProperties(basicRecording, getTotalTime());
+      setProperty(world, gameobject.value(), properties);
+    }
 
     maybeGetClientMessage(onClientMessage);
 

@@ -54,6 +54,10 @@ void copyObjectToScene(World& world, objid id, SysInterface interface);
 
 std::map<std::string, std::string> getAttributes(World& world, objid id);
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr);
+void setProperty(World& world, objid id, std::vector<Property>& properties);
+AttributeValue parsePropertySuffix(std::string key, std::string value);
+std::string serializePropertySuffix(std::string key, AttributeValue value);
+AttributeValue interpolateProperty(AttributeValue key1, AttributeValue key2, float percentage);
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
 std::string serializeObject(World& world, objid id, std::string overridename = "");

@@ -735,6 +735,34 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
     obj.transformation.scale = parseVec(attributes.at("scale"));
   }
 }
+void setProperty(World& world, objid id, std::vector<Property>& properties){
+  std::cout << "set property: " << properties.size() << " -- ";
+  for (auto property : properties){
+    std::cout << property.propertyName << " ";
+    if (property.propertyName == "position"){
+      auto posV = std::get_if<glm::vec3>(&property.value);
+      if(posV != NULL){
+        getGameObject(world, id).transformation.position = *posV;
+      }
+    }
+  }
+  std::cout << std::endl;
+}
+// property suffix looks like the parts of the tokens on the right hand side
+// eg position 10
+// eg tint 0.9 0.2 0.4
+AttributeValue parsePropertySuffix(std::string key, std::string value){
+  if (key == "position" || key == "scale"){
+    return parseVec(value);
+  }
+  return 0.f;
+}
+std::string serializePropertySuffix(std::string key, AttributeValue value){
+  return key + ":somevalue";
+}
+AttributeValue interpolateProperty(AttributeValue key1, AttributeValue key2, float percentage){
+  return key1;
+}
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   getGameObject(world, index).transformation.position = pos;
