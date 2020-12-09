@@ -1148,7 +1148,7 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
     auto gameobject = getGameObjectByName(world, "boxfront");
     if (gameobject.has_value()){
-      auto interpolatedProperties = recordingPropertiesInterpolated(basicRecording, getTotalTime());
+      auto interpolatedProperties = recordingPropertiesInterpolated(basicRecording, getTotalTime(), interpolateAttribute);
       setProperty(world, gameobject.value(), interpolatedProperties);
     }
 

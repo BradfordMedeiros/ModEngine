@@ -21,6 +21,7 @@ struct Recording {
 Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix); 
 //void saveRecording(std::string name, Recording recording);
 std::vector<Property> recordingProperties(Recording& recording, float time);
+std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate);
 
 /*std::vector<AttributeValue> propertiesForRecording(Recording& recording, float currentTime);
 void recordPropertiesToRecording(Recording& recording, Properties& properties);*/

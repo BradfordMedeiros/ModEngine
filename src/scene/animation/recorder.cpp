@@ -77,11 +77,20 @@ struct PropertyIndexs {
 };
 
 PropertyIndexs indexsForRecording(Recording& recording, float time){
-  auto lowIndex = indexForRecording(recording, time);
-  auto highIndex = lowIndex + 1;
+  auto highIndex = indexForRecording(recording, time);
+  auto lowIndex = highIndex - 1;
   auto lowTimestamp = recording.keyframes.at(lowIndex).time;
   auto highTimestamp = recording.keyframes.at(highIndex).time;
-  auto percentage = 0.5f;
+
+  auto elapsed = time - lowTimestamp;
+  auto totalTime = highTimestamp - lowTimestamp;
+  auto percentage = elapsed / totalTime;
+
+  std::cout << "time is: " << time << std::endl;
+  std::cout << "high time: " << highTimestamp << std::endl;
+  std::cout << "low time: " << lowTimestamp << std::endl;
+  std::cout << "percentage: " << percentage << std::endl;
+
   PropertyIndexs properties {
     .lowIndex = lowIndex,
     .highIndex = highIndex,
@@ -96,18 +105,33 @@ std::vector<Property> recordingProperties(Recording& recording, float time){
   return recording.keyframes.at(recordingIndex).properties;
 }
 
-std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time){
+std::optional<Property> maybeGetProperty(std::vector<Property>& properties, std::string propertyName){
+  for (auto property : properties){
+    if (property.propertyName == propertyName){
+      return property;
+    }
+  }
+  return std::nullopt;
+}
+
+std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate){
   auto recordingIndexs = indexsForRecording(recording, time);
   auto lowProperty = recording.keyframes.at(recordingIndexs.lowIndex).properties;
   auto highProperty = recording.keyframes.at(recordingIndexs.highIndex).properties;
-  return lowProperty;
+
+  std::vector<Property> properties;
+  for (auto property : lowProperty){
+    auto nextProperty = maybeGetProperty(highProperty, property.propertyName);
+    if (nextProperty.has_value()){
+      std::cout << "interpolating!!!!!!!!!!!" << std::endl;
+      properties.push_back(Property{
+        .propertyName = property.propertyName,
+        .value = interpolate(property.value, nextProperty -> value, recordingIndexs.percentage),
+      });
+    }else{
+      properties.push_back(property);
+    }
+  }
+  return properties;
 }
 
-/*
-void recordPropertiesToRecording(Recording& recording, Properties& properties){
-  
-}
-
-void startRecording(){
-  
-}*/
