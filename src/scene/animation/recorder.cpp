@@ -70,12 +70,38 @@ int indexForRecording(Recording& recording, float time){
   return recording.keyframes.size() - 1;
 }
 
+struct PropertyIndexs {
+  int lowIndex;
+  int highIndex;
+  float percentage;
+};
+
+PropertyIndexs indexsForRecording(Recording& recording, float time){
+  auto lowIndex = indexForRecording(recording, time);
+  auto highIndex = lowIndex + 1;
+  auto lowTimestamp = recording.keyframes.at(lowIndex).time;
+  auto highTimestamp = recording.keyframes.at(highIndex).time;
+  auto percentage = 0.5f;
+  PropertyIndexs properties {
+    .lowIndex = lowIndex,
+    .highIndex = highIndex,
+    .percentage = percentage,
+  };
+  return properties;
+}
+
 std::vector<Property> recordingProperties(Recording& recording, float time){
   auto recordingIndex = indexForRecording(recording, time);
   std::cout << "recording index: " << recordingIndex << std::endl;
   return recording.keyframes.at(recordingIndex).properties;
 }
 
+std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time){
+  auto recordingIndexs = indexsForRecording(recording, time);
+  auto lowProperty = recording.keyframes.at(recordingIndexs.lowIndex).properties;
+  auto highProperty = recording.keyframes.at(recordingIndexs.highIndex).properties;
+  return lowProperty;
+}
 
 /*
 void recordPropertiesToRecording(Recording& recording, Properties& properties){

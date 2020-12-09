@@ -1148,8 +1148,8 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
     auto gameobject = getGameObjectByName(world, "boxfront");
     if (gameobject.has_value()){
-      auto properties = recordingProperties(basicRecording, getTotalTime());
-      setProperty(world, gameobject.value(), properties);
+      auto interpolatedProperties = recordingPropertiesInterpolated(basicRecording, getTotalTime());
+      setProperty(world, gameobject.value(), interpolatedProperties);
     }
 
     maybeGetClientMessage(onClientMessage);
