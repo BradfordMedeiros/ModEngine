@@ -54,6 +54,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
       },
     },
     .multiselectMode = false,
+    .isRecording = false,
 	};
 	return state;
 }

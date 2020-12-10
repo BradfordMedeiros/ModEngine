@@ -777,13 +777,25 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
   if (key == "position" || key == "scale"){
     return parseVec(value);
   }
-  return 0.f;
+  return value;
 }
 std::string serializePropertySuffix(std::string key, AttributeValue value){
-  return key + ":somevalue";
-}
-AttributeValue interpolateProperty(AttributeValue key1, AttributeValue key2, float percentage){
-  return key1;
+  auto prefix = key + ":";
+  auto vecValue = std::get_if<glm::vec3>(&value);
+  if (vecValue != NULL){
+    return prefix + serializeVec(*vecValue);
+  }
+  auto floatValue = std::get_if<float>(&value);
+  if (floatValue != NULL){
+    return prefix + std::to_string(*floatValue);
+  }
+
+  auto stringValue = std::get_if<std::string>(&value);
+  if (stringValue != NULL){
+    return prefix + *stringValue;
+  }
+  assert(false);
+  return prefix;
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){

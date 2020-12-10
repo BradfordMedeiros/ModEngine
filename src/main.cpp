@@ -765,6 +765,13 @@ void takeScreenshot(std::string filepath){
   screenshotPath = filepath;
 }
 
+void startRecording(){
+
+}
+void stopRecording(){
+  
+}
+
 void genFramebufferTexture(unsigned int *texture){
   glGenTextures(1, texture);
   glBindTexture(GL_TEXTURE_2D, *texture);
@@ -1082,6 +1089,7 @@ int main(int argc, char* argv[]){
   );
 
   auto basicRecording = loadRecording("./res/recordings/move.rec", parsePropertySuffix);
+  saveRecording("./res/recordings/movecopy.rec", basicRecording, serializePropertySuffix);
 
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,

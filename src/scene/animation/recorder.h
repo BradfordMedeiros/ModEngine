@@ -17,13 +17,12 @@ struct Recording {
   std::vector<Record> keyframes;
 };
 
+Recording createRecording();
+void saveRecordingIndex(Recording& recording, std::string name, AttributeValue value, float time);
 
-Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix); 
-//void saveRecording(std::string name, Recording recording);
-std::vector<Property> recordingProperties(Recording& recording, float time);
+Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix);
+void saveRecording(std::string name, Recording& recording, std::function<std::string(std::string, AttributeValue)> serializePropertySuffix);
+
 std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate);
-
-/*std::vector<AttributeValue> propertiesForRecording(Recording& recording, float currentTime);
-void recordPropertiesToRecording(Recording& recording, Properties& properties);*/
 
 #endif

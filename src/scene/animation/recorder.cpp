@@ -1,5 +1,16 @@
 #include "./recorder.h"
 
+Recording createRecording(){
+  return Recording{};
+}
+
+int indexFromTime(float time){
+  return 0;
+}
+void saveRecordingIndex(Recording& recording, std::string name, AttributeValue value, float time){
+  auto index = indexFromTime(time);
+}
+
 Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix){
   std::string serializedData = loadFile(name);
   auto properties = filterWhitespace(split(serializedData, '\n'));
@@ -39,26 +50,19 @@ Recording loadRecording(std::string name, std::function<AttributeValue(std::stri
   return recording;
 }
 
-/*std::string serializeProperties(Properties& properties){
-  std::string data = "position:0 0 0\n" ;
-  data = data + "position:5 0 0\n";
-  data = data + "position:5 1 0\n";
-  data = data + "position:5 2 0\n";
+std::string serializeRecording(Recording& recording, std::function<std::string(std::string, AttributeValue)> serializePropertySuffix){
+  std::string data = "";
+  for (auto keyframe : recording.keyframes){
+    auto timestampPrefix = std::to_string(keyframe.time) + ":";
+    for (auto property : keyframe.properties){
+      data = data + timestampPrefix + serializePropertySuffix(property.propertyName, property.value) + "\n";
+    }
+  }
   return data;
 }
-std::string serializeRecording(Recording& recording){
-  int numTicks = 0;
-  std::string serializedData = "";
-  for (auto frame : recording.keyframes){
-    serializedData = serializedData + "tick-placeholder(" + std::to_string(numTicks) + ")" + "\n";
-    serializedData = serializedData +  serializeProperties(frame.properties) + "\n";
-    serializedData = serializedData + "\n";
-  }
-  return serializedData;
+void saveRecording(std::string name, Recording& recording, std::function<std::string(std::string, AttributeValue)> serializePropertySuffix){
+  saveFile(name, serializeRecording(recording, serializePropertySuffix));
 }
-void saveRecording(std::string name, Recording& recording){
-  saveFile(recordingPath(name), serializeRecording(recording)); 
-}*/
 
 int indexForRecording(Recording& recording, float time){
   std::cout << "time: " << time << std::endl;
@@ -86,23 +90,12 @@ PropertyIndexs indexsForRecording(Recording& recording, float time){
   auto totalTime = highTimestamp - lowTimestamp;
   auto percentage = elapsed / totalTime;
 
-  std::cout << "time is: " << time << std::endl;
-  std::cout << "high time: " << highTimestamp << std::endl;
-  std::cout << "low time: " << lowTimestamp << std::endl;
-  std::cout << "percentage: " << percentage << std::endl;
-
   PropertyIndexs properties {
     .lowIndex = lowIndex,
     .highIndex = highIndex,
     .percentage = percentage,
   };
   return properties;
-}
-
-std::vector<Property> recordingProperties(Recording& recording, float time){
-  auto recordingIndex = indexForRecording(recording, time);
-  std::cout << "recording index: " << recordingIndex << std::endl;
-  return recording.keyframes.at(recordingIndex).properties;
 }
 
 std::optional<Property> maybeGetProperty(std::vector<Property>& properties, std::string propertyName){
@@ -123,7 +116,6 @@ std::vector<Property> recordingPropertiesInterpolated(Recording& recording, floa
   for (auto property : lowProperty){
     auto nextProperty = maybeGetProperty(highProperty, property.propertyName);
     if (nextProperty.has_value()){
-      std::cout << "interpolating!!!!!!!!!!!" << std::endl;
       properties.push_back(Property{
         .propertyName = property.propertyName,
         .value = interpolate(property.value, nextProperty -> value, recordingIndexs.percentage),
