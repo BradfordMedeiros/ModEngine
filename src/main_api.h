@@ -10,6 +10,7 @@
 #include "./scene/sprites/sprites.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/timeplayback.h"
+#include "./scene/animation/recorder.h"
 #include "./scene/types/sound.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
@@ -127,6 +128,10 @@ std::string connectServer(std::string server);
 
 void startRecording(objid id, std::string recordingPath);
 void playRecording(objid id, std::string recordingPath);
+void startRecording();
+void tickRecording(float time, GameObject& gameobject);
+void stopRecording();
+
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 

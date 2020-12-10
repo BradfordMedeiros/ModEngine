@@ -5,10 +5,28 @@ Recording createRecording(){
 }
 
 int indexFromTime(float time){
-  return 0;
+  return (int)time;
 }
 void saveRecordingIndex(Recording& recording, std::string name, AttributeValue value, float time){
   auto index = indexFromTime(time);
+  auto property = Property {
+    .propertyName = name,
+    .value = value,
+  };
+  for (auto frame : recording.keyframes){
+    for (auto keyframe : recording.keyframes){
+      if (keyframe.time == index){
+        keyframe.properties.push_back(property);
+        return;
+      }
+    }
+  }
+  recording.keyframes.push_back(
+    Record{
+      .time = index,
+      .properties = { property }
+    }
+  );
 }
 
 Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix){
@@ -65,7 +83,6 @@ void saveRecording(std::string name, Recording& recording, std::function<std::st
 }
 
 int indexForRecording(Recording& recording, float time){
-  std::cout << "time: " << time << std::endl;
   for (int i = 0; i < recording.keyframes.size(); i++){
     if (recording.keyframes.at(i).time > time){
       return i;

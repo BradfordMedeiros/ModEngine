@@ -190,7 +190,9 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
-
+float getTotalTime(){
+  return now - initialTime;
+}
 
 bool useYAxis = true;
 void onDebugKey(){
@@ -487,9 +489,6 @@ glm::vec3 getTintIfSelected(bool isSelected, glm::vec3 defaultTint){
   return defaultTint;
 }
 
-float getTotalTime(){
-  return now - initialTime;
-}
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals){
   if (scene.isNested){
     return;
@@ -763,13 +762,6 @@ std::string screenshotPath = "./res/textures/screenshot.png";
 void takeScreenshot(std::string filepath){
   state.takeScreenshot = true;
   screenshotPath = filepath;
-}
-
-void startRecording(){
-
-}
-void stopRecording(){
-  
 }
 
 void genFramebufferTexture(unsigned int *texture){
@@ -1088,7 +1080,7 @@ int main(int argc, char* argv[]){
     debuggerDrawer
   );
 
-  auto basicRecording = loadRecording("./res/recordings/move.rec", parsePropertySuffix);
+  auto basicRecording = loadRecording("./res/recordings/test.rec", parsePropertySuffix);
   saveRecording("./res/recordings/movecopy.rec", basicRecording, serializePropertySuffix);
 
   interface = SysInterface {
@@ -1154,10 +1146,17 @@ int main(int argc, char* argv[]){
 
     processStateMachines();
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
+
+    auto time = getTotalTime();
     auto gameobject = getGameObjectByName(world, "boxfront");
     if (gameobject.has_value()){
-      auto interpolatedProperties = recordingPropertiesInterpolated(basicRecording, getTotalTime(), interpolateAttribute);
-      setProperty(world, gameobject.value(), interpolatedProperties);
+      if (!state.isRecording){
+        auto interpolatedProperties = recordingPropertiesInterpolated(basicRecording, time, interpolateAttribute);
+        setProperty(world, gameobject.value(), interpolatedProperties);
+      }else{
+        auto gameobj = getGameObject(world, gameobject.value());
+        tickRecording(time, gameobj);    
+      }
     }
 
     maybeGetClientMessage(onClientMessage);

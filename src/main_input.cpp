@@ -230,6 +230,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     state.multiselectMode = !state.multiselectMode;
     std::cout << "INFO: multi select mode: " << state.multiselectMode << std::endl;
   }
+
+  if (key == GLFW_KEY_N && action == 1){
+    startRecording();
+  } 
+  if (key == GLFW_KEY_M && action == 1){
+    stopRecording();
+  }
+
   if (key == 261 && action == 1){   // del
   }
   if (key == 268 && action == 1){   // home

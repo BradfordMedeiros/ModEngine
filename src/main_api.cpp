@@ -286,11 +286,29 @@ std::string connectServer(std::string data){
   });
 }
 
+
 void startRecording(objid id, std::string recordingPath){
-  std::cout << "start recording placeholder" << std::endl;
 }
 void playRecording(objid id, std::string recordingPath){
-  std::cout << "play recording placeholder" << std::endl;
+}
+
+auto recording = createRecording();
+void startRecording(){
+  std::cout << "INFO: start recording" << std::endl;
+  state.isRecording = true;
+
+}
+void tickRecording(float time, GameObject& gameobject){
+  saveRecordingIndex(recording, "position", gameobject.transformation.position, time);
+}
+
+void stopRecording(){
+  std::cout << "INFO: stop recording" << std::endl;
+  state.isRecording = false;
+  std::cout << "SAVING RECORDING STARTED" << std::endl;
+  saveRecording("./res/recordings/test.rec", recording, serializePropertySuffix);
+  std::cout << "SAVING RECORDING COMPLETE" << std::endl;
+  recording = createRecording();
 }
 
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance){
