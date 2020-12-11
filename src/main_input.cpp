@@ -247,6 +247,37 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == 269 && action == 1){   // end
     rmAllObjects(state.editor, removeObjectById);
   }
+
+  if (key == 91 && action == 1){  // [
+    if (state.renderMode == RENDER_FINAL){
+      state.renderMode = RENDER_DEPTH;
+      std::cout << "RENDER MODE: depth" << std::endl;
+    }else if (state.renderMode == RENDER_PORTAL){
+      state.renderMode =  RENDER_FINAL;
+      std::cout << "RENDER MODE: final" << std::endl;
+    }else if (state.renderMode == RENDER_PAINT){
+      state.renderMode = RENDER_PORTAL;
+      std::cout << "RENDER MODE: portal" << std::endl;
+    }else if (state.renderMode == RENDER_DEPTH){
+      state.renderMode = RENDER_PAINT;
+      std::cout << "RENDER MODE: paint" << std::endl;
+    }
+  }
+  if (key == 93 && action == 1){  // [
+    if (state.renderMode == RENDER_FINAL){
+      state.renderMode = RENDER_PORTAL;
+      std::cout << "RENDER MODE: portal" << std::endl;
+    }else if (state.renderMode == RENDER_PORTAL){
+      state.renderMode =  RENDER_PAINT;
+      std::cout << "RENDER MODE: paint" << std::endl;
+    }else if (state.renderMode == RENDER_PAINT){
+      state.renderMode = RENDER_DEPTH;
+      std::cout << "RENDER MODE: depth" << std::endl;
+    }else if (state.renderMode == RENDER_DEPTH){
+      state.renderMode = RENDER_FINAL;
+      std::cout << "RENDER MODE: final" << std::endl;
+    }
+  }
 }
 
 void onMouseButton(){    

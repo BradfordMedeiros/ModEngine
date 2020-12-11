@@ -124,21 +124,21 @@ float quadVertices[] = {
    1.0f,  1.0f,  1.0f, 1.0f
 };
 
-const int numTextures = 32;
+const int numDepthTextures = 32;
 int activeDepthTexture = 0;
 
 DrawingParams drawParams = getDefaultDrawingParams();
 
 void updateDepthTexturesSize(){
-  for (int i = 0; i < numTextures; i++){
+  for (int i = 0; i < numDepthTextures; i++){
     glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
     // GL_DEPTH_COMPONENT32F
     glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_STENCIL, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   }
 }
 void generateDepthTextures(){
-  glGenTextures(numTextures, depthTextures);
-  for (int i = 0; i < numTextures; i++){
+  glGenTextures(numDepthTextures, depthTextures);
+  for (int i = 0; i < numDepthTextures; i++){
     glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1379,7 +1379,8 @@ int main(int argc, char* argv[]){
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(state.showDepthBuffer ? depthProgram : framebufferProgram); 
+
+    glUseProgram((state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram); 
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
     glActiveTexture(GL_TEXTURE1);
@@ -1390,17 +1391,19 @@ int main(int argc, char* argv[]){
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(framebufferProgram, "framebufferTexture"), 0);
 
-    if (state.portalTextureIndex == 0 || (state.textureDisplayMode && textureToPaint == -1)){
-      glBindTexture(GL_TEXTURE_2D, state.showDepthBuffer ? depthTextures[1] : framebufferTexture);
-    }else{
-      if (state.textureDisplayMode){
-        glBindTexture(GL_TEXTURE_2D, textureToPaint);
-      }else{
-        assert(state.portalTextureIndex <= numPortalTextures);
-        glBindTexture(GL_TEXTURE_2D, portalTextures[state.portalTextureIndex - 1]);  // new code
-      }
+    if (state.renderMode == RENDER_FINAL){
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+    }else if (state.renderMode == RENDER_PORTAL){
+      assert(state.portalTextureIndex <= numPortalTextures && state.portalTextureIndex >= 0);
+      glBindTexture(GL_TEXTURE_2D, portalTextures[state.portalTextureIndex]);  
+    }else if (state.renderMode == RENDER_PAINT){
+      glBindTexture(GL_TEXTURE_2D, textureToPaint);
+    }else if (state.renderMode == RENDER_DEPTH){
+      glBindTexture(GL_TEXTURE_2D, depthTextures[1]);
     }
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
     if (state.takeScreenshot){
       state.takeScreenshot = false;
       saveScreenshot(screenshotPath);

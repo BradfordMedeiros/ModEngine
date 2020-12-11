@@ -31,7 +31,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .mouseIsDown = false,
 		.enableDiffuse = true,
 		.enableSpecular = true,
-		.showDepthBuffer = false,
 		.fov = 45.f,
 		.toggleFov = false,
 		.showBoneWeight = false,
@@ -39,7 +38,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.discardAmount = 0.5,
   	.offsetTextureMode = false,
   	.portalTextureIndex = 0,
-  	.textureDisplayMode = true,
   	.shouldPaint = false,
     .shouldTerrainPaint = false,
   	.enableBloom = false,
@@ -55,6 +53,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     },
     .multiselectMode = false,
     .isRecording = false,
+    .renderMode = RENDER_FINAL,
 	};
 	return state;
 }

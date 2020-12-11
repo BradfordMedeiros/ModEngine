@@ -6,6 +6,8 @@
 #include "./common/util.h"
 #include "./editor.h"
 
+enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH };
+
 struct engineState {
   bool visualizeNormals;
   bool showCameras;
@@ -36,7 +38,6 @@ struct engineState {
   bool mouseIsDown;
   bool enableDiffuse;
   bool enableSpecular;
-  bool showDepthBuffer;
   float fov;  // in degrees
   bool toggleFov;
   bool showBoneWeight;
@@ -44,7 +45,6 @@ struct engineState {
   float discardAmount;
   bool offsetTextureMode;
   int portalTextureIndex;
-  bool textureDisplayMode;
   bool shouldPaint;
   bool shouldTerrainPaint;
   bool terrainPaintDown;
@@ -56,6 +56,7 @@ struct engineState {
   EditorContent editor;
   bool multiselectMode;
   bool isRecording;
+  RENDER_MODE renderMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
