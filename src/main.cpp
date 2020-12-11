@@ -124,6 +124,8 @@ float quadVertices[] = {
    1.0f,  1.0f,  1.0f, 1.0f
 };
 
+// 0th depth texture is the main depth texture used for eg z buffer
+// other buffers are for the lights
 const int numDepthTextures = 32;
 int activeDepthTexture = 0;
 
@@ -1196,30 +1198,28 @@ int main(int argc, char* argv[]){
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
-    setActiveDepthTexture(1);
-
-    // depth buffer form point of view of 1 light source (all eventually, but 1 for now)
-
-    auto lightPosition = lights.size() > 0 ? lights.at(0).pos : glm::vec3(0, 0, 0);
-    auto lightRotation = lights.size() > 0 ? lights.at(0).rotation : glm::identity<glm::quat>();
-    auto lightView = renderView(lightPosition, lightRotation);
+    // depth buffer from point of view of 1 light source (all eventually, but 1 for now)
+    for (int i = 0; i < (lights.size() && i < 1); i++){
+      setActiveDepthTexture(i + 1);
+      auto lightPosition = lights.size() > 0 ? lights.at(0).pos : glm::vec3(0, 0, 0);
+      auto lightRotation = lights.size() > 0 ? lights.at(0).rotation : glm::identity<glm::quat>();
+      auto lightView = renderView(lightPosition, lightRotation);
     
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(255.0, 255.0, 255.0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glEnable(GL_DEPTH_TEST);
+      glClearColor(255.0, 255.0, 255.0, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), lights, portals);    // selection program since it's lightweight and we just care about depth buffer
+      for (auto &[_, scene] : world.scenes){
+        renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), lights, portals);    // selection program since it's lightweight and we just care about depth buffer
+      }
     }
 
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldtolight"), 1, GL_FALSE, glm::value_ptr(lightView));  // leftover from shadow mapping attempt, will revisit
 
     setActiveDepthTexture(0);
-
     // 1ST pass draws selection program shader to be able to handle selection 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
