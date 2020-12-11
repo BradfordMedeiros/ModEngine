@@ -1,0 +1,14 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -10 0
+
+wall:mesh:./res/models/box/box.obj
+wall:scale:100 100 1
+wall:position:0 0 -100
+
+smallwall:mesh:./res/models/box/box.obj
+smallwall:scale:10 10 1
+smallwall:position:0 0 -50
+
+!light:position:0 0 -25
