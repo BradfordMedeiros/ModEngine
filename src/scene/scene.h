@@ -90,7 +90,7 @@ std::vector<objid> getIdsInGroup(World& world, objid index);
 
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 bool idExists(World& world, objid id);
-
+Scene& sceneForId(World& world, objid id);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 
@@ -116,6 +116,7 @@ struct PortalInfo {
 PortalInfo getPortalInfo(World& world, objid id);
 std::vector<PortalInfo> getPortalInfo(World& world);
 bool isPortal(World& world, objid id);
+std::optional<GameObjectVoxel*> getVoxel(World& world, objid id);
 
 std::optional<Texture> textureForId(World& world, objid id);
 
