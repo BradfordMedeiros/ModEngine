@@ -454,15 +454,14 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
   }
   return shaderNameToId.at(fragShaderName);
 }
-void setShaderData(GLint shader, glm::mat4 projection, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id){
+void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview){
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "maintexture"), 0);        
   glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
   glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
   glActiveTexture(GL_TEXTURE0); 
 
-  glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-  glUniformMatrix4fv(glGetUniformLocation(shader, "view"),  1, GL_FALSE, glm::value_ptr(view));
+  glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
   glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, glm::value_ptr(defaultCamera.transformation.position));
   glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
@@ -473,6 +472,10 @@ void setShaderData(GLint shader, glm::mat4 projection, glm::mat4 view, std::vect
     glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
     glUniform3fv(glGetUniformLocation(shader, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
     glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
+    if (lightProjview.size() > i){
+      std::cout << "setting light proj view!" << std::endl;
+      glUniformMatrix4fv(glGetUniformLocation(shader, "lightsprojview"), 1, GL_FALSE, glm::value_ptr(lightProjview.at(i)));
+    }
   }
   if (orthographic){
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
@@ -491,14 +494,14 @@ glm::vec3 getTintIfSelected(bool isSelected, glm::vec3 defaultTint){
   return defaultTint;
 }
 
-void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals){
+void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projview,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
   if (scene.isNested){
     return;
   }
   glUseProgram(shaderProgram);
 
   clearTraversalPositions();
-  traverseScene(world, scene, [shaderProgram, &scene, projection, view, &portals, &lights](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader, glm::vec3 tint) -> void {
+  traverseScene(world, scene, [shaderProgram, &scene, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader, glm::vec3 tint) -> void {
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
@@ -507,7 +510,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projection, glm::m
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
 
     auto newShader = getShaderByName(shader, shaderProgram);
-    setShaderData(newShader, projection, view, lights, orthographic, getTintIfSelected(objectSelected, tint), id);
+    setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected, tint), id, lightProjview);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -1199,11 +1202,12 @@ int main(int argc, char* argv[]){
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
     // depth buffer from point of view of 1 light source (all eventually, but 1 for now)
-    for (int i = 0; i < (lights.size() && i < 1); i++){
+
+    std::vector<glm::mat4> lightMatrixs;
+    for (int i = 0; i < lights.size(); i++){
       setActiveDepthTexture(i + 1);
-      auto lightPosition = lights.size() > 0 ? lights.at(0).pos : glm::vec3(0, 0, 0);
-      auto lightRotation = lights.size() > 0 ? lights.at(0).rotation : glm::identity<glm::quat>();
-      auto lightView = renderView(lightPosition, lightRotation);
+      auto light = lights.at(i);
+      auto lightView = renderView(light.pos, light.rotation);
     
       glBindFramebuffer(GL_FRAMEBUFFER, fbo);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
@@ -1213,8 +1217,10 @@ int main(int argc, char* argv[]){
       glClearColor(255.0, 255.0, 255.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      auto lightProjview = projection * lightView;
+      lightMatrixs.push_back(lightProjview);
       for (auto &[_, scene] : world.scenes){
-        renderScene(scene, selectionProgram, projection, lightView, glm::mat4(1.0f), lights, portals);    // selection program since it's lightweight and we just care about depth buffer
+        renderScene(scene, selectionProgram, lightProjview, glm::mat4(1.0f), lights, portals, {});    // selection program since it's lightweight and we just care about depth buffer
       }
     }
 
@@ -1228,7 +1234,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_BLEND);
     
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals);
+      renderScene(scene, selectionProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     }
 
     // Each portal requires a render pass
@@ -1281,7 +1287,7 @@ int main(int argc, char* argv[]){
 
       auto portalViewMatrix = renderPortalView(portal, viewTransform);
       for (auto &[_, scene] : world.scenes){
-        renderScene(scene, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals);
+        renderScene(scene, shaderProgram, projection * portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
       }
       nextPortalCache[portal.id] = portalTextures[i];
     }
@@ -1311,7 +1317,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     for (auto &[_, scene] : world.scenes){
-      renderScene(scene, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals);
+      renderScene(scene, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     }
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
@@ -1394,12 +1400,13 @@ int main(int argc, char* argv[]){
     if (state.renderMode == RENDER_FINAL){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     }else if (state.renderMode == RENDER_PORTAL){
-      assert(state.portalTextureIndex <= numPortalTextures && state.portalTextureIndex >= 0);
-      glBindTexture(GL_TEXTURE_2D, portalTextures[state.portalTextureIndex]);  
+      assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
+      glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
     }else if (state.renderMode == RENDER_PAINT){
       glBindTexture(GL_TEXTURE_2D, textureToPaint);
     }else if (state.renderMode == RENDER_DEPTH){
-      glBindTexture(GL_TEXTURE_2D, depthTextures[1]);
+      assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
+      glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
     }
 
     glDrawArrays(GL_TRIANGLES, 0, 6);

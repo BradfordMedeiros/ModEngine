@@ -202,15 +202,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_K && action == 1){
-    state.portalTextureIndex--;
-    if (state.portalTextureIndex < 0){
-      state.portalTextureIndex = 0;
+    state.textureIndex--;
+    if (state.textureIndex < 0){
+      state.textureIndex = 0;
     }
-    std::cout << "portal index: " << state.portalTextureIndex << std::endl;
+    std::cout << "texture index: " << state.textureIndex << std::endl;
   }
   if (key == GLFW_KEY_L && action == 1){
-    state.portalTextureIndex++;
-    std::cout << "portal index: " << state.portalTextureIndex << std::endl;
+    state.textureIndex++;
+    std::cout << "texture index: " << state.textureIndex << std::endl;
   }
 
   if (key == GLFW_KEY_Q && action == 1){

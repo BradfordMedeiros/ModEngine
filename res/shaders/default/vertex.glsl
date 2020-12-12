@@ -7,13 +7,9 @@ layout (location = 3) in int aBoneIndex[4];
 layout (location = 7) in float aBoneWeight[4];
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 projview;
 uniform mat4 bones[100];
 uniform bool hasBones;
-
-
-//uniform mat4 worldtolight;
 
 out vec2 TexCoord;
 out vec3 Normal;
@@ -25,8 +21,6 @@ out vec4 glFragPos;
 flat out vec4 overcolor;
 uniform bool showBoneWeight;
 uniform bool useBoneTransform;
-
-
 ////
 
 void main(){
@@ -60,7 +54,7 @@ void main(){
 
     }
 
-    gl_Position = projection * view *  model * vec4(modelPosition.x, modelPosition.y, modelPosition.z, 1.0);
+    gl_Position = projview *  model * vec4(modelPosition.x, modelPosition.y, modelPosition.z, 1.0);
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
@@ -76,12 +70,10 @@ void main(){
   }else{
     vec4 modelPosition = model * vec4(aPos.xyz, 1.0);
 
-    gl_Position = projection * view * modelPosition;
+    gl_Position = projview * modelPosition;
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
     glFragPos = gl_Position;
   }
-
-  //FragLight = worldtolight * vec4(FragPos.xyz, 1.0);
 } 

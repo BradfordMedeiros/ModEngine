@@ -44,7 +44,7 @@ struct engineState {
   bool useBoneTransform;
   float discardAmount;
   bool offsetTextureMode;
-  int portalTextureIndex;
+  int textureIndex;
   bool shouldPaint;
   bool shouldTerrainPaint;
   bool terrainPaintDown;

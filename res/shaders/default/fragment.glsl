@@ -11,6 +11,8 @@ uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
 uniform sampler2D opacityTexture;
 
+uniform sampler2D lightDepthTexture;
+
 uniform vec3 tint;
 uniform vec3 cameraPosition;
 
@@ -26,6 +28,7 @@ uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
+uniform vec3 lightsprojview[MAX_LIGHTS];
 
 const float constant = 1.0;
 const float linear = 0.007;
@@ -80,8 +83,8 @@ void main(){
 
         //totalDiffuse = totalDiffuse + ( diffuse * lightscolor[i]);
         //totalSpecular = totalSpecular + (specular * lightscolor[i]);
-        totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
-        totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
+        totalDiffuse = totalDiffuse + (1 * diffuse * lightscolor[i]);
+        totalSpecular = totalSpecular + (1 * specular * lightscolor[i]);
     }
 
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
@@ -99,3 +102,4 @@ void main(){
 
        
 }
+
