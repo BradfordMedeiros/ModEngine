@@ -459,6 +459,8 @@ void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lig
   glUniform1i(glGetUniformLocation(shader, "maintexture"), 0);        
   glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
   glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
+  glUniform1i(glGetUniformLocation(shader, "lightDepthTexture"), 3);
+
   glActiveTexture(GL_TEXTURE0); 
 
   glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
@@ -473,8 +475,10 @@ void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lig
     glUniform3fv(glGetUniformLocation(shader, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
     glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
     if (lightProjview.size() > i){
-      std::cout << "setting light proj view!" << std::endl;
+      glActiveTexture(GL_TEXTURE3);
+      glBindTexture(GL_TEXTURE_2D, depthTextures[1]);
       glUniformMatrix4fv(glGetUniformLocation(shader, "lightsprojview"), 1, GL_FALSE, glm::value_ptr(lightProjview.at(i)));
+      glActiveTexture(GL_TEXTURE0);
     }
   }
   if (orthographic){
@@ -902,10 +906,11 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
+     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+
      updateDepthTexturesSize();
      updatePortalTexturesSize();
 
-     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
      // TODO orthoproj is using current screen width and height.  Switch this to match NDI for simplification. 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, (float)state.currentScreenHeight, 0.0f, -1.0f, 1.0f);  
@@ -1217,7 +1222,8 @@ int main(int argc, char* argv[]){
       glClearColor(255.0, 255.0, 255.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      auto lightProjview = projection * lightView;
+      glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);
+      auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
       for (auto &[_, scene] : world.scenes){
         renderScene(scene, selectionProgram, lightProjview, glm::mat4(1.0f), lights, portals, {});    // selection program since it's lightweight and we just care about depth buffer

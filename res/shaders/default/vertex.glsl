@@ -11,10 +11,15 @@ uniform mat4 projview;
 uniform mat4 bones[100];
 uniform bool hasBones;
 
+uniform mat4 lightsprojview;
+
+
 out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 out vec4 FragLight;
+out vec4 sshadowCoord;
+
 
 // temporary
 out vec4 glFragPos;
@@ -58,7 +63,7 @@ void main(){
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
-    
+    sshadowCoord = lightsprojview * vec4(FragPos, 1.0);
 
     if (!showBoneWeight){
       overcolor = vec4(aBoneIndex[0], aBoneIndex[1], aBoneIndex[2], 1.0);
@@ -74,6 +79,8 @@ void main(){
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
+    sshadowCoord = lightsprojview * vec4(FragPos, 1.0);
+
     glFragPos = gl_Position;
   }
 } 

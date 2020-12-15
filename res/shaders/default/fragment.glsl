@@ -3,6 +3,7 @@
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
+in vec4 sshadowCoord;
 
 layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BloomColor;
@@ -10,7 +11,6 @@ layout (location = 1) out vec4 BloomColor;
 uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
 uniform sampler2D opacityTexture;
-
 uniform sampler2D lightDepthTexture;
 
 uniform vec3 tint;
@@ -28,7 +28,7 @@ uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
-uniform vec3 lightsprojview[MAX_LIGHTS];
+//uniform mat4 lightsprojview[MAX_LIGHTS];
 
 const float constant = 1.0;
 const float linear = 0.007;
@@ -39,11 +39,20 @@ uniform float discardTexAmount;
 uniform float time;
 
 void main(){
-    vec2 adjustedTexCoord = (TexCoord * textureTiling) + textureOffset;
+   // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
+    // real close => 0 , real far => 1
+//    shadowCoord = shadowCoord * 0.5 + 0.5;
+    vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
 
-    vec4 diffuseColor = texture(maintexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
-    vec4 emissionColor = texture(emissionTexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
-    vec4 opacityColor = texture(opacityTexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
+    vec2 adjustedTexCoord = TexCoord;
+
+    vec4 diffuseColor = texture(maintexture, adjustedTexCoord);
+    
+    float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
+    //vec4 diffuseColor =  texture(lightDepthTexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
+
+    vec4 emissionColor = texture(emissionTexture, adjustedTexCoord);
+    vec4 opacityColor = texture(opacityTexture, adjustedTexCoord);
 
     bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
 
@@ -90,7 +99,17 @@ void main(){
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
     vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
-    FragColor = vec4(tint, 1.0) * color;
+
+    bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
+
+
+    if (!inShadow){
+      FragColor = texColor;
+    }else{
+      FragColor = texColor - vec4(0.4, 0.4, 0.4, 0);
+    }
+    //FragColor = texture(lightDepthTexture, shadowCoord.xy);
+    //FragColor = vec4(closestDepth, closestDepth, closestDepth, 1.0);
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;
