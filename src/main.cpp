@@ -996,8 +996,10 @@ int main(int argc, char* argv[]){
     createStateMachine,
     playStateMachine,
     setStateMachine,
-    startRecording,
     playRecording,
+    stopRecording,
+    createRecording,
+    saveRecording,
     makeObjectAttr,
     raycastW,
     takeScreenshot,
@@ -1090,7 +1092,7 @@ int main(int argc, char* argv[]){
     debuggerDrawer
   );
 
-  auto basicRecording = loadRecording("./res/recordings/test.rec", parsePropertySuffix);
+  auto basicRecording = loadRecording("./res/recordings/move.rec", parsePropertySuffix);
   saveRecording("./res/recordings/movecopy.rec", basicRecording, serializePropertySuffix);
 
   interface = SysInterface {
@@ -1222,7 +1224,7 @@ int main(int argc, char* argv[]){
       glClearColor(255.0, 255.0, 255.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);
+      glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
       auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
       for (auto &[_, scene] : world.scenes){

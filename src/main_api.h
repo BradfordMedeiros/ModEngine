@@ -126,11 +126,15 @@ double timeSeconds();
 void sendDataUdp(std::string data);
 std::string connectServer(std::string server);
 
-void startRecording(objid id, std::string recordingPath);
 void playRecording(objid id, std::string recordingPath);
+void stopRecording(objid id, std::string recordingPath);
+
 void startRecording();
 void tickRecording(float time, GameObject& gameobject);
 void stopRecording();
+
+objid createRecording(objid id);
+void saveRecording(objid recordingId, std::string filepath);
 
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);

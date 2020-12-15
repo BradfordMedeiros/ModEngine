@@ -591,14 +591,23 @@ SCM scmSetStateMachine(SCM scmMachine, SCM state){
   return SCM_UNSPECIFIED;
 }
 
-void (*_startRecording)(objid id, std::string recordingPath);
-SCM scmStartRecording(SCM id, SCM recordingPath){
-  _startRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
-  return SCM_UNSPECIFIED;
-}
 void (*_playRecording)(objid id, std::string recordingPath);
 SCM scmPlayRecording(SCM id, SCM recordingPath){
   _playRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
+  return SCM_UNSPECIFIED;
+}
+void (*_stopRecording)(objid id, std::string recordingPath);
+SCM scmStopRecording(SCM id, SCM recordingPath){
+  _stopRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
+  return SCM_UNSPECIFIED;
+}
+
+objid (*_createRecording)(objid id);
+SCM scmCreateRecording(SCM objid){
+  return SCM_UNSPECIFIED;
+}
+void (*_saveRecording)(objid recordingId, std::string filepath);
+SCM scmSaveRecording(SCM recordingId, SCM filepath){
   return SCM_UNSPECIFIED;
 }
 
@@ -866,8 +875,10 @@ void defineFunctions(objid id, bool isServer){
 
   // state-on-event
   // state-on-exit
-  scm_c_define_gsubr("start-recording", 2, 0, 0, (void*)scmStartRecording);
   scm_c_define_gsubr("play-recording", 2, 0, 0, (void*)scmPlayRecording);
+  scm_c_define_gsubr("stop-recording", 2, 0, 0, (void*)scmStopRecording);
+  scm_c_define_gsubr("create-recording", 1, 0, 0, (void*)scmCreateRecording);
+  scm_c_define_gsubr("save-recording", 2, 0, 0, (void*) scmSaveRecording);
 
   scm_c_define_gsubr("mk-obj-attr", 2, 0, 0, (void*)scmMakeObjectAttr);
   scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
@@ -935,8 +946,10 @@ void createStaticSchemeBindings(
   StateMachine (*createStateMachine)(std::vector<State> states),
   void (*playStateMachine)(StateMachine* machine),
   void (*setStateMachine)(StateMachine* machine, std::string newState),
-  void (*startRecording)(objid id, std::string recordingPath),
   void (*playRecording)(objid id, std::string recordingPath),
+  void (*stopRecording)(objid id, std::string recordingPath),
+  objid (*createRecording)(objid id),
+  void (*saveRecording)(objid recordingId, std::string filepath),
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
@@ -1015,8 +1028,10 @@ void createStaticSchemeBindings(
   _playStateMachine = playStateMachine;
   _setStateMachine = setStateMachine;
 
-  _startRecording = startRecording;
   _playRecording = playRecording;
+  _stopRecording = stopRecording;
+  _createRecording = createRecording;
+  _saveRecording = saveRecording;
 
   _makeObjectAttr = makeObjectAttr;
   _raycast = raycast;

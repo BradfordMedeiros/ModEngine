@@ -287,9 +287,19 @@ std::string connectServer(std::string data){
 }
 
 
-void startRecording(objid id, std::string recordingPath){
-}
 void playRecording(objid id, std::string recordingPath){
+  std::cout << "INFO: ANIMATION: PLAY RECORDING PLACEHOLDER" << std::endl;
+}
+void stopRecording(objid id, std::string recordingPath){
+  std::cout << "INFO: ANIMATION: STOP RECORDING PLACEHOLDER" << std::endl;
+}
+
+objid createRecording(objid id){
+  std::cout << "INFO: ANIMATION: CREATE RECORDING PLACEHOLDER" << std::endl;
+  return -1;
+}
+void saveRecording(objid recordingId, std::string filepath){
+  std::cout << "INFO: ANIMATION: SAVE RECORDING PLACEHOLDER" << std::endl;
 }
 
 auto recording = createRecording();
