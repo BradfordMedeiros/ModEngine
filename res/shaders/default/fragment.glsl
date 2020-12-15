@@ -90,8 +90,8 @@ void main(){
         float distanceToLight = length(lightPos - FragPos);
         float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
 
-        //totalDiffuse = totalDiffuse + ( diffuse * lightscolor[i]);
-        //totalSpecular = totalSpecular + (specular * lightscolor[i]);
+        totalDiffuse = totalDiffuse + ( diffuse * lightscolor[i]);
+        totalSpecular = totalSpecular + (specular * lightscolor[i]);
         totalDiffuse = totalDiffuse + (1 * diffuse * lightscolor[i]);
         totalSpecular = totalSpecular + (1 * specular * lightscolor[i]);
     }
@@ -101,15 +101,9 @@ void main(){
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
+    float shadowDelta = inShadow ? 0.2 : 1.0;
 
-
-    if (!inShadow){
-      FragColor = texColor;
-    }else{
-      FragColor = texColor - vec4(0.4, 0.4, 0.4, 0);
-    }
-    //FragColor = texture(lightDepthTexture, shadowCoord.xy);
-    //FragColor = vec4(closestDepth, closestDepth, closestDepth, 1.0);
+    FragColor = vec4(color.xyz * shadowDelta, color.w);
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;
