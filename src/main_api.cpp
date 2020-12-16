@@ -290,17 +290,9 @@ struct ActiveRecording {
   objid targetObj;
   Recording recording;
 };
+
 std::map<objid, ActiveRecording> activeRecordings;
-
-void playRecording(objid id, std::string recordingPath){
-  std::cout << "INFO: ANIMATION: PLAY RECORDING PLACEHOLDER" << std::endl;
-}
-void stopRecording(objid id, std::string recordingPath){
-  std::cout << "INFO: ANIMATION: STOP RECORDING PLACEHOLDER" << std::endl;
-}
-
 objid createRecording(objid id){  
-  std::cout << "INFO: ANIMATION: CREATE RECORDING PLACEHOLDER" << std::endl;
   auto recordingId = getUniqueObjId();
   assert(activeRecordings.find(recordingId) == activeRecordings.end());
   activeRecordings[recordingId] = ActiveRecording{
@@ -310,37 +302,34 @@ objid createRecording(objid id){
   return recordingId;
 }
 void saveRecording(objid recordingId, std::string filepath){
-  std::cout << "INFO: ANIMATION: SAVE RECORDING PLACEHOLDER" << std::endl;
-  for (auto [id, recording] : activeRecordings){
-    if (id == recordingId){
-       std::cout << "SAVING RECORDING STARTED - " << filepath << std::endl;
-       saveRecording(filepath, recording.recording, serializePropertySuffix);
-       activeRecordings.erase(id);
-       std::cout << "SAVING RECORDING COMPLETE - " << filepath << std::endl;
-       return;
-    }
-  }
-  assert(false);
+  auto recording = activeRecordings.at(recordingId);
+  std::cout << "SAVING RECORDING STARTED - " << filepath << std::endl;
+  saveRecording(filepath, recording.recording, serializePropertySuffix);
+  activeRecordings.erase(recordingId);
+  std::cout << "SAVING RECORDING COMPLETE - " << filepath << std::endl;
 }
 
-//void tickRecording(float time, GameObject& gameobject, Recording& recording){
-//  ;/
-//}//
-
-//activeRecordings.push_back(loadRecording("./res/recordings/move.rec", parsePropertySuffix));
+std::map<objid, Recording> playingRecordings;
+void playRecording(objid id, std::string recordingPath){
+  assert(playingRecordings.find(id) == playingRecordings.end());
+  playingRecordings[id] = loadRecording(recordingPath, parsePropertySuffix);
+}
+void stopRecording(objid id, std::string recordingPath){
+  assert(playingRecordings.find(id) != playingRecordings.end());
+  playingRecordings.erase(id);
+}
 
 void tickRecordings(float time){
   for (auto &[id, activeRecording] : activeRecordings){
     auto gameobject = getGameObject(world, activeRecording.targetObj);
     saveRecordingIndex(activeRecording.recording, "position", gameobject.transformation.position, time);
   } 
-    /*if (gameobject.has_value()){
-      if (!state.isRecording){
-        auto interpolatedProperties = recordingPropertiesInterpolated(recording, time, interpolateAttribute);
-        setProperty(world, gameobject.value(), interpolatedProperties);
-      }
-    } */     
 
+  for (auto &[id, recording] : playingRecordings){
+    auto gameobj = getGameObject(world, id);
+    auto interpolatedProperties = recordingPropertiesInterpolated(recording, time, interpolateAttribute);
+    setProperty(world, gameobj.id, interpolatedProperties);
+  }
 }
 
 
