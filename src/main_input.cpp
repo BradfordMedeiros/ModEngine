@@ -232,10 +232,21 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_N && action == 1){
-    startRecording();
+    assert(!state.isRecording);
+    auto gameobj = getGameObjectByName(world, "record");
+    if (gameobj.has_value()){
+      std::cout << "INPUT -> STARTED RECORDING" << std::endl;
+      state.isRecording = true;
+      state.recordingIndex = createRecording(gameobj.value());
+    }
+
   } 
   if (key == GLFW_KEY_M && action == 1){
-    stopRecording();
+    assert(state.isRecording);
+    std::cout << "INPUT -> STOPPED RECORDING" << std::endl;
+    saveRecording(state.recordingIndex, "./res/recordings/move.rec");
+    state.isRecording = false;
+    state.recordingIndex = -1;
   }
 
   if (key == 261 && action == 1){   // del

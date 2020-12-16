@@ -56,6 +56,7 @@ struct engineState {
   EditorContent editor;
   bool multiselectMode;
   bool isRecording;
+  objid recordingIndex;
   RENDER_MODE renderMode;
 };
 

@@ -1092,9 +1092,6 @@ int main(int argc, char* argv[]){
     debuggerDrawer
   );
 
-  auto basicRecording = loadRecording("./res/recordings/move.rec", parsePropertySuffix);
-  saveRecording("./res/recordings/movecopy.rec", basicRecording, serializePropertySuffix);
-
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,
     .unloadScript = unloadScript,
@@ -1160,16 +1157,7 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
 
     auto time = getTotalTime();
-    auto gameobject = getGameObjectByName(world, "boxfront");
-    if (gameobject.has_value()){
-      if (!state.isRecording){
-        auto interpolatedProperties = recordingPropertiesInterpolated(basicRecording, time, interpolateAttribute);
-        setProperty(world, gameobject.value(), interpolatedProperties);
-      }else{
-        auto gameobj = getGameObject(world, gameobject.value());
-        tickRecording(time, gameobj);    
-      }
-    }
+    tickRecordings(time);
 
     maybeGetClientMessage(onClientMessage);
 

@@ -604,10 +604,11 @@ SCM scmStopRecording(SCM id, SCM recordingPath){
 
 objid (*_createRecording)(objid id);
 SCM scmCreateRecording(SCM objid){
-  return SCM_UNSPECIFIED;
+  return scm_from_int32(_createRecording(scm_to_int32(objid)));
 }
 void (*_saveRecording)(objid recordingId, std::string filepath);
 SCM scmSaveRecording(SCM recordingId, SCM filepath){
+  _saveRecording(scm_to_int32(recordingId), scm_to_locale_string(filepath));
   return SCM_UNSPECIFIED;
 }
 

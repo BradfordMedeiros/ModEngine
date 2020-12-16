@@ -129,9 +129,8 @@ std::string connectServer(std::string server);
 void playRecording(objid id, std::string recordingPath);
 void stopRecording(objid id, std::string recordingPath);
 
-void startRecording();
 void tickRecording(float time, GameObject& gameobject);
-void stopRecording();
+void tickRecordings(float time);
 
 objid createRecording(objid id);
 void saveRecording(objid recordingId, std::string filepath);
