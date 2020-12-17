@@ -534,12 +534,12 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projview,  glm::ma
       if (objectSelected){
         drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), newShader);
       }
+      glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), meshObj -> discardAmount); 
+      glUniform1f(glGetUniformLocation(newShader, "emissionAmount"), meshObj -> emissionAmount); 
     }
     /////////////////////////////// end bounding code
 
     glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-    glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), state.discardAmount);  // TODO - remove this global discard tex amount
     glUniform1f(glGetUniformLocation(newShader, "time"), getTotalTime());
 
     bool isPortal = false;

@@ -20,7 +20,7 @@ TextureInformation texinfoFromFields(std::map<std::string, std::string>& additio
   return info;
 }
 
-static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texture" };
+static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texture", "discard", "emission" };
 GameObjectMesh createMesh(
   std::map<std::string, std::string> additionalFields, 
   std::map<std::string, Mesh>& meshes, 
@@ -61,6 +61,8 @@ GameObjectMesh createMesh(
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
     .texture = texinfoFromFields(additionalFields, ensureTextureLoaded),
+    .discardAmount = additionalFields.find("discard") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("emission").c_str()),
+    .emissionAmount = additionalFields.find("emission") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("emission").c_str()),
   };
   return obj;
 }

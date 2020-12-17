@@ -37,6 +37,8 @@ struct GameObjectMesh {
   bool nodeOnly;
   std::string rootMesh;
   TextureInformation texture;
+  float discardAmount;
+  float emissionAmount;
 };
 struct GameObjectCamera {};
 struct GameObjectPortal {
