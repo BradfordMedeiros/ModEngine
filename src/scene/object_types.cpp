@@ -88,9 +88,20 @@ GameObjectSound createSound(std::map<std::string, std::string> additionalFields)
   };
   return obj;
 }
+
+LightType getLightType(std::string type){
+  if (type == "spotlight"){
+    return LIGHT_SPOTLIGHT;
+  }
+  if (type == "directional"){
+    return LIGHT_DIRECTIONAL;
+  }
+  return LIGHT_POINT;
+}
 GameObjectLight createLight(std::map<std::string, std::string> additionalFields){
   auto color = additionalFields.find("color") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("color"));
-  auto lightType = (additionalFields.find("maxangle") == additionalFields.end()) ? LIGHT_SPOTLIGHT : LIGHT_POINT;
+  auto lightType = additionalFields.find("type") == additionalFields.end() ? LIGHT_POINT : getLightType(additionalFields.at("type"));
+
 
   GameObjectLight obj {
     .color = color,

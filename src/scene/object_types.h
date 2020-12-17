@@ -48,11 +48,8 @@ struct GameObjectSound{
   ALuint source;
 };
 
-enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT };
+enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT, LIGHT_DIRECTIONAL };
 struct GameObjectLight {
-  /*!light:type:directional
-  !light:type:directional 
-  !light:maxangle:50*/
   glm::vec3 color;
   LightType type;
   float maxangle;
