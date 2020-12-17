@@ -28,11 +28,8 @@ uniform int numlights;
 uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
+uniform vec3 lightsatten[MAX_LIGHTS];
 //uniform mat4 lightsprojview[MAX_LIGHTS];
-
-const float constant = 1.0;
-const float linear = 0.007;
-const float quadratic = 0.0002;
 
 const float emissionAmount = 1;
 uniform float discardTexAmount;
@@ -88,12 +85,15 @@ void main(){
         vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
  
         float distanceToLight = length(lightPos - FragPos);
+
+        vec3 attenuationTerms = lightsatten[i];
+        float constant = attenuationTerms.x;
+        float linear = attenuationTerms.y;
+        float quadratic = attenuationTerms.z;
         float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
 
-        totalDiffuse = totalDiffuse + ( diffuse * lightscolor[i]);
-        totalSpecular = totalSpecular + (specular * lightscolor[i]);
-        totalDiffuse = totalDiffuse + (1 * diffuse * lightscolor[i]);
-        totalSpecular = totalSpecular + (1 * specular * lightscolor[i]);
+        totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
+        totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
     }
 
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);

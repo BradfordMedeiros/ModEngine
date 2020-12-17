@@ -474,6 +474,8 @@ void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lig
     glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
     glUniform3fv(glGetUniformLocation(shader, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
     glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
+    glUniform3fv(glGetUniformLocation(shader, ("lightsatten[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.attenuation));
+
     if (lightProjview.size() > i){
       glActiveTexture(GL_TEXTURE3);
       glBindTexture(GL_TEXTURE_2D, depthTextures[1]);

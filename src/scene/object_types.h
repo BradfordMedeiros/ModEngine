@@ -51,9 +51,9 @@ struct GameObjectSound{
 enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT, LIGHT_DIRECTIONAL };
 struct GameObjectLight {
   glm::vec3 color;
-  float intensity;
   LightType type;
   float maxangle;
+  glm::vec3 attenuation;
 };
 struct GameObjectVoxel {
   Voxels voxel;

@@ -101,13 +101,16 @@ LightType getLightType(std::string type){
 GameObjectLight createLight(std::map<std::string, std::string> additionalFields){
   auto color = additionalFields.find("color") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("color"));
   auto lightType = additionalFields.find("type") == additionalFields.end() ? LIGHT_POINT : getLightType(additionalFields.at("type"));
-  auto lightIntensity = additionalFields.find("intensity") == additionalFields.end() ? 1.f : std::atof(additionalFields.at("intensity").c_str());
+
+  // constant, linear, quadratic
+  // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
+  auto attenuation = additionalFields.find("attenuation") == additionalFields.end() ? glm::vec3(1.0, 0.007, 0.0002) : parseVec(additionalFields.at("attenuation"));
 
   GameObjectLight obj {
     .color = color,
-    .intensity = lightIntensity,
     .type = lightType,
     .maxangle = lightType == LIGHT_SPOTLIGHT ? 30.f : 0.f,
+    .attenuation = attenuation,
   };
   return obj;
 }
