@@ -5,7 +5,8 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 
 !flashlight:position:0 -2 0 
-!flashlight:maxangle:30
+!flashlight:angle:0.3
+!flashlight:type:spotlight
 
 flashbox:mesh:./res/models/box/box.obj
 flashbox:child:!flashlight
