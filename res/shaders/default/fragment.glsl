@@ -43,7 +43,7 @@ void main(){
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-    vec2 adjustedTexCoord = TexCoord;
+    vec2 adjustedTexCoord = TexCoord * textureTiling;
 
     vec4 diffuseColor = texture(maintexture, adjustedTexCoord);
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
@@ -104,7 +104,7 @@ void main(){
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
-    float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
+    float shadowDelta = (inShadow) ? 0.2 : 1.0;
 
     FragColor = vec4(color.xyz * shadowDelta, color.w);
 
