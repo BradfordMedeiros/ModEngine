@@ -241,3 +241,7 @@ HeightmapMask loadMask(std::string brushFile){
   };
   return mask;
 }
+
+void saveHeightmap(HeightMapData& heightmap){
+  std::cout << "save heightmap placeholder" << std::endl;
+}

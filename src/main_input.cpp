@@ -222,6 +222,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     std::cout << "toggling terrain paint direction: " << state.terrainPaintDown << std::endl;
   }
 
+  if (key == GLFW_KEY_U && action == 1){
+    saveHeightmap(world, selected(state.editor));
+  }
+
   if (key == GLFW_KEY_P && action == 1){
     state.shouldSelect = !state.shouldSelect;
   }
@@ -232,6 +236,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_N && action == 1){
+    return;
     assert(!state.isRecording);
     auto gameobj = getGameObjectByName(world, "record");
     if (gameobj.has_value()){
@@ -242,6 +247,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   } 
   if (key == GLFW_KEY_M && action == 1){
+    return;
     assert(state.isRecording);
     std::cout << "INPUT -> STOPPED RECORDING" << std::endl;
     saveRecording(state.recordingIndex, "./res/recordings/move.rec");

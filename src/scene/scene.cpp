@@ -1065,6 +1065,14 @@ void applyHeightmapMasking(World& world, objid id, float amount, float uvx, floa
     updatePhysicsBody(world, sceneForId(world, id), id); 
   }, hm.mesh, shouldAverage);
 }
+void saveHeightmap(World& world, objid id){
+  auto heightmaps = getHeightmaps(world.objectMapping);
+  if (heightmaps.find(id) == heightmaps.end()){
+    return;
+  }
+  GameObjectHeightmap& hm = *heightmaps.at(id);
+  saveHeightmap(hm.heightmap);
+}
 
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
   NavGraph  navgraph { };

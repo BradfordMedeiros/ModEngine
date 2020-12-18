@@ -38,4 +38,6 @@ void applyMasking(
 
 HeightmapMask loadMask(std::string brushFile);
 
+void saveHeightmap(HeightMapData& heightmap);
+
 #endif
