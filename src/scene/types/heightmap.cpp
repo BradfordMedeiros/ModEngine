@@ -35,6 +35,7 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
       //char g = imageData[byteOffset + 1];
       //char b = imageData[byteOffset + 2];
       //char a = imageData[byteOffset + 3];
+      std::cout << "loading r: " << (unsigned int)r << std::endl;
       newData[(i * dataHeight) + j] = r;
     }
   }
@@ -242,6 +243,19 @@ HeightmapMask loadMask(std::string brushFile){
   return mask;
 }
 
+// This doesn't work correctly
 void saveHeightmap(HeightMapData& heightmap){
-  std::cout << "save heightmap placeholder" << std::endl;
+  char* newData = new char[heightmap.width * heightmap.height * 3];
+  for (int i = 0; i < heightmap.width; i++){
+    for (int j = 0; j < heightmap.height; j++){
+       int byteOffset = (int)(((i * heightmap.height) + j) * 3);
+       auto r = (char)heightmap.data[byteOffset];
+       std::cout << "r is: " << (unsigned int)r << std::endl;
+       newData[byteOffset] = r;
+       newData[byteOffset + 1] = 0;
+       newData[byteOffset + 2] = 0;
+    } 
+  }
+  stbi_write_png("./res/heightmaps/testmap.png",  heightmap.height,heightmap.width, 3, newData, 0); 
+  delete[] newData;
 }
