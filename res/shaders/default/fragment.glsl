@@ -29,9 +29,12 @@ uniform vec3 lights[MAX_LIGHTS];
 uniform vec3 lightscolor[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
 uniform vec3 lightsatten[MAX_LIGHTS];
+uniform float lightsmaxangle[MAX_LIGHTS];
+uniform bool lightsisdir[MAX_LIGHTS];
+
 //uniform mat4 lightsprojview[MAX_LIGHTS];
 
-const float emissionAmount = 1;
+uniform float emissionAmount;
 uniform float discardTexAmount;
 uniform float time;
 
@@ -40,13 +43,10 @@ void main(){
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-
     vec2 adjustedTexCoord = TexCoord;
 
     vec4 diffuseColor = texture(maintexture, adjustedTexCoord);
-    
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
-    //vec4 diffuseColor =  texture(lightDepthTexture, vec2(adjustedTexCoord.x, adjustedTexCoord.y));
 
     vec4 emissionColor = texture(emissionTexture, adjustedTexCoord);
     vec4 opacityColor = texture(opacityTexture, adjustedTexCoord);
@@ -70,13 +70,13 @@ void main(){
     
     for (int i = 0; i < min(numlights, MAX_LIGHTS); i++){
         vec3 lightPos = lights[i];
-        vec3 lightDir = normalize(lightPos - FragPos);
+        vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
         vec3 normal = normalize(Normal);
 
         float angle = dot(lightDir, normalize(-lightsdir[i]));
-        //if (angle < 0.1){
-        //    continue;
-        //}
+        if (angle < lightsmaxangle[i]){
+            continue;
+        }
 
         vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
 
@@ -92,8 +92,11 @@ void main(){
         float quadratic = attenuationTerms.z;
         float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
 
-        totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
-        totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
+        //totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
+        //totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
+
+        totalDiffuse = totalDiffuse + (diffuse * lightscolor[i]);
+        totalSpecular = totalSpecular + (specular * lightscolor[i]);
     }
 
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
@@ -101,7 +104,7 @@ void main(){
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
-    float shadowDelta = inShadow ? 0.2 : 1.0;
+    float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 
     FragColor = vec4(color.xyz * shadowDelta, color.w);
 

@@ -1,0 +1,8 @@
+# Demonstrates basic usage of spotlight
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+!flashlight:position:0 2 0 
+!flashlight:type:directional
