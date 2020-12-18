@@ -100,6 +100,10 @@ struct PropertyIndexs {
 PropertyIndexs indexsForRecording(Recording& recording, float time){
   auto highIndex = indexForRecording(recording, time);
   auto lowIndex = highIndex - 1;
+  if (lowIndex < 0){
+    lowIndex = 0;
+  }
+
   auto lowTimestamp = recording.keyframes.at(lowIndex).time;
   auto highTimestamp = recording.keyframes.at(highIndex).time;
 
@@ -110,7 +114,7 @@ PropertyIndexs indexsForRecording(Recording& recording, float time){
   PropertyIndexs properties {
     .lowIndex = lowIndex,
     .highIndex = highIndex,
-    .percentage = percentage,
+    .percentage = lowIndex == highIndex ? 1.f : (percentage > 1.f ? 1.f : percentage),
   };
   return properties;
 }
