@@ -47,6 +47,7 @@
 #include "./common/sysinterface.h"
 #include "./drawing.h"
 #include "./editor.h"
+#include "./mocap.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
