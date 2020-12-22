@@ -22,8 +22,8 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
   float minHeight = 0;
   float maxHeight = 0;
   // 4 components = 4 bytes (4 components, 1 byte per component -> RGBA)
-  for (int i = 0; i < dataWidth; i++){
-    for (int j = 0; j < dataHeight; j++){
+  for (int i = 0; i < dataHeight; i++){
+    for (int j = 0; j < dataWidth; j++){
       int byteOffset = (int)(((i * dataHeight * heightMultiplier) + j * widthMultiplier) * 4);
       assert(byteOffset < (textureWidth * textureHeight * 4));
       char r = imageData[byteOffset];
@@ -56,6 +56,7 @@ HeightMapData loadAndAllocateHeightmap(std::string heightmapFilePath, int dim){
     .height = dataHeight,
     .minHeight = minHeight,
     .maxHeight = maxHeight,
+    .originalMidpoint = midpointHeight,
   };
   return heightmapData;
 }
@@ -191,7 +192,7 @@ void applyMasking(
 
       if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
         if (shouldAverage && maskAmount > 0.f){
-          heightmap.data[targetIndex] = oldAverageValue + effectiveAmount;
+          heightmap.data[targetIndex] = oldAverageValue, heightmap.height, + effectiveAmount;
         }else{
           heightmap.data[targetIndex] += effectiveAmount;
         }
@@ -243,19 +244,19 @@ HeightmapMask loadMask(std::string brushFile){
   return mask;
 }
 
-// This doesn't work correctly
 void saveHeightmap(HeightMapData& heightmap){
   char* newData = new char[heightmap.width * heightmap.height * 3];
-  for (int i = 0; i < heightmap.width; i++){
-    for (int j = 0; j < heightmap.height; j++){
-       int byteOffset = (int)(((i * heightmap.height) + j) * 3);
-       auto r = (char)heightmap.data[byteOffset];
+  for (int i = 0; i < heightmap.height; i++){
+    for (int j = 0; j < heightmap.width; j++){
+       auto dataOffset = (i * heightmap.height) + j;
+       int byteOffset = (int)(dataOffset * 3);
+       auto r = (char)(heightmap.data[dataOffset] + heightmap.originalMidpoint);
        std::cout << "r is: " << (unsigned int)r << std::endl;
        newData[byteOffset] = r;
        newData[byteOffset + 1] = 0;
        newData[byteOffset + 2] = 0;
     } 
   }
-  stbi_write_png("./res/heightmaps/testmap.png",  heightmap.height,heightmap.width, 3, newData, 0); 
+  stbi_write_png("./res/heightmaps/testmap.png", heightmap.height, heightmap.width,  3, newData, 0); 
   delete[] newData;
 }

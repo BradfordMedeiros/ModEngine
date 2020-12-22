@@ -14,6 +14,7 @@ struct HeightMapData {
   int height;
   float minHeight;
   float maxHeight;
+  float originalMidpoint;
 };
 
 // have to free this data (probably should just use vectors)
