@@ -38,9 +38,6 @@ void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject
     copyObject(item.id);
   }
 }
-void mirrorAllObjects(EditorContent& editor, std::function<Transformation(objid)> getTransform){
-  std::cout << "INFO: EDITOR: MIRROR ALL OBJECTS" << std::endl;
-}
 void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById){
   std::cout << "INFO: EDITOR: RM ALL OBJECTS" << std::endl;
   editor.selectedObj = EditorItem {
