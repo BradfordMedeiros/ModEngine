@@ -12,6 +12,7 @@
 #include "./drawing.h"
 #include "./editor.h"
 #include "./colorselection.h"
+#include "./sql.h"
 
 std::string activeTextureName(std::map<std::string, Texture> worldTextures);
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);

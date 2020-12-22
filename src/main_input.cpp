@@ -255,6 +255,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     state.recordingIndex = -1;
   }
 
+  if (key == 344 && action == 1){  // shift
+    testQuery();
+  }
+
   if (key == 268 && action == 1){   // home
     copyAllObjects(state.editor, copyObject);
   }

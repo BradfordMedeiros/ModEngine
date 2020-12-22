@@ -15,6 +15,9 @@ void saveFile(std::string filepath, std::string content){
   file << content;
   file.close();
 }
+void rmFile(std::string filepath){    // maybe should guard to not be above the executable path?
+  std::remove(filepath.c_str());
+}
 
 std::vector<std::string> listAllFiles(std::filesystem::path path) {
   std::vector<std::string> files;

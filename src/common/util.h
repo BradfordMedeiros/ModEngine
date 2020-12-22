@@ -16,6 +16,7 @@
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
+void rmFile(std::string filepath);
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions);
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
