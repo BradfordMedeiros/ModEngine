@@ -1,48 +1,31 @@
 Features:
 
-ski trip cleanup:
-- ability to save heightmaps
-- generalize shadow code (plumb in correct shadow map)
----> recorder -> generalize all attributes
-- serialization of attributes incomplete/ broken
-- better movie playback
+next todo:
+* generalize shadow code (plumb in correct shadow map)
+* recorder -> generalize all attributes
+* serialization of attributes incomplete/ broken
+* better movie playback
   - add color
   - add audio 
-- mirror
-
-
-then:
 * separate scenegraph from object rendering
-
-and then:
 * fix animation system
   - allow model posing
   - inverse kinematics
-
-
-easier
-* automatic world chunking ==> take every loaded scene, and then divide these up into chunks
-
-med
-* fix memory reference incorrectness for scheme
+  - write mocap system
 * ai system goals 
-
-hard
-- cleanup physics code
-todo
-- fix networking code
-- better framepacing
-- performance profiling
-- heighmaps don't recalculate normals
-- scoping of scenes (all objects are in shared namespace)
-
-- maybe do for performance:
----> for attributes, pass around runtime symbols/atoms/whatever instead of strings
-
-
+* cleanup physics code
+* scoping of scenes (all objects are in shared namespace)
+* fix memory reference incorrectness for scheme
 
 ======================
 
+need tos, but kind of put offish:
+- performance profiling
+- better framepacing
+- fix networking code
+- for attributes, pass around runtime symbols/atoms/whatever instead of strings
+* heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
+* automatic world chunking ==> take every loaded scene, and then divide these up into chunks
 
 eventually:
 - c++ plugin system 
@@ -59,7 +42,7 @@ eventually:
 - better fonts
 - better voxel editing
 - long running "dormant" scripts (eg for a quest system, or to just set some attributes)
-
+- central store system for data (sql style system?)
 
 mocap? 
 - passive ball based
