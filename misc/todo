@@ -1,40 +1,48 @@
 Features:
 
-easy
-11/18
-- emitter system upgrades (more movement types)
+ski trip cleanup:
+- ability to save heightmaps
+- generalize shadow code (plumb in correct shadow map)
+---> recorder -> generalize all attributes
+- serialization of attributes incomplete/ broken
+- better movie playback
+  - add color
+  - add audio 
+- mirror
 
-11/19
-* heightmap brushes
 
-11/20
-* automatic world chunking
+then:
+* separate scenegraph from object rendering
+
+and then:
+* fix animation system
+  - allow model posing
+  - inverse kinematics
+
+
+easier
+* automatic world chunking ==> take every loaded scene, and then divide these up into chunks
 
 med
 * fix memory reference incorrectness for scheme
 * ai system goals 
-- recorder working
-* shadowmapping
-- better movie playback
-  - add audio 
 
 hard
-* separate scenegraph from object rendering
-* fix animation system
-  - allow model posing
-  - inverse kinematics
-  - cleanup physics code
-- fix networking code
-
-
+- cleanup physics code
 todo
+- fix networking code
 - better framepacing
 - performance profiling
 - heighmaps don't recalculate normals
-- serialization of attributes incomplete/ broken
 - scoping of scenes (all objects are in shared namespace)
- - copy/pasta  => these are harder b/c serialization bugs 
-  - mirror
+
+- maybe do for performance:
+---> for attributes, pass around runtime symbols/atoms/whatever instead of strings
+
+
+
+======================
+
 
 eventually:
 - c++ plugin system 
@@ -45,6 +53,30 @@ eventually:
 - destructable voxels
 - cool physics toys
 - windows build
+- improve build code
 - openvr integration
 - ragdoll
 - better fonts
+- better voxel editing
+- long running "dormant" scripts (eg for a quest system, or to just set some attributes)
+
+
+mocap? 
+- passive ball based
+
+problems you want solved first:
+- be able to take multiple video streams
+- do some basic image processing on these to identify the balls
+===> calibrate against background image, and then the diff should identify the balls
+===> position in fn (camera position, identified color in video feed)
+===> multiple cameras, identify position (might be occuluded, maybe average? might be able to weight based upon visibility %?)
+
+core problems:
+- identify balls in the scene
+- differentiate balls in scene
+- locate position of balls in scene
+
+software things to solve
+- create a way to map the balls to bone hierarchy
+
+- how to integrate into blender? 
