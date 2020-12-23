@@ -68,7 +68,32 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
 }
 
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
-  std::cout << "sql-> executing " << query.type << " on: " << query.table << std::endl;
+//SQL_SELECT, SQL_INSERT, SQL_UPDATE, SQL_DELETE, SQL_CREATE_TABLE, SQL_DELETE_TABLE
+  if (query.type == SQL_SELECT){
+    auto results = select(
+    query.table, 
+    {"testcolumn"}, 
+    SqlFilter{ 
+      .hasFilter = false,
+      //.column = "complete",
+      //.value = "false",
+      .invert = false,
+    });
+    return results;
+  }else if (query.type == SQL_INSERT){
+    assert(false);
+  }else if (query.type == SQL_UPDATE){
+    assert(false);
+  }else if (query.type == SQL_DELETE){
+    assert(false);
+  }else if (query.type == SQL_CREATE_TABLE){
+    createTable(query.table, {"testcolumn"});
+    return {};
+  }else if (query.type == SQL_DELETE_TABLE){
+    deleteTable(query.table);
+    return {};
+  }
+  assert(false);
   return {};
 }
 void testQuery(){

@@ -669,29 +669,30 @@ SCM scmNavPosition(SCM obj, SCM pos){
 }
 
 SCM scmSql(SCM sqlQuery){
-  auto mainCommand = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(0)));
-  auto table = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(1)));
-
-  SQL_QUERY_TYPE *queryType = NULL;
-  if (mainCommand == "select"){
-    *queryType = SQL_SELECT;
-  }else if (mainCommand == "insert"){
-    *queryType = SQL_INSERT;
-  }else if (mainCommand == "update"){
-    *queryType = SQL_UPDATE;
-  }else if (mainCommand == "delete"){
-    *queryType = SQL_DELETE;
-  }else if (mainCommand == "create-table"){
-    *queryType = SQL_CREATE_TABLE;
-  }else if (mainCommand == "delete-table"){
-    *queryType = SQL_DELETE_TABLE;
-  }
-  assert(queryType != NULL);
+  std::string mainCommand = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(0)));
+  std::string table = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(1)));
 
   SqlQuery query {
-    .type = *queryType,
+    .type = SQL_SELECT,
     .table = table,
   };
+
+  if (mainCommand == "select"){
+    std::cout << "setting query to select" << std::endl;
+    query.type = SQL_SELECT;
+  }else if (mainCommand == "insert"){
+    query.type = SQL_INSERT;
+  }else if (mainCommand == "update"){
+    query.type = SQL_UPDATE;
+  }else if (mainCommand == "delete"){
+    query.type = SQL_DELETE;
+  }else if (mainCommand == "create-table"){
+    std::cout << "setting query to create" << std::endl;
+    query.type = SQL_CREATE_TABLE;
+  }else if (mainCommand == "delete-table"){
+    query.type = SQL_DELETE_TABLE;
+  }
+
   auto result = executeSqlQuery(query);
 
   return SCM_UNSPECIFIED;
