@@ -668,6 +668,35 @@ SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
 }
 
+SCM scmSql(SCM sqlQuery){
+  auto mainCommand = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(0)));
+  auto table = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(1)));
+
+  SQL_QUERY_TYPE *queryType = NULL;
+  if (mainCommand == "select"){
+    *queryType = SQL_SELECT;
+  }else if (mainCommand == "insert"){
+    *queryType = SQL_INSERT;
+  }else if (mainCommand == "update"){
+    *queryType = SQL_UPDATE;
+  }else if (mainCommand == "delete"){
+    *queryType = SQL_DELETE;
+  }else if (mainCommand == "create-table"){
+    *queryType = SQL_CREATE_TABLE;
+  }else if (mainCommand == "delete-table"){
+    *queryType = SQL_DELETE_TABLE;
+  }
+  assert(queryType != NULL);
+
+  SqlQuery query {
+    .type = *queryType,
+    .table = table,
+  };
+  auto result = executeSqlQuery(query);
+
+  return SCM_UNSPECIFIED;
+} 
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -895,6 +924,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("set-texture", 2, 0, 0, (void*)scmSetTexture);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
+  scm_c_define_gsubr("sql", 1, 0, 0, (void*)scmSql);
 }
 
 

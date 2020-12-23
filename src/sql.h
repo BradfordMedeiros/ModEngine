@@ -19,7 +19,7 @@ struct SqlQuery {
   std::string table;
 };
 
-void executeSqlQuery(SqlQuery& query);
+std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query);
 void testQuery();
 
 #endif

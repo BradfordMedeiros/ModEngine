@@ -10,6 +10,7 @@
 #include <map>
 #include "../common/util.h"
 #include "../gizmo/sequencer.h"   // TODO -  don't depend on this directly 
+#include "../sql.h" // TODO don't depend on this directly
 
 void createStaticSchemeBindings(
   int32_t (*loadScene)(std::string),

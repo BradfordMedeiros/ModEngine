@@ -67,10 +67,10 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
   return rows;
 }
 
-void executeSqlQuery(SqlQuery& query){
-
+std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
+  std::cout << "sql-> executing " << query.type << " on: " << query.table << std::endl;
+  return {};
 }
-
 void testQuery(){
   //createTable("quests", { "name", "complete", "value" });
   auto results = select(
