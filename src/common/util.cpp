@@ -18,6 +18,12 @@ void saveFile(std::string filepath, std::string content){
 void rmFile(std::string filepath){    // maybe should guard to not be above the executable path?
   std::remove(filepath.c_str());
 }
+void appendFile(std::string filepath, std::string content){
+  std::cout << "appending: " << filepath << " w/ " << content << std::endl;
+  std::fstream file(filepath.c_str(), std::ios::out | std::ios::app);
+  file << content;
+  file.close();
+}
 
 std::vector<std::string> listAllFiles(std::filesystem::path path) {
   std::vector<std::string> files;

@@ -718,6 +718,10 @@ SCM scmSql(SCM sqlQuery){
     };
   }else if (mainCommand == "insert"){
     query.type = SQL_INSERT;
+    query.queryData = SqlInsert {
+      .columns = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(2))),
+      .values = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(3))),
+    };
   }else if (mainCommand == "update"){
     query.type = SQL_UPDATE;
   }else if (mainCommand == "delete"){
