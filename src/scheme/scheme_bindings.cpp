@@ -26,6 +26,33 @@ glm::vec3 listToVec3(SCM vecList){
   return glm::vec3(x, y, z);
 }
 
+std::vector<std::string> listToVecString(SCM stringList){
+  std::vector<std::string> list;
+  auto numElements = toUnsignedInt(scm_length(stringList));
+  for (int i = 0; i < numElements; i++){
+    auto stringValue = scm_to_locale_string(scm_list_ref(stringList, scm_from_unsigned_integer(i)));
+    list.push_back(stringValue);
+  }
+  return list;
+}
+
+SCM listToSCM(std::vector<std::string> stringList){
+  auto listSize = stringList.size();
+  SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));
+  for (int i = 0; i < listSize; i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_locale_string(stringList.at(i).c_str()));
+  }
+  return list;
+}
+SCM listToSCM(std::vector<std::vector<std::string>> stringList){
+  auto listSize = stringList.size();
+  SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));
+  for (int i = 0; i < listSize; i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), listToSCM(stringList.at(i)));
+  }
+  return list;
+}
+
 bool symbolDefinedInModule(const char* symbol, SCM module){
   return scm_to_bool(scm_defined_p(scm_string_to_symbol(scm_from_locale_string(symbol)), module));
 }
@@ -680,6 +707,15 @@ SCM scmSql(SCM sqlQuery){
   if (mainCommand == "select"){
     std::cout << "setting query to select" << std::endl;
     query.type = SQL_SELECT;
+    query.queryData = SqlSelect{
+      .columns = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(2))),
+      .filter = SqlFilter {
+        .hasFilter = false,
+        .column = "",
+        .value = "",
+        .invert = false,
+      }
+    };
   }else if (mainCommand == "insert"){
     query.type = SQL_INSERT;
   }else if (mainCommand == "update"){
@@ -689,13 +725,17 @@ SCM scmSql(SCM sqlQuery){
   }else if (mainCommand == "create-table"){
     std::cout << "setting query to create" << std::endl;
     query.type = SQL_CREATE_TABLE;
+    query.queryData = SqlCreate{
+      .columns = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(2))),
+    };
   }else if (mainCommand == "delete-table"){
     query.type = SQL_DELETE_TABLE;
   }
 
-  auto result = executeSqlQuery(query);
-
-  return SCM_UNSPECIFIED;
+  std::cout << "INFO: executing sql query" << std::endl;
+  auto sqlResponse = executeSqlQuery(query);
+  std::cout << "INFO: finished executing query" << std::endl;
+  return listToSCM(sqlResponse);
 } 
 
 // Callbacks

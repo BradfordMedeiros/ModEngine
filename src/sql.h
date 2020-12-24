@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <variant>
 #include "./common/util.h"
 
 enum SQL_QUERY_TYPE { SQL_SELECT, SQL_INSERT, SQL_UPDATE, SQL_DELETE, SQL_CREATE_TABLE, SQL_DELETE_TABLE };
@@ -14,12 +15,20 @@ struct SqlFilter {
   bool invert;
 };
 
+struct SqlSelect {
+  std::vector<std::string> columns;
+  SqlFilter filter;
+};
+struct SqlCreate {
+  std::vector<std::string> columns;
+};
+
 struct SqlQuery {
   SQL_QUERY_TYPE type;
   std::string table;
+  std::variant<SqlSelect, SqlCreate> queryData;
 };
 
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query);
-void testQuery();
 
 #endif

@@ -11,6 +11,7 @@ std::string tablePath(std::string tableName){
   return "./res/state/" + tableName + ".csv";  // TODO do paths better bro
 }
 void createTable(std::string tableName, std::vector<std::string> columns){
+  std::cout << "creating: " << tableName << "-- " << join(columns, ',') << std::endl;
   saveFile(tablePath(tableName), join(columns, ',') + "\n");
 }
 
@@ -53,7 +54,7 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
     for (auto index : indexs){
       row.push_back(columnContent.at(index));
     }
-    if (filter.hasFilter != -1){
+    if (filter.hasFilter){
       auto columnValue = columnContent.at(filterIndex);
       if (!filter.invert && columnValue != filter.value){
         continue;
@@ -70,16 +71,8 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
 //SQL_SELECT, SQL_INSERT, SQL_UPDATE, SQL_DELETE, SQL_CREATE_TABLE, SQL_DELETE_TABLE
   if (query.type == SQL_SELECT){
-    auto results = select(
-    query.table, 
-    {"testcolumn"}, 
-    SqlFilter{ 
-      .hasFilter = false,
-      //.column = "complete",
-      //.value = "false",
-      .invert = false,
-    });
-    return results;
+    auto selectData = std::get_if<SqlSelect>(&query.queryData);
+    return select(query.table, selectData -> columns, selectData -> filter);
   }else if (query.type == SQL_INSERT){
     assert(false);
   }else if (query.type == SQL_UPDATE){
@@ -87,7 +80,8 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
   }else if (query.type == SQL_DELETE){
     assert(false);
   }else if (query.type == SQL_CREATE_TABLE){
-    createTable(query.table, {"testcolumn"});
+    auto createData = std::get_if<SqlCreate>(&query.queryData);
+    createTable(query.table, createData -> columns);
     return {};
   }else if (query.type == SQL_DELETE_TABLE){
     deleteTable(query.table);
@@ -95,19 +89,4 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
   }
   assert(false);
   return {};
-}
-void testQuery(){
-  //createTable("quests", { "name", "complete", "value" });
-  auto results = select(
-    "quests", 
-    {"value", "name", "value"}, 
-    SqlFilter{ 
-      .hasFilter = true,
-      .column = "complete",
-      .value = "false",
-      .invert = false,
-    });
-  for (auto result : results){
-    std::cout << join(result, ' ') << std::endl;
-  }
 }
