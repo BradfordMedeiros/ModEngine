@@ -99,6 +99,14 @@ void insert(std::string tableName, std::vector<std::string> columns, std::vector
   appendFile(tablePath(tableName), join(valuesToInsert, ',') + "\n");
 }
 
+void update(std::string tableName, std::vector<std::string>& columns, std::vector<std::string>& values, SqlFilter& filter){
+
+}
+
+void deleteRows(std::string tableName, SqlFilter& filter){
+
+}
+
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
 //SQL_SELECT, SQL_INSERT, SQL_UPDATE, SQL_DELETE, SQL_CREATE_TABLE, SQL_DELETE_TABLE
   if (query.type == SQL_SELECT){
@@ -109,9 +117,11 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
     insert(query.table, insertData -> columns, insertData -> values);
     return {};
   }else if (query.type == SQL_UPDATE){
-    assert(false);
+    auto updateData = std::get_if<SqlUpdate>(&query.queryData);
+    update(query.table, updateData -> columns, updateData -> values, updateData -> filter);
   }else if (query.type == SQL_DELETE){
-    assert(false);
+    auto deleteData = std::get_if<SqlDelete>(&query.queryData);
+    deleteRows(query.table, deleteData -> filter);
   }else if (query.type == SQL_CREATE_TABLE){
     auto createData = std::get_if<SqlCreate>(&query.queryData);
     createTable(query.table, createData -> columns);
@@ -123,3 +133,4 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
   assert(false);
   return {};
 }
+

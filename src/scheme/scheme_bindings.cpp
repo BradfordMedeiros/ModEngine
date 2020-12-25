@@ -724,8 +724,28 @@ SCM scmSql(SCM sqlQuery){
     };
   }else if (mainCommand == "update"){
     query.type = SQL_UPDATE;
+    std::cout << "WARNING: GENERIC UPDATE, NOT USING ACTUAL VALUES" << std::endl;
+    query.queryData = SqlUpdate {
+      .columns = { "test" },
+      .values = { "testvalue" },
+      .filter = SqlFilter {
+        .hasFilter = false,
+        .column = "",
+        .value = "",
+        .invert = false,
+      }
+    };
   }else if (mainCommand == "delete"){
     query.type = SQL_DELETE;
+    std::cout << "WARNING: GENERIC DELETE, NOT USING ACTUAL VALUES" << std::endl;
+    query.queryData = SqlDelete {
+      .filter = SqlFilter {
+        .hasFilter = false,
+        .column = "test",
+        .value = "delete",
+        .invert = false,
+      }
+    };
   }else if (mainCommand == "create-table"){
     std::cout << "setting query to create" << std::endl;
     query.type = SQL_CREATE_TABLE;

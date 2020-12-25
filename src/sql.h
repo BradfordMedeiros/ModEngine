@@ -26,11 +26,19 @@ struct SqlInsert {
 struct SqlCreate {
   std::vector<std::string> columns;
 };
+struct SqlUpdate {
+  std::vector<std::string> columns;
+  std::vector<std::string> values;
+  SqlFilter filter;
+};
+struct SqlDelete {
+  SqlFilter filter;
+};
 
 struct SqlQuery {
   SQL_QUERY_TYPE type;
   std::string table;
-  std::variant<SqlSelect, SqlInsert, SqlCreate> queryData;
+  std::variant<SqlSelect, SqlInsert, SqlCreate, SqlUpdate, SqlDelete> queryData;
 };
 
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query);
