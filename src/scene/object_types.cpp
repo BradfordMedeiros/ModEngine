@@ -292,11 +292,12 @@ GameObjectVideo createVideo(
   std::map<std::string, std::string> additionalFields, 
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded
 ){
-  auto video = loadVideo("./res/videos/bunny.avi");
+  auto videoPath = additionalFields.at("source");
+  auto video = loadVideo(videoPath.c_str());
   std::cout << "INFO: OBJECT TYPE: CREATE VIDEO" << std::endl;
 
   ensureTextureDataLoaded(
-    "./res/videos/bunny2.avi",
+    videoPath,
     video.avFrame -> data[0], 
     video.avFrame -> width, 
     video.avFrame -> height, 
@@ -304,6 +305,7 @@ GameObjectVideo createVideo(
   );
   GameObjectVideo obj {
     .video = video,
+    .source = videoPath,
   };
   return obj;
 }
@@ -1049,7 +1051,7 @@ void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(s
     if (videoObj != NULL){
       nextFrame(videoObj -> video);
       updateTextureData( 
-        "./res/videos/bunny2.avi",
+        videoObj -> source,
         videoObj -> video.avFrame -> data[0], 
         videoObj -> video.avFrame -> width, 
         videoObj -> video.avFrame -> height

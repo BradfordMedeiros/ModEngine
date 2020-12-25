@@ -121,6 +121,7 @@ struct GameObjectUISlider {
 
 struct GameObjectVideo {
   VideoContent video;
+  std::string source;
 };
 
 typedef std::variant<

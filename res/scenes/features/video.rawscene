@@ -1,6 +1,10 @@
 # Demonstrates basic usage of an event system
 
+=bunnyvideo:position:0 5 0
+=bunnyvideo:source:./res/videos/bunny.avi
+
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
-platform:position:0 -5 0
-platform:texture:./res/textures/default.jpg
+platform:position:0 -70 0
+platform:texture:./res/videos/bunny.avi
+
