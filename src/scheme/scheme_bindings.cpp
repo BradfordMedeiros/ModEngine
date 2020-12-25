@@ -726,12 +726,12 @@ SCM scmSql(SCM sqlQuery){
     query.type = SQL_UPDATE;
     std::cout << "WARNING: GENERIC UPDATE, NOT USING ACTUAL VALUES" << std::endl;
     query.queryData = SqlUpdate {
-      .columns = { "test" },
-      .values = { "testvalue" },
+      .columns = { "name" },
+      .values = { "no-one" },
       .filter = SqlFilter {
-        .hasFilter = false,
-        .column = "",
-        .value = "",
+        .hasFilter = true,
+        .column = "name",
+        .value = "unknown",
         .invert = false,
       }
     };
