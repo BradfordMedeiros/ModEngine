@@ -740,9 +740,9 @@ SCM scmSql(SCM sqlQuery){
     std::cout << "WARNING: GENERIC DELETE, NOT USING ACTUAL VALUES" << std::endl;
     query.queryData = SqlDelete {
       .filter = SqlFilter {
-        .hasFilter = false,
-        .column = "test",
-        .value = "delete",
+        .hasFilter = true,
+        .column = "description",
+        .value = "hello",
         .invert = false,
       }
     };
