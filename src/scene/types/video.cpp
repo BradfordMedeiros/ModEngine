@@ -66,7 +66,7 @@ void printFrameInfo(AVFrame* avFrame){
   std::cout << "frame line size: " << avFrame -> linesize[0] << std::endl;
   std::cout << "------------------------------" << std::endl;
 }
-void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVFrame* avFrame, StreamIndexs& streams){
+void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams){
   auto readValue = av_read_frame(formatContext, avPacket);
   std::cout << "INFO: VIDEO: read frame: " << readValue << std::endl;
   if (readValue == 0 && avPacket -> stream_index == streams.video){
@@ -90,7 +90,31 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
       }
       assert(false);
     }
+
+    auto destWidth = avFrame -> width;
+    auto destHeight = avFrame -> height;
+    assert(destWidth != 0);
+    assert(destHeight != 0);
+
+    auto destFormat = AV_PIX_FMT_RGBA;
+    auto swsContext = sws_getContext(avFrame -> width, avFrame -> height, codecContext -> pix_fmt, destWidth, destHeight, destFormat,  SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    assert(swsContext != NULL);
+
+    avFrame2 -> width = avFrame -> width;
+    avFrame2 -> height = avFrame -> height;
+    avFrame2 -> linesize[0] = avFrame -> linesize[0];
+
+    // WARNING WARNING WARNING need to free this data TODO TODO TODO
+    av_image_alloc(avFrame2 -> data, avFrame2 -> linesize, avFrame2 -> width, avFrame2 -> height, destFormat, 1);
+    sws_scale(swsContext, avFrame -> data, avFrame -> linesize, 0, avFrame -> height, avFrame2-> data, avFrame2 -> linesize);
+    assert(false);
+
+    assert(avFrame2 -> width != 0);
+    assert(avFrame2 -> height != 0);
+    assert(avFrame2 -> linesize[0] != 0);
+
     printFrameInfo(avFrame);
+
     std::cout << "video: frame index: " << codecContext -> frame_number << std::endl;  
   }else if (avPacket -> stream_index == streams.audio){
     std::cout << "INFO: video: audio -- not yet implemented" << std::endl;
@@ -109,9 +133,9 @@ VideoContent loadVideo(const char* videopath){
   }
 
   // https://ffmpeg.org/doxygen/trunk/structAVFormatContext.html
-  AVFormatContext *formatContext = avformat_alloc_context();
+  AVFormatContext* formatContext = avformat_alloc_context();
   if (!formatContext){
-    std::cout << "ERROR: Could not allocate memeory for avformatcontext" << std::endl;
+    std::cout << "ERROR: Could not allocate memory for avformatcontext" << std::endl;
     assert(false);
   }
   
@@ -133,6 +157,9 @@ VideoContent loadVideo(const char* videopath){
   AVFrame* avFrame = av_frame_alloc();
   assert(avFrame);
 
+  AVFrame* avFrame2 = av_frame_alloc();
+  assert(avFrame2);
+
   auto streamIndexs = getStreamIndexs(formatContext);
 
   AVPacket *avPacket = av_packet_alloc();
@@ -141,6 +168,7 @@ VideoContent loadVideo(const char* videopath){
   VideoContent videoContent {
     .formatContext = formatContext,
     .avFrame = avFrame,
+    .avFrame2 = avFrame2,
     .avPacket = avPacket,
     .streamIndexs = streamIndexs,
     .codecs = getCodecs(formatContext, streamIndexs),
@@ -153,7 +181,7 @@ VideoContent loadVideo(const char* videopath){
 }
 
 AVFrame* nextFrame(VideoContent& content){
-  readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.avFrame, content.streamIndexs);
+  readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.avFrame, content.avFrame2, content.streamIndexs);
   return content.avFrame;
 }
 
@@ -161,5 +189,6 @@ void freeVideoContent(VideoContent& content){
   av_packet_free(&content.avPacket);
   freeCodecs(content.codecs);
   av_frame_free(&content.avFrame);
+  av_frame_free(&content.avFrame2);
   avformat_close_input(&content.formatContext);
 }

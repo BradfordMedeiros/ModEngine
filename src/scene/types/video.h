@@ -8,6 +8,8 @@
 extern "C" {
   #include <libavcodec/avcodec.h>
   #include <libavformat/avformat.h>
+  #include <libswscale/swscale.h>
+  #include <libavutil/imgutils.h>
 }
 
 struct StreamIndexs {
@@ -23,6 +25,7 @@ struct StreamCodecs {
 struct VideoContent {
   AVFormatContext* formatContext;
   AVFrame* avFrame;
+  AVFrame* avFrame2;
   AVPacket *avPacket;
   StreamIndexs streamIndexs;
   StreamCodecs codecs;

@@ -298,10 +298,10 @@ GameObjectVideo createVideo(
 
   ensureTextureDataLoaded(
     videoPath,
-    video.avFrame -> data[0], 
-    video.avFrame -> width, 
-    video.avFrame -> height, 
-    3
+    video.avFrame2 -> data[0], 
+    video.avFrame2 -> width, 
+    video.avFrame2 -> height, 
+    4
   );
   GameObjectVideo obj {
     .video = video,
@@ -1052,9 +1052,9 @@ void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(s
       nextFrame(videoObj -> video);
       updateTextureData( 
         videoObj -> source,
-        videoObj -> video.avFrame -> data[0], 
-        videoObj -> video.avFrame -> width, 
-        videoObj -> video.avFrame -> height
+        videoObj -> video.avFrame2 -> data[0], 
+        videoObj -> video.avFrame2 -> width, 
+        videoObj -> video.avFrame2 -> height
       );
     }
   }
