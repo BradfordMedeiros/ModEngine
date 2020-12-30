@@ -23,4 +23,8 @@ std::vector<std::string> listSounds();
 void setSoundPosition(ALuint source, float x, float y, float z);
 void setListenerPosition(float x, float y, float z);
 
+ALuint createBufferedAudio();
+void freeBufferedAudio(ALuint buffer);
+void playBufferedAudio(ALuint buffer);
+
 #endif

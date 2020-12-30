@@ -49,6 +49,10 @@ StreamCodecs getCodecs(AVFormatContext* formatContext, StreamIndexs& streamIndex
     .videoCodec = alloc_codec(formatContext, streamIndexs.video),
     .audioCodec = alloc_codec(formatContext, streamIndexs.audio),
   };
+
+  codecs.videoCodec -> time_base = {1, 1000000};   // 1 / 1000 seconds 
+  //codecs.videoCodec -> framerate = {1000, 1};   // 1 / 1000 seconds 
+
   return codecs;
 }
 void freeCodecs(StreamCodecs& codecs){
@@ -66,7 +70,15 @@ void printFrameInfo(AVFrame* avFrame){
   std::cout << "frame line size: " << avFrame -> linesize[0] << std::endl;
   std::cout << "------------------------------" << std::endl;
 }
-void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams){
+
+void printAudioFrameInfo(AVFrame* avFrame,  AVCodecContext *audioCodec){
+  std::cout  << "number of samples: " << avFrame -> nb_samples << std::endl;
+  std::cout << "duration: " << avFrame -> pkt_duration << std::endl;
+  std::cout << "timestamp: " << avFrame -> pkt_dts << std::endl;
+  std::cout << "channels: " << avFrame -> channels << std::endl;
+}
+
+void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat){
   auto readValue = av_read_frame(formatContext, avPacket);
   std::cout << "INFO: VIDEO: read frame: " << readValue << std::endl;
   if (readValue == 0 && avPacket -> stream_index == streams.video){
@@ -91,23 +103,9 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
       assert(false);
     }
 
-    auto destWidth = avFrame -> width;
-    auto destHeight = avFrame -> height;
-    assert(destWidth != 0);
-    assert(destHeight != 0);
-
-    auto destFormat = AV_PIX_FMT_RGBA;
-    auto swsContext = sws_getContext(avFrame -> width, avFrame -> height, codecContext -> pix_fmt, destWidth, destHeight, destFormat,  SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    auto swsContext = sws_getContext(avFrame -> width, avFrame -> height, codecContext -> pix_fmt, avFrame2 -> width, avFrame2 -> height, destFormat,  SWS_FAST_BILINEAR, NULL, NULL, NULL);
     assert(swsContext != NULL);
-
-    avFrame2 -> width = avFrame -> width;
-    avFrame2 -> height = avFrame -> height;
-    avFrame2 -> linesize[0] = avFrame -> linesize[0];
-
-    // WARNING WARNING WARNING need to free this data TODO TODO TODO
-    av_image_alloc(avFrame2 -> data, avFrame2 -> linesize, avFrame2 -> width, avFrame2 -> height, destFormat, 1);
     sws_scale(swsContext, avFrame -> data, avFrame -> linesize, 0, avFrame -> height, avFrame2-> data, avFrame2 -> linesize);
-    assert(false);
 
     assert(avFrame2 -> width != 0);
     assert(avFrame2 -> height != 0);
@@ -117,7 +115,30 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
 
     std::cout << "video: frame index: " << codecContext -> frame_number << std::endl;  
   }else if (avPacket -> stream_index == streams.audio){
-    std::cout << "INFO: video: audio -- not yet implemented" << std::endl;
+    std::cout << "INFO: VIDEO: processing audio frame" << std::endl;
+    // move this to the top video decoding
+    return;
+
+    auto sendValue = avcodec_send_packet(audioCodec, avPacket);
+    if (sendValue ==  AVERROR_EOF){
+      std::cout << "send packet: end of field" << std::endl;
+    }else if (sendValue ==  AVERROR(EAGAIN)){
+      std::cout << "send packet: averror(eagain)" << std::endl;
+    }else if (sendValue == AVERROR(EINVAL)){
+      std::cout << "send packet: averror(einval)" << std::endl;
+    }else if (sendValue ==  AVERROR(ENOMEM)){
+      std::cout << "send packet: averror(ENOMEM)" << std::endl;
+    }
+    assert(sendValue == 0);
+    auto receiveValue = avcodec_receive_frame(audioCodec, avFrame);
+    if (receiveValue != 0){
+      if (receiveValue == AVERROR_EOF){ // not actually an error
+        std::cout << "ERROR: AUDIO: LAST FRAME" << std::endl;
+      }
+      assert(false);
+    }
+
+    printAudioFrameInfo(avFrame, audioCodec);
   }else{
     std::cout << "INFO: video: READ error or end of video" << std::endl;
     assert(false);
@@ -160,6 +181,15 @@ VideoContent loadVideo(const char* videopath){
   AVFrame* avFrame2 = av_frame_alloc();
   assert(avFrame2);
 
+  auto format = AV_PIX_FMT_RGBA;
+
+  // These determine the output scaling of AVFrame2 (see usage in readFrame)
+  avFrame2 -> width = 200;
+  avFrame2 -> height = 100;
+  avFrame2 -> linesize[0] = 100;
+
+  av_image_alloc(avFrame2 -> data, avFrame2 -> linesize, avFrame2 -> width, avFrame2 -> height,  format, 1); 
+
   auto streamIndexs = getStreamIndexs(formatContext);
 
   AVPacket *avPacket = av_packet_alloc();
@@ -172,6 +202,7 @@ VideoContent loadVideo(const char* videopath){
     .avPacket = avPacket,
     .streamIndexs = streamIndexs,
     .codecs = getCodecs(formatContext, streamIndexs),
+    .format = format,
   };
   std::cout << "video: " << videopath << " is: " << videoContent.formatContext -> duration << std::endl;
   std::cout << "number video streams: " << numStreams << std::endl;
@@ -181,7 +212,7 @@ VideoContent loadVideo(const char* videopath){
 }
 
 AVFrame* nextFrame(VideoContent& content){
-  readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.avFrame, content.avFrame2, content.streamIndexs);
+  readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format);
   return content.avFrame;
 }
 
@@ -189,6 +220,7 @@ void freeVideoContent(VideoContent& content){
   av_packet_free(&content.avPacket);
   freeCodecs(content.codecs);
   av_frame_free(&content.avFrame);
+  av_freep(content.avFrame2 -> data);
   av_frame_free(&content.avFrame2);
   avformat_close_input(&content.formatContext);
 }

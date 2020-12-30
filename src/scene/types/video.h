@@ -29,6 +29,7 @@ struct VideoContent {
   AVPacket *avPacket;
   StreamIndexs streamIndexs;
   StreamCodecs codecs;
+  AVPixelFormat format;
 };
 
 VideoContent loadVideo(const char* videopath);

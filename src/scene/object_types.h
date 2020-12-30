@@ -14,6 +14,7 @@
 #include "./types/sound.h"
 #include "./types/video.h"
 #include "./types/emitter.h"
+#include <unistd.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -122,6 +123,7 @@ struct GameObjectUISlider {
 struct GameObjectVideo {
   VideoContent video;
   std::string source;
+  ALuint sound;
 };
 
 typedef std::variant<
@@ -316,6 +318,6 @@ void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<v
 void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy);
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position);
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
-void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData);
+void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp);
 
 #endif 

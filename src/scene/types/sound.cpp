@@ -85,3 +85,18 @@ void unloadSoundState(ALuint source,  std::string filepath){
     soundUsages[filepath] = soundUsages[filepath] - 1;
   }
 }
+
+ALuint createBufferedAudio(){
+  ALuint buffer;
+  alGenBuffers(1, &buffer);
+  assert(alGetError() == AL_NO_ERROR);
+  return buffer;
+}
+void freeBufferedAudio(ALuint buffer){
+  alDeleteBuffers(1, &buffer);
+}
+
+void playBufferedAudio(ALuint buffer){
+  std::cout << "play buffer audio placeholder" << std::endl;
+
+}

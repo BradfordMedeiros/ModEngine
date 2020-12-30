@@ -943,7 +943,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
 
   onObjectFrame(world.objectMapping, [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {
     updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
-  });
+  }, timeElapsed);
 }
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
