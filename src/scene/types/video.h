@@ -34,6 +34,9 @@ struct VideoContent {
 
 VideoContent loadVideo(const char* videopath);
 AVFrame* nextFrame(VideoContent& content);
+void seekVideo(VideoContent& content);
+void pauseVideo(VideoContent& content);
+void resumeVideo(VideoContent& content);
 void freeVideoContent(VideoContent& content);
 
 #endif

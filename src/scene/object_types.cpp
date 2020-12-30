@@ -1047,26 +1047,18 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
   }
 }
 
-float lastReadTime = 0;
-
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp){
   for (auto &[_, obj] : mapping){
     auto videoObj = std::get_if<GameObjectVideo>(&obj);
     if (videoObj != NULL){
-      float diff =  av_q2d(videoObj -> video.codecs.videoCodec -> time_base);
-      bool shouldRead = (timestamp - lastReadTime) > diff;
-      std::cout << "shoudl read: " << shouldRead << std::endl;
-      if (!shouldRead){
-        return;
+      auto videoStream = videoObj -> video.formatContext -> streams[videoObj -> video.streamIndexs.video];
+      auto pts = videoObj -> video.avFrame -> pts;
+      auto timebase = av_q2d(videoStream -> time_base);
+      auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
+      if (currentFrameTime > timestamp){
+        continue;
       }
-      lastReadTime = timestamp;
-      // timebase / fps = # pts per frame
 
-      std::cout << "timebase -- " <<  av_q2d(videoObj -> video.codecs.videoCodec -> time_base) << std::endl;
-      std::cout << "framerate -- " <<  av_q2d(videoObj -> video.codecs.videoCodec -> framerate) << std::endl;
-      std::cout << "pts -- " << videoObj -> video.avFrame -> pts << std::endl;
-
-      //std::cout << "(" << timestamp << " | " << videoTimestamp  << " | " << av_frame_get_best_effort_timestamp(videoObj -> video.avFrame) << ")" << std::endl;
       nextFrame(videoObj -> video);
       updateTextureData( 
         videoObj -> source,

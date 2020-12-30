@@ -49,10 +49,6 @@ StreamCodecs getCodecs(AVFormatContext* formatContext, StreamIndexs& streamIndex
     .videoCodec = alloc_codec(formatContext, streamIndexs.video),
     .audioCodec = alloc_codec(formatContext, streamIndexs.audio),
   };
-
-  codecs.videoCodec -> time_base = {1, 1000000};   // 1 / 1000 seconds 
-  //codecs.videoCodec -> framerate = {1000, 1};   // 1 / 1000 seconds 
-
   return codecs;
 }
 void freeCodecs(StreamCodecs& codecs){
@@ -80,9 +76,7 @@ void printAudioFrameInfo(AVFrame* avFrame,  AVCodecContext *audioCodec){
 
 void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat){
   auto readValue = av_read_frame(formatContext, avPacket);
-  std::cout << "INFO: VIDEO: read frame: " << readValue << std::endl;
   if (readValue == 0 && avPacket -> stream_index == streams.video){
-    std::cout << "INFO: VIDEO: stream index: " << avPacket -> stream_index << std::endl;
     auto sendValue = avcodec_send_packet(codecContext, avPacket);
     if (sendValue ==  AVERROR_EOF){
       std::cout << "send packet: end of field" << std::endl;
@@ -93,7 +87,6 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
     }else if (sendValue ==  AVERROR(ENOMEM)){
       std::cout << "send packet: averror(ENOMEM)" << std::endl;
     }
-    std::cout << "send value: " << sendValue << std::endl;
     assert(sendValue == 0);
     auto receiveValue = avcodec_receive_frame(codecContext, avFrame);
     if (receiveValue != 0){
@@ -110,14 +103,11 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
     assert(avFrame2 -> width != 0);
     assert(avFrame2 -> height != 0);
     assert(avFrame2 -> linesize[0] != 0);
-
-    printFrameInfo(avFrame);
-
-    std::cout << "video: frame index: " << codecContext -> frame_number << std::endl;  
+    //printFrameInfo(avFrame);
   }else if (avPacket -> stream_index == streams.audio){
-    std::cout << "INFO: VIDEO: processing audio frame" << std::endl;
     // move this to the top video decoding
     return;
+    std::cout << "INFO: VIDEO: processing audio frame" << std::endl;
 
     auto sendValue = avcodec_send_packet(audioCodec, avPacket);
     if (sendValue ==  AVERROR_EOF){
@@ -214,6 +204,16 @@ VideoContent loadVideo(const char* videopath){
 AVFrame* nextFrame(VideoContent& content){
   readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format);
   return content.avFrame;
+}
+
+void seekVideo(VideoContent& content){
+  assert(false);
+}
+void pauseVideo(VideoContent& content){
+  assert(false);
+}
+void resumeVideo(VideoContent& content){
+  assert(false);
 }
 
 void freeVideoContent(VideoContent& content){

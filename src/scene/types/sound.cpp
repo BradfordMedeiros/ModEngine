@@ -97,6 +97,5 @@ void freeBufferedAudio(ALuint buffer){
 }
 
 void playBufferedAudio(ALuint buffer){
-  std::cout << "play buffer audio placeholder" << std::endl;
-
+  //std::cout << "play buffer audio placeholder" << std::endl;
 }
