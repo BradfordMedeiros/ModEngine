@@ -1051,22 +1051,21 @@ void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(s
   for (auto &[_, obj] : mapping){
     auto videoObj = std::get_if<GameObjectVideo>(&obj);
     if (videoObj != NULL){
-      auto videoStream = videoObj -> video.formatContext -> streams[videoObj -> video.streamIndexs.video];
-      auto pts = videoObj -> video.avFrame -> pts;
-      auto timebase = av_q2d(videoStream -> time_base);
-      auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
-      if (currentFrameTime > timestamp){
+      if (videoObj -> video.videoTimestamp > timestamp){
         continue;
       }
 
-      nextFrame(videoObj -> video);
-      updateTextureData( 
-        videoObj -> source,
-        videoObj -> video.avFrame2 -> data[0], 
-        videoObj -> video.avFrame2 -> width, 
-        videoObj -> video.avFrame2 -> height
-      );
-      playBufferedAudio(videoObj -> sound);
+      int stream = nextFrame(videoObj -> video);
+      if (stream == videoObj -> video.streamIndexs.video){
+        updateTextureData( 
+          videoObj -> source,
+          videoObj -> video.avFrame2 -> data[0], 
+          videoObj -> video.avFrame2 -> width, 
+          videoObj -> video.avFrame2 -> height
+        );
+      }else if (stream == videoObj -> video.streamIndexs.audio){
+        playBufferedAudio(videoObj -> sound);
+      }
     }
   }
 }

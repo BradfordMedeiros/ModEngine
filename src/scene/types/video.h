@@ -30,10 +30,11 @@ struct VideoContent {
   StreamIndexs streamIndexs;
   StreamCodecs codecs;
   AVPixelFormat format;
+  float videoTimestamp;
 };
 
 VideoContent loadVideo(const char* videopath);
-AVFrame* nextFrame(VideoContent& content);
+int nextFrame(VideoContent& content);
 void seekVideo(VideoContent& content);
 void pauseVideo(VideoContent& content);
 void resumeVideo(VideoContent& content);

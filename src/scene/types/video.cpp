@@ -1,5 +1,7 @@
 #include "./video.h"
 
+// https://stackoverflow.com/questions/21386135/ffmpeg-openal-playback-streaming-sound-from-video-wont-work
+
 StreamIndexs getStreamIndexs(AVFormatContext *formatContext) {
   auto numStreams = formatContext -> nb_streams;
   int videoStream = -1;
@@ -67,15 +69,21 @@ void printFrameInfo(AVFrame* avFrame){
   std::cout << "------------------------------" << std::endl;
 }
 
-void printAudioFrameInfo(AVFrame* avFrame,  AVCodecContext *audioCodec){
+void printAudioFrameInfo(AVFrame* avFrame,  AVCodecContext* audioCodec){
   std::cout  << "number of samples: " << avFrame -> nb_samples << std::endl;
   std::cout << "duration: " << avFrame -> pkt_duration << std::endl;
-  std::cout << "timestamp: " << avFrame -> pkt_dts << std::endl;
+  std::cout << "dts: " << avFrame -> pkt_dts << std::endl;
+  std::cout << "pts: " << avFrame -> pkt_pts << std::endl;
   std::cout << "channels: " << avFrame -> channels << std::endl;
+
+  auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
+  std::cout << "buffer size: " << bufferSize << std::endl;
+
 }
 
-void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat){
+int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext* codecContext, AVCodecContext* audioCodec, AVFrame* avFrame, AVFrame* avFrame2, StreamIndexs& streams, AVPixelFormat destFormat, float* videoTimestamp){
   auto readValue = av_read_frame(formatContext, avPacket);
+  auto streamIndex = avPacket -> stream_index;
   if (readValue == 0 && avPacket -> stream_index == streams.video){
     auto sendValue = avcodec_send_packet(codecContext, avPacket);
     if (sendValue ==  AVERROR_EOF){
@@ -104,9 +112,15 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
     assert(avFrame2 -> height != 0);
     assert(avFrame2 -> linesize[0] != 0);
     //printFrameInfo(avFrame);
+
+    auto videoStream = formatContext -> streams[streams.video];
+    auto pts = avFrame -> pts;
+    auto timebase = av_q2d(videoStream -> time_base);
+    auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
+    *videoTimestamp = currentFrameTime;
+
   }else if (avPacket -> stream_index == streams.audio){
     // move this to the top video decoding
-    return;
     std::cout << "INFO: VIDEO: processing audio frame" << std::endl;
 
     auto sendValue = avcodec_send_packet(audioCodec, avPacket);
@@ -127,13 +141,13 @@ void readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContex
       }
       assert(false);
     }
-
-    printAudioFrameInfo(avFrame, audioCodec);
+    //printAudioFrameInfo(avFrame, audioCodec);
   }else{
     std::cout << "INFO: video: READ error or end of video" << std::endl;
     assert(false);
   } 
   av_packet_unref(avPacket);
+  return streamIndex;
 }
 
 bool initialized = false;
@@ -193,6 +207,7 @@ VideoContent loadVideo(const char* videopath){
     .streamIndexs = streamIndexs,
     .codecs = getCodecs(formatContext, streamIndexs),
     .format = format,
+    .videoTimestamp = -1,
   };
   std::cout << "video: " << videopath << " is: " << videoContent.formatContext -> duration << std::endl;
   std::cout << "number video streams: " << numStreams << std::endl;
@@ -201,9 +216,8 @@ VideoContent loadVideo(const char* videopath){
   return videoContent;
 }
 
-AVFrame* nextFrame(VideoContent& content){
-  readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format);
-  return content.avFrame;
+int nextFrame(VideoContent& content){
+  return readFrame(content.formatContext, content.avPacket, content.codecs.videoCodec, content.codecs.audioCodec, content.avFrame, content.avFrame2, content.streamIndexs, content.format, &content.videoTimestamp);
 }
 
 void seekVideo(VideoContent& content){
