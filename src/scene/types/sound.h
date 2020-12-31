@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <cerrno>
 #include <cstring>
+#include <queue>
 
 // https://www.openal.org/documentation/OpenAL_Programmers_Guide.pdf
 
@@ -23,8 +24,14 @@ std::vector<std::string> listSounds();
 void setSoundPosition(ALuint source, float x, float y, float z);
 void setListenerPosition(float x, float y, float z);
 
-ALuint createBufferedAudio();
-void freeBufferedAudio(ALuint buffer);
-void playBufferedAudio(ALuint buffer);
+struct BufferedAudio {
+  ALuint source;
+  std::vector<ALuint> buffers;
+  std::queue<ALuint> freeBuffers;
+};
+
+BufferedAudio createBufferedAudio();
+void freeBufferedAudio(BufferedAudio& buffer);
+void playBufferedAudio(BufferedAudio& buffer, char* data, int datasize);
 
 #endif

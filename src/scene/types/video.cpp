@@ -118,7 +118,6 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
     auto timebase = av_q2d(videoStream -> time_base);
     auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
     *videoTimestamp = currentFrameTime;
-
   }else if (avPacket -> stream_index == streams.audio){
     // move this to the top video decoding
     std::cout << "INFO: VIDEO: processing audio frame" << std::endl;

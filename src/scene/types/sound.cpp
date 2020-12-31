@@ -86,16 +86,84 @@ void unloadSoundState(ALuint source,  std::string filepath){
   }
 }
 
-ALuint createBufferedAudio(){
-  ALuint buffer;
-  alGenBuffers(1, &buffer);
+BufferedAudio createBufferedAudio(){
+  ALuint buffers[4];
+  ALuint source;
+
+  alGenSources(1, &source);
   assert(alGetError() == AL_NO_ERROR);
-  return buffer;
+
+  alGenBuffers(4, buffers);
+  assert(alGetError() == AL_NO_ERROR);
+
+  std::vector<ALuint> buffersv;
+  buffersv.push_back(buffers[0]);
+  buffersv.push_back(buffers[1]);
+  buffersv.push_back(buffers[2]);
+  buffersv.push_back(buffers[3]);
+
+  std::queue<ALuint> freeBuffers;
+  freeBuffers.push(0);
+  freeBuffers.push(1);
+  freeBuffers.push(2);
+  freeBuffers.push(3);
+
+  BufferedAudio audio {
+    .source = source,
+    .buffers = buffersv,
+    .freeBuffers = freeBuffers,
+  };
+  return audio;
 }
-void freeBufferedAudio(ALuint buffer){
-  alDeleteBuffers(1, &buffer);
+void freeBufferedAudio(BufferedAudio& buffer){
+  ALuint buffers[4];
+  buffers[0] = buffer.buffers.at(0);
+  buffers[1] = buffer.buffers.at(1);
+  buffers[2] = buffer.buffers.at(2);
+  buffers[3] = buffer.buffers.at(3);
+
+  alDeleteSources(1, &buffer.source);
+  assert(alGetError() == AL_NO_ERROR);
+  alDeleteBuffers(4, buffers);
+  assert(alGetError() == AL_NO_ERROR);
 }
 
-void playBufferedAudio(ALuint buffer){
-  //std::cout << "play buffer audio placeholder" << std::endl;
+bool isPlaying = false;
+void playBufferedAudio(BufferedAudio& buffer, char* data, int datasize){
+  int numProcessed = 0;
+  alGetSourcei(buffer.source, AL_BUFFERS_PROCESSED, &numProcessed);
+
+  auto alutError = alGetError();
+  if (alutError  != AL_NO_ERROR){
+    std::cout << "alut error: " << alutError << std::endl;
+  }
+
+  // dequeue buffers
+  auto alError = alGetError();
+  ALuint freeBuffer = -1;
+  while(alError == AL_NO_ERROR){
+    alSourceUnqueueBuffers(buffer.source, 1, &freeBuffer);
+    alError = alGetError();
+    assert(alError == AL_NO_ERROR || alError == AL_INVALID_VALUE);
+    if (alError != AL_INVALID_VALUE){
+      assert(freeBuffer != -1);
+      buffer.freeBuffers.push(freeBuffer);
+      std::cout << "dequeuing buffer: " << freeBuffer << std::endl;
+    }
+  }
+
+  bool hasDataToBuffer = true;
+  while(hasDataToBuffer && !buffer.freeBuffers.empty()){
+    ALuint bufferId = buffer.freeBuffers.front();
+    buffer.freeBuffers.pop();
+    alBufferData(bufferId, AL_FORMAT_MONO8, data, datasize, 44000);
+    alSourceQueueBuffers(buffer.source, 1, &bufferId);
+    std::cout << "enqueuing buffer: " << bufferId << std::endl;
+  }
+
+  if (isPlaying){
+    return;
+  }
+  isPlaying = true;
+  alSourcePlay(buffer.source);
 }

@@ -123,7 +123,7 @@ struct GameObjectUISlider {
 struct GameObjectVideo {
   VideoContent video;
   std::string source;
-  ALuint sound;
+  BufferedAudio sound;
 };
 
 typedef std::variant<

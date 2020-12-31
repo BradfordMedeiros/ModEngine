@@ -1064,7 +1064,13 @@ void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(s
           videoObj -> video.avFrame2 -> height
         );
       }else if (stream == videoObj -> video.streamIndexs.audio){
-        playBufferedAudio(videoObj -> sound);
+        //int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
+        //int bufferSize = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT) * p_videoInfo.audioNumChannels * outputSamples;
+        char data[100000];
+        for (int i = 0; i < 100000; i++){
+          data[i] = i;
+        }
+        playBufferedAudio(videoObj -> sound, data, 100000 * sizeof(char));
       }
     }
   }
