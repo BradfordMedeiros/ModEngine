@@ -1064,13 +1064,16 @@ void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(s
           videoObj -> video.avFrame2 -> height
         );
       }else if (stream == videoObj -> video.streamIndexs.audio){
-        //int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
-        //int bufferSize = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT) * p_videoInfo.audioNumChannels * outputSamples;
-        char data[100000];
-        for (int i = 0; i < 100000; i++){
-          data[i] = i;
-        }
-        playBufferedAudio(videoObj -> sound, data, 100000 * sizeof(char));
+        auto audioCodec = videoObj -> video.codecs.audioCodec;
+        auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, videoObj -> video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
+        auto numChannels = audioCodec -> channels;
+
+        // @TODO process all channels
+        // @TODO chandle more formats to eliminate assertion below 
+        // | int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
+        std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
+        assert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16);
+        playBufferedAudio(videoObj -> sound, (char*)videoObj -> video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
       }
     }
   }

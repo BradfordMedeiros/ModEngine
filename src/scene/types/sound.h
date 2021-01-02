@@ -32,6 +32,6 @@ struct BufferedAudio {
 
 BufferedAudio createBufferedAudio();
 void freeBufferedAudio(BufferedAudio& buffer);
-void playBufferedAudio(BufferedAudio& buffer, char* data, int datasize);
+void playBufferedAudio(BufferedAudio& buffer, char* data, int datasize, int samplerate);
 
 #endif
