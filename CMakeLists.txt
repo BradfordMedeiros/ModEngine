@@ -12,6 +12,7 @@ pkg_check_modules(AVCODEC     REQUIRED libavcodec)
 pkg_check_modules(AVFORMAT    REQUIRED libavformat)
 pkg_check_modules(AVUTIL      REQUIRED libavutil)
 pkg_check_modules(SWSCALE     REQUIRED  libswscale)
+pkg_check_modules(SWRESAMPLE  REQUIRED libswresample)
 
 file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
 
@@ -64,6 +65,7 @@ target_link_libraries(${PROJECT_NAME} ${AVFORMAT_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${AVCODEC_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${AVUTIL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${SWSCALE_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} "swresample")      # todo make standard
 
 # Command line parsing - CXXopts 
 set(CXX_DIR "${LIB_DIR}/cxxopts")
