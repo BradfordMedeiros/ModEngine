@@ -88,7 +88,7 @@ std::vector<std::string> parseChildren(std::string payload){
 }
 
 bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "tint"};
+  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity"};
   for (auto field : fields){
     if (attribute == field){
       attributes.vecAttributes[attribute] = parseVec(payload);
@@ -260,9 +260,6 @@ std::string serializeObj(
   }
   if (gameobject.netsynchronize){
     sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
-  }
-  if (!isIdentityVec(gameobject.tint)){
-    sceneData = sceneData + gameobjectName + ":tint:" + serializeVec(gameobject.tint) + "\n";
   }
 
   for (auto additionalField : additionalFields){

@@ -40,6 +40,7 @@ struct GameObjectMesh {
   TextureInformation texture;
   float discardAmount;
   float emissionAmount;
+  glm::vec3 tint;
 };
 struct GameObjectCamera {};
 struct GameObjectPortal {

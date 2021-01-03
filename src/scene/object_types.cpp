@@ -20,7 +20,7 @@ TextureInformation texinfoFromFields(std::map<std::string, std::string>& additio
   return info;
 }
 
-static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texture", "discard", "emission" };
+static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texture", "discard", "emission", "tint" };
 GameObjectMesh createMesh(
   std::map<std::string, std::string> additionalFields, 
   std::map<std::string, Mesh>& meshes, 
@@ -63,6 +63,7 @@ GameObjectMesh createMesh(
     .texture = texinfoFromFields(additionalFields, ensureTextureLoaded),
     .discardAmount = additionalFields.find("discard") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("emission").c_str()),
     .emissionAmount = additionalFields.find("emission") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("emission").c_str()),
+    .tint = additionalFields.find("tint") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("tint").c_str()),
   };
   return obj;
 }
@@ -440,6 +441,7 @@ void renderObject(
 
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.textureOverloadId);    
     }
     return;

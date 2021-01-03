@@ -37,7 +37,6 @@ struct SerializationObject {
   std::string script;
   std::string fragshader;
   bool netsynchronize;
-  glm::vec3 tint;
   std::map<std::string, std::string> additionalFields;
 };
 
@@ -51,7 +50,6 @@ struct GameObject {
   std::string script;
   std::string fragshader;
   bool netsynchronize;
-  glm::vec3 tint;
 };
 
 GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes);

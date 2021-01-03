@@ -341,7 +341,6 @@ void addObjectToWorld(
   bool shouldLoadModel, 
   std::function<objid()> getId,
   SysInterface interface,
-  glm::vec3 tint,
   std::map<std::string, std::string> additionalFields
 ){
     auto id =  scene.nameToId.at(name);
@@ -355,7 +354,7 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
-      [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface, tint](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(meshName); 
           world.animations[id] = data.animations;
@@ -382,12 +381,11 @@ void addObjectToWorld(
             data.nodeTransform, 
             data.names, 
             generateAdditionalFields(meshName, data, additionalFields, fieldsToCopy),
-            getId,
-            tint
+            getId
           );
 
           for (auto &[name, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, newSerialObj.tint, newSerialObj.additionalFields);
+            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, newSerialObj.additionalFields);
           }
           return hasMesh;
         }
@@ -448,12 +446,11 @@ void addSerialObjectsToWorld(
   std::vector<objid> idsAdded,
   std::function<objid()> getNewObjectId,
   SysInterface interface,
-  std::map<std::string, std::map<std::string, std::string>> additionalFields,
-  std::map<std::string, glm::vec3> tint
+  std::map<std::string, std::map<std::string, std::string>> additionalFields
 ){
   for (auto &[name, additionalField] : additionalFields){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, tint.at(name), additionalField);
+    addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, additionalField);
   }
   for (auto id : idsAdded){
     addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f));   
@@ -474,7 +471,7 @@ void addSerialObjectsToWorld(
 
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
   auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData);
-  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.deserializedScene.additionalFields, data.deserializedScene.tints);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.deserializedScene.additionalFields);
   return sceneId;
 }
 
@@ -497,11 +494,9 @@ objid addSerialObject(
   addGameObjectToScene(world.sandbox.scenes.at(sceneId), name, gameobjectObj, children);
 
   std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
-  std::map<std::string, glm::vec3> tints;
   additionalFieldsMap[name] = additionalFields;
-  tints[name] = gameobjectObj.tint;
 
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap, tints);
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap);
 
   auto gameobjId = world.sandbox.scenes.at(sceneId).nameToId.at(name);
   return gameobjId;

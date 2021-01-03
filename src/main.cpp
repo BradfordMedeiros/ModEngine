@@ -496,11 +496,11 @@ void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lig
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
 }
 
-glm::vec3 getTintIfSelected(bool isSelected, glm::vec3 defaultTint){
+glm::vec3 getTintIfSelected(bool isSelected){
   if (isSelected && state.highlight){
     return glm::vec3(1.0f, 0.0f, 0.0f);
   }
-  return defaultTint;
+  return glm::vec3(1.f, 1.f, 1.f);
 }
 
 void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projview,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
@@ -510,7 +510,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projview,  glm::ma
   glUseProgram(shaderProgram);
 
   clearTraversalPositions();
-  traverseScene(world.sandbox, scene, [shaderProgram, &scene, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader, glm::vec3 tint) -> void {
+  traverseScene(world.sandbox, scene, [shaderProgram, &scene, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
@@ -519,7 +519,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projview,  glm::ma
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
 
     auto newShader = getShaderByName(shader, shaderProgram);
-    setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected, tint), id, lightProjview);
+    setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));

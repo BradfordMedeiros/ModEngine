@@ -30,7 +30,6 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeVecSet(&object.physics.angularFactor, "physics_angle", attributes, &identityVec);
   safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, &identityVec);
   safeVecSet(&object.physics.gravity, "physics_gravity", attributes, &defaultGravity);
-  safeVecSet(&object.tint, "tint", attributes, &identityVec);
 
   auto oneValue = 1.f;
   auto negOneValue = -1.f;
@@ -133,7 +132,6 @@ GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& 
     .script = serialObj.script,
     .fragshader = serialObj.fragshader,
     .netsynchronize = serialObj.netsynchronize,
-    .tint = serialObj.tint,
   };
 
   return gameObject;
@@ -181,10 +179,6 @@ void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta
      gameobj.physicsOptions.gravity = gameobj.physicsOptions.gravity +  *value;
      return;
   }   
-  if (field == "tint" && value != NULL){
-     gameobj.tint = gameobj.tint +  *value;
-     return;
-  }  
 
   auto fValue = std::get_if<float>(&delta);
   if (field == "physics_friction" && fValue != NULL){

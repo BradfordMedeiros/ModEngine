@@ -34,7 +34,6 @@ struct Scene {
 struct SceneDeserialization {
   Scene scene;
   std::map<std::string, std::map<std::string, std::string>>  additionalFields;
-  std::map<std::string, glm::vec3>  tints;  // todo --> this is odd, should be removed
 };
 
 std::string serializeObject(Scene& scene, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
@@ -45,7 +44,6 @@ void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobject
 void addChildLink(Scene& scene, objid childId, objid parentId);
 
 struct SubsceneInfo {
-  glm::vec3 tint;
   std::map<std::string, std::string> additionalFields;
 };
 
@@ -57,15 +55,14 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
-  std::function<objid()> getNewObjectId,
-  glm::vec3 parentTint
+  std::function<objid()> getNewObjectId
 );
 
 std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
 void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
 std::vector<objid> listObjInScene(Scene& scene);
 
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 

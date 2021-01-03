@@ -21,7 +21,7 @@ std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index);
 bool idExists(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject);
+void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
 struct AddSceneDataValues {

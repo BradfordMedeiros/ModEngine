@@ -84,17 +84,14 @@ SceneDeserialization createSceneFromParsedContent(
   scene.isNested = false;
 
   std::map<std::string, std::map<std::string, std::string>> additionalFields;
-  std::map<std::string, glm::vec3>  tints; 
 
   for (auto &[name, gameobj] : serialGameAttrs){
     additionalFields[name] = gameobj.additionalFields;
-    tints[name] = gameobjs.at(name).tint;  
   }
 
   SceneDeserialization deserializedScene {
     .scene = scene,
     .additionalFields = additionalFields,
-    .tints = tints,
   };
   return deserializedScene;
 }
@@ -112,8 +109,7 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names,
   std::map<objid, std::map<std::string, std::string>> additionalFields,
-  std::function<objid()> getNewObjectId,
-  glm::vec3 parentTint
+  std::function<objid()> getNewObjectId
 ){
   std::map<std::string, SubsceneInfo> subsceneInfos;
 
@@ -133,12 +129,10 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
       .vecAttributes = {
         {"position", transform.position },
         {"scale",    transform.scale    },
-        {"tint",     parentTint         },
       },
     };
 
     subsceneInfos[names.at(nodeId)] = {
-      .tint = parentTint,
       .additionalFields = additionalFields.at(nodeId),
     };
 
@@ -264,7 +258,7 @@ std::vector<objid> listObjInScene(Scene& scene){
   return allObjects;
 }
 
-void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string, glm::vec3)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
   if (objectH.linkOnly){
     traverseLink(id, model, totalScale);
     return;
@@ -277,7 +271,7 @@ void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model,
   glm::vec3 scaling = object.transformation.scale * totalScale;  // having trouble with doing the scaling here so putting out of band.   Anyone in the ether please help if more elegant. 
   glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
 
-  onObject(id, scaledModelMatrix, model, "", object.tint);
+  onObject(id, scaledModelMatrix, model, "");
 
   for (objid id: objectH.children){
     traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject, traverseLink);
@@ -289,11 +283,11 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;
-  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string, glm::vec3) -> void {
+  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string) -> void {
     datum.push_back(traversalData{
       .id = foundId,
       .modelMatrix = modelMatrix,
@@ -306,7 +300,7 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
     for (auto data : datum){
       auto gameobject = scene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, gameobject.fragshader, gameobject.tint);
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, gameobject.fragshader);
       }
     }  
   }
