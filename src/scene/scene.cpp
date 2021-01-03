@@ -701,32 +701,6 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
   }
 }
 
-AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
-  assert(percentage <= 1.f && percentage >= 0.f);
-  auto attr1 = std::get_if<glm::vec3>(&key1);
-  if (attr1 != NULL){
-    auto attr2 = std::get_if<glm::vec3>(&key2);
-    assert(attr2 != NULL);
-
-    std::cout << "percentage: " << percentage << std::endl;
-    std::cout << "key1: " << print(*attr1) << std::endl;
-    std::cout << "key2: " << print(*attr2) << std::endl;
-    return glm::vec3(
-      (attr1 -> x * (1 - percentage)) + (attr2 -> x * percentage), 
-      (attr1 -> y * (1 - percentage)) + (attr2 -> y * percentage), 
-      (attr1 -> z * (1 - percentage)) + (attr2 -> z * percentage)
-    );
-  }
-  auto attr2 = std::get_if<float>(&key1);
-  if (attr2 != NULL){
-    auto attr2 = std::get_if<float>(&key2);
-    assert(attr2 != NULL);
-    return *attr1 + *attr2;
-  }
-  assert(false);
-  return key1;
-}
-
 // property suffix looks like the parts of the tokens on the right hand side
 // eg position 10
 // eg tint 0.9 0.2 0.4
