@@ -138,8 +138,14 @@ int readFrame(AVFormatContext* formatContext, AVPacket* avPacket, AVCodecContext
       if (receiveValue == AVERROR_EOF){ // not actually an error
         std::cout << "ERROR: AUDIO: LAST FRAME" << std::endl;
       }
-      assert(false);
+      //assert(false);
     }
+
+    auto audioStream = formatContext -> streams[streams.audio];
+    auto pts = avFrame -> pts;
+    auto timebase = av_q2d(audioStream -> time_base);
+    auto currentFrameTime = pts * timebase;  // Each pts you advance 1 timebase
+    *videoTimestamp = currentFrameTime;
     //printAudioFrameInfo(avFrame, audioCodec);
   }else{
     std::cout << "INFO: video: READ error or end of video" << std::endl;

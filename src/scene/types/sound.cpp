@@ -86,27 +86,25 @@ void unloadSoundState(ALuint source,  std::string filepath){
   }
 }
 
+const int NUM_AUDIO_BUFFERS = 100;
 BufferedAudio createBufferedAudio(){
-  ALuint buffers[4];
+  ALuint buffers[NUM_AUDIO_BUFFERS];
   ALuint source;
 
   alGenSources(1, &source);
   assert(alGetError() == AL_NO_ERROR);
 
-  alGenBuffers(4, buffers);
+  alGenBuffers(NUM_AUDIO_BUFFERS, buffers);
   assert(alGetError() == AL_NO_ERROR);
 
   std::vector<ALuint> buffersv;
-  buffersv.push_back(buffers[0]);
-  buffersv.push_back(buffers[1]);
-  buffersv.push_back(buffers[2]);
-  buffersv.push_back(buffers[3]);
-
+  for (int i = 0; i < NUM_AUDIO_BUFFERS; i++){
+    buffersv.push_back(buffers[i]);
+  }
   std::queue<ALuint> freeBuffers;
-  freeBuffers.push(0);
-  freeBuffers.push(1);
-  freeBuffers.push(2);
-  freeBuffers.push(3);
+  for (int i = 0; i < NUM_AUDIO_BUFFERS; i++){
+    freeBuffers.push(i);
+  }
 
   BufferedAudio audio {
     .source = source,
@@ -116,22 +114,20 @@ BufferedAudio createBufferedAudio(){
   return audio;
 }
 
-int count = 0;
 void freeBufferedAudio(BufferedAudio& buffer){
-  ALuint buffers[4];
-  buffers[0] = buffer.buffers.at(0);
-  buffers[1] = buffer.buffers.at(1);
-  buffers[2] = buffer.buffers.at(2);
-  buffers[3] = buffer.buffers.at(3);
+  ALuint buffers[NUM_AUDIO_BUFFERS];
+  for (int i = 0; i < NUM_AUDIO_BUFFERS; i++){
+    buffers[i] = buffer.buffers.at(i);
+  }
 
   alDeleteSources(1, &buffer.source);
   assert(alGetError() == AL_NO_ERROR);
-  alDeleteBuffers(4, buffers);
+  alDeleteBuffers(NUM_AUDIO_BUFFERS, buffers);
   assert(alGetError() == AL_NO_ERROR);
 }
 
 bool isPlaying = false;
-void playBufferedAudio(BufferedAudio& buffer, char* data, int datasize, int samplerate){
+void playBufferedAudio(BufferedAudio& buffer, uint8_t* data, int datasize, int samplerate){
   auto alutError = alGetError();
   if (alutError  != AL_NO_ERROR){
     std::cout << "alut error: " << alutError << std::endl;
@@ -146,25 +142,29 @@ void playBufferedAudio(BufferedAudio& buffer, char* data, int datasize, int samp
     if (alError != AL_INVALID_VALUE){
       assert(freeBuffer != -1);
       buffer.freeBuffers.push(freeBuffer);
-      std::cout << "dequeuing buffer: " << freeBuffer << std::endl;
     }
   }
 
-  bool hasDataToBuffer = true;
-  while(hasDataToBuffer && !buffer.freeBuffers.empty()){
+  if(!buffer.freeBuffers.empty()){
     ALuint bufferId = buffer.freeBuffers.front();
     buffer.freeBuffers.pop();
     alBufferData(bufferId,  AL_FORMAT_STEREO16, data, datasize, samplerate);
     alSourceQueueBuffers(buffer.source, 1, &bufferId);
-    std::cout << "enqueuing buffer: " << bufferId << std::endl;
     assert(alError == AL_NO_ERROR || alError == AL_INVALID_VALUE);
   }
 
   int state;
   alGetSourcei(buffer.source, AL_SOURCE_STATE, &state);
   if (state == AL_STOPPED){
+    std::cout << "BUFFER STREAM WAS STOPPED!!!" << std::endl;
     alSourcePlay(buffer.source);
   }else if (state == AL_INITIAL){
+    std::cout << "BUFFER STREAM INITIAL START!!!" << std::endl;
     alSourcePlay(buffer.source);
+  }else if (state == AL_PLAYING){
+
+  }else{
+    std::cout << "unexpected state" << std::endl;
+    assert(false);
   }
 }

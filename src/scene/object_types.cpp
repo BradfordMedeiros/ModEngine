@@ -1047,33 +1047,45 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
   }
 }
 
+void processVideoFrame(GameObjectVideo* videoObj, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData){
+  int stream = nextFrame(videoObj -> video);
+  if (stream == videoObj -> video.streamIndexs.video){
+    updateTextureData( 
+      videoObj -> source,
+      videoObj -> video.avFrame2 -> data[0], 
+      videoObj -> video.avFrame2 -> width, 
+      videoObj -> video.avFrame2 -> height
+    );
+  }else if (stream == videoObj -> video.streamIndexs.audio){
+    auto audioCodec = videoObj -> video.codecs.audioCodec;
+    auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, videoObj -> video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
+    auto numChannels = audioCodec -> channels;
+
+    uint8_t* bufferData = new uint8_t[bufferSize];
+    //https://stackoverflow.com/questions/21386135/ffmpeg-openal-playback-streaming-sound-from-video-wont-work
+
+    std::cout << "num channels: " << numChannels << std::endl;
+    // @TODO process all channels
+    // @TODO chandle more formats to eliminate assertion below 
+    std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
+    assert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16);
+   
+
+
+    playBufferedAudio(videoObj -> sound, videoObj -> video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
+  }
+}
+
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp){
   for (auto &[_, obj] : mapping){
     auto videoObj = std::get_if<GameObjectVideo>(&obj);
     if (videoObj != NULL){
-      if (videoObj -> video.videoTimestamp > timestamp){
-        continue;
-      }
-
-      int stream = nextFrame(videoObj -> video);
-      if (stream == videoObj -> video.streamIndexs.video){
-        updateTextureData( 
-          videoObj -> source,
-          videoObj -> video.avFrame2 -> data[0], 
-          videoObj -> video.avFrame2 -> width, 
-          videoObj -> video.avFrame2 -> height
-        );
-      }else if (stream == videoObj -> video.streamIndexs.audio){
-        auto audioCodec = videoObj -> video.codecs.audioCodec;
-        auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, videoObj -> video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
-        auto numChannels = audioCodec -> channels;
-
-        // @TODO process all channels
-        // @TODO chandle more formats to eliminate assertion below 
-        // | int outputSamples = swr_convert(p_swrContext,  p_destBuffer, p_destLinesize,  (const uint8_t**)p_frame->extended_data, p_frame->nb_samples);
-        std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
-        assert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16);
-        playBufferedAudio(videoObj -> sound, (char*)videoObj -> video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
+      while (true){
+        bool processedToCurrentTime =  videoObj -> video.videoTimestamp > (timestamp + 10);
+        if (processedToCurrentTime){
+          break;
+        }
+        processVideoFrame(videoObj, updateTextureData);
       }
     }
   }
