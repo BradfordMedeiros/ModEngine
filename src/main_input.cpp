@@ -15,7 +15,7 @@ extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
 
 void processManipulatorForId(objid id){
-  if (id == -1 || !idExists(world, id)){
+  if (id == -1 || !idExists(world.sandbox, id)){
     return;
   }
   auto selectObject = getGameObject(world, id); 
@@ -104,7 +104,7 @@ void maybeApplyTextureOffset(int index, glm::vec2 offset){
     return;
   }
 
-  for (auto id : getIdsInGroup(world, index)){
+  for (auto id : getIdsInGroup(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     assert(meshObj != NULL);
     meshObj -> texture.textureoffset = meshObj -> texture.textureoffset + offset;
@@ -120,7 +120,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     float offsetAmount = yoffset * 0.001;
     maybeApplyTextureOffset(selected(state.editor), glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
   }
-  if (!state.offsetTextureMode && selected(state.editor) != -1 && idExists(world, selected(state.editor))){
+  if (!state.offsetTextureMode && selected(state.editor) != -1 && idExists(world.sandbox, selected(state.editor))){
     maybeChangeTexture(selected(state.editor));
   }
 

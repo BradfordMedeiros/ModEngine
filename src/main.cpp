@@ -280,7 +280,7 @@ void selectItem(objid selectedId, Color pixelColor){
 
   applyPainting(selectedId);
 
-  auto groupid = getGroupId(world, selectedId);
+  auto groupid = getGroupId(world.sandbox, selectedId);
   auto selectedObject =  getGameObject(world, groupid);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
@@ -368,28 +368,28 @@ void loadAllTextures(){
 
 void translate(float x, float y, float z){
   auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world, selected)){
+  if (selected == -1 || !idExists(world.sandbox, selected)){
     return;
   }
   physicsTranslate(world, selected, x, y, z, state.moveRelativeEnabled);
 }
 void scale(float x, float y, float z){
   auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world, selected)){
+  if (selected == -1 || !idExists(world.sandbox, selected)){
     return;
   }
   physicsScale(world, selected, x, y, z);
 }
 void rotate(float x, float y, float z){
   auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world, selected)){
+  if (selected == -1 || !idExists(world.sandbox, selected)){
     return;
   }
   physicsRotate(world, selected, x, y, z);
 }
 void setObjectDimensions(int32_t index, float width, float height, float depth){
   auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world, selected)){
+  if (selected == -1 || !idExists(world.sandbox, selected)){
     return;
   }
   auto gameObjV = world.objectMapping.at(selected);  // todo this is bs, need a wrapper around objectmappping + scene
@@ -510,7 +510,7 @@ void renderScene(Scene& scene, GLint shaderProgram, glm::mat4 projview,  glm::ma
   glUseProgram(shaderProgram);
 
   clearTraversalPositions();
-  traverseScene(world, scene, [shaderProgram, &scene, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader, glm::vec3 tint) -> void {
+  traverseScene(world.sandbox, scene, [shaderProgram, &scene, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader, glm::vec3 tint) -> void {
     assert(id >= 0);
     if (id == voxelPtrId){
       voxelPtrModelMatrix = modelMatrix;
@@ -704,12 +704,12 @@ void onClientMessage(std::string message){
  // @TODO --  this needs to makeObject in the right scene
 void handleCreate(UdpPacket& packet){
   auto create = packet.payload.createpacket;
-  if (world.scenes.find(packet.payload.createpacket.sceneId) == world.scenes.end()){
+  if (world.sandbox.scenes.find(packet.payload.createpacket.sceneId) == world.sandbox.scenes.end()){
     return;
   }
 
   auto id = create.id;   
-  if (idExists(world, id)){     // could conceptually do a comparison to see if it changed, but probably not
+  if (idExists(world.sandbox, id)){     // could conceptually do a comparison to see if it changed, but probably not
     std::cout << "INFO: id already exits: " << id << std::endl;
     return;
   }
@@ -720,7 +720,7 @@ void handleCreate(UdpPacket& packet){
 }
 void handleDelete(UdpPacket& packet){
   auto deletep = packet.payload.deletepacket;
-  if (idExists(world, deletep.id)){
+  if (idExists(world.sandbox, deletep.id)){
     std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
     removeObjectById(deletep.id);
   }else{
@@ -731,7 +731,7 @@ void handleDelete(UdpPacket& packet){
 void handleUpdate(UdpPacket& packet){
   auto update = packet.payload.updatepacket;
 
-  if (idExists(world, update.id)){
+  if (idExists(world.sandbox, update.id)){
     setProperties(world, update.id, update.properties);
   }else{
     std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
@@ -1055,7 +1055,7 @@ int main(int argc, char* argv[]){
 
       packet.payload.createpacket = CreatePacket { 
         .id = obj.id,
-        .sceneId = world.idToScene.at(obj.id),
+        .sceneId = world.sandbox.idToScene.at(obj.id),
       };
       auto serialobj = serializeObject(world, obj.id);
       if (serialobj == ""){
@@ -1186,7 +1186,7 @@ int main(int argc, char* argv[]){
       }
     }
 
-    auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world, activeCameraObj -> id);
+    auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, activeCameraObj -> id);
     
     setListenerPosition(viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
     view = renderView(viewTransform.position, viewTransform.rotation);
@@ -1220,7 +1220,7 @@ int main(int argc, char* argv[]){
       glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
       auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
-      for (auto &[_, scene] : world.scenes){
+      for (auto &[_, scene] : world.sandbox.scenes){
         renderScene(scene, selectionProgram, lightProjview, glm::mat4(1.0f), lights, portals, {});    // selection program since it's lightweight and we just care about depth buffer
       }
     }
@@ -1234,7 +1234,7 @@ int main(int argc, char* argv[]){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
     
-    for (auto &[_, scene] : world.scenes){
+    for (auto &[_, scene] : world.sandbox.scenes){
       renderScene(scene, selectionProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     }
 
@@ -1247,7 +1247,7 @@ int main(int argc, char* argv[]){
     auto hoveredId= getIdFromColor(hoveredItemColor);
     
     state.lastHoveredIdInScene = state.hoveredIdInScene;
-    state.hoveredIdInScene = idExists(world, hoveredId);
+    state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
     state.lastHoverIndex = state.currentHoverIndex;
     state.currentHoverIndex = hoveredId;
 
@@ -1287,7 +1287,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       auto portalViewMatrix = renderPortalView(portal, viewTransform);
-      for (auto &[_, scene] : world.scenes){
+      for (auto &[_, scene] : world.sandbox.scenes){
         renderScene(scene, shaderProgram, projection * portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
       }
       nextPortalCache[portal.id] = portalTextures[i];
@@ -1317,7 +1317,7 @@ int main(int argc, char* argv[]){
     glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
-    for (auto &[_, scene] : world.scenes){
+    for (auto &[_, scene] : world.sandbox.scenes){
       renderScene(scene, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     }
 

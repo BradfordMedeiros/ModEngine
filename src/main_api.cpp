@@ -70,7 +70,7 @@ void unloadAllScenes(){
 
 // @TODO - save all the scenes in the world
 void saveScene(bool includeIds){
-  auto id = world.scenes.begin() -> first;
+  auto id = world.sandbox.scenes.begin() -> first;
   auto fileToSave = rawSceneFile;
   std::cout << "saving scene id: " << id << " to file: " << fileToSave << std::endl;
   saveFile(fileToSave, serializeScene(world, id, includeIds));
@@ -78,7 +78,7 @@ void saveScene(bool includeIds){
 
 std::vector<int32_t> listScenes(){
   std::vector<int32_t> sceneIds;
-  for (auto &[id, _] : world.scenes){
+  for (auto &[id, _] : world.sandbox.scenes){
     sceneIds.push_back(id);
   }
   return sceneIds;
@@ -126,7 +126,7 @@ void setGameObjectAttr(int32_t id, std::map<std::string, std::string> attr){
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
   if (isWorld){
-    return fullTransformation(world, index).position;
+    return fullTransformation(world.sandbox, index).position;
   }
   return getGameObject(world, index).transformation.position;
 }
@@ -149,7 +149,7 @@ void setGameObjectRotation(int32_t index, glm::quat rotation){
 }
 glm::quat getGameObjectRotation(int32_t index, bool isWorld){
   if (isWorld){
-    return fullTransformation(world, index).rotation;
+    return fullTransformation(world.sandbox, index).rotation;
   }
   return getGameObject(world, index).transformation.rotation;
 }
@@ -159,17 +159,17 @@ void setSelectionMode(bool enabled){
 }
 
 int32_t makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
-  return addObjectToScene(world, useSceneId ? sceneId : world.scenes.begin() -> first, serializedobj, id, useObjId, interface);
+  return addObjectToScene(world, useSceneId ? sceneId : world.sandbox.scenes.begin() -> first, serializedobj, id, useObjId, interface);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
-  assert(world.scenes.size() > 0); 
+  assert(world.sandbox.scenes.size() > 0); 
 
   GameobjAttributes attributes {
     .stringAttributes = stringAttributes,
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
   };
-  return addObjectToScene(world, world.scenes.begin() -> first, name, attributes, interface);
+  return addObjectToScene(world, world.sandbox.scenes.begin() -> first, name, attributes, interface);
 }
 
 void removeObjectById(objid id){
@@ -186,7 +186,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 
 std::vector<std::string> listAnimations(int32_t id){
   std::vector<std::string> animationNames;
-  auto groupId = getGroupId(world, id);
+  auto groupId = getGroupId(world.sandbox, id);
   if (world.animations.find(groupId) == world.animations.end()){
     return animationNames;
   }
@@ -225,7 +225,7 @@ void addAnimation(AnimationState& animationState, int32_t groupId, std::string a
 }
 
 void playAnimation(int32_t id, std::string animationToPlay){
-  auto groupId = getGroupId(world, id);
+  auto groupId = getGroupId(world.sandbox, id);
   if (animations.playbacks.find(groupId) != animations.playbacks.end()){
     animations.playbacks.erase(groupId);
   }
@@ -369,7 +369,7 @@ void setTexture(objid index, std::string textureName){
   }
 
   auto textureId = world.textures.at(textureName).textureId;
-  for (auto id : getIdsInGroup(world, index)){
+  for (auto id : getIdsInGroup(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     if (meshObj != NULL){
       meshObj -> texture.textureOverloadName = textureName;

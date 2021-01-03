@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include "./scenegraph.h"
+#include "./scene_sandbox.h"
 #include "./physics.h"
 #include "./object_types.h"
 #include "./types/emitter.h"
@@ -21,14 +22,13 @@ struct World {
   std::map<std::string, Mesh> meshes;
   std::map<std::string, Texture> textures;
   std::map<objid, std::vector<Animation>> animations;
-  std::map<objid, Scene> scenes;
-  std::map<objid, objid> idToScene;
   std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
   EmitterSystem emitters;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
   std::function<void(objid, bool)> onObjectDelete;
   std::set<objid> entitiesToUpdate;
+  SceneSandbox sandbox;
 };
 
 World createWorld(
@@ -90,12 +90,8 @@ std::vector<objid> getIdsInGroup(World& world, objid index);
 
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 bool idExists(World& world, objid id);
-Scene& sceneForId(World& world, objid id);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
-
-void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject);
-Transformation fullTransformation(World& world, Scene& scene, objid id);
 
 struct LightInfo {
   glm::vec3 pos;

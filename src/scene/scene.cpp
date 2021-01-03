@@ -1,45 +1,18 @@
 #include "./scene.h"
 
-void forEveryGameobj(World& world, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement){
-  for (auto &[_, scene] : world.scenes){
-    for (auto [id, gameObj]: scene.idToGameObjects){
-      onElement(id, scene, gameObj);
-    }
-  }
-}
-Scene& sceneForId(World& world, objid id){
-  return world.scenes.at(world.idToScene.at(id));
-}
-std::vector<objid> allSceneIds(World& world){
-  std::vector<objid> sceneIds;
-  for (auto [sceneId, _] : world.scenes){
-    sceneIds.push_back(sceneId);
-  }
-  return sceneIds;
-} 
-
 GameObject& getGameObject(World& world, objid id){
-  return getGameObject(sceneForId(world, id), id);
+  return getGameObject(sceneForId(world.sandbox, id), id);
 }
-std::optional<GameObject*> maybeGetGameObjectByName(World& world, std::string name){
-  for (auto [sceneId, _] : world.scenes){
-    for (auto &[id, gameObj]: world.scenes.at(sceneId).idToGameObjects){
-      if (gameObj.name == name){
-       return &gameObj;
-      }
-    }
-  }
-  return std::nullopt;
-}
+
 std::optional<objid> getGameObjectByName(World& world, std::string name){
-  auto obj = maybeGetGameObjectByName(world, name);
+  auto obj = maybeGetGameObjectByName(world.sandbox, name);
   if (obj.has_value()){
     return obj.value() -> id;
   }
   return std::nullopt;
 }
 GameObject& getGameObject(World& world, std::string name){
-  auto obj = maybeGetGameObjectByName(world, name);
+  auto obj = maybeGetGameObjectByName(world.sandbox, name);
   if (obj.has_value()){
     return *obj.value();
   }
@@ -47,24 +20,14 @@ GameObject& getGameObject(World& world, std::string name){
   assert(false);
 }
 
-objid getGroupId(World& world, objid id){
-  return getGroupId(sceneForId(world, id), id); 
-}
-std::vector<objid> getIdsInGroup(World& world, objid index){
-  return getIdsInGroup(sceneForId(world, index), getGroupId(world, index));
-}
-
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
-  auto groupId = getGroupId(world, id);
+  auto groupId = getGroupId(world.sandbox, id);
   for (auto gId : groupIds){
     if (groupId == gId){
       return true;
     }
   }
   return false;
-}
-bool idExists(World& world, objid id){
-  return world.idToScene.find(id) != world.idToScene.end();
 }
 
 NameAndMesh getMeshesForGroupId(World& world, objid groupId){
@@ -74,7 +37,7 @@ NameAndMesh getMeshesForGroupId(World& world, objid groupId){
     .meshNames = meshNames,
     .meshes = meshes
   };
-  for (auto id : getIdsInGroup(world.scenes.at(world.idToScene.at(groupId)), groupId)){
+  for (auto id : getIdsInGroup(world.sandbox, groupId)){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
     for (int i = 0; i < meshesForId.meshes.size(); i++){
       nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
@@ -136,7 +99,7 @@ struct GroupPhysicsInfo {
 };
 
 GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
-  auto groupId = getGroupId(scene, id);
+  auto groupId = getGroupId(world.sandbox, id);
   bool isRoot = groupId == id;
   if (!isRoot){
     return GroupPhysicsInfo {
@@ -250,7 +213,7 @@ void updatePhysicsBody(World& world, Scene& scene, objid id){
   assert(rigidBody != NULL);
   glm::vec3 oldScale = getScale(rigidBody);
   rmRigidBody(world, id);
-  addPhysicsBody(world, sceneForId(world, id), id, oldScale);
+  addPhysicsBody(world, sceneForId(world.sandbox, id), id, oldScale);
 }
 
 objid getIdForCollisionObject(World& world, const btCollisionObject* body){
@@ -313,6 +276,7 @@ World createWorld(
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
     .entitiesToUpdate = entitiesToUpdate,
+    .sandbox = createSceneSandbox(),
   };
 
   // Default meshes that are silently loaded in the background
@@ -382,12 +346,12 @@ void addObjectToWorld(
 ){
     auto id =  scene.nameToId.at(name);
 
-    if (world.idToScene.find(id) != world.idToScene.end()){
+    if (world.sandbox.idToScene.find(id) != world.sandbox.idToScene.end()){
       std::cout << "id already in the scene: " << id << std::endl;
       assert(false);
     }
 
-    world.idToScene[id] = sceneId;
+    world.sandbox.idToScene[id] = sceneId;
     auto localSceneId = sceneId;
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
@@ -437,14 +401,14 @@ void addObjectToWorld(
         return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels);
       },
       [&world, localSceneId, id]() -> void {
-        updatePhysicsBody(world, world.scenes.at(localSceneId), id);
+        updatePhysicsBody(world, world.sandbox.scenes.at(localSceneId), id);
       },
       [&world, sceneId, id, &interface](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
         auto childSceneId = addSceneToWorld(world, sceneToLoad, interface);
-        auto rootId = world.scenes.at(childSceneId).rootId;
-        addChildLink(world.scenes.at(sceneId), rootId, id);
-        world.scenes.at(childSceneId).isNested = true;
+        auto rootId = world.sandbox.scenes.at(childSceneId).rootId;
+        addChildLink(world.sandbox.scenes.at(sceneId), rootId, id);
+        world.sandbox.scenes.at(childSceneId).isNested = true;
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas);
@@ -458,15 +422,15 @@ void addObjectToWorld(
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
-  std::cout << "scene size: " << world.scenes.size() << std::endl;
-  Scene& scene = world.scenes.at(sceneId);
+  std::cout << "scene size: " << world.sandbox.scenes.size() << std::endl;
+  Scene& scene = world.sandbox.scenes.at(sceneId);
   return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping);
   }, includeIds);
 }
 
 std::string serializeObject(World& world, objid id, std::string overridename){
-  Scene& scene = sceneForId(world, id);
+  Scene& scene = sceneForId(world.sandbox, id);
   return serializeObject(
     scene, 
     id, 
@@ -489,10 +453,10 @@ void addSerialObjectsToWorld(
 ){
   for (auto &[name, additionalField] : additionalFields){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, world.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, tint.at(name), additionalField);
+    addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, tint.at(name), additionalField);
   }
   for (auto id : idsAdded){
-    addPhysicsBody(world,  world.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
+    addPhysicsBody(world,  world.sandbox.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
   }
 
   for (auto id : idsAdded){
@@ -509,12 +473,12 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
-  assert(world.scenes.find(sceneId) == world.scenes.end());
+  assert(world.sandbox.scenes.find(sceneId) == world.sandbox.scenes.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId);
-  world.scenes[sceneId] = deserializedScene.scene;
+  world.sandbox.scenes[sceneId] = deserializedScene.scene;
   std::vector<objid> idsAdded;
-  for (auto &[id, _] :  world.scenes.at(sceneId).idToGameObjects){
+  for (auto &[id, _] :  world.sandbox.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
   }
 
@@ -538,7 +502,7 @@ objid addSerialObject(
     return newId;
   };
 
-  addGameObjectToScene(world.scenes.at(sceneId), name, gameobjectObj, children);
+  addGameObjectToScene(world.sandbox.scenes.at(sceneId), name, gameobjectObj, children);
 
   std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
   std::map<std::string, glm::vec3> tints;
@@ -547,7 +511,7 @@ objid addSerialObject(
 
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap, tints);
 
-  auto gameobjId = world.scenes.at(sceneId).nameToId.at(name);
+  auto gameobjId = world.sandbox.scenes.at(sceneId).nameToId.at(name);
   return gameobjId;
 }
 
@@ -578,7 +542,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
     }
   );
   
-  world.idToScene.erase(objectId);
+  world.sandbox.idToScene.erase(objectId);
   world.onObjectDelete(objectId, netsynchronized);
 
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
@@ -586,9 +550,8 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
 }
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
-  Scene& scene = sceneForId(world, objectId);
-  auto groupId = getGroupId(scene, objectId);
-  for (auto gameobjId : getIdsInGroup(scene, groupId)){
+  Scene& scene = sceneForId(world.sandbox, objectId);
+  for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
     if (!idExists(scene, gameobjId)){
       continue;
     }
@@ -609,17 +572,17 @@ void copyObjectToScene(World& world, objid id, SysInterface interface){
   auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy");
   std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
-  addObjectToScene(world, world.idToScene.at(id), serializedObject, -1, false, interface);
+  addObjectToScene(world, world.sandbox.idToScene.at(id), serializedObject, -1, false, interface);
 }
 
 
 void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
-  if (world.scenes.find(sceneId) == world.scenes.end()) {
+  if (world.sandbox.scenes.find(sceneId) == world.sandbox.scenes.end()) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
   }
 
-  Scene& scene = world.scenes.at(sceneId);
+  Scene& scene = world.sandbox.scenes.at(sceneId);
   for (auto objectId : listObjInScene(scene)){
     auto gameobj = getGameObject(world, objectId);
     auto name = gameobj.name;
@@ -627,10 +590,10 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
     auto netsynchronized = gameobj.netsynchronize;
     removeObjectById(world, objectId, name, interface, scriptName, netsynchronized);
   }
-  world.scenes.erase(sceneId);
+  world.sandbox.scenes.erase(sceneId);
 }
 void removeAllScenesFromWorld(World& world, SysInterface interface){
-  for (auto sceneId : allSceneIds(world)){
+  for (auto sceneId : allSceneIds(world.sandbox)){
     removeSceneFromWorld(world, sceneId, interface);
   }
 }
@@ -843,7 +806,7 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  Scene& scene = sceneForId(world, index);
+  Scene& scene = sceneForId(world.sandbox, index);
   getGameObject(scene, index).transformation.scale = scale;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -872,13 +835,13 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
 }
 
 void updateSoundPositions(World& world){
-  forEveryGameobj(world, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
     updatePosition(world.objectMapping, id, gameobj.transformation.position);
   });
 }
 
 void enforceLookAt(World& world){
-  forEveryGameobj(world, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
     std::string lookAt = gameobj.lookat;                      
     if (lookAt == "" || lookAt == gameobj.name){
       return;
@@ -892,7 +855,7 @@ void enforceLookAt(World& world){
 }
 
 void callbackEntities(World& world){
-  forEveryGameobj(world, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
     if (id == getGroupId(scene, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
       world.onObjectUpdate(gameobj);
     }
@@ -915,9 +878,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     timeElapsed, 
     [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-      attributes.vecAttributes["position"] = fullTransformation(world, emitterNodeId).position;
+      attributes.vecAttributes["position"] = fullTransformation(world.sandbox, emitterNodeId).position;
       objid objectAdded = addObjectToScene(
-        world, world.idToScene.at(getGameObject(world, name).id), getUniqueObjectName(), attributes, interface
+        world, world.sandbox.idToScene.at(getGameObject(world, name).id), getUniqueObjectName(), attributes, interface
       );
       return objectAdded;
     }, 
@@ -950,36 +913,6 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
   return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
 }
 
-void traverseScene(World& world, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject){
-  traverseScene(scene, initialModel, scale, onObject, [&world, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
-      Scene& linkScene = world.scenes.at(world.idToScene.at(id));
-      traverseScene(world, linkScene, modelMatrix, scale, onObject);
-  });
-}
-
-void traverseScene(World& world, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string, glm::vec3)> onObject){
-  traverseScene(world, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
-}
-
-Transformation fullTransformation(World& world, objid id){
-  Scene& scene = sceneForId(world, id);
-  while(scene.isNested){
-    scene = sceneForId(world, parentId(scene, scene.rootId));
-  }
-  
-  Transformation transformation = {};
-  bool foundId = false;
-  
-  traverseScene(world, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, std::string fragshader, glm::vec3 tint) -> void {
-    if (traversedId == id){
-      foundId = true;
-      transformation = getTransformationFromMatrix(model);
-    }
-  });
-  assert(foundId);
-  return transformation;
-}
-
 std::vector<LightInfo> getLightInfo(World& world){
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   std::vector<LightInfo> lights;
@@ -988,7 +921,7 @@ std::vector<LightInfo> getLightInfo(World& world){
     auto objectLight = world.objectMapping.at(objectId);
     auto lightObject = std::get_if<GameObjectLight>(&objectLight);
 
-    auto lightTransform = fullTransformation(world, objectId);
+    auto lightTransform = fullTransformation(world.sandbox, objectId);
     LightInfo light {
       .pos = lightTransform.position,
       .rotation = lightTransform.rotation,
@@ -1062,7 +995,7 @@ void applyHeightmapMasking(World& world, objid id, float amount, float uvx, floa
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
       // Recreating simply ensures that the min/max height is always valid. 
-    updatePhysicsBody(world, sceneForId(world, id), id); 
+    updatePhysicsBody(world, sceneForId(world.sandbox, id), id); 
   }, hm.mesh, shouldAverage);
 }
 void saveHeightmap(World& world, objid id){
@@ -1097,7 +1030,7 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
     return isNavmesh(world.objectMapping, id);
   };
   auto position = [&world](objid id) -> glm::vec3 {
-    return fullTransformation(world, id).position;
+    return fullTransformation(world.sandbox, id).position;
   };
 
   auto currentMesh = targetNavmesh(position(id), raycastWorld, isNavmeshWorld, getName);
