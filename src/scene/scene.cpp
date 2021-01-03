@@ -47,8 +47,8 @@ NameAndMesh getMeshesForGroupId(World& world, objid groupId){
   return nameAndMeshes;
 }
 
-PhysicsInfo getPhysicsInfoForGameObject(World& world, Scene& scene, objid index){   // should be "for group id"
-  GameObject obj = getGameObject(scene, index);
+PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){  
+  GameObject obj = getGameObject(world.sandbox, index);
   auto gameObjV = world.objectMapping.at(index); 
 
   BoundInfo boundInfo = {
@@ -98,7 +98,7 @@ struct GroupPhysicsInfo {
   physicsOpts physicsOptions;
 };
 
-GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
+GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);
   bool isRoot = groupId == id;
   if (!isRoot){
@@ -109,16 +109,16 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, Scene& scene, objid id){
 
   GroupPhysicsInfo groupInfo {
     .isRoot = isRoot,
-    .physicsInfo = getPhysicsInfoForGameObject(world, scene, groupId),
-    .physicsOptions = getGameObject(scene, groupId).physicsOptions,
+    .physicsInfo = getPhysicsInfoForGameObject(world, groupId),
+    .physicsOptions = getGameObject(world.sandbox, groupId).physicsOptions,
   };  
   return groupInfo;
 }
 
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-void addPhysicsBody(World& world, Scene& scene, objid id, glm::vec3 initialScale){
-  auto groupPhysicsInfo = getPhysicsInfoForGroup(world, scene, id);
+void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
+  auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
     return;
   }
@@ -208,12 +208,12 @@ void rmRigidBody(World& world, objid id){
   world.rigidbodys.erase(id);
 }
 
-void updatePhysicsBody(World& world, Scene& scene, objid id){
+void updatePhysicsBody(World& world, objid id){
   auto rigidBody = world.rigidbodys.at(id);
   assert(rigidBody != NULL);
   glm::vec3 oldScale = getScale(rigidBody);
   rmRigidBody(world, id);
-  addPhysicsBody(world, sceneForId(world.sandbox, id), id, oldScale);
+  addPhysicsBody(world, id, oldScale);
 }
 
 objid getIdForCollisionObject(World& world, const btCollisionObject* body){
@@ -401,7 +401,7 @@ void addObjectToWorld(
         return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels);
       },
       [&world, localSceneId, id]() -> void {
-        updatePhysicsBody(world, world.sandbox.scenes.at(localSceneId), id);
+        updatePhysicsBody(world, id);
       },
       [&world, sceneId, id, &interface](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
@@ -427,7 +427,7 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
   return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping);
   }, includeIds);
-}
+} 
 
 std::string serializeObject(World& world, objid id, std::string overridename){
   Scene& scene = sceneForId(world.sandbox, id);
@@ -456,7 +456,7 @@ void addSerialObjectsToWorld(
     addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, tint.at(name), additionalField);
   }
   for (auto id : idsAdded){
-    addPhysicsBody(world,  world.sandbox.scenes.at(sceneId), id, glm::vec3(1.f, 1.f, 1.f));   
+    addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f));   
   }
 
   for (auto id : idsAdded){
@@ -473,16 +473,8 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
-  assert(world.sandbox.scenes.find(sceneId) == world.sandbox.scenes.end());
-
-  SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId);
-  world.sandbox.scenes[sceneId] = deserializedScene.scene;
-  std::vector<objid> idsAdded;
-  for (auto &[id, _] :  world.sandbox.scenes.at(sceneId).idToGameObjects){
-    idsAdded.push_back(id);
-  }
-
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getUniqueObjId, interface, deserializedScene.additionalFields, deserializedScene.tints);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.deserializedScene.additionalFields, data.deserializedScene.tints);
   return sceneId;
 }
 
@@ -810,7 +802,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   getGameObject(scene, index).transformation.scale = scale;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto collisionInfo = getPhysicsInfoForGameObject(world, scene, index).collisionInfo;
+    auto collisionInfo = getPhysicsInfoForGameObject(world, index).collisionInfo;
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
@@ -995,7 +987,7 @@ void applyHeightmapMasking(World& world, objid id, float amount, float uvx, floa
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
       // Recreating simply ensures that the min/max height is always valid. 
-    updatePhysicsBody(world, sceneForId(world.sandbox, id), id); 
+    updatePhysicsBody(world, id); 
   }, hm.mesh, shouldAverage);
 }
 void saveHeightmap(World& world, objid id){
