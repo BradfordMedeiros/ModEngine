@@ -148,3 +148,13 @@ objid getIdForCollisionObject(World& world, const btCollisionObject* body){
   }
   return -1;
 }
+
+bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
+  auto groupId = getGroupId(world.sandbox, id);
+  for (auto gId : groupIds){
+    if (groupId == gId){
+      return true;
+    }
+  }
+  return false;
+}

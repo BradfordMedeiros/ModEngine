@@ -20,16 +20,6 @@ GameObject& getGameObject(World& world, std::string name){
   assert(false);
 }
 
-bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
-  auto groupId = getGroupId(world.sandbox, id);
-  for (auto gId : groupIds){
-    if (groupId == gId){
-      return true;
-    }
-  }
-  return false;
-}
-
 NameAndMesh getMeshesForGroupId(World& world, objid groupId){
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;

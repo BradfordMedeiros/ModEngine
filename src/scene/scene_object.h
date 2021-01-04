@@ -36,4 +36,6 @@ std::optional<Texture> textureForId(World& world, objid id);
 
 objid getIdForCollisionObject(World& world, const btCollisionObject* body);
 
+bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
+
 #endif
