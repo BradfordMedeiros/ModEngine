@@ -101,3 +101,16 @@ void addLink(SceneSandbox& sandbox, objid childSceneId, objid id){
   addChildLink(sceneForId(sandbox, id), rootId, id);
   sandbox.scenes.at(childSceneId).isNested = true;
 }
+
+std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
+  SceneSandbox& sandbox,
+  Scene& scene, 
+  objid rootId,
+  objid rootIdNode, 
+  std::map<objid, objid> childToParent, 
+  std::map<objid, Transformation> gameobjTransforms, 
+  std::map<objid, std::string> names, 
+  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::function<objid()> getNewObjectId){
+  return addSubsceneToRoot(scene, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
+}

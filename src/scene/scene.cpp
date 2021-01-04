@@ -354,7 +354,8 @@ void addObjectToWorld(
             world.meshnameToBoneToParent[meshPath] = data.boneToParent;  
           } 
 
-          auto newSerialObjs = addSubsceneToRoot(
+          auto newSerialObjs = multiObjAdd(
+            world.sandbox,
             scene, 
             id,
             0,
@@ -365,8 +366,8 @@ void addObjectToWorld(
             getId
           );
 
-          for (auto &[name, newSerialObj] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, newSerialObj.additionalFields);
+          for (auto &[name, additionalFields] : newSerialObjs){
+            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, additionalFields);
           }
           return hasMesh;
         }

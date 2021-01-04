@@ -31,5 +31,16 @@ struct AddSceneDataValues {
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData);
 
 void addLink(SceneSandbox& sandbox, objid childSceneId, objid id);
+std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSandbox& sandbox,
+  Scene& scene, 
+  objid rootId,
+  objid rootIdNode, 
+  std::map<objid, objid> childToParent, 
+  std::map<objid, Transformation> gameobjTransforms, 
+  std::map<objid, std::string> names, 
+  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::function<objid()> getNewObjectId
+
+);
 
 #endif 

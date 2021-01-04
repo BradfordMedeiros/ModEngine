@@ -101,7 +101,7 @@ SceneDeserialization deserializeScene(std::string content, std::function<objid()
   return createSceneFromParsedContent(parseFormat(content), getNewObjectId);
 }
 
-std::map<std::string, SubsceneInfo> addSubsceneToRoot(
+std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
   objid rootId, 
   objid rootIdNode, 
@@ -111,7 +111,7 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId
 ){
-  std::map<std::string, SubsceneInfo> subsceneInfos;
+  std::map<std::string,  std::map<std::string, std::string>> subsceneInfos;
 
   std::map<objid, objid> nodeIdToRealId;
   for (auto [nodeId, transform] : gameobjTransforms){
@@ -132,9 +132,7 @@ std::map<std::string, SubsceneInfo> addSubsceneToRoot(
       },
     };
 
-    subsceneInfos[names.at(nodeId)] = {
-      .additionalFields = additionalFields.at(nodeId),
-    };
+    subsceneInfos[names.at(nodeId)] = additionalFields.at(nodeId);
 
     auto gameobj = gameObjectFromFields(names.at(nodeId), rootObj.layer, id, attributes);
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
