@@ -295,9 +295,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 void onMouseButton(){    
-  //for (auto [id, scene] : world.scenes){
-  //  std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
-  //}
+  for (auto [id, scene] : world.sandbox.scenes){
+    std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
+  }
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
     .fromPos = defaultCamera.transformation.position,
@@ -320,5 +320,11 @@ void onMouseButton(){
     auto collision = collidedVoxels[0];
     voxelPtr -> voxel.selectedVoxels.push_back(collision);
     applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
+  }
+}
+
+void drop_callback(GLFWwindow* window, int count, const char** paths){
+  for (int i = 0;  i < count;  i++){
+    std::cout << "dropped file: " << paths[i] << std::endl;
   }
 }

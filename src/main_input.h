@@ -21,5 +21,6 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void onMouseButton();
+void drop_callback(GLFWwindow* window, int count, const char** paths);
 
 #endif
