@@ -249,3 +249,22 @@ AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, fl
   assert(false);
   return key1;
 }
+
+std::string serializePropertySuffix(std::string key, AttributeValue value){
+  auto prefix = key + ":";
+  auto vecValue = std::get_if<glm::vec3>(&value);
+  if (vecValue != NULL){
+    return prefix + serializeVec(*vecValue);
+  }
+  auto floatValue = std::get_if<float>(&value);
+  if (floatValue != NULL){
+    return prefix + std::to_string(*floatValue);
+  }
+
+  auto stringValue = std::get_if<std::string>(&value);
+  if (stringValue != NULL){
+    return prefix + *stringValue;
+  }
+  assert(false);
+  return prefix;
+}

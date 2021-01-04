@@ -79,7 +79,6 @@ void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, SysInterface interface);
 
-objid getIdForCollisionObject(World& world,  const btCollisionObject* body);
 NameAndMesh getMeshesForGroupId(World& world, objid id);
 
 std::optional<objid> getGameObjectByName(World& world, std::string name);
@@ -92,6 +91,5 @@ std::vector<objid> getIdsInGroup(World& world, objid index);
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 bool idExists(World& world, objid id);
 
-std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 
 #endif

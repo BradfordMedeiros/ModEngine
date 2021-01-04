@@ -61,6 +61,7 @@ struct HitObject {
 
 typedef std::variant<glm::vec3, std::string, float> AttributeValue;
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage);
+std::string serializePropertySuffix(std::string key, AttributeValue value);
 
 struct Property {
   std::string propertyName;

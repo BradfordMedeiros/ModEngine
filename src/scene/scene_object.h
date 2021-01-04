@@ -31,4 +31,9 @@ void saveHeightmap(World& world, objid id);
 
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 
+std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
+std::optional<Texture> textureForId(World& world, objid id);
+
+objid getIdForCollisionObject(World& world, const btCollisionObject* body);
+
 #endif

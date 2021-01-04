@@ -216,15 +216,6 @@ void updatePhysicsBody(World& world, objid id){
   addPhysicsBody(world, id, oldScale);
 }
 
-objid getIdForCollisionObject(World& world, const btCollisionObject* body){
-  for (auto const&[id, rigidbody] : world.rigidbodys){
-    if (rigidbody == body){
-      return id;
-    }
-  }
-  return -1;
-}
-
 Texture loadTextureWorld(World& world, std::string texturepath){
   if (world.textures.find(texturepath) != world.textures.end()){
     return world.textures.at(texturepath);
@@ -705,24 +696,6 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
   }
   return value;
 }
-std::string serializePropertySuffix(std::string key, AttributeValue value){
-  auto prefix = key + ":";
-  auto vecValue = std::get_if<glm::vec3>(&value);
-  if (vecValue != NULL){
-    return prefix + serializeVec(*vecValue);
-  }
-  auto floatValue = std::get_if<float>(&value);
-  if (floatValue != NULL){
-    return prefix + std::to_string(*floatValue);
-  }
-
-  auto stringValue = std::get_if<std::string>(&value);
-  if (stringValue != NULL){
-    return prefix + *stringValue;
-  }
-  assert(false);
-  return prefix;
-}
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   getGameObject(world, index).transformation.position = pos;
@@ -869,12 +842,3 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
   }, timeElapsed);
 }
-
-std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
-  return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
-}
-
-std::optional<Texture> textureForId(World& world, objid id){
-  return textureForId(world.objectMapping, id);
-}
-

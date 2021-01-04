@@ -131,3 +131,20 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
   }
   return aiNavPosition(id, target, position, raycastWorld, isNavmeshWorld);
 }
+
+std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance){
+  return raycast(world.physicsEnvironment, world.rigidbodys, posFrom, direction, maxDistance);
+}
+
+std::optional<Texture> textureForId(World& world, objid id){
+  return textureForId(world.objectMapping, id);
+}
+
+objid getIdForCollisionObject(World& world, const btCollisionObject* body){
+  for (auto const&[id, rigidbody] : world.rigidbodys){
+    if (rigidbody == body){
+      return id;
+    }
+  }
+  return -1;
+}

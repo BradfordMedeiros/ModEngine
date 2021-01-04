@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <queue>          
 #include "./scene/scene.h"
+#include "./scene/scene_object.h"
 #include "./state.h"
 #include "./scene/physics.h"
 #include "./scheme/scriptmanager.h"
