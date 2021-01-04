@@ -84,6 +84,7 @@ NameAndMesh getMeshesForGroupId(World& world, objid id);
 
 std::optional<objid> getGameObjectByName(World& world, std::string name);
 GameObject& getGameObject(World& world, objid id);
+GameObject& getGameObject(World& world, std::string name);
 Transformation fullTransformation(World& world, objid id);
 objid getGroupId(World& world, objid id);
 std::vector<objid> getIdsInGroup(World& world, objid index);
@@ -92,33 +93,5 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 bool idExists(World& world, objid id);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
-
-struct LightInfo {
-  glm::vec3 pos;
-  glm::quat rotation;
-  GameObjectLight light;
-};
-
-std::vector<LightInfo> getLightInfo(World& world);
-
-struct PortalInfo {
-  glm::vec3 cameraPos;
-  glm::quat cameraRotation;
-  glm::vec3 portalPos;
-  glm::quat portalRotation;
-  bool perspective;
-  objid id;
-};
-PortalInfo getPortalInfo(World& world, objid id);
-std::vector<PortalInfo> getPortalInfo(World& world);
-bool isPortal(World& world, objid id);
-std::optional<GameObjectVoxel*> getVoxel(World& world, objid id);
-
-std::optional<Texture> textureForId(World& world, objid id);
-
-void applyHeightmapMasking(World& world, objid id, float amount, float uvx, float uvy, bool shouldAverage);
-void saveHeightmap(World& world, objid id);
-
-glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 
 #endif

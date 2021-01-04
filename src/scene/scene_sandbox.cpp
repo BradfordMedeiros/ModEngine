@@ -1,9 +1,7 @@
 #include "./scene_sandbox.h"
 
 SceneSandbox createSceneSandbox(){
-  SceneSandbox sandbox {
-
-  };
+  SceneSandbox sandbox {};
   return sandbox;
 }
 

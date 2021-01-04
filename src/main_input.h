@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "./state.h"
 #include "./scene/scene.h"
+#include "./scene/scene_object.h"
 #include "./scheme/scriptmanager.h"
 #include "./main_api.h"
 #include "./input.h"

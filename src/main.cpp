@@ -15,6 +15,7 @@
 #include "./main_api.h"
 #include "./main_input.h"
 #include "./scene/scene.h"
+#include "./scene/scene_object.h"
 #include "./scene/physics.h"
 #include "./scene/collision_cache.h"
 #include "./scene/scenegraph.h"

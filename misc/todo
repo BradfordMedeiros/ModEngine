@@ -1,31 +1,33 @@
-Features:
+4 - 1 hour sessions in this next week for 3d modeling
+-> spend on the art and make models or levels
 
 next todo:
-* generalize shadow code (plumb in correct shadow map)
-* recorder -> generalize all attributes
-* serialization of attributes incomplete/ broken
-* better movie playback
-  - add color
-  - add audio 
+
 * separate scenegraph from object rendering
+
 * fix animation system
   - allow model posing
   - inverse kinematics
-  - write mocap system
+
+* recorder -> generalize all attributes
 * ai system goals 
 * cleanup physics code
 * scoping of scenes (all objects are in shared namespace)
-* fix memory reference incorrectness for scheme
 
 ======================
 
 need tos, but kind of put offish:
+* serialization of attributes incomplete/ broken
+* better movie playback - add audio  (swr_convert?)
+* fix memory reference incorrectness for scheme
+* generalize shadow code (plumb in correct shadow map)
 - performance profiling
 - better framepacing
 - fix networking code
 - for attributes, pass around runtime symbols/atoms/whatever instead of strings
 * heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
 * automatic world chunking ==> take every loaded scene, and then divide these up into chunks
+* portals need to handle occlusion of an object better (if something is behind the portal camera it can be seen)
 
 eventually:
 - c++ plugin system 
@@ -43,6 +45,7 @@ eventually:
 - better voxel editing
 - long running "dormant" scripts (eg for a quest system, or to just set some attributes)
 - central store system for data (sql style system?)
+- decal system
 
 mocap? 
 - passive ball based
