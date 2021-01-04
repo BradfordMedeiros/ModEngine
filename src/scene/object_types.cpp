@@ -719,6 +719,10 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
   if (obj.texture.textureOverloadName != ""){
     pairs.push_back(std::pair<std::string, std::string>("texture", obj.texture.textureOverloadName));
   }
+  if (!isIdentityVec(obj.tint)){
+    pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
+  }
+
   return pairs;  
 }
 std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj){
