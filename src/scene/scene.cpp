@@ -382,12 +382,9 @@ void addObjectToWorld(
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, id);
       },
-      [&world, sceneId, id, &interface](std::string sceneToLoad) -> void {
+      [&world, id, &interface](std::string sceneToLoad) -> void {
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
-        auto childSceneId = addSceneToWorld(world, sceneToLoad, interface);
-        auto rootId = world.sandbox.scenes.at(childSceneId).rootId;
-        addChildLink(world.sandbox.scenes.at(sceneId), rootId, id);
-        world.sandbox.scenes.at(childSceneId).isNested = true;
+        addLink(world.sandbox, addSceneToWorld(world, sceneToLoad, interface), id);
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas);

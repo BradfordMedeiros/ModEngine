@@ -30,4 +30,6 @@ struct AddSceneDataValues {
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData);
 
+void addLink(SceneSandbox& sandbox, objid childSceneId, objid id);
+
 #endif 

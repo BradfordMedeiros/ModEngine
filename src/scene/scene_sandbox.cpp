@@ -96,3 +96,8 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
   return data;
 }
 
+void addLink(SceneSandbox& sandbox, objid childSceneId, objid id){
+  auto rootId = sandbox.scenes.at(childSceneId).rootId;
+  addChildLink(sceneForId(sandbox, id), rootId, id);
+  sandbox.scenes.at(childSceneId).isNested = true;
+}
