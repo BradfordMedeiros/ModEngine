@@ -101,6 +101,19 @@ SceneDeserialization deserializeScene(std::string content, std::function<objid()
   return createSceneFromParsedContent(parseFormat(content), getNewObjectId);
 }
 
+GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj){
+  GameobjAttributes attributes {
+    .stringAttributes = {
+      {"fragshader", gameobj.fragshader},
+    },
+    .vecAttributes = {
+      {"position", transform.position },
+      {"scale",    transform.scale    },
+    },
+  };
+  return attributes;
+}
+
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
   objid rootId, 
@@ -111,9 +124,10 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId
 ){
-  std::map<std::string,  std::map<std::string, std::string>> subsceneInfos;
-
+  std::map<std::string,  std::map<std::string, std::string>> nameToAdditionalFields;
   std::map<objid, objid> nodeIdToRealId;
+  auto rootObj = scene.idToGameObjects.at(rootId);
+
   for (auto [nodeId, transform] : gameobjTransforms){
     if (nodeId == rootIdNode){
       continue;
@@ -121,20 +135,9 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
     objid id = getNewObjectId();
     nodeIdToRealId[nodeId] = id;
 
-    auto rootObj = scene.idToGameObjects.at(rootId);
-    GameobjAttributes attributes {
-      .stringAttributes = {
-        {"fragshader", rootObj.fragshader},
-      },
-      .vecAttributes = {
-        {"position", transform.position },
-        {"scale",    transform.scale    },
-      },
-    };
+    nameToAdditionalFields[names.at(nodeId)] = additionalFields.at(nodeId);
 
-    subsceneInfos[names.at(nodeId)] = additionalFields.at(nodeId);
-
-    auto gameobj = gameObjectFromFields(names.at(nodeId), rootObj.layer, id, attributes);
+    auto gameobj = gameObjectFromFields(names.at(nodeId), rootObj.layer, id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     addObjectToScene(scene, -1, names.at(nodeId), gameobj);
@@ -148,7 +151,7 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   }
   enforceRootObjects(scene);
 
-  return subsceneInfos;
+  return nameToAdditionalFields;
 } 
 
 std::vector<std::string> childnames(Scene& scene, GameObjectH& gameobjecth){   
