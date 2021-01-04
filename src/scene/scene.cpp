@@ -345,7 +345,7 @@ void addObjectToWorld(
 ){
     auto id =  scene.nameToId.at(name);
 
-    if (world.sandbox.idToScene.find(id) != world.sandbox.idToScene.end()){
+    if (idExists(world.sandbox, id)){
       std::cout << "id already in the scene: " << id << std::endl;
       assert(false);
     }
