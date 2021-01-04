@@ -32,7 +32,6 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 
 void addLink(SceneSandbox& sandbox, objid childSceneId, objid id);
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSandbox& sandbox,
-  Scene& scene, 
   objid rootId,
   objid rootIdNode, 
   std::map<objid, objid> childToParent, 
