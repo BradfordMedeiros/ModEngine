@@ -137,13 +137,6 @@ GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& 
   return gameObject;
 }
 
-std::string attributeOrEmpty(std::map<std::string, std::string>& stringAttributes, std::string field){
-  if (stringAttributes.find(field) != stringAttributes.end()){
-    return stringAttributes.at(field);
-  }
-  return "";
-}
-
 SerializationObject serialObjectFromFields(std::string layer, GameobjAttributes attributes){
   auto defaultObject = getDefaultObject(layer);
   setSerialObjFromAttr(defaultObject, attributes); 
