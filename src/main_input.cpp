@@ -330,13 +330,14 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
     if (fileType == IMAGE_EXTENSION){
       setTexture(selected(state.editor), paths[i]);
     }else if (fileType == AUDIO_EXTENSION){
-
+      std::cout << "AUDIO FILE: doing nothing" << std::endl;
     }else if (fileType == VIDEO_EXTENSION){
-
+      std::cout << "VIDEO FILE: doing nothing" << std::endl;
     }else if (fileType == MODEL_EXTENSION){
-
+      std::cout << "MODEL FILE: doing nothing" << std::endl;
     }else if (fileType == UNKNOWN_EXTENSION){
       std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
     }
   }
 }
+

@@ -34,13 +34,22 @@ std::vector<std::string> listAllFiles(std::filesystem::path path) {
   }
   return files;
 }
+
+std::optional<std::string> getExtension(std::string file){
+  auto parts = split(file, '.');
+  if (parts.size() >= 2){
+    return parts.at(parts.size() - 1);  
+  }
+  return std::nullopt;
+}
+
+
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions){
   std::vector<std::string> models;
   for (auto file : listAllFiles(folder)){
-    auto parts = split(file, '.');
-    if (parts.size() >= 2){
-      auto extension = parts.at(parts.size() - 1);
-
+    auto extensionData = getExtension(file);
+    if (extensionData.has_value()){
+      auto extension = extensionData.value();
       bool isValidExtension = false;
       for (auto knownExtension : extensions){
         if (extension == knownExtension){
@@ -56,24 +65,28 @@ std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector
   return models;
 }
 
-std::vector<std::string> imageExtensions = { "png", "jpg" };
-std::vector<std::string> audioExtensions = {};
+std::vector<std::string> imageExtensions = { "png", "jpg", "jpeg", "tga" };
+std::vector<std::string> audioExtensions = { };
 std::vector<std::string> videoExtensions = {};
-std::vector<std::string> modelExtensions = {};
+std::vector<std::string> modelExtensions = { "fbx", "dae", "obj" };
 
 FILE_EXTENSION_TYPE getFileType(std::string filepath){
-  if (std::find(imageExtensions.begin(), imageExtensions.end(), filepath) != imageExtensions.end()){
-    return IMAGE_EXTENSION;
+  auto extensionData = getExtension(filepath);
+  if(extensionData.has_value()){
+    auto extension = extensionData.value();
+    if (std::find(imageExtensions.begin(), imageExtensions.end(), extension) != imageExtensions.end()){
+      return IMAGE_EXTENSION;
+    }
+    if (std::find(audioExtensions.begin(), audioExtensions.end(), extension) != audioExtensions.end()){
+      return AUDIO_EXTENSION;
+    } 
+    if (std::find(videoExtensions.begin(), videoExtensions.end(), extension) != videoExtensions.end()){
+      return VIDEO_EXTENSION;
+    } 
+    if (std::find(modelExtensions.begin(), modelExtensions.end(), extension) != modelExtensions.end()){
+      return MODEL_EXTENSION;
+    } 
   }
-  if (std::find(audioExtensions.begin(), audioExtensions.end(), filepath) != audioExtensions.end()){
-    return AUDIO_EXTENSION;
-  } 
-  if (std::find(videoExtensions.begin(), videoExtensions.end(), filepath) != videoExtensions.end()){
-    return VIDEO_EXTENSION;
-  } 
-  if (std::find(modelExtensions.begin(), modelExtensions.end(), filepath) != modelExtensions.end()){
-    return MODEL_EXTENSION;
-  } 
   return UNKNOWN_EXTENSION;
 }
 

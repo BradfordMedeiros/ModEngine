@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
+#include <optional>
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
