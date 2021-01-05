@@ -66,8 +66,8 @@ std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector
 }
 
 std::vector<std::string> imageExtensions = { "png", "jpg", "jpeg", "tga" };
-std::vector<std::string> audioExtensions = { };
-std::vector<std::string> videoExtensions = {};
+std::vector<std::string> audioExtensions = { "wav", "mp3" };
+std::vector<std::string> videoExtensions = { "mkv", "avi", "webm" };
 std::vector<std::string> modelExtensions = { "fbx", "dae", "obj" };
 
 FILE_EXTENSION_TYPE getFileType(std::string filepath){

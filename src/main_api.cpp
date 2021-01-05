@@ -168,6 +168,7 @@ objid makeObjectAttr(std::string name, std::map<std::string, std::string> string
     .stringAttributes = stringAttributes,
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
+    .additionalFields = stringAttributes,
   };
   return addObjectToScene(world, world.sandbox.scenes.begin() -> first, name, attributes, interface);
 }

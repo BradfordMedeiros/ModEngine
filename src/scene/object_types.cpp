@@ -1067,7 +1067,7 @@ void processVideoFrame(GameObjectVideo* videoObj, std::function<void(std::string
     auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, videoObj -> video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
     auto numChannels = audioCodec -> channels;
 
-    uint8_t* bufferData = new uint8_t[bufferSize];
+    /*uint8_t* bufferData = new uint8_t[bufferSize];
     //https://stackoverflow.com/questions/21386135/ffmpeg-openal-playback-streaming-sound-from-video-wont-work
 
     std::cout << "num channels: " << numChannels << std::endl;
@@ -1078,7 +1078,7 @@ void processVideoFrame(GameObjectVideo* videoObj, std::function<void(std::string
    
 
 
-    playBufferedAudio(videoObj -> sound, videoObj -> video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);
+    playBufferedAudio(videoObj -> sound, videoObj -> video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);*/
   }
 }
 
