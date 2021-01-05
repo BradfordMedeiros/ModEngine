@@ -56,6 +56,26 @@ std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector
   return models;
 }
 
+std::vector<std::string> imageExtensions = { "png", "jpg" };
+std::vector<std::string> audioExtensions = {};
+std::vector<std::string> videoExtensions = {};
+std::vector<std::string> modelExtensions = {};
+
+FILE_EXTENSION_TYPE getFileType(std::string filepath){
+  if (std::find(imageExtensions.begin(), imageExtensions.end(), filepath) != imageExtensions.end()){
+    return IMAGE_EXTENSION;
+  }
+  if (std::find(audioExtensions.begin(), audioExtensions.end(), filepath) != audioExtensions.end()){
+    return AUDIO_EXTENSION;
+  } 
+  if (std::find(videoExtensions.begin(), videoExtensions.end(), filepath) != videoExtensions.end()){
+    return VIDEO_EXTENSION;
+  } 
+  if (std::find(modelExtensions.begin(), modelExtensions.end(), filepath) != modelExtensions.end()){
+    return MODEL_EXTENSION;
+  } 
+  return UNKNOWN_EXTENSION;
+}
 
 std::string trim(const std::string& str){
   size_t first = str.find_first_not_of(' ');

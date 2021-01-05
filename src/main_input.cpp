@@ -325,6 +325,18 @@ void onMouseButton(){
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
   for (int i = 0;  i < count;  i++){
-    std::cout << "dropped file: " << paths[i] << std::endl;
+    std::cout << "Detected dropped file: " << paths[i] << std::endl;
+    auto fileType = getFileType(paths[i]);
+    if (fileType == IMAGE_EXTENSION){
+      setTexture(selected(state.editor), paths[i]);
+    }else if (fileType == AUDIO_EXTENSION){
+
+    }else if (fileType == VIDEO_EXTENSION){
+
+    }else if (fileType == MODEL_EXTENSION){
+
+    }else if (fileType == UNKNOWN_EXTENSION){
+      std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
+    }
   }
 }

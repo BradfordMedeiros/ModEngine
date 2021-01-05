@@ -2,6 +2,7 @@
 #define MOD_UTIL
 
 #include <string>
+#include <algorithm>
 #include <fstream>
 #include <filesystem>
 #include <sstream>
@@ -19,6 +20,10 @@ void saveFile(std::string filepath, std::string content);
 void rmFile(std::string filepath);
 void appendFile(std::string filepath, std::string content);
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions);
+
+enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, VIDEO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
+FILE_EXTENSION_TYPE getFileType(std::string filepath);
+
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
 std::string join(std::vector<std::string> values, char delimeter);

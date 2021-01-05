@@ -262,10 +262,10 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
    BoneInfo boneInfo = processBones(mesh);
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
-   for (unsigned int i = 0; i < mesh->mNumVertices; i++){
+   for (unsigned int i = 0; i < mesh -> mNumVertices; i++){
      Vertex vertex;
-     vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-     vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z); 
+     vertex.position = glm::vec3(mesh -> mVertices[i].x, mesh -> mVertices[i].y, mesh -> mVertices[i].z);
+     vertex.normal = glm::vec3(mesh -> mNormals[i].x, mesh -> mNormals[i].y, mesh -> mNormals[i].z); 
      setDefaultBoneIndexesAndWeights(boneInfo.vertexBoneWeight, i, vertex.boneIndexes, vertex.boneWeights, NUM_BONES_PER_VERTEX);
 
      // load one layer of texture coordinates for now
@@ -277,14 +277,14 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
      vertices.push_back(vertex);
    } 
  
-   for (unsigned int i = 0; i < mesh->mNumFaces; i++){
-     aiFace face = mesh->mFaces[i];
+   for (unsigned int i = 0; i < mesh -> mNumFaces; i++){
+     aiFace face = mesh -> mFaces[i];
      for (unsigned int j = 0; j < face.mNumIndices; j++){
        indices.push_back(face.mIndices[j]);
      }
    }
 
-   aiMaterial* material = scene->mMaterials[mesh -> mMaterialIndex];
+   aiMaterial* material = scene -> mMaterials[mesh -> mMaterialIndex];
    
    int diffuseTextureCount = material -> GetTextureCount(aiTextureType_DIFFUSE);
    assert(diffuseTextureCount == 0 || diffuseTextureCount == 1);
@@ -354,9 +354,9 @@ void processNode(
 ModelData loadModel(std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
-   if (!scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
+   if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
       std::cerr << "error loading model" << std::endl;
-      throw std::runtime_error("Error loading model: does the file " + modelPath + " exist?");
+      throw std::runtime_error("Error loading model: does the file " + modelPath + " exist and is valid?");
    } 
 
    std::map<int32_t, MeshData> meshIdToMeshData;

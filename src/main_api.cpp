@@ -365,7 +365,7 @@ std::vector<TextureAndName> worldTextures(World& world){
 
 void setTexture(objid index, std::string textureName){
   if (world.textures.find(textureName) == world.textures.end()){
-    textureName = "./res/textures/default.jpg"; // if the texture does not exist, we just use default texture
+    loadTextureWorld(world, textureName);
   }
 
   auto textureId = world.textures.at(textureName).textureId;
