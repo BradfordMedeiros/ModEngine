@@ -22,6 +22,7 @@ struct physicsOpts {
   float restitution;
   float mass;
   float maxspeed;
+  float layer;
 };
 
 struct SerializationObject {

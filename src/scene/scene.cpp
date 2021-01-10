@@ -131,7 +131,10 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
       .friction = physicsOptions.friction,
       .restitution = physicsOptions.restitution,
       .mass = physicsOptions.mass,
+      .layer = physicsOptions.layer,
     };
+
+    std::cout << "layer is: " << opts.layer << std::endl;
 
     if (isHeightmapObj){
       rigidBody = addRigidBodyHeightmap(

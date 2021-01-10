@@ -38,6 +38,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeFloatSet(&object.physics.restitution, "physics_restitution", attributes, &zeroValue);
   safeFloatSet(&object.physics.mass, "physics_mass", attributes, &oneValue);
   safeFloatSet(&object.physics.maxspeed, "physics_maxspeed", attributes, &negOneValue); // -1 ?  does sign matter? 
+  safeFloatSet(&object.physics.layer, "physics_layer", attributes, &zeroValue);
 
   safeStringSet(&object.lookat, "lookat", attributes);
   safeStringSet(&object.script, "script", attributes);
@@ -188,6 +189,10 @@ void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta
   }
   if (field == "physics_maxspeed" && fValue != NULL){
     gameobj.physicsOptions.maxspeed = *fValue;
+    return;
+  }
+  if (field == "physics_layer" && fValue != NULL){
+    gameobj.physicsOptions.layer = *fValue;
     return;
   }
 

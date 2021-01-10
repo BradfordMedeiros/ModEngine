@@ -98,7 +98,7 @@ bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::str
   return false;
 }
 bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed" };
+  auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed", "physics_layer" };
   for (auto field : fields){
     if (attribute == field){
       attributes.numAttributes[attribute] = std::atof(payload.c_str());
