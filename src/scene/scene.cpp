@@ -134,8 +134,6 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
       .layer = physicsOptions.layer,
     };
 
-    std::cout << "layer is: " << opts.layer << std::endl;
-
     if (isHeightmapObj){
       rigidBody = addRigidBodyHeightmap(
         world.physicsEnvironment,
@@ -401,7 +399,6 @@ void addObjectToWorld(
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
-  std::cout << "scene size: " << world.sandbox.scenes.size() << std::endl;
   Scene& scene = world.sandbox.scenes.at(sceneId);
   return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping);
