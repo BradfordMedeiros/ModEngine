@@ -14,6 +14,14 @@
 #include "./bulletdebug.h"
 #include "./physics_common.h"
 
+// Semi modified contract:   We just expose a single int as a layer mask 
+// And then that gets used.  Nice and simple to reason about
+struct SimpleMaskFilterCallback : public btOverlapFilterCallback{
+  virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const {
+    return !(proxy0 -> m_collisionFilterMask & proxy1 -> m_collisionFilterMask);
+  }
+};
+
 struct physicsEnv {
   btDefaultCollisionConfiguration* colConfig;
   btCollisionDispatcher* dispatcher;
@@ -22,6 +30,7 @@ struct physicsEnv {
   btDiscreteDynamicsWorld* dynamicsWorld;
   CollisionCache collisionCache;
   bool hasDebugDrawer;
+  SimpleMaskFilterCallback* filterCallback;
 };
 
 physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);

@@ -1,5 +1,6 @@
 #include "./physics.h"
 
+
 physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer){
   std::cout << "INFO: INIT: physics system" << std::endl;
   auto colConfig = new btDefaultCollisionConfiguration();  
@@ -11,6 +12,7 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
   dynamicsWorld -> setGravity(btVector3(0.f, -9.81f, 0.f));
 
   CollisionCache collisionCache(onObjectEnter, onObjectLeave);
+  SimpleMaskFilterCallback* filterCallback = new SimpleMaskFilterCallback();
 
   physicsEnv env = {
     .colConfig = colConfig,
@@ -19,9 +21,11 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
     .constraintSolver = constraintSolver,
     .dynamicsWorld = dynamicsWorld,
     .collisionCache = collisionCache,
-    .hasDebugDrawer = debugDrawer != NULL
+    .hasDebugDrawer = debugDrawer != NULL,
+    .filterCallback = filterCallback,
   };
 
+  env.dynamicsWorld -> getPairCache() -> setOverlapFilterCallback(filterCallback);
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> setDebugDrawer(debugDrawer);
   }
@@ -124,26 +128,26 @@ void setPhysicsOptions(btRigidBody* body, glm::vec3 linear, glm::vec3 angular,  
 }
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling, rigidBodyOpts opts){  
   auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision, isCentered, scaling, opts);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
 btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision, scaling, opts);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
 btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision, scaling, opts);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
 
 btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
   auto rigidBodyPtr = createRigidBodyHeightmap(pos, rotation, isStatic, opts, data, width, height, scaling, minHeight, maxHeight);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
@@ -233,6 +237,7 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed){
 
 void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not
   std::cout << "INFO: DEINIT: physics system" << std::endl;
+  delete env.filterCallback;
   delete env.dynamicsWorld;
   delete env.constraintSolver;
   delete env.broadphase;
