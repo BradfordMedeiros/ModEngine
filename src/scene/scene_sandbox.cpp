@@ -59,7 +59,16 @@ void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, 
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+  if (scene.isNested){
+    return;
+  }
   traverseScene(sandbox, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
+}
+
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+  for (auto &[_, scene] : sandbox.scenes){
+    traverseScene(sandbox, scene, onObject);
+  }
 }
 
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){

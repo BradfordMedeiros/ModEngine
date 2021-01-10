@@ -22,6 +22,8 @@ bool idExists(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
+
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
 struct AddSceneDataValues {
