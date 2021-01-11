@@ -49,6 +49,7 @@
 #include "./drawing.h"
 #include "./editor.h"
 #include "./mocap.h"
+#include "./common/profiling.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -812,6 +813,16 @@ int main(int argc, char* argv[]){
    ("h,help", "Print help")
   ;        
 
+  PROFILE("DEBUG PRINTING",
+    std::cout << "my macro" << std::endl;
+
+    PROFILE("INNER PRINTING",
+      std::cout << "my macro inner" << std::endl;
+    )
+
+    std::cout << "my macro another line" << std::endl;
+  )
+
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
@@ -1198,9 +1209,10 @@ int main(int argc, char* argv[]){
 
     updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
-    // depth buffer from point of view of 1 light source (all eventually, but 1 for now)
+    // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
 
     std::vector<glm::mat4> lightMatrixs;
+
     for (int i = 0; i < lights.size(); i++){
       setActiveDepthTexture(i + 1);
       auto light = lights.at(i);
