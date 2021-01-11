@@ -4,13 +4,16 @@
 #include <iostream>
 #include <vector>
 #include "./util.h"
+#include <GLFW/glfw3.h>
 
 #define PROFILE( PROFILE_NAME, BODY ) \
-  startProfile(PROFILE_NAME, 0); \
+  {int value =  startProfile(PROFILE_NAME); \
   BODY \
-  stopProfile(0);
+  stopProfile(value); }
+  
 
-void startProfile(std::string description, int id);
+int startProfile(std::string description);
 void stopProfile(int id);
+std::string dumpLogInfo();
 
 #endif

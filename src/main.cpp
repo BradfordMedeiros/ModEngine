@@ -815,13 +815,16 @@ int main(int argc, char* argv[]){
 
   PROFILE("DEBUG PRINTING",
     std::cout << "my macro" << std::endl;
+    
 
     PROFILE("INNER PRINTING",
       std::cout << "my macro inner" << std::endl;
     )
 
+
     std::cout << "my macro another line" << std::endl;
   )
+
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();

@@ -5,6 +5,7 @@
 #include <iostream>
 #include "./state.h"
 #include "./common/util.h"
+#include "./common/profiling.h"
 
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));
 void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float));

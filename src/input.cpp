@@ -271,4 +271,8 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
       state.enableBloom = !state.enableBloom;
    }
+
+   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+      std::cout << dumpLogInfo() << std::endl;
+   }
 }
