@@ -173,68 +173,6 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
     state.manipulatorAxis = ZAXIS;
   }
 
-  /*if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-    if (state.mode == 0){
-      translate(0.1 * deltaTime, 0, 0);
-    }else if (state.mode == 1){
-      scale(0.1 * deltaTime, 0, 0);
-    }else if (state.mode == 2){
-      rotate(0.1 * deltaTime, 0, 0);
-    }
-  }
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-    if (state.mode == 0){
-      translate(-0.1 * deltaTime, 0, 0);
-    }else if (state.mode == 1){
-      scale(-0.1 * deltaTime, 0, 0);
-    }else if (state.mode == 2){
-      rotate(-0.1 * deltaTime, 0, 0);
-    }    
-  }
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-    if (state.mode == 0){
-      if (state.axis == 0){
-        translate(0, 0, 0.1 * deltaTime);
-      }else{
-        translate(0, -0.1 * deltaTime, 0);
-      }
-    }else if (state.mode == 1){
-      if (state.axis == 0){
-        scale(0, 0, -0.1 * deltaTime);
-      }else{
-        scale(0, -0.1 * deltaTime, 0);
-      }
-    }else if (state.mode == 2){
-      if (state.axis == 0){
-        rotate(0, 0, -0.1 * deltaTime);
-      }else{
-        rotate(0, -0.1 * deltaTime, 0);
-      }
-    }    
-  }
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-    if (state.mode == 0){
-      if (state.axis == 0){
-        translate(0, 0, 0.1 * deltaTime);
-      }else{
-        translate(0, 0.1 * deltaTime, 0);
-      }
-    }else if (state.mode == 1){
-      if (state.axis == 0){
-      scale(0, 0, 0.1 * deltaTime);
-	  }else{
-	    scale(0, 0.1 * deltaTime, 0);
-	  }   
-	}else if (state.mode == 2){
-	  if (state.axis == 0){
-	    rotate(0, 0, 0.1 * deltaTime);
-	  }else{
-	    rotate(0, 0.1 * deltaTime, 0);
-      }
-    }
-  }
-  */
-
    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
      onArrowKey(GLFW_KEY_RIGHT);
    }
