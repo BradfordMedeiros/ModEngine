@@ -813,19 +813,6 @@ int main(int argc, char* argv[]){
    ("h,help", "Print help")
   ;        
 
-  PROFILE("DEBUG PRINTING",
-    std::cout << "my macro" << std::endl;
-    
-
-    PROFILE("INNER PRINTING",
-      std::cout << "my macro inner" << std::endl;
-    )
-
-
-    std::cout << "my macro another line" << std::endl;
-  )
-
-
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
@@ -1155,6 +1142,7 @@ int main(int argc, char* argv[]){
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
     frameCount++;
     now = glfwGetTime();
@@ -1236,16 +1224,19 @@ int main(int argc, char* argv[]){
       renderWorld(world, selectionProgram, lightProjview, glm::mat4(1.0f), lights, portals, {}); 
     }
 
+    PROFILE(
+      "RENDERING-SELECTION",
 
-    setActiveDepthTexture(0);
-    // 1ST pass draws selection program shader to be able to handle selection 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0, 0.0, 0.0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_BLEND);
+      setActiveDepthTexture(0);
+      // 1ST pass draws selection program shader to be able to handle selection 
+      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+      glEnable(GL_DEPTH_TEST);
+      glClearColor(0.0, 0.0, 0.0, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glDisable(GL_BLEND);
     
-    renderWorld(world, selectionProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      renderWorld(world, selectionProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+    )
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -1288,44 +1279,48 @@ int main(int argc, char* argv[]){
 
     assert(portals.size() <= numPortalTextures);
 
-    std::map<objid, unsigned int> nextPortalCache;
-    for (int i = 0; i < portals.size(); i++){
-      auto portal = portals.at(i);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
-      glClearColor(0.0, 0.0, 0.0, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    PROFILE("PORTAL_RENDERING", 
+      std::map<objid, unsigned int> nextPortalCache;
+      for (int i = 0; i < portals.size(); i++){
+        auto portal = portals.at(i);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
+        glClearColor(0.0, 0.0, 0.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      auto portalViewMatrix = renderPortalView(portal, viewTransform);
-      renderWorld(world, shaderProgram, projection * portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
+        auto portalViewMatrix = renderPortalView(portal, viewTransform);
+        renderWorld(world, shaderProgram, projection * portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
       
-      nextPortalCache[portal.id] = portalTextures[i];
-    }
-    portalIdCache = nextPortalCache;
+        nextPortalCache[portal.id] = portalTextures[i];
+      }
+      portalIdCache = nextPortalCache;
+    )
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(framebufferProgram); 
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    PROFILE("MAIN_RENDERING",
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glUseProgram(framebufferProgram); 
+      glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glDisable(GL_DEPTH_TEST);
+      glBindVertexArray(quadVAO);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    // 2ND pass renders what we care about to the screen.
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+      // 2ND pass renders what we care about to the screen.
+      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST);
-    glStencilMask(0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_STENCIL_TEST);
+      glStencilMask(0xFF);
+      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-    glClearColor(0.0, 0.0, 0.0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+      glClearColor(0.0, 0.0, 0.0, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
-    renderWorld(world, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      renderWorld(world, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+    )
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     if (shouldCallItemSelected){
@@ -1341,7 +1336,6 @@ int main(int argc, char* argv[]){
         schemeBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
-   
 
     glDisable(GL_STENCIL_TEST);
 
@@ -1368,27 +1362,28 @@ int main(int argc, char* argv[]){
     // then we take framebuffer texture 3, and use that like the original framebuffer texture
     // run it through again, blurring in other fucking direction 
     // We swap to attachment 2 which was just the old bloom attachment for final render pass
-    glUseProgram(blurProgram);
-    glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture3, 0);
+    PROFILE("BLOOM-RENDERING",
+      glUseProgram(blurProgram);
+      glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture3, 0);
 
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
+      glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
 
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+      glBindVertexArray(quadVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
    
-    glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
-    glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    ///
+      glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
+      glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+    )
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1422,10 +1417,11 @@ int main(int argc, char* argv[]){
       state.takeScreenshot = false;
       saveScreenshot(screenshotPath);
     }
-  }
+  })
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
-  
+  std::cout << std::endl << dumpLogInfo() << std::endl;
+
   cleanup:   
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
