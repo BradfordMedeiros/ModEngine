@@ -6,7 +6,7 @@
 #include "./util.h"
 #include <GLFW/glfw3.h>
 
-#define PROFILE( PROFILE_NAME, BODY ) \
+#define PROFILE( PROFILE_NAME, BODY ... ) \
   {int value =  startProfile(PROFILE_NAME); \
   BODY \
   stopProfile(value); }
