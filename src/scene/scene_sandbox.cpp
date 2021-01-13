@@ -71,23 +71,27 @@ void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4,
   }
 }
 
-Transformation fullTransformation(SceneSandbox& sandbox, objid id){
+glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   Scene& scene = sceneForId(sandbox, id);
   while(scene.isNested){
     scene = sceneForId(sandbox, parentId(scene, scene.rootId));
   }
   
-  Transformation transformation = {};
+  glm::mat4 transformation = {};
   bool foundId = false;
   
   traverseScene(sandbox, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, std::string fragshader) -> void {
     if (traversedId == id){
       foundId = true;
-      transformation = getTransformationFromMatrix(model);
+      transformation = model;
     }
   });
   assert(foundId);
   return transformation;
+}
+
+Transformation fullTransformation(SceneSandbox& sandbox, objid id){
+  return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData){

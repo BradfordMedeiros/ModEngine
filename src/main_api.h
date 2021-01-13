@@ -154,4 +154,10 @@ void playSoundState(std::string source);
 
 unsigned int activeTextureId();
 
+struct VoxelQueryData {
+  int index;
+  GameObjectVoxel* voxelPtr;
+};
+std::vector<VoxelQueryData> getSelectedVoxels();
+
 #endif

@@ -4,8 +4,6 @@ extern World world;
 extern engineState state;
 extern SchemeBindingCallbacks schemeBindings;
 extern bool disableInput;
-extern GameObjectVoxel* voxelPtr;
-extern glm::mat4 voxelPtrModelMatrix;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
 extern DrawingParams drawParams;
@@ -43,32 +41,28 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
 }
 
 void expandVoxelUp(){
-  if (voxelPtr == NULL){
-    return;
+  for (auto voxelData : getSelectedVoxels()){
+    std::cout << "voxels: expand voxel up" << std::endl;
+    expandVoxels(voxelData.voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
   }
-  std::cout << "voxels: expand voxel up" << std::endl;
-  expandVoxels(voxelPtr -> voxel, 0, useYAxis ? -1 : 0, !useYAxis ? -1 : 0);
 }
 void expandVoxelDown(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  std::cout << "voxels: expand voxel down" << std::endl;
-  expandVoxels(voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
+  for (auto voxelData : getSelectedVoxels()){
+    std::cout << "voxels: expand voxel down" << std::endl;
+    expandVoxels(voxelData.voxelPtr -> voxel , 0, useYAxis ? 1 : 0, !useYAxis ? 1 : 0);
+  }  
 }
 void expandVoxelLeft(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  std::cout << "voxels: expand voxel left" << std::endl;
-  expandVoxels(voxelPtr -> voxel, -1, 0, 0);
+  for (auto voxelData : getSelectedVoxels()){
+    std::cout << "voxels: expand voxel left" << std::endl;
+    expandVoxels(voxelData.voxelPtr -> voxel, -1, 0, 0); 
+  }  
 }
 void expandVoxelRight(){
-  if (voxelPtr == NULL){
-    return;
-  }
-  std::cout << "voxels: expand voxel right" << std::endl;
-  expandVoxels(voxelPtr -> voxel, 1, 0, 0);
+  for (auto voxelData : getSelectedVoxels()){
+    std::cout << "voxels: expand voxel right" << std::endl;
+    expandVoxels(voxelData.voxelPtr -> voxel, 1, 0, 0);
+  }  
 }
 
 void onArrowKey(int key){
@@ -124,19 +118,18 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
     maybeChangeTexture(selected(state.editor));
   }
 
-  if (voxelPtr == NULL){
-    return;
-  }
-  
-  auto activeTexture = activeTextureId();
-  if (activeTexture != -1){
-    if (yoffset > 0){
-      applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, activeTexture);
+  for (auto voxelData : getSelectedVoxels()){ 
+    auto activeTexture = activeTextureId();
+    if (activeTexture != -1){
+      if (yoffset > 0){
+        applyTextureToCube(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels, activeTexture);
+      }
+      if (yoffset < 0){
+        applyTextureToCube(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels, activeTexture);
+      }
     }
-    if (yoffset < 0){
-      applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, activeTexture);
-    }
-  }
+  } 
+
 }
 
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
@@ -167,9 +160,11 @@ void handleSnapEasyRight(objid id){
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
-  if (key == 259 && voxelPtr != NULL){  // backspace
-    removeVoxel(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels);
-    voxelPtr -> voxel.selectedVoxels.clear();
+  if (key == 259){  // backspace
+    for (auto voxelData : getSelectedVoxels()){
+      removeVoxel(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels);
+      voxelData.voxelPtr -> voxel.selectedVoxels.clear();
+    }
   } 
 
   if (key == GLFW_KEY_LEFT && action == 1 && selected(state.editor) != -1){
@@ -306,21 +301,22 @@ void onMouseButton(){
  
   permaLines.clear();
   permaLines.push_back(line);
-  if (voxelPtr == NULL){
-    return;
-  }
-  glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
-  glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
-  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
-  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
-  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
-  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
-  std::cout << "length is: " << collidedVoxels.size() << std::endl;
-  if (collidedVoxels.size() > 0){
-    auto collision = collidedVoxels[0];
-    voxelPtr -> voxel.selectedVoxels.push_back(collision);
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
-  }
+
+  for (auto voxelData : getSelectedVoxels()){
+    auto voxelPtrModelMatrix = fullModelTransform(world.sand, voxelData.index);
+    glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
+    glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
+    glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
+    glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
+    // This raycast happens in model space of voxel, so specify position + ray in voxel model space
+    auto collidedVoxels = raycastVoxels(voxelData.voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
+    std::cout << "length is: " << collidedVoxels.size() << std::endl;
+    if (collidedVoxels.size() > 0){
+      auto collision = collidedVoxels[0];
+      voxelData.voxelPtr -> voxel.selectedVoxels.push_back(collision);
+      applyTextureToCube(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels, 2);
+    }
+  }  
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){

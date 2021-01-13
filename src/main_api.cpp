@@ -504,3 +504,18 @@ void playSoundState(std::string source){
 unsigned int activeTextureId(){
   return world.textures.at(activeTextureName(drawParams, world.textures)).textureId;
 }
+
+
+std::vector<VoxelQueryData> getSelectedVoxels(){
+  std::vector<VoxelQueryData> voxels;
+  for (auto id : selectedIds(state.editor, state.multiselectMode)){
+    auto maybeVoxel = getVoxel(world, id);
+    if (maybeVoxel.has_value()){
+      voxels.push_back(VoxelQueryData{
+        .index = id,
+        .voxelPtr = maybeVoxel.value(),
+      });
+    }
+  }
+  return voxels;
+}

@@ -78,10 +78,6 @@ std::string rawSceneFile;
 bool bootStrapperMode = false;
 NetCode netcode { };
 
-GameObjectVoxel* voxelPtr;
-int32_t voxelPtrId = -1;
-glm::mat4 voxelPtrModelMatrix = glm::mat4(1.f);
-
 engineState state = getDefaultState(1920, 1080);
 World world;
 SysInterface interface;
@@ -353,8 +349,10 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
 
   schemeBindings.onMouseCallback(button, action, mods);
 
-  if (button == 0 && voxelPtr != NULL){
-    voxelPtr -> voxel.selectedVoxels.clear();
+  if (button == 0){
+    for (auto voxelData : getSelectedVoxels()){
+      voxelData.voxelPtr -> voxel.selectedVoxels.clear();
+    }
   }
 }
 
@@ -402,22 +400,6 @@ void setObjectDimensions(int32_t index, float width, float height, float depth){
     std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
     getGameObject(world, selected).transformation.scale = newScale;
   } 
-}
-
-
-void updateVoxelPtr(){
-  auto voxelIndexes = getGameObjectsIndex<GameObjectVoxel>(world.objectMapping);
-  if (voxelIndexes.size() > 0){
-    int32_t id = voxelIndexes.at(0);
-    GameObjectObj& toRender = world.objectMapping.at(id);
-    auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
-    assert(voxelObj != NULL);
-    voxelPtr = voxelObj;
-    voxelPtrId = id;    
-  }else{
-    voxelPtr = NULL;
-    voxelPtrId = -1;
-  }
 }
 
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
@@ -511,10 +493,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
 
   traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
     assert(id >= 0);
-    if (id == voxelPtrId){
-      voxelPtrModelMatrix = modelMatrix;
-    }
-    
+
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
     auto newShader = getShaderByName(shader, shaderProgram);
     setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
@@ -1197,8 +1176,6 @@ int main(int argc, char* argv[]){
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
-
-    updateVoxelPtr();   // this should be removed.  This basically picks a voxel id to be the one we work on. Better would to just have some way to determine this (like with the core selection mechanism)
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
 
