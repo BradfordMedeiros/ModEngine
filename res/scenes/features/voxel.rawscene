@@ -1,0 +1,6 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+]voxel:position:0 0 0
+]voxel:from:4|1|1|1111
