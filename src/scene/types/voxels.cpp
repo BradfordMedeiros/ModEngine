@@ -120,6 +120,11 @@ VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
   return state;
 }
 
+std::string serializeVoxelState(Voxels& voxels){
+  auto header = std::to_string(voxels.numWidth) + "|" + std::to_string(voxels.numHeight) + "|" + std::to_string(voxels.numDepth) + "|";
+  return header + ">>missing data";
+}
+
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
   std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ") -- " << textureId << std::endl;
   chunk.textures.at(x).at(y).at(z) = textureId;
