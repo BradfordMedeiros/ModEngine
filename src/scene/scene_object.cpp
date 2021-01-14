@@ -57,8 +57,8 @@ std::optional<GameObjectVoxel*> getVoxel(World& world, objid id){
   if (world.objectMapping.find(id) == world.objectMapping.end()){
     return std::nullopt;
   }
-  auto objectVoxel = world.objectMapping.at(id);
-  auto voxelObject = std::get_if<GameObjectVoxel>(&objectVoxel);
+  GameObjectObj& objectVoxel = world.objectMapping.at(id);
+  GameObjectVoxel* voxelObject = std::get_if<GameObjectVoxel>(&objectVoxel);
   if (voxelObject == NULL){
     return std::nullopt;
   }

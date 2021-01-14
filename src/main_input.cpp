@@ -303,7 +303,7 @@ void onMouseButton(){
   permaLines.push_back(line);
 
   for (auto voxelData : getSelectedVoxels()){
-    auto voxelPtrModelMatrix = fullModelTransform(world.sand, voxelData.index);
+    auto voxelPtrModelMatrix = fullModelTransform(world.sandbox, voxelData.index);
     glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
     glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
     glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
