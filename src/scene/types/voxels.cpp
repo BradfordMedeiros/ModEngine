@@ -75,6 +75,7 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
   }
   return vox;
 }
+
 VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
   std::vector<std::vector<std::vector<int>>> cubes;
   std::vector<std::vector<std::vector<unsigned int>>> textures;
@@ -122,7 +123,18 @@ VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
 
 std::string serializeVoxelState(Voxels& voxels){
   auto header = std::to_string(voxels.numWidth) + "|" + std::to_string(voxels.numHeight) + "|" + std::to_string(voxels.numDepth) + "|";
-  return header + ">>missing data";
+
+  std::string content = "";
+  for (int row = 0; row < voxels.numWidth; row++){
+    for (int col = 0; col < voxels.numHeight; col++){
+      for (int depth = 0; depth < voxels.numDepth; depth++){
+        auto flattenedIndex = (row * voxels.numHeight * voxels.numDepth) + (col * voxels.numDepth) + depth;  
+        int value = voxels.cubes.at(row).at(col).at(depth);
+        content = content + std::to_string(value);
+      }
+    }
+  }
+  return header + content;
 }
 
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
