@@ -119,8 +119,9 @@ GameObjectLight createLight(std::map<std::string, std::string> additionalFields)
   return obj;
 }
 
-GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture){
-  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from"), defaultTexture), onVoxelBoundInfoChanged, defaultTexture);
+GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
+  auto textureString = additionalFields.find("fromtextures") == additionalFields.end() ? "" : additionalFields.at("fromtextures");
+  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
   GameObjectVoxel obj {
     .voxel = voxel,
   };
@@ -339,7 +340,7 @@ void addObject(
     mapping[id] = createLight(additionalFields);
   }else if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
-    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, defaultVoxelTexture.textureId);
+    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, defaultVoxelTexture.textureId, ensureTextureLoaded);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if(objectType == "scene"){

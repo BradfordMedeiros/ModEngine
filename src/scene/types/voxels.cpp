@@ -76,7 +76,7 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
   return vox;
 }
 
-VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
+VoxelState parseVoxelState(std::string voxelState, std::string voxelTextures, unsigned int defaultTexture, std::function<Texture(std::string)> loadTexture){
   std::vector<std::vector<std::vector<int>>> cubes;
   std::vector<std::vector<std::vector<unsigned int>>> textures;
 
@@ -87,10 +87,21 @@ VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
   std::string voxelData = voxelStrings.at(3);
   assert(voxelData.size() == (numWidth * numHeight * numDepth));
 
+  auto textureStrings = split(voxelTextures, '|');
+  auto textureList = split(textureStrings.at(0), ',');
+
+  auto textureListString = textureStrings.at(0);
+  std::vector<int> texturePerVoxel;
+  for (char textureData : textureStrings.at(1)){
+    texturePerVoxel.push_back(atoi(&textureData));
+  }
+
   std::vector<int> textureValues;
   for (char textureData : voxelData){
     textureValues.push_back(atoi(&textureData));
   }
+
+  assert(texturePerVoxel.size() == textureValues.size());
 
   for (int row = 0; row < numWidth; row++){
     std::vector<std::vector<int>> cubestack;
@@ -101,8 +112,12 @@ VoxelState parseVoxelState(std::string voxelState, unsigned int defaultTexture){
       for (int depth = 0; depth < numDepth; depth++){
         auto flattenedIndex = (row * numHeight * numDepth) + (col * numDepth) + depth;  
         auto value = textureValues.at(flattenedIndex);
+
+        auto textureId = texturePerVoxel.at(flattenedIndex);
+        auto textureForVoxel = textureList.at(textureId);
+        auto texture = loadTexture(textureForVoxel);
         cuberow.push_back(value == 0 ? 0 : 1);
-        texturerow.push_back(defaultTexture);
+        texturerow.push_back(texture.textureId);
       }
       cubestack.push_back(cuberow);
       texturestack.push_back(texturerow);
@@ -149,7 +164,7 @@ void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int tex
 
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged){    
   chunk.cubes.at(x).at(y).at(z) = 1;
-  applyTextureToCube(chunk, x, y, z, chunk.defaultTextureId);
+  applyTextureToCube(chunk, x, y, z, chunk.textures.at(x).at(y).at(z));
   chunk.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
   if (callOnChanged){
     chunk.onVoxelBoundInfoChanged();
@@ -157,7 +172,7 @@ void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged){
 }
 void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
   for (auto voxel: voxels){
-    addVoxel(chunk, voxel.x, voxel.y, voxel.z);
+    addVoxel(chunk, voxel.x, voxel.y, voxel.z, chunk.textures.at(voxel.x).at(voxel.y).at(voxel.z));
   }
 }
 
