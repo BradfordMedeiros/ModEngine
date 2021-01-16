@@ -40,7 +40,14 @@ struct VoxelState {
 
 Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture);
 VoxelState parseVoxelState(std::string voxelState, std::string voxelTextures, unsigned int defaultTexture, std::function<Texture(std::string)> loadTexture);
-std::string serializeVoxelState(Voxels& voxels);
+
+struct VoxelSerialization {
+  std::string voxelState;
+  std::string textureState;
+};
+VoxelSerialization serializeVoxelState(Voxels& voxels, std::function<std::string(int)> textureName);
+
+
 void addVoxel(Voxels& chunk, int x, int y, int z, bool callOnChanged = true);
 void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels);   
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId);

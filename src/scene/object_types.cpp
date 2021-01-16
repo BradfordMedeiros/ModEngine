@@ -741,9 +741,14 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight 
   pairs.push_back(std::pair<std::string, std::string>("color", serializeVec(obj.color)));
   return pairs;
 }  
-std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj){
+std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj, std::function<std::string(int)> textureName){
   std::vector<std::pair<std::string, std::string>> pairs;
-  pairs.push_back(std::pair<std::string, std::string>("from", serializeVoxelState(obj.voxel)));
+  auto serializedData = serializeVoxelState(obj.voxel, textureName);
+
+  pairs.push_back(std::pair<std::string, std::string>("from", serializedData.voxelState));
+  if (serializedData.textureState != ""){
+    pairs.push_back(std::pair<std::string, std::string>("fromtextures", serializedData.textureState));
+  }
   return pairs;
 }  
 std::vector<std::pair<std::string, std::string>> serializeChannel(GameObjectChannel obj){
@@ -797,7 +802,7 @@ std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISli
   return pairs;
 }
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping){
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
   GameObjectObj objectToSerialize = mapping.at(id);
   auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
   if (meshObject != NULL){
@@ -817,7 +822,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   }
   auto voxelObject = std::get_if<GameObjectVoxel>(&objectToSerialize);
   if (voxelObject != NULL){
-    return serializeVoxel(*voxelObject);
+    return serializeVoxel(*voxelObject, getTextureName);
   }
   auto channelObject = std::get_if<GameObjectChannel>(&objectToSerialize);
   if (channelObject != NULL){

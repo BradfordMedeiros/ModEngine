@@ -136,20 +136,40 @@ VoxelState parseVoxelState(std::string voxelState, std::string voxelTextures, un
   return state;
 }
 
-std::string serializeVoxelState(Voxels& voxels){
+VoxelSerialization serializeVoxelState(Voxels& voxels, std::function<std::string(int)> textureName){
   auto header = std::to_string(voxels.numWidth) + "|" + std::to_string(voxels.numHeight) + "|" + std::to_string(voxels.numDepth) + "|";
 
   std::string content = "";
+  std::string textureContent = "todo_get_texturenames|";
+
+  std::map<int, std::string> textureIdToName;
+  std::vector<int> textureIds;
+
   for (int row = 0; row < voxels.numWidth; row++){
     for (int col = 0; col < voxels.numHeight; col++){
       for (int depth = 0; depth < voxels.numDepth; depth++){
         auto flattenedIndex = (row * voxels.numHeight * voxels.numDepth) + (col * voxels.numDepth) + depth;  
         int value = voxels.cubes.at(row).at(col).at(depth);
         content = content + std::to_string(value);
+        auto texId = voxels.textures.at(row).at(col).at(depth);
+        textureIdToName[texId] = textureName(texId);
+        textureIds.push_back(texId);
       }
     }
   }
-  return header + content;
+
+  for (auto &[textureId, textureName] : textureIdToName){
+    
+  }
+
+  for (auto textureId : textureIds){
+    textureContent = textureContent + std::to_string(textureId);
+  }
+
+  return  VoxelSerialization {
+    .voxelState = header + content,
+    .textureState = textureContent,
+  };
 }
 
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    

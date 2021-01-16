@@ -398,10 +398,22 @@ void addObjectToWorld(
     );
 }
 
+std::string getTextureById(World& world, int id){
+  for (auto &[textureName, texture] : world.textures){
+    if (texture.textureId == id){
+      return textureName;
+    }
+  }
+  assert(false);
+  return "";
+}
+
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
   Scene& scene = world.sandbox.scenes.at(sceneId);
   return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, world.objectMapping);
+    return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
+      return getTextureById(world, textureId);
+    });
   }, includeIds);
 } 
 
@@ -411,7 +423,9 @@ std::string serializeObject(World& world, objid id, std::string overridename){
     scene, 
     id, 
     [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-      return getAdditionalFields(objectId, world.objectMapping);
+      return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
+        return getTextureById(world, textureId);
+      });
     }, 
     false,
     overridename

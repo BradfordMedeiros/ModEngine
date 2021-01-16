@@ -291,7 +291,7 @@ void renderObject(
   glm::mat4 model
 );
 
-std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping);
+std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id);
 void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std::map<std::string, std::string> attributes);
 
