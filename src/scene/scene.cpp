@@ -404,6 +404,7 @@ std::string getTextureById(World& world, int id){
       return textureName;
     }
   }
+  std::cout << "TEXTURE : lookup: could not find texture with id: " << id << std::endl;
   assert(false);
   return "";
 }

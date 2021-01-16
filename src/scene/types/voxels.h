@@ -2,6 +2,7 @@
 #define MOD_VOXELS
 
 #include <vector>
+#include <set>
 #include <string>
 #include <glm/glm.hpp>
 #include <iostream>
