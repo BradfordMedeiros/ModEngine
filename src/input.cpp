@@ -62,18 +62,60 @@ void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, dou
   }
 }
 
+bool allowControllerMovement = false;
+void processControllerInput(void (*moveCamera)(glm::vec3), float deltaTime){
+  if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
+    std::cout << "joystick 0 not present" << std::endl;
+    return;
+  }
+  std::cout << "joystick is present" << std::endl;
+  int count;
+  auto axises = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);  
+
+  std::cout << "== axises == ( ";
+  for (int i = 0; i < count; i++){
+    std::cout << " " << axises[i];
+  }
+
+  if (allowControllerMovement){
+    moveCamera(glm::vec3(40.0f * axises[0] * deltaTime, 0.0, 40.0f * axises[1] * deltaTime));
+  }
+ 
+  std::cout << " )" << std::endl;
+
+  int buttonCount;
+  auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+
+  std::cout << "== buttons == ( ";
+  for (int i = 0; i < buttonCount; i++){
+    if (buttons[i] == GLFW_PRESS){
+      std::cout << "DOWN ";
+    }else {
+      std::cout << "UP ";
+    }
+  }
+  if (buttons[0] == GLFW_PRESS){
+    allowControllerMovement = true;
+  }else{
+    allowControllerMovement = false;
+  }
+  std::cout << " )" << std::endl;
+}
+
 void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
   engineState& state, 
 	void (*translate)(float, float, float), 
   void (*scale)(float, float, float), 
   void (*rotate)(float, float, float),
-  void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
+  void (*moveCamera)(glm::vec3), 
+  void (*nextCamera)(void),
   void (*setObjectDimensions)(int32_t index, float width, float height, float depth),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
   void (*onDelete)()
 ){
+  processControllerInput(moveCamera, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }

@@ -1100,6 +1100,7 @@ int main(int argc, char* argv[]){
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCharCallback(window, keyCharCallback);
   glfwSetDropCallback(window, drop_callback);
+  glfwSetJoystickCallback(joystickCallback);
 
   float deltaTime = 0.0f; // Time between current frame and last frame
 
@@ -1322,7 +1323,6 @@ int main(int argc, char* argv[]){
     renderUI(crosshairSprite, currentFramerate, pixelColor);
 
     handleInput(disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
-    
 
     glfwPollEvents();
     

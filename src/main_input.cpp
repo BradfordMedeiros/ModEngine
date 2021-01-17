@@ -40,6 +40,15 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   processManipulator();
 }
 
+void joystickCallback(int jid, int event){
+  if (event == GLFW_CONNECTED){
+    std::cout << "gamepad connected" << std::endl;
+  }else if (event == GLFW_DISCONNECTED){
+    std::cout << "gamepad disconnected" << std::endl;
+    // this disconnection thing seems to suck.  Can turn controller off and no message here
+  }
+}
+
 void expandVoxelUp(){
   for (auto voxelData : getSelectedVoxels()){
     std::cout << "voxels: expand voxel up" << std::endl;
