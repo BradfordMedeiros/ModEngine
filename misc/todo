@@ -3,31 +3,35 @@
 
 next todo:
 
-* separate scenegraph from object rendering
-
 * fix animation system
   - allow model posing
   - inverse kinematics
 
 * recorder -> generalize all attributes
-* ai system goals 
-* cleanup physics code
-* scoping of scenes (all objects are in shared namespace)
 
 ======================
 
 need tos, but kind of put offish:
-* serialization of attributes incomplete/ broken
-* better movie playback - add audio  (swr_convert?)
-* fix memory reference incorrectness for scheme
+* improve performance of scene rendering by not actually traversing the scenegraph while rendering but rather use cached values (dirty when move and then recalc)
 * generalize shadow code (plumb in correct shadow map)
 - performance profiling
 - better framepacing
 - fix networking code
 - for attributes, pass around runtime symbols/atoms/whatever instead of strings
-* heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
 * automatic world chunking ==> take every loaded scene, and then divide these up into chunks
+* ai system goals 
+
+things to maybe reconsider:
+* scoping of scenes (all objects are in shared namespace)
+
+bugs:
+* heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
 * portals need to handle occlusion of an object better (if something is behind the portal camera it can be seen)
+* fix memory reference incorrectness for scheme
+* better movie playback - add audio  (swr_convert?)
+* serialization of attributes incomplete/ broken
+* physics -> fix parenting collision bug
+
 
 eventually:
 - c++ plugin system 
@@ -46,6 +50,16 @@ eventually:
 - long running "dormant" scripts (eg for a quest system, or to just set some attributes)
 - central store system for data (sql style system?)
 - decal system
+  -> figure out proper normal on the surface
+  -> be able to automatically despawn after time, or limit of them 
+  ? -> can this bank anything of of the emitter system? 
+
+- LOD
+- can voxels be made into quadtree style structure to allow subdivision + optimization of voxels ? 
+  --> some sort of optimizing to this? 
+  
+- other platforms -> emscripten/ (browser/android/ios)? 
+=======================================
 
 mocap? 
 - passive ball based
