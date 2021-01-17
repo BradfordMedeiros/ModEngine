@@ -61,6 +61,7 @@ Voxels createVoxels(VoxelState initialState, std::function<void()> onVoxelBoundI
     .boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth),
     .selectedVoxels = selectedVoxels,
     .onVoxelBoundInfoChanged = onVoxelBoundInfoChanged,
+    .defaultTextureId = defaultTexture,
   };
 
   for (int row = 0; row < numWidth; row++){
@@ -113,11 +114,15 @@ VoxelState parseVoxelState(std::string voxelState, std::string voxelTextures, un
         auto flattenedIndex = (row * numHeight * numDepth) + (col * numDepth) + depth;  
         auto value = textureValues.at(flattenedIndex);
 
-        auto textureId = texturePerVoxel.at(flattenedIndex);
-        auto textureForVoxel = textureList.at(textureId);
-        auto texture = loadTexture(textureForVoxel);
+        auto textureIndex = texturePerVoxel.at(flattenedIndex);
+        if (textureIndex == 0){
+          texturerow.push_back(defaultTexture);
+        }else{
+          auto textureForVoxel = textureList.at(textureIndex -1);
+          auto textureId = loadTexture(textureForVoxel).textureId;
+          texturerow.push_back(textureId);
+        }
         cuberow.push_back(value == 0 ? 0 : 1);
-        texturerow.push_back(texture.textureId);
       }
       cubestack.push_back(cuberow);
       texturestack.push_back(texturerow);
@@ -160,14 +165,21 @@ VoxelSerialization serializeVoxelState(Voxels& voxels, std::function<std::string
   int localId = 0;
   std::vector<std::string> texNames;
   for (auto id : realTexIds){
-    texIdToLocalId[id] = localId;
+    if (id == voxels.defaultTextureId){
+      continue;
+    }
+    texIdToLocalId[id] = localId + 1;
     localId++;
     texNames.push_back(textureName(id));
   }
 
   std::string textureContent = join(texNames, ',') + "|";
   for (auto textureId : textureIds){
-    textureContent = textureContent + std::to_string(texIdToLocalId[textureId]);
+    if (textureId == voxels.defaultTextureId){
+      textureContent = textureContent + "0";
+    }else{
+      textureContent = textureContent + std::to_string(texIdToLocalId[textureId]);
+    }
   }
 
   return  VoxelSerialization {
@@ -202,7 +214,7 @@ void addVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
 
 void removeVoxel(Voxels& chunk, int x, int y, int z){
   chunk.cubes.at(x).at(y).at(z) = 0;
-  applyTextureToCube(chunk, x, y, z, 0);
+  applyTextureToCube(chunk, x, y, z, chunk.defaultTextureId);
   chunk.boundInfo = generateVoxelBoundInfo(chunk.cubes, chunk.numWidth, chunk.numHeight, chunk.numDepth);
   chunk.onVoxelBoundInfoChanged();
 }
