@@ -63,12 +63,12 @@ void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, dou
 }
 
 bool allowControllerMovement = false;
-void processControllerInput(void (*moveCamera)(glm::vec3), float deltaTime){
+void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime){
   if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
-    std::cout << "joystick 0 not present" << std::endl;
+    //std::cout << "joystick 0 not present" << std::endl;
     return;
   }
-  std::cout << "joystick is present" << std::endl;
+  //std::cout << "joystick is present" << std::endl;
   int count;
   auto axises = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);  
 
@@ -77,14 +77,45 @@ void processControllerInput(void (*moveCamera)(glm::vec3), float deltaTime){
     std::cout << " " << axises[i];
   }
 
-  if (allowControllerMovement){
-    moveCamera(glm::vec3(40.0f * axises[0] * deltaTime, 0.0, 40.0f * axises[1] * deltaTime));
-  }
  
   std::cout << " )" << std::endl;
 
   int buttonCount;
   auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+
+  for (auto buttonMapping : remapper.buttonMappings){
+    if (buttonMapping.sourceKey < buttonCount){
+      if (buttons[buttonMapping.sourceKey] == GLFW_PRESS){
+        std::cout << "should remap this to: " << buttonMapping.destinationKey << std::endl;
+      }
+    }
+  }
+
+  float axis0Multiplier = 1.f;
+  float axis1Multiplier = 1.f;
+  float axis0Value = axises[0];
+  float axis1Value = axises[1];
+  for (auto axisConfig : remapper.axisConfigurations){
+    if (axisConfig.index == 0){
+      if (axisConfig.invert){
+        axis0Multiplier = -1.f;
+      }
+      if (axis0Value > axisConfig.deadzonemin && axis0Value < axisConfig.deadzonemax){
+        axis0Multiplier = 0.f;
+      }
+    }
+    if (axisConfig.index == 1){
+      if (axisConfig.invert){
+        axis1Multiplier = -1.f;
+      }
+      if (axis1Value > axisConfig.deadzonemin && axis1Value < axisConfig.deadzonemax){
+        axis1Multiplier = 0.f;
+      }
+    } 
+  }
+  if (allowControllerMovement){
+    moveCamera(glm::vec3(axis0Multiplier * 40.0f * axis0Value * deltaTime, 0.0, axis1Multiplier * 40.0f * axis1Value * deltaTime));
+  }
 
   std::cout << "== buttons == ( ";
   for (int i = 0; i < buttonCount; i++){
@@ -102,7 +133,11 @@ void processControllerInput(void (*moveCamera)(glm::vec3), float deltaTime){
   std::cout << " )" << std::endl;
 }
 
-void handleInput(bool disableInput, GLFWwindow *window, float deltaTime, 
+void handleInput(
+  KeyRemapper& remapper,
+  bool disableInput, 
+  GLFWwindow *window, 
+  float deltaTime, 
   engineState& state, 
 	void (*translate)(float, float, float), 
   void (*scale)(float, float, float), 
@@ -115,7 +150,7 @@ void handleInput(bool disableInput, GLFWwindow *window, float deltaTime,
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
   void (*onDelete)()
 ){
-  processControllerInput(moveCamera, deltaTime);
+  processControllerInput(remapper, moveCamera, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }

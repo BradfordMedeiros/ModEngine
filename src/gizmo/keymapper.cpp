@@ -39,8 +39,34 @@ KeyRemapper readMapping(std::string filemapping){
     });
   }
 
+  std::vector<KeyMapping> buttonMappings;                
+  buttonMappings.push_back(KeyMapping {
+    .sourceKey = 0,
+    .destinationKey = 65,
+  });
+  buttonMappings.push_back(KeyMapping {
+    .sourceKey = 1,
+    .destinationKey = 66,
+  });
+
+  std::vector<KeyAxisConfiguration> axisConfigurations; 
+  axisConfigurations.push_back(KeyAxisConfiguration{
+    .index = 1,
+    .invert = true,
+    .deadzonemin = -0.1f,
+    .deadzonemax = 0.1f,
+  });
+  axisConfigurations.push_back(KeyAxisConfiguration{
+    .index = 0,
+    .invert = true,
+    .deadzonemin = -0.1f,
+    .deadzonemax = 0.1f,
+  });
+
   KeyRemapper remapper {
     .mapping = mapping,
+    .buttonMappings = buttonMappings,
+    .axisConfigurations = axisConfigurations,
   };
   return remapper;
 }

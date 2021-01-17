@@ -11,8 +11,17 @@ struct KeyMapping {
   int destinationKey;
 };
 
+struct KeyAxisConfiguration {
+  int index;
+  bool invert;
+  float deadzonemin;
+  float deadzonemax;
+};
+
 struct KeyRemapper {
-  std::vector<KeyMapping> mapping;
+  std::vector<KeyMapping> mapping;                          // ascii value key to ascii value key
+  std::vector<KeyMapping> buttonMappings;                   // index of the controller to ascii value key
+  std::vector<KeyAxisConfiguration> axisConfigurations; 
 };
 
 KeyRemapper readMapping(std::string filemapping);
