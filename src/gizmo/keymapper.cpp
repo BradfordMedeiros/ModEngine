@@ -1,18 +1,46 @@
 #include "./keymapper.h"
 
-
 bool isAsciiValue(std::string value){
   return value.size() > 2 && value.at(0) == '\'' && value.at(value.size() - 1) == '\'';
 }
-int getValue(std::string trimmedValue){
-  if (isAsciiValue(trimmedValue)){
-    auto payload = trimmedValue.substr(1, trimmedValue.size() - 2);
-    assert(payload.size() == 1);
-    int character = payload.at(0);
-    return character;
-  }
+int parseAsciiValue(std::string trimmedValue){
+  auto payload = trimmedValue.substr(1, trimmedValue.size() - 2);
+  assert(payload.size() == 1);
+  int character = payload.at(0);
+  return character; 
+}
+
+bool isNamedValue(std::string value){
+  return value.at(0) == ':';
+}
+
+struct NamedValue {
+  std::string command;
+  int index;
+};
+NamedValue parseNamedValue(std::string value){
+  return NamedValue {
+    .command = "button", 
+    .index = 0,
+  };
+}
+
+int parseCharValue(std::string trimmedValue){
   return char(std::atoi(trimmedValue.c_str()));
 }
+
+enum KeyValueType { KEY_VALUE_ASCII, KEY_VALUE_CHAR, KEY_VALUE_NAMED };
+KeyValueType getKeyValueType(std::string trimmedValue){
+  if (isAsciiValue(trimmedValue)){
+    return KEY_VALUE_ASCII;
+  }else if (isNamedValue(trimmedValue)){
+    return KEY_VALUE_NAMED;
+  }
+  return KEY_VALUE_CHAR;
+}
+
+
+
 
 KeyRemapper readMapping(std::string filemapping){
   if (filemapping == ""){
@@ -20,6 +48,7 @@ KeyRemapper readMapping(std::string filemapping){
   }
 
   std::vector<KeyMapping> mapping;
+  std::vector<KeyMapping> buttonMappings;                
   std::string keyMapperContent = loadFile(filemapping);
 
   auto mappedLines = filterWhitespace(filterComments(split(keyMapperContent, '\n')));
@@ -29,25 +58,36 @@ KeyRemapper readMapping(std::string filemapping){
       std::cout << "INFO: key mapping " << filemapping << " is invalid\n" << line << std::endl;
       exit(1);
     }
-    int fromChar = getValue(trim(expression.at(0)));
-    int secondPart = getValue(trim(expression.at(1)));
-    assert(fromChar >= 0);
-    assert(secondPart >= 0);
-    mapping.push_back(KeyMapping{
-      .sourceKey = fromChar,
-      .destinationKey = secondPart,
-    });
-  }
 
-  std::vector<KeyMapping> buttonMappings;                
-  buttonMappings.push_back(KeyMapping {
-    .sourceKey = 0,
-    .destinationKey = 65,
-  });
-  buttonMappings.push_back(KeyMapping {
-    .sourceKey = 1,
-    .destinationKey = 66,
-  });
+    auto expr1 = trim(expression.at(0));
+    auto expr2 = trim(expression.at(1));
+    auto keyType = getKeyValueType(expr1);
+    auto keyType2 = getKeyValueType(expr2);
+
+    if ((keyType == KEY_VALUE_ASCII  || keyType == KEY_VALUE_CHAR) && (keyType2 == KEY_VALUE_ASCII || keyType2 == KEY_VALUE_CHAR)){
+      int fromChar = keyType == KEY_VALUE_ASCII ?  parseAsciiValue(expr1) : parseCharValue(expr1);
+      int secondPart = keyType2 == KEY_VALUE_ASCII ?  parseAsciiValue(expr2) : parseCharValue(expr2);
+      assert(fromChar >= 0);
+      assert(secondPart >= 0);
+      mapping.push_back(KeyMapping{
+        .sourceKey = fromChar,
+        .destinationKey = secondPart,
+      });
+    }else if (keyType == KEY_VALUE_NAMED && (keyType2 == KEY_VALUE_ASCII || keyType2 == KEY_VALUE_CHAR)){
+      std::cout << "Keymapping: not yet implemented" << std::endl;
+      auto namedValue = parseNamedValue(expr1);
+      int secondPart = keyType2 == KEY_VALUE_ASCII ?  parseAsciiValue(expr2) : parseCharValue(expr2);
+      if (namedValue.command == "button"){
+        buttonMappings.push_back(KeyMapping {
+          .sourceKey = namedValue.index,
+          .destinationKey = secondPart,
+        });
+      }
+    }else{
+      std::cout << "Keymapping: combination not supported" << std::endl;
+    }
+
+  }
 
   std::vector<KeyAxisConfiguration> axisConfigurations; 
   axisConfigurations.push_back(KeyAxisConfiguration{
