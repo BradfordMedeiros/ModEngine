@@ -52,13 +52,11 @@ KeyRemapper readMapping(std::string filemapping){
   std::vector<KeyAxisConfiguration> axisConfigurations; 
   axisConfigurations.push_back(KeyAxisConfiguration{
     .index = 1,
-    .invert = true,
     .deadzonemin = -0.1f,
     .deadzonemax = 0.1f,
   });
   axisConfigurations.push_back(KeyAxisConfiguration{
     .index = 0,
-    .invert = true,
     .deadzonemin = -0.1f,
     .deadzonemax = 0.1f,
   });
@@ -80,4 +78,14 @@ int getKeyRemapping(KeyRemapper& keymapper, int key){
     }
   }
   return remappedKey;  
+}
+
+KeyAxisConfiguration getAxisConfig(KeyRemapper& keymapper, int index){
+  for (auto axisConfig : keymapper.axisConfigurations){
+    if (axisConfig.index == index){
+      return axisConfig;
+    }
+  }
+  assert(false);
+  return KeyAxisConfiguration{};
 }

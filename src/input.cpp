@@ -62,7 +62,38 @@ void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, dou
   }
 }
 
-bool allowControllerMovement = false;
+
+void printControllerDebug(const unsigned char* buttons, int buttonCount){
+  std::cout << "== buttons == ( ";
+  for (int i = 0; i < buttonCount; i++){
+    if (buttons[i] == GLFW_PRESS){
+      std::cout << "DOWN ";
+    }else {
+      std::cout << "UP ";
+    }
+  }
+  std::cout << " )" << std::endl;
+}
+void printAxisDebug(const float* axises, int count){
+  std::cout << "== axises == ( ";
+  for (int i = 0; i < count; i++){
+    std::cout << " " << axises[i];
+  }
+  std::cout << " )" << std::endl;
+}
+
+float calcAxisValue(const float* axises, int count, int index, float deadzonemin, float deadzonemax, bool invert){
+  assert(index < count);
+  float axisValue = axises[index];
+  if (axisValue > deadzonemin && axisValue < deadzonemax){
+    return 0.f;
+  }
+  if (invert){
+    axisValue = axisValue * -1.f;
+  }
+  return axisValue;
+}
+
 void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime){
   if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
     //std::cout << "joystick 0 not present" << std::endl;
@@ -71,15 +102,6 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   //std::cout << "joystick is present" << std::endl;
   int count;
   auto axises = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);  
-
-  std::cout << "== axises == ( ";
-  for (int i = 0; i < count; i++){
-    std::cout << " " << axises[i];
-  }
-
- 
-  std::cout << " )" << std::endl;
-
   int buttonCount;
   auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
 
@@ -91,46 +113,17 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
     }
   }
 
-  float axis0Multiplier = 1.f;
-  float axis1Multiplier = 1.f;
-  float axis0Value = axises[0];
-  float axis1Value = axises[1];
-  for (auto axisConfig : remapper.axisConfigurations){
-    if (axisConfig.index == 0){
-      if (axisConfig.invert){
-        axis0Multiplier = -1.f;
-      }
-      if (axis0Value > axisConfig.deadzonemin && axis0Value < axisConfig.deadzonemax){
-        axis0Multiplier = 0.f;
-      }
-    }
-    if (axisConfig.index == 1){
-      if (axisConfig.invert){
-        axis1Multiplier = -1.f;
-      }
-      if (axis1Value > axisConfig.deadzonemin && axis1Value < axisConfig.deadzonemax){
-        axis1Multiplier = 0.f;
-      }
-    } 
-  }
-  if (allowControllerMovement){
-    moveCamera(glm::vec3(axis0Multiplier * 40.0f * axis0Value * deltaTime, 0.0, axis1Multiplier * 40.0f * axis1Value * deltaTime));
-  }
-
-  std::cout << "== buttons == ( ";
-  for (int i = 0; i < buttonCount; i++){
-    if (buttons[i] == GLFW_PRESS){
-      std::cout << "DOWN ";
-    }else {
-      std::cout << "UP ";
-    }
-  }
-  if (buttons[0] == GLFW_PRESS){
-    allowControllerMovement = true;
-  }else{
-    allowControllerMovement = false;
-  }
-  std::cout << " )" << std::endl;
+  auto axis1Config = getAxisConfig(remapper, 0);
+  auto axis2Config = getAxisConfig(remapper, 1);
+  moveCamera(
+    glm::vec3(
+      calcAxisValue(axises, count, 0, axis1Config.deadzonemin, axis1Config.deadzonemax, axis1Config.invert) * 40.0f  * deltaTime, 
+      0.0, 
+      calcAxisValue(axises, count, 1, axis2Config.deadzonemin, axis2Config.deadzonemax, axis2Config.invert) * 40.0f  * deltaTime
+    )
+  );
+  //printControllerDebug(buttons, buttonCount);
+  //printAxisDebug(axises, count);
 }
 
 void handleInput(
