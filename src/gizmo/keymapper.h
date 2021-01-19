@@ -16,6 +16,9 @@ struct KeyAxisConfiguration {
   bool invert;
   float deadzonemin;
   float deadzonemax;
+  bool shouldMapKey;
+  float amount;
+  int destinationKey;
 };
 
 struct KeyRemapper {
