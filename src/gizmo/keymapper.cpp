@@ -101,6 +101,13 @@ KeyRemapper readMapping(std::string filemapping){
     .deadzonemax = 0.1f,
   });
 
+  axisConfigurations.push_back(KeyAxisConfiguration{
+    .index = 5,
+    .shouldMapKey = true,
+    .amount = 0.7,
+    .destinationKey = 68,
+  });
+
   KeyRemapper remapper {
     .mapping = mapping,
     .buttonMappings = buttonMappings,

@@ -115,11 +115,21 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
 
   auto axis1Config = getAxisConfig(remapper, 0);
   auto axis2Config = getAxisConfig(remapper, 1);
+  auto axis5Config = getAxisConfig(remapper, 5);
+
+  auto axis1Value = calcAxisValue(axises, count, 0, axis1Config.deadzonemin, axis1Config.deadzonemax, axis1Config.invert); 
+  auto axis2Value = calcAxisValue(axises, count, 1, axis2Config.deadzonemin, axis2Config.deadzonemax, axis2Config.invert);
+  auto axis5Value = calcAxisValue(axises, count, 5, axis5Config.deadzonemin, axis5Config.deadzonemax, axis5Config.invert);
+
+  if (axis5Config.shouldMapKey && axis5Value > axis5Config.amount){
+    std::cout << "via mapping should trigger: " << axis5Config.destinationKey << std::endl;
+  }
+
   moveCamera(
     glm::vec3(
-      calcAxisValue(axises, count, 0, axis1Config.deadzonemin, axis1Config.deadzonemax, axis1Config.invert) * 40.0f  * deltaTime, 
+      axis1Value * 40.0f  * deltaTime, 
       0.0, 
-      calcAxisValue(axises, count, 1, axis2Config.deadzonemin, axis2Config.deadzonemax, axis2Config.invert) * 40.0f  * deltaTime
+      axis2Value * 40.0f  * deltaTime
     )
   );
   //printControllerDebug(buttons, buttonCount);
