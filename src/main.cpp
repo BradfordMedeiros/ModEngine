@@ -766,6 +766,7 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
 
+
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
@@ -1322,7 +1323,7 @@ int main(int argc, char* argv[]){
     }
     renderUI(crosshairSprite, currentFramerate, pixelColor);
 
-    handleInput(keyMapper, disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete);
+    handleInput(keyMapper, disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete, keyCharCallback, onJoystick);
 
     glfwPollEvents();
     

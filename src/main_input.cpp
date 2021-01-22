@@ -49,6 +49,14 @@ void joystickCallback(int jid, int event){
   }
 }
 
+void onJoystick(std::vector<JoyStickInfo> infos){
+  std::cout << "Joystick callback:" << std::endl;
+  for (auto info : infos){
+    std::cout << "( " << info.index << ", " << info.value << ")" << std::endl;
+  }
+}
+
+
 void expandVoxelUp(){
   for (auto voxelData : getSelectedVoxels()){
     std::cout << "voxels: expand voxel up" << std::endl;
@@ -141,11 +149,14 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 
 }
 
-void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
+void keyCharCallback(unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint); 
   applyKey(world.objectMapping, codepoint, [](std::string text) -> void {
     std::cout << "set text placeholder: " << text << std::endl;
-  });
+  }); 
+}
+void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
+  keyCharCallback(codepoint);
 }
 
 void handleSnapEasyLeft(objid id){

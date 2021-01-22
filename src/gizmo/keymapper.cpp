@@ -159,13 +159,3 @@ int getKeyRemapping(KeyRemapper& keymapper, int key){
   }
   return remappedKey;  
 }
-
-KeyAxisConfiguration getAxisConfig(KeyRemapper& keymapper, int index){
-  for (auto &[keyIndex, configuration] : keymapper.axisConfigurations){
-    if (keyIndex == index){
-      return configuration;
-    }
-  }
-  assert(false);
-  return KeyAxisConfiguration{};
-}

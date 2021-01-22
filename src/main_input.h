@@ -17,8 +17,10 @@
 std::string activeTextureName(std::map<std::string, Texture> worldTextures);
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void joystickCallback(int jid, int event);
+void onJoystick(std::vector<JoyStickInfo> infos);
 void onArrowKey(int key);
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void keyCharCallback(unsigned int codepoint);
 void keyCharCallback(GLFWwindow* window, unsigned int codepoint);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void onMouseButton();

@@ -12,6 +12,11 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
 void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float));
 void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, double yoffset);
 
+struct JoyStickInfo {
+  int index;
+  float value;
+};
+
 void handleInput(
   KeyRemapper& remapper,
   bool disableInput, 
@@ -26,7 +31,9 @@ void handleInput(
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
-  void (*onDelete)()
+  void (*onDelete)(),
+  void (*onKeyChar)(unsigned int codepoint),
+  void (*onJoystick)(std::vector<JoyStickInfo> infos)
 );
 
 #endif

@@ -97,7 +97,7 @@ float calcAxisValue(const float* axises, int count, int index, float deadzonemin
   return axisValue;
 }
 
-void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime){
+void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos)){
   if (!glfwJoystickPresent(GLFW_JOYSTICK_1)){
     //std::cout << "joystick 0 not present" << std::endl;
     return;
@@ -111,32 +111,23 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   for (auto [index, axisConfiguration] : remapper.axisConfigurations){
     if (axisConfiguration.hasKeyMapping && axisConfiguration.mapping.sourceKey < buttonCount){
       if (buttons[axisConfiguration.mapping.sourceKey] == GLFW_PRESS){
-        std::cout << "should remap this to: " << axisConfiguration.mapping.destinationKey << std::endl;
+        onKeyChar(axisConfiguration.mapping.destinationKey);
       }
     }
   }
 
-  auto axis1Config = getAxisConfig(remapper, 0);
-  auto axis2Config = getAxisConfig(remapper, 1);
-  auto axis5Config = getAxisConfig(remapper, 5);
-
-  auto axis1Value = calcAxisValue(axises, count, 0, axis1Config.deadzonemin, axis1Config.deadzonemax, axis1Config.invert); 
-  auto axis2Value = calcAxisValue(axises, count, 1, axis2Config.deadzonemin, axis2Config.deadzonemax, axis2Config.invert);
-  auto axis5Value = calcAxisValue(axises, count, 5, axis5Config.deadzonemin, axis5Config.deadzonemax, axis5Config.invert);
-
-  if (axis5Config.shouldMapKey && axis5Value > axis5Config.amount){
-    std::cout << "via mapping should trigger: " << axis5Config.destinationKey << std::endl;
+  std::vector<JoyStickInfo> joystickInfos;
+  for (auto [index, axisConfig] :  remapper.axisConfigurations){
+    auto axisValue = calcAxisValue(axises, count, index, axisConfig.deadzonemin, axisConfig.deadzonemax, axisConfig.invert); 
+    if (axisConfig.shouldMapKey && axisValue > axisConfig.amount){
+      onKeyChar(axisConfig.destinationKey);
+    }
+    joystickInfos.push_back(JoyStickInfo{
+      .index = index,
+      .value = axisValue,
+    });
   }
-  std::cout << "axis 1 value: " << axis1Value << std::endl;
-  std::cout << "axis 2 value: " << axis2Value << std::endl;
-
-  moveCamera(
-    glm::vec3(
-      axis1Value * 40.0f  * deltaTime, 
-      0.0, 
-      axis2Value * 40.0f  * deltaTime
-    )
-  );
+  onJoystick(joystickInfos);
   //printControllerDebug(buttons, buttonCount);
   //printAxisDebug(axises, count);
 }
@@ -156,9 +147,11 @@ void handleInput(
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
-  void (*onDelete)()
+  void (*onDelete)(),
+  void (*onKeyChar)(unsigned int codepoint),
+  void (*onJoystick)(std::vector<JoyStickInfo> infos)
 ){
-  processControllerInput(remapper, moveCamera, deltaTime);
+  processControllerInput(remapper, moveCamera, deltaTime, onKeyChar, onJoystick);
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }

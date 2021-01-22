@@ -30,6 +30,5 @@ struct KeyRemapper {
 
 KeyRemapper readMapping(std::string filemapping);
 int getKeyRemapping(KeyRemapper& keymapper, int key);
-KeyAxisConfiguration getAxisConfig(KeyRemapper& keymapper, int index);
 
 #endif
