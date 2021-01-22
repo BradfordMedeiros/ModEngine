@@ -83,7 +83,10 @@ void printAxisDebug(const float* axises, int count){
 }
 
 float calcAxisValue(const float* axises, int count, int index, float deadzonemin, float deadzonemax, bool invert){
-  assert(index < count);
+  if (index >= count){
+    std::cout << "index: " << index << ", count: " << count << std::endl;
+    assert(false);
+  }
   float axisValue = axises[index];
   if (axisValue > deadzonemin && axisValue < deadzonemax){
     return 0.f;
@@ -105,10 +108,10 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   int buttonCount;
   auto buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
 
-  for (auto buttonMapping : remapper.buttonMappings){
-    if (buttonMapping.sourceKey < buttonCount){
-      if (buttons[buttonMapping.sourceKey] == GLFW_PRESS){
-        std::cout << "should remap this to: " << buttonMapping.destinationKey << std::endl;
+  for (auto [index, axisConfiguration] : remapper.axisConfigurations){
+    if (axisConfiguration.hasKeyMapping && axisConfiguration.mapping.sourceKey < buttonCount){
+      if (buttons[axisConfiguration.mapping.sourceKey] == GLFW_PRESS){
+        std::cout << "should remap this to: " << axisConfiguration.mapping.destinationKey << std::endl;
       }
     }
   }
@@ -124,6 +127,8 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   if (axis5Config.shouldMapKey && axis5Value > axis5Config.amount){
     std::cout << "via mapping should trigger: " << axis5Config.destinationKey << std::endl;
   }
+  std::cout << "axis 1 value: " << axis1Value << std::endl;
+  std::cout << "axis 2 value: " << axis2Value << std::endl;
 
   moveCamera(
     glm::vec3(

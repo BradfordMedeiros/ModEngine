@@ -2,6 +2,7 @@
 #define MOD_KEYMAPPER
 
 #include <vector>
+#include <map>
 #include <string>
 #include <iostream>
 #include "../common/util.h"
@@ -12,19 +13,19 @@ struct KeyMapping {
 };
 
 struct KeyAxisConfiguration {
-  int index;
   bool invert;
   float deadzonemin;
   float deadzonemax;
   bool shouldMapKey;
   float amount;
   int destinationKey;
+  bool hasKeyMapping;
+  KeyMapping mapping;
 };
 
 struct KeyRemapper {
   std::vector<KeyMapping> mapping;                          // ascii value key to ascii value key
-  std::vector<KeyMapping> buttonMappings;                   // index of the controller to ascii value key
-  std::vector<KeyAxisConfiguration> axisConfigurations; 
+  std::map<int, KeyAxisConfiguration> axisConfigurations;
 };
 
 KeyRemapper readMapping(std::string filemapping);

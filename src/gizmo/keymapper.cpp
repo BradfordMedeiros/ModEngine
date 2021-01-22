@@ -70,8 +70,7 @@ KeyRemapper readMapping(std::string filemapping){
   }
 
   std::vector<KeyMapping> mapping;
-  std::vector<KeyMapping> buttonMappings;                
-  std::vector<KeyAxisConfiguration> axisConfigurations; 
+  std::map<int, KeyAxisConfiguration> axisConfigurations; 
   std::string keyMapperContent = loadFile(filemapping);
 
   auto mappedLines = filterWhitespace(filterComments(split(keyMapperContent, '\n')));
@@ -84,11 +83,11 @@ KeyRemapper readMapping(std::string filemapping){
       if (keyType == KEY_VALUE_NAMED){
         auto value = parseNamedValue(data);
         if (value.command == "axis-deadzone"){
-          axisConfigurations.push_back(KeyAxisConfiguration{
-            .index = value.index,
-            .deadzonemin = value.deadzonemin,
-            .deadzonemax = value.deadzonemax,
-          });
+          if (axisConfigurations.find(value.index) == axisConfigurations.end()){
+            axisConfigurations[value.index] = KeyAxisConfiguration{};
+          }
+          axisConfigurations[value.index].deadzonemin = value.deadzonemin;
+          axisConfigurations[value.index].deadzonemax = value.deadzonemax;
         }else{
           std::cout << "invalid command type" << std::endl;
           assert(false);
@@ -117,19 +116,21 @@ KeyRemapper readMapping(std::string filemapping){
         auto namedValue = parseNamedValue(expr1);
         int secondPart = keyType2 == KEY_VALUE_ASCII ?  parseAsciiValue(expr2) : parseCharValue(expr2);
         if (namedValue.command == "button"){
-          buttonMappings.push_back(KeyMapping {
+          if (axisConfigurations.find(namedValue.index) == axisConfigurations.end()){
+            axisConfigurations[namedValue.index] = KeyAxisConfiguration{};
+          }
+          axisConfigurations[namedValue.index].hasKeyMapping = true;
+          axisConfigurations[namedValue.index].mapping = KeyMapping {
             .sourceKey = namedValue.index,
             .destinationKey = secondPart,
-          });
+          };
         }else if (namedValue.command == "axis-trigger"){
-          axisConfigurations.push_back(
-            KeyAxisConfiguration{
-              .index = namedValue.index,
-              .shouldMapKey = true,
-              .amount = namedValue.trigger,
-              .destinationKey = secondPart,
-            }
-          );
+          if (axisConfigurations.find(namedValue.index) == axisConfigurations.end()){
+            axisConfigurations[namedValue.index] = KeyAxisConfiguration{};
+          }
+          axisConfigurations[namedValue.index].shouldMapKey = true;
+          axisConfigurations[namedValue.index].amount = namedValue.trigger;
+          axisConfigurations[namedValue.index].destinationKey = secondPart;
         }
       }else{
         std::cout << "Keymapping: combination not supported" << std::endl;
@@ -143,7 +144,6 @@ KeyRemapper readMapping(std::string filemapping){
 
   KeyRemapper remapper {
     .mapping = mapping,
-    .buttonMappings = buttonMappings,
     .axisConfigurations = axisConfigurations,
   };
   return remapper;
@@ -161,9 +161,9 @@ int getKeyRemapping(KeyRemapper& keymapper, int key){
 }
 
 KeyAxisConfiguration getAxisConfig(KeyRemapper& keymapper, int index){
-  for (auto axisConfig : keymapper.axisConfigurations){
-    if (axisConfig.index == index){
-      return axisConfig;
+  for (auto &[keyIndex, configuration] : keymapper.axisConfigurations){
+    if (keyIndex == index){
+      return configuration;
     }
   }
   assert(false);
