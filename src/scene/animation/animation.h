@@ -6,6 +6,11 @@
 #include "./animationdebug.h"
 #include "../common/util/loadmodel.h"
 
-void advanceAnimation(Animation& animation, float currentTime, float elapsedTime,  std::function<void(std::string, glm::mat4)> setBonePose);
+struct AnimationPose {
+  std::string channelName;
+  glm::mat4 pose;
+};
+
+std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime, float elapsedTime);
 
 #endif

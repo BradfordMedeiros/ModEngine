@@ -21,7 +21,7 @@ int findIndexForKey(std::vector<KeyType>& keys, float currentTick){
   return tick;
 }
 
-glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
+glm::mat4 poseForTick(AnimationChannel& channel, float currentTick){
   auto tickPosIndex = findIndexForKey(channel.positionKeys, currentTick);
   auto tickRotIndex = findIndexForKey(channel.rotationKeys, currentTick);
   auto tickScaleIndex = findIndexForKey(channel.scalingKeys, currentTick);
@@ -36,14 +36,20 @@ glm::mat4 advanceAnimationForNode(AnimationChannel& channel, float currentTick){
   return newPose;
 }
 
-void advanceAnimation(Animation& animation, float currentTime, float elapsedTime, std::function<void(std::string, glm::mat4)> setBonePose){
+
+std::vector<AnimationPose> animationPosesAtTime(Animation& animation, float currentTime, float elapsedTime){
   assert(animation.ticksPerSecond != 0);                                                      // some models can have 0 ticks, probably should just set a default rate for these
 
+  std::vector<AnimationPose> poses;
   auto currentTick = currentTime * animation.ticksPerSecond;                                  // 200 ticks / 100 ticks per second = 2 seconds
   //printAnimationInfo(animation, currentTime, elapsedTime, currentTick);
 
   for (auto channel : animation.channels){
-    glm::mat4 newNodePose = advanceAnimationForNode(channel, currentTick);
-    setBonePose(channel.nodeName, newNodePose);  
+    glm::mat4 newNodePose = poseForTick(channel, currentTick);
+    poses.push_back(AnimationPose{
+      .channelName = channel.nodeName,
+      .pose = newNodePose,
+    });
   }
+  return poses;
 }
