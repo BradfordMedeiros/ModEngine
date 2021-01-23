@@ -175,8 +175,11 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
   if (vertexBoneWeight.find(vertexId) != vertexBoneWeight.end()){
     weighting = vertexBoneWeight.at(vertexId);
   }
-  assert(weighting.size() <= size);
-  assert(size == 4);
+
+  if (weighting.size() > size || size != 4){
+    std::cout << "weighting size: " << weighting.size() << ", size: " << size << std::endl;
+    assert(false);
+  }
 
   for (int i = 0; i < size; i++){
     if (i < weighting.size()){

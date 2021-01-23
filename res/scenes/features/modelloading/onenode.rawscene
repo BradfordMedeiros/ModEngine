@@ -1,0 +1,9 @@
+
+onenode_and_onemesh:mesh:./res/models/modelloading/onenode_onemesh.dae
+onenode_and_onemesh:position:0 0 -5
+
+twonode_and_onemesheach:mesh:./res/models/modelloading/twonode_onemesheach.dae
+twonode_and_onemesheach:position:0 0 -10
+
+threenode_and_onemesheach_onechild:mesh:./res/models/modelloading/threenode_onemesheach_onechild.dae
+
