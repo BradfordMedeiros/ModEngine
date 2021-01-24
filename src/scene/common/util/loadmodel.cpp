@@ -373,11 +373,13 @@ ModelData loadModel(std::string modelPath){
    int localNodeId = -1;
    processNode(scene -> mRootNode, localNodeId, &localNodeId, 
     [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId](int nodeId, int meshId) -> void {
+      // load mesh
       MeshData meshData = processMesh(scene -> mMeshes[meshId], scene, modelPath);
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
     [&nodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
+      // add node
       names[nodeId] = name;
       aiVector3t<float> scaling;
       aiQuaterniont<float> rotation;
@@ -395,6 +397,7 @@ ModelData loadModel(std::string modelPath){
       }
     },
     [&childToParent](int parentId, int nodeId) -> void {
+      // add parent
       childToParent[parentId] = nodeId;
     }
   );
