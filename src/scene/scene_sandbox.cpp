@@ -89,6 +89,20 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   assert(foundId);
   return transformation;
 }
+glm::mat4 groupModelTransform(SceneSandbox& sandbox, objid id){
+  auto groupTransform = fullModelTransform(sandbox, getGroupId(sandbox, id));
+  auto modelTransform = fullModelTransform(sandbox, id);
+  // group * something = model (aka aX = b, so X = inv(A) * B)
+  // inverse(group) * model
+  auto groupToModel =  inverse(groupTransform) * modelTransform;
+  assert(groupTransform * groupToModel == modelTransform);
+  if (groupToModel == glm::mat4(1.f)){
+    std::cout << "it's teh identity" << std::endl;
+  }else{
+    std::cout << "not identity" << std::endl;
+  }
+  return groupToModel;
+}
 
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
