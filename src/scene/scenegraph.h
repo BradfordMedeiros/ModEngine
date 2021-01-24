@@ -60,8 +60,6 @@ std::vector<objid> listObjInScene(Scene& scene);
 
 void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
 
-Transformation getTransformationFromMatrix(glm::mat4 matrix);
-
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 GameObject& getGameObject(Scene& scene, objid id);
 GameObject& getGameObject(Scene& scene, std::string name);

@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <map>
 #include <vector>
 #include "./boundinfo.h"
@@ -39,5 +40,7 @@ struct GameobjAttributes {
   std::map<std::string, std::string> additionalFields;
   std::vector<std::string> children;
 };
+
+Transformation getTransformationFromMatrix(glm::mat4 matrix);
 
 #endif

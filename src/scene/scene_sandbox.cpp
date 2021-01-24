@@ -96,11 +96,6 @@ glm::mat4 groupModelTransform(SceneSandbox& sandbox, objid id){
   // inverse(group) * model
   auto groupToModel =  inverse(groupTransform) * modelTransform;
   assert(groupTransform * groupToModel == modelTransform);
-  if (groupToModel == glm::mat4(1.f)){
-    std::cout << "it's teh identity" << std::endl;
-  }else{
-    std::cout << "not identity" << std::endl;
-  }
   return groupToModel;
 }
 
