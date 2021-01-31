@@ -278,7 +278,8 @@ void selectItem(objid selectedId, Color pixelColor){
 
   applyPainting(selectedId);
 
-  auto groupid = getGroupId(world.sandbox, selectedId);
+  //auto groupid = getGroupId(world.sandbox, selectedId);
+  auto groupid = selectedId;
   auto selectedObject =  getGameObject(world, groupid);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
@@ -493,6 +494,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
 
   traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
     assert(id >= 0);
+    addPositionToRender(modelMatrix, parentModelMatrix);
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
     auto newShader = getShaderByName(shader, shaderProgram);
@@ -567,9 +569,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
   
-  if (state.showCameras){
-    drawTraversalPositions();   
-  }
+
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -578,6 +578,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
+
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (numChunkingGridCells > 0){
@@ -612,6 +614,10 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
   lines.clear();
   bluelines.clear();
+
+  if (state.showCameras){
+    drawTraversalPositions();   
+  }
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor){

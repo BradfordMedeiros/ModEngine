@@ -37,7 +37,6 @@ void main(){
     }else{          
       float totalWeight = aBoneWeight[0] + aBoneWeight[1] + aBoneWeight[2] + aBoneWeight[3];  // @TODO -> what if there's no weights?  Probably should just use identity
       float multiplier = 1 / totalWeight;
-      bool useIdentity = totalWeight < 0.1;
 
       mat4 mul = 
       (bones[aBoneIndex[0]] * aBoneWeight[0] * multiplier) + 
@@ -45,9 +44,6 @@ void main(){
       (bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) + 
       (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
-      if (useIdentity){
-        mul = mat4(1);
-      }
 
       modelPosition = mul * vec4(aPos.xyz, 1.0);
 

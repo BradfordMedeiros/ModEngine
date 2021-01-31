@@ -98,9 +98,41 @@ std::vector<Animation> processAnimations(const aiScene* scene){
   return animations;
 }
 
-glm::mat4 aiMatrixToGlm(aiMatrix4x4 from) { 
-  return glm::transpose(glm::make_mat4(&from.a1)); 
+
+aiMatrix4x4 glmMatrixToAi(glm::mat4 mat){
+  return aiMatrix4x4(
+    mat[0][0],mat[0][1],mat[0][2],mat[0][3],
+    mat[1][0],mat[1][1],mat[1][2],mat[1][3],
+    mat[2][0],mat[2][1],mat[2][2],mat[2][3],
+    mat[3][0],mat[3][1],mat[3][2],mat[3][3]
+  );
 }
+
+glm::mat4 aiMatrixToGlm(aiMatrix4x4& in_mat){
+  glm::mat4 tmp;
+  tmp[0][0] = in_mat.a1;
+  tmp[1][0] = in_mat.b1;
+  tmp[2][0] = in_mat.c1;
+  tmp[3][0] = in_mat.d1;
+
+  tmp[0][1] = in_mat.a2;
+  tmp[1][1] = in_mat.b2;
+  tmp[2][1] = in_mat.c2;
+  tmp[3][1] = in_mat.d2;
+
+  tmp[0][2] = in_mat.a3;
+  tmp[1][2] = in_mat.b3;
+  tmp[2][2] = in_mat.c3;
+  tmp[3][2] = in_mat.d3;
+
+  tmp[0][3] = in_mat.a4;
+  tmp[1][3] = in_mat.b4;
+  tmp[2][3] = in_mat.c4;
+  tmp[3][3] = in_mat.d4;
+  return tmp;
+}
+
+
 glm::vec3 aiVectorToGlm(aiVector3D& vec){
   return glm::vec3(vec.x, vec.y, vec.z);
 }
@@ -145,6 +177,9 @@ BoneInfo processBones(aiMesh* mesh){
     aiBone* bone = bones[i];
 
     auto offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix);
+    auto glmMatrix = glmMatrixToAi(offsetMatrix);
+    assert(glmMatrix == bone -> mOffsetMatrix);
+
     Bone meshBone {
       .name = bone -> mName.C_Str(),
       .offsetMatrix = glm::mat4(1.f),
@@ -380,7 +415,8 @@ ModelData loadModel(std::string modelPath){
     },
     [&nodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
       // add node
-      names[nodeId] = name;
+      names[nodeId] = name;  
+      
       aiVector3t<float> scaling;
       aiQuaterniont<float> rotation;
       aiVector3t<float> position;
@@ -388,8 +424,10 @@ ModelData loadModel(std::string modelPath){
       Transformation trans = {
         .position = glm::vec3(position.x, position.y, position.z),
         .scale = glm::vec3(scaling.x, scaling.y, scaling.z),
-        .rotation = glm::quat(1.f, 0, 0, 0)
+        .rotation = aiQuatToGlm(rotation),
       };
+
+      std::cout << "transformation: " << print(trans.position) << std::endl;
       nodeTransform[nodeId] = trans;
       if (nodeToMeshId.find(nodeId) == nodeToMeshId.end()){
         std::vector<int> emptyMeshList;

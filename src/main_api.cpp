@@ -215,12 +215,35 @@ void addAnimation(AnimationState& animationState, int32_t groupId, std::string a
   TimePlayback playback(
     initialTime, 
     [animation, meshNameToMeshes](float currentTime, float elapsedTime) -> void { 
-      playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime);  
+      playbackAnimation(animation, world.meshnameToBoneToParent, meshNameToMeshes, currentTime, elapsedTime,
+      [&world](std::string name, bool group) -> glm::mat4 {
+        auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
+        if (gameobj.has_value()){
+          if (group){
+            return groupModelTransform(world.sandbox, gameobj.value() -> id);
+          }
+          return fullModelTransform(world.sandbox, gameobj.value() -> id);
+        }
+        std::cout << "no value" << std::endl;
+        assert(false);
+        return glm::mat4(1.f);
+      },
+      [&world](std::string name, glm::mat4 pose) -> void {
+        auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
+        if (gameobj.has_value()){
+
+          gameobj.value() -> transformation = getTransformationFromMatrix(pose);
+        }else{
+          std::cout << "warning no bone node named: " << name << std::endl;
+          assert(false);
+        }
+      });
     }, 
     [groupId, &animationState]() -> void { 
       playbacksToRemove.push_back(groupId);
     },
-    animation.duration
+    animation.duration,
+    RESTART
   );  
   animationState.playbacks[groupId] = playback;
 }
