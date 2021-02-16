@@ -37,6 +37,7 @@ enum Axis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 std::string print(glm::vec3 vec);
 std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
+std::string print(glm::mat4 mat);
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec2 parseVec2(std::string positionRaw);
 std::vector<float> parseFloatVec(std::string value);
