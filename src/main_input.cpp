@@ -187,6 +187,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
   } 
 
+
   if (key == GLFW_KEY_LEFT && action == 1 && selected(state.editor) != -1){
     for (auto id : selectedIds(state.editor, state.multiselectMode)){
       handleSnapEasyLeft(id);
@@ -243,6 +244,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   if (key == GLFW_KEY_P && action == 1){
     state.shouldSelect = !state.shouldSelect;
+  }
+
+  if (key == GLFW_KEY_T && action == 1){
+    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+      // can have multiple objects w/ same group id, just waste
+      auto groupId = getGroupId(world.sandbox, id);
+      auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
+      updateBonePoses(meshNameToMeshes, getModelTransform);
+    }
   }
 
   if (key == 260 && action == 1){   // ins

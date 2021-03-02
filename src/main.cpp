@@ -278,7 +278,6 @@ void selectItem(objid selectedId, Color pixelColor){
 
   applyPainting(selectedId);
 
-  //auto groupid = getGroupId(world.sandbox, selectedId);
   auto groupid = selectedId;
   auto selectedObject =  getGameObject(world, groupid);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);

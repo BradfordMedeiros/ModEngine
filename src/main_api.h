@@ -160,4 +160,6 @@ struct VoxelQueryData {
 };
 std::vector<VoxelQueryData> getSelectedVoxels();
 
+glm::mat4 getModelTransform(std::string name, bool group);
+
 #endif

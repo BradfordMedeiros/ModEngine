@@ -104,3 +104,16 @@ void playbackAnimation(
     //assert(!notMatching);
   }
 }
+
+void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, bool)> getModelMatrix){
+  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
+    std::string meshName = meshNameToMeshes.meshNames.at(i);
+    Mesh& mesh = meshNameToMeshes.meshes.at(i);
+    
+    for (Bone& bone : mesh.bones){
+      auto boneTransform =  getModelMatrix(bone.name, true);
+      auto parentTransform = getModelMatrix("Armature", true);
+      bone.offsetMatrix =  glm::inverse(parentTransform) * boneTransform;
+    }
+  }
+}

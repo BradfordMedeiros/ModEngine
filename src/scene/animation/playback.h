@@ -12,4 +12,6 @@ void playbackAnimation(Animation animation, std::map<std::string, std::map<std::
   std::function<void(std::string, glm::mat4)> setPose
 );
 
+void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, bool)> getModelMatrix);
+
 #endif
