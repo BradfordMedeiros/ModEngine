@@ -7,11 +7,14 @@
 #include "../common/mesh.h"
 #include "./animation.h"
 
-void playbackAnimation(Animation animation, std::map<std::string, std::map<std::string, std::string>>& meshnameToBoneToParent, NameAndMesh meshNameToMeshes, float currentTime, float elapsedTime, 
-  std::function<glm::mat4(std::string, bool)> getModelMatrix,
+void playbackAnimation(Animation animation, 
+  NameAndMesh meshNameToMeshes, 
+  float currentTime, 
+  float elapsedTime, 
+  std::function<glm::mat4(std::string)> getModelMatrix,
   std::function<void(std::string, glm::mat4)> setPose
 );
 
-void updateBonePoses(std::map<std::string, std::map<std::string, std::string>>& meshnameToBoneToParent, NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, bool)> getModelMatrix);
+void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string)> getModelMatrix);
 
 #endif
