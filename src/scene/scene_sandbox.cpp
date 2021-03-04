@@ -90,19 +90,26 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return transformation;
 }
 glm::mat4 groupModelTransform(SceneSandbox& sandbox, objid id){
-  //auto gameobj = maybeGetGameObjectByName(sandbox, "Armature");
+  auto gameobj = maybeGetGameObjectByName(sandbox, "Armature");
   //auto gameobj = maybeGetGameObjectByName(sandbox, "onenodewithanimation");
    
   //auto gameobj = maybeGetGameObjectByName(sandbox, "SENTINAL_ARMATURE");
 
-  auto groupTransform = fullModelTransform(sandbox, getGroupId(sandbox, id));
-  //auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
+  //auto groupTransform = fullModelTransform(sandbox, getGroupId(sandbox, id));
+  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
 
   auto modelTransform = fullModelTransform(sandbox, id);
   // group * something = model (aka aX = b, so X = inv(A) * B)
   // inverse(group) * model
   auto groupToModel =  inverse(groupTransform) * modelTransform;
-  assert(groupTransform * groupToModel == modelTransform);
+
+  auto resultCheck = groupTransform * groupToModel;
+  if (false && resultCheck != modelTransform){
+    std::cout << "result_check = " << print(resultCheck) << std::endl;
+    std::cout << "model_transform = " << print(modelTransform) << std::endl;
+    assert(false);
+
+  }
   return groupToModel;
 }
 

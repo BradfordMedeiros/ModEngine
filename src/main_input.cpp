@@ -251,7 +251,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       // can have multiple objects w/ same group id, just waste
       auto groupId = getGroupId(world.sandbox, id);
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      updateBonePoses(meshNameToMeshes, getModelTransform);
+      updateBonePoses(world.meshnameToBoneToParent, meshNameToMeshes, getModelTransform);
     }
   }
 

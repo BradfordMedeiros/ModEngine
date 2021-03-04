@@ -217,7 +217,7 @@ glm::mat4 getModelTransform(std::string name, bool group){
     }
     return fullModelTransform(world.sandbox, gameobj.value() -> id);
   }
-  std::cout << "no value" << std::endl;
+  std::cout << "no value: " << name << std::endl;
   assert(false);
   return glm::mat4(1.f);  
 }

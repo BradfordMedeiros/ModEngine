@@ -56,13 +56,13 @@ void playbackAnimation(
     bool notMatching = false;
     std::cout << "=====================" << std::endl;
 
-    auto topModel =  getModelMatrix("onenodewithanimation", true);
+    //auto topModel =  getModelMatrix("onenodewithanimation", true);
     auto armatureModel =  getModelMatrix("Armature", true);
-    auto cubeModel =  getModelMatrix("Cube", true);
+    //auto cubeModel =  getModelMatrix("Cube", true);
 
-    std::cout << "top model: " << print(topModel) << std::endl;
+    //std::cout << "top model: " << print(topModel) << std::endl;
     std::cout << "armature model: " << print(armatureModel) << std::endl;
-    std::cout << "cube model: " << print(cubeModel) << std::endl;
+    //std::cout << "cube model: " << print(cubeModel) << std::endl;
 
     for (Bone& bone : mesh.bones){
       auto boneTransform =  getModelMatrix(bone.name, true);
@@ -82,7 +82,7 @@ void playbackAnimation(
 
 
       auto hasParent = boneToParent.find(bone.name) != boneToParent.end();
-      //auto parentTransform = hasParent ? getOffsetMatrix(boneToParent.at(bone.name), meshNameToMeshes) : glm::mat4(1.f);
+      auto parent2Transform = hasParent ? getOffsetMatrix(boneToParent.at(bone.name), meshNameToMeshes) : glm::mat4(1.f);
       
       auto parentTransform = getModelMatrix("Armature", true);
 
@@ -105,15 +105,44 @@ void playbackAnimation(
   }
 }
 
-void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, bool)> getModelMatrix){
+std::map<std::string, glm::mat4> initialBonePoses;
+
+void updateBonePoses(
+  std::map<std::string, std::map<std::string, std::string>>& meshnameToBoneToParent,
+  NameAndMesh meshNameToMeshes, 
+  std::function<glm::mat4(std::string, bool)> getModelMatrix
+){
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
     std::string meshName = meshNameToMeshes.meshNames.at(i);
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
-    
+    auto boneToParent = meshnameToBoneToParent.at(meshName);
+
     for (Bone& bone : mesh.bones){
       auto boneTransform =  getModelMatrix(bone.name, true);
       auto parentTransform = getModelMatrix("Armature", true);
-      bone.offsetMatrix =  glm::inverse(parentTransform) * boneTransform;
+      auto parent3Transform = getModelMatrix("onenodewithanimation", false);
+
+      auto hasParent = boneToParent.find(bone.name) != boneToParent.end();
+
+
+      auto parent2Transform = hasParent ? getOffsetMatrix(boneToParent.at(bone.name), meshNameToMeshes) : glm::mat4(1.f);
+
+
+      std::cout << "bonename: " << bone.name << " - has parent: " <<  hasParent << std::endl;
+      std::cout << "bone transform is: " << print(boneTransform) << std::endl;
+      if (initialBonePoses.find(bone.name) == initialBonePoses.end()){
+        initialBonePoses[bone.name] = boneTransform;
+      }else{
+        std::cout << "initial_bone_transform = " << print(initialBonePoses.at(bone.name)) << std::endl;
+        std::cout << "initial_bone_transform_inv = " << print(glm::inverse(initialBonePoses.at(bone.name))) << std::endl;
+        std::cout << "initial_bone_x = " << print(boneTransform * glm::inverse(initialBonePoses.at(bone.name)) ) << std::endl;
+      }
+      std::cout << "parent ( " <<  (hasParent ? boneToParent.at(bone.name) : "no parent") << ") transform is: " << print(parent2Transform) << std::endl;
+      std::cout << "parent_inv =  " << print(glm::inverse(parent2Transform)) << std::endl  << std::endl;
+
+
+
+      bone.offsetMatrix = boneTransform * glm::inverse(initialBonePoses.at(bone.name)) ;
     }
   }
 }
