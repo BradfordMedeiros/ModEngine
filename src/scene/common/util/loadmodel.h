@@ -48,7 +48,7 @@ struct Animation {
 struct Bone {
   std::string name;
   glm::mat4 offsetMatrix;
-  glm::mat4 initialOffsetMatrix;
+  glm::mat4 initialOffsetMatrix;  // segfault when try to remove this, why?
 };
 
 struct MeshData {
@@ -71,7 +71,6 @@ struct ModelData {
   std::map<int32_t, Transformation> nodeTransform;
   std::map<int32_t, std::string> names;
   std::vector<Animation> animations;
-  std::map<std::string, std::string> boneToParent;  // @TODO - multiple meshes can share same bone hierchy, but this map is copied by value, so easy optimization here
 };
 
 // this really should be "load gameobject" --> since need children mesh

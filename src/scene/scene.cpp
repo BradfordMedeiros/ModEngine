@@ -234,7 +234,6 @@ void addMesh(World& world, std::string meshpath){
   world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
     return loadTextureWorld(world, texture);
   });     
-  world.meshnameToBoneToParent[meshpath] = data.boneToParent;
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
@@ -349,10 +348,9 @@ void addObjectToWorld(
             if (meshAlreadyLoaded){
               continue;
             }
-            world.meshes[meshPath] = loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
+            world.meshes[meshPath] = loadMesh("./res/textures/wood.jpg", meshData, [&world](std::string texture) -> Texture {
               return loadTextureWorld(world, texture);
             });    
-            world.meshnameToBoneToParent[meshPath] = data.boneToParent;  
           } 
 
           auto newSerialObjs = multiObjAdd(

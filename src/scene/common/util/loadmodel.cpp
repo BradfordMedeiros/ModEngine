@@ -175,15 +175,9 @@ BoneInfo processBones(aiMesh* mesh){
   std::map<unsigned int, std::vector<BoneWeighting>> vertexToBones;
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
-
-    auto offsetMatrix = aiMatrixToGlm(bone -> mOffsetMatrix);
-    auto glmMatrix = glmMatrixToAi(offsetMatrix);
-    assert(glmMatrix == bone -> mOffsetMatrix);
-
     Bone meshBone {
       .name = bone -> mName.C_Str(),
       .offsetMatrix = glm::mat4(1.f),
-      .initialOffsetMatrix = offsetMatrix
     };
     meshBones.push_back(meshBone);
 
@@ -249,41 +243,6 @@ void dumpVerticesData(std::string modelPath, MeshData& model){
     std::cout << modelPath << " v: " << vertexInfo << std::endl;
   }
 } 
-
-int getIndexByName(std::map<int32_t, std::string>& names, std::string name){
-  for (auto &[id, nameInNames] : names){
-    if (nameInNames == name){
-      return id;
-    }
-  }
-  return -1;
-}
-bool hasBone(std::vector<Bone>&bones, std::string boneName){
-  for (auto &bone : bones){
-    if (bone.name == boneName){
-      return true;
-    }
-  }
-  return false;
-}
-std::map<std::string, std::string> getBoneHierarchy(std::map<int32_t, std::string>& names, std::map<int32_t, int32_t>& childToParent, std::map<int32_t, MeshData>& meshIdToMeshData){
-  std::map<std::string, std::string> boneToParent;
-  for (auto &[_, meshData] : meshIdToMeshData){
-    for (auto &bone : meshData.bones){
-      auto index = getIndexByName(names, bone.name);
-      assert(index != -1);
-      if (childToParent.find(index) != childToParent.end()){
-        auto parentIndex = childToParent.at(index);
-        auto parentName = names.at(parentIndex);
-        if (hasBone(meshData.bones, parentName)){
-          boneToParent[bone.name] = parentName; 
-        }
-      }
-    }
-  }
-  return boneToParent;
-}
-
 
 std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMaterial* material){
   aiString texturePath;
@@ -427,7 +386,6 @@ ModelData loadModel(std::string modelPath){
         .rotation = aiQuatToGlm(rotation),
       };
 
-      std::cout << "transformation: " << print(trans.position) << std::endl;
       nodeTransform[nodeId] = trans;
       if (nodeToMeshId.find(nodeId) == nodeToMeshId.end()){
         std::vector<int> emptyMeshList;
@@ -450,7 +408,6 @@ ModelData loadModel(std::string modelPath){
      .nodeTransform = nodeTransform,
      .names = names,
      .animations = animations,
-     .boneToParent = getBoneHierarchy(names, childToParent, meshIdToMeshData)
    };
    return data;
 }

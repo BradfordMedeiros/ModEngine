@@ -22,7 +22,6 @@ struct World {
   std::map<std::string, Mesh> meshes;
   std::map<std::string, Texture> textures;
   std::map<objid, std::vector<Animation>> animations;
-  std::map<std::string, std::map<std::string, std::string>> meshnameToBoneToParent;
   EmitterSystem emitters;
   std::function<void(GameObject&)> onObjectUpdate;
   std::function<void(GameObject&)> onObjectCreate;
