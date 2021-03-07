@@ -1,9 +1,6 @@
 #include "./input.h"
 
 void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
-    if (disableInput){
-      return;
-    }
     if(state.firstMouse){
         state.lastX = xpos;
         state.lastY = ypos;
@@ -17,6 +14,10 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
     state.lastY = ypos;
     state.offsetX = xoffset;
     state.offsetY = yoffset;
+
+    if (disableInput){
+      return;
+    }
 
     float sensitivity = 0.05;
     xoffset *= sensitivity;
