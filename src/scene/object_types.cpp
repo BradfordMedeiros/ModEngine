@@ -717,7 +717,6 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std:
     setEmitterEnabled(enabled);
     return;
   }
-
   assert(false);
 }
 

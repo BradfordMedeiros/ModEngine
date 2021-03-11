@@ -655,7 +655,7 @@ std::map<std::string, std::string> getAttributes(World& world, objid id){
 std::map<std::string, std::string> extractAttributes(std::map<std::string, std::string>& attr,  std::vector<std::string> attributes){
   std::map<std::string, std::string> attrToSet;
   for (auto attribute : attributes){
-    if (attr.find(attribute) != attr.end()){
+    if (attr.find(attribute) != attr.end()){ // but why don't i pass all of them in?  this seems dumb
       attrToSet[attribute] = attr.at(attribute);
     }    
   }
@@ -668,7 +668,7 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   setObjectAttributes(
     world.objectMapping, 
     id, 
-    extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }),
+    extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color", "state" }),
     [&world, id](bool enabled) -> void {
       std::cout << "id: " << id << " should be enabled: " << enabled << std::endl;
       setEmitterEnabled(world.emitters, id, enabled);
