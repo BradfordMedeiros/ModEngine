@@ -678,7 +678,9 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
   return attributes;
 }
 
-void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std::map<std::string, std::string> attributes){
+
+// TODO -> this needs updating hard.  
+void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std::map<std::string, std::string> attributes, std::function<void(bool)> setEmitterEnabled){
  GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL){
@@ -707,8 +709,12 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std:
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL){
-    std::cout << "todo update emitter" << std::endl;
-    assert(false);
+    std::cout << "attr.size() => " << attributes.size() << std::endl;
+    for (auto [key, value] : attributes){
+      std::cout << "attr: (" << key << ", " << value << ")" << std::endl;
+    }
+    auto enabled = attributes.find("state") != attributes.end() ? !(attributes.at("state") == "disabled") : true;
+    setEmitterEnabled(enabled);
     return;
   }
 

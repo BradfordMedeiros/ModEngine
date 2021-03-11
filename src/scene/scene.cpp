@@ -665,7 +665,15 @@ std::map<std::string, std::string> extractAttributes(std::map<std::string, std::
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
   // @TODO create complete lists for attributes. 
   // look toward applyattribute delta 
-  setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
+  setObjectAttributes(
+    world.objectMapping, 
+    id, 
+    extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }),
+    [&world, id](bool enabled) -> void {
+      std::cout << "id: " << id << " should be enabled: " << enabled << std::endl;
+      setEmitterEnabled(world.emitters, id, enabled);
+    }
+  );
   
   auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });
   GameObject& obj = getGameObject(world, id);

@@ -154,3 +154,13 @@ void emitNewParticle(EmitterSystem& system, objid emitterNodeId){
   // loop over emitters, check where emitterNodeId is the id, and forceAdd++
   // then add this logic in update emitters
 }
+
+void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled){
+  for (auto &emitter : system.emitters){
+    if (emitter.emitterNodeId == emitterNodeId){
+      emitter.enabled = enabled;
+      return;
+    }
+  }
+  assert(false);
+}

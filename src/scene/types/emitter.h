@@ -50,6 +50,7 @@ void updateEmitters(
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId);
+void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled);
 
 #endif
 
