@@ -13,3 +13,5 @@ platform:position:0 -5 0
 +particles:+physics_collision:nocollide
 +particles:+texture:../gameresources/textures/iguana.jpg
 +particles:+fragshader:./res/shaders/discard_lowintensity/fragment.glsl
++particles:state:enabled
++particles:script:./res/scenes/features/emitter-emit.scm
