@@ -162,4 +162,6 @@ std::vector<VoxelQueryData> getSelectedVoxels();
 
 glm::mat4 getModelTransform(std::string name);
 
+void scmEmit(objid id);
+
 #endif

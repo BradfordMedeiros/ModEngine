@@ -540,3 +540,7 @@ std::vector<VoxelQueryData> getSelectedVoxels(){
   }
   return voxels;
 }
+
+void scmEmit(objid id){
+  emit(world, id);
+}

@@ -32,12 +32,15 @@ struct Emitter {
   float lifetime;
   GameobjAttributes particleAttributes;
   std::vector<EmitterDelta> deltas;
+
+  bool enabled;
+  int numForceNextRound;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::vector<EmitterDelta> deltas);
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::vector<EmitterDelta> deltas, bool enabled);
 void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 
@@ -46,6 +49,7 @@ void updateEmitters(
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId);
 
 #endif
 

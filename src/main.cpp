@@ -994,7 +994,8 @@ int main(int argc, char* argv[]){
     setFloatState,
     setIntState,
     setTexture,
-    navPosition
+    navPosition, 
+    scmEmit
   );
 
   schemeBindings = getSchemeCallbacks();

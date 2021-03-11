@@ -385,8 +385,8 @@ void addObjectToWorld(
         std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
         addLink(world.sandbox, addSceneToWorld(world, sceneToLoad, interface), id);
       },
-      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas) -> void {
-        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas);
+      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
+        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas, enabled);
       },
       [&world](MeshData& meshdata) -> Mesh {
         return loadMesh("./res/textures/default.jpg", meshdata, [&world](std::string texture) -> Texture {
@@ -664,6 +664,7 @@ std::map<std::string, std::string> extractAttributes(std::map<std::string, std::
 
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
   // @TODO create complete lists for attributes. 
+  // look toward applyattribute delta 
   setObjectAttributes(world.objectMapping, id, extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color" }));
   
   auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });

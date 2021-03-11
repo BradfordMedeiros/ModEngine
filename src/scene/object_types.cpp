@@ -200,13 +200,14 @@ std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> addit
   return deltas;
 }
 
-GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>)> addEmitter, std::map<std::string, std::string> additionalFields){
+GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter, std::map<std::string, std::string> additionalFields){
   GameObjectEmitter obj {};
   float spawnrate = additionalFields.find("rate") != additionalFields.end() ? std::atof(additionalFields.at("rate").c_str()) : 1.f;
   float lifetime = additionalFields.find("duration") != additionalFields.end() ? std::atof(additionalFields.at("duration").c_str()) : 10.f;
   int limit = additionalFields.find("limit") != additionalFields.end() ? std::atoi(additionalFields.at("limit").c_str()) : 10;
+  auto enabled = additionalFields.find("state") != additionalFields.end() ? !(additionalFields.at("state") == "disabled") : true;
   assert(limit >= 0);
-  addEmitter(spawnrate, lifetime, limit, particleFields(additionalFields), emitterDeltas(additionalFields));
+  addEmitter(spawnrate, lifetime, limit, particleFields(additionalFields), emitterDeltas(additionalFields), enabled);
   return obj;
 }
 
@@ -325,7 +326,7 @@ void addObject(
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>)> addEmitter,
+  std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
   if (objectType == "default"){
@@ -703,6 +704,14 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std:
     lightObj -> color = parseVec(attributes.at("color"));
     return;
   }
+
+  auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
+  if (emitterObj != NULL){
+    std::cout << "todo update emitter" << std::endl;
+    assert(false);
+    return;
+  }
+
   assert(false);
 }
 

@@ -158,3 +158,7 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
   }
   return false;
 }
+
+void emit(World& world, objid id){
+  emitNewParticle(world.emitters, id);
+}

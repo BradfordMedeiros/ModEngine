@@ -9,7 +9,8 @@ void addEmitter(
   float spawnrate, 
   float lifetime, 
   GameobjAttributes particleAttributes, 
-  std::vector<EmitterDelta> deltas
+  std::vector<EmitterDelta> deltas,
+  bool enabled
 ){
   std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
 
@@ -24,6 +25,8 @@ void addEmitter(
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
     .deltas =  deltas,
+    .enabled = enabled,
+    .numForceNextRound = 0,
   };
   system.emitters.push_back(emitter);
 }
@@ -91,6 +94,9 @@ void updateEmitters(
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
   for (auto &emitter : system.emitters){
+    if (!emitter.enabled){
+      continue;
+    }
     for (auto particle : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
       for (auto delta : emitter.deltas){
@@ -110,6 +116,9 @@ void updateEmitters(
   }
 
   for (auto &emitter : system.emitters){
+    if (!emitter.enabled){
+      continue;
+    }
     if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
       emitter.currentParticles-= 1;
       emitter.initTime = currentTime;
@@ -124,6 +133,9 @@ void updateEmitters(
   }
 
   for (auto &emitter : system.emitters){
+    if (!emitter.enabled){
+      continue;
+    }
     if (shouldSpawnParticle(emitter, currentTime)){
       emitter.currentParticles+= 1; 
       auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
@@ -135,4 +147,10 @@ void updateEmitters(
       std::cout << "INFO: particles: adding particle" << std::endl;
     }
   }
+}
+
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId){
+  std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
+  // loop over emitters, check where emitterNodeId is the id, and forceAdd++
+  // then add this logic in update emitters
 }

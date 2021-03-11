@@ -38,4 +38,6 @@ objid getIdForCollisionObject(World& world, const btCollisionObject* body);
 
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 
+void emit(World& world, objid id);
+
 #endif

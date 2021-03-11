@@ -72,7 +72,8 @@ void createStaticSchemeBindings(
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
   void (*setTexture)(objid id, std::string texture),
-  glm::vec3 (*navPosition)(objid, glm::vec3 pos)
+  glm::vec3 (*navPosition)(objid, glm::vec3 pos),
+  void (*scmEmit)(objid)
 );
 
 void defineFunctions(objid id, bool isServer);

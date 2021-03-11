@@ -762,6 +762,12 @@ SCM scmSql(SCM sqlQuery){
   return listToSCM(sqlResponse);
 } 
 
+void (*_scmEmit)(objid id);
+SCM scmEmit(SCM gameobjId){
+  _scmEmit(scm_to_int32(gameobjId));
+  return SCM_UNSPECIFIED;
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -990,6 +996,8 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
   scm_c_define_gsubr("sql", 1, 0, 0, (void*)scmSql);
+
+  scm_c_define_gsubr("emit", 1, 0, 0, (void*)scmEmit);
 }
 
 
@@ -1053,7 +1061,8 @@ void createStaticSchemeBindings(
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
   void (*setTexture)(objid id, std::string texture),
-  glm::vec3 (*navPosition)(objid, glm::vec3 pos)
+  glm::vec3 (*navPosition)(objid, glm::vec3 pos),
+  void (*scmEmit)(objid)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -1139,4 +1148,5 @@ void createStaticSchemeBindings(
 
   _setTexture = setTexture;
   _navPosition = navPosition;
+  _scmEmit = scmEmit;
 }

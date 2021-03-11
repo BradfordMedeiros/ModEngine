@@ -265,7 +265,7 @@ void addObject(
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
   std::function<void(std::string)> loadScene,
-  std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta> deltas)> addEmitter,
+  std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta> deltas, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 );
 
