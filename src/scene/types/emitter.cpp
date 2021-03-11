@@ -94,9 +94,6 @@ void updateEmitters(
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
   for (auto &emitter : system.emitters){
-    if (!emitter.enabled){
-      continue;
-    }
     for (auto particle : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
       for (auto delta : emitter.deltas){
@@ -116,7 +113,7 @@ void updateEmitters(
   }
 
   for (auto &emitter : system.emitters){
-    if (!emitter.enabled){
+    if (!emitter.enabled && emitter.numForceNextRound == 0){
       continue;
     }
     if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
@@ -133,10 +130,14 @@ void updateEmitters(
   }
 
   for (auto &emitter : system.emitters){
-    if (!emitter.enabled){
+    if (!emitter.enabled && emitter.numForceNextRound == 0){
       continue;
     }
-    if (shouldSpawnParticle(emitter, currentTime)){
+    bool forceSpawn = emitter.numForceNextRound > 0;
+    if (shouldSpawnParticle(emitter, currentTime) || forceSpawn){
+      if (forceSpawn){
+        emitter.numForceNextRound-= 1;
+      }
       emitter.currentParticles+= 1; 
       auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
       emitter.particles.push_back(ActiveParticle {
@@ -151,8 +152,13 @@ void updateEmitters(
 
 void emitNewParticle(EmitterSystem& system, objid emitterNodeId){
   std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
-  // loop over emitters, check where emitterNodeId is the id, and forceAdd++
-  // then add this logic in update emitters
+  for (auto &emitter : system.emitters){
+    if (emitter.emitterNodeId == emitterNodeId){
+      emitter.numForceNextRound++;
+      return;
+    }
+  }
+  assert(false);
 }
 
 void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled){
