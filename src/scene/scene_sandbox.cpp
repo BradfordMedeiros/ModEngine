@@ -117,9 +117,9 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers){
   assert(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
-  SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId);
+  SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId, layers);
   sandbox.scenes[sceneId] = deserializedScene.scene;
   std::vector<objid> idsAdded;
   for (auto &[id, _] :  sandbox.scenes.at(sceneId).idToGameObjects){

@@ -43,6 +43,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeStringSet(&object.lookat, "lookat", attributes);
   safeStringSet(&object.script, "script", attributes);
   safeStringSet(&object.fragshader, "fragshader", attributes);
+  safeStringSet(&object.layer, "layer", attributes);
 
   // old default in getDefaultPhysics was false
   if (attributes.stringAttributes.find("physics") != attributes.stringAttributes.end()){
@@ -96,12 +97,11 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   }
   object.additionalFields = attributes.additionalFields;
   object.children = attributes.children;
-  object.layer = attributes.layer;
 }
 
-SerializationObject getDefaultObject(std::string layer){
-  GameobjAttributes attr{ .layer = layer };
-  SerializationObject obj{ .layer = layer };
+SerializationObject getDefaultObject(){
+  GameobjAttributes attr{ };
+  SerializationObject obj{};
   setSerialObjFromAttr(obj, attr);
   return obj;
 }
@@ -116,7 +116,7 @@ GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& 
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
   };
-  auto defaultObject = getDefaultObject(serialObj.layer);
+  auto defaultObject = getDefaultObject();
   setSerialObjFromAttr(defaultObject, attributes);
 
   GameObject gameObject = {
@@ -138,15 +138,14 @@ GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& 
   return gameObject;
 }
 
-SerializationObject serialObjectFromFields(std::string layer, GameobjAttributes attributes){
-  auto defaultObject = getDefaultObject(layer);
+SerializationObject serialObjectFromFields(GameobjAttributes attributes){
+  auto defaultObject = getDefaultObject();
   setSerialObjFromAttr(defaultObject, attributes); 
   return defaultObject;
 }
 
-GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes){
-  auto serialObj = serialObjectFromFields(layer, attributes);
-  serialObj.layer = layer;
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
+  auto serialObj = serialObjectFromFields(attributes);
   return gameObjectFromParam(name, id, serialObj);
 }
 

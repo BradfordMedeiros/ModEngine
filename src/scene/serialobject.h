@@ -53,7 +53,7 @@ struct GameObject {
   bool netsynchronize;
 };
 
-GameObject gameObjectFromFields(std::string name, std::string layer, objid id, GameobjAttributes attributes);
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes);
 void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta);
 
 #endif

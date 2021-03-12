@@ -29,23 +29,14 @@ void enforceRootObjects(Scene& scene){
   }
 }
 
-std::string layerForObject(ParsedContent& parseFormat, std::string objname){
-  for (auto token : parseFormat.tokens){
-    if (token.target == objname){
-      return token.layer;
-    }
-  }
-  return "default";
-}
-
 SceneDeserialization createSceneFromParsedContent(
-  ParsedContent parsedContent,  
-  std::function<objid()> getNewObjectId
+  std::vector<Token> tokens,  
+  std::function<objid()> getNewObjectId, 
+  std::vector<LayerInfo> layers
 ){
   Scene scene;
-  auto tokens = parsedContent.tokens;
-  std::sort(std::begin(parsedContent.layers), std::end(parsedContent.layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
-  scene.layers = parsedContent.layers;
+  std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
+  scene.layers = layers;
 
   auto serialGameAttrs = deserializeSceneTokens(tokens);
 
@@ -64,9 +55,9 @@ SceneDeserialization createSceneFromParsedContent(
       objid id = (gameAttr.stringAttributes.find("id") != gameAttr.stringAttributes.end()) ? 
         std::atoi(gameAttr.stringAttributes.at("id").c_str()) : 
         getNewObjectId();
-      gameobjs[name] = gameObjectFromFields(name, layerForObject(parsedContent, name), id, gameAttr);
+      gameobjs[name] = gameObjectFromFields(name, id, gameAttr);
     }else{
-      gameobjs[name] = gameObjectFromFields(name, layerForObject(parsedContent, name), scene.rootId, gameAttr); 
+      gameobjs[name] = gameObjectFromFields(name, scene.rootId, gameAttr); 
     }
   }
 
@@ -96,15 +87,16 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId){
+SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromParsedContent(parseFormat(content), getNewObjectId);
+  return createSceneFromParsedContent(parseFormat(content), getNewObjectId, layers);
 }
 
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj){
   GameobjAttributes attributes {
     .stringAttributes = {
       {"fragshader", gameobj.fragshader},
+      {"layer", gameobj.layer},
     },
     .vecAttributes = {
       {"position", transform.position },
@@ -137,7 +129,7 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
 
     nameToAdditionalFields[names.at(nodeId)] = additionalFields.at(nodeId);
 
-    auto gameobj = gameObjectFromFields(names.at(nodeId), rootObj.layer, id, defaultAttributesForMultiObj(transform, rootObj));
+    auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     addObjectToScene(scene, -1, names.at(nodeId), gameobj);

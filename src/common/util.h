@@ -75,4 +75,10 @@ struct Property {
   AttributeValue value;
 };
 
+struct LayerInfo {
+  std::string name;
+  int zIndex;
+  bool orthographic;
+};
+
 #endif

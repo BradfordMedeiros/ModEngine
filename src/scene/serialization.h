@@ -16,7 +16,6 @@ struct Token {
   std::string target;
   std::string attribute;
   std::string payload;
-  std::string layer;
 };
 
 struct Field {
@@ -24,16 +23,7 @@ struct Field {
   std::string type;
 };
 
-struct LayerInfo {
-  std::string name;
-  int zIndex;
-  bool orthographic;
-};
-struct ParsedContent {
-  std::vector<Token> tokens; 
-  std::vector<LayerInfo> layers;
-};
-ParsedContent parseFormat(std::string content);
+std::vector<Token> parseFormat(std::string content);
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields);
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");

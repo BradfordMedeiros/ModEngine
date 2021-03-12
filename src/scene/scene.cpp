@@ -461,7 +461,7 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
-  auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData, interface.layers);
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.deserializedScene.additionalFields);
   return sceneId;
 }
@@ -590,15 +590,13 @@ objid addObjectToScene(
   std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
-  auto gameobjectObj = gameObjectFromFields(name, "default", idToAdd, attributes);
+  auto gameobjectObj = gameObjectFromFields(name, idToAdd, attributes);
   return addSerialObject(world, sceneId, name, interface, attributes.additionalFields, attributes.children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
-  ParsedContent content = parseFormat(serializedObj);
-  assert(content.layers.at(0).name == "default");   // TODO probably should allow the layer to actually be specified but ok for now
-
-  auto serialAttrs = deserializeSceneTokens(content.tokens);
+  auto tokens = parseFormat(serializedObj);
+  auto serialAttrs = deserializeSceneTokens(tokens);
 
   std::cout << "SERIAL ATTR SIZE: " << serialAttrs.size() << std::endl;
   if (serialAttrs.size() > 1){
@@ -613,7 +611,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
 
-  auto gameobj = gameObjectFromFields(name, content.layers.at(0).name, idToAdd, attrObj);
+  auto gameobj = gameObjectFromFields(name, idToAdd, attrObj);
   return addSerialObject(world, sceneId, name, interface, attrObj.additionalFields, attrObj.children, gameobj, idsAdded);
 }
 

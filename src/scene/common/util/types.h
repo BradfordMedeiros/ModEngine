@@ -36,7 +36,6 @@ struct GameobjAttributes {
   std::map<std::string, glm::vec3> vecAttributes;
   
   // todo get rid of these fields
-  std::string layer;
   std::map<std::string, std::string> additionalFields;
   std::vector<std::string> children;
 };

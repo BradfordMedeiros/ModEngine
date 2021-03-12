@@ -1084,6 +1084,23 @@ int main(int argc, char* argv[]){
     .loadScript = loadScriptFromWorld,
     .unloadScript = unloadScript,
     .getCurrentTime = getTotalTime,
+    .layers = {
+      LayerInfo {
+        .name = "",
+        .zIndex = 0,
+        .orthographic = false,
+      },
+      LayerInfo {
+        .name = "transparency",
+        .zIndex = 1,
+        .orthographic = false,
+      },
+      LayerInfo {
+        .name = "ui",
+        .zIndex = 2,
+        .orthographic = true,
+      }
+    }
   };
 
   loadAllTextures();
