@@ -314,7 +314,6 @@ void teleportObject(objid objectId, objid portalId){
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
-  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos);
 
   auto obj1Name = getGameObject(world, obj1Id).name;
   auto obj2Name = getGameObject(world, obj2Id).name;
@@ -329,6 +328,7 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
     std::cout << "teleport " << obj1Name << " through " << obj2Name << std::endl;
     teleportObject(obj1Id, obj2Id);
   } 
+  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos);
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));

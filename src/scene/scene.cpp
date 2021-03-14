@@ -55,11 +55,9 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
   if (meshObj != NULL){
     std::vector<BoundInfo> boundInfos;
     auto meshes = getMeshesForGroupId(world, index).meshes;
-    std::cout << "INFO: number meshes for id: (" << std::to_string(index) << ")  -- " << std::to_string(meshes.size()) << std::endl;
     for (Mesh& mesh : meshes){
       boundInfos.push_back(mesh.boundInfo);
     }
-    std::cout << "size: " << boundInfos.size() << std::endl;
     boundInfo = getMaxUnionBoundingInfo(boundInfos);
   }
 
