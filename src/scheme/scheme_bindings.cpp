@@ -640,13 +640,6 @@ SCM scmSaveRecording(SCM recordingId, SCM filepath){
 }
 
 std::vector<HitObject> (*_raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
-std::vector<objid> doraycast(glm::vec3 pos, glm::quat direction, float maxDistance){
-  std::vector<objid> ids;
-  auto hitobjects = _raycast( pos, direction, maxDistance);
-
-  return ids;
-}
-
 SCM scmRaycast(SCM pos, SCM direction, SCM distance){
   auto hitObjects = _raycast(listToVec3(pos), scmListToQuat(direction), scm_to_double(distance));
   SCM list = scm_make_list(scm_from_unsigned_integer(hitObjects.size()), scm_from_unsigned_integer(0));
