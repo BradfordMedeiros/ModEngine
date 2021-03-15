@@ -25,7 +25,6 @@ physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObje
     .filterCallback = filterCallback,
   };
 
-  env.dynamicsWorld -> getPairCache() -> setOverlapFilterCallback(filterCallback);
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> setDebugDrawer(debugDrawer);
   }
@@ -128,26 +127,26 @@ void setPhysicsOptions(btRigidBody* body, glm::vec3 linear, glm::vec3 angular,  
 }
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, bool isCentered, glm::vec3 scaling, rigidBodyOpts opts){  
   auto rigidBodyPtr = createRigidBodyRect(pos, width, height, depth, rotation, isStatic, hasCollision, isCentered, scaling, opts);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 0, opts.layer);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
 btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision, scaling, opts);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 0, opts.layer);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
 btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision, scaling, opts);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 0, opts.layer);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
 
 btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rotation, bool isStatic, rigidBodyOpts opts, float* data, int width, int height, glm::vec3 scaling, float minHeight, float maxHeight){
   auto rigidBodyPtr = createRigidBodyHeightmap(pos, rotation, isStatic, opts, data, width, height, scaling, minHeight, maxHeight);
-  env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 0, opts.layer);
+  env.dynamicsWorld -> addRigidBody(rigidBodyPtr);
   setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
   return rigidBodyPtr;
 }
@@ -248,8 +247,6 @@ void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too b
 std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
   std::vector<HitObject> hitobjects;
   btCollisionWorld::AllHitsRayResultCallback result(glmToBt(posFrom),glmToBt(posFrom));
-  result.m_collisionFilterMask = 0;
-  result.m_collisionFilterGroup = 0;
 
   auto posTo = moveRelative(posFrom, direction, glm::vec3(0.f, 0.f, -1 * maxDistance), false);
   auto btPosFrom = glmToBt(posFrom);
@@ -261,12 +258,14 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
   for (int i = 0; i < result.m_hitFractions.size(); i++){
     const btCollisionObject* obj = result.m_collisionObjects[i];
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
+    auto hitNormal = result.m_hitNormalWorld[i];
     bool found = false;
     for (auto [objid, rigidbody] : rigidbodys){
       if (rigidbody == obj){
         hitobjects.push_back(HitObject{
           .id = objid,
           .point = btToGlm(hitPoint),  
+          .normal = quatFromDirection(btToGlm(hitNormal)),
         });
         found = true;
       }

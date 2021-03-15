@@ -22,6 +22,8 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight);
 
 glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition);
+glm::quat quatFromDirection(glm::vec3 direction);
 glm::vec3 directionFromQuat(glm::quat direction);
+
 
 #endif 

@@ -82,6 +82,9 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
 }
 
+glm::quat quatFromDirection(glm::vec3 direction){ 
+  return orientationFromPos(glm::vec3(0.f, 0.f, 0.f), direction);
+}
 glm::vec3 directionFromQuat(glm::quat direction){
   return direction * glm::vec3(0, 1, 0);
 }

@@ -64,6 +64,7 @@ struct StringFloat {
 struct HitObject {
   objid id;
   glm::vec3 point;
+  glm::quat normal;
 };
 
 typedef std::variant<glm::vec3, std::string, float> AttributeValue;

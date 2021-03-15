@@ -639,9 +639,10 @@ SCM scmRaycast(SCM pos, SCM direction, SCM distance){
   SCM list = scm_make_list(scm_from_unsigned_integer(hitObjects.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < hitObjects.size(); i++){
     auto hitObject = hitObjects.at(i);
-    auto idAndHitPoint = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    auto idAndHitPoint = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
     scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(0), scm_from_int32(hitObject.id));
     scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(1), vec3ToScmList(hitObject.point));
+    scm_list_set_x(idAndHitPoint, scm_from_unsigned_integer(2), scmQuatToSCM(hitObject.normal));
     scm_list_set_x(list, scm_from_unsigned_integer(i), idAndHitPoint);
   }
   return list;

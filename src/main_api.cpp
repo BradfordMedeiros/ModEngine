@@ -207,10 +207,7 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
 }
 
 glm::mat4 getModelTransform(std::string name){
-  std::cout << "get model transform!" << std::endl;
   auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
-  std::cout << "get model transform end!" << std::endl;
- 
   if (gameobj.has_value()){
     return groupModelTransform(world.sandbox, gameobj.value() -> id);
   }
