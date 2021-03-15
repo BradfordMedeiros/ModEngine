@@ -73,7 +73,6 @@ void clearImpulse(int32_t index);
 
 void loadScriptFromWorld(std::string script, int32_t id);
 int32_t loadScene(std::string sceneFile);
-int32_t loadSceneObj(std::string sceneFile, int32_t sceneId);
 int32_t loadSceneData(std::string sceneData, objid sceneId);
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();

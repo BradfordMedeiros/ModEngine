@@ -14,7 +14,6 @@
 
 void createStaticSchemeBindings(
   int32_t (*loadScene)(std::string),
-  objid(*loadSceneObj)(std::string, objid),  
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
   std::vector<int32_t> (*listScenes)(),  

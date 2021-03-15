@@ -936,7 +936,6 @@ int main(int argc, char* argv[]){
  
   createStaticSchemeBindings(
     loadScene,
-    loadSceneObj,
     unloadScene,
     unloadAllScenes,
     listScenes,

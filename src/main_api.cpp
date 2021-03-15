@@ -51,9 +51,6 @@ int32_t loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   return addSceneToWorld(world, sceneFile, interface);
 }
-int32_t loadSceneObj(std::string sceneFile, int32_t sceneId){
-  std::cout << "INFO: SCENE LOADING: loading subscene" << sceneFile << std::endl;
-}
 
 int32_t loadSceneData(std::string sceneData, objid sceneId){
   std::cout << "INFO: SCENE LOADING: loading from scene data" << std::endl;
@@ -210,7 +207,10 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
 }
 
 glm::mat4 getModelTransform(std::string name){
+  std::cout << "get model transform!" << std::endl;
   auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
+  std::cout << "get model transform end!" << std::endl;
+ 
   if (gameobj.has_value()){
     return groupModelTransform(world.sandbox, gameobj.value() -> id);
   }
