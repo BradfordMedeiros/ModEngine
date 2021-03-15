@@ -276,7 +276,7 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;
@@ -293,7 +293,7 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
     for (auto data : datum){
       auto gameobject = scene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, gameobject.fragshader);
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, layer.ignoreDepthBuffer, gameobject.fragshader);
       }
     }  
   }

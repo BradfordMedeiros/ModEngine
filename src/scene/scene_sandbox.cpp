@@ -51,21 +51,21 @@ GameObject& getGameObject(SceneSandbox& sandbox, objid id){
   return getGameObject(sceneForId(sandbox, id), id);
 }
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   traverseScene(scene, initialModel, scale, onObject, [&sandbox, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
       Scene& linkScene = sandbox.scenes.at(sandbox.idToScene.at(id));
       traverseScene(sandbox, linkScene, modelMatrix, scale, onObject);
   });
 }
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   if (scene.isNested){
     return;
   }
   traverseScene(sandbox, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
 }
 
-void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject){
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   for (auto &[_, scene] : sandbox.scenes){
     traverseScene(sandbox, scene, onObject);
   }
@@ -80,7 +80,7 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   glm::mat4 transformation = {};
   bool foundId = false;
   
-  traverseScene(sandbox, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, std::string fragshader) -> void {
+  traverseScene(sandbox, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
     if (traversedId == id){
       foundId = true;
       transformation = model;

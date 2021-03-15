@@ -22,7 +22,7 @@ bool idExists(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
-void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
 glm::mat4 groupModelTransform(SceneSandbox& sandbox, objid id);

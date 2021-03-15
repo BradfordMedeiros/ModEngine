@@ -491,13 +491,20 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
   glUseProgram(shaderProgram);
   clearTraversalPositions();
 
-  traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, bool ignoreDepthBuffer, std::string shader) -> void {
     assert(id >= 0);
     addPositionToRender(modelMatrix, parentModelMatrix);
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
     auto newShader = getShaderByName(shader, shaderProgram);
     setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
+
+    // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
+    if (ignoreDepthBuffer){
+      glDisable(GL_DEPTH_TEST);
+    }else{
+      glEnable(GL_DEPTH_TEST);
+    }
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -1088,16 +1095,25 @@ int main(int argc, char* argv[]){
         .name = "",
         .zIndex = 0,
         .orthographic = false,
+        .ignoreDepthBuffer = false,
       },
       LayerInfo {
         .name = "transparency",
         .zIndex = 1,
         .orthographic = false,
+        .ignoreDepthBuffer = false,
+      },
+      LayerInfo {
+        .name = "no_depth",
+        .zIndex = 0,
+        .orthographic = false,
+        .ignoreDepthBuffer = true,
       },
       LayerInfo {
         .name = "ui",
         .zIndex = 2,
         .orthographic = true,
+        .ignoreDepthBuffer = false,
       }
     }
   };

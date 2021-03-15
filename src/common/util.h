@@ -79,6 +79,7 @@ struct LayerInfo {
   std::string name;
   int zIndex;
   bool orthographic;
+  bool ignoreDepthBuffer;
 };
 
 #endif
