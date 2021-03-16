@@ -3,15 +3,17 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 
-typedef void(*collisionPairPosFn)(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
+typedef void(*collisionPairPosFn)(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::quat normal);
 typedef void(*collisionPairFn)(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
 struct CollisionInstance {
   const btCollisionObject* obj1;
   const btCollisionObject* obj2;
   glm::vec3 pos;
+  glm::quat normal;
 };
 
 bool collisionInList(

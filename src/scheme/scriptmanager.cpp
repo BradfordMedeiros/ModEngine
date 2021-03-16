@@ -39,10 +39,10 @@ void onFrameAllScripts(){
   }
 }
 
-void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos){
+void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::quat normal){
   for (auto &[_, module] : scriptnameToModule){
     scm_set_current_module(module);
-    onCollisionEnter(obj1, obj2, pos);
+    onCollisionEnter(obj1, obj2, pos, normal);
   }
 }
 void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){

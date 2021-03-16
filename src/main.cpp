@@ -311,7 +311,7 @@ void teleportObject(objid objectId, objid portalId){
 
 }
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::quat normal){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
 
@@ -328,7 +328,7 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
     std::cout << "teleport " << obj1Name << " through " << obj2Name << std::endl;
     teleportObject(obj1Id, obj2Id);
   } 
-  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos);
+  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal);
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
@@ -610,6 +610,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
    drawLines(permaLines);
   }
 
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
   if (lines.size() > 0){
    drawLines(lines);
   }

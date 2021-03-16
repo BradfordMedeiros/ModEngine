@@ -193,11 +193,12 @@ void checkCollisions(physicsEnv& env){
       /// @NOTE Internally there can be more than one contact point, but it's simpler to just report one of them (maybe expose more in future)
       btManifoldPoint& point = contactManifold -> getContactPoint(0);  
       btVector3 median = (point.getPositionWorldOnA() + point.getPositionWorldOnB()) / 2.f;
-
-      collisionPairs.push_back(    CollisionInstance {
+      
+      collisionPairs.push_back(CollisionInstance {
         .obj1 = contactManifold -> getBody0(),
         .obj2 = contactManifold -> getBody1(),
         .pos = btToGlm(median),
+        .normal = quatFromDirection(btToGlm(point.m_normalWorldOnB)),
       });     
     }
   } 

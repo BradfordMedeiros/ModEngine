@@ -760,11 +760,11 @@ SCM scmEmit(SCM gameobjId){
 void onFrame(){
   maybeCallFunc("onFrame");
 }
-void onCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos){
+void onCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos, glm::quat normal){
   const char* function = "onCollideEnter";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_3(func_symbol, createGameObject(obj1), createGameObject(obj2), vec3ToScmList(contactPos));
+    scm_call_4(func_symbol, createGameObject(obj1), createGameObject(obj2), vec3ToScmList(contactPos), scmQuatToSCM(normal));
   }
 }
 void onCollisionExit(int32_t obj1, int32_t obj2){

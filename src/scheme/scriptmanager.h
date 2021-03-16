@@ -8,7 +8,7 @@
 #include "./scheme_bindings.h"
 
 typedef void(*func)();
-typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos);
+typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::quat normal);
 typedef void(*colfun)(int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos);

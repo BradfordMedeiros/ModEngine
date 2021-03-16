@@ -10,7 +10,7 @@ bool collisionInList(std::vector<CollisionInstance> currentCollisions, Collision
   return false;
 }
 
-void onCollisionPosDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos){}
+void onCollisionPosDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::quat normal){}
 void onCollisionDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2){}
 
 CollisionCache::CollisionCache(){
@@ -26,7 +26,7 @@ CollisionCache::CollisionCache(collisionPairPosFn onObjectEnter, collisionPairFn
 void CollisionCache::onObjectsCollide(std::vector<CollisionInstance>& collisionPairs){
   for (auto collisionPair : collisionPairs){
     if (!collisionInList(oldCollisions, collisionPair)){
-      onObjectEnter(collisionPair.obj1, collisionPair.obj2, collisionPair.pos);
+      onObjectEnter(collisionPair.obj1, collisionPair.obj2, collisionPair.pos, collisionPair.normal);
     }
   }
   for (auto collisionPair : this -> oldCollisions){
