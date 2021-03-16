@@ -45,7 +45,7 @@ void main(){
       (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
 
-      modelPosition = mul * vec4(aPos.xyz, 1.0);
+      modelPosition = model * (mul * vec4(aPos.xyz, 1.0));
 
       /*if (totalWeight == 1){
         overcolor = vec4(1, 0, 0, 1);
@@ -55,13 +55,13 @@ void main(){
 
     }
 
-    gl_Position = projview *  model * vec4(modelPosition.x, modelPosition.y, modelPosition.z, 1.0);
+    gl_Position = projview *  vec4(modelPosition.x, modelPosition.y, modelPosition.z, 1.0);
     TexCoord = aTexCoords;
     Normal = mat3(transpose(inverse(model))) * aNormal;  
     FragPos = modelPosition.xyz;
     sshadowCoord = lightsprojview * vec4(FragPos, 1.0);
 
-    if (!showBoneWeight){
+    if (true){
       overcolor = vec4(aBoneIndex[0], aBoneIndex[1], aBoneIndex[2], 1.0);
     }else{
       overcolor = vec4(aBoneWeight[0], aBoneWeight[1], aBoneWeight[2], 1.0);

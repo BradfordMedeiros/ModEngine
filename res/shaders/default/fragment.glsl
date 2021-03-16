@@ -104,9 +104,9 @@ void main(){
     vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
-    float shadowDelta = (inShadow) ? 0.2 : 1.0;
+    float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 
-    FragColor = vec4(color.xyz * shadowDelta, color.w);
+    FragColor = vec4(tint * color.xyz * shadowDelta, color.w);
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;
