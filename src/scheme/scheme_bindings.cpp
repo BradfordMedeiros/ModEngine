@@ -536,13 +536,69 @@ SCM scmCreateTrack(SCM name, SCM funcs){
   trackobj -> track = track;
   trackobj -> funcRefs = funcRefs;
 
-  scm_t_struct_finalize finalizer = finalizeTrack;
   return scm_make_foreign_object_1(trackType, trackobj);
 }
 void (*_playbackTrack)(Track& track);
 SCM scmPlayTrack(SCM track){
   _playbackTrack(getTrackFromScmType(track) -> track);
   return SCM_UNSPECIFIED;
+}
+
+SCM onExitType; // this is modified during init
+struct scmOnExit {
+  std::vector<SCM> funcRefs;
+  ExitCallback onExit;
+};
+scmOnExit* getOnExitFromScmType(SCM value){
+  scmOnExit* obj;
+  scm_assert_foreign_object_type(onExitType, value);
+  obj = (scmOnExit*)scm_foreign_object_ref(value, 0);
+  return obj;
+}
+void finalizeOnExit(SCM onexit){
+  auto onExit = getOnExitFromScmType(onexit);
+  for (auto scmFn : onExit -> funcRefs){
+    scm_gc_unprotect_object(scmFn);
+  }
+}
+SCM scmCreateOnExit(SCM funcs){
+  auto onexitObj = (scmOnExit*)scm_gc_malloc(sizeof(scmOnExit), "onexit");
+  std::vector<SCM> funcRefs;
+  std::vector<std::function<void()>> exitFns;
+
+  auto numOnExitFns = toUnsignedInt(scm_length(funcs));
+  for (int i = 0; i < numOnExitFns; i++){
+    SCM func = scm_list_ref(funcs, scm_from_unsigned_integer(i));  
+    bool isThunk = scm_to_bool(scm_procedure_p(func));
+    assert(isThunk);
+    scm_gc_protect_object(func); 
+    funcRefs.push_back(func);
+    exitFns.push_back([func]() -> void {
+      scm_call_0(func);  
+    });
+  }
+  onexitObj -> funcRefs = funcRefs;
+
+  ExitCallback onExit {
+    .exitFns = exitFns,
+  };
+  onexitObj -> onExit = onExit;
+  return scm_make_foreign_object_1(onExitType, onexitObj);
+}
+
+std::variant<scmTrack*, scmOnExit*> getStateType(SCM scmValue){
+  auto valueClass = scm_class_of(scmValue);
+  bool isTrack = scm_is_eq(valueClass, trackType);
+  bool isOnExit = scm_is_eq(valueClass, onExitType);
+  if (isTrack){
+    scmTrack* track = getTrackFromScmType(scmValue);
+    return track;   
+  }
+  if (isOnExit){
+    scmOnExit* onExit = getOnExitFromScmType(scmValue);
+    return onExit;
+  }
+  assert(false);
 }
 
 SCM stateType; // this is modified during init
@@ -554,12 +610,26 @@ SCM scmState(SCM name, SCM scmTracks){
   auto listLength = toUnsignedInt(scm_length(scmTracks));
 
   std::string defaultTrack;
+  int numTracks = 0;
+  ExitCallback onExit{};
+
   for (unsigned int i = 0; i < listLength; i++){
     SCM trackValue = scm_list_ref(scmTracks, scm_from_int64(i));
-    scmTrack* track = getTrackFromScmType(trackValue);
-    tracks[track -> track.name] = track -> track;  // @TODO - probably need to add extra track scm gc lock here + finalize, since making copy of the track
-    if (i == 0){
-      defaultTrack = track -> track.name;
+    auto pvalue = getStateType(trackValue);
+    auto ptrack = std::get_if<scmTrack*>(&pvalue);
+    auto pOnExit = std::get_if<scmOnExit*>(&pvalue);
+
+    if (ptrack != NULL){
+      numTracks++;
+      auto track = *ptrack;
+      tracks[track -> track.name] = track -> track;  // @TODO - probably need to add extra track scm gc lock here + finalize, since making copy of the track
+      if (numTracks == 1){
+        defaultTrack = track -> track.name;
+      }
+    }else if (pOnExit != NULL){
+      onExit = (*pOnExit) -> onExit;
+    }else{
+      assert(false);
     }
   }
   assert(listLength > 0);
@@ -569,6 +639,7 @@ SCM scmState(SCM name, SCM scmTracks){
     .defaultTrack = defaultTrack,
     .attributes = attributes,
     .tracks = tracks,
+    .onExit = onExit,
   };
   *stateobj = state;
   return scm_make_foreign_object_1(stateType, stateobj);
@@ -956,6 +1027,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("attributes", 0, 0, 0, (void*)scmAttributes);
   scm_c_define_gsubr("create-track", 2, 0, 0, (void*)scmCreateTrack);
   scm_c_define_gsubr("play-track", 1, 0, 0, (void*)scmPlayTrack);
+  scm_c_define_gsubr("on-exit", 1, 0, 0, (void*)scmCreateOnExit);
   scm_c_define_gsubr("state", 2, 0, 0, (void*)scmState);
   scm_c_define_gsubr("machine", 1, 0, 0, (void*)scmStateMachine);
   scm_c_define_gsubr("play-machine", 1, 0, 0, (void*)scmPlayStateMachine);
@@ -1053,6 +1125,7 @@ void createStaticSchemeBindings(
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
   trackType = scm_make_foreign_object_type(scm_from_utf8_symbol("track"), scm_list_1(scm_from_utf8_symbol("data")), finalizeTrack);
+  onExitType = scm_make_foreign_object_type(scm_from_utf8_symbol("onexit"), scm_list_1(scm_from_utf8_symbol("data")), finalizeOnExit);
   stateType = scm_make_foreign_object_type(scm_from_utf8_symbol("state"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
   stateMachineType = scm_make_foreign_object_type(scm_from_utf8_symbol("statemachine"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
 

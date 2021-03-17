@@ -34,6 +34,11 @@ void setStateMachine(StateMachine* machine, std::string newState){
   if (machine -> currentState == newState){
     return;
   }
+  auto onExit = machine -> states.at(machine -> currentState).onExit;
+  for (auto fn : onExit.exitFns){
+    fn();
+  }
+
   machine -> currentState = newState;
   machine -> currentTrack = machine -> states.at(newState).defaultTrack;
   machine -> trackIndex = 0;

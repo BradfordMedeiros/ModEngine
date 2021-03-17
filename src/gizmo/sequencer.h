@@ -13,12 +13,16 @@ struct Track {
   std::string name;
   std::vector<std::function<void()>> trackFns;
 };
+struct ExitCallback {
+  std::vector<std::function<void()>> exitFns;
+};
 
 struct State {
   std::string name;
   std::string defaultTrack;
   std::map<std::string, std::string> attributes;
   std::map<std::string, Track> tracks;
+  ExitCallback onExit;
 };
 
 struct StateMachine {
