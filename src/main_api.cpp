@@ -10,7 +10,7 @@ extern std::map<unsigned int, Mesh> fontMeshes;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::vector<int32_t> playbacksToRemove;
-extern std::queue<std::string> channelMessages;
+extern std::queue<StringString> channelMessages;
 
 extern float now;
 extern std::string rawSceneFile;
@@ -260,13 +260,19 @@ void sendEventMessage(std::string message){
   if (channelMapping.find(message) != channelMapping.end()){
     for (auto to : channelMapping.at(message)){
       std::cout << "SYSTEM INFO: channel: (" << message << ", " << to << ")" << std::endl;
-      channelMessages.push(to);
+      channelMessages.push(StringString {
+        .strTopic = to,
+        .strValue = "",
+      });
     }
   }
 }
 
-void sendNotifyMessage(std::string message){
-  channelMessages.push(message);
+void sendNotifyMessage(std::string message, std::string value){
+  channelMessages.push(StringString {
+    .strTopic = message,
+    .strValue = value,
+  });
 }
 
 double timeSeconds(){

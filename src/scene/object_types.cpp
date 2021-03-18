@@ -999,16 +999,16 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   return std::nullopt;
 }
 
-void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string)> sendNotify){
+void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string, std::string)> sendNotify){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUIButton>(&obj);
     if (uiControl != NULL){
       if (id == uiId && uiControl -> canToggle){
         uiControl -> toggleOn = !uiControl -> toggleOn;
         if (uiControl -> toggleOn && uiControl -> onToggleOn != ""){
-          sendNotify(uiControl -> onToggleOn);
+          sendNotify(uiControl -> onToggleOn, "");
         }else if (uiControl -> onToggleOff != ""){
-          sendNotify(uiControl -> onToggleOff);
+          sendNotify(uiControl -> onToggleOff, "");
         }
       }
 
@@ -1017,7 +1017,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
         std::cout << "id: " << id << " is now not focused" << std::endl;
         uiControl -> common.isFocused = false;
         if (uiControl -> common.onBlur != ""){
-          sendNotify(uiControl -> common.onBlur);
+          sendNotify(uiControl -> common.onBlur, "");
         }
       }
 
@@ -1025,7 +1025,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
         std::cout << "id: " << id << " is now focused" << std::endl;
         uiControl -> common.isFocused = true;
         if (uiControl -> common.onFocus != ""){
-          sendNotify(uiControl -> common.onFocus);
+          sendNotify(uiControl -> common.onFocus, "");
         }
       }
     }

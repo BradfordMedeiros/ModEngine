@@ -56,6 +56,11 @@ typedef int32_t objid;
 objid getUniqueObjId();
 std::string getUniqueObjectName();
 
+struct StringString {
+  std::string strTopic;
+  std::string strValue;
+};
+
 struct StringFloat {
   std::string strValue;
   float floatValue;

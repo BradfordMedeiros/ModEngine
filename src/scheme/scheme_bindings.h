@@ -47,7 +47,7 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
-  void (*sendNotifyMessage)(std::string message),
+  void (*sendNotifyMessage)(std::string message, std::string value),
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
@@ -89,7 +89,7 @@ void onObjectUnhover(int32_t index);
 void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
 void onCameraSystemChange(bool usingBuiltInCamera);
-void onMessage(std::string message);
+void onMessage(std::string message, std::string value);
 void onFloatMessage(StringFloat message);
 void onTcpMessage(std::string message);
 void onUdpMessage(std::string message);

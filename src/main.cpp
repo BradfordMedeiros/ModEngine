@@ -109,7 +109,7 @@ glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
-std::queue<std::string> channelMessages;
+std::queue<StringString> channelMessages;
 std::queue<StringFloat> channelFloatMessages;
 KeyRemapper keyMapper;
 

@@ -104,14 +104,14 @@ void onCameraSystemChangeAllScripts(bool usingBuiltInCamera){
     onCameraSystemChange(usingBuiltInCamera);
   }
 }
-void onMessageAllScripts(std::queue<std::string>& messages){
+void onMessageAllScripts(std::queue<StringString>& messages){
   while (!messages.empty()){
     auto message = messages.front();
     messages.pop();
 
     for (auto &[name, module] : scriptnameToModule){
       scm_set_current_module(module);
-      onMessage(message);
+      onMessage(message.strTopic, message.strValue);
     }
   }
 }

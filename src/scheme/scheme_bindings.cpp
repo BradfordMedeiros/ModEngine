@@ -442,9 +442,9 @@ SCM scmSendEventMessage(SCM channelFrom){
   return SCM_UNSPECIFIED;
 }
 
-void (*_sendNotifyMessage)(std::string message);
-SCM scmSendNotify(SCM message){
-  _sendNotifyMessage(scm_to_locale_string(message));
+void (*_sendNotifyMessage)(std::string message, std::string value);
+SCM scmSendNotify(SCM topic, SCM value){
+  _sendNotifyMessage(scm_to_locale_string(topic), scm_to_locale_string(value));
   return SCM_UNSPECIFIED;
 }
 
@@ -917,11 +917,11 @@ void onCameraSystemChange(bool usingBuiltInCamera){
     scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
   }
 }
-void onMessage(std::string message){
+void onMessage(std::string message, std::string value){
   const char* function = "onMessage";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_1(func_symbol, scm_from_locale_string(message.c_str()));
+    scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), scm_from_locale_string(value.c_str()));
   }
 }
 void onFloatMessage(StringFloat message){
@@ -1013,7 +1013,7 @@ void defineFunctions(objid id, bool isServer){
 
   // event system
   scm_c_define_gsubr("sendmessage", 1, 0, 0, (void*)scmSendEventMessage);
-  scm_c_define_gsubr("sendnotify", 1, 0, 0, (void*)scmSendNotify);
+  scm_c_define_gsubr("sendnotify", 2, 0, 0, (void*)scmSendNotify);
 
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
   scm_c_define_gsubr("save-scene", 0, 1, 0, (void*)scmSaveScene);
@@ -1095,7 +1095,7 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
-  void (*sendNotifyMessage)(std::string message),
+  void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(),
   void (*saveScene)(bool includeIds),
   std::map<std::string, std::string> (*listServers)(),
