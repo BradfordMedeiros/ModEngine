@@ -35,5 +35,7 @@ DynamicLoading createDynamicLoading(float chunkSize);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string chunkAddressToSceneFile(ChunkAddress chunk);
 void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId));
+objid addLoadingAround(objid);
+void removeLoadingAround(objid);
 
 #endif

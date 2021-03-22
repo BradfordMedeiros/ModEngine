@@ -1002,7 +1002,9 @@ int main(int argc, char* argv[]){
     setIntState,
     setTexture,
     navPosition, 
-    scmEmit
+    scmEmit,
+    addLoadingAround,
+    removeLoadingAround
   );
 
   schemeBindings = getSchemeCallbacks();

@@ -827,6 +827,17 @@ SCM scmEmit(SCM gameobjId){
   return SCM_UNSPECIFIED;
 }
 
+objid (*_loadAround)(objid);
+SCM scmLoadAround(SCM gameobjId){
+  return scm_from_short(_loadAround(scm_to_int32(gameobjId)));
+}
+void (*_rmLoadAround)(objid);
+SCM scmRmLoadAround(SCM loadingHandle){
+  _rmLoadAround(scm_to_int32(loadingHandle));
+  return SCM_UNSPECIFIED;
+}
+
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -1057,6 +1068,9 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("sql", 1, 0, 0, (void*)scmSql);
 
   scm_c_define_gsubr("emit", 1, 0, 0, (void*)scmEmit);
+
+  scm_c_define_gsubr("load-around", 1, 0, 0, (void*)scmLoadAround);
+  scm_c_define_gsubr("rm-load-around", 1, 0, 0, (void*)scmRmLoadAround);
 }
 
 
@@ -1120,7 +1134,9 @@ void createStaticSchemeBindings(
   void (*setIntState)(std::string stateName, int value),
   void (*setTexture)(objid id, std::string texture),
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
-  void (*scmEmit)(objid)
+  void (*scmEmit)(objid),
+  objid (*loadAround)(objid),
+  void (*rmLoadAround)(objid)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -1207,4 +1223,6 @@ void createStaticSchemeBindings(
   _setTexture = setTexture;
   _navPosition = navPosition;
   _scmEmit = scmEmit;
+  _loadAround = loadAround;
+  _rmLoadAround = rmLoadAround;
 }

@@ -106,3 +106,11 @@ void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, 
   loadingInfo.loadedChunks = chunksShouldBeLoaded;
 }
 
+objid addLoadingAround(objid){
+  std::cout << "add loading around placeholder" << std::endl;
+  return 0;
+} 
+
+void removeLoadingAround(objid){
+  std::cout << "remove loading around placeholder" << std::endl;
+}

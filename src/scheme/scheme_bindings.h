@@ -72,7 +72,9 @@ void createStaticSchemeBindings(
   void (*setIntState)(std::string stateName, int value),
   void (*setTexture)(objid id, std::string texture),
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
-  void (*scmEmit)(objid)
+  void (*scmEmit)(objid),
+  objid (*loadAround)(objid),
+  void (*rmLoadAround)(objid)
 );
 
 void defineFunctions(objid id, bool isServer);
