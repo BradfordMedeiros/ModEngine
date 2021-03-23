@@ -1,1 +1,3 @@
-onenodewithanimation:mesh:./res/models/modelloading/stupidguywalking.dae
+onenodewithanimation:mesh:./res/models/modelloading/robot.dae
+onenodewithanimation:script:./res/scripts/playtargetanim.scm
+

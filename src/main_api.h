@@ -17,6 +17,7 @@
 #include "./network/activemanager.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
+#include "./worldloader.h"
 
 struct Properties {
   Transformation transformation;
@@ -162,5 +163,8 @@ std::vector<VoxelQueryData> getSelectedVoxels();
 glm::mat4 getModelTransform(std::string name);
 
 void scmEmit(objid id);
+
+objid addLoadingAround(objid id);
+void removeLoadingAround(objid id);
 
 #endif

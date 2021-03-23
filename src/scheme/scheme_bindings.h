@@ -97,5 +97,6 @@ void onTcpMessage(std::string message);
 void onUdpMessage(std::string message);
 void onPlayerJoined(std::string connectionHash);
 void onPlayerLeave(std::string connectionHash);
+void onScriptUnload();
 
 #endif

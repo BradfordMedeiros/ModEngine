@@ -9,3 +9,4 @@ targetmodel:script:./res/scripts/playtargetanim.scm
 
 %enterPlaysAnimation:from:enterpressed
 %enterPlaysAnimation:to:animateFromChannel
+

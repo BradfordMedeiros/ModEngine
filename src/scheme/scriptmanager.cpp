@@ -26,6 +26,9 @@ void loadScript(std::string scriptpath, objid id, bool isServer){
 // I don't think this actually causes this module to be garbage collected.
 void unloadScript(std::string scriptpath, objid id){
   auto script = getScriptName(scriptpath, id);
+  auto module = scriptnameToModule.at(script);
+  scm_set_current_module(module);
+  onScriptUnload();
 
   std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) != scriptnameToModule.end());

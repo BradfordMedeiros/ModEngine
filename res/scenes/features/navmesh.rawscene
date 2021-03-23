@@ -1,3 +1,5 @@
+>uicamera:position:0 5 0
+
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
@@ -8,3 +10,4 @@ platform:position:0 -5 0
 navagent:mesh:./res/models/box/box.obj
 navagent:script:./res/scripts/nav.scm
 navagent:position:0 -2 0
+

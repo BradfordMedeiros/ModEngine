@@ -1124,6 +1124,7 @@ int main(int argc, char* argv[]){
   loadAllTextures();
   
   dynamicLoading = createDynamicLoading(chunkSize);
+
   if (!useChunkingSystem){
     std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
     for (auto rawScene : rawScenes){

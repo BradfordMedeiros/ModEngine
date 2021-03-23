@@ -18,10 +18,6 @@ struct ChunkLoadingInfo {
 };
 
 struct DynamicLoading {
-  float entityPosX;
-  float entityPosY;
-  float entityPosZ;
-
   float chunkXWidth;
   float chunkYHeight;
   float chunkZDepth;
@@ -29,13 +25,16 @@ struct DynamicLoading {
 
   std::map<std::string, objid> sceneFileToId; 
   std::vector<ChunkAddress> loadedChunks;
+
+  std::map<objid, objid> loadingHandleToId;
+  std::map<objid, int> idsLoadAround;
 };
 
 DynamicLoading createDynamicLoading(float chunkSize);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string chunkAddressToSceneFile(ChunkAddress chunk);
 void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId));
-objid addLoadingAround(objid);
-void removeLoadingAround(objid);
+objid addLoadingAround(DynamicLoading& loadingInfo, objid id);
+void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle);
 
 #endif

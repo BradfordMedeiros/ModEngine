@@ -1,0 +1,4 @@
+twonode_and_onemesheach:mesh:./res/models/modelloading/twonode.dae
+
+
+twonode_and_onemesheach:script:./res/scripts/playtargetanim.scm

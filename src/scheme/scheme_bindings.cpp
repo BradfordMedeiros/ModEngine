@@ -964,6 +964,10 @@ void onPlayerLeave(std::string connectionHash){
   maybeCallFuncString("on-player-leave", connectionHash.c_str());
 }
 
+void onScriptUnload(){
+  maybeCallFunc("beforeUnload");
+}
+
 ////////////
 void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);

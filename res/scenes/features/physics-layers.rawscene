@@ -1,5 +1,7 @@
 # Demonstrates camera system
 
+# if two physics_layers masks (think in binary) & together and equal 0, then they won't collide
+
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0

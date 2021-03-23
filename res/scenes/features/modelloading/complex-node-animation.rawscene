@@ -3,3 +3,5 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 
 onenodewithanimation:mesh:./res/models/modelloading/robot.dae
+onenodewithanimation:script:./res/scripts/playtargetanim.scm
+onenodewithanimation:animation:someanimation:time:0.4:somefunc

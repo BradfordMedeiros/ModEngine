@@ -17,6 +17,8 @@ extern std::string rawSceneFile;
 extern bool bootStrapperMode;
 extern NetCode netcode;
 extern DrawingParams drawParams;
+extern DynamicLoading dynamicLoading;
+
 
 NetworkPacket toNetworkPacket(UdpPacket& packet){
   NetworkPacket netpacket {
@@ -546,4 +548,11 @@ std::vector<VoxelQueryData> getSelectedVoxels(){
 
 void scmEmit(objid id){
   emit(world, id);
+}
+
+objid addLoadingAround(objid id){
+  addLoadingAround(dynamicLoading, id);
+}
+void removeLoadingAround(objid id){
+  removeLoadingAround(dynamicLoading, id);
 }
