@@ -1125,12 +1125,11 @@ int main(int argc, char* argv[]){
   
   dynamicLoading = createDynamicLoading(chunkSize);
 
-  if (!useChunkingSystem){
-    std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
-    for (auto rawScene : rawScenes){
-      loadScene(rawScene);
-    }
+  std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
+  for (auto rawScene : rawScenes){
+    loadScene(rawScene);
   }
+  
 
   auto defaultCameraName = result["camera"].as<std::string>();
   if (defaultCameraName != ""){
@@ -1295,7 +1294,14 @@ int main(int argc, char* argv[]){
     handleTerrainPainting(uvCoord);
      
     if (useChunkingSystem){
-      handleChunkLoading(dynamicLoading, defaultCamera.transformation.position.x, defaultCamera.transformation.position.y, defaultCamera.transformation.position.z, loadScene, unloadScene);
+      handleChunkLoading(
+        dynamicLoading, 
+        [](objid id) -> glm::vec3 { 
+          return getGameObjectPosition(id, true);
+        }, 
+        loadScene, 
+        unloadScene
+      );
     }
 
     assert(portals.size() <= numPortalTextures);

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <functional>
 #include <map>
 #include "./common/util.h"
 
@@ -33,7 +34,7 @@ struct DynamicLoading {
 DynamicLoading createDynamicLoading(float chunkSize);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string chunkAddressToSceneFile(ChunkAddress chunk);
-void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId));
+void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId));
 objid addLoadingAround(DynamicLoading& loadingInfo, objid id);
 void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle);
 

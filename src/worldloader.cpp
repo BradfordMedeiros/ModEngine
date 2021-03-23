@@ -12,30 +12,44 @@ DynamicLoading createDynamicLoading(float chunkSize){
   return loading;
 }
 
-std::vector<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world, ChunkAddress position, int chunkRadius){
-  int chunkX = round(position.x / world.chunkXWidth);
-  int chunkY = round(position.y / world.chunkYHeight);
-  int chunkZ = round(position.z / world.chunkZDepth);
+std::vector<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world, int chunkRadius, std::vector<ChunkAddress> loadingPos){
+  std::vector<ChunkAddress> allChunks;
+  for (auto position : loadingPos){
+    int chunkX = position.x;
+    int chunkY = position.y;
+    int chunkZ = position.z;    
+    
+    int adjacentChunks = chunkRadius -1;   
 
-  int adjacentChunks = chunkRadius -1;   
-
-  std::vector<ChunkAddress> chunks;
-  for (int x = -adjacentChunks; x <= adjacentChunks; x++){
-    for (int y = -adjacentChunks; y <= adjacentChunks; y++){
-      for (int z = -adjacentChunks; z <= adjacentChunks; z++){
-        ChunkAddress chunk = { .x = x + chunkX, .y = y + chunkY, .z = z + chunkZ };   
-        chunks.push_back(chunk);
+    std::vector<ChunkAddress> chunks;
+    for (int x = -adjacentChunks; x <= adjacentChunks; x++){
+      for (int y = -adjacentChunks; y <= adjacentChunks; y++){
+        for (int z = -adjacentChunks; z <= adjacentChunks; z++){
+          ChunkAddress chunk = { .x = x + chunkX, .y = y + chunkY, .z = z + chunkZ };   
+          chunks.push_back(chunk);
+        }
+      }
+    }
+    for (auto chunk : chunks){
+      bool foundChunk = false;
+      for (auto alreadyAddedChunk : allChunks){
+        if (chunk.x == alreadyAddedChunk.x && chunk.y == alreadyAddedChunk.y && chunk.z == alreadyAddedChunk.z){
+          foundChunk = true;
+          break;
+        }
+      }
+      if (!foundChunk){
+        allChunks.push_back(chunk);
       }
     }
   }
-
-  return chunks;
+  return allChunks;
 }
 
 bool chunksEqual(ChunkAddress chunk1, ChunkAddress chunk2){
   return chunk1.x == chunk2.x && chunk1.y == chunk2.y && chunk1.z == chunk2.z;
 }
-ChunkLoadingInfo getChunkDiff(std::vector<ChunkAddress> alreadyLoadedChunks, std::vector<ChunkAddress> chunksShouldBeLoaded){  // give this 
+ChunkLoadingInfo getChunkDiff(std::vector<ChunkAddress> alreadyLoadedChunks, std::vector<ChunkAddress> chunksShouldBeLoaded){  
   std::vector<ChunkAddress> chunksToLoad;
   std::vector<ChunkAddress> chunksToUnload;
 
@@ -94,12 +108,20 @@ std::string chunkAddressToSceneFile(ChunkAddress chunk){
   return std::string("./res/scenes/chunks/") + std::to_string(chunk.x)  + "." + std::to_string(chunk.y) + "." + std::to_string(chunk.z);
 }
 
-void handleChunkLoading(DynamicLoading& loadingInfo, float x, float y, float z, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId)){
-  auto chunksShouldBeLoaded = getChunksShouldBeLoaded(
-    loadingInfo, 
-    ChunkAddress { .x = x, .y = y, .z = z }, 
-    loadingInfo.chunkRadius
-  );
+void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId)){
+  std::vector<ChunkAddress> loadingPos;
+
+  for (auto &[id, _] : loadingInfo.idsLoadAround){
+    auto pos = getPos(id);
+    loadingPos.push_back(ChunkAddress{
+      .x = round(pos.x / loadingInfo.chunkXWidth), 
+      .y = round(pos.y / loadingInfo.chunkYHeight), 
+      .z = round(pos.z / loadingInfo.chunkZDepth),
+    });
+  }
+
+
+  auto chunksShouldBeLoaded = getChunksShouldBeLoaded(loadingInfo, loadingInfo.chunkRadius, loadingPos); 
   auto chunkLoading = getChunkDiff(loadingInfo.loadedChunks, chunksShouldBeLoaded);
   auto debugInfo = chunkloadingDebugInfo(chunkLoading);
   if (debugInfo != ""){
