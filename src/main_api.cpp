@@ -172,10 +172,6 @@ objid makeObjectAttr(std::string name, std::map<std::string, std::string> string
   return addObjectToScene(world, world.sandbox.scenes.begin() -> first, name, attributes, interface);
 }
 
-void removeObjectById(objid id){
-  removeObjectFromScene(world, id, interface);
-}
-
 void copyObject(int32_t id){
   copyObjectToScene(world, id, interface);
 }
@@ -251,6 +247,16 @@ void playAnimation(int32_t id, std::string animationToPlay){
     animations.playbacks.erase(groupId);
   }
   addAnimation(animations, groupId, animationToPlay);
+}
+
+void stopAnimation(int32_t id){
+  auto groupId = getGroupId(world.sandbox, id);
+  playbacksToRemove.push_back(groupId);
+}
+
+void removeObjectById(objid id){
+  stopAnimation(id);
+  removeObjectFromScene(world, id, interface);
 }
 
 std::vector<std::string> listModels(){

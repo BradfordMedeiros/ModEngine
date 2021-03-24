@@ -72,7 +72,6 @@ std::string shaderFolderPath;
 
 bool disableInput = false;
 int numChunkingGridCells = 0;
-float chunkSize = 100;
 bool useChunkingSystem = false;
 std::string rawSceneFile;
 bool bootStrapperMode = false;
@@ -172,12 +171,12 @@ void generatePortalTextures(){
 
 std::vector<int32_t> playbacksToRemove;
 void tickAnimations(AnimationState& animationState, float elapsedTime){
-  for (auto &[_, playback] : animationState.playbacks){
-    playback.setElapsedTime(elapsedTime);
-  }
   for (auto groupId : playbacksToRemove){
     std::cout << "removed playback: " << groupId << std::endl;
     animationState.playbacks.erase(groupId);
+  }
+  for (auto &[_, playback] : animationState.playbacks){
+    playback.setElapsedTime(elapsedTime);
   }
   playbacksToRemove.clear();
 }
@@ -589,8 +588,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (numChunkingGridCells > 0){
-    float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.chunkXWidth / 2) : 0;
-    drawGrid3DCentered(numChunkingGridCells, dynamicLoading.chunkXWidth, offset, offset, offset);
+    float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
+    drawGrid3DCentered(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   }else{
     auto selectedObj = state.editor.selectedObj.id;
@@ -799,7 +798,6 @@ int main(int argc, char* argv[]){
    ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
-   ("e,chunksize", "Size of worlds chunks", cxxopts::value<float>()->default_value("100"))
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
@@ -810,7 +808,6 @@ int main(int argc, char* argv[]){
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
   useChunkingSystem = result["world"].as<bool>();
-  chunkSize = result["chunksize"].as<float>();
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
@@ -1123,7 +1120,7 @@ int main(int argc, char* argv[]){
 
   loadAllTextures();
   
-  dynamicLoading = createDynamicLoading(chunkSize);
+  dynamicLoading = createDynamicLoading();
 
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto rawScene : rawScenes){

@@ -5,6 +5,7 @@ void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     for (Bone& bone : mesh.bones){
+      auto bonename = bone.name;
       auto boneTransform =  getModelMatrix(bone.name);
       if (initialBonePoses.find(bone.name) == initialBonePoses.end()){
         initialBonePoses[bone.name] = boneTransform;

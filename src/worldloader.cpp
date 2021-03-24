@@ -1,12 +1,120 @@
 #include "./worldloader.h"
 
+ChunkAddress decodeChunkHash(std::string chunkhash, bool* out_validResult){
+  bool isValidResult = false;
+  auto parts = split(chunkhash, '.');
+
+  auto chunkX = 0;
+  auto chunkY = 0;
+  auto chunkZ = 0;
+  if (parts.size() == 3){
+    chunkX = std::atoi(parts.at(0).c_str());
+    chunkY = std::atoi(parts.at(1).c_str());
+    chunkZ = std::atoi(parts.at(2).c_str());
+    isValidResult = true;
+  }
+  *out_validResult = isValidResult;
+  return ChunkAddress { .x = chunkX, .y = chunkY, .z = chunkZ };
+}
+std::string encodeChunkHash(ChunkAddress chunk){
+  return std::to_string(chunk.x) + "." + std::to_string(chunk.y) + "." + std::to_string(chunk.z);
+}
+
+std::string sceneFileForChunk(ChunkMappingInfo& mappingInfo, ChunkAddress& chunk){
+  auto chunkHash = encodeChunkHash(chunk);
+  if (mappingInfo.chunkHashToSceneFile.find(chunkHash) == mappingInfo.chunkHashToSceneFile.end()){
+    return mappingInfo.defaultScene;
+  }
+  return mappingInfo.chunkHashToSceneFile.at(chunkHash);
+}
+
+
+enum ChunkMappingTokenType { CHUNK_NONE, CHUNK_SIZE, CHUNK_DEFAULT_FILE, CHUNK_MAPPING };
+struct ChunkMappingCommand {
+  ChunkMappingTokenType type;
+  std::string content;
+  ChunkAddress chunkAddress;
+};
+
+ChunkMappingCommand parseMappingToken(std::string token){
+  auto tokens = split(token, ':');
+  assert(tokens.size() >= 2);
+
+  auto type = CHUNK_NONE;
+  bool isChunkHash = false;
+  auto chunkAddress = decodeChunkHash(tokens.at(0), &isChunkHash);
+  if (isChunkHash){
+    type = CHUNK_MAPPING;
+  }else if (tokens.at(0) == "default") {
+    type = CHUNK_DEFAULT_FILE;
+  }
+  else if (tokens.at(0) == "chunksize"){
+    type = CHUNK_SIZE;
+  }
+
+  ChunkMappingCommand command {
+    .type = type,
+    .content = tokens.at(1),
+    .chunkAddress = chunkAddress,
+  };
+  return command;
+}
+
+ChunkMappingInfo parseChunkMapping(std::string filepath){
+  auto fileContent = loadFile(filepath);
+  std::map<std::string, std::string> chunkHashToSceneFile;
+
+  std::vector<std::string> lines = filterWhitespace(split(fileContent, '\n'));
+
+  int numDefaultFiles = 0;
+  std::string defaultScene = "./res/scenes/chunks/0.0.0"; 
+
+  int numChunkSizes = 0;
+  int chunkSize = 100;
+
+  for(std::string line : lines){
+    auto mappingCommand = parseMappingToken(line);
+    if (mappingCommand.type == CHUNK_NONE){
+      std::cout << "invalid mapping command in: " << filepath << " " << line << std::endl;
+      assert(false);
+    }else if (mappingCommand.type == CHUNK_SIZE){
+      numChunkSizes++;
+      chunkSize = std::atoi(mappingCommand.content.c_str());
+    }else if (mappingCommand.type == CHUNK_DEFAULT_FILE){
+      numDefaultFiles++;
+      defaultScene = mappingCommand.content; // should I check that this file exists?
+    }else if (mappingCommand.type == CHUNK_MAPPING){
+      auto chunkHash = encodeChunkHash(mappingCommand.chunkAddress);
+      std::cout << "chunkmapping: " << chunkHash << " - " << mappingCommand.content << std::endl;
+      chunkHashToSceneFile[chunkHash] = mappingCommand.content;
+    }else{
+      assert(false); // default case should never happen
+    }
+  }
+
+  if (numDefaultFiles != 0 && numDefaultFiles != 1){
+    std::cout << "mapping file needs exactly 0 or 1 defaultings, got " << numDefaultFiles << std::endl;
+    assert(false);
+  }
+  if (numChunkSizes != 0 && numChunkSizes != 1){
+    std::cout << "mapping file needs exactly 0 or 1 defaultings, got " << numChunkSizes << std::endl;
+    assert(false);
+  }
+
+  ChunkMappingInfo chunkMapping {
+    .chunkSize = chunkSize,
+    .defaultScene = defaultScene,
+    .chunkHashToSceneFile = chunkHashToSceneFile,
+  };
+  return chunkMapping;
+}
+
 // @TODO currently dynamic chunkloading assumes it has exclusive access to scene management (or at least that loadscene/unload scene gives it that).
 // This causes the use case of, for example, a user loading a scene in code manually to have this unload the scene if the scene file happens to match that, which is questionable behavior
-DynamicLoading createDynamicLoading(float chunkSize){
+DynamicLoading createDynamicLoading(){
+  auto mappingInfo = parseChunkMapping("./res/scenes/chunks.mapping");
   DynamicLoading loading = {
-    .chunkXWidth = chunkSize, 
-    .chunkYHeight = chunkSize,
-    .chunkZDepth = chunkSize,
+    .mappingInfo = mappingInfo,
     .chunkRadius = 2, 
   };
   return loading;
@@ -104,22 +212,19 @@ std::string chunkloadingDebugInfo(ChunkLoadingInfo& info){
   return debugInfo;
 }
 
-std::string chunkAddressToSceneFile(ChunkAddress chunk){
-  return std::string("./res/scenes/chunks/") + std::to_string(chunk.x)  + "." + std::to_string(chunk.y) + "." + std::to_string(chunk.z);
-}
-
+// instead of keeping in memory here which chunks are loaded or not, it's probably better for this to requery the 
+// main scene system for a list of loaded chunks
 void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId)){
   std::vector<ChunkAddress> loadingPos;
 
   for (auto &[id, _] : loadingInfo.idsLoadAround){
     auto pos = getPos(id);
     loadingPos.push_back(ChunkAddress{
-      .x = round(pos.x / loadingInfo.chunkXWidth), 
-      .y = round(pos.y / loadingInfo.chunkYHeight), 
-      .z = round(pos.z / loadingInfo.chunkZDepth),
+      .x = round(pos.x / loadingInfo.mappingInfo.chunkSize), 
+      .y = round(pos.y / loadingInfo.mappingInfo.chunkSize), 
+      .z = round(pos.z / loadingInfo.mappingInfo.chunkSize),
     });
   }
-
 
   auto chunksShouldBeLoaded = getChunksShouldBeLoaded(loadingInfo, loadingInfo.chunkRadius, loadingPos); 
   auto chunkLoading = getChunkDiff(loadingInfo.loadedChunks, chunksShouldBeLoaded);
@@ -130,18 +235,18 @@ void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(obj
 
   for (auto &chunk : chunkLoading.chunksToUnload){
     std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
-    auto sceneFile = chunkAddressToSceneFile(chunk);
-    objid sceneId = loadingInfo.sceneFileToId.at(sceneFile);
+    auto chunkHash = encodeChunkHash(chunk);
+    objid sceneId = loadingInfo.chunkHashToSceneId.at(chunkHash);
     std::cout << "INFO: CHUNK MANAGEMENT: want to unload id: " << sceneId << std::endl;
     unloadScene(sceneId);
-    loadingInfo.sceneFileToId.erase(sceneFile);
+    loadingInfo.chunkHashToSceneId.erase(chunkHash);
   }
   for (auto &chunk : chunkLoading.chunksToLoad){
     std::cout << "INFO: CHUNK MANAGEMENT: load: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
-    auto sceneFile = chunkAddressToSceneFile(chunk);
+    auto sceneFile = sceneFileForChunk(loadingInfo.mappingInfo, chunk);
     auto sceneId = loadScene(sceneFile);
     std::cout << "INFO: CHUNK MANAGEMENT: want to load id: " << sceneId << std::endl;
-    loadingInfo.sceneFileToId[sceneFile] = sceneId;
+    loadingInfo.chunkHashToSceneId[encodeChunkHash(chunk)] = sceneId;
   }
 
   loadingInfo.loadedChunks = chunksShouldBeLoaded;
@@ -176,3 +281,4 @@ void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle){
     loadingInfo.idsLoadAround.erase(id);
   }
 }
+
