@@ -1296,7 +1296,7 @@ int main(int argc, char* argv[]){
         [](objid id) -> glm::vec3 { 
           return getGameObjectPosition(id, true);
         }, 
-        loadScene, 
+        loadSceneParentOffset, 
         unloadScene
       );
     }

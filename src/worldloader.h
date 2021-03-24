@@ -26,7 +26,6 @@ struct ChunkMappingInfo {
 
 struct DynamicLoading {
   ChunkMappingInfo mappingInfo;
-  float chunkSize;  
   float chunkRadius;  
 
   std::map<std::string, objid> chunkHashToSceneId;
@@ -38,7 +37,12 @@ struct DynamicLoading {
 
 DynamicLoading createDynamicLoading();
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
-void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId));
+void handleChunkLoading(
+  DynamicLoading& loadingInfo, 
+  std::function<glm::vec3(objid)> getPos, 
+  objid(*loadScene)(std::string sceneFile, glm::vec3 offset), 
+  void(*unloadScene)(objid sceneId)
+);
 objid addLoadingAround(DynamicLoading& loadingInfo, objid id);
 void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle);
 

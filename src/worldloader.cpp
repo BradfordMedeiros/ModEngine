@@ -214,7 +214,7 @@ std::string chunkloadingDebugInfo(ChunkLoadingInfo& info){
 
 // instead of keeping in memory here which chunks are loaded or not, it's probably better for this to requery the 
 // main scene system for a list of loaded chunks
-void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile), void(*unloadScene)(objid sceneId)){
+void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile, glm::vec3 offset), void(*unloadScene)(objid sceneId)){
   std::vector<ChunkAddress> loadingPos;
 
   for (auto &[id, _] : loadingInfo.idsLoadAround){
@@ -244,7 +244,14 @@ void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(obj
   for (auto &chunk : chunkLoading.chunksToLoad){
     std::cout << "INFO: CHUNK MANAGEMENT: load: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = sceneFileForChunk(loadingInfo.mappingInfo, chunk);
-    auto sceneId = loadScene(sceneFile);
+    auto sceneId = loadScene(
+      sceneFile, 
+      glm::vec3(
+        chunk.x * loadingInfo.mappingInfo.chunkSize, 
+        chunk.y * loadingInfo.mappingInfo.chunkSize, 
+        chunk.z * loadingInfo.mappingInfo.chunkSize
+      )
+    );
     std::cout << "INFO: CHUNK MANAGEMENT: want to load id: " << sceneId << std::endl;
     loadingInfo.chunkHashToSceneId[encodeChunkHash(chunk)] = sceneId;
   }
