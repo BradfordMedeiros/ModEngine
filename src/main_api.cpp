@@ -240,7 +240,7 @@ void addAnimation(AnimationState& animationState, int32_t groupId, std::string a
       playbacksToRemove.push_back(groupId);
     },
     animation.duration,
-    RESTART
+    PAUSE
   );  
   animationState.playbacks[groupId] = playback;
 }
