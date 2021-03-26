@@ -172,10 +172,9 @@ void generatePortalTextures(){
 std::vector<int32_t> playbacksToRemove;
 void tickAnimations(AnimationState& animationState, float elapsedTime){
   for (auto groupId : playbacksToRemove){
-    std::cout << "removed playback: " << groupId << std::endl;
     animationState.playbacks.erase(groupId);
   }
-  for (auto &[_, playback] : animationState.playbacks){
+  for (auto &[id, playback] : animationState.playbacks){
     playback.setElapsedTime(elapsedTime);
   }
   playbacksToRemove.clear();
@@ -1089,6 +1088,7 @@ int main(int argc, char* argv[]){
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,
     .unloadScript = unloadScript,
+    .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime,
     .layers = {
       LayerInfo {

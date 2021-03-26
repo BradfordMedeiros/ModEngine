@@ -56,7 +56,6 @@ void removeStateMachines(objid id){
 
 
 void processStateMachines(){
-  std::cout << "num state machines: " << activeMachines.size() << std::endl;
   for (auto &[_, machinesForId] : activeMachines){
     for (auto machine : machinesForId){
       State& activeState = machine -> states.at(machine -> currentState);

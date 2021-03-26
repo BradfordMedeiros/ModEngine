@@ -114,6 +114,7 @@ struct AnimationState {
 };
 std::vector<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay);
+void stopAnimation(int32_t id);
 
 std::vector<std::string> listSounds(int32_t id);
 void playSound(std::string sound);

@@ -259,7 +259,6 @@ void stopAnimation(int32_t id){
 }
 
 void removeObjectById(objid id){
-  stopAnimation(id);
   removeObjectFromScene(world, id, interface);
 }
 
@@ -561,7 +560,7 @@ void scmEmit(objid id){
 }
 
 objid addLoadingAround(objid id){
-  addLoadingAround(dynamicLoading, id);
+  return addLoadingAround(dynamicLoading, id);
 }
 void removeLoadingAround(objid id){
   removeLoadingAround(dynamicLoading, id);

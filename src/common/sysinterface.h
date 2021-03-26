@@ -7,6 +7,7 @@
 struct SysInterface {
   std::function<void(std::string, objid)> loadScript;
   std::function<void(std::string, objid)> unloadScript;
+  std::function<void(objid)> stopAnimation;
   std::function<float()> getCurrentTime;
   std::vector<LayerInfo> layers;
 };

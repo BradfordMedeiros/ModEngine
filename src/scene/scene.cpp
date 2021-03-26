@@ -506,6 +506,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   if (scriptName != ""){
     interface.unloadScript(scriptName, objectId);
   }
+  interface.stopAnimation(objectId);
   removeObject(
     world.objectMapping, 
     objectId, 
