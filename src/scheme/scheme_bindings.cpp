@@ -672,9 +672,10 @@ SCM scmStateMachine(SCM states){
   return scm_make_foreign_object_1(stateMachineType, statemachineobj);
 }
 
-void (*_playStateMachine)(StateMachine* machine);
+void (*_playStateMachine)(StateMachine* machine, objid id);
 SCM scmPlayStateMachine(SCM scmMachine){
-  _playStateMachine(getMachineFromScmType(scmMachine));
+  auto moduleId = currentModuleId();
+  _playStateMachine(getMachineFromScmType(scmMachine), moduleId);
   return SCM_UNSPECIFIED;
 }
 void (*_setStateMachine)(StateMachine* machine, std::string newState);
@@ -1124,7 +1125,7 @@ void createStaticSchemeBindings(
   Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
   void (*playbackTrack)(Track& track),
   StateMachine (*createStateMachine)(std::vector<State> states),
-  void (*playStateMachine)(StateMachine* machine),
+  void (*playStateMachine)(StateMachine* machine, objid id),
   void (*setStateMachine)(StateMachine* machine, std::string newState),
   void (*playRecording)(objid id, std::string recordingPath),
   void (*stopRecording)(objid id, std::string recordingPath),

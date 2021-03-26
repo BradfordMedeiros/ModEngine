@@ -42,6 +42,7 @@ struct SchemeBindingCallbacks {
   stringfunc onPlayerLeave;
 };
 
+objid currentModuleId();
 SchemeBindingCallbacks getSchemeCallbacks();
 void loadScript(std::string script, objid id, bool isServer);
 void unloadScript(std::string script, objid id);

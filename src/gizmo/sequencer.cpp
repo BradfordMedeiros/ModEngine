@@ -28,7 +28,7 @@ StateMachine createStateMachine(std::vector<State> states){
   return machine;
 }
 
-std::vector<StateMachine*> activeMachines;
+std::map<objid, std::vector<StateMachine*>> activeMachines;
 
 void setStateMachine(StateMachine* machine, std::string newState){
   if (machine -> currentState == newState){
@@ -44,18 +44,28 @@ void setStateMachine(StateMachine* machine, std::string newState){
   machine -> trackIndex = 0;
 }
 
-void playStateMachine(StateMachine* machine){
-  activeMachines.push_back(machine);
+void playStateMachine(StateMachine* machine, objid id){
+  if (activeMachines.find(id) == activeMachines.end()){
+    activeMachines[id] = {};
+  }
+  activeMachines.at(id).push_back(machine);
+}
+void removeStateMachines(objid id){
+  activeMachines.erase(id);
 }
 
+
 void processStateMachines(){
-  for (auto machine : activeMachines){
-    State& activeState = machine -> states.at(machine -> currentState);
-    Track& currentTrack = activeState.tracks.at(machine -> currentTrack);
-    for (int i = machine -> trackIndex; i < currentTrack.trackFns.size(); i++){
-       auto fn = currentTrack.trackFns.at(i);
-       fn();
-       machine -> trackIndex++;
+  std::cout << "num state machines: " << activeMachines.size() << std::endl;
+  for (auto &[_, machinesForId] : activeMachines){
+    for (auto machine : machinesForId){
+      State& activeState = machine -> states.at(machine -> currentState);
+      Track& currentTrack = activeState.tracks.at(machine -> currentTrack);
+      for (int i = machine -> trackIndex; i < currentTrack.trackFns.size(); i++){
+         auto fn = currentTrack.trackFns.at(i);
+        fn();
+        machine -> trackIndex++;
+      }
     }
   }
 } 

@@ -8,6 +8,7 @@
 #include <functional>
 #include <variant>
 #include <assert.h>
+#include "../common/util.h"
 
 struct Track {
   std::string name;
@@ -38,9 +39,9 @@ Track createTrack(std::string name, std::vector<std::function<void()>> fns);
 void playbackTrack(Track& track);
 
 StateMachine createStateMachine(std::vector<State> states);
-void playStateMachine(StateMachine* machine);
+void playStateMachine(StateMachine* machine, objid id);
+void removeStateMachines(objid id);
 void setStateMachine(StateMachine* machine, std::string newState);
-
 void processStateMachines();
 
 

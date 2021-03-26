@@ -11,6 +11,7 @@
 #include "../common/util.h"
 #include "../gizmo/sequencer.h"   // TODO -  don't depend on this directly 
 #include "../sql.h" // TODO don't depend on this directly
+#include "./scriptmanager.h"    // need to eliminate the circular relationship here
 
 void createStaticSchemeBindings(
   int32_t (*loadScene)(std::string),
@@ -58,7 +59,7 @@ void createStaticSchemeBindings(
   Track (*createTrack)(std::string, std::vector<std::function<void()>> fns),
   void (*playbackTrack)(Track& track),
   StateMachine (*createStateMachine)(std::vector<State> states),
-  void (*playStateMachine)(StateMachine* machine),
+  void (*playStateMachine)(StateMachine* machine, objid id),
   void (*setStateMachine)(StateMachine* machine, std::string newState),
   void (*playRecording)(objid id, std::string recordingPath),
   void (*stopRecording)(objid id, std::string recordingPath),
