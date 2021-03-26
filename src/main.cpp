@@ -276,8 +276,8 @@ void selectItem(objid selectedId, Color pixelColor){
 
   applyPainting(selectedId);
 
-  auto groupid = selectedId;
-  auto selectedObject =  getGameObject(world, groupid);
+  auto groupId = getGroupId(world.sandbox, selectedId);
+  auto selectedObject =  getGameObject(world, groupId);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
   shouldCallItemSelected = true;
@@ -285,7 +285,7 @@ void selectItem(objid selectedId, Color pixelColor){
   if (!state.shouldSelect){
     return;
   }
-  setSelectedIndex(state.editor, groupid, selectedObject.name, state.multiselectMode);
+  setSelectedIndex(state.editor, groupId, selectedObject.name, state.multiselectMode);
   state.selectedName = selectedObject.name + "(" + std::to_string(state.editor.selectedObj.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }

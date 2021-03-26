@@ -43,7 +43,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.enableBloom = false,
   	.bloomAmount = 1.f,
   	.takeScreenshot = false,
-    .highlight = false,
+    .highlight = true,
     .shouldSelect = true,
     .editor = EditorContent{
       .selectedObj = EditorItem { 
