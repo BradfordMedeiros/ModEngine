@@ -208,10 +208,10 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
   return  noAnimation;  // @todo probably use optional here.
 }
 
-glm::mat4 getModelTransform(std::string name){
+glm::mat4 getModelTransform(std::string name, std::string skeletonRoot){
   auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
   if (gameobj.has_value()){
-    return groupModelTransform(world.sandbox, gameobj.value() -> id);
+    return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot);
   }
   std::cout << "no value: " << name << std::endl;
   assert(false);
@@ -220,10 +220,10 @@ glm::mat4 getModelTransform(std::string name){
 
 void addAnimation(AnimationState& animationState, int32_t groupId, std::string animationToPlay){
   auto animation = getAnimation(world, groupId, animationToPlay);
-  auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
   TimePlayback playback(
     initialTime, 
-    [animation, meshNameToMeshes](float currentTime, float elapsedTime) -> void { 
+    [animation, groupId](float currentTime, float elapsedTime) -> void { 
+      auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
       playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime,
         getModelTransform,
         [&world](std::string name, glm::mat4 pose) -> void {

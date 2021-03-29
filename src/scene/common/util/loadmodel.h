@@ -48,7 +48,7 @@ struct Animation {
 struct Bone {
   std::string name;
   glm::mat4 offsetMatrix;
-  glm::mat4 initialOffsetMatrix;  // segfault when try to remove this, why?
+  std::string skeletonBase;
 };
 
 struct MeshData {

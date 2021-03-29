@@ -337,7 +337,6 @@ void addObjectToWorld(
         if (shouldLoadModel){
           ModelData data = loadModel(name, meshName); 
           world.animations[id] = data.animations;
-
           bool hasMesh = data.nodeToMeshId.at(0).size() > 0;     // this is 0 node because we just loaded a mesh, so by definition is root node
 
           for (auto [meshId, meshData] : data.meshIdToMeshData){
@@ -495,6 +494,7 @@ objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interfac
   return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), interface);
 }
 
+// todo finish removing data like eg clearing meshes, animations,etc
 void removeObjectById(World& world, objid objectId, std::string name, SysInterface interface, std::string scriptName, bool netsynchronized){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId);

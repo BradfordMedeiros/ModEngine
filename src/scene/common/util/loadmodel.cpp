@@ -183,6 +183,7 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
     Bone meshBone {
       .name = generateNodeName(rootname, bone -> mName.C_Str()),
       .offsetMatrix = glm::mat4(1.f),
+      .skeletonBase = "gun/Armature",
     };
     meshBones.push_back(meshBone);
 

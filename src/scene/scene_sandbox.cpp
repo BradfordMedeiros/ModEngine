@@ -89,8 +89,8 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   assert(foundId);
   return transformation;
 }
-glm::mat4 groupModelTransform(SceneSandbox& sandbox, objid id){
-  auto gameobj = maybeGetGameObjectByName(sandbox, "gun/Armature");
+glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot){
+  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot);
   assert(gameobj.has_value());
  
   //auto gameobj = maybeGetGameObjectByName(sandbox, "onenodewithanimation");

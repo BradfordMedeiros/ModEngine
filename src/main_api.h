@@ -162,7 +162,7 @@ struct VoxelQueryData {
 };
 std::vector<VoxelQueryData> getSelectedVoxels();
 
-glm::mat4 getModelTransform(std::string name);
+glm::mat4 getModelTransform(std::string name, std::string skeletonBase);
 
 void scmEmit(objid id);
 

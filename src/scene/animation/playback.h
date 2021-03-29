@@ -11,10 +11,10 @@ void playbackAnimation(Animation animation,
   NameAndMesh meshNameToMeshes, 
   float currentTime, 
   float elapsedTime, 
-  std::function<glm::mat4(std::string)> getModelMatrix,
+  std::function<glm::mat4(std::string, std::string)> getModelMatrix,
   std::function<void(std::string, glm::mat4)> setPose
 );
 
-void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string)> getModelMatrix);
+void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix);
 
 #endif
