@@ -43,7 +43,7 @@ void main(){
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-    vec2 adjustedTexCoord = TexCoord * textureTiling;
+    vec2 adjustedTexCoord = vec2(TexCoord.x, -TexCoord.y) * textureTiling;
 
     vec4 diffuseColor = texture(maintexture, adjustedTexCoord);
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
