@@ -90,9 +90,10 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return transformation;
 }
 glm::mat4 groupModelTransform(SceneSandbox& sandbox, objid id){
-  auto gameobj = maybeGetGameObjectByName(sandbox, "Armature");
+  auto gameobj = maybeGetGameObjectByName(sandbox, "gun/Armature");
+  assert(gameobj.has_value());
+ 
   //auto gameobj = maybeGetGameObjectByName(sandbox, "onenodewithanimation");
-   
   //auto gameobj = maybeGetGameObjectByName(sandbox, "SENTINAL_ARMATURE");
 
   //auto groupTransform = fullModelTransform(sandbox, getGroupId(sandbox, id));

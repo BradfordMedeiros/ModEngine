@@ -226,7 +226,7 @@ void updateTextureDataWorld(World& world, std::string texturepath, unsigned char
 }
 
 void addMesh(World& world, std::string meshpath){
-  ModelData data = loadModel(meshpath);
+  ModelData data = loadModel("", meshpath);
   assert(data.meshIdToMeshData.size() ==  1);
   auto meshData = data.meshIdToMeshData.begin() -> second;
   world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
@@ -333,9 +333,9 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
-      [&world, &scene, sceneId, id, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
-          ModelData data = loadModel(meshName); 
+          ModelData data = loadModel(name, meshName); 
           world.animations[id] = data.animations;
 
           bool hasMesh = data.nodeToMeshId.at(0).size() > 0;     // this is 0 node because we just loaded a mesh, so by definition is root node

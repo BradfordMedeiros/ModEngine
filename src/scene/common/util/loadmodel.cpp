@@ -42,7 +42,11 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   return info;
 }
 
-std::vector<Animation> processAnimations(const aiScene* scene){
+std::string generateNodeName(std::string rootname, const char* nodeName){
+  return rootname + "/" + nodeName; 
+}
+
+std::vector<Animation> processAnimations(std::string rootname, const aiScene* scene){
   std::vector<Animation> animations;
 
   int numAnimations = scene -> mNumAnimations;
@@ -77,7 +81,7 @@ std::vector<Animation> processAnimations(const aiScene* scene){
       }
 
       AnimationChannel channel {
-        .nodeName = aiAnimation -> mNodeName.C_Str(),
+        .nodeName = generateNodeName(rootname, aiAnimation -> mNodeName.C_Str()),
         .positionKeys = positionKeys,
         .scalingKeys = scalingKeys,
         .rotationKeys = rotationKeys
@@ -167,7 +171,8 @@ struct BoneInfo {
   std::map<unsigned int, std::vector<BoneWeighting>>  vertexBoneWeight;
 };
 
-BoneInfo processBones(aiMesh* mesh){
+
+BoneInfo processBones(std::string rootname, aiMesh* mesh){
   std::vector<Bone> meshBones;
 
   aiBone** bones = mesh -> mBones;
@@ -176,7 +181,7 @@ BoneInfo processBones(aiMesh* mesh){
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
     Bone meshBone {
-      .name = bone -> mName.C_Str(),
+      .name = generateNodeName(rootname, bone -> mName.C_Str()),
       .offsetMatrix = glm::mat4(1.f),
     };
     meshBones.push_back(meshBone);
@@ -252,11 +257,11 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
   return relativePath.string();
 }
 
-MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
+MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    
-   BoneInfo boneInfo = processBones(mesh);
+   BoneInfo boneInfo = processBones(rootname, mesh);
 
    std::cout << "loading modelPath: " << modelPath << std::endl;
    for (unsigned int i = 0; i < mesh -> mNumVertices; i++){
@@ -323,6 +328,7 @@ MeshData processMesh(aiMesh* mesh, const aiScene* scene, std::string modelPath){
 }
 
 void processNode(
+  std::string rootname,
   aiNode* node, 
   int parentNodeId,
   int* localNodeId, 
@@ -337,18 +343,31 @@ void processNode(
      addParent(currentNodeId, parentNodeId);
    }
 
-   onAddNode(node -> mName.C_Str(), currentNodeId, node -> mTransformation);
+   auto nodeName = generateNodeName(rootname, node -> mName.C_Str());
+   onAddNode(nodeName, currentNodeId, node -> mTransformation);
    for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
      onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
+     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
    }
+}
+
+void assertAllNamesUnique(std::map<int32_t, std::string>& idToName){
+  bool foundDuplicate = false;
+  std::map<std::string, int> names;
+  for (auto [val, name] : idToName){
+    if (names.find(name) != names.end()){
+      foundDuplicate = true;
+    }
+    names[name] = val;
+  }
+  assert(!foundDuplicate);
 }
 
 // Currently this just loads all the meshes into the models array. 
 // Should have parent/child relations and a hierarchy but todo.
-ModelData loadModel(std::string modelPath){
+ModelData loadModel(std::string rootname, std::string modelPath){
    Assimp::Importer import;
    const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
@@ -362,13 +381,13 @@ ModelData loadModel(std::string modelPath){
    std::map<int32_t, Transformation> nodeTransform;
    std::map<int32_t, std::string> names;
 
-   auto animations = processAnimations(scene);
+   auto animations = processAnimations(rootname, scene);
 
    int localNodeId = -1;
-   processNode(scene -> mRootNode, localNodeId, &localNodeId, 
-    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId](int nodeId, int meshId) -> void {
+   processNode(rootname, scene -> mRootNode, localNodeId, &localNodeId, 
+    [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId, &rootname](int nodeId, int meshId) -> void {
       // load mesh
-      MeshData meshData = processMesh(scene -> mMeshes[meshId], scene, modelPath);
+      MeshData meshData = processMesh(rootname, scene -> mMeshes[meshId], scene, modelPath);
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
@@ -400,6 +419,7 @@ ModelData loadModel(std::string modelPath){
 
    assert(nodeToMeshId.size() == nodeTransform.size());
    assert(names.size() ==  nodeToMeshId.size());
+   assertAllNamesUnique(names);
 
    ModelData data = {
      .meshIdToMeshData = meshIdToMeshData,

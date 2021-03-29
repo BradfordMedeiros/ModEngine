@@ -9,6 +9,7 @@ void addObjectToScene(Scene& scene, objid parentId, std::string name, GameObject
   };
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
+  assert(scene.nameToId.find(name) == scene.nameToId.end());
   scene.nameToId[name] = gameobjectObj.id;
 }
 
