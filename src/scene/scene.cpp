@@ -171,6 +171,15 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
         physicsInfo.collisionInfo,
         opts
       );
+    }else if (physicsOptions.shape == CAPSULE){
+      std::cout << "capsule collider not yet implemented" << std::endl;
+      assert(false);
+    }else if (physicsOptions.shape == CYLINDER){
+      std::cout << "cylinder collider not yet implemented" << std::endl;
+      assert(false);
+    }else if (physicsOptions.shape == CONVEXHULL){
+      std::cout << "convex hull collider not yet implemented" << std::endl;
+      assert(false);
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
       rigidBody = addRigidBodyVoxel(

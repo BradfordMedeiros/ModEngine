@@ -8,7 +8,7 @@
 #include "../common/util.h"
 #include "./common/util/types.h"
 
-enum ColliderShape { BOX, SPHERE, AUTOSHAPE };
+enum ColliderShape { BOX, SPHERE, CAPSULE, CYLINDER, CONVEXHULL, AUTOSHAPE };
 
 struct physicsOpts {
   bool enabled;

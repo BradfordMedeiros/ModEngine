@@ -183,6 +183,16 @@ std::string serializeObj(
   if (gameobject.physicsOptions.shape == SPHERE){
     sceneData = sceneData + gameobjectName + ":physics_shape:shape_sphere" + "\n"; 
   }
+  if (gameobject.physicsOptions.shape == CAPSULE){
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_capsule" + "\n"; 
+  }
+  if (gameobject.physicsOptions.shape == CYLINDER){
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_cylinder" + "\n"; 
+  } 
+  if (gameobject.physicsOptions.shape == CONVEXHULL){
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_hull" + "\n"; 
+  } 
+ 
   if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
     sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
   }

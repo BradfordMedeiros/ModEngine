@@ -71,6 +71,12 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
       object.physics.shape = SPHERE;
     }else if (value == "shape_box"){
       object.physics.shape = BOX;
+    }else if (value == "shape_capsule"){
+      object.physics.shape = CAPSULE;
+    }else if (value == "shape_cylinder"){
+      object.physics.shape = CYLINDER;
+    }else if (value == "shape_hull"){
+      object.physics.shape = CONVEXHULL;
     }else if (value == "shape_auto"){
       object.physics.shape = AUTOSHAPE;
     }else{
