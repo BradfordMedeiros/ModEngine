@@ -170,7 +170,7 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
           (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
           (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , 
           (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
-        ),                             
+        ) / 2.f,                             
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
@@ -181,6 +181,12 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
       std::cout << "INFO: PHYSICS: ADDING CAPSULE RIGID BODY" << std::endl;
       rigidBody = addRigidBodyCapsule(
         world.physicsEnvironment,
+        maxvalue(
+          (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
+          0.f,
+          (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+        ) / 2.f,
+        (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) ,
         physicsInfo.transformation.position,
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
@@ -192,6 +198,12 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
       std::cout << "INFO: PHYSICS: ADDING CYLINDER RIGID BODY" << std::endl;
       rigidBody = addRigidBodyCylinder(
         world.physicsEnvironment,
+        maxvalue(
+          (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
+          0.f,
+          (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+        ) / 2.f,
+        (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin),
         physicsInfo.transformation.position,
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,

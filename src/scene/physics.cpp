@@ -81,12 +81,12 @@ btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, b
   btCollisionShape* shape = new btSphereShape(radius); 
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
-btRigidBody* createRigidBodyCapsule(physicsEnv& env, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  btCollisionShape* shape = new btSphereShape(3);
+btRigidBody* createRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+  btCollisionShape* shape = new btCapsuleShape(radius, height);
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
-btRigidBody* createRigidBodyCylinder(physicsEnv& env, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  btCollisionShape* shape = new btSphereShape(5);
+btRigidBody* createRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+  btCollisionShape* shape = new btCylinderShape(btVector3(radius, radius, height));
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
 btRigidBody* createRigidBodyHull(physicsEnv& env, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
@@ -151,12 +151,12 @@ btRigidBody* addRigidBodySphere(physicsEnv& env, glm::vec3 pos, float radius, gl
   auto rigidBodyPtr = createRigidBodySphere(pos, radius, rotation, isStatic, hasCollision, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyCapsule(physicsEnv& env, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyCapsule(env, pos, rot, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyCapsule(env, radius, height, pos, rot, isStatic, hasCollision, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
-btRigidBody* addRigidBodyCylinder(physicsEnv& env, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  auto rigidBodyPtr = createRigidBodyCylinder(env, pos, rot, isStatic, hasCollision, scaling, opts);
+btRigidBody* addRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+  auto rigidBodyPtr = createRigidBodyCylinder(env, radius, height, pos, rot, isStatic, hasCollision, scaling, opts);
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 btRigidBody* addRigidBodyHull(physicsEnv& env, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
