@@ -151,7 +151,9 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
       rigidBody = addRigidBodyRect(
         world.physicsEnvironment, 
         physicsInfo.transformation.position, 
-        (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin),
+        physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin, 
+        physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin, 
+        physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin,
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
@@ -164,7 +166,11 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
       rigidBody = addRigidBodySphere(
         world.physicsEnvironment, 
         physicsInfo.transformation.position,
-        maxvalue((physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)),                             
+        maxvalue(
+          (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin), 
+          (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin) , 
+          (physicsInfo.boundInfo.zMax - physicsInfo.boundInfo.zMin)
+        ),                             
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
@@ -172,14 +178,38 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
         opts
       );
     }else if (physicsOptions.shape == CAPSULE){
-      std::cout << "capsule collider not yet implemented" << std::endl;
-      assert(false);
+      std::cout << "INFO: PHYSICS: ADDING CAPSULE RIGID BODY" << std::endl;
+      rigidBody = addRigidBodyCapsule(
+        world.physicsEnvironment,
+        physicsInfo.transformation.position,
+        physicsInfo.transformation.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        physicsInfo.collisionInfo,
+        opts
+      );
     }else if (physicsOptions.shape == CYLINDER){
-      std::cout << "cylinder collider not yet implemented" << std::endl;
-      assert(false);
+      std::cout << "INFO: PHYSICS: ADDING CYLINDER RIGID BODY" << std::endl;
+      rigidBody = addRigidBodyCylinder(
+        world.physicsEnvironment,
+        physicsInfo.transformation.position,
+        physicsInfo.transformation.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        physicsInfo.collisionInfo,
+        opts
+      );
     }else if (physicsOptions.shape == CONVEXHULL){
-      std::cout << "convex hull collider not yet implemented" << std::endl;
-      assert(false);
+      std::cout << "INFO: PHYSICS: ADDING CONVEXHULL RIGID BODY" << std::endl;
+      rigidBody = addRigidBodyHull(
+        world.physicsEnvironment,
+        physicsInfo.transformation.position,
+        physicsInfo.transformation.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        physicsInfo.collisionInfo,
+        opts
+      );
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
       rigidBody = addRigidBodyVoxel(
