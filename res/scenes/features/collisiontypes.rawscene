@@ -1,0 +1,33 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+boxrect:position:-10 0 0
+boxrect:mesh:./res/models/box/box.obj
+boxrect:physics:enabled
+boxrect:physics_shape:shape_box
+boxrect:physics_type:dynamic
+
+boxsphere:position:-5 0 0
+boxsphere:mesh:./res/models/box/box.obj
+boxsphere:physics:enabled
+boxsphere:physics_shape:shape_sphere
+boxsphere:physics_type:dynamic
+
+boxcylinder:position:0 0 0
+boxcylinder:mesh:./res/models/box/box.obj
+boxcylinder:physics:enabled
+boxcylinder:physics_shape:shape_cylinder
+boxcylinder:physics_type:dynamic
+
+boxcapsule:position:5 0 0
+boxcapsule:mesh:./res/models/box/box.obj
+boxcapsule:physics:enabled
+boxcapsule:physics_shape:shape_capsule
+boxcapsule:physics_type:dynamic
+
+boxhull:position:10 0 0
+boxhull:mesh:./res/models/box/box.obj
+boxhull:physics:enabled
+boxhull:physics_shape:shape_hull
+boxhull:physics_type:dynamic
