@@ -183,7 +183,7 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
     Bone meshBone {
       .name = generateNodeName(rootname, bone -> mName.C_Str()),
       .offsetMatrix = glm::mat4(1.f),
-      .skeletonBase = "gun/Armature",
+      .skeletonBase = "",
     };
     meshBones.push_back(meshBone);
 
@@ -225,6 +225,42 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
 //    assert(i != 0);
       indices[i] = 0;   // if no associated bone id, just put 0 bone id with 0 weighting so it won't add to the weight
       weights[i] = 0;
+    }
+  }
+}
+
+void setRootSkeletonInBones(
+  std::map<int32_t, MeshData>& meshIdToMeshData, 
+  std::map<std::string, int>& nodeNameToDepth, 
+  std::map<int32_t, int32_t>& childToParent,
+  std::map<int32_t, std::string>& names
+){
+  std::string highestBone = "";
+  {
+    int minDepthBone = -1;
+    for (auto &[_, mesh] : meshIdToMeshData){
+      for (auto &bone : mesh.bones){
+        auto boneDepth = nodeNameToDepth.at(bone.name);
+        if (minDepthBone == -1 || boneDepth < minDepthBone){
+          minDepthBone = boneDepth;
+          highestBone = bone.name;
+        }
+      }
+    }
+  }
+
+  std::string skeletonBase = "";
+  for (auto [nodeid, name] : names){
+    if (name == highestBone){
+      auto parentId = childToParent.at(nodeid);
+      auto parentName = names.at(parentId);
+      skeletonBase = parentName;
+    }
+  }
+
+  for (auto &[_, mesh] : meshIdToMeshData){
+    for (auto &bone : mesh.bones){
+      bone.skeletonBase = skeletonBase;
     }
   }
 }
@@ -334,8 +370,9 @@ void processNode(
   int parentNodeId,
   int* localNodeId, 
   std::function<void(int, int)> onLoadMesh,
-  std::function<void(std::string, int, aiMatrix4x4)> onAddNode,
-  std::function<void(int, int)> addParent
+  std::function<void(std::string, int, aiMatrix4x4, int depth)> onAddNode,
+  std::function<void(int, int)> addParent,
+  int depth
 ){
    *localNodeId = *localNodeId + 1;
    int currentNodeId =  *localNodeId;
@@ -345,12 +382,12 @@ void processNode(
    }
 
    auto nodeName = generateNodeName(rootname, node -> mName.C_Str());
-   onAddNode(nodeName, currentNodeId, node -> mTransformation);
+   onAddNode(nodeName, currentNodeId, node -> mTransformation, depth);
    for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
      onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent);
+     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1);
    }
 }
 
@@ -382,6 +419,8 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    std::map<int32_t, Transformation> nodeTransform;
    std::map<int32_t, std::string> names;
 
+   std::map<std::string, int> nodeNameToDepth;
+
    auto animations = processAnimations(rootname, scene);
 
    int localNodeId = -1;
@@ -392,7 +431,7 @@ ModelData loadModel(std::string rootname, std::string modelPath){
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
-    [&nodeTransform, &names, &nodeToMeshId](std::string name, int nodeId, aiMatrix4x4 transform) -> void {
+    [&nodeTransform, &names, &nodeToMeshId, &nodeNameToDepth](std::string name, int nodeId, aiMatrix4x4 transform, int depth) -> void {
       // add node
       names[nodeId] = name;  
       
@@ -411,12 +450,17 @@ ModelData loadModel(std::string rootname, std::string modelPath){
         std::vector<int> emptyMeshList;
         nodeToMeshId[nodeId] = emptyMeshList;
       }
+
+      nodeNameToDepth[name] = depth;
     },
     [&childToParent](int parentId, int nodeId) -> void {
       // add parent
       childToParent[parentId] = nodeId;
-    }
+    },
+    0
   );
+
+   setRootSkeletonInBones(meshIdToMeshData, nodeNameToDepth, childToParent, names);
 
    assert(nodeToMeshId.size() == nodeTransform.size());
    assert(names.size() ==  nodeToMeshId.size());
