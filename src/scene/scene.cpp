@@ -105,7 +105,7 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
 
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
+void addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initialLoad, std::vector<glm::vec3> verts){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
     return;
@@ -212,9 +212,14 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale){
         opts
       );
     }else if (physicsOptions.shape == CONVEXHULL){
+      // This is a hack, but it should be ok.  UpdatePhysicsBody really only need to apply for voxels and heightmaps as of writing this
+      // I don't have easy scope to the list of verts here, so I'd rather not reload the model (or really keep them in mem for no reason) just 
+      // for this, which is unused.  Probably should just change the usage of the voxel/heightmap refresh code eventually.
+      assert(initialLoad);  
       std::cout << "INFO: PHYSICS: ADDING CONVEXHULL RIGID BODY" << std::endl;
       rigidBody = addRigidBodyHull(
         world.physicsEnvironment,
+        verts,
         physicsInfo.transformation.position,
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
@@ -253,7 +258,7 @@ void updatePhysicsBody(World& world, objid id){
   assert(rigidBody != NULL);
   glm::vec3 oldScale = getScale(rigidBody);
   rmRigidBody(world, id);
-  addPhysicsBody(world, id, oldScale);
+  addPhysicsBody(world, id, oldScale, false, {});
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath){
@@ -363,6 +368,10 @@ std::string getType(std::string name, std::vector<Field> additionalFields){
   return type;
 }
 
+std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
+  return { glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 5.f, 0.f), glm::vec3(1.f, 1.f, 0.f) };
+}
+
 void addObjectToWorld(
   World& world, 
   Scene& scene, 
@@ -371,7 +380,8 @@ void addObjectToWorld(
   bool shouldLoadModel, 
   std::function<objid()> getId,
   SysInterface interface,
-  std::map<std::string, std::string> additionalFields
+  std::map<std::string, std::string> additionalFields,
+  std::map<objid, std::vector<glm::vec3>>& idToModelVertexs
 ){
     auto id =  scene.nameToId.at(name);
 
@@ -384,9 +394,11 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
-      [&world, &scene, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, &scene, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(name, meshName); 
+          idToModelVertexs[id] = getVertexsFromModelData(data);
+
           world.animations[id] = data.animations;
           bool hasMesh = data.nodeToMeshId.at(0).size() > 0;     // this is 0 node because we just loaded a mesh, so by definition is root node
 
@@ -413,7 +425,7 @@ void addObjectToWorld(
           );
 
           for (auto &[name, additionalFields] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, additionalFields);
+            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, additionalFields, idToModelVertexs);
           }
           return hasMesh;
         }
@@ -487,12 +499,17 @@ void addSerialObjectsToWorld(
   SysInterface interface,
   std::map<std::string, std::map<std::string, std::string>> additionalFields
 ){
+  std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, additionalField] : additionalFields){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, additionalField);
+    addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, additionalField, idToModelVertexs);
   }
   for (auto id : idsAdded){
-    addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f));   
+    std::vector<glm::vec3> modelVerts = {};
+    if (idToModelVertexs.find(id) != idToModelVertexs.end()){
+      modelVerts = idToModelVertexs.at(id);
+    }
+    addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts);   
   }
 
   for (auto id : idsAdded){
