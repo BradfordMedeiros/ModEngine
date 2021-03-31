@@ -79,6 +79,8 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
       object.physics.shape = CONVEXHULL;
     }else if (value == "shape_auto"){
       object.physics.shape = AUTOSHAPE;
+    }else if (value == "shape_exact"){
+      object.physics.shape = SHAPE_EXACT;
     }else{
       object.physics.shape = AUTOSHAPE;
     }

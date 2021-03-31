@@ -192,6 +192,9 @@ std::string serializeObj(
   if (gameobject.physicsOptions.shape == CONVEXHULL){
     sceneData = sceneData + gameobjectName + ":physics_shape:shape_hull" + "\n"; 
   } 
+  if (gameobject.physicsOptions.shape == SHAPE_EXACT){
+    sceneData = sceneData + gameobjectName + ":physics_shape:shape_exact" + "\n";
+  }
  
   if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
     sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 

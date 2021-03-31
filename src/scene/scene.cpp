@@ -227,6 +227,19 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initial
         physicsInfo.collisionInfo,
         opts
       );
+    }else if (physicsOptions.shape == SHAPE_EXACT){
+      assert(initialLoad);
+      std::cout << "INFO: PHYSICS: ADDING SHAPE_EXACT RIGID BODY" << std::endl;
+      rigidBody = addRigidBodyExact(
+        world.physicsEnvironment,
+        verts,
+        physicsInfo.transformation.position,
+        physicsInfo.transformation.rotation,
+        physicsOptions.isStatic,
+        physicsOptions.hasCollisions,
+        physicsInfo.collisionInfo,
+        opts
+      );
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
       std::cout << "INFO: PHYSICS: ADDING AUTOSHAPE VOXEL RIGID BODY" << std::endl;
       rigidBody = addRigidBodyVoxel(
@@ -369,7 +382,13 @@ std::string getType(std::string name, std::vector<Field> additionalFields){
 }
 
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
-  return { glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 5.f, 0.f), glm::vec3(1.f, 1.f, 0.f) };
+  std::vector<glm::vec3> vertexs;
+  for (auto [id, meshData] : data.meshIdToMeshData){
+    for (auto index : meshData.indices){
+      vertexs.push_back(meshData.vertices.at(index).position);
+    }
+  }
+  return vertexs;
 }
 
 void addObjectToWorld(
