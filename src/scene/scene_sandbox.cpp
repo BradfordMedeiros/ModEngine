@@ -111,7 +111,7 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
     assert(false);
 
   }
-  return groupToModel;
+  return glm::inverse(groupToModel);
 }
 
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){
