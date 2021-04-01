@@ -18,7 +18,6 @@
 #include "./scene/scene_object.h"
 #include "./scene/physics.h"
 #include "./scene/collision_cache.h"
-#include "./scene/scenegraph.h"
 #include "./scene/object_types.h"
 #include "./scene/common/mesh.h"
 #include "./scene/common/vectorgfx.h"

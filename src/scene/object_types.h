@@ -7,13 +7,13 @@
 #include <vector>
 #include <variant>
 #include "./common/mesh.h"
-#include "./scenegraph.h"
 #include "./types/voxels.h"
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
 #include "./types/sound.h"
 #include "./types/video.h"
 #include "./types/emitter.h"
+#include "./serialization.h"
 #include <unistd.h>
 
 #include <glm/glm.hpp>

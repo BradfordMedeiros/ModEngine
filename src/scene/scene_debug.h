@@ -1,7 +1,7 @@
 #ifndef MOD_SCENEDEBUG
 #define MOD_SCENEDEBUG
 
-#include "./scenegraph.h"
+#include "./scene_sandbox.h"
 #include "./physics.h"
 #include "./object_types.h"
 #include "./common/util/types.h"
