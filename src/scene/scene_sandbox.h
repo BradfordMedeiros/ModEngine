@@ -57,12 +57,6 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::function<objid()> getNewObjectId
 );
 
-std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
-void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
-std::vector<objid> listObjInScene(Scene& scene);
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
-
-
 /////////////////////////////
 struct SceneSandbox {
   std::map<objid, Scene> scenes;
@@ -71,6 +65,10 @@ struct SceneSandbox {
 
 //////////////////////////////
 
+std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
+void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
+std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId);
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 ///////////////////////////////
 

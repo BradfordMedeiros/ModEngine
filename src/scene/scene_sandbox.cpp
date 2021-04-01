@@ -225,7 +225,8 @@ void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects){  // 
   }
 }
 
-std::vector<objid> listObjInScene(Scene& scene){
+std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId){
+  Scene& scene = sandbox.scenes.at(sceneId);
   std::vector<objid> allObjects;
   for (auto const&[id, _] : scene.idToGameObjects){
     allObjects.push_back(id);

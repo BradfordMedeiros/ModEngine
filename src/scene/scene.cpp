@@ -641,8 +641,7 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
     return;   // @todo maybe better to throw error instead
   }
 
-  Scene& scene = world.sandbox.scenes.at(sceneId);
-  for (auto objectId : listObjInScene(scene)){
+  for (auto objectId : listObjInScene(world.sandbox, sceneId)){
     auto gameobj = getGameObject(world, objectId);
     auto name = gameobj.name;
     auto scriptName = gameobj.script;
