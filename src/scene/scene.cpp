@@ -612,7 +612,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
   Scene& scene = sceneForId(world.sandbox, objectId);
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
-    if (!idExists(scene, gameobjId)){
+    if (!idExists(world.sandbox, gameobjId)){
       continue;
     }
     auto idsToRemove = idsToRemoveFromScenegraph(scene, gameobjId);
@@ -829,8 +829,7 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  Scene& scene = sceneForId(world.sandbox, index);
-  getGameObject(scene, index).transformation.scale = scale;
+  getGameObject(world.sandbox, index).transformation.scale = scale;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).collisionInfo;
@@ -871,7 +870,7 @@ void enforceLookAt(World& world){
     }
     if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
       glm::vec3 fromPos = gameobj.transformation.position;
-      glm::vec3 targetPosition = getGameObject(scene, lookAt).transformation.position;
+      glm::vec3 targetPosition = getGameObject(world.sandbox, lookAt).transformation.position;
       physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
     }
   });  
@@ -879,7 +878,7 @@ void enforceLookAt(World& world){
 
 void callbackEntities(World& world){
   forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
-    if (id == getGroupId(scene, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
+    if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
       world.onObjectUpdate(gameobj);
     }
   });  

@@ -67,10 +67,6 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 GameObject& getGameObject(Scene& scene, objid id);
-GameObject& getGameObject(Scene& scene, std::string name);
-objid getGroupId(Scene& scene, objid id);
-bool idExists(Scene& scene, objid id);
-objid parentId(Scene& scene, objid id);
 
 /////////////////////////////
 //////////////////////////////
@@ -91,6 +87,7 @@ objid getGroupId(SceneSandbox& sandbox, objid id);
 std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index);
 bool idExists(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
+GameObject& getGameObject(SceneSandbox& sandbox, std::string name);
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);

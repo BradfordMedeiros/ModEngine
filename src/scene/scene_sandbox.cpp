@@ -368,6 +368,11 @@ bool idExists(SceneSandbox& sandbox, objid id){
 GameObject& getGameObject(SceneSandbox& sandbox, objid id){
   return getGameObject(sceneForId(sandbox, id), id);
 }
+GameObject& getGameObject(SceneSandbox& sandbox, std::string name){
+  auto gameobj = maybeGetGameObjectByName(sandbox, name);
+  GameObject& obj = *(gameobj.value()); 
+  return obj;
+}
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   traverseScene(scene, initialModel, scale, onObject);
