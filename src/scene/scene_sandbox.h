@@ -60,10 +60,8 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
 std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
 void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
 std::vector<objid> listObjInScene(Scene& scene);
-
 void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
 
-std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 
 /////////////////////////////
 struct SceneSandbox {
