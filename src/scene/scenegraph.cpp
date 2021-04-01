@@ -5,7 +5,6 @@ void addObjectToScene(Scene& scene, objid parentId, std::string name, GameObject
     .id = gameobjectObj.id,
     .parentId = parentId,
     .groupId = gameobjectObj.id,
-    .linkOnly = false
   };
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
@@ -199,16 +198,6 @@ void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobject
   enforceRootObjects(scene);
 }
 
-void addChildLink(Scene& scene, objid childId, objid parentId){
-  auto gameobjectH = GameObjectH {
-    .id = childId,
-    .parentId = parentId,
-    .linkOnly = true,
-  };
-  scene.idToGameObjectsH[gameobjectH.id] = gameobjectH;
-  enforceParentRelationship(scene, gameobjectH.id, scene.idToGameObjects.at(parentId).name);
-}
-
 void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
   auto parentObjH = scene.idToGameObjectsH.at(id);
   onAddObject(parentObjH.id);
@@ -252,12 +241,7 @@ std::vector<objid> listObjInScene(Scene& scene){
   return allObjects;
 }
 
-void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
-  if (objectH.linkOnly){
-    traverseLink(id, model, totalScale);
-    return;
-  }
-
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
   GameObject object = scene.idToGameObjects.at(objectH.id);
   glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
   modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
@@ -268,7 +252,7 @@ void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model,
   onObject(id, scaledModelMatrix, model, "");
 
   for (objid id: objectH.children){
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject, traverseLink);
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject);
   }
 }
 
@@ -277,7 +261,7 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink){
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;
@@ -287,7 +271,7 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
       .modelMatrix = modelMatrix,
       .parentMatrix = parentMatrix,
     });
-  }, traverseLink);
+  });
   
 
   for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame

@@ -140,15 +140,6 @@ GameObjectChannel createChannel(std::map<std::string, std::string> additionalFie
   return obj;
 }
 
-GameObjectScene createScene(objid id, std::map<std::string, std::string> additionalFields, std::function<void(std::string)> loadScene){
-  auto scenefile = additionalFields.at("scene");
-  loadScene(scenefile);
-  GameObjectScene obj {
-    .scenefile = scenefile,
-  };
-  return obj;
-}
-
 std::map<std::string, std::string> particleFields(std::map<std::string, std::string> additionalFields){
   std::map<std::string, std::string> particleAttributes;
   for (auto [key, value] : additionalFields){
@@ -325,7 +316,6 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(std::string)> loadScene,
   std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
@@ -344,8 +334,6 @@ void addObject(
     mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, defaultVoxelTexture.textureId, ensureTextureLoaded);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
-  }else if(objectType == "scene"){
-    mapping[id] = createScene(id, additionalFields, loadScene);
   }else if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
@@ -378,12 +366,6 @@ void removeObject(
   auto soundObj = std::get_if<GameObjectSound>(&Object);
   if (soundObj != NULL){
     unloadSoundState(soundObj -> source, soundObj -> clip); 
-  }
-
-  auto sceneObj = std::get_if<GameObjectScene>(&Object);
-  if (sceneObj != NULL){
-    std::cout << "ERROR: scene - remove scene obj not yet implemented" << std::endl;
-    assert(false);
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&Object);

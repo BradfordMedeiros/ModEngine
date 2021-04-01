@@ -34,7 +34,6 @@ struct AddSceneDataValues {
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers);
 
-void addLink(SceneSandbox& sandbox, objid childSceneId, objid id);
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSandbox& sandbox,
   objid rootId,
   objid rootIdNode, 
@@ -43,7 +42,6 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSand
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId
-
 );
 
 #endif 

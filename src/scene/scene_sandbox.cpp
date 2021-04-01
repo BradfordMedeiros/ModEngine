@@ -52,10 +52,7 @@ GameObject& getGameObject(SceneSandbox& sandbox, objid id){
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  traverseScene(scene, initialModel, scale, onObject, [&sandbox, &scene, &onObject](objid id, glm::mat4 modelMatrix, glm::vec3 scale) -> void {
-      Scene& linkScene = sandbox.scenes.at(sandbox.idToScene.at(id));
-      traverseScene(sandbox, linkScene, modelMatrix, scale, onObject);
-  });
+  traverseScene(scene, initialModel, scale, onObject);
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
@@ -126,12 +123,6 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
     .idsAdded = idsAdded,
   };
   return data;
-}
-
-void addLink(SceneSandbox& sandbox, objid childSceneId, objid id){
-  auto rootId = sandbox.scenes.at(childSceneId).rootId;
-  addChildLink(sceneForId(sandbox, id), rootId, id);
-  sandbox.scenes.at(childSceneId).isNested = true;
 }
 
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(

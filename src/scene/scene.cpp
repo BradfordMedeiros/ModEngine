@@ -460,10 +460,6 @@ void addObjectToWorld(
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, id);
       },
-      [&world, id, &interface](std::string sceneToLoad) -> void {
-        std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
-        addLink(world.sandbox, addSceneToWorld(world, sceneToLoad, interface), id);
-      },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas, enabled);
       },

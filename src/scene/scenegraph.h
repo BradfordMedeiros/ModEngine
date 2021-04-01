@@ -19,7 +19,6 @@ struct GameObjectH {
   objid parentId;
   std::set<objid> children;
   objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
-  bool linkOnly;
 };
 
 struct Scene {
@@ -41,7 +40,6 @@ std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std
 SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers);
 
 void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
-void addChildLink(Scene& scene, objid childId, objid parentId);
 
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
@@ -58,7 +56,7 @@ std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
 void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects);
 std::vector<objid> listObjInScene(Scene& scene);
 
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject, std::function<void(objid, glm::mat4, glm::vec3)> traverseLink);  
+void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
 GameObject& getGameObject(Scene& scene, objid id);
