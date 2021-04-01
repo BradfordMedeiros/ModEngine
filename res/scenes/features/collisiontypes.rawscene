@@ -26,8 +26,14 @@ boxcapsule:physics:enabled
 boxcapsule:physics_shape:shape_capsule
 boxcapsule:physics_type:dynamic
 
-boxhull:position:10 0 0
-boxhull:mesh:./res/models/box/box.obj
-boxhull:physics:enabled
-boxhull:physics_shape:shape_hull
-boxhull:physics_type:dynamic
+boxexact:position:10 0 0
+boxexact:mesh:./res/models/cone/cone.obj
+boxexact:physics:enabled
+boxexact:physics_shape:shape_exact
+boxexact:physics_type:dynamic
+
+#boxhull:position:15 0 0
+#boxhull:mesh:./res/models/column_seat/column_seat.obj
+#boxhull:physics:enabled
+#boxhull:physics_shape:shape_hull
+#boxhull:physics_type:dynamic

@@ -84,14 +84,38 @@ btRigidBody* createRigidBodySphere(glm::vec3 pos, float radius, glm::quat rot, b
 btRigidBody* createRigidBodyCapsule(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btCapsuleShape(radius, height);
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
-}
+};
 btRigidBody* createRigidBodyCylinder(physicsEnv& env, float radius, float height, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   btCollisionShape* shape = new btCylinderShape(btVector3(radius, radius, height));
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
+
 btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
+  std::cout << "rigid body hull not yet implemented" << std::endl;
+  assert(false);
+  return NULL;
+  /*assert(verts.size() % 3 == 0);
+  btTriangleMesh trimesh;
+  for (int i = 0; i < verts.size(); i+=3){
+    trimesh.addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
+  }
+  btConvexTriangleMeshShape shape(&trimesh);
+  btShapeHull hullBuilder(&shape);
+  hullBuilder.buildHull(0);
+
+  btTriangleMesh*  hullmesh = new btTriangleMesh();
+  const btVector3* hullVertexs = hullBuilder.getVertexPointer();
+  for (int i = 0; i < hullBuilder.numVertices(); i+=3){
+    hullmesh -> addTriangle(hullVertexs[i], hullVertexs[i + 1], hullVertexs[i + 2]);
+  }
+  btConvexTriangleMeshShape* shape2 = new btConvexTriangleMeshShape(hullmesh);
+  shape2 -> setMargin(0);
+
+  return createRigidBody(pos, shape2, rot, isStatic, hasCollision, scaling, opts);*/
+}
+
+btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   assert(verts.size() % 3 == 0);
-  std::cout << "num verts: " << verts.size() << std::endl;
   btTriangleMesh*  trimesh = new btTriangleMesh();
   for (int i = 0; i < verts.size(); i+=3){
     trimesh -> addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
@@ -99,6 +123,7 @@ btRigidBody* createRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts,
   btConvexTriangleMeshShape* shape = new btConvexTriangleMeshShape(trimesh);
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
+
 btRigidBody* createRigidBodyCompound(glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   btCompoundShape* shape = new btCompoundShape();
   for (auto body: bodies){
@@ -173,7 +198,8 @@ btRigidBody* addRigidBodyHull(physicsEnv& env, std::vector<glm::vec3>& verts, gl
   return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 btRigidBody* addRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts, glm::vec3 pos, glm::quat rot, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
-  return addRigidBodyHull(env, verts, pos, rot, isStatic, hasCollision, scaling, opts);
+  auto rigidBodyPtr = createRigidBodyExact(env, verts, pos, rot, isStatic, hasCollision, scaling, opts);
+  return addBodyToWorld(env, rigidBodyPtr, opts);
 }
 btRigidBody* addRigidBodyVoxel(physicsEnv& env, glm::vec3 pos, glm::quat rotation, std::vector<VoxelBody> bodies, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){
   auto rigidBodyPtr = createRigidBodyCompound(pos, rotation, bodies, isStatic, hasCollision, scaling, opts);
