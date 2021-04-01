@@ -16,8 +16,8 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, Scene& scene, std::map<
     auto groupId = obj.groupId;
     auto parentGroupId = parentId != - 1 ? getGroupId(sandbox, parentId) : -1;
 
-    auto childName = getGameObject(scene, childId).name;
-    auto parentName = parentId == -1 ? "root" : getGameObject(scene, parentId).name;
+    auto childName = getGameObject(sandbox, childId).name;
+    auto parentName = parentId == -1 ? "root" : getGameObject(sandbox, parentId).name;
         
     auto positionParent = parentId == -1 ? glm::vec3(0.f, 0.f, 0.f) : scene.idToGameObjects.at(parentId).transformation.position;
     auto positionChild = childId == -1 ? glm::vec3(0.f, 0.f, 0.f) : scene.idToGameObjects.at(childId).transformation.position;

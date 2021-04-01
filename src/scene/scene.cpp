@@ -1,7 +1,7 @@
 #include "./scene.h"
 
 GameObject& getGameObject(World& world, objid id){
-  return getGameObject(sceneForId(world.sandbox, id), id);
+  return getGameObject(world.sandbox, id);
 }
 
 std::optional<objid> getGameObjectByName(World& world, std::string name){
@@ -483,8 +483,7 @@ std::string getTextureById(World& world, int id){
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
-  Scene& scene = world.sandbox.scenes.at(sceneId);
-  return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
+  return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
       return getTextureById(world, textureId);
     });

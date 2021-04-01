@@ -43,9 +43,7 @@ struct SceneDeserialization {
 };
 
 std::string serializeObject(Scene& scene, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
-std::string serializeScene(Scene& scene, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers);
-
 void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
@@ -66,17 +64,19 @@ std::vector<objid> listObjInScene(Scene& scene);
 void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId);
-GameObject& getGameObject(Scene& scene, objid id);
 
 /////////////////////////////
-//////////////////////////////
-///////////////////////////////
-
-
 struct SceneSandbox {
   std::map<objid, Scene> scenes;
   std::map<objid, objid> idToScene;
 };
+
+//////////////////////////////
+
+std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
+///////////////////////////////
+
+
 
 SceneSandbox createSceneSandbox();
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement);
