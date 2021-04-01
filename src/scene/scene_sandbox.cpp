@@ -93,12 +93,7 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot);
   assert(gameobj.has_value());
  
-  //auto gameobj = maybeGetGameObjectByName(sandbox, "onenodewithanimation");
-  //auto gameobj = maybeGetGameObjectByName(sandbox, "SENTINAL_ARMATURE");
-
-  //auto groupTransform = fullModelTransform(sandbox, getGroupId(sandbox, id));
   auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
-
   auto modelTransform = fullModelTransform(sandbox, id);
   // group * something = model (aka aX = b, so X = inv(A) * B)
   // inverse(group) * model
@@ -111,7 +106,7 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
     assert(false);
 
   }
-  return glm::inverse(groupToModel);
+  return groupToModel;
 }
 
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){
