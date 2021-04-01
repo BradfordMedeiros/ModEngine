@@ -601,7 +601,6 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
     }
   );
   
-  world.sandbox.idToScene.erase(objectId);
   world.onObjectDelete(objectId, netsynchronized);
 
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
@@ -622,7 +621,7 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
       auto netsynchronized = gameobj.netsynchronize;
       removeObjectById(world, id, name, interface, scriptName, netsynchronized);
     }
-    removeObjectsFromScenegraph(scene, idsToRemove);  
+    removeObjectsFromScenegraph(world.sandbox, idsToRemove);  
   }
 }
 

@@ -213,8 +213,10 @@ std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid id){
   return objects;
 }
 
-void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects){  // it might make sense to check if any layers here are not present and then 
+
+void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  // it might make sense to check if any layers here are not present and then 
   for (auto id : objects){
+    Scene& scene = sceneForId(sandbox, id);
     std::string objectName = scene.idToGameObjects.at(id).name;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
@@ -222,6 +224,7 @@ void removeObjectsFromScenegraph(Scene& scene, std::vector<objid> objects){  // 
     for (auto &[_, objh] : scene.idToGameObjectsH){
       objh.children.erase(id);
     }
+    sandbox.idToScene.erase(id);
   }
 }
 
