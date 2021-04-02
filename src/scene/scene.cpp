@@ -561,7 +561,7 @@ objid addSerialObject(
     return newId;
   };
 
-  addGameObjectToScene(world.sandbox.scenes.at(sceneId), name, gameobjectObj, children);
+  addGameObjectToScene(world.sandbox, sceneId, name, gameobjectObj, children);
 
   std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
   additionalFieldsMap[name] = additionalFields;

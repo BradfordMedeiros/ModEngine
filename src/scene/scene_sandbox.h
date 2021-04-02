@@ -42,9 +42,17 @@ struct SceneDeserialization {
   std::map<std::string, std::map<std::string, std::string>>  additionalFields;
 };
 
+/////////////////////////////
+struct SceneSandbox {
+  std::map<objid, Scene> scenes;
+  std::map<objid, objid> idToScene;
+};
+
+//////////////////////////////
+
 std::string serializeObject(Scene& scene, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
 SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers);
-void addGameObjectToScene(Scene& scene, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
+void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
@@ -57,13 +65,6 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::function<objid()> getNewObjectId
 );
 
-/////////////////////////////
-struct SceneSandbox {
-  std::map<objid, Scene> scenes;
-  std::map<objid, objid> idToScene;
-};
-
-//////////////////////////////
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
