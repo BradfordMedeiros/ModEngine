@@ -852,13 +852,13 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
 }
 
 void updateSoundPositions(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     updatePosition(world.objectMapping, id, gameobj.transformation.position);
   });
 }
 
 void enforceLookAt(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     std::string lookAt = gameobj.lookat;                      
     if (lookAt == "" || lookAt == gameobj.name){
       return;
@@ -872,7 +872,7 @@ void enforceLookAt(World& world){
 }
 
 void callbackEntities(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
       world.onObjectUpdate(gameobj);
     }

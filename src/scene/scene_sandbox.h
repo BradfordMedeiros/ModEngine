@@ -72,7 +72,7 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 ///////////////////////////////
 
 SceneSandbox createSceneSandbox();
-void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement);
+void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement);
 std::vector<objid> allSceneIds(SceneSandbox& sandbox);
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name);
 objid getGroupId(SceneSandbox& sandbox, objid id);

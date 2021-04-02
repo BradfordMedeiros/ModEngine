@@ -339,10 +339,10 @@ SceneSandbox createSceneSandbox(){
   return sandbox;
 }
 
-void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement){
+void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement){
   for (auto &[_, scene] : sandbox.scenes){
     for (auto [id, gameObj]: scene.idToGameObjects){
-      onElement(id, scene, gameObj);
+      onElement(id, gameObj);
     }
   }
 }
