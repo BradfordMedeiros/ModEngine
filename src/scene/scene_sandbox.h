@@ -30,7 +30,6 @@ struct GameObjectH {
 
 struct Scene {
   objid rootId;
-  bool isNested;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<std::string, objid> nameToId;
