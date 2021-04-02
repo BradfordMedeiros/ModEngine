@@ -65,20 +65,15 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::function<objid()> getNewObjectId
 );
 
-
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId);
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 ///////////////////////////////
-
-
 
 SceneSandbox createSceneSandbox();
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement);
 std::vector<objid> allSceneIds(SceneSandbox& sandbox);
-Scene& sceneForId(SceneSandbox& sandbox, objid id);
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name);
 objid getGroupId(SceneSandbox& sandbox, objid id);
 std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index);
@@ -98,7 +93,8 @@ struct AddSceneDataValues {
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers);
 
-std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSandbox& sandbox,
+std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
+  SceneSandbox& sandbox,
   objid rootId,
   objid rootIdNode, 
   std::map<objid, objid> childToParent, 

@@ -1,6 +1,10 @@
 #include "./scene_sandbox.h"
 
 
+Scene& sceneForId(SceneSandbox& sandbox, objid id){
+  return sandbox.scenes.at(sandbox.idToScene.at(id));
+}
+
 //////////////////////
 void addObjectToScene(Scene& scene, objid parentId, std::string name, GameObject& gameobjectObj){
   auto gameobjectH = GameObjectH {
@@ -351,9 +355,7 @@ std::vector<objid> allSceneIds(SceneSandbox& sandbox){
   return sceneIds;
 } 
 
-Scene& sceneForId(SceneSandbox& sandbox, objid id){
-  return sandbox.scenes.at(sandbox.idToScene.at(id));
-}
+
 
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name){
   for (auto [sceneId, _] : sandbox.scenes){
