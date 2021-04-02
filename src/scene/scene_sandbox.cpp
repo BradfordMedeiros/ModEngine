@@ -160,7 +160,8 @@ std::vector<std::string> childnames(Scene& scene, GameObjectH& gameobjecth){
   return childnames;
 }
 
-std::string serializeObject(Scene& scene, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overridename){
+std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overridename){
+  Scene& scene = sceneForId(sandbox, id);
   auto gameobjecth = scene.idToGameObjectsH.at(id);
   auto gameobj = scene.idToGameObjects.at(id);
   auto objectSerialization = serializeObj(
@@ -179,7 +180,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   Scene& scene = sandbox.scenes.at(sceneId);
-  
+
   addObjectToScene(scene, -1, name, gameobjectObj);      
   for (auto child : children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
@@ -321,7 +322,7 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
     if (id == scene.rootId){
       continue;
     }
-    sceneData = sceneData + serializeObject(scene, id, getAdditionalFields, includeIds, "");
+    sceneData = sceneData + serializeObject(sandbox, id, getAdditionalFields, includeIds, "");
   }
   return sceneData;
 }
