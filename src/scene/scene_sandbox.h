@@ -26,6 +26,7 @@ struct GameObjectH {
   objid parentId;
   std::set<objid> children;
   objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
+  objid sceneId;
 };
 
 struct Scene {
@@ -45,6 +46,9 @@ struct SceneDeserialization {
 struct SceneSandbox {
   std::map<objid, Scene> scenes;
   std::map<objid, objid> idToScene;
+
+  objid mainSceneId;
+  Scene mainScene;
 };
 
 //////////////////////////////
@@ -84,6 +88,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   SceneSandbox& sandbox,
+  objid sceneId,
   objid rootId,
   objid rootIdNode, 
   std::map<objid, objid> childToParent, 

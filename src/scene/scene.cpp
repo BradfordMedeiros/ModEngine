@@ -434,6 +434,7 @@ void addObjectToWorld(
 
           auto newSerialObjs = multiObjAdd(
             world.sandbox,
+            sceneId,
             id,
             0,
             data.childToParent, 

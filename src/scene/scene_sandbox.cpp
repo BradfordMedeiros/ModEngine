@@ -5,11 +5,12 @@ Scene& sceneForId(SceneSandbox& sandbox, objid id){
 }
 
 //////////////////////
-void addObjectToScene(Scene& scene, objid parentId, std::string name, GameObject& gameobjectObj){
+void addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
     .parentId = parentId,
     .groupId = gameobjectObj.id,
+    .sceneId = sceneId,
   };
   assert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end());
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
@@ -36,6 +37,7 @@ void enforceRootObjects(Scene& scene){
 }
 
 SceneDeserialization createSceneFromParsedContent(
+  objid sceneId,
   std::vector<Token> tokens,  
   std::function<objid()> getNewObjectId, 
   std::vector<LayerInfo> layers
@@ -68,7 +70,7 @@ SceneDeserialization createSceneFromParsedContent(
   }
 
   for (auto [name, gameobjectObj] : gameobjs){
-    addObjectToScene(scene, -1, name, gameobjectObj);
+    addObjectToScene(scene, sceneId, -1, name, gameobjectObj);
   }
 
   for (auto [name, gameobj] : serialGameAttrs){
@@ -91,9 +93,9 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers){
+SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromParsedContent(parseFormat(content), getNewObjectId, layers);
+  return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId, layers);
 }
 
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj){
@@ -112,6 +114,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
 
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
+  objid sceneId,
   objid rootId, 
   objid rootIdNode, 
   std::map<objid, objid> childToParent, 
@@ -136,7 +139,7 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
     auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
-    addObjectToScene(scene, -1, names.at(nodeId), gameobj);
+    addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -182,7 +185,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   Scene& scene = sandbox.scenes.at(sceneId);
 
-  addObjectToScene(scene, -1, name, gameobjectObj);      
+  addObjectToScene(scene, sceneId, -1, name, gameobjectObj);      
   for (auto child : children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
@@ -332,7 +335,11 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 
 
 SceneSandbox createSceneSandbox(){
-  SceneSandbox sandbox {};
+  Scene mainScene;
+  SceneSandbox sandbox {
+    .mainSceneId = 0,
+    .mainScene = mainScene,
+  };
   return sandbox;
 }
 
@@ -442,7 +449,7 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
 
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers){
   assert(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
-  SceneDeserialization deserializedScene = deserializeScene(sceneData, getUniqueObjId, layers);
+  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, layers);
   sandbox.scenes[sceneId] = deserializedScene.scene;
   std::vector<objid> idsAdded;
   for (auto &[id, _] :  sandbox.scenes.at(sceneId).idToGameObjects){
@@ -457,6 +464,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   SceneSandbox& sandbox,
+  objid sceneId,
   objid rootId,
   objid rootIdNode, 
   std::map<objid, objid> childToParent, 
@@ -465,5 +473,5 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId){
   Scene& scene = sceneForId(sandbox, rootId);
-  return addSubsceneToRoot(scene, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
+  return addSubsceneToRoot(scene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
 }
