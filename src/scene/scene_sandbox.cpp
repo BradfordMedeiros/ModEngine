@@ -207,7 +207,8 @@ std::vector<objid> getChildrenIdsAndParent(Scene& scene, objid id){
   return objectIds;
 }
 
-std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid id){
+std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
+  Scene& scene = sceneForId(sandbox, id);
   auto objects = getChildrenIdsAndParent(scene, id);
   assert(id != scene.rootId);
   return objects;

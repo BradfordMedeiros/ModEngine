@@ -608,12 +608,11 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
 }
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
-  Scene& scene = sceneForId(world.sandbox, objectId);
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
     if (!idExists(world.sandbox, gameobjId)){
       continue;
     }
-    auto idsToRemove = idsToRemoveFromScenegraph(scene, gameobjId);
+    auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
     for (auto id : idsToRemove){
       auto gameobj = getGameObject(world, id);
       auto name = gameobj.name;

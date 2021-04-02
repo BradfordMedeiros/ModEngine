@@ -65,7 +65,7 @@ struct SceneSandbox {
 
 //////////////////////////////
 
-std::vector<objid> idsToRemoveFromScenegraph(Scene& scene, objid);
+std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId);
 void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);  
