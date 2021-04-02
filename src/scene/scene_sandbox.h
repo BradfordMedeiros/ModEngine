@@ -54,17 +54,6 @@ std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::
 SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
-std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
-  Scene& scene, 
-  objid rootId,
-  objid rootIdNode, 
-  std::map<objid, objid> childToParent, 
-  std::map<objid, Transformation> gameobjTransforms, 
-  std::map<objid, std::string> names, 
-  std::map<objid, std::map<std::string, std::string>> additionalFields,
-  std::function<objid()> getNewObjectId
-);
-
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId);
