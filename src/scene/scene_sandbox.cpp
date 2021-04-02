@@ -379,6 +379,9 @@ std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index){
 bool idExists(SceneSandbox& sandbox, objid id){
   return sandbox.idToScene.find(id) != sandbox.idToScene.end();
 }
+bool idExists(SceneSandbox& sandbox, std::string name){
+  return maybeGetGameObjectByName(sandbox, name).has_value();
+}
 GameObject& getGameObject(SceneSandbox& sandbox, objid id){
   return getGameObject(sceneForId(sandbox, id), id);
 }
