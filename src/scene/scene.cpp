@@ -393,7 +393,6 @@ std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
 
 void addObjectToWorld(
   World& world, 
-  Scene& scene, 
   objid sceneId, 
   std::string name,
   bool shouldLoadModel, 
@@ -402,7 +401,7 @@ void addObjectToWorld(
   std::map<std::string, std::string> additionalFields,
   std::map<objid, std::vector<glm::vec3>>& idToModelVertexs
 ){
-    auto id =  scene.nameToId.at(name);
+    auto id = getIdForName(world.sandbox, name);
 
     if (idExists(world.sandbox, id)){
       std::cout << "id already in the scene: " << id << std::endl;
@@ -413,7 +412,7 @@ void addObjectToWorld(
     auto localSceneId = sceneId;
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
-      [&world, &scene, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+      [&world, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(name, meshName); 
           idToModelVertexs[id] = getVertexsFromModelData(data);
@@ -445,7 +444,7 @@ void addObjectToWorld(
           );
 
           for (auto &[name, additionalFields] : newSerialObjs){
-            addObjectToWorld(world, scene, sceneId, name, false, getId, interface, additionalFields, idToModelVertexs);
+            addObjectToWorld(world, sceneId, name, false, getId, interface, additionalFields, idToModelVertexs);
           }
           return hasMesh;
         }
@@ -516,7 +515,7 @@ void addSerialObjectsToWorld(
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, additionalField] : additionalFields){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, world.sandbox.scenes.at(sceneId), sceneId, name, true, getNewObjectId, interface, additionalField, idToModelVertexs);
+    addObjectToWorld(world, sceneId, name, true, getNewObjectId, interface, additionalField, idToModelVertexs);
   }
   for (auto id : idsAdded){
     std::vector<glm::vec3> modelVerts = {};
