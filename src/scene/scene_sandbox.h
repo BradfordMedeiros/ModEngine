@@ -67,6 +67,7 @@ void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObj
 std::vector<objid> allSceneIds(SceneSandbox& sandbox);
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name);
 objid getGroupId(SceneSandbox& sandbox, objid id);
+objid getIdForName(SceneSandbox& sandbox, std::string name);
 std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index);
 bool idExists(SceneSandbox& sandbox, objid id);
 bool idExists(SceneSandbox& sandbox, std::string name);

@@ -307,15 +307,16 @@ GameObject& getGameObject(Scene& scene, std::string name){
 objid getGroupId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).groupId; 
 }
+objid getIdForName(SceneSandbox& sandbox, std::string name){
+  auto gameobj = maybeGetGameObjectByName(sandbox, name);
+  return gameobj.value() -> id;
+}
 bool idExists(Scene& scene, objid id){
   return scene.idToGameObjects.find(id) != scene.idToGameObjects.end();
 }
 objid parentId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).parentId;
 }
-
-
-
 
 ///////////////////////////////////////////
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){

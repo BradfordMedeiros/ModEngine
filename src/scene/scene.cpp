@@ -568,8 +568,7 @@ objid addSerialObject(
 
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap);
 
-  auto gameobjId = world.sandbox.scenes.at(sceneId).nameToId.at(name);
-  return gameobjId;
+  return getIdForName(world.sandbox, name);
 }
 
 objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface){
