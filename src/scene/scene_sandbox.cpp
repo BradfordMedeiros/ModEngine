@@ -474,6 +474,12 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
   };
   return data;
 }
+void removeScene(SceneSandbox& sandbox, objid sceneId){
+  sandbox.scenes.erase(sceneId);
+}
+bool sceneExists(SceneSandbox& sandbox, objid sceneId){
+  return !(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
+}
 
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   SceneSandbox& sandbox,

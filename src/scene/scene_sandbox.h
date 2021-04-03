@@ -87,6 +87,8 @@ struct AddSceneDataValues {
   std::vector<objid> idsAdded;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers);
+void removeScene(SceneSandbox& sandbox, objid sceneId);
+bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   SceneSandbox& sandbox,

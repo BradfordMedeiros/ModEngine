@@ -632,7 +632,7 @@ void copyObjectToScene(World& world, objid id, SysInterface interface){
 
 
 void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
-  if (world.sandbox.scenes.find(sceneId) == world.sandbox.scenes.end()) {
+  if (!sceneExists(world.sandbox, sceneId)) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
   }
@@ -644,7 +644,7 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
     auto netsynchronized = gameobj.netsynchronize;
     removeObjectById(world, objectId, name, interface, scriptName, netsynchronized);
   }
-  world.sandbox.scenes.erase(sceneId);
+  removeScene(world.sandbox, sceneId);
 }
 void removeAllScenesFromWorld(World& world, SysInterface interface){
   for (auto sceneId : allSceneIds(world.sandbox)){
