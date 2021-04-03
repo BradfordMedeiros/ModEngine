@@ -456,7 +456,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
     idsAdded.push_back(id);
   }
   AddSceneDataValues data  {
-    .deserializedScene = deserializedScene,
+    .additionalFields = deserializedScene.additionalFields,
     .idsAdded = idsAdded,
   };
   return data;

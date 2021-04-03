@@ -541,7 +541,7 @@ void addSerialObjectsToWorld(
 
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
   auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData, interface.layers);
-  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.deserializedScene.additionalFields);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields);
   return sceneId;
 }
 

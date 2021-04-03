@@ -54,7 +54,6 @@ struct SceneSandbox {
 //////////////////////////////
 
 std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
-SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
@@ -81,7 +80,7 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
 struct AddSceneDataValues {
-  SceneDeserialization deserializedScene;
+  std::map<std::string, std::map<std::string, std::string>>  additionalFields;
   std::vector<objid> idsAdded;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers);
