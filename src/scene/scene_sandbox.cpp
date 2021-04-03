@@ -93,11 +93,6 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers){
-  std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId, layers);
-}
-
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj){
   GameobjAttributes attributes {
     .stringAttributes = {
@@ -460,6 +455,10 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 
+SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers){
+  std::cout << "INFO: Deserialization: " << std::endl;
+  return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId, layers);
+}
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers){
   assert(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
   SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, layers);

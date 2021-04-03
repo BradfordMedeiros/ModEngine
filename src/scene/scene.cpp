@@ -409,7 +409,6 @@ void addObjectToWorld(
     }
 
     world.sandbox.idToScene[id] = sceneId;
-    auto localSceneId = sceneId;
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
       [&world, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
@@ -457,7 +456,7 @@ void addObjectToWorld(
       [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels) -> Texture {
         return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels);
       },
-      [&world, localSceneId, id]() -> void {
+      [&world, id]() -> void {
         updatePhysicsBody(world, id);
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
