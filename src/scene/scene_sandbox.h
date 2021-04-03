@@ -73,6 +73,8 @@ bool idExists(SceneSandbox& sandbox, objid id);
 bool idExists(SceneSandbox& sandbox, std::string name);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
 GameObject& getGameObject(SceneSandbox& sandbox, std::string name);
+GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
+GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name);
 
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);
 

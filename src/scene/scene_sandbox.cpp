@@ -304,6 +304,9 @@ GameObject& getGameObject(Scene& scene, objid id){
 GameObject& getGameObject(Scene& scene, std::string name){
   return scene.idToGameObjects.at(scene.nameToId.at(name));
 }
+GameObjectH& getGameObjectH(Scene& scene, objid id){
+  return scene.idToGameObjectsH.at(id);
+}
 objid getGroupId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).groupId; 
 }
@@ -394,6 +397,15 @@ GameObject& getGameObject(SceneSandbox& sandbox, std::string name){
   auto gameobj = maybeGetGameObjectByName(sandbox, name);
   GameObject& obj = *(gameobj.value()); 
   return obj;
+}
+GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id){
+  return getGameObjectH(sceneForId(sandbox, id), id);
+}
+GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name){
+  auto gameobj = maybeGetGameObjectByName(sandbox, name);
+  GameObject& obj = *(gameobj.value()); 
+  GameObjectH& objh = getGameObjectH(sandbox, obj.id);
+  return objh;
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){

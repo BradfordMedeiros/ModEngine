@@ -627,7 +627,7 @@ void copyObjectToScene(World& world, objid id, SysInterface interface){
   auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy");
   std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
-  addObjectToScene(world, world.sandbox.idToScene.at(id), serializedObject, -1, false, interface);
+  addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false, interface);
 }
 
 
@@ -896,7 +896,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       attributes.vecAttributes["position"] = fullTransformation(world.sandbox, emitterNodeId).position;
       objid objectAdded = addObjectToScene(
-        world, world.sandbox.idToScene.at(getGameObject(world, name).id), getUniqueObjectName(), attributes, interface
+        world, getGameObjectH(world.sandbox, name).sceneId, getUniqueObjectName(), attributes, interface
       );
       return objectAdded;
     }, 
