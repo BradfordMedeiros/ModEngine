@@ -4,24 +4,76 @@
 #include <map>
 #include <vector>
 #include <functional>
-#include "./scenegraph.h"
 
+////////////
+#include <vector>
+#include <map>
+#include <set>
+#include <sstream>
+#include <functional>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include "./common/mesh.h"
+#include "../common/util.h"
+#include "./serialization.h"
+#include "./serialobject.h"
+
+////////////////////////
+
+struct GameObjectH {
+  objid id;
+  objid parentId;
+  std::set<objid> children;
+  objid groupId;       // grouping mechanism for nodes.  It is either its own id, or explicitly stated when created. 
+  objid sceneId;
+};
+
+struct Scene {
+  objid rootId;
+  std::map<objid, GameObject> idToGameObjects;
+  std::map<objid, GameObjectH> idToGameObjectsH;
+  std::map<std::string, objid> nameToId;
+  std::vector<LayerInfo> layers;
+};
+
+struct SceneDeserialization {
+  Scene scene;
+  std::map<std::string, std::map<std::string, std::string>>  additionalFields;
+};
+
+/////////////////////////////
 struct SceneSandbox {
   std::map<objid, Scene> scenes;
   std::map<objid, objid> idToScene;
+
+  objid mainSceneId;
+  Scene mainScene;
 };
 
+//////////////////////////////
+
+std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
+SceneDeserialization deserializeScene(std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers);
+void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
+
+std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);
+void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects);
+std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId);
+std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
+///////////////////////////////
+
 SceneSandbox createSceneSandbox();
-void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, Scene& scene, GameObject& gameobj)> onElement);
+void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement);
 std::vector<objid> allSceneIds(SceneSandbox& sandbox);
-Scene& sceneForId(SceneSandbox& sandbox, objid id);
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name);
 objid getGroupId(SceneSandbox& sandbox, objid id);
 std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index);
 bool idExists(SceneSandbox& sandbox, objid id);
+bool idExists(SceneSandbox& sandbox, std::string name);
 GameObject& getGameObject(SceneSandbox& sandbox, objid id);
+GameObject& getGameObject(SceneSandbox& sandbox, std::string name);
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, std::string)> onObject);
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject);
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
@@ -34,8 +86,9 @@ struct AddSceneDataValues {
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers);
 
-void addLink(SceneSandbox& sandbox, objid childSceneId, objid id);
-std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSandbox& sandbox,
+std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
+  SceneSandbox& sandbox,
+  objid sceneId,
   objid rootId,
   objid rootIdNode, 
   std::map<objid, objid> childToParent, 
@@ -43,7 +96,6 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(SceneSand
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId
-
 );
 
 #endif 

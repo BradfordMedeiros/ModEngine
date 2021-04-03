@@ -7,13 +7,13 @@
 #include <vector>
 #include <variant>
 #include "./common/mesh.h"
-#include "./scenegraph.h"
 #include "./types/voxels.h"
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
 #include "./types/sound.h"
 #include "./types/video.h"
 #include "./types/emitter.h"
+#include "./serialization.h"
 #include <unistd.h>
 
 #include <glm/glm.hpp>
@@ -66,10 +66,6 @@ struct GameObjectChannel {
   std::string from;
   std::string to;
   bool complete;
-};
-
-struct GameObjectScene {
-  std::string scenefile;
 };
 
 struct GameObjectRoot {};
@@ -135,7 +131,6 @@ typedef std::variant<
   GameObjectLight, 
   GameObjectVoxel, 
   GameObjectChannel, 
-  GameObjectScene, 
   GameObjectRoot, 
   GameObjectEmitter,
   GameObjectHeightmap,
@@ -264,7 +259,6 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onVoxelBoundInfoChanged,
-  std::function<void(std::string)> loadScene,
   std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta> deltas, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 );

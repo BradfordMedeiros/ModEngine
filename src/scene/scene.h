@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <map>
-#include "./scenegraph.h"
 #include "./scene_sandbox.h"
 #include "./physics.h"
 #include "./object_types.h"

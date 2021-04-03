@@ -1,7 +1,7 @@
 #include "./scene.h"
 
 GameObject& getGameObject(World& world, objid id){
-  return getGameObject(sceneForId(world.sandbox, id), id);
+  return getGameObject(world.sandbox, id);
 }
 
 std::optional<objid> getGameObjectByName(World& world, std::string name){
@@ -434,6 +434,7 @@ void addObjectToWorld(
 
           auto newSerialObjs = multiObjAdd(
             world.sandbox,
+            sceneId,
             id,
             0,
             data.childToParent, 
@@ -460,10 +461,6 @@ void addObjectToWorld(
       [&world, localSceneId, id]() -> void {
         updatePhysicsBody(world, id);
       },
-      [&world, id, &interface](std::string sceneToLoad) -> void {
-        std::cout << "INFO: -- SCENE LOADING : " << sceneToLoad << std::endl;
-        addLink(world.sandbox, addSceneToWorld(world, sceneToLoad, interface), id);
-      },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas, enabled);
       },
@@ -487,8 +484,7 @@ std::string getTextureById(World& world, int id){
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
-  Scene& scene = world.sandbox.scenes.at(sceneId);
-  return serializeScene(scene, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
+  return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
       return getTextureById(world, textureId);
     });
@@ -496,9 +492,8 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
 } 
 
 std::string serializeObject(World& world, objid id, std::string overridename){
-  Scene& scene = sceneForId(world.sandbox, id);
   return serializeObject(
-    scene, 
+    world.sandbox, 
     id, 
     [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
       return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
@@ -566,7 +561,7 @@ objid addSerialObject(
     return newId;
   };
 
-  addGameObjectToScene(world.sandbox.scenes.at(sceneId), name, gameobjectObj, children);
+  addGameObjectToScene(world.sandbox, sceneId, name, gameobjectObj, children);
 
   std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
   additionalFieldsMap[name] = additionalFields;
@@ -606,7 +601,6 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
     }
   );
   
-  world.sandbox.idToScene.erase(objectId);
   world.onObjectDelete(objectId, netsynchronized);
 
   // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
@@ -614,12 +608,11 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
 }
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
-  Scene& scene = sceneForId(world.sandbox, objectId);
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
-    if (!idExists(scene, gameobjId)){
+    if (!idExists(world.sandbox, gameobjId)){
       continue;
     }
-    auto idsToRemove = idsToRemoveFromScenegraph(scene, gameobjId);
+    auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
     for (auto id : idsToRemove){
       auto gameobj = getGameObject(world, id);
       auto name = gameobj.name;
@@ -627,7 +620,7 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
       auto netsynchronized = gameobj.netsynchronize;
       removeObjectById(world, id, name, interface, scriptName, netsynchronized);
     }
-    removeObjectsFromScenegraph(scene, idsToRemove);  
+    removeObjectsFromScenegraph(world.sandbox, idsToRemove);  
   }
 }
 
@@ -646,8 +639,7 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
     return;   // @todo maybe better to throw error instead
   }
 
-  Scene& scene = world.sandbox.scenes.at(sceneId);
-  for (auto objectId : listObjInScene(scene)){
+  for (auto objectId : listObjInScene(world.sandbox, sceneId)){
     auto gameobj = getGameObject(world, objectId);
     auto name = gameobj.name;
     auto scriptName = gameobj.script;
@@ -833,8 +825,7 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  Scene& scene = sceneForId(world.sandbox, index);
-  getGameObject(scene, index).transformation.scale = scale;
+  getGameObject(world.sandbox, index).transformation.scale = scale;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).collisionInfo;
@@ -862,28 +853,28 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
 }
 
 void updateSoundPositions(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     updatePosition(world.objectMapping, id, gameobj.transformation.position);
   });
 }
 
 void enforceLookAt(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     std::string lookAt = gameobj.lookat;                      
     if (lookAt == "" || lookAt == gameobj.name){
       return;
     }
-    if(scene.nameToId.find(lookAt) != scene.nameToId.end()){
+    if(idExists(world.sandbox, lookAt)){
       glm::vec3 fromPos = gameobj.transformation.position;
-      glm::vec3 targetPosition = getGameObject(scene, lookAt).transformation.position;
+      glm::vec3 targetPosition = getGameObject(world.sandbox, lookAt).transformation.position;
       physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
     }
   });  
 }
 
 void callbackEntities(World& world){
-  forEveryGameobj(world.sandbox, [&world](objid id, Scene& scene, GameObject& gameobj) -> void {
-    if (id == getGroupId(scene, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
+  forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
+    if (id == getGroupId(world.sandbox, id) && world.entitiesToUpdate.find(id) != world.entitiesToUpdate.end()){
       world.onObjectUpdate(gameobj);
     }
   });  

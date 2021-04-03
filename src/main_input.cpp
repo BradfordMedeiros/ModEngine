@@ -321,7 +321,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void onMouseButton(){    
   for (auto [id, scene] : world.sandbox.scenes){
-    std::cout << scenegraphAsDotFormat(scene, world.objectMapping) << std::endl;
+    std::cout << scenegraphAsDotFormat(world.sandbox, scene, world.objectMapping) << std::endl;
   }
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
