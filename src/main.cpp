@@ -690,7 +690,7 @@ void onClientMessage(std::string message){
  // @TODO --  this needs to makeObject in the right scene
 void handleCreate(UdpPacket& packet){
   auto create = packet.payload.createpacket;
-  if (world.sandbox.scenes.find(packet.payload.createpacket.sceneId) == world.sandbox.scenes.end()){
+  if (!sceneExists(world.sandbox, packet.payload.createpacket.sceneId)){
     return;
   }
 
@@ -1042,7 +1042,7 @@ int main(int argc, char* argv[]){
 
       packet.payload.createpacket = CreatePacket { 
         .id = obj.id,
-        .sceneId = world.sandbox.idToScene.at(obj.id),
+        .sceneId = getGameObjectH(world.sandbox, obj.id).sceneId,
       };
       auto serialobj = serializeObject(world, obj.id);
       if (serialobj == ""){
