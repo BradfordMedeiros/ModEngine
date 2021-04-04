@@ -12,6 +12,9 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, objid sceneId, std::map
   std::string relations = "";
   forEveryGameobj(sandbox, [sceneId, &sandbox, &relations, &objectMapping](objid id, GameObject& gameobj) -> void {
     auto obj = getGameObjectH(sandbox, id);
+    if (obj.sceneId != sceneId){
+      return;
+    }
 
     auto childId = id;
     auto parentId = obj.parentId;
