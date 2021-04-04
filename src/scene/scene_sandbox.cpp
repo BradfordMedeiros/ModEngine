@@ -40,12 +40,9 @@ void enforceRootObjects(Scene& scene){
 SceneDeserialization createSceneFromParsedContent(
   objid sceneId,
   std::vector<Token> tokens,  
-  std::function<objid()> getNewObjectId, 
-  std::vector<LayerInfo> layers
+  std::function<objid()> getNewObjectId
 ){
   Scene scene;
-  std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
-  scene.layers = layers;
 
   auto serialGameAttrs = deserializeSceneTokens(tokens);
 
@@ -159,26 +156,25 @@ SubsceneAddition addSubsceneToRoot(
   };
 } 
 
-std::vector<std::string> childnames(Scene& scene, GameObjectH& gameobjecth){   
+std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
   std::vector<std::string> childnames;
   for (auto childid : gameobjecth.children){
-    auto childH = scene.idToGameObjectsH.at(childid);
+    auto childH = getGameObjectH(sandbox, childid);
     if (childH.groupId == childid){
-      childnames.push_back(scene.idToGameObjects.at(childid).name);
+      childnames.push_back(getGameObject(sandbox, childid).name);
     }
   }
   return childnames;
 }
 
 std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overridename){
-  Scene& scene = sceneForId(sandbox, id);
-  auto gameobjecth = scene.idToGameObjectsH.at(id);
-  auto gameobj = scene.idToGameObjects.at(id);
+  auto gameobjecth = getGameObjectH(sandbox, id);;
+  auto gameobj = getGameObject(sandbox, id);
   auto objectSerialization = serializeObj(
     id, 
     gameobjecth.groupId, 
     gameobj, 
-    childnames(scene, gameobjecth), 
+    childnames(sandbox, gameobjecth), 
     includeIds, 
     getAdditionalFields(id), 
     overridename
@@ -214,7 +210,7 @@ void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObjec
   }
 }
 
-std::vector<objid> getChildrenIdsAndParent(Scene& scene, objid id){
+std::vector<objid> getChildrenIdsAndParent(Scene& scene,  objid id){
   std::vector<objid> objectIds;
   auto onAddObject = [&objectIds](objid id) -> void {
     objectIds.push_back(id);
@@ -223,6 +219,7 @@ std::vector<objid> getChildrenIdsAndParent(Scene& scene, objid id){
   return objectIds;
 }
 
+// Conceptually needs => get all ids for this scene starting from this id
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
   Scene& scene = sceneForId(sandbox, id);
   auto objects = getChildrenIdsAndParent(scene, id);
@@ -231,7 +228,7 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
 }
 
 
-void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  // it might make sense to check if any layers here are not present and then 
+void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
   for (auto id : objects){
     Scene& scene = sceneForId(sandbox, id);
     std::string objectName = scene.idToGameObjects.at(id).name;
@@ -274,7 +271,7 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
+void traverseScene(Scene& scene, std::vector<LayerInfo> layers, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;
@@ -287,7 +284,7 @@ void traverseScene(Scene& scene, glm::mat4 initialModel, glm::vec3 totalScale, s
   });
   
 
-  for (auto layer : scene.layers){      // @TODO could organize this before to not require pass on each frame
+  for (auto layer : layers){      // @TODO could organize this before to not require pass on each frame
     for (auto data : datum){
       auto gameobject = scene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
@@ -347,11 +344,15 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 ///////////////////////
 
 
-SceneSandbox createSceneSandbox(){
+SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
   Scene mainScene;
+  
+  std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
+
   SceneSandbox sandbox {
     .mainSceneId = 0,
     .mainScene = mainScene,
+    .layers = layers,
   };
   return sandbox;
 }
@@ -418,7 +419,7 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name){
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  traverseScene(scene, initialModel, scale, onObject);
+  traverseScene(scene, sandbox.layers, initialModel, scale, onObject);
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
@@ -469,13 +470,13 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 
-SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<LayerInfo> layers){
+SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId){
   std::cout << "INFO: Deserialization: " << std::endl;
-  return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId, layers);
+  return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData){
   assert(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
-  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, layers);
+  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId);
 
   sandbox.scenes[sceneId] = deserializedScene.scene;
 

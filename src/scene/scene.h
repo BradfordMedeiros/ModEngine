@@ -35,7 +35,8 @@ World createWorld(
   std::function<void(GameObject&)> onObjectUpdate, 
   std::function<void(GameObject&)> onObjectCreate,
   std::function<void(objid, bool)> onObjectDelete,
-  btIDebugDraw* debugDrawer
+  btIDebugDraw* debugDrawer,
+  std::vector<LayerInfo> layers
 );
 Texture loadTextureWorld(World& world, std::string texturepath);
 

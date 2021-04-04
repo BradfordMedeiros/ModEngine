@@ -34,7 +34,6 @@ struct Scene {
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<std::string, objid> nameToId;
-  std::vector<LayerInfo> layers;
 };
 
 struct SceneDeserialization {
@@ -49,6 +48,7 @@ struct SceneSandbox {
 
   objid mainSceneId;
   Scene mainScene;
+  std::vector<LayerInfo> layers;
 };
 
 //////////////////////////////
@@ -62,7 +62,7 @@ std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId);
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds);
 ///////////////////////////////
 
-SceneSandbox createSceneSandbox();
+SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers);
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement);
 std::vector<objid> allSceneIds(SceneSandbox& sandbox);
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name);
@@ -86,7 +86,7 @@ struct AddSceneDataValues {
   std::map<std::string, std::map<std::string, std::string>>  additionalFields;
   std::vector<objid> idsAdded;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData, std::vector<LayerInfo> layers);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 

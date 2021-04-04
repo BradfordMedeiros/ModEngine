@@ -310,7 +310,8 @@ World createWorld(
   std::function<void(GameObject&)> onObjectUpdate,  
   std::function<void(GameObject&)> onObjectCreate, 
   std::function<void(objid, bool)> onObjectDelete, 
-  btIDebugDraw* debugDrawer
+  btIDebugDraw* debugDrawer,
+  std::vector<LayerInfo> layers
 ){
   auto objectMapping = getObjectMapping();
   EmitterSystem emitters;
@@ -324,7 +325,7 @@ World createWorld(
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
     .entitiesToUpdate = entitiesToUpdate,
-    .sandbox = createSceneSandbox(),
+    .sandbox = createSceneSandbox(layers),
   };
 
   // Default meshes that are silently loaded in the background
@@ -531,7 +532,7 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
-  auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData, interface.layers);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData);
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields);
   return sceneId;
 }

@@ -1081,15 +1081,8 @@ int main(int argc, char* argv[]){
         sendDataOnUdpSocket(toNetworkPacket(packet));
       }
     },
-    debuggerDrawer
-  );
-
-  interface = SysInterface {
-    .loadScript = loadScriptFromWorld,
-    .unloadScript = unloadScript,
-    .stopAnimation = stopAnimation,
-    .getCurrentTime = getTotalTime,
-    .layers = {
+    debuggerDrawer, 
+    {
       LayerInfo {
         .name = "",
         .zIndex = 0,
@@ -1115,6 +1108,13 @@ int main(int argc, char* argv[]){
         .ignoreDepthBuffer = false,
       }
     }
+  );
+
+  interface = SysInterface {
+    .loadScript = loadScriptFromWorld,
+    .unloadScript = unloadScript,
+    .stopAnimation = stopAnimation,
+    .getCurrentTime = getTotalTime
   };
 
   loadAllTextures();
