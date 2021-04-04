@@ -73,18 +73,15 @@ void unloadAllScenes(){
 
 // @TODO - save all the scenes in the world
 void saveScene(bool includeIds){
-  auto id = world.sandbox.scenes.begin() -> first;
+  auto sceneIds = allSceneIds(world.sandbox);
+  auto id = sceneIds.at(0);
   auto fileToSave = rawSceneFile;
   std::cout << "saving scene id: " << id << " to file: " << fileToSave << std::endl;
   saveFile(fileToSave, serializeScene(world, id, includeIds));
 }
 
 std::vector<int32_t> listScenes(){
-  std::vector<int32_t> sceneIds;
-  for (auto &[id, _] : world.sandbox.scenes){
-    sceneIds.push_back(id);
-  }
-  return sceneIds;
+  return allSceneIds(world.sandbox);
 }
 
 void sendLoadScene(int32_t id){
@@ -162,10 +159,12 @@ void setSelectionMode(bool enabled){
 }
 
 int32_t makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
-  return addObjectToScene(world, useSceneId ? sceneId : world.sandbox.scenes.begin() -> first, serializedobj, id, useObjId, interface);
+  auto firstSceneId = allSceneIds(world.sandbox).at(0);
+  return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId, interface);
 }
 objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
-  assert(world.sandbox.scenes.size() > 0); 
+  auto allScenes = allSceneIds(world.sandbox);
+  assert(allScenes.size() > 0); 
 
   GameobjAttributes attributes {
     .stringAttributes = stringAttributes,
@@ -173,7 +172,7 @@ objid makeObjectAttr(std::string name, std::map<std::string, std::string> string
     .vecAttributes = vecAttributes,
     .additionalFields = stringAttributes,
   };
-  return addObjectToScene(world, world.sandbox.scenes.begin() -> first, name, attributes, interface);
+  return addObjectToScene(world, allScenes.at(0), name, attributes, interface);
 }
 
 void copyObject(int32_t id){
