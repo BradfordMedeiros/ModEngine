@@ -403,13 +403,6 @@ void addObjectToWorld(
 ){
     auto id = getIdForName(world.sandbox, name);
 
-    if (idExists(world.sandbox, id)){
-      std::cout << "id already in the scene: " << id << std::endl;
-      assert(false);
-    }
-
-    world.sandbox.idToScene[id] = sceneId;
-
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
       [&world, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
