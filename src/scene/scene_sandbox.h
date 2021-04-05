@@ -44,9 +44,7 @@ struct SceneDeserialization {
 /////////////////////////////
 struct SceneSandbox {
   std::map<objid, Scene> scenes;
-  std::map<objid, objid> idToScene;
 
-  objid mainSceneId;
   Scene mainScene;
   std::vector<LayerInfo> layers;
 };

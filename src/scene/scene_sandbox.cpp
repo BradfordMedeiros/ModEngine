@@ -1,7 +1,13 @@
 #include "./scene_sandbox.h"
 
+
 Scene& sceneForId(SceneSandbox& sandbox, objid id){
-  return sandbox.scenes.at(sandbox.idToScene.at(id));
+  for (auto &[sceneId, scene] : sandbox.scenes){
+    if (scene.idToGameObjects.find(id) != scene.idToGameObjects.end()){
+      return scene;
+    }
+  }
+  assert(false);
 }
 
 //////////////////////
@@ -105,12 +111,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
   return attributes;
 }
 
-struct SubsceneAddition {
-  std::map<std::string,  std::map<std::string, std::string>> nameToAdditionalFields;
-  std::vector<objid> addedIds;
-};
-
-SubsceneAddition addSubsceneToRoot(
+std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
   objid sceneId,
   objid rootId, 
@@ -138,8 +139,7 @@ SubsceneAddition addSubsceneToRoot(
     auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
-    auto addedId = addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
-    addedIds.push_back(addedId);
+    addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -149,11 +149,7 @@ SubsceneAddition addSubsceneToRoot(
     enforceParentRelationship(scene, realChildId, scene.idToGameObjects.at(realParentId).name);
   }
   enforceRootObjects(scene);
-
-  return SubsceneAddition {
-    .nameToAdditionalFields = nameToAdditionalFields,
-    .addedIds = addedIds,
-  };
+  return nameToAdditionalFields;
 } 
 
 std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth){   
@@ -186,10 +182,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   Scene& scene = sandbox.scenes.at(sceneId);
-
   auto addedId = addObjectToScene(scene, sceneId, -1, name, gameobjectObj);      
-  assert(sandbox.idToScene.find(addedId) == sandbox.idToScene.end());
-  sandbox.idToScene[addedId] = sceneId;
 
   for (auto child : children){
     if (scene.nameToId.find(child) == scene.nameToId.end()){
@@ -238,7 +231,6 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     for (auto &[_, objh] : scene.idToGameObjectsH){
       objh.children.erase(id);
     }
-    sandbox.idToScene.erase(id);
   }
 }
 
@@ -346,11 +338,9 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
   Scene mainScene;
-  
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   SceneSandbox sandbox {
-    .mainSceneId = 0,
     .mainScene = mainScene,
     .layers = layers,
   };
@@ -395,7 +385,12 @@ std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index){
 }
 
 bool idExists(SceneSandbox& sandbox, objid id){
-  return sandbox.idToScene.find(id) != sandbox.idToScene.end();
+  for (auto &[_, scene] : sandbox.scenes){
+    if (scene.idToGameObjects.find(id) != scene.idToGameObjects.end()){
+      return true;
+    }
+  }
+  return false;
 }
 bool idExists(SceneSandbox& sandbox, std::string name){
   return maybeGetGameObjectByName(sandbox, name).has_value();
@@ -483,8 +478,6 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
   std::vector<objid> idsAdded;
   for (auto &[id, _] :  sandbox.scenes.at(sceneId).idToGameObjects){
     idsAdded.push_back(id);
-    assert(sandbox.idToScene.find(id) == sandbox.idToScene.end());
-    sandbox.idToScene[id] = sceneId;
   }
   AddSceneDataValues data  {
     .additionalFields = deserializedScene.additionalFields,
@@ -510,11 +503,7 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId){
   Scene& scene = sceneForId(sandbox, rootId);
-  auto addedSubscene = addSubsceneToRoot(scene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
-  for (auto addedId : addedSubscene.addedIds){
-    assert(sandbox.idToScene.find(addedId) == sandbox.idToScene.end());
-    sandbox.idToScene[addedId] = sceneId;
-  }
-  return addedSubscene.nameToAdditionalFields;
+  auto nameToAdditionalFields = addSubsceneToRoot(scene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
+  return nameToAdditionalFields;
 }
 
