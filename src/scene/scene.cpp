@@ -39,6 +39,7 @@ NameAndMesh getMeshesForGroupId(World& world, objid groupId){
 
 PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){  
   GameObject obj = getGameObject(world.sandbox, index);
+  std::cout << "index is: " << index << std::endl;
   auto gameObjV = world.objectMapping.at(index); 
 
   BoundInfo boundInfo = {
@@ -311,11 +312,13 @@ World createWorld(
   std::function<void(GameObject&)> onObjectCreate, 
   std::function<void(objid, bool)> onObjectDelete, 
   btIDebugDraw* debugDrawer,
-  std::vector<LayerInfo> layers
+  std::vector<LayerInfo> layers,
+  SysInterface interface
 ){
   auto objectMapping = getObjectMapping();
   EmitterSystem emitters;
   std::set<objid> entitiesToUpdate;
+
 
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
@@ -327,6 +330,9 @@ World createWorld(
     .entitiesToUpdate = entitiesToUpdate,
     .sandbox = createSceneSandbox(layers),
   };
+
+  // hackey, but createSceneSandbox adds root object with id 0 so this is needed
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, { 0 }, getUniqueObjId, interface, {{ "root", {}}});
 
   // Default meshes that are silently loaded in the background
   addMesh(world, "./res/models/ui/node.obj");

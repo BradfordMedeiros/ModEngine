@@ -1,17 +1,7 @@
 #include "./scene_sandbox.h"
 
-
-Scene& sceneForId(SceneSandbox& sandbox, objid id){
-  for (auto &[sceneId, scene] : sandbox.scenes){
-    if (scene.idToGameObjects.find(id) != scene.idToGameObjects.end()){
-      return scene;
-    }
-  }
-  assert(false);
-}
-
-//////////////////////
 objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
+  assert(name == gameobjectObj.name);
   auto gameobjectH = GameObjectH {
     .id = gameobjectObj.id,
     .parentId = parentId,
@@ -43,6 +33,12 @@ void enforceRootObjects(Scene& scene){
   }
 }
 
+GameobjAttributes rootGameObject(){
+  return GameobjAttributes {
+    .stringAttributes = {{"physics", "disabled"}}
+  };
+}
+
 SceneDeserialization createSceneFromParsedContent(
   objid sceneId,
   std::vector<Token> tokens,  
@@ -58,7 +54,7 @@ SceneDeserialization createSceneFromParsedContent(
 
   assert(serialGameAttrs.find(rootName) == serialGameAttrs.end());
   assert(rootName.find(',') == std::string::npos);
-  serialGameAttrs[rootName] = GameobjAttributes{ .stringAttributes = {{"physics", "disabled"}}};
+  serialGameAttrs[rootName] = rootGameObject();
 
   std::map<std::string, GameObject> gameobjs;
 
@@ -122,7 +118,6 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId
 ){
-  std::vector<objid> addedIds;
   std::map<std::string,  std::map<std::string, std::string>> nameToAdditionalFields;
   std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
@@ -181,18 +176,17 @@ std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children){
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
-  Scene& scene = sandbox.scenes.at(sceneId);
-  auto addedId = addObjectToScene(scene, sceneId, -1, name, gameobjectObj);      
+  auto addedId = addObjectToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
 
   for (auto child : children){
-    if (scene.nameToId.find(child) == scene.nameToId.end()){
+    if (sandbox.mainScene.nameToId.find(child) == sandbox.mainScene.nameToId.end()){
        // @TODO - shouldn't be an error should automatically create instead
       std::cout << "ERROR: NOT YET IMPLEMENTED : ADDING OBJECT WITH CHILD THAT DOES NOT EXIST IN THE SCENE" << std::endl;
       assert(false);
     }
-    enforceParentRelationship(scene, scene.nameToId.at(child), name);  
+    enforceParentRelationship(sandbox.mainScene, sandbox.mainScene.nameToId.at(child), name);  
   }
-  enforceRootObjects(scene);
+  enforceRootObjects(sandbox.mainScene);
 }
 
 void traverseNodes(Scene& scene, objid id, std::function<void(objid)> onAddObject){
@@ -214,31 +208,31 @@ std::vector<objid> getChildrenIdsAndParent(Scene& scene,  objid id){
 
 // Conceptually needs => get all ids for this scene starting from this id
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
-  Scene& scene = sceneForId(sandbox, id);
-  auto objects = getChildrenIdsAndParent(scene, id);
-  assert(id != scene.rootId);
+  auto objects = getChildrenIdsAndParent(sandbox.mainScene, id);
+  assert(id != sandbox.mainScene.rootId);
   return objects;
 }
 
 
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
   for (auto id : objects){
-    Scene& scene = sceneForId(sandbox, id);
+    Scene& scene = sandbox.mainScene;
     std::string objectName = scene.idToGameObjects.at(id).name;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
     scene.nameToId.erase(objectName);
-    for (auto &[_, objh] : scene.idToGameObjectsH){
+    for (auto &[_, objh] : scene.idToGameObjectsH){  
       objh.children.erase(id);
     }
   }
 }
 
 std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId){
-  Scene& scene = sandbox.scenes.at(sceneId);
   std::vector<objid> allObjects;
-  for (auto const&[id, _] : scene.idToGameObjects){
-    allObjects.push_back(id);
+  for (auto const&[id, obj] : sandbox.mainScene.idToGameObjectsH){
+    if (obj.sceneId == sceneId){
+      allObjects.push_back(id);
+    }
   }
   return allObjects;
 }
@@ -319,13 +313,13 @@ objid parentId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).parentId;
 }
 
-///////////////////////////////////////////
 std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds){
-  Scene& scene = sandbox.scenes.at(sceneId);
-
   std::string sceneData = "# Generated scene \n";
-  for (auto [id, _]: scene.idToGameObjectsH){
-    if (id == scene.rootId){
+  for (auto [id, obj]: sandbox.mainScene.idToGameObjectsH){
+    if (obj.sceneId != sceneId){
+      continue;
+    }
+    if (id == sandbox.mainScene.rootId){
       continue;
     }
     sceneData = sceneData + serializeObject(sandbox, id, getAdditionalFields, includeIds, "");
@@ -333,12 +327,14 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
   return sceneData;
 }
 
-///////////////////////
-
-
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
-  Scene mainScene;
+  Scene mainScene {
+    .rootId = 0,
+  };
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
+
+  auto rootObj = gameObjectFromFields("root", mainScene.rootId, rootGameObject()); 
+  addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
 
   SceneSandbox sandbox {
     .mainScene = mainScene,
@@ -348,16 +344,14 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
 }
 
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement){
-  for (auto &[_, scene] : sandbox.scenes){
-    for (auto [id, gameObj]: scene.idToGameObjects){
-      onElement(id, gameObj);
-    }
+  for (auto [id, gameObj]: sandbox.mainScene.idToGameObjects){
+    onElement(id, gameObj); 
   }
 }
 
 std::vector<objid> allSceneIds(SceneSandbox& sandbox){
   std::vector<objid> sceneIds;
-  for (auto [sceneId, _] : sandbox.scenes){
+  for (auto [sceneId, _] : sandbox.sceneIdToRootObj){
     sceneIds.push_back(sceneId);
   }
   return sceneIds;
@@ -366,37 +360,30 @@ std::vector<objid> allSceneIds(SceneSandbox& sandbox){
 
 
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name){
-  for (auto [sceneId, _] : sandbox.scenes){
-    for (auto &[id, gameObj]: sandbox.scenes.at(sceneId).idToGameObjects){
-      if (gameObj.name == name){
-       return &gameObj;
-      }
+  for (auto &[id, gameObj]: sandbox.mainScene.idToGameObjects){
+    if (gameObj.name == name){
+      return &gameObj;      
     }
   }
   return std::nullopt;
 }
 
 objid getGroupId(SceneSandbox& sandbox, objid id){
-  return getGroupId(sceneForId(sandbox, id), id); 
+  return getGroupId(sandbox.mainScene, id); 
 }
 
 std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index){
-  return getIdsInGroup(sceneForId(sandbox, index), getGroupId(sandbox, index));
+  return getIdsInGroup(sandbox.mainScene, getGroupId(sandbox, index));
 }
 
 bool idExists(SceneSandbox& sandbox, objid id){
-  for (auto &[_, scene] : sandbox.scenes){
-    if (scene.idToGameObjects.find(id) != scene.idToGameObjects.end()){
-      return true;
-    }
-  }
-  return false;
+  return sandbox.mainScene.idToGameObjects.find(id) != sandbox.mainScene.idToGameObjects.end();
 }
 bool idExists(SceneSandbox& sandbox, std::string name){
   return maybeGetGameObjectByName(sandbox, name).has_value();
 }
 GameObject& getGameObject(SceneSandbox& sandbox, objid id){
-  return getGameObject(sceneForId(sandbox, id), id);
+  return getGameObject(sandbox.mainScene, id);
 }
 GameObject& getGameObject(SceneSandbox& sandbox, std::string name){
   auto gameobj = maybeGetGameObjectByName(sandbox, name);
@@ -404,7 +391,7 @@ GameObject& getGameObject(SceneSandbox& sandbox, std::string name){
   return obj;
 }
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id){
-  return getGameObjectH(sceneForId(sandbox, id), id);
+  return getGameObjectH(sandbox.mainScene, id);
 }
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name){
   auto gameobj = maybeGetGameObjectByName(sandbox, name);
@@ -422,13 +409,11 @@ void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid
 }
 
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  for (auto &[_, scene] : sandbox.scenes){
-    traverseScene(sandbox, scene, onObject);
-  }
+  traverseScene(sandbox, sandbox.mainScene, onObject);
 }
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
-  Scene& scene = sceneForId(sandbox, id);
+  Scene& scene = sandbox.mainScene;
   glm::mat4 transformation = {};
   bool foundId = false;
   
@@ -470,14 +455,28 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
   return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId);
 }
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData){
-  assert(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
+  assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
+
   SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId);
 
-  sandbox.scenes[sceneId] = deserializedScene.scene;
+  for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
+    sandbox.mainScene.idToGameObjects[id] = obj;
+  }
+  for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
+    sandbox.mainScene.idToGameObjectsH[id] = obj;
+  }
+  for (auto &[name, id] : deserializedScene.scene.nameToId){
+    sandbox.mainScene.nameToId[name] = id;
+  }
+  auto rootId = deserializedScene.scene.rootId;
+  sandbox.sceneIdToRootObj[deserializedScene.scene.idToGameObjectsH.at(rootId).sceneId] = rootId;
+  enforceParentRelationship(sandbox.mainScene, rootId, "root");
 
   std::vector<objid> idsAdded;
-  for (auto &[id, _] :  sandbox.scenes.at(sceneId).idToGameObjects){
-    idsAdded.push_back(id);
+  for (auto &[id, obj] :  sandbox.mainScene.idToGameObjectsH){
+    if (obj.sceneId == sceneId){
+      idsAdded.push_back(id);
+    }
   }
   AddSceneDataValues data  {
     .additionalFields = deserializedScene.additionalFields,
@@ -485,12 +484,15 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
   };
   return data;
 }
+
+// This should find the root of the scene and remove that element + all children (clean up empty scenes i guess? -> but would require unloading the scene!) 
 void removeScene(SceneSandbox& sandbox, objid sceneId){
-  sandbox.scenes.erase(sceneId);
+  removeObjectsFromScenegraph(sandbox,listObjInScene(sandbox, sceneId));
+  sandbox.sceneIdToRootObj.erase(sceneId);
 }
 bool sceneExists(SceneSandbox& sandbox, objid sceneId){
-  return !(sandbox.scenes.find(sceneId) == sandbox.scenes.end());
-}
+  return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
+}    
 
 std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   SceneSandbox& sandbox,
@@ -502,8 +504,7 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId){
-  Scene& scene = sceneForId(sandbox, rootId);
-  auto nameToAdditionalFields = addSubsceneToRoot(scene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
+  auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
   return nameToAdditionalFields;
 }
 

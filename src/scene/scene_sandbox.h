@@ -19,8 +19,6 @@
 #include "./serialization.h"
 #include "./serialobject.h"
 
-////////////////////////
-
 struct GameObjectH {
   objid id;
   objid parentId;
@@ -41,15 +39,11 @@ struct SceneDeserialization {
   std::map<std::string, std::map<std::string, std::string>>  additionalFields;
 };
 
-/////////////////////////////
 struct SceneSandbox {
-  std::map<objid, Scene> scenes;
-
+  std::map<objid, objid> sceneIdToRootObj;
   Scene mainScene;
   std::vector<LayerInfo> layers;
 };
-
-//////////////////////////////
 
 std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);

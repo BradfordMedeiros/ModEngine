@@ -1014,6 +1014,13 @@ int main(int argc, char* argv[]){
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
+  interface = SysInterface {
+    .loadScript = loadScriptFromWorld,
+    .unloadScript = unloadScript,
+    .stopAnimation = stopAnimation,
+    .getCurrentTime = getTotalTime
+  };
+
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
@@ -1107,15 +1114,9 @@ int main(int argc, char* argv[]){
         .orthographic = true,
         .ignoreDepthBuffer = false,
       }
-    }
+    },
+    interface
   );
-
-  interface = SysInterface {
-    .loadScript = loadScriptFromWorld,
-    .unloadScript = unloadScript,
-    .stopAnimation = stopAnimation,
-    .getCurrentTime = getTotalTime
-  };
 
   loadAllTextures();
   
