@@ -133,6 +133,9 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   //printAxisDebug(axises, count);
 }
 
+
+
+
 void handleInput(
   KeyRemapper& remapper,
   bool disableInput, 
@@ -289,7 +292,7 @@ void handleInput(
       state.enableBloom = !state.enableBloom;
    }
 
-   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+   /*if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
       std::cout << dumpLogInfo() << std::endl;
-   }
+   }*/
 }

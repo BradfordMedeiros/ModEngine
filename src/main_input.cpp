@@ -28,7 +28,7 @@ void processManipulatorForId(objid id){
 
 void processManipulator(){
   if (state.enableManipulator){
-    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+    for (auto id : selectedIds(state.editor)){
       processManipulatorForId(id);
     }
   }
@@ -180,6 +180,8 @@ void handleSnapEasyRight(objid id){
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
+
+  // below stuff is editor/misc stuff
   if (key == 259){  // backspace
     for (auto voxelData : getSelectedVoxels()){
       removeVoxel(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels);
@@ -189,12 +191,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 
   if (key == GLFW_KEY_LEFT && action == 1 && selected(state.editor) != -1){
-    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+    for (auto id : selectedIds(state.editor)){
       handleSnapEasyLeft(id);
     }
   }
   if (key == GLFW_KEY_RIGHT && action == 1 && selected(state.editor) != -1){
-    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+    for (auto id : selectedIds(state.editor)){
       handleSnapEasyRight(id);
     }
   }
@@ -247,17 +249,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 
   if (key == GLFW_KEY_T && action == 1){
-    for (auto id : selectedIds(state.editor, state.multiselectMode)){
+    for (auto id : selectedIds(state.editor)){
       // can have multiple objects w/ same group id, just waste
       auto groupId = getGroupId(world.sandbox, id);
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
       updateBonePoses(meshNameToMeshes, getModelTransform);
     }
-  }
-
-  if (key == 260 && action == 1){   // ins
-    state.multiselectMode = !state.multiselectMode;
-    std::cout << "INFO: multi select mode: " << state.multiselectMode << std::endl;
   }
 
   if (key == GLFW_KEY_N && action == 1){
@@ -278,13 +275,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     saveRecording(state.recordingIndex, "./res/recordings/move.rec");
     state.isRecording = false;
     state.recordingIndex = -1;
-  }
-
-  if (key == 268 && action == 1){   // home
-    copyAllObjects(state.editor, copyObject);
-  }
-  if (key == 269 && action == 1){   // end
-    rmAllObjects(state.editor, removeObjectById);
   }
 
   if (key == 91 && action == 1){  // [
@@ -317,6 +307,28 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       std::cout << "RENDER MODE: final" << std::endl;
     }
   }
+
+
+  auto controlPressed = ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS   ) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
+  if (controlPressed && key == 67 && action == 1){   // C
+    setClipboardFromSelected(state.editor);
+  }
+  if (controlPressed && key == 86 && action == 1){  // V
+    copyAllObjects(state.editor, copyObject);
+  }
+  if (key == 269 && action == 1){   // end
+    rmAllObjects(state.editor, removeObjectById);
+  }
+  if (key == 340){
+    if (action == 0){
+      state.multiselect = false;
+    }
+    if (action == 1){
+      state.multiselect = true;
+    }
+  }
+
+  std::cout << "key is: " << key << std::endl;
 }
 
 void onMouseButton(){    

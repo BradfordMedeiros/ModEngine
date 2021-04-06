@@ -9,42 +9,51 @@ bool isInSelectedItems(std::vector<EditorItem> items, objid id){
   return false;
 }
 
-void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool addMultiple){
+void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool reset){
   std::cout << "INFO: EDITOR: ADD SELECTED INDEX" << std::endl;
-  editor.selectedObj = EditorItem {
-    .id = id,
-    .name = name,
-  };
-  if (addMultiple && !isInSelectedItems(editor.selectedObjs, id)){
-    editor.selectedObjs.push_back(editor.selectedObj);
+  if (reset){
+    editor.selectedObjs = {};
   }
-  std::cout << "INFO: SELECTED ITEMS: ";
-  for (auto item : editor.selectedObjs){
-    std::cout << item.id << " ";
+  if (!isInSelectedItems(editor.selectedObjs, id)){
+    editor.selectedObjs.push_back(EditorItem {
+      .id = id,
+      .name = name,
+    });
   }
-  std::cout << std::endl;
 }
+void unsetSelectedIndex(EditorContent& editor, objid id){
+  std::vector<EditorItem> selectedObjs;
+  for (auto item : editor.selectedObjs){
+    if (item.id != id){
+      selectedObjs.push_back(item);
+    }
+  }
+  std::vector<EditorItem> clipboardObjs;
+  for (auto item : editor.clipboardObjs){
+    if (item.id != id){
+      clipboardObjs.push_back(item);
+    }
+  }
+  editor.selectedObjs = selectedObjs;
+  editor.clipboardObjs = clipboardObjs;
+}
+
 void clearSelectedIndexs(EditorContent& editor){
   std::cout << "INFO: EDITOR: CLEAR SELECTED INDEXES" << std::endl;
-  editor.selectedObj = EditorItem {
-    .id = -1,
-    .name = "",
-  };
   editor.selectedObjs = {};
 }
 void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject){
   std::cout << "INFO: EDITOR: COPY ALL OBJECTS" << std::endl;
-  for (auto item : editor.selectedObjs){
+  for (auto item : editor.clipboardObjs){
     copyObject(item.id);
   }
 }
+void setClipboardFromSelected(EditorContent& editor){
+  std::cout << "set clipboard size to: " << editor.selectedObjs.size() << std::endl;
+  editor.clipboardObjs = editor.selectedObjs;
+}
 void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById){
   std::cout << "INFO: EDITOR: RM ALL OBJECTS" << std::endl;
-  editor.selectedObj = EditorItem {
-    .id = -1,
-    .name = "",
-  };
-
   for (auto item : editor.selectedObjs){
     rmObjectById(item.id);
   }
@@ -52,20 +61,22 @@ void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById
 }
 
 bool isSelected(EditorContent& editor, objid id){
-  return editor.selectedObj.id == id;
+  for (auto item : editor.selectedObjs){
+    if (item.id == id){
+      return true;
+    }
+  }
+  return false;
 }
 
-objid selected(EditorContent& editor, bool multiselectmode){
-  if (multiselectmode){
-    return true;
+objid selected(EditorContent& editor){
+  if (editor.selectedObjs.size() > 0){
+    return editor.selectedObjs.at(editor.selectedObjs.size() - 1).id;
   }
-  return editor.selectedObj.id;
+  return -1;
 }
 
-std::vector<objid> selectedIds(EditorContent& editor, bool multiselectmode){
-  if (!multiselectmode){
-    return { editor.selectedObj.id };
-  }
+std::vector<objid> selectedIds(EditorContent& editor){
   std::vector<objid> ids;
   for (auto item : editor.selectedObjs){
     ids.push_back(item.id);

@@ -203,11 +203,11 @@ void onDebugKey(){
 }
 
 void onDelete(){
-  if (state.editor.selectedObj.id != -1){
-    std::cout << "OnDelete object id: " << state.editor.selectedObj.id << std::endl;
-    removeObjectById(state.editor.selectedObj.id);
-    clearSelectedIndexs(state.editor);
+  for (auto id : selectedIds(state.editor)){
+    std::cout << "OnDelete object id: " << id << std::endl;
+    removeObjectById(id);
   }
+  clearSelectedIndexs(state.editor);   
 }
 
 unsigned int textureToPaint = -1;
@@ -284,8 +284,8 @@ void selectItem(objid selectedId, Color pixelColor){
   if (!state.shouldSelect){
     return;
   }
-  setSelectedIndex(state.editor, groupId, selectedObject.name, state.multiselectMode);
-  state.selectedName = selectedObject.name + "(" + std::to_string(state.editor.selectedObj.id) + ")";
+  setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
+  state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
 
@@ -364,39 +364,47 @@ void loadAllTextures(){
 
 
 void translate(float x, float y, float z){
-  auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world.sandbox, selected)){
-    return;
+  for (auto id : selectedIds(state.editor)){
+    auto selected = id;
+    if (selected == -1 || !idExists(world.sandbox, selected)){
+      return;
+    }
+    physicsTranslate(world, selected, x, y, z, state.moveRelativeEnabled);
   }
-  physicsTranslate(world, selected, x, y, z, state.moveRelativeEnabled);
 }
 void scale(float x, float y, float z){
-  auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world.sandbox, selected)){
-    return;
-  }
-  physicsScale(world, selected, x, y, z);
+  for (auto id : selectedIds(state.editor)){
+    auto selected = id;
+    if (selected == -1 || !idExists(world.sandbox, selected)){
+      return;
+    }
+    physicsScale(world, selected, x, y, z);
+  }  
 }
 void rotate(float x, float y, float z){
-  auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world.sandbox, selected)){
-    return;
-  }
-  physicsRotate(world, selected, x, y, z);
+  for (auto id : selectedIds(state.editor)){
+    auto selected = id;
+    if (selected == -1 || !idExists(world.sandbox, selected)){
+      return;
+    }
+    physicsRotate(world, selected, x, y, z);
+  }  
 }
 void setObjectDimensions(int32_t index, float width, float height, float depth){
-  auto selected = state.editor.selectedObj.id;
-  if (selected == -1 || !idExists(world.sandbox, selected)){
-    return;
-  }
-  auto gameObjV = world.objectMapping.at(selected);  // todo this is bs, need a wrapper around objectmappping + scene
-  auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
-  if (meshObj != NULL){
-    // @TODO this is resizing based upon first mesh only, which is questionable
-    auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
-    std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-    getGameObject(world, selected).transformation.scale = newScale;
-  } 
+  for (auto id : selectedIds(state.editor)){
+    auto selected = id;
+    if (selected == -1 || !idExists(world.sandbox, selected)){
+      return;
+    }
+    auto gameObjV = world.objectMapping.at(selected);  // todo this is bs, need a wrapper around objectmappping + scene
+    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+    if (meshObj != NULL){
+      // @TODO this is resizing based upon first mesh only, which is questionable
+      auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
+      std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
+      getGameObject(world, selected).transformation.scale = newScale;
+    } 
+  }  
 }
 
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
@@ -492,7 +500,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
     assert(id >= 0);
     addPositionToRender(modelMatrix, parentModelMatrix);
 
-    bool objectSelected = idInGroup(world, id, selectedIds(state.editor, state.multiselectMode));
+    bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     auto newShader = getShaderByName(shader, shaderProgram);
     setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
 
@@ -590,13 +598,15 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
     glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   }else{
-    auto selectedObj = state.editor.selectedObj.id;
-    if (state.manipulatorMode == TRANSLATE && selectedObj != -1){
-      float snapGridSize = getSnapTranslateSize();
-      if (snapGridSize > 0){
-        auto position = getGameObjectPosition(selectedObj, false);
-        drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
-        glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
+    for (auto id : selectedIds(state.editor)){
+      auto selectedObj = id;
+      if (state.manipulatorMode == TRANSLATE && selectedObj != -1){
+        float snapGridSize = getSnapTranslateSize();
+        if (snapGridSize > 0){
+          auto position = getGameObjectPosition(selectedObj, false);
+          drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
+          glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
+        }
       }
     }
   }
@@ -1074,11 +1084,8 @@ int main(int argc, char* argv[]){
         activeCameraObj = NULL;
         std::cout << "active camera reset" << std::endl;
       }
-      if (id == selected(state.editor)){
-        state.editor.selectedObj = EditorItem {
-          .id = -1,
-          .name = "",
-        };
+      if (id == isSelected(state.editor, id)){
+        unsetSelectedIndex(state.editor, id);
       }
 
       UdpPacket packet { .type = DELETE };

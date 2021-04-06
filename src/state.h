@@ -53,8 +53,8 @@ struct engineState {
   bool takeScreenshot;
   bool highlight;
   bool shouldSelect;
+  bool multiselect;
   EditorContent editor;
-  bool multiselectMode;
   bool isRecording;
   objid recordingIndex;
   RENDER_MODE renderMode;

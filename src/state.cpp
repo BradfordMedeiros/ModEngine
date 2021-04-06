@@ -45,13 +45,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.takeScreenshot = false,
     .highlight = true,
     .shouldSelect = true,
-    .editor = EditorContent{
-      .selectedObj = EditorItem { 
-        .id = -1,
-        .name = "",
-      },
-    },
-    .multiselectMode = false,
+    .multiselect = false,
+    .editor = EditorContent{},
     .isRecording = false,
     .recordingIndex = -1,
     .renderMode = RENDER_FINAL,

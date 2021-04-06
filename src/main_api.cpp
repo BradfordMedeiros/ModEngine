@@ -497,7 +497,7 @@ void setActiveCamera(int32_t cameraId){
     return;
   }
   activeCameraObj = &getGameObject(world, cameraId);
-  setSelectedIndex(state.editor, cameraId, activeCameraObj -> name);
+  setSelectedIndex(state.editor, cameraId, activeCameraObj -> name, true);
 }
 void setActiveCamera(std::string name){
   auto object = getGameObjectByName(name);
@@ -548,7 +548,7 @@ unsigned int activeTextureId(){
 
 std::vector<VoxelQueryData> getSelectedVoxels(){
   std::vector<VoxelQueryData> voxels;
-  for (auto id : selectedIds(state.editor, state.multiselectMode)){
+  for (auto id : selectedIds(state.editor)){
     auto maybeVoxel = getVoxel(world, id);
     if (maybeVoxel.has_value()){
       voxels.push_back(VoxelQueryData{
