@@ -328,6 +328,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
   }
 
+  if (key == 260){
+    clearSelectedIndexs(state.editor);
+  }
+
   std::cout << "key is: " << key << std::endl;
 }
 
