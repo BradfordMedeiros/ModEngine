@@ -66,6 +66,7 @@ void createStaticSchemeBindings(
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
+  void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),

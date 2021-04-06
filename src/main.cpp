@@ -990,6 +990,7 @@ int main(int argc, char* argv[]){
     createRecording,
     saveRecording,
     makeObjectAttr,
+    makeParent,
     raycastW,
     takeScreenshot,
     setState,

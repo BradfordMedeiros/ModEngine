@@ -1,7 +1,7 @@
 #include "./scene_debug.h"
 
-std::string getDotInfoForNode(std::string nodeName, int nodeId, objid groupId, glm::vec3 position, std::vector<std::string> meshes){
-  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ")" + " pos: " + print(position) + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
+std::string getDotInfoForNode(std::string nodeName, int nodeId, objid sceneId, objid groupId, glm::vec3 position, std::vector<std::string> meshes){
+  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ", " + std::to_string(sceneId) + ")" + " pos: " + print(position) + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
 }
 
 std::string scenegraphAsDotFormat(SceneSandbox& sandbox, objid sceneId, std::map<objid, GameObjectObj>& objectMapping){
@@ -26,7 +26,7 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, objid sceneId, std::map
         
     auto positionParent = parentId == -1 ? glm::vec3(0.f, 0.f, 0.f) : getGameObject(sandbox, parentId).transformation.position;
     auto positionChild = childId == -1 ? glm::vec3(0.f, 0.f, 0.f) : gameobj.transformation.position;
-    relations = relations + getDotInfoForNode(parentName, parentId, parentGroupId, positionParent, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId, groupId, positionChild, getMeshNames(objectMapping, childId)) + "\n";
+    relations = relations + getDotInfoForNode(parentName, parentId, obj.sceneId, parentGroupId, positionParent, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId,  getGameObjectH(sandbox, childId).sceneId, groupId, positionChild, getMeshNames(objectMapping, childId)) + "\n";
   }); 
 
 

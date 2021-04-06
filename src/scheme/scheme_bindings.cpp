@@ -188,6 +188,12 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
   return scm_from_int32(id);
 }
 
+void (*_makeParent)(objid child, objid parent);
+SCM scmMakeParent(SCM childId, SCM parentId){
+  _makeParent(scm_to_int32(childId), scm_to_int32(parentId));
+  return SCM_UNSPECIFIED;
+}
+
 void (*removeObjById)(int32_t id);
 SCM removeObject(SCM value){
   removeObjById(scm_to_int32(value));
@@ -1057,6 +1063,8 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("save-recording", 2, 0, 0, (void*) scmSaveRecording);
 
   scm_c_define_gsubr("mk-obj-attr", 2, 0, 0, (void*)scmMakeObjectAttr);
+  scm_c_define_gsubr("make-parent", 2, 0, 0, (void*)scmMakeParent);
+
   scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
 
   scm_c_define("mainobj", createGameObject(id));
@@ -1132,6 +1140,7 @@ void createStaticSchemeBindings(
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
   objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
+  void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),
   void (*setState)(std::string),
@@ -1218,6 +1227,8 @@ void createStaticSchemeBindings(
   _saveRecording = saveRecording;
 
   _makeObjectAttr = makeObjectAttr;
+  _makeParent = makeParent;
+
   _raycast = raycast;
 
   _saveScreenshot = saveScreenshot;

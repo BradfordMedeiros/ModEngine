@@ -564,3 +564,7 @@ objid addLoadingAround(objid id){
 void removeLoadingAround(objid id){
   removeLoadingAround(dynamicLoading, id);
 }
+
+void makeParent(objid child, objid parent){
+  makeParent(world.sandbox, child, parent);
+}

@@ -508,3 +508,34 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   return nameToAdditionalFields;
 }
 
+void makeParent(SceneSandbox& sandbox, objid child, objid parent){
+  assert(child != parent);
+
+  GameObjectH& parentObjH = getGameObjectH(sandbox, parent);
+  GameObjectH& childObjH = getGameObjectH(sandbox, child);
+  assert(childObjH.id == childObjH.groupId);
+
+  auto allDescendents = getChildrenIdsAndParent(sandbox.mainScene,  child);
+  for (auto decendentId : allDescendents){
+    assert(decendentId != parent);
+  }
+
+  auto oldParentId = childObjH.parentId;
+  GameObjectH& oldParentH = getGameObjectH(sandbox, oldParentId);
+
+  oldParentH.children.erase(childObjH.id);
+  parentObjH.children.insert(childObjH.id);
+  childObjH.parentId = parentObjH.id;
+
+  bool inDifferentScenes = parentObjH.sceneId != childObjH.sceneId;
+
+  if (inDifferentScenes && sandbox.sceneIdToRootObj.find(child) != sandbox.sceneIdToRootObj.end()){
+    auto ids = getChildrenIdsAndParent(sandbox.mainScene, child);
+    for (auto id : ids){
+      GameObjectH& objh = getGameObjectH(sandbox, id);
+      objh.sceneId = parentObjH.sceneId;
+    }
+  }
+}
+
+

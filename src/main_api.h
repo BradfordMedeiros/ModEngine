@@ -169,4 +169,6 @@ void scmEmit(objid id);
 objid addLoadingAround(objid id);
 void removeLoadingAround(objid id);
 
+void makeParent(objid child, objid parent);
+
 #endif
