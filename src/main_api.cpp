@@ -54,8 +54,14 @@ int32_t loadScene(std::string sceneFile){
   return addSceneToWorld(world, sceneFile, interface);
 }
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset){
+  std::cout << "loading called yo!" << std::endl;
+  auto name = std::to_string(getUniqueObjId());
+  auto nodeOffsetId = makeObjectAttr(name, {}, {}, {{"position", offset}});
   std::cout << "load scene offset: " << print(offset) << std::endl;
-  return loadScene(sceneFile);
+  auto sceneId = loadScene(sceneFile);
+  auto rootId = rootIdForScene(world.sandbox, sceneId);
+  makeParent(world.sandbox, rootId, nodeOffsetId);
+  return sceneId;
 }
 
 int32_t loadSceneData(std::string sceneData, objid sceneId){

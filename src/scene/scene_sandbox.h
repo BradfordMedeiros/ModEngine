@@ -95,5 +95,6 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
 );
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);
+objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 
 #endif 

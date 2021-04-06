@@ -11,7 +11,10 @@ objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string 
   assert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end());
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
-  assert(scene.nameToId.find(name) == scene.nameToId.end());
+  if (!(scene.nameToId.find(name) == scene.nameToId.end())){
+    std::cout << "name already exists: " << name << std::endl;
+    assert(false);
+  }
   scene.nameToId[name] = gameobjectObj.id;
   return gameobjectObj.id;
 }
@@ -538,4 +541,6 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
   }
 }
 
-
+objid rootIdForScene(SceneSandbox& sandbox, objid sceneId){
+  return sandbox.sceneIdToRootObj.at(sceneId);
+}
