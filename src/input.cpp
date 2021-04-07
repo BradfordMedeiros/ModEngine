@@ -204,18 +204,7 @@ void handleInput(
   if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
     setObjectDimensions(1, 10, 5, 10);
   }
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-    moveCamera(glm::vec3(0.0, 0.0, -40.0f * deltaTime));
-  }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-    moveCamera(glm::vec3(-40.0 * deltaTime, 0.0, 0.0));
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){ 
-    moveCamera(glm::vec3(0.0, 0.0, 40.0f * deltaTime));
-  }
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){ 
-    moveCamera(glm::vec3(40.0f * deltaTime, 0.0, 0.0f));
-  }
+
   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
     nextCamera();
   }

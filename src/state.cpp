@@ -44,7 +44,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.bloomAmount = 1.f,
   	.takeScreenshot = false,
     .highlight = true,
-    .shouldSelect = true,
     .multiselect = false,
     .editor = EditorContent{},
     .isRecording = false,

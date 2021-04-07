@@ -244,10 +244,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     saveHeightmap(world, selected(state.editor));
   }
 
-  if (key == GLFW_KEY_P && action == 1){
-    state.shouldSelect = !state.shouldSelect;
-  }
-
   if (key == GLFW_KEY_T && action == 1){
     for (auto id : selectedIds(state.editor)){
       // can have multiple objects w/ same group id, just waste
@@ -277,23 +273,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     state.recordingIndex = -1;
   }
 
-  auto controlPressed = ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS   ) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
-  if (controlPressed && key == 67 && action == 1){   // C
-    setClipboardFromSelected(state.editor);
-  }
-  if (controlPressed && key == 86 && action == 1){  // V
-    copyAllObjects(state.editor, copyObject);
-  }
   if (key == 269 && action == 1){   // end
     rmAllObjects(state.editor, removeObjectById);
-  }
-  if (key == 340){
-    if (action == 0){
-      state.multiselect = false;
-    }
-    if (action == 1){
-      state.multiselect = true;
-    }
   }
 
   if (key == 260){

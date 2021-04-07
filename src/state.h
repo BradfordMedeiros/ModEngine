@@ -52,7 +52,6 @@ struct engineState {
   float bloomAmount;
   bool takeScreenshot;
   bool highlight;
-  bool shouldSelect;
   bool multiselect;
   EditorContent editor;
   bool isRecording;

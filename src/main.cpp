@@ -81,6 +81,7 @@ World world;
 SysInterface interface;
 std::string textureFolderPath;
 float now = 0;
+float deltaTime = 0.0f; // Time between current frame and last frame
 
 AnimationState animations;
 
@@ -281,9 +282,6 @@ void selectItem(objid selectedId, Color pixelColor){
 
   shouldCallItemSelected = true;
 
-  if (!state.shouldSelect){
-    return;
-  }
   setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
@@ -850,8 +848,79 @@ std::vector<InputDispatch> inputFns = {
       state.renderMode = RENDER_PAINT;
     }
   }, 
+  InputDispatch{
+    .sourceKey = 67,  // 4
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 341,  // ctrl,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      setClipboardFromSelected(state.editor);
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 86,  // 4
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 341,  // ctrl,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      copyAllObjects(state.editor, copyObject);
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 340,  // 4
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      state.multiselect = true;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 340,  // 4
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      state.multiselect = false;
+    }
+  },  
+  InputDispatch{
+    .sourceKey = 87,  // w
+    .sourceType = BUTTON_HOLD,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      moveCamera(glm::vec3(0.0, 0.0, -40.0f * deltaTime));
+    }
+  },  
+  InputDispatch{
+    .sourceKey = 65,  // a
+    .sourceType = BUTTON_HOLD,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      moveCamera(glm::vec3(-40.0 * deltaTime, 0.0, 0.0));
+    }
+  },  
+  InputDispatch{
+    .sourceKey = 83,  // s
+    .sourceType = BUTTON_HOLD,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      moveCamera(glm::vec3(0.0, 0.0, 40.0f * deltaTime));
+    }
+  },  
+  InputDispatch{
+    .sourceKey = 68,  // d
+    .sourceType = BUTTON_HOLD,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      moveCamera(glm::vec3(40.0f * deltaTime, 0.0, 0.0f));
+    }
+  },  
 };
-
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -1214,8 +1283,6 @@ int main(int argc, char* argv[]){
   glfwSetCharCallback(window, keyCharCallback);
   glfwSetDropCallback(window, drop_callback);
   glfwSetJoystickCallback(joystickCallback);
-
-  float deltaTime = 0.0f; // Time between current frame and last frame
 
   unsigned int frameCount = 0;
   float previous = glfwGetTime();
