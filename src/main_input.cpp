@@ -179,6 +179,14 @@ void handleSnapEasyRight(objid id){
   }
 }
 
+void onDelete(){
+  for (auto id : selectedIds(state.editor)){
+    std::cout << "OnDelete object id: " << id << std::endl;
+    removeObjectById(id);
+  }
+  clearSelectedIndexs(state.editor);   
+}
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
 
@@ -257,10 +265,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     saveRecording(state.recordingIndex, "./res/recordings/move.rec");
     state.isRecording = false;
     state.recordingIndex = -1;
-  }
-
-  if (key == 269 && action == 1){   // end
-    rmAllObjects(state.editor, removeObjectById);
   }
 
   if (key == 260){
@@ -554,5 +558,15 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&cameraSpeed]() -> void {
       cameraSpeed = 1.f;
     }
+  },
+  InputDispatch{
+    .sourceKey = 261,  // delete
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      onDelete();
+    }
   }
 };
+

@@ -26,7 +26,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void onMouseButton();
 void drop_callback(GLFWwindow* window, int count, const char** paths);
 
-void handleSnapEasyLeft(objid id);
-void handleSnapEasyRight(objid id);
+void onDelete();
 
 #endif

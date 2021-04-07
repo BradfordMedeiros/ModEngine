@@ -8,8 +8,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.selectedName = "no object selected",
 		.useDefaultCamera = false,
 		.moveRelativeEnabled = false,
-		.mode = 0,  // 0 = translate mode, 1 = scale mode, 2 = rotate
-		.axis = 0,  // 0 = x, 1 = y, 2 = z
 	  .currentScreenWidth = initialScreenWidth,
 		.currentScreenHeight = initialScreenHeight,
 		.cursorLeft = initialScreenWidth / 2,

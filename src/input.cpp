@@ -228,23 +228,6 @@ void handleInput(
     state.toggleFov = !state.toggleFov;
     std::cout << "ToggleFOV: " << state.toggleFov << std::endl;
   }
-  if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS){
-    if (state.axis == 0){
-      state.axis = 1;
-    }else{
-      state.axis = 0;
-    }
-  }
-  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
-    state.mode = 0;
-  }
-  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
-    state.mode = 1;
-  } 
-  if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
-    state.mode = 2;
-  }
-
 
   if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS){
     state.offsetTextureMode = !state.offsetTextureMode;
@@ -290,10 +273,6 @@ void handleInput(
    }
    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS){
       state.discardAmount -= 0.01;
-   }
-
-   if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS){
-      onDelete();
    }
 
    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){

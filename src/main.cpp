@@ -204,14 +204,6 @@ void onDebugKey(){
   }
 }
 
-void onDelete(){
-  for (auto id : selectedIds(state.editor)){
-    std::cout << "OnDelete object id: " << id << std::endl;
-    removeObjectById(id);
-  }
-  clearSelectedIndexs(state.editor);   
-}
-
 unsigned int textureToPaint = -1;
 bool canPaint = false;
 
@@ -281,8 +273,10 @@ bool maybeProcessManipulator(objid selectedId, objid groupId){
     state.manipulatorObject = ZAXIS;
   }else{
     state.manipulatorObject = NOAXIS;
+    return false;
   }
   applyPhysicsTranslation(world, groupId, obj.transformation.position, state.offsetX, state.offsetY, state.manipulatorObject);
+  return true;
 }
 
 bool selectItemCalled = false;
@@ -665,9 +659,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   }
 
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
-  std::string modeText = state.mode == 0 ? "translate" : (state.mode == 1 ? "scale" : "rotate"); 
-  std::string axisText = state.axis == 0 ? "xz" : "xy";
-  drawText("Mode: " + modeText + " Axis: " + axisText, 10, 40, 3);      
 
   std::string manipulatorAxisString;
   if (state.manipulatorAxis == XAXIS){

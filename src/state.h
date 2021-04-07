@@ -15,8 +15,6 @@ struct engineState {
   std::string selectedName;
   bool useDefaultCamera;
   bool moveRelativeEnabled;
-  unsigned int mode;
-  unsigned int axis; 
   unsigned int currentScreenWidth;
   unsigned int currentScreenHeight;
   int cursorLeft;
