@@ -920,7 +920,70 @@ std::vector<InputDispatch> inputFns = {
       moveCamera(glm::vec3(40.0f * deltaTime, 0.0, 0.0f));
     }
   },  
+  InputDispatch{
+    .sourceKey = 83,  // s
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 341,  // ctrl,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      saveHeightmap(world, selected(state.editor));
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 65,  // a
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      std::cout << "setting snap absolute" << std::endl;
+      state.snappingMode = SNAP_ABSOLUTE;
+    }
+  },   
+  InputDispatch{
+    .sourceKey = 67,  // c
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      std::cout << "setting snap continuous" << std::endl;
+      state.snappingMode = SNAP_CONTINUOUS;
+    }
+  },   
+  InputDispatch{
+    .sourceKey = 82,  // r
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      std::cout << "setting snap relative" << std::endl;
+      state.snappingMode = SNAP_RELATIVE;
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 263,  // left arrow
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      for (auto id : selectedIds(state.editor)){
+        handleSnapEasyLeft(id);
+      }
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 262,  // right arrow
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      for (auto id : selectedIds(state.editor)){
+        handleSnapEasyRight(id);
+      }
+    }
+  }, 
 };
+
+
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");

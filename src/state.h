@@ -57,6 +57,7 @@ struct engineState {
   bool isRecording;
   objid recordingIndex;
   RENDER_MODE renderMode;
+  SNAPPING_MODE snappingMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

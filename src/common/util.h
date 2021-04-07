@@ -33,6 +33,7 @@ std::vector<std::string> filterComments(std::vector<std::string> values);
 
 enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
 enum Axis { NOAXIS, XAXIS, YAXIS, ZAXIS };
+enum SNAPPING_MODE { SNAP_CONTINUOUS, SNAP_ABSOLUTE, SNAP_RELATIVE };
 
 std::string print(glm::vec3 vec);
 std::string print(glm::vec2 vec);

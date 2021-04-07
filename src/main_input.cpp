@@ -189,17 +189,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
   } 
 
-
-  if (key == GLFW_KEY_LEFT && action == 1 && selected(state.editor) != -1){
-    for (auto id : selectedIds(state.editor)){
-      handleSnapEasyLeft(id);
-    }
-  }
-  if (key == GLFW_KEY_RIGHT && action == 1 && selected(state.editor) != -1){
-    for (auto id : selectedIds(state.editor)){
-      handleSnapEasyRight(id);
-    }
-  }
   if (key == GLFW_KEY_UP && action == 1 && selected(state.editor) != -1){
     if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
       setSnapTranslateUp();
@@ -238,10 +227,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == GLFW_KEY_E && action == 1){
     state.terrainPaintDown = !state.terrainPaintDown;
     std::cout << "toggling terrain paint direction: " << state.terrainPaintDown << std::endl;
-  }
-
-  if (key == GLFW_KEY_U && action == 1){
-    saveHeightmap(world, selected(state.editor));
   }
 
   if (key == GLFW_KEY_T && action == 1){
