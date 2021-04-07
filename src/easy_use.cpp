@@ -35,27 +35,40 @@ float getClosestAngle(float angle, int snapAngle, bool isUp){
   }
   assert(false);
 }
-glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp){
+glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp, SNAPPING_MODE mode){
   glm::vec3 euler = glm::degrees(glm::eulerAngles(angle));
- 
-  if (rotationAxis == NOAXIS || rotationAxis == XAXIS){
-    euler.x = getClosestAngle(euler.x, snapAngles.at(currentAngleIndex), isUp);
-  }else if (rotationAxis == YAXIS){
-    euler.y = getClosestAngle(euler.y, snapAngles.at(currentAngleIndex), isUp);
-  }else if (rotationAxis == ZAXIS){
-    euler.z = getClosestAngle(euler.z, snapAngles.at(currentAngleIndex), isUp);
-  }else{
-    assert(false);
-  }
+  auto deltaAngle = snapAngles.at(currentAngleIndex);
+  if (mode == SNAP_RELATIVE){
+    auto multiplier = isUp ? 1.f : -1.f;
+    if (rotationAxis == NOAXIS || rotationAxis == XAXIS){
+      euler.x = euler.x + (multiplier * deltaAngle);
+    }else if (rotationAxis == YAXIS){
+      euler.y = euler.y + (multiplier * deltaAngle);
+    }else if (rotationAxis == ZAXIS){
+      euler.z = euler.z + (multiplier * deltaAngle);
+    }else{
+      assert(false);
+    }    
+  }else {
+    if (rotationAxis == NOAXIS || rotationAxis == XAXIS){
+      euler.x = getClosestAngle(euler.x, deltaAngle, isUp);
+    }else if (rotationAxis == YAXIS){
+      euler.y = getClosestAngle(euler.y, deltaAngle, isUp);
+    }else if (rotationAxis == ZAXIS){
+      euler.z = getClosestAngle(euler.z, deltaAngle, isUp);
+    }else{
+      assert(false);
+    }
+  }  
   glm::vec3 newAngle = glm::radians(glm::vec3(euler.x, euler.y, euler.z));
   glm::quat newRotation = glm::quat(newAngle);
   return newRotation;
 }
 glm::quat snapAngleUp(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
-  return snapAngle(angle, rotationAxis, true);
+  return snapAngle(angle, rotationAxis, true, mode);
 }
 glm::quat snapAngleDown(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
-  return snapAngle(angle, rotationAxis, false);
+  return snapAngle(angle, rotationAxis, false, mode);
 }
 
 
