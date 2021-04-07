@@ -51,10 +51,10 @@ glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp){
   glm::quat newRotation = glm::quat(newAngle);
   return newRotation;
 }
-glm::quat snapAngleUp(glm::quat angle, Axis rotationAxis){
+glm::quat snapAngleUp(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
   return snapAngle(angle, rotationAxis, true);
 }
-glm::quat snapAngleDown(glm::quat angle, Axis rotationAxis){
+glm::quat snapAngleDown(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
   return snapAngle(angle, rotationAxis, false);
 }
 
@@ -95,10 +95,10 @@ void setSnapTranslateDown(){
   }
   std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
 }
-glm::vec3 snapTranslateUp(glm::vec3 currentPos, Axis translationAxis){
+glm::vec3 snapTranslateUp(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis){
   return snapVector(currentPos, translationAxis, true, snapTranslates.at(currentTranslateIndex));
 }
-glm::vec3 snapTranslateDown(glm::vec3 currentPos, Axis translationAxis){
+glm::vec3 snapTranslateDown(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis){
   return snapVector(currentPos, translationAxis, false, snapTranslates.at(currentTranslateIndex));
 }
 
@@ -115,10 +115,10 @@ void setSnapScaleDown(){
   }
   std::cout << "Snap scale is now: " << snapScales.at(currentScaleIndex) << std::endl;
 }
-glm::vec3 snapScaleUp(glm::vec3 currentScale, Axis translationAxis){
+glm::vec3 snapScaleUp(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
   return snapVector(currentScale, translationAxis, true, snapScales.at(currentScaleIndex));
 }
-glm::vec3 snapScaleDown(glm::vec3 currentScale, Axis translationAxis){
+glm::vec3 snapScaleDown(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
   return snapVector(currentScale, translationAxis, false, snapScales.at(currentScaleIndex));
 }
 

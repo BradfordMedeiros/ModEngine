@@ -161,20 +161,20 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
 
 void handleSnapEasyLeft(objid id){
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-    setGameObjectPosition(id, snapTranslateUp(getGameObjectPosition(id, false), state.manipulatorAxis));
+    setGameObjectPosition(id, snapTranslateUp(state.snappingMode, getGameObjectPosition(id, false), state.manipulatorAxis));
   }else if (state.manipulatorMode == ROTATE){
-    setGameObjectRotation(id, snapAngleDown(getGameObjectRotation(id, false), state.manipulatorAxis));
+    setGameObjectRotation(id, snapAngleDown(state.snappingMode, getGameObjectRotation(id, false), state.manipulatorAxis));
   }else if (state.manipulatorMode == SCALE){
-    setGameObjectScale(id, snapScaleDown(getGameObjectScale(id), state.manipulatorAxis));
+    setGameObjectScale(id, snapScaleDown(state.snappingMode, getGameObjectScale(id), state.manipulatorAxis));
   }
 }
 void handleSnapEasyRight(objid id){
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-    setGameObjectPosition(id, snapTranslateDown(getGameObjectPosition(id, false), state.manipulatorAxis));
+    setGameObjectPosition(id, snapTranslateDown(state.snappingMode, getGameObjectPosition(id, false), state.manipulatorAxis));
   }else if (state.manipulatorMode == ROTATE){
-    setGameObjectRotation(id, snapAngleUp(getGameObjectRotation(id, false), state.manipulatorAxis));
+    setGameObjectRotation(id, snapAngleUp(state.snappingMode, getGameObjectRotation(id, false), state.manipulatorAxis));
   }else if (state.manipulatorMode == SCALE){
-    setGameObjectScale(id, snapScaleUp(getGameObjectScale(id), state.manipulatorAxis));
+    setGameObjectScale(id, snapScaleUp(state.snappingMode, getGameObjectScale(id), state.manipulatorAxis));
   }
 }
 
