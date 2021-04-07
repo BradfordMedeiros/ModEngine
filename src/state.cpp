@@ -49,7 +49,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .isRecording = false,
     .recordingIndex = -1,
     .renderMode = RENDER_FINAL,
-    .snappingMode = SNAP_CONTINUOUS,
+    .snappingMode = SNAP_RELATIVE,
 	};
 	return state;
 }

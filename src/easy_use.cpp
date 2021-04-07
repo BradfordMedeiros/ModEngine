@@ -66,19 +66,28 @@ float getClosestPosition(float position, float snapAmount, bool isUp){
   }
   return (multiple - 1) * snapAmount;
 };
-glm::vec3 snapVector(glm::vec3 current, Axis translationAxis, bool isUp, float snapAmount){
-  if (translationAxis == NOAXIS || translationAxis == XAXIS){
-    float newX = getClosestPosition(current.x, snapAmount, isUp);    
-    return glm::vec3(newX, current.y, current.z);
-  }else if (translationAxis == YAXIS){
-    float newY = getClosestPosition(current.y, snapAmount, isUp);
-    return glm::vec3(current.x, newY, current.z);
-  }else if (translationAxis == ZAXIS){
-    float newZ = getClosestPosition(current.z, snapAmount, isUp);
-    return glm::vec3(current.x, current.y, newZ);
-  }else{
-    assert(false);
+glm::vec3 snapVector(glm::vec3 current, Axis translationAxis, bool isUp, float snapAmount, SNAPPING_MODE mode){
+  if (mode == SNAP_RELATIVE){
+    if (translationAxis == NOAXIS || translationAxis == XAXIS){
+      return glm::vec3((isUp ? 1 : -1) * snapAmount + current.x, current.y, current.z);
+    }else if (translationAxis == YAXIS){
+      return glm::vec3(current.x, (isUp ? 1 : -1) * snapAmount + current.y, current.z);
+    }else if (translationAxis == ZAXIS){
+      return glm::vec3(current.x, current.y, (isUp ? 1 : -1) * snapAmount + current.z);
+    }   
+  }else if (mode == SNAP_ABSOLUTE){
+    if (translationAxis == NOAXIS || translationAxis == XAXIS){
+      float newX = getClosestPosition(current.x, snapAmount, isUp);    
+      return glm::vec3(newX, current.y, current.z);
+    }else if (translationAxis == YAXIS){
+      float newY = getClosestPosition(current.y, snapAmount, isUp);
+      return glm::vec3(current.x, newY, current.z);
+    }else if (translationAxis == ZAXIS){
+      float newZ = getClosestPosition(current.z, snapAmount, isUp);
+      return glm::vec3(current.x, current.y, newZ);
+    }
   }
+  assert(false);
   return glm::vec3(0.f, 0.f, 0.f);
 }
 
@@ -96,10 +105,10 @@ void setSnapTranslateDown(){
   std::cout << "Snap translate is now: " << snapTranslates.at(currentTranslateIndex) << std::endl;
 }
 glm::vec3 snapTranslateUp(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis){
-  return snapVector(currentPos, translationAxis, true, snapTranslates.at(currentTranslateIndex));
+  return snapVector(currentPos, translationAxis, true, snapTranslates.at(currentTranslateIndex), mode);
 }
 glm::vec3 snapTranslateDown(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis){
-  return snapVector(currentPos, translationAxis, false, snapTranslates.at(currentTranslateIndex));
+  return snapVector(currentPos, translationAxis, false, snapTranslates.at(currentTranslateIndex), mode);
 }
 
 static std::vector<float> snapScales = { 0.01, 0.1, 0.5, 1, 5, 10 };
@@ -116,10 +125,10 @@ void setSnapScaleDown(){
   std::cout << "Snap scale is now: " << snapScales.at(currentScaleIndex) << std::endl;
 }
 glm::vec3 snapScaleUp(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
-  return snapVector(currentScale, translationAxis, true, snapScales.at(currentScaleIndex));
+  return snapVector(currentScale, translationAxis, true, snapScales.at(currentScaleIndex), mode);
 }
 glm::vec3 snapScaleDown(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
-  return snapVector(currentScale, translationAxis, false, snapScales.at(currentScaleIndex));
+  return snapVector(currentScale, translationAxis, false, snapScales.at(currentScaleIndex), mode);
 }
 
 float getSnapTranslateSize(){
