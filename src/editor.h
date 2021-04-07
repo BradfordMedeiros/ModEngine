@@ -18,7 +18,7 @@ struct EditorContent {
 };
 
 void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool reset);
-void unsetSelectedIndex(EditorContent& editor, objid id);
+void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard);
 void clearSelectedIndexs(EditorContent& editor);
 void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject);
 void setClipboardFromSelected(EditorContent& editor);

@@ -1283,7 +1283,7 @@ int main(int argc, char* argv[]){
         std::cout << "active camera reset" << std::endl;
       }
       if (id == isSelected(state.editor, id)){
-        unsetSelectedIndex(state.editor, id);
+        unsetSelectedIndex(state.editor, id, true);
       }
 
       UdpPacket packet { .type = DELETE };

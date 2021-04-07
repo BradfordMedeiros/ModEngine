@@ -11,17 +11,29 @@ bool isInSelectedItems(std::vector<EditorItem> items, objid id){
 
 void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool reset){
   std::cout << "INFO: EDITOR: ADD SELECTED INDEX" << std::endl;
+  bool inSelected = isInSelectedItems(editor.selectedObjs, id);
   if (reset){
-    editor.selectedObjs = {};
-  }
-  if (!isInSelectedItems(editor.selectedObjs, id)){
-    editor.selectedObjs.push_back(EditorItem {
-      .id = id,
-      .name = name,
-    });
+    if (inSelected && editor.selectedObjs.size() == 1){
+      editor.selectedObjs = {};
+    }else{
+      editor.selectedObjs = {};
+      editor.selectedObjs.push_back(EditorItem {
+        .id = id,
+        .name = name,
+      });
+    }
+  }else{
+    if (inSelected){
+      unsetSelectedIndex(editor, id, false);
+    }else {
+      editor.selectedObjs.push_back(EditorItem {
+        .id = id,
+        .name = name,
+      });
+    }
   }
 }
-void unsetSelectedIndex(EditorContent& editor, objid id){
+void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard){
   std::vector<EditorItem> selectedObjs;
   for (auto item : editor.selectedObjs){
     if (item.id != id){
