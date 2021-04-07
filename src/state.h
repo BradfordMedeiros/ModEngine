@@ -27,9 +27,12 @@ struct engineState {
   bool lastHoveredIdInScene;
   unsigned int activeCamera;
   std::string additionalText;
+ 
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
   Axis manipulatorAxis;
+  Axis manipulatorObject;
+
   bool firstMouse;
   float lastX;
   float lastY;

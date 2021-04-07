@@ -23,6 +23,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.enableManipulator = false,
 		.manipulatorMode = NONE,
 		.manipulatorAxis = NOAXIS,
+    .manipulatorObject = NOAXIS,
 		.firstMouse = true,
 		.lastX = 0,
 		.lastY = 0,

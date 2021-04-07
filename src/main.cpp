@@ -111,6 +111,7 @@ SchemeBindingCallbacks schemeBindings;
 std::queue<StringString> channelMessages;
 std::queue<StringFloat> channelFloatMessages;
 KeyRemapper keyMapper;
+extern std::vector<InputDispatch> inputFns;
 
 float quadVertices[] = {
   -1.0f,  1.0f,  0.0f, 1.0f,
@@ -267,6 +268,23 @@ void handleTerrainPainting(UVCoord uvCoord){
   }
 }
 
+bool maybeProcessManipulator(objid selectedId, objid groupId){
+  std::cout << "item selected: ( " << selectedId << " - " << ")" << std::endl;
+  auto obj = getGameObject(world, selectedId);
+  auto objName = obj.name;
+  std::cout << "obj name: " << objName << std::endl;
+  if (objName == "manipulator/xaxis"){
+    state.manipulatorObject = XAXIS;
+  }else if (objName == "manipulator/yaxis"){
+    state.manipulatorObject = YAXIS;
+  }else if (objName == "manipulator/zaxis"){
+    state.manipulatorObject = ZAXIS;
+  }else{
+    state.manipulatorObject = NOAXIS;
+  }
+  applyPhysicsTranslation(world, groupId, obj.transformation.position, state.offsetX, state.offsetY, state.manipulatorObject);
+}
+
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 void selectItem(objid selectedId, Color pixelColor){
@@ -277,6 +295,8 @@ void selectItem(objid selectedId, Color pixelColor){
   applyPainting(selectedId);
 
   auto groupId = getGroupId(world.sandbox, selectedId);
+  maybeProcessManipulator(selectedId, groupId);
+
   auto selectedObject =  getGameObject(world, groupId);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
@@ -783,244 +803,6 @@ void genFramebufferTexture(unsigned int *texture){
 glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
-
-float cameraSpeed = 1.f;
-std::vector<InputDispatch> inputFns = {
-  InputDispatch{
-    .sourceKey = 71,  // G 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.manipulatorMode = TRANSLATE;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 82,  // R
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.manipulatorMode = ROTATE;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 83,  // S
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.manipulatorMode = SCALE;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 49,  // 1
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.renderMode =  RENDER_FINAL;
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 50,  // 2
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.renderMode = RENDER_DEPTH;
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 51,  // 3
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.renderMode = RENDER_PORTAL;
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 52,  // 4
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      state.renderMode = RENDER_PAINT;
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 67,  // 4
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      setClipboardFromSelected(state.editor);
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 86,  // 4
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      copyAllObjects(state.editor, copyObject);
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 340,  // 4
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      state.multiselect = true;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 340,  // 4
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      state.multiselect = false;
-    }
-  },  
-  InputDispatch{
-    .sourceKey = 87,  // w
-    .sourceType = BUTTON_HOLD,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      moveCamera(glm::vec3(0.0, 0.0, cameraSpeed * -40.0f * deltaTime));
-    }
-  },  
-  InputDispatch{
-    .sourceKey = 65,  // a
-    .sourceType = BUTTON_HOLD,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      moveCamera(glm::vec3(cameraSpeed * -40.0 * deltaTime, 0.0, 0.0));
-    }
-  },  
-  InputDispatch{
-    .sourceKey = 83,  // s
-    .sourceType = BUTTON_HOLD,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      moveCamera(glm::vec3(0.0, 0.0, cameraSpeed * 40.0f * deltaTime));
-    }
-  },  
-  InputDispatch{
-    .sourceKey = 68,  // d
-    .sourceType = BUTTON_HOLD,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      moveCamera(glm::vec3(cameraSpeed * 40.0f * deltaTime, 0.0, 0.0f));
-    }
-  },  
-  InputDispatch{
-    .sourceKey = 83,  // s
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      saveHeightmap(world, selected(state.editor));
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 65,  // a
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      std::cout << "setting snap absolute" << std::endl;
-      state.snappingMode = SNAP_ABSOLUTE;
-    }
-  },   
-  InputDispatch{
-    .sourceKey = 67,  // c
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      std::cout << "setting snap continuous" << std::endl;
-      state.snappingMode = SNAP_CONTINUOUS;
-    }
-  },   
-  InputDispatch{
-    .sourceKey = 82,  // r
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
-    .hasPreq = true,
-    .fn = [&state]() -> void {
-      std::cout << "setting snap relative" << std::endl;
-      state.snappingMode = SNAP_RELATIVE;
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 263,  // left arrow
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      for (auto id : selectedIds(state.editor)){
-        handleSnapEasyLeft(id);
-      }
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 262,  // right arrow
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&state]() -> void {
-      for (auto id : selectedIds(state.editor)){
-        handleSnapEasyRight(id);
-      }
-    }
-  }, 
-  InputDispatch{
-    .sourceKey = 340,  // shift
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 0.f;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 340,  // shift
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 1.f;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 341,  // ctrl
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 0.f;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 341,  // ctrl
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 1.f;
-    }
-  }
-};
-
-
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
