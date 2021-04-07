@@ -171,9 +171,6 @@ void handleInput(
   GLFWwindow *window, 
   float deltaTime, 
   engineState& state, 
-	void (*translate)(float, float, float), 
-  void (*scale)(float, float, float), 
-  void (*rotate)(float, float, float),
   void (*moveCamera)(glm::vec3), 
   void (*nextCamera)(void),
   void (*setObjectDimensions)(int32_t index, float width, float height, float depth),
@@ -185,7 +182,6 @@ void handleInput(
   void (*onJoystick)(std::vector<JoyStickInfo> infos)
 ){
   processControllerInput(remapper, moveCamera, deltaTime, onKeyChar, onJoystick);
-  processKeyBindings(window, remapper);
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
@@ -193,6 +189,7 @@ void handleInput(
   if (disableInput){    // we return after escape, so escape still quits
     return;
   }
+  processKeyBindings(window, remapper);
 
   if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS){
     state.enableDiffuse = !state.enableDiffuse;

@@ -374,34 +374,6 @@ void loadAllTextures(){
   }
 }
 
-
-void translate(float x, float y, float z){
-  for (auto id : selectedIds(state.editor)){
-    auto selected = id;
-    if (selected == -1 || !idExists(world.sandbox, selected)){
-      return;
-    }
-    physicsTranslate(world, selected, x, y, z, state.moveRelativeEnabled);
-  }
-}
-void scale(float x, float y, float z){
-  for (auto id : selectedIds(state.editor)){
-    auto selected = id;
-    if (selected == -1 || !idExists(world.sandbox, selected)){
-      return;
-    }
-    physicsScale(world, selected, x, y, z);
-  }  
-}
-void rotate(float x, float y, float z){
-  for (auto id : selectedIds(state.editor)){
-    auto selected = id;
-    if (selected == -1 || !idExists(world.sandbox, selected)){
-      return;
-    }
-    physicsRotate(world, selected, x, y, z);
-  }  
-}
 void setObjectDimensions(int32_t index, float width, float height, float depth){
   for (auto id : selectedIds(state.editor)){
     auto selected = id;
@@ -1382,7 +1354,7 @@ int main(int argc, char* argv[]){
     }
     renderUI(crosshairSprite, currentFramerate, pixelColor);
 
-    handleInput(keyMapper, disableInput, window, deltaTime, state, translate, scale, rotate, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete, keyCharCallback, onJoystick);
+    handleInput(keyMapper, disableInput, window, deltaTime, state, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete, keyCharCallback, onJoystick);
 
     glfwPollEvents();
     
