@@ -75,7 +75,10 @@ glm::vec3 snapVector(glm::vec3 current, Axis translationAxis, bool isUp, float s
     }else if (translationAxis == ZAXIS){
       return glm::vec3(current.x, current.y, (isUp ? 1 : -1) * snapAmount + current.z);
     }   
-  }else if (mode == SNAP_ABSOLUTE){
+  }else {
+    if (mode == SNAP_CONTINUOUS){
+      snapAmount = 0.1f;
+    }
     if (translationAxis == NOAXIS || translationAxis == XAXIS){
       float newX = getClosestPosition(current.x, snapAmount, isUp);    
       return glm::vec3(newX, current.y, current.z);
