@@ -786,6 +786,72 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
 
+std::vector<InputDispatch> inputFns = {
+  InputDispatch{
+    .sourceKey = 71,  // G 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 341,  // ctrl,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.manipulatorMode = TRANSLATE;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 82,  // R
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 341,  // ctrl,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.manipulatorMode = ROTATE;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 83,  // S
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 341,  // ctrl,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.manipulatorMode = SCALE;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 49,  // 1
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode =  RENDER_FINAL;
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 50,  // 2
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode = RENDER_DEPTH;
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 51,  // 3
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode = RENDER_PORTAL;
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 52,  // 4
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode = RENDER_PAINT;
+    }
+  }, 
+};
+
 
 int main(int argc, char* argv[]){
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
@@ -820,7 +886,7 @@ int main(int argc, char* argv[]){
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
-  keyMapper = readMapping(result["mapping"].as<std::string>());
+  keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;

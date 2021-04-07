@@ -133,6 +133,35 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
   //printAxisDebug(axises, count);
 }
 
+void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
+  std::map<int, bool> lastFrameDown = {};
+  for (auto inputFn : remapper.inputFns){
+    auto mainKeyPressed = glfwGetKey(window, inputFn.sourceKey);
+    lastFrameDown[inputFn.sourceKey] = mainKeyPressed;
+    auto prereqOk = true; 
+    if (inputFn.hasPreq){
+      auto prereqDown = glfwGetKey(window, inputFn.prereqKey);
+      lastFrameDown[inputFn.prereqKey] = prereqDown;
+      prereqOk = prereqDown;
+    }
+    if (prereqOk){
+      if (inputFn.sourceType == BUTTON_PRESS){
+        if (mainKeyPressed && !remapper.lastFrameDown[inputFn.sourceKey]){
+          inputFn.fn();
+        }
+      }else if (inputFn.sourceType == BUTTON_RELEASE){
+        if (!mainKeyPressed && remapper.lastFrameDown[inputFn.sourceKey]){
+          inputFn.fn();
+        }
+      }else if (inputFn.sourceType == BUTTON_HOLD){
+        if (mainKeyPressed){
+          inputFn.fn();
+        }
+      }
+    }
+  } 
+  remapper.lastFrameDown = lastFrameDown;
+}
 
 
 
@@ -156,6 +185,8 @@ void handleInput(
   void (*onJoystick)(std::vector<JoyStickInfo> infos)
 ){
   processControllerInput(remapper, moveCamera, deltaTime, onKeyChar, onJoystick);
+  processKeyBindings(window, remapper);
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
     glfwSetWindowShouldClose(window, true);
   }
@@ -229,15 +260,7 @@ void handleInput(
     state.mode = 2;
   }
 
-  if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS){
-    state.manipulatorMode = TRANSLATE;
-  }
-  if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS){
-    state.manipulatorMode = SCALE;
-  }
-  if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
-    state.manipulatorMode = ROTATE;
-  }
+
   if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS){
     state.offsetTextureMode = !state.offsetTextureMode;
     std::cout << "offset texture mode: " << state.offsetTextureMode << std::endl;

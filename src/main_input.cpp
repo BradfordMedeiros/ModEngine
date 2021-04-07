@@ -277,38 +277,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     state.recordingIndex = -1;
   }
 
-  if (key == 91 && action == 1){  // [
-    if (state.renderMode == RENDER_FINAL){
-      state.renderMode = RENDER_DEPTH;
-      std::cout << "RENDER MODE: depth" << std::endl;
-    }else if (state.renderMode == RENDER_PORTAL){
-      state.renderMode =  RENDER_FINAL;
-      std::cout << "RENDER MODE: final" << std::endl;
-    }else if (state.renderMode == RENDER_PAINT){
-      state.renderMode = RENDER_PORTAL;
-      std::cout << "RENDER MODE: portal" << std::endl;
-    }else if (state.renderMode == RENDER_DEPTH){
-      state.renderMode = RENDER_PAINT;
-      std::cout << "RENDER MODE: paint" << std::endl;
-    }
-  }
-  if (key == 93 && action == 1){  // [
-    if (state.renderMode == RENDER_FINAL){
-      state.renderMode = RENDER_PORTAL;
-      std::cout << "RENDER MODE: portal" << std::endl;
-    }else if (state.renderMode == RENDER_PORTAL){
-      state.renderMode =  RENDER_PAINT;
-      std::cout << "RENDER MODE: paint" << std::endl;
-    }else if (state.renderMode == RENDER_PAINT){
-      state.renderMode = RENDER_DEPTH;
-      std::cout << "RENDER MODE: depth" << std::endl;
-    }else if (state.renderMode == RENDER_DEPTH){
-      state.renderMode = RENDER_FINAL;
-      std::cout << "RENDER MODE: final" << std::endl;
-    }
-  }
-
-
   auto controlPressed = ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS   ) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
   if (controlPressed && key == 67 && action == 1){   // C
     setClipboardFromSelected(state.editor);
