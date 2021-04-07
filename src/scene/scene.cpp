@@ -623,7 +623,7 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
 
 void copyObjectToScene(World& world, objid id, SysInterface interface){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
-  auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy");
+  auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
   std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
   addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false, interface);
