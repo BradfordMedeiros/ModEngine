@@ -209,10 +209,6 @@ void handleInput(
     nextCamera();
   }
    
-  if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
-    state.showCameras = !state.showCameras;
-    std::cout << "show cameras: " << state.showCameras << std::endl;
-  }
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
     //onDebugKey();
   }
@@ -233,9 +229,6 @@ void handleInput(
     state.offsetTextureMode = !state.offsetTextureMode;
     std::cout << "offset texture mode: " << state.offsetTextureMode << std::endl;
   } 
-  if (glfwGetKey(window, GLFW_KEY_9) == GLFW_PRESS){
-    state.showCameras = false; // turn this off so light isn't trapped in the box 
-  }
   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
     state.manipulatorAxis = XAXIS;
   }

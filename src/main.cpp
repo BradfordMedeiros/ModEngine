@@ -1457,7 +1457,6 @@ int main(int argc, char* argv[]){
   })
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
-  //std::cout << std::endl << dumpLogInfo() << std::endl;
 
   cleanup:   
     deinitPhysics(world.physicsEnvironment); 

@@ -567,6 +567,18 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       onDelete();
     }
+  },
+  InputDispatch{
+    .sourceKey = 79,  // O
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.showCameras = !state.showCameras;
+      std::cout << "show cameras: " << state.showCameras << std::endl;
+    }
   }
 };
 
+
+ 
