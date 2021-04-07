@@ -784,6 +784,7 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
 
+float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
   InputDispatch{
     .sourceKey = 71,  // G 
@@ -890,7 +891,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
-      moveCamera(glm::vec3(0.0, 0.0, -40.0f * deltaTime));
+      moveCamera(glm::vec3(0.0, 0.0, cameraSpeed * -40.0f * deltaTime));
     }
   },  
   InputDispatch{
@@ -899,7 +900,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
-      moveCamera(glm::vec3(-40.0 * deltaTime, 0.0, 0.0));
+      moveCamera(glm::vec3(cameraSpeed * -40.0 * deltaTime, 0.0, 0.0));
     }
   },  
   InputDispatch{
@@ -908,7 +909,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
-      moveCamera(glm::vec3(0.0, 0.0, 40.0f * deltaTime));
+      moveCamera(glm::vec3(0.0, 0.0, cameraSpeed * 40.0f * deltaTime));
     }
   },  
   InputDispatch{
@@ -917,7 +918,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
-      moveCamera(glm::vec3(40.0f * deltaTime, 0.0, 0.0f));
+      moveCamera(glm::vec3(cameraSpeed * 40.0f * deltaTime, 0.0, 0.0f));
     }
   },  
   InputDispatch{
@@ -981,6 +982,42 @@ std::vector<InputDispatch> inputFns = {
       }
     }
   }, 
+  InputDispatch{
+    .sourceKey = 340,  // shift
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&cameraSpeed]() -> void {
+      cameraSpeed = 0.f;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 340,  // shift
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&cameraSpeed]() -> void {
+      cameraSpeed = 1.f;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 341,  // ctrl
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&cameraSpeed]() -> void {
+      cameraSpeed = 0.f;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 341,  // ctrl
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&cameraSpeed]() -> void {
+      cameraSpeed = 1.f;
+    }
+  }
 };
 
 
