@@ -4,9 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
-#include "./common/util.h"
-
-/* enum SNAPPING_MODE { SNAP_CONTINUOUS, SNAP_ABSOLUTE, SNAP_RELATIVE }; */
+#include "../common/util.h"
 
 void setSnapAngleUp();
 void setSnapAngleDown();

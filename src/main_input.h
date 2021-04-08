@@ -8,10 +8,10 @@
 #include "./scheme/scriptmanager.h"
 #include "./main_api.h"
 #include "./input.h"
-#include "./easy_use.h"
+#include "./easyuse/easy_use.h"
+#include "./easyuse/editor.h"
 #include "./gizmo/keymapper.h"
 #include "./drawing.h"
-#include "./editor.h"
 #include "./colorselection.h"
 
 std::string activeTextureName(std::map<std::string, Texture> worldTextures);

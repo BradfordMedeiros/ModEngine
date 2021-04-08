@@ -4,8 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
-#include "./common/util.h"
-#include "./scene/common/util/types.h"
+#include "../common/util.h"
 
 struct EditorItem {
   objid id;

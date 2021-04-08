@@ -46,7 +46,7 @@
 #include "./gizmo/keymapper.h"
 #include "./common/sysinterface.h"
 #include "./drawing.h"
-#include "./editor.h"
+#include "./easyuse/editor.h"
 #include "./mocap.h"
 #include "./common/profiling.h"
 
@@ -260,10 +260,35 @@ void handleTerrainPainting(UVCoord uvCoord){
   }
 }
 
+
+auto manipulatorId = 0;
+auto manipulatorTarget = 0;
+void unspawnManipulator(){
+  std::cout << "unspawn manipulator called" << std::endl;
+  if (manipulatorId != 0){
+    removeObjectById(manipulatorId);
+  }
+  manipulatorId = 0;
+}
+void spawnManipulator(objid target){
+  // update the position of the manipulator to the targets location
+  std::cout << "spawn manipulator called" << std::endl;
+  unspawnManipulator();
+  auto position = getGameObject(world, target).transformation.position;
+  manipulatorId = makeObjectAttr(
+    "manipulator", 
+    {{ "mesh", "./res/models/ui/manipulator.fbx" }, {"texture", "./res/textures/bluetransparent.png" }}, 
+    {}, 
+    {{ "position", position }}
+  );  // todo make sure this is made in scene 0
+  manipulatorTarget = target;
+}
+
 bool maybeProcessManipulator(objid selectedId, objid groupId){
   std::cout << "item selected: ( " << selectedId << " - " << ")" << std::endl;
   auto obj = getGameObject(world, selectedId);
   auto objName = obj.name;
+
   std::cout << "obj name: " << objName << std::endl;
   if (objName == "manipulator/xaxis"){
     state.manipulatorObject = XAXIS;
@@ -273,15 +298,25 @@ bool maybeProcessManipulator(objid selectedId, objid groupId){
     state.manipulatorObject = ZAXIS;
   }else{
     state.manipulatorObject = NOAXIS;
+    spawnManipulator(groupId);
     return false;
   }
-  applyPhysicsTranslation(world, groupId, obj.transformation.position, state.offsetX, state.offsetY, state.manipulatorObject);
   return true;
+}
+void updateManipulator(){
+  if (state.manipulatorObject != NOAXIS && manipulatorTarget != 0){
+    GameObject& targetObj = getGameObject(world, manipulatorTarget);
+    auto obj = getGameObject(world, manipulatorId);
+    applyPhysicsTranslation(world, manipulatorId, obj.transformation.position, state.offsetX * 0.01, state.offsetY * 0.01, state.manipulatorObject);
+    physicsTranslateSet(world, targetObj.id, obj.transformation.position);
+    std::cout << "dragging the object" << std::endl;
+  }
 }
 
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 void selectItem(objid selectedId, Color pixelColor){
+  std::cout << "SELECT ITEM CALLED!" << std::endl;
   if (!showDebugInfo){
     return;
   }
@@ -1273,6 +1308,7 @@ int main(int argc, char* argv[]){
         uvCoord.y
       );
     }
+    updateManipulator();
     handlePainting(uvCoord);
     handleTerrainPainting(uvCoord);
      

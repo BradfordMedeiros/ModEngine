@@ -4,7 +4,7 @@
 #include <string>
 #include "./scene/scene_sandbox.h"
 #include "./common/util.h"
-#include "./editor.h"
+#include "./easyuse/editor.h"
 
 enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH };
 
