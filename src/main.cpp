@@ -47,6 +47,7 @@
 #include "./common/sysinterface.h"
 #include "./drawing.h"
 #include "./easyuse/editor.h"
+#include "./easyuse/manipulator.h"
 #include "./mocap.h"
 #include "./common/profiling.h"
 
@@ -260,57 +261,8 @@ void handleTerrainPainting(UVCoord uvCoord){
   }
 }
 
-
-auto manipulatorId = 0;
-auto manipulatorTarget = 0;
-void unspawnManipulator(){
-  std::cout << "unspawn manipulator called" << std::endl;
-  if (manipulatorId != 0){
-    removeObjectById(manipulatorId);
-  }
-  manipulatorId = 0;
-}
-void spawnManipulator(objid target){
-  // update the position of the manipulator to the targets location
-  std::cout << "spawn manipulator called" << std::endl;
-  unspawnManipulator();
-  auto position = getGameObject(world, target).transformation.position;
-  manipulatorId = makeObjectAttr(
-    "manipulator", 
-    {{ "mesh", "./res/models/ui/manipulator.fbx" }, {"texture", "./res/textures/bluetransparent.png" }}, 
-    {}, 
-    {{ "position", position }}
-  );  // todo make sure this is made in scene 0
-  manipulatorTarget = target;
-}
-
-bool maybeProcessManipulator(objid selectedId, objid groupId){
-  std::cout << "item selected: ( " << selectedId << " - " << ")" << std::endl;
-  auto obj = getGameObject(world, selectedId);
-  auto objName = obj.name;
-
-  std::cout << "obj name: " << objName << std::endl;
-  if (objName == "manipulator/xaxis"){
-    state.manipulatorObject = XAXIS;
-  }else if (objName == "manipulator/yaxis"){
-    state.manipulatorObject = YAXIS;
-  }else if (objName == "manipulator/zaxis"){
-    state.manipulatorObject = ZAXIS;
-  }else{
-    state.manipulatorObject = NOAXIS;
-    spawnManipulator(groupId);
-    return false;
-  }
-  return true;
-}
-void updateManipulator(){
-  if (state.manipulatorObject != NOAXIS && manipulatorTarget != 0){
-    GameObject& targetObj = getGameObject(world, manipulatorTarget);
-    auto obj = getGameObject(world, manipulatorId);
-    applyPhysicsTranslation(world, manipulatorId, obj.transformation.position, state.offsetX * 0.01, state.offsetY * 0.01, state.manipulatorObject);
-    physicsTranslateSet(world, targetObj.id, obj.transformation.position);
-    std::cout << "dragging the object" << std::endl;
-  }
+GameObject& getGameObj(objid id){
+  return getGameObject(world, id);
 }
 
 bool selectItemCalled = false;
@@ -324,12 +276,28 @@ void selectItem(objid selectedId, Color pixelColor){
   applyPainting(selectedId);
 
   auto groupId = getGroupId(world.sandbox, selectedId);
-  maybeProcessManipulator(selectedId, groupId);
 
+  auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, groupId);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
   shouldCallItemSelected = true;
+  onManipulatorSelectItem(
+    groupId, 
+    selectedSubObj.name,
+    []() -> objid {
+      return makeObjectAttr(
+        "manipulator", 
+        {{ "mesh", "./res/models/ui/manipulator.fbx" }, {"texture", "./res/textures/bluetransparent.png" }}, 
+        {}, 
+        {{ "position", glm::vec3(0.f, 0.f, 0.f) }}
+      );
+    },
+    [](objid id) -> void {
+      removeObjectById(id);
+    },
+    getGameObj
+  );
 
   setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
@@ -389,6 +357,9 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
+    onManipulatorMouseRelease(getGameObj);
   }
 
   schemeBindings.onMouseCallback(button, action, mods);
@@ -1308,7 +1279,7 @@ int main(int argc, char* argv[]){
         uvCoord.y
       );
     }
-    updateManipulator();
+    onManipulatorUpdate(getGameObj, state.offsetX, state.offsetY);
     handlePainting(uvCoord);
     handleTerrainPainting(uvCoord);
      
