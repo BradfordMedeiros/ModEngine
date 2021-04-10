@@ -17,7 +17,8 @@ void onManipulatorSelectItem(
   std::string selectedItemName,
   std::function<objid(void)> makeManipulator,
   std::function<void(objid)> removeObjectById,
-  std::function<GameObject&(objid)> getGameObject
+  std::function<glm::vec3(objid)> getPosition,
+  std::function<void(objid, glm::vec3)> setPosition
 ){
   auto isTargetManipulator =  selectedItem == manipulatorId;
   auto manipulatorExists = manipulatorId != 0;
@@ -26,8 +27,13 @@ void onManipulatorSelectItem(
     if (!manipulatorExists){
       manipulatorId = makeManipulator();
     }
-    manipulatorTarget = selectedItem;
-    getGameObject(manipulatorId).transformation.position = getGameObject(manipulatorTarget).transformation.position;
+    if (manipulatorTarget == selectedItem){
+      unspawnManipulator(removeObjectById);
+      manipulatorTarget = 0;
+    }else{
+      manipulatorTarget = selectedItem;
+      setPosition(manipulatorId, getPosition(manipulatorTarget));
+    }
   }else{
     std::cout << "item name is: " << selectedItemName << std::endl;
     if (selectedItemName == "manipulator/xaxis"){
@@ -42,29 +48,51 @@ void onManipulatorSelectItem(
     }
   }
 }
-void onManipulatorMouseRelease(std::function<GameObject&(objid)> getGameObject){
+void onManipulatorMouseRelease(){
   manipulatorObject = NOAXIS;
   std::cout << "manipulator release!" << std::endl;
 }
 
-void onManipulatorUpdate(std::function<GameObject&(objid)> getGameObject, float mouseX, float mouseY){
+void onManipulatorUpdate(
+  std::function<glm::vec3(objid)> getPosition, 
+  std::function<void(objid, glm::vec3)> setPosition, 
+  glm::mat4 cameraViewMatrix, 
+  ManipulatorMode mode,
+  float mouseX, 
+  float mouseY
+){
+  if (mouseX < 10 && mouseX > -10.f){
+    mouseX = 0.f;
+  }
+  if (mouseY < 10 && mouseY > -10.f){
+    mouseY = 0.f;
+  }
+
+  glm::vec4 moveVector = cameraViewMatrix * glm::vec4(mouseX, mouseY, 0, 0.f);
+  glm::vec3 vecc = glm::vec3(moveVector.x, moveVector.y, moveVector.z);
+  auto xVector = glm::dot(vecc, glm::vec3(1.f, 0.f, 0.f));
+  auto yVector = glm::dot(vecc, glm::vec3(0.f, 1.f, 0.f));
+  auto zVector = glm::dot(vecc, glm::vec3(0.f, 0.f, -1.f));
+  auto moveVec = glm::vec3(xVector, yVector, zVector);
+
   if (manipulatorId != 0 && manipulatorTarget != 0){
-    GameObject& target = getGameObject(manipulatorTarget);
-    GameObject& manipulator = getGameObject(manipulatorId);
+    auto targetPosition = getPosition(manipulatorTarget);
+    auto manipulatorPosition = getPosition(manipulatorId);
     if (manipulatorObject == XAXIS){
       std::cout << "manipulator x axis" << std::endl;
-      auto position = manipulator.transformation.position + glm::vec3(mouseX * 0.01f, 0.f, 0.f);
-      manipulator.transformation.position = position;
-      target.transformation.position = position;
+      auto position = manipulatorPosition + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
+      setPosition(manipulatorTarget, position);
+      setPosition(manipulatorId, position);
     }else if (manipulatorObject == YAXIS){
       std::cout << "manipulator y axis" << std::endl;
-      auto position = manipulator.transformation.position + glm::vec3(0.f, mouseY * -0.01f, 0.f);
-      manipulator.transformation.position = position;
-      target.transformation.position = position;
+      auto position = manipulatorPosition + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
+      setPosition(manipulatorTarget, position);
+      setPosition(manipulatorId, position);
     }else if (manipulatorObject == ZAXIS){
       std::cout << "manipulator z axis" << std::endl;
-      auto position = manipulator.transformation.position + glm::vec3(0.f, 0.0f, mouseX * 0.01f);
-      manipulator.transformation.position = position;
-      target.transformation.position = position;
+      auto position = manipulatorPosition + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
+      setPosition(manipulatorTarget, position);
+      setPosition(manipulatorId, position);
     }
   }
+}

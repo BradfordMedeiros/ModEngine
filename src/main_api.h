@@ -92,6 +92,7 @@ std::map<std::string, std::string> getGameObjectAttr(int32_t id);
 void setGameObjectAttr(int32_t id, std::map<std::string, std::string> attr);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
+glm::vec3 getGameObjectPos(int32_t index);
 void setGameObjectPosition(int32_t index, glm::vec3 pos);
 void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly);
 

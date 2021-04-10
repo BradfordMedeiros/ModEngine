@@ -136,6 +136,9 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
   }
   return getGameObject(world, index).transformation.position;
 }
+glm::vec3 getGameObjectPos(int32_t index){
+  return getGameObjectPosition(index, true);
+}
 void setGameObjectPosition(int32_t index, glm::vec3 pos){
   physicsTranslateSet(world, index, pos);
 }

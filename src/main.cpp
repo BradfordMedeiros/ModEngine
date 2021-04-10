@@ -261,10 +261,6 @@ void handleTerrainPainting(UVCoord uvCoord){
   }
 }
 
-GameObject& getGameObj(objid id){
-  return getGameObject(world, id);
-}
-
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 void selectItem(objid selectedId, Color pixelColor){
@@ -296,7 +292,8 @@ void selectItem(objid selectedId, Color pixelColor){
     [](objid id) -> void {
       removeObjectById(id);
     },
-    getGameObj
+    getGameObjectPos,
+    setGameObjectPosition
   );
 
   setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
@@ -359,7 +356,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
     selectItemCalled = true;
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
-    onManipulatorMouseRelease(getGameObj);
+    onManipulatorMouseRelease();
   }
 
   schemeBindings.onMouseCallback(button, action, mods);
@@ -1279,7 +1276,14 @@ int main(int argc, char* argv[]){
         uvCoord.y
       );
     }
-    onManipulatorUpdate(getGameObj, state.offsetX, state.offsetY);
+    onManipulatorUpdate(
+      getGameObjectPos, 
+      setGameObjectPosition, 
+      view, 
+      state.manipulatorMode, 
+      state.offsetX, 
+      state.offsetY
+    );
     handlePainting(uvCoord);
     handleTerrainPainting(uvCoord);
      
