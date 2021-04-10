@@ -48,7 +48,6 @@
 #include "./drawing.h"
 #include "./easyuse/editor.h"
 #include "./easyuse/manipulator.h"
-#include "./mocap.h"
 #include "./common/profiling.h"
 
 unsigned int framebufferProgram;
