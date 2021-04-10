@@ -1279,6 +1279,8 @@ int main(int argc, char* argv[]){
     onManipulatorUpdate(
       getGameObjectPos, 
       setGameObjectPosition, 
+      getGameObjectScale,
+      setGameObjectScale,
       view, 
       state.manipulatorMode, 
       state.offsetX, 
