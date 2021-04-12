@@ -4,15 +4,15 @@ GameObject& getGameObject(World& world, objid id){
   return getGameObject(world.sandbox, id);
 }
 
-std::optional<objid> getGameObjectByName(World& world, std::string name){
-  auto obj = maybeGetGameObjectByName(world.sandbox, name);
+std::optional<objid> getGameObjectByName(World& world, std::string name, objid sceneId){
+  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId);
   if (obj.has_value()){
     return obj.value() -> id;
   }
   return std::nullopt;
 }
-GameObject& getGameObject(World& world, std::string name){
-  auto obj = maybeGetGameObjectByName(world.sandbox, name);
+GameObject& getGameObject(World& world, std::string name, objid sceneId){
+  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId);
   if (obj.has_value()){
     return *obj.value();
   }
@@ -408,7 +408,7 @@ void addObjectToWorld(
   std::map<std::string, std::string> additionalFields,
   std::map<objid, std::vector<glm::vec3>>& idToModelVertexs
 ){
-    auto id = getIdForName(world.sandbox, name);
+    auto id = getIdForName(world.sandbox, name, sceneId);
 
     addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
       [&world, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
@@ -566,7 +566,7 @@ objid addSerialObject(
 
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap);
 
-  return getIdForName(world.sandbox, name);
+  return getIdForName(world.sandbox, name, sceneId);
 }
 
 objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface){
@@ -861,9 +861,10 @@ void enforceLookAt(World& world){
     if (lookAt == "" || lookAt == gameobj.name){
       return;
     }
-    if(idExists(world.sandbox, lookAt)){
+    auto sceneId = getGameObjectH(world.sandbox, id).sceneId;
+    if(idExists(world.sandbox, lookAt, sceneId)){
       glm::vec3 fromPos = gameobj.transformation.position;
-      glm::vec3 targetPosition = getGameObject(world.sandbox, lookAt).transformation.position;
+      glm::vec3 targetPosition = getGameObject(world.sandbox, lookAt, sceneId).transformation.position;
       physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
     }
   });  
@@ -895,7 +896,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       attributes.vecAttributes["position"] = fullTransformation(world.sandbox, emitterNodeId).position;
       objid objectAdded = addObjectToScene(
-        world, getGameObjectH(world.sandbox, name).sceneId, getUniqueObjectName(), attributes, interface
+        world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
       );
       return objectAdded;
     }, 

@@ -238,16 +238,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     std::cout << "toggling terrain paint direction: " << state.terrainPaintDown << std::endl;
   }
 
-  if (key == GLFW_KEY_T && action == 1){
-    for (auto id : selectedIds(state.editor)){
-      // can have multiple objects w/ same group id, just waste
-      auto groupId = getGroupId(world.sandbox, id);
-      auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      updateBonePoses(meshNameToMeshes, getModelTransform);
-    }
-  }
-
-  if (key == GLFW_KEY_N && action == 1){
+  /*if (key == GLFW_KEY_N && action == 1){
     return;
     assert(!state.isRecording);
     auto gameobj = getGameObjectByName(world, "record");
@@ -256,8 +247,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
       state.isRecording = true;
       state.recordingIndex = createRecording(gameobj.value());
     }
+  } */
 
-  } 
   if (key == GLFW_KEY_M && action == 1){
     return;
     assert(state.isRecording);

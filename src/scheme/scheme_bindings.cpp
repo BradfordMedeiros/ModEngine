@@ -408,9 +408,11 @@ SCM getGameObjectId(SCM value){
   return scm_from_int32(getGameobjId(value));
 }
 
-std::optional<objid> (*_getGameObjectByName)(std::string name);
+std::optional<objid> (*_getGameObjectByName)(std::string name, objid sceneId);
 SCM getGameObjByName(SCM value){
-  auto id = _getGameObjectByName(scm_to_locale_string(value));
+  auto sceneId = 0;
+  assert(false); // need a way to get the scene id here!
+  auto id = _getGameObjectByName(scm_to_locale_string(value), sceneId);
   if (!id.has_value()){
     return scm_from_bool(false);
   }
@@ -426,9 +428,11 @@ SCM scmListClips(){
   }
   return list;
 }
-void (*_playClip)(std::string);
+void (*_playClip)(std::string, objid);
 SCM scmPlayClip(SCM soundname){
-  _playClip(scm_to_locale_string(soundname));
+  auto sceneId = 0;
+  assert(false);
+  _playClip(scm_to_locale_string(soundname), sceneId);
   return SCM_UNSPECIFIED;
 }
 
@@ -1111,7 +1115,7 @@ void createStaticSchemeBindings(
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
-  std::optional<objid> (*getGameObjectByName)(std::string name),
+  std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
@@ -1119,7 +1123,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listAnimations)(int32_t id),
   void playAnimation(int32_t id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
-  void (*playClip)(std::string),
+  void (*playClip)(std::string, objid),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string topic, std::string value),

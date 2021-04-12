@@ -23,7 +23,7 @@ std::vector<LightInfo> getLightInfo(World& world){
 PortalInfo getPortalInfo(World& world, objid id){
   auto objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
-  auto transform = getGameObject(world, portalObject -> camera).transformation;
+  auto transform = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).transformation;
   auto portalGameObject = getGameObject(world, id);
 
   PortalInfo info {

@@ -28,8 +28,8 @@ NetworkPacket toNetworkPacket(UdpPacket& packet){
   return netpacket;
 }
 
-std::optional<objid> getGameObjectByName(std::string name){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
-  return getGameObjectByName(world, name);
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
+  return getGameObjectByName(world, name, sceneId);
 }
 
 void applyImpulse(int32_t index, glm::vec3 impulse){
@@ -216,26 +216,24 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
   return  noAnimation;  // @todo probably use optional here.
 }
 
-glm::mat4 getModelTransform(std::string name, std::string skeletonRoot){
-  auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
-  if (gameobj.has_value()){
-    return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot);
-  }
-  std::cout << "no value: " << name << std::endl;
-  assert(false);
-  return glm::mat4(1.f);  
-}
-
-void addAnimation(AnimationState& animationState, int32_t groupId, std::string animationToPlay){
+void addAnimation(AnimationState& animationState, int32_t groupId, objid sceneId, std::string animationToPlay){
   auto animation = getAnimation(world, groupId, animationToPlay);
   TimePlayback playback(
     initialTime, 
-    [animation, groupId](float currentTime, float elapsedTime) -> void { 
+    [animation, groupId, sceneId](float currentTime, float elapsedTime) -> void { 
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
       playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime,
-        getModelTransform,
-        [&world](std::string name, glm::mat4 pose) -> void {
-          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name);
+        [sceneId](std::string name, std::string skeletonRoot) -> glm::mat4 {
+          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, sceneId);
+          if (gameobj.has_value()){
+            return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot, sceneId);
+          }
+          std::cout << "no value: " << name << std::endl;
+          assert(false);
+          return glm::mat4(1.f);  
+        },
+        [&world, sceneId](std::string name, glm::mat4 pose) -> void {
+          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, sceneId);
           if (gameobj.has_value()){
             gameobj.value() -> transformation = getTransformationFromMatrix(pose);
           }else{
@@ -255,10 +253,11 @@ void addAnimation(AnimationState& animationState, int32_t groupId, std::string a
 
 void playAnimation(int32_t id, std::string animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);
+  auto idForScene = sceneId(world.sandbox, id);
   if (animations.playbacks.find(groupId) != animations.playbacks.end()){
     animations.playbacks.erase(groupId);
   }
-  addAnimation(animations, groupId, animationToPlay);
+  addAnimation(animations, groupId, idForScene, animationToPlay);
 }
 
 void stopAnimation(int32_t id){
@@ -502,8 +501,8 @@ void setActiveCamera(int32_t cameraId){
   activeCameraObj = &getGameObject(world, cameraId);
   setSelectedIndex(state.editor, cameraId, activeCameraObj -> name, true);
 }
-void setActiveCamera(std::string name){
-  auto object = getGameObjectByName(name);
+void setActiveCamera(std::string name, objid sceneId){
+  auto object = getGameObjectByName(name, sceneId);
   if (!object.has_value()){
     std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
     assert(false);
@@ -537,8 +536,8 @@ void rotateCamera(float xoffset, float yoffset){
   }
 }
 
-void playSoundState(std::string source){
-  auto gameobj = getGameObjectByName(world, source);
+void playSoundState(std::string source, objid sceneId){
+  auto gameobj = getGameObjectByName(world, source, sceneId);
   if (gameobj.has_value()){
     playSoundState(world.objectMapping, gameobj.value()); 
   }

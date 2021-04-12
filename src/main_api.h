@@ -63,7 +63,7 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 // Should trim down when it becomes clear what the core api should.
 
 void setActiveCamera(int32_t cameraId);
-void setActiveCamera(std::string name);
+void setActiveCamera(std::string name, objid sceneId);
 void nextCamera();
 void moveCamera(glm::vec3 offset);  
 void rotateCamera(float xoffset, float yoffset);
@@ -85,7 +85,7 @@ void sendLoadScene(int32_t sceneId);
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
-std::optional<objid> getGameObjectByName(std::string name);
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 std::vector<int32_t> getObjectsByType(std::string type);
 std::string getGameObjectName(int32_t index);
 std::map<std::string, std::string> getGameObjectAttr(int32_t id);
@@ -153,7 +153,7 @@ void setIntState(std::string stateName, int value);
 
 void copyStr(std::string& data, char* copyTo, int size);
 
-void playSoundState(std::string source);
+void playSoundState(std::string source, objid sceneId);
 
 unsigned int activeTextureId();
 
@@ -162,8 +162,6 @@ struct VoxelQueryData {
   GameObjectVoxel* voxelPtr;
 };
 std::vector<VoxelQueryData> getSelectedVoxels();
-
-glm::mat4 getModelTransform(std::string name, std::string skeletonBase);
 
 void scmEmit(objid id);
 
