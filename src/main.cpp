@@ -49,6 +49,7 @@
 #include "./easyuse/editor.h"
 #include "./easyuse/manipulator.h"
 #include "./common/profiling.h"
+#include "./benchmark.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -129,6 +130,7 @@ const int numDepthTextures = 32;
 int activeDepthTexture = 0;
 
 DrawingParams drawParams = getDefaultDrawingParams();
+Benchmark benchmark = createBenchmark(false);
 
 void updateDepthTexturesSize(){
   for (int i = 0; i < numDepthTextures; i++){
@@ -791,6 +793,7 @@ int main(int argc, char* argv[]){
    ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
+   ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -817,6 +820,10 @@ int main(int argc, char* argv[]){
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
   
+  auto benchmarkFile = result["benchmark"].as<std::string>();
+  auto shouldBenchmark = benchmarkFile != "";
+  benchmark = createBenchmark(shouldBenchmark);
+
   std::cout << "LIFECYCLE: program starting" << std::endl;
   disableInput = result["noinput"].as<bool>();
 
@@ -1158,6 +1165,8 @@ int main(int argc, char* argv[]){
     now = glfwGetTime();
     deltaTime = now - previous;   
     previous = now;
+    logBenchmarkTick(benchmark, deltaTime);
+
     timePlayback.setElapsedTime(deltaTime);
 
     if (frameCount == 60){
@@ -1444,6 +1453,10 @@ int main(int argc, char* argv[]){
   })
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
+
+  if (shouldBenchmark){
+    saveFile(benchmarkFile, benchmarkResult(benchmark));
+  }
 
   cleanup:   
     deinitPhysics(world.physicsEnvironment); 
