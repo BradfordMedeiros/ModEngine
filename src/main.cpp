@@ -930,6 +930,7 @@ int main(int argc, char* argv[]){
   Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
  
   createStaticSchemeBindings(
+    listSceneId,
     loadScene,
     unloadScene,
     unloadAllScenes,
@@ -1120,7 +1121,9 @@ int main(int argc, char* argv[]){
 
   auto defaultCameraName = result["camera"].as<std::string>();
   if (defaultCameraName != ""){
-    setActiveCamera(defaultCameraName);
+    auto ids =  getByName(world.sandbox, defaultCameraName);
+    auto sceneForId = sceneId(world.sandbox, ids.at(0));
+    setActiveCamera(defaultCameraName, sceneForId);
   }
 
   glfwSetCursorPosCallback(window, onMouseEvents); 

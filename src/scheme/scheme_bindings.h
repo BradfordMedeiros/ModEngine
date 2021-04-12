@@ -14,6 +14,7 @@
 #include "./scriptmanager.h"    // need to eliminate the circular relationship here
 
 void createStaticSchemeBindings(
+  int32_t (*listSceneId)(int32_t objid),
   int32_t (*loadScene)(std::string),
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
@@ -37,7 +38,7 @@ void createStaticSchemeBindings(
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
-  std::optional<objid> (*getGameObjectByName)(std::string name),
+  std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
   void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
@@ -45,7 +46,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listAnimations)(int32_t id),
   void playAnimation(int32_t id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
-  void (*playClip)(std::string),
+  void (*playClip)(std::string, objid sceneId),
   std::vector<std::string> (*listModels)(),
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message, std::string value),
