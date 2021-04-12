@@ -24,6 +24,7 @@ struct Mesh {
   long unsigned int numElements;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
+  int numTriangles;
 };
 
 struct NameAndMesh {

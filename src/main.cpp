@@ -83,6 +83,7 @@ SysInterface interface;
 std::string textureFolderPath;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
+int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 
 AnimationState animations;
 
@@ -480,11 +481,13 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
+int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
 
-  traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, bool ignoreDepthBuffer, std::string shader) -> void {
+  int numTriangles = 0;
+
+  traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview, &numTriangles](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, bool ignoreDepthBuffer, std::string shader) -> void {
     assert(id >= 0);
     addPositionToRender(modelMatrix, parentModelMatrix);
 
@@ -536,7 +539,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
     bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
 
-    renderObject(
+    auto trianglesDrawn = renderObject(
       newShader, 
       id, 
       world.objectMapping, 
@@ -550,6 +553,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
       (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
       modelMatrix
     );
+    numTriangles = numTriangles + trianglesDrawn;
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     if (isPortal && portalTextureInCache && isPerspectivePortal){
@@ -567,8 +571,7 @@ void renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::m
     glClear(GL_STENCIL_BUFFER_BIT);
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
-  
-
+  return numTriangles;
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
@@ -666,6 +669,9 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 170, 3);
   drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 180, 3);
   drawText("using object id: -1" , 40, 190, 3);
+
+  drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
+
 }
 
 Properties getProperties(World& world, objid id){
@@ -1353,7 +1359,7 @@ int main(int argc, char* argv[]){
       glClearColor(0.0, 0.0, 0.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
-      renderWorld(world, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      numTriangles = renderWorld(world, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     )
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);

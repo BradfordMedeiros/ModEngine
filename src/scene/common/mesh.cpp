@@ -9,6 +9,9 @@ void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm:
 // Generating the VAO per model is probaby not the most efficient, but figure that this is 
 // a clean abstraction, and we can optimize this fucker after we get more features in it.
 Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Texture(std::string)> ensureLoadTexture){
+  assert((meshData.indices.size() % 3) == 0);
+  auto numTriangles = meshData.indices.size() / 3;
+
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO); 
@@ -83,6 +86,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
+    .numTriangles = numTriangles,
   }; 
 
   return mesh; 

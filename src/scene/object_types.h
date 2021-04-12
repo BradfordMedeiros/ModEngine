@@ -270,7 +270,7 @@ void removeObject(
   std::function<void()> rmEmitter
 );
 
-void renderObject(
+int renderObject(
   GLint shaderProgram, 
   objid id, 
   std::map<objid, GameObjectObj>& mapping,
