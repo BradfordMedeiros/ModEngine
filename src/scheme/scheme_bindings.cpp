@@ -80,6 +80,8 @@ SCM vec3ToScmList(glm::vec3 vec){
   return list;
 }
 
+int32_t (*_listSceneId)(int32_t objid);
+
 // Main Api
 int32_t (*_loadScene)(std::string);
 SCM scm_loadScene(SCM value){
@@ -410,8 +412,7 @@ SCM getGameObjectId(SCM value){
 
 std::optional<objid> (*_getGameObjectByName)(std::string name, objid sceneId);
 SCM getGameObjByName(SCM value){
-  auto sceneId = 0;
-  assert(false); // need a way to get the scene id here!
+  auto sceneId = _listSceneId(currentModuleId());
   auto id = _getGameObjectByName(scm_to_locale_string(value), sceneId);
   if (!id.has_value()){
     return scm_from_bool(false);
@@ -430,8 +431,7 @@ SCM scmListClips(){
 }
 void (*_playClip)(std::string, objid);
 SCM scmPlayClip(SCM soundname){
-  auto sceneId = 0;
-  assert(false);
+  auto sceneId = _listSceneId(currentModuleId());
   _playClip(scm_to_locale_string(soundname), sceneId);
   return SCM_UNSPECIFIED;
 }
@@ -1092,6 +1092,7 @@ void defineFunctions(objid id, bool isServer){
 
 
 void createStaticSchemeBindings(
+  int32_t (*listSceneId)(int32_t objid),
   int32_t (*loadScene)(std::string),  
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
@@ -1162,6 +1163,8 @@ void createStaticSchemeBindings(
   onExitType = scm_make_foreign_object_type(scm_from_utf8_symbol("onexit"), scm_list_1(scm_from_utf8_symbol("data")), finalizeOnExit);
   stateType = scm_make_foreign_object_type(scm_from_utf8_symbol("state"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
   stateMachineType = scm_make_foreign_object_type(scm_from_utf8_symbol("statemachine"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
+
+  _listSceneId = listSceneId;
 
   _loadScene = loadScene;
 

@@ -930,6 +930,7 @@ int main(int argc, char* argv[]){
   Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
  
   createStaticSchemeBindings(
+    listSceneId,
     loadScene,
     unloadScene,
     unloadAllScenes,

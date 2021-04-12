@@ -62,6 +62,8 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 // These functions represent the functionality that individual language bindings use, but should not be coupled to any language in particular. 
 // Should trim down when it becomes clear what the core api should.
 
+objid listSceneId(int32_t id);
+
 void setActiveCamera(int32_t cameraId);
 void setActiveCamera(std::string name, objid sceneId);
 void nextCamera();

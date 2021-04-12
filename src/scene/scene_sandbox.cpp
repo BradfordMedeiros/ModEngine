@@ -365,8 +365,6 @@ std::vector<objid> allSceneIds(SceneSandbox& sandbox){
   return sceneIds;
 } 
 
-
-
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId){
   for (auto &[id, gameObj]: sandbox.mainScene.idToGameObjects){
     if (gameObj.name == name && (sandbox.mainScene.idToGameObjectsH.at(id).sceneId == sceneId)){

@@ -14,6 +14,7 @@
 #include "./scriptmanager.h"    // need to eliminate the circular relationship here
 
 void createStaticSchemeBindings(
+  int32_t (*listSceneId)(int32_t objid),
   int32_t (*loadScene)(std::string),
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),

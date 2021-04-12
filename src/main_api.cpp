@@ -492,6 +492,9 @@ void setIntState(std::string stateName, int value){
   }  
 }
 
+objid listSceneId(int32_t id){
+  return sceneId(world.sandbox, id);
+}
 void setActiveCamera(int32_t cameraId){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
