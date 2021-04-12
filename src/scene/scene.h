@@ -87,4 +87,6 @@ std::optional<objid> getGameObjectByName(World& world, std::string name, objid s
 GameObject& getGameObject(World& world, objid id);
 GameObject& getGameObject(World& world, std::string name, objid sceneId);
 
+int getNumberOfObjects(World& world);
+
 #endif

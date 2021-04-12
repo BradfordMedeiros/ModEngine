@@ -1,8 +1,10 @@
 #include <vector>
+#include <map>
 #include <string>
 
 struct BenchmarkMeasurement {
   float frametime;
+  int numObjects;
 };
 
 struct Benchmark {
@@ -11,7 +13,7 @@ struct Benchmark {
 };
 
 Benchmark createBenchmark(bool shouldBenchmark);
-void logBenchmarkTick(Benchmark& benchmark, float frametime);
+void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects);
 std::string benchmarkResult(Benchmark& benchmark);
 
 

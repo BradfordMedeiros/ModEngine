@@ -565,3 +565,7 @@ std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){
   }
   return ids;
 }
+
+int getNumberOfObjects(SceneSandbox& sandbox){
+  return sandbox.mainScene.idToGameObjects.size();
+}

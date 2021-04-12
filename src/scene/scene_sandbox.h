@@ -98,5 +98,6 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent);
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
+int getNumberOfObjects(SceneSandbox& sandbox);
 
 #endif 

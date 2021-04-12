@@ -1165,7 +1165,7 @@ int main(int argc, char* argv[]){
     now = glfwGetTime();
     deltaTime = now - previous;   
     previous = now;
-    logBenchmarkTick(benchmark, deltaTime);
+    logBenchmarkTick(benchmark, deltaTime, getNumberOfObjects(world.sandbox));
 
     timePlayback.setElapsedTime(deltaTime);
 
