@@ -84,6 +84,7 @@ std::string textureFolderPath;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
+int numObjects = 0;
 
 AnimationState animations;
 
@@ -671,7 +672,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("using object id: -1" , 40, 190, 3);
 
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
-
+  drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
 }
 
 Properties getProperties(World& world, objid id){
@@ -800,6 +801,7 @@ int main(int argc, char* argv[]){
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
+   ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
    ("h,help", "Print help")
   ;        
 
@@ -828,6 +830,8 @@ int main(int argc, char* argv[]){
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
+  auto timetoexit = result["timetoexit"].as<int>();
+
   benchmark = createBenchmark(shouldBenchmark);
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
@@ -1171,7 +1175,16 @@ int main(int argc, char* argv[]){
     now = glfwGetTime();
     deltaTime = now - previous;   
     previous = now;
-    logBenchmarkTick(benchmark, deltaTime, getNumberOfObjects(world.sandbox));
+    if (timetoexit != 0){
+      float timeInSeconds = timetoexit / 1000.f;
+      if (now > timeInSeconds){
+        std::cout << "INFO: TIME TO EXIST EXPIRED" << std::endl;
+        goto cleanup;
+      }
+    }
+
+    numObjects = getNumberOfObjects(world.sandbox);
+    logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
     timePlayback.setElapsedTime(deltaTime);
 
@@ -1460,11 +1473,10 @@ int main(int argc, char* argv[]){
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
 
-  if (shouldBenchmark){
-    saveFile(benchmarkFile, benchmarkResult(benchmark));
-  }
-
   cleanup:   
+    if (shouldBenchmark){
+      saveFile(benchmarkFile, benchmarkResult(benchmark));
+    }
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
     glfwTerminate(); 

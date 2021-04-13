@@ -7,7 +7,7 @@ Benchmark createBenchmark(bool shouldBenchmark){
   return result;
 }
 
-void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects){
+void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects, int numTriangles){
   if (!benchmark.shouldBenchmark){
     return;
   }
@@ -15,6 +15,7 @@ void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects){
     BenchmarkMeasurement{
       .frametime = frametime,
       .numObjects = numObjects,
+      .numTriangles = numTriangles,
     }
   );
 }
@@ -28,27 +29,49 @@ double averageFrametime(std::vector<BenchmarkMeasurement> samples){
   return averageFrametime;
 }
 
-std::map<int, double> numObjectsToFrametime(Benchmark& benchmark){
-  std::map<int, double> objectsToFrametime;
+std::map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function<int(BenchmarkMeasurement&)> getSample){
+  std::map<int, double> sampleValueToFrametime;
 
   std::map<int, std::vector<BenchmarkMeasurement>> measurements;
   for (auto sample : benchmark.samples){
-    if (measurements.find(sample.numObjects) == measurements.end()){
-      measurements[sample.numObjects] = {};
+    auto sampleValue = getSample(sample);
+    if (measurements.find(sampleValue) == measurements.end()){
+      measurements[sampleValue] = {};
     }
-    measurements.at(sample.numObjects).push_back(sample);
+    measurements.at(sampleValue).push_back(sample);
   } 
-  for (auto &[numObjects, measurement] : measurements){
-    objectsToFrametime[numObjects] = averageFrametime(measurement);
+  for (auto &[sampleValue, measurement] : measurements){
+    sampleValueToFrametime[sampleValue] = averageFrametime(measurement);
   }
-  return objectsToFrametime;
+  return sampleValueToFrametime;
+}
+
+std::string writeBenchmarkResult(std::string label, std::map<int, double> sampleResults){
+  std::string result = label + "\n";
+  for (auto &[sampleValue, frametime] : sampleResults){
+    result = result + std::to_string(sampleValue) + " " + std::to_string(frametime) + "\n";
+  }
+  return result + "\n";
 }
 
 std::string benchmarkResult(Benchmark& benchmark){
-  auto benchmarkResult  = std::string("average frametime: ") + std::to_string(averageFrametime(benchmark.samples)); 
-  auto objectsToFrame = numObjectsToFrametime(benchmark);
-  for (auto &[numObj, frametime] : objectsToFrame){
-    benchmarkResult = benchmarkResult + std::to_string(numObj) + "-" + std::to_string(frametime) + "\n";
-  }
+  auto benchmarkResult  = std::string("average frametime: ") + std::to_string(averageFrametime(benchmark.samples)) + "\n\n"; 
+  
+  benchmarkResult = benchmarkResult + writeBenchmarkResult(
+    "object-count to frametime", 
+    sampleValueToFrametime(
+      benchmark, 
+      [](BenchmarkMeasurement& sample) -> int { return sample.numObjects; }
+    )
+  );
+
+  benchmarkResult = benchmarkResult + writeBenchmarkResult(
+    "triangle-count to frametime", 
+    sampleValueToFrametime(
+      benchmark, 
+      [](BenchmarkMeasurement& sample) -> int { return sample.numTriangles; }
+    )
+  );
+
   return benchmarkResult;
 }
