@@ -99,5 +99,6 @@ objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);
+int getNumberScenesLoaded(SceneSandbox& sandbox);
 
 #endif 

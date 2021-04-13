@@ -499,6 +499,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 void removeScene(SceneSandbox& sandbox, objid sceneId){
   removeObjectsFromScenegraph(sandbox,listObjInScene(sandbox, sceneId));
   sandbox.sceneIdToRootObj.erase(sceneId);
+  sandbox.mainScene.sceneToNameToId.erase(sceneId);
 }
 bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
@@ -568,4 +569,8 @@ std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){
 
 int getNumberOfObjects(SceneSandbox& sandbox){
   return sandbox.mainScene.idToGameObjects.size();
+}
+
+int getNumberScenesLoaded(SceneSandbox& sandbox){
+  return sandbox.mainScene.sceneToNameToId.size();
 }

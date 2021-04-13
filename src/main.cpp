@@ -85,6 +85,7 @@ float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 int numObjects = 0;
+int numScenesLoaded = 0;
 
 AnimationState animations;
 
@@ -673,6 +674,8 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
 
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
   drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
+  drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
+
 }
 
 Properties getProperties(World& world, objid id){
@@ -1184,6 +1187,7 @@ int main(int argc, char* argv[]){
     }
 
     numObjects = getNumberOfObjects(world.sandbox);
+    numScenesLoaded = getNumberScenesLoaded(world.sandbox);
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
     timePlayback.setElapsedTime(deltaTime);
