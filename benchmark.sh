@@ -2,10 +2,10 @@
 set -e
 
 cleanup=true
-benchmarks=$(find ./res/scenes/benchmarks/*.rawscene)
+default_benchmarks=$(find ./res/scenes/benchmarks/*.rawscene)
 
 function run_benchmark(){
-  ./build/modengine -r $1 -e $((1000 * 5)) -l "$2" > /dev/null
+  ./build/modengine -r $1 -e $3 -l "$2" -q > /dev/null
 }
 
 function process_output(){
@@ -46,6 +46,25 @@ function generate_plot(){
 
 mkdir -p ./build/benchmarks 
 
+benchmarks=$default_benchmarks
+specific_benchmark=false
+
+if [[ ! -z "$1" ]]
+then
+  benchmarks="$1"
+  specific_benchmark=true
+fi
+
+
+last_triangle_png="";
+last_obj_png=""
+
+benchmark_duration=$((1000 * 5))
+if [[ ! -z "$2" ]]
+then
+  benchmark_duration="$2"
+fi
+
 for benchmark in $benchmarks
 do
     benchfile="./build/benchmarks/$(basename $benchmark).benchmark"
@@ -54,8 +73,11 @@ do
     obj_benchdat_out="./build/benchmarks/$(basename $benchmark).obj_benchmark.out"
     obj_benchdat_png="./build/benchmarks/$(basename $benchmark).obj_benchmark.png"
 
+    last_triangle_png=$tri_benchdat_png
+    last_obj_png=$obj_benchdat_png
+
     echo "Running Benchmark for $benchmark"
-    run_benchmark "$benchmark" "$benchfile"
+    run_benchmark "$benchmark" "$benchfile" "$benchmark_duration"
     
     process_output "$benchfile" "triangle-count to frametime" "$tri_benchdat_out"
     process_output "$benchfile" "object-count to frametime" "$obj_benchdat_out"
@@ -72,3 +94,10 @@ do
 
     echo "Finished Benchmark for $benchmark"
 done
+
+if $specific_benchmark
+then
+  xdg-open "$last_triangle_png"
+  xdg-open "$last_obj_png"
+fi 
+

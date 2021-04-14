@@ -823,11 +823,13 @@ int main(int argc, char* argv[]){
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
    ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
+   ("q,headlessmode", "Hide the window of the game engine", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;        
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
+  bool headlessmode = result["headlessmode"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
 
   std::string worldfile = result["world"].as<std::string>();
@@ -872,9 +874,13 @@ int main(int argc, char* argv[]){
     glfwTerminate();
     return -1;
   }
-  
   glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+
+  if (headlessmode){
+    glfwHideWindow(window);
+  }else{
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+  }
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
      std::cerr << "ERROR: failed to load opengl functions" << std::endl;
