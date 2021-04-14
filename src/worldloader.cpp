@@ -61,6 +61,9 @@ ChunkMappingCommand parseMappingToken(std::string token){
 }
 
 ChunkMappingInfo parseChunkMapping(std::string filepath){
+  if (filepath == ""){
+    return ChunkMappingInfo {};
+  }
   auto fileContent = loadFile(filepath);
   std::map<std::string, std::string> chunkHashToSceneFile;
 
