@@ -29,7 +29,21 @@ double averageFrametime(std::vector<BenchmarkMeasurement> samples){
   return averageFrametime;
 }
 
-std::map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function<int(BenchmarkMeasurement&)> getSample){
+bool firstLessThanSecond(const BenchmarkMeasurement& measurement1, const BenchmarkMeasurement& measurement2){
+  return measurement1.frametime < measurement2.frametime;
+}
+double medianFrametime(std::vector<BenchmarkMeasurement> samples){
+  if (samples.size() == 0){
+    return 0;
+  }
+  sort(samples.begin(), samples.end(), &firstLessThanSecond);
+  auto middleIndex = samples.size() / 2;
+  return (!(samples.size() % 2)) ?  ((samples.at(middleIndex).frametime + samples.at(middleIndex + 1).frametime) / 2.f) : samples.at(middleIndex).frametime;
+}
+
+enum BENCHMARKING_TYPE { BENCHMARK_AVERAGE, BENCHMARK_MEDIAN };
+
+std::map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function<int(BenchmarkMeasurement&)> getSample, BENCHMARKING_TYPE type){
   std::map<int, double> sampleValueToFrametime;
 
   std::map<int, std::vector<BenchmarkMeasurement>> measurements;
@@ -41,7 +55,7 @@ std::map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function
     measurements.at(sampleValue).push_back(sample);
   } 
   for (auto &[sampleValue, measurement] : measurements){
-    sampleValueToFrametime[sampleValue] = averageFrametime(measurement);
+    sampleValueToFrametime[sampleValue] = (type == BENCHMARK_AVERAGE) ? averageFrametime(measurement) : medianFrametime(measurement);
   }
   return sampleValueToFrametime;
 }
@@ -61,7 +75,16 @@ std::string benchmarkResult(Benchmark& benchmark){
     "object-count to frametime", 
     sampleValueToFrametime(
       benchmark, 
-      [](BenchmarkMeasurement& sample) -> int { return sample.numObjects; }
+      [](BenchmarkMeasurement& sample) -> int { return sample.numObjects; },
+      BENCHMARK_AVERAGE
+    )
+  );
+ benchmarkResult = benchmarkResult + writeBenchmarkResult(
+    "object-count to median frametime", 
+    sampleValueToFrametime(
+      benchmark, 
+      [](BenchmarkMeasurement& sample) -> int { return sample.numObjects; },
+      BENCHMARK_MEDIAN
     )
   );
 
@@ -69,7 +92,16 @@ std::string benchmarkResult(Benchmark& benchmark){
     "triangle-count to frametime", 
     sampleValueToFrametime(
       benchmark, 
-      [](BenchmarkMeasurement& sample) -> int { return sample.numTriangles; }
+      [](BenchmarkMeasurement& sample) -> int { return sample.numTriangles; },
+      BENCHMARK_AVERAGE
+    )
+  );
+  benchmarkResult = benchmarkResult + writeBenchmarkResult(
+    "triangle-count to median frametime", 
+    sampleValueToFrametime(
+      benchmark, 
+      [](BenchmarkMeasurement& sample) -> int { return sample.numTriangles; },
+      BENCHMARK_MEDIAN
     )
   );
 
