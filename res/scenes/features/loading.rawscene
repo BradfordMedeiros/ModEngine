@@ -1,7 +1,1 @@
-
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
-platform:position:0 -5 0
-
->maincamera:position:0 0 0
 >maincamera:script:./res/scripts/loading.scm

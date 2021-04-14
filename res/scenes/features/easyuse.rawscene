@@ -9,3 +9,4 @@ box1:scale:2 1 1
 
 box2:mesh:./res/models/box/box.obj
 box2:position:2 1 0
+
