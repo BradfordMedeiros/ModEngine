@@ -7,11 +7,10 @@ next todo:
   - allow model posing
   - inverse kinematics
 
-* recorder -> generalize all attributes
-
 ======================
 
 need tos, but kind of put offish:
+* recorder -> generalize all attributes
 * improve performance of scene rendering by not actually traversing the scenegraph while rendering but rather use cached values (dirty when move and then recalc)
 * generalize shadow code (plumb in correct shadow map)
 - performance profiling
@@ -56,9 +55,17 @@ eventually:
 
 - LOD
 - can voxels be made into quadtree style structure to allow subdivision + optimization of voxels ? 
-  --> some sort of optimizing to this? 
-  
+  --> some sort of optimizing to drawing, instancing / generated optimized mesh
+
 - other platforms -> emscripten/ (browser/android/ios)? 
+
+- split screen (can technically already do with )
+- controller support 
+- random potential optimizations:
+  - instancing 
+  - view culling
+
+
 =======================================
 
 mocap? 
