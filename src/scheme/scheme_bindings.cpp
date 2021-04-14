@@ -141,6 +141,7 @@ SCM scmRotateCamera(SCM xoffset, SCM yoffset){
 }
 
 objid (*_makeObjectAttr)(
+  objid sceneId,
   std::string name, 
   std::map<std::string, std::string> stringAttributes,
   std::map<std::string, double> numAttributes,
@@ -186,7 +187,8 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
     }
   }
 
-  objid id = _makeObjectAttr(scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
+  auto sceneId = _listSceneId(currentModuleId());
+  objid id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), stringAttributes, numAttributes, vecAttributes);
   return scm_from_int32(id);
 }
 
@@ -1144,7 +1146,7 @@ void createStaticSchemeBindings(
   void (*stopRecording)(objid id, std::string recordingPath),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
-  objid (*makeObjectAttr)(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
+  objid (*makeObjectAttr)(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
   void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),

@@ -35,12 +35,12 @@ struct DynamicLoading {
   std::map<objid, int> idsLoadAround;
 };
 
-DynamicLoading createDynamicLoading();
+DynamicLoading createDynamicLoading(std::string chunkfile);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 void handleChunkLoading(
   DynamicLoading& loadingInfo, 
   std::function<glm::vec3(objid)> getPos, 
-  objid(*loadScene)(std::string sceneFile, glm::vec3 offset), 
+  objid(*loadScene)(std::string sceneFile, glm::vec3 offset, std::string parentNode), 
   void(*unloadScene)(objid sceneId)
 );
 objid addLoadingAround(DynamicLoading& loadingInfo, objid id);

@@ -266,9 +266,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 void onMouseButton(){    
-  for (auto id : allSceneIds(world.sandbox)){
-    std::cout << scenegraphAsDotFormat(world.sandbox, id, world.objectMapping) << std::endl;
-  }
+  std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
+
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
     .fromPos = defaultCamera.transformation.position,
@@ -301,15 +300,19 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
     auto fileType = getFileType(paths[i]);
 
     std::string objectName = "random";
+
+    auto sceneId = 0;  //  todo -> which scene should it be loaded into?
+    assert(false);
+
     if (fileType == IMAGE_EXTENSION){
       setTexture(selected(state.editor), paths[i]);
     }else if (fileType == AUDIO_EXTENSION){
-      makeObjectAttr("&" + objectName, {{ "clip", paths[i] }}, {}, {});
+      makeObjectAttr(sceneId, "&" + objectName, {{ "clip", paths[i] }}, {}, {});
     }else if (fileType == VIDEO_EXTENSION){
       std::cout << "VIDEO FILE: doing nothing" << std::endl;
-      makeObjectAttr("=" + objectName, {{ "source", paths[i] }}, {}, {});
+      makeObjectAttr(sceneId, "=" + objectName, {{ "source", paths[i] }}, {}, {});
     }else if (fileType == MODEL_EXTENSION){
-      makeObjectAttr(objectName, {{ "mesh", paths[i] }}, {}, {});
+      makeObjectAttr(sceneId, objectName, {{ "mesh", paths[i] }}, {}, {});
     }else if (fileType == UNKNOWN_EXTENSION){
       std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
     }

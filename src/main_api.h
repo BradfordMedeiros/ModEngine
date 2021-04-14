@@ -76,7 +76,7 @@ void clearImpulse(int32_t index);
 
 void loadScriptFromWorld(std::string script, int32_t id);
 int32_t loadScene(std::string sceneFile);
-int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset);
+int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
 int32_t loadSceneData(std::string sceneData, objid sceneId);
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();
@@ -106,7 +106,7 @@ void setGameObjectRotation(int32_t index, glm::quat rotation);
 void setSelectionMode(bool enabled);
 
 int32_t makeObject(std::string serializedobj, objid id, bool useObjId, objid sceneId = -1, bool useSceneId = false);
-objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
+objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
 void removeObjectById(int32_t id);
 void copyObject(int32_t id);
 

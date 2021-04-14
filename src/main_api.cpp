@@ -53,15 +53,15 @@ int32_t loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   return addSceneToWorld(world, sceneFile, interface);
 }
-int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset){
-  std::cout << "loading called yo!" << std::endl;
-  auto name = std::to_string(getUniqueObjId());
-  auto nodeOffsetId = makeObjectAttr(name, {}, {}, {{"position", offset}});
+int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
+  auto name = std::to_string(getUniqueObjId()) + parentNodeName;
+
+  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, {}, {}, {{"position", offset}});
   std::cout << "load scene offset: " << print(offset) << std::endl;
   auto sceneId = loadScene(sceneFile);
   auto rootId = rootIdForScene(world.sandbox, sceneId);
   makeParent(world.sandbox, rootId, nodeOffsetId);
-  return sceneId;
+  return nodeOffsetId;
 }
 
 int32_t loadSceneData(std::string sceneData, objid sceneId){
@@ -171,17 +171,14 @@ int32_t makeObject(std::string serializedobj, objid id, bool useObjId, objid sce
   auto firstSceneId = allSceneIds(world.sandbox).at(0);
   return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId, interface);
 }
-objid makeObjectAttr(std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
-  auto allScenes = allSceneIds(world.sandbox);
-  assert(allScenes.size() > 0); 
-
+objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
   GameobjAttributes attributes {
     .stringAttributes = stringAttributes,
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
     .additionalFields = stringAttributes,
   };
-  return addObjectToScene(world, allScenes.at(0), name, attributes, interface);
+  return addObjectToScene(world, sceneId, name, attributes, interface);
 }
 
 void copyObject(int32_t id){

@@ -152,7 +152,6 @@ VoxelSerialization serializeVoxelState(Voxels& voxels, std::function<std::string
   for (int row = 0; row < voxels.numWidth; row++){
     for (int col = 0; col < voxels.numHeight; col++){
       for (int depth = 0; depth < voxels.numDepth; depth++){
-        auto flattenedIndex = (row * voxels.numHeight * voxels.numDepth) + (col * voxels.numDepth) + depth;  
         int value = voxels.cubes.at(row).at(col).at(depth);
         content = content + std::to_string(value);
         auto texId = voxels.textures.at(row).at(col).at(depth);

@@ -67,7 +67,7 @@ ChunkMappingInfo parseChunkMapping(std::string filepath){
   std::vector<std::string> lines = filterWhitespace(split(fileContent, '\n'));
 
   int numDefaultFiles = 0;
-  std::string defaultScene = "./res/scenes/chunks/0.0.0"; 
+  std::string defaultScene = ""; 
 
   int numChunkSizes = 0;
   int chunkSize = 100;
@@ -92,8 +92,8 @@ ChunkMappingInfo parseChunkMapping(std::string filepath){
     }
   }
 
-  if (numDefaultFiles != 0 && numDefaultFiles != 1){
-    std::cout << "mapping file needs exactly 0 or 1 defaultings, got " << numDefaultFiles << std::endl;
+  if (numDefaultFiles != 1){
+    std::cout << "mapping file needs a default entry got " << numDefaultFiles << std::endl;
     assert(false);
   }
   if (numChunkSizes != 0 && numChunkSizes != 1){
@@ -111,11 +111,11 @@ ChunkMappingInfo parseChunkMapping(std::string filepath){
 
 // @TODO currently dynamic chunkloading assumes it has exclusive access to scene management (or at least that loadscene/unload scene gives it that).
 // This causes the use case of, for example, a user loading a scene in code manually to have this unload the scene if the scene file happens to match that, which is questionable behavior
-DynamicLoading createDynamicLoading(){
-  auto mappingInfo = parseChunkMapping("./res/scenes/chunks.mapping");
+DynamicLoading createDynamicLoading(std::string chunkfile){
+  auto mappingInfo = parseChunkMapping(chunkfile);
   DynamicLoading loading = {
     .mappingInfo = mappingInfo,
-    .chunkRadius = 2, 
+    .chunkRadius = 1, 
   };
   return loading;
 }
@@ -127,7 +127,7 @@ std::vector<ChunkAddress> getChunksShouldBeLoaded(DynamicLoading& world, int chu
     int chunkY = position.y;
     int chunkZ = position.z;    
     
-    int adjacentChunks = chunkRadius -1;   
+    int adjacentChunks = chunkRadius;   
 
     std::vector<ChunkAddress> chunks;
     for (int x = -adjacentChunks; x <= adjacentChunks; x++){
@@ -214,7 +214,12 @@ std::string chunkloadingDebugInfo(ChunkLoadingInfo& info){
 
 // instead of keeping in memory here which chunks are loaded or not, it's probably better for this to requery the 
 // main scene system for a list of loaded chunks
-void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(objid)> getPos, objid(*loadScene)(std::string sceneFile, glm::vec3 offset), void(*unloadScene)(objid sceneId)){
+void handleChunkLoading(
+  DynamicLoading& loadingInfo, 
+  std::function<glm::vec3(objid)> getPos, 
+  objid(*loadScene)(std::string sceneFile, glm::vec3 offset, std::string parentNode), 
+  void(*unloadScene)(objid sceneId)
+){
   std::vector<ChunkAddress> loadingPos;
 
   for (auto &[id, _] : loadingInfo.idsLoadAround){
@@ -250,7 +255,8 @@ void handleChunkLoading(DynamicLoading& loadingInfo, std::function<glm::vec3(obj
         chunk.x * loadingInfo.mappingInfo.chunkSize, 
         chunk.y * loadingInfo.mappingInfo.chunkSize, 
         chunk.z * loadingInfo.mappingInfo.chunkSize
-      )
+      ),
+      std::to_string(chunk.x) + ", " + std::to_string(chunk.y) + ", " + std::to_string(chunk.z)
     );
     std::cout << "INFO: CHUNK MANAGEMENT: want to load id: " << sceneId << std::endl;
     loadingInfo.chunkHashToSceneId[encodeChunkHash(chunk)] = sceneId;

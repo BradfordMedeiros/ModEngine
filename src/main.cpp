@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-
+#include <csignal>
 #include <cxxopts.hpp>
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -287,6 +287,7 @@ void selectItem(objid selectedId, Color pixelColor){
     selectedSubObj.name,
     []() -> objid {
       return makeObjectAttr(
+        0,
         "manipulator", 
         {{ "mesh", "./res/models/ui/manipulator.fbx" }, {"texture", "./res/textures/bluetransparent.png" }}, 
         {}, 
@@ -781,7 +782,24 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
 
+void dumpDebugInfo(){
+  if (showDebugInfo){
+    auto filepath = "./build/info.crash";
+    auto scenegraphInfo = scenegraphAsDotFormat(world.sandbox, world.objectMapping);
+    saveFile(filepath, scenegraphInfo);
+    std::cout << "wrote crash info to: " << filepath << std::endl;
+  }
+}
+
+void signalHandler(int signum) {
+   dumpDebugInfo();
+   exit(signum);  
+}
+
+
 int main(int argc, char* argv[]){
+  signal(SIGABRT, signalHandler);  
+
   cxxopts::Options cxxoption("ModEngine", "ModEngine is a game engine for hardcore fps");
   cxxoption.add_options()
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
@@ -800,7 +818,7 @@ int main(int argc, char* argv[]){
    ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
-   ("w,world", "Use streaming chunk system", cxxopts::value<bool>()->default_value("false"))
+   ("w,world", "Use streaming chunk system", cxxopts::value<std::string>()->default_value(""))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
@@ -811,7 +829,9 @@ int main(int argc, char* argv[]){
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
-  useChunkingSystem = result["world"].as<bool>();
+
+  std::string worldfile = result["world"].as<std::string>();
+  useChunkingSystem = worldfile != "";
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
@@ -1131,7 +1151,7 @@ int main(int argc, char* argv[]){
 
   loadAllTextures();
   
-  dynamicLoading = createDynamicLoading();
+  dynamicLoading = createDynamicLoading(worldfile);
 
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto rawScene : rawScenes){
@@ -1330,7 +1350,7 @@ int main(int argc, char* argv[]){
           return getGameObjectPosition(id, true);
         }, 
         loadSceneParentOffset, 
-        unloadScene
+        removeObjectById
       );
     }
 

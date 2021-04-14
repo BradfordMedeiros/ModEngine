@@ -217,6 +217,21 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
   return objects;
 }
 
+void pruneSceneId(SceneSandbox& sandbox, objid sceneId){
+  sandbox.sceneIdToRootObj.erase(sceneId);
+  sandbox.mainScene.sceneToNameToId.erase(sceneId);  
+}
+void maybePruneScenes(SceneSandbox& sandbox){
+  std::vector<objid> sceneIdsToPrune;
+  for (auto &[sceneId, rootObjId] : sandbox.sceneIdToRootObj){
+    if (sandbox.mainScene.idToGameObjectsH.find(rootObjId) == sandbox.mainScene.idToGameObjectsH.end()){
+      sceneIdsToPrune.push_back(sceneId);
+    }
+  }
+  for (auto sceneId : sceneIdsToPrune){
+    pruneSceneId(sandbox, sceneId);
+  }
+}
 
 void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objects){  
   for (auto id : objects){
@@ -225,6 +240,9 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
+
+    std::cout << "scene id: " << sceneId << std::endl;
+    std::cout << "object name: " << objectName << std::endl;
     scene.sceneToNameToId.at(sceneId).erase(objectName);
     for (auto &[_, objh] : scene.idToGameObjectsH){  
       objh.children.erase(id);
@@ -297,11 +315,6 @@ std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
 
 GameObject& getGameObject(Scene& scene, objid id){
   return scene.idToGameObjects.at(id);
-}
-GameObject& getGameObject(Scene& scene, std::string name){
-  assert(false);
-  auto sceneId = 0;
-  return scene.idToGameObjects.at(scene.sceneToNameToId.at(sceneId).at(name));
 }
 GameObjectH& getGameObjectH(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id);
@@ -443,7 +456,7 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
   auto groupToModel =  glm::inverse(groupTransform) * modelTransform;
 
   auto resultCheck = groupTransform * groupToModel;
-  if (false && resultCheck != modelTransform){
+  if (resultCheck != modelTransform){
     std::cout << "result_check = " << print(resultCheck) << std::endl;
     std::cout << "model_transform = " << print(modelTransform) << std::endl;
     assert(false);
@@ -498,8 +511,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 // This should find the root of the scene and remove that element + all children (clean up empty scenes i guess? -> but would require unloading the scene!) 
 void removeScene(SceneSandbox& sandbox, objid sceneId){
   removeObjectsFromScenegraph(sandbox,listObjInScene(sandbox, sceneId));
-  sandbox.sceneIdToRootObj.erase(sceneId);
-  sandbox.mainScene.sceneToNameToId.erase(sceneId);
+  pruneSceneId(sandbox, sceneId);
 }
 bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());

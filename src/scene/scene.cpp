@@ -619,6 +619,7 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
     }
     removeObjectsFromScenegraph(world.sandbox, idsToRemove);  
   }
+  maybePruneScenes(world.sandbox);
 }
 
 void copyObjectToScene(World& world, objid id, SysInterface interface){
