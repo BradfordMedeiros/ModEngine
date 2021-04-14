@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-
 set -e
 
 cleanup=true
-benchmarks=$(find ./res/scenes/benchmarks/*)
+benchmarks=$(find ./res/scenes/benchmarks/*.rawscene)
 
 function run_benchmark(){
   ./build/modengine -r $1 -e $((1000 * 5)) -l "$2" > /dev/null
