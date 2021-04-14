@@ -23,6 +23,7 @@
       mainobj 
       (navpos (gameobj-id mainobj) (closest-hitpoint (map pos-from-collision ray) frompos))
     )
+    (display "raycast is 0!!!!\n")
   )
 )
 

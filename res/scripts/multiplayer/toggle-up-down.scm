@@ -1,7 +1,8 @@
 (define doorDown #f)
 
 
-(define (onMessage event)
+(define (onMessage event )
+  (display (string-append "event: " event "\n"))
   (if (equal? event "closedoor")
     (toggleDoor)
   )

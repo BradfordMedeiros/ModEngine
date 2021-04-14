@@ -1,7 +1,9 @@
 
-
 (define (playAnimation)
   (define animations (gameobj-animations mainobj))
+  (display "animations: ")
+  (display animations)
+  (display "\n")
   (display (string-append "play animation: " (car animations) "\n"))
   (gameobj-playanimation mainobj (car animations))
 )

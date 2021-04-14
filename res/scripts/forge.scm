@@ -74,6 +74,7 @@
       )
     )
   )
+  (display (string-append "Key is: " (number->string key) "\n"))
   (if (and (= key 331) (= action 1))
     (save-scene)
   )

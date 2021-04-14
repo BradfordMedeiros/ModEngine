@@ -1,4 +1,4 @@
 
-(set-camera (gameobj-id (lsobj-name ">maincamera")))
+(set-camera (gameobj-id mainobj))
 (load-around (gameobj-id mainobj))
 
