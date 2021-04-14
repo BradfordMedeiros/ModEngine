@@ -46,3 +46,6 @@ debugobject3:physics_linear:0.000000 0.000000 0.000000
 debugobject3:physics_angle:0.000000 0.000000 0.000000
 debugobject3:physics_gravity:0.000000 0.000000 0.000000
 debugobject3:mesh:../gameresources/misc/sink.obj
+
+*scene:path:./res/scenes/somescene.rawscene
+

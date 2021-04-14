@@ -175,5 +175,5 @@
   )
 )
 
-(onScroll 0)
+;(onScroll 0)
 (set! onModelViewer #f)
