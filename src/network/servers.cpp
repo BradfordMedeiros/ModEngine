@@ -47,7 +47,7 @@ tcpServer initTcpServer(){
 std::string getConnectionHash(std::string ipAddress, int port){
   return ipAddress + "\\" + std::to_string(port);
 }
-void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string)> onPlayerDisconnected){
+void processTcpServer(tcpServer& tserver, std::map<std::string, sockaddr_in>& udpConnections, std::function<void(std::string&)> onPlayerDisconnected){
   getDataFromSocket(tserver.server, [&tserver, &udpConnections, &onPlayerDisconnected](std::string request, int socketFd) -> socketResponse {      
     auto requestLines = split(request, '\n');
     auto requestHeader = requestLines.size() > 0 ? requestLines.at(0) : "";
@@ -121,7 +121,7 @@ void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::m
   }
 }
 
-NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected){
+NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
   std::map<std::string, sockaddr_in> udpConnections;
   NetCode netcode {

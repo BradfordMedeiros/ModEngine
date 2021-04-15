@@ -25,6 +25,6 @@ struct UVCoord {
 
 UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight);
 
-void saveScreenshot(std::string filepath);
+void saveScreenshot(std::string& filepath);
 
 #endif

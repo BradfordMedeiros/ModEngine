@@ -60,8 +60,8 @@ std::map<int, double> sampleValueToFrametime(Benchmark& benchmark, std::function
   return sampleValueToFrametime;
 }
 
-std::string writeBenchmarkResult(std::string label, std::map<int, double> sampleResults){
-  std::string result = label + "\n";
+std::string writeBenchmarkResult(const char* label, std::map<int, double> sampleResults){
+  std::string result = std::string(label) + "\n";
   for (auto &[sampleValue, frametime] : sampleResults){
     result = result + std::to_string(sampleValue) + " " + std::to_string(frametime) + "\n";
   }

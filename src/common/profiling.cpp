@@ -9,7 +9,7 @@ struct LogProfile {
 
 std::vector<LogProfile> profiles;
 
-int startProfile(std::string description){
+int startProfile(const char* description){
   profiles.push_back(LogProfile{
     .startTime = glfwGetTime(),
     .endTime = -1,

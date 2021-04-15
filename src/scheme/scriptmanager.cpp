@@ -149,26 +149,26 @@ void onFloatMessageAllScripts(std::queue<StringFloat>& messages){
   }
 }
 
-void onTcpMessageAllScripts(std::string message){
+void onTcpMessageAllScripts(std::string& message){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
     onTcpMessage(message);
   } 
 }
-void onUdpMessageAllScripts(std::string message){
+void onUdpMessageAllScripts(std::string& message){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
     onUdpMessage(message);
   } 
 }
 
-void onPlayerJoinedAllScripts(std::string connectionHash){
+void onPlayerJoinedAllScripts(std::string& connectionHash){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
     onPlayerJoined(connectionHash);
   } 
 }
-void onPlayerLeaveAllScripts(std::string connectionHash){
+void onPlayerLeaveAllScripts(std::string& connectionHash){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
     onPlayerLeave(connectionHash);

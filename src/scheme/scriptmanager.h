@@ -20,7 +20,7 @@ typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*boolfunc)(bool value);
 typedef void(*messagefunc)(std::queue<StringString>&);
 typedef void(*messagefloatfunc)(std::queue<StringFloat>&);
-typedef void(*stringfunc)(std::string);
+typedef void(*stringfunc)(std::string&);
 
 struct SchemeBindingCallbacks {
   func onFrame;

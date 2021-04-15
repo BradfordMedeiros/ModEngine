@@ -22,10 +22,10 @@ struct NetCode {
   tcpServer tServer;
   udpmodsocket udpModsocket;
   std::map<std::string, sockaddr_in> udpConnections;
-  std::function<void(std::string)> onPlayerConnected;
-  std::function<void(std::string)> onPlayerDisconnected;
+  std::function<void(std::string&)> onPlayerConnected;
+  std::function<void(std::string&)> onPlayerDisconnected;
 };
-NetCode initNetCode(std::function<void(std::string)> onPlayerConnected, std::function<void(std::string)> onPlayerDisconnected);
+NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected);
 bool tickNetCode(NetCode& netcode, NetworkPacket& packet, std::function<std::string()> maybeGetSetupConnectionHash);
 void sendUdpPacketToAllUdpClients(NetCode& netcode, NetworkPacket data);
 

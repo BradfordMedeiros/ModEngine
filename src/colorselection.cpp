@@ -39,7 +39,7 @@ UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight){
   return uvdata;
 }
 
-void saveScreenshot(std::string filepath){
+void saveScreenshot(std::string& filepath){
   int w, h;
   int miplevel = 0;
   glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &w);

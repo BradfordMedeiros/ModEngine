@@ -1,6 +1,6 @@
 #include "./worldloader.h"
 
-ChunkAddress decodeChunkHash(std::string chunkhash, bool* out_validResult){
+ChunkAddress decodeChunkHash(std::string& chunkhash, bool* out_validResult){
   bool isValidResult = false;
   auto parts = split(chunkhash, '.');
 
