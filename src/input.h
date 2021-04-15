@@ -6,6 +6,7 @@
 #include "./state.h"
 #include "./common/util.h"
 #include "./common/profiling.h"
+#include "./main_api.h"
 #include "./gizmo/keymapper.h"
 
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));

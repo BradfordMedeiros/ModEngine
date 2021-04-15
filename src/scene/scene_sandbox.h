@@ -32,6 +32,8 @@ struct Scene {
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
+
+  std::map<objid, glm::mat4> absolutePositions;
 };
 
 struct SceneDeserialization {
@@ -101,5 +103,7 @@ objid sceneId(SceneSandbox& sandbox, objid id);
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
+
+void updateAbsolutePositions(SceneSandbox& sandbox);
 
 #endif 

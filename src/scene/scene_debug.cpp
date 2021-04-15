@@ -29,6 +29,33 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObj
   return graph;
 }
 
+std::string debugAllGameObjects(SceneSandbox& sandbox){
+  std::string content = "";
+  for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjects){
+    content += std::to_string(id) + " " + std::to_string(gameobj.id) + " " + gameobj.name + "\n";
+  }
+  return content;
+}
+
+std::string debugAllGameObjectsH(SceneSandbox& sandbox){
+  std::string content = "";
+  for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjectsH){
+    content += std::to_string(id) + 
+      " " + std::to_string(gameobj.id) + 
+      " " + std::to_string(gameobj.sceneId) + 
+      " " + std::to_string(gameobj.groupId) + 
+      " " + std::to_string(gameobj.parentId) + " | ";
+    for (auto id : gameobj.children){
+      content = content + " " + std::to_string(id);      
+    }
+    content = content + "\n";
+  }
+
+  //   std::set<objid> children;
+
+  return content;
+}
+
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;

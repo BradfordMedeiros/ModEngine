@@ -782,18 +782,24 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
 
-void dumpDebugInfo(){
-  if (showDebugInfo){
-    auto filepath = "./build/info.crash";
-    auto scenegraphInfo = scenegraphAsDotFormat(world.sandbox, world.objectMapping);
-    saveFile(filepath, scenegraphInfo);
-    std::cout << "wrote crash info to: " << filepath << std::endl;
-  }
+std::string dumpDebugInfo(){
+  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping);
+  auto gameobjInfo = debugAllGameObjects(world.sandbox);
+  auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
+
+  auto benchmarkingContent = benchmarkResult(benchmark);
+  auto profilingInfo = dumpProfiling();
+  auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
+    "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
+    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
+  return content;
 }
 
 void signalHandler(int signum) {
-   dumpDebugInfo();
-   exit(signum);  
+  if (showDebugInfo){
+    saveFile("./res/build/crash.info", dumpDebugInfo());
+  }
+  exit(signum);  
 }
 
 
@@ -1200,6 +1206,8 @@ int main(int argc, char* argv[]){
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
+  PROFILE("FRAME",
+
     frameCount++;
     now = glfwGetTime();
     deltaTime = now - previous;   
@@ -1499,13 +1507,13 @@ int main(int argc, char* argv[]){
       state.takeScreenshot = false;
       saveScreenshot(screenshotPath);
     }
-  })
+  )})
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;
 
   cleanup:   
     if (shouldBenchmark){
-      saveFile(benchmarkFile, benchmarkResult(benchmark));
+      saveFile(benchmarkFile, dumpDebugInfo());
     }
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();

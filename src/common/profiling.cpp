@@ -24,9 +24,8 @@ void stopProfile(int id){
   profile.complete = true;
 }
 
-std::string dumpLogInfo(){
-  std::string content = "";
-  std::cout << "size is: " << profiles.size() << std::endl;
+std::string dumpProfiling(){
+  std::string content = "profiling information:  ";
   for (int i = 0; i < profiles.size(); i++){
     content = content + std::to_string(profiles.at(i).startTime) + " " + std::to_string(profiles.at(i).endTime) + " " + profiles.at(i).description + "\n";
   }

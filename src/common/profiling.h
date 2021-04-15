@@ -14,6 +14,6 @@
 
 int startProfile(std::string description);
 void stopProfile(int id);
-std::string dumpLogInfo();
+std::string dumpProfiling();
 
 #endif

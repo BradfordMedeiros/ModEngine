@@ -431,19 +431,15 @@ void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4,
   traverseScene(sandbox, sandbox.mainScene, onObject);
 }
 
-glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
-  Scene& scene = sandbox.mainScene;
-  glm::mat4 transformation = {};
-  bool foundId = false;
-  
-  traverseScene(sandbox, scene, [id, &foundId, &transformation](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
-    if (traversedId == id){
-      foundId = true;
-      transformation = model;
-    }
+void updateAbsolutePositions(SceneSandbox& sandbox){
+  sandbox.mainScene.absolutePositions = {};
+  traverseScene(sandbox, sandbox.mainScene, [&sandbox](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
+    sandbox.mainScene.absolutePositions[traversedId] = model;
   });
-  assert(foundId);
-  return transformation;
+}
+
+glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
+  return sandbox.mainScene.absolutePositions.at(id);
 }
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
