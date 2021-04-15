@@ -51,10 +51,10 @@ void joystickCallback(int jid, int event){
 }
 
 void onJoystick(std::vector<JoyStickInfo> infos){
-  std::cout << "Joystick callback:" << std::endl;
-  for (auto info : infos){
-    std::cout << "( " << info.index << ", " << info.value << ")" << std::endl;
-  }
+  //std::cout << "Joystick callback:" << std::endl;
+  //for (auto info : infos){
+  //  std::cout << "( " << info.index << ", " << info.value << ")" << std::endl;
+  //}
 }
 
 
