@@ -676,7 +676,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 
   std::cout << "SERIAL ATTR SIZE: " << serialAttrs.size() << std::endl;
   if (serialAttrs.size() > 1){
-    std::cout << "SERIALIZATION GOT MORE THAN 1 OBJECT.  Either bad data or has child element" << std::endl;
+    std::cout << "SERIALIZATION GOT MORE THAN 1 OBJECT.  Either bad data or has child element, got " << serialAttrs.size() << std::endl;
   }
   assert(serialAttrs.size() == 1);
   
