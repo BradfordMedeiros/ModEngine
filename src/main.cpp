@@ -410,8 +410,8 @@ void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
 std::vector<glm::vec3> traversalPositions;
 std::vector<glm::vec3> parentTraversalPositions;
 void addPositionToRender(glm::mat4 modelMatrix, glm::mat4 parentMatrix){
-  traversalPositions.push_back(getTransformationFromMatrix(modelMatrix).position);
-  parentTraversalPositions.push_back(getTransformationFromMatrix(parentMatrix).position);
+  //traversalPositions.push_back(getTransformationFromMatrix(modelMatrix).position);
+  //parentTraversalPositions.push_back(getTransformationFromMatrix(parentMatrix).position);
 }
 void clearTraversalPositions(){
   traversalPositions.clear();
@@ -783,7 +783,7 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
 }
 
 std::string dumpDebugInfo(){
-  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping);
+  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
   auto gameobjInfo = debugAllGameObjects(world.sandbox);
   auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
 
@@ -797,7 +797,9 @@ std::string dumpDebugInfo(){
 
 void signalHandler(int signum) {
   if (showDebugInfo){
-    saveFile("./res/build/crash.info", dumpDebugInfo());
+    auto crashFile = "./build/crash.info";
+    std::cout << "wrote crash file: " << crashFile << std::endl;
+    saveFile(crashFile, dumpDebugInfo());
   }
   exit(signum);  
 }
