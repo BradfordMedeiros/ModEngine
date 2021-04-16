@@ -1,7 +1,7 @@
 #include "./scene_debug.h"
 
-std::string getDotInfoForNode(std::string nodeName, int nodeId, objid sceneId, objid groupId, glm::vec3 position, std::vector<std::string> meshes){
-  return std::string("\"") + nodeName + "(" + std::to_string(nodeId) + ", " + std::to_string(sceneId) + ")" + " pos: " + print(position) + " meshes: [" + join(meshes, ' ') + "] groupId: " + std::to_string(groupId) + "\"";
+std::string getDotInfoForNode(std::string nodeName, int id, objid sceneId, objid groupId, glm::vec3 position, std::vector<std::string> meshes){
+  return std::string("\"") + nodeName + "(id: " + std::to_string(id) + ", sceneId:" + std::to_string(sceneId) + ", " + "groupId: " + std::to_string(groupId) + ") pos: " + print(position) + " meshes: [" + join(meshes, ' ') + "]\"";
 }
 
 std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
@@ -10,19 +10,20 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObj
   std::string suffix = "}"; 
 
   std::string relations = "";
-  forEveryGameobj(sandbox, [&sandbox, &relations, &objectMapping](objid id, GameObject& gameobj) -> void {
-    auto obj = getGameObjectH(sandbox, id);
-    auto childId = id;
-    auto parentId = obj.parentId;
-    auto groupId = obj.groupId;
-    auto parentGroupId = parentId != - 1 ? getGroupId(sandbox, parentId) : -1;
 
-    auto childName = gameobj.name;
-    auto parentName = parentId == -1 ? "root" : getGameObject(sandbox, parentId).name;
-        
-    auto positionParent = parentId == -1 ? glm::vec3(0.f, 0.f, 0.f) : getGameObject(sandbox, parentId).transformation.position;
-    auto positionChild = childId == -1 ? glm::vec3(0.f, 0.f, 0.f) : gameobj.transformation.position;
-    relations = relations + getDotInfoForNode(parentName, parentId, obj.sceneId, parentGroupId, positionParent, getMeshNames(objectMapping, parentId)) + " -- " + getDotInfoForNode(childName, childId,  getGameObjectH(sandbox, childId).sceneId, groupId, positionChild, getMeshNames(objectMapping, childId)) + "\n";
+  forEveryGameobj(sandbox, [&sandbox, &relations, &objectMapping](objid id, GameObject& childObj) -> void {
+    if (id == 0){
+      return;   // will show up since things are parented to the root
+    }
+    auto childObjH = getGameObjectH(sandbox, id);
+    auto parentId = childObjH.parentId;
+    auto parentObj = getGameObject(sandbox, parentId);
+    auto parentObjH = getGameObjectH(sandbox, parentId);
+
+    relations = relations + 
+     getDotInfoForNode(parentObj.name, parentObj.id, parentObjH.sceneId, parentObjH.groupId, parentObj.transformation.position, getMeshNames(objectMapping, parentId)) 
+    + " -- " + 
+    getDotInfoForNode(childObj.name, childObjH.id,  childObjH.sceneId, childObjH.groupId, childObj.transformation.position, getMeshNames(objectMapping, id)) + "\n";
   }); 
 
   graph = graph + prefix + relations + suffix;
