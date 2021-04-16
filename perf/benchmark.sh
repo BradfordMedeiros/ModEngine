@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+(cd .. && 
+
 cleanup=true
 default_benchmarks=$(find ./res/scenes/benchmarks/*.rawscene)
 
@@ -101,3 +103,4 @@ then
   xdg-open "$last_obj_png"
 fi 
 
+)
