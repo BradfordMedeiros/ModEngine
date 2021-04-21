@@ -106,10 +106,10 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
 
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-void addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initialLoad, std::vector<glm::vec3> verts){
+btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initialLoad, std::vector<glm::vec3> verts){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
-    return;
+    return NULL;
   }
 
   btRigidBody* rigidBody = NULL;
@@ -259,6 +259,7 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initial
   if (rigidBody != NULL){
     world.rigidbodys[id] = rigidBody;   
   }
+  return rigidBody;
 }
 void rmRigidBody(World& world, objid id){
   auto rigidBodyPtr = world.rigidbodys.at(id);
@@ -521,7 +522,11 @@ void addSerialObjectsToWorld(
     if (idToModelVertexs.find(id) != idToModelVertexs.end()){
       modelVerts = idToModelVertexs.at(id);
     }
-    addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts);   
+    auto rigidBody = addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts);   
+    if (rigidBody != NULL){
+      auto trans = fullTransformation(world.sandbox, id);
+      setTransform(rigidBody, trans.position, trans.scale, trans.rotation);
+    }
   }
 
   for (auto id : idsAdded){
@@ -781,12 +786,11 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
-  getGameObject(world, index).transformation.position = pos;
-
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
     setPosition(body, pos);
   }
+  updatePositionForObject(world.sandbox, index, pos);
   world.entitiesToUpdate.insert(index);
 }
 void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
@@ -807,12 +811,11 @@ void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, floa
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
-  getGameObject(world, index).transformation.rotation = rotation;
-
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
     setRotation(body, rotation);
   }
+  updateRotationForObject(world.sandbox, index, rotation);
   world.entitiesToUpdate.insert(index);
 }
 void physicsRotate(World& world, objid index, float x, float y, float z){
@@ -823,13 +826,12 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  getGameObject(world.sandbox, index).transformation.scale = scale;
-
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).collisionInfo;
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
+  updateScaleForObject(world.sandbox, index, scale);
   world.entitiesToUpdate.insert(index);
 }
 void physicsScale(World& world, objid index, float x, float y, float z){
@@ -841,13 +843,16 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
 }
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
-  for (auto [i, rigidBody]: rigidbodys){
-    GameObject& gameobj = getGameObject(world, i);
-    // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
-    gameobj.transformation.rotation = getRotation(rigidBody);   
-    gameobj.transformation.position = getPosition(rigidBody);
+  for (auto [id, rigidBody]: rigidbodys){
+    GameObject& gameobj = getGameObject(world, id);
+    updatePositionForObject(world.sandbox, id, Transformation {
+      .position = getPosition(rigidBody),
+      .scale = getScale(rigidBody),
+      .rotation = getRotation(rigidBody),
+    });
     clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
   }
+  updatePositionCache(world.sandbox);
 }
 
 void updateSoundPositions(World& world){
@@ -890,7 +895,6 @@ void updateAttributeDelta(World& world, objid id, std::string attribute, Attribu
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
-  updateAbsolutePositions(world.sandbox);
   updateEmitters(
     world.emitters, 
     timeElapsed, 

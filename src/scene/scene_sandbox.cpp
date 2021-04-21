@@ -1,5 +1,142 @@
 #include "./scene_sandbox.h"
 
+glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
+  glm::mat4 modelMatrix = glm::translate(initialModel, position);
+  modelMatrix = modelMatrix * glm::toMat4(rotation);
+  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
+  return scaledModelMatrix;
+}
+
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
+  GameObject object = scene.idToGameObjects.at(objectH.id);
+  glm::vec3 scaling = object.transformation.scale * totalScale;  // having trouble with doing the scaling here so putting out of band.   Anyone in the ether please help if more elegant. 
+
+  glm::mat4 modelMatrix = matrixFromComponents(
+    model,
+    object.transformation.position, 
+    glm::vec3(1.f, 1.f, 1.f), 
+    object.transformation.rotation
+  );
+  auto scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
+  onObject(id, scaledModelMatrix, model, "");
+
+  for (objid id: objectH.children){
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject);
+  }
+}
+
+struct traversalData {
+  objid id;
+  glm::mat4 modelMatrix;
+  glm::mat4 parentMatrix;
+};
+void traverseScene(Scene& scene, std::vector<LayerInfo>& layers, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
+  std::vector<traversalData> datum;
+  objid id = scene.rootId;
+  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string) -> void {
+    datum.push_back(traversalData{
+      .id = foundId,
+      .modelMatrix = modelMatrix,
+      .parentMatrix = parentMatrix,
+    });
+  });
+  
+  for (auto layer : layers){      // @TODO could organize this before to not require pass on each frame
+    for (auto data : datum){
+      auto gameobject = scene.idToGameObjects.at(data.id);
+      if (gameobject.layer == layer.name){
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, layer.ignoreDepthBuffer, gameobject.fragshader);
+      }
+    }  
+  }
+}
+
+void traverseScene(Scene& scene, std::vector<LayerInfo>& layers, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
+  traverseScene(scene, layers, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
+}
+
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
+  traverseScene(sandbox.mainScene, sandbox.layers, onObject);
+}
+
+glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
+  return sandbox.cache.absolutePositions.at(id).transform;
+}
+
+////////////////////
+
+
+void updatePositionForObject(SceneSandbox& sandbox, objid id, Transformation transform){
+  sandbox.cache.absolutePositions[id] = TransformCachePosition {
+    .transform =  matrixFromComponents(glm::mat4(1.f), transform.position, transform.scale, transform.rotation),
+    .isPhysics = true,
+  };
+}
+void updateScaleForObject(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+  getGameObject(sandbox, id).transformation.scale = scale;
+}
+void updatePositionForObject(SceneSandbox& sandbox, objid id, glm::vec3 position){
+  getGameObject(sandbox, id).transformation.position = position;
+}
+void updateRotationForObject(SceneSandbox& sandbox, objid id, glm::quat rotation){
+  getGameObject(sandbox, id).transformation.rotation = rotation;
+}
+
+void updateAbsolutePositions(Scene& mainScene, TransformCache& cache, std::vector<LayerInfo>& layers){
+  traverseScene(mainScene, layers, [&cache](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
+    cache.absolutePositions[traversedId] = TransformCachePosition{
+      .transform = model,
+      .isPhysics = false,
+    };
+  });
+}
+
+void updateLocalTransform(SceneSandbox& sandbox, objid id){
+  // physics objects maintain their newly updated positions 
+  // this means that constraints are effectively null for physics objects that are children to something else
+  // basic objects maintain their constraints 
+  // - this means regular object stays the same
+  // - basic object parented to a physics object should have the same relative transform according to the parent
+  auto absTransformCache = sandbox.cache.absolutePositions.at(id); 
+  auto parentTransform = sandbox.cache.absolutePositions.at(getGameObjectH(sandbox, id).parentId).transform;
+  auto relativeTransform = glm::inverse(parentTransform) * absTransformCache.transform;
+  if (absTransformCache.isPhysics){
+    getGameObject(sandbox, id).transformation = getTransformationFromMatrix(relativeTransform);
+  }
+}
+void calculateLocalTransforms(SceneSandbox& sandbox){
+  for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjects){
+    if (id == 0){
+      continue;
+    }
+    updateLocalTransform(sandbox, id);
+  }
+}
+
+void updatePositionCache(SceneSandbox& sandbox){
+  calculateLocalTransforms(sandbox);
+}
+
+TransformCache createTransformCache(Scene& mainScene, std::vector<LayerInfo>& layers){
+  std::map<objid, TransformCachePosition> absolutePositions;
+  TransformCache cache {
+    .absolutePositions = absolutePositions,
+  };
+  updateAbsolutePositions(mainScene, cache, layers);
+  return cache;
+}
+
+void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, TransformCache& cache, objid id){
+  std::cout << "add to cache" << std::endl;
+  updateAbsolutePositions(mainScene, cache, layers);
+}
+void removeObjectFromCache(TransformCache& cache, objid id){
+  std::cout << "remove to cache" << std::endl;
+  // for now this clears every frame so whatever just leave since it'll rebuild, but that's not good enough eventually
+}
+
+///////////////////////////////////////////////////
+
 objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   assert(name == gameobjectObj.name);
   auto gameobjectH = GameObjectH {
@@ -112,6 +249,8 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
 }
 
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
+  std::vector<LayerInfo>& layers,
+  TransformCache& cache,
   Scene& scene, 
   objid sceneId,
   objid rootId, 
@@ -126,6 +265,8 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
 
+  std::vector<objid> addedIds;
+
   for (auto [nodeId, transform] : gameobjTransforms){
     if (nodeId == rootIdNode){
       continue;
@@ -138,7 +279,8 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
     auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
-    addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
+    auto addedId = addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
+    addedIds.push_back(addedId);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -148,6 +290,10 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
     enforceParentRelationship(scene, realChildId, realParentId);
   }
   enforceRootObjects(scene);
+  for (auto id : addedIds){
+    addObjectToCache(scene, layers, cache, id);
+  }
+
   return nameToAdditionalFields;
 } 
 
@@ -181,6 +327,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto addedId = addObjectToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
+  addObjectToCache(sandbox.mainScene, sandbox.layers, sandbox.cache, addedId);
 
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
@@ -240,6 +387,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
+    removeObjectFromCache(sandbox.cache, id);
 
     std::cout << "scene id: " << sceneId << std::endl;
     std::cout << "object name: " << objectName << std::endl;
@@ -258,49 +406,6 @@ std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId){
     }
   }
   return allObjects;
-}
-
-void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
-  GameObject object = scene.idToGameObjects.at(objectH.id);
-  glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
-  
-  glm::vec3 scaling = object.transformation.scale * totalScale;  // having trouble with doing the scaling here so putting out of band.   Anyone in the ether please help if more elegant. 
-  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
-
-  onObject(id, scaledModelMatrix, model, "");
-
-  for (objid id: objectH.children){
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject);
-  }
-}
-
-struct traversalData {
-  objid id;
-  glm::mat4 modelMatrix;
-  glm::mat4 parentMatrix;
-};
-void traverseScene(Scene& scene, std::vector<LayerInfo> layers, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  std::vector<traversalData> datum;
-
-  objid id = scene.rootId;
-  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string) -> void {
-    datum.push_back(traversalData{
-      .id = foundId,
-      .modelMatrix = modelMatrix,
-      .parentMatrix = parentMatrix,
-    });
-  });
-  
-
-  for (auto layer : layers){      // @TODO could organize this before to not require pass on each frame
-    for (auto data : datum){
-      auto gameobject = scene.idToGameObjects.at(data.id);
-      if (gameobject.layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, layer.ignoreDepthBuffer, gameobject.fragshader);
-      }
-    }  
-  }
 }
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
@@ -350,16 +455,20 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
   Scene mainScene {
     .rootId = 0,
-    .sceneToNameToId = {{ 0, {}}}
+    .sceneToNameToId = {{ 0, {}}},
   };
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   auto rootObj = gameObjectFromFields("root", mainScene.rootId, rootGameObject()); 
-  addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
+  auto rootObjId = addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
+
+  auto cache = createTransformCache(mainScene, layers);
+  addObjectToCache(mainScene, layers, cache, rootObjId);
 
   SceneSandbox sandbox {
     .mainScene = mainScene,
     .layers = layers,
+    .cache = cache,
   };
   return sandbox;
 }
@@ -419,28 +528,6 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
   return objh;
 }
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  traverseScene(scene, sandbox.layers, initialModel, scale, onObject);
-}
-
-void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  traverseScene(sandbox, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
-}
-
-void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
-  traverseScene(sandbox, sandbox.mainScene, onObject);
-}
-
-void updateAbsolutePositions(SceneSandbox& sandbox){
-  sandbox.mainScene.absolutePositions = {};
-  traverseScene(sandbox, sandbox.mainScene, [&sandbox](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
-    sandbox.mainScene.absolutePositions[traversedId] = model;
-  });
-}
-
-glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
-  return sandbox.mainScene.absolutePositions.at(id);
-}
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
   assert(gameobj.has_value());
@@ -476,6 +563,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;
+    addObjectToCache(sandbox.mainScene, sandbox.layers, sandbox.cache, id);
   }
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
@@ -504,7 +592,6 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
   return data;
 }
 
-// This should find the root of the scene and remove that element + all children (clean up empty scenes i guess? -> but would require unloading the scene!) 
 void removeScene(SceneSandbox& sandbox, objid sceneId){
   removeObjectsFromScenegraph(sandbox,listObjInScene(sandbox, sceneId));
   pruneSceneId(sandbox, sceneId);
@@ -523,7 +610,7 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId){
-  auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
+  auto nameToAdditionalFields = addSubsceneToRoot(sandbox.layers, sandbox.cache, sandbox.mainScene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
   return nameToAdditionalFields;
 }
 

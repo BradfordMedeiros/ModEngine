@@ -51,9 +51,14 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
     }
     content = content + "\n";
   }
+  return content;
+}
 
-  //   std::set<objid> children;
-
+std::string debugTransformCache(SceneSandbox& sandbox){
+  std::string content = "";
+  for (auto &[id, transform] : sandbox.cache.absolutePositions){
+    content += std::to_string(id) + "\n";
+  }
   return content;
 }
 

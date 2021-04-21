@@ -19,6 +19,7 @@
 #include "./serialization.h"
 #include "./serialobject.h"
 
+
 struct GameObjectH {
   objid id;
   objid parentId;
@@ -27,13 +28,20 @@ struct GameObjectH {
   objid sceneId;
 };
 
+struct TransformCachePosition {
+  glm::mat4 transform;
+  bool isPhysics;
+};
+
+struct TransformCache {
+  std::map<objid, TransformCachePosition> absolutePositions;
+};
+
 struct Scene {
   objid rootId;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
-
-  std::map<objid, glm::mat4> absolutePositions;
 };
 
 struct SceneDeserialization {
@@ -45,6 +53,8 @@ struct SceneSandbox {
   std::map<objid, objid> sceneIdToRootObj;
   Scene mainScene;
   std::vector<LayerInfo> layers;
+
+  TransformCache cache;
 };
 
 std::string serializeObject(SceneSandbox& sandbox, objid id, std::function<std::vector<std::pair<std::string, std::string>>(objid)> getAdditionalFields, bool includeIds, std::string overrideName);
@@ -104,6 +114,11 @@ std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 
-void updateAbsolutePositions(SceneSandbox& sandbox);
+void updatePositionForObject(SceneSandbox& sandbox, objid id, Transformation transform);
+void updateScaleForObject(SceneSandbox& sandbox, objid id, glm::vec3 position);
+void updatePositionForObject(SceneSandbox& sandbox, objid id, glm::vec3 scale);
+void updateRotationForObject(SceneSandbox& sandbox, objid id, glm::quat rotation);
+
+void updatePositionCache(SceneSandbox& sandbox);
 
 #endif 
