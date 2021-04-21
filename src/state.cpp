@@ -48,6 +48,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .recordingIndex = -1,
     .renderMode = RENDER_FINAL,
     .snappingMode = SNAP_RELATIVE,
+    .drawPoints = false,
 	};
 	return state;
 }

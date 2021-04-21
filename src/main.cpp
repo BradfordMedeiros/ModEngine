@@ -507,7 +507,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      drawMesh(world.meshes.at("./res/models/cone/cone.obj"), newShader); 
+      drawMesh(world.meshes.at("./res/models/cone/cone.obj"), newShader, false); 
     }
 
     // bounding code //////////////////////
@@ -519,7 +519,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f))));
 
       if (objectSelected){
-        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), newShader);
+        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), newShader, false);
       }
       glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), meshObj -> discardAmount); 
       glUniform1f(glGetUniformLocation(newShader, "emissionAmount"), meshObj -> emissionAmount); 
@@ -554,7 +554,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       state.showBoneWeight,
       state.useBoneTransform,
       (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
-      modelMatrix
+      modelMatrix,
+      state.drawPoints
     );
     numTriangles = numTriangles + trianglesDrawn;
 
@@ -956,6 +957,7 @@ int main(int argc, char* argv[]){
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
+  glPointSize(10.f);
   
   std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");

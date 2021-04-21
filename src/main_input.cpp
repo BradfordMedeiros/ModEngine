@@ -571,6 +571,15 @@ std::vector<InputDispatch> inputFns = {
       state.showCameras = !state.showCameras;
       std::cout << "show cameras: " << state.showCameras << std::endl;
     }
+  },
+  InputDispatch{
+    .sourceKey = 79,  // O
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.drawPoints = !state.drawPoints;
+    }
   }
 };
 
