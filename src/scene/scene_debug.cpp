@@ -57,6 +57,15 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
   return content;
 }
 
+std::string debugTransformCache(SceneSandbox& sandbox){
+  std::string content = "";
+  for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
+    content += std::to_string(id) + " " + print(transform.position) + " " + print(transform.scale) + "\n";
+  }
+  content = content + "\n";
+  return content;  
+}
+
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;

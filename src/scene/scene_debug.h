@@ -10,6 +10,7 @@
 std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping);
 std::string debugAllGameObjects(SceneSandbox& sandbox);
 std::string debugAllGameObjectsH(SceneSandbox& sandbox);
+std::string debugTransformCache(SceneSandbox& sandbox);
 void printPhysicsInfo(PhysicsInfo physicsInfo);
 void dumpPhysicsInfo(std::map<objid, btRigidBody*>& rigidbodys);
 
