@@ -282,7 +282,8 @@ int renderObject(
   bool showBoneWeight,
   bool useBoneTransform,
   unsigned int portalTexture,
-  glm::mat4 model
+  glm::mat4 model,
+  bool drawPoints
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

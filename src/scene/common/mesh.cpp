@@ -169,7 +169,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
   return load2DMeshHelper(imagePath, uiVerts, indices, 20, 6, 3, 2, ensureLoadTexture);  
 }
 
-void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId){
+void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints){
   glBindVertexArray(mesh.VAOPointer);
  
   glActiveTexture(GL_TEXTURE0); 
@@ -189,6 +189,10 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
 
   glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
+
+  if (drawPoints){
+    glDrawElements(GL_POINTS, mesh.numElements, GL_UNSIGNED_INT, 0);   
+  }
 }
 
 void drawLines(std::vector<Line> allLines){

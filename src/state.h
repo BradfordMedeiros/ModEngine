@@ -58,6 +58,7 @@ struct engineState {
   objid recordingIndex;
   RENDER_MODE renderMode;
   SNAPPING_MODE snappingMode;
+  bool drawPoints;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

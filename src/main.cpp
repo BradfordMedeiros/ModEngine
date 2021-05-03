@@ -554,7 +554,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       state.showBoneWeight,
       state.useBoneTransform,
       (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
-      modelMatrix
+      modelMatrix,
+      state.drawPoints
     );
     numTriangles = numTriangles + trianglesDrawn;
 
@@ -954,6 +955,7 @@ int main(int argc, char* argv[]){
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
+  glPointSize(10.f);
   
   std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");

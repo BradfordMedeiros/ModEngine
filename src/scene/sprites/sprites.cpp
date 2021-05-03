@@ -11,7 +11,7 @@ std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad){
 void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height){
   glm::mat4 modelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(left, top, 0)), glm::vec3(width * 1.0f, height * 1.0f, 1.0f)); 
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-  drawMesh(mesh, shaderProgram);
+  drawMesh(mesh, shaderProgram, -1, -1, false);
 }
 void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height){
   drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height);

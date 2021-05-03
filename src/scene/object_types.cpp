@@ -399,7 +399,8 @@ int renderObject(
   bool showBoneWeight,
   bool useBoneTransform,
   unsigned int portalTexture,
-  glm::mat4 model
+  glm::mat4 model,
+  bool drawPoints
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -427,7 +428,7 @@ int renderObject(
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
-      drawMesh(meshToRender, shaderProgram, meshObj -> texture.textureOverloadId);   
+      drawMesh(meshToRender, shaderProgram, meshObj -> texture.textureOverloadId, -1, drawPoints);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
