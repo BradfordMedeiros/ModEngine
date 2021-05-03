@@ -260,13 +260,24 @@ std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId){
   return allObjects;
 }
 
+glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
+  glm::mat4 modelMatrix = glm::translate(initialModel, position);
+  modelMatrix = modelMatrix * glm::toMat4(rotation);
+  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
+  return scaledModelMatrix;
+}
+
 void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
   GameObject object = scene.idToGameObjects.at(objectH.id);
-  glm::mat4 modelMatrix = glm::translate(model, object.transformation.position);
-  modelMatrix = modelMatrix * glm::toMat4(object.transformation.rotation);
+  glm::vec3 scaling = object.transformation.scale * totalScale;
   
-  glm::vec3 scaling = object.transformation.scale * totalScale;  // having trouble with doing the scaling here so putting out of band.   Anyone in the ether please help if more elegant. 
-  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
+  glm::mat4 modelMatrix = matrixFromComponents(
+    model,
+    object.transformation.position, 
+    glm::vec3(1.f, 1.f, 1.f), 
+    object.transformation.rotation
+  );
+  auto scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
 
   onObject(id, scaledModelMatrix, model, "");
 
