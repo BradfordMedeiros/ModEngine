@@ -452,6 +452,17 @@ void updateAbsolutePositions(SceneSandbox& sandbox){
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   sandbox.mainScene.absoluteTransforms[id] = transform;
 }
+void updateLocalTransform(SceneSandbox& sandbox, objid id){
+  // physics objects maintain their newly updated positions 
+  // this means that constraints are effectively null for physics objects that are children to something else
+  // basic objects maintain their constraints 
+  // - this means regular object stays the same
+  // - basic object parented to a physics object should have the same relative transform according to the parent
+  auto absTransformCache = sandbox.mainScene.absolutePositions.at(id); 
+  auto parentTransform = sandbox.mainScene.absolutePositions.at(getGameObjectH(sandbox, id).parentId);
+  auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
+  getGameObject(sandbox, id).transformation = getTransformationFromMatrix(relativeTransform);
+}
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.absolutePositions.at(id);
