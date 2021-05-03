@@ -282,7 +282,7 @@ void selectItem(objid selectedId, Color pixelColor){
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
   shouldCallItemSelected = true;
-  onManipulatorSelectItem(
+  /*onManipulatorSelectItem(
     groupId, 
     selectedSubObj.name,
     []() -> objid {
@@ -299,7 +299,7 @@ void selectItem(objid selectedId, Color pixelColor){
     },
     getGameObjectPos,
     setGameObjectPosition
-  );
+  );*/
 
   setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
@@ -361,7 +361,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
     selectItemCalled = true;
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
-    onManipulatorMouseRelease();
+    //onManipulatorMouseRelease();
   }
 
   schemeBindings.onMouseCallback(button, action, mods);
