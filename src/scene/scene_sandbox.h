@@ -34,6 +34,7 @@ struct Scene {
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
 
   std::map<objid, glm::mat4> absolutePositions;
+  std::map<objid, Transformation> absoluteTransforms;
 };
 
 struct SceneDeserialization {
@@ -105,5 +106,6 @@ int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 
 void updateAbsolutePositions(SceneSandbox& sandbox);
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
 
 #endif 

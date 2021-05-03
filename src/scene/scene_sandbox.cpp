@@ -449,6 +449,10 @@ void updateAbsolutePositions(SceneSandbox& sandbox){
   });
 }
 
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+  sandbox.mainScene.absoluteTransforms[id] = transform;
+}
+
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.absolutePositions.at(id);
 }

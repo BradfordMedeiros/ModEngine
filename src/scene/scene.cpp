@@ -106,10 +106,10 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
 
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-void addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initialLoad, std::vector<glm::vec3> verts){
+btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initialLoad, std::vector<glm::vec3> verts){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
-    return;
+    return NULL;
   }
 
   btRigidBody* rigidBody = NULL;
@@ -259,6 +259,7 @@ void addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initial
   if (rigidBody != NULL){
     world.rigidbodys[id] = rigidBody;   
   }
+  return rigidBody;
 }
 void rmRigidBody(World& world, objid id){
   auto rigidBodyPtr = world.rigidbodys.at(id);
@@ -457,6 +458,7 @@ void addObjectToWorld(
         return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels);
       },
       [&world, id]() -> void {
+        assert(false); // think about what this should do better!
         updatePhysicsBody(world, id);
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
@@ -521,7 +523,11 @@ void addSerialObjectsToWorld(
     if (idToModelVertexs.find(id) != idToModelVertexs.end()){
       modelVerts = idToModelVertexs.at(id);
     }
-    addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts);   
+    auto physicsBody = addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts); 
+    if (physicsBody != NULL){
+      //auto transform = fullTransformation(world.sandbox, id);
+      //setTransform(physicsBody, transform.position, transform.scale, transform.rotation);
+    }  
   }
 
   for (auto id : idsAdded){
