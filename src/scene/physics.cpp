@@ -242,6 +242,12 @@ void setScale(btRigidBody* body, float width, float height, float depth){
 glm::vec3 getScale(btRigidBody* body){
   return btToGlm(body -> getCollisionShape() -> getLocalScaling());
 }
+
+void setTransform(btRigidBody* body, glm::vec3 pos, glm::vec3 scale, glm::quat rotation){
+  setPosition(body, pos);
+  setScale(body, scale.x, scale.y, scale.z);
+  setRotation(body, rotation);
+}
     
 void checkCollisions(physicsEnv& env){   
   auto dispatcher = env.dynamicsWorld -> getDispatcher();
