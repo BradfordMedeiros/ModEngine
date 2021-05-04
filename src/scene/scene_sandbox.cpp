@@ -273,6 +273,9 @@ glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::
   glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
   return scaledModelMatrix;
 }
+glm::mat4 matrixFromComponents(Transformation transformation){
+  return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
+}
 
 void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
   GameObject object = scene.idToGameObjects.at(objectH.id);
@@ -445,20 +448,23 @@ void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   traverseScene(sandbox, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
 }
+void traverseScene(Scene& scene, std::vector<LayerInfo>& layers, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
+  traverseScene(scene, layers, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
+}
 
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, bool, std::string)> onObject){
   traverseScene(sandbox, sandbox.mainScene, onObject);
 }
 
 void updateAbsolutePositions(SceneSandbox& sandbox){
-  sandbox.mainScene.absolutePositions = {};
-  traverseScene(sandbox, sandbox.mainScene, [&sandbox](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
-    sandbox.mainScene.absolutePositions[traversedId] = model;
+  sandbox.mainScene.absoluteTransforms = {};
+  traverseScene(sandbox.mainScene, sandbox.layers, [&sandbox](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
+    sandbox.mainScene.absoluteTransforms[traversedId] = getTransformationFromMatrix(model);
   });
 }
 
 void updateSandbox(SceneSandbox& sandbox){
-
+  updateAbsolutePositions(sandbox);
 }
 
 void addObjectToCache(Scene& mainScene, objid id){
@@ -480,14 +486,14 @@ void updateLocalTransform(SceneSandbox& sandbox, objid id){
   // basic objects maintain their constraints 
   // - this means regular object stays the same
   // - basic object parented to a physics object should have the same relative transform according to the parent
-  auto absTransformCache = sandbox.mainScene.absolutePositions.at(id); 
-  auto parentTransform = sandbox.mainScene.absolutePositions.at(getGameObjectH(sandbox, id).parentId);
+  auto absTransformCache = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id)); 
+  auto parentTransform = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(getGameObjectH(sandbox, id).parentId));
   auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
   getGameObject(sandbox, id).transformation = getTransformationFromMatrix(relativeTransform);
 }
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
-  return sandbox.mainScene.absolutePositions.at(id);
+  return matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id));
 }
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);

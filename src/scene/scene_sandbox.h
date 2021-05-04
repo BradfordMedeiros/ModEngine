@@ -33,7 +33,6 @@ struct Scene {
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
 
-  std::map<objid, glm::mat4> absolutePositions;
   std::map<objid, Transformation> absoluteTransforms;
 };
 

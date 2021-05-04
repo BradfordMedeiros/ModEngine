@@ -51,9 +51,6 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
     }
     content = content + "\n";
   }
-
-  //   std::set<objid> children;
-
   return content;
 }
 
