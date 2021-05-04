@@ -896,7 +896,7 @@ void updateAttributeDelta(World& world, objid id, std::string attribute, Attribu
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
-  updateAbsolutePositions(world.sandbox);
+  updateSandbox(world.sandbox);
   updateEmitters(
     world.emitters, 
     timeElapsed, 

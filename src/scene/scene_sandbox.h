@@ -105,7 +105,9 @@ std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 
-void updateAbsolutePositions(SceneSandbox& sandbox);
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
+void updateSandbox(SceneSandbox& sandbox);
+void addObjectToCache(Scene& mainScene, objid id);
+void removeObjectFromCache(Scene& mainScene, objid id);
 
 #endif 

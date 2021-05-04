@@ -125,6 +125,7 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::map<std::string,  std::map<std::string, std::string>> nameToAdditionalFields;
   std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
+  std::vector<objid> addedIds;
 
   for (auto [nodeId, transform] : gameobjTransforms){
     if (nodeId == rootIdNode){
@@ -138,7 +139,8 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
     auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
-    addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
+    auto addedId = addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
+    addedIds.push_back(addedId);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
 
@@ -148,6 +150,9 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
     enforceParentRelationship(scene, realChildId, realParentId);
   }
   enforceRootObjects(scene);
+  for (auto id : addedIds){
+    addObjectToCache(scene, id);
+  }
   return nameToAdditionalFields;
 } 
 
@@ -181,6 +186,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto addedId = addObjectToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
+  addObjectToCache(sandbox.mainScene, addedId);
 
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
@@ -240,6 +246,7 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     auto sceneId = scene.idToGameObjectsH.at(id).sceneId;
     scene.idToGameObjects.erase(id);
     scene.idToGameObjectsH.erase(id);
+    removeObjectFromCache(scene, id);
 
     std::cout << "scene id: " << sceneId << std::endl;
     std::cout << "object name: " << objectName << std::endl;
@@ -366,7 +373,8 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   auto rootObj = gameObjectFromFields("root", mainScene.rootId, rootGameObject()); 
-  addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
+  auto rootObjId = addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
+  addObjectToCache(mainScene, rootObjId);
 
   SceneSandbox sandbox {
     .mainScene = mainScene,
@@ -449,6 +457,20 @@ void updateAbsolutePositions(SceneSandbox& sandbox){
   });
 }
 
+void updateSandbox(SceneSandbox& sandbox){
+
+}
+
+void addObjectToCache(Scene& mainScene, objid id){
+  mainScene.absoluteTransforms[id] = Transformation {
+    .position = glm::vec3(1.f, 2.f, 3.f),
+    .scale = glm::vec3(1.f, 2.f, 3.f),
+  };
+}
+void removeObjectFromCache(Scene& mainScene, objid id){
+  mainScene.absoluteTransforms.erase(id);
+}
+
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   sandbox.mainScene.absoluteTransforms[id] = transform;
 }
@@ -502,6 +524,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;
+    addObjectToCache(sandbox.mainScene, id);
   }
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
