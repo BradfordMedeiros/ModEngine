@@ -106,7 +106,7 @@ int getNumberScenesLoaded(SceneSandbox& sandbox);
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
 void updateSandbox(SceneSandbox& sandbox);
-void addObjectToCache(Scene& mainScene, objid id);
+void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id);
 void removeObjectFromCache(Scene& mainScene, objid id);
 
 #endif 

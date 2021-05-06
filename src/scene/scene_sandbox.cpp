@@ -113,6 +113,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
 
 std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   Scene& scene, 
+  std::vector<LayerInfo>& layers,
   objid sceneId,
   objid rootId, 
   objid rootIdNode, 
@@ -151,7 +152,7 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   }
   enforceRootObjects(scene);
   for (auto id : addedIds){
-    addObjectToCache(scene, id);
+    addObjectToCache(scene, layers, id);
   }
   return nameToAdditionalFields;
 } 
@@ -186,7 +187,7 @@ void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name
    // @TODO - this is a bug sort of.  If this layer does not exist in the scene already, it should be added. 
   // Result if it doesn't exist is that it just doesn't get rendered, so nbd, but it really probably should be rendered (probably as a new layer with max depth?)
   auto addedId = addObjectToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
-  addObjectToCache(sandbox.mainScene, addedId);
+  addObjectToCache(sandbox.mainScene, sandbox.layers, addedId);
 
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
@@ -377,7 +378,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
 
   auto rootObj = gameObjectFromFields("root", mainScene.rootId, rootGameObject()); 
   auto rootObjId = addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
-  addObjectToCache(mainScene, rootObjId);
+  addObjectToCache(mainScene, layers, rootObjId);
 
   SceneSandbox sandbox {
     .mainScene = mainScene,
@@ -456,18 +457,18 @@ void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4,
   traverseScene(sandbox, sandbox.mainScene, onObject);
 }
 
-void updateAbsolutePositions(SceneSandbox& sandbox){
-  sandbox.mainScene.absoluteTransforms = {};
-  traverseScene(sandbox.mainScene, sandbox.layers, [&sandbox](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
-    sandbox.mainScene.absoluteTransforms[traversedId] = getTransformationFromMatrix(model);
+void updateAbsolutePositions(Scene& mainScene, std::vector<LayerInfo>& layers){
+  mainScene.absoluteTransforms = {};
+  traverseScene(mainScene, layers, [&mainScene](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
+    mainScene.absoluteTransforms[traversedId] = getTransformationFromMatrix(model);
   });
 }
 
 void updateSandbox(SceneSandbox& sandbox){
-  updateAbsolutePositions(sandbox);
+  updateAbsolutePositions(sandbox.mainScene, sandbox.layers);
 }
 
-void addObjectToCache(Scene& mainScene, objid id){
+void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id){
   mainScene.absoluteTransforms[id] = Transformation {
     .position = glm::vec3(1.f, 2.f, 3.f),
     .scale = glm::vec3(1.f, 2.f, 3.f),
@@ -530,7 +531,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;
-    addObjectToCache(sandbox.mainScene, id);
+    addObjectToCache(sandbox.mainScene, sandbox.layers, id);
   }
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjectsH){
     sandbox.mainScene.idToGameObjectsH[id] = obj;
@@ -578,7 +579,7 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, std::string> names, 
   std::map<objid, std::map<std::string, std::string>> additionalFields,
   std::function<objid()> getNewObjectId){
-  auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
+  auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sandbox.layers, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
   return nameToAdditionalFields;
 }
 
