@@ -457,44 +457,79 @@ void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4,
   traverseScene(sandbox, sandbox.mainScene, onObject);
 }
 
-void updateAbsolutePositions(Scene& mainScene, std::vector<LayerInfo>& layers){
-  mainScene.absoluteTransforms = {};
-  traverseScene(mainScene, layers, [&mainScene](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
-    mainScene.absoluteTransforms[traversedId] = getTransformationFromMatrix(model);
-  });
-}
-
-void updateSandbox(SceneSandbox& sandbox){
-  updateAbsolutePositions(sandbox.mainScene, sandbox.layers);
-}
-
-void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id){
-  mainScene.absoluteTransforms[id] = Transformation {
-    .position = glm::vec3(1.f, 2.f, 3.f),
-    .scale = glm::vec3(1.f, 2.f, 3.f),
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+  std::cout << "updating transform (absolute): " << id << " " << print(transform.position) << std::endl;
+  sandbox.mainScene.absoluteTransforms[id] = TransformCachePosition {
+    .transform = transform,
+    .isPhysics = true,
   };
 }
-void removeObjectFromCache(Scene& mainScene, objid id){
-  mainScene.absoluteTransforms.erase(id);
+void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+  getGameObject(sandbox, id).transformation.position = position;
+}
+void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+  getGameObject(sandbox, id).transformation.position = position;
+}
+void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+  getGameObject(sandbox, id).transformation.scale = scale;
+}
+void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+  getGameObject(sandbox, id).transformation.scale = scale;
+}
+void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+  getGameObject(sandbox, id).transformation.rotation = rotation;
 }
 
-void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
-  sandbox.mainScene.absoluteTransforms[id] = transform;
-}
-void updateLocalTransform(SceneSandbox& sandbox, objid id){
+void updateLocalTransform(Scene& mainScene, objid id){
   // physics objects maintain their newly updated positions 
   // this means that constraints are effectively null for physics objects that are children to something else
   // basic objects maintain their constraints 
   // - this means regular object stays the same
   // - basic object parented to a physics object should have the same relative transform according to the parent
-  auto absTransformCache = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id)); 
-  auto parentTransform = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(getGameObjectH(sandbox, id).parentId));
+
+  auto parentId = getGameObjectH(mainScene, id).parentId;
+
+  auto parentTransform = glm::mat4(1.f);
+  if (parentId != -1){
+    parentTransform = matrixFromComponents(mainScene.absoluteTransforms.at(parentId).transform);
+  }
+  auto cacheTransform = mainScene.absoluteTransforms.at(id);
+  auto absTransformCache = matrixFromComponents(cacheTransform.transform); 
   auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
-  getGameObject(sandbox, id).transformation = getTransformationFromMatrix(relativeTransform);
+  auto localTransform = getTransformationFromMatrix(relativeTransform);
+
+  if (cacheTransform.isPhysics){
+    getGameObject(mainScene, id).transformation = localTransform;
+    std::cout << "updating transform (local) - id is: " << id << "--- " << print(localTransform.position) << std::endl;
+  }
+}
+
+void updateAbsolutePositions(Scene& mainScene, std::vector<LayerInfo>& layers){
+  traverseScene(mainScene, layers, [&mainScene](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
+    auto transform = getTransformationFromMatrix(model);
+    mainScene.absoluteTransforms[traversedId] = TransformCachePosition {
+      .transform = transform,
+      .isPhysics = false,
+    };
+    std::cout << "updating transform for: " << traversedId << " --- " << print(transform.position) << std::endl;
+  });
+}
+
+void updateSandbox(SceneSandbox& sandbox){
+  forEveryGameobj(sandbox, [&sandbox](objid id, GameObject& gameobj) -> void {
+    updateLocalTransform(sandbox.mainScene, id);
+  });
+}
+
+void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id){
+  updateAbsolutePositions(mainScene, layers);
+}
+void removeObjectFromCache(Scene& mainScene, objid id){
+  mainScene.absoluteTransforms.erase(id);
 }
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
-  return matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id));
+  return matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id).transform);
 }
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
@@ -517,7 +552,7 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
 }
 
 Transformation fullTransformation(SceneSandbox& sandbox, objid id){
-  return getTransformationFromMatrix(fullModelTransform(sandbox, id));
+  return sandbox.mainScene.absoluteTransforms.at(id).transform;
 }
 
 SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId){

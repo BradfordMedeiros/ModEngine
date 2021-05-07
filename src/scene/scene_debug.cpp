@@ -56,8 +56,8 @@ std::string debugAllGameObjectsH(SceneSandbox& sandbox){
 
 std::string debugTransformCache(SceneSandbox& sandbox){
   std::string content = "";
-  for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
-    content += std::to_string(id) + " " + "(" + print(transform.position) + ") (" + print(transform.scale) + ")\n";
+  for (auto &[id, transformCache] : sandbox.mainScene.absoluteTransforms){
+    content += std::to_string(id) + " " + "(" + print(transformCache.transform.position) + ") (" + print(transformCache.transform.scale) + ")\n";
   }
   content = content + "\n";
   return content;  

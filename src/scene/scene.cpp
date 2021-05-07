@@ -525,8 +525,8 @@ void addSerialObjectsToWorld(
     }
     auto physicsBody = addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts); 
     if (physicsBody != NULL){
-      //auto transform = fullTransformation(world.sandbox, id);
-      //setTransform(physicsBody, transform.position, transform.scale, transform.rotation);
+      auto transform = fullTransformation(world.sandbox, id);
+      setTransform(physicsBody, transform.position, transform.scale, transform.rotation);
     }  
   }
 
@@ -756,13 +756,12 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   );
   
   auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });
-  GameObject& obj = getGameObject(world, id);
 
   if (attributes.find("position") != attributes.end()){
-    obj.transformation.position = parseVec(attributes.at("position"));
+    updateRelativePosition(world.sandbox, id, parseVec(attributes.at("position")));
   }
   if (attributes.find("scale") != attributes.end()){
-    obj.transformation.scale = parseVec(attributes.at("scale"));
+    updateRelativeScale(world.sandbox, id, parseVec(attributes.at("scale")));
   }
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
@@ -770,7 +769,7 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
     if (property.propertyName == "position"){
       auto posV = std::get_if<glm::vec3>(&property.value);
       if(posV != NULL){
-        getGameObject(world, id).transformation.position = *posV;
+        updateAbsolutePosition(world.sandbox, id, *posV);
       }
     }
   }
@@ -787,7 +786,7 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
-  getGameObject(world, index).transformation.position = pos;
+  updateAbsolutePosition(world.sandbox, index, pos);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -813,7 +812,7 @@ void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, floa
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
-  getGameObject(world, index).transformation.rotation = rotation;
+  updateAbsoluteRotation(world.sandbox, index, rotation);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -829,7 +828,7 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  getGameObject(world.sandbox, index).transformation.scale = scale;
+  updateAbsoluteScale(world.sandbox, index, scale);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).collisionInfo;
@@ -848,12 +847,14 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
-    GameObject& gameobj = getGameObject(world, i);
-    // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
-    gameobj.transformation.rotation = getRotation(rigidBody);   
-    gameobj.transformation.position = getPosition(rigidBody);
-    clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
+    updateAbsoluteTransform(world.sandbox, i, Transformation {
+      .position = getPosition(rigidBody),
+      .scale = getScale(rigidBody),
+      .rotation = getRotation(rigidBody),
+    });
+    clampMaxVelocity(rigidBody, getGameObject(world, i).physicsOptions.maxspeed);
   }
+  updateSandbox(world.sandbox);
 }
 
 void updateSoundPositions(World& world){
@@ -896,7 +897,6 @@ void updateAttributeDelta(World& world, objid id, std::string attribute, Attribu
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
-  updateSandbox(world.sandbox);
   updateEmitters(
     world.emitters, 
     timeElapsed, 
