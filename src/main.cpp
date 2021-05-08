@@ -50,6 +50,7 @@
 #include "./easyuse/manipulator.h"
 #include "./common/profiling.h"
 #include "./benchmark.h"
+#include "./extensions.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -835,8 +836,10 @@ int main(int argc, char* argv[]){
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
    ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
    ("q,headlessmode", "Hide the window of the game engine", cxxopts::value<bool>()->default_value("false"))
+   ("j,extensions", "SO files to load", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("h,help", "Print help")
   ;        
+
 
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
@@ -848,6 +851,9 @@ int main(int argc, char* argv[]){
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
+
+  auto extensions = loadExtensions(result["extensions"].as<std::vector<std::string>>());
+  extensionsInit(extensions);
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
 
@@ -1448,6 +1454,7 @@ int main(int argc, char* argv[]){
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
     schemeBindings.onFloatMessage(channelFloatMessages);
+    extensionsOnFrame(extensions);
 
     portalIdCache.clear();
 
