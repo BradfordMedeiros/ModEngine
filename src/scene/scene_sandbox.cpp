@@ -502,13 +502,24 @@ void updateLocalTransform(Scene& mainScene, objid id){
   auto parentId = getGameObjectH(mainScene, id).parentId;
 
   auto parentTransform = glm::mat4(1.f);
+  glm::vec3 parentScale(1.f, 1.f, 1.f);
   if (parentId != -1){
-    parentTransform = matrixFromComponents(mainScene.absoluteTransforms.at(parentId).transform);
+    auto parentTransformElement = mainScene.absoluteTransforms.at(parentId).transform;
+    parentScale = parentTransformElement.scale;
+    parentTransformElement.scale = glm::vec3(1.f, 1.f, 1.f);
+    parentTransform = matrixFromComponents(parentTransformElement);
   }
   auto cacheTransform = mainScene.absoluteTransforms.at(id);
-  auto absTransformCache = matrixFromComponents(cacheTransform.transform); 
+  auto cacheTransformElement = cacheTransform.transform;
+
+  auto cacheTransformElementScale = cacheTransformElement.scale;
+  cacheTransformElement.scale = glm::vec3(1.f, 1.f, 1.f);
+
+  auto absTransformCache = matrixFromComponents(cacheTransformElement); 
   auto relativeTransform = glm::inverse(parentTransform) * absTransformCache;
   auto localTransform = getTransformationFromMatrix(relativeTransform);
+
+  localTransform.scale = cacheTransformElementScale / parentScale;
 
   if (cacheTransform.isPhysics){
     getGameObject(mainScene, id).transformation = localTransform;
