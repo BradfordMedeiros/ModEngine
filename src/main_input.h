@@ -13,7 +13,9 @@
 #include "./gizmo/keymapper.h"
 #include "./drawing.h"
 #include "./colorselection.h"
+#include "./benchmark.h"
 
+std::string dumpDebugInfo(bool fullInfo = true);
 std::string activeTextureName(std::map<std::string, Texture> worldTextures);
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void joystickCallback(int jid, int event);

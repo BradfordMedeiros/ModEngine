@@ -12,18 +12,35 @@ extern glm::mat4 view;
 extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
 extern float deltaTime;
+extern Benchmark benchmark;
+
+std::string dumpDebugInfo(bool fullInfo){
+  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
+  auto gameobjInfo = debugAllGameObjects(world.sandbox);
+  auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
+  auto cacheInfo = debugTransformCache(world.sandbox);
+
+  auto benchmarkingContent = benchmarkResult(benchmark);
+  auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
+
+  auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
+    "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
+    "transform cache - id pos scale" + cacheInfo + "\n" + 
+    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
+  return content;
+}
 
 void processManipulatorForId(objid id){
   if (id == -1 || !idExists(world.sandbox, id)){
     return;
   }
-  auto selectObject = getGameObject(world, id); 
+  auto fullTransform = fullTransformation(world.sandbox, id);
   if (state.manipulatorMode == TRANSLATE){
-    applyPhysicsTranslation(world, id, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsTranslation(world, id, fullTransform.position, state.offsetX, state.offsetY, state.manipulatorAxis);
   }else if (state.manipulatorMode == SCALE){
-    applyPhysicsScaling(world, id, selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsScaling(world, id, fullTransform.position, fullTransform.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
   }else if (state.manipulatorMode == ROTATE){
-    applyPhysicsRotation(world, id, selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsRotation(world, id, fullTransform.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
   } 
 }
 
@@ -579,6 +596,16 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.drawPoints = !state.drawPoints;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 79, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      std::cout << dumpDebugInfo(false) << std::endl;
+      
     }
   }
 };

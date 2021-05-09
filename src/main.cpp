@@ -49,7 +49,6 @@
 #include "./easyuse/editor.h"
 #include "./easyuse/manipulator.h"
 #include "./common/profiling.h"
-#include "./benchmark.h"
 #include "./extensions.h"
 
 unsigned int framebufferProgram;
@@ -784,20 +783,6 @@ glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
 }
 
-std::string dumpDebugInfo(){
-  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
-  auto gameobjInfo = debugAllGameObjects(world.sandbox);
-  auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
-  auto cacheInfo = debugTransformCache(world.sandbox);
-
-  auto benchmarkingContent = benchmarkResult(benchmark);
-  auto profilingInfo = dumpProfiling();
-  auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
-    "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
-    "transform cache - id pos scale" + cacheInfo + "\n" + 
-    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
-  return content;
-}
 
 void signalHandler(int signum) {
   if (showDebugInfo){

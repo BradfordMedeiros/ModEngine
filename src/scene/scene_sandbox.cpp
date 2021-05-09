@@ -249,8 +249,8 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
     scene.idToGameObjectsH.erase(id);
     removeObjectFromCache(scene, id);
 
-    std::cout << "scene id: " << sceneId << std::endl;
-    std::cout << "object name: " << objectName << std::endl;
+    //std::cout << "scene id: " << sceneId << std::endl;
+    //std::cout << "object name: " << objectName << std::endl;
     scene.sceneToNameToId.at(sceneId).erase(objectName);
     for (auto &[_, objh] : scene.idToGameObjectsH){  
       objh.children.erase(id);
@@ -458,16 +458,28 @@ void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4,
 }
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
-  std::cout << "updating transform (absolute): " << id << " " << print(transform.position) << std::endl;
+  //std::cout << "updating transform (absolute): " << id << " " << print(transform.position) << std::endl;
   sandbox.mainScene.absoluteTransforms[id] = TransformCachePosition {
     .transform = transform,
     .isPhysics = true,
   };
 }
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
-  getGameObject(sandbox, id).transformation.position = position;
+  //getGameObject(sandbox, id).transformation.position = position;
+  auto oldTransformCache = sandbox.mainScene.absoluteTransforms.at(id);
+  auto newTransform = oldTransformCache.transform;
+  newTransform.position = position;
+
+  std::cout << "Updated: " << id << "from: " << print(oldTransformCache.transform.position) <<  " to: " << print(position) << std::endl;
+
+
+  sandbox.mainScene.absoluteTransforms.at(id) = TransformCachePosition {
+    .transform = newTransform,
+    .isPhysics = true,
+  };
 }
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+  assert(false);
   getGameObject(sandbox, id).transformation.position = position;
 }
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
@@ -500,18 +512,20 @@ void updateLocalTransform(Scene& mainScene, objid id){
 
   if (cacheTransform.isPhysics){
     getGameObject(mainScene, id).transformation = localTransform;
-    std::cout << "updating transform (local) - id is: " << id << "--- " << print(localTransform.position) << std::endl;
+    mainScene.absoluteTransforms.at(id).isPhysics = false;
+    //std::cout << "updating transform (local) - id is: " << id << "--- " << print(localTransform.position) << std::endl;
   }
 }
 
 void updateAbsolutePositions(Scene& mainScene, std::vector<LayerInfo>& layers){
   traverseScene(mainScene, layers, [&mainScene](objid traversedId, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
     auto transform = getTransformationFromMatrix(model);
-    mainScene.absoluteTransforms[traversedId] = TransformCachePosition {
-      .transform = transform,
-      .isPhysics = false,
-    };
-    std::cout << "updating transform for: " << traversedId << " --- " << print(transform.position) << std::endl;
+    bool isPhysics = mainScene.absoluteTransforms.find(traversedId) != mainScene.absoluteTransforms.end() ? mainScene.absoluteTransforms.at(traversedId).isPhysics : false;
+      mainScene.absoluteTransforms[traversedId] = TransformCachePosition {
+        .transform = transform,
+        .isPhysics = false,
+      };    
+    //std::cout << "updating transform for: " << traversedId << " --- " << print(transform.position) << std::endl;
   });
 }
 
@@ -519,6 +533,7 @@ void updateSandbox(SceneSandbox& sandbox){
   forEveryGameobj(sandbox, [&sandbox](objid id, GameObject& gameobj) -> void {
     updateLocalTransform(sandbox.mainScene, id);
   });
+  updateAbsolutePositions(sandbox.mainScene, sandbox.layers);
 }
 
 void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id){
@@ -543,8 +558,8 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
 
   auto resultCheck = groupTransform * groupToModel;
   if (resultCheck != modelTransform){
-    std::cout << "result_check = " << print(resultCheck) << std::endl;
-    std::cout << "model_transform = " << print(modelTransform) << std::endl;
+    //std::cout << "result_check = " << print(resultCheck) << std::endl;
+    //std::cout << "model_transform = " << print(modelTransform) << std::endl;
     assert(false);
 
   }
