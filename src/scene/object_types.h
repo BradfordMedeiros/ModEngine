@@ -117,6 +117,8 @@ struct GameObjectUISlider {
   std::string onSlide;
 };
 
+struct GameObjectUIText {};
+
 struct GameObjectVideo {
   VideoContent video;
   std::string source;
@@ -138,6 +140,7 @@ typedef std::variant<
   GameObjectNavConns,
   GameObjectUIButton,
   GameObjectUISlider,
+  GameObjectUIText,
   GameObjectVideo
 > GameObjectObj;
 
@@ -223,6 +226,11 @@ static Field uiSliderField {
   .type = "slider",
 };
 
+static Field uiTextField {
+  .prefix = ')',
+  .type = "text",
+};
+
 static Field videoField {
   .prefix = '=',
   .type = "video",
@@ -245,6 +253,7 @@ static std::vector fields = {
   uiButtonField, 
   uiSliderField,
   videoField,
+  uiTextField,
 };
 
 std::map<objid, GameObjectObj> getObjectMapping();
@@ -283,7 +292,8 @@ int renderObject(
   bool useBoneTransform,
   unsigned int portalTexture,
   glm::mat4 model,
-  bool drawPoints
+  bool drawPoints,
+  std::function<void(std::string, unsigned int)> drawWord
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

@@ -556,7 +556,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       state.useBoneTransform,
       (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
       modelMatrix,
-      state.drawPoints
+      state.drawPoints,
+      drawWord
     );
     numTriangles = numTriangles + trianglesDrawn;
 

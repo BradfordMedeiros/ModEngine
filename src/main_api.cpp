@@ -186,7 +186,11 @@ void copyObject(int32_t id){
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);
+  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);  // remove necessarily using this shader program
+}
+
+void drawWord(std::string word, unsigned int fontSize){
+  drawText(word, 0, 0, fontSize);
 }
 
 std::vector<std::string> listAnimations(int32_t id){

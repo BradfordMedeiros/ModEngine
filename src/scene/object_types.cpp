@@ -282,6 +282,11 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
   return obj;
 }
 
+GameObjectUIText createUIText(){
+  GameObjectUIText obj {};
+  return obj;
+}
+
 GameObjectVideo createVideo(
   std::map<std::string, std::string> additionalFields, 
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded
@@ -348,6 +353,8 @@ void addObject(
     mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
     mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
+  }else if (objectType == "text"){
+    mapping[id] = createUIText();
   }else if (objectType == "video"){
     mapping[id] = createVideo(additionalFields, ensureTextureDataLoaded);
   }else{
@@ -400,7 +407,8 @@ int renderObject(
   bool useBoneTransform,
   unsigned int portalTexture,
   glm::mat4 model,
-  bool drawPoints
+  bool drawPoints,
+  std::function<void(std::string, unsigned int)> drawWord
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -600,6 +608,12 @@ int renderObject(
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 1 - uiSliderObj -> percentage);  
     drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture, uiSliderObj -> opacityTexture);  
     return uiSliderObj -> common.mesh.numTriangles;  
+  }
+
+  auto textObj = std::get_if<GameObjectUIText>(&toRender);
+  if (textObj != NULL){
+    drawWord("hello", 100);
+    return 0;
   }
 
   auto videoObj = std::get_if<GameObjectVideo>(&toRender);
@@ -880,6 +894,13 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return serializeSlider(*uiControlSliderObj);    
+  }
+
+  auto uiTextObj = std::get_if<GameObjectUIText>(&objectToSerialize);
+  if (uiTextObj != NULL){
+    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};
   }
 
   auto uiVideoObj = std::get_if<GameObjectVideo>(&objectToSerialize);
