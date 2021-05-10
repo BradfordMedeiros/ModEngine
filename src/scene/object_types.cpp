@@ -267,7 +267,7 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
+GameObjectUISlider createUISlider(std::map<std::string, std::string>& additionalFields, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
   auto onSlide = additionalFields.find("onslide") != additionalFields.end() ? additionalFields.at("onslide") : "";
 
   GameObjectUISlider obj {
@@ -282,8 +282,11 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectUIText createUIText(){
-  GameObjectUIText obj {};
+GameObjectUIText createUIText(std::map<std::string, std::string>& additionalFields){
+  auto value = additionalFields.find("value") != additionalFields.end() ? additionalFields.at("value") : "";
+  GameObjectUIText obj {
+    .value = value,
+  };
   return obj;
 }
 
@@ -354,7 +357,7 @@ void addObject(
   }else if (objectType == "slider"){
     mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "text"){
-    mapping[id] = createUIText();
+    mapping[id] = createUIText(additionalFields);
   }else if (objectType == "video"){
     mapping[id] = createVideo(additionalFields, ensureTextureDataLoaded);
   }else{
@@ -408,7 +411,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(std::string, unsigned int)> drawWord
+  std::function<void(GLint, std::string, unsigned int)> drawWord
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -612,7 +615,7 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    drawWord("hello", 100);
+    drawWord(shaderProgram, textObj -> value, 2);
     return 0;
   }
 

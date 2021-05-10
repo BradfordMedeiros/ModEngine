@@ -117,7 +117,9 @@ struct GameObjectUISlider {
   std::string onSlide;
 };
 
-struct GameObjectUIText {};
+struct GameObjectUIText {
+  std::string value;
+};
 
 struct GameObjectVideo {
   VideoContent video;
@@ -293,7 +295,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(std::string, unsigned int)> drawWord
+  std::function<void(GLint, std::string, unsigned int)> drawWord
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
