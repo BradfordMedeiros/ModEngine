@@ -499,6 +499,11 @@ void updateLocalTransform(Scene& mainScene, objid id){
   // - this means regular object stays the same
   // - basic object parented to a physics object should have the same relative transform according to the parent
 
+  auto cacheTransform = mainScene.absoluteTransforms.at(id);
+  if (!cacheTransform.isPhysics){
+    return;
+  }
+
   auto parentId = getGameObjectH(mainScene, id).parentId;
 
   auto parentTransform = glm::mat4(1.f);
@@ -509,7 +514,6 @@ void updateLocalTransform(Scene& mainScene, objid id){
     parentTransformElement.scale = glm::vec3(1.f, 1.f, 1.f);
     parentTransform = matrixFromComponents(parentTransformElement);
   }
-  auto cacheTransform = mainScene.absoluteTransforms.at(id);
   auto cacheTransformElement = cacheTransform.transform;
 
   auto cacheTransformElementScale = cacheTransformElement.scale;
@@ -521,11 +525,9 @@ void updateLocalTransform(Scene& mainScene, objid id){
 
   localTransform.scale = cacheTransformElementScale / parentScale;
 
-  if (cacheTransform.isPhysics){
-    getGameObject(mainScene, id).transformation = localTransform;
-    mainScene.absoluteTransforms.at(id).isPhysics = false;
-    //std::cout << "updating transform (local) - id is: " << id << "--- " << print(localTransform.position) << std::endl;
-  }
+  getGameObject(mainScene, id).transformation = localTransform;
+  mainScene.absoluteTransforms.at(id).isPhysics = false;
+  //std::cout << "updating transform (local) - id is: " << id << "--- " << print(localTransform.position) << std::endl;
 }
 
 void updateAbsolutePositions(Scene& mainScene, std::vector<LayerInfo>& layers){
