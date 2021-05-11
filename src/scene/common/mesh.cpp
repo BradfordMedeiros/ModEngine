@@ -6,8 +6,6 @@ void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm:
   glBufferSubData(GL_ARRAY_BUFFER, (sizeof(Vertex) * vertexIndex) + offsetof(Vertex, normal), sizeof(normal), &normal);
 }
 
-// Generating the VAO per model is probaby not the most efficient, but figure that this is 
-// a clean abstraction, and we can optimize this fucker after we get more features in it.
 Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Texture(std::string)> ensureLoadTexture){
   assert((meshData.indices.size() % 3) == 0);
   auto numTriangles = meshData.indices.size() / 3;
@@ -29,9 +27,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   glEnableVertexAttribArray(0);  
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
  
-  // @TODO texture loading can be optimized when textures are shared between objects, right now places each meshs texture in memory redundantly. right now this is super, super unoptimized.
   Texture texture;
-
   if (meshData.hasDiffuseTexture){
     texture = ensureLoadTexture(meshData.diffuseTexturePath); 
   }else{
@@ -92,7 +88,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   return mesh; 
 }
 
-Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indices[], 
+Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[], 
   unsigned int dataSize, unsigned int numIndices, unsigned int vertexWidth, unsigned int textureWidth, std::function<Texture(std::string)> ensureLoadTexture){
   unsigned int bufferWidth = vertexWidth + textureWidth;
 
@@ -130,43 +126,32 @@ Mesh load2DMeshHelper(std::string imagePath, float vertices[], unsigned int indi
     .numElements = numIndices,
     .boundInfo = boundInfo,
     .bones = bones,
+    .numTriangles = numIndices / 3,
   };
 
   return mesh;
 }
-Mesh load2DMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture){
-  float quadVerts[] = {
-    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-    1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
-  };
-  unsigned int indices[] = {0, 1, 2, 0, 2, 3};
-  return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2, ensureLoadTexture);  // @TODO last 4 nums seem derivable in load2dmesh helper
-}
-Mesh load2DMeshTexCoords(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi, std::function<Texture(std::string)> ensureLoadTexture){
-  float quadVerts[] = {
+
+Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi, std::function<Texture(std::string)> ensureLoadTexture){
+  float verts[] = {
     -1.0f,  1.0f, 0.0f,  offsetxndi, offsetyndi + heightndi,
     -1.0f, -1.0f, 0.0f,  offsetxndi, offsetyndi,
     1.0f, -1.0f, 0.0f,   offsetxndi + widthndi, offsetyndi,
     1.0f,  1.0f, 0.0f,   offsetxndi + widthndi, offsetyndi + heightndi,
   };
   unsigned int indices[] = {0, 1, 2, 0, 2, 3};
-  return load2DMeshHelper(imagePath, quadVerts, indices, 20, 6, 3, 2, ensureLoadTexture);
-}
-Mesh loadMeshFrom3Vert2TexCoords(std::string imagePath, std::vector<float> vertices, std::vector<unsigned int> indicies, std::function<Texture(std::string)> ensureLoadTexture){
-  return load2DMeshHelper(imagePath, &(vertices[0]), &indicies[0], vertices.size(), indicies.size(), 3, 2, ensureLoadTexture);
+  return load2DMesh(imagePath, verts, indices, 20, 6, 3, 2, ensureLoadTexture);
 }
 
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture){
-  float uiVerts[] = {
+  float verts[] = {
     0.0f,  1.0f, 0.0f,  0.0f, 1.0f,
     0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
     1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
     1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
   };
   unsigned int indices[] = {0, 1, 2, 0, 2, 3};
-  return load2DMeshHelper(imagePath, uiVerts, indices, 20, 6, 3, 2, ensureLoadTexture);  
+  return load2DMesh(imagePath, verts, indices, 20, 6, 3, 2, ensureLoadTexture);  
 }
 
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints){

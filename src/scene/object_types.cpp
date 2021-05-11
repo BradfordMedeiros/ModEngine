@@ -411,7 +411,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(GLint, std::string, unsigned int)> drawWord
+  std::function<void(GLint, objid, std::string, unsigned int)> drawWord
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -615,7 +615,12 @@ int renderObject(
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
   if (textObj != NULL){
-    drawWord(shaderProgram, textObj -> value, 2);
+    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawWord(shaderProgram, id, textObj -> value, 2);
     return 0;
   }
 
