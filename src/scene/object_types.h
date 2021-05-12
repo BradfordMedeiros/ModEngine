@@ -125,6 +125,7 @@ enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
+  std::vector<std::string> elements;
 };
 
 struct GameObjectVideo {

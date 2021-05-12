@@ -162,3 +162,7 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
 void emit(World& world, objid id){
   emitNewParticle(world.emitters, id);
 }
+
+void enforceAllLayouts(World& world){
+  std::cout << "enforce layouts placeholder" << std::endl;
+}

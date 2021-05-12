@@ -40,4 +40,6 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 
 void emit(World& world, objid id);
 
+void enforceAllLayouts(World& world);
+
 #endif

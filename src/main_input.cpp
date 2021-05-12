@@ -152,6 +152,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 
 void keyCharCallback(unsigned int codepoint){
   schemeBindings.onKeyCharCallback(codepoint); 
+  //std::cout << "Key is: " << codepoint << std::endl;
   applyKey(world.objectMapping, codepoint, [](std::string text) -> void {
     std::cout << "set text placeholder: " << text << std::endl;
   }); 
@@ -261,8 +262,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == 260){
     clearSelectedIndexs(state.editor);
   }
-
-  std::cout << "key is: " << key << std::endl;
 }
 
 void onMouseButton(){    
@@ -579,6 +578,15 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.drawPoints = !state.drawPoints;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 59,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      enforceAllLayouts(world);
     }
   }
 };
