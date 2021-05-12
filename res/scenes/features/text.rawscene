@@ -1,2 +1,4 @@
 
-)text_1:value:h
+)credit1:value:writer =>
+)credit1:child:)credit2
+

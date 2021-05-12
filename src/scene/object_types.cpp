@@ -290,6 +290,16 @@ GameObjectUIText createUIText(std::map<std::string, std::string>& additionalFiel
   return obj;
 }
 
+GameObjectUILayout createUILayout(std::map<std::string, std::string>& additionalFields){
+  auto spacing = additionalFields.find("spacing") == additionalFields.end() ? 0 : std::atof(additionalFields.at("spacing").c_str());
+  auto type = (additionalFields.find("type") == additionalFields.end() && additionalFields.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
+  GameObjectUILayout obj{
+    .type = type,
+    .spacing = spacing,
+  };
+  return obj;
+}
+
 GameObjectVideo createVideo(
   std::map<std::string, std::string> additionalFields, 
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded
@@ -358,6 +368,8 @@ void addObject(
     mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
   }else if (objectType == "text"){
     mapping[id] = createUIText(additionalFields);
+  }else if (objectType == "layout"){
+    mapping[id] = createUILayout(additionalFields);
   }else if (objectType == "video"){
     mapping[id] = createVideo(additionalFields, ensureTextureDataLoaded);
   }else{
@@ -621,6 +633,15 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     drawWord(shaderProgram, id, textObj -> value, 2);
+    return 0;
+  }
+
+  auto layoutObj = std::get_if<GameObjectUILayout>(&toRender);
+  if (layoutObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawMesh(nodeMesh, shaderProgram);
     return 0;
   }
 
@@ -906,6 +927,13 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 
   auto uiTextObj = std::get_if<GameObjectUIText>(&objectToSerialize);
   if (uiTextObj != NULL){
+    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};
+  }
+
+  auto uiLayoutObj = std::get_if<GameObjectUILayout>(&objectToSerialize);
+  if (uiLayoutObj != NULL){
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};

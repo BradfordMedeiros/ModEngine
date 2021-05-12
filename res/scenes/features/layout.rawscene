@@ -1,0 +1,13 @@
+
+)credit1:value:writer
+
+*basicbutton:ontexture:./res/textures/wood.jpg
+*basicbutton:offtexture:./res/textures/window.png
+*basicbutton:position:0.1 0 0
+*basicbutton:state:on
+*basicbutton:ontint:0 0 1
+
+(layout:position:0 0 0
+(layout:type:horizontal
+(layout:elements:)credit1,*basicbutton
+(layout:spacing:0.1

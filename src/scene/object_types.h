@@ -121,6 +121,12 @@ struct GameObjectUIText {
   std::string value;
 };
 
+enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
+struct GameObjectUILayout {
+  UILayoutType type;
+  float spacing;
+};
+
 struct GameObjectVideo {
   VideoContent video;
   std::string source;
@@ -143,6 +149,7 @@ typedef std::variant<
   GameObjectUIButton,
   GameObjectUISlider,
   GameObjectUIText,
+  GameObjectUILayout,
   GameObjectVideo
 > GameObjectObj;
 
@@ -233,6 +240,11 @@ static Field uiTextField {
   .type = "text",
 };
 
+static Field uiLayoutField {
+  .prefix = '(',
+  .type = "layout",
+};
+
 static Field videoField {
   .prefix = '=',
   .type = "video",
@@ -256,6 +268,7 @@ static std::vector fields = {
   uiSliderField,
   videoField,
   uiTextField,
+  uiLayoutField,
 };
 
 std::map<objid, GameObjectObj> getObjectMapping();
