@@ -292,16 +292,18 @@ GameObjectUIText createUIText(std::map<std::string, std::string>& additionalFiel
 
 GameObjectUILayout createUILayout(std::map<std::string, std::string>& additionalFields){
   auto spacing = additionalFields.find("spacing") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("spacing").c_str());
-  auto type = (additionalFields.find("type") == additionalFields.end() && additionalFields.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
+  auto type = (additionalFields.find("type") != additionalFields.end() && additionalFields.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
   
   std::vector<std::string> elements = {};
   if (additionalFields.find("elements") != additionalFields.end()){
     elements = split(additionalFields.at("elements"), ',');
   }
+  auto order = (additionalFields.find("order") == additionalFields.end()) ? 0 : std::atoi(additionalFields.at("order").c_str());
   GameObjectUILayout obj{
     .type = type,
     .spacing = spacing,
     .elements = elements,
+    .order = order,
   };
   return obj;
 }

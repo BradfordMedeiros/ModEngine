@@ -163,6 +163,69 @@ void emit(World& world, objid id){
   emitNewParticle(world.emitters, id);
 }
 
-void enforceAllLayouts(World& world){
-  std::cout << "enforce layouts placeholder" << std::endl;
+
+void enforceLayout(World& world, objid id){
+  auto objectLayout = world.objectMapping.at(id);
+  auto layoutObject = std::get_if<GameObjectUILayout>(&objectLayout);
+  auto elements = layoutObject -> elements;
+  auto currentSceneId = sceneId(world.sandbox, id);
+  auto spacing = layoutObject -> spacing;
+
+  auto layoutType = layoutObject -> type;
+  auto firstTransform = getGameObject(world.sandbox, elements.at(0), currentSceneId).transformation;
+
+  if (layoutType == LAYOUT_HORIZONTAL){
+    auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
+    auto horizontal = rootPosition.x;
+    auto fixedY = rootPosition.y;
+    for (int i = 0; i < elements.size(); i++){
+      GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
+      obj.transformation.position.x = horizontal;
+      obj.transformation.position.y = fixedY;
+      horizontal += spacing;
+    }
+  }else if (layoutType == LAYOUT_VERTICAL){
+    auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
+    auto vertical = rootPosition.y;
+    auto fixedX = rootPosition.x;
+    for (int i = 0; i < elements.size(); i++){
+      GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
+      obj.transformation.position.y = vertical;
+      obj.transformation.position.x = fixedX;
+      vertical += spacing;
+    }  
+  }
 }
+
+struct UILayoutAndId {
+  objid id;
+  GameObjectUILayout* layout;
+};
+
+std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
+  std::vector<UILayoutAndId> layouts;
+  auto layoutIndexs = getGameObjectsIndex<GameObjectUILayout>(world.objectMapping);
+  for (auto id : layoutIndexs){
+    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
+    layouts.push_back(UILayoutAndId{
+      .id = id,
+      .layout = layoutObject,
+    });
+  }
+  std::sort(
+    std::begin(layouts), 
+    std::end(layouts), 
+    [](UILayoutAndId layout1, UILayoutAndId layout2) { 
+      return layout1.layout -> order < layout2.layout -> order; 
+    }
+  );
+  return layouts;
+}
+
+void enforceAllLayouts(World& world){
+  auto layouts = layoutsSortedByOrder(world);
+  for (auto layout : layouts){
+    enforceLayout(world, layout.id);
+  }
+}
+
