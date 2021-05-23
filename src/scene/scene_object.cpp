@@ -170,19 +170,25 @@ void enforceLayout(World& world, objid id){
   auto elements = layoutObject -> elements;
   auto currentSceneId = sceneId(world.sandbox, id);
   auto spacing = layoutObject -> spacing;
-
   auto layoutType = layoutObject -> type;
-  auto firstTransform = getGameObject(world.sandbox, elements.at(0), currentSceneId).transformation;
 
+  // Doesn't account for rotational effects of the objects, so boundingwidth/height incorrect if object is rotated
+  // Should consoilate the vertical/horizontal cases in terms of code, identical just dereffing different properties (x vs y)
   if (layoutType == LAYOUT_HORIZONTAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
     auto horizontal = rootPosition.x;
     auto fixedY = rootPosition.y;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      obj.transformation.position.x = horizontal;
+      auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
+      auto isCentered = !physicsInfo.boundInfo.isNotCentered;
+      auto boundingWidth = (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin);
+      auto objectWidth =  boundingWidth * physicsInfo.transformation.scale.x;
+      auto left = physicsInfo.boundInfo.isNotCentered ? horizontal : (horizontal + objectWidth / 2.f);
+      auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
+      obj.transformation.position.x = left;
       obj.transformation.position.y = fixedY;
-      horizontal += spacing;
+      horizontal += effectiveSpacing;
     }
   }else if (layoutType == LAYOUT_VERTICAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
@@ -190,9 +196,15 @@ void enforceLayout(World& world, objid id){
     auto fixedX = rootPosition.x;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      obj.transformation.position.y = vertical;
+      auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
+      auto isCentered = !physicsInfo.boundInfo.isNotCentered;
+      auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
+      auto objectHeight =  boundingHeight * physicsInfo.transformation.scale.y;
+      auto top = physicsInfo.boundInfo.isNotCentered ? vertical : (vertical + objectHeight / 2.f);
+      auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
       obj.transformation.position.x = fixedX;
-      vertical += spacing;
+      obj.transformation.position.y = top;
+      vertical += effectiveSpacing;
     }  
   }
 }

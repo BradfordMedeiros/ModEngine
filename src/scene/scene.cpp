@@ -72,6 +72,11 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     boundInfo = navmeshObj -> mesh.boundInfo;
   }
 
+  auto uiButtonObj = std::get_if<GameObjectUIButton>(&gameObjV);
+  if (uiButtonObj != NULL){
+    boundInfo = uiButtonObj -> common.mesh.boundInfo;
+  }
+
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .transformation = obj.transformation,
@@ -79,12 +84,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
 
   return info;
 }
-
-struct GroupPhysicsInfo {
-  bool isRoot;
-  PhysicsInfo physicsInfo;
-  physicsOpts physicsOptions;
-};
 
 GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);

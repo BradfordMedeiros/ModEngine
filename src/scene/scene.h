@@ -89,4 +89,12 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId);
 
 int getNumberOfObjects(World& world);
 
+struct GroupPhysicsInfo {
+  bool isRoot;
+  PhysicsInfo physicsInfo;
+  physicsOpts physicsOptions;
+};
+GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id);
+PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index);
+
 #endif
