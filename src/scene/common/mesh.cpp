@@ -90,8 +90,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
 
 Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[], 
   unsigned int dataSize, unsigned int numIndices, unsigned int vertexWidth, unsigned int textureWidth, std::function<Texture(std::string)> ensureLoadTexture){
-  unsigned int bufferWidth = vertexWidth + textureWidth;
 
+  unsigned int bufferWidth = vertexWidth + textureWidth;
   Texture texture = ensureLoadTexture(imagePath);
 
   unsigned int VAO;
@@ -111,9 +111,10 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
   glVertexAttribPointer(0, vertexWidth, GL_FLOAT, GL_FALSE, sizeof(float) * bufferWidth, (void*)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, textureWidth, GL_FLOAT, GL_FALSE, sizeof(float) *  bufferWidth, (void*)(sizeof(float) * vertexWidth));
-  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, textureWidth, GL_FLOAT, GL_FALSE, sizeof(float) *  bufferWidth, (void*)(sizeof(float) * vertexWidth));
+  glEnableVertexAttribArray(2);
  
+
   BoundInfo boundInfo { };
   std::vector<Bone> bones;
   Mesh mesh = {
