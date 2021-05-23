@@ -69,7 +69,7 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "y: [ " << info.yMin << ", " << info.yMax << "]" << std::endl;
   std::cout << "z: [ " << info.zMin << ", " << info.zMax << "]" << std::endl;
   std::cout << "pos: (" << physicsInfo.transformation.position.x << ", " << physicsInfo.transformation.position.y << ", " << physicsInfo.transformation.position.z << ")" << std::endl;
-  std::cout << "box: (" << physicsInfo.collisionInfo.x << ", " << physicsInfo.collisionInfo.y << ", " << physicsInfo.collisionInfo.z << ")" << std::endl;
+  std::cout << "box: (" << physicsInfo.transformation.scale.x << ", " << physicsInfo.transformation.scale.y << ", " << physicsInfo.transformation.scale.z << ")" << std::endl;
 }
 
 void dumpPhysicsInfo(std::map<objid, btRigidBody*>& rigidbodys){

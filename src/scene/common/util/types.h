@@ -26,7 +26,6 @@ struct Transformation {
 
 struct PhysicsInfo {
   BoundInfo boundInfo;
-  glm::vec3 collisionInfo;
   Transformation transformation;
 };
 

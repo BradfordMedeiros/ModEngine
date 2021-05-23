@@ -74,7 +74,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
 
   PhysicsInfo info = {
     .boundInfo = boundInfo,
-    .collisionInfo =  obj.transformation.scale,
     .transformation = obj.transformation,
   };
 
@@ -143,7 +142,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         heightmapObj -> heightmap.data,
         heightmapObj -> heightmap.width, 
         heightmapObj -> heightmap.height,
-        physicsInfo.collisionInfo,
+        physicsInfo.transformation.scale,
         heightmapObj -> heightmap.minHeight,
         heightmapObj -> heightmap.maxHeight
       );
@@ -159,7 +158,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
         !physicsInfo.boundInfo.isNotCentered,
-        physicsInfo.collisionInfo, 
+        physicsInfo.transformation.scale, 
         opts
       );
     }else if (physicsOptions.shape == SPHERE){
@@ -175,7 +174,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        physicsInfo.collisionInfo,
+        physicsInfo.transformation.scale,
         opts
       );
     }else if (physicsOptions.shape == CAPSULE){
@@ -192,7 +191,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        physicsInfo.collisionInfo,
+        physicsInfo.transformation.scale,
         opts
       );
     }else if (physicsOptions.shape == CYLINDER){
@@ -209,7 +208,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        physicsInfo.collisionInfo,
+        physicsInfo.transformation.scale,
         opts
       );
     }else if (physicsOptions.shape == CONVEXHULL){
@@ -225,7 +224,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        physicsInfo.collisionInfo,
+        physicsInfo.transformation.scale,
         opts
       );
     }else if (physicsOptions.shape == SHAPE_EXACT){
@@ -238,7 +237,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        physicsInfo.collisionInfo,
+        physicsInfo.transformation.scale,
         opts
       );
     }else if (physicsOptions.shape == AUTOSHAPE && isVoxelObj){
@@ -832,7 +831,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   getGameObject(world.sandbox, index).transformation.scale = scale;
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto collisionInfo = getPhysicsInfoForGameObject(world, index).collisionInfo;
+    auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
     auto body =  world.rigidbodys.at(index);
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
