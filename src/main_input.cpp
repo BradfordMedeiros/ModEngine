@@ -588,8 +588,64 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       enforceAllLayouts(world);
     }
-  }
+  },
+
+  InputDispatch{
+    .sourceKey = 322,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      snapCameraDown(setCameraRotation);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 324,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      snapCameraLeft(setCameraRotation);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 326,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      snapCameraRight(setCameraRotation);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 327,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      snapCameraForward(setCameraRotation);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 328,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      snapCameraUp(setCameraRotation);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 329,  // ;
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      snapCameraBackward(setCameraRotation);
+    }
+  },
 };
+
 
 
  

@@ -540,6 +540,13 @@ void rotateCamera(float xoffset, float yoffset){
     setGameObjectRotation(activeCameraObj ->id, setFrontDelta(activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
   }
 }
+void setCameraRotation(glm::quat orientation){
+  if (activeCameraObj == NULL){
+    defaultCamera.transformation.rotation = orientation;
+  }else{
+    setGameObjectRotation(activeCameraObj ->id, orientation);
+  }
+}
 
 void playSoundState(std::string source, objid sceneId){
   auto gameobj = getGameObjectByName(world, source, sceneId);

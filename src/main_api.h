@@ -69,6 +69,7 @@ void setActiveCamera(std::string name, objid sceneId);
 void nextCamera();
 void moveCamera(glm::vec3 offset);  
 void rotateCamera(float xoffset, float yoffset);
+void setCameraRotation(glm::quat orientation);
 
 void applyImpulse(int32_t index, glm::vec3 impulse);
 void applyImpulseRel(int32_t index, glm::vec3 impulse);

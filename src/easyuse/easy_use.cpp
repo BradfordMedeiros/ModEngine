@@ -151,3 +151,21 @@ float getSnapTranslateSize(){
   return snapTranslates.at(currentTranslateIndex);
 }
 
+void snapCameraForward(std::function<void(glm::quat)> orientation){
+  orientation(quatFromDirection(glm::vec3(0.f, 0.f, -1.f)));
+}
+void snapCameraBackward(std::function<void(glm::quat)> orientation){
+  orientation(quatFromDirection(glm::vec3(0.f, 0.f, 1.f)));
+}
+void snapCameraUp(std::function<void(glm::quat)> orientation){
+  orientation(quatFromDirection(glm::vec3(0.f, 1.f, 0.f)));
+}
+void snapCameraDown(std::function<void(glm::quat)> orientation){
+  orientation(quatFromDirection(glm::vec3(0.f, -1.f, 0.f)));
+}
+void snapCameraLeft(std::function<void(glm::quat)> orientation){
+  orientation(quatFromDirection(glm::vec3(-1.f, 0.f, 0.f)));
+}
+void snapCameraRight(std::function<void(glm::quat)> orientation){
+  orientation(quatFromDirection(glm::vec3(1.f, 0.f, 0.f)));
+}

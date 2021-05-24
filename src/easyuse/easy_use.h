@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include "../common/util.h"
+#include "../translations.h"
 
 void setSnapAngleUp();
 void setSnapAngleDown();
@@ -22,5 +23,12 @@ glm::vec3 snapScaleUp(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translati
 glm::vec3 snapScaleDown(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis);
 
 float getSnapTranslateSize();
+
+void snapCameraForward(std::function<void(glm::quat)> orientation);
+void snapCameraBackward(std::function<void(glm::quat)> orientation);
+void snapCameraUp(std::function<void(glm::quat)> orientation);
+void snapCameraDown(std::function<void(glm::quat)> orientation);
+void snapCameraLeft(std::function<void(glm::quat)> orientation);
+void snapCameraRight(std::function<void(glm::quat)> orientation);
 
 #endif
