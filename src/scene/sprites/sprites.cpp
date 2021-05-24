@@ -24,7 +24,9 @@ void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMe
   float leftAlign = left;
 
   for (char& character : word){
-    drawSprite(shaderProgram, fontMeshes.at((int)character), left + leftAlign, top, fontSize, fontSize, model);
+    if (fontMeshes.find((int)(character)) != fontMeshes.end()){
+      drawSprite(shaderProgram, fontMeshes.at((int)character), left + leftAlign, top, fontSize, fontSize, model);
+    }
     leftAlign += 14;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
 }
