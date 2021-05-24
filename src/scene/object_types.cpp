@@ -299,11 +299,19 @@ GameObjectUILayout createUILayout(std::map<std::string, std::string>& additional
     elements = split(additionalFields.at("elements"), ',');
   }
   auto order = (additionalFields.find("order") == additionalFields.end()) ? 0 : std::atoi(additionalFields.at("order").c_str());
+
+  BoundInfo boundInfo {
+    .xMin = 0, .xMax = 0,
+    .yMin = 0, .yMax = 0,
+    .zMin = 0, .zMax = 0,
+    .isNotCentered = true,
+  };
   GameObjectUILayout obj{
     .type = type,
     .spacing = spacing,
     .elements = elements,
     .order = order,
+    .boundInfo = boundInfo,
   };
   return obj;
 }
@@ -645,7 +653,7 @@ int renderObject(
   }
 
   auto layoutObj = std::get_if<GameObjectUILayout>(&toRender);
-  if (layoutObj != NULL){
+  if (layoutObj != NULL && showDebug){
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));

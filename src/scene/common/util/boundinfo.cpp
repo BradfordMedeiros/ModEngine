@@ -50,6 +50,7 @@ glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float d
   return glm::vec3(ratio.xratio, ratio.yratio, ratio.zratio);
 }
 
+// This should take into account things being centered (or not)
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
   BoundInfo info = infos.at(0);
   for (int i = 1; i < infos.size(); i++){
@@ -74,4 +75,20 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
     }
   }
   return info;
+}
+
+BoundInfo getScaledMaxUnionBoundingInfo(std::vector<BoundInfo> infos, std::vector<glm::vec3> scales){
+  assert(infos.size() == scales.size());
+  for (int i = 0; i < scales.size(); i++){
+    auto scale = scales.at(i);
+    std::cout << "scale is: " << print(scale) << std::endl;
+    BoundInfo& info = infos.at(i);
+    info.xMin *= scale.x;
+    info.xMax *= scale.x;
+    info.yMin *= scale.y;
+    info.yMax *= scale.y;
+    info.zMin *= scale.z;
+    info.zMax *= scale.z;
+  }
+  return getMaxUnionBoundingInfo(infos);
 }

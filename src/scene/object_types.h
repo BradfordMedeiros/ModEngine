@@ -127,6 +127,7 @@ struct GameObjectUILayout {
   float spacing;
   std::vector<std::string> elements;
   int order;
+  BoundInfo boundInfo;
 };
 
 struct GameObjectVideo {

@@ -77,6 +77,11 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     boundInfo = uiButtonObj -> common.mesh.boundInfo;
   }
 
+  auto layoutObj = std::get_if<GameObjectUILayout>(&gameObjV);
+  if (layoutObj != NULL){
+    boundInfo = layoutObj -> boundInfo;
+  }
+
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .transformation = obj.transformation,

@@ -163,17 +163,17 @@ void emit(World& world, objid id){
   emitNewParticle(world.emitters, id);
 }
 
-
-void enforceLayout(World& world, objid id){
-  auto objectLayout = world.objectMapping.at(id);
-  auto layoutObject = std::get_if<GameObjectUILayout>(&objectLayout);
+void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto elements = layoutObject -> elements;
   auto currentSceneId = sceneId(world.sandbox, id);
   auto spacing = layoutObject -> spacing;
   auto layoutType = layoutObject -> type;
 
   // Doesn't account for rotational effects of the objects, so boundingwidth/height incorrect if object is rotated
+  // Also parenting/transforms use the relative transform, so nesting (in scenegraph) can get fucked
   // Should consoilate the vertical/horizontal cases in terms of code, identical just dereffing different properties (x vs y)
+  std::vector<BoundInfo> infos;
+  std::vector<glm::vec3> scales;
   if (layoutType == LAYOUT_HORIZONTAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
     auto horizontal = rootPosition.x;
@@ -189,6 +189,8 @@ void enforceLayout(World& world, objid id){
       obj.transformation.position.x = left;
       obj.transformation.position.y = fixedY;
       horizontal += effectiveSpacing;
+      infos.push_back(physicsInfo.boundInfo);
+      scales.push_back(physicsInfo.transformation.scale);
     }
   }else if (layoutType == LAYOUT_VERTICAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
@@ -205,8 +207,12 @@ void enforceLayout(World& world, objid id){
       obj.transformation.position.x = fixedX;
       obj.transformation.position.y = top;
       vertical += effectiveSpacing;
+      infos.push_back(physicsInfo.boundInfo);
+      scales.push_back(physicsInfo.transformation.scale);
     }  
   }
+  BoundInfo newBoundingInfo = getScaledMaxUnionBoundingInfo(infos, scales);
+  layoutObject -> boundInfo = newBoundingInfo;
 }
 
 struct UILayoutAndId {
@@ -218,7 +224,8 @@ std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
   std::vector<UILayoutAndId> layouts;
   auto layoutIndexs = getGameObjectsIndex<GameObjectUILayout>(world.objectMapping);
   for (auto id : layoutIndexs){
-    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
+    GameObjectObj& obj = world.objectMapping.at(id);
+    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&obj);
     layouts.push_back(UILayoutAndId{
       .id = id,
       .layout = layoutObject,
@@ -237,7 +244,7 @@ std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
 void enforceAllLayouts(World& world){
   auto layouts = layoutsSortedByOrder(world);
   for (auto layout : layouts){
-    enforceLayout(world, layout.id);
+    enforceLayout(world, layout.id, layout.layout);
   }
 }
 

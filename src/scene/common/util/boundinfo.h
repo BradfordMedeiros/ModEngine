@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
+#include "../../../common/util.h"
 
 struct BoundInfo {
   float xMin, xMax;
@@ -23,6 +24,7 @@ struct boundRatio {
 
 boundRatio getBoundRatio(BoundInfo info1, BoundInfo info2);
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos);
+BoundInfo getScaledMaxUnionBoundingInfo(std::vector<BoundInfo> infos, std::vector<glm::vec3> scales);
 void printBoundInfo(BoundInfo info);
 glm::mat4 getMatrixForBoundRatio(boundRatio ratio, glm::mat4 currentMatrix);
 glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float depth);
