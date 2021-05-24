@@ -186,8 +186,12 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       auto objectWidth =  boundingWidth * physicsInfo.transformation.scale.x;
       auto left = physicsInfo.boundInfo.isNotCentered ? horizontal : (horizontal + objectWidth / 2.f);
       auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
-      obj.transformation.position.x = left;
-      obj.transformation.position.y = fixedY;
+
+      glm::vec3 newPos = obj.transformation.position;
+      newPos.x = left;
+      newPos.y = fixedY;
+      physicsTranslateSet(world, obj.id, newPos);
+
       horizontal += effectiveSpacing;
       infos.push_back(physicsInfo.boundInfo);
       scales.push_back(physicsInfo.transformation.scale);
@@ -204,8 +208,12 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       auto objectHeight =  boundingHeight * physicsInfo.transformation.scale.y;
       auto top = physicsInfo.boundInfo.isNotCentered ? vertical : (vertical + objectHeight / 2.f);
       auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
-      obj.transformation.position.x = fixedX;
-      obj.transformation.position.y = top;
+
+      glm::vec3 newPos = obj.transformation.position;
+      newPos.x = fixedX;
+      newPos.y = top;
+      physicsTranslateSet(world, obj.id, newPos);
+  
       vertical += effectiveSpacing;
       infos.push_back(physicsInfo.boundInfo);
       scales.push_back(physicsInfo.transformation.scale);
