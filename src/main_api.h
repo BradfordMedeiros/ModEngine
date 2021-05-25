@@ -112,7 +112,7 @@ void removeObjectById(int32_t id);
 void copyObject(int32_t id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
-void drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize);
+void drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta);
 
 struct AnimationState {
   std::map<int32_t, TimePlayback> playbacks;

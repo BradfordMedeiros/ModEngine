@@ -119,6 +119,7 @@ struct GameObjectUISlider {
 
 struct GameObjectUIText {
   std::string value;
+  float deltaOffset;
 };
 
 enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
@@ -285,7 +286,7 @@ void addObject(
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
-  std::function<void()> onVoxelBoundInfoChanged,
+  std::function<void()> onCollisionChange,
   std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta> deltas, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 );
@@ -311,7 +312,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(GLint, objid, std::string, unsigned int)> drawWord
+  std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

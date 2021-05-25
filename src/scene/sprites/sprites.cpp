@@ -20,9 +20,7 @@ void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float cente
   drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height, glm::mat4(1.f));
 }
 
-void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, bool center){
-  float offsetDelta = 14;
-
+void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, bool center, float offsetDelta){
   // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
   float leftAlign = !center ? left : (left  - ((word.size() / 2) * offsetDelta) + ((word.size() % 2) ? 0.f : (0.5f * offsetDelta)));
 
@@ -35,7 +33,7 @@ void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMe
 }
 
 void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, false);
+  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, false, 14);
 }
 
 

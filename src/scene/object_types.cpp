@@ -284,8 +284,11 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string>& additional
 
 GameObjectUIText createUIText(std::map<std::string, std::string>& additionalFields){
   auto value = additionalFields.find("value") != additionalFields.end() ? additionalFields.at("value") : "";
+  auto deltaOffset = additionalFields.find("spacing") != additionalFields.end() ? std::atof(additionalFields.at("spacing").c_str()) : 2;
+
   GameObjectUIText obj {
     .value = value,
+    .deltaOffset = deltaOffset,
   };
   return obj;
 }
@@ -349,7 +352,7 @@ void addObject(
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
-  std::function<void()> onVoxelBoundInfoChanged,
+  std::function<void()> onCollisionChange,
   std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
@@ -365,7 +368,7 @@ void addObject(
     mapping[id] = createLight(additionalFields);
   }else if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
-    mapping[id] = createVoxel(additionalFields, onVoxelBoundInfoChanged, defaultVoxelTexture.textureId, ensureTextureLoaded);
+    mapping[id] = createVoxel(additionalFields, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
   }else if(objectType == "channel"){
     mapping[id] = createChannel(additionalFields);
   }else if (objectType == "root"){
@@ -439,7 +442,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(GLint, objid, std::string, unsigned int)> drawWord
+  std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -648,7 +651,7 @@ int renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawWord(shaderProgram, id, textObj -> value, 1);
+    drawWord(shaderProgram, id, textObj -> value, 1, textObj -> deltaOffset);
     return 0;
   }
 
