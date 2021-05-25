@@ -13,6 +13,7 @@
 #include "../common/util.h"
 #include "../common/sysinterface.h"
 #include "./types/ainav.h"
+#include "./sprites/sprites.h"
 
 struct World {
   physicsEnv physicsEnvironment;
