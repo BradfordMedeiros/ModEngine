@@ -1,0 +1,7 @@
+
+sprite:mesh:./path/to/some/plane.obj
+sprite:texture-playback:500
+sprite:texture-steps:5
+sprite:texture-sprite-width:10
+sprite:texture-sprite-height:15
+sprite:texture-sprite-offset:offsetInfo
