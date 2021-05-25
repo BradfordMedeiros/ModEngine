@@ -20,17 +20,22 @@ void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float cente
   drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height, glm::mat4(1.f));
 }
 
-void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize){
-  float leftAlign = left;
+void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, bool center){
+  float offsetDelta = 14;
+
+  // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
+  float leftAlign = !center ? left : (left  - ((word.size() / 2) * offsetDelta) + ((word.size() % 2) ? 0.f : (0.5f * offsetDelta)));
 
   for (char& character : word){
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
-      drawSprite(shaderProgram, fontMeshes.at((int)character), left + leftAlign, top, fontSize, fontSize, model);
+      drawSprite(shaderProgram, fontMeshes.at((int)character), leftAlign, top, fontSize, fontSize, model);
     }
-    leftAlign += 14;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
+    leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
 }
 
 void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize);
+  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, false);
 }
+
+

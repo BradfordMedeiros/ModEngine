@@ -190,8 +190,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 }
 
 void drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize){
-  //std::cout << "draw words: " << word << std::endl;
-  drawWordsRelative(shaderProgram, fontMeshes, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize);
+  drawWordsRelative(shaderProgram, fontMeshes, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, true);
 }
 
 std::vector<std::string> listAnimations(int32_t id){

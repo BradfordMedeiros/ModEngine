@@ -648,7 +648,7 @@ int renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawWord(shaderProgram, id, textObj -> value, 2);
+    drawWord(shaderProgram, id, textObj -> value, 1);
     return 0;
   }
 
