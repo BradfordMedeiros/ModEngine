@@ -50,6 +50,19 @@ glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float d
   return glm::vec3(ratio.xratio, ratio.yratio, ratio.zratio);
 }
 
+std::vector<glm::vec4> boundInfoToPoints(BoundInfo boundInfo){
+  std::vector<glm::vec4> points;
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMin, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMin, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMin, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMin, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMax, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMax, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMax, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMax, 0.f));
+  return points;
+}
+
 // This should take into account things being centered (or not)
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
   BoundInfo info = infos.at(0);
@@ -77,3 +90,37 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
   return info;
 }
 
+BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
+  auto boundInfoPoints =  boundInfoToPoints(boundInfo);
+  auto firstPointTransformed =  transform * boundInfoPoints.at(0);
+  float minX = firstPointTransformed.x;
+  float maxX = firstPointTransformed.x;
+  float minY = firstPointTransformed.y;
+  float maxY = firstPointTransformed.y;
+  float minZ = firstPointTransformed.y;
+  float maxZ = firstPointTransformed.z;
+
+  for (auto point : boundInfoPoints){
+    auto transformedPoint = transform * point;
+    if (transformedPoint.x < minX){
+      minX = transformedPoint.x;
+    }
+    if (transformedPoint.x > maxX){
+      maxX = transformedPoint.x;
+    }
+    if (transformedPoint.y < minY){
+      minY = transformedPoint.y;
+    }
+    if (transformedPoint.y > maxY){
+      maxY = transformedPoint.y;
+    }
+    if (transformedPoint.z < minZ){
+      minZ = transformedPoint.z;
+    }
+    if (transformedPoint.z > maxZ){
+      maxZ = transformedPoint.z;
+    }  
+  } 
+
+  return BoundInfo { .xMin = minX, .xMax = maxX, .yMin = minY, .yMax = maxY, .zMin = minZ, .zMax = maxZ };
+}

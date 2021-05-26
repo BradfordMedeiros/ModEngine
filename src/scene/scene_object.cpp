@@ -163,20 +163,20 @@ void emit(World& world, objid id){
   emitNewParticle(world.emitters, id);
 }
 
-BoundInfo getScaledMaxUnionBoundingInfo(World& world, std::vector<BoundInfo> infos, std::vector<glm::vec3> scales){
-  assert(infos.size() == scales.size());
-  for (int i = 0; i < scales.size(); i++){
-    auto scale = scales.at(i);
-    std::cout << "scale is: " << print(scale) << std::endl;
-    BoundInfo& info = infos.at(i);
-    info.xMin *= scale.x;
-    info.xMax *= scale.x;
-    info.yMin *= scale.y;
-    info.yMax *= scale.y;
-    info.zMin *= scale.z;
-    info.zMax *= scale.z;
+
+BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
+  std::vector<BoundInfo> infos;
+  for (auto id : ids){
+    infos.push_back(
+      transformBoundInfo(
+        getPhysicsInfoForGameObject(world, id).boundInfo, 
+        fullModelTransform(world.sandbox, id)
+      )
+    );
   }
-  return getMaxUnionBoundingInfo(infos);
+  auto bounding = getMaxUnionBoundingInfo(infos); 
+  bounding.zMax = 1.f;
+  return bounding;
 }
 
 
@@ -189,8 +189,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   // Doesn't account for rotational effects of the objects, so boundingwidth/height incorrect if object is rotated
   // Also parenting/transforms use the relative transform, so nesting (in scenegraph) can get fucked
   // Should consoilate the vertical/horizontal cases in terms of code, identical just dereffing different properties (x vs y)
-  std::vector<BoundInfo> infos;
-  std::vector<glm::vec3> scales;
+  std::vector<objid> elementIds;
   if (layoutType == LAYOUT_HORIZONTAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
     auto horizontal = rootPosition.x;
@@ -210,8 +209,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       physicsTranslateSet(world, obj.id, newPos);
 
       horizontal += effectiveSpacing;
-      infos.push_back(physicsInfo.boundInfo);
-      scales.push_back(physicsInfo.transformation.scale);
+      elementIds.push_back(obj.id);
     }
   }else if (layoutType == LAYOUT_VERTICAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
@@ -230,16 +228,12 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       newPos.x = fixedX;
       newPos.y = top;
       physicsTranslateSet(world, obj.id, newPos);
-  
       vertical += effectiveSpacing;
-      infos.push_back(physicsInfo.boundInfo);
-      scales.push_back(physicsInfo.transformation.scale);
+
+      elementIds.push_back(obj.id);
     }  
   }
-  BoundInfo newBoundingInfo = getScaledMaxUnionBoundingInfo(world, infos, scales);
-  layoutObject -> boundInfo = newBoundingInfo;
-  layoutObject -> boundInfo.isNotCentered = true;
-  layoutObject -> boundInfo.zMax = 0.1f;
+  layoutObject -> boundInfo = createBoundingAround(world, elementIds);
 }
 
 struct UILayoutAndId {
