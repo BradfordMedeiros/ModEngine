@@ -77,18 +77,3 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
   return info;
 }
 
-BoundInfo getScaledMaxUnionBoundingInfo(std::vector<BoundInfo> infos, std::vector<glm::vec3> scales){
-  assert(infos.size() == scales.size());
-  for (int i = 0; i < scales.size(); i++){
-    auto scale = scales.at(i);
-    std::cout << "scale is: " << print(scale) << std::endl;
-    BoundInfo& info = infos.at(i);
-    info.xMin *= scale.x;
-    info.xMax *= scale.x;
-    info.yMin *= scale.y;
-    info.yMax *= scale.y;
-    info.zMin *= scale.z;
-    info.zMax *= scale.z;
-  }
-  return getMaxUnionBoundingInfo(infos);
-}

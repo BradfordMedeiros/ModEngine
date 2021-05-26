@@ -163,6 +163,23 @@ void emit(World& world, objid id){
   emitNewParticle(world.emitters, id);
 }
 
+BoundInfo getScaledMaxUnionBoundingInfo(World& world, std::vector<BoundInfo> infos, std::vector<glm::vec3> scales){
+  assert(infos.size() == scales.size());
+  for (int i = 0; i < scales.size(); i++){
+    auto scale = scales.at(i);
+    std::cout << "scale is: " << print(scale) << std::endl;
+    BoundInfo& info = infos.at(i);
+    info.xMin *= scale.x;
+    info.xMax *= scale.x;
+    info.yMin *= scale.y;
+    info.yMax *= scale.y;
+    info.zMin *= scale.z;
+    info.zMax *= scale.z;
+  }
+  return getMaxUnionBoundingInfo(infos);
+}
+
+
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto elements = layoutObject -> elements;
   auto currentSceneId = sceneId(world.sandbox, id);
@@ -219,8 +236,10 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       scales.push_back(physicsInfo.transformation.scale);
     }  
   }
-  BoundInfo newBoundingInfo = getScaledMaxUnionBoundingInfo(infos, scales);
+  BoundInfo newBoundingInfo = getScaledMaxUnionBoundingInfo(world, infos, scales);
   layoutObject -> boundInfo = newBoundingInfo;
+  layoutObject -> boundInfo.isNotCentered = true;
+  layoutObject -> boundInfo.zMax = 0.1f;
 }
 
 struct UILayoutAndId {
@@ -253,6 +272,7 @@ void enforceAllLayouts(World& world){
   auto layouts = layoutsSortedByOrder(world);
   for (auto layout : layouts){
     enforceLayout(world, layout.id, layout.layout);
+    updatePhysicsBody(world, layout.id);
   }
 }
 
