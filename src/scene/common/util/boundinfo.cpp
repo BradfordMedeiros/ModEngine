@@ -121,5 +121,5 @@ BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
       maxZ = transformedPoint.z;
     }  
   } 
-  return BoundInfo { .xMin = minX, .xMax = maxX, .yMin = minY, .yMax = maxY, .zMin = minZ, .zMax = maxZ, .isNotCentered = true };
+  return BoundInfo { .xMin = minX, .xMax = maxX, .yMin = minY, .yMax = maxY, .zMin = minZ, .zMax = maxZ };
 }

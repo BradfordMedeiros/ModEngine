@@ -35,11 +35,11 @@ BoundInfo generateVoxelBoundInfo(std::vector<std::vector<std::vector<int>>>& cub
       }
     }
   }
+
   BoundInfo info = {
     .xMin = xMin, .xMax = xMax,
     .yMin = yMin, .yMax = yMax,
     .zMin = zMin, .zMax = zMax,
-    .isNotCentered = true
   };
   return info; 
 }

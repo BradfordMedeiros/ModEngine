@@ -307,7 +307,6 @@ GameObjectUILayout createUILayout(std::map<std::string, std::string>& additional
     .xMin = 0, .xMax = 0,
     .yMin = 0, .yMax = 0,
     .zMin = 0, .zMax = 0,
-    .isNotCentered = true,
   };
   GameObjectUILayout obj{
     .type = type,

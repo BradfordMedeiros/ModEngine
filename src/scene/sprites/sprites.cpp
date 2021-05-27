@@ -49,7 +49,6 @@ BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, floa
     .xMin = 0, .xMax = right - leftAlign,
     .yMin = 0, .yMax = 2,
     .zMin = 0, .zMax = 0.1,
-    .isNotCentered = false,
   };
   return info;
 }

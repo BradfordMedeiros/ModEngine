@@ -49,7 +49,6 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     .yMax = 1,
     .zMin = -1,
     .zMax = 1,
-    .isNotCentered = false,
   };
 
   auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
@@ -156,7 +155,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         heightmapObj -> heightmap.maxHeight
       );
     }else if (physicsOptions.shape == BOX || (!isVoxelObj && physicsOptions.shape == AUTOSHAPE)){
-      std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ") -- " << (physicsInfo.boundInfo.isNotCentered ? "notcentered" : "centered") << std::endl;
+      std::cout << "INFO: PHYSICS: ADDING BOX RIGID BODY (" << id << ")" << std::endl;
       rigidBody = addRigidBodyRect(
         world.physicsEnvironment, 
         physicsInfo.transformation.position, 
@@ -166,7 +165,6 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         physicsInfo.transformation.rotation,
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        !physicsInfo.boundInfo.isNotCentered,
         physicsInfo.transformation.scale, 
         opts
       );

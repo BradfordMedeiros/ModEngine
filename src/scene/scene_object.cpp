@@ -205,10 +205,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
-      auto isCentered = !physicsInfo.boundInfo.isNotCentered;
       auto boundingWidth = (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin);
       auto objectWidth =  boundingWidth * physicsInfo.transformation.scale.x;
-      auto left = physicsInfo.boundInfo.isNotCentered ? horizontal : (horizontal + objectWidth / 2.f);
+      auto left = horizontal + objectWidth / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
 
       glm::vec3 newPos = obj.transformation.position;
@@ -226,10 +225,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
-      auto isCentered = !physicsInfo.boundInfo.isNotCentered;
       auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
       auto objectHeight =  boundingHeight * physicsInfo.transformation.scale.y;
-      auto top = physicsInfo.boundInfo.isNotCentered ? vertical : (vertical + objectHeight / 2.f);
+      auto top = vertical + objectHeight / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
 
       glm::vec3 newPos = obj.transformation.position;

@@ -10,7 +10,6 @@ struct BoundInfo {
   float xMin, xMax;
   float yMin, yMax;
   float zMin, zMax;
-  bool isNotCentered;
 };
 
 struct boundRatio {
