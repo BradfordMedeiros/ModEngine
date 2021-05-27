@@ -1,0 +1,21 @@
+untiled:mesh:./res/models/box/spriteplane.dae
+untiled:position:-5 0 -10
+untiled:texture:./res/textures/wood.jpg
+
+offset1.2:mesh:./res/models/box/spriteplane.dae
+offset1.2:position:-2 0 -10
+offset1.2:texture:./res/textures/wood.jpg
+offset1.2:textureoffset:0.2 0    
+
+offset1.5:mesh:./res/models/box/spriteplane.dae
+offset1.5:position:2 0 -10
+offset1.5:texture:./res/textures/wood.jpg
+offset1.5:textureoffset:0.5 0    
+
+
+## NOTICE HERE THAT THE TILING GETS APPLIED AFTER THE OFFSET
+offset1.4_tiled:mesh:./res/models/box/spriteplane.dae
+offset1.4_tiled:position:5 0 -10
+offset1.4_tiled:texture:./res/textures/wood.jpg
+offset1.4_tiled:textureoffset:0.5 0    
+offset1.4_tiled:texturetiling:2 1
