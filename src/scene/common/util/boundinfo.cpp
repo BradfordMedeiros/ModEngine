@@ -52,14 +52,14 @@ glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float d
 
 std::vector<glm::vec4> boundInfoToPoints(BoundInfo boundInfo){
   std::vector<glm::vec4> points;
-  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMin, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMin, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMin, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMin, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMax, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMax, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMax, 0.f));
-  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMax, 0.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMax, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMax, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMax, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMax, 1.f));
   return points;
 }
 
@@ -101,7 +101,7 @@ BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
   float maxZ = firstPointTransformed.z;
 
   for (auto point : boundInfoPoints){
-    auto transformedPoint = transform * point;
+    glm::vec4 transformedPoint = point * transform;
     if (transformedPoint.x < minX){
       minX = transformedPoint.x;
     }
@@ -121,6 +121,5 @@ BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
       maxZ = transformedPoint.z;
     }  
   } 
-
-  return BoundInfo { .xMin = minX, .xMax = maxX, .yMin = minY, .yMax = maxY, .zMin = minZ, .zMax = maxZ };
+  return BoundInfo { .xMin = minX, .xMax = maxX, .yMin = minY, .yMax = maxY, .zMin = minZ, .zMax = maxZ, .isNotCentered = true };
 }

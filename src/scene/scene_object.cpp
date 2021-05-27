@@ -166,16 +166,24 @@ void emit(World& world, objid id){
 
 BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
   std::vector<BoundInfo> infos;
+  std::cout << "infos:----------------------" << std::endl;
   for (auto id : ids){
-    infos.push_back(
-      transformBoundInfo(
-        getPhysicsInfoForGameObject(world, id).boundInfo, 
-        fullModelTransform(world.sandbox, id)
-      )
+    auto transformedBoundInfo =  transformBoundInfo(
+      getPhysicsInfoForGameObject(world, id).boundInfo, 
+      fullModelTransform(world.sandbox, id)
     );
+    std::cout << "bound info: " << std::endl;
+    printBoundInfo(transformedBoundInfo);
+    infos.push_back(transformedBoundInfo);
   }
   auto bounding = getMaxUnionBoundingInfo(infos); 
   bounding.zMax = 1.f;
+
+  bounding.yMax -= bounding.yMin;
+  bounding.yMin = 0;
+  bounding.xMax -= bounding.xMin;
+  bounding.xMin = 0;
+
   return bounding;
 }
 
