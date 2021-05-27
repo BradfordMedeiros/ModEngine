@@ -179,11 +179,6 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
   auto bounding = getMaxUnionBoundingInfo(infos); 
   bounding.zMax = 1.f;
 
-  bounding.yMax -= bounding.yMin;
-  bounding.yMin = 0;
-  bounding.xMax -= bounding.xMin;
-  bounding.xMin = 0;
-
   return bounding;
 }
 
