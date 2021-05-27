@@ -27,6 +27,7 @@
 struct TextureInformation {
   glm::vec2 textureoffset;
   glm::vec2 texturetiling;
+  glm::vec2 texturesize;
   std::string textureOverloadName;
   int textureOverloadId;
 };
