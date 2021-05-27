@@ -1,6 +1,13 @@
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
-platform:position:0 -5 0
+untiled:mesh:./res/models/box/spriteplane.dae
+untiled:position:-4 0 -10
+untiled:texture:./res/textures/wood.jpg
 
-#platform:texture:./res/textures/blacktop.jpg
-platform:texturetiling:150 150           
+3x1y:mesh:./res/models/box/spriteplane.dae
+3x1y:position:0 0 -10
+3x1y:texture:./res/textures/wood.jpg
+3x1y:texturetiling:3 1    
+
+3x3y:mesh:./res/models/box/spriteplane.dae
+3x3y:position:4 0 -10
+3x3y:texture:./res/textures/wood.jpg
+3x3y:texturetiling:3 3   
