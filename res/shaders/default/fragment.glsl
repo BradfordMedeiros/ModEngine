@@ -22,6 +22,7 @@ uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
+uniform vec2 textureSize;
 
 #define MAX_LIGHTS 32
 uniform int numlights;
@@ -42,9 +43,11 @@ void main(){
    // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
+
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-    vec2 offsetTexCoord = TexCoord + textureOffset;
-    vec2 adjustedTexCoord = vec2(offsetTexCoord.x, offsetTexCoord.y) * textureTiling;
+    vec2 offsetTexCoord = vec2(TexCoord.x, -TexCoord.y);
+  
+    vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
 
     vec4 diffuseColor = texture(maintexture, adjustedTexCoord);
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
