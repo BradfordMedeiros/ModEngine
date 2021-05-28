@@ -1,12 +1,20 @@
 
 untiled:mesh:./res/models/box/spriteplane.dae
 untiled:position:0 5 -10
-untiled:scale:5 1 1
-
+untiled:scale:1 1 1
 
 1:mesh:./res/models/box/spriteplane.dae
 1:position:0 2 -10
-1:scale:5 1 1
-1:texturesize:0.5 1
-1:textureoffset:0.125 0
-1:texturetiling:1 1
+1:scale:1 1 1
+
+1:texturesize:0.4 0.6
+1:textureoffset:0.2 0
+1:texturetiling:2 2
+
+==================
+
+
+
+
+
+
