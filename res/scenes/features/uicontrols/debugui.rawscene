@@ -1,5 +1,0 @@
-
-*basicbutton2:ontexture:./res/textures/wood.jpg
-*basicbutton2:offtexture:./res/textures/window.png
-*basicbutton2:position:0 0 2
-*basicbutton2:state:on
