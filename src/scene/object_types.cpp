@@ -762,6 +762,10 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std:
     if (attributes.find("isDisabled") != attributes.end()){
       meshObj -> isDisabled = attributes.at("isDisabled") == "true";;
     }
+    if (attributes.find("textureoffset") != attributes.end()){
+      std::cout << "updating texture offset" << std::endl;
+      meshObj -> texture.textureoffset = parseVec2(attributes.at("textureoffset"));
+    }
     return;
   }
 

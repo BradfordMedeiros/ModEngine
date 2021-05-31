@@ -754,7 +754,7 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   setObjectAttributes(
     world.objectMapping, 
     id, 
-    extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color", "state" }),
+    extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color", "state", "textureoffset" }),
     [&world, id](bool enabled) -> void {
       std::cout << "id: " << id << " should be enabled: " << enabled << std::endl;
       setEmitterEnabled(world.emitters, id, enabled);
