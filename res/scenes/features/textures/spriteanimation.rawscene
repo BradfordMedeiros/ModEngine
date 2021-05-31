@@ -3,7 +3,8 @@
 1:position:0 2 -10
 1:scale:1 1 1
 
-1:texturesize:0.2 0.2
+1:texturesize:0.125 1
 1:textureoffset:0 0
+1:texture:./res/textures/spritesheet.png
 
 1:script:./res/scenes/features/textures/spriteanimation.scm
