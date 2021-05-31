@@ -5,22 +5,22 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.92.0 commit date:2021-02-24, commit time:16:25, hash:02948a2cab44</authoring_tool>
     </contributor>
-    <created>2021-05-26T22:38:45</created>
-    <modified>2021-05-26T22:38:45</modified>
+    <created>2021-05-27T12:02:29</created>
+    <modified>2021-05-27T12:02:29</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_effects>
     <effect id="Material_001-effect">
       <profile_COMMON>
-        <newparam sid="spritesheet_png-surface">
+        <newparam sid="grid_png-surface">
           <surface type="2D">
-            <init_from>spritesheet_png</init_from>
+            <init_from>grid_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="spritesheet_png-sampler">
+        <newparam sid="grid_png-sampler">
           <sampler2D>
-            <source>spritesheet_png-surface</source>
+            <source>grid_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -29,7 +29,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="spritesheet_png-sampler" texcoord="UVMap"/>
+              <texture texture="grid_png-sampler" texcoord="Plane-mesh-map-0"/>
             </diffuse>
             <index_of_refraction>
               <float sid="ior">1.45</float>
@@ -40,8 +40,8 @@
     </effect>
   </library_effects>
   <library_images>
-    <image id="spritesheet_png" name="spritesheet_png">
-      <init_from>spritesheet.png</init_from>
+    <image id="grid_png" name="grid_png">
+      <init_from>grid.png</init_from>
     </image>
   </library_images>
   <library_materials>
@@ -101,7 +101,7 @@
           <bind_material>
             <technique_common>
               <instance_material symbol="Material_001-material" target="#Material_001-material">
-                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+                <bind_vertex_input semantic="Plane-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
           </bind_material>
