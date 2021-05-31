@@ -13,6 +13,3 @@ flashbox:child:!flashlight
 flashbox:scale:0.5 2 0.5
 flashbox:position:0 5 0
 
-flashbox:physics_type:dynamic
-flashbox:physics:enabled
-flashbox:shader:./res/

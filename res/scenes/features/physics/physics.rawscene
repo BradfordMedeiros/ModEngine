@@ -7,11 +7,3 @@ platform:position:0 -5 0
 box:mesh:./res/models/box/box.obj
 box:position:0 5 0
 box:physics_type:dynamic
-box:child:follower
-
-follower:mesh:./res/models/box/box.obj
-follower:position:3 0 0
-follower:physics_type:dynamic
-
-thing:mesh:./res/models/box/box.obj
-thing:physics:disabled

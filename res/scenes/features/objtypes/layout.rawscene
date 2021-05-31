@@ -1,13 +1,18 @@
 
-)credit1:value:writer
+### ROW 1
+*basicbutton1:ontexture:./res/textures/wood.jpg
+*basicbutton1:offtexture:./res/textures/window.png
+*basicbutton1:position:0.1 0 0
+*basicbutton1:state:on
+*basicbutton1:ontint:0 0 1
 
-*basicbutton:ontexture:./res/textures/wood.jpg
-*basicbutton:offtexture:./res/textures/window.png
-*basicbutton:position:0.1 0 0
-*basicbutton:state:on
-*basicbutton:ontint:0 0 1
+*basicbutton2:ontexture:./res/textures/wood.jpg
+*basicbutton2:offtexture:./res/textures/window.png
+*basicbutton2:position:1 0 0
+*basicbutton2:state:on
+*basicbutton2:ontint:0 0 1
 
-(layout:position:0 0 0
-(layout:type:horizontal
-(layout:elements:)credit1,*basicbutton
-(layout:spacing:0.1
+(row1:position:0 1 0
+(row1:type:horizontal
+(row1:elements:*basicbutton1,*basicbutton2
+
