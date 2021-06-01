@@ -76,6 +76,7 @@ struct ModelData {
 // this really should be "load gameobject" --> since need children mesh
 // but no representation for scene/children/objects yet so just flattening it to models
 ModelData loadModel(std::string rootname, std::string modelPath);
+std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 
 #endif 
 

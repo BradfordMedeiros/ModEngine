@@ -395,16 +395,6 @@ std::string getType(std::string name, std::vector<Field> additionalFields){
   return type;
 }
 
-std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
-  std::vector<glm::vec3> vertexs;
-  for (auto [id, meshData] : data.meshIdToMeshData){
-    for (auto index : meshData.indices){
-      vertexs.push_back(meshData.vertices.at(index).position);
-    }
-  }
-  return vertexs;
-}
-
 void addObjectToWorld(
   World& world, 
   objid sceneId, 

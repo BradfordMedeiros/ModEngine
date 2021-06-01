@@ -476,3 +476,12 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    return data;
 }
 
+std::vector<glm::vec3> getVertexsFromModelData(ModelData& data){
+  std::vector<glm::vec3> vertexs;
+  for (auto [id, meshData] : data.meshIdToMeshData){
+    for (auto index : meshData.indices){
+      vertexs.push_back(meshData.vertices.at(index).position);
+    }
+  }
+  return vertexs;
+}
