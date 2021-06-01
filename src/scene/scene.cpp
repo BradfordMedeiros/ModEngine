@@ -762,7 +762,12 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   );
   
   auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });
+
+
   GameObject& obj = getGameObject(world, id);
+ /// applyAttributeValue(obj, std::string field, AttributeValue value);
+
+
 
   if (attributes.find("position") != attributes.end()){
     obj.transformation.position = parseVec(attributes.at("position"));
@@ -892,13 +897,16 @@ void callbackEntities(World& world){
   world.entitiesToUpdate.clear();
 }
 
-// TODO generalize this function
+void afterAttributesSet(World& world, objid id, GameObject& gameobj){
+  physicsTranslateSet(world, id, gameobj.transformation.position);
+  physicsScaleSet(world, id, gameobj.transformation.scale);  
+}
+
 void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
-  //std::cout << "Update particle diff: (" << attribute << ") - " << v << std::endl;
+  std::cout << "Update particle diff: (" << attribute << ")" << std::endl;
   GameObject& gameobj = getGameObject(world, id);
   applyAttribute(gameobj, attribute, delta);
-  physicsTranslateSet(world, id, gameobj.transformation.position);
-  physicsScaleSet(world, id, gameobj.transformation.scale);
+  afterAttributesSet(world, id, gameobj);
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){

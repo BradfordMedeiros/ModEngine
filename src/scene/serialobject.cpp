@@ -157,31 +157,30 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
   return gameObjectFromParam(name, id, serialObj);
 }
 
-// TODO -> eliminate all the strings in the fields and use some sort of symbol system
-void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta){
-  auto value = std::get_if<glm::vec3>(&delta);
+void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
+  auto value = std::get_if<glm::vec3>(&attr);
   if (field == "position" && value != NULL){
-     gameobj.transformation.position = gameobj.transformation.position +  *value;
+     gameobj.transformation.position = *value;
      return;
   }
   if (field == "scale" && value != NULL){
-     gameobj.transformation.scale = gameobj.transformation.scale +  *value;
+     gameobj.transformation.scale = *value;
      return;
   } 
   if (field == "physics_angle" && value != NULL){
-     gameobj.physicsOptions.angularFactor = gameobj.physicsOptions.angularFactor +  *value;
+     gameobj.physicsOptions.angularFactor = *value;
      return;
   } 
   if (field == "physics_linear" && value != NULL){
-     gameobj.physicsOptions.linearFactor = gameobj.physicsOptions.linearFactor +  *value;
+     gameobj.physicsOptions.linearFactor = *value;
      return;
   } 
   if (field == "physics_gravity" && value != NULL){
-     gameobj.physicsOptions.gravity = gameobj.physicsOptions.gravity +  *value;
+     gameobj.physicsOptions.gravity = *value;
      return;
   }   
 
-  auto fValue = std::get_if<float>(&delta);
+  auto fValue = std::get_if<float>(&attr);
   if (field == "physics_friction" && fValue != NULL){
     gameobj.physicsOptions.friction = *fValue;
     return;
@@ -205,4 +204,63 @@ void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta
 
   std::cout << "attribute not yet supported: " << field << std::endl;
   assert(false);
+} 
+AttributeValue attributeValue(GameObject& gameobj, std::string field){
+  if (field == "position"){
+    return gameobj.transformation.position;
+  }
+  if (field == "scale"){
+    return gameobj.transformation.scale;
+  } 
+  if (field == "physics_angle"){
+    return gameobj.physicsOptions.angularFactor;
+  } 
+  if (field == "physics_linear"){
+    return gameobj.physicsOptions.linearFactor;
+  } 
+  if (field == "physics_gravity"){
+    return gameobj.physicsOptions.gravity = gameobj.physicsOptions.gravity;
+  }   
+  if (field == "physics_friction"){
+    return gameobj.physicsOptions.friction;
+  }
+  if (field == "physics_restitution"){
+    return gameobj.physicsOptions.restitution;
+  }
+  if (field == "physics_mass"){
+    return gameobj.physicsOptions.mass;
+  }
+  if (field == "physics_maxspeed"){
+    return gameobj.physicsOptions.maxspeed;
+  }
+  if (field == "physics_layer"){
+    return gameobj.physicsOptions.layer;
+  }
+  std::cout << "attribute not yet supported: " << field << std::endl;
+  assert(false);
+  return 0;
 }
+
+AttributeValue addAttributes(AttributeValue one, AttributeValue two){
+  auto valueOne = std::get_if<glm::vec3>(&one);
+  auto valueTwo = std::get_if<glm::vec3>(&two);
+  if (valueOne != NULL){
+    assert(valueTwo != NULL);
+    return *valueOne + *valueTwo;
+  }
+  auto fValueOne = std::get_if<float>(&one);
+  auto fValueTwo = std::get_if<float>(&two);
+  if (fValueOne != NULL){
+    assert(fValueTwo != NULL);
+    return *fValueOne + *valueTwo;
+  }
+  // TODO -> wtf to do for strings?
+  std::cout << "string values not supported" << std::endl;
+  assert(false);
+}
+
+// TODO -> eliminate all the strings in the fields and use some sort of symbol system
+void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta){
+  setAttribute(gameobj, field, addAttributes(attributeValue(gameobj, field), delta));
+}
+
