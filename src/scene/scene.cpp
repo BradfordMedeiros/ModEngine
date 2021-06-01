@@ -738,42 +738,27 @@ std::map<std::string, std::string> getAttributes(World& world, objid id){
   return attr;
 }
 
-std::map<std::string, std::string> extractAttributes(std::map<std::string, std::string>& attr,  std::vector<std::string> attributes){
-  std::map<std::string, std::string> attrToSet;
-  for (auto attribute : attributes){
-    if (attr.find(attribute) != attr.end()){ // but why don't i pass all of them in?  this seems dumb
-      attrToSet[attribute] = attr.at(attribute);
-    }    
-  }
-  return attrToSet;
-}
-
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
   // @TODO create complete lists for attributes. 
   // look toward applyattribute delta 
   setObjectAttributes(
     world.objectMapping, 
     id, 
-    extractAttributes(attr, { "mesh", "isDisabled", "clip", "from", "to", "color", "state", "textureoffset" }),
+    attr,
     [&world, id](bool enabled) -> void {
       std::cout << "id: " << id << " should be enabled: " << enabled << std::endl;
       setEmitterEnabled(world.emitters, id, enabled);
     }
   );
   
-  auto attributes = extractAttributes(attr, { "position", "scale", "rotation", "lookat", "layer", "script" });
-
-
   GameObject& obj = getGameObject(world, id);
  /// applyAttributeValue(obj, std::string field, AttributeValue value);
 
-
-
-  if (attributes.find("position") != attributes.end()){
-    obj.transformation.position = parseVec(attributes.at("position"));
+  if (attr.find("position") != attr.end()){
+    obj.transformation.position = parseVec(attr.at("position"));
   }
-  if (attributes.find("scale") != attributes.end()){
-    obj.transformation.scale = parseVec(attributes.at("scale"));
+  if (attr.find("scale") != attr.end()){
+    obj.transformation.scale = parseVec(attr.at("scale"));
   }
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
@@ -781,16 +766,6 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
   for (auto property : properties){
     setAttribute(gameobj, property.propertyName, property.value);
   }
-}
-
-// property suffix looks like the parts of the tokens on the right hand side
-// eg position 10
-// eg tint 0.9 0.2 0.4
-AttributeValue parsePropertySuffix(std::string key, std::string value){
-  if (key == "position" || key == "scale"){
-    return parseVec(value);
-  }
-  return value;
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){

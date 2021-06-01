@@ -264,3 +264,12 @@ void applyAttributeDelta(GameObject& gameobj, std::string field, AttributeValue 
   setAttribute(gameobj, field, addAttributes(attributeValue(gameobj, field), delta));
 }
 
+// property suffix looks like the parts of the tokens on the right hand side
+// eg position 10
+// eg tint 0.9 0.2 0.4
+AttributeValue parsePropertySuffix(std::string key, std::string value){
+  if (key == "position" || key == "scale"){
+    return parseVec(value);
+  }
+  return value;
+}
