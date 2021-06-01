@@ -777,13 +777,9 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   }
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
+  GameObject& gameobj = getGameObject(world, id);
   for (auto property : properties){
-    if (property.propertyName == "position"){
-      auto posV = std::get_if<glm::vec3>(&property.value);
-      if(posV != NULL){
-        getGameObject(world, id).transformation.position = *posV;
-      }
-    }
+    setAttribute(gameobj, property.propertyName, property.value);
   }
 }
 
@@ -905,7 +901,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj){
 void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
   std::cout << "Update particle diff: (" << attribute << ")" << std::endl;
   GameObject& gameobj = getGameObject(world, id);
-  applyAttribute(gameobj, attribute, delta);
+  applyAttributeDelta(gameobj, attribute, delta);
   afterAttributesSet(world, id, gameobj);
 }
 

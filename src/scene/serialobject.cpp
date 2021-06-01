@@ -260,7 +260,7 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
 }
 
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
-void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta){
+void applyAttributeDelta(GameObject& gameobj, std::string field, AttributeValue delta){
   setAttribute(gameobj, field, addAttributes(attributeValue(gameobj, field), delta));
 }
 

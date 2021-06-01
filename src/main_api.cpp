@@ -370,9 +370,8 @@ void tickRecordings(float time){
   } 
 
   for (auto &[id, recording] : playingRecordings){
-    auto gameobj = getGameObject(world, id);
     auto interpolatedProperties = recordingPropertiesInterpolated(recording, time, interpolateAttribute);
-    setProperty(world, gameobj.id, interpolatedProperties);
+    setProperty(world, id, interpolatedProperties);
   }
 }
 

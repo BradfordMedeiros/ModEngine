@@ -54,6 +54,7 @@ struct GameObject {
 };
 
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes);
-void applyAttribute(GameObject& gameobj, std::string field, AttributeValue delta);
+void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr);
+void applyAttributeDelta(GameObject& gameobj, std::string field, AttributeValue delta);
 
 #endif
