@@ -29,16 +29,6 @@ struct PhysicsInfo {
   Transformation transformation;
 };
 
-struct GameobjAttributes {
-  std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, double> numAttributes;
-  std::map<std::string, glm::vec3> vecAttributes;
-  
-  // todo get rid of these fields
-  std::map<std::string, std::string> additionalFields;
-  std::vector<std::string> children;
-};
-
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 
 #endif

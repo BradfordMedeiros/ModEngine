@@ -2,16 +2,12 @@
 #define MOD_SCHEMEBINDINGS
 
 #include <iostream>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <libguile.h>
-#include <limits>       
 #include <map>
 #include "../common/util.h"
 #include "../gizmo/sequencer.h"   // TODO -  don't depend on this directly 
 #include "../sql.h" // TODO don't depend on this directly
 #include "./scriptmanager.h"    // need to eliminate the circular relationship here
+#include "./scheme_util.h"
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
