@@ -728,8 +728,13 @@ std::map<std::string, std::string> getAttributes(World& world, objid id){
   return attr;
 }
 
+void afterAttributesSet(World& world, objid id, GameObject& gameobj){
+  physicsTranslateSet(world, id, gameobj.transformation.position);
+  std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
+  physicsScaleSet(world, id, gameobj.transformation.scale);  
+}
+
 void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
-  // @TODO create complete lists for attributes. 
   // look toward applyattribute delta 
   setObjectAttributes(
     world.objectMapping, 
@@ -742,14 +747,10 @@ void setAttributes(World& world, objid id, std::map<std::string, std::string> at
   );
   
   GameObject& obj = getGameObject(world, id);
- /// applyAttributeValue(obj, std::string field, AttributeValue value);
-
-  if (attr.find("position") != attr.end()){
-    obj.transformation.position = parseVec(attr.at("position"));
+  for (auto [field, fieldValue] : attr){
+    setAttribute(obj, field, parsePropertySuffix(field, fieldValue));
   }
-  if (attr.find("scale") != attr.end()){
-    obj.transformation.scale = parseVec(attr.at("scale"));
-  }
+  afterAttributesSet(world, id, obj);
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
   GameObject& gameobj = getGameObject(world, id);
@@ -856,11 +857,6 @@ void callbackEntities(World& world){
     }
   });  
   world.entitiesToUpdate.clear();
-}
-
-void afterAttributesSet(World& world, objid id, GameObject& gameobj){
-  physicsTranslateSet(world, id, gameobj.transformation.position);
-  physicsScaleSet(world, id, gameobj.transformation.scale);  
 }
 
 void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
