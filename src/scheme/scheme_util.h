@@ -7,6 +7,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "../common/util.h"
 
 unsigned int toUnsignedInt(SCM value);
 glm::quat scmListToQuat(SCM rotation);
