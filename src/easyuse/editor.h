@@ -21,7 +21,6 @@ void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard
 void clearSelectedIndexs(EditorContent& editor);
 void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject);
 void setClipboardFromSelected(EditorContent& editor);
-void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById);
 bool isSelected(EditorContent& editor, objid id);
 objid selected(EditorContent& editor);
 std::vector<objid> selectedIds(EditorContent& editor);

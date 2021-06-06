@@ -763,19 +763,7 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   }
   world.entitiesToUpdate.insert(index);
 }
-void physicsTranslate(World& world, objid index, float x, float y, float z, bool moveRelativeEnabled){
-  const int SPEED = 5;
-  auto offset = glm::vec3(x * SPEED, y * SPEED, z * SPEED);
 
-  glm::vec3 newPosition;
-  if (moveRelativeEnabled){
-    auto oldGameObject = getGameObject(world, index);
-    newPosition = moveRelative(oldGameObject.transformation.position, oldGameObject.transformation.rotation, offset, false);
-  }else{
-    newPosition = move(getGameObject(world, index).transformation.position, offset);   
-  }
-  physicsTranslateSet(world, index, newPosition);
-}
 void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
   physicsTranslateSet(world, index, applyTranslation(position, offsetX, offsetY, manipulatorAxis));
 }
@@ -789,9 +777,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation){
   }
   world.entitiesToUpdate.insert(index);
 }
-void physicsRotate(World& world, objid index, float x, float y, float z){
-  physicsRotateSet(world, index, setFrontDelta(getGameObject(world, index).transformation.rotation, x, y, z, 5));
-}
+
 void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
   physicsRotateSet(world, index, applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis));
 }
@@ -806,10 +792,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   }
   world.entitiesToUpdate.insert(index);
 }
-void physicsScale(World& world, objid index, float x, float y, float z){
-  auto oldScale = getGameObject(world, index).transformation.scale;
-  physicsScaleSet(world, index, glm::vec3(oldScale.x + x, oldScale.y + y, oldScale.z + z));
-}
+
 void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
   physicsScaleSet(world, index, applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
 }

@@ -64,13 +64,6 @@ void setClipboardFromSelected(EditorContent& editor){
   std::cout << "set clipboard size to: " << editor.selectedObjs.size() << std::endl;
   editor.clipboardObjs = editor.selectedObjs;
 }
-void rmAllObjects(EditorContent& editor, std::function<void(objid)> rmObjectById){
-  std::cout << "INFO: EDITOR: RM ALL OBJECTS" << std::endl;
-  for (auto item : editor.selectedObjs){
-    rmObjectById(item.id);
-  }
-  editor.selectedObjs = {};
-}
 
 bool isSelected(EditorContent& editor, objid id){
   for (auto item : editor.selectedObjs){

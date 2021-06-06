@@ -332,7 +332,7 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
         });
         found = true;
       }
-      //assert(found);
+      assert(found);
     }
   } 
   assert(hitobjects.size() == result.m_hitFractions.size());
