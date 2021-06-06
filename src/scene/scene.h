@@ -56,7 +56,7 @@ void removeObjectFromScene(World& world, objid id, SysInterface interface);
 void copyObjectToScene(World& world, objid id, SysInterface interface);
 
 std::map<std::string, std::string> getAttributes(World& world, objid id);
-void setAttributes(World& world, objid id, std::map<std::string, std::string> attr);
+void setAttributes(World& world, objid id, GameobjAttributes& attr);
 void setProperty(World& world, objid id, std::vector<Property>& properties);
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage);
 AttributeValue parsePropertySuffix(std::string key, std::string value);

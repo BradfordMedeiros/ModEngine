@@ -755,44 +755,40 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
 
 
 // TODO -> this needs updating hard.  
-void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, std::map<std::string, std::string> attributes, std::function<void(bool)> setEmitterEnabled){
+void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled){
  GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL){
-    if (attributes.find("isDisabled") != attributes.end()){
-      meshObj -> isDisabled = attributes.at("isDisabled") == "true";;
+    if (attributes.stringAttributes.find("isDisabled") != attributes.stringAttributes.end()){
+      meshObj -> isDisabled = attributes.stringAttributes.at("isDisabled") == "true";;
     }
-    if (attributes.find("textureoffset") != attributes.end()){
+    if (attributes.stringAttributes.find("textureoffset") != attributes.stringAttributes.end()){
       std::cout << "updating texture offset" << std::endl;
-      meshObj -> texture.textureoffset = parseVec2(attributes.at("textureoffset"));
+      meshObj -> texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
     }
     return;
   }
 
   auto cameraObj = std::get_if<GameObjectChannel>(&toRender);
   if (cameraObj != NULL){
-    if (attributes.find("to") != attributes.end()){
-      cameraObj -> to = attributes.at("to");
+    if (attributes.stringAttributes.find("to") != attributes.stringAttributes.end()){
+      cameraObj -> to = attributes.stringAttributes.at("to");
     }
-    if (attributes.find("from") != attributes.end()){
-      cameraObj -> from = attributes.at("from");
+    if (attributes.stringAttributes.find("from") != attributes.stringAttributes.end()){
+      cameraObj -> from = attributes.stringAttributes.at("from");
     }
     return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL){   
-    lightObj -> color = parseVec(attributes.at("color"));
+    lightObj -> color = attributes.vecAttributes.at("color");
     return;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL){
-    std::cout << "attr.size() => " << attributes.size() << std::endl;
-    for (auto [key, value] : attributes){
-      std::cout << "attr: (" << key << ", " << value << ")" << std::endl;
-    }
-    auto enabled = attributes.find("state") != attributes.end() ? !(attributes.at("state") == "disabled") : true;
+    auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
     setEmitterEnabled(enabled);
     return;
   }

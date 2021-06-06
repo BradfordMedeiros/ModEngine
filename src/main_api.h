@@ -92,7 +92,7 @@ std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
 std::vector<int32_t> getObjectsByType(std::string type);
 std::string getGameObjectName(int32_t index);
 std::map<std::string, std::string> getGameObjectAttr(int32_t id);
-void setGameObjectAttr(int32_t id, std::map<std::string, std::string> attr);
+void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
 
 glm::vec3 getGameObjectPosition(int32_t index, bool isWorld);
 glm::vec3 getGameObjectPos(int32_t index);

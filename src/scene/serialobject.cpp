@@ -205,6 +205,21 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
   std::cout << "attribute not yet supported: " << field << std::endl;
   assert(false);
 } 
+void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
+  for (auto [field, fieldValue] : attr.stringAttributes){
+    setAttribute(gameobj, field, fieldValue);
+  }
+  for (auto [field, fieldValue] : attr.numAttributes){
+    setAttribute(gameobj, field, fieldValue);
+  }
+  for (auto [field, fieldValue] : attr.vecAttributes){
+    setAttribute(gameobj, field, fieldValue);
+  }
+  for (auto [field, fieldValue] : attr.additionalFields){
+    setAttribute(gameobj, field, fieldValue);
+  }  
+}
+
 AttributeValue attributeValue(GameObject& gameobj, std::string field){
   if (field == "position"){
     return gameobj.transformation.position;

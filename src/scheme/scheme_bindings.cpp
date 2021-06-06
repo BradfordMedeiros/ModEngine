@@ -161,18 +161,11 @@ SCM scmGetGameObjectAttr(SCM gameobj){
 }
 
 // @TODO -> add types around this
-void (*_setGameObjectAttr)(int32_t id, std::map<std::string, std::string> attr);
+void (*_setGameObjectAttr)(int32_t id, GameobjAttributes& attr);
 SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
   auto id = getGameobjId(gameobj);
-  std::map<std::string, std::string> newAttributes;
-  auto numElements = toUnsignedInt(scm_length(attr));
-  for (int i = 0; i < numElements; i++){
-    auto nameValuePair = scm_list_ref(attr, scm_from_unsigned_integer(i));
-    auto attrName = scm_to_locale_string(scm_list_ref(nameValuePair, scm_from_unsigned_integer(0)));
-    auto attrValue = scm_to_locale_string(scm_list_ref(nameValuePair, scm_from_unsigned_integer(1)));
-    newAttributes[attrName] = attrValue;
-  }
-  _setGameObjectAttr(id, newAttributes);
+  auto attrs = scmToAttributes(attr);
+  _setGameObjectAttr(id, attrs);
   return SCM_UNSPECIFIED;
 }
 
@@ -991,7 +984,7 @@ void createStaticSchemeBindings(
   void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),
   std::string (*getGameObjectNameForId)(int32_t id),
   std::map<std::string, std::string> getGameObjectAttr(int32_t id),
-  void (*setGameObjectAttr)(int32_t id, std::map<std::string, std::string> attr),
+  void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
   void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
   void (*setGameObjectPosRelative)(int32_t index, float x, float y, float z, bool xzPlaneOnly),

@@ -126,7 +126,7 @@ std::string getGameObjectName(int32_t index){
 std::map<std::string, std::string> getGameObjectAttr(int32_t id){
   return getAttributes(world, id);
 }
-void setGameObjectAttr(int32_t id, std::map<std::string, std::string> attr){
+void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
   setAttributes(world, id, attr);
 }
 

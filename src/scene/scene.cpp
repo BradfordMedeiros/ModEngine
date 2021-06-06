@@ -734,22 +734,17 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj){
   physicsScaleSet(world, id, gameobj.transformation.scale);  
 }
 
-void setAttributes(World& world, objid id, std::map<std::string, std::string> attr){
-  // look toward applyattribute delta 
+void setAttributes(World& world, objid id, GameobjAttributes& attr){
   setObjectAttributes(
     world.objectMapping, 
     id, 
     attr,
     [&world, id](bool enabled) -> void {
-      std::cout << "id: " << id << " should be enabled: " << enabled << std::endl;
       setEmitterEnabled(world.emitters, id, enabled);
     }
   );
-  
   GameObject& obj = getGameObject(world, id);
-  for (auto [field, fieldValue] : attr){
-    setAttribute(obj, field, parsePropertySuffix(field, fieldValue));
-  }
+  setAllAttributes(obj, attr);
   afterAttributesSet(world, id, obj);
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
