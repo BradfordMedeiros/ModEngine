@@ -766,6 +766,9 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
       std::cout << "updating texture offset" << std::endl;
       meshObj -> texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
     }
+    if (attributes.vecAttributes.find("color") != attributes.vecAttributes.end()){
+      meshObj -> tint = attributes.vecAttributes.at("color");
+    }
     return;
   }
 

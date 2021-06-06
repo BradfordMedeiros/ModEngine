@@ -201,9 +201,6 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
     gameobj.physicsOptions.layer = *fValue;
     return;
   }
-
-  std::cout << "attribute not yet supported: " << field << std::endl;
-  assert(false);
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
   for (auto [field, fieldValue] : attr.stringAttributes){
