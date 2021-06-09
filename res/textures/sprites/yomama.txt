@@ -1,0 +1,8 @@
+200
+4
+./res/textures/voxel.png
+/home/rking/Desktop/myprojects/ModEngine/ModEngine/res/textures/sprites/a0.png
+/home/rking/Desktop/myprojects/ModEngine/ModEngine/res/textures/sprites/a1.png
+/home/rking/Desktop/myprojects/ModEngine/ModEngine/res/textures/sprites/a3.png
+/home/rking/Desktop/myprojects/ModEngine/ModEngine/res/textures/sprites/a4.png
+/home/rking/Desktop/myprojects/ModEngine/ModEngine/res/textures/sprites/a2.png
