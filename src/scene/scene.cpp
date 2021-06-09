@@ -373,15 +373,22 @@ std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName
     }
   }
 
-  assert(false);
-  /*for (auto &[_, fields] : additionalFieldsMap){    // @TODO - this looks wrong, shouldn't we copy all fields? 
+  for (auto &[_, obj] : additionalFieldsMap){    // @TODO - this looks wrong, shouldn't we copy all fields? 
     for (auto field : fieldsToCopy){
-      assert(fields.find(field) == fields.end());
-      if (additionalFields.find(field) != additionalFields.end()){
-        fields[field] = additionalFields.at(field);
+      assert(obj.stringAttributes.find(field) == obj.stringAttributes.end());
+      assert(obj.numAttributes.find(field) == obj.numAttributes.end());
+      assert(obj.vecAttributes.find(field) == obj.vecAttributes.end());
+      if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+        obj.stringAttributes[field] = attr.stringAttributes.at(field);
+      }
+      if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+        obj.numAttributes[field] = attr.numAttributes.at(field);
+      }
+      if (attr.vecAttributes.find(field) != attr.vecAttributes.end()){
+        obj.vecAttributes[field] = attr.vecAttributes.at(field);
       }
     }
-  }*/
+  }
 
   return additionalFieldsMap;
 }
