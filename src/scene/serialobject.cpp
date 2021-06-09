@@ -103,7 +103,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   }else{
     object.rotation = glm::identity<glm::quat>();
   }
-  object.additionalFields = attributes.additionalFields;
+  object.additionalFields = attributes;
   object.children = attributes.children;
 }
 
@@ -212,9 +212,6 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
   for (auto [field, fieldValue] : attr.vecAttributes){
     setAttribute(gameobj, field, fieldValue);
   }
-  for (auto [field, fieldValue] : attr.additionalFields){
-    setAttribute(gameobj, field, fieldValue);
-  }  
 }
 
 AttributeValue attributeValue(GameObject& gameobj, std::string field){

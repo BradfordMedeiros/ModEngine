@@ -170,6 +170,10 @@ glm::vec3 parseVec(std::string positionRaw){;
   in >> x >> y >> z;
   return glm::vec3(x, y, z);
 }
+bool maybeParseVec(std::string positionRaw, glm::vec3& _vec){
+  assert(false);
+  return false;
+}
 glm::vec2 parseVec2(std::string positionRaw){;
   float x, y;
   std::istringstream in(positionRaw);
@@ -183,6 +187,10 @@ std::vector<float> parseFloatVec(std::string value){
     floats.push_back(std::atof(value.c_str()));
   }
   return floats;
+}
+bool maybeParseFloat(std::string value, float& _number){
+  assert(false);
+  return false;
 }
 
 glm::quat eulerToQuat(glm::vec3 eulerAngles){

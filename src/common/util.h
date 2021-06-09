@@ -41,8 +41,10 @@ std::string print(glm::vec2 vec);
 std::string print(glm::quat quat);
 std::string print(glm::mat4 mat);
 glm::vec3 parseVec(std::string positionRaw);
+bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
 glm::vec2 parseVec2(std::string positionRaw);
 std::vector<float> parseFloatVec(std::string value);
+bool maybeParseFloat(std::string value, float& _number);
 glm::quat eulerToQuat(glm::vec3 eulerAngles);
 glm::quat parseQuat(std::string payload);
 glm::vec3 quatToVec(glm::quat quat);
@@ -96,7 +98,6 @@ struct GameobjAttributes {
   std::map<std::string, glm::vec3> vecAttributes;
   
   // todo get rid of these fields
-  std::map<std::string, std::string> additionalFields;
   std::vector<std::string> children;
 };
 

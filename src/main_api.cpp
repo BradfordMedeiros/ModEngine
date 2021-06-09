@@ -176,7 +176,6 @@ objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std:
     .stringAttributes = stringAttributes,
     .numAttributes = numAttributes,
     .vecAttributes = vecAttributes,
-    .additionalFields = stringAttributes,
   };
   return addObjectToScene(world, sceneId, name, attributes, interface);
 }

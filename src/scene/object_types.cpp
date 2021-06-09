@@ -5,11 +5,11 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-TextureInformation texinfoFromFields(std::map<std::string, std::string>& additionalFields, std::function<Texture(std::string)> ensureTextureLoaded){
-  glm::vec2 textureoffset = additionalFields.find("textureoffset") == additionalFields.end() ? glm::vec2(0.f, 0.f) : parseVec2(additionalFields.at("textureoffset"));
-  glm::vec2 texturetiling = additionalFields.find("texturetiling") == additionalFields.end() ? glm::vec2(1.f, 1.f) : parseVec2(additionalFields.at("texturetiling"));
-  glm::vec2 texturesize = additionalFields.find("texturesize") == additionalFields.end() ? glm::vec2(1.f, 1.f) : parseVec2(additionalFields.at("texturesize"));
-  std::string textureOverloadName = additionalFields.find("texture") == additionalFields.end() ? "" : additionalFields.at("texture");
+TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded){
+  glm::vec2 textureoffset = attr.stringAttributes.find("textureoffset") == attr.stringAttributes.end() ? glm::vec2(0.f, 0.f) : parseVec2(attr.stringAttributes.at("textureoffset"));
+  glm::vec2 texturetiling = attr.stringAttributes.find("texturetiling") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturetiling"));
+  glm::vec2 texturesize = attr.stringAttributes.find("texturesize") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturesize"));
+  std::string textureOverloadName = attr.stringAttributes.find("texture") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("texture");
   int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName).textureId;
 
   TextureInformation info {
@@ -24,21 +24,20 @@ TextureInformation texinfoFromFields(std::map<std::string, std::string>& additio
 
 static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texturesize", "texture", "discard", "emission", "tint" };
 GameObjectMesh createMesh(
-  std::map<std::string, std::string> additionalFields, 
+  GameobjAttributes& attr, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded
 ){
-  std::string rootMeshName = additionalFields.find("mesh") == additionalFields.end()  ? "" : additionalFields.at("mesh");
-  bool usesMultipleMeshes = additionalFields.find("meshes") != additionalFields.end();
-
+  std::string rootMeshName = attr.stringAttributes.find("mesh") == attr.stringAttributes.end()  ? "" : attr.stringAttributes.at("mesh");
+  bool usesMultipleMeshes = attr.stringAttributes.find("meshes") != attr.stringAttributes.end();
 
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
 
   if (usesMultipleMeshes){
-    auto meshStrings = split(additionalFields.at("meshes"), ',');
+    auto meshStrings = split(attr.stringAttributes.at("meshes"), ',');
     for (auto meshName : meshStrings){
       bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
       if (loadedMesh){
@@ -47,7 +46,7 @@ GameObjectMesh createMesh(
       }
     }
   }else{
-    auto meshName = (additionalFields.find("mesh") != additionalFields.end()) ? additionalFields.at("mesh") : defaultMesh;
+    auto meshName = (attr.stringAttributes.find("mesh") != attr.stringAttributes.end()) ? attr.stringAttributes.at("mesh") : defaultMesh;
     meshName = (meshName == "") ? defaultMesh : meshName;
     bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
     if (loadedMesh){
@@ -59,13 +58,13 @@ GameObjectMesh createMesh(
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
-    .isDisabled = additionalFields.find("disabled") != additionalFields.end(),
+    .isDisabled = attr.stringAttributes.find("disabled") != attr.stringAttributes.end(),
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
-    .texture = texinfoFromFields(additionalFields, ensureTextureLoaded),
-    .discardAmount = additionalFields.find("discard") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("emission").c_str()),
-    .emissionAmount = additionalFields.find("emission") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("emission").c_str()),
-    .tint = additionalFields.find("tint") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("tint").c_str()),
+    .texture = texinfoFromFields(attr, ensureTextureLoaded),
+    .discardAmount = attr.numAttributes.find("discard") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("discard"),
+    .emissionAmount = attr.numAttributes.find("emission") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("emission"),
+    .tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint"),
   };
   return obj;
 }
@@ -73,10 +72,10 @@ GameObjectCamera createCamera(){
   GameObjectCamera obj {};
   return obj;
 }
-GameObjectPortal createPortal(std::map<std::string, std::string> additionalFields){
-  bool hasCamera =  additionalFields.find("camera") != additionalFields.end();
-  auto camera = hasCamera ? additionalFields.at("camera") : "";
-  auto perspective = additionalFields.find("perspective") != additionalFields.end() ? additionalFields.at("perspective") == "true" : false;
+GameObjectPortal createPortal(GameobjAttributes& attr){
+  bool hasCamera = attr.stringAttributes.find("camera") != attr.stringAttributes.end();
+  auto camera = hasCamera ? attr.stringAttributes.at("camera") : "";
+  auto perspective = attr.stringAttributes.find("perspective") != attr.stringAttributes.end() ? attr.stringAttributes.at("perspective") == "true" : false;
 
   GameObjectPortal obj {
     .camera = camera,
@@ -84,8 +83,8 @@ GameObjectPortal createPortal(std::map<std::string, std::string> additionalField
   };
   return obj;
 }
-GameObjectSound createSound(std::map<std::string, std::string> additionalFields){
-  auto clip = additionalFields.at("clip");
+GameObjectSound createSound(GameobjAttributes& attr){
+  auto clip = attr.stringAttributes.at("clip");
   auto source = loadSoundState(clip);
   GameObjectSound obj {
     .clip = clip,
@@ -103,14 +102,14 @@ LightType getLightType(std::string type){
   }
   return LIGHT_POINT;
 }
-GameObjectLight createLight(std::map<std::string, std::string> additionalFields){
-  auto color = additionalFields.find("color") == additionalFields.end() ? glm::vec3(1.f, 1.f, 1.f) : parseVec(additionalFields.at("color"));
-  auto lightType = additionalFields.find("type") == additionalFields.end() ? LIGHT_POINT : getLightType(additionalFields.at("type"));
-  auto maxangle = (lightType != LIGHT_SPOTLIGHT || additionalFields.find("angle") == additionalFields.end()) ? -10.f : std::atof(additionalFields.at("angle").c_str());
+GameObjectLight createLight(GameobjAttributes& attr){
+  auto color = attr.vecAttributes.find("color") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("color");
+  auto lightType = attr.stringAttributes.find("type") == attr.stringAttributes.end() ? LIGHT_POINT : getLightType(attr.stringAttributes.at("type"));
+  auto maxangle = (lightType != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
 
   // constant, linear, quadratic
   // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
-  auto attenuation = additionalFields.find("attenuation") == additionalFields.end() ? glm::vec3(1.0, 0.007, 0.0002) : parseVec(additionalFields.at("attenuation"));
+  auto attenuation = attr.vecAttributes.find("attenuation") == attr.vecAttributes.end() ? glm::vec3(1.0, 0.007, 0.0002) : attr.vecAttributes.at("attenuation");
 
   GameObjectLight obj {
     .color = color,
@@ -121,22 +120,22 @@ GameObjectLight createLight(std::map<std::string, std::string> additionalFields)
   return obj;
 }
 
-GameObjectVoxel createVoxel(std::map<std::string, std::string> additionalFields, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto textureString = additionalFields.find("fromtextures") == additionalFields.end() ? "" : additionalFields.at("fromtextures");
-  auto voxel = createVoxels(parseVoxelState(additionalFields.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
+GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
+  auto textureString = attr.stringAttributes.find("fromtextures") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("fromtextures");
+  auto voxel = createVoxels(parseVoxelState(attr.stringAttributes.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
   GameObjectVoxel obj {
     .voxel = voxel,
   };
   return obj;
 }
 
-GameObjectChannel createChannel(std::map<std::string, std::string> additionalFields){
-  bool hasFrom = additionalFields.find("from") != additionalFields.end();
-  bool hasTo = additionalFields.find("to") != additionalFields.end();
+GameObjectChannel createChannel(GameobjAttributes& attr){
+  bool hasFrom = attr.stringAttributes.find("from") != attr.stringAttributes.end();
+  bool hasTo = attr.stringAttributes.find("to") != attr.stringAttributes.end();
 
   GameObjectChannel obj {
-    .from = hasFrom ? additionalFields.at("from") : "",
-    .to = hasTo ? additionalFields.at("to") : "",
+    .from = hasFrom ? attr.stringAttributes.at("from") : "",
+    .to = hasTo ? attr.stringAttributes.at("to") : "",
     .complete = hasFrom && hasTo,
   };
   return obj;
@@ -193,26 +192,26 @@ std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> addit
   return deltas;
 }
 
-GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter, std::map<std::string, std::string> additionalFields){
+GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter, GameobjAttributes& attributes){
   GameObjectEmitter obj {};
-  float spawnrate = additionalFields.find("rate") != additionalFields.end() ? std::atof(additionalFields.at("rate").c_str()) : 1.f;
-  float lifetime = additionalFields.find("duration") != additionalFields.end() ? std::atof(additionalFields.at("duration").c_str()) : 10.f;
-  int limit = additionalFields.find("limit") != additionalFields.end() ? std::atoi(additionalFields.at("limit").c_str()) : 10;
-  auto enabled = additionalFields.find("state") != additionalFields.end() ? !(additionalFields.at("state") == "disabled") : true;
+  float spawnrate = attributes.numAttributes.find("rate") != attributes.numAttributes.end() ? attributes.numAttributes.at("rate") : 1.f;
+  float lifetime = attributes.numAttributes.find("duration") != attributes.numAttributes.end() ? attributes.numAttributes.at("duration") : 10.f;
+  int limit = attributes.numAttributes.find("limit") != attributes.numAttributes.end() ? attributes.numAttributes.at("limit") : 10;
+  auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
   assert(limit >= 0);
-  addEmitter(spawnrate, lifetime, limit, particleFields(additionalFields), emitterDeltas(additionalFields), enabled);
+  addEmitter(spawnrate, lifetime, limit, particleFields(attributes.stringAttributes), emitterDeltas(attributes.stringAttributes), enabled);
   return obj;
 }
 
-GameObjectHeightmap createHeightmap(std::map<std::string, std::string> additionalFields, std::function<Mesh(MeshData&)> loadMesh, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto mapName = additionalFields.find("map") != additionalFields.end() ? additionalFields.at("map") : "";
-  auto dim = additionalFields.find("dim") != additionalFields.end() ? std::atoi(additionalFields.at("dim").c_str()) : -1;
+GameObjectHeightmap createHeightmap(GameobjAttributes& attr, std::function<Mesh(MeshData&)> loadMesh, std::function<Texture(std::string)> ensureTextureLoaded){
+  auto mapName = attr.stringAttributes.find("map") != attr.stringAttributes.end() ? attr.stringAttributes.at("map") : "";
+  auto dim = attr.numAttributes.find("dim") != attr.numAttributes.end() ? attr.numAttributes.at("dim") : -1;
   auto heightmap = loadAndAllocateHeightmap(mapName, dim);
   auto meshData = generateHeightmapMeshdata(heightmap);
   GameObjectHeightmap obj{
     .heightmap = heightmap,
     .mesh = loadMesh(meshData),
-    .texture = texinfoFromFields(additionalFields, ensureTextureLoaded),
+    .texture = texinfoFromFields(attr, ensureTextureLoaded),
   };
   return obj;
 }
@@ -224,16 +223,16 @@ GameObjectNavmesh createNavmesh(Mesh& navmesh){
   return obj;
 }
 
-GameObjectNavConns createNavConns(std::map<std::string, std::string>& additionalFields){
+GameObjectNavConns createNavConns(GameobjAttributes& attr){
   GameObjectNavConns obj {
-    .navgraph = createNavGraph(additionalFields),
+    .navgraph = createNavGraph(attr.stringAttributes),
   };
   return obj;
 }
 
-GameObjectUICommon parseCommon(std::map<std::string, std::string>& additionalFields, std::map<std::string, Mesh>& meshes){
-  auto onFocus = additionalFields.find("focus") != additionalFields.end() ? additionalFields.at("focus") : "";
-  auto onBlur = additionalFields.find("blur") != additionalFields.end() ? additionalFields.at("blur") : "";
+GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, Mesh>& meshes){
+  auto onFocus = attr.stringAttributes.find("focus") != attr.stringAttributes.end() ? attr.stringAttributes.at("focus") : "";
+  auto onBlur = attr.stringAttributes.find("blur") != attr.stringAttributes.end() ? attr.stringAttributes.at("blur") : "";
   GameObjectUICommon common {
     .mesh = meshes.at("./res/models/controls/input.obj"),
     .isFocused = false,
@@ -242,18 +241,18 @@ GameObjectUICommon parseCommon(std::map<std::string, std::string>& additionalFie
   };
   return common;
 }
-GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalFields, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto onTexture = additionalFields.find("ontexture") != additionalFields.end() ? additionalFields.at("ontexture") : "";
-  auto offTexture = additionalFields.find("offtexture") != additionalFields.end() ? additionalFields.at("offtexture") : "";
-  auto toggleOn = additionalFields.find("state") != additionalFields.end() && additionalFields.at("state") == "on";
-  auto canToggle = additionalFields.find("cantoggle") == additionalFields.end() || !(additionalFields.at("cantoggle") == "false");
-  auto onToggleOn = additionalFields.find("on") != additionalFields.end() ? additionalFields.at("on") : "";
-  auto onToggleOff = additionalFields.find("off") != additionalFields.end() ? additionalFields.at("off") : "";
-  auto hasOnTint  = additionalFields.find("ontint") != additionalFields.end();
-  auto onTint = hasOnTint ? parseVec(additionalFields.at("ontint")) : glm::vec3(1.f, 1.f, 1.f);
+GameObjectUIButton createUIButton(GameobjAttributes& attr, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
+  auto onTexture = attr.stringAttributes.find("ontexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("ontexture") : "";
+  auto offTexture = attr.stringAttributes.find("offtexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("offtexture") : "";
+  auto toggleOn = attr.stringAttributes.find("state") != attr.stringAttributes.end() && attr.stringAttributes.at("state") == "on";
+  auto canToggle = attr.stringAttributes.find("cantoggle") == attr.stringAttributes.end() || !(attr.stringAttributes.at("cantoggle") == "false");
+  auto onToggleOn = attr.stringAttributes.find("on") != attr.stringAttributes.end() ? attr.stringAttributes.at("on") : "";
+  auto onToggleOff = attr.stringAttributes.find("off") != attr.stringAttributes.end() ? attr.stringAttributes.at("off") : "";
+  auto hasOnTint  = attr.vecAttributes.find("ontint") != attr.vecAttributes.end();
+  auto onTint = hasOnTint ? attr.vecAttributes.at("ontint") : glm::vec3(1.f, 1.f, 1.f);
 
   GameObjectUIButton obj { 
-    .common = parseCommon(additionalFields, meshes),
+    .common = parseCommon(attr, meshes),
     .initialState = toggleOn,
     .toggleOn = toggleOn,
     .canToggle = canToggle,
@@ -269,11 +268,11 @@ GameObjectUIButton createUIButton(std::map<std::string, std::string> additionalF
   return obj;
 }
 
-GameObjectUISlider createUISlider(std::map<std::string, std::string>& additionalFields, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto onSlide = additionalFields.find("onslide") != additionalFields.end() ? additionalFields.at("onslide") : "";
+GameObjectUISlider createUISlider(GameobjAttributes& attr, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
+  auto onSlide = attr.stringAttributes.find("onslide") != attr.stringAttributes.end() ? attr.stringAttributes.at("onslide") : "";
 
   GameObjectUISlider obj {
-    .common = parseCommon(additionalFields, meshes),
+    .common = parseCommon(attr, meshes),
     .min = 0.f,
     .max = 100.f,
     .percentage = 100.f,
@@ -284,9 +283,9 @@ GameObjectUISlider createUISlider(std::map<std::string, std::string>& additional
   return obj;
 }
 
-GameObjectUIText createUIText(std::map<std::string, std::string>& additionalFields){
-  auto value = additionalFields.find("value") != additionalFields.end() ? additionalFields.at("value") : "";
-  auto deltaOffset = additionalFields.find("spacing") != additionalFields.end() ? std::atof(additionalFields.at("spacing").c_str()) : 2;
+GameObjectUIText createUIText(GameobjAttributes& attr){
+  auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
+  auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
 
   GameObjectUIText obj {
     .value = value,
@@ -295,15 +294,15 @@ GameObjectUIText createUIText(std::map<std::string, std::string>& additionalFiel
   return obj;
 }
 
-GameObjectUILayout createUILayout(std::map<std::string, std::string>& additionalFields){
-  auto spacing = additionalFields.find("spacing") == additionalFields.end() ? 0.f : std::atof(additionalFields.at("spacing").c_str());
-  auto type = (additionalFields.find("type") != additionalFields.end() && additionalFields.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
+GameObjectUILayout createUILayout(GameobjAttributes& attr){
+  auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
+  auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
   
   std::vector<std::string> elements = {};
-  if (additionalFields.find("elements") != additionalFields.end()){
-    elements = split(additionalFields.at("elements"), ',');
+  if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
+    elements = split(attr.stringAttributes.at("elements"), ',');
   }
-  auto order = (additionalFields.find("order") == additionalFields.end()) ? 0 : std::atoi(additionalFields.at("order").c_str());
+  auto order = (attr.numAttributes.find("order") == attr.numAttributes.end()) ? 0 : attr.numAttributes.at("order");
 
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
@@ -321,10 +320,10 @@ GameObjectUILayout createUILayout(std::map<std::string, std::string>& additional
 }
 
 GameObjectVideo createVideo(
-  std::map<std::string, std::string> additionalFields, 
+  GameobjAttributes& attr, 
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded
 ){
-  auto videoPath = additionalFields.at("source");
+  auto videoPath = attr.stringAttributes.at("source");
   auto video = loadVideo(videoPath.c_str());
   std::cout << "INFO: OBJECT TYPE: CREATE VIDEO" << std::endl;
 
@@ -346,7 +345,7 @@ GameObjectVideo createVideo(
 void addObject(
   objid id, 
   std::string objectType, 
-  std::map<std::string, std::string> additionalFields,
+  GameobjAttributes& attr,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, 
   std::string defaultMesh, 
@@ -358,40 +357,40 @@ void addObject(
   std::function<Mesh(MeshData&)> loadMesh
 ){
   if (objectType == "default"){
-    mapping[id] = createMesh(additionalFields, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
+    mapping[id] = createMesh(attr, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if (objectType == "portal"){
-    mapping[id] = createPortal(additionalFields);
+    mapping[id] = createPortal(attr);
   }else if(objectType == "sound"){
-    mapping[id] = createSound(additionalFields);
+    mapping[id] = createSound(attr);
   }else if(objectType == "light"){
-    mapping[id] = createLight(additionalFields);
+    mapping[id] = createLight(attr);
   }else if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
-    mapping[id] = createVoxel(additionalFields, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
+    mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
   }else if(objectType == "channel"){
-    mapping[id] = createChannel(additionalFields);
+    mapping[id] = createChannel(attr);
   }else if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
-    mapping[id] = createEmitter(addEmitter, additionalFields);
+    mapping[id] = createEmitter(addEmitter, attr);
   }else if (objectType == "heightmap"){
-    mapping[id] = createHeightmap(additionalFields, loadMesh, ensureTextureLoaded);
+    mapping[id] = createHeightmap(attr, loadMesh, ensureTextureLoaded);
   }else if (objectType == "navmesh"){
     mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj"));
   }else if (objectType == "navconnection"){
-    mapping[id] = createNavConns(additionalFields);
+    mapping[id] = createNavConns(attr);
   }else if (objectType == "ui"){
-    mapping[id] = createUIButton(additionalFields, meshes, ensureTextureLoaded);
+    mapping[id] = createUIButton(attr, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
-    mapping[id] = createUISlider(additionalFields, meshes, ensureTextureLoaded);
+    mapping[id] = createUISlider(attr, meshes, ensureTextureLoaded);
   }else if (objectType == "text"){
-    mapping[id] = createUIText(additionalFields);
+    mapping[id] = createUIText(attr);
   }else if (objectType == "layout"){
-    mapping[id] = createUILayout(additionalFields);
+    mapping[id] = createUILayout(attr);
   }else if (objectType == "video"){
-    mapping[id] = createVideo(additionalFields, ensureTextureDataLoaded);
+    mapping[id] = createVideo(attr, ensureTextureDataLoaded);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
