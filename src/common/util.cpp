@@ -167,7 +167,11 @@ std::string print(glm::mat4 mat){
 
 bool maybeParseFloat(std::string value, float& _number){
   try {
-    float number = std::stof(value);
+    std::string::size_type parsedSize;
+    float number = std::stof(value, &parsedSize);
+    if (parsedSize != value.size()){
+      return false;
+    }
     _number = number;
     return true;
   }catch(...){}
