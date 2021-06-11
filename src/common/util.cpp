@@ -185,7 +185,7 @@ glm::vec3 parseVec(std::string positionRaw){;
   return glm::vec3(x, y, z);
 }
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec){
-  auto parts = filterWhitespace(split(positionRaw, ','));
+  auto parts = filterWhitespace(split(positionRaw, ' '));
   if (parts.size() != 3){
     return false;
   }
