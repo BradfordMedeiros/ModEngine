@@ -447,8 +447,8 @@ void addObjectToWorld(
             getId
           );
 
-          for (auto &[name, additionalFields] : newSerialObjs){
-            addObjectToWorld(world, sceneId, name, false, getId, interface, attr, idToModelVertexs);
+          for (auto &[name, objAttr] : newSerialObjs){
+            addObjectToWorld(world, sceneId, name, false, getId, interface, objAttr, idToModelVertexs);
           }
           return hasMesh;
         }
