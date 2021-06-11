@@ -84,10 +84,9 @@ SceneDeserialization createSceneFromParsedContent(
   }
   enforceRootObjects(scene);
 
-  std::map<std::string, std::map<std::string, std::string>> additionalFields;
-
-  for (auto &[name, gameobj] : serialGameAttrs){
-    additionalFields[name] = gameobj.additionalFields;
+  std::map<std::string, GameobjAttributes> additionalFields;
+  for (auto &[name, attr] : serialGameAttrs){
+    additionalFields[name] = attr;
   }
 
   SceneDeserialization deserializedScene {
@@ -111,7 +110,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
   return attributes;
 }
 
-std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
+std::map<std::string, GameobjAttributes> addSubsceneToRoot(
   Scene& scene, 
   std::vector<LayerInfo>& layers,
   objid sceneId,
@@ -120,10 +119,10 @@ std::map<std::string,  std::map<std::string, std::string>> addSubsceneToRoot(
   std::map<objid, objid> childToParent, 
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names,
-  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId
 ){
-  std::map<std::string,  std::map<std::string, std::string>> nameToAdditionalFields;
+  std::map<std::string,  GameobjAttributes> nameToAdditionalFields;
   std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
   std::vector<objid> addedIds;
@@ -569,7 +568,7 @@ bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
 }    
 
-std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
+std::map<std::string, GameobjAttributes> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId,
@@ -577,7 +576,7 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, objid> childToParent, 
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names, 
-  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId){
   auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sandbox.layers, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
   return nameToAdditionalFields;

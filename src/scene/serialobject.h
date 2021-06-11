@@ -38,7 +38,7 @@ struct SerializationObject {
   std::string script;
   std::string fragshader;
   bool netsynchronize;
-  std::map<std::string, std::string> additionalFields;
+  GameobjAttributes additionalFields;
 };
 
 struct GameObject {

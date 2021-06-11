@@ -80,6 +80,21 @@ bool addFields(GameobjAttributes& attributes, std::string attribute, std::string
   }
   return false;
 }
+void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  glm::vec3 vec(0.f, 0.f, 0.f);
+  bool isVec = maybeParseVec(payload, vec);
+  if (isVec){
+    attributes.vecAttributes[attribute] = vec;
+    return;
+  }
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(payload, number);
+  if (isFloat){
+    attributes.numAttributes[attribute] = number;
+    return;
+  }
+  attributes.stringAttributes[attribute] = payload;
+}
 
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, GameobjAttributes> objectAttributes;
@@ -107,7 +122,7 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
     if (addedField){
       continue;
     }  
-    objectAttributes.at(token.target).additionalFields[token.attribute] = token.payload;
+    addFieldDynamic(objectAttributes.at(token.target), token.attribute, token.payload);
   }
 
   return objectAttributes;

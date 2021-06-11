@@ -339,7 +339,7 @@ World createWorld(
   };
 
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, { 0 }, getUniqueObjId, interface, {{ "root", {}}});
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, { 0 }, getUniqueObjId, interface, {{ "root", GameobjAttributes{}}});
 
   // Default meshes that are silently loaded in the background
   addMesh(world, "./res/models/ui/node.obj");
@@ -352,32 +352,40 @@ World createWorld(
   return world;
 }
 
-std::map<objid, std::map<std::string, std::string>> generateAdditionalFields(std::string meshName, ModelData& data, std::map<std::string, std::string> additionalFields, std::vector<std::string> fieldsToCopy){
-  std::map<objid, std::map<std::string, std::string>> additionalFieldsMap;
+std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName, ModelData& data, GameobjAttributes& attr, std::vector<std::string> fieldsToCopy){
+  std::map<objid, GameobjAttributes> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
     std::map<std::string, std::string> emptyFields;
-    additionalFieldsMap[nodeId] = emptyFields;
+    additionalFieldsMap[nodeId] = GameobjAttributes{};
   }
 
   for (auto [nodeId, meshListIds] : data.nodeToMeshId){
     if (meshListIds.size() == 1){
       auto meshRef = meshName + "::" + std::to_string(meshListIds.at(0));
-      additionalFieldsMap.at(nodeId)["mesh"] = meshRef;
+      additionalFieldsMap.at(nodeId).stringAttributes["mesh"] = meshRef;
     }else if (meshListIds.size() > 1){
       std::vector<std::string> meshRefNames;
       for (auto id : meshListIds){
         auto meshRef = meshName + "::" + std::to_string(id);
         meshRefNames.push_back(meshRef);
       }
-      additionalFieldsMap.at(nodeId)["meshes"] = join(meshRefNames, ',');
+      additionalFieldsMap.at(nodeId).stringAttributes["meshes"] = join(meshRefNames, ',');
     }
   }
 
-  for (auto &[_, fields] : additionalFieldsMap){    // @TODO - this looks wrong, shouldn't we copy all fields? 
+  for (auto &[_, obj] : additionalFieldsMap){    // @TODO - this looks wrong, shouldn't we copy all fields? 
     for (auto field : fieldsToCopy){
-      assert(fields.find(field) == fields.end());
-      if (additionalFields.find(field) != additionalFields.end()){
-        fields[field] = additionalFields.at(field);
+      assert(obj.stringAttributes.find(field) == obj.stringAttributes.end());
+      assert(obj.numAttributes.find(field) == obj.numAttributes.end());
+      assert(obj.vecAttributes.find(field) == obj.vecAttributes.end());
+      if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+        obj.stringAttributes[field] = attr.stringAttributes.at(field);
+      }
+      if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+        obj.numAttributes[field] = attr.numAttributes.at(field);
+      }
+      if (attr.vecAttributes.find(field) != attr.vecAttributes.end()){
+        obj.vecAttributes[field] = attr.vecAttributes.at(field);
       }
     }
   }
@@ -402,13 +410,13 @@ void addObjectToWorld(
   bool shouldLoadModel, 
   std::function<objid()> getId,
   SysInterface interface,
-  std::map<std::string, std::string> additionalFields,
+  GameobjAttributes attr,
   std::map<objid, std::vector<glm::vec3>>& idToModelVertexs
 ){
     auto id = getIdForName(world.sandbox, name, sceneId);
 
-    addObject(id, getType(name, fields), additionalFields, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
-      [&world, sceneId, id, name, shouldLoadModel, getId, &additionalFields, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
+    addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
+      [&world, sceneId, id, name, shouldLoadModel, getId, &attr, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(name, meshName); 
           idToModelVertexs[id] = getVertexsFromModelData(data);
@@ -435,12 +443,12 @@ void addObjectToWorld(
             data.childToParent, 
             data.nodeTransform, 
             data.names, 
-            generateAdditionalFields(meshName, data, additionalFields, fieldsToCopy),
+            generateAdditionalFields(meshName, data, attr, fieldsToCopy),
             getId
           );
 
-          for (auto &[name, additionalFields] : newSerialObjs){
-            addObjectToWorld(world, sceneId, name, false, getId, interface, additionalFields, idToModelVertexs);
+          for (auto &[name, objAttr] : newSerialObjs){
+            addObjectToWorld(world, sceneId, name, false, getId, interface, objAttr, idToModelVertexs);
           }
           return hasMesh;
         }
@@ -507,12 +515,12 @@ void addSerialObjectsToWorld(
   std::vector<objid> idsAdded,
   std::function<objid()> getNewObjectId,
   SysInterface interface,
-  std::map<std::string, std::map<std::string, std::string>> additionalFields
+  std::map<std::string, GameobjAttributes> nameToAttr
 ){
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
-  for (auto &[name, additionalField] : additionalFields){
+  for (auto &[name, attr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, name, true, getNewObjectId, interface, additionalField, idToModelVertexs);
+    addObjectToWorld(world, sceneId, name, true, getNewObjectId, interface, attr, idToModelVertexs);
   }
   for (auto id : idsAdded){
     std::vector<glm::vec3> modelVerts = {};
@@ -550,7 +558,7 @@ objid addSerialObject(
   objid sceneId, 
   std::string name, 
   SysInterface interface, 
-  std::map<std::string, std::string> additionalFields, 
+  GameobjAttributes& attr, 
   std::vector<std::string> children, 
   GameObject gameobjectObj, 
   std::vector<objid>& idsAdded
@@ -563,8 +571,8 @@ objid addSerialObject(
 
   addGameObjectToScene(world.sandbox, sceneId, name, gameobjectObj, children);
 
-  std::map<std::string, std::map<std::string, std::string>> additionalFieldsMap;
-  additionalFieldsMap[name] = additionalFields;
+  std::map<std::string, GameobjAttributes> additionalFieldsMap;
+  additionalFieldsMap[name] = attr;
 
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap);
 
@@ -669,7 +677,7 @@ objid addObjectToScene(
   auto idToAdd = useObjId ? id : getUniqueObjId();
   idsAdded.push_back(idToAdd);
   auto gameobjectObj = gameObjectFromFields(name, idToAdd, attributes);
-  return addSerialObject(world, sceneId, name, interface, attributes.additionalFields, attributes.children, gameobjectObj, idsAdded);
+  return addSerialObject(world, sceneId, name, interface, attributes, attributes.children, gameobjectObj, idsAdded);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
@@ -690,7 +698,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   idsAdded.push_back(idToAdd);
 
   auto gameobj = gameObjectFromFields(name, idToAdd, attrObj);
-  return addSerialObject(world, sceneId, name, interface, attrObj.additionalFields, attrObj.children, gameobj, idsAdded);
+  return addSerialObject(world, sceneId, name, interface, attrObj, attrObj.children, gameobj, idsAdded);
 }
 
 std::map<std::string, std::string> getAttributes(World& world, objid id){

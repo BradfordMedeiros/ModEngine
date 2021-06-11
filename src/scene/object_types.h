@@ -281,7 +281,7 @@ std::map<objid, GameObjectObj> getObjectMapping();
 void addObject(
   objid id, 
   std::string objectType, 
-  std::map<std::string, std::string> additionalFields,
+  GameobjAttributes& attr,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, Mesh>& meshes, std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,

@@ -38,7 +38,7 @@ struct Scene {
 
 struct SceneDeserialization {
   Scene scene;
-  std::map<std::string, std::map<std::string, std::string>>  additionalFields;
+  std::map<std::string, GameobjAttributes>  additionalFields;
 };
 
 struct SceneSandbox {
@@ -78,14 +78,14 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 
 struct AddSceneDataValues {
-  std::map<std::string, std::map<std::string, std::string>>  additionalFields;
+  std::map<std::string, GameobjAttributes>  additionalFields;
   std::vector<objid> idsAdded;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
-std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
+std::map<std::string, GameobjAttributes> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId,
@@ -93,7 +93,7 @@ std::map<std::string,  std::map<std::string, std::string>> multiObjAdd(
   std::map<objid, objid> childToParent, 
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names, 
-  std::map<objid, std::map<std::string, std::string>> additionalFields,
+  std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId
 );
 

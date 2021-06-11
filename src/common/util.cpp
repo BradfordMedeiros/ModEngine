@@ -164,11 +164,44 @@ std::string print(glm::mat4 mat){
     std::to_string(mat[3][0]) + ", " + std::to_string(mat[3][1]) + ", " + std::to_string(mat[3][2]) + ", " + std::to_string(mat[3][3]) + 
   "]";
 }
+
+bool maybeParseFloat(std::string value, float& _number){
+  try {
+    std::string::size_type parsedSize;
+    float number = std::stof(value, &parsedSize);
+    if (parsedSize != value.size()){
+      return false;
+    }
+    _number = number;
+    return true;
+  }catch(...){}
+  return false;
+}
+
 glm::vec3 parseVec(std::string positionRaw){;
   float x, y, z;
   std::istringstream in(positionRaw);
   in >> x >> y >> z;
   return glm::vec3(x, y, z);
+}
+bool maybeParseVec(std::string positionRaw, glm::vec3& _vec){
+  auto parts = filterWhitespace(split(positionRaw, ' '));
+  if (parts.size() != 3){
+    return false;
+  }
+  float vecParts[3] = { 0, 0, 0 };
+  for (int i = 0; i < 3; i++){
+    float number;
+    bool isFloat = maybeParseFloat(parts.at(i), number);
+    if (!isFloat){
+      return false;
+    }
+    vecParts[i] = number;
+  }
+  _vec.x = vecParts[0];
+  _vec.y = vecParts[1];
+  _vec.z = vecParts[2];
+  return true;
 }
 glm::vec2 parseVec2(std::string positionRaw){;
   float x, y;
