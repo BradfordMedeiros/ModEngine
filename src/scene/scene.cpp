@@ -763,7 +763,7 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
-  getGameObject(world, index).transformation.position = pos;
+  updateRelativePosition(world.sandbox, index, pos);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -777,7 +777,7 @@ void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, floa
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
-  getGameObject(world, index).transformation.rotation = rotation;
+  updateRelativeRotation(world.sandbox, index, rotation);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -791,7 +791,7 @@ void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientatio
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  getGameObject(world.sandbox, index).transformation.scale = scale;
+  updateRelativeScale(world.sandbox, index, scale);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
@@ -809,15 +809,17 @@ void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigi
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
     // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
-    gameobj.transformation.rotation = getRotation(rigidBody);   
-    gameobj.transformation.position = getPosition(rigidBody);
+    updateRelativePosition(world.sandbox, i, getPosition(rigidBody));
+    updateRelativeScale(world.sandbox, i, getScale(rigidBody));
+    updateRelativeRotation(world.sandbox, i, getRotation(rigidBody));
     clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
   }
 }
 
 void updateSoundPositions(World& world){
   forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
-    updatePosition(world.objectMapping, id, gameobj.transformation.position);
+    auto absolutePosition = fullTransformation(world.sandbox, id).position;
+    updatePosition(world.objectMapping, id, absolutePosition);
   });
 }
 
@@ -829,8 +831,8 @@ void enforceLookAt(World& world){
     }
     auto sceneId = getGameObjectH(world.sandbox, id).sceneId;
     if(idExists(world.sandbox, lookAt, sceneId)){
-      glm::vec3 fromPos = gameobj.transformation.position;
-      glm::vec3 targetPosition = getGameObject(world.sandbox, lookAt, sceneId).transformation.position;
+      glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
+      glm::vec3 targetPosition = fullTransformation(world.sandbox, getGameObject(world.sandbox, lookAt, sceneId).id).position;
       physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
     }
   });  

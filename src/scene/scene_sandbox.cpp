@@ -480,6 +480,25 @@ void removeObjectFromCache(Scene& mainScene, objid id){
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   sandbox.mainScene.absoluteTransforms[id] = transform;
 }
+void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+  assert(false);
+}
+void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
+  getGameObject(sandbox, id).transformation.position = position;
+}
+void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+  assert(false);
+}
+void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
+  getGameObject(sandbox, id).transformation.scale = scale;
+}
+void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+  assert(false);
+}
+void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+  getGameObject(sandbox, id).transformation.rotation = rotation;
+}
+
 void updateLocalTransform(SceneSandbox& sandbox, objid id){
   // physics objects maintain their newly updated positions 
   // this means that constraints are effectively null for physics objects that are children to something else
