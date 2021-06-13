@@ -1,4 +1,5 @@
-(set! mainobj (lsobj-name "1/Plane"))
+
+(define meshObj (lsobj-name "1/Plane"))
 
 (define lasttime (time-seconds))
 (define (time-elapsed amount) 
@@ -15,7 +16,13 @@
       (gameobj-setattr! 
         mainobj
         (list
-          (list "textureoffset" (string-join (list (number->string xpos) "0") " "))
+          (list "position" (list xpos 0 0))
+        )
+      )
+      (gameobj-setattr! 
+        meshObj
+        (list
+          (list "color" (list (* 10 xpos) 1 1))
         )
       )
     )
