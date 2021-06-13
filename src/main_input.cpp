@@ -12,6 +12,23 @@ extern glm::mat4 view;
 extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
 extern float deltaTime;
+extern Benchmark benchmark;
+
+std::string dumpDebugInfo(bool fullInfo){
+  auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
+  auto gameobjInfo = debugAllGameObjects(world.sandbox);
+  auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
+  auto cacheInfo = debugTransformCache(world.sandbox);
+
+  auto benchmarkingContent = benchmarkResult(benchmark);
+  auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
+
+  auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
+    "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
+    "transform cache - id pos scale" + cacheInfo + "\n" + 
+    sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
+  return content;
+}
 
 void processManipulatorForId(objid id){
   if (id == -1 || !idExists(world.sandbox, id)){
@@ -642,6 +659,15 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraBackward(setCameraRotation);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 79, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      std::cout << dumpDebugInfo(false) << std::endl;
     }
   },
 };
