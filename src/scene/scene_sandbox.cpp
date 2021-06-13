@@ -480,6 +480,9 @@ void removeObjectFromCache(Scene& mainScene, objid id){
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   sandbox.mainScene.absoluteTransforms[id] = transform;
 }
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+  getGameObject(sandbox, id).transformation = transform;
+}
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
   assert(false);
 }

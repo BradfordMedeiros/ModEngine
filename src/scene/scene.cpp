@@ -808,10 +808,11 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    // @TODO - physics bug -  getPosition/Rotatin is in world space, need to translate this back relative to parent
-    updateRelativePosition(world.sandbox, i, getPosition(rigidBody));
-    updateRelativeScale(world.sandbox, i, getScale(rigidBody));
-    updateRelativeRotation(world.sandbox, i, getRotation(rigidBody));
+    updateRelativeTransform(world.sandbox, i, Transformation {
+      .position = getPosition(rigidBody),
+      .scale = getScale(rigidBody),
+      .rotation = getRotation(rigidBody),
+    });
     clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
   }
 }
