@@ -34,13 +34,14 @@ void processManipulatorForId(objid id){
   if (id == -1 || !idExists(world.sandbox, id)){
     return;
   }
-  auto selectObject = getGameObject(world, id); 
+  //auto transform = fullTransformation(world.sandbox, id);
+  auto transform = getGameObject(world, id).transformation; 
   if (state.manipulatorMode == TRANSLATE){
-    applyPhysicsTranslation(world, id, selectObject.transformation.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsTranslation(world, id, transform.position, state.offsetX, state.offsetY, state.manipulatorAxis);
   }else if (state.manipulatorMode == SCALE){
-    applyPhysicsScaling(world, id, selectObject.transformation.position, selectObject.transformation.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsScaling(world, id, transform.position, transform.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
   }else if (state.manipulatorMode == ROTATE){
-    applyPhysicsRotation(world, id, selectObject.transformation.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsRotation(world, id, transform.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
   } 
 }
 

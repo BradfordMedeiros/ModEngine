@@ -27,13 +27,18 @@ struct GameObjectH {
   objid sceneId;
 };
 
+struct TransformCacheElement {
+  Transformation transform;
+  bool skipConstraints;
+};
+
 struct Scene {
   objid rootId;
   std::map<objid, GameObject> idToGameObjects;
   std::map<objid, GameObjectH> idToGameObjectsH;
   std::map<objid, std::map<std::string, objid>> sceneToNameToId;
 
-  std::map<objid, Transformation> absoluteTransforms;
+  std::map<objid, TransformCacheElement> absoluteTransforms;
 };
 
 struct SceneDeserialization {
@@ -105,7 +110,6 @@ int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
-void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform);
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale);

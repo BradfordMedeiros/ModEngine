@@ -529,8 +529,8 @@ void addSerialObjectsToWorld(
     }
     auto physicsBody = addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts); 
     if (physicsBody != NULL){
-      //auto transform = fullTransformation(world.sandbox, id);
-      //setTransform(physicsBody, transform.position, transform.scale, transform.rotation);
+      auto transform = fullTransformation(world.sandbox, id);
+      setTransform(physicsBody, transform.position, transform.scale, transform.rotation);
     }  
   }
 
@@ -808,7 +808,7 @@ void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    updateRelativeTransform(world.sandbox, i, Transformation {
+    updateAbsoluteTransform(world.sandbox, i, Transformation {
       .position = getPosition(rigidBody),
       .scale = getScale(rigidBody),
       .rotation = getRotation(rigidBody),
