@@ -16,8 +16,8 @@ std::vector<MeshInterpolated> interpolatedPositions(){
     .rotation = glm::identity<glm::quat>(),
   });
   points.push_back(MeshInterpolated{
-    .position = glm::vec3(3.f, 0.f, 10.f),
-    .rotation = quatFromDirection(glm::vec3(1.f, 1.f, 0.f)),
+    .position = glm::vec3(1.f, 0.f, 7.f),
+    .rotation = glm::identity<glm::quat>(),
   });
   return points;
 }
@@ -53,29 +53,31 @@ void connectFace(std::vector<Vertex>& _vertices, Vertex& fromLeftSide, Vertex& t
    _vertices.push_back(fromRightSide);
 }
 
-int connect2DCrossSections(std::vector<Vertex>& vertices, int faceTriangleCount){
+// TODO -> should remove inner faces.  Need to think about how (probably some existing algorithm?)
+void connect2DCrossSections(std::vector<Vertex>& vertices, int faceTriangleCount){
   auto trianglesPerFace = 3 * faceTriangleCount;
   auto numFaces = vertices.size() / trianglesPerFace;
 
   std::vector<Vertex> verticesToAdd;
-  for (int i = 0; i < numFaces - 1; i++){
-    auto fromVertex1 = vertices.at(i * trianglesPerFace);
-    auto toVertex1 = vertices.at((i + 1) * trianglesPerFace);
-    auto fromVertex2 = vertices.at(i * trianglesPerFace + 1);
-    auto toVertex2 = vertices.at((i + 1) * trianglesPerFace + 1);
-    auto fromVertex3 = vertices.at(i * trianglesPerFace + 2);
-    auto toVertex3 = vertices.at((i + 1) * trianglesPerFace + 2);
-    connectFace(verticesToAdd, fromVertex1, toVertex1, fromVertex2, toVertex2);
-    connectFace(verticesToAdd, fromVertex1, toVertex1, fromVertex3, toVertex3);
-    connectFace(verticesToAdd, fromVertex2, toVertex2, fromVertex3, toVertex3);
+  for (int face = 0; face < numFaces - 1; face++){
+    auto fromFaceOffset = face * trianglesPerFace;
+    auto toFaceOffset = (face + 1) * trianglesPerFace;
+    for (int triangle = 0; triangle < faceTriangleCount; triangle++){
+      auto triangleOffset = triangle * 3;
+      auto fromVertex1 = vertices.at(fromFaceOffset + triangleOffset);
+      auto toVertex1 = vertices.at(toFaceOffset + triangleOffset);
+      auto fromVertex2 = vertices.at(fromFaceOffset + triangleOffset + 1);
+      auto toVertex2 = vertices.at(toFaceOffset + triangleOffset + 1);
+      auto fromVertex3 = vertices.at(fromFaceOffset + triangleOffset + 2);
+      auto toVertex3 = vertices.at(toFaceOffset + triangleOffset + 2);
+      connectFace(verticesToAdd, fromVertex1, toVertex1, fromVertex2, toVertex2);
+      connectFace(verticesToAdd, fromVertex1, toVertex1, fromVertex3, toVertex3);
+      connectFace(verticesToAdd, fromVertex2, toVertex2, fromVertex3, toVertex3);
+    }
   }
-
-  int numVertexsAdded = 0;
   for (auto vertex : verticesToAdd){
     vertices.push_back(vertex);
-    numVertexsAdded++;    
   }
-  return numVertexsAdded;
 }
 
 glm::mat4 createRotation(glm::vec3 position, glm::quat rotation){
@@ -86,18 +88,12 @@ MeshData generateMesh(){
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
 
-  int numIndex = 0;
   for (auto pos : interpolatedPositions()){
-    auto lastIndex = vertices.size();
     add2DCrossSection(vertices, createRotation(pos.position, pos.rotation));
-    auto newLastIndex = vertices.size();
-    for (int i = lastIndex; i < newLastIndex; i++){
-      indices.push_back(i);
-      numIndex = i;
-    }
   }
-  auto numVertexsAdded = connect2DCrossSections(vertices, 2);
-  for (int i = numIndex; i < (numIndex + numVertexsAdded); i++){
+  connect2DCrossSections(vertices, 2);
+  
+  for (int i = 0; i < vertices.size(); i++){
     indices.push_back(i);
   }
 
