@@ -8,6 +8,35 @@
 #include <vector>
 #include "./boundinfo.h"
 
+#define NUM_BONES_PER_VERTEX 4
+
+struct Vertex {
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 texCoords;
+  int32_t boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
+  float boneWeights[NUM_BONES_PER_VERTEX]; 
+};
+
+struct Bone {
+  std::string name;
+  glm::mat4 offsetMatrix;
+  std::string skeletonBase;
+};
+
+struct MeshData {
+  std::vector<Vertex> vertices;
+  std::vector<unsigned int> indices;
+  std::string diffuseTexturePath;
+  bool hasDiffuseTexture;
+  std::string emissionTexturePath;
+  bool hasEmissionTexture;
+  std::string opacityTexturePath;
+  bool hasOpacityTexture;
+  BoundInfo boundInfo;
+  std::vector<Bone> bones;
+};
+
 struct Line {
   glm::vec3 fromPos;
   glm::vec3 toPos;
@@ -30,5 +59,6 @@ struct PhysicsInfo {
 };
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
+BoundInfo getBounds(std::vector<Vertex>& vertices);
 
 #endif

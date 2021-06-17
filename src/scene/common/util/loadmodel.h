@@ -17,18 +17,7 @@
 #include "./types.h"
 #include "../../../common/util.h"
 
-#define NUM_BONES_PER_VERTEX 4
-
 glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey);
-
-struct Vertex {
-  glm::vec3 position;
-  glm::vec3 normal;
-  glm::vec2 texCoords;
-  int32_t boneIndexes[NUM_BONES_PER_VERTEX]; // hardcoded limit of 4 per vertex
-  float boneWeights[NUM_BONES_PER_VERTEX]; 
-};
-
 
 struct AnimationChannel {
   std::string nodeName;
@@ -42,26 +31,6 @@ struct Animation {
   double duration;
   double ticksPerSecond;
   std::vector<AnimationChannel> channels;
-};
-
-
-struct Bone {
-  std::string name;
-  glm::mat4 offsetMatrix;
-  std::string skeletonBase;
-};
-
-struct MeshData {
-  std::vector<Vertex> vertices;
-  std::vector<unsigned int> indices;
-  std::string diffuseTexturePath;
-  bool hasDiffuseTexture;
-  std::string emissionTexturePath;
-  bool hasEmissionTexture;
-  std::string opacityTexturePath;
-  bool hasOpacityTexture;
-  BoundInfo boundInfo;
-  std::vector<Bone> bones;
 };
 
 struct ModelData {
