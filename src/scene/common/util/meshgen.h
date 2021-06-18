@@ -2,6 +2,7 @@
 #define MOD_MESHGEN
 
 #include <vector>
+#include <variant>
 #include <iostream>
 #include <glm/glm.hpp>
 #include "./types.h"

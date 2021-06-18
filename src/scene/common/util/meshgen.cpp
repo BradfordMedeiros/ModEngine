@@ -1,26 +1,15 @@
 #include "./meshgen.h"
 
-struct MeshInterpolated {
-  glm::vec3 position;
-  glm::quat rotation;
+struct MeshGenPoints { 
+  std::vector<glm::vec3> points; 
 };
+typedef std::variant<MeshGenPoints> MeshgenInterpolator;
 
-std::vector<MeshInterpolated> interpolatedPositions(){
-  std::vector<MeshInterpolated> points;
-  points.push_back(MeshInterpolated{
-    .position = glm::vec3(0.f, 0.f, 0.f),
-    .rotation = glm::identity<glm::quat>(),
-  });
-  points.push_back(MeshInterpolated{
-    .position = glm::vec3(0.f, 0.f, 5.f),
-    .rotation = glm::identity<glm::quat>(),
-  });
-  points.push_back(MeshInterpolated{
-    .position = glm::vec3(1.f, 0.f, 7.f),
-    .rotation = glm::identity<glm::quat>(),
-  });
-  return points;
-}
+struct MeshgenConfig {
+  std::vector<Vertex> face;
+  MeshgenInterpolator interpolator;
+  std::string diffuseTexturePath;
+};
 
 Vertex createVertex(glm::vec3 position, glm::vec2 texCoords){
   Vertex vertex {
@@ -35,31 +24,38 @@ Vertex createVertex(glm::vec3 position, glm::vec2 texCoords){
   return vertex;
 }
 
-void add2DCrossSection(std::vector<Vertex>& vertices, glm::mat4 transform, std::vector<Vertex>& face){
-  vertices.push_back(createVertex(
-    transform * glm::vec4(0.f, 0.f, 0.f, 1.f),
-    glm::vec2(0.f, 0.f)
-  ));
-  vertices.push_back(createVertex(
-    transform * glm::vec4(1.f, 0.f, 0.f, 1.f),
-    glm::vec2(1.f, 0.f)
-  ));
-  vertices.push_back(createVertex(
-    transform * glm::vec4(0.5f, 1.f, 0.f, 1.f),
-    glm::vec2(1.f, 1.f)
-  ));
-  vertices.push_back(createVertex(
-    transform * glm::vec4(0.f, 0.f, 0.f, 1.f),
-    glm::vec2(1.f, 1.f)
-  ));
-  vertices.push_back(createVertex(
-    transform * glm::vec4(1.f, 0.f, 0.f, 1.f),
-    glm::vec2(0.f, 1.f)
-  ));
-  vertices.push_back(createVertex(
-    transform * glm::vec4(0.5f, -1.f, 0.f, 1.f),
-    glm::vec2(0.f, 0.f)
-  ));
+struct MeshInterpolated {
+  glm::vec3 position;
+  glm::quat rotation;
+};
+
+std::vector<MeshInterpolated> interpolatedPositions(MeshgenInterpolator& interpolator){
+  std::vector<MeshInterpolated> points;
+  auto pointInterpolater = std::get_if<MeshGenPoints>(&interpolator);
+  if (pointInterpolater != NULL){
+    for (auto point : pointInterpolater -> points){
+      points.push_back(MeshInterpolated{
+        .position = point,
+        .rotation = glm::identity<glm::quat>(),
+      });
+    }
+  }else{
+    std::cout << "invalid points interpolator" << std::endl;
+    assert(false);
+  }
+  return points;
+}
+
+
+
+void add2DCrossSection(std::vector<Vertex>& _vertices, glm::mat4 transform, std::vector<Vertex>& face){
+  assert(face.size() % 3 == 0);
+  for (auto vertex : face){
+    _vertices.push_back(createVertex(
+      transform * glm::vec4(vertex.position.x, vertex.position.y, vertex.position.z, 1.f),
+      vertex.texCoords
+    ));
+  }
 }
 
 void connectFace(std::vector<Vertex>& _vertices, Vertex& fromLeftSide, Vertex& toLeftSide, Vertex& fromRightSide, Vertex& toRightSide){
@@ -121,23 +117,57 @@ glm::mat4 createRotation(glm::vec3 position, glm::quat rotation){
 }
 
 MeshData generateMesh(){
+  MeshgenConfig config {
+    .face = {
+      createVertex(
+        glm::vec4(0.f, 0.f, 0.f, 1.f),
+        glm::vec2(0.f, 0.f)
+      ),
+      createVertex(
+        glm::vec4(1.f, 0.f, 0.f, 1.f),
+        glm::vec2(1.f, 0.f)
+      ),
+      createVertex(
+        glm::vec4(0.5f, 1.f, 0.f, 1.f),
+        glm::vec2(1.f, 1.f)
+      ),
+      createVertex(
+        glm::vec4(0.f, 0.f, 0.f, 1.f),
+        glm::vec2(1.f, 1.f)
+      ),
+      createVertex(
+        glm::vec4(1.f, 0.f, 0.f, 1.f),
+        glm::vec2(0.f, 1.f)
+      ),
+      createVertex(
+        glm::vec4(0.5f, -1.f, 0.f, 1.f),
+        glm::vec2(0.f, 0.f)
+      )
+    },
+    .interpolator = MeshGenPoints {
+      .points = {
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f, 0.f, 5.f),
+        glm::vec3(1.f, 0.f, 7.f),
+      },
+    },
+    .diffuseTexturePath = "./res/textures/wood.jpg",
+  };
+
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
-
-  std::vector<Vertex> face = {};
-  assert(face.size() % 3 == 0);
-  
-  for (auto pos : interpolatedPositions()){
-    add2DCrossSection(vertices, createRotation(pos.position, pos.rotation), face);
+  for (auto pos : interpolatedPositions(config.interpolator)){
+    // maybe should verify cross section points are actually coplanar?
+    add2DCrossSection(vertices, createRotation(pos.position, pos.rotation), config.face);
   }
-  connect2DCrossSections(vertices, 2);
+  connect2DCrossSections(vertices, config.face.size() / 3);
   for (int i = 0; i < vertices.size(); i++){
     indices.push_back(i);
   }
   MeshData meshdata {
     .vertices = vertices,
     .indices = indices,
-    .diffuseTexturePath = "./res/textures/wood.jpg",
+    .diffuseTexturePath = config.diffuseTexturePath,
     .hasDiffuseTexture = true,
     .emissionTexturePath = "",
     .hasEmissionTexture = false,
