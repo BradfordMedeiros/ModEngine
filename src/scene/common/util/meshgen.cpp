@@ -22,11 +22,11 @@ std::vector<MeshInterpolated> interpolatedPositions(){
   return points;
 }
 
-Vertex createVertex(glm::vec4 position){
+Vertex createVertex(glm::vec3 position, glm::vec2 texCoords){
   Vertex vertex {
     .position = position,
-    .normal = {},
-    .texCoords = {},
+    .normal = glm::vec3(0.f, 0.f, 0.f),
+    .texCoords = texCoords,
   };
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
     vertex.boneIndexes[i] = 0;
@@ -35,22 +35,58 @@ Vertex createVertex(glm::vec4 position){
   return vertex;
 }
 
-void add2DCrossSection(std::vector<Vertex>& vertices, glm::mat4 transform){
-  vertices.push_back(createVertex(transform * glm::vec4(0.f, 0.f, 0.f, 1.f)));
-  vertices.push_back(createVertex(transform * glm::vec4(1.f, 0.f, 0.f, 1.f)));
-  vertices.push_back(createVertex(transform * glm::vec4(0.5f, 1.f, 0.f, 1.f)));
-  vertices.push_back(createVertex(transform * glm::vec4(0.f, 0.f, 0.f, 1.f)));
-  vertices.push_back(createVertex(transform * glm::vec4(1.f, 0.f, 0.f, 1.f)));
-  vertices.push_back(createVertex(transform * glm::vec4(0.5f, -1.f, 0.f, 1.f)));
+void add2DCrossSection(std::vector<Vertex>& vertices, glm::mat4 transform, std::vector<Vertex>& face){
+  vertices.push_back(createVertex(
+    transform * glm::vec4(0.f, 0.f, 0.f, 1.f),
+    glm::vec2(0.f, 0.f)
+  ));
+  vertices.push_back(createVertex(
+    transform * glm::vec4(1.f, 0.f, 0.f, 1.f),
+    glm::vec2(1.f, 0.f)
+  ));
+  vertices.push_back(createVertex(
+    transform * glm::vec4(0.5f, 1.f, 0.f, 1.f),
+    glm::vec2(1.f, 1.f)
+  ));
+  vertices.push_back(createVertex(
+    transform * glm::vec4(0.f, 0.f, 0.f, 1.f),
+    glm::vec2(1.f, 1.f)
+  ));
+  vertices.push_back(createVertex(
+    transform * glm::vec4(1.f, 0.f, 0.f, 1.f),
+    glm::vec2(0.f, 1.f)
+  ));
+  vertices.push_back(createVertex(
+    transform * glm::vec4(0.5f, -1.f, 0.f, 1.f),
+    glm::vec2(0.f, 0.f)
+  ));
 }
 
 void connectFace(std::vector<Vertex>& _vertices, Vertex& fromLeftSide, Vertex& toLeftSide, Vertex& fromRightSide, Vertex& toRightSide){
-   _vertices.push_back(fromLeftSide);
-   _vertices.push_back(toLeftSide);
-   _vertices.push_back(toRightSide);
-   _vertices.push_back(fromLeftSide);
-   _vertices.push_back(toRightSide);
-   _vertices.push_back(fromRightSide);
+   _vertices.push_back(createVertex(
+      fromLeftSide.position,
+      glm::vec2(0.f, 0.f)
+    ));
+   _vertices.push_back(createVertex(
+      toLeftSide.position,
+      glm::vec2(1.f, 0.f)
+    ));
+   _vertices.push_back(createVertex(
+      toRightSide.position,
+      glm::vec2(1.f, 1.f)
+    ));
+   _vertices.push_back(createVertex(
+      fromLeftSide.position,
+      glm::vec2(1.f, 1.f)
+    ));
+   _vertices.push_back(createVertex(
+      toRightSide.position,
+      glm::vec2(0.f, 1.f)
+    ));
+   _vertices.push_back(createVertex(
+      fromRightSide.position,
+      glm::vec2(0.f, 0.f)
+    ));
 }
 
 // TODO -> should remove inner faces.  Need to think about how (probably some existing algorithm?)
@@ -88,15 +124,16 @@ MeshData generateMesh(){
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
 
+  std::vector<Vertex> face = {};
+  assert(face.size() % 3 == 0);
+  
   for (auto pos : interpolatedPositions()){
-    add2DCrossSection(vertices, createRotation(pos.position, pos.rotation));
+    add2DCrossSection(vertices, createRotation(pos.position, pos.rotation), face);
   }
   connect2DCrossSections(vertices, 2);
-  
   for (int i = 0; i < vertices.size(); i++){
     indices.push_back(i);
   }
-
   MeshData meshdata {
     .vertices = vertices,
     .indices = indices,
