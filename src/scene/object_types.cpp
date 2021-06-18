@@ -512,12 +512,7 @@ int renderObject(
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showDebug){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), cameraMesh.bones.size() > 0);
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(cameraMesh, shaderProgram);
-    return cameraMesh.numTriangles;
+    return renderDefaultNode(shaderProgram, cameraMesh);
   }
 
   auto soundObject = std::get_if<GameObjectSound>(&toRender);
@@ -677,6 +672,7 @@ int renderObject(
   if (geoObj != NULL){
     return renderDefaultNode(shaderProgram, nodeMesh);
   }
+  return 0;
 }
 
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
