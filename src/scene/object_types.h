@@ -138,7 +138,9 @@ struct GameObjectVideo {
   BufferedAudio sound;
 };
 
-struct GameObjectGeo {};
+struct GameObjectGeo {
+  std::vector<glm::vec3> points;
+};
 
 typedef std::variant<
   GameObjectMesh, 
