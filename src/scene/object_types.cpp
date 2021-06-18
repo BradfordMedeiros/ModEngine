@@ -342,6 +342,11 @@ GameObjectVideo createVideo(
   return obj;
 }
 
+GameObjectGeo createGeo(){
+  GameObjectGeo geo{};
+  return geo;
+}
+
 void addObject(
   objid id, 
   std::string objectType, 
@@ -391,6 +396,8 @@ void addObject(
     mapping[id] = createUILayout(attr);
   }else if (objectType == "video"){
     mapping[id] = createVideo(attr, ensureTextureDataLoaded);
+  }else if (objectType == "geo"){
+    mapping[id] = createGeo();
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -690,6 +697,16 @@ int renderObject(
     drawMesh(nodeMesh, shaderProgram);   
     return nodeMesh.numTriangles;
   }
+
+  auto geoObj = std::get_if<GameObjectGeo>(&toRender);
+  if (geoObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    drawMesh(nodeMesh, shaderProgram);
+    return 0;    
+  }
 }
 
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
@@ -987,6 +1004,13 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     std::cout << "ERROR: VIDEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};
+  }
+
+  auto geoObj = std::get_if<GameObjectGeo>(&objectToSerialize);
+  if (geoObj != NULL){
+    std::cout << "ERROR: VIDEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    assert(false);
+    return {};    
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);

@@ -138,6 +138,8 @@ struct GameObjectVideo {
   BufferedAudio sound;
 };
 
+struct GameObjectGeo {};
+
 typedef std::variant<
   GameObjectMesh, 
   GameObjectCamera, 
@@ -155,7 +157,8 @@ typedef std::variant<
   GameObjectUISlider,
   GameObjectUIText,
   GameObjectUILayout,
-  GameObjectVideo
+  GameObjectVideo,
+  GameObjectGeo
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
@@ -255,6 +258,11 @@ static Field videoField {
   .type = "video",
 };
 
+static Field geoField {
+  .prefix = '<',
+  .type = "geo",
+};
+
 static std::vector fields = { 
   obj, 
   camera, 
@@ -274,6 +282,7 @@ static std::vector fields = {
   videoField,
   uiTextField,
   uiLayoutField,
+  geoField,
 };
 
 std::map<objid, GameObjectObj> getObjectMapping();
