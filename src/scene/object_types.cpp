@@ -342,13 +342,36 @@ GameObjectVideo createVideo(
   return obj;
 }
 
-GameObjectGeo createGeo(GameobjAttributes& attr){
-  GameObjectGeo geo{
-    .points = {
-      glm::vec3(0.f, 0.f, 0.f),
-      glm::vec3(1.f, 0.f, 0.f),
-      glm::vec3(1.f, 1.f, 0.f)
+std::vector<glm::vec3> parsePoints(std::string value){
+  std::vector<glm::vec3> points;
+  auto pointsArr = filterWhitespace(split(value, '|'));
+  for (auto point : pointsArr){
+    glm::vec3 pointValue(0.f, 0.f, 0.f);
+    auto isVec = maybeParseVec(point, pointValue);
+    assert(isVec);
+    points.push_back(pointValue);
+  }
+  return points;
+}
+std::string pointsToString(std::vector<glm::vec3>& points){
+  std::string value = "";
+  for (int i = 0; i < points.size(); i++){
+    auto point = points.at(i);
+    value = value + print(point);
+    if (i != (points.size() - 1)){
+      value = value + "|";
     }
+  }
+  return value;
+}
+GameObjectGeo createGeo(GameobjAttributes& attr){
+  auto points = parsePoints(
+    attr.stringAttributes.find("points") != attr.stringAttributes.end() ? 
+    attr.stringAttributes.at("points") : 
+    ""
+  );
+  GameObjectGeo geo{
+    .points = points,
   };
   return geo;
 }
@@ -731,6 +754,12 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
     return attributes;
   }
 
+  auto geoObj = std::get_if<GameObjectGeo>(&toRender);
+  if (geoObj != NULL){
+    attributes["points"] = pointsToString(geoObj -> points);
+    return attributes;
+  }
+
   assert(false);
   return attributes;
 }
@@ -775,6 +804,14 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   if (emitterObj != NULL){
     auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
     setEmitterEnabled(enabled);
+    return;
+  }
+
+  auto geoObj = std::get_if<GameObjectGeo>(&toRender);
+  if (geoObj != NULL){
+    if (attributes.stringAttributes.find("points") != attributes.stringAttributes.end()){
+      geoObj -> points = parsePoints(attributes.stringAttributes.at("points"));
+    }
     return;
   }
   assert(false);
