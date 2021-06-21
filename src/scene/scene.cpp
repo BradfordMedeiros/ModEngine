@@ -354,7 +354,12 @@ World createWorld(
   addMesh(world, "./res/models/box/plane.dae");
   addMesh(world, "./res/models/controls/input.obj");
 
-  auto generatedMesh = generateMesh();
+  std::vector<glm::vec3> points = {
+    glm::vec3(0.f, 0.f, 0.f),
+    glm::vec3(0.f, 0.f, 5.f),
+    glm::vec3(1.f, 0.f, 7.f),
+  };
+  auto generatedMesh = generateMesh(points);
   loadMeshData(world, "testmesh", generatedMesh);
   return world;
 }
