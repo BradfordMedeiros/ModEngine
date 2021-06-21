@@ -8,6 +8,6 @@
 #include "./types.h"
 #include "../../../translations.h"
 
-MeshData generateMesh();
+MeshData generateMesh(std::vector<glm::vec3>& points);
 
 #endif

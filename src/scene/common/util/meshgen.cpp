@@ -116,7 +116,7 @@ glm::mat4 createRotation(glm::vec3 position, glm::quat rotation){
   return glm::translate(glm::mat4(1.f), position) * glm::toMat4(rotation);
 }
 
-MeshData generateMesh(){
+MeshData generateMesh(std::vector<glm::vec3>& points){
   MeshgenConfig config {
     .face = {
       createVertex(
@@ -145,11 +145,7 @@ MeshData generateMesh(){
       )
     },
     .interpolator = MeshGenPoints {
-      .points = {
-        glm::vec3(0.f, 0.f, 0.f),
-        glm::vec3(0.f, 0.f, 5.f),
-        glm::vec3(1.f, 0.f, 7.f),
-      },
+      .points = points,
     },
     .diffuseTexturePath = "./res/textures/wood.jpg",
   };
