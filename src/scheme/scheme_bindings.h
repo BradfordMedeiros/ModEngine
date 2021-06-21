@@ -73,7 +73,8 @@ void createStaticSchemeBindings(
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
   void (*scmEmit)(objid),
   objid (*loadAround)(objid),
-  void (*rmLoadAround)(objid)
+  void (*rmLoadAround)(objid),
+  void (*generateMesh)(objid, std::string)
 );
 
 void defineFunctions(objid id, bool isServer);

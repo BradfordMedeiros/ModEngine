@@ -302,13 +302,17 @@ void updateTextureDataWorld(World& world, std::string texturepath, unsigned char
   updateTextureData(world.textures.at(texturepath), data, textureWidth, textureHeight);
 }
 
+void loadMeshData(World& world, std::string meshPath, MeshData& meshData){
+  world.meshes[meshPath] =  loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
+    return loadTextureWorld(world, texture);
+  });     
+}
+
 void addMesh(World& world, std::string meshpath){
   ModelData data = loadModel("", meshpath);
   assert(data.meshIdToMeshData.size() ==  1);
   auto meshData = data.meshIdToMeshData.begin() -> second;
-  world.meshes[meshpath] =  loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
-    return loadTextureWorld(world, texture);
-  });     
+  loadMeshData(world, meshpath, meshData);
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
@@ -349,6 +353,9 @@ World createWorld(
   addMesh(world, "./res/models/camera/camera.dae");
   addMesh(world, "./res/models/box/plane.dae");
   addMesh(world, "./res/models/controls/input.obj");
+
+  auto generatedMesh = generateMesh();
+  loadMeshData(world, "testmesh", generatedMesh);
   return world;
 }
 

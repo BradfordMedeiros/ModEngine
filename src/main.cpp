@@ -549,6 +549,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       world.objectMapping, 
       world.meshes.at("./res/models/ui/node.obj"),
       world.meshes.at("./res/models/camera/camera.dae"),
+      //world.meshes.at("testmesh"),
       world.meshes.at("./res/models/box/plane.dae"),
       world.meshes.at("./res/models/unit_rect/unit_rect.obj"),
       state.showCameras, 
@@ -1043,7 +1044,8 @@ int main(int argc, char* argv[]){
     navPosition, 
     scmEmit,
     addLoadingAround,
-    removeLoadingAround
+    removeLoadingAround,
+    createGeneratedMesh
   );
 
   schemeBindings = getSchemeCallbacks();

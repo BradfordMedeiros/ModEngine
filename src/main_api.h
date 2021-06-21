@@ -174,4 +174,7 @@ void removeLoadingAround(objid id);
 
 void makeParent(objid child, objid parent);
 
+void createGeneratedMesh(objid sourceLineId, std::string destMesh);
+
+
 #endif

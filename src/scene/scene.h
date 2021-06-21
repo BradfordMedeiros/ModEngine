@@ -14,6 +14,7 @@
 #include "../common/sysinterface.h"
 #include "./types/ainav.h"
 #include "./sprites/sprites.h"
+#include "./common/util/meshgen.h"
 
 struct World {
   physicsEnv physicsEnvironment;
@@ -94,5 +95,6 @@ struct GroupPhysicsInfo {
 };
 GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id);
 PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index);
+void loadMeshData(World& world, std::string meshPath, MeshData& meshData);
 
 #endif

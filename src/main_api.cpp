@@ -585,3 +585,7 @@ void removeLoadingAround(objid id){
 void makeParent(objid child, objid parent){
   makeParent(world.sandbox, child, parent);
 }
+
+void createGeneratedMesh(objid sourceLineId, std::string destMesh){
+  createGeneratedMesh(world, sourceLineId, destMesh);
+}

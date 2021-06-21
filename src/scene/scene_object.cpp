@@ -271,3 +271,11 @@ void enforceAllLayouts(World& world){
   }
 }
 
+void createGeneratedMesh(World& world, objid sourceLineId, std::string destMesh){
+  auto lineObj = world.objectMapping.at(sourceLineId);
+  auto line = std::get_if<GameObjectGeo>(&lineObj);
+  assert(line != NULL);
+
+  auto generatedMesh = generateMesh();
+  loadMeshData(world, "testmesh", generatedMesh);
+}

@@ -725,6 +725,12 @@ SCM scmRmLoadAround(SCM loadingHandle){
   return SCM_UNSPECIFIED;
 }
 
+void (*_generateMesh)(objid, std::string);
+SCM scmGenerateMesh(SCM lineobj, SCM meshname){
+  _generateMesh(getGameobjId(lineobj), scm_to_locale_string(meshname));
+  return SCM_UNSPECIFIED;
+}
+
 
 // Callbacks
 void onFrame(){
@@ -1032,7 +1038,8 @@ void createStaticSchemeBindings(
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
   void (*scmEmit)(objid),
   objid (*loadAround)(objid),
-  void (*rmLoadAround)(objid)
+  void (*rmLoadAround)(objid),
+  void (*generateMesh)(objid, std::string)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -1125,4 +1132,5 @@ void createStaticSchemeBindings(
   _scmEmit = scmEmit;
   _loadAround = loadAround;
   _rmLoadAround = rmLoadAround;
+  _generateMesh = generateMesh;
 }
