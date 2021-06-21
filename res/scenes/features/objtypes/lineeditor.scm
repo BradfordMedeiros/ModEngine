@@ -45,6 +45,7 @@
       (list "points" (string-join (points-from-gameobj) "|"))
     )
   )
+  (genmesh mainobj "testmesh")
 )
 
 (define (onKeyChar key)

@@ -971,6 +971,8 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("load-around", 1, 0, 0, (void*)scmLoadAround);
   scm_c_define_gsubr("rm-load-around", 1, 0, 0, (void*)scmRmLoadAround);
+
+  scm_c_define_gsubr("genmesh", 2, 0, 0, (void*)scmGenerateMesh);
 }
 
 

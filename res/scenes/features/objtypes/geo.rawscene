@@ -1,3 +1,5 @@
 <line:position:0 1 0
 <line:points:0 0 0|5 0 0|5 0 3|6 0 0
 <line:script:./res/scenes/features/objtypes/lineeditor.scm
+
+>camera:position:0 0 0
