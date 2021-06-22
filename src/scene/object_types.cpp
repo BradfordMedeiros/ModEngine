@@ -370,8 +370,14 @@ GameObjectGeo createGeo(GameobjAttributes& attr){
     attr.stringAttributes.at("points") : 
     ""
   );
+
+  auto type = attr.stringAttributes.find("shape") != attr.stringAttributes.end() ? 
+  (attr.stringAttributes.at("shape") == "sphere" ? GEOSPHERE : GEODEFAULT) : 
+  GEODEFAULT;
+
   GameObjectGeo geo{
     .points = points,
+    .type = type,
   };
   return geo;
 }
@@ -487,7 +493,8 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord
+  std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord,
+  std::function<int()> drawSphere
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -693,6 +700,10 @@ int renderObject(
 
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
+    if (geoObj -> type == GEOSPHERE){
+      std::cout << "drawing sphere" << std::endl;
+      return drawSphere();
+    }
     return renderDefaultNode(shaderProgram, nodeMesh);
   }
   return 0;
@@ -757,6 +768,11 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
     attributes["points"] = pointsToString(geoObj -> points);
+
+    if (geoObj -> type == GEOSPHERE){
+      attributes["shape"] = "sphere";
+    }
+
     return attributes;
   }
 
@@ -1011,7 +1027,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
 
   auto geoObj = std::get_if<GameObjectGeo>(&objectToSerialize);
   if (geoObj != NULL){
-    std::cout << "ERROR: VIDEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+    std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};    
   }

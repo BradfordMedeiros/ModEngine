@@ -138,8 +138,10 @@ struct GameObjectVideo {
   BufferedAudio sound;
 };
 
+enum GeoShapeType { GEODEFAULT, GEOSPHERE };
 struct GameObjectGeo {
   std::vector<glm::vec3> points;
+  GeoShapeType type;
 };
 
 typedef std::variant<
@@ -324,7 +326,8 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord
+  std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord,
+  std::function<int()> drawSphere
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

@@ -17,7 +17,7 @@ void drawCube(float width, float height, float depth){
   drawLines(allLines);
 }
 
-void drawSphere(){                  // lots of repeat code here, should generalize
+int drawSphere(){                  // lots of repeat code here, should generalize
   static unsigned int resolution = 30;
   std::vector<Line> allLines;
 
@@ -54,7 +54,7 @@ void drawSphere(){                  // lots of repeat code here, should generali
     lastY = y;
   }
 
-  drawLines(allLines);
+  return drawLines(allLines);
 }
 
 void drawGridVertical(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){   

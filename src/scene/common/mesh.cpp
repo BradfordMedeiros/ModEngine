@@ -181,7 +181,8 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   }
 }
 
-void drawLines(std::vector<Line> allLines){
+// returns # of verts drawn
+int drawLines(std::vector<Line> allLines){
   std::vector<glm::vec3> lines;
   for (Line line : allLines){
     lines.push_back(line.fromPos);
@@ -215,4 +216,5 @@ void drawLines(std::vector<Line> allLines){
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &EBO);
   glDeleteBuffers(1, &VBO);
+  return indicies.size();
 }
