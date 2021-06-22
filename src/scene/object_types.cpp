@@ -701,7 +701,6 @@ int renderObject(
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
     if (geoObj -> type == GEOSPHERE){
-      std::cout << "drawing sphere" << std::endl;
       return drawSphere();
     }
     return renderDefaultNode(shaderProgram, nodeMesh);
