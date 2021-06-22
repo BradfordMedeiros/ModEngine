@@ -1,0 +1,3 @@
+platform:position:0 -5 0
+platform:scale:100 1.0 100
+platform:script:./res/scenes/features/painting.scm
