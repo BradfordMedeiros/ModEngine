@@ -7,7 +7,29 @@ cleanup=true
 default_benchmarks=$(find ./res/scenes/benchmarks/*.rawscene)
 
 function run_benchmark(){
-  ./build/modengine -r $1 -e $3 -l "$2" -q > /dev/null
+  ./build/modengine -r $1 -e $3 -l "$2" -q > /dev/null &
+  engine_process_pid=$!
+  process_running=true
+  output_memfile="$4"
+  output_mempng="$5"
+
+  echo "wrote: $output_memfile"
+  touch "$output_memfile"
+  while [[ $process_running = true ]]
+  do
+    sleep 1
+    mem_usage=$(ps -o pid,vsz | grep $engine_process_pid | awk '{ print $2 }') # probably not the best stat?
+    echo "$mem_usage" >> "$output_memfile"
+    if [[ $(kill -0 $engine_process_pid || echo "stopped") = "stopped" ]]; then
+      process_running=false
+    fi
+  done
+
+  mem_usage_plot_command="
+    set terminal png; 
+    plot '$output_memfile' with points pt 7;
+  "
+  gnuplot -e "$mem_usage_plot_command" > "$output_mempng"
 }
 
 function process_output(){
@@ -70,6 +92,8 @@ fi
 for benchmark in $benchmarks
 do
     benchfile="./build/benchmarks/$(basename $benchmark).benchmark"
+    memory_out="./build/benchmarks/$(basename $benchmark).mem_benchmark.out"
+    memory_png="./build/benchmarks/$(basename $benchmark).mem_benchmark.png"
     tri_benchdat_out="./build/benchmarks/$(basename $benchmark).triangle_benchmark.out"
     tri_benchdat_png="./build/benchmarks/$(basename $benchmark).triangle_benchmark.png"
     obj_benchdat_out="./build/benchmarks/$(basename $benchmark).obj_benchmark.out"
@@ -79,7 +103,7 @@ do
     last_obj_png=$obj_benchdat_png
 
     echo "Running Benchmark for $benchmark"
-    run_benchmark "$benchmark" "$benchfile" "$benchmark_duration"
+    run_benchmark "$benchmark" "$benchfile" "$benchmark_duration" "$memory_out" "$memory_png"
     
     process_output "$benchfile" "triangle-count to frametime" "$tri_benchdat_out"
     process_output "$benchfile" "object-count to frametime" "$obj_benchdat_out"
@@ -92,6 +116,7 @@ do
       rm $benchfile
       rm $tri_benchdat_out
       rm $obj_benchdat_out
+      rm $memory_out
     fi 
 
     echo "Finished Benchmark for $benchmark"
