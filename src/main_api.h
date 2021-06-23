@@ -174,7 +174,6 @@ void removeLoadingAround(objid id);
 
 void makeParent(objid child, objid parent);
 
-void createGeneratedMesh(objid sourceLineId, std::string destMesh);
-
+void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh);
 
 #endif

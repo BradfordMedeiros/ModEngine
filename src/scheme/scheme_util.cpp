@@ -37,6 +37,10 @@ std::vector<std::string> listToVecString(SCM stringList){
   return list;
 }
 
+std::vector<glm::vec3> listToVecVec3(SCM vecList){
+  return {};
+}
+
 SCM listToSCM(std::vector<std::string> stringList){
   auto listSize = stringList.size();
   SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));

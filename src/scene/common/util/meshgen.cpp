@@ -124,34 +124,26 @@ glm::mat4 createRotation(glm::vec3 position, glm::quat rotation){
   return glm::translate(glm::mat4(1.f), position) * glm::toMat4(rotation);
 }
 
-MeshData generateMesh(std::vector<glm::vec3>& points){
+MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& points){
+  assert(face.size() % 3 == 0);
+  std::vector<glm::vec2> texCoords = {
+    glm::vec2(0.f, 0.f),
+    glm::vec2(1.f, 0.f),
+    glm::vec2(1.f, 1.f),
+    glm::vec2(0.f, 0.f),
+    glm::vec2(1.f, 0.f),
+    glm::vec2(1.f, 1.f),
+  };
+
+  std::vector<Vertex> configFaces;
+  for (int i = 0; i < face.size(); i++){
+    configFaces.push_back(createVertex(
+      face.at(i),
+      texCoords.at(i % 6)
+    ));
+  }
   MeshgenConfig config {
-    .face = {
-      createVertex(
-        glm::vec4(0.f, 0.f, 0.f, 1.f),
-        glm::vec2(0.f, 0.f)
-      ),
-      createVertex(
-        glm::vec4(1.f, 0.f, 0.f, 1.f),
-        glm::vec2(1.f, 0.f)
-      ),
-      createVertex(
-        glm::vec4(0.5f, 1.f, 0.f, 1.f),
-        glm::vec2(1.f, 1.f)
-      ),
-      createVertex(
-        glm::vec4(0.f, 0.f, 0.f, 1.f),
-        glm::vec2(1.f, 1.f)
-      ),
-      createVertex(
-        glm::vec4(1.f, 0.f, 0.f, 1.f),
-        glm::vec2(0.f, 1.f)
-      ),
-      createVertex(
-        glm::vec4(0.5f, -1.f, 0.f, 1.f),
-        glm::vec2(0.f, 0.f)
-      )
-    },
+    .face = configFaces,
     .interpolator = MeshGenPoints {
       .points = points,
     },

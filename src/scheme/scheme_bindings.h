@@ -74,7 +74,7 @@ void createStaticSchemeBindings(
   void (*scmEmit)(objid),
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
-  void (*generateMesh)(objid, std::string)
+  void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string)
 );
 
 void defineFunctions(objid id, bool isServer);

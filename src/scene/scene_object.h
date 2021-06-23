@@ -42,6 +42,7 @@ void emit(World& world, objid id);
 
 void enforceAllLayouts(World& world);
 
-void createGeneratedMesh(World& world, objid sourceLineId, std::string destMesh);
+void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh);
+
 
 #endif

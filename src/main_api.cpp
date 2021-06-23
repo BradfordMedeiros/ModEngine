@@ -586,6 +586,6 @@ void makeParent(objid child, objid parent){
   makeParent(world.sandbox, child, parent);
 }
 
-void createGeneratedMesh(objid sourceLineId, std::string destMesh){
-  createGeneratedMesh(world, sourceLineId, destMesh);
+void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh){
+  createGeneratedMesh(world, face, points, destMesh);
 }

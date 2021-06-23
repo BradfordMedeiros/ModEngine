@@ -725,9 +725,9 @@ SCM scmRmLoadAround(SCM loadingHandle){
   return SCM_UNSPECIFIED;
 }
 
-void (*_generateMesh)(objid, std::string);
-SCM scmGenerateMesh(SCM lineobj, SCM meshname){
-  _generateMesh(getGameobjId(lineobj), scm_to_locale_string(meshname));
+void (*_generateMesh)(std::vector<glm::vec3>, std::vector<glm::vec3>, std::string);
+SCM scmGenerateMesh(SCM face, SCM points, SCM meshname){
+  _generateMesh(listToVecVec3(face), listToVecVec3(points), scm_to_locale_string(meshname));
   return SCM_UNSPECIFIED;
 }
 
@@ -972,7 +972,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("load-around", 1, 0, 0, (void*)scmLoadAround);
   scm_c_define_gsubr("rm-load-around", 1, 0, 0, (void*)scmRmLoadAround);
 
-  scm_c_define_gsubr("genmesh", 2, 0, 0, (void*)scmGenerateMesh);
+  scm_c_define_gsubr("genmesh", 3, 0, 0, (void*)scmGenerateMesh);
 }
 
 
@@ -1041,7 +1041,7 @@ void createStaticSchemeBindings(
   void (*scmEmit)(objid),
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
-  void (*generateMesh)(objid, std::string)
+  void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
