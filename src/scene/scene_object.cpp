@@ -183,7 +183,7 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
 }
 
 
-void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
+void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm::vec3 layoutPos){
   auto elements = layoutObject -> elements;
   auto currentSceneId = sceneId(world.sandbox, id);
   auto spacing = layoutObject -> spacing;
@@ -235,6 +235,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     }  
   }
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
+  layoutObject -> boundOrigin = layoutPos;
 }
 
 struct UILayoutAndId {
@@ -266,7 +267,7 @@ std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
 void enforceAllLayouts(World& world){
   auto layouts = layoutsSortedByOrder(world);
   for (auto layout : layouts){
-    enforceLayout(world, layout.id, layout.layout);
+    enforceLayout(world, layout.id, layout.layout, fullTransformation(world.sandbox, layout.id).position);
     updatePhysicsBody(world, layout.id);
   }
 }

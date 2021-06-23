@@ -315,6 +315,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr){
     .elements = elements,
     .order = order,
     .boundInfo = boundInfo,
+    .boundOrigin = glm::vec3(0.f, 0.f, 0.f),
   };
   return obj;
 }
@@ -487,6 +488,7 @@ int renderObject(
   Mesh& cameraMesh,
   Mesh& portalMesh, 
   Mesh& voxelCubeMesh,
+  Mesh& unitXYRect, // unit xy rect is a 1x1 2d plane along the xy axis, centered at the origin
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,
@@ -689,8 +691,28 @@ int renderObject(
   }
 
   auto layoutObj = std::get_if<GameObjectUILayout>(&toRender);
-  if (layoutObj != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, nodeMesh);
+  if (layoutObj != NULL){
+    glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));     
+    int layoutVertexCount = 0;
+    if (showDebug){
+      layoutVertexCount += renderDefaultNode(shaderProgram, nodeMesh);
+    }
+
+    auto boundWidth = layoutObj -> boundInfo.xMax - layoutObj  -> boundInfo.xMin;
+    auto boundheight = layoutObj -> boundInfo.yMax - layoutObj -> boundInfo.yMin;
+    auto zFightingBias = glm::vec3(0.f, 0.f, -0.001f);  
+    auto rectModel = glm::scale(glm::translate(glm::mat4(1.0f), layoutObj -> boundOrigin + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f));
+
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(rectModel));
+    drawMesh(unitXYRect, shaderProgram);
+    layoutVertexCount += unitXYRect.numTriangles;
+    return layoutVertexCount;
   }
 
   auto videoObj = std::get_if<GameObjectVideo>(&toRender);

@@ -130,6 +130,7 @@ struct GameObjectUILayout {
   std::vector<std::string> elements;
   int order;
   BoundInfo boundInfo;
+  glm::vec3 boundOrigin;
 };
 
 struct GameObjectVideo {
@@ -320,6 +321,7 @@ int renderObject(
   Mesh& cameraMesh, 
   Mesh& portalMesh, 
   Mesh& voxelCubeMesh,
+  Mesh& unitXYRect,
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,

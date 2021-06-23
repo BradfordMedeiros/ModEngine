@@ -552,6 +552,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       world.meshes.at("testmesh"),
       world.meshes.at("./res/models/box/plane.dae"),
       world.meshes.at("./res/models/unit_rect/unit_rect.obj"),
+      world.meshes.at("./res/models/controls/input.obj"), // using this b/c 1x1 xy mesh
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
