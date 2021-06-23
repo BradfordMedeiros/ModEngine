@@ -45,7 +45,15 @@
       (list "points" (string-join (points-from-gameobj) "|"))
     )
   )
-  (genmesh mainobj "testmesh")
+  (genmesh 
+    (list
+      (list 0 0 0)
+      (list 1 0 0)
+      (list 0.5 1 0)
+    ) 
+    (map parse-point (points-from-gameobj))
+    "testmesh"
+  )
 )
 
 (define (onKeyChar key)
@@ -54,3 +62,5 @@
 )
 
 (define (beforeUnload) (delete-managed-points))
+
+

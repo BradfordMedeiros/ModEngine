@@ -38,7 +38,13 @@ std::vector<std::string> listToVecString(SCM stringList){
 }
 
 std::vector<glm::vec3> listToVecVec3(SCM vecList){
-  return {};
+  std::vector<glm::vec3> vecPoints;
+  auto numElements = toUnsignedInt(scm_length(vecList));
+  for (int i = 0; i < numElements; i++){
+    auto vecValue = scm_list_ref(vecList, scm_from_unsigned_integer(i));
+    vecPoints.push_back(listToVec3(vecValue));
+  }
+  return vecPoints;
 }
 
 SCM listToSCM(std::vector<std::string> stringList){
