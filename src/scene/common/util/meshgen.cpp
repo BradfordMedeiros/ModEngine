@@ -39,13 +39,15 @@ std::vector<MeshInterpolated> interpolatedPositions(MeshgenInterpolator& interpo
         .rotation = glm::identity<glm::quat>(),
       });
     }
-    for (int i = 0; i < points.size() - 1; i++){
-      auto fromPos = points.at(i).position;
-      auto targetPosition = points.at(i + 1).position;
+    for (int i = 1; i < points.size(); i++){
+      auto fromPos = points.at(i - 1).position;
+      auto targetPosition = points.at(i).position;
       points.at(i).rotation = orientationFromPos(fromPos, targetPosition);
     }
     if (points.size() >= 2){
-      points.at(points.size() - 1).rotation = points.at(points.size() - 2).rotation;
+      auto fromPos = points.at(0).position;
+      auto targetPosition = points.at(1).position;
+      points.at(0).rotation = orientationFromPos(fromPos, targetPosition);
     }
   }else{
     std::cout << "invalid points interpolator" << std::endl;
