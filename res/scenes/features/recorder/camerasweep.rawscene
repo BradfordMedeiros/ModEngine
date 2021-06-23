@@ -1,0 +1,6 @@
+
+>basicamera:script:./res/scenes/features/recorder/play.scm
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0

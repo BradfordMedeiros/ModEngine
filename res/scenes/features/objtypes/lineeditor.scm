@@ -50,6 +50,9 @@
       (list 0 0 0)
       (list 1 0 0)
       (list 0.5 1 0)
+      (list 1 0 0)
+      (list 2 0 0)
+      (list 1.5 1 0)
     ) 
     (map parse-point (points-from-gameobj))
     "testmesh"

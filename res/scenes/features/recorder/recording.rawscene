@@ -9,4 +9,4 @@ box:scale:5 5 2
 
 record:mesh:./res/models/box/box.obj
 record:position:0 0 5
-record:script:./res/scripts/record.scm
+record:script:./res/scenes/features/recorder/record.scm
