@@ -327,7 +327,7 @@ int renderObject(
   glm::mat4 model,
   bool drawPoints,
   std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord,
-  std::function<int()> drawSphere
+  std::function<int(glm::vec3)> drawSphere
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

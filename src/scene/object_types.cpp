@@ -494,7 +494,7 @@ int renderObject(
   glm::mat4 model,
   bool drawPoints,
   std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord,
-  std::function<int()> drawSphere
+  std::function<int(glm::vec3)> drawSphere
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -700,10 +700,14 @@ int renderObject(
 
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
-    if (geoObj -> type == GEOSPHERE){
-      return drawSphere();
+    auto sphereVertexCount = 0;
+    if (showDebug){
+      for (auto point : geoObj -> points){
+        sphereVertexCount += drawSphere(point);
+      }
     }
-    return renderDefaultNode(shaderProgram, nodeMesh);
+    auto defaultNodeVertexCount = geoObj -> type == GEOSPHERE ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, nodeMesh);
+    return defaultNodeVertexCount + sphereVertexCount;
   }
   return 0;
 }

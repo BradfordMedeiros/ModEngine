@@ -559,7 +559,10 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
       modelMatrix,
       state.drawPoints,
       drawWord,
-      drawSphere
+      [&modelMatrix, &newShader](glm::vec3 pos) -> int {
+        glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
+        return drawSphere();
+      }
     );
     numTriangles = numTriangles + trianglesDrawn;
 
