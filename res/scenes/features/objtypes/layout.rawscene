@@ -15,4 +15,7 @@
 (row1:position:0 1 0
 (row1:type:horizontal
 (row1:elements:*basicbutton1,*basicbutton2
+(row1:backpanel:true
+(row1:tint:0.1 0.1 0.1
+(row1:margin:0.05
 

@@ -235,6 +235,13 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
     }  
   }
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
+
+  layoutObject -> boundInfo.xMin -= layoutObject -> margin;
+  layoutObject -> boundInfo.xMax += layoutObject -> margin;
+  layoutObject -> boundInfo.yMin -= layoutObject -> margin;
+  layoutObject -> boundInfo.yMax += layoutObject -> margin;
+  layoutObject -> boundInfo.zMin -= layoutObject -> margin;
+  layoutObject -> boundInfo.zMax += layoutObject -> margin;
   layoutObject -> boundOrigin = layoutPos;
 }
 

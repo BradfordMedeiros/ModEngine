@@ -131,6 +131,9 @@ struct GameObjectUILayout {
   int order;
   BoundInfo boundInfo;
   glm::vec3 boundOrigin;
+  bool showBackpanel;
+  glm::vec3 tint;
+  float margin;
 };
 
 struct GameObjectVideo {

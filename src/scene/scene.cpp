@@ -353,6 +353,7 @@ World createWorld(
   addMesh(world, "./res/models/camera/camera.dae");
   addMesh(world, "./res/models/box/plane.dae");
   addMesh(world, "./res/models/controls/input.obj");
+  addMesh(world, "./res/models/controls/unitxy.obj");
 
   std::vector<glm::vec3> face = {
     glm::vec4(0.f, 0.f, 0.f, 1.f),
