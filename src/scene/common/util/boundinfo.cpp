@@ -101,7 +101,7 @@ BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
   float maxZ = firstPointTransformed.z;
 
   for (auto point : boundInfoPoints){
-    glm::vec4 transformedPoint = point * transform;
+    glm::vec4 transformedPoint = transform * point;
     if (transformedPoint.x < minX){
       minX = transformedPoint.x;
     }
