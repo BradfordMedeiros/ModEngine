@@ -1,51 +1,7 @@
-# Generated scene 
-debugobject5:position:0.000000 30.000000 0.000000
-debugobject5:scale:50.000000 30.000000 70.000000
-debugobject5:rotation:0.000000 0.000000 -3.141593
-debugobject5:physics:shape_box
-debugobject5:physics_linear:0.000000 0.000000 0.000000
-debugobject5:physics_angle:0.000000 0.000000 0.000000
-debugobject5:physics_gravity:0.000000 0.000000 0.000000
-debugobject5:mesh:../gameresources/primitives/walls/1-0.2-1.dae
-debugobject1:position:0.000000 -5.500000 0.000000
-debugobject1:scale:200.000000 1.000000 200.000000
-debugobject1:rotation:0.000000 0.000000 -3.141593
-debugobject1:physics:shape_box
-debugobject1:mesh:./res/models/box/box.obj
-debugobject2:position:-30.000000 5.000000 0.000000
-debugobject2:scale:3.000000 10.000000 40.000000
-debugobject2:rotation:0.000000 0.000000 -3.141593
-debugobject2:physics:shape_box
-debugobject2:physics_linear:0.000000 0.000000 0.000000
-debugobject2:physics_angle:0.000000 0.000000 0.000000
-debugobject2:physics_gravity:0.000000 0.000000 0.000000
-debugobject2:mesh:../gameresources/misc/sink.obj
->levelcamera:position:5.000000 80.000000 260.000000
->levelcamera:rotation:-0.261800 0.000000 -3.141593
-debugobject4:position:0.000000 8.000000 0.000000
-debugobject4:scale:10.100000 85.000000 20.000000
-debugobject4:rotation:0.000000 0.000000 -3.141593
-debugobject4:physics:shape_box
-debugobject4:physics_linear:0.000000 0.000000 0.000000
-debugobject4:physics_angle:0.000000 0.000000 0.000000
-debugobject4:physics_gravity:0.000000 0.000000 0.000000
-debugobject4:mesh:../gameresources/primitives/walls/1-0.2-1.dae
-debugobject6:position:0.000000 30.000000 0.000000
-debugobject6:scale:140.000000 5.020000 36.000000
-debugobject6:rotation:0.000000 0.000000 -3.141593
-debugobject6:physics:shape_box
-debugobject6:physics_linear:0.000000 0.000000 0.000000
-debugobject6:physics_angle:0.000000 0.000000 0.000000
-debugobject6:physics_gravity:0.000000 0.000000 0.000000
-debugobject6:mesh:../gameresources/primitives/walls/1-0.2-1.dae
-debugobject3:position:30.000000 5.000000 0.000000
-debugobject3:scale:3.000000 10.000000 40.000000
-debugobject3:rotation:0.000000 0.000000 -3.141593
-debugobject3:physics:shape_box
-debugobject3:physics_linear:0.000000 0.000000 0.000000
-debugobject3:physics_angle:0.000000 0.000000 0.000000
-debugobject3:physics_gravity:0.000000 0.000000 0.000000
-debugobject3:mesh:../gameresources/misc/sink.obj
 
-*scene:path:./res/scenes/somescene.rawscene
+unitcube:position:0 -5 0
+unitcube:scale:100 1.0 100
+unitcube:mesh:./res/models/unit_rect/unit_rect.obj
+unitcube:layer:ui
 
+>somecamera:position:0 0 0
