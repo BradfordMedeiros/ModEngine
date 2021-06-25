@@ -193,6 +193,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
   // Also parenting/transforms use the relative transform, so nesting (in scenegraph) can get fucked
   // Should consoilate the vertical/horizontal cases in terms of code, identical just dereffing different properties (x vs y)
   std::vector<objid> elementIds;
+  std::map<objid, glm::vec3> newPositions;
+
   if (layoutType == LAYOUT_HORIZONTAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
     auto horizontal = rootPosition.x;
@@ -208,8 +210,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
       glm::vec3 newPos = obj.transformation.position;
       newPos.x = left;
       newPos.y = fixedY;
-      physicsTranslateSet(world, obj.id, newPos);
-
+      newPositions[obj.id] = newPos;
       horizontal += effectiveSpacing;
       elementIds.push_back(obj.id);
     }
@@ -228,14 +229,18 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
       glm::vec3 newPos = obj.transformation.position;
       newPos.x = fixedX;
       newPos.y = top;
-      physicsTranslateSet(world, obj.id, newPos);
+      newPositions[obj.id] = newPos;
       vertical += effectiveSpacing;
-
       elementIds.push_back(obj.id);
     }  
   }
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
-
+  auto boundingWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
+  auto boundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
+  for (auto [id, newPos] : newPositions){
+    auto offset = layoutType == LAYOUT_HORIZONTAL ? glm::vec3(boundingWidth / 2, 0.f, 0.f) : glm::vec3(0.f, boundingHeight / 2, 0.f);
+    physicsTranslateSet(world, id, newPos - offset);
+  }
   layoutObject -> boundInfo.xMin -= layoutObject -> margin;
   layoutObject -> boundInfo.xMax += layoutObject -> margin;
   layoutObject -> boundInfo.yMin -= layoutObject -> margin;
