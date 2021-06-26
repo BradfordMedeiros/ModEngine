@@ -64,6 +64,7 @@ struct engineState {
 
   int depthBufferLayer;
   bool printKeyStrokes;
+  bool cullEnabled;
 
 };
 

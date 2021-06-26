@@ -666,6 +666,20 @@ std::vector<InputDispatch> inputFns = {
       state.printKeyStrokes = !state.printKeyStrokes;
     }
   },
+  InputDispatch{
+    .sourceKey = 92, // "\"
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.cullEnabled = !state.cullEnabled;
+      if (state.cullEnabled){
+        glEnable(GL_CULL_FACE);  
+      }else{
+        glDisable(GL_CULL_FACE);  
+      }
+    }
+  },
 };
 
 

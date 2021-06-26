@@ -53,6 +53,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .cameraFast = true,
     .depthBufferLayer = -1,
     .printKeyStrokes = true,
+    .cullEnabled = false,
 	};
 	return state;
 }
