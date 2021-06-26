@@ -207,6 +207,9 @@ void onDelete(){
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+  if (state.printKeyStrokes){
+    std::cout << "key: " << key << " action: " << action << std::endl;
+  }
   schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
 
   // below stuff is editor/misc stuff
@@ -652,6 +655,15 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       std::cout << dumpDebugInfo(false) << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 348, // to the right of fn key, looks like notepad
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.printKeyStrokes = !state.printKeyStrokes;
     }
   },
 };

@@ -62,7 +62,9 @@ struct engineState {
   bool moveUp;
   bool cameraFast;
 
-  int depthBufferLayer = -1;
+  int depthBufferLayer;
+  bool printKeyStrokes;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
