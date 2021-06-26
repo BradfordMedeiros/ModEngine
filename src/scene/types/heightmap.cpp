@@ -134,7 +134,7 @@ MeshData generateHeightmapMeshdata(HeightMapData& heightmap){
   MeshData data {
     .vertices = vertices,
     .indices = indices,
-    .diffuseTexturePath = "./res/textures/grass.jpeg",
+    .diffuseTexturePath = "./res/textures/grass.jpg",
     .hasDiffuseTexture = true,
     .hasEmissionTexture = false,
     .hasOpacityTexture = false,
