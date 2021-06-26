@@ -622,7 +622,12 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
   
-  assert(numDepthClears < numUniqueDepthLayers(layers));
+  auto maxExpectedClears = numUniqueDepthLayers(layers);
+  if (numDepthClears > maxExpectedClears){
+    std::cout << "num clears: " << numDepthClears << std::endl;
+    std::cout << "num unique depth clears: " << maxExpectedClears << std::endl;
+    assert(false);
+  }
   return numTriangles;
 }
 
