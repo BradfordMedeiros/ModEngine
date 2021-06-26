@@ -320,7 +320,6 @@ void selectItem(objid selectedId, Color pixelColor){
         "manipulator", 
         { 
           {"mesh", "./res/models/ui/manipulator.fbx" }, 
-          {"texture", "./res/textures/bluetransparent.png" },
           {"layer", "no_depth" }
         }, 
         {}, 
