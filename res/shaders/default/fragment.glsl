@@ -45,7 +45,7 @@ void main(){
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
 
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
-    vec2 offsetTexCoord = vec2(TexCoord.x, TexCoord.y);
+    vec2 offsetTexCoord = vec2(TexCoord.x, -1 * TexCoord.y);  // -1 because the images we feed in are flipped b/c the image encoding has them flipped.  Could reverse them there, but 
   
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
 
