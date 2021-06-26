@@ -16,6 +16,7 @@
 #include <variant>
 #include <iostream>
 #include <map>
+#include <set>
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
@@ -89,8 +90,9 @@ struct LayerInfo {
   std::string name;
   int zIndex;
   bool orthographic;
-  bool ignoreDepthBuffer;
+  int depthBufferLayer;
 };
+int numUniqueDepthLayers(std::vector<LayerInfo> layers);
 
 struct GameobjAttributes {
   std::map<std::string, std::string> stringAttributes;

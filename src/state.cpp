@@ -49,6 +49,9 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .renderMode = RENDER_FINAL,
     .snappingMode = SNAP_RELATIVE,
     .drawPoints = false,
+    .moveUp = false,
+    .cameraFast = true,
+    .depthBufferLayer = -1,
 	};
 	return state;
 }

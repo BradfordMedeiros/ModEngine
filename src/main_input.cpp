@@ -280,6 +280,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == 260){
     clearSelectedIndexs(state.editor);
   }
+
+  if (key == 340){
+    state.moveUp = (action == 1);
+  }
 }
 
 void onMouseButton(){    
@@ -443,7 +447,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
-      moveCamera(glm::vec3(0.0, 0.0, cameraSpeed * -40.0f * deltaTime));
+      auto speed = cameraSpeed * -40.0f * deltaTime;
+      glm::vec3 moveVec = state.moveUp ? glm::vec3(0.0, -1 * speed, 0.f) : glm::vec3(0.0, 0.0, speed);
+      moveCamera(moveVec);
     }
   },  
   InputDispatch{
@@ -461,7 +467,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&state]() -> void {
-      moveCamera(glm::vec3(0.0, 0.0, cameraSpeed * 40.0f * deltaTime));
+      auto speed = cameraSpeed * 40.0f * deltaTime;
+      glm::vec3 moveVec = state.moveUp ? glm::vec3(0.0, -1 * speed, 0.f) : glm::vec3(0.0, 0.0, speed);
+      moveCamera(moveVec);
     }
   },  
   InputDispatch{
@@ -535,39 +543,14 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
-    .sourceKey = 340,  // shift
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 0.f;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 340,  // shift
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 1.f;
-    }
-  },
-  InputDispatch{
     .sourceKey = 341,  // ctrl
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 0.f;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 341,  // ctrl
-    .sourceType = BUTTON_RELEASE,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = [&cameraSpeed]() -> void {
-      cameraSpeed = 1.f;
+    .fn = [&cameraSpeed, &state]() -> void {
+      state.cameraFast = !state.cameraFast;
+      std::cout << "camera fast: " << state.cameraFast << std::endl;
+      cameraSpeed = state.cameraFast ? 1.f : 0.1f;
     }
   },
   InputDispatch{

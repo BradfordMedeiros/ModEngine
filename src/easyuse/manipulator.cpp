@@ -4,12 +4,16 @@ auto manipulatorId = 0;
 auto manipulatorTarget = 0;
 Axis manipulatorObject = NOAXIS;
 
+objid getManipulatorId(){
+  return manipulatorId;
+}
 void unspawnManipulator(std::function<void(objid)> removeObjectById){
   std::cout << "unspawn manipulator called" << std::endl;
   if (manipulatorId != 0){
     removeObjectById(manipulatorId);
   }
   manipulatorId = 0;
+  manipulatorTarget = 0;
 }
 
 void onManipulatorSelectItem(
@@ -29,7 +33,6 @@ void onManipulatorSelectItem(
     }
     if (manipulatorTarget == selectedItem){
       unspawnManipulator(removeObjectById);
-      manipulatorTarget = 0;
     }else{
       manipulatorTarget = selectedItem;
       setPosition(manipulatorId, getPosition(manipulatorTarget));
@@ -50,7 +53,6 @@ void onManipulatorSelectItem(
 }
 void onManipulatorMouseRelease(){
   manipulatorObject = NOAXIS;
-  std::cout << "manipulator release!" << std::endl;
 }
 
 void onManipulatorUpdate(
@@ -82,17 +84,14 @@ void onManipulatorUpdate(
       auto targetPosition = getPosition(manipulatorTarget);
       auto manipulatorPosition = getPosition(manipulatorId);
       if (manipulatorObject == XAXIS){
-        std::cout << "manipulator x axis" << std::endl;
         auto position = manipulatorPosition + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
         setPosition(manipulatorTarget, position);
         setPosition(manipulatorId, position);
       }else if (manipulatorObject == YAXIS){
-        std::cout << "manipulator y axis" << std::endl;
         auto position = manipulatorPosition + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
         setPosition(manipulatorTarget, position);
         setPosition(manipulatorId, position);
       }else if (manipulatorObject == ZAXIS){
-        std::cout << "manipulator z axis" << std::endl;
         auto position = manipulatorPosition + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
         setPosition(manipulatorTarget, position);
         setPosition(manipulatorId, position);
@@ -100,18 +99,20 @@ void onManipulatorUpdate(
     }else if (mode == SCALE){
       auto targetScale = getScale(manipulatorTarget);
       if (manipulatorObject == XAXIS){
-        std::cout << "manipulator x axis" << std::endl;
         auto scale = targetScale + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
         setScale(manipulatorTarget, scale);
       }else if (manipulatorObject == YAXIS){
-        std::cout << "manipulator y axis" << std::endl;
         auto scale = targetScale + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
         setScale(manipulatorTarget, scale);
       }else if (manipulatorObject == ZAXIS){
-        std::cout << "manipulator z axis" << std::endl;
         auto scale = targetScale + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
         setScale(manipulatorTarget, scale);
       }      
     }
   }
+}
+
+void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
+  std::cout << "on manipulator unselect" << std::endl;
+  unspawnManipulator(removeObjectById);
 }

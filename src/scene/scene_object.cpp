@@ -189,12 +189,13 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
   auto spacing = layoutObject -> spacing;
   auto layoutType = layoutObject -> type;
 
-  // Doesn't account for rotational effects of the objects, so boundingwidth/height incorrect if object is rotated
   // Also parenting/transforms use the relative transform, so nesting (in scenegraph) can get fucked
   // Should consoilate the vertical/horizontal cases in terms of code, identical just dereffing different properties (x vs y)
   std::vector<objid> elementIds;
   std::map<objid, glm::vec3> newPositions;
 
+  // Measure elements, and place them offset from one another
+  // Starts at origin of element since cannot know how wide it is until after measuring
   if (layoutType == LAYOUT_HORIZONTAL){
     auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
     auto horizontal = rootPosition.x;
@@ -234,7 +235,10 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
       elementIds.push_back(obj.id);
     }  
   }
+  
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
+
+  // Offset each element starting from the left 
   auto boundingWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
   auto boundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
   for (auto [id, newPos] : newPositions){

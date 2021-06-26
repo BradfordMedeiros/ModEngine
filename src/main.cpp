@@ -128,6 +128,34 @@ float quadVertices[] = {
    1.0f,  1.0f,  1.0f, 1.0f
 };
 
+std::vector<LayerInfo> layers = {
+  LayerInfo {
+    .name = "",
+    .zIndex = 0,
+    .orthographic = false,
+    .depthBufferLayer = 0,
+  },
+  LayerInfo {
+    .name = "transparency",
+    .zIndex = 1,
+    .orthographic = false,
+    .depthBufferLayer = 0,
+  },
+  LayerInfo {
+    .name = "no_depth",
+    .zIndex = 2,
+    .orthographic = false,
+    .depthBufferLayer = 1,
+  },
+  LayerInfo {
+    .name = "ui",
+    .zIndex = 3,
+    .orthographic = true,
+    .depthBufferLayer = 0,
+  }
+};
+  
+
 // 0th depth texture is the main depth texture used for eg z buffer
 // other buffers are for the lights
 const int numDepthTextures = 32;
@@ -283,28 +311,38 @@ void selectItem(objid selectedId, Color pixelColor){
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
   shouldCallItemSelected = true;
-  /*onManipulatorSelectItem(
+  onManipulatorSelectItem(
     groupId, 
     selectedSubObj.name,
     []() -> objid {
       return makeObjectAttr(
         0,
         "manipulator", 
-        {{ "mesh", "./res/models/ui/manipulator.fbx" }, {"texture", "./res/textures/bluetransparent.png" }}, 
+        { 
+          {"mesh", "./res/models/ui/manipulator.fbx" }, 
+          {"texture", "./res/textures/bluetransparent.png" },
+          {"layer", "no_depth" }
+        }, 
         {}, 
-        {{ "position", glm::vec3(0.f, 0.f, 0.f) }}
+        {}
       );
     },
-    [](objid id) -> void {
-      removeObjectById(id);
-    },
+    removeObjectById,
     getGameObjectPos,
     setGameObjectPosition
-  );*/
+  );
 
   setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
+}
+
+void notSelectItem(){
+  auto manipulatorId = getManipulatorId();
+  if (manipulatorId != 0){
+    onManipulatorUnselect(removeObjectById);
+    unsetSelectedIndex(state.editor, manipulatorId, true);
+  }
 }
 
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
@@ -362,7 +400,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
     selectItemCalled = true;
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
-    //onManipulatorMouseRelease();
+    onManipulatorMouseRelease();
   }
 
   schemeBindings.onMouseCallback(button, action, mods);
@@ -488,29 +526,29 @@ glm::vec3 getTintIfSelected(bool isSelected){
 int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
-
   int numTriangles = 0;
 
-  traverseSandbox(world.sandbox, [&world, shaderProgram, projview, &portals, &lights, &lightProjview, &numTriangles](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, bool ignoreDepthBuffer, std::string shader) -> void {
+  int numDepthClears = 0;
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, projview, &portals, &lights, &lightProjview, &numTriangles](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
     assert(id >= 0);
+     // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
+    if (state.depthBufferLayer != depthBufferLayer){
+      state.depthBufferLayer = depthBufferLayer;
+      glClear(GL_DEPTH_BUFFER_BIT);
+      numDepthClears++;
+    }
+
     addPositionToRender(modelMatrix, parentModelMatrix);
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     auto newShader = getShaderByName(shader, shaderProgram);
     setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
 
-    // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
-    if (ignoreDepthBuffer){
-      glDisable(GL_DEPTH_TEST);
-    }else{
-      glEnable(GL_DEPTH_TEST);
-    }
-
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
       drawMesh(world.meshes.at("./res/models/cone/cone.obj"), newShader); 
     }
-
+  
     // bounding code //////////////////////
     auto gameObjV = world.objectMapping.at(id);
     auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
@@ -583,6 +621,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
     glClear(GL_STENCIL_BUFFER_BIT);
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
+  
+  assert(numDepthClears < numUniqueDepthLayers(layers));
   return numTriangles;
 }
 
@@ -1137,32 +1177,7 @@ int main(int argc, char* argv[]){
       }
     },
     debuggerDrawer, 
-    {
-      LayerInfo {
-        .name = "",
-        .zIndex = 0,
-        .orthographic = false,
-        .ignoreDepthBuffer = false,
-      },
-      LayerInfo {
-        .name = "transparency",
-        .zIndex = 1,
-        .orthographic = false,
-        .ignoreDepthBuffer = false,
-      },
-      LayerInfo {
-        .name = "no_depth",
-        .zIndex = 0,
-        .orthographic = false,
-        .ignoreDepthBuffer = true,
-      },
-      LayerInfo {
-        .name = "ui",
-        .zIndex = 2,
-        .orthographic = true,
-        .ignoreDepthBuffer = false,
-      }
-    },
+    layers,
     interface
   );
 
@@ -1323,7 +1338,7 @@ int main(int argc, char* argv[]){
 
     auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-    auto hoveredId= getIdFromColor(hoveredItemColor);
+    auto hoveredId = getIdFromColor(hoveredItemColor);
     
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
@@ -1333,6 +1348,8 @@ int main(int argc, char* argv[]){
     if (selectItemCalled){
       if (state.hoveredIdInScene){
         selectItem(hoveredId, hoveredItemColor);
+      }else{
+        notSelectItem();
       }
       selectItemCalled = false;
       applyUICoord(

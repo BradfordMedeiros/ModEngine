@@ -342,3 +342,12 @@ std::string serializePropertySuffix(std::string key, AttributeValue value){
   assert(false);
   return prefix;
 }
+
+int numUniqueDepthLayers(std::vector<LayerInfo> layers){
+  int nums = 0;
+  std::set<int> depths;
+  for (auto layer : layers){
+    depths.insert(layer.depthBufferLayer);
+  }
+  return depths.size();
+}

@@ -59,6 +59,10 @@ struct engineState {
   RENDER_MODE renderMode;
   SNAPPING_MODE snappingMode;
   bool drawPoints;
+  bool moveUp;
+  bool cameraFast;
+
+  int depthBufferLayer = -1;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
