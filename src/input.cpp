@@ -173,7 +173,6 @@ void handleInput(
   engineState& state, 
   void (*moveCamera)(glm::vec3), 
   void (*nextCamera)(void),
-  void (*setObjectDimensions)(int32_t index, float width, float height, float depth),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
@@ -196,10 +195,6 @@ void handleInput(
   }
   if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
     state.enableSpecular = !state.enableSpecular;
-  }
-
-  if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
-    setObjectDimensions(1, 10, 5, 10);
   }
 
   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){

@@ -85,7 +85,6 @@ std::string textureFolderPath;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
-int numScenesLoaded = 0;
 
 AnimationState animations;
 
@@ -374,23 +373,6 @@ void loadAllTextures(){
   }
 }
 
-void setObjectDimensions(int32_t index, float width, float height, float depth){
-  for (auto id : selectedIds(state.editor)){
-    auto selected = id;
-    if (selected == -1 || !idExists(world.sandbox, selected)){
-      return;
-    }
-    auto gameObjV = world.objectMapping.at(selected);  // todo this is bs, need a wrapper around objectmappping + scene
-    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
-    if (meshObj != NULL){
-      // @TODO this is resizing based upon first mesh only, which is questionable
-      auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
-      std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
-      getGameObject(world, selected).transformation.scale = newScale;
-    } 
-  }  
-}
-
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
   Line line = {
     .fromPos = fromPos,
@@ -635,7 +617,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 }
 
-void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects){
+void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
@@ -783,10 +765,6 @@ void genFramebufferTexture(unsigned int *texture){
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-
-glm::vec3 navPosition(objid id, glm::vec3 target){
-  return aiNavigate(world, id, target);
 }
 
 void signalHandler(int signum) {
@@ -1208,7 +1186,7 @@ int main(int argc, char* argv[]){
     }
 
     int numObjects = getNumberOfObjects(world.sandbox);
-    numScenesLoaded = getNumberScenesLoaded(world.sandbox);
+    int numScenesLoaded = getNumberScenesLoaded(world.sandbox);
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
     timePlayback.setElapsedTime(deltaTime);
@@ -1422,9 +1400,9 @@ int main(int argc, char* argv[]){
     if (showDebugInfo){
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
-    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects);
+    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
 
-    handleInput(keyMapper, disableInput, window, deltaTime, state, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete, keyCharCallback, onJoystick);
+    handleInput(keyMapper, disableInput, window, deltaTime, state, moveCamera, nextCamera, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete, keyCharCallback, onJoystick);
 
     glfwPollEvents();
     

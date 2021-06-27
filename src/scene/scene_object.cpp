@@ -165,6 +165,26 @@ std::optional<Texture> textureForId(World& world, objid id){
   return textureForId(world.objectMapping, id);
 }
 
+// Fn seems broken, b/c sometimes meshesToRender is 0 size
+// Also probably should use generic bound info, not assume is mesh.
+// ... but this functionality doesn't seem too important in reality
+void setObjectDimensions(World& world, std::vector<objid>& ids, float width, float height, float depth){
+  for (auto id : ids){
+    auto selected = id;
+    if (selected == -1 || !idExists(world.sandbox, selected)){
+      return;
+    }
+    auto gameObjV = world.objectMapping.at(selected); 
+    auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
+    if (meshObj != NULL){
+      // @TODO this is resizing based upon first mesh only, which is questionable
+      auto newScale = getScaleEquivalent(meshObj -> meshesToRender.at(0).boundInfo, width, height, depth);   // this is correlated to logic in scene//getPhysicsInfoForGameObject, needs to be fixed
+      std::cout << "new scale: (" << newScale.x << ", " << newScale.y << ", " << newScale.z << ")" << std::endl;
+      getGameObject(world, selected).transformation.scale = newScale;
+    } 
+  }  
+}
+
 objid getIdForCollisionObject(World& world, const btCollisionObject* body){
   for (auto const&[id, rigidbody] : world.rigidbodys){
     if (rigidbody == body){

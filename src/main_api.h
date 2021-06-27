@@ -178,4 +178,7 @@ void makeParent(objid child, objid parent);
 
 void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string destMesh);
 
+glm::vec3 navPosition(objid id, glm::vec3 target);
+
+
 #endif

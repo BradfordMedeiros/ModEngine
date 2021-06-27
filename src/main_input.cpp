@@ -662,7 +662,20 @@ std::vector<InputDispatch> inputFns = {
       }
     }
   },
+  InputDispatch{
+    .sourceKey = 85, // u
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      auto selected = selectedIds(state.editor);
+      setObjectDimensions(world, selected, 10, 5, 10);
+    }
+  },
 };
+
+
+
 
 
 

@@ -25,7 +25,6 @@ void handleInput(
   float deltaTime, 
 	engineState& state, 
 	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
-	void (*setObjectDimensions)(int32_t index, float width, float height, float depth),
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),

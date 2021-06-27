@@ -35,6 +35,7 @@ glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 
 std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 std::optional<Texture> textureForId(World& world, objid id);
+void setObjectDimensions(World& world, std::vector<objid>& ids, float width, float height, float depth);
 
 objid getIdForCollisionObject(World& world, const btCollisionObject* body);
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
@@ -44,6 +45,7 @@ void emit(World& world, objid id);
 void enforceAllLayouts(World& world);
 
 void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh);
+
 
 
 #endif
