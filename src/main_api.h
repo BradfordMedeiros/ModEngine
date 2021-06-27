@@ -76,6 +76,8 @@ void applyImpulseRel(int32_t index, glm::vec3 impulse);
 void clearImpulse(int32_t index);
 
 void loadScriptFromWorld(std::string script, int32_t id);
+
+std::vector<std::string> listSceneFiles();
 int32_t loadScene(std::string sceneFile);
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
 int32_t loadSceneData(std::string sceneData, objid sceneId);

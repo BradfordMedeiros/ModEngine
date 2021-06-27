@@ -1035,6 +1035,7 @@ int main(int argc, char* argv[]){
     unloadScene,
     unloadAllScenes,
     listScenes,
+    listSceneFiles,
     sendLoadScene,
     moveCamera, 
     rotateCamera, 

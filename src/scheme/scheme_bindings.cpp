@@ -25,7 +25,17 @@ SCM scm_listScenes(){
   auto scenes = _listScenes();
   SCM list = scm_make_list(scm_from_unsigned_integer(scenes.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < scenes.size(); i++){
-    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_int32(scenes[i])); 
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_int32(scenes.at(i))); 
+  }
+  return list;
+}
+
+std::vector<std::string> (*_listSceneFiles)();
+SCM scm_listSceneFiles(){
+  auto scenes = _listSceneFiles();
+  SCM list = scm_make_list(scm_from_unsigned_integer(scenes.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < scenes.size(); i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_locale_string(scenes.at(i).c_str())); 
   }
   return list;
 }
@@ -869,6 +879,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
+  scm_c_define_gsubr("list-scenefiles", 0, 0, 0, (void *)scm_listSceneFiles);
   scm_c_define_gsubr("send-load-scene", 1, 0, 0, (void *)scm_sendLoadScene);
 
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
@@ -982,6 +993,7 @@ void createStaticSchemeBindings(
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
   std::vector<int32_t> (*listScenes)(),  
+  std::vector<std::string> (*listSceneFiles)(),
   void (*sendLoadScene)(int32_t id),
 	void (*moveCamera)(glm::vec3),  
 	void (*rotateCamera)(float xoffset, float yoffset),
@@ -1057,6 +1069,7 @@ void createStaticSchemeBindings(
   _unloadScene = unloadScene;
   _unloadAllScenes = unloadAllScenes;
   _listScenes = listScenes;
+  _listSceneFiles = listSceneFiles;
   _sendLoadScene = sendLoadScene;
   
   selectionMode = setSelectionMode;

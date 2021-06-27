@@ -49,6 +49,11 @@ void loadScriptFromWorld(std::string script, int32_t id){
   std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
   loadScript(script, id, bootStrapperMode);
 }
+
+std::vector<std::string> listSceneFiles(){
+  return listFilesWithExtensions("./res/scenes", { "rawscene" });
+}
+
 int32_t loadScene(std::string sceneFile){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   return addSceneToWorld(world, sceneFile, interface);
