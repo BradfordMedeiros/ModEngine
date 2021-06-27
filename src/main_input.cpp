@@ -128,29 +128,11 @@ void onArrowKey(int key){
   std::cout << "key: " << key << std::endl;
 }
 
-void maybeApplyTextureOffset(int index, glm::vec2 offset){
-  GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(index));
-  if (meshObj == NULL){
-    return;
-  }
-
-  for (auto id : getIdsInGroup(world.sandbox, index)){
-    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
-    assert(meshObj != NULL);
-    meshObj -> texture.textureoffset = meshObj -> texture.textureoffset + offset;
-  }
-}
-
-
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
   schemeBindings.onScrollCallback(yoffset);
   
-  if (state.offsetTextureMode && selected(state.editor) != -1){
-    float offsetAmount = yoffset * 0.001;
-    maybeApplyTextureOffset(selected(state.editor), glm::vec2(state.manipulatorAxis == YAXIS ? offsetAmount : 0, state.manipulatorAxis == YAXIS ? 0 : offsetAmount));
-  }
-  if (!state.offsetTextureMode && selected(state.editor) != -1 && idExists(world.sandbox, selected(state.editor))){
+  if (selected(state.editor) != -1 && idExists(world.sandbox, selected(state.editor))){
     maybeChangeTexture(selected(state.editor));
   }
 
@@ -239,7 +221,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
   }
 
-  if (key == GLFW_KEY_K && action == 1){
+  /*if (key == GLFW_KEY_K && action == 1){
     state.textureIndex--;
     if (state.textureIndex < 0){
       state.textureIndex = 0;
@@ -249,7 +231,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == GLFW_KEY_L && action == 1){
     state.textureIndex++;
     std::cout << "texture index: " << state.textureIndex << std::endl;
-  }
+  }*/
 
   if (key == GLFW_KEY_Q && action == 1){
     state.shouldTerrainPaint = !state.shouldTerrainPaint;

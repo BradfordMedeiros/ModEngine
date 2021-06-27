@@ -222,10 +222,6 @@ void handleInput(
     std::cout << "ToggleFOV: " << state.toggleFov << std::endl;
   }
 
-  if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS){
-    state.offsetTextureMode = !state.offsetTextureMode;
-    std::cout << "offset texture mode: " << state.offsetTextureMode << std::endl;
-  } 
   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
     state.manipulatorAxis = XAXIS;
   }

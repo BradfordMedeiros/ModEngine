@@ -43,7 +43,6 @@ struct engineState {
   bool showBoneWeight;
   bool useBoneTransform;
   float discardAmount;
-  bool offsetTextureMode;
   int textureIndex;
   bool shouldPaint;
   bool shouldTerrainPaint;

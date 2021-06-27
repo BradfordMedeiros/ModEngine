@@ -34,7 +34,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.showBoneWeight = false,
   	.useBoneTransform = true,
   	.discardAmount = 0.5,
-  	.offsetTextureMode = false,
   	.textureIndex = 0,
   	.shouldPaint = false,
     .shouldTerrainPaint = false,
