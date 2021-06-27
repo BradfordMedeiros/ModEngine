@@ -6,6 +6,7 @@
 #include <iostream>
 #include "./common/util.h"
 #include "./scene/common/texture.h"
+#include "./translations.h"
 
 struct Color {
   GLfloat r;
@@ -24,6 +25,7 @@ struct UVCoord {
 };
 
 UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight);
+glm::vec3 uvToNDC(UVCoord coord);
 
 void saveScreenshot(std::string& filepath);
 

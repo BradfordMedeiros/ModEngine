@@ -85,7 +85,6 @@ std::string textureFolderPath;
 float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
-int numObjects = 0;
 int numScenesLoaded = 0;
 
 AnimationState animations;
@@ -117,16 +116,6 @@ std::queue<StringString> channelMessages;
 std::queue<StringFloat> channelFloatMessages;
 KeyRemapper keyMapper;
 extern std::vector<InputDispatch> inputFns;
-
-float quadVertices[] = {
-  -1.0f,  1.0f,  0.0f, 1.0f,
-  -1.0f, -1.0f,  0.0f, 0.0f,
-   1.0f, -1.0f,  1.0f, 0.0f,
-
-  -1.0f,  1.0f,  0.0f, 1.0f,
-   1.0f, -1.0f,  1.0f, 0.0f,
-   1.0f,  1.0f,  1.0f, 1.0f
-};
 
 std::vector<LayerInfo> layers = {
   LayerInfo {
@@ -248,12 +237,6 @@ void applyPainting(objid id){
     canPaint = true;
   }
   //std::cout << "texture id is: " << texture.textureId << std::endl;
-}
-
-glm::vec3 uvToNDC(UVCoord coord){
-  float xCoord = convertBase(coord.x, 0, 1, -1, 1);
-  float yCoord = convertBase(coord.y, 0, 1, -1, 1);
-  return glm::vec3(xCoord, yCoord, 0.f);
 }
 
 void handlePainting(UVCoord uvsToPaint){
@@ -652,7 +635,7 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 }
 
-void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor){
+void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
@@ -934,6 +917,14 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
+  float quadVertices[] = {
+    -1.0f,  1.0f,  0.0f, 1.0f,
+    -1.0f, -1.0f,  0.0f, 0.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
+    -1.0f,  1.0f,  0.0f, 1.0f,
+    1.0f, -1.0f,  1.0f, 0.0f,
+    1.0f,  1.0f,  1.0f, 1.0f
+  };
   unsigned int quadVBO;
   glGenVertexArrays(1, &quadVAO);
   glGenBuffers(1, &quadVBO);
@@ -1216,7 +1207,7 @@ int main(int argc, char* argv[]){
       }
     }
 
-    numObjects = getNumberOfObjects(world.sandbox);
+    int numObjects = getNumberOfObjects(world.sandbox);
     numScenesLoaded = getNumberScenesLoaded(world.sandbox);
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
@@ -1431,7 +1422,7 @@ int main(int argc, char* argv[]){
     if (showDebugInfo){
       renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
     }
-    renderUI(crosshairSprite, currentFramerate, pixelColor);
+    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects);
 
     handleInput(keyMapper, disableInput, window, deltaTime, state, moveCamera, nextCamera, setObjectDimensions, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, onDelete, keyCharCallback, onJoystick);
 

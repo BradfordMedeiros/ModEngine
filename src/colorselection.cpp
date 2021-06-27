@@ -39,6 +39,12 @@ UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight){
   return uvdata;
 }
 
+glm::vec3 uvToNDC(UVCoord coord){
+  float xCoord = convertBase(coord.x, 0, 1, -1, 1);
+  float yCoord = convertBase(coord.y, 0, 1, -1, 1);
+  return glm::vec3(xCoord, yCoord, 0.f);
+}
+
 void saveScreenshot(std::string& filepath){
   int w, h;
   int miplevel = 0;
