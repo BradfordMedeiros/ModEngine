@@ -250,7 +250,7 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-glm::vec3 uvToOffset(UVCoord coord){
+glm::vec3 uvToNDC(UVCoord coord){
   float xCoord = convertBase(coord.x, 0, 1, -1, 1);
   float yCoord = convertBase(coord.y, 0, 1, -1, 1);
   return glm::vec3(xCoord, yCoord, 0.f);
@@ -276,7 +276,7 @@ void handlePainting(UVCoord uvsToPaint){
 
   glUniformMatrix4fv(glGetUniformLocation(drawingProgram, "model"), 1, GL_FALSE, glm::value_ptr(
     glm::scale(
-      glm::translate(glm::mat4(1.0f), uvToOffset(uvsToPaint)), 
+      glm::translate(glm::mat4(1.0f), uvToNDC(uvsToPaint)), 
       glm::vec3(0.01f, 0.01f, 0.01f) * drawParams.scale)
     )
   );
