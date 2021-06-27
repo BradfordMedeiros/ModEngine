@@ -1,6 +1,5 @@
 #include "./scene_object.h"
 
-
 std::vector<LightInfo> getLightInfo(World& world){
   auto lightsIndexs = getGameObjectsIndex<GameObjectLight>(world.objectMapping);
   std::vector<LightInfo> lights;
@@ -52,6 +51,32 @@ bool isPortal(World& world, objid id){
   return portalObject != NULL;
 }
 
+glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
+  if (!info.perspective){
+    return renderView(info.cameraPos, info.cameraRotation);
+  }
+  auto cameraToPortalOffset = transform.position - info.portalPos;
+  return glm::inverse(renderView(glm::vec3(0.f, 0.f, 0.f), info.portalRotation) *  glm::inverse(renderView(cameraToPortalOffset, transform.rotation))) * renderView(info.cameraPos, info.cameraRotation);
+}
+
+// TODO - needs to be done relative to parent, not local space
+void teleportObject(World& world, objid objectId, objid portalId){
+  std::cout << "teleporting object: " << objectId << std::endl;
+  GameObject& gameobject = getGameObject(world, objectId);
+  auto portalView = glm::inverse(renderPortalView(getPortalInfo(world, portalId), gameobject.transformation));
+  auto newTransform = getTransformationFromMatrix(portalView);
+  auto newPosition = newTransform.position;
+  physicsTranslateSet(world, objectId, newPosition);
+}
+void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id){
+  auto obj1IsPortal = isPortal(world, obj1Id);
+  auto obj2IsPortal = isPortal(world, obj2Id);
+  if (obj1IsPortal && !obj2IsPortal){
+    teleportObject(world, obj2Id, obj1Id);
+  }else if (!obj1IsPortal && obj2IsPortal){
+    teleportObject(world, obj1Id, obj2Id);
+  } 
+}
 
 std::optional<GameObjectVoxel*> getVoxel(World& world, objid id){
   if (world.objectMapping.find(id) == world.objectMapping.end()){

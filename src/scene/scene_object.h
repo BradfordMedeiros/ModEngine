@@ -8,7 +8,6 @@ struct LightInfo {
   glm::quat rotation;
   GameObjectLight light;
 };
-
 std::vector<LightInfo> getLightInfo(World& world);
 
 struct PortalInfo {
@@ -22,6 +21,9 @@ struct PortalInfo {
 PortalInfo getPortalInfo(World& world, objid id);
 std::vector<PortalInfo> getPortalInfo(World& world);
 bool isPortal(World& world, objid id);
+glm::mat4 renderPortalView(PortalInfo info, Transformation transform);
+void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id);
+
 std::optional<GameObjectVoxel*> getVoxel(World& world, objid id);
 
 std::optional<Texture> textureForId(World& world, objid id);
@@ -35,7 +37,6 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
 std::optional<Texture> textureForId(World& world, objid id);
 
 objid getIdForCollisionObject(World& world, const btCollisionObject* body);
-
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 
 void emit(World& world, objid id);

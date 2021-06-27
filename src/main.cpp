@@ -344,42 +344,13 @@ void notSelectItem(){
   }
 }
 
-glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
-  if (!info.perspective){
-    return renderView(info.cameraPos, info.cameraRotation);
-  }
-  auto cameraToPortalOffset = transform.position - info.portalPos;
-  return glm::inverse(renderView(glm::vec3(0.f, 0.f, 0.f), info.portalRotation) *  glm::inverse(renderView(cameraToPortalOffset, transform.rotation))) * renderView(info.cameraPos, info.cameraRotation);
-}
-
-// TODO - needs to be done relative to parent, not local space
-void teleportObject(objid objectId, objid portalId){
-  std::cout << "teleporting object: " << objectId << std::endl;
-  GameObject& gameobject = getGameObject(world, objectId);
-  auto portalView = glm::inverse(renderPortalView(getPortalInfo(world, portalId), gameobject.transformation));
-  auto newTransform = getTransformationFromMatrix(portalView);
-  auto newPosition = newTransform.position;
-  physicsTranslateSet(world, objectId, newPosition);
-
-}
-
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::quat normal){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
-
   auto obj1Name = getGameObject(world, obj1Id).name;
   auto obj2Name = getGameObject(world, obj2Id).name;
   std::cout << "collision: " << obj1Name << " colliden with: " << obj2Name << std::endl;
-
-  auto obj1IsPortal = isPortal(world, obj1Id);
-  auto obj2IsPortal = isPortal(world, obj2Id);
-  if (obj1IsPortal && !obj2IsPortal){
-    std::cout << "teleport " << obj2Name << " through " << obj1Name << std::endl;
-    teleportObject(obj2Id, obj1Id);
-  }else if (!obj1IsPortal && obj2IsPortal){
-    std::cout << "teleport " << obj1Name << " through " << obj2Name << std::endl;
-    teleportObject(obj1Id, obj2Id);
-  } 
+  maybeTeleportObjects(world, obj1Id, obj2Id);
   schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal);
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
