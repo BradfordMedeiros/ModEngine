@@ -90,6 +90,29 @@ std::optional<GameObjectVoxel*> getVoxel(World& world, objid id){
   return voxelObject;
 }
 
+void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection){
+  auto voxel = getVoxel(world, id);
+  if (!voxel.has_value()){
+    return;
+  }
+  GameObjectVoxel* voxelPtr = voxel.value();
+
+  auto voxelPtrModelMatrix = fullModelTransform(world.sandbox, id);
+  glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f);
+  glm::vec4 toPos =  glm::vec4(fromPos.x, fromPos.y, fromPos.z, 1.f) + glm::vec4(toPosDirection.x, toPosDirection.y, toPosDirection.z, 1.f);
+  glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
+  glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
+  // This raycast happens in model space of voxel, so specify position + ray in voxel model space
+  auto collidedVoxels = raycastVoxels(voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
+  std::cout << "length is: " << collidedVoxels.size() << std::endl;
+  if (collidedVoxels.size() > 0){
+    auto collision = collidedVoxels.at(0);
+    voxelPtr -> voxel.selectedVoxels.push_back(collision);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
+  } 
+}
+
+
 void applyHeightmapMasking(World& world, objid id, float amount, float uvx, float uvy, bool shouldAverage){
   auto heightmaps = getHeightmaps(world.objectMapping);
   if (heightmaps.find(id) == heightmaps.end()){

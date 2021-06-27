@@ -561,21 +561,6 @@ unsigned int activeTextureId(){
   return world.textures.at(activeTextureName(drawParams, world.textures)).textureId;
 }
 
-
-std::vector<VoxelQueryData> getSelectedVoxels(){
-  std::vector<VoxelQueryData> voxels;
-  for (auto id : selectedIds(state.editor)){
-    auto maybeVoxel = getVoxel(world, id);
-    if (maybeVoxel.has_value()){
-      voxels.push_back(VoxelQueryData{
-        .index = id,
-        .voxelPtr = maybeVoxel.value(),
-      });
-    }
-  }
-  return voxels;
-}
-
 void scmEmit(objid id){
   emit(world, id);
 }
@@ -597,4 +582,18 @@ void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> poi
 
 glm::vec3 navPosition(objid id, glm::vec3 target){
   return aiNavigate(world, id, target);
+}
+
+std::vector<VoxelQueryData> getSelectedVoxels(){
+  std::vector<VoxelQueryData> voxels;
+  for (auto id : selectedIds(state.editor)){
+    auto maybeVoxel = getVoxel(world, id);
+    if (maybeVoxel.has_value()){
+      voxels.push_back(VoxelQueryData{
+        .index = id,
+        .voxelPtr = maybeVoxel.value(),
+      });
+    }
+  }
+  return voxels;
 }

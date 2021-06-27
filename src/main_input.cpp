@@ -271,33 +271,19 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 }
 
+
 void onMouseButton(){    
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
-
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
     .fromPos = defaultCamera.transformation.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
- 
+  for (auto id : selectedIds(state.editor)){
+    handleVoxelRaycast(world, id, line.fromPos, line.toPos);
+  }
   permaLines.clear();
   permaLines.push_back(line);
-
-  for (auto voxelData : getSelectedVoxels()){
-    auto voxelPtrModelMatrix = fullModelTransform(world.sandbox, voxelData.index);
-    glm::vec4 fromPosModelSpace = glm::inverse(voxelPtrModelMatrix) * glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f);
-    glm::vec4 toPos =  glm::vec4(line.fromPos.x, line.fromPos.y, line.fromPos.z, 1.f) + glm::vec4(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000, 1.f);
-    glm::vec4 toPosModelSpace = glm::inverse(voxelPtrModelMatrix) * toPos;
-    glm::vec3 rayDirectionModelSpace =  toPosModelSpace - fromPosModelSpace;
-    // This raycast happens in model space of voxel, so specify position + ray in voxel model space
-    auto collidedVoxels = raycastVoxels(voxelData.voxelPtr -> voxel, fromPosModelSpace, rayDirectionModelSpace);
-    std::cout << "length is: " << collidedVoxels.size() << std::endl;
-    if (collidedVoxels.size() > 0){
-      auto collision = collidedVoxels[0];
-      voxelData.voxelPtr -> voxel.selectedVoxels.push_back(collision);
-      applyTextureToCube(voxelData.voxelPtr -> voxel, voxelData.voxelPtr -> voxel.selectedVoxels, 2);
-    }
-  }  
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
