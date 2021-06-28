@@ -97,4 +97,10 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id);
 PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index);
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData);
 
+struct Properties {
+  Transformation transformation;
+};
+Properties getProperties(World& world, objid id);
+void setProperties(World& world, objid id, Properties& properties);
+
 #endif

@@ -910,3 +910,14 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateTextureDataWorld(world, texturepath, data, textureWidth, textureHeight);
   }, timeElapsed);
 }
+
+
+Properties getProperties(World& world, objid id){
+  Properties properties {
+    .transformation = getGameObject(world, id).transformation,
+  };
+  return properties;
+}
+void setProperties(World& world, objid id, Properties& properties){
+  getGameObject(world, id).transformation = properties.transformation;
+}

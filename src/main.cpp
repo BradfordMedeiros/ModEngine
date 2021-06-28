@@ -216,7 +216,9 @@ float getTotalTime(){
   return now - initialTime;
 }
 
+bool useYAxis = true;
 void onDebugKey(){
+  useYAxis = !useYAxis;
   if (timePlayback.isPaused()){
     timePlayback.play();
   }else{
@@ -664,16 +666,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
   drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
 
-}
-
-Properties getProperties(World& world, objid id){
-  Properties properties {
-    .transformation = getGameObject(world, id).transformation,
-  };
-  return properties;
-}
-void setProperties(World& world, objid id, Properties& properties){
-  getGameObject(world, id).transformation = properties.transformation;
 }
 
 void onClientMessage(std::string message){
