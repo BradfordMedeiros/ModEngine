@@ -42,5 +42,6 @@ struct UdpPacket {
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
+void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
 
 #endif

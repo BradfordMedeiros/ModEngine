@@ -40,3 +40,19 @@ void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool boots
     sendDataOnUdpSocket(toNetworkPacket(packet));
   } 
 }
+
+void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode){
+  if (!obj.netsynchronize){   
+    return;
+  }
+  UdpPacket packet { .type = UPDATE };
+  packet.payload.updatepacket = UpdatePacket { 
+    .id = obj.id,
+    .properties = getProperties(world, obj.id),
+  };
+  if (bootstrapperMode){
+    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+  }else if (isConnectedToServer()){
+    sendDataOnUdpSocket(toNetworkPacket(packet));
+  }   
+}

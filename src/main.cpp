@@ -767,23 +767,6 @@ void signalHandler(int signum) {
   exit(signum);  
 }
 
-void netObjectUpdate(GameObject& obj){
-  if (!obj.netsynchronize){   
-    return;
-  }
-  UdpPacket packet { .type = UPDATE };
-  packet.payload.updatepacket = UpdatePacket { 
-    .id = obj.id,
-    .properties = getProperties(world, obj.id),
-  };
-  if (bootStrapperMode){
-    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-  }else if (isConnectedToServer()){
-    sendDataOnUdpSocket(toNetworkPacket(packet));
-  }   
-}
-
-
 void netObjectDelete(int32_t id, bool isNet) {
   if (!isNet){
     return;
@@ -1089,7 +1072,9 @@ int main(int argc, char* argv[]){
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    netObjectUpdate, 
+    [&world](GameObject& obj) -> void {
+      netObjectUpdate(world, obj, netcode, bootStrapperMode);
+    }, 
     [&world](GameObject& obj) -> void {
       netObjectCreate(world, obj, netcode, bootStrapperMode);
     },
