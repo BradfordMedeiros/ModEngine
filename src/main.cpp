@@ -216,9 +216,7 @@ float getTotalTime(){
   return now - initialTime;
 }
 
-bool useYAxis = true;
 void onDebugKey(){
-  useYAxis = !useYAxis;
   if (timePlayback.isPaused()){
     timePlayback.play();
   }else{
