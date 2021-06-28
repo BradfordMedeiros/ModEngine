@@ -673,42 +673,6 @@ void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
 
- // @TODO --  this needs to makeObject in the right scene
-void handleCreate(UdpPacket& packet){
-  auto create = packet.payload.createpacket;
-  if (!sceneExists(world.sandbox, packet.payload.createpacket.sceneId)){
-    return;
-  }
-
-  auto id = create.id;   
-  if (idExists(world.sandbox, id)){     // could conceptually do a comparison to see if it changed, but probably not
-    std::cout << "INFO: id already exits: " << id << std::endl;
-    return;
-  }
-  std::string serialobj = create.serialobj;
-  assert(serialobj.size() > 0);
-  auto newObjId = makeObject(serialobj, create.id, true, packet.payload.createpacket.sceneId, true);                        
-  assert(newObjId == id);
-}
-void handleDelete(UdpPacket& packet){
-  auto deletep = packet.payload.deletepacket;
-  if (idExists(world.sandbox, deletep.id)){
-    std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
-    removeObjectById(deletep.id);
-  }else{
-    std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
-  }
-}
-
-void handleUpdate(UdpPacket& packet){
-  auto update = packet.payload.updatepacket;
-
-  if (idExists(world.sandbox, update.id)){
-    setProperties(world, update.id, update.properties);
-  }else{
-    std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
-  }
-}
 void onUdpClientMessage(UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
   if (packet.type == SETUP){
@@ -719,11 +683,11 @@ void onUdpClientMessage(UdpPacket& packet){
     std::cout << "trying to load scene packet!" << std::endl;
     loadSceneData(sceneData, packet.payload.loadpacket.sceneId);  
   }else if (packet.type == UPDATE){
-    handleUpdate(packet);
+    handleUpdate(world, packet);
   }else if (packet.type == CREATE){
-    handleCreate(packet);
+    handleCreate(world, interface, packet);
   }else if (packet.type == DELETE){
-    handleDelete(packet);
+    handleDelete(world, interface, packet);
   }
   //schemeBindings.onUdpMessage(message);
 }
@@ -734,11 +698,11 @@ void onUdpServerMessage(UdpPacket& packet){
   }else if (packet.type == LOAD){
     std::cout << "WARNING: LOAD message server, ignoring" << std::endl;
   }else if (packet.type == UPDATE){
-    handleUpdate(packet);
+    handleUpdate(world, packet);
   }else if (packet.type == CREATE){
-    handleCreate(packet);
+    handleCreate(world, interface, packet);
   }else if (packet.type == DELETE){
-    handleDelete(packet);
+    handleDelete(world, interface, packet);
   }else {
     std::cout << "ERROR: unknown packet type" << std::endl;
   }

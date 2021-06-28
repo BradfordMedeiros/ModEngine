@@ -44,4 +44,9 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
 void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
 
+ // @TODO --  this needs to makeObject in the right scene
+void handleCreate(World& world, SysInterface& interface, UdpPacket& packet);
+void handleUpdate(World& world, UdpPacket& packet);
+void handleDelete(World& world, SysInterface& interface, UdpPacket& packet);
+
 #endif

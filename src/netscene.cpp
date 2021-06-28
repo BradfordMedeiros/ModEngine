@@ -56,3 +56,46 @@ void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool boots
     sendDataOnUdpSocket(toNetworkPacket(packet));
   }   
 }
+
+int32_t makeObject(World& world, SysInterface& interface, std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
+  auto firstSceneId = allSceneIds(world.sandbox).at(0);
+  return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId, interface);
+}
+
+ // @TODO --  this needs to makeObject in the right scene
+void handleCreate(World& world, SysInterface& interface, UdpPacket& packet){
+  auto create = packet.payload.createpacket;
+  if (!sceneExists(world.sandbox, packet.payload.createpacket.sceneId)){
+    return;
+  }
+
+  auto id = create.id;   
+  if (idExists(world.sandbox, id)){     // could conceptually do a comparison to see if it changed, but probably not
+    std::cout << "INFO: id already exits: " << id << std::endl;
+    return;
+  }
+  std::string serialobj = create.serialobj;
+  assert(serialobj.size() > 0);
+  auto newObjId = makeObject(world, interface, serialobj, create.id, true, packet.payload.createpacket.sceneId, true);                        
+  assert(newObjId == id);
+}
+
+void handleUpdate(World& world, UdpPacket& packet){
+  auto update = packet.payload.updatepacket;
+
+  if (idExists(world.sandbox, update.id)){
+    setProperties(world, update.id, update.properties);
+  }else{
+    std::cout << "WARNING: Udp client update: does not exist " << update.id << std::endl;
+  }
+}
+
+void handleDelete(World& world, SysInterface& interface, UdpPacket& packet){
+  auto deletep = packet.payload.deletepacket;
+  if (idExists(world.sandbox, deletep.id)){
+    std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
+    removeObjectFromScene(world, deletep.id, interface);
+  }else{
+    std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
+  }
+}
