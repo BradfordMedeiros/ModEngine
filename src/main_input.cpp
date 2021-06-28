@@ -105,16 +105,11 @@ void onArrowKey(int key){
   if (key == 262){ // right
     std::cout << "next texture" << std::endl;
     nextTexture();
-    state.bloomAmount += 0.1f;
     expandVoxelRight();
   }
   if (key == 263){ // left
     std::cout << "previous texture" << std::endl;
     previousTexture();
-    state.bloomAmount -= 0.1f;
-    if (state.bloomAmount < 0.f){
-      state.bloomAmount = 0.f;
-    }
     expandVoxelLeft();
   }
 
@@ -203,22 +198,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   } 
 
   if (key == GLFW_KEY_UP && action == 1 && selected(state.editor) != -1){
-    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setSnapTranslateUp();
-    }else if (state.manipulatorMode == ROTATE){
-      setSnapAngleUp();
-    }else if (state.manipulatorMode == SCALE){
-      setSnapScaleUp();
-    }
+    setSnapEasyUseUp(state.manipulatorMode);
   }
   if (key == GLFW_KEY_DOWN && action == 1 && selected(state.editor) != -1){
-    if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-      setSnapTranslateDown();
-    }else if (state.manipulatorMode == ROTATE){
-      setSnapAngleDown();
-    }else if (state.manipulatorMode == SCALE){
-      setSnapScaleDown();
-    }
+    setSnapEasyUseDown(state.manipulatorMode);
   }
 
   /*if (key == GLFW_KEY_K && action == 1){

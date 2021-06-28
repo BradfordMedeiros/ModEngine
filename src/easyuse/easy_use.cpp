@@ -151,6 +151,27 @@ float getSnapTranslateSize(){
   return snapTranslates.at(currentTranslateIndex);
 }
 
+void setSnapEasyUseUp(ManipulatorMode manipulatorMode){
+  if (manipulatorMode == NONE || manipulatorMode == TRANSLATE){
+    setSnapTranslateUp();
+  }else if (manipulatorMode == ROTATE){
+    setSnapAngleUp();
+  }else if (manipulatorMode == SCALE){
+    setSnapScaleUp();
+  }
+}
+
+void setSnapEasyUseDown(ManipulatorMode manipulatorMode){
+  if (manipulatorMode == NONE || manipulatorMode == TRANSLATE){
+    setSnapTranslateDown();
+  }else if (manipulatorMode == ROTATE){
+    setSnapAngleDown();
+  }else if (manipulatorMode == SCALE){
+    setSnapScaleDown();
+  }
+}
+
+
 void snapCameraForward(std::function<void(glm::quat)> orientation){
   orientation(quatFromDirection(glm::vec3(0.f, 0.f, -1.f)));
 }
