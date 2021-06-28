@@ -175,14 +175,6 @@ void handleSnapEasyRight(objid id){
   }
 }
 
-void onDelete(){
-  for (auto id : selectedIds(state.editor)){
-    std::cout << "OnDelete object id: " << id << std::endl;
-    removeObjectById(id);
-  }
-  clearSelectedIndexs(state.editor);   
-}
-
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   if (state.printKeyStrokes){
     std::cout << "key: " << key << " action: " << action << std::endl;
@@ -513,7 +505,11 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      onDelete();
+      for (auto id : selectedIds(state.editor)){
+        std::cout << "delete object id: " << id << std::endl;
+        removeObjectById(id);
+      }
+      clearSelectedIndexs(state.editor);   
     }
   },
   InputDispatch{

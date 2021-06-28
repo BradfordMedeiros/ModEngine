@@ -176,7 +176,6 @@ void handleInput(
   void (*onDebugKey)(),
   void (*onArrowKey)(int key),
   void (*onCameraSystemChange)(bool usingBuiltInCamera),
-  void (*onDelete)(),
   void (*onKeyChar)(unsigned int codepoint),
   void (*onJoystick)(std::vector<JoyStickInfo> infos)
 ){
