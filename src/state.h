@@ -42,7 +42,6 @@ struct engineState {
   bool toggleFov;
   bool showBoneWeight;
   bool useBoneTransform;
-  float discardAmount;
   int textureIndex;
   bool shouldPaint;
   bool shouldTerrainPaint;
