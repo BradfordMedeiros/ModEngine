@@ -766,6 +766,68 @@ void signalHandler(int signum) {
   exit(signum);  
 }
 
+void netObjectUpdate(GameObject& obj){
+  if (!obj.netsynchronize){   
+    return;
+  }
+  UdpPacket packet { .type = UPDATE };
+  packet.payload.updatepacket = UpdatePacket { 
+    .id = obj.id,
+    .properties = getProperties(world, obj.id),
+  };
+  if (bootStrapperMode){
+    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+  }else if (isConnectedToServer()){
+    sendDataOnUdpSocket(toNetworkPacket(packet));
+  }   
+}
+void netObjectCreate(GameObject& obj){
+  if (!obj.netsynchronize){
+    return;
+  }
+
+  std::cout << "created obj id: " << obj.id << std::endl;
+  UdpPacket packet { .type = CREATE };
+
+  packet.payload.createpacket = CreatePacket { 
+    .id = obj.id,
+    .sceneId = getGameObjectH(world.sandbox, obj.id).sceneId,
+  };
+  auto serialobj = serializeObject(world, obj.id);
+  if (serialobj == ""){
+    return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit
+  }
+
+  copyStr(serialobj, packet.payload.createpacket.serialobj, sizeof(packet.payload.createpacket.serialobj));
+
+  if (bootStrapperMode){
+    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+  }else if (isConnectedToServer()){
+    sendDataOnUdpSocket(toNetworkPacket(packet));
+  } 
+}
+
+void netObjectDelete(int32_t id, bool isNet) {
+  if (!isNet){
+    return;
+  }
+  std::cout << "deleted obj id: " << id << std::endl;
+  if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
+    activeCameraObj = NULL;
+    std::cout << "active camera reset" << std::endl;
+  }
+  if (id == isSelected(state.editor, id)){
+    unsetSelectedIndex(state.editor, id, true);
+  }
+
+  UdpPacket packet { .type = DELETE };
+  packet.payload.deletepacket =  DeletePacket { .id = id };
+  if (bootStrapperMode){
+    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+  }else if (isConnectedToServer()){
+    sendDataOnUdpSocket(toNetworkPacket(packet));
+  }
+}
 
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
@@ -1050,67 +1112,9 @@ int main(int argc, char* argv[]){
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
-    [](GameObject& obj) -> void { 
-      if (!obj.netsynchronize){   
-        return;
-      }
-      UdpPacket packet { .type = UPDATE };
-      packet.payload.updatepacket = UpdatePacket { 
-        .id = obj.id,
-        .properties = getProperties(world, obj.id),
-      };
-      if (bootStrapperMode){
-        sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-      }else if (isConnectedToServer()){
-        sendDataOnUdpSocket(toNetworkPacket(packet));
-      }
-    }, 
-    [](GameObject &obj) -> void {
-      if (!obj.netsynchronize){
-        return;
-      }
-
-      std::cout << "created obj id: " << obj.id << std::endl;
-      UdpPacket packet { .type = CREATE };
-
-      packet.payload.createpacket = CreatePacket { 
-        .id = obj.id,
-        .sceneId = getGameObjectH(world.sandbox, obj.id).sceneId,
-      };
-      auto serialobj = serializeObject(world, obj.id);
-      if (serialobj == ""){
-        return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit
-      }
-
-      copyStr(serialobj, packet.payload.createpacket.serialobj, sizeof(packet.payload.createpacket.serialobj));
-
-      if (bootStrapperMode){
-        sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-      }else if (isConnectedToServer()){
-        sendDataOnUdpSocket(toNetworkPacket(packet));
-      }
-    },
-    [](int32_t id, bool isNet) -> void {
-      if (!isNet){
-        return;
-      }
-      std::cout << "deleted obj id: " << id << std::endl;
-      if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
-        activeCameraObj = NULL;
-        std::cout << "active camera reset" << std::endl;
-      }
-      if (id == isSelected(state.editor, id)){
-        unsetSelectedIndex(state.editor, id, true);
-      }
-
-      UdpPacket packet { .type = DELETE };
-      packet.payload.deletepacket =  DeletePacket { .id = id };
-      if (bootStrapperMode){
-        sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-      }else if (isConnectedToServer()){
-        sendDataOnUdpSocket(toNetworkPacket(packet));
-      }
-    },
+    netObjectUpdate, 
+    netObjectCreate,
+    netObjectDelete,
     debuggerDrawer, 
     layers,
     interface
