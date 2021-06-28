@@ -156,22 +156,19 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
   keyCharCallback(codepoint);
 }
 
-void handleSnapEasyLeft(objid id){
+void handleSnapEasy(objid id, bool left){
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-    setGameObjectPosition(id, snapTranslateUp(state.snappingMode, getGameObjectPosition(id, false), state.manipulatorAxis));
+    auto objPos = getGameObjectPosition(id, false);
+    auto snapAmount = left ? snapTranslateDown(state.snappingMode, objPos, state.manipulatorAxis) : snapTranslateUp(state.snappingMode, objPos, state.manipulatorAxis);
+    setGameObjectPosition(id, snapAmount);
   }else if (state.manipulatorMode == ROTATE){
-    setGameObjectRotation(id, snapAngleDown(state.snappingMode, getGameObjectRotation(id, false), state.manipulatorAxis));
+    auto objRot = getGameObjectRotation(id, false);
+    auto snapAmount = left ? snapAngleDown(state.snappingMode, objRot, state.manipulatorAxis) : snapAngleUp(state.snappingMode, objRot, state.manipulatorAxis);
+    setGameObjectRotation(id, snapAmount);
   }else if (state.manipulatorMode == SCALE){
-    setGameObjectScale(id, snapScaleDown(state.snappingMode, getGameObjectScale(id), state.manipulatorAxis));
-  }
-}
-void handleSnapEasyRight(objid id){
-  if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-    setGameObjectPosition(id, snapTranslateDown(state.snappingMode, getGameObjectPosition(id, false), state.manipulatorAxis));
-  }else if (state.manipulatorMode == ROTATE){
-    setGameObjectRotation(id, snapAngleUp(state.snappingMode, getGameObjectRotation(id, false), state.manipulatorAxis));
-  }else if (state.manipulatorMode == SCALE){
-    setGameObjectScale(id, snapScaleUp(state.snappingMode, getGameObjectScale(id), state.manipulatorAxis));
+    auto objScale = getGameObjectScale(id);
+    auto snapAmount = left ? snapScaleDown(state.snappingMode, objScale, state.manipulatorAxis) : snapScaleUp(state.snappingMode, objScale, state.manipulatorAxis);
+    setGameObjectScale(id, snapAmount);
   }
 }
 
@@ -312,6 +309,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
+      std::cout << "mode set to scale!" << std::endl;
       state.manipulatorMode = SCALE;
     }
   },
@@ -473,7 +471,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = [&state]() -> void {
       for (auto id : selectedIds(state.editor)){
-        handleSnapEasyLeft(id);
+        handleSnapEasy(id, true);
       }
     }
   }, 
@@ -484,7 +482,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = [&state]() -> void {
       for (auto id : selectedIds(state.editor)){
-        handleSnapEasyRight(id);
+        handleSnapEasy(id, false);
       }
     }
   }, 
