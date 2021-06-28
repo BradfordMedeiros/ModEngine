@@ -673,41 +673,6 @@ void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
 }
 
-void onUdpClientMessage(UdpPacket& packet){
-  std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
-  if (packet.type == SETUP){
-    std::cout << "WARNING: should not get setup packet type" << std::endl;
-  }
-  else if (packet.type == LOAD){
-    std::string sceneData = packet.payload.loadpacket.sceneData;
-    std::cout << "trying to load scene packet!" << std::endl;
-    loadSceneData(sceneData, packet.payload.loadpacket.sceneId);  
-  }else if (packet.type == UPDATE){
-    handleUpdate(world, packet);
-  }else if (packet.type == CREATE){
-    handleCreate(world, interface, packet);
-  }else if (packet.type == DELETE){
-    handleDelete(world, interface, packet);
-  }
-  //schemeBindings.onUdpMessage(message);
-}
-
-void onUdpServerMessage(UdpPacket& packet){
-  if (packet.type == SETUP){
-    std::cout << "INFO: SETUP PACKET HANDLED IN SERVER CODE" << packet.payload.setuppacket.connectionHash << std::endl;
-  }else if (packet.type == LOAD){
-    std::cout << "WARNING: LOAD message server, ignoring" << std::endl;
-  }else if (packet.type == UPDATE){
-    handleUpdate(world, packet);
-  }else if (packet.type == CREATE){
-    handleCreate(world, interface, packet);
-  }else if (packet.type == DELETE){
-    handleDelete(world, interface, packet);
-  }else {
-    std::cout << "ERROR: unknown packet type" << std::endl;
-  }
-}
-
 std::string screenshotPath = "./res/textures/screenshot.png";
 void takeScreenshot(std::string filepath){
   state.takeScreenshot = true;
@@ -1131,7 +1096,7 @@ int main(int argc, char* argv[]){
     UdpPacket udpPacket { };
     auto hasClientMessage = maybeGetUdpClientMessage(&udpPacket, sizeof(udpPacket));
     if (hasClientMessage){
-      onUdpClientMessage(udpPacket);
+      onUdpClientMessage(world, interface, udpPacket);
     }
 
     if (bootStrapperMode){
@@ -1144,7 +1109,7 @@ int main(int argc, char* argv[]){
         return "";
       });
       if (udpPacketHasData){
-        onUdpServerMessage(packet);
+        onUdpServerMessage(world, interface, packet);
       }
     }
 
