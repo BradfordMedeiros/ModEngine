@@ -18,40 +18,7 @@
 #include "./common/sysinterface.h"
 #include "./drawing.h"
 #include "./worldloader.h"
-
-enum PacketType { CREATE, DELETE, UPDATE, SETUP, LOAD };
-struct SetupPacket {
-  char connectionHash[4000];
-};
-struct CreatePacket {
-  int32_t id;
-  objid sceneId;
-  char serialobj[3000];
-};
-struct DeletePacket {
-  int32_t id;
-};
-struct UpdatePacket {
-  int32_t id;
-  Properties properties;
-};
-
-// @TODO this should optimize so only send the size necessary, not max size since scnee file needs to be larger
-struct LoadPacket {
-  objid sceneId;
-  char sceneData[4000]; // this makes every message 4k, which is probably way bigger than each packet needs to be, optimize this
-};
-union PacketPayload {
-  SetupPacket setuppacket;
-  CreatePacket createpacket;
-  DeletePacket deletepacket;
-  UpdatePacket updatepacket;
-  LoadPacket loadpacket;
-};
-struct UdpPacket {
-  PacketType type;
-  PacketPayload payload;
-};
+#include "./netscene.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
@@ -153,8 +120,6 @@ void maybeChangeTexture(int index);
 void setState(std::string stateName);
 void setFloatState(std::string stateName, float value);
 void setIntState(std::string stateName, int value);
-
-void copyStr(std::string& data, char* copyTo, int size);
 
 void playSoundState(std::string source, objid sceneId);
 

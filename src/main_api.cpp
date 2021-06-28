@@ -19,15 +19,6 @@ extern NetCode netcode;
 extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
 
-
-NetworkPacket toNetworkPacket(UdpPacket& packet){
-  NetworkPacket netpacket {
-    .packet = &packet,
-    .packetSize = sizeof(packet),
-  };
-  return netpacket;
-}
-
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByName(world, name, sceneId);
 }
@@ -307,13 +298,6 @@ void sendDataUdp(std::string data){
     .type = CREATE,
   };
   sendDataOnUdpSocket(toNetworkPacket(packet));
-}
-
-void copyStr(std::string& data, char* copyTo, int size){
-  auto strdata = data.c_str();
-  assert((sizeof(strdata) + 1 ) < size);
-  strncpy(copyTo, strdata, size);
-  assert(copyTo[size -1] == '\0');
 }
 
 std::string connectServer(std::string data){

@@ -51,6 +51,7 @@
 #include "./common/profiling.h"
 #include "./benchmark.h"
 #include "./extensions.h"
+#include "./netscene.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -781,31 +782,7 @@ void netObjectUpdate(GameObject& obj){
     sendDataOnUdpSocket(toNetworkPacket(packet));
   }   
 }
-void netObjectCreate(GameObject& obj){
-  if (!obj.netsynchronize){
-    return;
-  }
 
-  std::cout << "created obj id: " << obj.id << std::endl;
-  UdpPacket packet { .type = CREATE };
-
-  packet.payload.createpacket = CreatePacket { 
-    .id = obj.id,
-    .sceneId = getGameObjectH(world.sandbox, obj.id).sceneId,
-  };
-  auto serialobj = serializeObject(world, obj.id);
-  if (serialobj == ""){
-    return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit
-  }
-
-  copyStr(serialobj, packet.payload.createpacket.serialobj, sizeof(packet.payload.createpacket.serialobj));
-
-  if (bootStrapperMode){
-    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-  }else if (isConnectedToServer()){
-    sendDataOnUdpSocket(toNetworkPacket(packet));
-  } 
-}
 
 void netObjectDelete(int32_t id, bool isNet) {
   if (!isNet){
@@ -1113,7 +1090,9 @@ int main(int argc, char* argv[]){
     onObjectEnter, 
     onObjectLeave, 
     netObjectUpdate, 
-    netObjectCreate,
+    [&world](GameObject& obj) -> void {
+      netObjectCreate(world, obj, netcode, bootStrapperMode);
+    },
     netObjectDelete,
     debuggerDrawer, 
     layers,
