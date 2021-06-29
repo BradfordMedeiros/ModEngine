@@ -612,7 +612,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 92, // "\"
+    .sourceKey = '\\', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -635,11 +635,55 @@ std::vector<InputDispatch> inputFns = {
       setObjectDimensions(world, selected, 10, 5, 10);
     }
   },
+  InputDispatch{
+    .sourceKey = 73, // i
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.enableBloom = !state.enableBloom;
+      std::cout << "bloom: " << state.enableBloom << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 72, // h
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.enableDiffuse = !state.enableDiffuse;
+      std::cout << "diffuse: " << state.enableDiffuse << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 74, // j
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.enableSpecular = !state.enableSpecular;
+      std::cout << "specular: " << state.enableSpecular << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'F', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.useBoneTransform = !state.useBoneTransform;
+      std::cout << "state: use bone transform: " << state.useBoneTransform << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'G', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.showBoneWeight = !state.showBoneWeight;
+      std::cout << "state: show bone weight " << state.showBoneWeight << std::endl;
+    }
+  },
 };
 
-
-
-
-
-
- 

@@ -189,13 +189,6 @@ void handleInput(
   }
   processKeyBindings(window, remapper);
 
-  if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS){
-    state.enableDiffuse = !state.enableDiffuse;
-  }
-  if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
-    state.enableSpecular = !state.enableSpecular;
-  }
-
   if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
     nextCamera();
   }
@@ -239,16 +232,5 @@ void handleInput(
      onArrowKey(GLFW_KEY_DOWN);
    }
 
-   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS){
-     state.showBoneWeight = !state.showBoneWeight;
-     std::cout << "state: show bone weight " << state.showBoneWeight << std::endl;
-   }
-   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS){
-     state.useBoneTransform = !state.useBoneTransform;
-     std::cout << "state: use bone transform: " << state.useBoneTransform << std::endl;
-   }
 
-   if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
-      state.enableBloom = !state.enableBloom;
-   }
 }
