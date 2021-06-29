@@ -861,6 +861,12 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
     }
     return;
   }
+
+  auto videoObj = std::get_if<GameObjectVideo>(&toRender);
+  if (videoObj != NULL){
+    assert(false);
+    return; 
+  }
   assert(false);
 }
 

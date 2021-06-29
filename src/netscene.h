@@ -43,6 +43,7 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
 void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
+void netObjectDelete(objid id, bool isNet, std::function<void(objid)> onObjectDelete, NetCode& netcode, bool bootstrapperMode);
 
  // @TODO --  this needs to makeObject in the right scene
 void handleCreate(World& world, SysInterface& interface, UdpPacket& packet);
@@ -51,5 +52,7 @@ void handleDelete(World& world, SysInterface& interface, UdpPacket& packet);
 
 void onUdpServerMessage(World& world, SysInterface& interface, UdpPacket& packet);
 void onUdpClientMessage(World& world, SysInterface& interface, UdpPacket& packet);
+
+void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
 #endif

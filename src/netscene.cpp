@@ -57,6 +57,21 @@ void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool boots
   }   
 }
 
+void netObjectDelete(objid id, bool isNet, std::function<void(objid)> onObjectDelete, NetCode& netcode, bool bootstrapperMode) {
+  if (!isNet){
+    return;
+  }
+  onObjectDelete(id);
+
+  UdpPacket packet { .type = DELETE };
+  packet.payload.deletepacket =  DeletePacket { .id = id };
+  if (bootstrapperMode){
+    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+  }else if (isConnectedToServer()){
+    sendDataOnUdpSocket(toNetworkPacket(packet));
+  }
+}
+
 int32_t makeObject(World& world, SysInterface& interface, std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
   auto firstSceneId = allSceneIds(world.sandbox).at(0);
   return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId, interface);
@@ -130,4 +145,26 @@ void onUdpClientMessage(World& world, SysInterface& interface, UdpPacket& packet
     handleDelete(world, interface, packet);
   }
   //schemeBindings.onUdpMessage(message);
+}
+
+void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
+  maybeGetClientMessage(onClientMessage);
+  UdpPacket udpPacket { };
+  auto hasClientMessage = maybeGetUdpClientMessage(&udpPacket, sizeof(udpPacket));
+  if (hasClientMessage){
+    onUdpClientMessage(world, interface, udpPacket);
+  }
+  if (bootstrapperMode){
+    UdpPacket packet { };
+    auto networkPacket = toNetworkPacket(packet);
+    bool udpPacketHasData = tickNetCode(netcode, networkPacket, [&packet]() -> std::string {
+      if (packet.type == SETUP){
+        return packet.payload.setuppacket.connectionHash;          
+      }
+      return "";
+    });
+    if (udpPacketHasData){
+      onUdpServerMessage(world, interface, packet);
+    }
+  }
 }

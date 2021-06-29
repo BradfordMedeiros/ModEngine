@@ -15,22 +15,11 @@
 #include "./main_api.h"
 #include "./main_input.h"
 #include "./scene/scene.h"
-#include "./scene/scene_object.h"
-#include "./scene/physics.h"
-#include "./scene/collision_cache.h"
-#include "./scene/object_types.h"
-#include "./scene/common/mesh.h"
 #include "./scene/common/vectorgfx.h"
-#include "./scene/common/util/loadmodel.h"
-#include "./scene/common/util/boundinfo.h"
-#include "./scene/sprites/readfont.h"
-#include "./scene/sprites/sprites.h"
 #include "./scene/animation/timeplayback.h"
 #include "./scene/animation/animation.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/recorder.h"
-#include "./scene/types/ainav.h"
-#include "./scheme/scheme_bindings.h"
 #include "./scheme/scriptmanager.h"
 #include "./shaders.h"
 #include "./translations.h"
@@ -696,11 +685,8 @@ void signalHandler(int signum) {
   exit(signum);  
 }
 
-void netObjectDelete(int32_t id, bool isNet) {
-  if (!isNet){
-    return;
-  }
-  std::cout << "deleted obj id: " << id << std::endl;
+void onObjDelete(objid id){
+ std::cout << "deleted obj id: " << id << std::endl;
   if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
     activeCameraObj = NULL;
     std::cout << "active camera reset" << std::endl;
@@ -708,15 +694,8 @@ void netObjectDelete(int32_t id, bool isNet) {
   if (id == isSelected(state.editor, id)){
     unsetSelectedIndex(state.editor, id, true);
   }
-
-  UdpPacket packet { .type = DELETE };
-  packet.payload.deletepacket =  DeletePacket { .id = id };
-  if (bootStrapperMode){
-    sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
-  }else if (isConnectedToServer()){
-    sendDataOnUdpSocket(toNetworkPacket(packet));
-  }
 }
+
 
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
@@ -1007,7 +986,9 @@ int main(int argc, char* argv[]){
     [&world](GameObject& obj) -> void {
       netObjectCreate(world, obj, netcode, bootStrapperMode);
     },
-    netObjectDelete,
+    [](objid id, bool isNet) -> void {
+      netObjectDelete(id, isNet, onObjDelete, netcode, bootStrapperMode);
+    }, 
     debuggerDrawer, 
     layers,
     interface
@@ -1059,7 +1040,6 @@ int main(int argc, char* argv[]){
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
-
     frameCount++;
     now = glfwGetTime();
     deltaTime = now - previous;   
@@ -1091,27 +1071,7 @@ int main(int argc, char* argv[]){
     auto time = getTotalTime();
     tickRecordings(time);
 
-    maybeGetClientMessage(onClientMessage);
-
-    UdpPacket udpPacket { };
-    auto hasClientMessage = maybeGetUdpClientMessage(&udpPacket, sizeof(udpPacket));
-    if (hasClientMessage){
-      onUdpClientMessage(world, interface, udpPacket);
-    }
-
-    if (bootStrapperMode){
-      UdpPacket packet { };
-      auto networkPacket = toNetworkPacket(packet);
-      bool udpPacketHasData = tickNetCode(netcode, networkPacket, [&packet]() -> std::string {
-        if (packet.type == SETUP){
-          return packet.payload.setuppacket.connectionHash;          
-        }
-        return "";
-      });
-      if (udpPacketHasData){
-        onUdpServerMessage(world, interface, packet);
-      }
-    }
+    onNetCode(world, interface, netcode, onClientMessage, bootStrapperMode);
 
     auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, activeCameraObj -> id);
     
@@ -1373,6 +1333,7 @@ int main(int argc, char* argv[]){
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
     glfwTerminate(); 
-   
+    unloadExtensions(extensions);
+
   return 0;
 }
