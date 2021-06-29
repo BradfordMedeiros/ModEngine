@@ -624,20 +624,21 @@ SCM scmSaveScreenshot(SCM filepath){
 }
 
 void (*_setState)(std::string);
-SCM scmSetState(SCM value){
-  _setState(scm_to_locale_string(value));
-  return SCM_UNSPECIFIED;
-}
-
-void (*_setFloatState)(std::string, float);
-SCM scmSetFloatState(SCM value, SCM amount){
-  _setFloatState(scm_to_locale_string(value), scm_to_double(amount));
-  return SCM_UNSPECIFIED;
-}
-
 void (*_setIntState)(std::string, int);
-SCM scmSetIntState(SCM value, SCM amount){
-  _setIntState(scm_to_locale_string(value), scm_to_int32(amount));
+void (*_setFloatState)(std::string, float);
+SCM scmSetState(SCM value, SCM value2){
+  if (!scm_is_eq (value2, SCM_UNDEFINED)){
+    bool isInt = scm_is_exact_integer(value2);
+    bool isNumber = scm_is_number(value2);
+    assert(isInt || isNumber);
+    if (isInt){
+      _setIntState(scm_to_locale_string(value), scm_to_int32(value2));
+    }else if (isNumber){
+      _setFloatState(scm_to_locale_string(value), scm_to_double(value2));
+    }
+  }else{
+    _setState(scm_to_locale_string(value));
+  }
   return SCM_UNSPECIFIED;
 }
 
@@ -968,10 +969,8 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define("mainobj", createGameObject(id));
   scm_c_define("is-server", scm_from_bool(isServer));
 
-  scm_c_define_gsubr("ss", 1, 0, 0, (void*)scmSaveScreenshot);
-  scm_c_define_gsubr("set-state", 1, 0, 0, (void*)scmSetState);
-  scm_c_define_gsubr("set-fstate", 2, 0, 0, (void*)scmSetFloatState);
-  scm_c_define_gsubr("set-istate", 2, 0, 0, (void*)scmSetIntState);
+  scm_c_define_gsubr("screenshot", 1, 0, 0, (void*)scmSaveScreenshot);
+  scm_c_define_gsubr("set-state", 1, 1, 0, (void*)scmSetState);
 
   scm_c_define_gsubr("set-texture", 2, 0, 0, (void*)scmSetTexture);
 
