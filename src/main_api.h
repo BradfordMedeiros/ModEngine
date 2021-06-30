@@ -96,9 +96,6 @@ void sendNotifyMessage(std::string message, std::string value);
 
 double timeSeconds();
 
-void sendDataUdp(std::string data);
-std::string connectServer(std::string server);
-
 void playRecording(objid id, std::string recordingPath);
 void stopRecording(objid id, std::string recordingPath);
 
