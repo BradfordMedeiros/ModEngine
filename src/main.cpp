@@ -1249,8 +1249,7 @@ int main(int argc, char* argv[]){
     }
     renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
 
-    handleInput(keyMapper, disableInput, window, deltaTime, state, moveCamera, nextCamera, onDebugKey, onArrowKey, schemeBindings.onCameraSystemChange, keyCharCallback, onJoystick);
-
+    handleInput(window);
     glfwPollEvents();
     
     schemeBindings.onFrame();

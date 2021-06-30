@@ -18,18 +18,7 @@ struct JoyStickInfo {
   float value;
 };
 
-void handleInput(
-  KeyRemapper& remapper,
-  bool disableInput, 
-  GLFWwindow *window, 
-  float deltaTime, 
-	engineState& state, 
-	void (*moveCamera)(glm::vec3), void (*nextCamera)(void),
-  void (*onDebugKey)(),
-  void (*onArrowKey)(int key),
-  void (*onCameraSystemChange)(bool usingBuiltInCamera),
-  void (*onKeyChar)(unsigned int codepoint),
-  void (*onJoystick)(std::vector<JoyStickInfo> infos)
-);
+void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos));
+void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper);
 
 #endif

@@ -283,70 +283,106 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
   }
 }
 
+void handleInput(GLFWwindow* window){
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+    glfwSetWindowShouldClose(window, true);
+  }
+  processControllerInput(keyMapper, moveCamera, deltaTime, keyCharCallback, onJoystick);
+  if (!disableInput){    // we return after escape, so escape still quits
+    processKeyBindings(window, keyMapper);
+  }
+}
+
 float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
   InputDispatch{
-    .sourceKey = 71,  // G 
+    .sourceKey = 'B',  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = [&state, &schemeBindings]() -> void {
+      state.useDefaultCamera = !state.useDefaultCamera;
+      std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
+      schemeBindings.onCameraSystemChange(state.useDefaultCamera);
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = 'N',  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = [&state]() -> void {
+      nextCamera();
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'G',  // G 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
+      std::cout << "mode set to translate" << std::endl;
       state.manipulatorMode = TRANSLATE;
     }
   },
   InputDispatch{
-    .sourceKey = 82,  // R
+    .sourceKey = 'R',  // R
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
+      std::cout << "mode set to rotate" << std::endl;
       state.manipulatorMode = ROTATE;
     }
   },
   InputDispatch{
-    .sourceKey = 83,  // S
+    .sourceKey = 'S',  // S
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
-      std::cout << "mode set to scale!" << std::endl;
+      std::cout << "mode set to scale" << std::endl;
       state.manipulatorMode = SCALE;
     }
   },
   InputDispatch{
-    .sourceKey = 49,  // 1
+    .sourceKey = '1', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
     .fn = [&state]() -> void {
       state.renderMode =  RENDER_FINAL;
+      std::cout << "render mode: final" << std::endl;
     }
   }, 
   InputDispatch{
-    .sourceKey = 50,  // 2
+    .sourceKey = '2',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
     .fn = [&state]() -> void {
       state.renderMode = RENDER_DEPTH;
+      std::cout << "render mode: depth" << std::endl;
     }
   }, 
   InputDispatch{
-    .sourceKey = 51,  // 3
+    .sourceKey = '3',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
     .fn = [&state]() -> void {
       state.renderMode = RENDER_PORTAL;
+      std::cout << "render mode: portal" << std::endl;
     }
   }, 
   InputDispatch{
-    .sourceKey = 52,  // 4
+    .sourceKey = '4', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
     .fn = [&state]() -> void {
       state.renderMode = RENDER_PAINT;
+      std::cout << "render mode: paint" << std::endl;
     }
   }, 
   InputDispatch{
@@ -386,7 +422,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
-    .sourceKey = 87,  // w
+    .sourceKey = 'W',  // w
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -397,7 +433,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
-    .sourceKey = 65,  // a
+    .sourceKey = 'A',  // a
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -406,7 +442,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
-    .sourceKey = 83,  // s
+    .sourceKey = 'S',  // s
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -417,7 +453,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
-    .sourceKey = 68,  // d
+    .sourceKey = 'D',  // d
     .sourceType = BUTTON_HOLD,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -426,16 +462,17 @@ std::vector<InputDispatch> inputFns = {
     }
   },  
   InputDispatch{
-    .sourceKey = 83,  // s
+    .sourceKey = 'S',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
+      std::cout << "saving heightmap" << std::endl;
       saveHeightmap(world, selected(state.editor));
     }
   }, 
   InputDispatch{
-    .sourceKey = 65,  // a
+    .sourceKey = 'A',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
@@ -445,7 +482,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },   
   InputDispatch{
-    .sourceKey = 67,  // c
+    .sourceKey = 'C',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
@@ -455,7 +492,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },   
   InputDispatch{
-    .sourceKey = 82,  // r
+    .sourceKey = 'R',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
     .hasPreq = true,
@@ -511,7 +548,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 79,  // O
+    .sourceKey = 'O',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -521,26 +558,28 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 79,  // O
+    .sourceKey = 'O',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
       state.drawPoints = !state.drawPoints;
+      std::cout << "draw points: " << state.drawPoints << std::endl;
     }
   },
   InputDispatch{
-    .sourceKey = 59,  // ;
+    .sourceKey = ';',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
+      std::cout << "enforcing layouts" << std::endl;
       enforceAllLayouts(world);
     }
   },
 
   InputDispatch{
-    .sourceKey = 322,  // ;
+    .sourceKey = 322,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -549,7 +588,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 324,  // ;
+    .sourceKey = 324,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -558,7 +597,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 326,  // ;
+    .sourceKey = 326, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -567,7 +606,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 327,  // ;
+    .sourceKey = 327, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -576,7 +615,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 328,  // ;
+    .sourceKey = 328,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -585,7 +624,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 329,  // ;
+    .sourceKey = 329,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -609,6 +648,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.printKeyStrokes = !state.printKeyStrokes;
+      std::cout << "print key strokes: " << state.printKeyStrokes << std::endl;
     }
   },
   InputDispatch{
@@ -623,20 +663,22 @@ std::vector<InputDispatch> inputFns = {
       }else{
         glDisable(GL_CULL_FACE);  
       }
+      std::cout << "culling enabled: " << state.cullEnabled << std::endl;
     }
   },
   InputDispatch{
-    .sourceKey = 85, // u
+    .sourceKey = 'U', // u
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
+      std::cout << "setting obj dimensions" << std::endl;
       auto selected = selectedIds(state.editor);
       setObjectDimensions(world, selected, 10, 5, 10);
     }
   },
   InputDispatch{
-    .sourceKey = 73, // i
+    .sourceKey = 'I', // i
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -646,7 +688,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 72, // h
+    .sourceKey = 'H', // h
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -656,7 +698,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 74, // j
+    .sourceKey = 'J', // j
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -685,5 +727,96 @@ std::vector<InputDispatch> inputFns = {
       std::cout << "state: show bone weight " << state.showBoneWeight << std::endl;
     }
   },
+  InputDispatch{
+    .sourceKey = 'X', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.manipulatorAxis = XAXIS;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'Y', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.manipulatorAxis = YAXIS;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'Z', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.manipulatorAxis = ZAXIS;
+    }
+  },
+  InputDispatch{
+    .sourceKey = GLFW_KEY_RIGHT, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      onArrowKey(GLFW_KEY_RIGHT);
+    }
+  },
+  InputDispatch{
+    .sourceKey = GLFW_KEY_LEFT, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      onArrowKey(GLFW_KEY_LEFT);
+    }
+  },
+  InputDispatch{
+    .sourceKey = GLFW_KEY_UP, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      onArrowKey(GLFW_KEY_UP);
+    }
+  },
+  InputDispatch{
+    .sourceKey = GLFW_KEY_DOWN, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      onArrowKey(GLFW_KEY_DOWN);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'R', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.moveRelativeEnabled = !state.moveRelativeEnabled;
+      std::cout << "move relative: " << state.moveRelativeEnabled << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'V', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.toggleFov = !state.toggleFov;
+      std::cout << "ToggleFOV: " << state.toggleFov << std::endl;
+    }
+  },
+  /*InputDispatch{
+    .sourceKey = 'Q', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      onDebugKey();
+    }
+  },*/
 };
-
