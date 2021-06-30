@@ -109,7 +109,6 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
     state.cursorLeft = state.currentScreenWidth / 2;
     state.cursorTop = state.currentScreenHeight / 2;
   }
-    
 }
 
 void joystickCallback(int jid, int event){

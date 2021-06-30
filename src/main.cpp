@@ -1,18 +1,6 @@
-#include <iostream>
-#include <vector>
-#include <thread>
 #include <csignal>
 #include <cxxopts.hpp>
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtc/quaternion.hpp>
 
-#include "./main_api.h"
 #include "./main_input.h"
 #include "./scene/scene.h"
 #include "./scene/common/vectorgfx.h"
@@ -23,7 +11,6 @@
 #include "./scheme/scriptmanager.h"
 #include "./shaders.h"
 #include "./translations.h"
-#include "./common/util.h"
 #include "./colorselection.h"
 #include "./state.h"
 #include "./network/network.h"
@@ -32,7 +19,6 @@
 #include "./worldloader.h"
 #include "./gizmo/sequencer.h"
 #include "./gizmo/keymapper.h"
-#include "./common/sysinterface.h"
 #include "./drawing.h"
 #include "./easyuse/editor.h"
 #include "./easyuse/manipulator.h"
