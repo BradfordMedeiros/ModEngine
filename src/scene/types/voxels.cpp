@@ -225,10 +225,13 @@ void removeVoxel(Voxels& chunk, std::vector<VoxelAddress> voxels){
 }
 
 std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, glm::vec3 rayDirection){    
-  float magnitudeLine = sqrt(chunk.numWidth * chunk.numWidth + chunk.numHeight * chunk.numHeight + chunk.numDepth * chunk.numDepth);
-  glm::vec3 lineEnd = rayPosition + (rayDirection * magnitudeLine);
+  // since the voxels start centered, add half an offset to adjusted the ray position as if it started from 0 
+  auto adjustedRayPosition = rayPosition + glm::vec3(chunk.numWidth / 2.f, chunk.numHeight / 2.f, chunk.numDepth / 2.f);  
 
-  glm::vec3 currentPosition = rayPosition;
+  float magnitudeLine = sqrt(chunk.numWidth * chunk.numWidth + chunk.numHeight * chunk.numHeight + chunk.numDepth * chunk.numDepth);
+  glm::vec3 lineEnd = adjustedRayPosition + (rayDirection * magnitudeLine);
+
+  glm::vec3 currentPosition = adjustedRayPosition;
   glm::vec3 rayIncrement = glm::normalize(rayDirection);
 
   std::vector<VoxelAddress> addresses;
@@ -326,12 +329,16 @@ void expandVoxels(Voxels& voxel, int x, int y, int z){
 
 std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
   std::vector<VoxelBody> bodies;
+
+  auto widthOffset = voxels.numWidth / 2.f;
+  auto heightOffset = voxels.numHeight / 2.f;
+  auto depthOffset = voxels.numDepth / 2.f;
   for (int x = 0; x < voxels.numWidth; x++){
     for (int y = 0; y < voxels.numHeight; y++){
       for (int z = 0; z < voxels.numDepth; z++){
         if (voxels.cubes.at(x).at(y).at(z) == 1){
           VoxelBody body = {
-            .position = glm::vec3(x, y, z),
+            .position = glm::vec3(x - widthOffset, y - heightOffset, z - depthOffset),
             .textureId = voxels.textures.at(x).at(y).at(z),
           };
           bodies.push_back(body);
