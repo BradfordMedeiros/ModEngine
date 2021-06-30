@@ -45,4 +45,7 @@ void netObjectDelete(objid id, bool isNet, std::function<void(objid)> onObjectDe
 
 void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
+void sendDataUdp(std::string data);
+std::string connectServer(std::string data);
+
 #endif

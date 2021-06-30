@@ -168,3 +168,28 @@ void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::fun
     }
   }
 }
+
+void sendDataUdp(std::string data){
+  UdpPacket packet {
+    .type = CREATE,
+  };
+  sendDataOnUdpSocket(toNetworkPacket(packet));
+}
+
+std::string connectServer(std::string data){
+  UdpPacket setup = {
+    .type = SETUP,
+  };  
+
+  SetupPacket setupPacket {};
+  auto packet = toNetworkPacket(setup);
+
+  return connectServer(data, [&setup, &setupPacket, &packet](std::string connectionHash) -> NetworkPacket {
+    auto data = connectionHash.c_str();
+    assert((sizeof(data) + 1 ) < sizeof(setupPacket.connectionHash));
+    strncpy(setupPacket.connectionHash, data, sizeof(setupPacket.connectionHash));
+    assert(setupPacket.connectionHash[sizeof(setupPacket.connectionHash) -1] == '\0');
+    setup.payload.setuppacket = setupPacket;
+    return packet;
+  });
+}
