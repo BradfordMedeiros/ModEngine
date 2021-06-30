@@ -385,7 +385,9 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
   }
   return shaderNameToId.at(fragShaderName);
 }
-void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview){
+void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview){
+  auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
+
   glUseProgram(shader);
   glUniform1i(glGetUniformLocation(shader, "maintexture"), 0);        
   glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
@@ -416,12 +418,13 @@ void setShaderData(GLint shader, glm::mat4 projview, std::vector<LightInfo>& lig
       glActiveTexture(GL_TEXTURE0);
     }
   }
+  /// This is used in the ui shader, probably possible to consolidate 
   if (orthographic){
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
   }else{
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   }
-
+  /////////////////////////////
   glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
 }
@@ -433,13 +436,13 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
+int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
   int numTriangles = 0;
 
   int numDepthClears = 0;
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, projview, &portals, &lights, &lightProjview, &numTriangles](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
     assert(id >= 0);
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
     if (state.depthBufferLayer != depthBufferLayer){
@@ -452,7 +455,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     auto newShader = getShaderByName(shader, shaderProgram);
-    setShaderData(newShader, projview, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
+    setShaderData(newShader, proj, view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -543,8 +546,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 projview,  glm::ma
 
 void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
   glUseProgram(shaderProgram);
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
-  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),  1, GL_FALSE, glm::value_ptr(view));
+  glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projview"), 1, GL_FALSE, glm::value_ptr(projection * view));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
@@ -1092,7 +1094,7 @@ int main(int argc, char* argv[]){
       auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
 
-      renderWorld(world, selectionProgram, lightProjview, glm::mat4(1.0f), lights, portals, {}); 
+      renderWorld(world, selectionProgram, lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}); 
     }
 
     PROFILE(
@@ -1106,7 +1108,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glDisable(GL_BLEND);
     
-      renderWorld(world, selectionProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      renderWorld(world, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     )
 
     // Each portal requires a render pass
@@ -1178,7 +1180,7 @@ int main(int argc, char* argv[]){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto portalViewMatrix = renderPortalView(portal, viewTransform);
-        renderWorld(world, shaderProgram, projection * portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
+        renderWorld(world, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
       
         nextPortalCache[portal.id] = portalTextures[i];
       }
@@ -1209,7 +1211,7 @@ int main(int argc, char* argv[]){
       glClearColor(0.0, 0.0, 0.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
-      numTriangles = renderWorld(world, shaderProgram, projection * view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     )
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
