@@ -26,7 +26,6 @@
 #include "./common/util.h"
 #include "./colorselection.h"
 #include "./state.h"
-#include "./input.h"
 #include "./network/network.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"

@@ -8,6 +8,7 @@ objid getManipulatorId(){
   return manipulatorId;
 }
 void unspawnManipulator(std::function<void(objid)> removeObjectById){
+  return;
   std::cout << "unspawn manipulator called" << std::endl;
   if (manipulatorId != 0){
     removeObjectById(manipulatorId);
@@ -24,6 +25,7 @@ void onManipulatorSelectItem(
   std::function<glm::vec3(objid)> getPosition,
   std::function<void(objid, glm::vec3)> setPosition
 ){
+  return;
   auto isTargetManipulator =  selectedItem == manipulatorId;
   auto manipulatorExists = manipulatorId != 0;
 
@@ -52,6 +54,7 @@ void onManipulatorSelectItem(
   }
 }
 void onManipulatorMouseRelease(){
+  return;
   manipulatorObject = NOAXIS;
 }
 
@@ -65,6 +68,7 @@ void onManipulatorUpdate(
   float mouseX, 
   float mouseY
 ){
+  return;
   if (mouseX < 10 && mouseX > -10.f){
     mouseX = 0.f;
   }
@@ -113,6 +117,7 @@ void onManipulatorUpdate(
 }
 
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
+  return;
   std::cout << "on manipulator unselect" << std::endl;
   unspawnManipulator(removeObjectById);
 }
