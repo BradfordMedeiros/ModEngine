@@ -135,6 +135,8 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
 
 Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi, std::function<Texture(std::string)> ensureLoadTexture){
   float verts[] = {
+    // -1 in the tex coords since the image loaded are flipped on the vertical + reversed in the shader
+    // Implementation detail of data loaded for texture loading. 
     -1.0f,  1.0f, 0.0f,  offsetxndi, -1 * (offsetyndi + heightndi),
     -1.0f, -1.0f, 0.0f,  offsetxndi, -1 * offsetyndi,
     1.0f, -1.0f, 0.0f,   offsetxndi + widthndi, -1 * offsetyndi,
@@ -146,10 +148,11 @@ Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offse
 
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture){
   float verts[] = {
-    0.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+    // See above note to explain the -1 in y
+    0.0f,  1.0f, 0.0f,  0.0f, -1.0f,
     0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
     1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-    1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+    1.0f,  1.0f, 0.0f,  1.0f, -1.0f,
   };
   unsigned int indices[] = {2, 1, 0, 3, 2, 0};
   return load2DMesh(imagePath, verts, indices, 20, 6, 3, 2, ensureLoadTexture);  
