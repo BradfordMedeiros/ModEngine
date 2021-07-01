@@ -152,8 +152,15 @@ std::string print(glm::vec2 vec){
   return stream.str();
 }
 std::string print(glm::quat quat){
+  glm::vec3 radianAngles = glm::eulerAngles(quat);
+  auto degreeX = glm::degrees(radianAngles.x);
+  auto degreeY = glm::degrees(radianAngles.y);
+  auto degreeZ = glm::degrees(radianAngles.z);
+  auto x = degreeX >= 0 ? degreeX : degreeX + 360;
+  auto y = degreeY >= 0 ? degreeY : degreeY + 360;
+  auto z = degreeZ >= 0 ? degreeZ : degreeZ + 360;
   std::stringstream stream;
-  stream << quat.x << " " << quat.y << " " << quat.z;
+  stream << x << " " << y << " " << z;
   return stream.str();
 }
 std::string print(glm::mat4 mat){
