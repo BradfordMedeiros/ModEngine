@@ -1,0 +1,38 @@
+
+*prev_scene:ontexture:./res/textures/crosshairs/crosshair008.png
+*prev_scene:ontint:1 1 1
+*prev_scene:state:on
+*prev_scene:cantoggle:false
+*prev_scene:focus:prevscenefocus
+*prev_scene:blur:prevsceneblur
+
+*next_scene:ontexture:./res/textures/crosshairs/crosshair008.png
+*prev_scene:ontint:1 1 1
+*next_scene:state:on
+*next_scene:cantoggle:false
+
+)current_scene:value:no scene loaded
+)current_scene:scale:0.1 0.1 0.1
+
+(scenepicker:position:0 1 0
+(scenepicker:type:horizontal
+(scenepicker:backpanel:true
+(scenepicker:tint:0.1 0.1 0.1
+(scenepicker:margin:0.1
+(scenepicker:elements:*prev_scene,)current_scene,*next_scene
+(scenepicker:script:./res/scenes/debug/scene_editor.scm
+
+
+)newscene:value:[new scene]
+)newscene:scale:0.05 0.05 0.05
+
+*savescene:ontexture:./res/textures/crosshairs/crosshair008.png
+*savescene:ontint:1 1 1
+*savescene:state:on
+*savescene:cantoggle:false
+
+(scenecontrols:type:horizontal
+(scenecontrols:backpanel:true
+(scenecontrols:tint:0.1 0.1 0.1
+(scenecontrols:position:-1 0 0
+(scenecontrols:elements:)newscene,*savescene

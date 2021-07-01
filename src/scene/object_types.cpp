@@ -286,7 +286,6 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, std::map<std::string,
 GameObjectUIText createUIText(GameobjAttributes& attr){
   auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
-
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -867,6 +866,18 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
     assert(false);
     return; 
   }
+
+  auto textObj = std::get_if<GameObjectUIText>(&toRender);
+  if (textObj != NULL){
+    if (attributes.stringAttributes.find("value") != attributes.stringAttributes.end()){
+      textObj -> value = attributes.stringAttributes.at("value");
+    }
+    if (attributes.numAttributes.find("spacing") != attributes.numAttributes.end()){
+      textObj -> deltaOffset = attributes.numAttributes.at("spacing");
+    }
+    return;
+  }
+
   assert(false);
 }
 
