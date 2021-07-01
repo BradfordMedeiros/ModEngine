@@ -52,8 +52,8 @@ glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, 
   }
 }
 glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
-  float deltaYaw = manipulatorAxis == XAXIS ? offsetY : 0;
-  float deltaPitch = manipulatorAxis == YAXIS ? offsetX : 0;
+  float deltaPitch = manipulatorAxis == XAXIS ? offsetY : 0;
+  float deltaYaw = manipulatorAxis == YAXIS ? offsetX : 0;
   float deltaRoll = manipulatorAxis == ZAXIS ? offsetX : 0;
   return setFrontDelta(currentOrientation, deltaYaw, deltaPitch, deltaRoll, 0.1);
 }
@@ -86,3 +86,4 @@ glm::quat quatFromDirection(glm::vec3 direction){
 glm::vec3 directionFromQuat(glm::quat direction){
   return direction * glm::vec3(0, 1, 0);
 }
+
