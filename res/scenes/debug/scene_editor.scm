@@ -1,10 +1,6 @@
 
-(define allscenes (list 
-  "./res/scenes/features/lighting/lights.rawscene" 
-  "./res/scenes/features/lighting/tint.rawscene" 
-
-))
-(define activescene "./res/scenes/features/lighting/lights.rawscene")
+(define allscenes (list-scenefiles))
+(define activescene (car allscenes))
 (define loadedSceneId #f)
 
 (define (findIndex scenes activescene currIndex) 
