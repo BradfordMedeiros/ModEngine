@@ -39,7 +39,7 @@ void applyImpulse(int32_t index, glm::vec3 impulse);
 void applyImpulseRel(int32_t index, glm::vec3 impulse);
 void clearImpulse(int32_t index);
 
-void loadScriptFromWorld(std::string script, int32_t id);
+void loadScriptFromWorld(std::string script, objid id, objid sceneId);
 
 std::vector<std::string> listSceneFiles();
 int32_t loadScene(std::string sceneFile);
@@ -47,7 +47,7 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
 int32_t loadSceneData(std::string sceneData, objid sceneId);
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();
-void saveScene(bool includeIds);
+void saveScene(bool includeIds, objid sceneId);
 std::vector<int32_t> listScenes();
 void sendLoadScene(int32_t sceneId);
 

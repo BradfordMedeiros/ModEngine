@@ -35,10 +35,10 @@ void clearImpulse(int32_t index){
   clearImpulse(world.rigidbodys.at(index));
 }
 
-void loadScriptFromWorld(std::string script, int32_t id){
+void loadScriptFromWorld(std::string script, objid id, objid sceneId){
   auto name = getGameObject(world, id).name;
   std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-  loadScript(script, id, bootStrapperMode);
+  loadScript(script, id, sceneId, bootStrapperMode);
 }
 
 std::vector<std::string> listSceneFiles(){
@@ -74,12 +74,10 @@ void unloadAllScenes(){
 }
 
 // @TODO - save all the scenes in the world
-void saveScene(bool includeIds){
-  auto sceneIds = allSceneIds(world.sandbox);
-  auto id = sceneIds.at(0);
-  auto fileToSave = rawSceneFile;
-  std::cout << "saving scene id: " << id << " to file: " << fileToSave << std::endl;
-  saveFile(fileToSave, serializeScene(world, id, includeIds));
+void saveScene(bool includeIds, objid sceneId){
+  auto fileToSave = "./res/scenes/example_save.rawscene";    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
+  std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
+  //saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
 }
 
 std::vector<int32_t> listScenes(){

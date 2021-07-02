@@ -555,7 +555,7 @@ void addSerialObjectsToWorld(
   for (auto id : idsAdded){
     auto obj = getGameObject(world, id);
     if (obj.script != ""){
-      interface.loadScript(obj.script, id);
+      interface.loadScript(obj.script, id, sceneId);
     }
   }
 

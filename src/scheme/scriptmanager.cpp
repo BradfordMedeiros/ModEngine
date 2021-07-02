@@ -2,6 +2,7 @@
 
 struct ScriptModule {
   objid id;
+  objid sceneId;
   SCM module;
 };
 static std::map<std::string, ScriptModule> scriptnameToModule;
@@ -24,7 +25,18 @@ objid currentModuleId(){
   assert(false);
 }
 
-void loadScript(std::string scriptpath, objid id, bool isServer){ 
+objid currentSceneId(){
+  SCM module = scm_current_module();
+  for (auto &[script, scriptModule] : scriptnameToModule){
+    std::cout << "Checking module: " << scriptModule.id << std::endl;
+    if (module == scriptModule.module){
+      return scriptModule.sceneId;
+    }
+  }
+  assert(false); 
+}
+
+void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer){ 
   auto script = getScriptName(scriptpath, id);
 
   std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
@@ -32,6 +44,7 @@ void loadScript(std::string scriptpath, objid id, bool isServer){
   SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
   scriptnameToModule[script] = ScriptModule {
     .id = id,
+    .sceneId = sceneId,
     .module = module,
   };                    
   scm_set_current_module(module);
