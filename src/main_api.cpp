@@ -72,7 +72,20 @@ void unloadAllScenes(){
 void saveScene(bool includeIds, objid sceneId){
   auto fileToSave = sceneNameForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
-  saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
+  auto fileExtension = getPreExtension(fileToSave);
+
+  auto allowedToSave = true;
+  if (fileExtension.has_value()){
+    auto extension = fileExtension.value();
+    std::cout << "extension is: " << extension << std::endl;
+    allowedToSave = extension != "p";
+  }
+  if (allowedToSave){
+    saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
+  }else{
+    std::cout << "WARNING: CANNOT SAVE: " << fileToSave << " because is a protected file" << std::endl;
+  }
+
 }
 
 std::vector<int32_t> listScenes(){

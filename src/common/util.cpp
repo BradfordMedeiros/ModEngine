@@ -43,6 +43,13 @@ std::optional<std::string> getExtension(std::string file){
   return std::nullopt;
 }
 
+std::optional<std::string> getPreExtension(std::string file){
+  auto parts = split(file, '.');
+  if (parts.size() >= 3){
+    return parts.at(parts.size() - 2);  
+  }
+  return std::nullopt;  
+}
 
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions){
   std::vector<std::string> models;
