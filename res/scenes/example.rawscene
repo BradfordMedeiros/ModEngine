@@ -1,6 +1,6 @@
 
 unitcube:position:0 -5 0
-unitcube:scale:100 1.0 100
+unitcube:scale:1 1 1
 unitcube:mesh:./res/models/unit_rect/unit_rect.obj
 unitcube:layer:ui
 

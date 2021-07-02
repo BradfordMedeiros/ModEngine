@@ -40,6 +40,19 @@
 (define (changeScenePrev) (changeScene (prevSceneName)))
 (define (changeSceneNext) (changeScene (nextSceneName)))
 
+(define (saveScene)
+  (if loadedSceneId
+    (begin
+      (display (string-append "should save current scene: (" activescene ", " (number->string loadedSceneId) ")\n"))
+      (save-scene #f loadedSceneId)
+    )
+  )
+)
+
+(define (newSceneName) "debug.rawscene")
+(define (newScene)
+  (display (string-append "should create a new scene called: " (newSceneName) "\n"))
+)
 
 (define (onObjSelected obj color)
   (define objname (gameobj-name obj))
@@ -47,6 +60,8 @@
     ((equal? objname "*prev_scene"    ) (changeScenePrev))
     ((equal? objname "*next_scene"    ) (changeSceneNext))
     ((equal? objname ")current_scene" ) (updateSceneText (string-append "text-" (number->string (random 10)))))
+    ((equal? objname "*save_scene"    ) (saveScene))
+    ((equal? objname "*new_scene"     ) (newScene))
   )
 )
 

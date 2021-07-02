@@ -1,9 +1,8 @@
 # Generated scene 
 ]voxel:rotation:0.000000 0.000000 -3.141593
-]voxel:physics_shape:shape_box
-]voxel:from:2|1|2|1111
-]voxel:fromtextures:./res/brush/border_5x5.png,./res/heightmaps/dunes.jpg|1020
-
+]voxel:from:2|2|2|11001111
+]voxel:fromtextures:./res/brush/border_5x5.png,./res/heightmaps/dunes.jpg|10201020
+]voxel:physics_shape:shape_auto
 
 platform:position:0.000000 -5.000000 0.000000
 platform:scale:100.000000 1.000000 100.000000

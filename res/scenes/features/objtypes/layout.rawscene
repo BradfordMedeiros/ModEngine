@@ -16,6 +16,11 @@
 (row1:type:horizontal
 (row1:elements:*basicbutton1,*basicbutton2
 (row1:backpanel:true
-(row1:tint:0.1 0.1 0.1
-(row1:margin:0.05
+(row1:tint:1.0 0.1 0.1
+(row1:margin:0.1
 
+(row1:width:100
+(row1:wrap:flex
+
+(row1:height:50
+(row1:mode:flex

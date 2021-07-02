@@ -1,0 +1,8 @@
+
+box:mesh:./res/models/parentingbug.dae
+
+box:texture:./res/textures/grid.png
+
+platform:mesh:./res/models/box/box.obj
+platform:scale: 100 1 100
+platform:position:0 -10 0

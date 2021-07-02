@@ -1,0 +1,26 @@
+# Generated scene 
+!lighttwo:position:-10.000000 2.000000 0.000000
+!lighttwo:rotation:0.000000 -0.000000 -3.141593
+!lighttwo:physics_shape:shape_box
+!lighttwo:color:0.000000 1.000000 0.000000
+!lightone:position:0.000000 2.000000 0.000000
+!lightone:rotation:0.000000 -0.000000 -3.141593
+!lightone:physics_shape:shape_box
+!lightone:color:1.000000 0.000000 0.000000
+~root:1012592185:child:!lighttwo,!lightone,door,!lightthree,platform
+~root:1012592185:rotation:0.000000 -0.000000 -3.141593
+~root:1012592185:physics:disabled
+~root:1012592185:physics_shape:shape_box
+door:position:0.000000 0.000000 -17.000000
+door:rotation:0.000000 -0.000000 -3.141593
+door:physics_shape:shape_box
+door:mesh:./res/models/box/box.obj
+!lightthree:position:10.000000 2.000000 0.000000
+!lightthree:rotation:0.000000 -0.000000 -3.141593
+!lightthree:physics_shape:shape_box
+!lightthree:color:0.000000 0.000000 1.000000
+platform:position:0.000000 -5.000000 0.000000
+platform:scale:100.000000 1.000000 100.000000
+platform:rotation:0.000000 -0.000000 -3.141593
+platform:physics_shape:shape_box
+platform:mesh:./res/models/box/box.obj
