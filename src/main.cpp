@@ -1216,7 +1216,10 @@ int main(int argc, char* argv[]){
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
     if (shouldCallItemSelected){
-      schemeBindings.onObjectSelected(selected(state.editor), glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      auto selectedId = selected(state.editor);
+      if (selectedId != -1){
+        schemeBindings.onObjectSelected(selectedId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      }
       shouldCallItemSelected = false;
     }
 
