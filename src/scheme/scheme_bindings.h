@@ -17,6 +17,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*listScenes)(),  
   std::vector<std::string> (*listSceneFiles)(),
   void (*sendLoadScene)(int32_t id),
+  void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(int32_t id),

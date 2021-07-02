@@ -49,9 +49,12 @@
   )
 )
 
-(define (newSceneName) "debug.rawscene")
+(define (newSceneName) (string-append "./res/scenes/generated/scene_" (number->string (random 9999999)) ".rawscene"))
 (define (newScene)
-  (display (string-append "should create a new scene called: " (newSceneName) "\n"))
+  (define sceneToCreate (newSceneName))
+  (set! allscenes (list-scenefiles))
+  (create-scene sceneToCreate)
+  (changeScene sceneToCreate)  
 )
 
 (define (onObjSelected obj color)

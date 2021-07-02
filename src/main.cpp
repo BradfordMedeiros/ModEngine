@@ -884,6 +884,7 @@ int main(int argc, char* argv[]){
     listScenes,
     listSceneFiles,
     sendLoadScene,
+    createScene,
     moveCamera, 
     rotateCamera, 
     removeObjectById, 

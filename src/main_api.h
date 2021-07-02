@@ -49,6 +49,7 @@ void unloadAllScenes();
 void saveScene(bool includeIds, objid sceneId);
 std::vector<int32_t> listScenes();
 void sendLoadScene(int32_t sceneId);
+void createScene(std::string scenename);
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);

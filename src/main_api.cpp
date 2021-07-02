@@ -111,6 +111,14 @@ void sendLoadScene(int32_t id){
   sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
 }
 
+void createScene(std::string scenename){
+  auto extension = getExtension(scenename);
+  bool canSave = extension.has_value() && extension == "rawscene";
+  assert(canSave);
+  saveFile(scenename, "");
+}
+
+
 std::vector<int32_t> getObjectsByType(std::string type){
   if (type == "mesh"){
     std::vector indexes = getGameObjectsIndex<GameObjectMesh>(world.objectMapping);
