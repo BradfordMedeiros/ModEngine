@@ -142,7 +142,7 @@ void deleteRows(std::string tableName, SqlFilter& filter){
 
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
 //SQL_SELECT, SQL_INSERT, SQL_UPDATE, SQL_DELETE, SQL_CREATE_TABLE, SQL_DELETE_TABLE
-  if (query.type == SQL_SELECT){
+  /*if (query.type == SQL_SELECT){
     auto selectData = std::get_if<SqlSelect>(&query.queryData);
     return select(query.table, selectData -> columns, selectData -> filter);
   }else if (query.type == SQL_INSERT){
@@ -165,7 +165,89 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query){
     deleteTable(query.table);
     return {};
   }
-  assert(false);
-  return {};
+  assert(false);*/
+  return {{"one", "two", "three"}, {"hello", "wow", "go"}};
 }
 
+SqlQuery compileSqlQuery(std::string queryString){
+  SqlQuery query {
+    .type = SQL_SELECT,
+    .table = "testtable",
+    .queryData = SqlSelect{
+      .columns = { "somecolumn1", "somecolumn2" },
+      .filter = SqlFilter {
+        .hasFilter = false,
+        .column = "",
+        .value = "",
+        .invert = false,
+      }
+    }
+  }; 
+  return query;
+}
+
+
+/* std::string mainCommand = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(0)));
+  std::string table = scm_to_locale_string(scm_list_ref(sqlQuery, scm_from_int64(1)));
+
+  SqlQuery query {
+    .type = SQL_SELECT,
+    .table = table,
+  };
+
+  if (mainCommand == "select"){
+    std::cout << "setting query to select" << std::endl;
+    query.type = SQL_SELECT;
+    query.queryData = SqlSelect{
+      .columns = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(2))),
+      .filter = SqlFilter {
+        .hasFilter = false,
+        .column = "",
+        .value = "",
+        .invert = false,
+      }
+    };
+  }else if (mainCommand == "insert"){
+    query.type = SQL_INSERT;
+    query.queryData = SqlInsert {
+      .columns = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(2))),
+      .values = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(3))),
+    };
+  }else if (mainCommand == "update"){
+    query.type = SQL_UPDATE;
+    std::cout << "WARNING: GENERIC UPDATE, NOT USING ACTUAL VALUES" << std::endl;
+    query.queryData = SqlUpdate {
+      .columns = { "name" },
+      .values = { "no-one" },
+      .filter = SqlFilter {
+        .hasFilter = true,
+        .column = "name",
+        .value = "unknown",
+        .invert = false,
+      }
+    };
+  }else if (mainCommand == "delete"){
+    query.type = SQL_DELETE;
+    std::cout << "WARNING: GENERIC DELETE, NOT USING ACTUAL VALUES" << std::endl;
+    query.queryData = SqlDelete {
+      .filter = SqlFilter {
+        .hasFilter = true,
+        .column = "description",
+        .value = "hello",
+        .invert = false,
+      }
+    };
+  }else if (mainCommand == "create-table"){
+    std::cout << "setting query to create" << std::endl;
+    query.type = SQL_CREATE_TABLE;
+    query.queryData = SqlCreate{
+      .columns = listToVecString(scm_list_ref(sqlQuery, scm_from_int64(2))),
+    };
+  }else if (mainCommand == "delete-table"){
+    query.type = SQL_DELETE_TABLE;
+  }
+
+  std::cout << "INFO: executing sql query" << std::endl;
+  auto sqlResponse = executeSqlQuery(query);
+  std::cout << "INFO: finished executing query" << std::endl;
+  return listToSCM(sqlResponse);*/

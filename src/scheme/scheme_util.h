@@ -18,6 +18,7 @@ std::vector<glm::vec3> listToVecVec3(SCM vecList);
 SCM listToSCM(std::vector<std::string> stringList);
 SCM listToSCM(std::vector<std::vector<std::string>> stringList);
 SCM vec3ToScmList(glm::vec3 vec);
+SCM nestedVecToSCM(std::vector<std::vector<std::string>>& list);
 bool symbolDefinedInModule(const char* symbol, SCM module);
 bool symbolDefined(const char* symbol);
 void maybeCallFunc(const char* function);

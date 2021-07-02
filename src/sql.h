@@ -42,5 +42,6 @@ struct SqlQuery {
 };
 
 std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query);
+SqlQuery compileSqlQuery(std::string queryString);
 
 #endif

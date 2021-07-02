@@ -72,6 +72,10 @@ SCM vec3ToScmList(glm::vec3 vec){
   return list;
 }
 
+SCM nestedVecToSCM(std::vector<std::vector<std::string>>& list){
+  return SCM_UNDEFINED;
+}
+
 bool symbolDefinedInModule(const char* symbol, SCM module){
   return scm_to_bool(scm_defined_p(scm_string_to_symbol(scm_from_locale_string(symbol)), module));
 }
