@@ -48,6 +48,7 @@ struct SceneDeserialization {
 
 struct SceneSandbox {
   std::map<objid, objid> sceneIdToRootObj;
+  std::map<objid, std::string> sceneIdToSceneName;
   Scene mainScene;
   std::vector<LayerInfo> layers;
 };
@@ -86,7 +87,7 @@ struct AddSceneDataValues {
   std::map<std::string, GameobjAttributes>  additionalFields;
   std::vector<objid> idsAdded;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 

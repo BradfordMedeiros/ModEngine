@@ -44,7 +44,6 @@ void loadScriptFromWorld(std::string script, objid id, objid sceneId);
 std::vector<std::string> listSceneFiles();
 int32_t loadScene(std::string sceneFile);
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
-int32_t loadSceneData(std::string sceneData, objid sceneId);
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();
 void saveScene(bool includeIds, objid sceneId);

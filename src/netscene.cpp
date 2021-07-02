@@ -136,7 +136,7 @@ void onUdpClientMessage(World& world, SysInterface& interface, UdpPacket& packet
   if (packet.type == SETUP){
     std::cout << "WARNING: should not get setup packet type" << std::endl;
   }else if (packet.type == LOAD){
-    addSceneToWorldFromData(world, packet.payload.loadpacket.sceneId, packet.payload.loadpacket.sceneData, interface);
+    addSceneToWorldFromData(world, "", packet.payload.loadpacket.sceneId, packet.payload.loadpacket.sceneData, interface);
   }else if (packet.type == UPDATE){
     handleUpdate(world, packet);
   }else if (packet.type == CREATE){

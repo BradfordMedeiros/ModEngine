@@ -48,7 +48,7 @@ Texture loadTextureWorld(World& world, std::string texturepath);
 objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
 
 objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface);
-objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface);
 void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
 void removeAllScenesFromWorld(World& world, SysInterface interface);
 
@@ -102,5 +102,7 @@ struct Properties {
 };
 Properties getProperties(World& world, objid id);
 void setProperties(World& world, objid id, Properties& properties);
+
+std::string sceneNameForSceneId(World& world, objid sceneId);
 
 #endif

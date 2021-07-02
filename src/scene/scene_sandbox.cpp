@@ -234,7 +234,8 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
 
 void pruneSceneId(SceneSandbox& sandbox, objid sceneId){
   sandbox.sceneIdToRootObj.erase(sceneId);
-  sandbox.mainScene.sceneToNameToId.erase(sceneId);  
+  sandbox.sceneIdToSceneName.erase(sceneId);
+  sandbox.mainScene.sceneToNameToId.erase(sceneId); 
 }
 void maybePruneScenes(SceneSandbox& sandbox){
   std::vector<objid> sceneIdsToPrune;
@@ -608,7 +609,7 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
   std::cout << "INFO: Deserialization: " << std::endl;
   return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, std::string sceneData){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId);
@@ -627,6 +628,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, objid sceneId, 
   }
   auto rootId = deserializedScene.scene.rootId;
   sandbox.sceneIdToRootObj[deserializedScene.scene.idToGameObjectsH.at(rootId).sceneId] = rootId;
+  sandbox.sceneIdToSceneName[sceneId] = sceneFileName;
 
   enforceParentRelationship(sandbox.mainScene, rootId, sandbox.mainScene.rootId);
 

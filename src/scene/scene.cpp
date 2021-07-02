@@ -565,8 +565,8 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, objid sceneId, std::string sceneData, SysInterface interface){
-  auto data = addSceneDataToScenebox(world.sandbox, sceneId, sceneData);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface){
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData);
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields);
   return sceneId;
 }
@@ -598,7 +598,7 @@ objid addSerialObject(
 }
 
 objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface){
-  return addSceneToWorldFromData(world, getUniqueObjId(), loadFile(sceneFile), interface);
+  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), loadFile(sceneFile), interface);
 }
 
 // todo finish removing data like eg clearing meshes, animations,etc
@@ -920,4 +920,8 @@ Properties getProperties(World& world, objid id){
 }
 void setProperties(World& world, objid id, Properties& properties){
   getGameObject(world, id).transformation = properties.transformation;
+}
+
+std::string sceneNameForSceneId(World& world, objid sceneId){
+  return world.sandbox.sceneIdToSceneName.at(sceneId);
 }

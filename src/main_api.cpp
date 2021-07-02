@@ -60,11 +60,6 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
   return nodeOffsetId;
 }
 
-int32_t loadSceneData(std::string sceneData, objid sceneId){
-  std::cout << "INFO: SCENE LOADING: loading from scene data" << std::endl;
-  return addSceneToWorldFromData(world, sceneId, sceneData, interface);
-}
-
 void unloadScene(int32_t sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId, interface);
@@ -75,9 +70,9 @@ void unloadAllScenes(){
 
 // @TODO - save all the scenes in the world
 void saveScene(bool includeIds, objid sceneId){
-  auto fileToSave = "./res/scenes/example_save.rawscene";    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
+  auto fileToSave = sceneNameForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
-  //saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
+  saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
 }
 
 std::vector<int32_t> listScenes(){
