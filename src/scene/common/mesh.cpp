@@ -134,7 +134,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
 }
 
 // This orients the text correctly, but the 2d text rendering isnt yet setup for this
-/*Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi, std::function<Texture(std::string)> ensureLoadTexture){
+Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi, std::function<Texture(std::string)> ensureLoadTexture){
   float verts[] = {
     // -1 in the tex coords since the image loaded are flipped on the vertical + reversed in the shader
     // Implementation detail of data loaded for texture loading. 
@@ -144,19 +144,6 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     1.0f,  1.0f, 0.0f,   offsetxndi + widthndi, -1 * offsetyndi,
   };
   unsigned int indices[] = {0, 1, 2, 0, 2, 3};
-  return load2DMesh(imagePath, verts, indices, 20, 6, 3, 2, ensureLoadTexture);
-}*/
-
-Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offsetyndi, float widthndi, float heightndi, std::function<Texture(std::string)> ensureLoadTexture){
-  float verts[] = {
-    // -1 in the tex coords since the image loaded are flipped on the vertical + reversed in the shader
-    // Implementation detail of data loaded for texture loading. 
-    -1.0f,  1.0f, 0.0f,  offsetxndi, -1 * (offsetyndi + heightndi),
-    -1.0f, -1.0f, 0.0f,  offsetxndi, -1 * offsetyndi,
-    1.0f, -1.0f, 0.0f,   offsetxndi + widthndi, -1 * offsetyndi,
-    1.0f,  1.0f, 0.0f,   offsetxndi + widthndi, -1 * (offsetyndi + heightndi),
-  };
-  unsigned int indices[] = {2, 1, 0, 3, 2, 0};
   return load2DMesh(imagePath, verts, indices, 20, 6, 3, 2, ensureLoadTexture);
 }
 

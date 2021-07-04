@@ -191,7 +191,8 @@ void copyObject(int32_t id){
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawWords(uiShaderProgram, fontMeshes, word, left, top, fontSize);  
+  auto adjustedTop = state.currentScreenHeight - top;
+  drawWords(uiShaderProgram, fontMeshes, word, left, adjustedTop, fontSize);  
 }
 
 void drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta){

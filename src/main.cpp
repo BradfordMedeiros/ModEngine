@@ -603,7 +603,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   }
 
   if(!state.isRotateSelection){
-     drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.cursorTop, 20, 20);
+     drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
   }
 
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
@@ -841,7 +841,7 @@ int main(int argc, char* argv[]){
 
 
      // TODO orthoproj is using current screen width and height.  Switch this to match NDI for simplification. 
-     orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, (float)state.currentScreenHeight, 0.0f, -1.0f, 1.0f);  
+     orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
   }; 
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
