@@ -73,7 +73,16 @@ SCM vec3ToScmList(glm::vec3 vec){
 }
 
 SCM nestedVecToSCM(std::vector<std::vector<std::string>>& list){
-  return SCM_UNDEFINED;
+  SCM scmList = scm_make_list(scm_from_unsigned_integer(list.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < list.size(); i++){
+    auto sublist = list.at(i);
+    SCM scmSubList = scm_make_list(scm_from_unsigned_integer(sublist.size()), scm_from_unsigned_integer(0));
+    for (int j = 0; j < sublist.size(); j++){
+      scm_list_set_x (scmSubList, scm_from_unsigned_integer(j), scm_from_locale_string(sublist.at(j).c_str()));
+    }
+    scm_list_set_x(scmList, scm_from_unsigned_integer(i), scmSubList);
+  }
+  return scmList;
 }
 
 bool symbolDefinedInModule(const char* symbol, SCM module){
