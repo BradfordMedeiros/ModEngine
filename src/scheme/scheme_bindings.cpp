@@ -178,16 +178,14 @@ SCM scmGetGameObjectAttr(SCM gameobj){
   for (auto &[key, value] : attr.numAttributes){
     SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
     scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
-    //scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_double(value));
-    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_locale_string("num_placeholder"));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_double(value));
     scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
     index++;   
   }
   for (auto &[key, value] : attr.vecAttributes){
     SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
     scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
-    //scm_list_set_x(attributePair, scm_from_unsigned_integer(1), vec3ToScmList(value));
-    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_locale_string("vec_placeholder"));  
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), vec3ToScmList(value));
     scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
     index++;   
   }
