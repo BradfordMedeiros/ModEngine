@@ -1,0 +1,7 @@
+(define (onMessage key value)
+  (display "key is: ")
+  (display key)
+  (display " ")
+  (display value)
+  (display "\n")
+)
