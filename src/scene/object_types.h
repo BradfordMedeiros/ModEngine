@@ -211,11 +211,6 @@ static Field channelField {
   .type = "channel",
 };
 
-static Field sceneField {
-  .prefix = '$',
-  .type = "scene",
-};
-
 static Field rootField {
   .prefix = '~',
   .type = "root",
@@ -279,7 +274,6 @@ static std::vector fields = {
   light, 
   voxelField, 
   channelField, 
-  sceneField, 
   rootField, 
   emitterField, 
   heightmap, 
