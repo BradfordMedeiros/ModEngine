@@ -161,17 +161,35 @@ SCM scmGetGameObjectById(SCM scmId){
   return createGameObject(id);
 }
 
-std::map<std::string, std::string> (*_getGameObjectAttr)(int32_t id);
+GameobjAttributes (*_getGameObjectAttr)(int32_t id);
 SCM scmGetGameObjectAttr(SCM gameobj){
-  std::map<std::string, std::string> attributes = _getGameObjectAttr(getGameobjId(gameobj));
-  SCM list = scm_make_list(scm_from_unsigned_integer(attributes.size()), scm_from_unsigned_integer(0));
+  auto attr = _getGameObjectAttr(getGameobjId(gameobj));
+  int totalSize = attr.stringAttributes.size() + attr.numAttributes.size() + attr.vecAttributes.size();
+  SCM list = scm_make_list(scm_from_unsigned_integer(totalSize), scm_from_unsigned_integer(0));
+
   int index = 0;
-  for (auto [name, value] : attributes){
+  for (auto &[key, value] : attr.stringAttributes){
     SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
-    scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(name.c_str()));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
     scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_locale_string(value.c_str()));
     scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
-    index = index + 1;
+    index++;   
+  }
+  for (auto &[key, value] : attr.numAttributes){
+    SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
+    //scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_double(value));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_locale_string("num_placeholder"));
+    scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
+    index++;   
+  }
+  for (auto &[key, value] : attr.vecAttributes){
+    SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
+    //scm_list_set_x(attributePair, scm_from_unsigned_integer(1), vec3ToScmList(value));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), scm_from_locale_string("vec_placeholder"));  
+    scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
+    index++;   
   }
   return list;
 }
@@ -988,7 +1006,7 @@ void createStaticSchemeBindings(
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),
   std::string (*getGameObjectNameForId)(int32_t id),
-  std::map<std::string, std::string> getGameObjectAttr(int32_t id),
+  GameobjAttributes getGameObjectAttr(int32_t id),
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
   void (*setGameObjectPos)(int32_t index, glm::vec3 pos),

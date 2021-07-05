@@ -26,7 +26,7 @@ void createStaticSchemeBindings(
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),  
   std::string (*getGameObjectNameForId)(int32_t id),
-  std::map<std::string, std::string> getGameObjectAttr(int32_t id),
+  GameobjAttributes getGameObjectAttr(int32_t id),
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
   void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
