@@ -1,24 +1,39 @@
-
 (define attributeList '())
 (define currGameobj #f)
 
-(define (maybe-replace attr name value)
-  (if (equal? (car attr) name)
-    (list name value)
-    attr
+(define (parseVecString vecString)
+  (define stringList (filter (lambda (x) (> (string-length x) 0)) (string-split vecString #\ )))
+  (define numList (map string->number stringList))
+  (if (equal? (length numList) 3)
+    numList
+    #f
   )
-) 
-
-(define (submit attributes)
-  (gameobj-setattr! currGameobj attributes)
 )
-(define (createAttributes name value)
-  (map (lambda (attr) (maybe-replace attr name value)) attributeList)
+
+(define (attrValueTyped attrValue originalAttrValue)
+  (cond 
+    ((list? originalAttrValue) (parseVecString attrValue))
+    ((number? originalAttrValue) (string->number attrValue))
+    ((string? originalAttrValue) attrValue)
+    (#t #f)
+  )
 )
 
 (define (submitAttributes attributeIndex newValue)
-  (submit (createAttributes (car (list-ref attributeList attributeIndex)) newValue))
-  (set! attributeList (gameobj-attr currGameobj))
+  (define attributeToUpdate (list-ref attributeList attributeIndex))
+  (define attrName (car attributeToUpdate))
+  (define attrValue (cadr attributeToUpdate))
+  (define newPairValue (attrValueTyped newValue attrValue))
+  (define newPair (list attrName newPairValue))
+  (if newPairValue
+    (begin
+      (display "new pair is: ")
+      (display newPair)
+      (display "\n")
+      (gameobj-setattr! currGameobj (list newPair))
+      (set! attributeList (gameobj-attr currGameobj))
+    )
+  )
 )
 
 (define selectedIndex 0)
@@ -57,7 +72,16 @@
   )
 )
 
-(define (drawAttribute value currentHeight index)
+(define (convert-type value)
+  (cond 
+    ((list? value) (string-append "(" (string-join (map number->string value) " ") ")"))
+    ((number? value) (number->string value))
+    (#t value)
+  )
+)
+
+(define (drawAttribute typeValue currentHeight index)
+  (define value (list (car typeValue) (convert-type (cadr typeValue))))
   (draw-text 
     (string-append 
       (string-pad-right (maybe-highlight (car value) index #t) 30) 
@@ -118,6 +142,8 @@
 )
 
 (define (onObjSelected obj color)
+  (define objattr (gameobj-attr obj))
+  (display objattr)
   (set! currGameobj obj)
-  (set! attributeList (gameobj-attr obj))
+  (set! attributeList objattr)
 )
