@@ -804,20 +804,32 @@ void onCameraSystemChange(bool usingBuiltInCamera){
     scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
   }
 }
-void onMessage(std::string message, std::string value){
+
+void onAttrMessage(std::string message, AttributeValue value){
   const char* function = "onMessage";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), scm_from_locale_string(value.c_str()));
-  }
+
+    auto strValue = std::get_if<std::string>(&value);
+    if (strValue != NULL){
+      scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), scm_from_locale_string(strValue -> c_str())); 
+      return;
+    }
+    auto floatValue = std::get_if<float>(&value);
+    if (floatValue != NULL){
+      scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), scm_from_double(*floatValue)); 
+      return;   
+    }
+    auto vecValue = std::get_if<glm::vec3>(&value);
+    if (vecValue != NULL){
+      scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), vec3ToScmList(*vecValue)); 
+      return;
+    }
+    std::cout << "invalid type" << std::endl;
+    assert(false);
+  }  
 }
-void onFloatMessage(StringFloat message){
-  const char* function = "onFloatMessage";
-  if (symbolDefined(function)){
-    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, scm_from_locale_string(message.strValue.c_str()), scm_from_double(message.floatValue));
-  }
-}
+
 void onTcpMessage(std::string message){
   const char* function = "onTcpMessage";
   if (symbolDefined(function)){

@@ -19,7 +19,6 @@ typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*boolfunc)(bool value);
 typedef void(*messagefunc)(std::queue<StringString>&);
-typedef void(*messagefloatfunc)(std::queue<StringFloat>&);
 typedef void(*stringfunc)(std::string&);
 
 struct SchemeBindingCallbacks {
@@ -35,7 +34,6 @@ struct SchemeBindingCallbacks {
   keycharcallback onKeyCharCallback;
   boolfunc onCameraSystemChange;
   messagefunc onMessage;
-  messagefloatfunc onFloatMessage;
   stringfunc onTcpMessage;
   stringfunc onUdpMessage;
   stringfunc onPlayerJoined;

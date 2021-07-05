@@ -146,18 +146,7 @@ void onMessageAllScripts(std::queue<StringString>& messages){
 
     for (auto &[name, scriptModule] : scriptnameToModule){
       scm_set_current_module(scriptModule.module);
-      onMessage(message.strTopic, message.strValue);
-    }
-  }
-}
-void onFloatMessageAllScripts(std::queue<StringFloat>& messages){
-  while (!messages.empty()){
-    auto message = messages.front();
-    messages.pop();
-
-    for (auto &[name, scriptModule] : scriptnameToModule){
-      scm_set_current_module(scriptModule.module);
-      onFloatMessage(message);
+      onAttrMessage(message.strTopic, message.strValue);
     }
   }
 }
@@ -202,7 +191,6 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onKeyCharCallback = onKeyCharCallbackAllScripts,
     .onCameraSystemChange = onCameraSystemChangeAllScripts,
     .onMessage = onMessageAllScripts,
-    .onFloatMessage = onFloatMessageAllScripts,
     .onTcpMessage = onTcpMessageAllScripts,
     .onUdpMessage = onUdpMessageAllScripts,
     .onPlayerJoined = onPlayerJoinedAllScripts,

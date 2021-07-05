@@ -63,14 +63,11 @@ typedef int32_t objid;
 objid getUniqueObjId();
 std::string getUniqueObjectName();
 
+typedef std::variant<glm::vec3, std::string, float> AttributeValue;
+
 struct StringString {
   std::string strTopic;
-  std::string strValue;
-};
-
-struct StringFloat {
-  std::string strValue;
-  float floatValue;
+  AttributeValue strValue;
 };
 
 struct HitObject {
@@ -79,7 +76,6 @@ struct HitObject {
   glm::quat normal;
 };
 
-typedef std::variant<glm::vec3, std::string, float> AttributeValue;
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage);
 std::string serializePropertySuffix(std::string key, AttributeValue value);
 
