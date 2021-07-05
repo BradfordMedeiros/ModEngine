@@ -739,6 +739,8 @@ int renderObject(
   return 0;
 }
 
+
+// TODO --> this needs to be joined with the serialized attributes probably (and it should probably be gameobj attr)
 std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
   std::map<std::string, std::string> attributes;
 
@@ -803,6 +805,13 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
       attributes["shape"] = "sphere";
     }
 
+    return attributes;
+  }
+
+  auto textObj = std::get_if<GameObjectUIText>(&toRender);
+  if (textObj != NULL){
+    attributes["value"] = textObj -> value;
+    attributes["spacing"] = std::to_string(textObj -> deltaOffset);
     return attributes;
   }
 

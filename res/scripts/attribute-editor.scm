@@ -90,7 +90,7 @@
 
 (define (onFrame)
   (if showConsole
-    (drawFrame 100)
+    (drawFrame 400)
   )
 )
 
@@ -117,7 +117,7 @@
   )
 )
 
-(define (onObjSelected obj)
+(define (onObjSelected obj color)
   (set! currGameobj obj)
   (set! attributeList (gameobj-attr obj))
 )
