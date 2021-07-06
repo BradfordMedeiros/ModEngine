@@ -739,63 +739,70 @@ int renderObject(
   return 0;
 }
 
-void objectAttributes(GameobjAttributes& _attributes){
-  /*
-    std::map<std::string, std::string> attributes;
-
+void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& _attributes){
   GameObjectObj& toRender = mapping.at(id);
+
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL){
     if (meshObj -> meshNames.size() > 0){
-      attributes["mesh"] = meshObj -> meshNames.at(0);
+      _attributes.stringAttributes["mesh"] = meshObj -> meshNames.at(0);
     }
-    attributes["isDisabled"] = meshObj -> isDisabled ? "true": "false";
-    return attributes;
-  }
+    _attributes.stringAttributes["isDisabled"] = meshObj -> isDisabled ? "true" : "false";
+    _attributes.vecAttributes["tint"] = meshObj -> tint;
+    return;
+  }  
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL){
-    return attributes;
+    return;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL){   
-    attributes["color"] = print(lightObj -> color);
-    return attributes;
+    _attributes.vecAttributes["color"] = lightObj -> color;
+    return;
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
     // not yet implemented
     assert(false);
-    return attributes;
-  }
+    return;
+  } 
 
   auto soundObj = std::get_if<GameObjectSound>(&toRender);
   if (soundObj != NULL){
-    attributes["clip"] = soundObj -> clip;
-    return attributes;
+    _attributes.stringAttributes["clip"] = soundObj -> clip;
+    return;
   }
 
   auto channelObj = std::get_if<GameObjectChannel>(&toRender);
   if (channelObj != NULL){
-    attributes["from"] = channelObj -> from;
-    attributes["to"] = channelObj -> to;
-    return attributes;
+    _attributes.stringAttributes["from"] = channelObj -> from;
+    _attributes.stringAttributes["to"] = channelObj -> to;
+    return;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL){
     assert(false);
-    return attributes;
+    return;
   }
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   if (heightmapObj != NULL){
     assert(false);
-    return attributes;
+    return;
   }
 
+  auto textObj = std::get_if<GameObjectUIText>(&toRender);
+  if (textObj != NULL){
+    _attributes.stringAttributes["value"] = textObj -> value;
+    _attributes.stringAttributes["spacing"] = std::to_string(textObj -> deltaOffset);
+    return;
+  }
+
+  /*
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
     attributes["points"] = pointsToString(geoObj -> points);
@@ -807,12 +814,7 @@ void objectAttributes(GameobjAttributes& _attributes){
     return attributes;
   }
 
-  auto textObj = std::get_if<GameObjectUIText>(&toRender);
-  if (textObj != NULL){
-    attributes["value"] = textObj -> value;
-    attributes["spacing"] = std::to_string(textObj -> deltaOffset);
-    return attributes;
-  }
+
 
   assert(false);
   return attributes;*/
@@ -830,8 +832,8 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
       std::cout << "updating texture offset" << std::endl;
       meshObj -> texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
     }
-    if (attributes.vecAttributes.find("color") != attributes.vecAttributes.end()){
-      meshObj -> tint = attributes.vecAttributes.at("color");
+    if (attributes.vecAttributes.find("tint") != attributes.vecAttributes.end()){
+      meshObj -> tint = attributes.vecAttributes.at("tint");
     }
     return;
   }

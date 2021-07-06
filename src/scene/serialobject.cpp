@@ -222,7 +222,7 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.stringAttributes["script"] = gameobj.script;
   _attr.stringAttributes["fragshader"] = gameobj.fragshader;
 
-  // todo -> need to complete full list
+  // TODO -> need to complete full list
   /*
   sceneAttrs["rotation"] = print(gameobj.transformation.rotation);
 
