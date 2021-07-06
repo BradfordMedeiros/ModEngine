@@ -136,21 +136,7 @@
   (if (and showConsole (not (= key 96)))
     (appendToBuffer (string (integer->char key)))
   )
-
-  (if (equal? key 112)
-    (parent-stuff)
-  )
-  (if (equal? key 108)
-    (simple-parent)
-  )
 )
 
 
 
-(define (parent-stuff)
-  (make-parent (gameobj-id (lsobj-name "box")) (gameobj-id (lsobj-name "box1")))
-)
-
-(define (simple-parent)
-  (make-parent (gameobj-id (lsobj-name "box1")) (gameobj-id (lsobj-name "box2")))
-)
