@@ -1,7 +1,9 @@
 #include "./scene_debug.h"
 
-std::string getDotInfoForNode(std::string nodeName, int id, objid sceneId, objid groupId, glm::vec3 position, std::vector<std::string> meshes){
-  return std::string("\"") + nodeName + "(id: " + std::to_string(id) + ", sceneId:" + std::to_string(sceneId) + ", " + "groupId: " + std::to_string(groupId) + ") pos: " + print(position) + " meshes: [" + join(meshes, ' ') + "]\"";
+std::string getDotInfoForNode(std::string nodeName, int id, objid sceneId, objid groupId, glm::vec3 position, glm::vec3 scale, glm::quat rotation, std::vector<std::string> meshes){
+  return std::string("\"") + nodeName + "(id: " + std::to_string(id) + ", sceneId:" + std::to_string(sceneId) + ", " + "groupId: " + std::to_string(groupId) + 
+  ") pos: " + print(position) + " scale: " + print(scale) +  " rot: " + print(rotation) + 
+  " meshes: [" + join(meshes, ' ') + "]\"";
 }
 
 std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
@@ -21,9 +23,9 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObj
     auto parentObjH = getGameObjectH(sandbox, parentId);
 
     relations = relations + 
-     getDotInfoForNode(parentObj.name, parentObj.id, parentObjH.sceneId, parentObjH.groupId, parentObj.transformation.position, getMeshNames(objectMapping, parentId)) 
+     getDotInfoForNode(parentObj.name, parentObj.id, parentObjH.sceneId, parentObjH.groupId, parentObj.transformation.position, parentObj.transformation.scale, parentObj.transformation.rotation, getMeshNames(objectMapping, parentId)) 
     + " -- " + 
-    getDotInfoForNode(childObj.name, childObjH.id,  childObjH.sceneId, childObjH.groupId, childObj.transformation.position, getMeshNames(objectMapping, id)) + "\n";
+    getDotInfoForNode(childObj.name, childObjH.id,  childObjH.sceneId, childObjH.groupId, childObj.transformation.position, childObj.transformation.scale, childObj.transformation.rotation, getMeshNames(objectMapping, id)) + "\n";
   }); 
 
   graph = graph + prefix + relations + suffix;
