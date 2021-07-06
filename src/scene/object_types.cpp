@@ -739,10 +739,9 @@ int renderObject(
   return 0;
 }
 
-
-// TODO --> this needs to be joined with the serialized attributes probably (and it should probably be gameobj attr)
-std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id){
-  std::map<std::string, std::string> attributes;
+void objectAttributes(GameobjAttributes& _attributes){
+  /*
+    std::map<std::string, std::string> attributes;
 
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -816,9 +815,8 @@ std::map<std::string, std::string> objectAttributes(std::map<objid, GameObjectOb
   }
 
   assert(false);
-  return attributes;
+  return attributes;*/
 }
-
 
 // TODO -> this needs updating hard.  
 void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled){

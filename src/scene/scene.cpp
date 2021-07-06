@@ -719,38 +719,10 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return addSerialObject(world, sceneId, name, interface, attrObj, attrObj.children, gameobj, idsAdded);
 }
 
-std::map<std::string, std::string> getAttributes(World& world, objid id){
-  // @TODO handle types better
-  std::map<std::string, std::string> attr;
-  auto objAttrs = objectAttributes(world.objectMapping, id);
-
-  std::map<std::string, std::string> sceneAttrs;
-  auto gameobj = getGameObject(world, id); 
-
-  // todo missing physics   TODO I should expose the real types here not strings
-  sceneAttrs["position"] = print(gameobj.transformation.position);
-  sceneAttrs["scale"] = print(gameobj.transformation.scale);
-  sceneAttrs["rotation"] = print(gameobj.transformation.rotation);
-
-  if (gameobj.lookat != ""){
-    sceneAttrs["lookat"] = gameobj.lookat;
-  }
-  if (gameobj.layer != ""){
-    sceneAttrs["layer"] = gameobj.layer;
-  }
-  if (gameobj.script != ""){
-    sceneAttrs["script"] = gameobj.script;
-  }
-  if (gameobj.fragshader != ""){
-    sceneAttrs["fragshader"] = gameobj.fragshader;
-  }
-
-  for (auto [attrName, attrValue] : objAttrs){
-    attr[attrName] = attrValue;
-  }
-  for (auto [attrName, attrValue] : sceneAttrs){
-    attr[attrName] = attrValue;
-  }
+GameobjAttributes objectAttributes(World& world, objid id){
+  GameobjAttributes attr {};
+  objectAttributes(attr);
+  getAllAttributes(getGameObject(world, id), attr);
   return attr;
 }
 

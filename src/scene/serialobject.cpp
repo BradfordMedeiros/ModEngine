@@ -213,6 +213,22 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
     setAttribute(gameobj, field, fieldValue);
   }
 }
+void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
+  _attr.vecAttributes["position"] = gameobj.transformation.position;
+  _attr.vecAttributes["scale"] = gameobj.transformation.scale;
+
+  _attr.stringAttributes["lookat"] = gameobj.lookat;
+  _attr.stringAttributes["layer"] = gameobj.layer;
+  _attr.stringAttributes["script"] = gameobj.script;
+  _attr.stringAttributes["fragshader"] = gameobj.fragshader;
+
+  // todo -> need to complete full list
+  /*
+  sceneAttrs["rotation"] = print(gameobj.transformation.rotation);
+
+  */
+
+}
 
 AttributeValue attributeValue(GameObject& gameobj, std::string field){
   if (field == "position"){

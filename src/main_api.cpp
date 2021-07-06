@@ -134,21 +134,7 @@ std::string getGameObjectName(int32_t index){
 }
 
 GameobjAttributes getGameObjectAttr(int32_t id){
-  //std::map<std::string, std::string> getAttributes(World& world, objid id){
-
-  GameobjAttributes attr { 
-    .stringAttributes = {
-      { "str_somefield", "somevalue" },
-      { "str_anotherfield", "anothervalue" },
-    },
-    .numAttributes = {
-      { "num_thing", 2.4 },
-    },
-    .vecAttributes = {
-      { "vec_somevec", glm::vec3(0.f, 1.f, 2.f) },
-    },
-  };
-  return attr;
+  return objectAttributes(world, id);
 }
 
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
