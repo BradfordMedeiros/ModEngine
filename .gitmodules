@@ -1,7 +1,7 @@
 [submodule "lib/assimp"]
 	path = lib/assimp
 	url = https://github.com/assimp/assimp.git
-	branch = v.5.0.0.rc1
+	branch = v5.0.1
 [submodule "lib/cxxopts"]
 	path = lib/cxxopts
 	url = https://github.com/jarro2783/cxxopts.git
@@ -9,3 +9,4 @@
 [submodule "lib/bullet3"]
 	path = lib/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
+        branch = v3.17
