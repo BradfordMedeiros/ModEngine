@@ -802,22 +802,16 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     return;
   }
 
-  /*
+
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
-    attributes["points"] = pointsToString(geoObj -> points);
-
-    if (geoObj -> type == GEOSPHERE){
-      attributes["shape"] = "sphere";
+    _attributes.stringAttributes["points"] = pointsToString(geoObj -> points);
+    if (geoObj -> type == GEOSPHERE){   // should show for any shape
+      _attributes.stringAttributes["shape"] = "sphere";
     }
-
-    return attributes;
+    return;
   }
-
-
-
   assert(false);
-  return attributes;*/
 }
 
 // TODO -> this needs updating hard.  
