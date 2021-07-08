@@ -1,0 +1,193 @@
+TODAY:
+- allow selection of the individual item (instead of group)
+
+
+|       |
+|       |
+|  THEN | SHOULD BE DONE BY 7/10
+|       |
+
+- FIX - absolute physics position BUG
+
+
+===========================
+|        |
+|        |
+|  AFTER | SHOULD BE DONE BY 7/30
+|        |
+
+==========> model loading with a single parent doesn't load model correctly, something wrong w/ the transform, maybe this is screwing up the animation? see untitled.dae
+=> can get rid of the empty top level node that never has a mesh?
+./res/models/parentingbug.dae
+
+=>  animation still fucked up
+====> might be a bug, but it might not be
+====> animation plays wrong axis 
+MAKE SURE MODELS LOAD REAL GOOD 
+- optional callback/timing for the animation would be cool
+
+=======+> MODEL LOADING SEEMS COOL NOW I THINK, AND THEN SEEMS LIKE, GIVEN THE MODEL LOADING IT WORKING, JUST
+
+glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
+  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
+  assert(gameobj.has_value());
+ 
+  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
+  auto modelTransform = fullModelTransform(sandbox, id);
+  // group * something = model (aka aX = b, so X = inv(A) * B)
+  // inverse(group) * model
+  *** auto groupToModel =  modelTransform * glm::inverse(groupTransform); ****
+
+
+  auto resultCheck = groupTransform * groupToModel;
+  if (resultCheck != modelTransform){
+    std::cout << "result_check = " << print(resultCheck) << std::endl;
+    std::cout << "model_transform = " << print(modelTransform) << std::endl;
+
+  }
+  return groupToModel;
+}
+
+
+=====================================
+goal: end of july
+====================================
+
+|        |
+|        |
+|  LATER |
+|        |
+
+==================
+GAME SPECIFIC
+==================
+==> fixed field of view.  gun probably should be on a fixed fov layer, but everything else no
+
+improve gun system
+- xoffset, yoffset as percentage of the screen)
+- fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
+- hud ui element better sizing and shit
+- make use of the (not yet implemented) sql system
+
+- improve movement system  (very tunable)
+  - maybe write custom controller and don't rely on the basic physics body stuff?
+  - movement speed
+  - gravity
+  - tilt
+  - landing sound effect
+  - sprint 
+  - limit vertical
+
+core gameplay implementation stage:
+- emitter initial velocity 
+- gun system (very tunable)
+  - projectile effect (on muzzle?)
+  - animation hooks => firing maybe should trigger the animiation, and then specified to that it will actually fire?
+
+
+========================================================================
+
+|           |
+|           |
+|  AND THEN |
+|           |
+
+GO HAM ON THE EDITOR -> VOXELS + TERRAIN
+- worldloading:
+- how to resize
+  conceptually:
+  calculate the position of each object 
+  --> don't take into account parented objects b/c too confusing/ constrainty 
+  --> calculate the position relative to the offset of the chunk, so pos = fn(obj_rel, chunk_index, chunk_size)
+  --> solve for pos = fn(obj_rel_to_solve, chunk_index_new, chunk_size_new) such that obj_rel_to_solve < chunk_size_new
+  ====> i guess?
+  
+========================================================================
+MAKE WORK IN DOCKER BUILD!!! + AUTOMATED BUILDS ON CI 
+MAKE WORK ON WINDOWS!!!!
+======================================================================
+
+
+-> merge serialize attr + getattr + include all attr
+
+- revisit layouts and try to get nice ui working for editor
+layout bugs:
+-> requires at least two passes (how many actuallly though?)
+-> bounding box seems to be wrong still (try w/ text no work?)
+-> should have a flex layout
+
+ui ideas:
+================
+top level console that scrolls down from the top
+==> how to implement scrollable text? ===>  MAYBE JUST DO FIXED SIZE AND SCRIPT FOR NOW
+- get properties/recorder working properly (use case -> texture sprite playback)
+
+
+===========================================
+
+- better voxels
+  - better editing
+  - destruction?
+
+
+===============================================
+emitter upgrades: 
+- optional message for each spawn?  
+- maybe the delta stuff should be relative to the parent?  
+and thenfore solve: - enemy should then start shooting projectiles at the player
+
+bugs:
+- tilt thing for movement not working great
+- make everything time independent
+- bugs with memory management for tracks / onexit fns
+=> convex/exact hull kind of wrongish, sometimes hull would crash eh 
+- layout bound info gets centered, but the layout should be aligned from the left
+- video no longer work wtf shit
+
+
+eventually:
+- work on ai, make players and shit move and stuff enemy ai 
+  - detection system: solved conceptually, but has parenting bugs 
+  - integrate pathfinding: - eventually try to make navmesh's automatically somehow?
+  - goal/destination system 
+    - goals exist as things in a scene -> real objects with position
+    - of the detected goals, each goal is evaluated with some utility value fn(actor, distance, goal) => number
+    - do the goal that has the highest utility
+- better way to include scene code/prefabs 
+- sql parser? 
+
+
+bugs for eventually:
+- drawline doesn't seem to work with 0 objects being rendered in the scene
+========> be more consistent with setting shaders
+
+
+- physics raycast is gets a collision object that does not a rigidbody in the map
+- playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
+- attribute updating/serialization not kept in line
+- consider when the script should be loaded.
+  - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
+  - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
+
+features for eventually:
+- (script-go-dormant "wake-message") => allows for one off events and stuff
+- generic messaging thing instead of the individual float/string/bool ones
+
+- improve state machine attrs (not super important yet but needed when get more involved w/ scripting
+  - attr function (i guess it affects the associated object?)
+- ability to have user defined attributes
+
+- guile should print a stacktrace
+- console.scm can switch scope into modules
+
+========================================================
+
+  => creates the way to do pinning : <mainobjectname>/<rest_of_the_node>:position:5 5 5 (overrides the animation data)
+      ==> WOULD ALLOW FOR POSING 
+
+easy use ideas:
+- nice graphic
+- for rotation
+- clean up/speed up model loading (every reference requires reading the file, even if it could be cached)
+
+
