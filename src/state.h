@@ -64,6 +64,7 @@ struct engineState {
   bool printKeyStrokes;
   bool cullEnabled;
 
+  bool groupSelection;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

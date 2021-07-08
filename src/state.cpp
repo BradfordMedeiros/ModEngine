@@ -52,6 +52,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .depthBufferLayer = -1,
     .printKeyStrokes = true,
     .cullEnabled = false,
+    .groupSelection = true,
 	};
 	return state;
 }

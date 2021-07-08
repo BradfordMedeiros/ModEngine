@@ -260,15 +260,15 @@ void selectItem(objid selectedId, Color pixelColor){
 
   applyPainting(selectedId);
 
-  auto groupId = getGroupId(world.sandbox, selectedId);
+  auto idToUse = state.groupSelection ? getGroupId(world.sandbox, selectedId) : selectedId;
 
   auto selectedSubObj = getGameObject(world, selectedId);
-  auto selectedObject =  getGameObject(world, groupId);
+  auto selectedObject =  getGameObject(world, idToUse);
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
 
   shouldCallItemSelected = true;
   onManipulatorSelectItem(
-    groupId, 
+    idToUse, 
     selectedSubObj.name,
     []() -> objid {
       return makeObjectAttr(
@@ -287,7 +287,7 @@ void selectItem(objid selectedId, Color pixelColor){
     setGameObjectPosition
   );
 
-  setSelectedIndex(state.editor, groupId, selectedObject.name, !state.multiselect);
+  setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }

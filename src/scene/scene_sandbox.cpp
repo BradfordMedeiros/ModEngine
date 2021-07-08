@@ -277,22 +277,20 @@ std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId){
   return allObjects;
 }
 
-void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
+void traverseScene(objid id, GameObjectH objectH, Scene& scene, glm::mat4 model, std::function<void(objid, glm::mat4, glm::mat4, std::string)> onObject){
   GameObject object = scene.idToGameObjects.at(objectH.id);
-  glm::vec3 scaling = object.transformation.scale * totalScale;
   
   glm::mat4 modelMatrix = matrixFromComponents(
     model,
     object.transformation.position, 
-    glm::vec3(1.f, 1.f, 1.f), 
+    object.transformation.scale, 
     object.transformation.rotation
   );
-  auto scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scaling);
 
-  onObject(id, scaledModelMatrix, model, "");
+  onObject(id, modelMatrix, model, "");
 
   for (objid id: objectH.children){
-    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix, scaling, onObject);
+    traverseScene(id, scene.idToGameObjectsH.at(id), scene, modelMatrix,  onObject);
   }
 }
 
@@ -301,11 +299,11 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, std::vector<LayerInfo> layers, glm::mat4 initialModel, glm::vec3 totalScale, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
+void traverseScene(Scene& scene, std::vector<LayerInfo> layers, glm::mat4 initialModel, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;
-  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel, totalScale, [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string) -> void {
+  traverseScene(id, scene.idToGameObjectsH.at(id), scene, initialModel,  [&datum](objid foundId, glm::mat4 modelMatrix, glm::mat4 parentMatrix, std::string) -> void {
     datum.push_back(traversalData{
       .id = foundId,
       .modelMatrix = modelMatrix,
@@ -441,15 +439,15 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
   return objh;
 }
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel, glm::vec3 scale, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(scene, sandbox.layers, initialModel, scale, onObject);
+void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel,  std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
+  traverseScene(scene, sandbox.layers, initialModel, onObject);
 }
 
 void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(sandbox, scene, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
+  traverseScene(sandbox, scene, glm::mat4(1.f), onObject);
 }
 void traverseScene(Scene& scene, std::vector<LayerInfo>& layers, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(scene, layers, glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f), onObject);
+  traverseScene(scene, layers, glm::mat4(1.f), onObject);
 }
 
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
