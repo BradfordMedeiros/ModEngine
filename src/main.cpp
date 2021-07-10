@@ -26,6 +26,7 @@
 #include "./benchmark.h"
 #include "./extensions.h"
 #include "./netscene.h"
+#include "./worldtiming.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -61,7 +62,7 @@ float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 
-AnimationState animations;
+WorldTiming timings = createWorldTiming();
 
 DynamicLoading dynamicLoading;
 std::vector<Line> lines;
@@ -166,22 +167,11 @@ void generatePortalTextures(){
   }
 }
 
-std::vector<int32_t> playbacksToRemove;
-void tickAnimations(AnimationState& animationState, float elapsedTime){
-  for (auto groupId : playbacksToRemove){
-    animationState.playbacks.erase(groupId);
-  }
-  for (auto &[id, playback] : animationState.playbacks){
-    playback.setElapsedTime(elapsedTime);
-  }
-  playbacksToRemove.clear();
-}
-
 float initialTime = glfwGetTime();
 TimePlayback timePlayback(
   initialTime, 
   [](float currentTime, float elapsedTime) -> void {
-    tickAnimations(animations, elapsedTime);
+    tickAnimations(timings, elapsedTime);
   }, 
   []() -> void {}
 ); 

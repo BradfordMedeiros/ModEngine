@@ -9,9 +9,6 @@
 #include "./scene/physics.h"
 #include "./scheme/scriptmanager.h"
 #include "./scene/sprites/sprites.h"
-#include "./scene/animation/playback.h"
-#include "./scene/animation/timeplayback.h"
-#include "./scene/animation/recorder.h"
 #include "./scene/types/sound.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
@@ -19,6 +16,7 @@
 #include "./drawing.h"
 #include "./worldloader.h"
 #include "./netscene.h"
+#include "./worldtiming.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
@@ -79,9 +77,6 @@ void copyObject(int32_t id);
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 void drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta);
 
-struct AnimationState {
-  std::map<int32_t, TimePlayback> playbacks;
-};
 std::vector<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay);
 void stopAnimation(int32_t id);

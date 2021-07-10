@@ -2,14 +2,13 @@
 
 extern World world;
 extern SysInterface interface;
-extern AnimationState animations;
+extern WorldTiming timings;
 extern GameObject* activeCameraObj;
 extern engineState state;
 extern GameObject defaultCamera;
 extern std::map<unsigned int, Mesh> fontMeshes;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
-extern std::vector<int32_t> playbacksToRemove;
 extern std::queue<StringString> channelMessages;
 
 extern float now;
@@ -212,65 +211,13 @@ std::vector<std::string> listAnimations(int32_t id){
   }
   return animationNames;
 }
-Animation getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
-  Animation noAnimation { };
-  for (auto animation :  world.animations.at(groupId)){
-    if (animation.name == animationToPlay){
-      return animation;
-    }
-  }
-  std::cout << "no animation found" << std::endl;
-  assert(false);
-  return  noAnimation;  // @todo probably use optional here.
-}
-
-void addAnimation(AnimationState& animationState, int32_t groupId, objid sceneId, std::string animationToPlay){
-  auto animation = getAnimation(world, groupId, animationToPlay);
-  TimePlayback playback(
-    initialTime, 
-    [animation, groupId, sceneId](float currentTime, float elapsedTime) -> void { 
-      auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime,
-        [sceneId](std::string name, std::string skeletonRoot) -> glm::mat4 {
-          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, sceneId);
-          if (gameobj.has_value()){
-            return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot, sceneId);
-          }
-          std::cout << "no value: " << name << std::endl;
-          assert(false);
-          return glm::mat4(1.f);  
-        },
-        [&world, sceneId](std::string name, glm::mat4 pose) -> void {
-          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, sceneId);
-          if (gameobj.has_value()){
-            gameobj.value() -> transformation = getTransformationFromMatrix(pose);
-          }else{
-            std::cout << "warning no bone node named: " << name << std::endl;
-            assert(false);
-          }
-      });
-    }, 
-    [groupId, &animationState]() -> void { 
-      playbacksToRemove.push_back(groupId);
-    },
-    animation.duration,
-    PAUSE
-  );  
-  animationState.playbacks[groupId] = playback;
-}
 
 void playAnimation(int32_t id, std::string animationToPlay){
-  auto groupId = getGroupId(world.sandbox, id);
-  auto idForScene = sceneId(world.sandbox, id);
-  if (animations.playbacks.find(groupId) != animations.playbacks.end()){
-    animations.playbacks.erase(groupId);
-  }
-  addAnimation(animations, groupId, idForScene, animationToPlay);
+  addAnimation(world, timings, initialTime, id, animationToPlay);
 }
 
 void stopAnimation(int32_t id){
-  auto groupId = getGroupId(world.sandbox, id);
-  playbacksToRemove.push_back(groupId);
+  removeAnimation(world, timings, id);
 }
 
 void removeObjectById(objid id){
