@@ -48,4 +48,6 @@ void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::fun
 void sendDataUdp(std::string data);
 std::string connectServer(std::string data);
 
+void sendLoadScene(World& world, NetCode& netcode, bool bootStrapperMode, int32_t id);
+
 #endif

@@ -193,3 +193,22 @@ std::string connectServer(std::string data){
     return packet;
   });
 }
+
+void sendLoadScene(World& world, NetCode& netcode, bool bootStrapperMode, int32_t id){
+  if (!bootStrapperMode){
+    std::cout << "ERROR: cannot send load scene in not-server mode" << std::endl;
+    assert(false);
+  }
+
+  std::string sceneData = serializeScene(world, id, true);
+  UdpPacket packet { .type = LOAD };
+  auto data = sceneData.c_str();
+  LoadPacket loadpacket {
+    .sceneId = id,
+  };
+  assert((sizeof(data) + 1 ) < sizeof(loadpacket.sceneData));
+  strncpy(loadpacket.sceneData, data, sizeof(loadpacket.sceneData));
+  assert(loadpacket.sceneData[sizeof(loadpacket.sceneData) -1] == '\0');
+  packet.payload.loadpacket = loadpacket; 
+  sendUdpPacketToAllUdpClients(netcode, toNetworkPacket(packet));
+}
