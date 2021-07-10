@@ -62,8 +62,6 @@ float now = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 
-WorldTiming timings = createWorldTiming();
-
 DynamicLoading dynamicLoading;
 std::vector<Line> lines;
 std::vector<Line> bluelines;
@@ -168,6 +166,8 @@ void generatePortalTextures(){
 }
 
 float initialTime = glfwGetTime();
+WorldTiming timings = createWorldTiming(initialTime);
+
 TimePlayback timePlayback(
   initialTime, 
   [](float currentTime, float elapsedTime) -> void {

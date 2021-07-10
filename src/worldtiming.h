@@ -15,11 +15,12 @@ struct AnimationState {
 struct WorldTiming {
   AnimationState animations;
   std::vector<int32_t> playbacksToRemove;
+  float initialTime;
 };
 
-WorldTiming createWorldTiming();
+WorldTiming createWorldTiming(float initialTime);
 void tickAnimations(WorldTiming& timings, float elapsedTime);
-void addAnimation(World& world, WorldTiming& timings, float initialTime, objid id, std::string animationToPlay);
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay);
 void removeAnimation(World& world, WorldTiming& timings, objid id);
 
 #endif

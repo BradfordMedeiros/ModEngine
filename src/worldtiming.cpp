@@ -1,12 +1,13 @@
 #include "./worldtiming.h"
 
-WorldTiming createWorldTiming(){
+WorldTiming createWorldTiming(float initialTime){
   AnimationState animations;
   std::vector<int32_t> playbacksToRemove;
 
   WorldTiming timing {
     .animations = animations,
     .playbacksToRemove = playbacksToRemove,
+    .initialTime = initialTime,
   };
   return timing;
 }
@@ -33,7 +34,7 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
   return  noAnimation;  // @todo probably use optional here.
 }
 
-void addAnimation(World& world, WorldTiming& timings, float initialTime, objid id, std::string animationToPlay){
+void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);
   auto idScene = sceneId(world.sandbox, id);
   if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
@@ -42,7 +43,7 @@ void addAnimation(World& world, WorldTiming& timings, float initialTime, objid i
 
   auto animation = getAnimation(world, groupId, animationToPlay);
   TimePlayback playback(
-    initialTime, 
+    timings.initialTime, 
     [&world, animation, groupId, idScene](float currentTime, float elapsedTime) -> void { 
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
       playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime,

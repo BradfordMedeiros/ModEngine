@@ -198,7 +198,7 @@ std::vector<std::string> listAnimations(int32_t id){
 }
 
 void playAnimation(int32_t id, std::string animationToPlay){
-  addAnimation(world, timings, initialTime, id, animationToPlay);
+  addAnimation(world, timings, id, animationToPlay);
 }
 
 void stopAnimation(int32_t id){
