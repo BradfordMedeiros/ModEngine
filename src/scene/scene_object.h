@@ -47,6 +47,11 @@ void enforceAllLayouts(World& world);
 
 void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh);
 
-
+struct TextureAndName {
+  Texture texture;
+  std::string textureName;
+};
+std::vector<TextureAndName> worldTextures(World& world);
+void setTexture(World& world, objid index, std::string textureName);
 
 #endif

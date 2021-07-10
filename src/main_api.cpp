@@ -298,46 +298,12 @@ void previousTexture(){
   previousTexture(drawParams);
 }
 
-struct TextureAndName {
-  Texture texture;
-  std::string textureName;
-};
-std::vector<TextureAndName> worldTextures(World& world){
-  std::vector<TextureAndName> textures;
-  for (auto [textureName, texture] : world.textures){
-    textures.push_back(TextureAndName{
-      .texture = texture,
-      .textureName = textureName
-    });
-  }
-  return textures;
-}
-
 void setTexture(objid index, std::string textureName){
-  if (world.textures.find(textureName) == world.textures.end()){
-    loadTextureWorld(world, textureName);
-  }
-
-  auto textureId = world.textures.at(textureName).textureId;
-  for (auto id : getIdsInGroup(world.sandbox, index)){
-    GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
-    if (meshObj != NULL){
-      meshObj -> texture.textureOverloadName = textureName;
-      meshObj -> texture.textureOverloadId = textureId;       
-    }
-
-    GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
-    if (buttonObj != NULL){
-      buttonObj -> onTextureString = textureName;
-      buttonObj -> onTexture = textureId;
-      buttonObj -> offTextureString = textureName;
-      buttonObj -> offTexture = textureId;
-    }
-  }
+  setTexture(world, index, textureName);
 }
 void maybeChangeTexture(int index){
   auto textureName = worldTextures(world).at(drawParams.activeTextureIndex).textureName;
-  setTexture(index, textureName);
+  setTexture(world, index, textureName);
 }
 
 void setState(std::string stateName){
