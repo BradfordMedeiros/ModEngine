@@ -12,6 +12,7 @@ uniform sampler2D maintexture;
 uniform sampler2D emissionTexture;
 uniform sampler2D opacityTexture;
 uniform sampler2D lightDepthTexture;
+uniform samplerCube cubemapTexture;
 
 uniform vec3 tint;
 uniform vec3 cameraPosition;
@@ -20,6 +21,8 @@ uniform bool enableDiffuse;
 uniform bool enableSpecular;
 uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
+uniform bool hasCubemapTexture;
+
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
 uniform vec2 textureSize;
@@ -43,6 +46,10 @@ void main(){
    // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
+    if (hasCubemapTexture){
+      FragColor = texture(cubemapTexture, FragPos);
+      return;
+    }
 
     vec3 shadowCoord = sshadowCoord.xyz * 0.5 + 0.5;
     vec2 offsetTexCoord = vec2(TexCoord.x, -1 * TexCoord.y);  // -1 because the images we feed in are flipped b/c the image encoding has them flipped.  Could reverse them there, but 
