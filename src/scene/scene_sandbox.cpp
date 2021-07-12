@@ -466,8 +466,6 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
   std::cout << "calc absolute transform placeholder" << std::endl;
   Transformation parentTransform = sandbox.mainScene.absoluteTransforms.at(parentId).transform;
-  auto parentScale = parentTransform.scale;
-  parentTransform.scale = glm::vec3(1.f, 1.f, 1.f);
 
   glm::mat4 parentMatrix = matrixFromComponents(parentTransform);
   glm::mat4 childMatrix = matrixFromComponents(transform);
