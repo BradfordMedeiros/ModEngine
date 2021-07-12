@@ -56,6 +56,7 @@ NetCode netcode { };
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+
 SysInterface interface;
 std::string textureFolderPath;
 float now = 0;
@@ -382,6 +383,8 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
   glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
   glUniform1i(glGetUniformLocation(shader, "lightDepthTexture"), 3);
+  glUniform1i(glGetUniformLocation(shader, "cubemapTexture"), 4);
+
 
   glActiveTexture(GL_TEXTURE0); 
 
@@ -583,6 +586,15 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 }
 
+void renderSkybox(GLint shaderProgram, glm::mat4 projection, glm::mat4 view){
+  std::vector<LightInfo> lights = {};
+  std::vector<glm::mat4> lightProjView = {};
+
+  auto value = glm::mat3(view);
+  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView);
+  drawMesh(world.meshes.at("skybox"), shaderProgram); 
+}
+
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
@@ -631,7 +643,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
   drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
   drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
-
 }
 
 void onClientMessage(std::string message){
@@ -1200,6 +1211,10 @@ int main(int argc, char* argv[]){
 
       glClearColor(0.0, 0.0, 0.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+
+      glDepthMask(GL_FALSE);
+      renderSkybox(shaderProgram, projection, view);  // Probably better to render this at the end 
+      glDepthMask(GL_TRUE);
 
       numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs);
     )

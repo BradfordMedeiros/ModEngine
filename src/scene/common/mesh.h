@@ -21,6 +21,8 @@ struct Mesh {
   Texture emissionTexture;
   bool hasOpacityTexture;
   Texture opacityTexture;
+  bool hasCubemapTexture;
+  Texture cubemapTexture;
   long unsigned int numElements;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
@@ -38,5 +40,8 @@ Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetx, float offsety,
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1, unsigned int customOpacityTextureId = -1,  bool drawPoints = false);  						 // draws mesh and related texture info (no shader data supplied)
 int drawLines(std::vector<Line> allLines); // returns # of verts drawn
+
+Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);
+
 
 #endif 

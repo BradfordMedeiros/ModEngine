@@ -79,6 +79,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .emissionTexture = emission,
     .hasOpacityTexture = meshData.hasOpacityTexture,
     .opacityTexture = opacity,
+    .hasCubemapTexture = false,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
@@ -124,6 +125,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     .texture = texture,
     .hasEmissionTexture = false,
     .hasOpacityTexture = false,
+    .hasCubemapTexture = false,
     .numElements = numIndices,
     .boundInfo = boundInfo,
     .bones = bones,
@@ -177,6 +179,10 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glActiveTexture(GL_TEXTURE0 + 2);
   glBindTexture(GL_TEXTURE_2D, opacityTextureId);
 
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasCubemapTexture"), mesh.hasCubemapTexture);
+  glActiveTexture(GL_TEXTURE0 + 4);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, mesh.cubemapTexture.textureId);
+
   glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);
 
@@ -222,3 +228,15 @@ int drawLines(std::vector<Line> allLines){
   glDeleteBuffers(1, &VBO);
   return indicies.size();
 }
+
+Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture){
+  ModelData data = loadModel("", skyboxPath);
+  assert(data.meshIdToMeshData.size() == 1);
+  MeshData meshData = data.meshIdToMeshData.begin() -> second;
+  Mesh mesh = loadMesh(defaultTexture, meshData, ensureLoadTexture);
+  mesh.hasCubemapTexture = true;
+  mesh.cubemapTexture = ensureLoadCubemapTexture("./res/textures/skyboxs/");
+  return mesh;
+}
+
+ 

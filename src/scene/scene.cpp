@@ -290,6 +290,15 @@ Texture loadTextureWorld(World& world, std::string texturepath){
   world.textures[texturepath] = texture;
   return texture;
 }
+Texture loadSkyboxWorld(World& world, std::string texturepath){
+  if (world.textures.find(texturepath) != world.textures.end()){
+    return world.textures.at(texturepath);
+  }
+  Texture texture = loadCubemapTexture(texturepath);
+  world.textures[texturepath] = texture;
+  return texture;
+}
+
 Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels){
   if (world.textures.find(texturepath) != world.textures.end()){
     return world.textures.at(texturepath);
@@ -354,6 +363,17 @@ World createWorld(
   addMesh(world, "./res/models/box/plane.dae");
   addMesh(world, "./res/models/controls/input.obj");
   addMesh(world, "./res/models/controls/unitxy.obj");
+
+  world.meshes["skybox"] = loadSkybox(
+    "./res/textures/default.jpg", 
+    "./res/models/skybox.obj", 
+    [&world](std::string texture) -> Texture {
+      return loadTextureWorld(world, texture);
+    },
+    [&world](std::string texture) -> Texture {
+      return loadSkyboxWorld(world, texture);
+    }
+  );     
 
   std::vector<glm::vec3> face = {
     glm::vec4(0.f, 0.f, 0.f, 1.f),
