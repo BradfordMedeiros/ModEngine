@@ -469,15 +469,10 @@ Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Tran
   auto parentScale = parentTransform.scale;
   parentTransform.scale = glm::vec3(1.f, 1.f, 1.f);
 
-  Transformation newTransform = transform;
-  auto desiredLocalScale = newTransform.scale;
-  newTransform.scale = glm::vec3(1.f, 1.f, 1.f);
-
   glm::mat4 parentMatrix = matrixFromComponents(parentTransform);
-  glm::mat4 childMatrix = matrixFromComponents(newTransform);
+  glm::mat4 childMatrix = matrixFromComponents(transform);
 
-  auto finalScale = desiredLocalScale * parentScale;
-  auto finalTransform = glm::scale(parentMatrix * childMatrix, finalScale);
+  auto finalTransform = parentMatrix * childMatrix;
   return getTransformationFromMatrix(finalTransform);
 }
 
