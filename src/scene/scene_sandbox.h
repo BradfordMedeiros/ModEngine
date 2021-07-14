@@ -29,7 +29,7 @@ struct GameObjectH {
 
 struct TransformCacheElement {
   Transformation transform;
-  bool skipConstraints;
+  bool absTransformUpdated;
 };
 
 struct Scene {

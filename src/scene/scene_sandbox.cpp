@@ -299,7 +299,8 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, std::vector<LayerInfo> layers, glm::mat4 initialModel, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
+void traverseScene(Scene& scene, std::vector<LayerInfo> layers, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
+  glm::mat4 initialModel(1.f);
   std::vector<traversalData> datum;
 
   objid id = scene.rootId;
@@ -321,6 +322,11 @@ void traverseScene(Scene& scene, std::vector<LayerInfo> layers, glm::mat4 initia
     }  
   }
 }
+
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
+  traverseScene(sandbox.mainScene, sandbox.layers, onObject);
+}
+
 
 std::vector<objid> getIdsInGroup(Scene& scene, objid groupId){
   std::vector<objid> ids;
@@ -439,21 +445,6 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
   return objh;
 }
 
-void traverseScene(SceneSandbox& sandbox, Scene& scene, glm::mat4 initialModel,  std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(scene, sandbox.layers, initialModel, onObject);
-}
-
-void traverseScene(SceneSandbox& sandbox, Scene& scene, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(sandbox, scene, glm::mat4(1.f), onObject);
-}
-void traverseScene(Scene& scene, std::vector<LayerInfo>& layers, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(scene, layers, glm::mat4(1.f), onObject);
-}
-
-void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
-  traverseScene(sandbox, sandbox.mainScene, onObject);
-}
-
 // What position should the gameobject be based upon the two absolute transform of parent and child
 Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid parentId){
   auto absTransformCache = matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(childId).transform); 
@@ -464,7 +455,6 @@ Transformation calcRelativeTransform(SceneSandbox& sandbox, objid childId, objid
 
 // What should the absolute transform be given a parents absolute and a relative child transform
 Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Transformation transform){
-  std::cout << "calc absolute transform placeholder" << std::endl;
   Transformation parentTransform = sandbox.mainScene.absoluteTransforms.at(parentId).transform;
 
   glm::mat4 parentMatrix = matrixFromComponents(parentTransform);
@@ -474,20 +464,54 @@ Transformation calcAbsoluteTransform(SceneSandbox& sandbox, objid parentId, Tran
   return getTransformationFromMatrix(finalTransform);
 }
 
+void updateTraverse(Scene& scene, objid id, std::function<bool(objid)> onAddObject){
+  auto parentObjH = scene.idToGameObjectsH.at(id);
+  bool shouldTraverse = onAddObject(parentObjH.id);
+  if (!shouldTraverse){
+    return;
+  }
+  for (objid id : parentObjH.children){
+    updateTraverse(scene, id, onAddObject);
+  }
+}
+
 void updateSandbox(SceneSandbox& sandbox){
+  std::set<objid> dirtiedElements;
   for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
     if (id == 0){
       continue;
     }
-
-    // This isn't quite right.
-    // Consider if the absolute position gets updated for the parent element (such as when skipConstraints).
-    // This would make it so all the child elements of this should also be updated.
-    // The actual transformation remains fine, but what is in the absolute transform cache is now invalid
-    if (transform.skipConstraints){
-      getGameObject(sandbox, id).transformation = calcRelativeTransform(sandbox, id, getGameObjectH(sandbox, id).parentId);
+    if (transform.absTransformUpdated){
+      dirtiedElements.insert(id);
     }
-    // TODO => update absoluteCache for dirtied elements (see note above)
+  }
+  /*std::cout << "need to update: ";
+  for (auto element : dirtiedElements){
+    std::cout << element << " ";
+  }
+  std::cout << std::endl;
+  */
+  std::set<objid> alreadyUpdated;
+  for (auto element : dirtiedElements){
+    updateTraverse(sandbox.mainScene, element, [&sandbox, &alreadyUpdated](objid id) -> bool {
+      if (alreadyUpdated.find(id) != alreadyUpdated.end()){
+        return false;
+      }
+      TransformCacheElement& element = sandbox.mainScene.absoluteTransforms.at(id);
+
+      auto parentId = getGameObjectH(sandbox, id).parentId;
+      if (!element.absTransformUpdated){
+        if (parentId != -1){
+          element.transform = calcAbsoluteTransform(sandbox, parentId, getGameObject(sandbox, id).transformation);
+        }
+      }
+      getGameObject(sandbox, id).transformation = calcRelativeTransform(sandbox, id, parentId);
+      element.absTransformUpdated = false;
+      //std::cout << "traversed element: " << id << std::endl;
+      alreadyUpdated.insert(id);
+      return true;
+    });
+    //std::cout << std::endl;
   }
 }
 
@@ -495,7 +519,7 @@ void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id
   traverseScene(mainScene, layers, [&mainScene](objid id, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
     mainScene.absoluteTransforms[id] = TransformCacheElement {
       .transform = getTransformationFromMatrix(model),
-      .skipConstraints = false,
+      .absTransformUpdated = false,
     };
   });
 
@@ -510,7 +534,7 @@ void removeObjectFromCache(Scene& mainScene, objid id){
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
 }
 
@@ -519,8 +543,9 @@ void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position)
   newTransform.position = position;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
+  std::cout << "update absolute position" << std::endl;
 }
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
   auto parentId = getGameObjectH(sandbox, id).parentId;
@@ -529,15 +554,17 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position)
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
+  std::cout << "update relative position" << std::endl;
+
 }
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   Transformation newTransform =  sandbox.mainScene.absoluteTransforms.at(id).transform;
   newTransform.scale = scale;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
 }
 void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
@@ -547,7 +574,7 @@ void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
 }
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
@@ -555,7 +582,7 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
   newTransform.rotation = rotation;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
 }
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
@@ -565,7 +592,7 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .skipConstraints = true,
+    .absTransformUpdated = true,
   };
 }
 
@@ -587,7 +614,6 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
     std::cout << "result_check = " << print(resultCheck) << std::endl;
     std::cout << "model_transform = " << print(modelTransform) << std::endl;
     assert(false);
-
   }
   return groupToModel;
 }
