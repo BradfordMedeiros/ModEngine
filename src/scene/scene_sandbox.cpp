@@ -528,9 +528,6 @@ void removeObjectFromCache(Scene& mainScene, objid id){
   mainScene.absoluteTransforms.erase(id);
 }
 
-// All transform updates update the absolute position cache first
-// then the relative transform gets updated, if either the id mat4, or parent mat4 were dirtied.
-// should have a flag which says to preserve the constaint or not 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
@@ -607,13 +604,13 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
   auto modelTransform = fullModelTransform(sandbox, id);
   // group * something = model (aka aX = b, so X = inv(A) * B)
   // inverse(group) * model
-  auto groupToModel =  glm::inverse(groupTransform) * modelTransform;
+  auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
 
   auto resultCheck = groupTransform * groupToModel;
   if (resultCheck != modelTransform){
-    std::cout << "result_check = " << print(resultCheck) << std::endl;
-    std::cout << "model_transform = " << print(modelTransform) << std::endl;
-    assert(false);
+    //std::cout << "result_check = " << print(resultCheck) << std::endl;
+    //std::cout << "model_transform = " << print(modelTransform) << std::endl;
+    //assert(false);
   }
   return groupToModel;
 }
