@@ -59,7 +59,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
         [&world, idScene](std::string name, glm::mat4 pose) -> void {
           auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
           if (gameobj.has_value()){
-            gameobj.value() -> transformation = getTransformationFromMatrix(pose);
+            updateAbsoluteTransform(world.sandbox, gameobj.value() -> id, getTransformationFromMatrix(pose));
           }else{
             std::cout << "warning no bone node named: " << name << std::endl;
             assert(false);
