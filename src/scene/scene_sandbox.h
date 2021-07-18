@@ -111,6 +111,7 @@ int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform);
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position);
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale);

@@ -12,7 +12,7 @@ glm::mat4 matrixFromComponents(Transformation transformation){
 
 objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   assert(name == gameobjectObj.name);
-  auto gameobjectH = GameObjectH {
+  auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
     .parentId = parentId,
     .groupId = gameobjectObj.id,
@@ -476,6 +476,8 @@ void updateTraverse(Scene& scene, objid id, std::function<bool(objid)> onAddObje
 }
 
 void updateSandbox(SceneSandbox& sandbox){
+  std::cout << std::endl << std::endl;
+
   std::set<objid> dirtiedElements;
   for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
     if (id == 0){
@@ -529,8 +531,18 @@ void removeObjectFromCache(Scene& mainScene, objid id){
 }
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+  std::cout << "update: " << id << " - " << print(transform.position) << std::endl;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
+    .absTransformUpdated = true,
+  };
+}
+
+void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+  auto parentId = getGameObjectH(sandbox, id).parentId;
+  auto newTransform = calcAbsoluteTransform(sandbox, parentId, transform);
+  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
+    .transform = newTransform,
     .absTransformUpdated = true,
   };
 }
