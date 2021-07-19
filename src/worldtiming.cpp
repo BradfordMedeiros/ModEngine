@@ -34,6 +34,20 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
   return  noAnimation;  // @todo probably use optional here.
 }
 
+
+std::map<std::string, glm::mat4> initialBonePoses;
+
+
+glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::string skeletonRoot){
+  auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
+  if (gameobj.has_value()){
+    return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot, idScene);
+  }
+  std::cout << "no value: " << name << std::endl;
+  assert(false);
+  return glm::mat4(1.f);   
+}
+
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);
   auto idScene = sceneId(world.sandbox, id);
@@ -48,13 +62,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
       playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime,
         [&world, idScene](std::string name, std::string skeletonRoot) -> glm::mat4 {
-          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
-          if (gameobj.has_value()){
-            return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot, idScene);
-          }
-          std::cout << "no value: " << name << std::endl;
-          assert(false);
-          return glm::mat4(1.f);  
+          return getModelMatrix(world, idScene, name, skeletonRoot);
         },
         [&world, idScene](std::string name, glm::mat4 pose) -> void {
           auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
@@ -64,7 +72,16 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
             std::cout << "warning no bone node named: " << name << std::endl;
             assert(false);
           }
-      });
+        }, 
+        [&world, idScene](Bone& bone) -> glm::mat4 {
+          auto bonename = bone.name;
+          auto boneTransform =  getModelMatrix(world, idScene, bone.name, bone.skeletonBase);
+          if (initialBonePoses.find(bone.name) == initialBonePoses.end()){
+            initialBonePoses[bone.name] = boneTransform;
+          }
+          return initialBonePoses.at(bone.name);
+        }
+      );
     }, 
     [groupId, &timings]() -> void { 
       timings.playbacksToRemove.push_back(groupId);
