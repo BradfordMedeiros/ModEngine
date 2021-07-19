@@ -71,29 +71,25 @@ aiMatrix4x4 glmMatrixToAi(glm::mat4 mat){
 }
 
 glm::mat4 aiMatrixToGlm(aiMatrix4x4& in_mat){
-  glm::mat4 tmp;
-  tmp[0][0] = in_mat.a1;
-  tmp[1][0] = in_mat.b1;
-  tmp[2][0] = in_mat.c1;
-  tmp[3][0] = in_mat.d1;
-
-  tmp[0][1] = in_mat.a2;
-  tmp[1][1] = in_mat.b2;
-  tmp[2][1] = in_mat.c2;
-  tmp[3][1] = in_mat.d2;
-
-  tmp[0][2] = in_mat.a3;
-  tmp[1][2] = in_mat.b3;
-  tmp[2][2] = in_mat.c3;
-  tmp[3][2] = in_mat.d3;
-
-  tmp[0][3] = in_mat.a4;
-  tmp[1][3] = in_mat.b4;
-  tmp[2][3] = in_mat.c4;
-  tmp[3][3] = in_mat.d4;
-  return tmp;
+  glm::mat4 temp;
+  temp[0][0] = in_mat.a1; 
+  temp[0][1] = in_mat.b1;  
+  temp[0][2] = in_mat.c1; 
+  temp[0][3] = in_mat.d1;
+  temp[1][0] = in_mat.a2; 
+  temp[1][1] = in_mat.b2;  
+  temp[1][2] = in_mat.c2; 
+  temp[1][3] = in_mat.d2;
+  temp[2][0] = in_mat.a3; 
+  temp[2][1] = in_mat.b3;  
+  temp[2][2] = in_mat.c3; 
+  temp[2][3] = in_mat.d3;
+  temp[3][0] = in_mat.a4; 
+  temp[3][1] = in_mat.b4;  
+  temp[3][2] = in_mat.c4; 
+  temp[3][3] = in_mat.d4;
+  return temp;
 }
-
 
 glm::vec3 aiVectorToGlm(aiVector3D& vec){
   return glm::vec3(vec.x, vec.y, vec.z);
@@ -111,9 +107,10 @@ glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVector
   auto rotation = aiQuatToGlm(rotationKey.mValue);
   auto scaling = aiVectorToGlm(scalingKey.mValue);
     
-  auto scalingMatrix = glm::scale(glm::mat4(1.f), scaling);                     //http://assimp.sourceforge.net/lib_html/structai_node_anim.html  scaling, then rotation, then translation
-  auto rotationMatrix = glm::toMat4(rotation);
+  //http://assimp.sourceforge.net/lib_html/structai_node_anim.html  scaling, then rotation, then translation
   auto positionMatrix = glm::translate(glm::mat4(1.f), position);
+  auto rotationMatrix = glm::toMat4(rotation);
+  auto scalingMatrix = glm::scale(glm::mat4(1.f), scaling);
 
   return positionMatrix * rotationMatrix * scalingMatrix;
 }
@@ -129,6 +126,18 @@ struct BoneInfo {
   std::map<unsigned int, std::vector<BoneWeighting>>  vertexBoneWeight;
 };
 
+void printMatrix(std::string bonename, aiMatrix4x4& matrix, glm::mat4 glmMatrix){
+  std::cout << "process bones: " << bonename << std::endl;
+  auto transform = getTransformationFromMatrix(glm::inverse(glmMatrix));
+  aiVector3t<float> scaling;
+  aiQuaterniont<float> rotation;
+  aiVector3t<float> position;
+  matrix.Decompose(scaling, rotation, position);
+
+  std::cout << "position: " << print(transform.position) << " | " << print(aiVectorToGlm(position)) << std::endl;
+  std::cout << "scale: " << print(transform.scale) << " | " << print(aiVectorToGlm(scaling)) << std::endl;
+  std::cout << "rotation: " << print(transform.rotation) << std::endl << std::endl;
+}
 
 BoneInfo processBones(std::string rootname, aiMesh* mesh){
   std::vector<Bone> meshBones;
@@ -142,7 +151,11 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
       .name = generateNodeName(rootname, bone -> mName.C_Str()),
       .offsetMatrix = glm::mat4(1.f),
       .skeletonBase = "",
+      .initialBonePose = aiMatrixToGlm(bone -> mOffsetMatrix),
     };
+
+    printMatrix(meshBone.name, bone -> mOffsetMatrix, meshBone.initialBonePose);
+
     meshBones.push_back(meshBone);
 
     for (int j = 0; j < bone -> mNumWeights; j++){
@@ -221,6 +234,10 @@ void setRootSkeletonInBones(
       bone.skeletonBase = skeletonBase;
     }
   }
+}
+
+void setInitialBonePoses(){
+
 }
 
 void dumpVerticesData(std::string modelPath, MeshData& model){
@@ -419,6 +436,7 @@ ModelData loadModel(std::string rootname, std::string modelPath){
   );
 
    setRootSkeletonInBones(meshIdToMeshData, nodeNameToDepth, childToParent, names);
+   setInitialBonePoses();
 
    assert(nodeToMeshId.size() == nodeTransform.size());
    assert(names.size() ==  nodeToMeshId.size());

@@ -36,8 +36,6 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
 
 
 std::map<std::string, glm::mat4> initialBonePoses;
-
-
 glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::string skeletonRoot){
   auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
   if (gameobj.has_value()){
