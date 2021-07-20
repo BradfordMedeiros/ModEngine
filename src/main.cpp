@@ -375,7 +375,7 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
   }
   return shaderNameToId.at(fragShaderName);
 }
-void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview){
+void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
 
   glUseProgram(shader);
@@ -389,7 +389,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glActiveTexture(GL_TEXTURE0); 
 
   glUniformMatrix4fv(glGetUniformLocation(shader, "projview"), 1, GL_FALSE, glm::value_ptr(projview));
-  glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, glm::value_ptr(defaultCamera.transformation.position));
+  glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
   glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
 
@@ -428,13 +428,13 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview){
+int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
   int numTriangles = 0;
 
   int numDepthClears = 0;
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
     assert(id >= 0);
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
     if (state.depthBufferLayer != depthBufferLayer){
@@ -447,7 +447,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     auto newShader = getShaderByName(shader, shaderProgram);
-    setShaderData(newShader, proj, view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview);
+    setShaderData(newShader, proj, view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -586,12 +586,12 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 }
 
-void renderSkybox(GLint shaderProgram, glm::mat4 projection, glm::mat4 view){
+void renderSkybox(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::vec3 cameraPosition){
   std::vector<LightInfo> lights = {};
   std::vector<glm::mat4> lightProjView = {};
 
   auto value = glm::mat3(view);
-  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView);
+  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition);
   drawMesh(world.meshes.at("skybox"), shaderProgram); 
 }
 
@@ -1095,7 +1095,7 @@ int main(int argc, char* argv[]){
       auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
 
-      renderWorld(world, selectionProgram, lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}); 
+      renderWorld(world, selectionProgram, lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
     }
 
     PROFILE(
@@ -1109,7 +1109,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glDisable(GL_BLEND);
     
-      renderWorld(world, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      renderWorld(world, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
     // Each portal requires a render pass
@@ -1181,7 +1181,7 @@ int main(int argc, char* argv[]){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto portalViewMatrix = renderPortalView(portal, viewTransform);
-        renderWorld(world, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs);
+        renderWorld(world, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
       
         nextPortalCache[portal.id] = portalTextures[i];
       }
@@ -1213,10 +1213,10 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
       glDepthMask(GL_FALSE);
-      renderSkybox(shaderProgram, projection, view);  // Probably better to render this at the end 
+      renderSkybox(shaderProgram, projection, view, viewTransform.position);  // Probably better to render this at the end 
       glDepthMask(GL_TRUE);
 
-      numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs);
+      numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
