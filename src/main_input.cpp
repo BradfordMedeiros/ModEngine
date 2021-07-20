@@ -34,6 +34,8 @@ void processManipulatorForId(objid id){
   if (id == -1 || !idExists(world.sandbox, id)){
     return;
   }
+
+  std::cout << "processing manipulator" << std::endl;
   //auto transform = fullTransformation(world.sandbox, id);
   auto transform = getGameObject(world, id).transformation; 
   if (state.manipulatorMode == TRANSLATE){
@@ -971,7 +973,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 'Y', 
+    .sourceKey = 'L', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
