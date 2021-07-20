@@ -970,6 +970,18 @@ std::vector<InputDispatch> inputFns = {
       std::cout << "ToggleFOV: " << state.toggleFov << std::endl;
     }
   },
+  InputDispatch{
+    .sourceKey = 'Y', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      auto ids = selectedIds(state.editor);
+      if (ids.size() > 0){
+        updateBonePose(world, ids.at(0));
+      }
+    }
+  }
   /*InputDispatch{
     .sourceKey = 'Q', 
     .sourceType = BUTTON_PRESS,
