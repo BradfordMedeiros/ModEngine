@@ -1,0 +1,11 @@
+
+unitcube:position:0 -5 0
+unitcube:scale:2 2 2
+unitcube:rotation:45 0 0
+unitcube:mesh:./res/models/unit_rect/unit_rect.obj
+
+
+unitcube2:position:3 -5 0
+unitcube2:scale:1 1 1
+unitcube2:rotation:45 0 0
+unitcube2:mesh:./res/models/unit_rect/unit_rect.obj
