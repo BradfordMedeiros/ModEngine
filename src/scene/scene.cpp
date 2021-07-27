@@ -325,6 +325,20 @@ void addMesh(World& world, std::string meshpath){
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
+void loadSkybox(World& world, std::string skyboxpath){
+  world.meshes["skybox"] = loadSkybox(
+    "./res/textures/default.jpg", 
+    "./res/models/skybox.obj",
+    skyboxpath, 
+    [&world](std::string texture) -> Texture {
+      return loadTextureWorld(world, texture);
+    },
+    [&world](std::string texture) -> Texture {
+      return loadSkyboxWorld(world, texture);
+    }
+  );    
+}
+
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 
@@ -364,16 +378,7 @@ World createWorld(
   addMesh(world, "./res/models/controls/input.obj");
   addMesh(world, "./res/models/controls/unitxy.obj");
 
-  world.meshes["skybox"] = loadSkybox(
-    "./res/textures/default.jpg", 
-    "./res/models/skybox.obj", 
-    [&world](std::string texture) -> Texture {
-      return loadTextureWorld(world, texture);
-    },
-    [&world](std::string texture) -> Texture {
-      return loadSkyboxWorld(world, texture);
-    }
-  );     
+  loadSkybox(world, "./res/textures/skyboxs/sky/"); 
 
   std::vector<glm::vec3> face = {
     glm::vec4(0.f, 0.f, 0.f, 1.f),

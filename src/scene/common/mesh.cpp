@@ -229,14 +229,15 @@ int drawLines(std::vector<Line> allLines){
   return indicies.size();
 }
 
-Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture){
+Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture){
   ModelData data = loadModel("", skyboxPath);
   assert(data.meshIdToMeshData.size() == 1);
   MeshData meshData = data.meshIdToMeshData.begin() -> second;
   Mesh mesh = loadMesh(defaultTexture, meshData, ensureLoadTexture);
   mesh.hasCubemapTexture = true;
-  mesh.cubemapTexture = ensureLoadCubemapTexture("./res/textures/skyboxs/");
+  mesh.cubemapTexture = ensureLoadCubemapTexture(skyboxTexture);
   return mesh;
+  
 }
 
  

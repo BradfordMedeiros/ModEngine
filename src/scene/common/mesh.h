@@ -41,7 +41,7 @@ Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> e
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1, unsigned int customOpacityTextureId = -1,  bool drawPoints = false);  						 // draws mesh and related texture info (no shader data supplied)
 int drawLines(std::vector<Line> allLines); // returns # of verts drawn
 
-Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);
+Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);
 
 
 #endif 
