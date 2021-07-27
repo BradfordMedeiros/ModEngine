@@ -378,7 +378,7 @@ World createWorld(
   addMesh(world, "./res/models/controls/input.obj");
   addMesh(world, "./res/models/controls/unitxy.obj");
 
-  loadSkybox(world, "./res/textures/skyboxs/sky/"); 
+  loadSkybox(world, "./res/textures/skyboxs/desert/"); 
 
   std::vector<glm::vec3> face = {
     glm::vec4(0.f, 0.f, 0.f, 1.f),

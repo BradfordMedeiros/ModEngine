@@ -466,3 +466,7 @@ std::vector<VoxelQueryData> getSelectedVoxels(){
   }
   return voxels;
 }
+
+void setSkybox(std::string skybox){
+  loadSkybox(world, skybox); 
+}

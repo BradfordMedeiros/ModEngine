@@ -943,7 +943,8 @@ int main(int argc, char* argv[]){
     scmEmit,
     addLoadingAround,
     removeLoadingAround,
-    createGeneratedMesh
+    createGeneratedMesh,
+    setSkybox
   );
 
   schemeBindings = getSchemeCallbacks();

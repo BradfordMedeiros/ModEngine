@@ -729,6 +729,12 @@ SCM scmGenerateMesh(SCM face, SCM points, SCM meshname){
   return SCM_UNSPECIFIED;
 }
 
+void (*_setSkybox)(std::string);
+SCM scmSetSkybox(SCM skybox){
+  _setSkybox(scm_to_locale_string(skybox));
+  return SCM_UNSPECIFIED;
+}
+
 
 // Callbacks
 void onFrame(){
@@ -984,6 +990,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("rm-load-around", 1, 0, 0, (void*)scmRmLoadAround);
 
   scm_c_define_gsubr("genmesh", 3, 0, 0, (void*)scmGenerateMesh);
+  scm_c_define_gsubr("set-skybox", 1, 0, 0, (void*)scmSetSkybox);
 }
 
 
@@ -1054,7 +1061,8 @@ void createStaticSchemeBindings(
   void (*scmEmit)(objid),
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
-  void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string)
+  void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
+  void (*setSkybox)(std::string)
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -1151,4 +1159,6 @@ void createStaticSchemeBindings(
   _loadAround = loadAround;
   _rmLoadAround = rmLoadAround;
   _generateMesh = generateMesh;
+
+  _setSkybox = setSkybox;
 }
