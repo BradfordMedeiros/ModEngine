@@ -4,6 +4,7 @@ Extensions loadExtensions(std::vector<std::string> extensionFiles){
   std::vector<void*> handles;
   std::vector<func_t> onStart;
   std::vector<func_t> onFrame;
+  std::vector<func_t> registerGuileFns;
 
   for (auto extensionFile : extensionFiles){
     void* handle = dlopen(extensionFile.c_str(), RTLD_NOW);
@@ -15,18 +16,26 @@ Extensions loadExtensions(std::vector<std::string> extensionFiles){
     handles.push_back(handle);
 
     func_t onStartFn = (func_t)dlsym(handle, "onStart");
-    assert(onStartFn != NULL);
-    onStart.push_back(onStartFn);
+    if (onStartFn != NULL){
+      onStart.push_back(onStartFn);
+    }
 
     func_t onFrameFn = (func_t)dlsym(handle, "onFrame");
-    assert(onFrameFn != NULL);
-    onFrame.push_back(onFrameFn);
+    if(onFrameFn != NULL){
+      onFrame.push_back(onFrameFn);
+    }
+
+    func_t registerGuileFn = (func_t)dlsym(handle, "registerGuileFns");
+    if(registerGuileFn != NULL){
+      registerGuileFns.push_back(registerGuileFn);
+    }
   }
   
   Extensions extensions { 
     .handles = handles,
     .onStart = onStart,
     .onFrame = onFrame,
+    .registerGuileFns = registerGuileFns,
   };
   return extensions;
 }
@@ -48,3 +57,4 @@ void unloadExtensions(Extensions& extensions){
     assert(dlclose(handle) == 0);
   }
 }
+

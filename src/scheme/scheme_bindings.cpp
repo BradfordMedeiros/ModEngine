@@ -878,6 +878,7 @@ void onScriptUnload(){
   maybeCallFunc("beforeUnload");
 }
 
+std::vector<func_t> _registerGuileFns;
 ////////////
 void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
@@ -991,6 +992,10 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("genmesh", 3, 0, 0, (void*)scmGenerateMesh);
   scm_c_define_gsubr("set-skybox", 1, 0, 0, (void*)scmSetSkybox);
+
+  for (auto registerFn : _registerGuileFns){
+    registerFn();
+  }
 }
 
 
@@ -1062,7 +1067,8 @@ void createStaticSchemeBindings(
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
-  void (*setSkybox)(std::string)
+  void (*setSkybox)(std::string),
+  std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
   gameObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("gameobj"), scm_list_1(scm_from_utf8_symbol("data")), NULL);
@@ -1161,4 +1167,6 @@ void createStaticSchemeBindings(
   _generateMesh = generateMesh;
 
   _setSkybox = setSkybox;
+
+  _registerGuileFns = registerGuileFns;
 }

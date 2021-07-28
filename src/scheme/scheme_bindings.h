@@ -77,7 +77,8 @@ void createStaticSchemeBindings(
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
-  void (*setSkybox)(std::string)
+  void (*setSkybox)(std::string),
+  std::vector<func_t> registerGuileFns
 );
 
 void defineFunctions(objid id, bool isServer);

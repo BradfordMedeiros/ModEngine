@@ -741,7 +741,7 @@ int main(int argc, char* argv[]){
 
   shaderFolderPath = result["shader"].as<std::string>();
   textureFolderPath = result["texture"].as<std::string>();
-  const std::string framebufferTexturePath = result["framebuffer"].as<std::string>();
+  const std::string framebufferShaderPath = result["framebuffer"].as<std::string>();
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
   
@@ -851,8 +851,8 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");
   
-  std::cout << "INFO: framebuffer file path is " << framebufferTexturePath << std::endl;
-  framebufferProgram = loadShader(framebufferTexturePath + "/vertex.glsl", framebufferTexturePath + "/fragment.glsl");
+  std::cout << "INFO: framebuffer file path is " << framebufferShaderPath << std::endl;
+  framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl");
 
   std::string depthShaderPath = "./res/shaders/depth";
   std::cout << "INFO: depth file path is " << depthShaderPath << std::endl;
@@ -944,7 +944,8 @@ int main(int argc, char* argv[]){
     addLoadingAround,
     removeLoadingAround,
     createGeneratedMesh,
-    setSkybox
+    setSkybox,
+    extensions.registerGuileFns
   );
 
   schemeBindings = getSchemeCallbacks();

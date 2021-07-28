@@ -101,4 +101,6 @@ struct GameobjAttributes {
   std::vector<std::string> children;
 };
 
+typedef void (*func_t)();
+
 #endif

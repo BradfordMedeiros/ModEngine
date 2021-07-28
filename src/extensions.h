@@ -13,6 +13,7 @@ struct Extensions {
   std::vector<void*> handles;
   std::vector<func_t> onStart;
   std::vector<func_t> onFrame;
+  std::vector<func_t> registerGuileFns;
 };
 
 Extensions loadExtensions(std::vector<std::string> extensionFiles);
