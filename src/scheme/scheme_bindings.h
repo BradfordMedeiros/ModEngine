@@ -5,7 +5,6 @@
 #include <map>
 #include "../common/util.h"
 #include "../gizmo/sequencer.h"   // TODO -  don't depend on this directly 
-#include "../sql.h" // TODO don't depend on this directly
 #include "./scriptmanager.h"    // need to eliminate the circular relationship here
 #include "./scheme_util.h"
 

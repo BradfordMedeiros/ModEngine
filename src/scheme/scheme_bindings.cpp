@@ -677,36 +677,6 @@ SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
 }
 
-struct sqlQueryHolder {
-  SqlQuery* query;
-};
-
-SCM sqlObjectType;   // this is modified during init
-SqlQuery* queryFromForeign(SCM sqlQuery){
-  sqlQueryHolder* query;
-  scm_assert_foreign_object_type(sqlObjectType, sqlQuery);
-  query = (sqlQueryHolder*)scm_foreign_object_ref(sqlQuery, 0); 
-  return query -> query;
-}
-
-SCM scmSql(SCM sqlQuery){
-  auto query = queryFromForeign(sqlQuery);
-  auto sqlResult = executeSqlQuery(*query);
-  return nestedVecToSCM(sqlResult);
-} 
-
-SCM scmSqlCompile(SCM sqlQueryString){
-  auto queryObj = (sqlQueryHolder*)scm_gc_malloc(sizeof(sqlQueryHolder), "sqlquery");
-  SqlQuery* query = new SqlQuery;
-  *query = compileSqlQuery(scm_to_locale_string(sqlQueryString));
-  queryObj -> query = query;
-  return scm_make_foreign_object_1(sqlObjectType, queryObj);
-}
-void finalizeSqlObjectType(SCM sqlQuery){
-  auto query = queryFromForeign(sqlQuery);
-  delete query;
-}
-
 void (*_scmEmit)(objid id);
 SCM scmEmit(SCM gameobjId){
   _scmEmit(scm_to_int32(gameobjId));
@@ -982,8 +952,6 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("set-texture", 2, 0, 0, (void*)scmSetTexture);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
-  scm_c_define_gsubr("sql", 1, 0, 0, (void*)scmSql);
-  scm_c_define_gsubr("sql-compile", 1, 0, 0, (void*)scmSqlCompile);
 
   scm_c_define_gsubr("emit", 1, 0, 0, (void*)scmEmit);
 
@@ -1076,7 +1044,6 @@ void createStaticSchemeBindings(
   onExitType = scm_make_foreign_object_type(scm_from_utf8_symbol("onexit"), scm_list_1(scm_from_utf8_symbol("data")), finalizeOnExit);
   stateType = scm_make_foreign_object_type(scm_from_utf8_symbol("state"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
   stateMachineType = scm_make_foreign_object_type(scm_from_utf8_symbol("statemachine"),  scm_list_1(scm_from_utf8_symbol("data")), NULL);
-  sqlObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("sqlquery"), scm_list_1(scm_from_utf8_symbol("data")), finalizeSqlObjectType);
 
   _listSceneId = listSceneId;
 
