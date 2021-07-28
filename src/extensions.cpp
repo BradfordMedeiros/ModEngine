@@ -58,3 +58,11 @@ void unloadExtensions(Extensions& extensions){
   }
 }
 
+void registerGuileTypes(Extensions& extensions){
+  for (auto handle : extensions.handles){
+    func_t registerGuileTypeFn = (func_t)dlsym(handle, "registerGuileTypes");
+    if(registerGuileTypeFn != NULL){
+      registerGuileTypeFn();   
+    }      
+  }
+}

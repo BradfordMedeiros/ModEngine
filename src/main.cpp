@@ -947,6 +947,8 @@ int main(int argc, char* argv[]){
     setSkybox,
     extensions.registerGuileFns
   );
+  registerGuileTypes(extensions);
+
 
   schemeBindings = getSchemeCallbacks();
   if(bootStrapperMode){

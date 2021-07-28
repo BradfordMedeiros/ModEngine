@@ -20,5 +20,6 @@ Extensions loadExtensions(std::vector<std::string> extensionFiles);
 void extensionsInit(Extensions& extensions);
 void extensionsOnFrame(Extensions& extensions);
 void unloadExtensions(Extensions& extensions);
+void registerGuileTypes(Extensions& extensions);
 
 #endif
