@@ -663,8 +663,10 @@ void genFramebufferTexture(unsigned int *texture){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+bool wroteCrash = false;
 void signalHandler(int signum) {
-  if (showDebugInfo){
+  if (showDebugInfo && !wroteCrash){
+    wroteCrash = true;
     auto crashFile = "./build/crash.info";
     std::cout << "wrote crash file: " << crashFile << std::endl;
     saveFile(crashFile, dumpDebugInfo());
