@@ -1,0 +1,6 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+parentbone_rotate:mesh:../gameresources/build/debug/parentbone.fbx
+parentbone_rotate:script:./res/scenes/features/animation/animate.scm
