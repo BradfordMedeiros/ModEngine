@@ -398,7 +398,6 @@ World createWorld(
 std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName, ModelData& data, GameobjAttributes& attr, std::vector<std::string> fieldsToCopy){
   std::map<objid, GameobjAttributes> additionalFieldsMap;
   for (auto [nodeId, _] : data.nodeTransform){
-    std::map<std::string, std::string> emptyFields;
     additionalFieldsMap[nodeId] = GameobjAttributes{};
   }
 

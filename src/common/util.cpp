@@ -349,7 +349,6 @@ std::string serializePropertySuffix(std::string key, AttributeValue value){
 }
 
 int numUniqueDepthLayers(std::vector<LayerInfo> layers){
-  int nums = 0;
   std::set<int> depths;
   for (auto layer : layers){
     depths.insert(layer.depthBufferLayer);
