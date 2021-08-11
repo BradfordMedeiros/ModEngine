@@ -884,6 +884,19 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   assert(false);
 }
 
+
+void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
+  if (texture.textureoffset.x != 0.f && texture.textureoffset.y != 0.f){
+    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(texture.textureoffset)));
+  }
+  if (texture.textureOverloadName != ""){
+    pairs.push_back(std::pair<std::string, std::string>("texture", texture.textureOverloadName));
+  }
+  if (texture.texturesize.x != 1.f && texture.texturesize.y != 1.f){
+    pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
+  }
+}
+
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
   std::vector<std::pair<std::string, std::string>> pairs;
   if (obj.rootMesh != ""){
@@ -892,15 +905,7 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
   if (obj.isDisabled){
     pairs.push_back(std::pair<std::string, std::string>("disabled", "true"));
   }
-  if (obj.texture.textureoffset.x != 0.f && obj.texture.textureoffset.y != 0.f){
-    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(obj.texture.textureoffset)));
-  }
-  if (obj.texture.textureOverloadName != ""){
-    pairs.push_back(std::pair<std::string, std::string>("texture", obj.texture.textureOverloadName));
-  }
-  if (obj.texture.texturesize.x != 1.f && obj.texture.texturesize.y != 1.f){
-    pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(obj.texture.texturesize)));
-  }
+  addSerializedTextureInformation(pairs, obj.texture);
   if (!isIdentityVec(obj.tint)){
     pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
   }
@@ -1087,8 +1092,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   if (rootObj != NULL){
     return {};
   }
-
-  //assert(false);  
+  assert(false);  
   return {};
 }
 
