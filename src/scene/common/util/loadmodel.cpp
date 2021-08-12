@@ -269,6 +269,7 @@ std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMateria
   return relativePath.string();
 }
 
+const bool DUMP_VERTEX_DATA = false;
 MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, std::string modelPath){
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
@@ -334,8 +335,9 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
      .bones = boneInfo.bones,
    };
 
-   //dumpVerticesData(modelPath, model); 
-
+   if (DUMP_VERTEX_DATA){
+     dumpVerticesData(modelPath, model); 
+   }
    return model;
 }
 

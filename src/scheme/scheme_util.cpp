@@ -27,16 +27,6 @@ glm::vec3 listToVec3(SCM vecList){
   return glm::vec3(x, y, z);
 }
 
-std::vector<std::string> listToVecString(SCM stringList){
-  std::vector<std::string> list;
-  auto numElements = toUnsignedInt(scm_length(stringList));
-  for (int i = 0; i < numElements; i++){
-    auto stringValue = scm_to_locale_string(scm_list_ref(stringList, scm_from_unsigned_integer(i)));
-    list.push_back(stringValue);
-  }
-  return list;
-}
-
 std::vector<glm::vec3> listToVecVec3(SCM vecList){
   std::vector<glm::vec3> vecPoints;
   auto numElements = toUnsignedInt(scm_length(vecList));
