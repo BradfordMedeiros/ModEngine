@@ -312,6 +312,7 @@ void updateTextureDataWorld(World& world, std::string texturepath, unsigned char
 }
 
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData){
+  std::cout << "warning: overriting mesh data at: " << meshPath << std::endl;
   world.meshes[meshPath] =  loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
     return loadTextureWorld(world, texture);
   });     
@@ -472,9 +473,7 @@ void addObjectToWorld(
             if (meshAlreadyLoaded){
               continue;
             }
-            world.meshes[meshPath] = loadMesh("./res/textures/wood.jpg", meshData, [&world](std::string texture) -> Texture {
-              return loadTextureWorld(world, texture);
-            });    
+            loadMeshData(world, meshPath, meshData);
           } 
 
           auto newSerialObjs = multiObjAdd(
