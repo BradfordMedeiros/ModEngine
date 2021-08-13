@@ -5,6 +5,8 @@ Extensions loadExtensions(std::vector<std::string> extensionFiles){
   std::vector<func_t> onStart;
   std::vector<func_t> onFrame;
   std::vector<func_t> registerGuileFns;
+  std::vector<registerGetModFn> registerGetModuleFns;
+  std::vector<func_unload> onScriptUnload;
 
   for (auto extensionFile : extensionFiles){
     void* handle = dlopen(extensionFile.c_str(), RTLD_NOW);
@@ -29,6 +31,17 @@ Extensions loadExtensions(std::vector<std::string> extensionFiles){
     if(registerGuileFn != NULL){
       registerGuileFns.push_back(registerGuileFn);
     }
+
+    registerGetModFn registerGetCurrentModule = (registerGetModFn)dlsym(handle, "registerGetCurrentModule");
+    if (registerGetCurrentModule != NULL){
+      registerGetModuleFns.push_back(registerGetCurrentModule);
+    }
+
+    func_unload onScriptUnloadFn = (func_unload)dlsym(handle, "onScriptUnload");
+    if (onScriptUnloadFn != NULL){
+      onScriptUnload.push_back(onScriptUnloadFn);
+    } 
+
   }
   
   Extensions extensions { 
@@ -36,13 +49,18 @@ Extensions loadExtensions(std::vector<std::string> extensionFiles){
     .onStart = onStart,
     .onFrame = onFrame,
     .registerGuileFns = registerGuileFns,
+    .registerGetModuleFns = registerGetModuleFns,
+    .onScriptUnload = onScriptUnload,
   };
   return extensions;
 }
 
-void extensionsInit(Extensions& extensions){
+void extensionsInit(Extensions& extensions, func_i getCurrentModule){
   for (auto onStart : extensions.onStart){
     onStart();
+  }
+  for (auto registerGetCurrentModule : extensions.registerGetModuleFns){
+    registerGetCurrentModule(getCurrentModule);
   }
 }
 
@@ -64,5 +82,11 @@ void registerGuileTypes(Extensions& extensions){
     if(registerGuileTypeFn != NULL){
       registerGuileTypeFn();   
     }      
+  }
+}
+
+void extensionsUnloadScript(Extensions& extensions, int32_t scriptId){
+  for (auto onScriptUnload : extensions.onScriptUnload){
+    onScriptUnload(scriptId);
   }
 }

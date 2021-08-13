@@ -17,8 +17,7 @@
 #include "./network/servers.h"
 #include "./network/activemanager.h"
 #include "./worldloader.h"
-#include "./gizmo/sequencer.h"
-#include "./gizmo/keymapper.h"
+#include "./keymapper.h"
 #include "./drawing.h"
 #include "./easyuse/editor.h"
 #include "./easyuse/manipulator.h"
@@ -730,7 +729,7 @@ int main(int argc, char* argv[]){
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
   auto extensions = loadExtensions(result["extensions"].as<std::vector<std::string>>());
-  extensionsInit(extensions);
+  extensionsInit(extensions, currentModuleId);
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
 
@@ -924,11 +923,6 @@ int main(int argc, char* argv[]){
     disconnectServer,
     sendMessageToActiveServer,
     sendDataUdp,
-    createTrack,
-    playbackTrack,
-    createStateMachine,
-    playStateMachine,
-    setStateMachine,
     playRecording,
     stopRecording,
     createRecording,
@@ -966,7 +960,10 @@ int main(int argc, char* argv[]){
 
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,
-    .unloadScript = unloadScript,
+    .unloadScript = [&extensions](std::string scriptpath, objid id) -> void {
+      extensionsUnloadScript(extensions, id);
+        unloadScript(scriptpath, id); 
+    },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime
   };
@@ -1059,7 +1056,6 @@ int main(int argc, char* argv[]){
       currentFramerate = (int)60/(timedelta);
     }
 
-    processStateMachines();
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
 
     auto time = getTotalTime();

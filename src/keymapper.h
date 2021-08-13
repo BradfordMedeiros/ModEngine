@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 #include <functional>
-#include "../common/util.h"
+#include "./common/util.h"
 
 struct KeyMapping {
   int sourceKey;

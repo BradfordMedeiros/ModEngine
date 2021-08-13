@@ -59,7 +59,9 @@ void unloadScript(std::string scriptpath, objid id){
   auto script = getScriptName(scriptpath, id);
   auto module = scriptnameToModule.at(script).module;
   scm_set_current_module(module);
-  removeStateMachines(currentModuleId());
+
+  // TODO -> need to provide a hook for plugin to be able to do something when the script unloads
+
   onScriptUnload();
 
   std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;

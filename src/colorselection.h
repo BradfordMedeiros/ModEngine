@@ -4,9 +4,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <iostream>
-#include "./common/util.h"
 #include "./scene/common/texture.h"
-#include "./translations.h"
+#include "./translations.h" 
 
 struct Color {
   GLfloat r;

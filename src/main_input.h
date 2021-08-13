@@ -7,7 +7,7 @@
 #include "./main_api.h"
 #include "./easyuse/easy_use.h"
 #include "./easyuse/editor.h"
-#include "./gizmo/keymapper.h"
+#include "./keymapper.h"
 #include "./drawing.h"
 #include "./colorselection.h"
 #include "./benchmark.h"
