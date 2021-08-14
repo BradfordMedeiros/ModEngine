@@ -20,9 +20,10 @@ std::vector<LightInfo> getLightInfo(World& world){
 }
 
 PortalInfo getPortalInfo(World& world, objid id){
-  assert(false); // needs to use absolute position
+  //assert(false); // needs to use absolute position
   auto objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
+
   auto transform = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).transformation;
   auto portalGameObject = getGameObject(world, id);
 
@@ -360,7 +361,7 @@ void enforceAllLayouts(World& world){
 
 void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh){
   auto generatedMesh = generateMesh(face, points);
-  loadMeshData(world, destMesh, generatedMesh);
+  loadMeshData(world, destMesh, generatedMesh, -1); // -1 since this mesh doesn't belong to an object, which it probably should.
 }
 
 std::vector<TextureAndName> worldTextures(World& world){

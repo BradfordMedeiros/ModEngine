@@ -20,7 +20,7 @@ struct World {
   physicsEnv physicsEnvironment;
   std::map<objid, btRigidBody*> rigidbodys;
   std::map<objid, GameObjectObj> objectMapping;
-  std::map<std::string, Mesh> meshes;
+  std::map<std::string, MeshRef> meshes;
   std::map<std::string, Texture> textures;
   std::map<objid, std::vector<Animation>> animations;
   EmitterSystem emitters;
@@ -95,7 +95,7 @@ struct GroupPhysicsInfo {
 };
 GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id);
 PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index);
-void loadMeshData(World& world, std::string meshPath, MeshData& meshData);
+void loadMeshData(World& world, std::string meshPath, MeshData& meshData, objid ownerId);
 
 struct Properties {
   Transformation transformation;

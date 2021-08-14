@@ -450,7 +450,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-      drawMesh(world.meshes.at("./res/models/cone/cone.obj"), newShader); 
+      drawMesh(world.meshes.at("./res/models/cone/cone.obj").mesh, newShader); 
     }
   
     // bounding code //////////////////////
@@ -458,11 +458,11 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
     auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
     if (meshObj != NULL && meshObj -> meshesToRender.size() > 0){
       // @TODO i use first mesh to get sizing for bounding box, obviously that's questionable
-      auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
+      auto bounding = getBoundRatio(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh.boundInfo, meshObj -> meshesToRender.at(0).boundInfo);
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(getMatrixForBoundRatio(bounding, modelMatrix), glm::vec3(1.01f, 1.01f, 1.01f))));
 
       if (objectSelected){
-        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj"), newShader);
+        drawMesh(world.meshes.at("./res/models/boundingbox/boundingbox.obj").mesh, newShader);
       }
       glUniform1f(glGetUniformLocation(newShader, "discardTexAmount"), meshObj -> discardAmount); 
       glUniform1f(glGetUniformLocation(newShader, "emissionAmount"), meshObj -> emissionAmount); 
@@ -489,12 +489,12 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
       newShader, 
       id, 
       world.objectMapping, 
-      world.meshes.at("./res/models/ui/node.obj"),
+      world.meshes.at("./res/models/ui/node.obj").mesh,
       //world.meshes.at("./res/models/camera/camera.dae"),
-      world.meshes.at("testmesh"),
-      world.meshes.at("./res/models/box/plane.dae"),
-      world.meshes.at("./res/models/unit_rect/unit_rect.obj"),
-      world.meshes.at("./res/models/controls/unitxy.obj"), // using this b/c 1x1 xy mesh
+      world.meshes.at("testmesh").mesh,
+      world.meshes.at("./res/models/box/plane.dae").mesh,
+      world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
+      world.meshes.at("./res/models/controls/unitxy.obj").mesh, // using this b/c 1x1 xy mesh
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
@@ -592,7 +592,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
   setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  drawMesh(world.meshes.at("skybox"), shaderProgram); 
+  drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded){

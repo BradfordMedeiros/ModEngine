@@ -25,7 +25,7 @@ TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Text
 static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texturesize", "texture", "discard", "emission", "tint" };
 GameObjectMesh createMesh(
   GameobjAttributes& attr, 
-  std::map<std::string, Mesh>& meshes, 
+  std::map<std::string, MeshRef>& meshes, 
   std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded
@@ -42,7 +42,7 @@ GameObjectMesh createMesh(
       bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
       if (loadedMesh){
         meshNames.push_back(meshName);
-        meshesToRender.push_back(meshes.at(meshName));  
+        meshesToRender.push_back(meshes.at(meshName).mesh);  
       }
     }
   }else{
@@ -51,7 +51,7 @@ GameObjectMesh createMesh(
     bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
     if (loadedMesh){
       meshNames.push_back(meshName);
-      meshesToRender.push_back(meshes.at(meshName));   
+      meshesToRender.push_back(meshes.at(meshName).mesh);   
     }
   }
 
@@ -230,18 +230,18 @@ GameObjectNavConns createNavConns(GameobjAttributes& attr){
   return obj;
 }
 
-GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, Mesh>& meshes){
+GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes){
   auto onFocus = attr.stringAttributes.find("focus") != attr.stringAttributes.end() ? attr.stringAttributes.at("focus") : "";
   auto onBlur = attr.stringAttributes.find("blur") != attr.stringAttributes.end() ? attr.stringAttributes.at("blur") : "";
   GameObjectUICommon common {
-    .mesh = meshes.at("./res/models/controls/input.obj"),
+    .mesh = meshes.at("./res/models/controls/input.obj").mesh,
     .isFocused = false,
     .onFocus = onFocus,
     .onBlur = onBlur,
   };
   return common;
 }
-GameObjectUIButton createUIButton(GameobjAttributes& attr, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
+GameObjectUIButton createUIButton(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
   auto onTexture = attr.stringAttributes.find("ontexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("ontexture") : "";
   auto offTexture = attr.stringAttributes.find("offtexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("offtexture") : "";
   auto toggleOn = attr.stringAttributes.find("state") != attr.stringAttributes.end() && attr.stringAttributes.at("state") == "on";
@@ -268,7 +268,7 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, std::map<std::string,
   return obj;
 }
 
-GameObjectUISlider createUISlider(GameobjAttributes& attr, std::map<std::string, Mesh>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
+GameObjectUISlider createUISlider(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
   auto onSlide = attr.stringAttributes.find("onslide") != attr.stringAttributes.end() ? attr.stringAttributes.at("onslide") : "";
 
   GameObjectUISlider obj {
@@ -393,7 +393,7 @@ void addObject(
   std::string objectType, 
   GameobjAttributes& attr,
   std::map<objid, GameObjectObj>& mapping, 
-  std::map<std::string, Mesh>& meshes, 
+  std::map<std::string, MeshRef>& meshes, 
   std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
@@ -424,7 +424,7 @@ void addObject(
   }else if (objectType == "heightmap"){
     mapping[id] = createHeightmap(attr, loadMesh, ensureTextureLoaded);
   }else if (objectType == "navmesh"){
-    mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj"));
+    mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj").mesh);
   }else if (objectType == "navconnection"){
     mapping[id] = createNavConns(attr);
   }else if (objectType == "ui"){

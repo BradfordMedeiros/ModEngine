@@ -311,33 +311,65 @@ void updateTextureDataWorld(World& world, std::string texturepath, unsigned char
   updateTextureData(world.textures.at(texturepath), data, textureWidth, textureHeight);
 }
 
-void loadMeshData(World& world, std::string meshPath, MeshData& meshData){
-  std::cout << "warning: overriting mesh data at: " << meshPath << std::endl;
-  world.meshes[meshPath] =  loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
-    return loadTextureWorld(world, texture);
-  });     
+void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
+  if (world.meshes.find(meshPath) != world.meshes.end()){
+    world.meshes.at(meshPath).owners.insert(ownerId);
+  }else{
+    world.meshes[meshPath] = MeshRef {
+      .owners = { ownerId }, 
+      .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
+        return loadTextureWorld(world, texture);
+      })  
+    };
+  }
 }
 
 void addMesh(World& world, std::string meshpath){
   ModelData data = loadModel("", meshpath);
   assert(data.meshIdToMeshData.size() ==  1);
   auto meshData = data.meshIdToMeshData.begin() -> second;
-  loadMeshData(world, meshpath, meshData);
+  loadMeshData(world, meshpath, meshData, -1);
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
-void loadSkybox(World& world, std::string skyboxpath){
-  world.meshes["skybox"] = loadSkybox(
-    "./res/textures/default.jpg", 
-    "./res/models/skybox.obj",
-    skyboxpath, 
-    [&world](std::string texture) -> Texture {
-      return loadTextureWorld(world, texture);
-    },
-    [&world](std::string texture) -> Texture {
-      return loadSkyboxWorld(world, texture);
+void freeMeshRef(World& world, std::string meshname){
+    std::cout << "PLACEHOLDER --> should free the mesh for: " << meshname << std::endl;
+    // just naively call and unload, but eventually it might more sense to be smarter
+    world.meshes.erase(meshname);
+}
+void freeMeshRefsByOwner(World& world, int ownerId){
+  for (auto &[name, mesh] : world.meshes){
+    mesh.owners.erase(ownerId);
+  }
+  std::vector<std::string> meshesToFree;
+  for (auto &[name, mesh] : world.meshes){
+    if (mesh.owners.size() == 0){
+      meshesToFree.push_back(name);
     }
-  );    
+  }
+  for (auto meshname : meshesToFree){
+    freeMeshRef(world, meshname);
+  }
+}
+
+void loadSkybox(World& world, std::string skyboxpath){
+  if (world.meshes.find("skybox") != world.meshes.end()){
+    freeMeshRef(world, "skybox");
+  }
+  world.meshes["skybox"] = MeshRef {
+    .owners = { -1 },
+    .mesh = loadSkybox(
+      "./res/textures/default.jpg", 
+      "./res/models/skybox.obj",
+      skyboxpath, 
+      [&world](std::string texture) -> Texture {
+        return loadTextureWorld(world, texture);
+      },
+      [&world](std::string texture) -> Texture {
+        return loadSkyboxWorld(world, texture);
+      }
+    )
+  };
 }
 
 World createWorld(
@@ -392,7 +424,7 @@ World createWorld(
     glm::vec3(1.f, 0.f, 7.f),
   };
   auto generatedMesh = generateMesh(face, points);
-  loadMeshData(world, "testmesh", generatedMesh);
+  loadMeshData(world, "testmesh", generatedMesh, -1);
   return world;
 }
 
@@ -469,11 +501,7 @@ void addObjectToWorld(
 
           for (auto [meshId, meshData] : data.meshIdToMeshData){
             auto meshPath = meshName + "::" + std::to_string(meshId);
-            bool meshAlreadyLoaded = !(world.meshes.find(meshPath) == world.meshes.end());
-            if (meshAlreadyLoaded){
-              continue;
-            }
-            loadMeshData(world, meshPath, meshData);
+            loadMeshData(world, meshPath, meshData, id);
           } 
 
           auto newSerialObjs = multiObjAdd(
@@ -650,10 +678,9 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   );
   
   world.onObjectDelete(objectId, netsynchronized);
-
-  // @TODO IMPORTANT : remove free meshes (no way to tell currently if free -> need counting probably) from meshes
-  std::cout << "TODO: MESH MANAGEMENT HORRIBLE NEED TO REMOVE AND NOT BE DUMB ABOUT LOADING THEM" << std::endl;
+  freeMeshRefsByOwner(world, objectId);
 }
+
 // this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){

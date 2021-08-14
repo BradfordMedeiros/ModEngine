@@ -29,6 +29,11 @@ struct Mesh {
   int numTriangles;
 };
 
+struct MeshRef {
+  std::set<objid> owners;
+  Mesh mesh;
+};
+
 struct NameAndMesh {
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
