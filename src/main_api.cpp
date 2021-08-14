@@ -134,10 +134,11 @@ glm::vec3 getGameObjectPosition(int32_t index, bool isWorld){
 glm::vec3 getGameObjectPos(int32_t index){
   return getGameObjectPosition(index, true);
 }
-void setGameObjectPosition(int32_t index, glm::vec3 pos){
+void setGameObjectPosition(int32_t index, glm::vec3 pos){ // sets the absolutePosition
   physicsTranslateSet(world, index, pos);
 }
 void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly){
+  assert(false);  // this is updating local 
   auto transformation = getGameObject(world, index).transformation;
   glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z), xzPlaneOnly);
   physicsTranslateSet(world, index, pos);

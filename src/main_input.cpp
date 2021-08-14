@@ -35,15 +35,12 @@ void processManipulatorForId(objid id){
     return;
   }
 
-  std::cout << "processing manipulator" << std::endl;
-  //auto transform = fullTransformation(world.sandbox, id);
-  auto transform = getGameObject(world, id).transformation; 
   if (state.manipulatorMode == TRANSLATE){
-    applyPhysicsTranslation(world, id, transform.position, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsTranslation(world, id, state.offsetX, state.offsetY, state.manipulatorAxis);
   }else if (state.manipulatorMode == SCALE){
-    applyPhysicsScaling(world, id, transform.position, transform.scale, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsScaling(world, id, state.lastX, state.lastY, state.offsetX, state.offsetY, state.manipulatorAxis);
   }else if (state.manipulatorMode == ROTATE){
-    applyPhysicsRotation(world, id, transform.rotation, state.offsetX, state.offsetY, state.manipulatorAxis);
+    applyPhysicsRotation(world, id, state.offsetX, state.offsetY, state.manipulatorAxis);
   } 
 }
 

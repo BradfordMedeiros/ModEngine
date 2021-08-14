@@ -40,6 +40,8 @@ glm::vec3 applyTranslation(glm::vec3 position, float offsetX, float offsetY, Axi
   return position + axis * translate;
 }
 glm::vec3 applyScaling(glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
+  // The scaling operation needs to figure out if you should make it bigger by making it 
+  // more positive, or by making it more negative.  Therefore, need to use the objects position 
   float distanceOld = glm::distance(position, glm::vec3(lastX, lastY, 0));
   float distanceNew = glm::distance(position, glm::vec3(lastX + offsetX, lastY + offsetY, 0));
 

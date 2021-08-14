@@ -20,6 +20,7 @@ std::vector<LightInfo> getLightInfo(World& world){
 }
 
 PortalInfo getPortalInfo(World& world, objid id){
+  assert(false); // needs to use absolute position
   auto objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
   auto transform = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).transformation;
@@ -62,6 +63,7 @@ glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
 // TODO - needs to be done relative to parent, not local space
 void teleportObject(World& world, objid objectId, objid portalId){
   std::cout << "teleporting object: " << objectId << std::endl;
+  assert(false);  // needs to use absolute positions
   GameObject& gameobject = getGameObject(world, objectId);
   auto portalView = glm::inverse(renderPortalView(getPortalInfo(world, portalId), gameobject.transformation));
   auto newTransform = getTransformationFromMatrix(portalView);

@@ -485,12 +485,6 @@ void updateSandbox(SceneSandbox& sandbox){
       dirtiedElements.insert(id);
     }
   }
-  /*std::cout << "need to update: ";
-  for (auto element : dirtiedElements){
-    std::cout << element << " ";
-  }
-  std::cout << std::endl;
-  */
   std::set<objid> alreadyUpdated;
   for (auto element : dirtiedElements){
     updateTraverse(sandbox.mainScene, element, [&sandbox, &alreadyUpdated](objid id) -> bool {
@@ -507,11 +501,9 @@ void updateSandbox(SceneSandbox& sandbox){
       }
       getGameObject(sandbox, id).transformation = calcRelativeTransform(sandbox, id, parentId);
       element.absTransformUpdated = false;
-      //std::cout << "traversed element: " << id << std::endl;
       alreadyUpdated.insert(id);
       return true;
     });
-    //std::cout << std::endl;
   }
 }
 

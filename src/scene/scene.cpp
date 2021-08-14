@@ -750,6 +750,7 @@ GameobjAttributes objectAttributes(World& world, objid id){
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj){
+  assert(false); // needs to use proper absolute (or calc via relative)
   physicsTranslateSet(world, id, gameobj.transformation.position);
   std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
   physicsScaleSet(world, id, gameobj.transformation.scale);  
@@ -776,7 +777,7 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
-  updateRelativePosition(world.sandbox, index, pos);
+  updateAbsolutePosition(world.sandbox, index, pos);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -785,12 +786,13 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
   world.entitiesToUpdate.insert(index);
 }
 
-void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis){
+void applyPhysicsTranslation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis){
+  auto position = fullTransformation(world.sandbox, index).position;
   physicsTranslateSet(world, index, applyTranslation(position, offsetX, offsetY, manipulatorAxis));
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation){
-  updateRelativeRotation(world.sandbox, index, rotation);
+  updateAbsoluteRotation(world.sandbox, index, rotation);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
@@ -799,12 +801,13 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation){
   world.entitiesToUpdate.insert(index);
 }
 
-void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis){
+void applyPhysicsRotation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis){
+  auto currentOrientation = fullTransformation(world.sandbox, index).rotation;
   physicsRotateSet(world, index, applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis));
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
-  updateRelativeScale(world.sandbox, index, scale);
+  updateAbsoluteScale(world.sandbox, index, scale);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
@@ -814,8 +817,9 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   world.entitiesToUpdate.insert(index);
 }
 
-void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
-  physicsScaleSet(world, index, applyScaling(position, initialScale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
+void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis){
+  auto transform = fullTransformation(world.sandbox, index);
+  physicsScaleSet(world, index, applyScaling(transform.position, transform.scale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
 }
 
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){

@@ -72,9 +72,9 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation);  // this s
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 
-void applyPhysicsTranslation(World& world, objid index, glm::vec3 position, float offsetX, float offsetY, Axis manipulatorAxis);
-void applyPhysicsRotation(World& world, objid index, glm::quat currentOrientation, float offsetX, float offsetY, Axis manipulatorAxis);
-void applyPhysicsScaling(World& world, objid index, glm::vec3 position, glm::vec3 initialScale, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsTranslation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsRotation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis);
+void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
 
 void updatePhysicsBody(World& world, objid id);
 
