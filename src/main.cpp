@@ -1206,18 +1206,19 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
+      glClearColor(0.0, 0.0, 0.0, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+
+      glDepthMask(GL_FALSE);
+      glDisable(GL_STENCIL_TEST);
+      renderSkybox(shaderProgram, projection, view, viewTransform.position);  // Probably better to render this at the end 
+
+      glDepthMask(GL_TRUE);
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_STENCIL_TEST);
       glStencilMask(0xFF);
       glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
-
-      glClearColor(0.0, 0.0, 0.0, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
-
-      glDepthMask(GL_FALSE);
-      renderSkybox(shaderProgram, projection, view, viewTransform.position);  // Probably better to render this at the end 
-      glDepthMask(GL_TRUE);
 
       numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
