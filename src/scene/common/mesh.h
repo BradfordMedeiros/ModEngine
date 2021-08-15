@@ -47,6 +47,6 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1,
 int drawLines(std::vector<Line> allLines); // returns # of verts drawn
 
 Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);
-
+void freeMesh(Mesh& mesh);
 
 #endif 

@@ -237,7 +237,8 @@ Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string 
   mesh.hasCubemapTexture = true;
   mesh.cubemapTexture = ensureLoadCubemapTexture(skyboxTexture);
   return mesh;
-  
 }
 
- 
+void freeMesh(Mesh& mesh){
+  std::cout << "PLACEHOLDER: SHOULD FREE MESH BUT NOT YET IMPLEMENTED" << std::endl;
+}

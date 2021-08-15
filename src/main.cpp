@@ -333,7 +333,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
 void loadAllTextures(){
   for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
-    loadTextureWorld(world, texturePath);
+    loadTextureWorld(world, texturePath, -1);
   }
 }
 
@@ -514,8 +514,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
       glUseProgram(framebufferProgram); 
       glDisable(GL_DEPTH_TEST);
       glBindVertexArray(quadVAO);
-      loadTextureWorld(world, "./res/textures/wood.jpg");
-      auto textureId = world.textures.at("./res/textures/wood.jpg").textureId;
+      loadTextureWorld(world, "./res/textures/wood.jpg", -1);  //wtf is this doing here?
+      auto textureId = world.textures.at("./res/textures/wood.jpg").texture.textureId;
       glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glEnable(GL_DEPTH_TEST);

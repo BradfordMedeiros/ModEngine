@@ -368,7 +368,7 @@ std::vector<TextureAndName> worldTextures(World& world){
   std::vector<TextureAndName> textures;
   for (auto [textureName, texture] : world.textures){
     textures.push_back(TextureAndName{
-      .texture = texture,
+      .texture = texture.texture,
       .textureName = textureName
     });
   }
@@ -376,11 +376,7 @@ std::vector<TextureAndName> worldTextures(World& world){
 }
 
 void setTexture(World& world, objid index, std::string textureName){
-  if (world.textures.find(textureName) == world.textures.end()){
-    loadTextureWorld(world, textureName);
-  }
-
-  auto textureId = world.textures.at(textureName).textureId;
+  auto textureId = loadTextureWorld(world, textureName, index).textureId;
   for (auto id : getIdsInGroup(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     if (meshObj != NULL){

@@ -21,7 +21,7 @@ struct World {
   std::map<objid, btRigidBody*> rigidbodys;
   std::map<objid, GameObjectObj> objectMapping;
   std::map<std::string, MeshRef> meshes;
-  std::map<std::string, Texture> textures;
+  std::map<std::string, TextureRef> textures;
   std::map<objid, std::vector<Animation>> animations;
   EmitterSystem emitters;
   std::function<void(GameObject&)> onObjectUpdate;
@@ -43,7 +43,7 @@ World createWorld(
 );
 
 void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid> idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributes> additionalFields);
-Texture loadTextureWorld(World& world, std::string texturepath);
+Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
 

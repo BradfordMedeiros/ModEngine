@@ -113,3 +113,7 @@ void saveTextureData(std::string filepath, char* data, int width, int height){
   stbi_flip_vertically_on_write(1);
   stbi_write_png(filepath.c_str(), width, height, 3, data, 0); 
 }
+
+void freeTexture(Texture& texture){
+  std::cout << "Free texture placeholder: " << texture.textureId << std::endl;
+}

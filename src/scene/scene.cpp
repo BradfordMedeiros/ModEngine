@@ -282,33 +282,65 @@ void updatePhysicsBody(World& world, objid id){
   addPhysicsBody(world, id, oldScale, false, {});
 }
 
-Texture loadTextureWorld(World& world, std::string texturepath){
+Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
-    return world.textures.at(texturepath);
+    world.textures.at(texturepath).owners.insert(ownerId);
+    return world.textures.at(texturepath).texture;
   }
   Texture texture = loadTexture(texturepath);
-  world.textures[texturepath] = texture;
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+  };
   return texture;
 }
-Texture loadSkyboxWorld(World& world, std::string texturepath){
+Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
-    return world.textures.at(texturepath);
+    world.textures.at(texturepath).owners.insert(ownerId);
+    return world.textures.at(texturepath).texture;
   }
   Texture texture = loadCubemapTexture(texturepath);
-  world.textures[texturepath] = texture;
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+  };
   return texture;
 }
 
-Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels){
+Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
-    return world.textures.at(texturepath);
+    world.textures.at(texturepath).owners.insert(ownerId);
+    return world.textures.at(texturepath).texture;
   }
   Texture texture = loadTextureData(data, textureWidth, textureHeight, numChannels);
-  world.textures[texturepath] = texture;
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+  };
   return texture;  
 }
 void updateTextureDataWorld(World& world, std::string texturepath, unsigned char* data, int textureWidth, int textureHeight){
-  updateTextureData(world.textures.at(texturepath), data, textureWidth, textureHeight);
+  updateTextureData(world.textures.at(texturepath).texture, data, textureWidth, textureHeight);
+}
+
+void freeTextureRef(World& world, std::string textureName){
+  std::cout << "INFO: freeing texture: " << textureName  << std::endl;
+  freeTexture(world.textures.at(textureName).texture);
+  world.textures.erase(textureName);
+}
+void freeTextureRefsByOwner(World& world, int ownerId){
+  for (auto &[name, textureRef] : world.textures){
+    textureRef.owners.erase(ownerId);
+  }
+  std::vector<std::string> texturesToFree;
+  for (auto &[name, textureRef] : world.textures){
+    if (textureRef.owners.size() == 0){
+      texturesToFree.push_back(name);
+    }
+  }
+  for (auto textureName : texturesToFree){
+    freeTextureRef(world, textureName);
+  }  
 }
 
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
@@ -317,8 +349,8 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
   }else{
     world.meshes[meshPath] = MeshRef {
       .owners = { ownerId }, 
-      .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world](std::string texture) -> Texture {
-        return loadTextureWorld(world, texture);
+      .mesh = loadMesh("./res/textures/default.jpg", meshData, [&world, ownerId](std::string texture) -> Texture {
+        return loadTextureWorld(world, texture, ownerId);
       })  
     };
   }
@@ -333,9 +365,9 @@ void addMesh(World& world, std::string meshpath){
 }
 
 void freeMeshRef(World& world, std::string meshname){
-    std::cout << "PLACEHOLDER --> should free the mesh for: " << meshname << std::endl;
-    // just naively call and unload, but eventually it might more sense to be smarter
-    world.meshes.erase(meshname);
+  std::cout << "INFO: freeing mesh: " << meshname  << std::endl;
+  freeMesh(world.meshes.at(meshname).mesh);
+  world.meshes.erase(meshname);
 }
 void freeMeshRefsByOwner(World& world, int ownerId){
   for (auto &[name, mesh] : world.meshes){
@@ -363,10 +395,10 @@ void loadSkybox(World& world, std::string skyboxpath){
       "./res/models/skybox.obj",
       skyboxpath, 
       [&world](std::string texture) -> Texture {
-        return loadTextureWorld(world, texture);
+        return loadTextureWorld(world, texture, -1);
       },
       [&world](std::string texture) -> Texture {
-        return loadSkyboxWorld(world, texture);
+        return loadSkyboxWorld(world, texture, -1);
       }
     )
   };
@@ -523,12 +555,12 @@ void addObjectToWorld(
         }
         return true;   // This is basically ensure model loaded so by definition this was already loaded. 
       }, 
-      [&world](std::string texturepath) -> Texture {
+      [&world, id](std::string texturepath) -> Texture {
         std::cout << "Custom texture loading: " << texturepath << std::endl;
-        return loadTextureWorld(world, texturepath);
+        return loadTextureWorld(world, texturepath, id);
       },
-      [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels) -> Texture {
-        return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels);
+      [&world, id](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels) -> Texture {
+        return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels, id);
       },
       [&world, id]() -> void {
         assert(false); // think about what this should do better!
@@ -537,9 +569,9 @@ void addObjectToWorld(
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, std::map<std::string, std::string> particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
         addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, fieldsToAttributes(particleFields), deltas, enabled);
       },
-      [&world](MeshData& meshdata) -> Mesh {
-        return loadMesh("./res/textures/default.jpg", meshdata, [&world](std::string texture) -> Texture {
-          return loadTextureWorld(world, texture);
+      [&world, id](MeshData& meshdata) -> Mesh {
+        return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
+          return loadTextureWorld(world, texture, id);
         });    
       }
     );
@@ -547,7 +579,7 @@ void addObjectToWorld(
 
 std::string getTextureById(World& world, int id){
   for (auto &[textureName, texture] : world.textures){
-    if (texture.textureId == id){
+    if (texture.texture.textureId == id){
       return textureName;
     }
   }
@@ -679,6 +711,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   
   world.onObjectDelete(objectId, netsynchronized);
   freeMeshRefsByOwner(world, objectId);
+  freeTextureRefsByOwner(world, objectId);
 }
 
 // this needs to also delete all children objects. 

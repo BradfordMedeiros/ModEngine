@@ -17,6 +17,6 @@ struct DrawingParams{
 DrawingParams getDefaultDrawingParams();
 void nextTexture(DrawingParams&, int numTotalTextures);
 void previousTexture(DrawingParams&);
-std::string activeTextureName(DrawingParams& params, std::map<std::string, Texture> worldTextures);
+std::string activeTextureName(DrawingParams& params, std::map<std::string, TextureRef> worldTextures);
 
 #endif

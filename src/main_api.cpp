@@ -428,7 +428,7 @@ void playSoundState(std::string source, objid sceneId){
 }
 
 unsigned int activeTextureId(){
-  return world.textures.at(activeTextureName(drawParams, world.textures)).textureId;
+  return world.textures.at(activeTextureName(drawParams, world.textures)).texture.textureId;
 }
 
 void scmEmit(objid id){
