@@ -304,31 +304,6 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 }
 
 
-void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
-  if (button == 0 && action == 1){
-    state.mouseIsDown = true;
-  }else if (button == 0 && action == 0){
-    state.mouseIsDown = false;
-  }
-
-  mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-    selectItemCalled = true;
-  }
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
-    onManipulatorMouseRelease();
-  }
-
-  schemeBindings.onMouseCallback(button, action, mods);
-
-  if (button == 0){
-    for (auto voxelData : getSelectedVoxels()){
-      voxelData.voxelPtr -> voxel.selectedVoxels.clear();
-    }
-  }
-}
-
-
 // This is wasteful, as obviously I shouldn't be loading in all the textures on load, but ok for now. 
 // This shoiuld really just be creating a list of names, and then the cycle above should cycle between possible textures to load, instead of what is loaded 
 void loadAllTextures(){
@@ -514,9 +489,9 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
       glUseProgram(framebufferProgram); 
       glDisable(GL_DEPTH_TEST);
       glBindVertexArray(quadVAO);
-      loadTextureWorld(world, "./res/textures/wood.jpg", -1);  //wtf is this doing here?
-      auto textureId = world.textures.at("./res/textures/wood.jpg").texture.textureId;
-      glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
+      //loadTextureWorld(world, "./res/textures/wood.jpg", -1);  //wtf is this doing here?
+      //auto textureId = world.textures.at("./res/textures/wood.jpg").texture.textureId;
+      //glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glEnable(GL_DEPTH_TEST);
       glUseProgram(newShader); 
@@ -986,7 +961,7 @@ int main(int argc, char* argv[]){
     interface
   );
 
-  loadAllTextures();
+  //loadAllTextures();
   
   dynamicLoading = createDynamicLoading(worldfile);
 

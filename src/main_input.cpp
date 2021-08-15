@@ -13,6 +13,7 @@ extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
 extern float deltaTime;
 extern Benchmark benchmark;
+extern bool selectItemCalled;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -89,6 +90,30 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(disableInput, window, state, xpos, ypos, rotateCamera);  
   schemeBindings.onMouseMoveCallback(state.offsetX, state.offsetY); 
   processManipulator();
+}
+
+void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
+  if (button == 0 && action == 1){
+    state.mouseIsDown = true;
+  }else if (button == 0 && action == 0){
+    state.mouseIsDown = false;
+  }
+
+  mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    selectItemCalled = true;
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
+    onManipulatorMouseRelease();
+  }
+
+  schemeBindings.onMouseCallback(button, action, mods);
+
+  if (button == 0){
+    for (auto voxelData : getSelectedVoxels()){
+      voxelData.voxelPtr -> voxel.selectedVoxels.clear();
+    }
+  }
 }
 
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){

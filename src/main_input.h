@@ -12,6 +12,7 @@
 #include "./colorselection.h"
 #include "./benchmark.h"
 #include "./common/profiling.h"
+#include "./easyuse/manipulator.h"
 
 struct JoyStickInfo {
   int index;
@@ -20,6 +21,7 @@ struct JoyStickInfo {
 
 std::string dumpDebugInfo(bool fullInfo = true);
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
+void onMouseCallback(GLFWwindow* window, int button, int action, int mods);
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));
 void joystickCallback(int jid, int event);
 void onJoystick(std::vector<JoyStickInfo> infos);
