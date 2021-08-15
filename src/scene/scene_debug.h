@@ -11,6 +11,9 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObj
 std::string debugAllGameObjects(SceneSandbox& sandbox);
 std::string debugAllGameObjectsH(SceneSandbox& sandbox);
 std::string debugTransformCache(SceneSandbox& sandbox);
+std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures);
+std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes);
+
 void printPhysicsInfo(PhysicsInfo physicsInfo);
 void dumpPhysicsInfo(std::map<objid, btRigidBody*>& rigidbodys);
 

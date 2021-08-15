@@ -1,56 +1,14 @@
-TODAY:
-- allow selection of the individual item (instead of group)
+** important ** properly free textures, vaos, buffers, etc
+==> unload meshes eventually (never cleanup) + audit what resources are loaded/unloaded
 
 
-|       |
-|       |
-|  THEN | SHOULD BE DONE BY 7/10
-|       |
-
-- FIX - absolute physics position BUG
-
-
-===========================
-|        |
-|        |
-|  AFTER | SHOULD BE DONE BY 7/30
-|        |
-
-==========> model loading with a single parent doesn't load model correctly, something wrong w/ the transform, maybe this is screwing up the animation? see untitled.dae
+=> fix when get local position and update vs the new value in the cache
+=> animation still fucked up
+=> bones should be relative to the root model
 => can get rid of the empty top level node that never has a mesh?
-./res/models/parentingbug.dae
-
-=>  animation still fucked up
-====> might be a bug, but it might not be
-====> animation plays wrong axis 
-MAKE SURE MODELS LOAD REAL GOOD 
-- optional callback/timing for the animation would be cool
-
-=======+> MODEL LOADING SEEMS COOL NOW I THINK, AND THEN SEEMS LIKE, GIVEN THE MODEL LOADING IT WORKING, JUST
-
-glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
-  assert(gameobj.has_value());
- 
-  auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);
-  auto modelTransform = fullModelTransform(sandbox, id);
-  // group * something = model (aka aX = b, so X = inv(A) * B)
-  // inverse(group) * model
-  *** auto groupToModel =  modelTransform * glm::inverse(groupTransform); ****
 
 
-  auto resultCheck = groupTransform * groupToModel;
-  if (resultCheck != modelTransform){
-    std::cout << "result_check = " << print(resultCheck) << std::endl;
-    std::cout << "model_transform = " << print(modelTransform) << std::endl;
-
-  }
-  return groupToModel;
-}
-
-
-=====================================
-goal: end of july
+goal: end of august
 ====================================
 
 |        |
@@ -67,7 +25,6 @@ improve gun system
 - xoffset, yoffset as percentage of the screen)
 - fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
 - hud ui element better sizing and shit
-- make use of the (not yet implemented) sql system
 
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
@@ -80,9 +37,7 @@ improve gun system
 
 core gameplay implementation stage:
 - emitter initial velocity 
-- gun system (very tunable)
-  - projectile effect (on muzzle?)
-  - animation hooks => firing maybe should trigger the animiation, and then specified to that it will actually fire?
+- gun system (very tunable) : projectile effect (on muzzle?)
 
 
 ========================================================================
@@ -102,11 +57,27 @@ GO HAM ON THE EDITOR -> VOXELS + TERRAIN
   --> solve for pos = fn(obj_rel_to_solve, chunk_index_new, chunk_size_new) such that obj_rel_to_solve < chunk_size_new
   ====> i guess?
   
+
+============== GOAL END OF AUGUST ==================================
+
+
 ========================================================================
 MAKE WORK IN DOCKER BUILD!!! + AUTOMATED BUILDS ON CI 
 MAKE WORK ON WINDOWS!!!!
-======================================================================
+======================================================
+============== GOAL END OF SEPTEMBER ==================================
 
+
+
+
+
+
+
+
+FIXING BUGS
+========================
+currentModuleId -> is flawed
+guile -> for out how to catch any exception, then be smart about stuff
 
 -> merge serialize attr + getattr + include all attr
 
@@ -132,11 +103,11 @@ top level console that scrolls down from the top
 
 ===============================================
 emitter upgrades: 
-- optional message for each spawn?  
 - maybe the delta stuff should be relative to the parent?  
 and thenfore solve: - enemy should then start shooting projectiles at the player
 
 bugs:
+
 - tilt thing for movement not working great
 - make everything time independent
 - bugs with memory management for tracks / onexit fns
@@ -154,11 +125,8 @@ eventually:
     - of the detected goals, each goal is evaluated with some utility value fn(actor, distance, goal) => number
     - do the goal that has the highest utility
 - better way to include scene code/prefabs 
-- sql parser? 
-
 
 bugs for eventually:
-- drawline doesn't seem to work with 0 objects being rendered in the scene
 ========> be more consistent with setting shaders
 
 
@@ -170,10 +138,7 @@ bugs for eventually:
   - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
 
 features for eventually:
-- (script-go-dormant "wake-message") => allows for one off events and stuff
-- generic messaging thing instead of the individual float/string/bool ones
-
-- improve state machine attrs (not super important yet but needed when get more involved w/ scripting
+- [plugin] improve state machine attrs (not super important yet but needed when get more involved w/ scripting
   - attr function (i guess it affects the associated object?)
 - ability to have user defined attributes
 

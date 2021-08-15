@@ -19,13 +19,17 @@ std::string dumpDebugInfo(bool fullInfo){
   auto gameobjInfo = debugAllGameObjects(world.sandbox);
   auto gameobjhInfo = debugAllGameObjectsH(world.sandbox);
   auto cacheInfo = debugTransformCache(world.sandbox);
+  auto textureInfo = debugLoadedTextures(world.textures);
+  auto meshInfo = debugLoadedMeshes(world.meshes);
 
   auto benchmarkingContent = benchmarkResult(benchmark);
   auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
 
   auto content = "gameobj info - id id name\n" + gameobjInfo + "\n" + 
     "gameobjh info - id id sceneId groupId parentId | [children]\n" + gameobjhInfo + "\n" + 
-    "transform cache - id pos scale" + cacheInfo + "\n" + 
+    "transform cache - id pos scale\n" + cacheInfo + "\n" + 
+    "texture cache\n" + textureInfo + "\n" +
+    "mesh cache\n" + meshInfo + "\n" + 
     sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
   return content;
 }
@@ -792,7 +796,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 79, 
+    .sourceKey = 346, 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,

@@ -66,6 +66,32 @@ std::string debugTransformCache(SceneSandbox& sandbox){
   return content;  
 }
 
+std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures){
+  std::string content = "";
+  for (auto &[name, texture] : textures){
+    content += name + " " + "[";
+    for (auto id : texture.owners){
+      content = content + std::to_string(id) + " ";
+    }
+    content = content + "]\n";
+  }
+  content = content + "\n";
+  return content;
+}
+
+std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes){
+  std::string content = "";
+  for (auto &[name, mesh] : meshes){
+    content += name + " " + "[";
+    for (auto id : mesh.owners){
+      content = content + std::to_string(id) + " ";
+    }
+    content = content + "]\n";
+  }
+  content = content + "\n";
+  return content; 
+}
+
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
