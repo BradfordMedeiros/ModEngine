@@ -24,7 +24,6 @@ Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight
   return tex;
 }
 
-
 Texture loadTexture(std::string textureFilePath){
   std::cout << "Event: loading texture: " << textureFilePath << std::endl;
 
@@ -115,5 +114,6 @@ void saveTextureData(std::string filepath, char* data, int width, int height){
 }
 
 void freeTexture(Texture& texture){
-  std::cout << "Free texture placeholder: " << texture.textureId << std::endl;
+  std::cout << "Deleted texture: " << texture.textureId << std::endl;
+  glDeleteTextures(1, &texture.textureId);
 }
