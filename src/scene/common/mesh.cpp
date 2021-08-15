@@ -240,5 +240,8 @@ Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string 
 }
 
 void freeMesh(Mesh& mesh){
-  std::cout << "PLACEHOLDER: SHOULD FREE MESH BUT NOT YET IMPLEMENTED" << std::endl;
+  std::cout << "FREEING MESH" << std::endl;
+  glDeleteVertexArrays(1, &mesh.VAOPointer);
+  GLuint buffersToDelete[2] = { mesh.EBOPointer, mesh.VBOPointer };
+  glDeleteBuffers(2, buffersToDelete);
 }
