@@ -22,6 +22,7 @@ std::string dumpDebugInfo(bool fullInfo){
   auto cacheInfo = debugTransformCache(world.sandbox);
   auto textureInfo = debugLoadedTextures(world.textures);
   auto meshInfo = debugLoadedMeshes(world.meshes);
+  auto animationInfo = debugAnimations(world.animations);
 
   auto benchmarkingContent = benchmarkResult(benchmark);
   auto profilingInfo = fullInfo ? dumpProfiling() : "" ;
@@ -31,6 +32,7 @@ std::string dumpDebugInfo(bool fullInfo){
     "transform cache - id pos scale\n" + cacheInfo + "\n" + 
     "texture cache\n" + textureInfo + "\n" +
     "mesh cache\n" + meshInfo + "\n" + 
+    "animation cache\n" + animationInfo + "\n" + 
     sceneInfo +  benchmarkingContent + "\n" + profilingInfo;
   return content;
 }

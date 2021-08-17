@@ -92,6 +92,19 @@ std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes){
   return content; 
 }
 
+std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations){
+  std::string content = "";
+  for (auto &[id, animVals] : animations){
+    content += std::to_string(id) + " " + "[";
+    for (auto animation : animVals){
+      content = content + animation.name + " ";
+    }
+    content = content + "]\n";
+  }
+  content = content + "\n";
+  return content; 
+}
+
 void printPhysicsInfo(PhysicsInfo physicsInfo){
   BoundInfo info = physicsInfo.boundInfo;
   std::cout << "x: [ " << info.xMin << ", " << info.xMax << "]" << std::endl;
