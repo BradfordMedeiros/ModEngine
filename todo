@@ -1,7 +1,5 @@
-** important ** properly free textures, vaos, buffers, etc
-==> unload meshes eventually (never cleanup) + audit what resources are loaded/unloaded
 
-
+=> audit resources + profile memory in general
 => fix when get local position and update vs the new value in the cache
 => animation still fucked up
 => bones should be relative to the root model
@@ -19,8 +17,6 @@ goal: end of august
 ==================
 GAME SPECIFIC
 ==================
-==> fixed field of view.  gun probably should be on a fixed fov layer, but everything else no
-
 improve gun system
 - xoffset, yoffset as percentage of the screen)
 - fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
@@ -69,15 +65,11 @@ MAKE WORK ON WINDOWS!!!!
 
 
 
-
-
-
-
-
 FIXING BUGS
 ========================
 currentModuleId -> is flawed
 guile -> for out how to catch any exception, then be smart about stuff
+textures -> always convert to abs path so doesn't reuse
 
 -> merge serialize attr + getattr + include all attr
 
@@ -107,10 +99,8 @@ emitter upgrades:
 and thenfore solve: - enemy should then start shooting projectiles at the player
 
 bugs:
-
 - tilt thing for movement not working great
 - make everything time independent
-- bugs with memory management for tracks / onexit fns
 => convex/exact hull kind of wrongish, sometimes hull would crash eh 
 - layout bound info gets centered, but the layout should be aligned from the left
 - video no longer work wtf shit
@@ -139,7 +129,7 @@ bugs for eventually:
 
 features for eventually:
 - [plugin] improve state machine attrs (not super important yet but needed when get more involved w/ scripting
-  - attr function (i guess it affects the associated object?)
+  - attr function (i guess it affects the associated object?) - bugs with memory management for tracks / onexit fns
 - ability to have user defined attributes
 
 - guile should print a stacktrace

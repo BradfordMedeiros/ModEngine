@@ -343,6 +343,11 @@ void freeTextureRefsByOwner(World& world, int ownerId){
   }  
 }
 
+void freeAnimationsForOwner(World& world, objid id){
+  std::cout << "INFO: removing animations for: " << id << std::endl;
+  world.animations.erase(id);
+}
+
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
   if (world.meshes.find(meshPath) != world.meshes.end()){
     world.meshes.at(meshPath).owners.insert(ownerId);
@@ -712,6 +717,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   world.onObjectDelete(objectId, netsynchronized);
   freeMeshRefsByOwner(world, objectId);
   freeTextureRefsByOwner(world, objectId);
+  freeAnimationsForOwner(world, objectId);
 }
 
 // this needs to also delete all children objects. 
