@@ -152,6 +152,7 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
       .offsetMatrix = glm::mat4(1.f),
       .skeletonBase = "",
       .initialBonePose = aiMatrixToGlm(bone -> mOffsetMatrix),
+      .initialPoseSet = false,
     };
 
     printMatrix(meshBone.name, bone -> mOffsetMatrix, meshBone.initialBonePose);

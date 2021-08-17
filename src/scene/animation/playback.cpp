@@ -9,6 +9,21 @@ void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::
   }
 }
 
+/*void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::function<glm::mat4(Bone&)> getInitialPose){
+  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
+    Mesh& mesh = meshNameToMeshes.meshes.at(i);
+    auto meshName = meshNameToMeshes.meshNames.at(i);
+    for (Bone& bone : mesh.bones){
+      bone.offsetMatrix =  glm::inverse(getModelMatrix("move/Cube", "move")) * (
+        getModelMatrix(bone.name, bone.skeletonBase) * 
+        glm::inverse(
+          getInitialPose(bone)
+        )
+      );
+    }
+  }
+}*/
+
 void playbackAnimation(
   Animation animation,  
   NameAndMesh meshNameToMeshes,  

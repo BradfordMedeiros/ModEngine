@@ -35,7 +35,6 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
 }
 
 
-std::map<std::string, glm::mat4> initialBonePoses;
 glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::string skeletonRoot){
   auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
   if (gameobj.has_value()){
@@ -57,10 +56,11 @@ void updateBonePose(World& world, objid id){
     },
     [&world, idScene](Bone& bone) -> glm::mat4 {
       auto boneTransform =  getModelMatrix(world, idScene, bone.name, bone.skeletonBase);
-      if (initialBonePoses.find(bone.name) == initialBonePoses.end()){
-        initialBonePoses[bone.name] = boneTransform;
+      if (!bone.initialPoseSet){
+        bone.initialBonePose = boneTransform;
+        bone.initialPoseSet = true;
       }
-      return initialBonePoses.at(bone.name);
+      return bone.initialBonePose;
     }
   ); 
 }
@@ -92,10 +92,11 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
         }, 
         [&world, idScene](Bone& bone) -> glm::mat4 {
           auto boneTransform =  getModelMatrix(world, idScene, bone.name, bone.skeletonBase);
-          if (initialBonePoses.find(bone.name) == initialBonePoses.end()){
-            initialBonePoses[bone.name] = boneTransform;
+          if (!bone.initialPoseSet){
+            bone.initialBonePose = boneTransform;
+            bone.initialPoseSet = true;
           }
-          return initialBonePoses.at(bone.name);
+          return bone.initialBonePose;
         }
       );
     }, 
