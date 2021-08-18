@@ -7,10 +7,9 @@ glm::mat4 getInitialPose(Bone& bone, std::function<glm::mat4(std::string, std::s
     bone.initialBonePose = boneTransform;
     bone.initialPoseSet = true;
     auto initPose = getTransformationFromMatrix(boneTransform);
-    std::cout << "setting initial bone name: " << bone.name << std::endl;
-    std::cout << "Initial posn: " << print(initPose.position) << std::endl;
-    std::cout << "Initial scale: " << print(initPose.scale) << std::endl;
-    std::cout << "Initial rot: " << print(initPose.rotation) << std::endl;
+    std::cout << "BONEINFO_ANIM: " << bone.name <<  " posn: " << print(initPose.position) << std::endl;
+    std::cout << "BONEINFO_ANIM: " << bone.name << " scale: " << print(initPose.scale) << std::endl;
+    std::cout << "BONEINFO_ANIM: " << bone.name << " rot: " << print(initPose.rotation) << std::endl;
   }
   return bone.initialBonePose;
 }

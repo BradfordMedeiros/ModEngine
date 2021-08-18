@@ -128,15 +128,15 @@ struct BoneInfo {
 
 void printMatrix(std::string bonename, aiMatrix4x4& matrix, glm::mat4 glmMatrix){
   std::cout << "process bones: " << bonename << std::endl;
-  auto transform = getTransformationFromMatrix(glm::inverse(glmMatrix));
+  auto transform = getTransformationFromMatrix(glmMatrix);
   aiVector3t<float> scaling;
   aiQuaterniont<float> rotation;
   aiVector3t<float> position;
   matrix.Decompose(scaling, rotation, position);
 
-  std::cout << "position: " << print(transform.position) << " | " << print(aiVectorToGlm(position)) << std::endl;
-  std::cout << "scale: " << print(transform.scale) << " | " << print(aiVectorToGlm(scaling)) << std::endl;
-  std::cout << "rotation: " << print(transform.rotation) << std::endl << std::endl;
+  std::cout << "BONEINFO_MODEL: " << bonename << " " << " position: " << print(transform.position) << " | " << print(aiVectorToGlm(position)) << std::endl;
+  std::cout << "BONEINFO_MODEL: " << bonename << " " << " scale: " << print(transform.scale) << " | " << print(aiVectorToGlm(scaling)) << std::endl;
+  std::cout << "BONEINFO_MODEL: " << bonename << " " << " rotation: " << print(transform.rotation) << std::endl << std::endl;
 }
 
 BoneInfo processBones(std::string rootname, aiMesh* mesh){
