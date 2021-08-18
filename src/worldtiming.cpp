@@ -45,24 +45,29 @@ glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::str
   return glm::mat4(1.f);   
 }
 
+std::function<glm::mat4(std::string, std::string)> scopeGetModelMatrix(World& world, objid idScene){
+  return [&world, idScene](std::string name, std::string skeletonRoot) -> glm::mat4 {
+    return getModelMatrix(world, idScene, name, skeletonRoot);
+  };
+}
+
+std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world, objid idScene){
+  return [&world, idScene](std::string name, glm::mat4 pose) -> void {
+    auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
+    if (gameobj.has_value()){
+      updateRelativeTransform(world.sandbox, gameobj.value() -> id, getTransformationFromMatrix(pose));
+    }else{
+      std::cout << "warning no bone node named: " << name << std::endl;
+      assert(false);
+    }
+  };
+}
+
 void updateBonePose(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);
   auto idScene = sceneId(world.sandbox, id);
   auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-  updateBonePoses(
-    meshNameToMeshes,
-    [&world, idScene](std::string name, std::string skeletonRoot) -> glm::mat4 {
-      return getModelMatrix(world, idScene, name, skeletonRoot);
-    },
-    [&world, idScene](Bone& bone) -> glm::mat4 {
-      auto boneTransform =  getModelMatrix(world, idScene, bone.name, bone.skeletonBase);
-      if (!bone.initialPoseSet){
-        bone.initialBonePose = boneTransform;
-        bone.initialPoseSet = true;
-      }
-      return bone.initialBonePose;
-    }
-  ); 
+  updateBonePoses(meshNameToMeshes, scopeGetModelMatrix(world, idScene)); 
 }
 
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay){
@@ -77,28 +82,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
     timings.initialTime, 
     [&world, animation, groupId, idScene](float currentTime, float elapsedTime) -> void { 
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime,
-        [&world, idScene](std::string name, std::string skeletonRoot) -> glm::mat4 {
-          return getModelMatrix(world, idScene, name, skeletonRoot);
-        },
-        [&world, idScene](std::string name, glm::mat4 pose) -> void {
-          auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
-          if (gameobj.has_value()){
-            updateRelativeTransform(world.sandbox, gameobj.value() -> id, getTransformationFromMatrix(pose));
-          }else{
-            std::cout << "warning no bone node named: " << name << std::endl;
-            assert(false);
-          }
-        }, 
-        [&world, idScene](Bone& bone) -> glm::mat4 {
-          auto boneTransform =  getModelMatrix(world, idScene, bone.name, bone.skeletonBase);
-          if (!bone.initialPoseSet){
-            bone.initialBonePose = boneTransform;
-            bone.initialPoseSet = true;
-          }
-          return bone.initialBonePose;
-        }
-      );
+      playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene));
     }, 
     [groupId, &timings]() -> void { 
       timings.playbacksToRemove.push_back(groupId);
