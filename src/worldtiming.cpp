@@ -29,7 +29,12 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
       return animation;
     }
   }
-  std::cout << "no animation found" << std::endl;
+  std::cout << "ERROR: no animation found named: " << animationToPlay << std::endl;
+  std::cout << "ERROR INFO: existing animation names [" << world.animations.at(groupId).size() << "] - ";
+  for (auto animation : world.animations.at(groupId)){
+    std::cout << animation.name << " ";
+  }
+  std::cout << std::endl;
   assert(false);
   return  noAnimation;  // @todo probably use optional here.
 }
