@@ -71,12 +71,14 @@ std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world,
 void updateBonePose(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);
   auto idScene = sceneId(world.sandbox, id);
+  auto rootname = getGameObject(world, id).name;
   auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-  updateBonePoses(meshNameToMeshes, scopeGetModelMatrix(world, idScene)); 
+  updateBonePoses(meshNameToMeshes, scopeGetModelMatrix(world, idScene), rootname); 
 }
 
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);
+  auto rootname = getGameObject(world, groupId).name;
   auto idScene = sceneId(world.sandbox, id);
   if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
     timings.animations.playbacks.erase(groupId);
@@ -85,9 +87,9 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
   auto animation = getAnimation(world, groupId, animationToPlay);
   TimePlayback playback(
     timings.initialTime, 
-    [&world, animation, groupId, idScene](float currentTime, float elapsedTime) -> void { 
+    [&world, animation, groupId, idScene, rootname](float currentTime, float elapsedTime) -> void { 
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
-      playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene));
+      playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene), rootname);
     }, 
     [groupId, &timings]() -> void { 
       timings.playbacksToRemove.push_back(groupId);
