@@ -20,16 +20,20 @@ GameObject& getGameObject(World& world, std::string name, objid sceneId){
   assert(false);
 }
 
-NameAndMesh getMeshesForGroupId(World& world, objid groupId){
+NameAndMeshObjName getMeshesForGroupId(World& world, objid groupId){
+  std::vector<std::string> objnames;
   std::vector<std::reference_wrapper<std::string>> meshNames;
   std::vector<std::reference_wrapper<Mesh>> meshes;
-  NameAndMesh nameAndMeshes = {
+  NameAndMeshObjName nameAndMeshes = {
+    .objnames = objnames,
     .meshNames = meshNames,
     .meshes = meshes
   };
   for (auto id : getIdsInGroup(world.sandbox, groupId)){
     auto meshesForId = getMeshesForId(world.objectMapping, id);
+    auto gameobjname = getGameObject(world, id).name;
     for (int i = 0; i < meshesForId.meshes.size(); i++){
+      nameAndMeshes.objnames.push_back(gameobjname);
       nameAndMeshes.meshNames.push_back(meshesForId.meshNames.at(i));
       nameAndMeshes.meshes.push_back(meshesForId.meshes.at(i));
     }    

@@ -1007,18 +1007,21 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       auto ids = selectedIds(state.editor);
+      std::cout << "l pressed" << std::endl;
       if (ids.size() > 0){
+        std::cout << "setting pose!" << std::endl;
         updateBonePose(world, ids.at(0));
       }
     }
-  }
-  /*InputDispatch{
+  },
+  InputDispatch{
     .sourceKey = 'Q', 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      onDebugKey();
+      //onDebugKey();
+      state.groupSelection = !state.groupSelection;
     }
-  },*/
+  },
 };

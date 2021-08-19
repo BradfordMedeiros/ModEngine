@@ -39,6 +39,12 @@ struct NameAndMesh {
   std::vector<std::reference_wrapper<Mesh>> meshes;
 };
 
+struct NameAndMeshObjName {
+  std::vector<std::string> objnames;
+  std::vector<std::reference_wrapper<std::string>> meshNames;
+  std::vector<std::reference_wrapper<Mesh>> meshes;
+};
+
 void setVertexPosition(Mesh& mesh, unsigned int vertexIndex, glm::vec3 pos, glm::vec3 normal);
 Mesh loadMesh(std::string defaultTexture, MeshData modelData, std::function<Texture(std::string)> ensureLoadTexture);		 // loads model and returns mesh/bound texture data
 Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetx, float offsety, float width, float height, std::function<Texture(std::string)> ensureLoadTexture); // 2DMesh with subimage selection

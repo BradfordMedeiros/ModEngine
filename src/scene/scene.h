@@ -80,7 +80,7 @@ void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, SysInterface interface);
 
-NameAndMesh getMeshesForGroupId(World& world, objid id);
+NameAndMeshObjName getMeshesForGroupId(World& world, objid id);
 
 std::optional<objid> getGameObjectByName(World& world, std::string name, objid sceneId);
 GameObject& getGameObject(World& world, objid id);
