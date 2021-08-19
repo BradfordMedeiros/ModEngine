@@ -45,7 +45,7 @@ void main(){
       (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
 
-      modelPosition = model * (mul * vec4(aPos.xyz, 1.0));
+      modelPosition = (mul * vec4(aPos.xyz, 1.0)) * model;
 
       /*if (totalWeight == 1){
         overcolor = vec4(1, 0, 0, 1);
