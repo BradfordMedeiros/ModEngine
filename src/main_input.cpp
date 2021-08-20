@@ -249,11 +249,11 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
 
 void handleSnapEasy(objid id, bool left){
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
-    auto objPos = getGameObjectPosition(id, false);
+    auto objPos = getGameObjectPosition(id, true);
     auto snapAmount = left ? snapTranslateDown(state.snappingMode, objPos, state.manipulatorAxis) : snapTranslateUp(state.snappingMode, objPos, state.manipulatorAxis);
     setGameObjectPosition(id, snapAmount);
   }else if (state.manipulatorMode == ROTATE){
-    auto objRot = getGameObjectRotation(id, false);
+    auto objRot = getGameObjectRotation(id, true);
     auto snapAmount = left ? snapAngleDown(state.snappingMode, objRot, state.manipulatorAxis) : snapAngleUp(state.snappingMode, objRot, state.manipulatorAxis);
     setGameObjectRotation(id, snapAmount);
   }else if (state.manipulatorMode == SCALE){
