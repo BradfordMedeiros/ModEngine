@@ -3,6 +3,8 @@
 
 #include <functional>
 #include <math.h>
+#include <iostream>
+#include <assert.h>
 
 enum EndBehavior {
     PAUSE,         

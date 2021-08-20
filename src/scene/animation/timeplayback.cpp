@@ -13,6 +13,7 @@ TimePlayback::TimePlayback(float currentTime, std::function<void(float, float)> 
 bool TimePlayback::hasRemainingTime(){
   float totalElapsedTime = this -> currentTime - this -> beginTime;
   float remainingTime = this -> duration - totalElapsedTime;
+  //std::cout << "remaining time: " << remainingTime << std::endl;
   return remainingTime > 0;
 }
 

@@ -6,7 +6,7 @@ void printAnimationInfo(Animation& animation, float currentTime, float elapsedTi
   std::cout << "current time: " << currentTime << std::endl;
   std::cout << "elapsed time: " << elapsedTime << std::endl;
 
-  double animationLengthSec = animation.duration / animation.ticksPerSecond;
+  double animationLengthSec = animationLengthSeconds(animation);
   std::cout << "anim length: " << animationLengthSec << std::endl;
   std::cout << "num ticks: " << animation.duration << std::endl;
   std::cout << "ticks/s " << animation.ticksPerSecond << std::endl;
@@ -25,4 +25,9 @@ void printChannelInfo(AnimationChannel& channel, int tickPosIndex, int tickRotIn
   std::cout << "tick rot key: " << tickRotIndex << std::endl;
   std::cout << "tick scale key: " << tickScaleIndex << std::endl;
   std::cout << std::endl;
+}
+
+
+double animationLengthSeconds(Animation& animation){
+  return animation.duration / animation.ticksPerSecond;
 }
