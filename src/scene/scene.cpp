@@ -820,8 +820,8 @@ GameobjAttributes objectAttributes(World& world, objid id){
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj){
-  assert(false); // needs to use proper absolute (or calc via relative)
-  physicsTranslateSet(world, id, gameobj.transformation.position, false);
+  physicsTranslateSet(world, id, gameobj.transformation.position, true);
+  // why no rotate set here?
   std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
   physicsScaleSet(world, id, gameobj.transformation.scale);  
 }
