@@ -66,10 +66,8 @@ std::string serializePropertySuffix(std::string key, AttributeValue value);
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
 std::string serializeObject(World& world, objid id, std::string overridename = "");
 
-void physicsTranslateSet(World& world, objid index, glm::vec3 pos);
-
-void physicsRotateSet(World& world, objid index, glm::quat rotation);  // this sets to rotation
-
+void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative);
+void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative);  
 void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 
 void applyPhysicsTranslation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis);

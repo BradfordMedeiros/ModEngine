@@ -821,7 +821,7 @@ GameobjAttributes objectAttributes(World& world, objid id){
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj){
   assert(false); // needs to use proper absolute (or calc via relative)
-  physicsTranslateSet(world, id, gameobj.transformation.position);
+  physicsTranslateSet(world, id, gameobj.transformation.position, false);
   std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
   physicsScaleSet(world, id, gameobj.transformation.scale);  
 }
@@ -846,7 +846,8 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
   }
 }
 
-void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
+void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
+  assert(!relative);
   updateAbsolutePosition(world.sandbox, index, pos);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -858,10 +859,11 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos){
 
 void applyPhysicsTranslation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis){
   auto position = fullTransformation(world.sandbox, index).position;
-  physicsTranslateSet(world, index, applyTranslation(position, offsetX, offsetY, manipulatorAxis));
+  physicsTranslateSet(world, index, applyTranslation(position, offsetX, offsetY, manipulatorAxis), false);
 }
 
-void physicsRotateSet(World& world, objid index, glm::quat rotation){
+void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
+  assert(!relative);
   updateAbsoluteRotation(world.sandbox, index, rotation);
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -873,7 +875,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation){
 
 void applyPhysicsRotation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis){
   auto currentOrientation = fullTransformation(world.sandbox, index).rotation;
-  physicsRotateSet(world, index, applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis));
+  physicsRotateSet(world, index, applyRotation(currentOrientation, offsetX, offsetY, manipulatorAxis), false);
 }
 
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
@@ -921,7 +923,7 @@ void enforceLookAt(World& world){
     if(idExists(world.sandbox, lookAt, sceneId)){
       glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
       glm::vec3 targetPosition = fullTransformation(world.sandbox, getGameObject(world.sandbox, lookAt, sceneId).id).position;
-      physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition));
+      physicsRotateSet(world, id, orientationFromPos(fromPos, targetPosition), false);
     }
   });  
 }

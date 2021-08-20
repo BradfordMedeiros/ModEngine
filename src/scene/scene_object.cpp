@@ -69,7 +69,7 @@ void teleportObject(World& world, objid objectId, objid portalId){
   auto portalView = glm::inverse(renderPortalView(getPortalInfo(world, portalId), gameobject.transformation));
   auto newTransform = getTransformationFromMatrix(portalView);
   auto newPosition = newTransform.position;
-  physicsTranslateSet(world, objectId, newPosition);
+  physicsTranslateSet(world, objectId, newPosition, false);
 }
 void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id){
   auto obj1IsPortal = isPortal(world, obj1Id);
@@ -314,7 +314,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
   auto boundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
   for (auto [id, newPos] : newPositions){
     auto offset = layoutType == LAYOUT_HORIZONTAL ? glm::vec3(boundingWidth / 2, 0.f, 0.f) : glm::vec3(0.f, boundingHeight / 2, 0.f);
-    physicsTranslateSet(world, id, newPos - offset);
+    physicsTranslateSet(world, id, newPos - offset, false);
   }
   layoutObject -> boundInfo.xMin -= layoutObject -> margin;
   layoutObject -> boundInfo.xMax += layoutObject -> margin;
