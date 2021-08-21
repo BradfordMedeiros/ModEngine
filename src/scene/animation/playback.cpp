@@ -1,15 +1,15 @@
 #include "./playback.h"
 
+// BRAD -> create an animation with and xyz offset, and make sure the frame is matching what we are using and not flipping x/y/z anywhere
 
 glm::mat4 getInitialPose(Bone& bone, std::function<glm::mat4(std::string, std::string)>& getModelMatrix){
   auto boneTransform =  getModelMatrix(bone.name, bone.skeletonBase);
   if (!bone.initialPoseSet){
+    auto initPose = getTransformationFromMatrix(bone.initialBonePose);
+    printMatrixInformation(bone.initialBonePose, std::string("BONEINFO_INIT") + bone.name);
     bone.initialBonePose = boneTransform;
     bone.initialPoseSet = true;
-    auto initPose = getTransformationFromMatrix(bone.initialBonePose);
-    std::cout << "BONEINFO_ANIM: " << bone.name <<  " posn: " << print(initPose.position) << std::endl;
-    std::cout << "BONEINFO_ANIM: " << bone.name << " scale: " << print(initPose.scale) << std::endl;
-    std::cout << "BONEINFO_ANIM: " << bone.name << " rot: " << print(initPose.rotation) << std::endl;
+    printMatrixInformation(bone.initialBonePose, std::string("BONEINFO_ANIM") + bone.name);
   }
   return bone.initialBonePose;
 }
@@ -23,11 +23,11 @@ void updateBonePoses(NameAndMeshObjName meshNameToMeshes, std::function<glm::mat
       std::cout << "skeletonBase is: " << bone.skeletonBase << std::endl;
       auto meshTransform = getModelMatrix(meshname, rootname);
       //auto meshTransform = getModelMatrix("targetmodel/sentinel", "targetmodel");
-      auto boneOffsetMatrix = (glm::inverse(getInitialPose(bone, getModelMatrix)) * getModelMatrix(bone.name, bone.skeletonBase));
-      auto boTransform = getTransformationFromMatrix(boneOffsetMatrix);
-      std::cout << "BONEINFO_OFFSET: " << bone.name <<  " posn: " << print(boTransform.position) << std::endl;
-      std::cout << "BONEINFO_OFFSET: " << bone.name << " scale: " << print(boTransform.scale) << std::endl;
-      std::cout << "BONEINFO_OFFSET: " << bone.name << " rot: " << print(boTransform.rotation) << std::endl;
+
+      //auto boneOffsetMatrix = getModelMatrix(bone.name, bone.skeletonBase) * glm::inverse(getInitialPose(bone, getModelMatrix));
+      auto boneOffsetMatrix =  glm::inverse(glm::inverse(getInitialPose(bone, getModelMatrix)) * getModelMatrix(bone.name, bone.skeletonBase));
+      printMatrixInformation(boneOffsetMatrix, std::string("BONEINFO_OFFSET") + bone.name);
+
       std::cout << "mesh name is : " << meshname << std::endl;
 
       bone.offsetMatrix = boneOffsetMatrix;

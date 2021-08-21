@@ -61,6 +61,7 @@ struct PhysicsInfo {
 };
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
+void printMatrixInformation(glm::mat4 transform, std::string label);
 BoundInfo getBounds(std::vector<Vertex>& vertices);
 
 #endif

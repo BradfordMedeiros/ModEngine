@@ -594,6 +594,8 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id).transform);
 }
+
+
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
   assert(gameobj.has_value());
@@ -602,13 +604,15 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
   auto modelTransform = fullModelTransform(sandbox, id);
   // group * something = model (aka aX = b, so X = inv(A) * B)
   // inverse(group) * model
-  auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
+  //auto groupToModel =  modelTransform * glm::inverse(groupTransform); 
+  auto groupToModel =  glm::inverse(groupTransform) * modelTransform; 
 
   auto resultCheck = groupTransform * groupToModel;
-  if (resultCheck != modelTransform){
-    //std::cout << "result_check = " << print(resultCheck) << std::endl;
-    //std::cout << "model_transform = " << print(modelTransform) << std::endl;
-    //assert(false);
+  if (false && resultCheck != modelTransform){
+    std::cout << "group_to_model = " << print(groupToModel) << std::endl;
+    std::cout << "result_check = " << print(resultCheck) << std::endl;
+    std::cout << "model_transform = " << print(modelTransform) << std::endl;
+    assert(false);
   }
   return groupToModel;
 }

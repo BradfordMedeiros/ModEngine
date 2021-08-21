@@ -15,6 +15,13 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
   return transform;  
 }
 
+void printMatrixInformation(glm::mat4 transform, std::string label){
+  auto initPose = getTransformationFromMatrix(transform);
+  std::cout << label <<  " posn: " << print(initPose.position) << std::endl;
+  std::cout << label << " scale: " << print(initPose.scale) << std::endl;
+  std::cout << label << " rot: " << print(initPose.rotation) << std::endl;
+}
+
 BoundInfo getBounds(std::vector<Vertex>& vertices){
   float xMin, xMax;
   float yMin, yMax;
