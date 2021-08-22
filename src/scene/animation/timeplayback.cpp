@@ -29,7 +29,9 @@ bool TimePlayback::isPaused() {
   return this -> paused;
 }
 
-void TimePlayback::setElapsedTime(float elapsedTime){
+
+// probably would be better to just set the current time, and calculate the delta instead
+void TimePlayback::setElapsedTime(float elapsedTime){ 
   if (!this -> paused){
     this -> currentTime = this -> currentTime + elapsedTime;
     this -> onFrame(this -> currentTime, elapsedTime); 

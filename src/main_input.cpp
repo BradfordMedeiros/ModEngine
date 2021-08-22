@@ -1025,4 +1025,14 @@ std::vector<InputDispatch> inputFns = {
       state.groupSelection = !state.groupSelection;
     }
   },
+  InputDispatch{
+    .sourceKey = 'P', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.pauseWorldTiming = !state.pauseWorldTiming;
+      std::cout << "pause world timing: " << state.pauseWorldTiming << std::endl;
+    }
+  },
 };

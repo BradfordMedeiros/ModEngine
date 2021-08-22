@@ -20,6 +20,17 @@ void printMatrixInformation(glm::mat4 transform, std::string label){
   std::cout << label <<  " posn: " << print(initPose.position) << std::endl;
   std::cout << label << " scale: " << print(initPose.scale) << std::endl;
   std::cout << label << " rot: " << print(initPose.rotation) << std::endl;
+
+  std::cout << label << " = [";
+  for (int i = 0; i < 4; i++){
+    for (int j = 0; j < 4; j++){
+      std::cout << transform[j][i] << " ";
+    }
+    if (i != 3){
+      std::cout << "; ";
+    }
+  }  
+  std::cout << "]" << std::endl;
 }
 
 BoundInfo getBounds(std::vector<Vertex>& vertices){
@@ -27,12 +38,12 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   float yMin, yMax;
   float zMin, zMax;
 
-  xMin = vertices[0].position.x;    // @todo zero vertex model --> which is fucking stupid but correct, will error here.
-  xMax = vertices[0].position.x;
-  yMin = vertices[0].position.y;
-  yMax = vertices[0].position.y;
-  zMin = vertices[0].position.z;
-  zMax = vertices[0].position.z;
+  xMin = vertices.at(0).position.x;    // @todo zero vertex model --> which is fucking stupid but correct, will error here.
+  xMax = vertices.at(0).position.x;
+  yMin = vertices.at(0).position.y;
+  yMax = vertices.at(0).position.y;
+  zMin = vertices.at(0).position.z;
+  zMax = vertices.at(0).position.z;
 
   for (Vertex vert: vertices){
     if (vert.position.x > xMax){

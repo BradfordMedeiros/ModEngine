@@ -14,28 +14,29 @@ glm::mat4 getInitialPose(Bone& bone, std::function<glm::mat4(std::string, std::s
   return bone.initialBonePose;
 }
 
+// https://gamedev.net/forums/topic/484984-skeletal-animation-non-uniform-scale/4172731/
 void updateBonePoses(NameAndMeshObjName meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::string rootname){
   std::cout << "rootname: " << rootname << std::endl;
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     std::string meshname = meshNameToMeshes.objnames.at(i);
     for (Bone& bone : mesh.bones){
-      std::cout << "skeletonBase is: " << bone.skeletonBase << std::endl;
-      auto meshTransform = getModelMatrix(meshname, rootname);
-      //auto meshTransform = getModelMatrix("targetmodel/sentinel", "targetmodel");
+      auto initialBonePose = getInitialPose(bone, getModelMatrix);
+      auto bonePose = getModelMatrix(bone.name, bone.skeletonBase);
+      auto armatureOffset = getModelMatrix(rootname, bone.skeletonBase);
+      auto boneOffsetMatrix = armatureOffset * glm::inverse(initialBonePose) * bonePose;
 
-      //auto boneOffsetMatrix = getModelMatrix(bone.name, bone.skeletonBase) * glm::inverse(getInitialPose(bone, getModelMatrix));
-      auto boneOffsetMatrix =  glm::inverse(glm::inverse(getInitialPose(bone, getModelMatrix)) * getModelMatrix(bone.name, bone.skeletonBase));
-      printMatrixInformation(boneOffsetMatrix, std::string("BONEINFO_OFFSET") + bone.name);
-
-      std::cout << "mesh name is : " << meshname << std::endl;
+      printMatrixInformation(initialBonePose, "INITIAL_POSE ");
+      printMatrixInformation(bonePose, "BONE_POSE ");
+      printMatrixInformation(boneOffsetMatrix, std::string("EFFECTIVE_OFFSET") + bone.name + " ");
+      printMatrixInformation(armatureOffset, "ARMATURE_POSE");
 
       bone.offsetMatrix = boneOffsetMatrix;
     }
   }
 }
 
-/*void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelMatrix, std::function<glm::mat4(Bone&)> getInitialPose){
+/*void updateBonePoses(NameAndMesh meshNameToMeshes, std::function<glm::mat4(std::string, std::string)> getModelM/atrix, std::function<glm::mat4(Bone&)> getInitialPose){
   for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
     Mesh& mesh = meshNameToMeshes.meshes.at(i);
     auto meshName = meshNameToMeshes.meshNames.at(i);
@@ -60,7 +61,11 @@ void playbackAnimation(
   std::string rootname
 ){  
   auto posesForTick = animationPosesAtTime(animation, currentTime, elapsedTime);
+
+  updateBonePoses(meshNameToMeshes, getModelMatrix, rootname); // just for now so we set initial poses as side effect
+
   for (auto pose : posesForTick){
+    printMatrixInformation(pose.pose, std::string("SET_CHANNEL:") + pose.channelName);
     setPose(pose.channelName, pose.pose);
   }
   updateBonePoses(meshNameToMeshes, getModelMatrix, rootname);

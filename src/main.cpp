@@ -1023,7 +1023,9 @@ int main(int argc, char* argv[]){
     int numScenesLoaded = getNumberScenesLoaded(world.sandbox);
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
-    timePlayback.setElapsedTime(deltaTime);
+    if (!state.pauseWorldTiming){
+      timePlayback.setElapsedTime(deltaTime);
+    }
 
     if (frameCount == 60){
       frameCount = 0;

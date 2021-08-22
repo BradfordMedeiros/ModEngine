@@ -65,6 +65,7 @@ struct engineState {
   bool cullEnabled;
 
   bool groupSelection;
+  bool pauseWorldTiming;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
