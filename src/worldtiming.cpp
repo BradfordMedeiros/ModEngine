@@ -71,8 +71,8 @@ std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world,
 
 void updateBonePose(World& world, objid id){
   auto groupId = getGroupId(world.sandbox, id);
-  auto idScene = sceneId(world.sandbox, id);
-  auto rootname = getGameObject(world, id).name;
+  auto idScene = sceneId(world.sandbox, groupId);
+  auto rootname = getGameObject(world, groupId).name;
   auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
   updateBonePoses(meshNameToMeshes, scopeGetModelMatrix(world, idScene), rootname); 
 }
@@ -80,7 +80,7 @@ void updateBonePose(World& world, objid id){
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay){
   auto groupId = getGroupId(world.sandbox, id);
   auto rootname = getGameObject(world, groupId).name;
-  auto idScene = sceneId(world.sandbox, id);
+  auto idScene = sceneId(world.sandbox, groupId);
   if (timings.animations.playbacks.find(groupId) != timings.animations.playbacks.end()){
     timings.animations.playbacks.erase(groupId);
   }
