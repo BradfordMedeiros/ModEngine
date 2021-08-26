@@ -17,9 +17,9 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
 
 void printMatrixInformation(glm::mat4 transform, std::string label){
   auto initPose = getTransformationFromMatrix(transform);
-  std::cout << label <<  " posn: " << print(initPose.position) << std::endl;
-  std::cout << label << " scale: " << print(initPose.scale) << std::endl;
-  std::cout << label << " rot: " << print(initPose.rotation) << std::endl;
+  std::cout << label <<  "x.pos = [ " << print(initPose.position)  << " ]; ";
+  std::cout << "x.scale = [ " << print(initPose.scale) << " ]; ";
+  std::cout << "x.rot = [ " << print(initPose.rotation) << " ]; " << std::endl;
 
   std::cout << label << " = [";
   for (int i = 0; i < 4; i++){

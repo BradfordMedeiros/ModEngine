@@ -15,7 +15,7 @@ WorldTiming createWorldTiming(float initialTime){
 void tickAnimations(WorldTiming& timings, float elapsedTime){
   //std::cout << "num active playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto &[id, playback] : timings.animations.playbacks){
-    playback.setElapsedTime(elapsedTime);
+    playback.setElapsedTime(elapsedTime * 5);
   }
   for (auto groupId : timings.playbacksToRemove){
     timings.animations.playbacks.erase(groupId);
@@ -87,6 +87,11 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
   auto animation = getAnimation(world, groupId, animationToPlay);
   std::string animationname = animation.name;
+  float animLength = animationLengthSeconds(animation);
+  std::cout << "adding animation: " << animationname << " length: " << animLength << std::endl;
+  std::cout << "anim length: " << animLength << std::endl;
+  std::cout << "num ticks: " << animation.duration << std::endl;
+  std::cout << "ticks/s " << animation.ticksPerSecond << std::endl;
 
   TimePlayback playback(
     timings.initialTime, 
@@ -98,7 +103,7 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
       std::cout << "INFO: onfinish: " << animationname << " remove: " << groupId << std::endl;
       timings.playbacksToRemove.push_back(groupId);
     },
-    animationLengthSeconds(animation),
+    animLength,
     PAUSE
   );  
   timings.animations.playbacks[groupId] = playback;
