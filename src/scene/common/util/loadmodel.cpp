@@ -403,6 +403,15 @@ void printDebugModelData(ModelData& data, std::string modelPath){
     std::cout << "(" << childid << ", " << parentid << ")" << std::endl;
   }
   std::cout << std::endl;
+
+  std::cout << "nodeid to transform: " << std::endl;
+  for (auto &[nodeid, transform] : data.nodeTransform){
+    std::cout << "(" << nodeid << ", ";
+    std::cout << "pos: " << print(transform.position) << " | ";
+    std::cout << "scale: " << print(transform.scale) << " | ";
+    std::cout << "rot: " << print(transform.rotation) << ")" << std::endl;
+  }
+  std::cout << std::endl;
 }
 
 // Currently this just loads all the meshes into the models array. 
