@@ -422,10 +422,10 @@ void printDebugModelData(ModelData& data, std::string modelPath){
   for (auto &[meshid, meshData] : data.meshIdToMeshData){
     std::cout << "(" << meshid << ", [" << std::endl;
     for (auto bone : meshData.bones){
-      std::cout << "  (" << bone.name << " ";
+      std::cout << "  (" << bone.name << " " << std::endl;
       auto initialBonePose = getTransformationFromMatrix(bone.initialBonePose);
-      printTransformDebug(initialBonePose);
-      std::cout << ")" << std::endl;
+      printMatrixInformation(bone.initialBonePose, "    bone");
+      std::cout << "  )" << std::endl;
     }
     std::cout << "])" << std::endl;
   }
