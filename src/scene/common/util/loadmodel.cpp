@@ -381,6 +381,30 @@ void assertAllNamesUnique(std::map<int32_t, std::string>& idToName){
   assert(!foundDuplicate);
 }
 
+void printDebugModelData(ModelData& data, std::string modelPath){
+  std::cout << "DEBUG: Model Data: " << modelPath << std::endl;
+  std::cout << "id to mesh ids: " << std::endl;
+  for (auto &[id, meshids] : data.nodeToMeshId){
+    std::cout << id << " - [ ";
+    for (auto meshid : meshids){
+      std::cout << meshid << " ";
+    }
+    std::cout << "]" << std::endl;
+  }
+  std::cout << std::endl;
+  std::cout << "id to name: " << std::endl;
+  for (auto &[id, name] : data.names){
+    std::cout << "(" << id << ", " << name << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+  std::cout << "childid to parentid: " << std::endl;
+  for (auto &[childid, parentid] : data.childToParent){
+    std::cout << "(" << childid << ", " << parentid << ")" << std::endl;
+  }
+  std::cout << std::endl;
+}
+
 // Currently this just loads all the meshes into the models array. 
 // Should have parent/child relations and a hierarchy but todo.
 ModelData loadModel(std::string rootname, std::string modelPath){
@@ -437,7 +461,6 @@ ModelData loadModel(std::string rootname, std::string modelPath){
     },
     0
   );
-
    setRootSkeletonInBones(meshIdToMeshData, nodeNameToDepth, childToParent, names);
    setInitialBonePoses();
 
@@ -453,6 +476,8 @@ ModelData loadModel(std::string rootname, std::string modelPath){
      .names = names,
      .animations = animations,
    };
+
+   //printDebugModelData(data, modelPath);
    return data;
 }
 
