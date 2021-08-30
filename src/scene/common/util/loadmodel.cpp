@@ -381,6 +381,12 @@ void assertAllNamesUnique(std::map<int32_t, std::string>& idToName){
   assert(!foundDuplicate);
 }
 
+void printTransformDebug(Transformation& transform){
+  std::cout << "pos: " << print(transform.position) << " | ";
+  std::cout << "scale: " << print(transform.scale) << " | ";
+  std::cout << "rot: " << print(transform.rotation);
+}
+
 void printDebugModelData(ModelData& data, std::string modelPath){
   std::cout << "DEBUG: Model Data: " << modelPath << std::endl;
   std::cout << "id to mesh ids: " << std::endl;
@@ -407,9 +413,21 @@ void printDebugModelData(ModelData& data, std::string modelPath){
   std::cout << "nodeid to transform: " << std::endl;
   for (auto &[nodeid, transform] : data.nodeTransform){
     std::cout << "(" << nodeid << ", ";
-    std::cout << "pos: " << print(transform.position) << " | ";
-    std::cout << "scale: " << print(transform.scale) << " | ";
-    std::cout << "rot: " << print(transform.rotation) << ")" << std::endl;
+    printTransformDebug(transform);
+    std::cout << ")" << std::endl;
+  }
+  std::cout << std::endl;
+
+  std::cout << "bone data: " << std::endl;
+  for (auto &[meshid, meshData] : data.meshIdToMeshData){
+    std::cout << "(" << meshid << ", [" << std::endl;
+    for (auto bone : meshData.bones){
+      std::cout << "  (" << bone.name << " ";
+      auto initialBonePose = getTransformationFromMatrix(bone.initialBonePose);
+      printTransformDebug(initialBonePose);
+      std::cout << ")" << std::endl;
+    }
+    std::cout << "])" << std::endl;
   }
   std::cout << std::endl;
 }
@@ -486,7 +504,7 @@ ModelData loadModel(std::string rootname, std::string modelPath){
      .animations = animations,
    };
 
-   //printDebugModelData(data, modelPath);
+   printDebugModelData(data, modelPath);
    return data;
 }
 
