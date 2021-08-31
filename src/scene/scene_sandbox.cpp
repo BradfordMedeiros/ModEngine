@@ -1,15 +1,5 @@
 #include "./scene_sandbox.h"
 
-glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
-  glm::mat4 modelMatrix = glm::translate(initialModel, position);
-  modelMatrix = modelMatrix * glm::toMat4(rotation);
-  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
-  return scaledModelMatrix;
-}
-glm::mat4 matrixFromComponents(Transformation transformation){
-  return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
-}
-
 objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   assert(name == gameobjectObj.name);
   auto gameobjectH = GameObjectH { 

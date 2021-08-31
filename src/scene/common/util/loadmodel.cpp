@@ -151,8 +151,7 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
       .name = generateNodeName(rootname, bone -> mName.C_Str()),
       .offsetMatrix = glm::mat4(1.f),
       .skeletonBase = "",
-      .initialBonePose = aiMatrixToGlm(bone -> mOffsetMatrix),
-      .initialPoseSet = false,
+      .initialBonePose = glm::mat4(1.f),  // this gets populated in setInitialBonePoses since needs lookup
     };
 
     printMatrix(meshBone.name, bone -> mOffsetMatrix, meshBone.initialBonePose);
@@ -237,8 +236,26 @@ void setRootSkeletonInBones(
   }
 }
 
-void setInitialBonePoses(){
+int32_t getNodeId(ModelData& data, std::string nodename){
+  for (auto &[id, name] : data.names){
+    if (name == nodename){
+      return id;
+    }
+  }
+  assert(false);
+  return 0;
+}
 
+void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnodeTransform){
+  for (auto &[id, transform] : fullnodeTransform){
+    printMatrixInformation(transform, std::string("initialbone - ") + std::to_string(id));
+  }
+  for (auto &[id, meshdata] : data.meshIdToMeshData){
+    for (auto &bone : meshdata.bones){
+      bone.initialBonePose = fullnodeTransform.at(getNodeId(data, bone.name));
+      printMatrixInformation(bone.initialBonePose, std::string("offsetmatrix - " + bone.name));
+    }
+  }
 }
 
 void dumpVerticesData(std::string modelPath, MeshData& model){
@@ -342,15 +359,29 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
    return model;
 }
 
+Transformation aiMatrixToTransform(aiMatrix4x4& matrix){
+  aiVector3t<float> scaling;
+  aiQuaterniont<float> rotation;
+  aiVector3t<float> position;  
+  matrix.Decompose(scaling, rotation, position);
+  Transformation trans = {
+    .position = glm::vec3(position.x, position.y, position.z),
+    .scale = glm::vec3(scaling.x, scaling.y, scaling.z),
+    .rotation = aiQuatToGlm(rotation),
+  };
+  return trans;
+}
+
 void processNode(
   std::string rootname,
   aiNode* node, 
   int parentNodeId,
   int* localNodeId, 
   std::function<void(int, int)> onLoadMesh,
-  std::function<void(std::string, int, aiMatrix4x4, int depth)> onAddNode,
+  std::function<void(std::string, int, Transformation& transform, glm::mat4, int depth)> onAddNode,
   std::function<void(int, int)> addParent,
-  int depth
+  int depth,
+  glm::mat4 fullTransform
 ){
    *localNodeId = *localNodeId + 1;
    int currentNodeId =  *localNodeId;
@@ -360,12 +391,17 @@ void processNode(
    }
 
    auto nodeName = generateNodeName(rootname, node -> mName.C_Str());
-   onAddNode(nodeName, currentNodeId, node -> mTransformation, depth);
+   auto trans = aiMatrixToTransform(node -> mTransformation); 
+
+   // Root node uses position specified, not what the model says
+   auto transformMatrix = parentNodeId == -1 ? fullTransform : matrixFromComponents(fullTransform, trans.position, trans.scale, trans.rotation);
+
+   onAddNode(nodeName, currentNodeId, trans, transformMatrix, depth);
    for (unsigned int i = 0; i < (node -> mNumMeshes); i++){
      onLoadMesh(currentNodeId, node -> mMeshes[i]);
    }
    for (unsigned int i = 0; i < node -> mNumChildren; i++){
-     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1);
+     processNode(rootname, node -> mChildren[i], currentNodeId, localNodeId, onLoadMesh, onAddNode, addParent, depth + 1, transformMatrix);
    }
 }
 
@@ -446,6 +482,7 @@ ModelData loadModel(std::string rootname, std::string modelPath){
    std::map<int32_t, std::vector<int>> nodeToMeshId;
    std::map<int32_t, int32_t> childToParent;
    std::map<int32_t, Transformation> nodeTransform;
+   std::map<int32_t, glm::mat4> fullnodeTransform;
    std::map<int32_t, std::string> names;
 
    std::map<std::string, int> nodeNameToDepth;
@@ -460,21 +497,11 @@ ModelData loadModel(std::string rootname, std::string modelPath){
       nodeToMeshId[nodeId].push_back(meshId);
       meshIdToMeshData[meshId] = meshData;
     },
-    [&nodeTransform, &names, &nodeToMeshId, &nodeNameToDepth](std::string name, int nodeId, aiMatrix4x4 transform, int depth) -> void {
+    [&nodeTransform, &fullnodeTransform, &names, &nodeToMeshId, &nodeNameToDepth](std::string name, int nodeId, Transformation& trans, glm::mat4 fullTransform, int depth) -> void {
       // add node
       names[nodeId] = name;  
-      
-      aiVector3t<float> scaling;
-      aiQuaterniont<float> rotation;
-      aiVector3t<float> position;
-      transform.Decompose(scaling, rotation, position);
-      Transformation trans = {
-        .position = glm::vec3(position.x, position.y, position.z),
-        .scale = glm::vec3(scaling.x, scaling.y, scaling.z),
-        .rotation = aiQuatToGlm(rotation),
-      };
-
       nodeTransform[nodeId] = trans;
+      fullnodeTransform[nodeId] = fullTransform;
       if (nodeToMeshId.find(nodeId) == nodeToMeshId.end()){
         std::vector<int> emptyMeshList;
         nodeToMeshId[nodeId] = emptyMeshList;
@@ -486,11 +513,11 @@ ModelData loadModel(std::string rootname, std::string modelPath){
       // add parent
       childToParent[parentId] = nodeId;
     },
-    0
+    0,
+    glm::mat4(1.f)
   );
    setRootSkeletonInBones(meshIdToMeshData, nodeNameToDepth, childToParent, names);
-   setInitialBonePoses();
-
+ 
    assert(nodeToMeshId.size() == nodeTransform.size());
    assert(names.size() ==  nodeToMeshId.size());
    assertAllNamesUnique(names);
@@ -503,6 +530,9 @@ ModelData loadModel(std::string rootname, std::string modelPath){
      .names = names,
      .animations = animations,
    };
+
+   // pass in full transforms, and bones, then set initialoffset to full transform of bone
+   setInitialBonePoses(data, fullnodeTransform); 
 
    printDebugModelData(data, modelPath);
    return data;

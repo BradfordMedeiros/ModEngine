@@ -23,7 +23,6 @@ struct Bone {
   glm::mat4 offsetMatrix;
   std::string skeletonBase;
   glm::mat4 initialBonePose;
-  bool initialPoseSet;
 };
 
 struct MeshData {
@@ -63,5 +62,7 @@ struct PhysicsInfo {
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 void printMatrixInformation(glm::mat4 transform, std::string label);
 BoundInfo getBounds(std::vector<Vertex>& vertices);
+glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation);
+glm::mat4 matrixFromComponents(Transformation transformation);
 
 #endif
