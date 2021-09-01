@@ -15,7 +15,7 @@ WorldTiming createWorldTiming(float initialTime){
 void tickAnimations(WorldTiming& timings, float elapsedTime){
   //std::cout << "num active playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto &[id, playback] : timings.animations.playbacks){
-    playback.setElapsedTime(elapsedTime * 5);
+    playback.setElapsedTime(elapsedTime);
   }
   for (auto groupId : timings.playbacksToRemove){
     timings.animations.playbacks.erase(groupId);
