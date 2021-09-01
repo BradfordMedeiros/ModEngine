@@ -62,7 +62,15 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     for (Mesh& mesh : meshes){
       boundInfos.push_back(mesh.boundInfo);
     }
-    boundInfo = getMaxUnionBoundingInfo(boundInfos);
+    if (boundInfos.size() > 0){
+      boundInfo = getMaxUnionBoundingInfo(boundInfos);
+    }else{
+      boundInfo = BoundInfo {  // maybe this should be 0 size, or not have a bound info? hmm
+        .xMin = -0.5, .xMax = 0.5,
+        .yMin = -0.5, .yMax = 0.5,
+        .zMin = -0.5, .zMax = 0.5,
+      };
+    }
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&gameObjV);

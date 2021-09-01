@@ -46,12 +46,13 @@ GameObjectMesh createMesh(
       }
     }
   }else{
-    auto meshName = (attr.stringAttributes.find("mesh") != attr.stringAttributes.end()) ? attr.stringAttributes.at("mesh") : defaultMesh;
-    meshName = (meshName == "") ? defaultMesh : meshName;
-    bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
-    if (loadedMesh){
-      meshNames.push_back(meshName);
-      meshesToRender.push_back(meshes.at(meshName).mesh);   
+    auto meshName = (attr.stringAttributes.find("mesh") != attr.stringAttributes.end()) ? attr.stringAttributes.at("mesh") : "";
+    if (meshName != ""){
+      bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
+      if (loadedMesh){
+        meshNames.push_back(meshName);
+        meshesToRender.push_back(meshes.at(meshName).mesh);   
+      }     
     }
   }
 
