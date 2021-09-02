@@ -426,7 +426,8 @@ void playSoundState(std::string source, objid sceneId){
   if (gameobj.has_value()){
     playSoundState(world.objectMapping, gameobj.value()); 
   }else{
-    std::cout << "no source named: " << source << " in scene: " << sceneId << std::endl;
+    std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
+    assert(false);
   }
 }
 
