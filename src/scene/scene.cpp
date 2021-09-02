@@ -539,7 +539,7 @@ void addObjectToWorld(
 ){
     auto id = getIdForName(world.sandbox, name, sceneId);
 
-    addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes, "./res/models/ui/node.obj",
+    addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes,
       [&world, sceneId, id, name, shouldLoadModel, getId, &attr, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
         if (shouldLoadModel){
           ModelData data = loadModel(name, meshName); 

@@ -26,7 +26,6 @@ static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "textureti
 GameObjectMesh createMesh(
   GameobjAttributes& attr, 
   std::map<std::string, MeshRef>& meshes, 
-  std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded
 ){
@@ -395,7 +394,6 @@ void addObject(
   GameobjAttributes& attr,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, MeshRef>& meshes, 
-  std::string defaultMesh, 
   std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
@@ -404,7 +402,7 @@ void addObject(
   std::function<Mesh(MeshData&)> loadMesh
 ){
   if (objectType == "default"){
-    mapping[id] = createMesh(attr, meshes, defaultMesh, ensureMeshLoaded, ensureTextureLoaded);
+    mapping[id] = createMesh(attr, meshes, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "camera"){
     mapping[id] = createCamera();
   }else if (objectType == "portal"){
