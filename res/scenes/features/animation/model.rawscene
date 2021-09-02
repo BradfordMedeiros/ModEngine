@@ -2,5 +2,5 @@ platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
 
-nod:mesh:../gameresources/build/debug/plaguerobot.gltf
+nod:mesh:../gameresources/build/characters/plaguerobot.gltf
 nod:script:./res/scenes/features/animation/animate.scm
