@@ -1,5 +1,4 @@
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
-platform:position:0 -5 0
 
-node:mesh:../gameresources/build/debug/onespike.fbx
+
+node:mesh:../gameresources/build/debug/onespike.gltf
+node:texture:./res/textures/grid.png
