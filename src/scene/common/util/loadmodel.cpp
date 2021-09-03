@@ -205,6 +205,7 @@ int32_t getNodeId(ModelData& data, std::string nodename){
       return id;
     }
   }
+  std::cout << "no node named: [" << nodename << "]" << std::endl;
   assert(false);
   return 0;
 }

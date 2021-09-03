@@ -1022,6 +1022,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       //onDebugKey();
+      std::cout << "group selection: " << state.groupSelection << std::endl;
       state.groupSelection = !state.groupSelection;
     }
   },
