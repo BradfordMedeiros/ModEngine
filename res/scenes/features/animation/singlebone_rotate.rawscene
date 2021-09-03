@@ -2,5 +2,6 @@ platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
 
-rotate:mesh:../gameresources/build/debug/singlebone_move.fbx
+rotate:mesh:../gameresources/build/debug/singlebone_move.gltf
 rotate:script:./res/scenes/features/animation/animate.scm
+rotate:texture:./res/textures/wood.jpg

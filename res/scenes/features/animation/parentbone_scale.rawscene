@@ -2,5 +2,5 @@ platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
 
-parentbone_scale:mesh:../gameresources/build/debug/parentbone.fbx
-parentbone_scale:script:./res/scenes/features/animation/animate.scm
+scale:mesh:../gameresources/build/debug/parentbone.gltf
+scale:script:./res/scenes/features/animation/animate.scm
