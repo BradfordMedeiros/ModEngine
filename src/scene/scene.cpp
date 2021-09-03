@@ -527,29 +527,54 @@ std::string getType(std::string name, std::vector<Field> additionalFields){
   return type;
 }
 
+std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
+  return rootmesh + "::" + std::to_string(meshId);
+}
+int32_t nodeIdFromName(ModelData& modelData, std::string targetName){
+  for (auto &[nodeId, name] : modelData.names){
+    if (name == targetName){
+      return nodeId;
+    }
+  }
+  std::cout << "no node named: " << targetName << std::endl;
+  assert(false);
+  return -1;
+}
+
+std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName){
+  std::vector<std::string> meshnames;
+  auto meshIds = modelData.nodeToMeshId.at(nodeIdFromName(modelData, nodeName));
+  for (auto meshId : meshIds){
+    meshnames.push_back(nameForMeshId(rootmesh, meshId));
+  }
+  return meshnames;
+}
+
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
   std::string name,
-  bool shouldLoadModel, 
   std::function<objid()> getId,
   SysInterface interface,
   GameobjAttributes attr,
-  std::map<objid, std::vector<glm::vec3>>& idToModelVertexs
+  std::map<objid, std::vector<glm::vec3>>& idToModelVertexs,
+  ModelData* data,
+  std::string rootMeshName
 ){
     auto id = getIdForName(world.sandbox, name, sceneId);
 
     addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes,
-      [&world, sceneId, id, name, shouldLoadModel, getId, &attr, &interface, &idToModelVertexs](std::string meshName, std::vector<std::string> fieldsToCopy) -> bool {  // This is a weird function, it might be better considered "ensure model l"
-        if (shouldLoadModel){
+      [&world, sceneId, id, name, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
+        if (meshName == ""){
+          return {};
+        }
+        if (data == NULL){
           ModelData data = loadModel(name, meshName); 
           idToModelVertexs[id] = getVertexsFromModelData(data);
-
           world.animations[id] = data.animations;
-          bool hasMesh = data.nodeToMeshId.at(0).size() > 0;     // this is 0 node because we just loaded a mesh, so by definition is root node
 
           for (auto [meshId, meshData] : data.meshIdToMeshData){
-            auto meshPath = meshName + "::" + std::to_string(meshId);
+            auto meshPath = nameForMeshId(meshName, meshId);
             loadMeshData(world, meshPath, meshData, id);
           } 
 
@@ -566,11 +591,11 @@ void addObjectToWorld(
           );
 
           for (auto &[name, objAttr] : newSerialObjs){
-            addObjectToWorld(world, sceneId, name, false, getId, interface, objAttr, idToModelVertexs);
+            addObjectToWorld(world, sceneId, name, getId, interface, objAttr, idToModelVertexs, &data, meshName);
           }
-          return hasMesh;
+          return meshNamesForNode(data, meshName, name);
         }
-        return true;   // This is basically ensure model loaded so by definition this was already loaded. 
+        return meshNamesForNode(*data, rootMeshName, name);  
       }, 
       [&world, id](std::string texturepath) -> Texture {
         std::cout << "Custom texture loading: " << texturepath << std::endl;
@@ -638,7 +663,7 @@ void addSerialObjectsToWorld(
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, attr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, name, true, getNewObjectId, interface, attr, idToModelVertexs);
+    addObjectToWorld(world, sceneId, name, getNewObjectId, interface, attr, idToModelVertexs, NULL, "");
   }
   for (auto id : idsAdded){
     std::vector<glm::vec3> modelVerts = {};

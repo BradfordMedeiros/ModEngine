@@ -295,7 +295,7 @@ void addObject(
   GameobjAttributes& attr,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, MeshRef>& meshes,
-  std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
+  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onCollisionChange,

@@ -26,33 +26,19 @@ static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "textureti
 GameObjectMesh createMesh(
   GameobjAttributes& attr, 
   std::map<std::string, MeshRef>& meshes, 
-  std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
+  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded
 ){
+  // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
+  // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
   std::string rootMeshName = attr.stringAttributes.find("mesh") == attr.stringAttributes.end()  ? "" : attr.stringAttributes.at("mesh");
-  bool usesMultipleMeshes = attr.stringAttributes.find("meshes") != attr.stringAttributes.end();
-
+  auto meshNamesForObj = ensureMeshLoaded(rootMeshName, meshFieldsToCopy);
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
-
-  if (usesMultipleMeshes){
-    auto meshStrings = split(attr.stringAttributes.at("meshes"), ',');
-    for (auto meshName : meshStrings){
-      bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
-      if (loadedMesh){
-        meshNames.push_back(meshName);
-        meshesToRender.push_back(meshes.at(meshName).mesh);  
-      }
-    }
-  }else{
-    auto meshName = (attr.stringAttributes.find("mesh") != attr.stringAttributes.end()) ? attr.stringAttributes.at("mesh") : "";
-    if (meshName != ""){
-      bool loadedMesh = ensureMeshLoaded(meshName, meshFieldsToCopy);
-      if (loadedMesh){
-        meshNames.push_back(meshName);
-        meshesToRender.push_back(meshes.at(meshName).mesh);   
-      }     
-    }
+  for (auto meshName : meshNamesForObj){
+    std::cout << "trying to get mesh name: " << meshName << std::endl;
+    meshNames.push_back(meshName);
+    meshesToRender.push_back(meshes.at(meshName).mesh);  
   }
 
   GameObjectMesh obj {
@@ -394,7 +380,7 @@ void addObject(
   GameobjAttributes& attr,
   std::map<objid, GameObjectObj>& mapping, 
   std::map<std::string, MeshRef>& meshes, 
-  std::function<bool(std::string, std::vector<std::string>)> ensureMeshLoaded,
+  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded,
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onCollisionChange,

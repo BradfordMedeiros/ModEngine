@@ -150,7 +150,6 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
     Bone meshBone {
       .name = generateNodeName(rootname, bone -> mName.C_Str()),
       .offsetMatrix = glm::mat4(1.f),
-      .skeletonBase = "",
       .initialBonePose = glm::mat4(1.f),  // this gets populated in setInitialBonePoses since needs lookup
     };
 
@@ -196,42 +195,6 @@ void setDefaultBoneIndexesAndWeights(std::map<unsigned int, std::vector<BoneWeig
 //    assert(i != 0);
       indices[i] = 0;   // if no associated bone id, just put 0 bone id with 0 weighting so it won't add to the weight
       weights[i] = 0;
-    }
-  }
-}
-
-void setRootSkeletonInBones(
-  std::map<int32_t, MeshData>& meshIdToMeshData, 
-  std::map<std::string, int>& nodeNameToDepth, 
-  std::map<int32_t, int32_t>& childToParent,
-  std::map<int32_t, std::string>& names
-){
-  std::string highestBone = "";
-  {
-    int minDepthBone = -1;
-    for (auto &[_, mesh] : meshIdToMeshData){
-      for (auto &bone : mesh.bones){
-        auto boneDepth = nodeNameToDepth.at(bone.name);
-        if (minDepthBone == -1 || boneDepth < minDepthBone){
-          minDepthBone = boneDepth;
-          highestBone = bone.name;
-        }
-      }
-    }
-  }
-
-  std::string skeletonBase = "";
-  for (auto [nodeid, name] : names){
-    if (name == highestBone){
-      auto parentId = childToParent.at(nodeid);
-      auto parentName = names.at(parentId);
-      skeletonBase = parentName;
-    }
-  }
-
-  for (auto &[_, mesh] : meshIdToMeshData){
-    for (auto &bone : mesh.bones){
-      bone.skeletonBase = skeletonBase;
     }
   }
 }
@@ -390,7 +353,7 @@ void processNode(
      addParent(currentNodeId, parentNodeId);
    }
 
-   auto nodeName = generateNodeName(rootname, node -> mName.C_Str());
+   auto nodeName = parentNodeId == -1 ?  rootname : generateNodeName(rootname, node -> mName.C_Str());
    auto trans = aiMatrixToTransform(node -> mTransformation); 
 
    // Root node uses position specified, not what the model says
@@ -516,7 +479,6 @@ ModelData loadModel(std::string rootname, std::string modelPath){
     0,
     glm::mat4(1.f)
   );
-   setRootSkeletonInBones(meshIdToMeshData, nodeNameToDepth, childToParent, names);
  
    assert(nodeToMeshId.size() == nodeTransform.size());
    assert(names.size() ==  nodeToMeshId.size());
