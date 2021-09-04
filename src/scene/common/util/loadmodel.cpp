@@ -206,6 +206,11 @@ int32_t getNodeId(ModelData& data, std::string nodename){
     }
   }
   std::cout << "no node named: [" << nodename << "]" << std::endl;
+  std::cout << "existing nodes: [ ";
+  for (auto &[_, name] : data.names){
+    std::cout << name << " ";
+  }
+  std::cout << "]" << std::endl;
   assert(false);
   return 0;
 }
