@@ -1,9 +1,5 @@
 #include "./loadmodel.h"
 
-std::string generateNodeName(std::string rootname, const char* nodeName){
-  return rootname + "/" + nodeName; 
-}
-
 std::vector<Animation> processAnimations(std::string rootname, const aiScene* scene){
   std::vector<Animation> animations;
 
@@ -39,7 +35,7 @@ std::vector<Animation> processAnimations(std::string rootname, const aiScene* sc
       }
 
       AnimationChannel channel {
-        .nodeName = generateNodeName(rootname, aiAnimation -> mNodeName.C_Str()),
+        .nodeName = aiAnimation -> mNodeName.C_Str(),
         .positionKeys = positionKeys,
         .scalingKeys = scalingKeys,
         .rotationKeys = rotationKeys
@@ -148,7 +144,7 @@ BoneInfo processBones(std::string rootname, aiMesh* mesh){
   for (int i = 0; i < mesh -> mNumBones; i++){
     aiBone* bone = bones[i];
     Bone meshBone {
-      .name = generateNodeName(rootname, bone -> mName.C_Str()),
+      .name = bone -> mName.C_Str(),
       .offsetMatrix = glm::mat4(1.f),
       .initialBonePose = glm::mat4(1.f),  // this gets populated in setInitialBonePoses since needs lookup
     };
@@ -226,6 +222,42 @@ void setInitialBonePoses(ModelData& data, std::map<int32_t, glm::mat4>& fullnode
     }
   }
 }
+
+std::string generateNodeName(std::string rootname, const char* nodeName){
+  return rootname + "/" + nodeName; 
+}
+void renameRootNode(ModelData& data, std::string rootname, std::string realrootname){
+  for (auto &[_, meshdata] : data.meshIdToMeshData){
+    for (auto &bone : meshdata.bones){
+      // bone.name
+      if (bone.name == realrootname){
+        bone.name == rootname;
+      }else{
+        bone.name = generateNodeName(rootname, bone.name.c_str());
+      }
+    }
+  }
+  for (auto &idToName : data.names){
+    if (idToName.second == realrootname){
+      idToName.second = rootname;
+    }else{
+      idToName.second = generateNodeName(rootname, idToName.second.c_str());
+    }
+  }
+
+  for (auto &animation : data.animations){
+    for (auto &channel : animation.channels){
+      // chnnael.nodeName
+      if (channel.nodeName == realrootname){
+        channel.nodeName = rootname;
+      }else{
+        channel.nodeName = generateNodeName(rootname, channel.nodeName.c_str());
+      }
+    }
+  }
+  std::vector<Animation> animations;
+}
+
 
 void dumpVerticesData(std::string modelPath, MeshData& model){
   for (auto vertex : model.vertices){
@@ -359,7 +391,7 @@ void processNode(
      addParent(currentNodeId, parentNodeId);
    }
 
-   auto nodeName = parentNodeId == -1 ?  rootname : generateNodeName(rootname, node -> mName.C_Str());
+   auto nodeName = node -> mName.C_Str();
    auto trans = aiMatrixToTransform(node -> mTransformation); 
 
    // Root node uses position specified, not what the model says
@@ -458,6 +490,8 @@ ModelData loadModel(std::string rootname, std::string modelPath){
 
    auto animations = processAnimations(rootname, scene);
 
+   std::cout << "real root node name is: " <<  scene -> mRootNode -> mName.C_Str() << std::endl;
+
    int localNodeId = -1;
    processNode(rootname, scene -> mRootNode, localNodeId, &localNodeId, 
     [&scene, modelPath, &meshIdToMeshData, &nodeToMeshId, &rootname](int nodeId, int meshId) -> void {
@@ -501,8 +535,9 @@ ModelData loadModel(std::string rootname, std::string modelPath){
 
    // pass in full transforms, and bones, then set initialoffset to full transform of bone
    setInitialBonePoses(data, fullnodeTransform); 
+   renameRootNode(data, rootname, scene -> mRootNode -> mName.C_Str());
+   //printDebugModelData(data, modelPath);
 
-   printDebugModelData(data, modelPath);
    return data;
 }
 
