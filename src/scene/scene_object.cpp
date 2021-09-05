@@ -20,18 +20,20 @@ std::vector<LightInfo> getLightInfo(World& world){
 }
 
 PortalInfo getPortalInfo(World& world, objid id){
-  //assert(false); // needs to use absolute position
   auto objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
-
-  auto transform = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).transformation;
+  
+  auto cameraId = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).id;
+  auto cameraFullTransform = fullTransformation(world.sandbox, cameraId);
+  
   auto portalGameObject = getGameObject(world, id);
+  auto portalFullTransform = fullTransformation(world.sandbox, id);
 
   PortalInfo info {
-    .cameraPos = transform.position,
-    .cameraRotation = transform.rotation,
-    .portalPos = portalGameObject.transformation.position,
-    .portalRotation = portalGameObject.transformation.rotation,
+    .cameraPos = cameraFullTransform.position,
+    .cameraRotation = cameraFullTransform.rotation,
+    .portalPos = portalFullTransform.position,
+    .portalRotation = portalFullTransform.rotation,
     .perspective = portalObject -> perspective,
     .id = id
   };
