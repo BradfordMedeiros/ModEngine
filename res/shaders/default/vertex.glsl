@@ -31,6 +31,7 @@ uniform bool useBoneTransform;
 void main(){
   if (hasBones){
     vec4 modelPosition;
+    mat4 fullmodel;
     if (!useBoneTransform){
       modelPosition= vec4(aPos.xyz, 1.0);
       overcolor = vec4(0, 0, 1, 1);
@@ -44,8 +45,8 @@ void main(){
       (bones[aBoneIndex[2]] * aBoneWeight[2] * multiplier) + 
       (bones[aBoneIndex[3]] * aBoneWeight[3] * multiplier);
 
-
-      modelPosition = model  * mul * vec4(aPos.xyz, 1.0);
+      fullmodel = model  * mul;
+      modelPosition = fullmodel * vec4(aPos.xyz, 1.0);
 
       /*if (totalWeight == 1){
         overcolor = vec4(1, 0, 0, 1);
@@ -57,7 +58,7 @@ void main(){
 
     gl_Position = projview *  vec4(modelPosition.x, modelPosition.y, modelPosition.z, 1.0);
     TexCoord = aTexCoords;
-    Normal = mat3(transpose(inverse(model))) * aNormal;  
+    Normal = mat3(transpose(inverse(fullmodel))) * aNormal;  
     FragPos = modelPosition.xyz;
     sshadowCoord = lightsprojview * vec4(FragPos, 1.0);
 
