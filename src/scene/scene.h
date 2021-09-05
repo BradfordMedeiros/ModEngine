@@ -73,6 +73,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale);
 void applyPhysicsTranslation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis);
 void applyPhysicsRotation(World& world, objid index, float offsetX, float offsetY, Axis manipulatorAxis);
 void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
+void physicsLocalTransformSet(World& world, objid index, Transformation transform);
 
 void updatePhysicsBody(World& world, objid id);
 

@@ -61,7 +61,7 @@ std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world,
   return [&world, idScene](std::string name, glm::mat4 pose) -> void {
     auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
     if (gameobj.has_value()){
-      updateRelativeTransform(world.sandbox, gameobj.value() -> id, getTransformationFromMatrix(pose));
+      physicsLocalTransformSet(world, gameobj.value() -> id, getTransformationFromMatrix(pose));
     }else{
       std::cout << "warning no bone node named: " << name << std::endl;
       assert(false);

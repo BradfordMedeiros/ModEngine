@@ -927,6 +927,15 @@ void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, fl
   physicsScaleSet(world, index, applyScaling(transform.position, transform.scale, lastX, lastY, offsetX, offsetY, manipulatorAxis));
 }
 
+void physicsLocalTransformSet(World& world, objid index, Transformation transform){
+  updateRelativeTransform(world.sandbox, index, transform);
+  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+    auto body =  world.rigidbodys.at(index);
+    auto fullTransform = fullTransformation(world.sandbox, index);
+    setTransform(body, fullTransform.position, fullTransform.scale, fullTransform.rotation);
+  }
+}
+
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
