@@ -1160,13 +1160,13 @@ int main(int argc, char* argv[]){
         glClearColor(0.0, 0.0, 0.0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        auto portalViewMatrix = renderPortalView(portal, viewTransform);
         // Render Skybox code -> need to think harder about stencil
         glDepthMask(GL_FALSE);
-        renderSkybox(shaderProgram, projection, view, viewTransform.position);  // Probably better to render this at the end 
+        renderSkybox(shaderProgram, projection, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
         glDepthMask(GL_TRUE);
         /////////////////////////////
 
-        auto portalViewMatrix = renderPortalView(portal, viewTransform);
         renderWorld(world, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
       
         nextPortalCache[portal.id] = portalTextures[i];
