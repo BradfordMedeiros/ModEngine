@@ -23,3 +23,6 @@ openal install from native package manager, should embed in cmake?
 sudo apt-get install libalut-dev
 sudo apt-get install libopenal-dev
 sudo apt-get install libavformat57 libavformat-dev libavcodec57 libswscale-dev libswresample-dev
+
+
+assimp -> e7085199f212427d9b5e08b2166673c2860d709e

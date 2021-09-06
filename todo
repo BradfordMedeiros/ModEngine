@@ -1,22 +1,26 @@
-
-=> audit resources + profile memory in general
-=> fix when get local position and update vs the new value in the cache
-=> animation still fucked up
-=> bones should be relative to the root model
-=> can get rid of the empty top level node that never has a mesh?
+-> because i don't use the root ainode rotation, it can be rotated incorrectly, fuck
+======> should I have an additional "hidden" transform?
+===> maybe this should just be solved in the export?
 
 
-goal: end of august
-====================================
+get the basic menu stuff for mosttrusted working
 
-|        |
-|        |
-|  LATER |
-|        |
+
+=======
+Hopefully done by this weekend
+
+=================
+
+
+========
+- write basic setup scripts for afterworld
+- get the basic guns working (restore previous behavior)
 
 ==================
 GAME SPECIFIC
 ==================
+third person toggle (just some basic character that can run around and stuff)
+
 improve gun system
 - xoffset, yoffset as percentage of the screen)
 - fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
@@ -35,10 +39,13 @@ core gameplay implementation stage:
 - emitter initial velocity 
 - gun system (very tunable) : projectile effect (on muzzle?)
 
+============== GOAL END OF SEPTEMBER ==================================
+Note: I don't think the movement has to feel perfect, or even that good yet
+but is important that the main functional aspects are defined
 
 ========================================================================
 
-|           |
+|            |
 |           |
 |  AND THEN |
 |           |
@@ -54,7 +61,6 @@ GO HAM ON THE EDITOR -> VOXELS + TERRAIN
   ====> i guess?
   
 
-============== GOAL END OF AUGUST ==================================
 
 
 ========================================================================
@@ -67,6 +73,19 @@ MAKE WORK ON WINDOWS!!!!
 
 FIXING BUGS
 ========================
+=> model loading sets the coords slightly off, maybe scene sandbox issue?  too many conversion steps?  etc? 
+=> parenting sandbox (querying can get out of data if using to read?)
+=> fix when get local position and update vs the new value in the cache
+- make timeplayback stateless 
+- animation interpolation
+- verify animation some
+- fix dae/fbx models in model loading (convert all to gltf maybe?) + cleanup unused models
+
+
+=> way to globally address obj by name -> maybe <sceneid>:objname? ? 
+(set-scene-name "coolname")
+(lsobj-name "someobject" "coolname")
+
 currentModuleId -> is flawed
 guile -> for out how to catch any exception, then be smart about stuff
 textures -> always convert to abs path so doesn't reuse
@@ -104,7 +123,7 @@ bugs:
 => convex/exact hull kind of wrongish, sometimes hull would crash eh 
 - layout bound info gets centered, but the layout should be aligned from the left
 - video no longer work wtf shit
-
+- painting seems to mismap the uvs
 
 eventually:
 - work on ai, make players and shit move and stuff enemy ai 
@@ -146,3 +165,4 @@ easy use ideas:
 - clean up/speed up model loading (every reference requires reading the file, even if it could be cached)
 
 
+=> audit resources + profile memory in general
