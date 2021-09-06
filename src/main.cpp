@@ -491,7 +491,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
       glBindVertexArray(quadVAO);
       //loadTextureWorld(world, "./res/textures/wood.jpg", -1);  //wtf is this doing here?
       //auto textureId = world.textures.at("./res/textures/wood.jpg").texture.textureId;
-      //glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
+      glBindTexture(GL_TEXTURE_2D,  portalIdCache.at(id));
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glEnable(GL_DEPTH_TEST);
       glUseProgram(newShader); 
