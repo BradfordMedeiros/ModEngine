@@ -1,18 +1,5 @@
--> because i don't use the root ainode rotation, it can be rotated incorrectly, fuck
-======> should I have an additional "hidden" transform?
-===> maybe this should just be solved in the export?
 
-
-get the basic menu stuff for mosttrusted working
-
-
-=======
-Hopefully done by this weekend
-
-=================
-
-
-========
+- get the basic menu stuff for mosttrusted working
 - write basic setup scripts for afterworld
 - get the basic guns working (restore previous behavior)
 
@@ -73,6 +60,10 @@ MAKE WORK ON WINDOWS!!!!
 
 FIXING BUGS
 ========================
+- initial model transform/rotation/scale (broken feature scenes) -> do I care?
+- skybox sometimes doesn't render if -i is not used
+=====> cleanup core rendering code, think about how buffers are used, fix bloom etc
+
 => model loading sets the coords slightly off, maybe scene sandbox issue?  too many conversion steps?  etc? 
 => parenting sandbox (querying can get out of data if using to read?)
 => fix when get local position and update vs the new value in the cache
