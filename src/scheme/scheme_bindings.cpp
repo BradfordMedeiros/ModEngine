@@ -321,8 +321,9 @@ SCM getGameObjectId(SCM value){
 }
 
 std::optional<objid> (*_getGameObjectByName)(std::string name, objid sceneId);
-SCM getGameObjByName(SCM value){
-  auto sceneId = _listSceneId(currentModuleId());
+SCM getGameObjByName(SCM value, SCM scmSceneId){
+  auto sceneIdDefined = !scm_is_eq(scmSceneId, SCM_UNDEFINED);
+  auto sceneId = sceneIdDefined ? scm_to_int32(scmSceneId) : _listSceneId(currentModuleId());
   auto id = _getGameObjectByName(scm_to_locale_string(value), sceneId);
   if (!id.has_value()){
     return scm_from_bool(false);
@@ -675,7 +676,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
   scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
-  scm_c_define_gsubr("lsobj-name", 1, 0, 0, (void *)getGameObjByName);
+  scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
   scm_c_define_gsubr("draw-text", 4, 0, 0, (void*)scmDrawText);
   scm_c_define_gsubr("draw-line", 2, 0, 0, (void*)scmDrawLine);
