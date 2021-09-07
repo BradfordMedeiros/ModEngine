@@ -7,8 +7,6 @@ platform:position:0 -5 0
 box:mesh:./res/models/box/box.obj
 box:position:0 5 0
 box:child:follower
-box:physics:disabled
 
 follower:mesh:./res/models/box/box.obj
 follower:position:0 2 0
-follower:physics:disabled
