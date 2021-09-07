@@ -1,7 +1,6 @@
 bug: parenting doesn't work when physics are enabled
+bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
 
-
-- write basic setup/run scripts for afterworld
 - get the basic guns working (restore previous behavior)
 
 ==================
