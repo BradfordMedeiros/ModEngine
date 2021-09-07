@@ -658,6 +658,13 @@ void onObjDelete(objid id){
   }
 }
 
+std::map<std::string, std::string> getArgs(){
+  std::map<std::string, std::string> args;
+  args["test1"] = "hello";
+  args["test2"] = "wow";
+  return args;
+}
+
 
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
@@ -920,6 +927,7 @@ int main(int argc, char* argv[]){
     removeLoadingAround,
     createGeneratedMesh,
     setSkybox,
+    getArgs,
     extensions.registerGuileFns
   );
   registerGuileTypes(extensions);

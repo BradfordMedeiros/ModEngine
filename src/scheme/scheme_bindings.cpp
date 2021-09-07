@@ -513,6 +513,16 @@ SCM scmSetSkybox(SCM skybox){
   return SCM_UNSPECIFIED;
 }
 
+std::map<std::string, std::string> (*_getArgs)();
+SCM scmArgs(SCM argKey){
+  auto args = _getArgs();
+  auto key = scm_to_locale_string(argKey);
+  if (args.find(key) == args.end()){
+    return SCM_UNDEFINED;
+  }
+  return scm_from_locale_string(args.at(key).c_str());
+}
+
 
 // Callbacks
 void onFrame(){
@@ -758,6 +768,8 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("genmesh", 3, 0, 0, (void*)scmGenerateMesh);
   scm_c_define_gsubr("set-skybox", 1, 0, 0, (void*)scmSetSkybox);
 
+  scm_c_define_gsubr("args", 1, 0, 0, (void*)scmArgs);
+
   for (auto registerFn : _registerGuileFns){
     registerFn();
   }
@@ -828,6 +840,7 @@ void createStaticSchemeBindings(
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
   void (*setSkybox)(std::string),
+  std::map<std::string, std::string> (*getArgs)(),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -914,6 +927,8 @@ void createStaticSchemeBindings(
   _generateMesh = generateMesh;
 
   _setSkybox = setSkybox;
+  _getArgs = getArgs;
+
 
   _registerGuileFns = registerGuileFns;
 }
