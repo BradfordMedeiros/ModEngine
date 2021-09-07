@@ -658,10 +658,8 @@ void onObjDelete(objid id){
   }
 }
 
+std::map<std::string, std::string> args;
 std::map<std::string, std::string> getArgs(){
-  std::map<std::string, std::string> args;
-  args["test1"] = "hello";
-  args["test2"] = "wow";
   return args;
 }
 
@@ -689,6 +687,7 @@ int main(int argc, char* argv[]){
    ("g,grid", "Size of grid chunking grid used for open world streaming, default to zero (no grid)", cxxopts::value<int>()->default_value("0"))
    ("w,world", "Use streaming chunk system", cxxopts::value<std::string>()->default_value(""))
    ("r,rawscene", "Rawscene file to use (only used when world = false)", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("a,args", "Args to provide to scheme", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("m,mapping", "Key mapping file to use", cxxopts::value<std::string>()->default_value(""))
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
    ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
@@ -697,7 +696,6 @@ int main(int argc, char* argv[]){
    ("h,help", "Print help")
   ;        
 
-
   const auto result = cxxoption.parse(argc, argv);
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   bool headlessmode = result["headlessmode"].as<bool>();
@@ -705,6 +703,17 @@ int main(int argc, char* argv[]){
 
   std::string worldfile = result["world"].as<std::string>();
   useChunkingSystem = worldfile != "";
+
+  auto parsedArgs = result["args"].as<std::vector<std::string>>();
+  for (auto arg : parsedArgs){
+    auto parsedArg = split(arg, '=');
+    assert(parsedArg.size() <= 2);
+    if (parsedArg.size() == 2){
+      args[parsedArg.at(0)] = parsedArg.at(1);
+    }else{
+      args[parsedArg.at(0)] = "";
+    }
+  }
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";

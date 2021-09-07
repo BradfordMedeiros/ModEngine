@@ -518,9 +518,13 @@ SCM scmArgs(SCM argKey){
   auto args = _getArgs();
   auto key = scm_to_locale_string(argKey);
   if (args.find(key) == args.end()){
-    return SCM_UNDEFINED;
+    return SCM_BOOL_F;
   }
-  return scm_from_locale_string(args.at(key).c_str());
+  auto value = args.at(key);
+  if (value == ""){
+    return SCM_BOOL_T;
+  }
+  return scm_from_locale_string(value.c_str());
 }
 
 
