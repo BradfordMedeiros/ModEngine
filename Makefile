@@ -12,7 +12,7 @@ modengine_release: build resourcefiles
 	@(cd ./build && cmake .. -DCMAKE_BUILD_TYPE=Release  && make all)
 	@echo modengine release output to ./build/modengine          
 
-resourcefiles: build assimp  		# This should probably be in CMakeLists.txt but is doesn't seem to play nice
+resourcefiles: build #assimp  		# This should probably be in CMakeLists.txt but is doesn't seem to play nice
 	@rm -rf ./build/res
 	@cp -r ./res ./build/
 build:
