@@ -475,3 +475,14 @@ std::vector<VoxelQueryData> getSelectedVoxels(){
 void setSkybox(std::string skybox){
   loadSkybox(world, skybox); 
 }
+
+bool lock(std::string key, objid owner){
+  assert(key == "input");
+  std::cout << "lock placeholder: " << key << " owner: " << owner << std::endl;
+  return false;
+}
+bool unlock(std::string key, objid owner){
+  assert(key == "input");
+  std::cout << "unlock placeholder: " << key << " owner: " << owner << std::endl;
+  return false;
+}

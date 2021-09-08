@@ -72,6 +72,8 @@ void createStaticSchemeBindings(
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
   void (*setSkybox)(std::string),
   std::map<std::string, std::string> (*getArgs)(),
+  bool (*lock)(std::string, objid),
+  bool (*unlock)(std::string, objid),
   std::vector<func_t> registerGuileFns
 );
 

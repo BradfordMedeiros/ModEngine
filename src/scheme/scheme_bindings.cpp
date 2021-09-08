@@ -527,6 +527,16 @@ SCM scmArgs(SCM argKey){
   return scm_from_locale_string(value.c_str());
 }
 
+bool (*_lock)(std::string, objid);
+SCM scmLock(SCM key){
+  _lock(scm_to_locale_string(key), currentModuleId());
+  return SCM_UNSPECIFIED;
+}
+bool (*_unlock)(std::string, objid);
+SCM scmUnlock(SCM key){
+  _unlock(scm_to_locale_string(key), currentModuleId());
+  return SCM_UNSPECIFIED;
+}
 
 // Callbacks
 void onFrame(){
@@ -773,6 +783,8 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("set-skybox", 1, 0, 0, (void*)scmSetSkybox);
 
   scm_c_define_gsubr("args", 1, 0, 0, (void*)scmArgs);
+  scm_c_define_gsubr("lock", 1, 0, 0, (void*)scmLock);
+  scm_c_define_gsubr("unlock", 1, 0, 0, (void*)scmUnlock);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();
@@ -845,6 +857,8 @@ void createStaticSchemeBindings(
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
   void (*setSkybox)(std::string),
   std::map<std::string, std::string> (*getArgs)(),
+  bool (*lock)(std::string, objid),
+  bool (*unlock)(std::string, objid),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -932,7 +946,8 @@ void createStaticSchemeBindings(
 
   _setSkybox = setSkybox;
   _getArgs = getArgs;
-
+  _lock = lock;
+  _unlock = unlock;
 
   _registerGuileFns = registerGuileFns;
 }

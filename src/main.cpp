@@ -937,6 +937,8 @@ int main(int argc, char* argv[]){
     createGeneratedMesh,
     setSkybox,
     getArgs,
+    lock,
+    unlock,
     extensions.registerGuileFns
   );
   registerGuileTypes(extensions);

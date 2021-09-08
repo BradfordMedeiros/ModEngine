@@ -133,5 +133,7 @@ void createGeneratedMesh(std::vector<glm::vec3> face, std::vector<glm::vec3> poi
 
 glm::vec3 navPosition(objid id, glm::vec3 target);
 void setSkybox(std::string skybox);
+bool lock(std::string key, objid owner);
+bool unlock(std::string key, objid owner);
 
 #endif
