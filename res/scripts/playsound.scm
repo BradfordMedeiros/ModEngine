@@ -1,4 +1,4 @@
 
-(define (onMessage event)
+(define (onMessage event value)
   (playclip event)
 )
