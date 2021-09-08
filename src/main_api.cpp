@@ -502,3 +502,15 @@ bool unlock(std::string key, objid owner){
   std::cout << "ERROR: tried to unlock a key that did not own (" << key << "," << owner << ")" << std::endl;
   return false;
 }
+
+void removeLocks(objid owner){
+  std::vector<std::string> locksOwnedByOwner;
+  for (auto &[lockname, id] : activeLocks){
+    if (id == owner){
+      locksOwnedByOwner.push_back(lockname);
+    }
+  }
+  for (auto lockname : locksOwnedByOwner){
+    activeLocks.erase(lockname);
+  }
+}

@@ -135,5 +135,6 @@ glm::vec3 navPosition(objid id, glm::vec3 target);
 void setSkybox(std::string skybox);
 bool lock(std::string key, objid owner);
 bool unlock(std::string key, objid owner);
+void removeLocks(objid owner);
 
 #endif

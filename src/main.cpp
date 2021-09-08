@@ -964,6 +964,7 @@ int main(int argc, char* argv[]){
       unloadScript(scriptpath, id, [&extensions, id]() -> void {
         extensionsUnloadScript(extensions, id);
       }); 
+      removeLocks(id);
     },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime
