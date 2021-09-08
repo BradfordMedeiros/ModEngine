@@ -51,6 +51,7 @@ struct GameObjectPortal {
 struct GameObjectSound{
   std::string clip;  
   ALuint source;
+  bool loop;
 };
 
 enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT, LIGHT_DIRECTIONAL };

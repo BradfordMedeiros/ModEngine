@@ -71,10 +71,12 @@ GameObjectPortal createPortal(GameobjAttributes& attr){
 }
 GameObjectSound createSound(GameobjAttributes& attr){
   auto clip = attr.stringAttributes.at("clip");
-  auto source = loadSoundState(clip);
+  auto loop = (attr.stringAttributes.find("loop") != attr.stringAttributes.end()) && (attr.stringAttributes.at("loop") == "true");
+  auto source = loadSoundState(clip, loop);
   GameObjectSound obj {
     .clip = clip,
     .source = source,
+    .loop = loop,
   };
   return obj;
 }
@@ -758,6 +760,7 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
   auto soundObj = std::get_if<GameObjectSound>(&toRender);
   if (soundObj != NULL){
     _attributes.stringAttributes["clip"] = soundObj -> clip;
+    _attributes.stringAttributes["loop"] = soundObj -> loop ? "true" : "false";
     return;
   }
 
@@ -904,6 +907,9 @@ std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound 
   std::vector<std::pair<std::string, std::string>> pairs;
   if (obj.clip != ""){
     pairs.push_back(std::pair<std::string, std::string>("clip", obj.clip));
+  }
+  if (obj.loop){
+    pairs.push_back(std::pair<std::string, std::string>("loop", "true"));
   }
   return pairs;
 }   

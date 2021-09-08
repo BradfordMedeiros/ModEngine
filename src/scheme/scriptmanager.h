@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <queue>          
+#include <functional>
 #include "./scheme_bindings.h"
 
 typedef void(*func)();
@@ -44,6 +45,6 @@ objid currentModuleId();
 objid currentSceneId();
 SchemeBindingCallbacks getSchemeCallbacks();
 void loadScript(std::string script, objid id, objid sceneId, bool isServer);
-void unloadScript(std::string script, objid id);
+void unloadScript(std::string script, objid id, std::function<void()> additionalUnload);
 
 #endif

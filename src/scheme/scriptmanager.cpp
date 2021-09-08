@@ -17,7 +17,7 @@ std::string getScriptName(std::string scriptpath, objid id){
 objid currentModuleId(){
   SCM module = scm_current_module();
   for (auto &[script, scriptModule] : scriptnameToModule){
-    std::cout << "Checking module: " << scriptModule.id << std::endl;
+    std::cout << "Current module id: Checking module: " << scriptModule.id << std::endl;
     if (module == scriptModule.module){
       return scriptModule.id;
     }
@@ -28,7 +28,7 @@ objid currentModuleId(){
 objid currentSceneId(){
   SCM module = scm_current_module();
   for (auto &[script, scriptModule] : scriptnameToModule){
-    std::cout << "Checking module: " << scriptModule.id << std::endl;
+    std::cout << "Current scene id: Checking module: " << scriptModule.id << std::endl;
     if (module == scriptModule.module){
       return scriptModule.sceneId;
     }
@@ -55,13 +55,12 @@ void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer){
 
 // @TODO -- need to figure out how to really unload a module.
 // I don't think this actually causes this module to be garbage collected.
-void unloadScript(std::string scriptpath, objid id){
+void unloadScript(std::string scriptpath, objid id, std::function<void()> additionalUnload){
   auto script = getScriptName(scriptpath, id);
   auto module = scriptnameToModule.at(script).module;
   scm_set_current_module(module);
 
-  // TODO -> need to provide a hook for plugin to be able to do something when the script unloads
-
+  additionalUnload();
   onScriptUnload();
 
   std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;

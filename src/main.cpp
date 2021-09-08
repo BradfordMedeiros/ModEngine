@@ -957,8 +957,9 @@ int main(int argc, char* argv[]){
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,
     .unloadScript = [&extensions](std::string scriptpath, objid id) -> void {
-      extensionsUnloadScript(extensions, id);
-        unloadScript(scriptpath, id); 
+      unloadScript(scriptpath, id, [&extensions, id]() -> void {
+        extensionsUnloadScript(extensions, id);
+      }); 
     },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime
@@ -1063,7 +1064,14 @@ int main(int argc, char* argv[]){
 
     auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, activeCameraObj -> id);
     
-    setListenerPosition(viewTransform.position.x, viewTransform.position.y, viewTransform.position.z);
+    auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
+    auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
+    setListenerPosition(
+      viewTransform.position.x, viewTransform.position.y, viewTransform.position.z,
+      { forward.x, forward.y, forward.z},
+      { up.x, up.y, up.z }
+    );
+    
     view = renderView(viewTransform.position, viewTransform.rotation);
 
     projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
