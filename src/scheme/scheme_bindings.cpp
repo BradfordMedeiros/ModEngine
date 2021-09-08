@@ -529,13 +529,13 @@ SCM scmArgs(SCM argKey){
 
 bool (*_lock)(std::string, objid);
 SCM scmLock(SCM key){
-  _lock(scm_to_locale_string(key), currentModuleId());
-  return SCM_UNSPECIFIED;
+  auto lockSuccess = _lock(scm_to_locale_string(key), currentModuleId());
+  return scm_from_bool(lockSuccess);
 }
 bool (*_unlock)(std::string, objid);
 SCM scmUnlock(SCM key){
-  _unlock(scm_to_locale_string(key), currentModuleId());
-  return SCM_UNSPECIFIED;
+  auto unlockSuccess = _unlock(scm_to_locale_string(key), currentModuleId());
+  return scm_from_bool(unlockSuccess);
 }
 
 // Callbacks

@@ -115,7 +115,13 @@
 (define showConsole #f)
 (define (onKey key scancode action mods)
   (if (and (= key 96) (= action 1))
-    (set! showConsole (not showConsole))
+    (begin
+      (set! showConsole (not showConsole))
+      (if showConsole
+        (lock "input")
+        (unlock "input")
+      )
+    )
   )
   (if showConsole
     (if (and (= action 1) (not (= key 96)))

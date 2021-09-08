@@ -1,5 +1,9 @@
+
+
 bug: parenting doesn't work when physics are enabled
 bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
+bug: look into openal audio types, dont want to use big wav files
+bug: initially loaded scripts have fake ids, define mainobjs that don't actually exist
 
 - get the basic guns working (restore previous behavior)
 
@@ -12,6 +16,7 @@ improve gun system
 - xoffset, yoffset as percentage of the screen)
 - fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
 - hud ui element better sizing and shit
+
 
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?

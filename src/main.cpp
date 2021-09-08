@@ -89,6 +89,8 @@ std::queue<StringString> channelMessages;
 KeyRemapper keyMapper;
 extern std::vector<InputDispatch> inputFns;
 
+std::map<std::string, objid> activeLocks;
+
 std::vector<LayerInfo> layers = {
   LayerInfo {
     .name = "",
@@ -950,7 +952,7 @@ int main(int argc, char* argv[]){
   }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadScript(script, -1, -1, bootStrapperMode);
+    loadScript(script, getUniqueObjId(), -1, bootStrapperMode);
   }
 
   BulletDebugDrawer drawer(addLineNextCycle);

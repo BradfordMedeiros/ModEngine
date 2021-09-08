@@ -17,6 +17,7 @@ extern bool bootStrapperMode;
 extern NetCode netcode;
 extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
+extern std::map<std::string, objid> activeLocks;
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByName(world, name, sceneId);
@@ -477,12 +478,27 @@ void setSkybox(std::string skybox){
 }
 
 bool lock(std::string key, objid owner){
-  assert(key == "input");
-  std::cout << "lock placeholder: " << key << " owner: " << owner << std::endl;
-  return false;
+  std::cout << "lock: (" << key << ", " << owner << ")" << std::endl;
+  auto canLock = activeLocks.find(key) == activeLocks.end();
+  if (!canLock){
+    return false;
+  }
+  activeLocks[key] = owner;
+  std::cout << "lock: " << key << std::endl;
+  return true;
 }
 bool unlock(std::string key, objid owner){
-  assert(key == "input");
-  std::cout << "unlock placeholder: " << key << " owner: " << owner << std::endl;
+  std::cout << "unlock: (" << key << ", " << owner << ")" << std::endl;
+  auto lockExists = activeLocks.find(key) != activeLocks.end();
+  auto ownerOwnsKey = lockExists && activeLocks.at(key) == owner;
+  if (!lockExists){
+    return true;
+  }  
+  if (ownerOwnsKey){
+    activeLocks.erase(key);
+    std::cout << "unlock: " << key << std::endl;
+    return true;
+  }
+  std::cout << "ERROR: tried to unlock a key that did not own (" << key << "," << owner << ")" << std::endl;
   return false;
 }
