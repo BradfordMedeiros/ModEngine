@@ -721,7 +721,7 @@ int main(int argc, char* argv[]){
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
   auto extensions = loadExtensions(result["extensions"].as<std::vector<std::string>>());
-  extensionsInit(extensions, currentModuleId);
+  extensionsInit(extensions, currentModuleId, getArgs);
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
 
