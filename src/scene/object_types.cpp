@@ -819,13 +819,13 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
     return;
   }
 
-  auto cameraObj = std::get_if<GameObjectChannel>(&toRender);
-  if (cameraObj != NULL){
+  auto channelObj = std::get_if<GameObjectChannel>(&toRender);
+  if (channelObj != NULL){
     if (attributes.stringAttributes.find("to") != attributes.stringAttributes.end()){
-      cameraObj -> to = attributes.stringAttributes.at("to");
+      channelObj -> to = attributes.stringAttributes.at("to");
     }
     if (attributes.stringAttributes.find("from") != attributes.stringAttributes.end()){
-      cameraObj -> from = attributes.stringAttributes.at("from");
+      channelObj -> from = attributes.stringAttributes.at("from");
     }
     return;
   }
@@ -868,6 +868,10 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
     return;
   }
 
+  auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
+  if (cameraObj != NULL){
+    return; 
+  }
   assert(false);
 }
 
