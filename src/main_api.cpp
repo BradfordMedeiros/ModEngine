@@ -3,7 +3,6 @@
 extern World world;
 extern SysInterface interface;
 extern WorldTiming timings;
-extern GameObject* activeCameraObj;
 extern engineState state;
 extern GameObject defaultCamera;
 extern std::map<unsigned int, Mesh> fontMeshes;
@@ -376,8 +375,8 @@ void setActiveCamera(int32_t cameraId){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     return;
   }
-  activeCameraObj = &getGameObject(world, cameraId);
-  setSelectedIndex(state.editor, cameraId, activeCameraObj -> name, true);
+  state.activeCameraObj = &getGameObject(world, cameraId);
+  setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
 }
 void setActiveCamera(std::string name, objid sceneId){
   auto object = getGameObjectByName(name, sceneId);
@@ -391,7 +390,7 @@ void setActiveCamera(std::string name, objid sceneId){
 void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
-    activeCameraObj = NULL;
+    state.activeCameraObj = NULL;
     return;
   }
 
@@ -400,24 +399,24 @@ void nextCamera(){
   setActiveCamera(activeCameraId);
 }
 void moveCamera(glm::vec3 offset){
-  if (activeCameraObj == NULL){
+  if (state.activeCameraObj == NULL){
     defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
   }else{
-    setGameObjectPosition(activeCameraObj ->id, moveRelative(activeCameraObj -> transformation.position, activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
+    setGameObjectPosition(state.activeCameraObj ->id, moveRelative(state.activeCameraObj -> transformation.position, state.activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
   }
 }
 void rotateCamera(float xoffset, float yoffset){
-  if (activeCameraObj == NULL){
+  if (state.activeCameraObj == NULL){
     defaultCamera.transformation.rotation = setFrontDelta(defaultCamera.transformation.rotation, xoffset, yoffset, 0, 0.1);
   }else{
-    setGameObjectRotation(activeCameraObj ->id, setFrontDelta(activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
+    setGameObjectRotation(state.activeCameraObj ->id, setFrontDelta(state.activeCameraObj -> transformation.rotation, xoffset, yoffset, 0, 0.1));
   }
 }
 void setCameraRotation(glm::quat orientation){
-  if (activeCameraObj == NULL){
+  if (state.activeCameraObj == NULL){
     defaultCamera.transformation.rotation = orientation;
   }else{
-    setGameObjectRotation(activeCameraObj ->id, orientation);
+    setGameObjectRotation(state.activeCameraObj ->id, orientation);
   }
 }
 

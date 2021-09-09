@@ -32,7 +32,6 @@ unsigned int drawingProgram;
 unsigned int blurProgram;
 unsigned int quadVAO;
 
-GameObject* activeCameraObj;
 GameObject defaultCamera = GameObject {
   .id = -1,
   .name = "defaultCamera",
@@ -651,8 +650,8 @@ void signalHandler(int signum) {
 
 void onObjDelete(objid id){
  std::cout << "deleted obj id: " << id << std::endl;
-  if (activeCameraObj != NULL &&  id == activeCameraObj -> id){
-    activeCameraObj = NULL;
+  if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
+    state.activeCameraObj = NULL;
     std::cout << "active camera reset" << std::endl;
   }
   if (id == isSelected(state.editor, id)){
@@ -1067,7 +1066,7 @@ int main(int argc, char* argv[]){
 
     onNetCode(world, interface, netcode, onClientMessage, bootStrapperMode);
 
-    auto viewTransform = (state.useDefaultCamera || activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, activeCameraObj -> id);
+    auto viewTransform = (state.useDefaultCamera || state.activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, state.activeCameraObj -> id);
     
     auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
     auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);

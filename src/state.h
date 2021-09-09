@@ -66,6 +66,7 @@ struct engineState {
 
   bool groupSelection;
   bool pauseWorldTiming;
+  GameObject* activeCameraObj;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

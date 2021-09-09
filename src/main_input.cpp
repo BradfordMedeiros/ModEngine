@@ -495,6 +495,11 @@ std::vector<InputDispatch> inputFns = {
       state.useDefaultCamera = !state.useDefaultCamera;
       std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
       schemeBindings.onCameraSystemChange(state.useDefaultCamera);
+      if (state.useDefaultCamera){
+        state.activeCameraObj = NULL;
+      }else{
+        nextCamera();
+      }
     }
   }, 
   InputDispatch{
@@ -503,7 +508,9 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0,
     .hasPreq = false,
     .fn = [&state]() -> void {
-      nextCamera();
+      if (!state.useDefaultCamera){
+        nextCamera();
+      }
     }
   },
   InputDispatch{
