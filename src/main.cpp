@@ -930,7 +930,6 @@ int main(int argc, char* argv[]){
     setState,
     setFloatState,
     setIntState,
-    setTexture,
     navPosition, 
     scmEmit,
     addLoadingAround,

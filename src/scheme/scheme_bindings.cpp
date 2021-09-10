@@ -474,12 +474,6 @@ SCM scmSetState(SCM value, SCM value2){
   return SCM_UNSPECIFIED;
 }
 
-void (*_setTexture)(objid, std::string);
-SCM scmSetTexture(SCM obj, SCM texture){
-  _setTexture(scm_to_int32(obj), scm_to_locale_string(texture));
-  return SCM_UNSPECIFIED;
-}
-
 glm::vec3 (*_navPosition)(objid, glm::vec3 pos);
 SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
@@ -731,6 +725,9 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void*)scmSetFrontDelta);
   scm_c_define_gsubr("move-relative", 3, 0, 0, (void*)scmMoveRelative);
   scm_c_define_gsubr("orientation-from-pos", 2, 0, 0, (void*)scmOrientationFromPos);
+  scm_c_define_gsubr("orientation-from-pos", 2, 0, 0, (void*)scmOrientationFromPos);
+  //scm_c_define_gsubr("quat-to-euler", 1, 0, 0, (void*)scmOrientationFromPos);
+  //scm_c_define_gsubr("euler-to-quat", 1, 0, 0, (void*)scmOrientationFromPos);
 
   // physics functions
   scm_c_define_gsubr("applyimpulse", 2, 0, 0, (void *)scm_applyImpulse);
@@ -769,8 +766,6 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("screenshot", 1, 0, 0, (void*)scmSaveScreenshot);
   scm_c_define_gsubr("set-state", 1, 1, 0, (void*)scmSetState);
-
-  scm_c_define_gsubr("set-texture", 2, 0, 0, (void*)scmSetTexture);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
@@ -849,7 +844,6 @@ void createStaticSchemeBindings(
   void (*setState)(std::string),
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
-  void (*setTexture)(objid id, std::string texture),
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
   void (*scmEmit)(objid),
   objid (*loadAround)(objid),
@@ -937,7 +931,6 @@ void createStaticSchemeBindings(
   _setFloatState = setFloatState;
   _setIntState = setIntState;
 
-  _setTexture = setTexture;
   _navPosition = navPosition;
   _scmEmit = scmEmit;
   _loadAround = loadAround;
