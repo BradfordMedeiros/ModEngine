@@ -725,7 +725,6 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("setfrontdelta", 4, 0, 0, (void*)scmSetFrontDelta);
   scm_c_define_gsubr("move-relative", 3, 0, 0, (void*)scmMoveRelative);
   scm_c_define_gsubr("orientation-from-pos", 2, 0, 0, (void*)scmOrientationFromPos);
-  scm_c_define_gsubr("orientation-from-pos", 2, 0, 0, (void*)scmOrientationFromPos);
   //scm_c_define_gsubr("quat-to-euler", 1, 0, 0, (void*)scmOrientationFromPos);
   //scm_c_define_gsubr("euler-to-quat", 1, 0, 0, (void*)scmOrientationFromPos);
 

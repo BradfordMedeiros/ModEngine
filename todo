@@ -2,7 +2,6 @@
 - get movement working 
 ===> need to sponsor set values on gameobj in setAttr
 ==> test out the different set options
-===> add in ground detection to prevent double jumping
 ====> limit look angle up/down
 
 - get guns working
