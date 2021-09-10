@@ -79,8 +79,8 @@ void createStaticSchemeBindings(
 void defineFunctions(objid id, bool isServer);
 
 void onFrame();
-void onCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos, glm::quat normal);
-void onCollisionExit(int32_t obj1, int32_t obj2);
+void onCollisionEnter(int32_t obj1, glm::vec3 contactPos, glm::vec3 normal);
+void onCollisionExit(int32_t obj1);
 void onMouseCallback(int button, int action, int mods);
 void onMouseMoveCallback(double xPos, double yPos);
 void onScrollCallback(double amount);

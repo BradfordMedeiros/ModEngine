@@ -1,10 +1,18 @@
 
+- get movement working 
+===> need to sponsor set values on gameobj in setAttr
+==> test out the different set options
+===> add in ground detection to prevent double jumping
+====> limit look angle up/down
 
-bug: parenting doesn't work when physics are enabled
-bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
-bug: look into openal audio types, dont want to use big wav files
-bug: initially loaded scripts have fake ids, define mainobjs that don't actually exist
+- get guns working
 
+
+- update default meshes to something reasonable (cams, emitters, etc)
+- sql "select movement-speed from traits limit x" -> returns 0 length
+- ability to auto reload script when notice a change (probably rate limit?)
+
+important: bug: parenting doesn't work when physics are enabled
 - get the basic guns working (restore previous behavior)
 
 ==================
@@ -65,6 +73,11 @@ MAKE WORK ON WINDOWS!!!!
 
 FIXING BUGS
 ========================
+bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
+bug: look into openal audio types, dont want to use big wav files
+bug: initially loaded scripts have fake ids, define mainobjs that don't actually exist
+
+
 - initial model transform/rotation/scale (broken feature scenes) -> do I care?
 - skybox sometimes doesn't render if -i is not used
 =====> cleanup core rendering code, think about how buffers are used, fix bloom etc

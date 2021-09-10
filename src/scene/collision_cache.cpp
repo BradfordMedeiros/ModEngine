@@ -10,7 +10,7 @@ bool collisionInList(std::vector<CollisionInstance> currentCollisions, Collision
   return false;
 }
 
-void onCollisionPosDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::quat normal){}
+void onCollisionPosDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal){}
 void onCollisionDoNothing(const btCollisionObject* obj1, const btCollisionObject* obj2){}
 
 CollisionCache::CollisionCache(){

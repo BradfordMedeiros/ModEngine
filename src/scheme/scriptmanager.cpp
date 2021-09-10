@@ -75,16 +75,26 @@ void onFrameAllScripts(){
   }
 }
 
-void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::quat normal){
+void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
-    onCollisionEnter(obj1, obj2, pos, normal);
+    auto moduleId = currentModuleId();
+    if (moduleId == obj1){
+      onCollisionEnter(obj2, pos, oppositeNormal);
+    }else if (moduleId == obj2){
+      onCollisionEnter(obj1, pos, normal);
+    }
   }
 }
 void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
-    onCollisionExit(obj1, obj2);
+    auto moduleId = currentModuleId();
+    if (moduleId == obj1){
+      onCollisionExit(obj2);
+    }else if (moduleId == obj2){
+      onCollisionExit(obj1);
+    }
   }
 }
 void onMouseCallbackAllScripts(int button, int action, int mods){

@@ -299,6 +299,9 @@ void previousTexture(){
   previousTexture(drawParams);
 }
 
+void setTexture(objid index, std::string textureName){
+  setTexture(world, index, textureName);
+}
 void maybeChangeTexture(int index){
   auto textureName = worldTextures(world).at(drawParams.activeTextureIndex).textureName;
   setTexture(world, index, textureName);

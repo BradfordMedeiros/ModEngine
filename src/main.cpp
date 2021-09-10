@@ -291,14 +291,14 @@ void notSelectItem(){
   }
 }
 
-void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::quat normal){
+void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal){
   auto obj1Id = getIdForCollisionObject(world, obj1);
   auto obj2Id = getIdForCollisionObject(world, obj2);
   auto obj1Name = getGameObject(world, obj1Id).name;
   auto obj2Name = getGameObject(world, obj2Id).name;
   std::cout << "collision: " << obj1Name << " colliden with: " << obj2Name << std::endl;
   maybeTeleportObjects(world, obj1Id, obj2Id);
-  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal);
+  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));

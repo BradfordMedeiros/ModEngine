@@ -106,6 +106,7 @@ glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
 void nextTexture();
 void previousTexture();
 void maybeChangeTexture(int index);
+void setTexture(objid index, std::string textureName);
 
 void setState(std::string stateName);
 void setFloatState(std::string stateName, float value);

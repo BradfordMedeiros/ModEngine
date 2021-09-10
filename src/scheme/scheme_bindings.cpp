@@ -536,18 +536,18 @@ SCM scmUnlock(SCM key){
 void onFrame(){
   maybeCallFunc("onFrame");
 }
-void onCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos, glm::quat normal){
+void onCollisionEnter(int32_t obj1, glm::vec3 contactPos, glm::vec3 normal){
   const char* function = "onCollideEnter";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_4(func_symbol, createGameObject(obj1), createGameObject(obj2), vec3ToScmList(contactPos), scmQuatToSCM(normal));
+    scm_call_3(func_symbol, createGameObject(obj1), vec3ToScmList(contactPos), vec3ToScmList(normal));
   }
 }
-void onCollisionExit(int32_t obj1, int32_t obj2){
+void onCollisionExit(int32_t obj1){
   const char* function = "onCollideExit";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, createGameObject(obj1), createGameObject(obj2));
+    scm_call_1(func_symbol, createGameObject(obj1));
   }
 }
 void onMouseCallback(int button, int action, int mods){

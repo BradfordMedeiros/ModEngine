@@ -252,7 +252,7 @@ void checkCollisions(physicsEnv& env){
         .obj1 = contactManifold -> getBody0(),
         .obj2 = contactManifold -> getBody1(),
         .pos = btToGlm(median),
-        .normal = quatFromDirection(btToGlm(point.m_normalWorldOnB)),
+        .normal = glm::normalize(btToGlm(point.m_normalWorldOnB)),
       });     
     }
   } 
