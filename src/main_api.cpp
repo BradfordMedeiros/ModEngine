@@ -22,16 +22,29 @@ std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    //
   return getGameObjectByName(world, name, sceneId);
 }
 
+
+btRigidBody* getRigidBody(int32_t index){
+  return world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index);
+}
 void applyImpulse(int32_t index, glm::vec3 impulse){
-  applyImpulse(world.rigidbodys.at(index), impulse);
+  auto rigidBody = getRigidBody(index);
+  if (rigidBody != NULL){
+    applyImpulse(rigidBody, impulse);
+  }
 }
 void applyImpulseRel(int32_t index, glm::vec3 impulse){
-  glm::vec3 relativeImpulse = calculateRelativeOffset(getGameObject(world, index).transformation.rotation, impulse, true);
-  applyImpulse(world.rigidbodys.at(index), relativeImpulse);
+  auto rigidBody = getRigidBody(index);
+  if (rigidBody != NULL){
+    glm::vec3 relativeImpulse = calculateRelativeOffset(getGameObject(world, index).transformation.rotation, impulse, true);
+    applyImpulse(rigidBody, relativeImpulse);
+  }
 }
 
 void clearImpulse(int32_t index){
-  clearImpulse(world.rigidbodys.at(index));
+  auto rigidBody = getRigidBody(index);
+  if (rigidBody != NULL){
+    clearImpulse(rigidBody);
+  }
 }
 
 void loadScriptFromWorld(std::string script, objid id, objid sceneId){
