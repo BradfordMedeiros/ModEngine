@@ -17,5 +17,6 @@ resourcefiles: build #assimp  		# This should probably be in CMakeLists.txt but 
 	@cp -r ./res ./build/
 build:
 	@mkdir -p ./build
+	@mkdir -p ./build/screenshots
 clean:
 	@rm -r ./build
