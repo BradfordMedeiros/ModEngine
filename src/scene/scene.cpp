@@ -857,6 +857,19 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj){
   // why no rotate set here?
   std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
   physicsScaleSet(world, id, gameobj.transformation.scale);  
+
+  btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id) : NULL;
+  rigidBodyOpts opts {
+    .linear = gameobj.physicsOptions.linearFactor,
+    .angular = gameobj.physicsOptions.angularFactor,
+    .gravity = gameobj.physicsOptions.gravity,
+    .friction = gameobj.physicsOptions.friction,
+    .restitution = gameobj.physicsOptions.restitution,
+    .mass = gameobj.physicsOptions.mass,
+    .layer = gameobj.physicsOptions.layer,
+  };
+  updateRigidBodyOpts(world.physicsEnvironment, body, opts);
+
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){

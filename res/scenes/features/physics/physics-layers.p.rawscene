@@ -1,20 +1,20 @@
 # Demonstrates camera system
 
-# if two physics_layers masks (think in binary) & together and equal 0, then they won't collide
+# if two physics_layers masks (think in binary) & together and equal 0, then they will collide
 
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
-platform:position:0 -5 0
+platform:position:0 -5 0 # 000 default mask
 
 box1:mesh:./res/models/box/box.obj
 box1:position:0 5 0
 box1:physics_type:dynamic
-box1:physics_layer:1
+box1:physics_layer:1 # 001
 
 
 box2:mesh:./res/models/box/box.obj
 box2:position:2 5 0
 box2:physics_type:dynamic
-box2:physics_layer:3
+box2:physics_layer:3 # 011
 
 

@@ -61,6 +61,8 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
 
 void rmRigidBody(physicsEnv& env, btRigidBody* body);
 
+void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts);
+
 void setPosition(btRigidBody* body, glm::vec3);
 glm::vec3 getPosition(btRigidBody* rigidbody);
 void setRotation(btRigidBody* body, glm::quat rotation);

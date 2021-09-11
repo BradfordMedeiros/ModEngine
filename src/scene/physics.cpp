@@ -48,9 +48,6 @@ btRigidBody* createRigidBody(glm::vec3 pos, btCollisionShape* shape, glm::quat r
   shape -> setLocalScaling(glmToBt(scaling));
 
   auto constructionInfo = btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape, inertia);
-  constructionInfo.m_friction = opts.friction;
-  constructionInfo.m_restitution = opts.restitution;
-
   auto body  = new btRigidBody(constructionInfo);
   if (!hasCollision){
     body -> setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
@@ -155,14 +152,23 @@ void cleanupRigidBody(btRigidBody* body){
 }
 
 // Due to bullet weirdness, this seems like it has to be called after adding rigid body to world (for the gravity part)
-void setPhysicsOptions(btRigidBody* body, glm::vec3 linear, glm::vec3 angular,  glm::vec3 gravity){
-  body -> setLinearFactor(glmToBt(linear));
-  body -> setAngularFactor(glmToBt(angular));
-  body -> setGravity(glmToBt(gravity));
+void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
+  body -> setLinearFactor(glmToBt(opts.linear));
+  body -> setAngularFactor(glmToBt(opts.angular));
+  body -> setGravity(glmToBt(opts.gravity));
+  body -> setFriction(opts.friction);
+  body -> setRestitution(opts.restitution);
+
+  auto collisionFlags = body -> getCollisionFlags();
+  auto isStatic = (collisionFlags | btCollisionObject::CF_KINEMATIC_OBJECT) ==  collisionFlags; 
+  if (!isStatic){
+    body -> setMassProps(opts.mass, body -> getLocalInertia());
+  }
+  body -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
 }
 btRigidBody* addBodyToWorld(physicsEnv& env, btRigidBody* rigidBodyPtr, rigidBodyOpts& opts){
   env.dynamicsWorld -> addRigidBody(rigidBodyPtr, 1, opts.layer);
-  setPhysicsOptions(rigidBodyPtr, opts.linear, opts.angular, opts.gravity);
+  setPhysicsOptions(rigidBodyPtr, opts);
   return rigidBodyPtr;
 }
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts){  
@@ -202,6 +208,10 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
 void rmRigidBody(physicsEnv& env, btRigidBody* body){
   env.dynamicsWorld -> removeRigidBody(body);
   cleanupRigidBody(body);
+}
+
+void updateRigidBodyOpts(physicsEnv& env, btRigidBody* body, rigidBodyOpts opts){
+  setPhysicsOptions(body, opts);
 }
 
 glm::vec3 getPosition(btRigidBody* body){
