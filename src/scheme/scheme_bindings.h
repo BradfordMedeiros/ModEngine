@@ -73,6 +73,7 @@ void createStaticSchemeBindings(
   std::map<std::string, std::string> (*getArgs)(),
   bool (*lock)(std::string, objid),
   bool (*unlock)(std::string, objid),
+  std::string (*debugInfo)(std::string infoType),
   std::vector<func_t> registerGuileFns
 );
 

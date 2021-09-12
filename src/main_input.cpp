@@ -37,6 +37,10 @@ std::string dumpDebugInfo(bool fullInfo){
   return content;
 }
 
+std::string debugInfo(std::string infoType){
+  return "placeholder info";
+}
+
 void processManipulatorForId(objid id){
   if (id == -1 || !idExists(world.sandbox, id)){
     return;

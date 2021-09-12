@@ -939,6 +939,7 @@ int main(int argc, char* argv[]){
     getArgs,
     lock,
     unlock,
+    debugInfo,
     extensions.registerGuileFns
   );
   registerGuileTypes(extensions);

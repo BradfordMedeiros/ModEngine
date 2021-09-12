@@ -532,6 +532,11 @@ SCM scmUnlock(SCM key){
   return scm_from_bool(unlockSuccess);
 }
 
+std::string (*_debugInfo)(std::string infoType);
+SCM scmDebugInfo(SCM infoType){
+  return scm_from_locale_string(_debugInfo(scm_to_locale_string(infoType)).c_str());
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -779,6 +784,7 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("args", 1, 0, 0, (void*)scmArgs);
   scm_c_define_gsubr("lock", 1, 0, 0, (void*)scmLock);
   scm_c_define_gsubr("unlock", 1, 0, 0, (void*)scmUnlock);
+  scm_c_define_gsubr("debuginfo", 1, 0, 0, (void*)scmDebugInfo);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();
@@ -852,6 +858,7 @@ void createStaticSchemeBindings(
   std::map<std::string, std::string> (*getArgs)(),
   bool (*lock)(std::string, objid),
   bool (*unlock)(std::string, objid),
+  std::string (*debugInfo)(std::string infoType),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -940,6 +947,7 @@ void createStaticSchemeBindings(
   _getArgs = getArgs;
   _lock = lock;
   _unlock = unlock;
+  _debugInfo = debugInfo;
 
   _registerGuileFns = registerGuileFns;
 }
