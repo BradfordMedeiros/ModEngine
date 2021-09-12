@@ -20,7 +20,7 @@ struct JoyStickInfo {
 };
 
 std::string dumpDebugInfo(bool fullInfo = true);
-std::string debugInfo(std::string infoType);
+void debugInfo(std::string infoType, std::string filepath);
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods);

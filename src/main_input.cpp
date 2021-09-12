@@ -37,8 +37,8 @@ std::string dumpDebugInfo(bool fullInfo){
   return content;
 }
 
-std::string debugInfo(std::string infoType){
-  return "placeholder info";
+void debugInfo(std::string infoType, std::string filepath){
+  saveFile(filepath, dumpDebugInfo(false));
 }
 
 void processManipulatorForId(objid id){

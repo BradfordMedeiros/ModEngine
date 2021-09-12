@@ -1,14 +1,12 @@
+-> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
+=====> create screenshot debugger so 
 
 - get movement working 
-===> need to sponsor set values on gameobj in setAttr
-==> test out the different set options
-====> limit look angle up/down
-
 - get guns working
+- tilt thing for movement 
 
 
 - update default meshes to something reasonable (cams, emitters, etc)
-- sql "select movement-speed from traits limit x" -> returns 0 length
 - ability to auto reload script when notice a change (probably rate limit?)
 
 important: bug: parenting doesn't work when physics are enabled
@@ -66,7 +64,7 @@ GO HAM ON THE EDITOR -> VOXELS + TERRAIN
 MAKE WORK IN DOCKER BUILD!!! + AUTOMATED BUILDS ON CI 
 MAKE WORK ON WINDOWS!!!!
 ======================================================
-============== GOAL END OF SEPTEMBER ==================================
+============== GOAL END OF OCTOBER ==================================
 
 
 
@@ -79,7 +77,10 @@ bug: initially loaded scripts have fake ids, define mainobjs that don't actually
 
 - initial model transform/rotation/scale (broken feature scenes) -> do I care?
 - skybox sometimes doesn't render if -i is not used
+
+core loop:
 =====> cleanup core rendering code, think about how buffers are used, fix bloom etc
+=====> make all input events and state modifications happen after rendering, not during
 
 => model loading sets the coords slightly off, maybe scene sandbox issue?  too many conversion steps?  etc? 
 => parenting sandbox (querying can get out of data if using to read?)
@@ -125,7 +126,6 @@ emitter upgrades:
 and thenfore solve: - enemy should then start shooting projectiles at the player
 
 bugs:
-- tilt thing for movement not working great
 - make everything time independent
 => convex/exact hull kind of wrongish, sometimes hull would crash eh 
 - layout bound info gets centered, but the layout should be aligned from the left
@@ -144,8 +144,6 @@ eventually:
 
 bugs for eventually:
 ========> be more consistent with setting shaders
-
-
 - physics raycast is gets a collision object that does not a rigidbody in the map
 - playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
 - attribute updating/serialization not kept in line
@@ -154,9 +152,7 @@ bugs for eventually:
   - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
 
 features for eventually:
-- [plugin] improve state machine attrs (not super important yet but needed when get more involved w/ scripting
-  - attr function (i guess it affects the associated object?) - bugs with memory management for tracks / onexit fns
-- ability to have user defined attributes
+
 
 - guile should print a stacktrace
 - console.scm can switch scope into modules
@@ -169,7 +165,20 @@ features for eventually:
 easy use ideas:
 - nice graphic
 - for rotation
-- clean up/speed up model loading (every reference requires reading the file, even if it could be cached)
-
-
+- clean up/speed up model loading
 => audit resources + profile memory in general
+
+
+==[plugins]==
+
+SEQUENCER
+=================
+-  improve state machine attrs (not super important yet but needed when get more involved w/ scripting
+  - attr function (i guess it affects the associated object?) - bugs with memory management for tracks / onexit fns
+- ability to have user defined attributes
+
+SQL BUGS
+=================
+- sql "select movement-speed from traits limit x" -> returns 0 length
+- no way to escape strings 
+- create easy way to safely bind strings 

@@ -2,7 +2,7 @@
 (define number 0)
 
 (define (screenshotpath) (string-append "./build/screenshots/screenshot_" (number->string number) ".png"))
-(define (debugpath) (string-append "./build/screenshots/screenshot_" (number->string number)))
+(define (debugpath) (string-append "./build/screenshots/debug_" (number->string number) ".debug"))
 
 (define (onFrame)
   (define currtime (time-seconds))
@@ -11,6 +11,7 @@
       (set! lastTime currtime)
       (format #t "should take screenshot now!\n")
       (screenshot (screenshotpath))
+      (debuginfo "" (debugpath))
       (set! number (+ number 1))
     )
   )
