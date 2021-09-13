@@ -71,17 +71,6 @@ glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float curs
   return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
 }
 
-glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
-  // @TODO consider extracting a better up direction from current orientation
-  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
-  // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
-  // Should look more into the math!  How to pick up vector properly? 
-  if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){    
-    return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, 1))));
-  }
-  return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
-}
-
 glm::quat quatFromDirection(glm::vec3 direction){ 
   return orientationFromPos(glm::vec3(0.f, 0.f, 0.f), direction);
 }

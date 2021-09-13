@@ -224,14 +224,25 @@ std::vector<float> parseFloatVec(std::string value){
 }
 
 glm::quat eulerToQuat(glm::vec3 eulerAngles){
-  return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, (eulerAngles.z + M_PI)));
+  return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
 glm::quat parseQuat(std::string payload){
-  return eulerToQuat(parseVec(payload));
+  return orientationFromPos(glm::vec3(0, 0, 0), (parseVec(payload)));
 }
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
 }
+glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
+  // @TODO consider extracting a better up direction from current orientation
+  // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
+  // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
+  // Should look more into the math!  How to pick up vector properly? 
+  if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){    
+    return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, 1))));
+  }
+  return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
+}
+
 std::string serializeVec(glm::vec3 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
 }
@@ -239,8 +250,11 @@ std::string serializeVec(glm::vec2 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y);
 }
 std::string serializeRotation(glm::quat rotation){
+  std::cout << "serialize rotation is wrong" << std::endl;
+  // updated the parseQuat but not this.  This shoudl return a vector in the direction of the rotation
+  assert(false);
   glm::vec3 angles = eulerAngles(rotation);
-  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z - M_PI); 
+  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z); 
 }
 
 float maxvalue(float x, float y, float z){
