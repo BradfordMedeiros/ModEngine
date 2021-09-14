@@ -286,6 +286,9 @@ void loadAllTextures(){
   for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }
+  for (auto texturePath : listFilesWithExtensions("/home/brad/automate/mosttrusted/gameresources/build/", { "png", "jpg" })){
+    loadTextureWorld(world, texturePath, -1);
+  }
 }
 
 void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
@@ -893,6 +896,7 @@ int main(int argc, char* argv[]){
     sendEventMessage,
     sendNotifyMessage,
     timeSeconds,
+    timeElapsed,
     saveScene,
     listServers,
     connectServer,

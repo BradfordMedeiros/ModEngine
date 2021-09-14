@@ -48,6 +48,7 @@ void createStaticSchemeBindings(
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message, std::string value),
   double (*timeSeconds)(),
+  double (*timeElapsed)(),
   void (*saveScene)(bool includeIds, objid sceneId), 
   std::map<std::string, std::string> (*listServers)(),
   std::string (*connectServer)(std::string server),

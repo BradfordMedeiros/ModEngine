@@ -1,9 +1,14 @@
+void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly){
+==> fix this, currently can't do cause physics translate set is false
+
+
 implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
 https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
 https://www.youtube.com/watch?v=ibnNu7N22UM
+
+
 bug: drawline doesn't work properly
 bug: raycast erroring
-
 -> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
 ==> is this true? important: bug: parenting doesn't work when physics are enabled
 
@@ -26,15 +31,10 @@ GAME SPECIFIC
 ==================
 third person toggle (just some basic character that can run around and stuff)
 
-improve gun system
-- hud ui element better sizing and shit
-
-
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
   - tilt
   - landing sound effect
-  - sprint 
 
 core gameplay implementation stage:
 - emitter initial velocity 
@@ -156,9 +156,9 @@ bugs for eventually:
 - consider when the script should be loaded.
   - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
   - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
+- noticeable obvious performance drop for trivial stuff due to loading textures on demand (instead of preloading) (probably would also happen for audio, models)
 
 features for eventually:
-
 
 - guile should print a stacktrace
 - console.scm can switch scope into modules

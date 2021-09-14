@@ -90,6 +90,7 @@ void sendEventMessage(std::string message);
 void sendNotifyMessage(std::string message, std::string value);
 
 double timeSeconds();
+double timeElapsed();
 
 void playRecording(objid id, std::string recordingPath);
 void stopRecording(objid id, std::string recordingPath);

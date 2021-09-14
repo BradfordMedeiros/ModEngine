@@ -11,6 +11,8 @@ extern float initialTime;
 extern std::queue<StringString> channelMessages;
 
 extern float now;
+extern float deltaTime;
+
 extern std::string rawSceneFile;
 extern bool bootStrapperMode;
 extern NetCode netcode;
@@ -151,10 +153,10 @@ void setGameObjectPosition(int32_t index, glm::vec3 pos){ // sets the absolutePo
   physicsTranslateSet(world, index, pos, false);
 }
 void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly){
-  assert(false);  // this is updating local 
-  auto transformation = getGameObject(world, index).transformation;
+  //assert(false);  // this is updating local 
+  auto transformation = fullTransformation(world.sandbox, index);
   glm::vec3 pos = moveRelative(transformation.position, transformation.rotation, glm::vec3(x, y, z), xzPlaneOnly);
-  physicsTranslateSet(world, index, pos, true);
+  physicsTranslateSet(world, index, pos, false);
 }
 glm::vec3 getGameObjectScale(int32_t index){
   return getGameObject(world, index).transformation.scale;
@@ -249,6 +251,10 @@ void sendNotifyMessage(std::string message, std::string value){
 
 double timeSeconds(){
   return now;
+}
+
+double timeElapsed(){
+  return deltaTime;
 }
 
 struct ActiveRecording {

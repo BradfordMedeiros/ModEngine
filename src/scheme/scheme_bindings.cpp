@@ -373,6 +373,11 @@ double (*_timeSeconds)();
 SCM scmTimeSeconds(){
   return scm_from_double(_timeSeconds());
 }
+double (*_timeElapsed)();
+SCM scmTimeElapsed(){
+  return scm_from_double(_timeElapsed());
+}
+
 void (*_saveScene)(bool includeIds, objid sceneId); 
 SCM scmSaveScene(SCM scmIncludeIds, SCM scmSceneId){
   auto includeIds = scmIncludeIds == SCM_UNDEFINED ? false : scm_to_bool(scmIncludeIds);
@@ -757,6 +762,8 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("sendnotify", 2, 0, 0, (void*)scmSendNotify);
 
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
+  scm_c_define_gsubr("time-elapsed", 0, 0, 0, (void*)scmTimeElapsed);
+
   scm_c_define_gsubr("save-scene", 0, 2, 0, (void*)scmSaveScene);
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
@@ -845,6 +852,7 @@ void createStaticSchemeBindings(
   void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(),
+  double (*timeElapsed)(),
   void (*saveScene)(bool includeIds, objid sceneId), 
   std::map<std::string, std::string> (*listServers)(),
   std::string (*connectServer)(std::string server),
@@ -927,6 +935,7 @@ void createStaticSchemeBindings(
   _sendNotifyMessage = sendNotifyMessage;
 
   _timeSeconds = timeSeconds;
+  _timeElapsed = timeElapsed;
   _saveScene = saveScene;
 
   _listServers = listServers;
