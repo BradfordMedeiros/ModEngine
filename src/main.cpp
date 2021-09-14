@@ -69,7 +69,6 @@ std::vector<Line> permaLines;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
-glm::mat4 projection;
 glm::mat4 view;
 unsigned int framebufferTexture;
 unsigned int framebufferTexture2;
@@ -326,6 +325,7 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
   }
   return shaderNameToId.at(fragShaderName);
 }
+
 void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
 
@@ -364,9 +364,8 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   /// This is used in the ui shader, probably possible to consolidate 
   if (orthographic){
     glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
-  }else{
-    glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));    
   }
+  
   /////////////////////////////
   glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
@@ -379,14 +378,20 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
+glm::mat4 projectionFromLayer(LayerInfo& layer){
+  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
+}
+
+int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
   int numTriangles = 0;
-
   int numDepthClears = 0;
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
+    auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
+
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
     bool orthographic = layer.orthographic;
     if (state.depthBufferLayer != layer.depthBufferLayer){
@@ -486,7 +491,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
   return numTriangles;
 }
 
-void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::mat4 model){
+void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
+  auto projection = projectionFromLayer(layers.at(0));
   glUseProgram(shaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projview"), 1, GL_FALSE, glm::value_ptr(projection * view));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -536,7 +542,8 @@ void renderVector(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm
   }
 }
 
-void renderSkybox(GLint shaderProgram, glm::mat4 projection, glm::mat4 view, glm::vec3 cameraPosition){
+void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition){
+  auto projection = projectionFromLayer(layers.at(0));
   std::vector<LightInfo> lights = {};
   std::vector<glm::mat4> lightProjView = {};
 
@@ -1055,8 +1062,6 @@ int main(int argc, char* argv[]){
     
     view = renderView(viewTransform.position, viewTransform.rotation);
 
-    projection = glm::perspective(glm::radians(45.f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
-
     glfwSwapBuffers(window);
     
     std::vector<LightInfo> lights = getLightInfo(world);
@@ -1084,7 +1089,7 @@ int main(int argc, char* argv[]){
       auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
 
-      renderWorld(world, selectionProgram, lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
+      renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
     }
 
     PROFILE(
@@ -1098,7 +1103,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glDisable(GL_BLEND);
     
-      renderWorld(world, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
+      renderWorld(world, selectionProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
     // Each portal requires a render pass
@@ -1172,11 +1177,11 @@ int main(int argc, char* argv[]){
         auto portalViewMatrix = renderPortalView(portal, viewTransform);
         // Render Skybox code -> need to think harder about stencil
         glDepthMask(GL_FALSE);
-        renderSkybox(shaderProgram, projection, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
+        renderSkybox(shaderProgram, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
         glDepthMask(GL_TRUE);
         /////////////////////////////
 
-        renderWorld(world, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
+        renderWorld(world, shaderProgram, NULL, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
       
         nextPortalCache[portal.id] = portalTextures[i];
       }
@@ -1203,7 +1208,7 @@ int main(int argc, char* argv[]){
 
       glDepthMask(GL_FALSE);
       glDisable(GL_STENCIL_TEST);
-      renderSkybox(shaderProgram, projection, view, viewTransform.position);  // Probably better to render this at the end 
+      renderSkybox(shaderProgram, view, viewTransform.position);  // Probably better to render this at the end 
 
       glDepthMask(GL_TRUE);
       glEnable(GL_DEPTH_TEST);
@@ -1212,7 +1217,7 @@ int main(int argc, char* argv[]){
       glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-      numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
+      numTriangles = renderWorld(world, shaderProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
@@ -1236,7 +1241,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_STENCIL_TEST);
 
     if (showDebugInfo){
-      renderVector(shaderProgram, projection, view, glm::mat4(1.0f));
+      renderVector(shaderProgram, view, glm::mat4(1.0f));
     }
     renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
 

@@ -10,4 +10,3 @@ no_depth:depth:1
 ui:zindex:3
 ui:ortho:true
 
-default:fov:200

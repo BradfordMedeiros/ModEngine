@@ -1,10 +1,10 @@
-- support different: - ability to specify fov for layer
 
 implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
 https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
 https://www.youtube.com/watch?v=ibnNu7N22UM
 bug: drawline doesn't work properly
 bug: raycast erroring
+bug: layer, voxel raycast needs to get projection associated with each layer value
 
 -> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
 ==> is this true? important: bug: parenting doesn't work when physics are enabled

@@ -7,7 +7,6 @@ extern bool disableInput;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
 extern DrawingParams drawParams;
-extern glm::mat4 projection;
 extern glm::mat4 view;
 extern GameObject defaultCamera;
 extern std::vector<Line> permaLines;
@@ -335,7 +334,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 
 void onMouseButton(){    
-  std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
+  return;
+  // THE BELOW IS WRONG, SINCE THE PROJECTION IS NOW BASED ON THE ASSOCIATED LAYER FOR EACH ELEMENT
+  /*std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
   auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
     .fromPos = defaultCamera.transformation.position,
@@ -345,7 +346,7 @@ void onMouseButton(){
     handleVoxelRaycast(world, id, line.fromPos, line.toPos);
   }
   permaLines.clear();
-  permaLines.push_back(line);
+  permaLines.push_back(line);*/
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
