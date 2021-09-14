@@ -210,12 +210,6 @@ void onArrowKey(int key){
 }
 
 void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, double yoffset){
-  if (state.toggleFov){
-    if ((state.fov <= 0 && yoffset < 0) || (state.fov >= 180 && yoffset > 0)){
-      return;
-    }
-    state.fov = state.fov + yoffset;
-  }
 }
 
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
@@ -1000,16 +994,6 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.moveRelativeEnabled = !state.moveRelativeEnabled;
       std::cout << "move relative: " << state.moveRelativeEnabled << std::endl;
-    }
-  },
-  InputDispatch{
-    .sourceKey = 'V', 
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      state.toggleFov = !state.toggleFov;
-      std::cout << "ToggleFOV: " << state.toggleFov << std::endl;
     }
   },
   InputDispatch{

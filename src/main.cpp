@@ -385,11 +385,12 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
   int numTriangles = 0;
 
   int numDepthClears = 0;
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
-    if (state.depthBufferLayer != depthBufferLayer){
-      state.depthBufferLayer = depthBufferLayer;
+    bool orthographic = layer.orthographic;
+    if (state.depthBufferLayer != layer.depthBufferLayer){
+      state.depthBufferLayer = layer.depthBufferLayer;
       glClear(GL_DEPTH_BUFFER_BIT);
       numDepthClears++;
     }
@@ -572,8 +573,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
   drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
   drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
-
-  drawText("fov: " + std::to_string(state.fov), 10, 80, 3);
   drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
   if (selected(state.editor) != -1){
@@ -1056,7 +1055,7 @@ int main(int argc, char* argv[]){
     
     view = renderView(viewTransform.position, viewTransform.rotation);
 
-    projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
+    projection = glm::perspective(glm::radians(45.f), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
 
     glfwSwapBuffers(window);
     
