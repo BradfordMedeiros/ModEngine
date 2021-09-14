@@ -44,6 +44,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
       .depthBufferLayer = 0,
       .fov = 45.f,
     });
+    assert(false);
   }else{
     layers2.at("default").name = "";    
   }

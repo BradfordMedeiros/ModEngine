@@ -38,6 +38,8 @@ struct engineState {
   bool mouseIsDown;
   bool enableDiffuse;
   bool enableSpecular;
+  float fov;  // in degrees
+  bool toggleFov;
   bool showBoneWeight;
   bool useBoneTransform;
   int textureIndex;

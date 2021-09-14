@@ -1,3 +1,4 @@
+- support different: - ability to specify fov for layer
 
 implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
 https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
@@ -10,14 +11,17 @@ bug: raycast erroring
 
 
 cleanup: combine set-state and send-notify
+
 - get movement working 
 - get guns working
 - tilt thing for movement 
 - bullet hole decal
 - bullet hole particle 
 
+
 - update default meshes to something reasonable (cams, emitters, etc)
 - ability to auto reload script when notice a change (probably rate limit?)
+
 
 ==================
 GAME SPECIFIC

@@ -289,7 +289,7 @@ struct traversalData {
   glm::mat4 modelMatrix;
   glm::mat4 parentMatrix;
 };
-void traverseScene(Scene& scene, std::vector<LayerInfo> layers, std::function<void(objid, glm::mat4, glm::mat4, LayerInfo&, std::string)> onObject){
+void traverseScene(Scene& scene, std::vector<LayerInfo> layers, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
   glm::mat4 initialModel(1.f);
   std::vector<traversalData> datum;
 
@@ -307,13 +307,13 @@ void traverseScene(Scene& scene, std::vector<LayerInfo> layers, std::function<vo
     for (auto data : datum){
       auto gameobject = scene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer, gameobject.fragshader);
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer.orthographic, layer.depthBufferLayer, gameobject.fragshader);
       }
     }  
   }
 }
 
-void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, LayerInfo&, std::string)> onObject){
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject){
   traverseScene(sandbox.mainScene, sandbox.layers, onObject);
 }
 
@@ -498,7 +498,7 @@ void updateSandbox(SceneSandbox& sandbox){
 }
 
 void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id){
-  traverseScene(mainScene, layers, [&mainScene](objid id, glm::mat4 model, glm::mat4 parent, LayerInfo& layer, std::string fragshader) -> void {
+  traverseScene(mainScene, layers, [&mainScene](objid id, glm::mat4 model, glm::mat4 parent, bool isOrtho, bool ignoreDepth, std::string fragshader) -> void {
     mainScene.absoluteTransforms[id] = TransformCacheElement {
       .transform = getTransformationFromMatrix(model),
       .absTransformUpdated = false,
