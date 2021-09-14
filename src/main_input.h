@@ -22,6 +22,8 @@ struct JoyStickInfo {
 std::string dumpDebugInfo(bool fullInfo = true);
 void debugInfo(std::string infoType, std::string filepath);
 
+glm::mat4 projectionFromLayer(LayerInfo& layer);
+
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods);
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));

@@ -378,10 +378,6 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-glm::mat4 projectionFromLayer(LayerInfo& layer){
-  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
-}
-
 int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   glUseProgram(shaderProgram);
   clearTraversalPositions();

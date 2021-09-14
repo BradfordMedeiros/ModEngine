@@ -13,6 +13,7 @@ extern std::vector<Line> permaLines;
 extern float deltaTime;
 extern Benchmark benchmark;
 extern bool selectItemCalled;
+extern std::vector<LayerInfo> layers;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -332,21 +333,33 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   }
 }
 
+glm::mat4 projectionFromLayer(LayerInfo& layer){
+  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
+}
+LayerInfo layerByName(std::string layername){
+  for (auto &layer : layers){
+    if (layer.name == layername){
+      return layer;
+    }
+  }
+  assert(false);
+  return LayerInfo{};
+}
 
 void onMouseButton(){    
-  return;
-  // THE BELOW IS WRONG, SINCE THE PROJECTION IS NOW BASED ON THE ASSOCIATED LAYER FOR EACH ELEMENT
-  /*std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
-  auto rayDirection = getCursorRayDirection(projection, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
-  Line line = {
-    .fromPos = defaultCamera.transformation.position,
-    .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
-  };
+  std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
   for (auto id : selectedIds(state.editor)){
+    auto layer = layerByName(getGameObject(world, id).layer);
+    auto proj = projectionFromLayer(layer);
+    auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+    Line line = {
+      .fromPos = defaultCamera.transformation.position,
+      .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
+    };
     handleVoxelRaycast(world, id, line.fromPos, line.toPos);
+    permaLines.clear();
+    permaLines.push_back(line);
   }
-  permaLines.clear();
-  permaLines.push_back(line);*/
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
