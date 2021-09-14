@@ -1,16 +1,27 @@
+- support different: - ability to specify fov for layer
+
+implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
+https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
+https://www.youtube.com/watch?v=ibnNu7N22UM
+bug: drawline doesn't work properly
+bug: raycast erroring
+
 -> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
-=====> create screenshot debugger so 
+==> is this true? important: bug: parenting doesn't work when physics are enabled
+
+
+cleanup: combine set-state and send-notify
 
 - get movement working 
 - get guns working
 - tilt thing for movement 
+- bullet hole decal
+- bullet hole particle 
 
 
 - update default meshes to something reasonable (cams, emitters, etc)
 - ability to auto reload script when notice a change (probably rate limit?)
 
-important: bug: parenting doesn't work when physics are enabled
-- get the basic guns working (restore previous behavior)
 
 ==================
 GAME SPECIFIC
@@ -18,19 +29,14 @@ GAME SPECIFIC
 third person toggle (just some basic character that can run around and stuff)
 
 improve gun system
-- xoffset, yoffset as percentage of the screen)
-- fixed field of view to handle fov better (need core engine layer system to always render this on top I guess?)
 - hud ui element better sizing and shit
 
 
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
-  - movement speed
-  - gravity
   - tilt
   - landing sound effect
   - sprint 
-  - limit vertical
 
 core gameplay implementation stage:
 - emitter initial velocity 
@@ -73,7 +79,8 @@ FIXING BUGS
 bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
 bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids, define mainobjs that don't actually exist
-
+bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
+====> eulerToQuat / serializeQuat has +/- PI...why?
 
 - initial model transform/rotation/scale (broken feature scenes) -> do I care?
 - skybox sometimes doesn't render if -i is not used
@@ -131,6 +138,7 @@ bugs:
 - layout bound info gets centered, but the layout should be aligned from the left
 - video no longer work wtf shit
 - painting seems to mismap the uvs
+- removing object mid animation causes error
 
 eventually:
 - work on ai, make players and shit move and stuff enemy ai 
@@ -182,3 +190,5 @@ SQL BUGS
 - sql "select movement-speed from traits limit x" -> returns 0 length
 - no way to escape strings 
 - create easy way to safely bind strings 
+select name, modelpath, fire-animation from guns where name = " gunname  ==> gunname should require quotes, but requires they have no quotes instead
+- no way to specify offset

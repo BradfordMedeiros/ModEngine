@@ -1,0 +1,13 @@
+## Layers zindex: <int>, depth: <int>, ortho: true/false, fov: <float> ##
+### default name override the default view layer.
+
+transparency:zindex:1
+transparency:depth:1
+
+no_depth:zindex:2
+no_depth:depth:1
+
+ui:zindex:3
+ui:ortho:true
+
+default:fov:200

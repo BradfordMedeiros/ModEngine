@@ -18,6 +18,7 @@
 #include "./network/activemanager.h"
 #include "./worldloader.h"
 #include "./keymapper.h"
+#include "./layers.h"
 #include "./drawing.h"
 #include "./easyuse/editor.h"
 #include "./easyuse/manipulator.h"
@@ -90,32 +91,7 @@ extern std::vector<InputDispatch> inputFns;
 
 std::map<std::string, objid> activeLocks;
 
-std::vector<LayerInfo> layers = {
-  LayerInfo {
-    .name = "",
-    .zIndex = 0,
-    .orthographic = false,
-    .depthBufferLayer = 0,
-  },
-  LayerInfo {
-    .name = "transparency",
-    .zIndex = 1,
-    .orthographic = false,
-    .depthBufferLayer = 0,
-  },
-  LayerInfo {
-    .name = "no_depth",
-    .zIndex = 2,
-    .orthographic = false,
-    .depthBufferLayer = 1,
-  },
-  LayerInfo {
-    .name = "ui",
-    .zIndex = 3,
-    .orthographic = true,
-    .depthBufferLayer = 0,
-  }
-};
+std::vector<LayerInfo> layers;
   
 
 // 0th depth texture is the main depth texture used for eg z buffer
@@ -673,11 +649,10 @@ int main(int argc, char* argv[]){
    ("s,shader", "Folder path of default shader", cxxopts::value<std::string>()->default_value("./res/shaders/default"))
    ("t,texture", "Additional textures folder to use", cxxopts::value<std::string>()->default_value("./res"))
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
-   ("f,framebuffer", "Folder path of framebuffer", cxxopts::value<std::string>()->default_value("./res/shaders/framebuffer"))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,camera", "Camera to use after initial load", cxxopts::value<std::string>()->default_value(""))
    ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
-   ("z,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
+   ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
@@ -694,6 +669,7 @@ int main(int argc, char* argv[]){
    ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
    ("q,headlessmode", "Hide the window of the game engine", cxxopts::value<bool>()->default_value("false"))
    ("j,extensions", "SO files to load", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
    ("h,help", "Print help")
   ;        
 
@@ -716,6 +692,8 @@ int main(int argc, char* argv[]){
     }
   }
 
+  layers = parseLayerInfo(result["layers"].as<std::string>());
+
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
@@ -733,7 +711,7 @@ int main(int argc, char* argv[]){
 
   shaderFolderPath = result["shader"].as<std::string>();
   textureFolderPath = result["texture"].as<std::string>();
-  const std::string framebufferShaderPath = result["framebuffer"].as<std::string>();
+  const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
   

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <map>
+#include <glm/gtx/compatibility.hpp>
 #include "../common/util.h"
 #include "./scriptmanager.h"      // need to eliminate the circular relationship here
 #include "./scheme_util.h"

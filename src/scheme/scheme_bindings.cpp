@@ -538,6 +538,15 @@ SCM scmDebugInfo(SCM infoType, SCM filepath){
   return SCM_UNSPECIFIED;
 }
 
+SCM scmLerp(SCM fromPos, SCM toPos, SCM amount){
+  float famount = (float)scm_to_double(amount);
+  return vec3ToScmList(glm::lerp(listToVec3(fromPos), listToVec3(toPos), famount));
+}
+SCM scmSlerp(SCM fromQuat, SCM toQuat, SCM amount){
+  float famount = (float)scm_to_double(amount);
+  return scmQuatToSCM(glm::slerp(scmListToQuat(fromQuat), scmListToQuat(toQuat), famount));
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -786,6 +795,9 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("lock", 1, 0, 0, (void*)scmLock);
   scm_c_define_gsubr("unlock", 1, 0, 0, (void*)scmUnlock);
   scm_c_define_gsubr("debuginfo", 2, 0, 0, (void*)scmDebugInfo);
+
+  scm_c_define_gsubr("lerp", 3, 0, 0, (void*)scmLerp);
+  scm_c_define_gsubr("slerp", 3, 0, 0, (void*)scmSlerp);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();
