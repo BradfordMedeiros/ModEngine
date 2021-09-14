@@ -29,8 +29,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .mouseIsDown = false,
 		.enableDiffuse = true,
 		.enableSpecular = true,
-		.fov = 45.f,
-		.toggleFov = false,
 		.showBoneWeight = false,
   	.useBoneTransform = true,
   	.textureIndex = 0,
@@ -53,7 +51,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .printKeyStrokes = true,
     .cullEnabled = false,
     .groupSelection = true,
-    .pauseWorldTiming = true,
+    .pauseWorldTiming = false,
     .activeCameraObj = NULL,
 	};
 	return state;

@@ -379,17 +379,27 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
+glm::mat4 projectionFromLayer(LayerInfo& layer){
+  if (layer.orthographic){
+    return glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f);
+  }
+  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
+}
+
+int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
   int numTriangles = 0;
 
   int numDepthClears = 0;
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, proj, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, bool orthographic, int depthBufferLayer, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
+    auto proj = projection != NULL ? *projection : projectionFromLayer(layer);
+
+    std::cout << "fov: " << layer.fov << std::endl;
      // This could easily be moved to reduce opengl context switches since the onObject sorts on layers (so just have to pass down).  
-    if (state.depthBufferLayer != depthBufferLayer){
-      state.depthBufferLayer = depthBufferLayer;
+    if (state.depthBufferLayer != layer.depthBufferLayer){
+      state.depthBufferLayer = layer.depthBufferLayer;
       glClear(GL_DEPTH_BUFFER_BIT);
       numDepthClears++;
     }
@@ -398,7 +408,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4 proj, glm::mat4 vi
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     auto newShader = getShaderByName(shader, shaderProgram);
-    setShaderData(newShader, proj, view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
+    setShaderData(newShader, proj, view, lights, layer.orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -572,8 +582,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
   drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
   drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
-
-  drawText("fov: " + std::to_string(state.fov), 10, 80, 3);
   drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
   if (selected(state.editor) != -1){
@@ -1056,8 +1064,6 @@ int main(int argc, char* argv[]){
     
     view = renderView(viewTransform.position, viewTransform.rotation);
 
-    projection = glm::perspective(glm::radians(state.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
-
     glfwSwapBuffers(window);
     
     std::vector<LightInfo> lights = getLightInfo(world);
@@ -1085,7 +1091,7 @@ int main(int argc, char* argv[]){
       auto lightProjview = lightProjection * lightView;
       lightMatrixs.push_back(lightProjview);
 
-      renderWorld(world, selectionProgram, lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
+      renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
     }
 
     PROFILE(
@@ -1099,7 +1105,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glDisable(GL_BLEND);
     
-      renderWorld(world, selectionProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
+      renderWorld(world, selectionProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
     // Each portal requires a render pass
@@ -1177,7 +1183,7 @@ int main(int argc, char* argv[]){
         glDepthMask(GL_TRUE);
         /////////////////////////////
 
-        renderWorld(world, shaderProgram, projection, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
+        renderWorld(world, shaderProgram, NULL, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
       
         nextPortalCache[portal.id] = portalTextures[i];
       }
@@ -1213,7 +1219,7 @@ int main(int argc, char* argv[]){
       glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-      numTriangles = renderWorld(world, shaderProgram, projection, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
+      numTriangles = renderWorld(world, shaderProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
     Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);

@@ -77,7 +77,7 @@ GameObject& getGameObject(SceneSandbox& sandbox, std::string name, objid sceneId
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id);
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId);
 
-void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, bool, int, std::string)> onObject);
+void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, LayerInfo&, std::string)> onObject);
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleton, objid sceneId);
