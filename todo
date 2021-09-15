@@ -1,26 +1,26 @@
-void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly){
+
+* void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly){
 ==> fix this, currently can't do cause physics translate set is false
 
-
-implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
+* implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
 https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
 https://www.youtube.com/watch?v=ibnNu7N22UM
 
 
-bug: drawline doesn't work properly
-bug: raycast erroring
+core gameplay implementation stage:
+- emitter initial velocity 
+- gun system (very tunable) : projectile effect (on muzzle?)
+
+==========================================
+
 -> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
 ==> is this true? important: bug: parenting doesn't work when physics are enabled
+* bullet hole decal/particle <-- should be done w/ emitter so that the emitter handles cleanup
 
-
-cleanup: combine set-state and send-notify
 
 - get movement working 
 - get guns working
 - tilt thing for movement 
-- bullet hole decal
-- bullet hole particle 
-
 
 - update default meshes to something reasonable (cams, emitters, etc)
 - ability to auto reload script when notice a change (probably rate limit?)
@@ -34,11 +34,8 @@ third person toggle (just some basic character that can run around and stuff)
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
   - tilt
-  - landing sound effect
 
-core gameplay implementation stage:
-- emitter initial velocity 
-- gun system (very tunable) : projectile effect (on muzzle?)
+
 
 ============== GOAL END OF SEPTEMBER ==================================
 Note: I don't think the movement has to feel perfect, or even that good yet
@@ -78,7 +75,9 @@ bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this valu
 bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids, define mainobjs that don't actually exist
 bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
+bug/feature: no way to specify no main texture (should have "no main texture" value)
 ====> eulerToQuat / serializeQuat has +/- PI...why?
+cleanup: combine set-state and send-notify
 
 - initial model transform/rotation/scale (broken feature scenes) -> do I care?
 - skybox sometimes doesn't render if -i is not used
@@ -116,13 +115,7 @@ ui ideas:
 top level console that scrolls down from the top
 ==> how to implement scrollable text? ===>  MAYBE JUST DO FIXED SIZE AND SCRIPT FOR NOW
 - get properties/recorder working properly (use case -> texture sprite playback)
-
-
-===========================================
-
-- better voxels
-  - better editing
-  - destruction?
+- better voxels - editing
 
 
 ===============================================
@@ -157,6 +150,7 @@ bugs for eventually:
   - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
   - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
 - noticeable obvious performance drop for trivial stuff due to loading textures on demand (instead of preloading) (probably would also happen for audio, models)
+- minimize opengl state changes (via sorting or maybe caching?)
 
 features for eventually:
 
@@ -190,3 +184,10 @@ SQL BUGS
 - create easy way to safely bind strings 
 select name, modelpath, fire-animation from guns where name = " gunname  ==> gunname should require quotes, but requires they have no quotes instead
 - no way to specify offset
+
+- empty last column sound seems to screw up 
+profile,speed,speed-air,jump-height,max-angleup,max-angledown,friction,restitution,gravity,mass,jump-sound,land-sound
+slow,0.1,0.1,16,-1.5,1,0.4,0,-40,1,../ModEngine/res/sounds/silenced-gunshot.wav,
+regular,0.8,0,30,-3.1415,3.1415,1,0,-20,2,,../ModEngine/res/sounds/silenced-gunshot.wav
+still,0,0,1000,-1.8,1.1,1,0,2,1,../ModEngine/res/sounds/silenced-gunshot.wav,../ModEngine/res/sounds/silenced-gunshot.wav
+reverse,-0.5,-0.5,10,-1.8,1.1,1,0,-9.81,1,../ModEngine/res/sounds/sample.wav,../ModEngine/res/sounds/silenced-gunshot.wav

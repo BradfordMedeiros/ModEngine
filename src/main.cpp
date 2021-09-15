@@ -271,7 +271,6 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
   auto obj2Id = getIdForCollisionObject(world, obj2);
   auto obj1Name = getGameObject(world, obj1Id).name;
   auto obj2Name = getGameObject(world, obj2Id).name;
-  std::cout << "collision: " << obj1Name << " colliden with: " << obj2Name << std::endl;
   maybeTeleportObjects(world, obj1Id, obj2Id);
   schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
 }
@@ -364,11 +363,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
       glActiveTexture(GL_TEXTURE0);
     }
   }
-  /// This is used in the ui shader, probably possible to consolidate 
-  if (orthographic){
-    glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f)));    
-  }
-  
   /////////////////////////////
   glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
@@ -497,6 +491,10 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
+
+  // Some texture needs to be bound, who cares what. 
+  // Probably conceptual fix would be to add "hasMainTexture"
+  glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/wood.jpg").texture.textureId);
 
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -1009,7 +1007,7 @@ int main(int argc, char* argv[]){
     goto cleanup;
   }
 
-  //glEnable(GL_CULL_FACE);  
+  state.cullEnabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

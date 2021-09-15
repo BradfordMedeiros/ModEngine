@@ -17,7 +17,7 @@ std::string getScriptName(std::string scriptpath, objid id){
 objid currentModuleId(){
   SCM module = scm_current_module();
   for (auto &[script, scriptModule] : scriptnameToModule){
-    std::cout << "Current module id: Checking module: " << scriptModule.id << std::endl;
+    //std::cout << "Current module id: Checking module: " << scriptModule.id << std::endl;
     if (module == scriptModule.module){
       return scriptModule.id;
     }

@@ -333,7 +333,7 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     auto hitNormal = result.m_hitNormalWorld[i];
     bool found = false;
-    for (auto [objid, rigidbody] : rigidbodys){
+    for (auto &[objid, rigidbody] : rigidbodys){
       if (rigidbody == obj){
         hitobjects.push_back(HitObject{
           .id = objid,
@@ -342,8 +342,8 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
         });
         found = true;
       }
-      assert(found);
     }
+    assert(found);
   } 
   assert(hitobjects.size() == result.m_hitFractions.size());
   return hitobjects;

@@ -1,4 +1,8 @@
 
+; draws a circle
+
 (define (onFrame)
-  (draw-line '(1 0 0) '(1 10 0))
+  (define x (cos (time-seconds)))
+  (define y (sin (time-seconds)))
+  (draw-line (list 0 0 0) (list x 1 y))
 )
