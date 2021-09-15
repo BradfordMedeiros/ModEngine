@@ -219,19 +219,12 @@ SCM setGameObjectPosition(SCM value, SCM positon){
   return SCM_UNSPECIFIED;
 }
 
-void (*setGameObjectPosnRel)(int32_t index, float x, float y, float z, bool xzPlaneOnly);
-void setPosition(SCM value, SCM position, bool xzOnly){
+void (*setGameObjectPosnRel)(int32_t index, glm::vec3 pos);
+SCM setGameObjectPositionRel(SCM value, SCM position){
   auto x = scm_to_double(scm_list_ref(position, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(position, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(position, scm_from_int64(2)));
-  setGameObjectPosnRel(getGameobjId(value), x, y, z, xzOnly);
-}
-SCM setGameObjectPositionRel(SCM value, SCM position){
-  setPosition(value, position, false);
-  return SCM_UNSPECIFIED;
-}
-SCM setGameObjectPositionRelXZ(SCM value, SCM position){
-  setPosition(value, position, true);
+  setGameObjectPosnRel(getGameobjId(value), glm::vec3(x, y, z));
   return SCM_UNSPECIFIED;
 }
 
@@ -723,7 +716,6 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("gameobj-pos-world", 1, 0, 0, (void*)scmGetGameObjectPosWorld);
   scm_c_define_gsubr("gameobj-setpos!", 2, 0, 0, (void *)setGameObjectPosition);
   scm_c_define_gsubr("gameobj-setpos-rel!", 2, 0, 0, (void *)setGameObjectPositionRel);
-  scm_c_define_gsubr("gameobj-setpos-relxz!", 2, 0, 0, (void *)setGameObjectPositionRelXZ);
   
   scm_c_define_gsubr("gameobj-rot", 1, 0, 0, (void *)scmGetGameObjectRotation);
   scm_c_define_gsubr("gameobj-rot-world", 1, 0, 0, (void *)getGameObjectRotationWorld);
@@ -833,7 +825,7 @@ void createStaticSchemeBindings(
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
   void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(int32_t index, float x, float y, float z, bool xzPlaneOnly),
+  void (*setGameObjectPosRelative)(int32_t index, glm::vec3 pos),
   glm::quat (*getGameObjectRotation)(int32_t index, bool world),
   void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
