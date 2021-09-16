@@ -226,19 +226,6 @@ std::vector<std::string> listModels(){
   return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }
 
-void sendEventMessage(std::string message){
-  auto channelMapping = getChannelMapping(world.objectMapping);
-  if (channelMapping.find(message) != channelMapping.end()){
-    for (auto to : channelMapping.at(message)){
-      std::cout << "SYSTEM INFO: channel: (" << message << ", " << to << ")" << std::endl;
-      channelMessages.push(StringString {
-        .strTopic = to,
-        .strValue = "",
-      });
-    }
-  }
-}
-
 void sendNotifyMessage(std::string message, std::string value){
   channelMessages.push(StringString {
     .strTopic = message,

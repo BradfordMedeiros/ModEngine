@@ -55,6 +55,7 @@ NetCode netcode { };
 
 engineState state = getDefaultState(1920, 1080);
 World world;
+DefaultMeshes defaultMeshes;
 
 SysInterface interface;
 std::string textureFolderPath;
@@ -436,16 +437,22 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
     bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
 
+    DefaultMeshes defaultMeshes {
+      .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
+      .cameraMesh = &world.meshes.at("./res/models/camera/camera.dae").mesh, 
+      .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
+      .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
+      .soundMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .lightMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .emitter = &world.meshes.at("./res/models/ui/node.obj").mesh,
+      .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    };
+
     auto trianglesDrawn = renderObject(
       newShader, 
       id, 
       world.objectMapping, 
-      world.meshes.at("./res/models/ui/node.obj").mesh,
-      //world.meshes.at("./res/models/camera/camera.dae"),
-      world.meshes.at("testmesh").mesh,
-      world.meshes.at("./res/models/box/plane.dae").mesh,
-      world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
-      world.meshes.at("./res/models/controls/unitxy.obj").mesh, // using this b/c 1x1 xy mesh
       state.showCameras, 
       state.showBoneWeight,
       state.useBoneTransform,
@@ -456,7 +463,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
       [&modelMatrix, &newShader](glm::vec3 pos) -> int {
         glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
         return drawSphere();
-      }
+      },
+      defaultMeshes
     );
     numTriangles = numTriangles + trianglesDrawn;
 
@@ -891,7 +899,6 @@ int main(int argc, char* argv[]){
     listSounds,
     playSoundState,
     listModels,
-    sendEventMessage,
     sendNotifyMessage,
     timeSeconds,
     timeElapsed,
@@ -951,6 +958,16 @@ int main(int argc, char* argv[]){
     .getCurrentTime = getTotalTime
   };
 
+  std::vector<std::string> defaultMeshesToLoad {
+    "./res/models/ui/node.obj",
+    "./res/models/boundingbox/boundingbox.obj",
+    "./res/models/unit_rect/unit_rect.obj",
+    "./res/models/cone/cone.obj",
+    "./res/models/camera/camera.dae",
+    "./res/models/box/plane.dae",
+    "./res/models/controls/input.obj",
+    "./res/models/controls/unitxy.obj",  
+  };
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
@@ -965,8 +982,20 @@ int main(int argc, char* argv[]){
     }, 
     debuggerDrawer, 
     layers,
-    interface
+    interface,
+    defaultMeshesToLoad
   );
+  defaultMeshes = DefaultMeshes{
+    .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
+    .cameraMesh = &world.meshes.at("./res/models/camera/camera.dae").mesh, 
+    .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
+    .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
+    .soundMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    .lightMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    .emitter = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
+  };
 
   //loadAllTextures();
   

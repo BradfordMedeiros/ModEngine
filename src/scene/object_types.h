@@ -64,11 +64,6 @@ struct GameObjectLight {
 struct GameObjectVoxel {
   Voxels voxel;
 };
-struct GameObjectChannel {
-  std::string from;
-  std::string to;
-  bool complete;
-};
 
 struct GameObjectRoot {};
 
@@ -156,7 +151,6 @@ typedef std::variant<
   GameObjectSound, 
   GameObjectLight, 
   GameObjectVoxel, 
-  GameObjectChannel, 
   GameObjectRoot, 
   GameObjectEmitter,
   GameObjectHeightmap,
@@ -204,12 +198,6 @@ static Field light = {
 static Field voxelField = {
   .prefix = ']',
   .type = "voxel",
-};
-
-// attributes: from, to
-static Field channelField {
-  .prefix = '%',
-  .type = "channel",
 };
 
 static Field rootField {
@@ -274,7 +262,6 @@ static std::vector fields = {
   sound, 
   light, 
   voxelField, 
-  channelField, 
   rootField, 
   emitterField, 
   heightmap, 
@@ -311,15 +298,22 @@ void removeObject(
   std::function<void()> rmEmitter
 );
 
+struct DefaultMeshes {
+  Mesh* nodeMesh;
+  Mesh* portalMesh;
+  Mesh* cameraMesh;
+  Mesh* voxelCubeMesh; 
+  Mesh* unitXYRect; // unit xy rect is a 1x1 2d plane along the xy axis, centered at the origin
+  Mesh* soundMesh;
+  Mesh* lightMesh;
+  Mesh* emitter;
+  Mesh* nav;
+};
+
 int renderObject(
   GLint shaderProgram, 
   objid id, 
   std::map<objid, GameObjectObj>& mapping,
-  Mesh& nodeMesh,
-  Mesh& cameraMesh, 
-  Mesh& portalMesh, 
-  Mesh& voxelCubeMesh,
-  Mesh& unitXYRect,
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,
@@ -327,7 +321,8 @@ int renderObject(
   glm::mat4 model,
   bool drawPoints,
   std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord,
-  std::function<int(glm::vec3)> drawSphere
+  std::function<int(glm::vec3)> drawSphere,
+  DefaultMeshes& defaultMeshes
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
@@ -349,7 +344,6 @@ std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping);
 NameAndMesh getMeshesForId(std::map<objid, GameObjectObj>& mapping, objid id);
 std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, objid id);
-std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid, GameObjectObj>& mapping);
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping);
 bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);

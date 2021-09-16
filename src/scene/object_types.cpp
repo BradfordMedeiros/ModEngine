@@ -117,18 +117,6 @@ GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVox
   return obj;
 }
 
-GameObjectChannel createChannel(GameobjAttributes& attr){
-  bool hasFrom = attr.stringAttributes.find("from") != attr.stringAttributes.end();
-  bool hasTo = attr.stringAttributes.find("to") != attr.stringAttributes.end();
-
-  GameObjectChannel obj {
-    .from = hasFrom ? attr.stringAttributes.at("from") : "",
-    .to = hasTo ? attr.stringAttributes.at("to") : "",
-    .complete = hasFrom && hasTo,
-  };
-  return obj;
-}
-
 std::map<std::string, std::string> particleFields(std::map<std::string, std::string> additionalFields){
   std::map<std::string, std::string> particleAttributes;
   for (auto [key, value] : additionalFields){
@@ -402,8 +390,6 @@ void addObject(
   }else if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
     mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
-  }else if(objectType == "channel"){
-    mapping[id] = createChannel(attr);
   }else if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
@@ -476,11 +462,6 @@ int renderObject(
   GLint shaderProgram, 
   objid id, 
   std::map<objid, GameObjectObj>& mapping, 
-  Mesh& nodeMesh,
-  Mesh& cameraMesh,
-  Mesh& portalMesh, 
-  Mesh& voxelCubeMesh,
-  Mesh& unitXYRect, // unit xy rect is a 1x1 2d plane along the xy axis, centered at the origin
   bool showDebug, 
   bool showBoneWeight,
   bool useBoneTransform,
@@ -488,7 +469,8 @@ int renderObject(
   glm::mat4 model,
   bool drawPoints,
   std::function<void(GLint, objid, std::string, unsigned int, float)> drawWord,
-  std::function<int(glm::vec3)> drawSphere
+  std::function<int(glm::vec3)> drawSphere,
+  DefaultMeshes& defaultMeshes
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -530,38 +512,38 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
-    drawMesh(nodeMesh, shaderProgram, meshObj -> texture.textureOverloadId);    
-    return nodeMesh.numTriangles;
+    drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.textureOverloadId);    
+    return defaultMeshes.nodeMesh -> numTriangles;
   }
 
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
   if (cameraObj != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, cameraMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh);
   }
 
   auto soundObject = std::get_if<GameObjectSound>(&toRender);
   if (soundObject != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, nodeMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh);
   }
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
   if (portalObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), defaultMeshes.nodeMesh -> bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(portalMesh, shaderProgram, portalTexture);
-    return portalMesh.numTriangles;
+    drawMesh(*defaultMeshes.portalMesh, shaderProgram, portalTexture);
+    return defaultMeshes.portalMesh -> numTriangles;
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
   if (lightObj != NULL && showDebug){   
-    return renderDefaultNode(shaderProgram, nodeMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh);
   }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), voxelCubeMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), defaultMeshes.voxelCubeMesh -> bones.size() > 0);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
@@ -572,30 +554,25 @@ int renderObject(
     for (int i = 0; i < voxelBodies.size(); i++){
       auto voxelBody = voxelBodies.at(i);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, voxelBody.position + glm::vec3(0.5f, 0.5f, 0.5f))));
-      drawMesh(voxelCubeMesh, shaderProgram, voxelBody.textureId);   
-      numTriangles = numTriangles = voxelCubeMesh.numTriangles; 
+      drawMesh(*defaultMeshes.voxelCubeMesh, shaderProgram, voxelBody.textureId);   
+      numTriangles = numTriangles = defaultMeshes.voxelCubeMesh -> numTriangles; 
     }
     return numTriangles;
   }
 
-  auto channelObj = std::get_if<GameObjectChannel>(&toRender);
-  if (channelObj != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, nodeMesh);
-  }
-
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
-  if (rootObj != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, nodeMesh);
+  if (rootObj != NULL){
+    return 0;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, nodeMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.emitter);
   }
 
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   if (heightmapObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(heightmapObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(heightmapObj -> texture.texturetiling));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(heightmapObj -> texture.texturesize));
@@ -605,19 +582,19 @@ int renderObject(
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
   if (navmeshObj != NULL && showDebug){
-    return renderDefaultNode(shaderProgram, nodeMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nav);
   }
 
   auto navconnObj = std::get_if<GameObjectNavConns>(&toRender);
   if (navconnObj != NULL && showDebug){
     int numTriangles = 0;
 
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    drawMesh(nodeMesh, shaderProgram); 
-    numTriangles = numTriangles + nodeMesh.numTriangles;
+    drawMesh(*defaultMeshes.nav, shaderProgram); 
+    numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
 
     auto navPoints = aiAllPoints(navconnObj -> navgraph);
 
@@ -629,8 +606,8 @@ int renderObject(
           glm::scale(glm::translate(glm::mat4(1.0f), navPoint.fromPoint), glm::vec3(10.f, 1.f, 10.f))
         )
       );
-      drawMesh(nodeMesh, shaderProgram);
-      numTriangles = numTriangles + nodeMesh.numTriangles;
+      drawMesh(*defaultMeshes.nav, shaderProgram);
+      numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
 
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
       glUniformMatrix4fv(
@@ -638,8 +615,8 @@ int renderObject(
           glm::scale(glm::translate(glm::mat4(1.0f), navPoint.toPoint), glm::vec3(5.f, 2.f, 10.f))
         )
       );
-      drawMesh(nodeMesh, shaderProgram);
-      numTriangles = numTriangles + nodeMesh.numTriangles;
+      drawMesh(*defaultMeshes.nav, shaderProgram);
+      numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
     }
     std::cout << std::endl;
     return numTriangles;
@@ -647,7 +624,7 @@ int renderObject(
 
   auto uiObj = std::get_if<GameObjectUIButton>(&toRender);
   if (uiObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
@@ -661,7 +638,7 @@ int renderObject(
 
   auto uiSliderObj = std::get_if<GameObjectUISlider>(&toRender);
   if (uiSliderObj != NULL){
-    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
@@ -692,7 +669,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));     
     int layoutVertexCount = 0;
     if (showDebug){
-      layoutVertexCount += renderDefaultNode(shaderProgram, nodeMesh);
+      layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     if (layoutObj -> showBackpanel){
       auto boundWidth = layoutObj -> boundInfo.xMax - layoutObj  -> boundInfo.xMin;
@@ -701,15 +678,15 @@ int renderObject(
       auto rectModel = glm::scale(glm::translate(glm::mat4(1.0f), layoutObj -> boundOrigin + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f));
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(rectModel));
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
-      drawMesh(unitXYRect, shaderProgram);
-      layoutVertexCount += unitXYRect.numTriangles;
+      drawMesh(*defaultMeshes.unitXYRect, shaderProgram);
+      layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;
     }
     return layoutVertexCount;
   }
 
   auto videoObj = std::get_if<GameObjectVideo>(&toRender);
   if (videoObj != NULL){
-    return renderDefaultNode(shaderProgram, nodeMesh);
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
   }
 
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
@@ -720,7 +697,7 @@ int renderObject(
         sphereVertexCount += drawSphere(point);
       }
     }
-    auto defaultNodeVertexCount = geoObj -> type == GEOSPHERE ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, nodeMesh);
+    auto defaultNodeVertexCount = geoObj -> type == GEOSPHERE ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     return defaultNodeVertexCount + sphereVertexCount;
   }
   return 0;
@@ -761,13 +738,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
   if (soundObj != NULL){
     _attributes.stringAttributes["clip"] = soundObj -> clip;
     _attributes.stringAttributes["loop"] = soundObj -> loop ? "true" : "false";
-    return;
-  }
-
-  auto channelObj = std::get_if<GameObjectChannel>(&toRender);
-  if (channelObj != NULL){
-    _attributes.stringAttributes["from"] = channelObj -> from;
-    _attributes.stringAttributes["to"] = channelObj -> to;
     return;
   }
 
@@ -815,17 +785,6 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
     }
     if (attributes.vecAttributes.find("tint") != attributes.vecAttributes.end()){
       meshObj -> tint = attributes.vecAttributes.at("tint");
-    }
-    return;
-  }
-
-  auto channelObj = std::get_if<GameObjectChannel>(&toRender);
-  if (channelObj != NULL){
-    if (attributes.stringAttributes.find("to") != attributes.stringAttributes.end()){
-      channelObj -> to = attributes.stringAttributes.at("to");
-    }
-    if (attributes.stringAttributes.find("from") != attributes.stringAttributes.end()){
-      channelObj -> from = attributes.stringAttributes.at("from");
     }
     return;
   }
@@ -931,16 +890,6 @@ std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel 
   }
   return pairs;
 }  
-std::vector<std::pair<std::string, std::string>> serializeChannel(GameObjectChannel obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.from != ""){
-    pairs.push_back(std::pair<std::string, std::string>("from", obj.from));
-  }
-  if (obj.to != ""){
-    pairs.push_back(std::pair<std::string, std::string>("to", obj.to));
-  }
-  return pairs;
-}
 
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
   if (common.onFocus != ""){
@@ -1004,11 +953,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   if (voxelObject != NULL){
     return serializeVoxel(*voxelObject, getTextureName);
   }
-  auto channelObject = std::get_if<GameObjectChannel>(&objectToSerialize);
-  if (channelObject != NULL){
-    return serializeChannel(*channelObject);
-  }
-
   auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
   if (rootObject != NULL){
     return {};
@@ -1132,21 +1076,6 @@ std::vector<std::string> getMeshNames(std::map<objid, GameObjectObj>& mapping, o
   }
 
   return names;
-}
-
-std::map<std::string, std::vector<std::string>> getChannelMapping(std::map<objid, GameObjectObj>& mapping){
-  std::map<std::string, std::vector<std::string>> channelMapping;
-  for (auto &[_, obj] : mapping){
-    auto channelObj = std::get_if<GameObjectChannel>(&obj);
-    if (channelObj != NULL && channelObj -> complete){
-      std::vector<std::string> toChannels;
-      if (channelMapping.find(channelObj -> from) == channelMapping.end()){
-        channelMapping[channelObj -> from] = toChannels;
-      }
-      channelMapping[channelObj -> from].push_back(channelObj -> to);   
-    } 
-  }
-  return channelMapping;
 }
 
 std::map<objid, GameObjectHeightmap*> getHeightmaps(std::map<objid, GameObjectObj>& mapping){

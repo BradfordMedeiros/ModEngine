@@ -350,12 +350,6 @@ SCM scmListModels(){
   return list;
 }
 
-void (*_sendEventMessage)(std::string message);
-SCM scmSendEventMessage(SCM channelFrom){
-  _sendEventMessage(scm_to_locale_string(channelFrom));
-  return SCM_UNSPECIFIED;
-}
-
 void (*_sendNotifyMessage)(std::string message, std::string value);
 SCM scmSendNotify(SCM topic, SCM value){
   _sendNotifyMessage(scm_to_locale_string(topic), scm_to_locale_string(value));
@@ -750,7 +744,6 @@ void defineFunctions(objid id, bool isServer){
   scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
 
   // event system
-  scm_c_define_gsubr("sendmessage", 1, 0, 0, (void*)scmSendEventMessage);
   scm_c_define_gsubr("sendnotify", 2, 0, 0, (void*)scmSendNotify);
 
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
@@ -841,7 +834,6 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid),
   std::vector<std::string> (*listModels)(),
-  void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(),
   double (*timeElapsed)(),
@@ -923,7 +915,6 @@ void createStaticSchemeBindings(
   _playClip = playClip;
   _listModels = listModels;
 
-  _sendEventMessage = sendEventMessage;
   _sendNotifyMessage = sendNotifyMessage;
 
   _timeSeconds = timeSeconds;

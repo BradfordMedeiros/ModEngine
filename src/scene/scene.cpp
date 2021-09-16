@@ -429,7 +429,8 @@ World createWorld(
   std::function<void(objid, bool)> onObjectDelete, 
   btIDebugDraw* debugDrawer,
   std::vector<LayerInfo> layers,
-  SysInterface interface
+  SysInterface interface,
+  std::vector<std::string> defaultMeshes
 ){
   auto objectMapping = getObjectMapping();
   EmitterSystem emitters;
@@ -451,14 +452,9 @@ World createWorld(
   addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, { 0 }, getUniqueObjId, interface, {{ "root", GameobjAttributes{}}});
 
   // Default meshes that are silently loaded in the background
-  addMesh(world, "./res/models/ui/node.obj");
-  addMesh(world, "./res/models/boundingbox/boundingbox.obj");
-  addMesh(world, "./res/models/unit_rect/unit_rect.obj");
-  addMesh(world, "./res/models/cone/cone.obj");
-  addMesh(world, "./res/models/camera/camera.dae");
-  addMesh(world, "./res/models/box/plane.dae");
-  addMesh(world, "./res/models/controls/input.obj");
-  addMesh(world, "./res/models/controls/unitxy.obj");
+  for (auto &meshname : defaultMeshes){
+    addMesh(world, meshname);
+  }
 
   loadSkybox(world, "./res/textures/skyboxs/desert/"); 
 
@@ -853,9 +849,10 @@ GameobjAttributes objectAttributes(World& world, objid id){
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj){
-  physicsTranslateSet(world, id, gameobj.transformation.position, true);
   // why no rotate set here?
+  assert(false);
   std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
+  physicsTranslateSet(world, id, gameobj.transformation.position, true);
   physicsScaleSet(world, id, gameobj.transformation.scale);  
 
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id) : NULL;
@@ -894,12 +891,19 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
-  assert(!relative);
-  updateAbsolutePosition(world.sandbox, index, pos);
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    setPosition(body, pos);
+  if (relative){
+    updateRelativePosition(world.sandbox, index, pos);
+    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      auto body =  world.rigidbodys.at(index);
+      auto pos = fullTransformation(world.sandbox, index).position;
+      setPosition(body, pos);
+    }
+  }else{
+    updateAbsolutePosition(world.sandbox, index, pos);
+    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      auto body =  world.rigidbodys.at(index);
+      setPosition(body, pos);
+    }
   }
   world.entitiesToUpdate.insert(index);
 }
@@ -915,7 +919,8 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto body =  world.rigidbodys.at(index);
-    setRotation(body, rotation);
+    auto rot = fullTransformation(world.sandbox, index).rotation;
+    setRotation(body, rot);
   }
   world.entitiesToUpdate.insert(index);
 }

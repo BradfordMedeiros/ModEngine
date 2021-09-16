@@ -39,7 +39,8 @@ World createWorld(
   std::function<void(objid, bool)> onObjectDelete,
   btIDebugDraw* debugDrawer,
   std::vector<LayerInfo> layers,
-  SysInterface interface
+  SysInterface interface,
+  std::vector<std::string> defaultMeshes
 );
 
 void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid> idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributes> additionalFields);

@@ -45,7 +45,6 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid sceneId),
   std::vector<std::string> (*listModels)(),
-  void (*sendEventMessage)(std::string message),
   void (*sendNotifyMessage)(std::string message, std::string value),
   double (*timeSeconds)(),
   double (*timeElapsed)(),

@@ -86,7 +86,6 @@ void playSound(std::string sound);
 
 std::vector<std::string> listModels();
 
-void sendEventMessage(std::string message);
 void sendNotifyMessage(std::string message, std::string value);
 
 double timeSeconds();
