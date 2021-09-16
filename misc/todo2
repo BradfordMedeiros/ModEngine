@@ -1,0 +1,89 @@
+4 - 1 hour sessions in this next week for 3d modeling
+-> spend on the art and make models or levels
+
+next todo:
+
+* fix animation system
+  - allow model posing
+  - inverse kinematics
+
+======================
+
+need tos, but kind of put offish:
+* recorder -> generalize all attributes
+* improve performance of scene rendering by not actually traversing the scenegraph while rendering but rather use cached values (dirty when move and then recalc)
+* generalize shadow code (plumb in correct shadow map)
+- performance profiling
+- better framepacing
+- fix networking code
+- for attributes, pass around runtime symbols/atoms/whatever instead of strings
+* automatic world chunking ==> take every loaded scene, and then divide these up into chunks
+* ai system goals 
+
+things to maybe reconsider:
+* scoping of scenes (all objects are in shared namespace)
+
+bugs:
+* heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
+* portals need to handle occlusion of an object better (if something is behind the portal camera it can be seen)
+* fix memory reference incorrectness for scheme
+* better movie playback - add audio  (swr_convert?)
+* serialization of attributes incomplete/ broken
+* physics -> fix parenting collision bug
+
+
+eventually:
+- c++ plugin system 
+- lightmapping
+- triplanar mapping
+- normal mapping
+- pbr 
+- destructable voxels
+- cool physics toys
+- windows build
+- improve build code
+- openvr integration
+- ragdoll
+- better fonts
+- better voxel editing
+- long running "dormant" scripts (eg for a quest system, or to just set some attributes)
+- central store system for data (sql style system?)
+- decal system
+  -> figure out proper normal on the surface
+  -> be able to automatically despawn after time, or limit of them 
+  ? -> can this bank anything of of the emitter system? 
+
+- LOD
+- can voxels be made into quadtree style structure to allow subdivision + optimization of voxels ? 
+  --> some sort of optimizing to drawing, instancing / generated optimized mesh
+
+- other platforms -> emscripten/ (browser/android/ios)? 
+
+- split screen (can technically already do with )
+- controller support 
+- random potential optimizations:
+  - instancing 
+  - view culling
+
+
+=======================================
+
+mocap? 
+- passive ball based
+
+problems you want solved first:
+- be able to take multiple video streams
+- do some basic image processing on these to identify the balls
+===> calibrate against background image, and then the diff should identify the balls
+===> position in fn (camera position, identified color in video feed)
+===> multiple cameras, identify position (might be occuluded, maybe average? might be able to weight based upon visibility %?)
+
+core problems:
+- identify balls in the scene
+- differentiate balls in scene
+- locate position of balls in scene
+
+software things to solve
+- create a way to map the balls to bone hierarchy
+
+- how to integrate into blender? 

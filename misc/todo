@@ -1,89 +1,193 @@
-4 - 1 hour sessions in this next week for 3d modeling
--> spend on the art and make models or levels
 
-next todo:
+* void setGameObjectPositionRelative(int32_t index, float x, float y, float z, bool xzPlaneOnly){
+==> fix this, currently can't do cause physics translate set is false
 
-* fix animation system
-  - allow model posing
-  - inverse kinematics
+* implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
+https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
+https://www.youtube.com/watch?v=ibnNu7N22UM
 
-======================
 
-need tos, but kind of put offish:
-* recorder -> generalize all attributes
-* improve performance of scene rendering by not actually traversing the scenegraph while rendering but rather use cached values (dirty when move and then recalc)
-* generalize shadow code (plumb in correct shadow map)
-- performance profiling
-- better framepacing
-- fix networking code
-- for attributes, pass around runtime symbols/atoms/whatever instead of strings
-* automatic world chunking ==> take every loaded scene, and then divide these up into chunks
-* ai system goals 
+core gameplay implementation stage:
+- emitter initial velocity 
+- gun system (very tunable) : projectile effect (on muzzle?)
 
-things to maybe reconsider:
-* scoping of scenes (all objects are in shared namespace)
+==========================================
+
+-> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
+==> is this true? important: bug: parenting doesn't work when physics are enabled
+* bullet hole decal/particle <-- should be done w/ emitter so that the emitter handles cleanup
+
+
+- get movement working 
+- get guns working
+- tilt thing for movement 
+
+- update default meshes to something reasonable (cams, emitters, etc)
+- ability to auto reload script when notice a change (probably rate limit?)
+
+
+==================
+GAME SPECIFIC
+==================
+third person toggle (just some basic character that can run around and stuff)
+
+- improve movement system  (very tunable)
+  - maybe write custom controller and don't rely on the basic physics body stuff?
+  - tilt
+
+
+
+============== GOAL END OF SEPTEMBER ==================================
+Note: I don't think the movement has to feel perfect, or even that good yet
+but is important that the main functional aspects are defined
+
+========================================================================
+
+|            |
+|           |
+|  AND THEN |
+|           |
+
+GO HAM ON THE EDITOR -> VOXELS + TERRAIN
+- worldloading:
+- how to resize
+  conceptually:
+  calculate the position of each object 
+  --> don't take into account parented objects b/c too confusing/ constrainty 
+  --> calculate the position relative to the offset of the chunk, so pos = fn(obj_rel, chunk_index, chunk_size)
+  --> solve for pos = fn(obj_rel_to_solve, chunk_index_new, chunk_size_new) such that obj_rel_to_solve < chunk_size_new
+  ====> i guess?
+  
+
+
+
+========================================================================
+MAKE WORK IN DOCKER BUILD!!! + AUTOMATED BUILDS ON CI 
+MAKE WORK ON WINDOWS!!!!
+======================================================
+============== GOAL END OF OCTOBER ==================================
+
+
+
+FIXING BUGS
+========================
+bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
+bug: look into openal audio types, dont want to use big wav files
+bug: initially loaded scripts have fake ids, define mainobjs that don't actually exist
+bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
+bug/feature: no way to specify no main texture (should have "no main texture" value)
+====> eulerToQuat / serializeQuat has +/- PI...why?
+cleanup: combine set-state and send-notify
+
+- initial model transform/rotation/scale (broken feature scenes) -> do I care?
+- skybox sometimes doesn't render if -i is not used
+
+core loop:
+=====> cleanup core rendering code, think about how buffers are used, fix bloom etc
+=====> make all input events and state modifications happen after rendering, not during
+
+=> model loading sets the coords slightly off, maybe scene sandbox issue?  too many conversion steps?  etc? 
+=> parenting sandbox (querying can get out of data if using to read?)
+=> fix when get local position and update vs the new value in the cache
+- make timeplayback stateless 
+- animation interpolation
+- verify animation some
+- fix dae/fbx models in model loading (convert all to gltf maybe?) + cleanup unused models/files
+
+=> way to globally address obj by name -> maybe <sceneid>:objname? ? 
+(set-scene-name "coolname")
+(lsobj-name "someobject" "coolname")
+
+currentModuleId -> is flawed
+guile -> for out how to catch any exception, then be smart about stuff
+textures -> always convert to abs path so doesn't reuse
+
+-> merge serialize attr + getattr + include all attr
+
+- revisit layouts and try to get nice ui working for editor
+layout bugs:
+-> requires at least two passes (how many actuallly though?)
+-> bounding box seems to be wrong still (try w/ text no work?)
+-> should have a flex layout
+
+ui ideas:
+================
+top level console that scrolls down from the top
+==> how to implement scrollable text? ===>  MAYBE JUST DO FIXED SIZE AND SCRIPT FOR NOW
+- get properties/recorder working properly (use case -> texture sprite playback)
+- better voxels - editing
+
+
+===============================================
+emitter upgrades: 
+- maybe the delta stuff should be relative to the parent?  
+and thenfore solve: - enemy should then start shooting projectiles at the player
 
 bugs:
-* heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
-* portals need to handle occlusion of an object better (if something is behind the portal camera it can be seen)
-* fix memory reference incorrectness for scheme
-* better movie playback - add audio  (swr_convert?)
-* serialization of attributes incomplete/ broken
-* physics -> fix parenting collision bug
-
+- make everything time independent
+=> convex/exact hull kind of wrongish, sometimes hull would crash eh 
+- layout bound info gets centered, but the layout should be aligned from the left
+- video no longer work wtf shit
+- painting seems to mismap the uvs
+- removing object mid animation causes error
 
 eventually:
-- c++ plugin system 
-- lightmapping
-- triplanar mapping
-- normal mapping
-- pbr 
-- destructable voxels
-- cool physics toys
-- windows build
-- improve build code
-- openvr integration
-- ragdoll
-- better fonts
-- better voxel editing
-- long running "dormant" scripts (eg for a quest system, or to just set some attributes)
-- central store system for data (sql style system?)
-- decal system
-  -> figure out proper normal on the surface
-  -> be able to automatically despawn after time, or limit of them 
-  ? -> can this bank anything of of the emitter system? 
+- work on ai, make players and shit move and stuff enemy ai 
+  - detection system: solved conceptually, but has parenting bugs 
+  - integrate pathfinding: - eventually try to make navmesh's automatically somehow?
+  - goal/destination system 
+    - goals exist as things in a scene -> real objects with position
+    - of the detected goals, each goal is evaluated with some utility value fn(actor, distance, goal) => number
+    - do the goal that has the highest utility
+- better way to include scene code/prefabs 
 
-- LOD
-- can voxels be made into quadtree style structure to allow subdivision + optimization of voxels ? 
-  --> some sort of optimizing to drawing, instancing / generated optimized mesh
+bugs for eventually:
+========> be more consistent with setting shaders
+- physics raycast is gets a collision object that does not a rigidbody in the map
+- playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
+- attribute updating/serialization not kept in line
+- consider when the script should be loaded.
+  - ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
+  - scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
+- noticeable obvious performance drop for trivial stuff due to loading textures on demand (instead of preloading) (probably would also happen for audio, models)
+- minimize opengl state changes (via sorting or maybe caching?)
 
-- other platforms -> emscripten/ (browser/android/ios)? 
+features for eventually:
 
-- split screen (can technically already do with )
-- controller support 
-- random potential optimizations:
-  - instancing 
-  - view culling
+- guile should print a stacktrace
+- console.scm can switch scope into modules
+
+========================================================
+
+  => creates the way to do pinning : <mainobjectname>/<rest_of_the_node>:position:5 5 5 (overrides the animation data)
+      ==> WOULD ALLOW FOR POSING 
+
+easy use ideas:
+- nice graphic
+- for rotation
+- clean up/speed up model loading
+=> audit resources + profile memory in general
 
 
-=======================================
+==[plugins]==
 
-mocap? 
-- passive ball based
+SEQUENCER
+=================
+-  improve state machine attrs (not super important yet but needed when get more involved w/ scripting
+  - attr function (i guess it affects the associated object?) - bugs with memory management for tracks / onexit fns
+- ability to have user defined attributes
 
-problems you want solved first:
-- be able to take multiple video streams
-- do some basic image processing on these to identify the balls
-===> calibrate against background image, and then the diff should identify the balls
-===> position in fn (camera position, identified color in video feed)
-===> multiple cameras, identify position (might be occuluded, maybe average? might be able to weight based upon visibility %?)
+SQL BUGS
+=================
+- sql "select movement-speed from traits limit x" -> returns 0 length
+- no way to escape strings 
+- create easy way to safely bind strings 
+select name, modelpath, fire-animation from guns where name = " gunname  ==> gunname should require quotes, but requires they have no quotes instead
+- no way to specify offset
 
-core problems:
-- identify balls in the scene
-- differentiate balls in scene
-- locate position of balls in scene
-
-software things to solve
-- create a way to map the balls to bone hierarchy
-
-- how to integrate into blender? 
+- empty last column sound seems to screw up 
+profile,speed,speed-air,jump-height,max-angleup,max-angledown,friction,restitution,gravity,mass,jump-sound,land-sound
+slow,0.1,0.1,16,-1.5,1,0.4,0,-40,1,../ModEngine/res/sounds/silenced-gunshot.wav,
+regular,0.8,0,30,-3.1415,3.1415,1,0,-20,2,,../ModEngine/res/sounds/silenced-gunshot.wav
+still,0,0,1000,-1.8,1.1,1,0,2,1,../ModEngine/res/sounds/silenced-gunshot.wav,../ModEngine/res/sounds/silenced-gunshot.wav
+reverse,-0.5,-0.5,10,-1.8,1.1,1,0,-9.81,1,../ModEngine/res/sounds/sample.wav,../ModEngine/res/sounds/silenced-gunshot.wav

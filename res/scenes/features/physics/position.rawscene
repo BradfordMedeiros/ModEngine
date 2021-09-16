@@ -1,0 +1,15 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0 
+platform:script:./res/scenes/features/physics/position.scm
+
+s>boxupdown:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+s>boxupdown:position:25 1 0
+s>boxupdown:texture:./res/textures/wood.jpg
+
+s>boxupdown:physics_angle:0.000000 0.000000 0.000000
+s>boxupdown:physics:enabled
+#>boxupdown:physics:disabled
+s>boxupdown:physics_type:dynamic
+s>boxupdown:physics_gravity:0 -9.81 0
+s>boxupdown:physics_shape:shape_sphere
