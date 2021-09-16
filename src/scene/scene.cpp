@@ -963,11 +963,12 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    updateAbsoluteTransform(world.sandbox, i, Transformation {
+    Transformation transform {
       .position = getPosition(rigidBody),
       .scale = getScale(rigidBody),
       .rotation = getRotation(rigidBody),
-    });
+    };
+    updateAbsoluteTransform(world.sandbox, i, transform);
     clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
   }
 }

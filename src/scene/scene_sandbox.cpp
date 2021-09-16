@@ -504,13 +504,15 @@ void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id
       .absTransformUpdated = false,
     };
   });
-
 }
 void removeObjectFromCache(Scene& mainScene, objid id){
   mainScene.absoluteTransforms.erase(id);
 }
 
-void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform){
+
+void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation& transform){
+  std::cout << "transform cache: " << id << ":" << std::endl;
+  printTransformInformation(transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
     .absTransformUpdated = true,
@@ -520,65 +522,44 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, transform);
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, transform);
 }
 
 void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
   Transformation newTransform =  sandbox.mainScene.absoluteTransforms.at(id).transform;
   newTransform.position = position;
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, newTransform);
 }
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   Transformation oldRelativeTransform = getGameObject(sandbox, id).transformation;
   oldRelativeTransform.position = position;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, newTransform);
 }
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   Transformation newTransform =  sandbox.mainScene.absoluteTransforms.at(id).transform;
   newTransform.scale = scale;
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, newTransform);
 }
 void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   Transformation oldRelativeTransform = getGameObject(sandbox, id).transformation;
   oldRelativeTransform.scale = scale;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, newTransform);
 }
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
   Transformation newTransform = sandbox.mainScene.absoluteTransforms.at(id).transform;
   newTransform.rotation = rotation;
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, newTransform);
 }
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
   auto parentId = getGameObjectH(sandbox, id).parentId;
   Transformation oldRelativeTransform = getGameObject(sandbox, id).transformation;
   oldRelativeTransform.rotation = rotation;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
-  sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
-    .transform = newTransform,
-    .absTransformUpdated = true,
-  };
+  updateAbsoluteTransform(sandbox, id, newTransform);
 }
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
