@@ -25,12 +25,17 @@ glm::mat4 matrixFromComponents(Transformation transformation){
   return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
 }
 
+void printTransformInformation(Transformation transform){
+  std::cout << "x.pos = [ " << print(transform.position)  << " ]; ";
+  std::cout << "x.scale = [ " << print(transform.scale) << " ]; ";
+  std::cout << "x.rot = [ " << print(transform.rotation) << " ]; " << std::endl; 
+}
 
 void printMatrixInformation(glm::mat4 transform, std::string label){
   auto initPose = getTransformationFromMatrix(transform);
-  std::cout << label <<  "x.pos = [ " << print(initPose.position)  << " ]; ";
-  std::cout << "x.scale = [ " << print(initPose.scale) << " ]; ";
-  std::cout << "x.rot = [ " << print(initPose.rotation) << " ]; " << std::endl;
+  std::cout << label;
+
+  printTransformInformation(initPose);
 
   std::cout << label << " = [";
   for (int i = 0; i < 4; i++){
