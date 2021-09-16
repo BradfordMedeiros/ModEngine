@@ -437,18 +437,6 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
     bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
 
-    DefaultMeshes defaultMeshes {
-      .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
-      .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
-      .cameraMesh = &world.meshes.at("./res/models/camera/camera.dae").mesh, 
-      .voxelCubeMesh = &world.meshes.at("./res/models/unit_rect/unit_rect.obj").mesh,
-      .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
-      .soundMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
-      .lightMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
-      .emitter = &world.meshes.at("./res/models/ui/node.obj").mesh,
-      .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
-    };
-
     auto trianglesDrawn = renderObject(
       newShader, 
       id, 
@@ -967,6 +955,7 @@ int main(int argc, char* argv[]){
     "./res/models/box/plane.dae",
     "./res/models/controls/input.obj",
     "./res/models/controls/unitxy.obj",  
+    "./res/models/objtypes/symbol_emitter.gltf",  
   };
   world = createWorld(
     onObjectEnter, 
@@ -993,7 +982,7 @@ int main(int argc, char* argv[]){
     .unitXYRect = &world.meshes.at("./res/models/controls/unitxy.obj").mesh,
     .soundMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
     .lightMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
-    .emitter = &world.meshes.at("./res/models/ui/node.obj").mesh,
+    .emitter = &world.meshes.at("./res/models/objtypes/symbol_emitter.gltf").mesh,
     .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
   };
 

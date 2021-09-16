@@ -449,13 +449,15 @@ void removeObject(
   mapping.erase(id);
 }
 
-int renderDefaultNode(GLint shaderProgram, Mesh& nodeMesh){
-  glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), nodeMesh.bones.size() > 0);
+int renderDefaultNode(GLint shaderProgram, Mesh& mesh){
+  // Transformation getTransformationFromMatrix(glm::mat4 matrix){
+  // unscale this model matrix
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), mesh.bones.size() > 0);
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));  
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
   glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-  drawMesh(nodeMesh, shaderProgram);
-  return nodeMesh.numTriangles;
+  drawMesh(mesh, shaderProgram);
+  return mesh.numTriangles;
 }
 
 int renderObject(
@@ -567,6 +569,7 @@ int renderObject(
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL && showDebug){
+    std::cout << "rendering emitter" << std::endl;
     return renderDefaultNode(shaderProgram, *defaultMeshes.emitter);
   }
 

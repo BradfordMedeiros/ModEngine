@@ -375,7 +375,10 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
 
 void addMesh(World& world, std::string meshpath){
   ModelData data = loadModel("", meshpath);
-  assert(data.meshIdToMeshData.size() ==  1);
+  if (data.meshIdToMeshData.size() !=  1){
+    std::cout << "ERROR: " << meshpath << " actual size: " << data.meshIdToMeshData.size() << std::endl;
+    assert(false);
+  }
   auto meshData = data.meshIdToMeshData.begin() -> second;
   loadMeshData(world, meshpath, meshData, -1);
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
