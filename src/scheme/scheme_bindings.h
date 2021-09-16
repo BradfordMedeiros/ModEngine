@@ -36,7 +36,6 @@ void createStaticSchemeBindings(
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
   std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
-  void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
   void (*clearImpulse)(int32_t index),

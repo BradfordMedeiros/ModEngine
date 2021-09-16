@@ -878,7 +878,6 @@ int main(int argc, char* argv[]){
     moveRelative,
     orientationFromPos,
     getGameObjectByName,
-    setSelectionMode,
     applyImpulse,
     applyImpulseRel,
     clearImpulse,

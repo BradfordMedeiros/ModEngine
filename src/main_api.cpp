@@ -171,10 +171,6 @@ glm::quat getGameObjectRotation(int32_t index, bool isWorld){
   return getGameObject(world, index).transformation.rotation;
 }
 
-void setSelectionMode(bool enabled){
-  // todo allow toggle for this 
-}
-
 objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes){
   GameobjAttributes attributes {
     .stringAttributes = stringAttributes,

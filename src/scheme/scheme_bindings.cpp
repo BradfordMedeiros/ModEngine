@@ -52,12 +52,6 @@ SCM scm_sendLoadScene(SCM sceneId){
   return SCM_UNSPECIFIED;
 }
 
-void (*selectionMode)(bool enabled);
-SCM setSelectionMod(SCM value){
-  selectionMode(scm_to_bool(value));
-  return SCM_UNSPECIFIED;
-}
-
 void (*setActCamera)(int32_t id);
 SCM setActiveCam(SCM value){
   setActCamera(scm_to_int32(value));
@@ -695,7 +689,6 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
 
-  scm_c_define_gsubr("set-selection-mode", 1, 0, 0, (void *)setSelectionMod);
   scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);    
   scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
@@ -825,7 +818,6 @@ void createStaticSchemeBindings(
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
   std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
-  void (*setSelectionMode)(bool enabled),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
   void (*clearImpulse)(int32_t index),
@@ -879,7 +871,6 @@ void createStaticSchemeBindings(
   _sendLoadScene = sendLoadScene;
   _createScene = createScene;
   
-  selectionMode = setSelectionMode;
 	moveCam = moveCamera;
 	rotateCam = rotateCamera;
 	removeObjById = removeObjectById;
