@@ -852,12 +852,7 @@ GameobjAttributes objectAttributes(World& world, objid id){
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj){
-  // why no rotate set here?
-  assert(false);
-  std::cout << "setting new pos to : " << print(gameobj.transformation.position) << std::endl;
-  physicsTranslateSet(world, id, gameobj.transformation.position, true);
-  physicsScaleSet(world, id, gameobj.transformation.scale);  
-
+  physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id) : NULL;
   if (body != NULL){
     rigidBodyOpts opts {
@@ -917,13 +912,20 @@ void applyPhysicsTranslation(World& world, objid index, float offsetX, float off
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
-  assert(!relative);
-  updateAbsoluteRotation(world.sandbox, index, rotation);
-
-  if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
-    auto rot = fullTransformation(world.sandbox, index).rotation;
-    setRotation(body, rot);
+  if (relative){
+    updateRelativeRotation(world.sandbox, index, rotation);
+    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      auto body =  world.rigidbodys.at(index);
+      auto rot = fullTransformation(world.sandbox, index).rotation;
+      setRotation(body, rot);
+    }
+  }else{
+    updateAbsoluteRotation(world.sandbox, index, rotation);
+    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      auto body =  world.rigidbodys.at(index);
+      auto rot = fullTransformation(world.sandbox, index).rotation;
+      setRotation(body, rot);
+    }
   }
   world.entitiesToUpdate.insert(index);
 }
