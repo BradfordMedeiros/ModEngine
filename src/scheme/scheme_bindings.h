@@ -77,7 +77,7 @@ void createStaticSchemeBindings(
   std::vector<func_t> registerGuileFns
 );
 
-void defineFunctions(objid id, bool isServer);
+void defineFunctions(objid id, bool isServer, bool isFreeScript);
 
 void onFrame();
 void onCollisionEnter(int32_t obj1, glm::vec3 contactPos, glm::vec3 normal);

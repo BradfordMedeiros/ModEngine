@@ -1,7 +1,4 @@
-- initial scripts define mainobjs that don't actually exist
-
 => fix when get local position and update vs the new value in the cache
-
 -> theory -> using old cached positions?
 ====> but i don't think this should have a big effect, since this is relative to the parent?
 ==> new theory: since relative updates set absolute location, this makes it like a final physics update

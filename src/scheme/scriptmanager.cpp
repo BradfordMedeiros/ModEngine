@@ -36,7 +36,7 @@ objid currentSceneId(){
   assert(false); 
 }
 
-void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer){ 
+void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, bool isFreeScript){ 
   auto script = getScriptName(scriptpath, id);
 
   std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
@@ -48,13 +48,13 @@ void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer){
     .module = module,
   };                    
   scm_set_current_module(module);
-  defineFunctions(id, isServer);
+  defineFunctions(id, isServer, isFreeScript);
   scm_c_primitive_load(scriptpath.c_str());
   onFrame();
 }
 
 // @TODO -- need to figure out how to really unload a module.
-// I don't think this actually causes this module to be garbage collected.
+// I don't know this actually causes this module to be garbage collected.
 void unloadScript(std::string scriptpath, objid id, std::function<void()> additionalUnload){
   auto script = getScriptName(scriptpath, id);
   auto module = scriptnameToModule.at(script).module;

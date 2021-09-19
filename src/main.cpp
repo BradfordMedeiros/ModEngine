@@ -927,7 +927,7 @@ int main(int argc, char* argv[]){
   }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadScript(script, getUniqueObjId(), -1, bootStrapperMode);
+    loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
   }
 
   BulletDebugDrawer drawer(addLineNextCycle);

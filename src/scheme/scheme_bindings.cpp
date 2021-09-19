@@ -677,7 +677,7 @@ void onScriptUnload(){
 
 std::vector<func_t> _registerGuileFns;
 ////////////
-void defineFunctions(objid id, bool isServer){
+void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
@@ -760,7 +760,9 @@ void defineFunctions(objid id, bool isServer){
 
   scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
 
-  scm_c_define("mainobj", createGameObject(id));
+  if (!isFreeScript){
+    scm_c_define("mainobj", createGameObject(id));
+  }
   scm_c_define("is-server", scm_from_bool(isServer));
 
   scm_c_define_gsubr("screenshot", 1, 0, 0, (void*)scmSaveScreenshot);

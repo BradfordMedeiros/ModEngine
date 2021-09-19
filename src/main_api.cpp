@@ -52,7 +52,7 @@ void clearImpulse(int32_t index){
 void loadScriptFromWorld(std::string script, objid id, objid sceneId){
   auto name = getGameObject(world, id).name;
   std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-  loadScript(script, id, sceneId, bootStrapperMode);
+  loadScript(script, id, sceneId, bootStrapperMode, false);
 }
 
 std::vector<std::string> listSceneFiles(){
