@@ -14,11 +14,14 @@ std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObj
   std::string relations = "";
 
   forEveryGameobj(sandbox, [&sandbox, &relations, &objectMapping](objid id, GameObject& childObj) -> void {
-    if (id == 0){
-      return;   // will show up since things are parented to the root
-    }
     auto childObjH = getGameObjectH(sandbox, id);
     auto parentId = childObjH.parentId;
+
+    if (id == 0){
+      relations =  relations + getDotInfoForNode(childObj.name, childObjH.id,  childObjH.sceneId, childObjH.groupId, childObj.transformation.position, childObj.transformation.scale, childObj.transformation.rotation, getMeshNames(objectMapping, id)) + "\n";
+      return;   
+    }
+
     auto parentObj = getGameObject(sandbox, parentId);
     auto parentObjH = getGameObjectH(sandbox, parentId);
 
