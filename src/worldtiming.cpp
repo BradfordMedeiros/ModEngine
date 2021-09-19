@@ -21,6 +21,7 @@ void tickAnimations(WorldTiming& timings, float elapsedTime){
     timings.animations.playbacks.erase(groupId);
   }
   timings.playbacksToRemove.clear();
+  //std::cout << "num animations: " << timings.animations.playbacks.size() << std::endl;
 }
 
 Animation getAnimation(World& world, int32_t groupId, std::string animationToPlay){  
@@ -95,7 +96,13 @@ void addAnimation(World& world, WorldTiming& timings, objid id, std::string anim
 
   TimePlayback playback(
     timings.initialTime, 
-    [&world, animation, groupId, idScene, rootname](float currentTime, float elapsedTime) -> void { 
+    [&world, &timings, animation, groupId, idScene, rootname](float currentTime, float elapsedTime) -> void { 
+      // might be better to not have this check here and instead just assume obj exists,
+      // remove animation when del object, but for now!
+      if (!idExists(world.sandbox, groupId)){
+        timings.playbacksToRemove.push_back(groupId);
+        return;
+      }
       auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
       playbackAnimation(animation, meshNameToMeshes, currentTime, elapsedTime, scopeGetModelMatrix(world, idScene), scopeSetPose(world, idScene), rootname);
     }, 

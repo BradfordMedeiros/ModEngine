@@ -1,4 +1,3 @@
-- removing object mid animation causes error
 - initial scripts define mainobjs that don't actually exist
 
 => fix when get local position and update vs the new value in the cache
@@ -83,6 +82,7 @@ bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids
 bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
 bug/feature: no way to specify no main texture (should have "no main texture" value)
+bug: makeobjattr caused &jump-sound to be orphaned outside of the scene (huh?)
 
 core loop:
 =====> cleanup core rendering code, think about how buffers are used, fix bloom etc
@@ -203,3 +203,8 @@ MIGHT NOT BE BUGS BUT LOOKOUT FOR
 - make everything time independent
 - playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
 ====> eulerToQuat / serializeQuat has +/- PI...why?
+
+
+BORDERLINE
+==============
+if object is added but belongs to no layer, probably should have some warning? 
