@@ -20,20 +20,15 @@ need tos, but kind of put offish:
 * automatic world chunking ==> take every loaded scene, and then divide these up into chunks
 * ai system goals 
 
-things to maybe reconsider:
-* scoping of scenes (all objects are in shared namespace)
-
 bugs:
 * heightmap: - heighmaps don't recalculate normals (can just reload the scene or the gameobj)
 * portals need to handle occlusion of an object better (if something is behind the portal camera it can be seen)
 * fix memory reference incorrectness for scheme
 * better movie playback - add audio  (swr_convert?)
 * serialization of attributes incomplete/ broken
-* physics -> fix parenting collision bug
 
 
 eventually:
-- c++ plugin system 
 - lightmapping
 - triplanar mapping
 - normal mapping
@@ -64,26 +59,3 @@ eventually:
 - random potential optimizations:
   - instancing 
   - view culling
-
-
-=======================================
-
-mocap? 
-- passive ball based
-
-problems you want solved first:
-- be able to take multiple video streams
-- do some basic image processing on these to identify the balls
-===> calibrate against background image, and then the diff should identify the balls
-===> position in fn (camera position, identified color in video feed)
-===> multiple cameras, identify position (might be occuluded, maybe average? might be able to weight based upon visibility %?)
-
-core problems:
-- identify balls in the scene
-- differentiate balls in scene
-- locate position of balls in scene
-
-software things to solve
-- create a way to map the balls to bone hierarchy
-
-- how to integrate into blender? 
