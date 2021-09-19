@@ -334,7 +334,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 glm::mat4 projectionFromLayer(LayerInfo& layer){
-  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, 0.1f, 1000.0f); 
+  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, layer.nearplane, layer.farplane); 
 }
 LayerInfo layerByName(std::string layername){
   for (auto &layer : layers){

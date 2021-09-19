@@ -13,6 +13,8 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
         .orthographic = false,
         .depthBufferLayer = 0,
         .fov = 45.f,
+        .nearplane = 0.1f,
+        .farplane = 1000.f,
       };
     }
 
@@ -29,6 +31,10 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
         std::cout << "WARNING: layers: ortho" << token.payload << " is not a valid option" << std::endl;
         assert(false);
       }
+    }else if (token.attribute == "near"){
+      layers2[token.target].nearplane = std::atof(token.payload.c_str());
+    }else if (token.attribute == "far"){
+      layers2[token.target].farplane = std::atof(token.payload.c_str());
     }else if (token.attribute == "fov"){
       layers2[token.target].fov = std::atof(token.payload.c_str());
     }else{
@@ -43,6 +49,8 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
       .orthographic = false,
       .depthBufferLayer = 0,
       .fov = 45.f,
+      .nearplane = 0.1f,
+      .farplane = 1000.f,
     });
   }else{
     layers2.at("default").name = "";    

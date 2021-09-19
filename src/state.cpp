@@ -51,7 +51,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .printKeyStrokes = true,
     .cullEnabled = false,
     .groupSelection = true,
-    .pauseWorldTiming = true,
+    .pauseWorldTiming = false,
     .activeCameraObj = NULL,
 	};
 	return state;

@@ -90,6 +90,8 @@ struct LayerInfo {
   bool orthographic;
   int depthBufferLayer;
   float fov;
+  float nearplane;
+  float farplane;
 };
 int numUniqueDepthLayers(std::vector<LayerInfo> layers);
 

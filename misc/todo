@@ -1,3 +1,8 @@
+bug: makeobjattr caused &jump-sound to be orphaned outside of the scene (huh?)
+bug/feature: no way to specify no main texture (should have "no main texture" value)
+- make timeplayback stateless
+- ability to step frames independently 
+
 => fix when get local position and update vs the new value in the cache
 -> theory -> using old cached positions?
 ====> but i don't think this should have a big effect, since this is relative to the parent?
@@ -25,7 +30,6 @@ core gameplay implementation stage:
 GAME SPECIFIC
 ==================
 third person toggle (just some basic character that can run around and stuff)
-
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
   - tilt
@@ -65,11 +69,8 @@ MODEL_LOADING/ANIMATION
 - initial model transform/rotation/scale (broken feature scenes) -> do I care?
 => model loading sets the coords slightly off, maybe scene sandbox issue?  too many conversion steps?  etc? 
 => parenting sandbox (querying can get out of data if using to read?)
-- make timeplayback stateless
-- ability to step frames independently 
 - animation interpolation
 - verify animation some
-- fix dae/fbx models in model loading (convert all to gltf maybe?) + cleanup unused models/files
 
 
 MISC/UNCATEGORIZED BUGS
@@ -78,8 +79,7 @@ bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this valu
 bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids
 bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
-bug/feature: no way to specify no main texture (should have "no main texture" value)
-bug: makeobjattr caused &jump-sound to be orphaned outside of the scene (huh?)
+
 
 core loop:
 =====> cleanup core rendering code, think about how buffers are used, fix bloom etc
@@ -145,6 +145,7 @@ PERFORMANCE
 - minimize opengl state changes (via sorting or maybe caching?)
 - noticeable obvious performance drop for trivial stuff due to loading textures on demand (instead of preloading) (probably would also happen for audio, models)
 - textures -> always convert to abs path so doesn't reuse
+- culling
 
 USABILITY
 =============
