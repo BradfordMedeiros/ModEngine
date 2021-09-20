@@ -1021,6 +1021,10 @@ int main(int argc, char* argv[]){
 
   GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
   glDrawBuffers(2,buffers_to_render);
+
+  int frameratelimit = 60;
+  bool hasFramelimit = frameratelimit != 0;
+  float minDeltaTime = !hasFramelimit ? 0 : (1.f / frameratelimit);
   
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -1034,9 +1038,11 @@ int main(int argc, char* argv[]){
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
     frameCount++;
+
+    fpscountstart:
     now = glfwGetTime();
     deltaTime = now - previous;   
-    previous = now;
+
     if (timetoexit != 0){
       float timeInSeconds = timetoexit / 1000.f;
       if (now > timeInSeconds){
@@ -1044,6 +1050,12 @@ int main(int argc, char* argv[]){
         goto cleanup;
       }
     }
+
+    if (hasFramelimit &&  (deltaTime < minDeltaTime)){
+      goto fpscountstart;
+    }
+
+    previous = now;
 
     int numObjects = getNumberOfObjects(world.sandbox);
     int numScenesLoaded = getNumberScenesLoaded(world.sandbox);
@@ -1057,7 +1069,7 @@ int main(int argc, char* argv[]){
       frameCount = 0;
       float timedelta = now - last60;
       last60 = now;
-      currentFramerate = (int)60/(timedelta);
+      currentFramerate = floor((60.f/(timedelta) + 0.5f));
     }
 
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
