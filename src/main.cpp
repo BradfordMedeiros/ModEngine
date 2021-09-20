@@ -142,8 +142,8 @@ void generatePortalTextures(){
   }
 }
 
-float initialTime = glfwGetTime();
-WorldTiming timings = createWorldTiming(initialTime);
+float initialTime = 0;
+WorldTiming timings;
 
 TimePlayback timePlayback(
   initialTime, 
@@ -977,6 +977,11 @@ int main(int argc, char* argv[]){
     interface,
     defaultMeshesToLoad
   );
+
+  bool fpsFixed = result["fps-fixed"].as<bool>();
+  initialTime = fpsFixed  ? 0 : glfwGetTime();
+
+  timings = createWorldTiming(initialTime);
   defaultMeshes = DefaultMeshes{
     .nodeMesh = &world.meshes.at("./res/models/ui/node.obj").mesh,
     .portalMesh = &world.meshes.at("./res/models/box/plane.dae").mesh,
@@ -1015,7 +1020,7 @@ int main(int argc, char* argv[]){
   glfwSetJoystickCallback(joystickCallback);
 
   unsigned int frameCount = 0;
-  float previous = glfwGetTime();
+  float previous = now;
   float last60 = previous;
 
   unsigned int currentFramerate = 0;
@@ -1027,8 +1032,14 @@ int main(int argc, char* argv[]){
   int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
   float minDeltaTime = !hasFramelimit ? 0 : (1.f / frameratelimit);
-  bool fpsFixed = result["fps-fixed"].as<bool>();
+
+  float fixedFps = 60.f;
+  float fixedDelta = 1.f / fixedFps;
   float fpsLag = (result["fps-lag"].as<int>()) / 1000.f;
+  long long totalFrames = 0;
+
+  assert(!hasFramelimit || !fpsFixed);
+  assert(fpsLag < 0 || !fpsFixed);
 
   if (result["skiploop"].as<bool>()){
     goto cleanup;
@@ -1042,9 +1053,10 @@ int main(int argc, char* argv[]){
   while (!glfwWindowShouldClose(window)){
   PROFILE("FRAME",
     frameCount++;
+    totalFrames++;
 
     fpscountstart:
-    now = glfwGetTime();
+    now = fpsFixed ? (fixedDelta * (totalFrames - 1)) :  glfwGetTime();
     deltaTime = now - previous;   
 
     if (timetoexit != 0){
