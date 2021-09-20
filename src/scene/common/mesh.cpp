@@ -74,6 +74,7 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .VAOPointer = VAO,
     .EBOPointer = EBO,
     .VBOPointer = VBO,
+    .hasDiffuseTexture = meshData.hasDiffuseTexture,
     .texture = texture,
     .hasEmissionTexture = meshData.hasEmissionTexture,
     .emissionTexture = emission,
@@ -122,6 +123,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     .VAOPointer = VAO,
     .EBOPointer = EBO,
     .VBOPointer = VBO,
+    .hasDiffuseTexture = true,
     .texture = texture,
     .hasEmissionTexture = false,
     .hasOpacityTexture = false,
@@ -167,6 +169,8 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glActiveTexture(GL_TEXTURE0); 
 
   auto diffuseTextureId = customTextureId == -1 ? mesh.texture.textureId : customTextureId;
+  auto hasDiffuseTexture = customTextureId != -1 || mesh.hasDiffuseTexture; 
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasDiffuseTexture"), hasDiffuseTexture);
   glBindTexture(GL_TEXTURE_2D, diffuseTextureId);
  
   glUniform1i(glGetUniformLocation(shaderProgram, "hasEmissionTexture"), mesh.hasEmissionTexture);

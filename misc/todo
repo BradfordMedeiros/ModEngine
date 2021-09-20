@@ -1,5 +1,4 @@
-bug: makeobjattr caused &jump-sound to be orphaned outside of the scene (huh?)
-bug/feature: no way to specify no main texture (should have "no main texture" value)
+feature: framelimiting
 - make timeplayback stateless
 - ability to step frames independently 
 
@@ -79,6 +78,8 @@ bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this valu
 bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids
 bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
+bug: makeobjattr caused &jump-sound is outside of the scene (huh?)
+==> what is the proper behavior?
 
 
 core loop:
