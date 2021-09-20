@@ -650,7 +650,7 @@ int main(int argc, char* argv[]){
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,camera", "Camera to use after initial load", cxxopts::value<std::string>()->default_value(""))
-   ("o,font", "Font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
+   ("o,fps", "Font to use", cxxopts::value<int>()->default_value("0"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
@@ -847,7 +847,7 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
   blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
 
-  fontMeshes = loadFontMeshes(readFont(result["font"].as<std::string>()));
+  fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
   Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
  
   createStaticSchemeBindings(
@@ -1022,7 +1022,7 @@ int main(int argc, char* argv[]){
   GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
   glDrawBuffers(2,buffers_to_render);
 
-  int frameratelimit = 60;
+  int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
   float minDeltaTime = !hasFramelimit ? 0 : (1.f / frameratelimit);
   
