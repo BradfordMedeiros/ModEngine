@@ -650,7 +650,9 @@ int main(int argc, char* argv[]){
    ("x,scriptpath", "Script file to use", cxxopts::value<std::vector<std::string>>()->default_value(""))
    ("u,uishader", "Shader to use for ui", cxxopts::value<std::string>()->default_value("./res/shaders/ui"))
    ("c,camera", "Camera to use after initial load", cxxopts::value<std::string>()->default_value(""))
-   ("o,fps", "Font to use", cxxopts::value<int>()->default_value("0"))
+   ("fps", "Framerate limit", cxxopts::value<int>()->default_value("0"))
+   ("fps-fixed", "Whether to guarantee the framerate, which means values do not occur in realtime", cxxopts::value<bool>()->default_value("false"))
+   ("fps-lag", "Extra lag to induce in each frame in ms", cxxopts::value<int>()->default_value("-1"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
@@ -1025,7 +1027,9 @@ int main(int argc, char* argv[]){
   int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
   float minDeltaTime = !hasFramelimit ? 0 : (1.f / frameratelimit);
-  
+  bool fpsFixed = result["fps-fixed"].as<bool>();
+  float fpsLag = (result["fps-lag"].as<int>()) / 1000.f;
+
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -1053,6 +1057,9 @@ int main(int argc, char* argv[]){
 
     if (hasFramelimit &&  (deltaTime < minDeltaTime)){
       goto fpscountstart;
+    }
+    if (deltaTime < fpsLag){
+      goto fpscountstart; 
     }
 
     previous = now;
