@@ -283,7 +283,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     setSnapEasyUseDown(state.manipulatorMode);
   }
 
-  /*if (key == GLFW_KEY_K && action == 1){
+  if (key == GLFW_KEY_K && action == 1){
     state.textureIndex--;
     if (state.textureIndex < 0){
       state.textureIndex = 0;
@@ -293,7 +293,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (key == GLFW_KEY_L && action == 1){
     state.textureIndex++;
     std::cout << "texture index: " << state.textureIndex << std::endl;
-  }*/
+  }
 
   if (key == GLFW_KEY_Q && action == 1){
     state.shouldTerrainPaint = !state.shouldTerrainPaint;
@@ -593,6 +593,16 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       state.renderMode = RENDER_PAINT;
       std::cout << "render mode: paint" << std::endl;
+    }
+  }, 
+  InputDispatch{
+    .sourceKey = '5', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode = RENDER_BLOOM;
+      std::cout << "render mode: bloom" << std::endl;
     }
   }, 
   InputDispatch{

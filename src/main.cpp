@@ -1242,16 +1242,8 @@ int main(int argc, char* argv[]){
     )
 
     PROFILE("MAIN_RENDERING",
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glUseProgram(framebufferProgram); 
-      glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glDisable(GL_DEPTH_TEST);
-      glBindVertexArray(quadVAO);
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+      setActiveDepthTexture(0);
 
-      // 2ND pass renders what we care about to the screen.
       glBindFramebuffer(GL_FRAMEBUFFER, fbo);
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
@@ -1262,10 +1254,10 @@ int main(int argc, char* argv[]){
       glDepthMask(GL_FALSE);
       glDisable(GL_STENCIL_TEST);
       renderSkybox(shaderProgram, view, viewTransform.position);  // Probably better to render this at the end 
-
       glDepthMask(GL_TRUE);
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_STENCIL_TEST);
+
       glStencilMask(0xFF);
       glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -1315,6 +1307,7 @@ int main(int argc, char* argv[]){
     // run it through again, blurring in other fucking direction 
     // We swap to attachment 2 which was just the old bloom attachment for final render pass
     PROFILE("BLOOM-RENDERING",
+      setActiveDepthTexture(1);
       glUseProgram(blurProgram);
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
@@ -1330,7 +1323,7 @@ int main(int argc, char* argv[]){
    
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0); // blur only has 1 color attachment?
       glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
       glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1339,17 +1332,27 @@ int main(int argc, char* argv[]){
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    glUseProgram((state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram); 
+    auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
+    glUseProgram(finalProgram); 
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+    glUniform1i(glGetUniformLocation(finalProgram, "enableBloom"), state.enableBloom);
+    glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);
+    glUniform1i(glGetUniformLocation(finalProgram, "bloomTexture"), 1);
+    glUniform1i(glGetUniformLocation(finalProgram, "depthTexture"), 2);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
+
 
     glActiveTexture(GL_TEXTURE1);
-    glUniform1i(glGetUniformLocation(framebufferProgram, "enableBloom"), state.enableBloom);
-    glUniform1f(glGetUniformLocation(framebufferProgram, "bloomAmount"), state.bloomAmount);
-    glUniform1i(glGetUniformLocation(framebufferProgram, "bloomTexture"), 1);
     glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+
     glActiveTexture(GL_TEXTURE0);
-    glUniform1i(glGetUniformLocation(framebufferProgram, "framebufferTexture"), 0);
+    glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
+
 
     if (state.renderMode == RENDER_FINAL){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);
@@ -1361,6 +1364,8 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_DEPTH){
       assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
+    }else if (state.renderMode == RENDER_BLOOM){
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }
 
     glDrawArrays(GL_TRIANGLES, 0, 6);

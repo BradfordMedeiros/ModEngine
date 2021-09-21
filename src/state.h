@@ -6,7 +6,7 @@
 #include "./common/util.h"
 #include "./easyuse/editor.h"
 
-enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH };
+enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM };
 
 struct engineState {
   bool visualizeNormals;
