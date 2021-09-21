@@ -8,20 +8,16 @@ uniform sampler2D depthTexture;
 uniform bool enableBloom;
 uniform float bloomAmount;
 uniform bool enableFog;
-//uniform vec3 fogColor;
-//vec3 fogColor(5, 1, 1);
-//uniform float near;
-float near = 0.1; 
-//uniform float far;
-float far  = 10.0; 
-float mincutoff = 0.8;
-float maxcuttoff = 0.99999;
+uniform vec4 fogColor;
+uniform float near;
+uniform float far;
+uniform float mincutoff;
+uniform float maxcuttoff;
 
-void calculateFogEffect(in vec3 fogColor, in float depthAmount, out vec4 fogAmount){
+void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
     fogAmount = vec4(0, 0, 0, 0);
   }else{
-    vec4 fogColor = vec4(0.4, 0.4, 0.4, -1);
     float fromBaseLow = mincutoff;
     float fromBaseHigh = maxcuttoff;
     float toBaseLow = 0;
@@ -38,7 +34,9 @@ void main(){
   
   vec4 fogEffect = vec4(0, 0, 0, 0);
   // in the 0.2 remaining, it should fall off 100%
-  calculateFogEffect(vec3(0, 0, 1), depthAmount, fogEffect);
+  if (enableFog){
+    calculateFogEffect(depthAmount, fogEffect);
+  }
 
   if (enableBloom){
     FragColor = fogEffect + (texture(framebufferTexture, TexCoords) + (bloomAmount * texture(bloomTexture, TexCoords)));

@@ -1339,9 +1339,18 @@ int main(int argc, char* argv[]){
 
 
     glUniform1i(glGetUniformLocation(finalProgram, "enableBloom"), state.enableBloom);
+    glUniform1i(glGetUniformLocation(finalProgram, "enableFog"), state.enableFog);
+    glUniform4fv(glGetUniformLocation(finalProgram, "fogColor"), 1, glm::value_ptr(glm::vec4(5, 1, 1, 0)));
+    glUniform1f(glGetUniformLocation(finalProgram, "near"), 0.1);
+    glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
+    glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);
+    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 0.99999);
+
     glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);
     glUniform1i(glGetUniformLocation(finalProgram, "bloomTexture"), 1);
     glUniform1i(glGetUniformLocation(finalProgram, "depthTexture"), 2);
+
+    
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, depthTextures[0]);

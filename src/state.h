@@ -44,8 +44,11 @@ struct engineState {
   bool shouldPaint;
   bool shouldTerrainPaint;
   bool terrainPaintDown;
+  
   bool enableBloom;
   float bloomAmount;
+  bool enableFog;
+
   bool takeScreenshot;
   bool highlight;
   bool multiselect;

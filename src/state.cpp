@@ -36,6 +36,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .shouldTerrainPaint = false,
   	.enableBloom = false,
   	.bloomAmount = 1.f,
+    .enableFog = true,
   	.takeScreenshot = false,
     .highlight = true,
     .multiselect = false,
