@@ -89,3 +89,11 @@ BoundInfo getBounds(std::vector<Vertex>& vertices){
   };
   return info;
 }
+
+Transformation interpolate(Transformation transform1, Transformation transform2, float posamount, float scaleamount, float rotamount){
+  return Transformation {
+    .position = glm::lerp(transform1.position, transform2.position, posamount),
+    .scale = glm::lerp(transform1.scale, transform2.scale, scaleamount),
+    .rotation = glm::slerp(transform1.rotation,  transform2.rotation, rotamount),
+  };
+}

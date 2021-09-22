@@ -3,6 +3,7 @@
 // format: <token>:<attribute>:<payload>
 std::optional<Token> parseToken(std::string content) {
   std::vector<std::string> validToken = split(content, ':');
+  assert(validToken.size() <= 3);
   Token token = { 
     .target = (validToken.size() > 0) ? trim(validToken.at(0)) : "",
     .attribute = (validToken.size() > 1) ? trim(validToken.at(1)) : "",

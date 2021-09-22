@@ -98,11 +98,22 @@ std::string trim(const std::string& str){
 }
 
 std::vector<std::string> split(std::string strToSplit, char delimeter){
-  std::stringstream ss(strToSplit);
-  std::string item;
   std::vector<std::string> splittedStrings;
-  while (std::getline(ss, item, delimeter)){
-    splittedStrings.push_back(item);
+  int lowIndex = 0;
+  for (int i = 0; i < strToSplit.size(); i++){
+    if (strToSplit.at(i) == delimeter){
+      auto stringlength = i - lowIndex;
+      auto token = strToSplit.substr(lowIndex, stringlength);
+      lowIndex = i + 1;
+      splittedStrings.push_back(token);
+    }
+  }
+  if (lowIndex != strToSplit.size()){
+    auto token = strToSplit.substr(lowIndex, strToSplit.size() - lowIndex);
+    splittedStrings.push_back(token);
+  }
+  if (strToSplit.size() > 0 && strToSplit.at(strToSplit.size() - 1) == delimeter){
+    splittedStrings.push_back("");
   }
   return splittedStrings;
 }

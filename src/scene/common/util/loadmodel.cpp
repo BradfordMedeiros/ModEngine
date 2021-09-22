@@ -98,15 +98,20 @@ glm::quat aiQuatToGlm(aiQuaternion& quat){
   quaternion.w = quat.w;
   return quaternion;
 }
-glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
-  auto position = aiVectorToGlm(positionKey.mValue);
-  auto rotation = aiQuatToGlm(rotationKey.mValue);
-  auto scaling = aiVectorToGlm(scalingKey.mValue);
-    
+
+Transformation aiKeysToTransform(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey){
+  Transformation transform {
+    .position = aiVectorToGlm(positionKey.mValue),
+    .scale = aiVectorToGlm(scalingKey.mValue),
+    .rotation = aiQuatToGlm(rotationKey.mValue),
+  };
+  return transform;
+}
+glm::mat4 transformToGlm(Transformation transform){
   //http://assimp.sourceforge.net/lib_html/structai_node_anim.html  scaling, then rotation, then translation
-  auto positionMatrix = glm::translate(glm::mat4(1.f), position);
-  auto rotationMatrix = glm::toMat4(rotation);
-  auto scalingMatrix = glm::scale(glm::mat4(1.f), scaling);
+  auto positionMatrix = glm::translate(glm::mat4(1.f), transform.position);
+  auto rotationMatrix = glm::toMat4(transform.rotation);
+  auto scalingMatrix = glm::scale(glm::mat4(1.f), transform.scale);
 
   return positionMatrix * rotationMatrix * scalingMatrix;
 }

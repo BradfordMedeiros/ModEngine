@@ -17,7 +17,8 @@
 #include "./types.h"
 #include "../../../common/util.h"
 
-glm::mat4 aiKeysToGlm(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey);
+Transformation aiKeysToTransform(aiVectorKey& positionKey, aiQuatKey& rotationKey, aiVectorKey& scalingKey);
+glm::mat4 transformToGlm(Transformation transform);
 
 struct AnimationChannel {
   std::string nodeName;

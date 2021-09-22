@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <map>
 #include <vector>
 #include "./boundinfo.h"
@@ -64,5 +65,6 @@ void printMatrixInformation(glm::mat4 transform, std::string label);
 BoundInfo getBounds(std::vector<Vertex>& vertices);
 glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation);
 glm::mat4 matrixFromComponents(Transformation transformation);
+Transformation interpolate(Transformation transform1, Transformation transform2, float posamount, float scaleamount, float rotamount);
 
 #endif
