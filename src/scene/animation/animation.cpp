@@ -1,26 +1,5 @@
 #include "./animation.h"
 
-// slightly off, check comparison func, maybe to do with the float values idk.
-// this probably will need to be sped up.  Might make sense to put this into a ticktime -> position/scale/rot structure + seems to miss last key.  assumes array is in time order as well.
-template<typename KeyType>   
-int findIndexForKey(std::vector<KeyType>& keys, float currentTick){   //todo frameup should be uses                  
-  int tick = 0;
-  for (int i = 0; i < keys.size(); i++){                 
-    auto key = keys[i];
-    if (i == (keys.size() - 1)){
-      if (key.mTime <= currentTick){
-        return i;
-      }
-    }
-
-    auto nextKey = keys[i+1];
-    if (key.mTime <= currentTick && nextKey.mTime > currentTick){    // mTime is in ticks
-      return i;
-    }
-  }
-  return tick;
-}
-
 struct KeyIndex {
   int primaryIndex;
   int secondaryIndex;
@@ -32,13 +11,41 @@ struct KeyInfo {
   KeyIndex rotation;
 };
 
+//// slightly off, check comparison func, maybe to do with the float values idk.
+// this probably will need to be sped up.  Might make sense to put this into a ticktime -> position/scale/rot structure + seems to miss last key.  assumes array is in time order as well.
+// ^ old note, dont remember, should verify
 template<typename KeyType>   
 KeyIndex findKeyIndex(std::vector<KeyType>& keys, float currentTick){
-  auto tick = findIndexForKey(keys, currentTick);
+  int primaryTick = 0;
+  int secondaryTick = 0;
+  float primaryIndexAmount = 0.f;
+  for (int i = 0; i < keys.size(); i++){                 
+    auto key = keys[i];
+    if (i == (keys.size() - 1)){
+      if (key.mTime <= currentTick){
+        primaryTick = i;
+        secondaryTick = i;
+        primaryIndexAmount = 1.f;
+        break;
+      }
+    }
+    int nextKeyIndex = i + 1;
+    assert(nextKeyIndex < keys.size());
+    auto nextKey = keys[nextKeyIndex];
+    if (key.mTime <= currentTick && nextKey.mTime > currentTick){    // mTime is in ticks
+      primaryTick = i;
+      secondaryTick = nextKeyIndex;
+      auto howFarThroughTick = currentTick - key.mTime;
+      auto totalLengthBetweenTicks = nextKey.mTime - key.mTime;
+      primaryIndexAmount = howFarThroughTick / totalLengthBetweenTicks;
+      break;
+    }
+  }
+
   return KeyIndex {
-    .primaryIndex = tick,
-    .secondaryIndex = tick,
-    .primaryIndexAmount = 0.f,
+    .primaryIndex = primaryTick,
+    .secondaryIndex = secondaryTick,
+    .primaryIndexAmount = primaryIndexAmount,
   };
 }
 
