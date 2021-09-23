@@ -74,5 +74,6 @@ struct engineState {
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
 void setState(engineState& state, std::vector<ObjectValue>& values);
+void setInitialState(engineState& state, std::string file);
 
 #endif

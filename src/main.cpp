@@ -704,6 +704,7 @@ int main(int argc, char* argv[]){
   extensionsInit(extensions, currentModuleId, getArgs);
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
+  setInitialState(state, "./res/world.state"); 
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
