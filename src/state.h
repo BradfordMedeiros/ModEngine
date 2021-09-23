@@ -2,6 +2,7 @@
 #define MOD_STATE
 
 #include <string>
+#include <functional>
 #include "./scene/scene_sandbox.h"
 #include "./common/util.h"
 #include "./easyuse/editor.h"
@@ -48,6 +49,7 @@ struct engineState {
   bool enableBloom;
   float bloomAmount;
   bool enableFog;
+  glm::vec3 fogColor;
 
   bool takeScreenshot;
   bool highlight;
@@ -71,5 +73,6 @@ struct engineState {
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
+void setState(engineState& state, std::vector<ObjectValue>& values);
 
 #endif

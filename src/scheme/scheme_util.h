@@ -22,5 +22,6 @@ bool symbolDefined(const char* symbol);
 void maybeCallFunc(const char* function);
 void maybeCallFuncString(const char* function, const char* payload);
 GameobjAttributes scmToAttributes(SCM scmAttributes);
+ObjectValue scmListToObjectValue(SCM list);
 
 #endif

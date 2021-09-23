@@ -54,6 +54,7 @@ bool bootStrapperMode = false;
 NetCode netcode { };
 
 engineState state = getDefaultState(1920, 1080);
+
 World world;
 DefaultMeshes defaultMeshes;
 
@@ -919,6 +920,7 @@ int main(int argc, char* argv[]){
     lock,
     unlock,
     debugInfo,
+    setWorldState,
     extensions.registerGuileFns
   );
   registerGuileTypes(extensions);
@@ -1339,7 +1341,7 @@ int main(int argc, char* argv[]){
 
     glUniform1i(glGetUniformLocation(finalProgram, "enableBloom"), state.enableBloom);
     glUniform1i(glGetUniformLocation(finalProgram, "enableFog"), state.enableFog);
-    glUniform4fv(glGetUniformLocation(finalProgram, "fogColor"), 1, glm::value_ptr(glm::vec4(1, 1, 1, 0)));
+    glUniform4fv(glGetUniformLocation(finalProgram, "fogColor"), 1, glm::value_ptr(state.fogColor));
     glUniform1f(glGetUniformLocation(finalProgram, "near"), 0.1);
     glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
     glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);

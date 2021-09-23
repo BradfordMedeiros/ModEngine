@@ -84,6 +84,12 @@ struct Property {
   AttributeValue value;
 };
 
+struct ObjectValue {
+  std::string object;
+  std::string attribute;
+  AttributeValue value;
+};
+
 struct LayerInfo {
   std::string name;
   int zIndex;

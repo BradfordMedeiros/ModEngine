@@ -74,6 +74,7 @@ void createStaticSchemeBindings(
   bool (*lock)(std::string, objid),
   bool (*unlock)(std::string, objid),
   void (*debugInfo)(std::string infoType, std::string filepath),
+  void (*setWorldState)(std::vector<ObjectValue> values),
   std::vector<func_t> registerGuileFns
 );
 

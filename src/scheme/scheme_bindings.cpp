@@ -460,6 +460,19 @@ SCM scmSetState(SCM value, SCM value2){
   return SCM_UNSPECIFIED;
 }
 
+void (*_setWorldState)(std::vector<ObjectValue> values);
+SCM scmSetWorldState(SCM value){
+  std::vector<ObjectValue> values;
+  auto numElements = toUnsignedInt(scm_length(value));
+  for (int i = 0; i < numElements; i++){
+    auto objectValueSCMList = scm_list_ref(value, scm_from_unsigned_integer(i));
+    auto objectValue = scmListToObjectValue(objectValueSCMList);
+    values.push_back(objectValue);
+  }
+  _setWorldState(values);
+  return SCM_UNSPECIFIED;
+}
+
 glm::vec3 (*_navPosition)(objid, glm::vec3 pos);
 SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
@@ -767,6 +780,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("screenshot", 1, 0, 0, (void*)scmSaveScreenshot);
   scm_c_define_gsubr("set-state", 1, 1, 0, (void*)scmSetState);
+  scm_c_define_gsubr("set-wstate", 1, 0, 0, (void*)scmSetWorldState);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
@@ -858,6 +872,7 @@ void createStaticSchemeBindings(
   bool (*lock)(std::string, objid),
   bool (*unlock)(std::string, objid),
   void (*debugInfo)(std::string infoType, std::string filepath),
+  void (*setWorldState)(std::vector<ObjectValue> values),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -932,6 +947,8 @@ void createStaticSchemeBindings(
 
   _saveScreenshot = saveScreenshot;
   _setState = setState;
+  _setWorldState = setWorldState;
+
   _setFloatState = setFloatState;
   _setIntState = setIntState;
 

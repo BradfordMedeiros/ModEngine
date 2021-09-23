@@ -127,3 +127,29 @@ GameobjAttributes scmToAttributes(SCM scmAttributes){
   };
   return attrs;
 }
+
+AttributeValue toAttributeValue(SCM attrValue){
+  bool isNumber = scm_is_number(attrValue);
+  bool isString = scm_is_string(attrValue);
+  bool isList = scm_to_bool(scm_list_p(attrValue));
+  assert(isNumber || isString || isList);
+  if (isNumber){
+    return scm_to_double(attrValue);
+  }
+  if (isString){
+    return scm_to_locale_string(attrValue);
+  }
+  return listToVec3(attrValue);
+}
+ObjectValue scmListToObjectValue(SCM list){
+  auto listLength = toUnsignedInt(scm_length(list));
+  assert(listLength == 3);
+  auto object = scm_to_locale_string(scm_list_ref(list, scm_from_unsigned_integer(0)));
+  auto attribute = scm_to_locale_string(scm_list_ref(list, scm_from_unsigned_integer(1)));
+  auto value = toAttributeValue(scm_list_ref(list, scm_from_unsigned_integer(2)));
+  return ObjectValue {
+    .object = object,
+    .attribute = attribute,
+    .value = value,
+  };
+}

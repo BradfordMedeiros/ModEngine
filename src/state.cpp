@@ -34,9 +34,10 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.textureIndex = 0,
   	.shouldPaint = false,
     .shouldTerrainPaint = false,
-  	.enableBloom = false,
-  	.bloomAmount = 1.f,
-    .enableFog = true,
+  	.enableBloom = false, 
+  	.bloomAmount = 1.f,   
+    .enableFog = true,  
+    .fogColor = glm::vec3(0.f, 0.f, 0.f), 
   	.takeScreenshot = false,
     .highlight = true,
     .multiselect = false,
@@ -58,3 +59,88 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 	return state;
 }
 
+struct ObjectStateMapping {
+  std::function<void(engineState& state, AttributeValue)> attr;
+  std::string object;
+  std::string attribute;
+};
+
+std::vector<ObjectStateMapping> mapping = {
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto enabled = std::get_if<std::string>(&value);
+      if (enabled != NULL){
+        state.enableDiffuse = *enabled == "true";
+      }
+    },
+    .object = "diffuse",
+    .attribute = "enabled",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto enabled = std::get_if<std::string>(&value);
+      if (enabled != NULL){
+        state.enableSpecular = *enabled == "true";
+      }
+    },
+    .object = "specular",
+    .attribute = "enabled",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto color = std::get_if<glm::vec3>(&value);
+      if (color != NULL){
+        state.fogColor = *color; 
+      }
+    },
+    .object = "fog",
+    .attribute = "color",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto enabled = std::get_if<std::string>(&value);
+      if (enabled != NULL){
+        state.enableFog = *enabled == "true";
+      }
+    },
+    .object = "fog",
+    .attribute = "enabled",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto enabled = std::get_if<std::string>(&value);
+      if (enabled != NULL){
+        state.enableBloom = *enabled == "true";
+      }
+    },
+    .object = "bloom",
+    .attribute = "enabled",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto amount = std::get_if<float>(&value);
+      if (amount != NULL){
+        state.bloomAmount = *amount;
+      }
+    },
+    .object = "bloom",
+    .attribute = "amount",
+  },
+};
+
+void setState(engineState& state, ObjectValue& value){
+  for (auto &stateMap : mapping){
+    if (value.object == stateMap.object && value.attribute == stateMap.attribute){
+      stateMap.attr(state, value.value);
+      return;
+    }
+  }
+  std::cout << value.object << " not supported" << std::endl;
+  assert(false);
+}
+
+void setState(engineState& state, std::vector<ObjectValue>& values){
+  for (auto &value : values){
+    setState(state, value);
+  }
+}

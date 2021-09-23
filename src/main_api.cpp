@@ -340,6 +340,10 @@ void setState(std::string stateName){
   }
 }
 
+void setWorldState(std::vector<ObjectValue> values){
+  setState(state, values);
+}
+
 void setFloatState(std::string stateName, float value){
   if (stateName == "opacity"){
     drawParams.opacity = value;
