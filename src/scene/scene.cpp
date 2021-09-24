@@ -889,6 +889,7 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
+  std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativePosition(world.sandbox, index, pos);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -912,6 +913,7 @@ void applyPhysicsTranslation(World& world, objid index, float offsetX, float off
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
+  std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativeRotation(world.sandbox, index, rotation);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
@@ -1011,7 +1013,6 @@ void updateAttributeDelta(World& world, objid id, std::string attribute, Attribu
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
-  updateSandbox(world.sandbox);
   updateEmitters(
     world.emitters, 
     timeElapsed, 
@@ -1037,10 +1038,11 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       dumpPhysicsInfo(world.rigidbodys);
     }
     stepPhysicsSimulation(world.physicsEnvironment, timestep);
-    updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);     
+    updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
   }
   updateSoundPositions(world);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
+  updateSandbox(world.sandbox);
   callbackEntities(world);
 
   onObjectFrame(world.objectMapping, [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {

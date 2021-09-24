@@ -68,6 +68,7 @@ void setGameObjectScale(int32_t index, glm::vec3 scale);
 
 glm::quat getGameObjectRotation(int32_t index, bool isWorld);
 void setGameObjectRotation(int32_t index, glm::quat rotation);
+void setGameObjectRotationRelative(int32_t index, glm::quat rotation);
 
 objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
 void removeObjectById(int32_t id);

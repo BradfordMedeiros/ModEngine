@@ -1,0 +1,8 @@
+
+#fog:value:10
+#fog:color:10 10 10 
+
+diffuse:enabled:true
+specular:enabled:true
+bloom:enabled:false
+

@@ -27,6 +27,7 @@
 #include "./extensions.h"
 #include "./netscene.h"
 #include "./worldtiming.h"
+#include "./main_test.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -673,10 +674,17 @@ int main(int argc, char* argv[]){
    ("q,headlessmode", "Hide the window of the game engine", cxxopts::value<bool>()->default_value("false"))
    ("j,extensions", "SO files to load", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
+   ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;        
 
   const auto result = cxxoption.parse(argc, argv);
+  auto runUnitTests = result["test-unit"].as<bool>();
+  if (runUnitTests){
+    auto returnVal = runTests();
+    exit(returnVal);
+  }
+
   bool dumpPhysics = result["dumpphysics"].as<bool>();
   bool headlessmode = result["headlessmode"].as<bool>();
   numChunkingGridCells = result["grid"].as<int>();
@@ -878,7 +886,7 @@ int main(int argc, char* argv[]){
     setGameObjectPosition,
     setGameObjectPositionRelative,
     getGameObjectRotation,
-    setGameObjectRotation,
+    setGameObjectRotationRelative,
     setFrontDelta,
     moveRelative,
     orientationFromPos,
