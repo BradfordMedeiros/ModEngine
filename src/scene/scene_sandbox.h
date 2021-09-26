@@ -30,6 +30,7 @@ struct GameObjectH {
 struct TransformCacheElement {
   Transformation transform;
   bool absTransformUpdated;
+  bool updated;
 };
 
 struct Scene {
@@ -80,8 +81,8 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid scene
 void traverseSandbox(SceneSandbox& sandbox, std::function<void(objid, glm::mat4, glm::mat4, LayerInfo&, std::string)> onObject);
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
-glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleton, objid sceneId);
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
+glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleton, objid sceneId);
 
 struct AddSceneDataValues {
   std::map<std::string, GameobjAttributes>  additionalFields;
@@ -120,7 +121,5 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
 
 void updateSandbox(SceneSandbox& sandbox);
-void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id);
-void removeObjectFromCache(Scene& mainScene, objid id);
 
 #endif 

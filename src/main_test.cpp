@@ -6,8 +6,8 @@ struct TestCase {
   func_t test;
 };
 
-void sampleTest(){
-
+void sampleTest(){ 
+  //throw std::logic_error("error loading buffer");
 }
 
 std::vector<TestCase> tests = { 
@@ -15,6 +15,20 @@ std::vector<TestCase> tests = {
     .name = "sample_test",
     .test = sampleTest,
   },
+  TestCase {
+    .name = "sandboxBasicDeserialization",
+    .test = sandboxBasicDeserialization,
+  },
+  TestCase {
+    .name = "sandboxParentPosition",
+    .test = sandboxParentPosition,
+  },
+  TestCase {
+    .name = "sandboxMakeParentPosition",
+    .test = sandboxMakeParentPosition,
+  },
+
+  
 };
 
 

@@ -1,5 +1,8 @@
 #include "./scene_sandbox.h"
 
+void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id);
+void removeObjectFromCache(Scene& mainScene, objid id);
+
 objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   assert(name == gameobjectObj.name);
   auto gameobjectH = GameObjectH { 
@@ -77,7 +80,6 @@ SceneDeserialization createSceneFromParsedContent(
 
   for (auto [name, gameobj] : serialGameAttrs){
     for (auto childName : gameobj.children){
-      std::cout << "child parenting not yet implemented" << std::endl;
       auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
       enforceParentRelationship(scene, scene.sceneToNameToId.at(sceneId).at(childName), parentId);
     }
@@ -469,7 +471,7 @@ void updateSandbox(SceneSandbox& sandbox){
     if (id == 0){
       continue;
     }
-    if (transform.absTransformUpdated){
+    if (transform.updated){
       dirtiedElements.insert(id);
     }
   }
@@ -484,11 +486,14 @@ void updateSandbox(SceneSandbox& sandbox){
       auto parentId = getGameObjectH(sandbox, id).parentId;
       if (!element.absTransformUpdated){
         if (parentId != -1){
+          std::cout << "updated: " << id << " because: " << parentId << " was updated" << std::endl;
           element.transform = calcAbsoluteTransform(sandbox, parentId, getGameObject(sandbox, id).transformation);
         }
       }
       getGameObject(sandbox, id).transformation = calcRelativeTransform(sandbox, id, parentId);
+      std::cout << "updated: " << id << " - " << print (getGameObject(sandbox, id).transformation.position) << std::endl;
       element.absTransformUpdated = false;
+      element.updated = false;
       alreadyUpdated.insert(id);
       return true;
     });
@@ -500,6 +505,7 @@ void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id
     mainScene.absoluteTransforms[id] = TransformCacheElement {
       .transform = getTransformationFromMatrix(model),
       .absTransformUpdated = false,
+      .updated = false,
     };
   });
 
@@ -512,6 +518,7 @@ void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation tra
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform =  transform,
     .absTransformUpdated = true,
+    .updated = true,
   };
 }
 
@@ -520,7 +527,8 @@ void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation tra
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, transform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .absTransformUpdated = true,
+    .absTransformUpdated = false,
+    .updated = true,
   };
 }
 
@@ -530,6 +538,7 @@ void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position)
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
     .absTransformUpdated = true,
+    .updated = true,
   };
 }
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
@@ -539,7 +548,8 @@ void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position)
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .absTransformUpdated = true,
+    .absTransformUpdated = false,
+    .updated = true,
   };
 }
 void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
@@ -548,6 +558,7 @@ void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
     .absTransformUpdated = true,
+    .updated = true,
   };
 }
 void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
@@ -557,7 +568,8 @@ void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .absTransformUpdated = true,
+    .absTransformUpdated = false,
+    .updated = true,
   };
 }
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
@@ -566,6 +578,7 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
     .absTransformUpdated = true,
+    .updated = true,
   };
 }
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
@@ -575,15 +588,17 @@ void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
     .transform = newTransform,
-    .absTransformUpdated = true,
+    .absTransformUpdated = false,
+    .updated = true,
   };
 }
 
 glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id){
   return matrixFromComponents(sandbox.mainScene.absoluteTransforms.at(id).transform);
 }
-
-
+Transformation fullTransformation(SceneSandbox& sandbox, objid id){
+  return getTransformationFromMatrix(fullModelTransform(sandbox, id));
+}
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
   auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
   assert(gameobj.has_value());
@@ -605,12 +620,8 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
   return groupToModel;
 }
 
-Transformation fullTransformation(SceneSandbox& sandbox, objid id){
-  return getTransformationFromMatrix(fullModelTransform(sandbox, id));
-}
 
 SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId){
-  std::cout << "INFO: Deserialization: " << std::endl;
   return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId);
 }
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData){
