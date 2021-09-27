@@ -4,3 +4,5 @@
 void sandboxBasicDeserialization();
 void sandboxParentPosition();
 void sandboxMakeParentPosition();
+void sandboxUpdateParentRelative();
+void sandboxUpdateParentAbsolute();

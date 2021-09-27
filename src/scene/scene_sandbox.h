@@ -27,10 +27,10 @@ struct GameObjectH {
   objid sceneId;
 };
 
+enum TransformUpdateType { UPDATE_NONE, UPDATE_ABSOLUTE, UPDATE_RECALC_RELATIVE };
 struct TransformCacheElement {
   Transformation transform;
-  bool absTransformUpdated;
-  bool updated;
+  TransformUpdateType updateType;
 };
 
 struct Scene {

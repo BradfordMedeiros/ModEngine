@@ -1,5 +1,10 @@
 #include "./scene_sandbox_test.h"
 
+// Should be able to update the pos of an element and get it instantaneously
+// parent pos take 1 frame (update sandbox) to update
+
+// but maybe this should check if a read for a child is dirty and then it could recalculate?
+
 bool aboutEqual(float one, float two){
   float delta = 0.00001f;
   return one > (two - delta) && one < (two + delta);
@@ -51,10 +56,51 @@ void sandboxMakeParentPosition(){
   }
 
   makeParent(sandbox, objectTwoId, objectOneId);
+  updateSandbox(sandbox);
 
   auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
   auto equalParented = aboutEqual(posObjectTwoParented.position, glm::vec3(6.f, 0.f, 0.f));
   if (!equalParented){
     throw std::logic_error(std::string("positions not equal: got ") + print(posObjectTwoParented.position));
   }
+}
+
+void sandboxUpdateParentRelative(){
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  std::string sceneWithChild = std::string("") + 
+  "object_one:position:-1 0 0\n" + 
+  "object_one:child:object_two\n" + 
+  "object_two:position:5 0 0\n";
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild);
+  auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
+  auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
+
+  updateRelativePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f));
+  updateSandbox(sandbox);
+
+  auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
+  auto equalParented = aboutEqual(posObjectTwoParented.position, glm::vec3(8.f, 1.f, 1.f));
+  if (!equalParented){
+    throw std::logic_error(std::string("positions not equal: got ") + print(posObjectTwoParented.position));
+  } 
+}
+
+void sandboxUpdateParentAbsolute(){
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  std::string sceneWithChild = std::string("") + 
+  "object_two:position:5 0 0\n" + 
+    "object_one:position:-1 0 0\n" + 
+  "object_one:child:object_two\n";
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild);
+  auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
+  auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
+
+  updateAbsolutePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f));
+  updateSandbox(sandbox);
+
+  auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
+  auto equalParented = aboutEqual(posObjectTwoParented.position, glm::vec3(8.f, 1.f, 1.f));
+  if (!equalParented){
+    throw std::logic_error(std::string("positions not equal: got ") + print(posObjectTwoParented.position));
+  } 
 }

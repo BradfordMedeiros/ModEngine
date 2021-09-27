@@ -22,6 +22,9 @@ std::vector<Token> parseFormat(std::string content) {
     std::vector<std::string> tokens = split(line, '#');
     if (tokens.size() > 0){
       auto lineCommentsStripped = tokens.at(0);
+      if (trim(lineCommentsStripped) == ""){
+        continue;
+      }
       auto parsedToken = parseToken(lineCommentsStripped);
       if (parsedToken.has_value()){
         dtokens.push_back(parsedToken.value());
