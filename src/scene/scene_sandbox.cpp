@@ -562,7 +562,7 @@ void updateAbsolutePosition(SceneSandbox& sandbox, objid id, glm::vec3 position)
 }
 void updateRelativePosition(SceneSandbox& sandbox, objid id, glm::vec3 position){
   auto parentId = getGameObjectH(sandbox, id).parentId;
-  Transformation oldRelativeTransform = fullTransformation(sandbox, id);
+  auto oldRelativeTransform = calcRelativeTransform(sandbox, id, parentId);
   oldRelativeTransform.position = position;
   getGameObject(sandbox, id).transformation = oldRelativeTransform;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
@@ -581,7 +581,7 @@ void updateAbsoluteScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
 }
 void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   auto parentId = getGameObjectH(sandbox, id).parentId;
-  Transformation oldRelativeTransform = fullTransformation(sandbox, id);
+  auto oldRelativeTransform = calcRelativeTransform(sandbox, id, parentId);
   oldRelativeTransform.scale = scale;
   getGameObject(sandbox, id).transformation = oldRelativeTransform;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
@@ -591,6 +591,7 @@ void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   };
 }
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
+  std::cout << "update absolute rotation " << getGameObject(sandbox, id).name << std::endl;
   Transformation newTransform = sandbox.mainScene.absoluteTransforms.at(id).transform;
   newTransform.rotation = rotation;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
@@ -600,7 +601,7 @@ void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation)
 }
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
   auto parentId = getGameObjectH(sandbox, id).parentId;
-  Transformation oldRelativeTransform = fullTransformation(sandbox, id);
+  auto oldRelativeTransform = calcRelativeTransform(sandbox, id, parentId);
   oldRelativeTransform.rotation = rotation;
   getGameObject(sandbox, id).transformation = oldRelativeTransform;
   auto newTransform = calcAbsoluteTransform(sandbox, parentId, oldRelativeTransform);
