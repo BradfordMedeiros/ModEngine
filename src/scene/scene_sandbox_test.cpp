@@ -5,14 +5,6 @@
 
 // but maybe this should check if a read for a child is dirty and then it could recalculate?
 
-bool aboutEqual(float one, float two){
-  float delta = 0.00001f;
-  return one > (two - delta) && one < (two + delta);
-}
-bool aboutEqual(glm::vec3 one, glm::vec3 two){
-  return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z);
-}
-
 void sandboxBasicDeserialization(){
   auto sandbox = createSceneSandbox({});
   std::string twoItemScene = std::string("") + 

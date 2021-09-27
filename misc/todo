@@ -1,12 +1,5 @@
-feature: framelimiting
-- make timeplayback stateless
-- ability to step frames independently 
 
-=> fix when get local position and update vs the new value in the cache
--> theory -> using old cached positions?
-====> but i don't think this should have a big effect, since this is relative to the parent?
-==> new theory: since relative updates set absolute location, this makes it like a final physics update
-This causes the parent not to update the childs position
+- move-relative forward vector wrong, why?
 
 * implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
 https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
@@ -32,7 +25,6 @@ third person toggle (just some basic character that can run around and stuff)
 - improve movement system  (very tunable)
   - maybe write custom controller and don't rely on the basic physics body stuff?
   - tilt
-
 
 ============== GOAL END OF SEPTEMBER ==================================
 Note: I don't think the movement has to feel perfect, or even that good yet
@@ -68,8 +60,9 @@ MODEL_LOADING/ANIMATION
 - initial model transform/rotation/scale (broken feature scenes) -> do I care?
 => model loading sets the coords slightly off, maybe scene sandbox issue?  too many conversion steps?  etc? 
 => parenting sandbox (querying can get out of data if using to read?)
-- animation interpolation
 - verify animation some
+- make timeplayback stateless
+- ability to set play speed, pause, etc time
 
 
 MISC/UNCATEGORIZED BUGS
@@ -77,14 +70,13 @@ MISC/UNCATEGORIZED BUGS
 bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this value be made something easy to understand?
 bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids
-bug: rotation is a 3 vec string attribute, should probably be a vec3 attribute
+bug: rotation is a 3 vec string attribute, should probably be a vec4 attribute
 bug: makeobjattr caused &jump-sound is outside of the scene (huh?)
 ==> what is the proper behavior?
 
 
 core loop:
-=====> cleanup core rendering code, think about how buffers are used, fix bloom etc
-=====> make all input events and state modifications happen after rendering, not during
+=====> make all input events and state modifications happen before rendering
 
 
 MISC IDEAS:
@@ -124,7 +116,6 @@ AI
     - of the detected goals, each goal is evaluated with some utility value fn(actor, distance, goal) => number
     - do the goal that has the highest utility
 
-
 SCENE SERIALIZATION
 =======================
 - merge serialize attr + getattr + include all attr
@@ -148,6 +139,12 @@ PERFORMANCE
 - textures -> always convert to abs path so doesn't reuse
 - culling
 
+RENDERING
+======================
+=====> cleanup core rendering code, think about how buffers are used, fix bloom etc
+- bloom doesn't do depth test correctly
+
+
 USABILITY
 =============
 - overlay files that can be combined into a scene -> a layer basically -
@@ -167,18 +164,10 @@ SEQUENCER
 
 SQL BUGS
 =================
-- sql "select movement-speed from traits limit x" -> returns 0 length
 - no way to escape strings 
 - create easy way to safely bind strings 
 select name, modelpath, fire-animation from guns where name = " gunname  ==> gunname should require quotes, but requires they have no quotes instead
-- no way to specify offset
 
-- empty last column sound seems to screw up 
-profile,speed,speed-air,jump-height,max-angleup,max-angledown,friction,restitution,gravity,mass,jump-sound,land-sound
-slow,0.1,0.1,16,-1.5,1,0.4,0,-40,1,../ModEngine/res/sounds/silenced-gunshot.wav,
-regular,0.8,0,30,-3.1415,3.1415,1,0,-20,2,,../ModEngine/res/sounds/silenced-gunshot.wav
-still,0,0,1000,-1.8,1.1,1,0,2,1,../ModEngine/res/sounds/silenced-gunshot.wav,../ModEngine/res/sounds/silenced-gunshot.wav
-reverse,-0.5,-0.5,10,-1.8,1.1,1,0,-9.81,1,../ModEngine/res/sounds/sample.wav,../ModEngine/res/sounds/silenced-gunshot.wav
 
 SCRIPTING
 ================
@@ -188,7 +177,8 @@ SCRIPTING
   -> scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
   -> bug: onMessage tries to remove itself from script, doesn't work
     guile: uncaught throw to wrong-type-arg: (set-current-module Wrong type argument in position ~A (expecting ~A): ~S (1 module (((((((Segmentation fault (core dumped)
-cleanup: combine set-state and send-notify
+
+
 - ability to auto reload script when notice a change (probably rate limit?)
 => way to globally address obj by name -> maybe <sceneid>:objname? ? 
 (set-scene-name "coolname")
@@ -202,8 +192,43 @@ MIGHT NOT BE BUGS BUT LOOKOUT FOR
 - make everything time independent
 - playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
 ====> eulerToQuat / serializeQuat has +/- PI...why?
+scenebox positioning and stuff like that
 
 
 BORDERLINE
 ==============
-if object is added but belongs to no layer, probably should have some warning? 
+- if object is added but belongs to no layer, probably should have some warning? 
+- could get input at fps independent of rendering (same for physics)
+
+
+COOL BUT NOT YET
+=================
+
+RENDERING
+========================
+deferred rendering mode
+render mode: visualize different values for deferred rendering 
+=> per layer?  Should still allow forward rendering eg for opacity
+ambient occulusion
+normal mapping
+pbr
+fix shadows
+depth of field
+
+
+PHYSICS
+=========
+ropes/chains
+joints
+buyancy
+etc
+
+WATER?
+========
+
+
+SANDBOX
+==============
+-addObjectToCache requires all elements to belong to a layer, if not exception
+
+-> ability to apply any texture as a final framebuffer (for eg, a hud that can have more stability...)

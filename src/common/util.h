@@ -112,4 +112,7 @@ struct GameobjAttributes {
 
 typedef void (*func_t)();
 
+bool aboutEqual(float one, float two);
+bool aboutEqual(glm::vec3 one, glm::vec3 two);
+
 #endif

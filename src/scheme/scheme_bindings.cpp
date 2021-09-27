@@ -550,6 +550,9 @@ SCM scmSlerp(SCM fromQuat, SCM toQuat, SCM amount){
   float famount = (float)scm_to_double(amount);
   return scmQuatToSCM(glm::slerp(scmListToQuat(fromQuat), scmListToQuat(toQuat), famount));
 }
+SCM scmInverseQuat(SCM quat){
+  return scmQuatToSCM(glm::inverse(scmListToQuat(quat)));
+}
 
 // Callbacks
 void onFrame(){
@@ -804,6 +807,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("lerp", 3, 0, 0, (void*)scmLerp);
   scm_c_define_gsubr("slerp", 3, 0, 0, (void*)scmSlerp);
+  scm_c_define_gsubr("invquat", 1, 0, 0, (void*)scmInverseQuat);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();

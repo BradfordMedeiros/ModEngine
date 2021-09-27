@@ -380,3 +380,11 @@ int numUniqueDepthLayers(std::vector<LayerInfo> layers){
   }
   return depths.size();
 }
+
+bool aboutEqual(float one, float two){
+  float delta = 0.00001f;
+  return one > (two - delta) && one < (two + delta);
+}
+bool aboutEqual(glm::vec3 one, glm::vec3 two){
+  return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z);
+}
