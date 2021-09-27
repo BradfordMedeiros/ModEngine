@@ -63,6 +63,13 @@ void sandboxMakeParentPosition(){
   if (!equalParented){
     throw std::logic_error(std::string("positions not equal: got ") + print(posObjectTwoParented.position));
   }
+
+  auto posObjectTwoLocal = getGameObject(sandbox, objectTwoId).transformation;
+  auto equalParentedLocal = aboutEqual(posObjectTwoLocal.position, glm::vec3(5.f, 0.f, 0.f));
+  if (!equalParentedLocal){
+    throw std::logic_error(std::string("local positions not equal: got ") + print(posObjectTwoLocal.position));
+  }
+
 }
 
 void sandboxUpdateParentRelative(){
@@ -100,6 +107,29 @@ void sandboxUpdateParentAbsolute(){
 
   auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
   auto equalParented = aboutEqual(posObjectTwoParented.position, glm::vec3(8.f, 1.f, 1.f));
+  if (!equalParented){
+    throw std::logic_error(std::string("positions not equal: got ") + print(posObjectTwoParented.position));
+  } 
+}
+
+
+void sandboxUpdateParentAndChildRelative(){
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  std::string sceneWithChild = std::string("") + 
+  "object_one:position:-1 0 0\n" + 
+  "object_one:child:object_two\n" + 
+  "object_two:position:5 0 0\n";
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild);
+  auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
+  auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
+
+  updateRelativePosition(sandbox, objectOneId, glm::vec3(3.f, 1.f, 1.f));
+  updateRelativePosition(sandbox, objectTwoId, glm::vec3(-4.f, -1.f, -1.f));
+
+  updateSandbox(sandbox);
+
+  auto posObjectTwoParented = fullTransformation(sandbox, objectTwoId);
+  auto equalParented = aboutEqual(posObjectTwoParented.position, glm::vec3(-1.f, 0.f, 0.f));
   if (!equalParented){
     throw std::logic_error(std::string("positions not equal: got ") + print(posObjectTwoParented.position));
   } 

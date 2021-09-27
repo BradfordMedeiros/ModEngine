@@ -35,7 +35,10 @@ std::vector<TestCase> tests = {
     .name = "sandboxUpdateParentAbsolute",
     .test = sandboxUpdateParentAbsolute,
   },
-
+  TestCase {
+    .name = "sandboxUpdateParentAndChildRelative",
+    .test = sandboxUpdateParentAndChildRelative,
+  }
   
 
   
