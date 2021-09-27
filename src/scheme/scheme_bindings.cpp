@@ -258,8 +258,13 @@ SCM scmSetFrontDelta(SCM orientation, SCM deltaYaw, SCM deltaPitch, SCM deltaRol
 }
 
 glm::vec3 (*_moveRelative)(glm::vec3 pos, glm::quat orientation, float distance);
+glm::vec3 (*_moveRelativeVec)(glm::vec3 pos, glm::quat orientation, glm::vec3 distance);
 SCM scmMoveRelative(SCM pos, SCM orientation, SCM distance){
-  return vec3ToScmList(_moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance)));
+  bool isNumber = scm_is_number(distance);
+  if (isNumber){
+    return vec3ToScmList(_moveRelative(listToVec3(pos), scmListToQuat(orientation), scm_to_double(distance)));
+  }
+  return vec3ToScmList(_moveRelativeVec(listToVec3(pos), scmListToQuat(orientation), listToVec3(distance)));
 }
 
 glm::quat (*_orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos);
@@ -832,6 +837,7 @@ void createStaticSchemeBindings(
   void (*setGameObjectRot)(int32_t index, glm::quat rotation),
   glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
+  glm::vec3 (*moveRelativeVec)(glm::vec3 pos, glm::quat orientation, glm::vec3 distance),
   glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
   std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
@@ -909,6 +915,7 @@ void createStaticSchemeBindings(
   
   _setFrontDelta = setFrontDelta;
   _moveRelative = moveRelative;
+  _moveRelativeVec = moveRelativeVec;
   _orientationFromPos = orientationFromPos;  
 
   _applyImpulse = applyImpulse;

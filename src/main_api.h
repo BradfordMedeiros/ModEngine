@@ -102,6 +102,7 @@ void saveRecording(objid recordingId, std::string filepath);
 
 std::vector<HitObject> raycastW(glm::vec3 pos, glm::quat direction, float maxDistance);
 glm::vec3 moveRelative(glm::vec3, glm::quat orientation, float distance);
+glm::vec3 moveRelative(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec);
 
 void nextTexture();
 void previousTexture();

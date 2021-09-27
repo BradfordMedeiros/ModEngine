@@ -1,3 +1,6 @@
+#ifndef MOD_SCENESANDBOX_TEST
+#define MOD_SCENESANDBOX_TEST
+
 #include <iostream>
 #include "./scene_sandbox.h"
 
@@ -7,3 +10,5 @@ void sandboxMakeParentPosition();
 void sandboxUpdateParentRelative();
 void sandboxUpdateParentAbsolute();
 void sandboxUpdateParentAndChildRelative();
+
+#endif

@@ -913,7 +913,7 @@ void applyPhysicsTranslation(World& world, objid index, float offsetX, float off
 }
 
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative){
-  std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
+  //std::cout << "physics rotate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativeRotation(world.sandbox, index, rotation);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
