@@ -133,8 +133,10 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
 }
 
 GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
+  //std::cout << "fields to attributes: " << std::endl;
   std::vector<Token> tokens;
   for (auto [attribute, payload] : fields){
+    //std::cout << "attribute: " << attribute << ", payload: " << payload << std::endl;
     tokens.push_back(Token {
       .target = "default",
       .attribute = attribute,

@@ -889,7 +889,7 @@ void setProperty(World& world, objid id, std::vector<Property>& properties){
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){
-  std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
+  //std::cout << "physics translate set: " << index << " relative: " << relative << std::endl;
   if (relative){
     updateRelativePosition(world.sandbox, index, pos);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){

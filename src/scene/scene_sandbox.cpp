@@ -591,7 +591,6 @@ void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale){
   };
 }
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation){
-  std::cout << "update absolute rotation " << getGameObject(sandbox, id).name << std::endl;
   Transformation newTransform = sandbox.mainScene.absoluteTransforms.at(id).transform;
   newTransform.rotation = rotation;
   sandbox.mainScene.absoluteTransforms.at(id) = TransformCacheElement {
