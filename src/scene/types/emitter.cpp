@@ -112,9 +112,6 @@ void updateEmitters(
   }
 
   for (auto &emitter : system.emitters){
-    if (!emitter.enabled && emitter.numForceNextRound == 0){
-      continue;
-    }
     if (emitter.currentParticles > 0 && (emitterTimeExpired(emitter, currentTime) || (emitter.currentParticles > emitter.targetParticles))){
       emitter.currentParticles-= 1;
 
