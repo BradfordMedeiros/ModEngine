@@ -3,15 +3,14 @@ platform:scale:100 1 100
 platform:position:0 -5 0
 
 +particles:position:0 2 0
-+particles:limit:20
-+particles:rate:0.3
-+particles:duration:2
++particles:limit:2
++particles:rate:5
++particles:duration:5
 
 +particles:+mesh:./res/models/box/box.obj
 +particles:+physics_type:dynamic
 +particles:+physics:enabled
-+particles:+physics_collision:nocollide
 +particles:+texture:../gameresources/textures/iguana.jpg
 +particles:+fragshader:./res/shaders/discard_lowintensity/fragment.glsl
 +particles:state:enabled
-+particles:script:./res/scenes/features/emitter-emit.scm
++particles:script:./res/scenes/features/objtypes/emitter-emit.scm
