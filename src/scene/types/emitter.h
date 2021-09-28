@@ -23,7 +23,6 @@ struct ActiveParticle {
 struct Emitter {
   std::string name;
   objid emitterNodeId;
-  float initTime;
   float lastSpawnTime;
   unsigned int targetParticles;
   unsigned int currentParticles;

@@ -17,7 +17,6 @@ void addEmitter(
   Emitter emitter {
     .name = name,
     .emitterNodeId = emitterNodeId,
-    .initTime = currentTime,
     .lastSpawnTime = currentTime,
     .targetParticles = targetParticles,
     .currentParticles = 0,
@@ -68,7 +67,7 @@ void removeEmitter(EmitterSystem& system, std::string name){
 }
 
 bool emitterTimeExpired(Emitter& emitter, float currentTime){
-  return (currentTime - emitter.lastSpawnTime) > emitter.lifetime;                  
+  return (currentTime - emitter.particles.front().spawntime) > emitter.lifetime;
 }
 bool shouldSpawnParticle(Emitter& emitter, float currentTime){
   auto countUnderTarget = emitter.currentParticles < emitter.targetParticles;
@@ -118,7 +117,6 @@ void updateEmitters(
     }
     if (emitter.currentParticles > 0 && emitterTimeExpired(emitter, currentTime)){
       emitter.currentParticles-= 1;
-      emitter.initTime = currentTime;
 
       if (emitter.particles.size() > 0){
         auto particleId = emitter.particles.front().id;
@@ -144,7 +142,7 @@ void updateEmitters(
         .id = particleId,
         .spawntime = currentTime,
       });
-      emitter.lastSpawnTime = emitter.lastSpawnTime + emitter.spawnrate;
+      emitter.lastSpawnTime = currentTime;
       std::cout << "INFO: particles: adding particle" << std::endl;
     }
   }
