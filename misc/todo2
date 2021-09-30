@@ -42,7 +42,6 @@ eventually:
 - better fonts
 - better voxel editing
 - long running "dormant" scripts (eg for a quest system, or to just set some attributes)
-- central store system for data (sql style system?)
 - decal system
   -> figure out proper normal on the surface
   -> be able to automatically despawn after time, or limit of them 

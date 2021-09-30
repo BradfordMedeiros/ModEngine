@@ -1,5 +1,6 @@
 - REPLACE $MAINOBJ TEMPLATE
 - after animation removed, need to restore defaults for the boneoffset matrixs
+- demo day/night cycle could be cool
 
 ==================================
 
@@ -139,6 +140,7 @@ SCENE SERIALIZATION
 
 INVERSE KINEMATICS/BONES AND PHYSICS
 ====================================
+=> incorrect exact sizing (correct shape, scale/position seems wrong?) => see ramp example
 => creates the way to do pinning / posing : <mainobjectname>/<rest_of_the_node>:position:5 5 5 (overrides the animation data)
 => attach physics objects to subobjects (via above mechanism) -> ragdolls
 => convex/exact hull kind of wrongish, sometimes hull would crash eh 
