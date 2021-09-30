@@ -545,7 +545,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
   setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(state.skyboxcolor));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(state.skyboxcolor));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 

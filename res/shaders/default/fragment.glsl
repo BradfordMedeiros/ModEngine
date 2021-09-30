@@ -48,7 +48,7 @@ void main(){
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
     if (hasCubemapTexture){
-      FragColor = texture(cubemapTexture, FragPos);
+      FragColor = vec4(tint.rgb, 1.0) * texture(cubemapTexture, FragPos);
       return;
     }
 

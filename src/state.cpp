@@ -33,12 +33,9 @@ std::vector<ObjectStateMapping> mapping = {
     .attr = [](engineState& state, AttributeValue value) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
       if (color != NULL){
-        //state.fogColor = *color; 
-        state.fogColor = glm::vec4(0, 1.0f, 0, 1.f);
-        return;
+        auto fogColor = *color;
+        state.fogColor = glm::vec4(fogColor.x, fogColor.y, fogColor.z, 1.0f); 
       }
-      //assert(false);
-      state.fogColor = glm::vec4(1.f, 0, 0, 1.f);
     },
     .object = "fog",
     .attribute = "color",
@@ -91,11 +88,6 @@ std::vector<ObjectStateMapping> mapping = {
         std::cout << "state: update skybox color: " << print(*skyboxColor) << std::endl;
         state.skyboxcolor = *skyboxColor; 
       }
-
-      auto skyboxStr = std::get_if<std::string>(&value);
-      std::cout << "not valid value!: " << (skyboxColor == NULL) << " - " <<  (skyboxStr == NULL) << std::endl;
-      std::cout << "value is: [" << *skyboxStr << "]" << std::endl;
-      assert(false);
     },
     .object = "skybox",
     .attribute = "color",
@@ -187,7 +179,7 @@ void setInitialState(engineState& state, std::string file){
     ObjectValue objValue {
       .object = token.target,
       .attribute = token.attribute,
-      .value = token.payload,
+      .value = parseAttributeValue(token.payload),
     };
     setState(state, objValue); 
   }

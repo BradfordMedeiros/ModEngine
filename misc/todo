@@ -1,30 +1,33 @@
+- REPLACE $MAINOBJ TEMPLATE
+- after animation removed, need to restore defaults for the boneoffset matrixs
 
-- move-relative forward vector wrong, why?
+==================================
 
-* implement: weapon sway (position, rotation -> use mouse movement to lerp to new angle/position, w/ limits)
-https://www.youtube.com/watch?v=hifCUD3dATs&t=819s
-https://www.youtube.com/watch?v=ibnNu7N22UM
-
+- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
+- translation move relative tests
+=> then make emitter particle from the gun 
 core gameplay implementation stage:
+
+
+(list 
+          (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
+        ;(list "+physics" "disabled")
+;        (list "+physics_type" "static")
+        ;(list "+physics_type" "dynamic")
+        ;(list "+physics_collision" "nocollide")
+        ;(list "+texture" "../gameresources/textures/iguana.jpg")
+        ;(list "+scale" "0.3 0.3 0.3")
+        ;(list "+lookat" parent-name)
+        ;(list "+layer" "no_depth")
+        ;(list "+fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
+        )
+        
+
+- emitter attrs all f'd up
 - emitter initial velocity 
 - gun system (very tunable) : projectile effect (on muzzle?)
-=> fix when get local position and update vs the new value in the cache
-
--> drift due to movement when parenting objects (worse when physics enabled, not sure if exists otherwise???? maybe...but not sure)
-==> is this true? important: bug: parenting doesn't work when physics are enabled
 * bullet hole decal/particle <-- should be done w/ emitter so that the emitter handles cleanup
 
-- get movement working 
-- get guns working
-- tilt thing for movement 
-
-==================
-GAME SPECIFIC
-==================
-third person toggle (just some basic character that can run around and stuff)
-- improve movement system  (very tunable)
-  - maybe write custom controller and don't rely on the basic physics body stuff?
-  - tilt
 
 ============== GOAL END OF SEPTEMBER ==================================
 Note: I don't think the movement has to feel perfect, or even that good yet
@@ -47,12 +50,22 @@ GO HAM ON THE EDITOR -> VOXELS + TERRAIN
   --> solve for pos = fn(obj_rel_to_solve, chunk_index_new, chunk_size_new) such that obj_rel_to_solve < chunk_size_new
   ====> i guess?
   
+============== GOAL END OF OCTOBER ==================================
+
+NOVEMBER 
+- basic enemy ai
+  => detect enemy
+  => engage enemy
+  => simple follow ai
+  => etc
+- messaging for enemies and take damage
+- navmesh generation based on voxel word (and generally?)
+
 
 ========================================================================
 MAKE WORK IN DOCKER BUILD!!! + AUTOMATED BUILDS ON CI 
 MAKE WORK ON WINDOWS!!!!
 ======================================================
-============== GOAL END OF OCTOBER ==================================
 
 
 MODEL_LOADING/ANIMATION
@@ -63,7 +76,7 @@ MODEL_LOADING/ANIMATION
 - verify animation some
 - make timeplayback stateless
 - ability to set play speed, pause, etc time
-
+- animation uses singular bone offsetmatrix to store values, this means can only play animation for one object
 
 MISC/UNCATEGORIZED BUGS
 ========================
@@ -121,6 +134,8 @@ SCENE SERIALIZATION
 - merge serialize attr + getattr + include all attr
 - attribute updating/serialization not kept in line
 - better way to include scene code/prefabs 
+- cannot attach arbitary attributes and get them back in gameobj-attr 
+- serialization -> getAttributeValue and addFieldDynamic should be combined
 
 INVERSE KINEMATICS/BONES AND PHYSICS
 ====================================
@@ -199,6 +214,7 @@ BORDERLINE
 ==============
 - if object is added but belongs to no layer, probably should have some warning? 
 - could get input at fps independent of rendering (same for physics)
+- emitter types for +values must be strings instead of native types
 
 
 COOL BUT NOT YET
@@ -232,3 +248,7 @@ SANDBOX
 -addObjectToCache requires all elements to belong to a layer, if not exception
 
 -> ability to apply any texture as a final framebuffer (for eg, a hud that can have more stability...)
+
+SOUND
+================
+- create silent option to just mute all sounds (or set volume?)

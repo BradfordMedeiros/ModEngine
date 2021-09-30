@@ -293,6 +293,7 @@ void applyAttributeDelta(GameObject& gameobj, std::string field, AttributeValue 
 // eg position 10
 // eg tint 0.9 0.2 0.4
 AttributeValue parsePropertySuffix(std::string key, std::string value){
+  std::cout << "TODO -> combine parse property suffix with getAttribute in serialization" << std::endl;
   if (key == "position" || key == "scale"){
     return parseVec(value);
   }

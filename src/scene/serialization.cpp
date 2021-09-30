@@ -84,6 +84,20 @@ bool addFields(GameobjAttributes& attributes, std::string attribute, std::string
   }
   return false;
 }
+
+AttributeValue parseAttributeValue(std::string payload){
+  glm::vec3 vec(0.f, 0.f, 0.f);
+  bool isVec = maybeParseVec(payload, vec);
+  if (isVec){
+    return vec;
+  }
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(payload, number);
+  if (isFloat){
+    return number;
+  } 
+  return payload;
+}
 void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
   glm::vec3 vec(0.f, 0.f, 0.f);
   bool isVec = maybeParseVec(payload, vec);
