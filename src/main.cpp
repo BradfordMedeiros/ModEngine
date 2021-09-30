@@ -940,9 +940,6 @@ int main(int argc, char* argv[]){
     netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
   }
 
-  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
-  }
 
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
@@ -990,7 +987,9 @@ int main(int argc, char* argv[]){
     defaultMeshesToLoad
   );
   setInitialState(state, "./res/world.state"); 
-
+  for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
+    loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
+  }
 
   bool fpsFixed = result["fps-fixed"].as<bool>();
   initialTime = fpsFixed  ? 0 : glfwGetTime();
