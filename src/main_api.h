@@ -124,7 +124,7 @@ struct VoxelQueryData {
 };
 std::vector<VoxelQueryData> getSelectedVoxels();
 
-void scmEmit(objid id);
+void scmEmit(objid id, glm::vec3* initPosition, glm::quat* initOrientation);
 
 objid addLoadingAround(objid id);
 void removeLoadingAround(objid id);

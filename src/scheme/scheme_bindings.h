@@ -66,7 +66,7 @@ void createStaticSchemeBindings(
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
-  void (*scmEmit)(objid),
+  void (*scmEmit)(objid, glm::vec3*, glm::quat*),
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),

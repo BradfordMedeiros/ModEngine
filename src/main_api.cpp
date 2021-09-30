@@ -432,8 +432,8 @@ unsigned int activeTextureId(){
   return world.textures.at(activeTextureName(drawParams, world.textures)).texture.textureId;
 }
 
-void scmEmit(objid id){
-  emit(world, id);
+void scmEmit(objid id, glm::vec3* initPosition, glm::quat* initOrientation){
+  emit(world, id, NULL, NULL);
 }
 
 objid addLoadingAround(objid id){

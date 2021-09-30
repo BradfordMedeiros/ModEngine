@@ -145,7 +145,7 @@ void updateEmitters(
   }
 }
 
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId){
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation){
   std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){

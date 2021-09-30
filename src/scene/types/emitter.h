@@ -48,7 +48,7 @@ void updateEmitters(
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId);
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation);
 void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled);
 
 #endif
