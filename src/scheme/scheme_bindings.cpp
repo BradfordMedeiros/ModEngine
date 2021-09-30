@@ -505,12 +505,6 @@ SCM scmGenerateMesh(SCM face, SCM points, SCM meshname){
   return SCM_UNSPECIFIED;
 }
 
-void (*_setSkybox)(std::string);
-SCM scmSetSkybox(SCM skybox){
-  _setSkybox(scm_to_locale_string(skybox));
-  return SCM_UNSPECIFIED;
-}
-
 std::map<std::string, std::string> (*_getArgs)();
 SCM scmArgs(SCM argKey){
   auto args = _getArgs();
@@ -572,6 +566,21 @@ void onCollisionExit(int32_t obj1){
     scm_call_1(func_symbol, createGameObject(obj1));
   }
 }
+void onGlobalCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos, glm::vec3 normal, glm::vec3 oppositeNormal){
+  const char* function = "onGlobalCollideEnter";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_5(func_symbol, createGameObject(obj1), createGameObject(obj2), vec3ToScmList(contactPos), vec3ToScmList(normal), vec3ToScmList(oppositeNormal));
+  }
+}
+void onGlobalCollisionExit(int32_t obj1, int32_t obj2){
+  const char* function = "onGlobalCollideExit";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_2(func_symbol, createGameObject(obj1), createGameObject(obj2));
+  }
+}
+
 void onMouseCallback(int button, int action, int mods){
   const char* function = "onMouse";
   if (symbolDefined(function)){
@@ -798,7 +807,6 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("rm-load-around", 1, 0, 0, (void*)scmRmLoadAround);
 
   scm_c_define_gsubr("genmesh", 3, 0, 0, (void*)scmGenerateMesh);
-  scm_c_define_gsubr("set-skybox", 1, 0, 0, (void*)scmSetSkybox);
 
   scm_c_define_gsubr("args", 1, 0, 0, (void*)scmArgs);
   scm_c_define_gsubr("lock", 1, 0, 0, (void*)scmLock);
@@ -877,7 +885,6 @@ void createStaticSchemeBindings(
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
-  void (*setSkybox)(std::string),
   std::map<std::string, std::string> (*getArgs)(),
   bool (*lock)(std::string, objid),
   bool (*unlock)(std::string, objid),
@@ -969,7 +976,6 @@ void createStaticSchemeBindings(
   _rmLoadAround = rmLoadAround;
   _generateMesh = generateMesh;
 
-  _setSkybox = setSkybox;
   _getArgs = getArgs;
   _lock = lock;
   _unlock = unlock;

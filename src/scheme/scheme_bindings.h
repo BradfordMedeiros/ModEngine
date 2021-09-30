@@ -70,7 +70,6 @@ void createStaticSchemeBindings(
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
-  void (*setSkybox)(std::string),
   std::map<std::string, std::string> (*getArgs)(),
   bool (*lock)(std::string, objid),
   bool (*unlock)(std::string, objid),
@@ -84,6 +83,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript);
 void onFrame();
 void onCollisionEnter(int32_t obj1, glm::vec3 contactPos, glm::vec3 normal);
 void onCollisionExit(int32_t obj1);
+void onGlobalCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos, glm::vec3 normal, glm::vec3 oppositeNormal);
+void onGlobalCollisionExit(int32_t obj1, int32_t obj2);
 void onMouseCallback(int button, int action, int mods);
 void onMouseMoveCallback(double xPos, double yPos);
 void onScrollCallback(double amount);

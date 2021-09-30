@@ -1,8 +1,12 @@
 
-#fog:value:10
-#fog:color:10 10 10 
+fog:color:10 0 0
+fog:enabled:true
 
 diffuse:enabled:true
 specular:enabled:true
 bloom:enabled:false
+
+
+skybox:texture:./res/textures/skyboxs/desert/
+#skybox:color:0 0 1
 

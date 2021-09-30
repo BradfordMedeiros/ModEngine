@@ -545,6 +545,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
   setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(state.skyboxcolor));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
@@ -712,7 +713,6 @@ int main(int argc, char* argv[]){
   extensionsInit(extensions, currentModuleId, getArgs);
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
-  setInitialState(state, "./res/world.state"); 
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
@@ -925,7 +925,6 @@ int main(int argc, char* argv[]){
     addLoadingAround,
     removeLoadingAround,
     createGeneratedMesh,
-    setSkybox,
     getArgs,
     lock,
     unlock,
@@ -990,6 +989,8 @@ int main(int argc, char* argv[]){
     interface,
     defaultMeshesToLoad
   );
+  setInitialState(state, "./res/world.state"); 
+
 
   bool fpsFixed = result["fps-fixed"].as<bool>();
   initialTime = fpsFixed  ? 0 : glfwGetTime();
@@ -1355,7 +1356,7 @@ int main(int argc, char* argv[]){
     glUniform1f(glGetUniformLocation(finalProgram, "near"), 0.1);
     glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
     glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);
-    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 1.0f);
+    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 1.1f);
 
     glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);
     glUniform1i(glGetUniformLocation(finalProgram, "bloomTexture"), 1);

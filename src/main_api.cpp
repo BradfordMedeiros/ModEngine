@@ -469,10 +469,6 @@ std::vector<VoxelQueryData> getSelectedVoxels(){
   return voxels;
 }
 
-void setSkybox(std::string skybox){
-  loadSkybox(world, skybox); 
-}
-
 bool lock(std::string key, objid owner){
   std::cout << "lock: (" << key << ", " << owner << ")" << std::endl;
   auto canLock = activeLocks.find(key) == activeLocks.end();

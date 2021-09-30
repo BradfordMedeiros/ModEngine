@@ -57,7 +57,7 @@ void main(){
   
     vec2 adjustedTexCoord = mod(offsetTexCoord * textureTiling, 1) * textureSize + textureOffset;
 
-    vec4 diffuseColor = hasDiffuseTexture ? texture(maintexture, adjustedTexCoord) : vec4(0, 0, 1, 1);
+    vec4 diffuseColor = hasDiffuseTexture ? texture(maintexture, adjustedTexCoord) : vec4(1, 1, 1, 1);
     float closestDepth = texture(lightDepthTexture, shadowCoord.xy).r;
 
     vec4 emissionColor = texture(emissionTexture, adjustedTexCoord);

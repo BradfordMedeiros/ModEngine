@@ -1,5 +1,7 @@
 #include "./state.h"
 
+extern World world;
+
 struct ObjectStateMapping {
   std::function<void(engineState& state, AttributeValue)> attr;
   std::string object;
@@ -31,8 +33,12 @@ std::vector<ObjectStateMapping> mapping = {
     .attr = [](engineState& state, AttributeValue value) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
       if (color != NULL){
-        state.fogColor = *color; 
+        //state.fogColor = *color; 
+        state.fogColor = glm::vec4(0, 1.0f, 0, 1.f);
+        return;
       }
+      //assert(false);
+      state.fogColor = glm::vec4(1.f, 0, 0, 1.f);
     },
     .object = "fog",
     .attribute = "color",
@@ -66,6 +72,33 @@ std::vector<ObjectStateMapping> mapping = {
     },
     .object = "bloom",
     .attribute = "amount",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto skyboxTexture = std::get_if<std::string>(&value);
+      if (skyboxTexture != NULL){
+        std::cout << "state: update skybox: " << *skyboxTexture << std::endl;
+        loadSkybox(world, *skyboxTexture); 
+      }     
+    },
+    .object = "skybox",
+    .attribute = "texture",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto skyboxColor = std::get_if<glm::vec3>(&value);
+      if (skyboxColor != NULL){
+        std::cout << "state: update skybox color: " << print(*skyboxColor) << std::endl;
+        state.skyboxcolor = *skyboxColor; 
+      }
+
+      auto skyboxStr = std::get_if<std::string>(&value);
+      std::cout << "not valid value!: " << (skyboxColor == NULL) << " - " <<  (skyboxStr == NULL) << std::endl;
+      std::cout << "value is: [" << *skyboxStr << "]" << std::endl;
+      assert(false);
+    },
+    .object = "skybox",
+    .attribute = "color",
   },
 };
 
@@ -124,7 +157,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.enableBloom = false, 
   	.bloomAmount = 1.f,   
     .enableFog = true,  
-    .fogColor = glm::vec3(0.f, 0.f, 0.f), 
+    .fogColor = glm::vec4(0.f, 0.f, 0.f, 1.f), 
   	.takeScreenshot = false,
     .highlight = true,
     .multiselect = false,
@@ -142,6 +175,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .groupSelection = true,
     .pauseWorldTiming = false,
     .activeCameraObj = NULL,
+    .skybox = "",
+    .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
 	};
 	return state;
 }

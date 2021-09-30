@@ -238,8 +238,10 @@ Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string 
   assert(data.meshIdToMeshData.size() == 1);
   MeshData meshData = data.meshIdToMeshData.begin() -> second;
   Mesh mesh = loadMesh(defaultTexture, meshData, ensureLoadTexture);
-  mesh.hasCubemapTexture = true;
-  mesh.cubemapTexture = ensureLoadCubemapTexture(skyboxTexture);
+  mesh.hasCubemapTexture = skyboxTexture != "";
+  if (skyboxTexture != ""){
+    mesh.cubemapTexture = ensureLoadCubemapTexture(skyboxTexture);
+  }
   return mesh;
 }
 

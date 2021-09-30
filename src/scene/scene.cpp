@@ -459,7 +459,7 @@ World createWorld(
     addMesh(world, meshname);
   }
 
-  loadSkybox(world, "./res/textures/skyboxs/desert/"); 
+  loadSkybox(world, ""); 
 
   std::vector<glm::vec3> face = {
     glm::vec4(0.f, 0.f, 0.f, 1.f),

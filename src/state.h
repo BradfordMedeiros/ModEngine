@@ -3,9 +3,9 @@
 
 #include <string>
 #include <functional>
-#include "./scene/scene_sandbox.h"
 #include "./common/util.h"
 #include "./easyuse/editor.h"
+#include "./scene/scene.h"
 
 enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM };
 
@@ -49,7 +49,7 @@ struct engineState {
   bool enableBloom;
   float bloomAmount;
   bool enableFog;
-  glm::vec3 fogColor;
+  glm::vec4 fogColor;
 
   bool takeScreenshot;
   bool highlight;
@@ -70,6 +70,9 @@ struct engineState {
   bool groupSelection;
   bool pauseWorldTiming;
   GameObject* activeCameraObj;
+
+  std::string skybox;
+  glm::vec3 skyboxcolor;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
