@@ -1016,9 +1016,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updateEmitters(
     world.emitters, 
     timeElapsed, 
-    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId) -> objid {      
+    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-      attributes.vecAttributes["position"] = fullTransformation(world.sandbox, emitterNodeId).position;
+      attributes.vecAttributes["position"] = initPosition != NULL ?  *initPosition : fullTransformation(world.sandbox, emitterNodeId).position;
       objid objectAdded = addObjectToScene(
         world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
       );

@@ -25,7 +25,7 @@ void addEmitter(
     .particleAttributes = particleAttributes,
     .deltas =  deltas,
     .enabled = enabled,
-    .numForceNextRound = 0,
+    .forceParticles = {},
   };
   system.emitters.push_back(emitter);
 }
@@ -88,7 +88,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId)> addParticle, 
+  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -125,16 +125,25 @@ void updateEmitters(
   }
 
   for (auto &emitter : system.emitters){
-    if (!emitter.enabled && emitter.numForceNextRound == 0){
+    if (!emitter.enabled && emitter.forceParticles.size() == 0){
       continue;
     }
-    bool forceSpawn = emitter.numForceNextRound > 0;
+    bool forceSpawn = emitter.forceParticles.size() > 0;
     if (shouldSpawnParticle(emitter, currentTime) || forceSpawn){
+      glm::vec3* position = NULL;
+      glm::quat* rotation = NULL;
       if (forceSpawn){
-        emitter.numForceNextRound-= 1;
+        auto emitterConfig = emitter.forceParticles.front();
+        if(emitterConfig.position.has_value()){
+          position = &emitterConfig.position.value();
+        }
+        if (emitterConfig.orientation.has_value()){
+          rotation = &emitterConfig.orientation.value();
+        }
+        emitter.forceParticles.pop_front();
       }
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId);
+      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, position, rotation);
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,
         .spawntime = currentTime,
@@ -149,7 +158,10 @@ void emitNewParticle(EmitterSystem& system, objid emitterNodeId, glm::vec3* init
   std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){
-      emitter.numForceNextRound++;
+      emitter.forceParticles.push_back(EmitterConfig{
+        .position = initPosition == NULL ? std::nullopt : std::optional(*initPosition),
+        .orientation = initOrientation == NULL ? std::nullopt : std::optional(*initOrientation),
+      });
       return;
     }
   }

@@ -150,7 +150,7 @@ WorldTiming timings;
 TimePlayback timePlayback(
   initialTime, 
   [](float currentTime, float elapsedTime) -> void {
-    tickAnimations(timings, elapsedTime);
+    tickAnimations(world, timings, elapsedTime);
   }, 
   []() -> void {}
 ); 

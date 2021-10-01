@@ -5,6 +5,7 @@
 #include <queue>
 #include <iostream>
 #include <functional>
+#include <optional>
 #include <map>
 #include "../../common/util.h"
 #include "../common/util/types.h"
@@ -20,6 +21,11 @@ struct ActiveParticle {
   objid id;
   float spawntime;
 };
+
+struct EmitterConfig {
+  std::optional<glm::vec3> position;
+  std::optional<glm::quat> orientation;
+};
 struct Emitter {
   std::string name;
   objid emitterNodeId;
@@ -33,7 +39,7 @@ struct Emitter {
   std::vector<EmitterDelta> deltas;
 
   bool enabled;
-  int numForceNextRound;
+  std::deque<EmitterConfig> forceParticles;
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
@@ -44,7 +50,7 @@ void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string, GameobjAttributes, objid)> addParticle, 
+  std::function<objid(std::string, GameobjAttributes, objid, glm::vec3*, glm::quat*)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );

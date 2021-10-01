@@ -433,7 +433,7 @@ unsigned int activeTextureId(){
 }
 
 void scmEmit(objid id, glm::vec3* initPosition, glm::quat* initOrientation){
-  emit(world, id, NULL, NULL);
+  emit(world, id, initPosition, initOrientation);
 }
 
 objid addLoadingAround(objid id){
