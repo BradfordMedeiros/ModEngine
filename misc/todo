@@ -1,33 +1,35 @@
-- REPLACE $MAINOBJ TEMPLATE
-- after animation removed, need to restore defaults for the boneoffset matrixs
-- demo day/night cycle could be cool
+- (parse-attr "30 1 0")
+===> bug: hit raycast is wrong
 
-==================================
 
-- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
-- translation move relative tests
-=> then make emitter particle from the gun 
+* scale the guns to something reasonable, then polish up some guns
+
+
 core gameplay implementation stage:
 
-
 (list 
-          (list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
-        ;(list "+physics" "disabled")
-;        (list "+physics_type" "static")
-        ;(list "+physics_type" "dynamic")
-        ;(list "+physics_collision" "nocollide")
-        ;(list "+texture" "../gameresources/textures/iguana.jpg")
-        ;(list "+scale" "0.3 0.3 0.3")
-        ;(list "+lookat" parent-name)
-        ;(list "+layer" "no_depth")
-        ;(list "+fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
-        )
+  ;(list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
+  ;(list "+physics" "disabled")
+  ;(list "+physics_type" "static")
+  ;(list "+physics_type" "dynamic")
+  ;(list "+physics_collision" "nocollide")
+  ;(list "+texture" "../gameresources/textures/iguana.jpg")
+  ;(list "+scale" "0.3 0.3 0.3")
+  ;(list "+lookat" parent-name)
+  ;(list "+layer" "no_depth")
+  ;(list "+fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
+)
         
+
+==================================
 
 - emitter attrs all f'd up
 - emitter initial velocity 
 - gun system (very tunable) : projectile effect (on muzzle?)
-* bullet hole decal/particle <-- should be done w/ emitter so that the emitter handles cleanup
+- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
+- translation move relative tests
+=> incorrect exact sizing (correct shape, scale/position seems wrong?) => see ramp example
+
 
 
 ============== GOAL END OF SEPTEMBER ==================================
@@ -140,7 +142,6 @@ SCENE SERIALIZATION
 
 INVERSE KINEMATICS/BONES AND PHYSICS
 ====================================
-=> incorrect exact sizing (correct shape, scale/position seems wrong?) => see ramp example
 => creates the way to do pinning / posing : <mainobjectname>/<rest_of_the_node>:position:5 5 5 (overrides the animation data)
 => attach physics objects to subobjects (via above mechanism) -> ragdolls
 => convex/exact hull kind of wrongish, sometimes hull would crash eh 
@@ -254,3 +255,8 @@ SANDBOX
 SOUND
 ================
 - create silent option to just mute all sounds (or set volume?)
+
+OTHER
+=============
+PLAY VS EDIT MODES IN EDITOR? 
+==> what does this really mean? 

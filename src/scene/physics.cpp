@@ -105,7 +105,7 @@ btRigidBody* createRigidBodyExact(physicsEnv& env, std::vector<glm::vec3>& verts
   for (int i = 0; i < verts.size(); i+=3){
     trimesh -> addTriangle(glmToBt(verts.at(i)), glmToBt(verts.at(i + 1)), glmToBt(verts.at(i + 2)));
   }
-  btConvexTriangleMeshShape* shape = new btConvexTriangleMeshShape(trimesh);
+  btTriangleMeshShape* shape = new btBvhTriangleMeshShape(trimesh, true);  
   return createRigidBody(pos, shape, rot, isStatic, hasCollision, scaling, opts);
 }
 
