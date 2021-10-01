@@ -19,7 +19,7 @@ struct WorldTiming {
 };
 
 WorldTiming createWorldTiming(float initialTime);
-void tickAnimations(WorldTiming& timings, float elapsedTime);
+void tickAnimations(World& world, WorldTiming& timings, float elapsedTime);
 void updateBonePose(World& world, objid id);
 void addAnimation(World& world, WorldTiming& timings, objid id, std::string animationToPlay);
 void removeAnimation(World& world, WorldTiming& timings, objid id);

@@ -12,12 +12,26 @@ WorldTiming createWorldTiming(float initialTime){
   return timing;
 }
 
-void tickAnimations(WorldTiming& timings, float elapsedTime){
+void resetMeshBones(World& world, objid groupId){
+  auto meshNameToMeshes = getMeshesForGroupId(world, groupId);  
+  for (int i = 0; i <  meshNameToMeshes.meshes.size(); i++){
+    Mesh& mesh = meshNameToMeshes.meshes.at(i);
+    for (Bone& bone : mesh.bones){
+      bone.offsetMatrix = glm::mat4(1.f);
+    }
+  }
+}
+
+bool resetInitialPose = true;
+void tickAnimations(World& world, WorldTiming& timings, float elapsedTime){
   //std::cout << "num active playbacks: " << timings.animations.playbacks.size() << std::endl;
   for (auto &[id, playback] : timings.animations.playbacks){
     playback.setElapsedTime(elapsedTime);
   }
   for (auto groupId : timings.playbacksToRemove){
+    if (resetInitialPose && idExists(world.sandbox, groupId)){
+      resetMeshBones(world, groupId);
+    }
     timings.animations.playbacks.erase(groupId);
   }
   timings.playbacksToRemove.clear();
