@@ -1,36 +1,27 @@
-- (parse-attr "30 1 0")
+fixed:
+1. bug where try to remove already removed emitters since was child of removed element
+2. fix emitter attr parsing - parse-attr - kind of unsatisfied w/ this 
+
+
+todo:
+
+- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
+- translation move relative tests
+procedural recoil?
+
 ===> bug: hit raycast is wrong
+
+==================================
+
 
 
 * scale the guns to something reasonable, then polish up some guns
-
-
-core gameplay implementation stage:
-
-(list 
-  ;(list "+mesh" "../gameresources/build/primitives/plane_xy_1x1.gltf")
-  ;(list "+physics" "disabled")
-  ;(list "+physics_type" "static")
-  ;(list "+physics_type" "dynamic")
-  ;(list "+physics_collision" "nocollide")
-  ;(list "+texture" "../gameresources/textures/iguana.jpg")
-  ;(list "+scale" "0.3 0.3 0.3")
-  ;(list "+lookat" parent-name)
-  ;(list "+layer" "no_depth")
-  ;(list "+fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
-)
-        
-
-==================================
+>>> core gameplay implementation stage:
 
 - emitter attrs all f'd up
 - emitter initial velocity 
 - gun system (very tunable) : projectile effect (on muzzle?)
-- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
-- translation move relative tests
-=> incorrect exact sizing (correct shape, scale/position seems wrong?) => see ramp example
-
-
+- inter rotation
 
 ============== GOAL END OF SEPTEMBER ==================================
 Note: I don't think the movement has to feel perfect, or even that good yet

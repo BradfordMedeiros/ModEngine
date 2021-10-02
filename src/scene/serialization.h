@@ -28,6 +28,5 @@ GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields);
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
 bool isIdentityVec(glm::vec3 scale);
-AttributeValue parseAttributeValue(std::string payload);
 
 #endif

@@ -141,6 +141,23 @@ AttributeValue toAttributeValue(SCM attrValue){
   }
   return listToVec3(attrValue);
 }
+SCM fromAttributeValue(AttributeValue& value){
+  auto vecValue = std::get_if<glm::vec3>(&value);
+  if (vecValue != NULL){
+    return vec3ToScmList(*vecValue);
+  }
+  auto floatValue = std::get_if<float>(&value);
+  if (floatValue != NULL){
+    return scm_from_double(*floatValue);
+  }
+  auto strValue = std::get_if<std::string>(&value);
+  if (strValue != NULL){
+    return scm_from_locale_string(strValue -> c_str());
+  }
+  assert(false);
+  return SCM_UNSPECIFIED;
+}
+
 ObjectValue scmListToObjectValue(SCM list){
   auto listLength = toUnsignedInt(scm_length(list));
   assert(listLength == 3);

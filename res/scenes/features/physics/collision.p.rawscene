@@ -9,5 +9,6 @@ platform:physics:enabled
 
 
 box:physics:enabled
-box:position:0 0 0
+box:position:0 5 0
 box:physics_type:dynamic
+box:mesh:./res/models/box/box.obj

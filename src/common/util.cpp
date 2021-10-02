@@ -328,6 +328,20 @@ std::string getUniqueObjectName(){
   return std::string("name(") + std::to_string(getUniqueObjId()) + ")";
 }
 
+AttributeValue parseAttributeValue(std::string payload){
+  glm::vec3 vec(0.f, 0.f, 0.f);
+  bool isVec = maybeParseVec(payload, vec);
+  if (isVec){
+    return vec;
+  }
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(payload, number);
+  if (isFloat){
+    return number;
+  } 
+  return payload;
+}
+
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
   assert(percentage <= 1.f && percentage >= 0.f);
   auto attr1 = std::get_if<glm::vec3>(&key1);

@@ -8,5 +8,6 @@ platform:position:0 -5 0
 +particles:duration:2
 
 +particles:+mesh:./res/models/box/box.obj
-+particles:!position:0.01 0 0
-+particles:?position:0 0.01 0
+#+particles:!scale:0.1 0 0
++particles:?position:0 1 0
+#+particles:physics_type:dynamic

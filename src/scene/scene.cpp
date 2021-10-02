@@ -756,8 +756,8 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   freeAnimationsForOwner(world, objectId);
 }
 
-// this needs to also delete all children objects. 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
+  std::cout << "removing object: " << objectId << objectId << " " << getGameObject(world, objectId).name << std::endl;
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
     if (!idExists(world.sandbox, gameobjId)){
       continue;

@@ -21,6 +21,7 @@ bool symbolDefinedInModule(const char* symbol, SCM module);
 bool symbolDefined(const char* symbol);
 void maybeCallFunc(const char* function);
 void maybeCallFuncString(const char* function, const char* payload);
+SCM fromAttributeValue(AttributeValue& value);
 GameobjAttributes scmToAttributes(SCM scmAttributes);
 ObjectValue scmListToObjectValue(SCM list);
 

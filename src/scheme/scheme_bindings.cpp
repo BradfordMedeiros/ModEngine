@@ -559,6 +559,11 @@ SCM scmInverseQuat(SCM quat){
   return scmQuatToSCM(glm::inverse(scmListToQuat(quat)));
 }
 
+SCM scmParseAttr(SCM attrString){
+  auto attrValue = parseAttributeValue(scm_to_locale_string(attrString));
+  return fromAttributeValue(attrValue);
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -827,6 +832,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lerp", 3, 0, 0, (void*)scmLerp);
   scm_c_define_gsubr("slerp", 3, 0, 0, (void*)scmSlerp);
   scm_c_define_gsubr("invquat", 1, 0, 0, (void*)scmInverseQuat);
+
+  scm_c_define_gsubr("parse-attr", 1, 0, 0, (void*)scmParseAttr);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();

@@ -64,6 +64,7 @@ objid getUniqueObjId();
 std::string getUniqueObjectName();
 
 typedef std::variant<glm::vec3, std::string, float> AttributeValue;
+AttributeValue parseAttributeValue(std::string payload);
 
 struct StringString {
   std::string strTopic;
