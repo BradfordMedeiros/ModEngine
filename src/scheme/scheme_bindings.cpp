@@ -108,7 +108,7 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize){
   return SCM_UNSPECIFIED;
 }
 
-int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline);
+int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner);
 SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline){
   auto permalineDefined = !scm_is_eq(permaline, SCM_UNDEFINED);
   auto isPermaline = false;
@@ -116,12 +116,13 @@ SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline){
     isPermaline = scm_to_bool(permaline);
   }
 
-  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline);
+  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0);
   return scm_from_int32(lineId);
 }
 void (*_freeLine)(int32_t lineid);
 SCM scmFreeLine(SCM lineid){
   _freeLine(scm_to_int32(lineid));
+  return SCM_UNSPECIFIED;
 }
 
 
@@ -868,7 +869,7 @@ void createStaticSchemeBindings(
 	std::vector<int32_t> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(int32_t cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
-  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline),
+  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),
   GameobjAttributes getGameObjectAttr(int32_t id),

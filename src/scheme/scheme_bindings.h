@@ -23,7 +23,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByType)(std::string),
   void (*setActiveCamera)(int32_t cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
-  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline),
+  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),
   GameobjAttributes getGameObjectAttr(int32_t id),

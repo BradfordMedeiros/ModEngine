@@ -68,7 +68,13 @@ int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing cert
 DynamicLoading dynamicLoading;
 std::vector<Line> lines;
 std::vector<Line> bluelines;
-std::vector<Line> permaLines;
+
+struct PermaLine {
+  Line line;
+  objid lineid;
+  objid owner;
+};
+std::vector<PermaLine> permaLines;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
@@ -293,13 +299,20 @@ void loadAllTextures(){
   }
 }
 
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline){
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
   if (permaline){
-    permaLines.push_back(Line{
-      .fromPos = fromPos,
-      .toPos = toPos,
-    });    
-    return 0;
+    auto lineId = getUniqueObjId();
+    permaLines.push_back(
+      PermaLine {
+        .line = Line{
+          .fromPos = fromPos,
+          .toPos = toPos,
+        },
+        .lineid = lineId,
+        .owner = owner, 
+      }
+    );   
+    return lineId;
   }
   Line line = {
     .fromPos = fromPos,
@@ -309,7 +322,22 @@ objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline){
   return 0;
 }
 void freeLine(objid lineId){
-  std::cout << "free line placeholder" << std::endl;
+  std::vector<PermaLine> newLines;
+  for (auto &line : permaLines){
+    if (lineId != line.lineid){
+      newLines.push_back(line);
+    }
+  }
+  permaLines = newLines;
+}
+void removePermalines(objid owner){
+  std::vector<PermaLine> newLines;
+  for (auto &line : permaLines){
+    if (owner != line.owner){
+      newLines.push_back(line);
+    }
+  }
+  permaLines = newLines;  
 }
 
 std::vector<glm::vec3> traversalPositions;
@@ -326,7 +354,7 @@ void drawTraversalPositions(){
   for (int i = 0; i < traversalPositions.size(); i++){
     auto fromPos = traversalPositions.at(i);
     auto toPos = parentTraversalPositions.at(i);
-    addLineNextCycle(fromPos, toPos, false);
+    addLineNextCycle(fromPos, toPos, false, 0);
   }
 }
 
@@ -528,7 +556,11 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
   if (permaLines.size() > 0){
-   drawLines(permaLines);
+    std::vector<Line> lines;
+    for (auto permaline : permaLines){
+     lines.push_back(permaline.line);
+    }
+    drawLines(lines);
   }
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
@@ -963,6 +995,7 @@ int main(int argc, char* argv[]){
         extensionsUnloadScript(extensions, id);
       }); 
       removeLocks(id);
+      removePermalines(id);
     },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime
