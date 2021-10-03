@@ -1,6 +1,6 @@
 #include "./bulletdebug.h"
 
-BulletDebugDrawer::BulletDebugDrawer(void(*drawLine)(glm::vec3 fromPos, glm::vec3 toPos)){
+BulletDebugDrawer::BulletDebugDrawer(int32_t(*drawLine)(glm::vec3 fromPos, glm::vec3 toPos, bool permaline)){
   this -> setDebugMode(btIDebugDraw::DBG_DrawWireframe);
   this -> debugDrawLine = drawLine; 
 }
@@ -8,10 +8,10 @@ BulletDebugDrawer::~BulletDebugDrawer(){}
 
 
 void BulletDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor){
-  this -> debugDrawLine(btToGlm(from), btToGlm(to));
+  this -> debugDrawLine(btToGlm(from), btToGlm(to), false);
 }
 void BulletDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
-  this -> debugDrawLine(btToGlm(from), btToGlm(to));
+  this -> debugDrawLine(btToGlm(from), btToGlm(to), false);
 }
 void BulletDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color){
   std::cout << "CRITICAL DEBUG WARNING: DRAW SPHERE: not yet implemented" << std::endl;

@@ -1,5 +1,13 @@
-
-; draws a circle
+(define linehandle #f)
+(define (onKey key scancode action mods)
+  (if (and (= key 257) (= action 1))
+    (begin
+      (if (not (equal? linehandle #f)) (free-line linehandle))
+      (set! linehandle (draw-line (list 0 0 0) (list 0 1 (random 10)) #t))
+      (format #t "draw line called\n")
+    )
+  )
+)
 
 (define (onFrame)
   (define x (cos (time-seconds)))

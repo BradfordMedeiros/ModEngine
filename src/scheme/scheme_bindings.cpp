@@ -108,11 +108,22 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize){
   return SCM_UNSPECIFIED;
 }
 
-void (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo);
-SCM scmDrawLine(SCM posFrom, SCM posTo){
-  _drawLine(listToVec3(posFrom), listToVec3(posTo));
-  return SCM_UNSPECIFIED;
+int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline);
+SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline){
+  auto permalineDefined = !scm_is_eq(permaline, SCM_UNDEFINED);
+  auto isPermaline = false;
+  if (permalineDefined){
+    isPermaline = scm_to_bool(permaline);
+  }
+
+  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline);
+  return scm_from_int32(lineId);
 }
+void (*_freeLine)(int32_t lineid);
+SCM scmFreeLine(SCM lineid){
+  _freeLine(scm_to_int32(lineid));
+}
+
 
 struct gameObject {
   int32_t id;
@@ -743,7 +754,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
   scm_c_define_gsubr("draw-text", 4, 0, 0, (void*)scmDrawText);
-  scm_c_define_gsubr("draw-line", 2, 0, 0, (void*)scmDrawLine);
+  scm_c_define_gsubr("draw-line", 2, 1, 0, (void*)scmDrawLine);
+  scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)scmGetGameObjectPos);
   scm_c_define_gsubr("gameobj-pos-world", 1, 0, 0, (void*)scmGetGameObjectPosWorld);
@@ -856,7 +868,8 @@ void createStaticSchemeBindings(
 	std::vector<int32_t> (*getObjectsByType)(std::string),
 	void (*setActiveCamera)(int32_t cameraId),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
-  void (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo),
+  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline),
+  void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),
   GameobjAttributes getGameObjectAttr(int32_t id),
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
@@ -931,6 +944,7 @@ void createStaticSchemeBindings(
   
   _drawText = drawText;
   _drawLine = drawLine;
+  _freeLine = freeLine;
 
   getGameObjNameForId = getGameObjectNameForId;
   _getGameObjectAttr = getGameObjectAttr;

@@ -293,12 +293,23 @@ void loadAllTextures(){
   }
 }
 
-void addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos){
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline){
+  if (permaline){
+    permaLines.push_back(Line{
+      .fromPos = fromPos,
+      .toPos = toPos,
+    });    
+    return 0;
+  }
   Line line = {
     .fromPos = fromPos,
     .toPos = toPos
   };
   lines.push_back(line);
+  return 0;
+}
+void freeLine(objid lineId){
+  std::cout << "free line placeholder" << std::endl;
 }
 
 std::vector<glm::vec3> traversalPositions;
@@ -315,7 +326,7 @@ void drawTraversalPositions(){
   for (int i = 0; i < traversalPositions.size(); i++){
     auto fromPos = traversalPositions.at(i);
     auto toPos = parentTraversalPositions.at(i);
-    addLineNextCycle(fromPos, toPos);
+    addLineNextCycle(fromPos, toPos, false);
   }
 }
 
@@ -879,6 +890,7 @@ int main(int argc, char* argv[]){
     setActiveCamera,
     drawText,
     addLineNextCycle,
+    freeLine,
     getGameObjectName,
     getGameObjectAttr,
     setGameObjectAttr,

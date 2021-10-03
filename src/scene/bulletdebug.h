@@ -8,9 +8,9 @@
 
 class BulletDebugDrawer : public btIDebugDraw {
    int m_debugMode;
-  void (*debugDrawLine)(glm::vec3 fromPos, glm::vec3 toPos);
+   int32_t (*debugDrawLine)(glm::vec3 fromPos, glm::vec3 toPos, bool permaline);
 public:
-  BulletDebugDrawer(void (*drawLine)(glm::vec3 fromPos, glm::vec3 toPos));
+  BulletDebugDrawer(int32_t (*drawLine)(glm::vec3 fromPos, glm::vec3 toPos, bool permaline));
   virtual ~BulletDebugDrawer();
   virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor);
   virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
