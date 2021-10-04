@@ -1015,10 +1015,10 @@ void updateAttributeDelta(World& world, objid id, std::string attribute, Attribu
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
   updateEmitters(
     world.emitters, 
-    timeElapsed, 
-    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation) -> objid {      
+    timeElapsed,
+    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-      attributes.vecAttributes["position"] = initPosition != NULL ?  *initPosition : fullTransformation(world.sandbox, emitterNodeId).position;
+      attributes.vecAttributes["position"] = initPosition.has_value() ?  initPosition.value() : fullTransformation(world.sandbox, emitterNodeId).position;
       objid objectAdded = addObjectToScene(
         world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
       );

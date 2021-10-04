@@ -495,7 +495,7 @@ SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
 }
 
-void (*_scmEmit)(objid id, glm::vec3* initPosition, glm::quat* initOrientation);
+void (*_scmEmit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation);
 SCM scmEmit(SCM gameobjId, SCM scmPos, SCM scmNormal){
   auto positionDefined = scmPos != SCM_UNDEFINED;
   auto normalDefined = scmNormal != SCM_UNDEFINED;
@@ -505,10 +505,11 @@ SCM scmEmit(SCM gameobjId, SCM scmPos, SCM scmNormal){
   if (positionDefined){
     pos = listToVec3(scmPos);
   }
+  std::cout << "scheme - emitter position: " << print(pos) << std::endl;
   if (normalDefined){
     rot = scmListToQuat(scmNormal);
   }
-  _scmEmit(scm_to_int32(gameobjId), positionDefined ? &pos : NULL, normalDefined ? &rot : NULL);
+  _scmEmit(scm_to_int32(gameobjId), positionDefined ? std::optional(pos) : std::nullopt, normalDefined ? std::optional(rot) : std::nullopt);
   return SCM_UNSPECIFIED;
 }
 
@@ -913,7 +914,7 @@ void createStaticSchemeBindings(
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
-  void (*scmEmit)(objid, glm::vec3* initPosition, glm::quat* initOrientation),
+  void (*scmEmit)(objid, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation),
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),

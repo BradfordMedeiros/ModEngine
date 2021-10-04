@@ -88,7 +88,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation)> addParticle, 
+  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -130,20 +130,12 @@ void updateEmitters(
     }
     bool forceSpawn = emitter.forceParticles.size() > 0;
     if (shouldSpawnParticle(emitter, currentTime) || forceSpawn){
-      glm::vec3* position = NULL;
-      glm::quat* rotation = NULL;
+      auto emitterConfig = emitter.forceParticles.front();
       if (forceSpawn){
-        auto emitterConfig = emitter.forceParticles.front();
-        if(emitterConfig.position.has_value()){
-          position = &emitterConfig.position.value();
-        }
-        if (emitterConfig.orientation.has_value()){
-          rotation = &emitterConfig.orientation.value();
-        }
         emitter.forceParticles.pop_front();
       }
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, position, rotation);
+      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, emitterConfig.position, emitterConfig.orientation);
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,
         .spawntime = currentTime,
@@ -154,13 +146,13 @@ void updateEmitters(
   }
 }
 
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation){
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation){
   std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){
       emitter.forceParticles.push_back(EmitterConfig{
-        .position = initPosition == NULL ? std::nullopt : std::optional(*initPosition),
-        .orientation = initOrientation == NULL ? std::nullopt : std::optional(*initOrientation),
+        .position = initPosition,
+        .orientation = initOrientation,
       });
       return;
     }

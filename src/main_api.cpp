@@ -432,7 +432,7 @@ unsigned int activeTextureId(){
   return world.textures.at(activeTextureName(drawParams, world.textures)).texture.textureId;
 }
 
-void scmEmit(objid id, glm::vec3* initPosition, glm::quat* initOrientation){
+void scmEmit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation){
   emit(world, id, initPosition, initOrientation);
 }
 

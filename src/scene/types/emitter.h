@@ -50,11 +50,11 @@ void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string, GameobjAttributes, objid, glm::vec3*, glm::quat*)> addParticle, 
+  std::function<objid(std::string, GameobjAttributes, objid, std::optional<glm::vec3>, std::optional<glm::quat>)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId, glm::vec3* initPosition, glm::quat* initOrientation);
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation);
 void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled);
 
 #endif
