@@ -328,7 +328,10 @@ void freeLine(objid lineId){
       newLines.push_back(line);
     }
   }
-  permaLines = newLines;
+  permaLines.clear();
+  for (auto line : newLines){
+    permaLines.push_back(line);
+  }
 }
 void removePermalines(objid owner){
   std::vector<PermaLine> newLines;
@@ -337,7 +340,10 @@ void removePermalines(objid owner){
       newLines.push_back(line);
     }
   }
-  permaLines = newLines;  
+  permaLines.clear();
+  for (auto line : newLines){
+    permaLines.push_back(line);
+  }
 }
 
 std::vector<glm::vec3> traversalPositions;
@@ -623,7 +629,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   
   if (selected(state.editor) != -1){
     auto selectedIndex = selected(state.editor);
-    std::cout << "selected index: " << selectedIndex << std::endl;
     auto obj = getGameObject(world, selectedIndex);
     drawText("position: " + print(obj.transformation.position), 10, 100, 3);
     drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
