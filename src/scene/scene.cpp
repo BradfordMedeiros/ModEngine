@@ -1026,7 +1026,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     }, 
     [&world, &interface](objid id) -> void { 
       std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
-      removeObjectFromScene(world, id, interface);
+      if (idExists(world.sandbox, id)){
+        removeObjectFromScene(world, id, interface);
+      }
     },
     [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
       updateAttributeDelta(world, id, attribute, delta);

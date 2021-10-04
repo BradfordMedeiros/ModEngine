@@ -57,11 +57,10 @@ void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool boots
   }   
 }
 
-void netObjectDelete(objid id, bool isNet, std::function<void(objid)> onObjectDelete, NetCode& netcode, bool bootstrapperMode) {
+void netObjectDelete(objid id, bool isNet, NetCode& netcode, bool bootstrapperMode) {
   if (!isNet){
     return;
   }
-  onObjectDelete(id);
 
   UdpPacket packet { .type = DELETE };
   packet.payload.deletepacket =  DeletePacket { .id = id };

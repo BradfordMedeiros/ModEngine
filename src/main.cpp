@@ -622,7 +622,9 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
   
   if (selected(state.editor) != -1){
-    auto obj = getGameObject(world, selected(state.editor));
+    auto selectedIndex = selected(state.editor);
+    std::cout << "selected index: " << selectedIndex << std::endl;
+    auto obj = getGameObject(world, selectedIndex);
     drawText("position: " + print(obj.transformation.position), 10, 100, 3);
     drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
     drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
@@ -675,9 +677,7 @@ void onObjDelete(objid id){
     state.activeCameraObj = NULL;
     std::cout << "active camera reset" << std::endl;
   }
-  if (id == isSelected(state.editor, id)){
-    unsetSelectedIndex(state.editor, id, true);
-  }
+  unsetSelectedIndex(state.editor, id, true);
 }
 
 std::map<std::string, std::string> args;
@@ -1024,7 +1024,8 @@ int main(int argc, char* argv[]){
       netObjectCreate(world, obj, netcode, bootStrapperMode);
     },
     [](objid id, bool isNet) -> void {
-      netObjectDelete(id, isNet, onObjDelete, netcode, bootStrapperMode);
+      onObjDelete(id);
+      netObjectDelete(id, isNet, netcode, bootStrapperMode);
     }, 
     debuggerDrawer, 
     layers,

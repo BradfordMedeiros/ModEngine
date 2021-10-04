@@ -41,7 +41,7 @@ struct UdpPacket {
 
 void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
 void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
-void netObjectDelete(objid id, bool isNet, std::function<void(objid)> onObjectDelete, NetCode& netcode, bool bootstrapperMode);
+void netObjectDelete(objid id, bool isNet, NetCode& netcode, bool bootstrapperMode);
 
 void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
