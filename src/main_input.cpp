@@ -9,7 +9,6 @@ extern bool useYAxis;
 extern DrawingParams drawParams;
 extern glm::mat4 view;
 extern GameObject defaultCamera;
-extern std::vector<Line> permaLines;
 extern float deltaTime;
 extern Benchmark benchmark;
 extern bool selectItemCalled;
@@ -357,8 +356,6 @@ void onMouseButton(){
       .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
     };
     handleVoxelRaycast(world, id, line.fromPos, line.toPos);
-    permaLines.clear();
-    permaLines.push_back(line);
   }
 }
 
