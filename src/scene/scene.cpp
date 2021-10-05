@@ -1022,6 +1022,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       objid objectAdded = addObjectToScene(
         world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
       );
+      if (initOrientation.has_value()){
+        physicsRotateSet(world, objectAdded, initOrientation.value(), true);
+      }
       return objectAdded;
     }, 
     [&world, &interface](objid id) -> void { 
