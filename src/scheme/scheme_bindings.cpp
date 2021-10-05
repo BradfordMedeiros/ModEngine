@@ -568,6 +568,9 @@ SCM scmSlerp(SCM fromQuat, SCM toQuat, SCM amount){
   float famount = (float)scm_to_double(amount);
   return scmQuatToSCM(glm::slerp(scmListToQuat(fromQuat), scmListToQuat(toQuat), famount));
 }
+SCM scmReflect(SCM inVec, SCM surfaceNormalVec){
+  return vec3ToScmList(glm::reflect(listToVec3(inVec), listToVec3(surfaceNormalVec)));
+}
 SCM scmInverseQuat(SCM quat){
   return scmQuatToSCM(glm::inverse(scmListToQuat(quat)));
 }
@@ -845,6 +848,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("lerp", 3, 0, 0, (void*)scmLerp);
   scm_c_define_gsubr("slerp", 3, 0, 0, (void*)scmSlerp);
+  scm_c_define_gsubr("reflect", 2, 0, 0, (void*)scmReflect);
   scm_c_define_gsubr("invquat", 1, 0, 0, (void*)scmInverseQuat);
 
   scm_c_define_gsubr("parse-attr", 1, 0, 0, (void*)scmParseAttr);
