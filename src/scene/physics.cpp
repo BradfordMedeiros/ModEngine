@@ -164,6 +164,9 @@ void setPhysicsOptions(btRigidBody* body, rigidBodyOpts& opts){
   if (!isStatic){
     body -> setMassProps(opts.mass, body -> getLocalInertia());
   }
+  if (opts.velocity.has_value()){
+    body -> setLinearVelocity(glmToBt(opts.velocity.value()));
+  }
   body -> getBroadphaseHandle() -> m_collisionFilterMask = opts.layer;
 }
 btRigidBody* addBodyToWorld(physicsEnv& env, btRigidBody* rigidBodyPtr, rigidBodyOpts& opts){

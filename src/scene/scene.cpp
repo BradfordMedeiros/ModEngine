@@ -150,6 +150,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
       .restitution = physicsOptions.restitution,
       .mass = physicsOptions.mass,
       .layer = physicsOptions.layer,
+      .velocity = physicsOptions.velocity,
     };
 
     if (isHeightmapObj){
@@ -863,6 +864,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj){
       .restitution = gameobj.physicsOptions.restitution,
       .mass = gameobj.physicsOptions.mass,
       .layer = gameobj.physicsOptions.layer,
+      .velocity = std::nullopt,
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }

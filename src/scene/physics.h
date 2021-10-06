@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <optional>
 #include <glm/gtc/quaternion.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -48,6 +49,7 @@ struct rigidBodyOpts {
   float restitution;
   float mass;
   float layer;
+  std::optional<glm::vec3> velocity;
 };
 
 btRigidBody* addRigidBodyRect(physicsEnv& env, glm::vec3 pos, float width, float height, float depth, glm::quat rotation, bool isStatic, bool hasCollision, glm::vec3 scaling, rigidBodyOpts opts);

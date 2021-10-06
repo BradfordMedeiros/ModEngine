@@ -1,0 +1,14 @@
+
+
+platform:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+platform:position:0 -10 0
+platform:scale:100 100 1
+platform:rotation:0 -1 0
+platform:texture:../gameresources/textures/wood.jpg
+platform:physics_restitution:1
+
+box:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+box:physics_velocity:0 20 -5
+box:physics_type:dynamic
+box:texture:../gameresources/textures/wood.jpg
+box:position:0 0 -30

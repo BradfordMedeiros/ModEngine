@@ -18,6 +18,7 @@ struct physicsOpts {
   glm::vec3 linearFactor;
   glm::vec3 angularFactor;
   glm::vec3 gravity;
+  glm::vec3 velocity;
   float friction;
   float restitution;
   float mass;
@@ -45,7 +46,7 @@ struct GameObject {
   objid id;
   std::string name;
   Transformation transformation;
-  physicsOpts physicsOptions;
+  physicsOpts physicsOptions;  // Should remove this and just get it from the physics system (probably)
   std::string lookat;
   std::string layer;
   std::string script;
