@@ -12,3 +12,9 @@ box:physics_velocity:0 20 -5
 box:physics_type:dynamic
 box:texture:../gameresources/textures/wood.jpg
 box:position:0 0 -30
+
+movingbox:mesh:../gameresources/build/primitives/walls/1-0.2-1.gltf
+movingbox:physics_type:dynamic
+movingbox:texture:../gameresources/textures/wood.jpg
+movingbox:position:0 0 -55
+movingbox:script:./res/scenes/features/physics/velocity.scm
