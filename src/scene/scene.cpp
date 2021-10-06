@@ -852,9 +852,11 @@ GameobjAttributes objectAttributes(World& world, objid id){
   return attr;
 }
 
-void afterAttributesSet(World& world, objid id, GameObject& gameobj){
+void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet){
   physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id) : NULL;
+
+  std::cout << "after attrs: " << print (gameobj.physicsOptions.velocity) << std::endl;
   if (body != NULL){
     rigidBodyOpts opts {
       .linear = gameobj.physicsOptions.linearFactor,
@@ -864,7 +866,7 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj){
       .restitution = gameobj.physicsOptions.restitution,
       .mass = gameobj.physicsOptions.mass,
       .layer = gameobj.physicsOptions.layer,
-      .velocity = std::nullopt,
+      .velocity = velocitySet ? std::optional(gameobj.physicsOptions.velocity) : std::nullopt,    // velocity is not updated so this will reset the vel
     };
     updateRigidBodyOpts(world.physicsEnvironment, body, opts);
   }
@@ -881,7 +883,7 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
   );
   GameObject& obj = getGameObject(world, id);
   setAllAttributes(obj, attr);
-  afterAttributesSet(world, id, obj);
+  afterAttributesSet(world, id, obj, attr.vecAttributes.find("physics_velocity") != attr.vecAttributes.end());
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
   GameObject& gameobj = getGameObject(world, id);
@@ -1011,7 +1013,7 @@ void updateAttributeDelta(World& world, objid id, std::string attribute, Attribu
   std::cout << "Update particle diff: (" << attribute << ")" << std::endl;
   GameObject& gameobj = getGameObject(world, id);
   applyAttributeDelta(gameobj, attribute, delta);
-  afterAttributesSet(world, id, gameobj);
+  afterAttributesSet(world, id, gameobj, attribute == "physics_velocity");
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
