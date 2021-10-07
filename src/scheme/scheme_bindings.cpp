@@ -574,6 +574,9 @@ SCM scmReflect(SCM inVec, SCM surfaceNormalVec){
 SCM scmInverseQuat(SCM quat){
   return scmQuatToSCM(glm::inverse(scmListToQuat(quat)));
 }
+SCM scmQuatMult(SCM scmQuat1, SCM scmQuat2){
+  return scmQuatToSCM(scmListToQuat(scmQuat1) * scmListToQuat(scmQuat2));
+}
 
 SCM scmParseAttr(SCM attrString){
   auto attrValue = parseAttributeValue(scm_to_locale_string(attrString));
@@ -850,6 +853,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("slerp", 3, 0, 0, (void*)scmSlerp);
   scm_c_define_gsubr("reflect", 2, 0, 0, (void*)scmReflect);
   scm_c_define_gsubr("invquat", 1, 0, 0, (void*)scmInverseQuat);
+  scm_c_define_gsubr("quatmult", 2, 0, 0, (void*)scmQuatMult);
 
   scm_c_define_gsubr("parse-attr", 1, 0, 0, (void*)scmParseAttr);
 
