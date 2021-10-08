@@ -136,7 +136,7 @@ struct ValueVariance {
 std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> additionalFields){
   std::map<std::string, ValueVariance> values;
   for (auto [key, value] : additionalFields){
-    if ((key.at(0) == '!' || key.at(0) == '?') && key.size() > 1){
+    if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
       values[newKey] = ValueVariance {
         .value = glm::vec3(0.f, 0.f, 0.f),

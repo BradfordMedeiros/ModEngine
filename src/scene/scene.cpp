@@ -1020,9 +1020,13 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updateEmitters(
     world.emitters, 
     timeElapsed,
-    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation) -> objid {      
+    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       attributes.vecAttributes["position"] = initPosition.has_value() ?  initPosition.value() : fullTransformation(world.sandbox, emitterNodeId).position;
+      if (initVelocity.has_value()){
+        attributes.vecAttributes["physics_velocity"] = initVelocity.value();
+      }
+
       objid objectAdded = addObjectToScene(
         world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
       );
@@ -1038,6 +1042,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       }
     },
     [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
+      std::cout << "update particle: " << attribute << std::endl;
       updateAttributeDelta(world, id, attribute, delta);
     }
   );  

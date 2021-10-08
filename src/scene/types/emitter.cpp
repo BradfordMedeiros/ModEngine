@@ -88,7 +88,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation)> addParticle, 
+  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -135,7 +135,7 @@ void updateEmitters(
         emitter.forceParticles.pop_front();
       }
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, emitterConfig.position, emitterConfig.orientation);
+      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, emitterConfig.position, emitterConfig.orientation, emitterConfig.velocity);
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,
         .spawntime = currentTime,
@@ -146,13 +146,14 @@ void updateEmitters(
   }
 }
 
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation){
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity){
   std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){
       emitter.forceParticles.push_back(EmitterConfig{
         .position = initPosition,
         .orientation = initOrientation,
+        .velocity = initVelocity
       });
       return;
     }

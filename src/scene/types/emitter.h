@@ -25,6 +25,7 @@ struct ActiveParticle {
 struct EmitterConfig {
   std::optional<glm::vec3> position;
   std::optional<glm::quat> orientation;
+  std::optional<glm::vec3> velocity;
 };
 struct Emitter {
   std::string name;
@@ -50,11 +51,11 @@ void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string, GameobjAttributes, objid, std::optional<glm::vec3>, std::optional<glm::quat>)> addParticle, 
+  std::function<objid(std::string, GameobjAttributes, objid, std::optional<glm::vec3>, std::optional<glm::quat>, std::optional<glm::vec3>)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation);
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity);
 void setEmitterEnabled(EmitterSystem& system, objid emitterNodeId, bool enabled);
 
 #endif

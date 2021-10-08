@@ -41,7 +41,7 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
 objid getIdForCollisionObject(World& world, const btCollisionObject* body);
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 
-void emit(World& world, objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation);
+void emit(World& world, objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity);
 
 void enforceAllLayouts(World& world);
 

@@ -970,7 +970,7 @@ int main(int argc, char* argv[]){
     setFloatState,
     setIntState,
     navPosition, 
-    scmEmit,
+    emit,
     addLoadingAround,
     removeLoadingAround,
     createGeneratedMesh,

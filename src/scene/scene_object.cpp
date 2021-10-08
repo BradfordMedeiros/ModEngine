@@ -232,8 +232,8 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds){
   return false;
 }
 
-void emit(World& world, objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation){
-  emitNewParticle(world.emitters, id, initPosition, initOrientation);
+void emit(World& world, objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity){
+  emitNewParticle(world.emitters, id, initPosition, initOrientation, initVelocity);
 }
 
 
