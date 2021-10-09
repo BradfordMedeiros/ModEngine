@@ -735,9 +735,6 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
     world.rigidbodys.erase(objectId);
   }
 
-  if (scriptName != ""){
-    interface.unloadScript(scriptName, objectId);
-  }
   interface.stopAnimation(objectId);
   removeObject(
     world.objectMapping, 
@@ -755,12 +752,20 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   freeMeshRefsByOwner(world, objectId);
   freeTextureRefsByOwner(world, objectId);
   freeAnimationsForOwner(world, objectId);
+  if (scriptName != ""){
+    interface.unloadScript(scriptName, objectId);
+  }
 }
 
 void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
   std::cout << "removing object: " << objectId << objectId << " " << getGameObject(world, objectId).name << std::endl;
+  if (!idExists(world.sandbox, objectId)){
+    return;
+  }
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
     if (!idExists(world.sandbox, gameobjId)){
+      std::cout << "id does not exist: " << gameobjId << std::endl;
+      assert(false);
       continue;
     }
     auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);
