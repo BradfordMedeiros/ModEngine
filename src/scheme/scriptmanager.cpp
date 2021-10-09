@@ -153,10 +153,11 @@ void onKeyCharCallbackAllScripts(unsigned int codepoint){
     onKeyCharCallback(codepoint);
   }
 }
-void onCameraSystemChangeAllScripts(bool usingBuiltInCamera){
+
+void onCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
   for (auto &[_, scriptModule] : scriptnameToModule){
     scm_set_current_module(scriptModule.module);
-    onCameraSystemChange(usingBuiltInCamera);
+    onCameraSystemChange(camera, usingBuiltInCamera);
   }
 }
 void onMessageAllScripts(std::queue<StringString>& messages){

@@ -1,27 +1,30 @@
-fixed:
-1. bug where try to remove already removed emitters since was child of removed element
-2. fix emitter attr parsing - parse-attr - kind of unsatisfied w/ this 
 
 
-todo:
+- initial angular velocity
 
-- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
-- translation move relative tests
-procedural recoil?
-
-===> bug: hit raycast is wrong
 
 ==================================
+goal: 10/10 => finish initial gun pass
 
-
+- rm-obj mainobj doesn't really work
+should teleport now!
+guile: uncaught throw to wrong-type-arg: (#f Wrong type (expecting ~A): ~S (exact integer #<gameobj 55dd70f1c2c0>) (#<gameobj 55dd70f1c2c0>))
+AL lib: (EE) alc_cleanup: 1 device not closed
 
 * scale the guns to something reasonable, then polish up some guns
->>> core gameplay implementation stage:
+guns - bloom as fn of shooting time:
+angle = (random theta) 
+d = (random max diameter)  fn(time to recover, (bloom per shot) ^ 2 bloom per shot, max bloom)  <- linear , maybe inst
+x = d * cos(angle)
+y = d * cos(angle)
 
-- emitter attrs all f'd up
-- emitter initial velocity 
-- gun system (very tunable) : projectile effect (on muzzle?)
-- inter rotation
+- detect ground via raycast
+- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
+
+=========> this only works for weapons that have 0 0 -1 initial rotation, since the setfrontdelta function is used improperly
+- fix setfrontdelta/moverelative shit
+
+
 
 ============== GOAL END OF SEPTEMBER ==================================
 Note: I don't think the movement has to feel perfect, or even that good yet
@@ -147,6 +150,7 @@ PERFORMANCE
 - noticeable obvious performance drop for trivial stuff due to loading textures on demand (instead of preloading) (probably would also happen for audio, models)
 - textures -> always convert to abs path so doesn't reuse
 - culling
+- add debug times for major conceptual areas (bloom time, portal rendering time, etc)
 
 RENDERING
 ======================
@@ -240,7 +244,6 @@ WATER?
 SANDBOX
 ==============
 -addObjectToCache requires all elements to belong to a layer, if not exception
-
 -> ability to apply any texture as a final framebuffer (for eg, a hud that can have more stability...)
 
 SOUND
@@ -251,3 +254,14 @@ OTHER
 =============
 PLAY VS EDIT MODES IN EDITOR? 
 ==> what does this really mean? 
+
+
+
+
+
+
+
+
+
+
+

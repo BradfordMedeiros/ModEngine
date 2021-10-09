@@ -4,5 +4,9 @@ platform:position:0 -5 0
 platform:script:./res/scenes/features/objtypes/camera-interp.scm
 
 >camera1:position:0 3 0
->camera2:position:5 3 -10
+
+>camera2:position:5 20 -10
 >camera2:rotation:-1 0 0
+
+>camera3:position:-5 10 -10
+>camera3:rotation:0 0 1

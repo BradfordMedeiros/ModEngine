@@ -9,6 +9,13 @@
 
 enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM };
 
+struct CamInterpolation {
+  bool shouldInterpolate;
+  float startingTime;
+  float length;
+  objid targetCam;
+};
+
 struct engineState {
   bool visualizeNormals;
   bool showCameras;
@@ -24,7 +31,10 @@ struct engineState {
   int32_t lastHoverIndex;
   bool hoveredIdInScene;
   bool lastHoveredIdInScene;
+
   unsigned int activeCamera;
+  CamInterpolation cameraInterp;
+
   std::string additionalText;
  
   bool enableManipulator;

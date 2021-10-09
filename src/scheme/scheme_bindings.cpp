@@ -693,11 +693,11 @@ void onKeyCharCallback(unsigned int codepoint){
     scm_call_1(func_symbol, scm_from_unsigned_integer(codepoint));
   }
 }
-void onCameraSystemChange(bool usingBuiltInCamera){
+void onCameraSystemChange(std::string camera, bool usingBuiltInCamera){
   const char* function = "onCameraSystemChange";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_1(func_symbol, scm_from_bool(usingBuiltInCamera));
+    scm_call_2(func_symbol, scm_from_locale_string(camera.c_str()), scm_from_bool(usingBuiltInCamera));
   }
 }
 

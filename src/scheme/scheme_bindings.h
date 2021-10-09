@@ -94,7 +94,7 @@ void onObjectHover(int32_t index);
 void onObjectUnhover(int32_t index);
 void onKeyCallback(int key, int scancode, int action, int mods);
 void onKeyCharCallback(unsigned int codepoint);
-void onCameraSystemChange(bool usingBuiltInCamera);
+void onCameraSystemChange(std::string camera, bool usingBuiltInCamera);
 void onAttrMessage(std::string message, AttributeValue value);
 void onTcpMessage(std::string message);
 void onUdpMessage(std::string message);

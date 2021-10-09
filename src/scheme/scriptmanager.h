@@ -18,7 +18,7 @@ typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
-typedef void(*boolfunc)(bool value);
+typedef void(*stringboolFunc)(std::string, bool value);
 typedef void(*messagefunc)(std::queue<StringString>&);
 typedef void(*stringfunc)(std::string&);
 
@@ -33,7 +33,7 @@ struct SchemeBindingCallbacks {
   onobjectHoverFunc onObjectHover;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
-  boolfunc onCameraSystemChange;
+  stringboolFunc onCameraSystemChange;
   messagefunc onMessage;
   stringfunc onTcpMessage;
   stringfunc onUdpMessage;

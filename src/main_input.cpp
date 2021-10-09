@@ -367,7 +367,6 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
     std::string objectName = "random";
 
     auto sceneId = 0;  //  todo -> which scene should it be loaded into?
-    assert(false);
 
     if (fileType == IMAGE_EXTENSION){
       setTexture(selected(state.editor), paths[i]);
@@ -500,10 +499,9 @@ std::vector<InputDispatch> inputFns = {
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0,
     .hasPreq = false,
-    .fn = [&state, &schemeBindings]() -> void {
+    .fn = [&state]() -> void {
       state.useDefaultCamera = !state.useDefaultCamera;
       std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
-      schemeBindings.onCameraSystemChange(state.useDefaultCamera);
       if (state.useDefaultCamera){
         state.activeCameraObj = NULL;
       }else{

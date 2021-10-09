@@ -19,6 +19,7 @@ extern NetCode netcode;
 extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
 extern std::map<std::string, objid> activeLocks;
+extern SchemeBindingCallbacks schemeBindings;
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByName(world, name, sceneId);
@@ -376,6 +377,7 @@ Transformation getCameraTransform(){
     if (lerpAmount >= 1){
       state.cameraInterp.shouldInterpolate = false;
       state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
+      schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
     }
     auto oldCameraPosition = fullTransformation(world.sandbox, state.activeCameraObj -> id);
     auto newCameraPosition = fullTransformation(world.sandbox, state.cameraInterp.targetCam);
@@ -411,6 +413,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
 
   state.activeCameraObj = &getGameObject(world, cameraId);
   setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
+  schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
 }
 void setActiveCamera(std::string name, objid sceneId){
   auto object = getGameObjectByName(name, sceneId);
