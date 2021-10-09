@@ -368,6 +368,9 @@ objid listSceneId(int32_t id){
 }
 
 Transformation getCameraTransform(){
+  if (state.useDefaultCamera || state.activeCameraObj == NULL){
+    return defaultCamera.transformation;
+  }
   if (state.cameraInterp.shouldInterpolate){
     auto lerpAmount = (now - state.cameraInterp.startingTime) / state.cameraInterp.length;
     if (lerpAmount >= 1){
@@ -378,12 +381,15 @@ Transformation getCameraTransform(){
     auto newCameraPosition = fullTransformation(world.sandbox, state.cameraInterp.targetCam);
     return interpolate(oldCameraPosition, newCameraPosition, lerpAmount, lerpAmount, lerpAmount);
   }
-  return (state.useDefaultCamera || state.activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, state.activeCameraObj -> id);
+  return fullTransformation(world.sandbox, state.activeCameraObj -> id);
 }
 void maybeResetCamera(int32_t id){
   if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
     state.activeCameraObj = NULL;
     std::cout << "active camera reset" << std::endl;
+  }
+  if (state.cameraInterp.targetCam == id){
+    state.cameraInterp.shouldInterpolate = false;
   }
 }
 void setActiveCamera(int32_t cameraId, float interpolationTime){
