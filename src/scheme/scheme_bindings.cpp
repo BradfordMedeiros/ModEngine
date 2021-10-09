@@ -52,9 +52,11 @@ SCM scm_sendLoadScene(SCM sceneId){
   return SCM_UNSPECIFIED;
 }
 
-void (*setActCamera)(int32_t id);
-SCM setActiveCam(SCM value){
-  setActCamera(scm_to_int32(value));
+void (*_setActiveCamera)(int32_t id, float interpolationTime);
+SCM scmSetActiveCamera(SCM value, SCM interpolationTime){
+  auto interpolationDefined = interpolationTime != SCM_UNDEFINED;
+  auto interpTime = interpolationDefined ? scm_to_double(interpolationTime) : -1;
+  _setActiveCamera(scm_to_int32(value), interpTime);
   return SCM_UNSPECIFIED;
 }
 
@@ -764,7 +766,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
 
-  scm_c_define_gsubr("set-camera", 1, 0, 0, (void *)setActiveCam);    
+  scm_c_define_gsubr("set-camera", 1, 1, 0, (void *)scmSetActiveCamera);    
   scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
@@ -886,7 +888,7 @@ void createStaticSchemeBindings(
 	void (*rotateCamera)(float xoffset, float yoffset),
 	void (*removeObjectById)(int32_t id),
 	std::vector<int32_t> (*getObjectsByType)(std::string),
-	void (*setActiveCamera)(int32_t cameraId),
+	void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner),
   void (*freeLine)(int32_t lineid),
@@ -960,7 +962,7 @@ void createStaticSchemeBindings(
 	rotateCam = rotateCamera;
 	removeObjById = removeObjectById;
 	getObjByType = getObjectsByType;
-	setActCamera = setActiveCamera;
+	_setActiveCamera = setActiveCamera;
   
   _drawText = drawText;
   _drawLine = drawLine;

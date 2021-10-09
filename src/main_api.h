@@ -26,7 +26,9 @@ NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 objid listSceneId(int32_t id);
 
-void setActiveCamera(int32_t cameraId);
+Transformation getCameraTransform();
+void maybeResetCamera(int32_t id);
+void setActiveCamera(int32_t cameraId, float interpolationTime);
 void setActiveCamera(std::string name, objid sceneId);
 void nextCamera();
 void moveCamera(glm::vec3 offset);  

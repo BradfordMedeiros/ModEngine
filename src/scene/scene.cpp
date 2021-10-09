@@ -856,7 +856,6 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
   physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id) : NULL;
 
-  std::cout << "after attrs: " << print (gameobj.physicsOptions.velocity) << std::endl;
   if (body != NULL){
     rigidBodyOpts opts {
       .linear = gameobj.physicsOptions.linearFactor,

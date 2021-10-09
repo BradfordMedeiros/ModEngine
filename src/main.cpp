@@ -678,10 +678,7 @@ void signalHandler(int signum) {
 
 void onObjDelete(objid id){
  std::cout << "deleted obj id: " << id << std::endl;
-  if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
-    state.activeCameraObj = NULL;
-    std::cout << "active camera reset" << std::endl;
-  }
+  maybeResetCamera(id);
   unsetSelectedIndex(state.editor, id, true);
 }
 
@@ -1166,8 +1163,8 @@ int main(int argc, char* argv[]){
 
     onNetCode(world, interface, netcode, onClientMessage, bootStrapperMode);
 
-    auto viewTransform = (state.useDefaultCamera || state.activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, state.activeCameraObj -> id);
-    
+    auto viewTransform = getCameraTransform();
+
     auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);
     auto up  = calculateRelativeOffset(viewTransform.rotation, {0, 1, 0 }, false);
     setListenerPosition(

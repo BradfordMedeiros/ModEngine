@@ -366,12 +366,43 @@ void setIntState(std::string stateName, int value){
 objid listSceneId(int32_t id){
   return sceneId(world.sandbox, id);
 }
-void setActiveCamera(int32_t cameraId){
+
+Transformation getCameraTransform(){
+  if (state.cameraInterp.shouldInterpolate){
+    auto lerpAmount = (now - state.cameraInterp.startingTime) / state.cameraInterp.length;
+    if (lerpAmount >= 1){
+      state.cameraInterp.shouldInterpolate = false;
+      state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
+    }
+    auto oldCameraPosition = fullTransformation(world.sandbox, state.activeCameraObj -> id);
+    auto newCameraPosition = fullTransformation(world.sandbox, state.cameraInterp.targetCam);
+    return interpolate(oldCameraPosition, newCameraPosition, lerpAmount, lerpAmount, lerpAmount);
+  }
+  return (state.useDefaultCamera || state.activeCameraObj == NULL) ? defaultCamera.transformation : fullTransformation(world.sandbox, state.activeCameraObj -> id);
+}
+void maybeResetCamera(int32_t id){
+  if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
+    state.activeCameraObj = NULL;
+    std::cout << "active camera reset" << std::endl;
+  }
+}
+void setActiveCamera(int32_t cameraId, float interpolationTime){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (! (std::find(cameraIndexs.begin(), cameraIndexs.end(), cameraId) != cameraIndexs.end())){
     std::cout << "index: " << cameraId << " is not a valid index" << std::endl;
     return;
   }
+
+  if (interpolationTime > 0){
+    state.cameraInterp = CamInterpolation {
+      .shouldInterpolate = true,
+      .startingTime = now,
+      .length = interpolationTime,
+      .targetCam = cameraId,
+    };
+    return;
+  }
+
   state.activeCameraObj = &getGameObject(world, cameraId);
   setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
 }
@@ -381,7 +412,7 @@ void setActiveCamera(std::string name, objid sceneId){
     std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
     assert(false);
   }
-  setActiveCamera(object.value());
+  setActiveCamera(object.value(), -1);
 }
 
 void nextCamera(){
@@ -393,7 +424,7 @@ void nextCamera(){
 
   state.activeCamera = (state.activeCamera + 1) % cameraIndexs.size();
   int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
-  setActiveCamera(activeCameraId);
+  setActiveCamera(activeCameraId, -1);
 }
 void moveCamera(glm::vec3 offset){
   if (state.activeCameraObj == NULL){
