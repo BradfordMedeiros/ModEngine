@@ -88,7 +88,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity)> addParticle, 
+  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -130,12 +130,12 @@ void updateEmitters(
     }
     bool forceSpawn = emitter.forceParticles.size() > 0;
     if (shouldSpawnParticle(emitter, currentTime) || forceSpawn){
-      auto emitterConfig = emitter.forceParticles.front();
+      auto newParticleOpts = emitter.forceParticles.front();
       if (forceSpawn){
         emitter.forceParticles.pop_front();
       }
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, emitterConfig.position, emitterConfig.orientation, emitterConfig.velocity);
+      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, newParticleOpts);
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,
         .spawntime = currentTime,
@@ -146,15 +146,11 @@ void updateEmitters(
   }
 }
 
-void emitNewParticle(EmitterSystem& system, objid emitterNodeId, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity){
+void emitNewParticle(EmitterSystem& system, objid emitterNodeId, NewParticleOptions options){
   std::cout << "Emit new particle placehodler: " << emitterNodeId << std::endl;
   for (auto &emitter : system.emitters){
     if (emitter.emitterNodeId == emitterNodeId){
-      emitter.forceParticles.push_back(EmitterConfig{
-        .position = initPosition,
-        .orientation = initOrientation,
-        .velocity = initVelocity
-      });
+      emitter.forceParticles.push_back(options);
       return;
     }
   }

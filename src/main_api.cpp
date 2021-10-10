@@ -473,7 +473,11 @@ unsigned int activeTextureId(){
 }
 
 void emit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity){
-  emit(world, id, initPosition, initOrientation, initVelocity);
+  emit(world, id, NewParticleOptions {
+    .position = initPosition,
+    .orientation = initOrientation,
+    .velocity = initVelocity,
+  });
 }
 
 objid addLoadingAround(objid id){
