@@ -26,6 +26,7 @@ struct NewParticleOptions {
   std::optional<glm::vec3> position;
   std::optional<glm::quat> orientation; 
   std::optional<glm::vec3> velocity;
+  std::optional<glm::vec3> angularVelocity;
 };
 
 struct Emitter {

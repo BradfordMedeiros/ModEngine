@@ -497,15 +497,17 @@ SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
 }
 
-void (*_scmEmit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity);
-SCM scmEmit(SCM gameobjId, SCM scmPos, SCM scmNormal, SCM scmVelocity){
+void (*_emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity);
+SCM scmEmit(SCM gameobjId, SCM scmPos, SCM scmNormal, SCM scmVelocity, SCM scmAvelocity){
   auto positionDefined = scmPos != SCM_UNDEFINED;
   auto normalDefined = scmNormal != SCM_UNDEFINED;
   auto velocityDefined = scmVelocity != SCM_UNDEFINED;
+  auto avelocityDefined = scmAvelocity != SCM_UNDEFINED;
 
   glm::vec3 pos(0.f, 0.f, 0.f);
   glm::quat rot(0.f, 0.f, 0.f, 0.f);
   glm::vec3 vel(0.f, 0.f, 0.f);
+  glm::vec3 avel(0.f, 0.f, 0.f);
 
   if (positionDefined){
     pos = listToVec3(scmPos);
@@ -516,11 +518,15 @@ SCM scmEmit(SCM gameobjId, SCM scmPos, SCM scmNormal, SCM scmVelocity){
   if (velocityDefined){
     vel = listToVec3(scmVelocity);
   }
-  _scmEmit(
+  if (avelocityDefined){
+    avel = listToVec3(scmAvelocity);
+  }
+  _emit(
     scm_to_int32(gameobjId), 
     positionDefined ? std::optional(pos) : std::nullopt, 
     normalDefined ? std::optional(rot) : std::nullopt,
-    velocityDefined ? std::optional(vel) : std::nullopt
+    velocityDefined ? std::optional(vel) : std::nullopt,
+    avelocityDefined ? std::optional(avel) : std::nullopt
   );
   return SCM_UNSPECIFIED;
 }
@@ -849,7 +855,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
-  scm_c_define_gsubr("emit", 1, 3, 0, (void*)scmEmit);
+  scm_c_define_gsubr("emit", 1, 4, 0, (void*)scmEmit);
 
   scm_c_define_gsubr("load-around", 1, 0, 0, (void*)scmLoadAround);
   scm_c_define_gsubr("rm-load-around", 1, 0, 0, (void*)scmRmLoadAround);
@@ -934,7 +940,7 @@ void createStaticSchemeBindings(
   void (*setFloatState)(std::string stateName, float value),
   void (*setIntState)(std::string stateName, int value),
   glm::vec3 (*navPosition)(objid, glm::vec3 pos),
-  void (*emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity),
+  void (*emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity),
   objid (*loadAround)(objid),
   void (*rmLoadAround)(objid),
   void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
@@ -1025,7 +1031,7 @@ void createStaticSchemeBindings(
   _setIntState = setIntState;
 
   _navPosition = navPosition;
-  _scmEmit = emit;
+  _emit = emit;
   _loadAround = loadAround;
   _rmLoadAround = rmLoadAround;
   _generateMesh = generateMesh;

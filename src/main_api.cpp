@@ -472,11 +472,12 @@ unsigned int activeTextureId(){
   return world.textures.at(activeTextureName(drawParams, world.textures)).texture.textureId;
 }
 
-void emit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity){
+void emit(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity){
   emit(world, id, NewParticleOptions {
     .position = initPosition,
     .orientation = initOrientation,
     .velocity = initVelocity,
+    .angularVelocity = initAvelocity, 
   });
 }
 

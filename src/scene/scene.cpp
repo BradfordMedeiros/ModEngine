@@ -1031,6 +1031,9 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       if (particleOpts.velocity.has_value()){
         attributes.vecAttributes["physics_velocity"] = particleOpts.velocity.value();
       }
+      if (particleOpts.angularVelocity.has_value()){
+        attributes.vecAttributes["physics_avelocity"] = particleOpts.angularVelocity.value();
+      }
       objid objectAdded = addObjectToScene(
         world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
       );
