@@ -151,6 +151,7 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
       .mass = physicsOptions.mass,
       .layer = physicsOptions.layer,
       .velocity = physicsOptions.velocity,
+      .angularVelocity = physicsOptions.angularVelocity,
     };
 
     if (isHeightmapObj){
@@ -765,7 +766,7 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
   for (auto gameobjId : getIdsInGroup(world.sandbox, objectId)){
     if (!idExists(world.sandbox, gameobjId)){
       std::cout << "id does not exist: " << gameobjId << std::endl;
-      assert(false);
+      //assert(false);
       continue;
     }
     auto idsToRemove = idsToRemoveFromScenegraph(world.sandbox, gameobjId);

@@ -40,7 +40,7 @@ std::vector<std::string> parseChildren(std::string payload){
 }
 
 bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity"};
+  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "physics_velocity", "physics_avelocity" };
   for (auto field : fields){
     if (attribute == field){
       attributes.vecAttributes[attribute] = parseVec(payload);

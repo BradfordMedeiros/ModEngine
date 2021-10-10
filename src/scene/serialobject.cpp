@@ -31,6 +31,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   safeVecSet(&object.physics.linearFactor, "physics_linear", attributes, &identityVec);
   safeVecSet(&object.physics.gravity, "physics_gravity", attributes, &defaultGravity);
   safeVecSet(&object.physics.velocity, "physics_velocity", attributes, &zeroVec);
+  safeVecSet(&object.physics.angularVelocity, "physics_avelocity", attributes, &zeroVec);
 
   auto oneValue = 1.f;
   auto negOneValue = -1.f;
@@ -184,6 +185,10 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
     gameobj.physicsOptions.velocity = *value;
     return;
   }
+  if (field == "physics_avelocity" && value != NULL){
+    gameobj.physicsOptions.angularVelocity = *value;
+    return;
+  }
 
   auto fValue = std::get_if<float>(&attr);
   if (field == "physics_friction" && fValue != NULL){
@@ -247,6 +252,9 @@ AttributeValue attributeValue(GameObject& gameobj, std::string field){
   }   
   if (field == "physics_velocity"){
     return gameobj.physicsOptions.velocity;
+  }
+  if (field == "physics_avelocity"){
+    return gameobj.physicsOptions.angularVelocity;
   }
   if (field == "physics_friction"){
     return gameobj.physicsOptions.friction;
