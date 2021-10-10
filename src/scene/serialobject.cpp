@@ -226,13 +226,7 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.stringAttributes["layer"] = gameobj.layer;
   _attr.stringAttributes["script"] = gameobj.script;
   _attr.stringAttributes["fragshader"] = gameobj.fragshader;
-
-  // TODO -> need to complete full list
-  /*
-  sceneAttrs["rotation"] = print(gameobj.transformation.rotation);
-
-  */
-
+  _attr.stringAttributes["physics_type"] = gameobj.physicsOptions.isStatic ? "static" : "dynamic";
 }
 
 AttributeValue attributeValue(GameObject& gameobj, std::string field){
