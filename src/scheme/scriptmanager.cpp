@@ -4,6 +4,7 @@ struct ScriptModule {
   objid id;
   objid sceneId;
   SCM module;
+  bool isvalid;
 };
 static std::map<std::string, ScriptModule> scriptnameToModule;
 
@@ -46,6 +47,7 @@ void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, 
     .id = id,
     .sceneId = sceneId,
     .module = module,
+    .isvalid = true,
   };                    
   scm_set_current_module(module);
   defineFunctions(id, isServer, isFreeScript);
@@ -65,11 +67,25 @@ void unloadScript(std::string scriptpath, objid id, std::function<void()> additi
 
   std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) != scriptnameToModule.end());
-  scriptnameToModule.erase(script);
+  scriptnameToModule.at(script).isvalid = false;
+}
+void unloadScriptsCleanup(){
+  std::vector<std::string> scriptsToRemove;
+  for (auto &[script, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      scriptsToRemove.push_back(script);
+    }
+  } 
+  for (auto script : scriptsToRemove){
+    scriptnameToModule.erase(script);
+  }
 }
 
 void onFrameAllScripts(){
   for (auto &[script, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onFrame();
   }
@@ -77,6 +93,9 @@ void onFrameAllScripts(){
 
 void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     auto moduleId = currentModuleId();
     if (moduleId == obj1){
@@ -92,6 +111,9 @@ void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::
 }
 void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     auto moduleId = currentModuleId();
     if (moduleId == obj1){
@@ -108,18 +130,27 @@ void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){
 
 void onMouseCallbackAllScripts(int button, int action, int mods){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onMouseCallback(button, action, mods);
   }
 }
 void onMouseMoveCallbackAllScripts(double xPos, double yPos){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onMouseMoveCallback(xPos, yPos);
   }
 }
 void onScrollCallbackAllScripts(double amount){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onScrollCallback(amount);
   }
@@ -127,12 +158,18 @@ void onScrollCallbackAllScripts(double amount){
 
 void onObjectSelectedAllScripts(int32_t index, glm::vec3 color){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onObjectSelected(index, color);
   }
 }
 void onObjectHoverAllScripts(int32_t index, bool isHover){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     if (isHover){
       onObjectHover(index);
@@ -143,12 +180,18 @@ void onObjectHoverAllScripts(int32_t index, bool isHover){
 }
 void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onKeyCallback(key, scancode, action, mods);
   }
 }
 void onKeyCharCallbackAllScripts(unsigned int codepoint){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onKeyCharCallback(codepoint);
   }
@@ -156,6 +199,9 @@ void onKeyCharCallbackAllScripts(unsigned int codepoint){
 
 void onCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onCameraSystemChange(camera, usingBuiltInCamera);
   }
@@ -166,6 +212,9 @@ void onMessageAllScripts(std::queue<StringString>& messages){
     messages.pop();
 
     for (auto &[name, scriptModule] : scriptnameToModule){
+      if (!scriptModule.isvalid){
+        continue;
+      }
       scm_set_current_module(scriptModule.module);
       onAttrMessage(message.strTopic, message.strValue);
     }
@@ -174,12 +223,18 @@ void onMessageAllScripts(std::queue<StringString>& messages){
 
 void onTcpMessageAllScripts(std::string& message){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onTcpMessage(message);
   } 
 }
 void onUdpMessageAllScripts(std::string& message){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onUdpMessage(message);
   } 
@@ -187,12 +242,18 @@ void onUdpMessageAllScripts(std::string& message){
 
 void onPlayerJoinedAllScripts(std::string& connectionHash){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onPlayerJoined(connectionHash);
   } 
 }
 void onPlayerLeaveAllScripts(std::string& connectionHash){
   for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
     scm_set_current_module(scriptModule.module);
     onPlayerLeave(connectionHash);
   } 

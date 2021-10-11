@@ -1356,7 +1356,8 @@ int main(int argc, char* argv[]){
     schemeBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
     extensionsOnFrame(extensions);
-    
+    unloadScriptsCleanup();
+
     portalIdCache.clear();
 
 
