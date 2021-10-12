@@ -110,6 +110,7 @@ struct GameobjAttributes {
   // todo get rid of these fields
   std::vector<std::string> children;
 };
+std::string print(GameobjAttributes& attr);
 
 typedef void (*func_t)();
 

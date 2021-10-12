@@ -395,6 +395,23 @@ int numUniqueDepthLayers(std::vector<LayerInfo> layers){
   return depths.size();
 }
 
+std::string print(GameobjAttributes& attr){
+  std::string content = "";
+  content = content + "string-attr[" + std::to_string(attr.stringAttributes.size()) + "]\n--------\n";
+  for (auto &[key, value] : attr.stringAttributes){
+    content = content + key + ":" + value + "\n"; 
+  }
+  content = content + "vec-attr[" + std::to_string(attr.vecAttributes.size()) + "]\n--------\n";
+  for (auto &[key, value] : attr.vecAttributes){
+    content = content + key + ":" + print(value) + "\n"; 
+  }
+  content = content + "num-attr[" + std::to_string(attr.numAttributes.size()) + "]\n--------\n";
+  for (auto &[key, value] : attr.numAttributes){
+    content = content + key + ":" + std::to_string(value) + "\n"; 
+  }  
+  return content;
+}
+
 bool aboutEqual(float one, float two){
   float delta = 0.00001f;
   return one > (two - delta) && one < (two + delta);
