@@ -8,8 +8,16 @@ struct LogProfile {
 };
 
 std::vector<LogProfile> profiles;
+bool shouldProfile = false;
+
+void setShouldProfile(bool profile){
+  shouldProfile = profile;
+}
 
 int startProfile(const char* description){
+  if (!shouldProfile){
+    return 0;
+  }
   profiles.push_back(LogProfile{
     .startTime = glfwGetTime(),
     .endTime = -1,
@@ -19,6 +27,9 @@ int startProfile(const char* description){
   return profiles.size() - 1;
 }
 void stopProfile(int id){
+  if (!shouldProfile){
+    return;
+  }
   LogProfile& profile = profiles.at(id);
   profile.endTime = glfwGetTime();
   profile.complete = true;

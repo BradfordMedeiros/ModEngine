@@ -11,7 +11,7 @@
   BODY \
   stopProfile(value); }
   
-
+void setShouldProfile(bool profile);
 int startProfile(const char* description);
 void stopProfile(int id);
 std::string dumpProfiling();
