@@ -51,7 +51,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   if (attributes.stringAttributes.find("physics") != attributes.stringAttributes.end()){
     object.physics.enabled = attributes.stringAttributes.at("physics") == "enabled";
   }else{
-    object.physics.enabled = true;
+    object.physics.enabled = false;
   }
 
   // old default in getDefaultPhysics was false

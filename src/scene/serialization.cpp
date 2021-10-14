@@ -133,22 +133,6 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
   return objectAttributes;
 }
 
-GameobjAttributes fieldsToAttributes(std::map<std::string, std::string> fields){
-  //std::cout << "fields to attributes: " << std::endl;
-  std::vector<Token> tokens;
-  for (auto [attribute, payload] : fields){
-    //std::cout << "attribute: " << attribute << ", payload: " << payload << std::endl;
-    tokens.push_back(Token {
-      .target = "default",
-      .attribute = attribute,
-      .payload = payload,
-    });
-  }    
-  auto gameobjs = deserializeSceneTokens(tokens);
-  assert(gameobjs.size() == 1);
-  return gameobjs.at("default"); 
-}
-
 bool isDefaultPosition(glm::vec3 pos){
   return pos.x == 0 && pos.y == 0 && pos.z == 0;
 }
@@ -190,8 +174,8 @@ std::string serializeObj(
   }
   sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
 
-  if (!gameobject.physicsOptions.enabled){
-    sceneData = sceneData + gameobjectName + ":physics:disabled" + "\n"; 
+  if (gameobject.physicsOptions.enabled){
+    sceneData = sceneData + gameobjectName + ":physics:enabled" + "\n"; 
   }
   if (!gameobject.physicsOptions.isStatic){
     sceneData = sceneData + gameobjectName + ":physics_type:dynamic" + "\n"; 

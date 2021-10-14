@@ -13,6 +13,7 @@ void addEmitter(
   bool enabled
 ){
   std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
+  std::cout << "emitter particle attrs: " << print(particleAttributes) << std::endl;
 
   Emitter emitter {
     .name = name,
@@ -124,18 +125,28 @@ void updateEmitters(
     }
   }
 
+
+
+
   for (auto &emitter : system.emitters){
     if (!emitter.enabled && emitter.forceParticles.size() == 0){
       continue;
     }
     bool forceSpawn = emitter.forceParticles.size() > 0;
     if (shouldSpawnParticle(emitter, currentTime) || forceSpawn){
-      auto newParticleOpts = emitter.forceParticles.front();
+      NewParticleOptions newParticleOpts {
+        .position = std::nullopt,
+        .orientation = std::nullopt,
+        .velocity = std::nullopt,
+        .angularVelocity = std::nullopt,
+      };
       if (forceSpawn){
+        newParticleOpts = emitter.forceParticles.front();
         emitter.forceParticles.pop_front();
       }
       emitter.currentParticles+= 1; 
       auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, newParticleOpts);
+
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,
         .spawntime = currentTime,

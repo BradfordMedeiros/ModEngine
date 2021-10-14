@@ -117,15 +117,31 @@ GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVox
   return obj;
 }
 
-std::map<std::string, std::string> particleFields(std::map<std::string, std::string> additionalFields){
-  std::map<std::string, std::string> particleAttributes;
-  for (auto [key, value] : additionalFields){
+GameobjAttributes particleFields(GameobjAttributes& attributes){
+  GameobjAttributes attr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttributes = {},
+  };
+  for (auto [key, value] : attributes.stringAttributes){
     if (key.at(0) == '+' && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      particleAttributes[newKey] = value;
+      attr.stringAttributes[newKey] = value;
     }
   }
-  return particleAttributes;
+  for (auto [key, value] : attributes.numAttributes){
+    if (key.at(0) == '+' && key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      attr.numAttributes[newKey] = value;
+    }
+  }
+  for (auto [key, value] : attributes.vecAttributes){
+    if (key.at(0) == '+' && key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      attr.vecAttributes[newKey] = value;
+    }
+  }
+  return attr;
 }
 
 struct ValueVariance {
@@ -168,14 +184,15 @@ std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> addit
   return deltas;
 }
 
-GameObjectEmitter createEmitter(std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter, GameobjAttributes& attributes){
+GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAttributes& attributes, std::vector<EmitterDelta>, bool)> addEmitter, GameobjAttributes& attributes){
   GameObjectEmitter obj {};
   float spawnrate = attributes.numAttributes.find("rate") != attributes.numAttributes.end() ? attributes.numAttributes.at("rate") : 1.f;
   float lifetime = attributes.numAttributes.find("duration") != attributes.numAttributes.end() ? attributes.numAttributes.at("duration") : 10.f;
   int limit = attributes.numAttributes.find("limit") != attributes.numAttributes.end() ? attributes.numAttributes.at("limit") : 10;
   auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
   assert(limit >= 0);
-  addEmitter(spawnrate, lifetime, limit, particleFields(attributes.stringAttributes), emitterDeltas(attributes.stringAttributes), enabled);
+  auto emitterAttr = particleFields(attributes);
+  addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes.stringAttributes), enabled);
   return obj;
 }
 
@@ -374,7 +391,7 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onCollisionChange,
-  std::function<void(float, float, int, std::map<std::string, std::string>, std::vector<EmitterDelta>, bool)> addEmitter,
+  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
   if (objectType == "default"){
