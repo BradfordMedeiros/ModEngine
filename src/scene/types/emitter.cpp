@@ -10,7 +10,8 @@ void addEmitter(
   float lifetime, 
   GameobjAttributes particleAttributes, 
   std::vector<EmitterDelta> deltas,
-  bool enabled
+  bool enabled,
+  EmitterDeleteBehavior deleteBehavior
 ){
   std::cout << "INFO: emitter: adding emitter -  " << name << ", " << currentTime << std::endl;
   std::cout << "emitter particle attrs: " << print(particleAttributes) << std::endl;
@@ -25,6 +26,7 @@ void addEmitter(
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
     .deltas =  deltas,
+    .deleteBehavior = deleteBehavior,
     .enabled = enabled,
     .forceParticles = {},
   };

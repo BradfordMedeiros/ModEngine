@@ -609,8 +609,8 @@ void addObjectToWorld(
         assert(false); // think about what this should do better!
         updatePhysicsBody(world, id);
       },
-      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled) -> void {
-        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled);
+      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
+        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
       },
       [&world, id](MeshData& meshdata) -> Mesh {
         return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {

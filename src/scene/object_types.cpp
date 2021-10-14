@@ -187,15 +187,22 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   return deltas;
 }
 
-GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAttributes& attributes, std::vector<EmitterDelta>, bool)> addEmitter, GameobjAttributes& attributes){
+GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAttributes& attributes, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter, GameobjAttributes& attributes){
   GameObjectEmitter obj {};
   float spawnrate = attributes.numAttributes.find("rate") != attributes.numAttributes.end() ? attributes.numAttributes.at("rate") : 1.f;
   float lifetime = attributes.numAttributes.find("duration") != attributes.numAttributes.end() ? attributes.numAttributes.at("duration") : 10.f;
   int limit = attributes.numAttributes.find("limit") != attributes.numAttributes.end() ? attributes.numAttributes.at("limit") : 10;
   auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
   assert(limit >= 0);
+  
+  auto deleteValueStr = attributes.stringAttributes.find("onremove") != attributes.stringAttributes.end() ? attributes.stringAttributes.at("onremove") : "delete";
+  auto deleteType = EMITTER_DELETE;
+  if (deleteValueStr == "orphan"){
+    deleteType = EMITTER_ORPHAN;
+  }
+
   auto emitterAttr = particleFields(attributes);
-  addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled);
+  addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled, deleteType);
   return obj;
 }
 
@@ -394,7 +401,7 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onCollisionChange,
-  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool)> addEmitter,
+  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
   if (objectType == "default"){

@@ -29,6 +29,7 @@ struct NewParticleOptions {
   std::optional<glm::vec3> angularVelocity;
 };
 
+enum EmitterDeleteBehavior { EMITTER_DELETE, EMITTER_ORPHAN };
 struct Emitter {
   std::string name;
   objid emitterNodeId;
@@ -40,6 +41,7 @@ struct Emitter {
   float lifetime;
   GameobjAttributes particleAttributes;
   std::vector<EmitterDelta> deltas;
+  EmitterDeleteBehavior deleteBehavior;
 
   bool enabled;
   std::deque<NewParticleOptions> forceParticles;
@@ -48,7 +50,7 @@ struct EmitterSystem {
   std::vector<Emitter> emitters;
 };
 
-void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::vector<EmitterDelta> deltas, bool enabled);
+void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);
 void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 

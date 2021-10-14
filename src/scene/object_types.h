@@ -287,7 +287,7 @@ void addObject(
   std::function<Texture(std::string)> ensureTextureLoaded,
   std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
   std::function<void()> onCollisionChange,
-  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool)> addEmitter,
+  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 );
 
