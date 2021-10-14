@@ -1014,13 +1014,6 @@ void callbackEntities(World& world){
   world.entitiesToUpdate.clear();
 }
 
-void updateAttributeDelta(World& world, objid id, std::string attribute, AttributeValue delta){
-  std::cout << "Update particle diff: (" << attribute << ")" << std::endl;
-  GameObject& gameobj = getGameObject(world, id);
-  applyAttributeDelta(gameobj, attribute, delta);
-  afterAttributesSet(world, id, gameobj, attribute == "physics_velocity");
-}
-
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
   updateEmitters(
     world.emitters, 
@@ -1049,8 +1042,13 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       }
     },
     [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
-      std::cout << "update particle: " << attribute << std::endl;
-      updateAttributeDelta(world, id, attribute, delta);
+      std::cout << "update particle attr -- WARNING ADD FPS INDEPNDENC HERE: " << attribute << std::endl;
+
+      GameObject& gameobj = getGameObject(world, id);
+      applyAttributeDelta(gameobj, attribute, delta);
+      afterAttributesSet(world, id, gameobj, attribute == "physics_velocity");
+
+      //setAttributes(world, id, GameobjAttributes& attr){
     }
   );  
 

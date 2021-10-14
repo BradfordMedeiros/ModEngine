@@ -149,27 +149,30 @@ struct ValueVariance {
   glm::vec3 variance;
   std::vector<float> lifetimeEffect;
 };
-std::vector<EmitterDelta> emitterDeltas(std::map<std::string, std::string> additionalFields){
+std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   std::map<std::string, ValueVariance> values;
-  for (auto [key, value] : additionalFields){
+  for (auto [key, _] : attributes.vecAttributes){
     if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
       values[newKey] = ValueVariance {
         .value = glm::vec3(0.f, 0.f, 0.f),
         .variance = glm::vec3(0.f, 0.f, 0.f),
+        .lifetimeEffect = {},
       };
     }
   }
-  for (auto [key, value] : additionalFields){
+  
+  for (auto [key, value] : attributes.vecAttributes){
     if (key.size() > 1){
       auto newKey = key.substr(1, key.size());
       if (key.at(0) == '!'){
-        values.at(newKey).value = parseVec(value);
+        values.at(newKey).value = value;
       }else if (key.at(0) == '?'){
-        values.at(newKey).variance = parseVec(value);
-      }else if (key.at(0) == '%'){
-        values.at(newKey).lifetimeEffect = parseFloatVec(value);
+        values.at(newKey).variance = value;
       }
+      /*else if (key.at(0) == '%'){
+        values.at(newKey).lifetimeEffect = parseFloatVec(value);
+      }*/
     }
   }
   std::vector<EmitterDelta> deltas;
@@ -192,7 +195,7 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAtt
   auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
   assert(limit >= 0);
   auto emitterAttr = particleFields(attributes);
-  addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes.stringAttributes), enabled);
+  addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled);
   return obj;
 }
 
