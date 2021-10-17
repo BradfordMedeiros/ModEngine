@@ -438,7 +438,7 @@ World createWorld(
   std::vector<std::string> defaultMeshes
 ){
   auto objectMapping = getObjectMapping();
-  EmitterSystem emitters;
+  EmitterSystem emitters { .emitters = {}, .additionalParticlesToRemove = {} };
   std::set<objid> entitiesToUpdate;
 
 

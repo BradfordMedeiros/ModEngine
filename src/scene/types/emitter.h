@@ -48,6 +48,7 @@ struct Emitter {
 };
 struct EmitterSystem {
   std::vector<Emitter> emitters;
+  std::vector<objid> additionalParticlesToRemove;
 };
 
 void addEmitter(EmitterSystem& system, std::string name, objid emitterNodeId, float currentTime, unsigned int targetParticles, float spawnrate, float lifetime, GameobjAttributes particleAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior deleteBehavior);

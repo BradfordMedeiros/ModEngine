@@ -64,7 +64,18 @@ EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<std::strin
 }
 
 void removeEmitter(EmitterSystem& system, std::string name){
-  auto remainingEmitters = filterEmitters(system, { name }).remainingEmitters;
+  auto emitters = filterEmitters(system, { name });
+  auto remainingEmitters = emitters.remainingEmitters;
+  auto removedEmitters = emitters.removedEmitters;
+  for (auto emitter : removedEmitters){
+    if (emitter.deleteBehavior == EMITTER_DELETE){
+      for (auto particle : emitter.particles){
+        system.additionalParticlesToRemove.push_back(particle.id);
+      }
+    }else if (emitter.deleteBehavior == EMITTER_ORPHAN){
+      // do nothing, orphan this.  particles removed when scene gets unloaded
+    }
+  }
   assert(remainingEmitters.size() == system.emitters.size() - 1);  // Better to just no op?)
   system.emitters = remainingEmitters;
 }
@@ -127,8 +138,10 @@ void updateEmitters(
     }
   }
 
-
-
+  for (auto particleId : system.additionalParticlesToRemove){
+    rmParticle(particleId);
+  }
+  system.additionalParticlesToRemove = {};
 
   for (auto &emitter : system.emitters){
     if (!emitter.enabled && emitter.forceParticles.size() == 0){
