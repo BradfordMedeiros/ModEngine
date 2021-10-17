@@ -54,12 +54,6 @@ target_link_libraries(${PROJECT_NAME} "alut")
 target_link_libraries(${PROJECT_NAME} "guile-2.2")
 target_include_directories(${PROJECT_NAME} PRIVATE "/usr/include/guile/2.2")
 
-target_link_libraries(${PROJECT_NAME} ${AVFORMAT_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${AVCODEC_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${AVUTIL_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${SWSCALE_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} "swresample")      # todo make standard
-
 # Command line parsing - CXXopts 
 set(CXX_DIR "${LIB_DIR}/cxxopts")
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE INTERNAL "build cxxopts examples")
