@@ -11,7 +11,6 @@
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
 #include "./types/sound.h"
-#include "./types/video.h"
 #include "./types/emitter.h"
 #include "./serialization.h"
 #include <unistd.h>
@@ -132,12 +131,6 @@ struct GameObjectUILayout {
   float margin;
 };
 
-struct GameObjectVideo {
-  VideoContent video;
-  std::string source;
-  BufferedAudio sound;
-};
-
 enum GeoShapeType { GEODEFAULT, GEOSPHERE };
 struct GameObjectGeo {
   std::vector<glm::vec3> points;
@@ -160,7 +153,6 @@ typedef std::variant<
   GameObjectUISlider,
   GameObjectUIText,
   GameObjectUILayout,
-  GameObjectVideo,
   GameObjectGeo
 > GameObjectObj;
 
@@ -245,11 +237,6 @@ static Field uiLayoutField {
   .type = "layout",
 };
 
-static Field videoField {
-  .prefix = '=',
-  .type = "video",
-};
-
 static Field geoField {
   .prefix = '<',
   .type = "geo",
@@ -269,7 +256,6 @@ static std::vector fields = {
   navconnectionField, 
   uiButtonField, 
   uiSliderField,
-  videoField,
   uiTextField,
   uiLayoutField,
   geoField,

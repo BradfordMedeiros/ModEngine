@@ -7,13 +7,6 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(AVCODEC     REQUIRED libavcodec)
-pkg_check_modules(AVFORMAT    REQUIRED libavformat)
-pkg_check_modules(AVUTIL      REQUIRED libavutil)
-pkg_check_modules(SWSCALE     REQUIRED  libswscale)
-pkg_check_modules(SWRESAMPLE  REQUIRED libswresample)
-
 file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
 
 #Executable

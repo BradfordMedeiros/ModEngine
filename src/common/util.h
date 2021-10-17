@@ -24,7 +24,7 @@ std::optional<std::string> getExtension(std::string file);
 std::optional<std::string> getPreExtension(std::string file);
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions);
 
-enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, VIDEO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
+enum FILE_EXTENSION_TYPE { IMAGE_EXTENSION, AUDIO_EXTENSION, MODEL_EXTENSION, UNKNOWN_EXTENSION };
 FILE_EXTENSION_TYPE getFileType(std::string filepath);
 
 std::string trim(const std::string& str);

@@ -372,9 +372,6 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
       setTexture(selected(state.editor), paths[i]);
     }else if (fileType == AUDIO_EXTENSION){
       makeObjectAttr(sceneId, "&" + objectName, {{ "clip", paths[i] }}, {}, {});
-    }else if (fileType == VIDEO_EXTENSION){
-      std::cout << "VIDEO FILE: doing nothing" << std::endl;
-      makeObjectAttr(sceneId, "=" + objectName, {{ "source", paths[i] }}, {}, {});
     }else if (fileType == MODEL_EXTENSION){
       makeObjectAttr(sceneId, objectName, {{ "mesh", paths[i] }}, {}, {});
     }else if (fileType == UNKNOWN_EXTENSION){

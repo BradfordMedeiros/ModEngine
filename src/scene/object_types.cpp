@@ -328,29 +328,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr){
   return obj;
 }
 
-GameObjectVideo createVideo(
-  GameobjAttributes& attr, 
-  std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded
-){
-  auto videoPath = attr.stringAttributes.at("source");
-  auto video = loadVideo(videoPath.c_str());
-  std::cout << "INFO: OBJECT TYPE: CREATE VIDEO" << std::endl;
-
-  ensureTextureDataLoaded(
-    videoPath,
-    video.avFrame2 -> data[0], 
-    video.avFrame2 -> width, 
-    video.avFrame2 -> height, 
-    4
-  );
-  GameObjectVideo obj {
-    .video = video,
-    .source = videoPath,
-    .sound = createBufferedAudio(),
-  };
-  return obj;
-}
-
 std::vector<glm::vec3> parsePoints(std::string value){
   std::vector<glm::vec3> points;
   auto pointsArr = filterWhitespace(split(value, '|'));
@@ -435,8 +412,6 @@ void addObject(
     mapping[id] = createUIText(attr);
   }else if (objectType == "layout"){
     mapping[id] = createUILayout(attr);
-  }else if (objectType == "video"){
-    mapping[id] = createVideo(attr, ensureTextureDataLoaded);
   }else if (objectType == "geo"){
     mapping[id] = createGeo(attr);
   }else{
@@ -465,12 +440,6 @@ void removeObject(
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&Object);
   if (heightmapObj !=NULL){
     delete[] heightmapObj -> heightmap.data;
-  }
-
-  auto videoObj = std::get_if<GameObjectVideo>(&Object);
-  if (videoObj != NULL){
-    freeVideoContent(videoObj -> video);
-    freeBufferedAudio(videoObj -> sound);
   }
 
   mapping.erase(id);
@@ -714,11 +683,6 @@ int renderObject(
     return layoutVertexCount;
   }
 
-  auto videoObj = std::get_if<GameObjectVideo>(&toRender);
-  if (videoObj != NULL){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
-  }
-
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
     auto sphereVertexCount = 0;
@@ -838,12 +802,6 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
       geoObj -> points = parsePoints(attributes.stringAttributes.at("points"));
     }
     return;
-  }
-
-  auto videoObj = std::get_if<GameObjectVideo>(&toRender);
-  if (videoObj != NULL){
-    assert(false);
-    return; 
   }
 
   auto textObj = std::get_if<GameObjectUIText>(&toRender);
@@ -1042,13 +1000,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     return {};
   }
 
-  auto uiVideoObj = std::get_if<GameObjectVideo>(&objectToSerialize);
-  if (uiVideoObj != NULL){
-    std::cout << "ERROR: VIDEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};
-  }
-
   auto geoObj = std::get_if<GameObjectGeo>(&objectToSerialize);
   if (geoObj != NULL){
     std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
@@ -1217,46 +1168,6 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
   }
 }
 
-void processVideoFrame(GameObjectVideo* videoObj, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData){
-  int stream = nextFrame(videoObj -> video);
-  if (stream == videoObj -> video.streamIndexs.video){
-    updateTextureData( 
-      videoObj -> source,
-      videoObj -> video.avFrame2 -> data[0], 
-      videoObj -> video.avFrame2 -> width, 
-      videoObj -> video.avFrame2 -> height
-    );
-  }else if (stream == videoObj -> video.streamIndexs.audio){
-    auto audioCodec = videoObj -> video.codecs.audioCodec;
-    auto bufferSize = av_samples_get_buffer_size(NULL, audioCodec -> channels, videoObj -> video.avFrame -> nb_samples, audioCodec -> sample_fmt, 0);
-    auto numChannels = audioCodec -> channels;
-
-    /*uint8_t* bufferData = new uint8_t[bufferSize];
-    //https://stackoverflow.com/questions/21386135/ffmpeg-openal-playback-streaming-sound-from-video-wont-work
-
-    std::cout << "num channels: " << numChannels << std::endl;
-    // @TODO process all channels
-    // @TODO chandle more formats to eliminate assertion below 
-    std::cout << "fmt name: " << av_get_sample_fmt_name(audioCodec -> sample_fmt) << std::endl;;
-    assert(audioCodec -> sample_fmt == AV_SAMPLE_FMT_S16);
-   
-
-
-    playBufferedAudio(videoObj -> sound, videoObj -> video.avFrame -> data[0], bufferSize, audioCodec -> sample_rate);*/
-  }
-}
-
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp){
-  for (auto &[_, obj] : mapping){
-    auto videoObj = std::get_if<GameObjectVideo>(&obj);
-    if (videoObj != NULL){
-      while (true){
-        bool processedToCurrentTime =  videoObj -> video.videoTimestamp > (timestamp + 10);
-        if (processedToCurrentTime){
-          break;
-        }
-        processVideoFrame(videoObj, updateTextureData);
-      }
-    }
-  }
+  // placeholder unused for now
 }
