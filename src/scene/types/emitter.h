@@ -29,7 +29,7 @@ struct NewParticleOptions {
   std::optional<glm::vec3> angularVelocity;
 };
 
-enum EmitterDeleteBehavior { EMITTER_DELETE, EMITTER_ORPHAN };
+enum EmitterDeleteBehavior { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH };
 struct Emitter {
   std::string name;
   objid emitterNodeId;
@@ -44,6 +44,7 @@ struct Emitter {
   EmitterDeleteBehavior deleteBehavior;
 
   bool enabled;
+  bool active;
   std::deque<NewParticleOptions> forceParticles;
 };
 struct EmitterSystem {

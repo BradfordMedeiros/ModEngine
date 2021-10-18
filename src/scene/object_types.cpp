@@ -200,6 +200,9 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAtt
   if (deleteValueStr == "orphan"){
     deleteType = EMITTER_ORPHAN;
   }
+  if (deleteValueStr == "finish"){
+    deleteType = EMITTER_FINISH;
+  }
 
   auto emitterAttr = particleFields(attributes);
   addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled, deleteType);

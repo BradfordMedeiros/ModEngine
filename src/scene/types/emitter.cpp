@@ -28,6 +28,7 @@ void addEmitter(
     .deltas =  deltas,
     .deleteBehavior = deleteBehavior,
     .enabled = enabled,
+    .active = true,
     .forceParticles = {},
   };
   system.emitters.push_back(emitter);
@@ -38,13 +39,13 @@ struct EmitterFilterResult {
   std::vector<Emitter> remainingEmitters;
 };
 
-EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<std::string> toRemove){
+EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<std::string> toRemove, EmitterDeleteBehavior preserveType){
   std::vector<Emitter> removedEmitters;
   std::vector<Emitter> remainingEmitters;
   for (auto emitter : system.emitters){
     bool shouldRemove = false;
     for (auto emitterToRemove : toRemove){
-      if (emitter.name == emitterToRemove){
+      if (emitter.name == emitterToRemove && emitter.deleteBehavior != preserveType){
         shouldRemove = true;
         break;
       }
@@ -64,7 +65,7 @@ EmitterFilterResult filterEmitters(EmitterSystem& system, std::vector<std::strin
 }
 
 void removeEmitter(EmitterSystem& system, std::string name){
-  auto emitters = filterEmitters(system, { name });
+  auto emitters = filterEmitters(system, { name }, EMITTER_FINISH);
   auto remainingEmitters = emitters.remainingEmitters;
   auto removedEmitters = emitters.removedEmitters;
   for (auto emitter : removedEmitters){
@@ -76,7 +77,13 @@ void removeEmitter(EmitterSystem& system, std::string name){
       // do nothing, orphan this.  particles removed when scene gets unloaded
     }
   }
-  assert(remainingEmitters.size() == system.emitters.size() - 1);  // Better to just no op?)
+
+  for (auto &emitter : remainingEmitters){
+    if (emitter.name == name && emitter.deleteBehavior == EMITTER_FINISH){
+      emitter.active = false;
+    }
+  }
+
   system.emitters = remainingEmitters;
 }
 
@@ -106,6 +113,16 @@ void updateEmitters(
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
+  std::vector<std::string> emittersToRemove;
+  for (auto &emitter : system.emitters){
+    if (!emitter.active && emitter.particles.size() == 0){
+      emittersToRemove.push_back(emitter.name);
+    }
+  }
+  if (emittersToRemove.size() > 0){
+    system.emitters  = filterEmitters(system, emittersToRemove, EMITTER_NOTYPE).remainingEmitters;
+  }
+
   for (auto &emitter : system.emitters){
     for (auto particle : emitter.particles){
       //std::cout << "INFO: PARTICLES: " << particleId << " , attribute: " << emitter.delta.attributeName << std::endl;
@@ -144,7 +161,7 @@ void updateEmitters(
   system.additionalParticlesToRemove = {};
 
   for (auto &emitter : system.emitters){
-    if (!emitter.enabled && emitter.forceParticles.size() == 0){
+    if (!emitter.active || (!emitter.enabled && emitter.forceParticles.size() == 0)){
       continue;
     }
     bool forceSpawn = emitter.forceParticles.size() > 0;
