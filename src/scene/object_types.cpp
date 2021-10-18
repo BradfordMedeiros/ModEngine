@@ -55,18 +55,6 @@ GameObjectMesh createMesh(
   return obj;
 }
 
-GameObjectSound createSound(GameobjAttributes& attr){
-  auto clip = attr.stringAttributes.at("clip");
-  auto loop = (attr.stringAttributes.find("loop") != attr.stringAttributes.end()) && (attr.stringAttributes.at("loop") == "true");
-  auto source = loadSoundState(clip, loop);
-  GameObjectSound obj {
-    .clip = clip,
-    .source = source,
-    .loop = loop,
-  };
-  return obj;
-}
-
 GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
   auto textureString = attr.stringAttributes.find("fromtextures") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("fromtextures");
   auto voxel = createVoxels(parseVoxelState(attr.stringAttributes.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
@@ -327,6 +315,11 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
   },
+  ObjectType {
+    .name = "sound",
+    .variantType = getVariantIndex(GameObjectSound{}),
+    .createObj = createSound,
+  },
 };
 
 void addObject(
@@ -351,8 +344,6 @@ void addObject(
 
   if (objectType == "default"){
     mapping[id] = createMesh(attr, meshes, ensureMeshLoaded, ensureTextureLoaded);
-  }else if(objectType == "sound"){
-    mapping[id] = createSound(attr);
   }else if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
     mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);

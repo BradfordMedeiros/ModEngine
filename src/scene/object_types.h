@@ -10,13 +10,13 @@
 #include "./types/voxels.h"
 #include "./types/heightmap.h"
 #include "./types/ainav.h"
-#include "./types/sound.h"
 #include "./types/emitter.h"
 #include "./serialization.h"
 #include "./objtypes/obj_geo.h"
 #include "./objtypes/obj_camera.h"
 #include "./objtypes/obj_portal.h"
 #include "./objtypes/obj_light.h"
+#include "./objtypes/obj_sound.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
@@ -45,12 +45,6 @@ struct GameObjectMesh {
   float discardAmount;
   float emissionAmount;
   glm::vec3 tint;
-};
-
-struct GameObjectSound{
-  std::string clip;  
-  ALuint source;
-  bool loop;
 };
 
 struct GameObjectVoxel {
