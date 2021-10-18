@@ -67,33 +67,6 @@ GameObjectSound createSound(GameobjAttributes& attr){
   return obj;
 }
 
-LightType getLightType(std::string type){
-  if (type == "spotlight"){
-    return LIGHT_SPOTLIGHT;
-  }
-  if (type == "directional"){
-    return LIGHT_DIRECTIONAL;
-  }
-  return LIGHT_POINT;
-}
-GameObjectLight createLight(GameobjAttributes& attr){
-  auto color = attr.vecAttributes.find("color") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("color");
-  auto lightType = attr.stringAttributes.find("type") == attr.stringAttributes.end() ? LIGHT_POINT : getLightType(attr.stringAttributes.at("type"));
-  auto maxangle = (lightType != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
-
-  // constant, linear, quadratic
-  // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
-  auto attenuation = attr.vecAttributes.find("attenuation") == attr.vecAttributes.end() ? glm::vec3(1.0, 0.007, 0.0002) : attr.vecAttributes.at("attenuation");
-
-  GameObjectLight obj {
-    .color = color,
-    .type = lightType,
-    .maxangle = maxangle, 
-    .attenuation = attenuation,
-  };
-  return obj;
-}
-
 GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
   auto textureString = attr.stringAttributes.find("fromtextures") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("fromtextures");
   auto voxel = createVoxels(parseVoxelState(attr.stringAttributes.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
@@ -342,6 +315,10 @@ std::vector<ObjectType> objTypes = {
     .name = "portal",
     .createObj = createPortal,
   },
+  ObjectType {
+    .name = "light",
+    .createObj = createLight,
+  },
 };
 
 void addObject(
@@ -368,8 +345,6 @@ void addObject(
     mapping[id] = createMesh(attr, meshes, ensureMeshLoaded, ensureTextureLoaded);
   }else if(objectType == "sound"){
     mapping[id] = createSound(attr);
-  }else if(objectType == "light"){
-    mapping[id] = createLight(attr);
   }else if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
     mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);

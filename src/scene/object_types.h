@@ -16,6 +16,7 @@
 #include "./objtypes/obj_geo.h"
 #include "./objtypes/obj_camera.h"
 #include "./objtypes/obj_portal.h"
+#include "./objtypes/obj_light.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
@@ -52,13 +53,6 @@ struct GameObjectSound{
   bool loop;
 };
 
-enum LightType { LIGHT_POINT, LIGHT_SPOTLIGHT, LIGHT_DIRECTIONAL };
-struct GameObjectLight {
-  glm::vec3 color;
-  LightType type;
-  float maxangle;
-  glm::vec3 attenuation;
-};
 struct GameObjectVoxel {
   Voxels voxel;
 };
