@@ -302,21 +302,29 @@ std::string pointsToString(std::vector<glm::vec3>& points){
   return value;
 }
 
+std::size_t getVariantIndex(GameObjectObj gameobj){
+  return gameobj.index();
+}
+
 std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "geo",
+    .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
   },
   ObjectType {
     .name = "camera",
+    .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
   },
   ObjectType {
     .name = "portal",
+    .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
   },
   ObjectType {
     .name = "light",
+    .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
   },
 };
