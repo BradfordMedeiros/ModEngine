@@ -54,21 +54,7 @@ GameObjectMesh createMesh(
   };
   return obj;
 }
-GameObjectCamera createCamera(){
-  GameObjectCamera obj {};
-  return obj;
-}
-GameObjectPortal createPortal(GameobjAttributes& attr){
-  bool hasCamera = attr.stringAttributes.find("camera") != attr.stringAttributes.end();
-  auto camera = hasCamera ? attr.stringAttributes.at("camera") : "";
-  auto perspective = attr.stringAttributes.find("perspective") != attr.stringAttributes.end() ? attr.stringAttributes.at("perspective") == "true" : false;
 
-  GameObjectPortal obj {
-    .camera = camera,
-    .perspective = perspective,
-  };
-  return obj;
-}
 GameObjectSound createSound(GameobjAttributes& attr){
   auto clip = attr.stringAttributes.at("clip");
   auto loop = (attr.stringAttributes.find("loop") != attr.stringAttributes.end()) && (attr.stringAttributes.at("loop") == "true");
@@ -331,17 +317,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr){
   return obj;
 }
 
-std::vector<glm::vec3> parsePoints(std::string value){
-  std::vector<glm::vec3> points;
-  auto pointsArr = filterWhitespace(split(value, '|'));
-  for (auto point : pointsArr){
-    glm::vec3 pointValue(0.f, 0.f, 0.f);
-    auto isVec = maybeParseVec(point, pointValue);
-    assert(isVec);
-    points.push_back(pointValue);
-  }
-  return points;
-}
 std::string pointsToString(std::vector<glm::vec3>& points){
   std::string value = "";
   for (int i = 0; i < points.size(); i++){
@@ -353,23 +328,21 @@ std::string pointsToString(std::vector<glm::vec3>& points){
   }
   return value;
 }
-GameObjectGeo createGeo(GameobjAttributes& attr){
-  auto points = parsePoints(
-    attr.stringAttributes.find("points") != attr.stringAttributes.end() ? 
-    attr.stringAttributes.at("points") : 
-    ""
-  );
 
-  auto type = attr.stringAttributes.find("shape") != attr.stringAttributes.end() ? 
-  (attr.stringAttributes.at("shape") == "sphere" ? GEOSPHERE : GEODEFAULT) : 
-  GEODEFAULT;
-
-  GameObjectGeo geo{
-    .points = points,
-    .type = type,
-  };
-  return geo;
-}
+std::vector<ObjectType> objTypes = {
+  ObjectType {
+    .name = "geo",
+    .createObj = createGeo,
+  },
+  ObjectType {
+    .name = "camera",
+    .createObj = createCamera,
+  },
+  ObjectType {
+    .name = "portal",
+    .createObj = createPortal,
+  },
+};
 
 void addObject(
   objid id, 
@@ -384,12 +357,15 @@ void addObject(
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
+  for (auto &objType : objTypes){
+    if (objectType == objType.name){
+      mapping[id] = objType.createObj(attr);
+      return;
+    }
+  }
+
   if (objectType == "default"){
     mapping[id] = createMesh(attr, meshes, ensureMeshLoaded, ensureTextureLoaded);
-  }else if(objectType == "camera"){
-    mapping[id] = createCamera();
-  }else if (objectType == "portal"){
-    mapping[id] = createPortal(attr);
   }else if(objectType == "sound"){
     mapping[id] = createSound(attr);
   }else if(objectType == "light"){
@@ -415,8 +391,6 @@ void addObject(
     mapping[id] = createUIText(attr);
   }else if (objectType == "layout"){
     mapping[id] = createUILayout(attr);
-  }else if (objectType == "geo"){
-    mapping[id] = createGeo(attr);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);

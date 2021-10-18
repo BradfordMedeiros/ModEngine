@@ -13,8 +13,11 @@
 #include "./types/sound.h"
 #include "./types/emitter.h"
 #include "./serialization.h"
-#include <unistd.h>
+#include "./objtypes/obj_geo.h"
+#include "./objtypes/obj_camera.h"
+#include "./objtypes/obj_portal.h"
 
+#include <unistd.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -42,11 +45,7 @@ struct GameObjectMesh {
   float emissionAmount;
   glm::vec3 tint;
 };
-struct GameObjectCamera {};
-struct GameObjectPortal {
-  std::string camera;
-  bool perspective;
-};
+
 struct GameObjectSound{
   std::string clip;  
   ALuint source;
@@ -129,12 +128,6 @@ struct GameObjectUILayout {
   bool showBackpanel;
   glm::vec3 tint;
   float margin;
-};
-
-enum GeoShapeType { GEODEFAULT, GEOSPHERE };
-struct GameObjectGeo {
-  std::vector<glm::vec3> points;
-  GeoShapeType type;
 };
 
 typedef std::variant<
@@ -262,6 +255,12 @@ static std::vector fields = {
 };
 
 std::map<objid, GameObjectObj> getObjectMapping();
+
+struct ObjectType {
+  std::string name;
+  std::function<GameObjectObj(GameobjAttributes&)> createObj;
+};
+
 
 void addObject(
   objid id, 
