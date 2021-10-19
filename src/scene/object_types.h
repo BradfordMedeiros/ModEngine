@@ -18,6 +18,7 @@
 #include "./objtypes/obj_light.h"
 #include "./objtypes/obj_sound.h"
 #include "./objtypes/obj_text.h"
+#include "./objtypes/obj_uilayout.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
@@ -99,19 +100,6 @@ struct GameObjectUISlider {
   int texture;
   int opacityTexture;
   std::string onSlide;
-};
-
-enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
-struct GameObjectUILayout {
-  UILayoutType type;
-  float spacing;
-  std::vector<std::string> elements;
-  int order;
-  BoundInfo boundInfo;
-  glm::vec3 boundOrigin;
-  bool showBackpanel;
-  glm::vec3 tint;
-  float margin;
 };
 
 typedef std::variant<
