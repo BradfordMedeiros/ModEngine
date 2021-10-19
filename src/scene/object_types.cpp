@@ -236,16 +236,6 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, std::map<std::string,
   return obj;
 }
 
-GameObjectUIText createUIText(GameobjAttributes& attr){
-  auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
-  auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
-  GameObjectUIText obj {
-    .value = value,
-    .deltaOffset = deltaOffset,
-  };
-  return obj;
-}
-
 GameObjectUILayout createUILayout(GameobjAttributes& attr){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
   auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
@@ -325,6 +315,12 @@ std::vector<ObjectType> objTypes = {
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
   },
+  ObjectType {
+    .name = "text",
+    .variantType = getVariantIndex(GameObjectUIText{}),
+    .createObj = createUIText,
+    .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
+  },
 };
 
 void addObject(
@@ -366,8 +362,6 @@ void addObject(
     mapping[id] = createUIButton(attr, meshes, ensureTextureLoaded);
   }else if (objectType == "slider"){
     mapping[id] = createUISlider(attr, meshes, ensureTextureLoaded);
-  }else if (objectType == "text"){
-    mapping[id] = createUIText(attr);
   }else if (objectType == "layout"){
     mapping[id] = createUILayout(attr);
   }else{
@@ -690,13 +684,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
   auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
   if (heightmapObj != NULL){
     assert(false);
-    return;
-  }
-
-  auto textObj = std::get_if<GameObjectUIText>(&toRender);
-  if (textObj != NULL){
-    _attributes.stringAttributes["value"] = textObj -> value;
-    _attributes.stringAttributes["spacing"] = std::to_string(textObj -> deltaOffset);
     return;
   }
 

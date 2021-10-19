@@ -17,6 +17,7 @@
 #include "./objtypes/obj_portal.h"
 #include "./objtypes/obj_light.h"
 #include "./objtypes/obj_sound.h"
+#include "./objtypes/obj_text.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
@@ -98,11 +99,6 @@ struct GameObjectUISlider {
   int texture;
   int opacityTexture;
   std::string onSlide;
-};
-
-struct GameObjectUIText {
-  std::string value;
-  float deltaOffset;
 };
 
 enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
