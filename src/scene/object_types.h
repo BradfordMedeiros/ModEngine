@@ -248,7 +248,9 @@ struct ObjectType {
   std::string name;
   std::size_t variantType;
   std::function<GameObjectObj(GameobjAttributes&)> createObj;
+  std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
 };
+
 
 
 void addObject(

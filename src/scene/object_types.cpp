@@ -294,31 +294,73 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
 
+void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
+  // do nothing
+}
+
+void lightObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
+  auto lightObj = std::get_if<GameObjectLight>(&obj);
+  if (lightObj != NULL){   
+    _attributes.vecAttributes["color"] = lightObj -> color;
+  }else{
+    assert(false);
+  }
+}
+
+void geoObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
+  auto geoObj = std::get_if<GameObjectGeo>(&obj);
+  if (geoObj != NULL){
+    _attributes.stringAttributes["points"] = pointsToString(geoObj -> points);
+    if (geoObj -> type == GEOSPHERE){   // should show for any shape
+      _attributes.stringAttributes["shape"] = "sphere";
+    }
+  }else{
+    assert(false);
+  }
+}
+
+void soundObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
+  auto soundObj = std::get_if<GameObjectSound>(&obj);
+  if (soundObj != NULL){
+    _attributes.stringAttributes["clip"] = soundObj -> clip;
+    _attributes.stringAttributes["loop"] = soundObj -> loop ? "true" : "false";
+    return;
+  }else{
+    assert(false);
+  }
+}
+
+
 std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "geo",
     .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
+    .objectAttributes = geoObjAttr,
   },
   ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
+    .objectAttributes = nothingObjAttr,
   },
   ObjectType {
     .name = "portal",
     .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
+    .objectAttributes = nothingObjAttr,
   },
   ObjectType {
     .name = "light",
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
+    .objectAttributes = lightObjAttr,
   },
   ObjectType {
     .name = "sound",
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
+    .objectAttributes = soundObjAttr,
   },
 };
 
@@ -650,6 +692,13 @@ int renderObject(
 
 void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& _attributes){
   GameObjectObj& toRender = mapping.at(id);
+  auto variantIndex = toRender.index();
+  for (auto &objType : objTypes){
+    if (variantIndex == objType.variantType){
+      objType.objectAttributes(toRender, _attributes);
+      return;
+    }
+  }
 
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
   if (meshObj != NULL){
@@ -661,16 +710,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     return;
   }  
 
-  auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
-  if (cameraObj != NULL){
-    return;
-  }
-
-  auto lightObj = std::get_if<GameObjectLight>(&toRender);
-  if (lightObj != NULL){   
-    _attributes.vecAttributes["color"] = lightObj -> color;
-    return;
-  }
 
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
@@ -678,13 +717,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     assert(false);
     return;
   } 
-
-  auto soundObj = std::get_if<GameObjectSound>(&toRender);
-  if (soundObj != NULL){
-    _attributes.stringAttributes["clip"] = soundObj -> clip;
-    _attributes.stringAttributes["loop"] = soundObj -> loop ? "true" : "false";
-    return;
-  }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
   if (emitterObj != NULL){
@@ -705,15 +737,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     return;
   }
 
-
-  auto geoObj = std::get_if<GameObjectGeo>(&toRender);
-  if (geoObj != NULL){
-    _attributes.stringAttributes["points"] = pointsToString(geoObj -> points);
-    if (geoObj -> type == GEOSPHERE){   // should show for any shape
-      _attributes.stringAttributes["shape"] = "sphere";
-    }
-    return;
-  }
   assert(false);
 }
 
