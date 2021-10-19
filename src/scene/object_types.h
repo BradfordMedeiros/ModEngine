@@ -245,6 +245,7 @@ struct ObjectType {
   std::size_t variantType;
   std::function<GameObjectObj(GameobjAttributes&)> createObj;
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
+  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
 };
 
 

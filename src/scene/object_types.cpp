@@ -284,42 +284,62 @@ std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementV
   };
 }
 
+//  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
+template<typename T>
+std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj)> convertSerialize(std::function<void(T&)> serialize) {   
+  return [](GameObjectObj& obj) -> std::vector<std::pair<std::string, std::string>> {
+    return {};
+  };
+}
+
+std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj){
+  std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+  assert(false);
+  return {};    
+}
+
 std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "geo",
     .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
     .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
+    .serialize = serializeNotImplemented,
   },
   ObjectType {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
     .objectAttributes = nothingObjAttr,
+    .serialize = serializeNotImplemented,
   },
   ObjectType {
     .name = "portal",
     .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
     .objectAttributes = nothingObjAttr,
+    .serialize = serializeNotImplemented,
   },
   ObjectType {
     .name = "light",
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
+    .serialize = convertSerialize<GameObjectLight>(serializeLight),
   },
   ObjectType {
     .name = "sound",
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
+    .serialize = convertSerialize<GameObjectSound>(serializeSound),
   },
   ObjectType {
     .name = "text",
     .variantType = getVariantIndex(GameObjectUIText{}),
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
+    .serialize = serializeNotImplemented,
   },
 };
 
@@ -774,24 +794,7 @@ std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh ob
 
   return pairs;  
 }
-std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj){
-  return {}; 
-}  
-std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.clip != ""){
-    pairs.push_back(std::pair<std::string, std::string>("clip", obj.clip));
-  }
-  if (obj.loop){
-    pairs.push_back(std::pair<std::string, std::string>("loop", "true"));
-  }
-  return pairs;
-}   
-std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  pairs.push_back(std::pair<std::string, std::string>("color", serializeVec(obj.color)));
-  return pairs;
-}  
+  
 std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj, std::function<std::string(int)> textureName){
   std::vector<std::pair<std::string, std::string>> pairs;
   auto serializedData = serializeVoxelState(obj.voxel, textureName);
@@ -845,22 +848,18 @@ std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISli
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
   GameObjectObj objectToSerialize = mapping.at(id);
+  auto variantIndex = objectToSerialize.index();
+  for (auto &objType : objTypes){
+    if (variantIndex == objType.variantType){
+      return objType.serialize(objectToSerialize);
+    }
+  }
+
   auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
   if (meshObject != NULL){
     return serializeMesh(*meshObject);
   }
-  auto cameraObject = std::get_if<GameObjectCamera>(&objectToSerialize);
-  if (cameraObject != NULL){
-    return serializeCamera(*cameraObject);
-  }
-  auto soundObject = std::get_if<GameObjectSound>(&objectToSerialize);
-  if (soundObject != NULL){
-    return serializeSound(*soundObject);
-  }
-  auto lightObject = std::get_if<GameObjectLight>(&objectToSerialize);
-  if (lightObject != NULL){
-    return serializeLight(*lightObject);
-  }
+
   auto voxelObject = std::get_if<GameObjectVoxel>(&objectToSerialize);
   if (voxelObject != NULL){
     return serializeVoxel(*voxelObject, getTextureName);
@@ -910,25 +909,11 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     return serializeSlider(*uiControlSliderObj);    
   }
 
-  auto uiTextObj = std::get_if<GameObjectUIText>(&objectToSerialize);
-  if (uiTextObj != NULL){
-    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};
-  }
-
   auto uiLayoutObj = std::get_if<GameObjectUILayout>(&objectToSerialize);
   if (uiLayoutObj != NULL){
     std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};
-  }
-
-  auto geoObj = std::get_if<GameObjectGeo>(&objectToSerialize);
-  if (geoObj != NULL){
-    std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};    
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);

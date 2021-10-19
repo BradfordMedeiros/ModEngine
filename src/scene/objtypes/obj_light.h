@@ -13,5 +13,6 @@ struct GameObjectLight {
 
 GameObjectLight createLight(GameobjAttributes& attr);
 void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes);
+std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight obj);
 
 #endif

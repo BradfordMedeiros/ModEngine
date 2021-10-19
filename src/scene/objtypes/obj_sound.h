@@ -12,5 +12,6 @@ struct GameObjectSound{
 
 GameObjectSound createSound(GameobjAttributes& attr);
 void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes);
+std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj);
 
 #endif
