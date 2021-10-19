@@ -11,3 +11,8 @@ GameObjectSound createSound(GameobjAttributes& attr){
   };
   return obj;
 }
+
+void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes){
+  _attributes.stringAttributes["clip"] = soundObj.clip;
+  _attributes.stringAttributes["loop"] = soundObj.loop ? "true" : "false";
+}

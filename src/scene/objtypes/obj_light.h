@@ -12,5 +12,6 @@ struct GameObjectLight {
 };
 
 GameObjectLight createLight(GameobjAttributes& attr);
+void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes);
 
 #endif

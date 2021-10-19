@@ -29,3 +29,22 @@ std::vector<glm::vec3> parsePoints(std::string value){
   }
   return points;
 }
+
+std::string pointsToString(std::vector<glm::vec3>& points){
+  std::string value = "";
+  for (int i = 0; i < points.size(); i++){
+    auto point = points.at(i);
+    value = value + print(point);
+    if (i != (points.size() - 1)){
+      value = value + "|";
+    }
+  }
+  return value;
+}
+
+void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes){
+  _attributes.stringAttributes["points"] = pointsToString(geoObj.points);
+  if (geoObj.type == GEOSPHERE){   // should show for any shape
+   _attributes.stringAttributes["shape"] = "sphere";
+  }
+}

@@ -11,5 +11,6 @@ struct GameObjectSound{
 };
 
 GameObjectSound createSound(GameobjAttributes& attr);
+void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes);
 
 #endif

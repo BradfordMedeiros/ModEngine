@@ -13,4 +13,6 @@ struct GameObjectGeo {
 GameObjectGeo createGeo(GameobjAttributes& attr);
 std::vector<glm::vec3> parsePoints(std::string value);
 
+void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes);
+
 #endif

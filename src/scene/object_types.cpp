@@ -278,65 +278,28 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr){
   return obj;
 }
 
-std::string pointsToString(std::vector<glm::vec3>& points){
-  std::string value = "";
-  for (int i = 0; i < points.size(); i++){
-    auto point = points.at(i);
-    value = value + print(point);
-    if (i != (points.size() - 1)){
-      value = value + "|";
-    }
-  }
-  return value;
-}
-
 std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
 
-void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
-  // do nothing
-}
+void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
 
-void lightObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
-  auto lightObj = std::get_if<GameObjectLight>(&obj);
-  if (lightObj != NULL){   
-    _attributes.vecAttributes["color"] = lightObj -> color;
-  }else{
-    assert(false);
-  }
-}
 
-void geoObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
-  auto geoObj = std::get_if<GameObjectGeo>(&obj);
-  if (geoObj != NULL){
-    _attributes.stringAttributes["points"] = pointsToString(geoObj -> points);
-    if (geoObj -> type == GEOSPHERE){   // should show for any shape
-      _attributes.stringAttributes["shape"] = "sphere";
-    }
-  }else{
-    assert(false);
-  }
+template<typename T>
+std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementValue(std::function<void(T&, GameobjAttributes&)> getAttr) {   
+  return [&getAttr](GameObjectObj& obj, GameobjAttributes& attr) -> void {
+    auto objInstance = std::get_if<T>(&obj);
+    assert(objInstance != NULL);
+    getAttr(*objInstance, attr);
+  };
 }
-
-void soundObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){
-  auto soundObj = std::get_if<GameObjectSound>(&obj);
-  if (soundObj != NULL){
-    _attributes.stringAttributes["clip"] = soundObj -> clip;
-    _attributes.stringAttributes["loop"] = soundObj -> loop ? "true" : "false";
-    return;
-  }else{
-    assert(false);
-  }
-}
-
 
 std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "geo",
     .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
-    .objectAttributes = geoObjAttr,
+    .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
   },
   ObjectType {
     .name = "camera",
@@ -354,13 +317,13 @@ std::vector<ObjectType> objTypes = {
     .name = "light",
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
-    .objectAttributes = lightObjAttr,
+    .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
   },
   ObjectType {
     .name = "sound",
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
-    .objectAttributes = soundObjAttr,
+    .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
   },
 };
 

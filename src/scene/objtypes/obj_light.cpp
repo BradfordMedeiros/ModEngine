@@ -26,3 +26,7 @@ GameObjectLight createLight(GameobjAttributes& attr){
   };
   return obj;
 }
+
+void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes){
+  _attributes.vecAttributes["color"] = lightObj.color;
+}
