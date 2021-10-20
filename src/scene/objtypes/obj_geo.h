@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../../common/util.h"
+#include "./obj_util.h"
 
 enum GeoShapeType { GEODEFAULT, GEOSPHERE };
 struct GameObjectGeo {
@@ -10,7 +11,7 @@ struct GameObjectGeo {
   GeoShapeType type;
 };
 
-GameObjectGeo createGeo(GameobjAttributes& attr);
+GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<glm::vec3> parsePoints(std::string value);
 
 void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes);

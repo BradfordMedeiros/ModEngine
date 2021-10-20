@@ -176,66 +176,6 @@ GameObjectNavmesh createNavmesh(Mesh& navmesh){
   return obj;
 }
 
-GameObjectNavConns createNavConns(GameobjAttributes& attr){
-  GameObjectNavConns obj {
-    .navgraph = createNavGraph(attr.stringAttributes),
-  };
-  return obj;
-}
-
-GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes){
-  auto onFocus = attr.stringAttributes.find("focus") != attr.stringAttributes.end() ? attr.stringAttributes.at("focus") : "";
-  auto onBlur = attr.stringAttributes.find("blur") != attr.stringAttributes.end() ? attr.stringAttributes.at("blur") : "";
-  GameObjectUICommon common {
-    .mesh = meshes.at("./res/models/controls/input.obj").mesh,
-    .isFocused = false,
-    .onFocus = onFocus,
-    .onBlur = onBlur,
-  };
-  return common;
-}
-GameObjectUIButton createUIButton(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto onTexture = attr.stringAttributes.find("ontexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("ontexture") : "";
-  auto offTexture = attr.stringAttributes.find("offtexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("offtexture") : "";
-  auto toggleOn = attr.stringAttributes.find("state") != attr.stringAttributes.end() && attr.stringAttributes.at("state") == "on";
-  auto canToggle = attr.stringAttributes.find("cantoggle") == attr.stringAttributes.end() || !(attr.stringAttributes.at("cantoggle") == "false");
-  auto onToggleOn = attr.stringAttributes.find("on") != attr.stringAttributes.end() ? attr.stringAttributes.at("on") : "";
-  auto onToggleOff = attr.stringAttributes.find("off") != attr.stringAttributes.end() ? attr.stringAttributes.at("off") : "";
-  auto hasOnTint  = attr.vecAttributes.find("ontint") != attr.vecAttributes.end();
-  auto onTint = hasOnTint ? attr.vecAttributes.at("ontint") : glm::vec3(1.f, 1.f, 1.f);
-
-  GameObjectUIButton obj { 
-    .common = parseCommon(attr, meshes),
-    .initialState = toggleOn,
-    .toggleOn = toggleOn,
-    .canToggle = canToggle,
-    .onTextureString = onTexture,
-    .onTexture = ensureTextureLoaded(onTexture == "" ? "./res/models/controls/on.png" : onTexture).textureId,
-    .offTextureString = offTexture,
-    .offTexture = ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture).textureId,
-    .onToggleOn = onToggleOn,
-    .onToggleOff = onToggleOff,
-    .hasOnTint = hasOnTint,
-    .onTint = onTint,
-  };
-  return obj;
-}
-
-GameObjectUISlider createUISlider(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto onSlide = attr.stringAttributes.find("onslide") != attr.stringAttributes.end() ? attr.stringAttributes.at("onslide") : "";
-
-  GameObjectUISlider obj {
-    .common = parseCommon(attr, meshes),
-    .min = 0.f,
-    .max = 100.f,
-    .percentage = 100.f,
-    .texture = ensureTextureLoaded("./res/models/controls/slider.png").textureId,
-    .opacityTexture = ensureTextureLoaded("./res/models/controls/slider_opacity.png").textureId,
-    .onSlide = onSlide,
-  };
-  return obj;
-}
-
 std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
@@ -316,6 +256,27 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
   },
+  ObjectType {
+    .name = "navconnection",
+    .variantType = getVariantIndex(GameObjectNavConns{}),
+    .createObj = createNavConns,
+    .objectAttributes = nothingObjAttr,
+    .serialize = serializeNotImplemented,
+  },
+  ObjectType {
+    .name = "ui",
+    .variantType = getVariantIndex(GameObjectUIButton{}),
+    .createObj = createUIButton,
+    .objectAttributes = nothingObjAttr,
+    .serialize = convertSerialize<GameObjectUIButton>(serializeButton),
+  },
+  ObjectType {
+    .name = "slider",
+    .variantType = getVariantIndex(GameObjectUISlider{}),
+    .createObj = createUISlider,
+    .objectAttributes = nothingObjAttr, 
+    .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
+  },
 };
 
 
@@ -332,9 +293,13 @@ void addObject(
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter,
   std::function<Mesh(MeshData&)> loadMesh
 ){
+  ObjectTypeUtil util {
+    .meshes = meshes,
+    .ensureTextureLoaded = ensureTextureLoaded,
+  };
   for (auto &objType : objTypes){
     if (objectType == objType.name){
-      mapping[id] = objType.createObj(attr);
+      mapping[id] = objType.createObj(attr, util);
       return;
     }
   }
@@ -352,12 +317,6 @@ void addObject(
     mapping[id] = createHeightmap(attr, loadMesh, ensureTextureLoaded);
   }else if (objectType == "navmesh"){
     mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj").mesh);
-  }else if (objectType == "navconnection"){
-    mapping[id] = createNavConns(attr);
-  }else if (objectType == "ui"){
-    mapping[id] = createUIButton(attr, meshes, ensureTextureLoaded);
-  }else if (objectType == "slider"){
-    mapping[id] = createUISlider(attr, meshes, ensureTextureLoaded);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -780,46 +739,6 @@ std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel 
   return pairs;
 }  
 
-void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
-  if (common.onFocus != ""){
-    pairs.push_back(std::pair<std::string, std::string>("focus", common.onFocus));
-  }
-  if (common.onBlur != ""){
-    pairs.push_back(std::pair<std::string, std::string>("blur", common.onBlur));
-  }
-}
-std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  addSerializeCommon(pairs, obj.common);
-  if (obj.canToggle != true){
-    pairs.push_back(std::pair<std::string, std::string>("cantoggle", "false"));
-  }
-  if (obj.onTextureString != ""){
-    pairs.push_back(std::pair<std::string, std::string>("ontexture", obj.onTextureString));
-  }
-  if (obj.offTextureString != ""){
-    pairs.push_back(std::pair<std::string, std::string>("offtexture", obj.offTextureString));
-  }
-  if (obj.onToggleOn != ""){
-    pairs.push_back(std::pair<std::string, std::string>("on", obj.onToggleOn));
-  }
-  if (obj.onToggleOff != ""){
-    pairs.push_back(std::pair<std::string, std::string>("off", obj.onToggleOff));
-  }
-  if (obj.initialState == true){
-    pairs.push_back(std::pair<std::string, std::string>("state", "on"));
-  }
-  return pairs;
-}
-std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  addSerializeCommon(pairs, obj.common);
-  if (obj.onSlide != ""){
-    pairs.push_back(std::pair<std::string, std::string>("onslide", obj.onSlide));
-  }
-  return pairs;
-}
-
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
   GameObjectObj objectToSerialize = mapping.at(id);
   auto variantIndex = objectToSerialize.index();
@@ -862,25 +781,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     std::cout << "ERROR: NAVMESH SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};
-  }
-
-  auto navconnObj = std::get_if<GameObjectNavConns>(&objectToSerialize);
-  if (navconnObj != NULL){
-    std::cout << "ERROR: NAVCONN SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};
-  }
-
-  auto uiControlObj = std::get_if<GameObjectUIButton>(&objectToSerialize);
-  if (uiControlObj != NULL){
-    return serializeButton(*uiControlObj);
-  }
-  
-  auto uiControlSliderObj = std::get_if<GameObjectUISlider>(&objectToSerialize);
-  if (uiControlSliderObj != NULL){
-    std::cout << "ERROR: UI SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return serializeSlider(*uiControlSliderObj);    
   }
 
   auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);

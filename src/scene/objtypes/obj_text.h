@@ -2,13 +2,14 @@
 #define MOD_OBJ_TEXT
 
 #include "../../common/util.h"
+#include "./obj_util.h"
 
 struct GameObjectUIText {
   std::string value;
   float deltaOffset;
 };
 
-GameObjectUIText createUIText(GameobjAttributes& attr);
+GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);
 void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes);
 
 #endif

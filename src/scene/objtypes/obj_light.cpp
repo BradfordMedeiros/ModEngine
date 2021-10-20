@@ -9,7 +9,7 @@ LightType getLightType(std::string type){
   }
   return LIGHT_POINT;
 }
-GameObjectLight createLight(GameobjAttributes& attr){
+GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto color = attr.vecAttributes.find("color") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("color");
   auto lightType = attr.stringAttributes.find("type") == attr.stringAttributes.end() ? LIGHT_POINT : getLightType(attr.stringAttributes.at("type"));
   auto maxangle = (lightType != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");

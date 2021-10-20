@@ -1,6 +1,6 @@
 #include "./obj_geo.h"
 
-GameObjectGeo createGeo(GameobjAttributes& attr){
+GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto points = parsePoints(
     attr.stringAttributes.find("points") != attr.stringAttributes.end() ? 
     attr.stringAttributes.at("points") : 

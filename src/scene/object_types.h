@@ -19,6 +19,10 @@
 #include "./objtypes/obj_sound.h"
 #include "./objtypes/obj_text.h"
 #include "./objtypes/obj_uilayout.h"
+#include "./objtypes/obj_uibutton.h"
+#include "./objtypes/obj_uislider.h"
+#include "./objtypes/obj_navconn.h"
+#include "./objtypes/obj_util.h"
 
 #include <unistd.h>
 #include <glm/glm.hpp>
@@ -64,42 +68,6 @@ struct GameObjectHeightmap{
 
 struct GameObjectNavmesh {
   Mesh mesh;
-};
-
-struct GameObjectNavConns {
-  NavGraph navgraph;
-};
-
-struct GameObjectUICommon {
-  Mesh mesh;
-  bool isFocused;
-  std::string onFocus;
-  std::string onBlur;
-};
-
-struct GameObjectUIButton {
-  GameObjectUICommon common;
-  bool initialState;
-  bool toggleOn;
-  bool canToggle;
-  std::string onTextureString;
-  int onTexture;
-  std::string offTextureString;
-  int offTexture;
-  std::string onToggleOn;
-  std::string onToggleOff;
-  bool hasOnTint;
-  glm::vec3 onTint;
-};
-
-struct GameObjectUISlider {
-  GameObjectUICommon common;
-  float min;
-  float max;
-  float percentage;
-  int texture;
-  int opacityTexture;
-  std::string onSlide;
 };
 
 typedef std::variant<
@@ -231,7 +199,7 @@ std::map<objid, GameObjectObj> getObjectMapping();
 struct ObjectType {
   std::string name;
   std::size_t variantType;
-  std::function<GameObjectObj(GameobjAttributes&)> createObj;
+  std::function<GameObjectObj(GameobjAttributes&, ObjectTypeUtil&)> createObj;
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
 };

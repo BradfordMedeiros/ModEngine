@@ -3,6 +3,7 @@
 
 #include "../../common/util.h"
 #include "../common/util/boundinfo.h"
+#include "./obj_util.h"
 
 enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
 struct GameObjectUILayout {
@@ -17,6 +18,6 @@ struct GameObjectUILayout {
   float margin;
 };
 
-GameObjectUILayout createUILayout(GameobjAttributes& attr);
+GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);
 
 #endif

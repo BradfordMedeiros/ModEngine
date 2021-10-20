@@ -1,6 +1,6 @@
 #include "./obj_text.h"
 
-GameObjectUIText createUIText(GameobjAttributes& attr){
+GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
   GameObjectUIText obj {

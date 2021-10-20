@@ -1,6 +1,6 @@
 #include "./obj_uilayout.h"
 
-GameObjectUILayout createUILayout(GameobjAttributes& attr){
+GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
   auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
   
