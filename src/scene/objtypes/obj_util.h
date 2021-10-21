@@ -3,6 +3,7 @@
 
 #include <map>
 #include "../common/mesh.h"
+#include "../types/emitter.h"
 
 struct GameObjectUICommon {
   Mesh mesh;
@@ -23,6 +24,7 @@ struct ObjectTypeUtil {
   std::map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)>& ensureTextureLoaded;
   std::function<Mesh(MeshData&)> loadMesh;
+  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
 };
 
 GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes);

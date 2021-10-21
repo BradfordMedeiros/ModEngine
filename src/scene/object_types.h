@@ -9,7 +9,6 @@
 #include "./common/mesh.h"
 #include "./types/voxels.h"
 #include "./types/ainav.h"
-#include "./types/emitter.h"
 #include "./serialization.h"
 #include "./objtypes/obj_geo.h"
 #include "./objtypes/obj_camera.h"
@@ -23,6 +22,7 @@
 #include "./objtypes/obj_navconn.h"
 #include "./objtypes/obj_navmesh.h"
 #include "./objtypes/obj_heightmap.h"
+#include "./objtypes/obj_emitter.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -51,8 +51,6 @@ struct GameObjectVoxel {
 };
 
 struct GameObjectRoot {};
-
-struct GameObjectEmitter{};
 
 typedef std::variant<
   GameObjectMesh, 

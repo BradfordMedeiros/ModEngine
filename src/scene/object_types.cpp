@@ -47,99 +47,6 @@ GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVox
   return obj;
 }
 
-GameobjAttributes particleFields(GameobjAttributes& attributes){
-  GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttributes = {},
-  };
-  for (auto [key, value] : attributes.stringAttributes){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.stringAttributes[newKey] = value;
-    }
-  }
-  for (auto [key, value] : attributes.numAttributes){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.numAttributes[newKey] = value;
-    }
-  }
-  for (auto [key, value] : attributes.vecAttributes){
-    if (key.at(0) == '+' && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      attr.vecAttributes[newKey] = value;
-    }
-  }
-  return attr;
-}
-
-struct ValueVariance {
-  glm::vec3 value;
-  glm::vec3 variance;
-  std::vector<float> lifetimeEffect;
-};
-std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
-  std::map<std::string, ValueVariance> values;
-  for (auto [key, _] : attributes.vecAttributes){
-    if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      values[newKey] = ValueVariance {
-        .value = glm::vec3(0.f, 0.f, 0.f),
-        .variance = glm::vec3(0.f, 0.f, 0.f),
-        .lifetimeEffect = {},
-      };
-    }
-  }
-  
-  for (auto [key, value] : attributes.vecAttributes){
-    if (key.size() > 1){
-      auto newKey = key.substr(1, key.size());
-      if (key.at(0) == '!'){
-        values.at(newKey).value = value;
-      }else if (key.at(0) == '?'){
-        values.at(newKey).variance = value;
-      }
-      /*else if (key.at(0) == '%'){
-        values.at(newKey).lifetimeEffect = parseFloatVec(value);
-      }*/
-    }
-  }
-  std::vector<EmitterDelta> deltas;
-  for (auto [key, value] : values){
-    deltas.push_back(EmitterDelta{
-      .attributeName = key,
-      .value = value.value,
-      .variance = value.variance,
-      .lifetimeEffect = value.lifetimeEffect,
-    });
-  }
-  return deltas;
-}
-
-GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAttributes& attributes, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter, GameobjAttributes& attributes){
-  GameObjectEmitter obj {};
-  float spawnrate = attributes.numAttributes.find("rate") != attributes.numAttributes.end() ? attributes.numAttributes.at("rate") : 1.f;
-  float lifetime = attributes.numAttributes.find("duration") != attributes.numAttributes.end() ? attributes.numAttributes.at("duration") : 10.f;
-  int limit = attributes.numAttributes.find("limit") != attributes.numAttributes.end() ? attributes.numAttributes.at("limit") : 10;
-  auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
-  assert(limit >= 0);
-  
-  auto deleteValueStr = attributes.stringAttributes.find("onremove") != attributes.stringAttributes.end() ? attributes.stringAttributes.at("onremove") : "delete";
-  auto deleteType = EMITTER_DELETE;
-  if (deleteValueStr == "orphan"){
-    deleteType = EMITTER_ORPHAN;
-  }
-  if (deleteValueStr == "finish"){
-    deleteType = EMITTER_FINISH;
-  }
-
-  auto emitterAttr = particleFields(attributes);
-  addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled, deleteType);
-  return obj;
-}
-
-
 std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
@@ -279,8 +186,15 @@ std::vector<ObjectType> objTypes = {
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
+  ObjectType {
+    .name = "emitter",
+    .variantType = getVariantIndex(GameObjectEmitter{}),
+    .createObj = createEmitter,
+    .objectAttributes = nothingObjAttr, 
+    .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
+  },
 };
-
 
 void addObject(
   objid id, 
@@ -299,6 +213,7 @@ void addObject(
     .meshes = meshes,
     .ensureTextureLoaded = ensureTextureLoaded,
     .loadMesh = loadMesh,
+    .addEmitter = addEmitter,
   };
   for (auto &objType : objTypes){
     if (objectType == objType.name){
@@ -314,8 +229,6 @@ void addObject(
     mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
   }else if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
-  }else if (objectType == "emitter"){
-    mapping[id] = createEmitter(addEmitter, attr);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -625,12 +538,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     return;
   } 
 
-  auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
-  if (emitterObj != NULL){
-    assert(false);
-    return;
-  }
-
   assert(false);
 }
 
@@ -749,13 +656,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   }
   auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
   if (rootObject != NULL){
-    return {};
-  }
-
-  auto emitterObj = std::get_if<GameObjectEmitter>(&objectToSerialize);
-  if (emitterObj != NULL){
-    std::cout << "ERROR: EMITTER SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
     return {};
   }
 
