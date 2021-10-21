@@ -139,12 +139,6 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAtt
   return obj;
 }
 
-GameObjectNavmesh createNavmesh(Mesh& navmesh){
-  GameObjectNavmesh obj {
-    .mesh = navmesh,
-  };
-  return obj;
-}
 
 std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
@@ -177,6 +171,7 @@ std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObj
 }
 
 void removeDoNothing(GameObjectObj& obj){}
+
 
 std::vector<ObjectType> objTypes = {
   ObjectType {
@@ -267,9 +262,15 @@ std::vector<ObjectType> objTypes = {
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
+  ObjectType {
+    .name = "navmesh",
+    .variantType = getVariantIndex(GameObjectNavmesh{}),
+    .createObj = createNavmesh,
+    .objectAttributes = nothingObjAttr, 
+    .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
+  },
 };
-
-
 
 
 void addObject(
@@ -306,8 +307,6 @@ void addObject(
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
     mapping[id] = createEmitter(addEmitter, attr);
-  }else if (objectType == "navmesh"){
-    mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj").mesh);
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
     assert(false);
@@ -750,13 +749,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   auto emitterObj = std::get_if<GameObjectEmitter>(&objectToSerialize);
   if (emitterObj != NULL){
     std::cout << "ERROR: EMITTER SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};
-  }
-
-  auto navmeshObj = std::get_if<GameObjectNavmesh>(&objectToSerialize);
-  if (navmeshObj != NULL){
-    std::cout << "ERROR: NAVMESH SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};
   }

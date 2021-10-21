@@ -21,6 +21,7 @@
 #include "./objtypes/obj_uibutton.h"
 #include "./objtypes/obj_uislider.h"
 #include "./objtypes/obj_navconn.h"
+#include "./objtypes/obj_navmesh.h"
 #include "./objtypes/obj_heightmap.h"
 #include "./objtypes/obj_util.h"
 
@@ -52,10 +53,6 @@ struct GameObjectVoxel {
 struct GameObjectRoot {};
 
 struct GameObjectEmitter{};
-
-struct GameObjectNavmesh {
-  Mesh mesh;
-};
 
 typedef std::variant<
   GameObjectMesh, 
