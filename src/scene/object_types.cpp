@@ -149,7 +149,7 @@ void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do 
 
 template<typename T>
 std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementValue(std::function<void(T&, GameobjAttributes&)> getAttr) {   
-  return [&getAttr](GameObjectObj& obj, GameobjAttributes& attr) -> void {
+  return [getAttr](GameObjectObj& obj, GameobjAttributes& attr) -> void {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
     getAttr(*objInstance, attr);
@@ -166,9 +166,10 @@ std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& ob
 
 template<typename T>
 std::function<void(GameObjectObj& obj)> convertRemove(std::function<void(T&)> rmObject) {   
-  return [&rmObject](GameObjectObj& obj) -> void {
+  return [rmObject](GameObjectObj& obj) -> void {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
+    std::cout << "obj instance not null, going to call teh fn" << std::endl;
     rmObject(*objInstance);
   };
 }
@@ -326,11 +327,11 @@ void removeObject(
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter
 ){
-  // @TODO - handle resource cleanup better here eg unload meshes
   auto Object = mapping.at(id); 
   auto variantIndex = Object.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
+      std::cout << "type is: " << objType.name << std::endl;
       objType.removeObject(Object);
       mapping.erase(id);
       return;
@@ -688,7 +689,6 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   }
   assert(false);
 }
-
 
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
   if (texture.textureoffset.x != 0.f && texture.textureoffset.y != 0.f){
