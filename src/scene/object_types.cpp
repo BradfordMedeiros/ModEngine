@@ -164,6 +164,15 @@ std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& ob
   };
 }
 
+template<typename T>
+std::function<void(GameObjectObj& obj)> convertRemove(std::function<void(T&)> rmObject) {   
+  return [&rmObject](GameObjectObj& obj) -> void {
+    auto objInstance = std::get_if<T>(&obj);
+    assert(objInstance != NULL);
+    rmObject(*objInstance);
+  };
+}
+
 std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj){
   std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
   assert(false);
@@ -171,7 +180,6 @@ std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObj
 }
 
 void removeDoNothing(GameObjectObj& obj){}
-
 
 std::vector<ObjectType> objTypes = {
   ObjectType {
@@ -212,7 +220,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
-    .removeObject = removeDoNothing,
+    .removeObject = convertRemove<GameObjectSound>(removeSound),
   },
   ObjectType {
     .name = "text",
@@ -260,7 +268,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createHeightmap,
     .objectAttributes = nothingObjAttr, 
     .serialize = serializeNotImplemented,
-    .removeObject = removeDoNothing,
+    .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
   },
   ObjectType {
     .name = "navmesh",
@@ -320,21 +328,19 @@ void removeObject(
 ){
   // @TODO - handle resource cleanup better here eg unload meshes
   auto Object = mapping.at(id); 
-  auto soundObj = std::get_if<GameObjectSound>(&Object);
-  if (soundObj != NULL){
-    unloadSoundState(soundObj -> source, soundObj -> clip); 
+  auto variantIndex = Object.index();
+  for (auto &objType : objTypes){
+    if (variantIndex == objType.variantType){
+      objType.removeObject(Object);
+      mapping.erase(id);
+      return;
+    }
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&Object);
   if (emitterObj != NULL){
     rmEmitter();
   }
-
-  auto heightmapObj = std::get_if<GameObjectHeightmap>(&Object);
-  if (heightmapObj !=NULL){
-    delete[] heightmapObj -> heightmap.data;
-  }
-
   mapping.erase(id);
 }
 

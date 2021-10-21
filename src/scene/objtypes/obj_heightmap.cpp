@@ -12,3 +12,7 @@ GameObjectHeightmap createHeightmap(GameobjAttributes& attr, ObjectTypeUtil& uti
   };
   return obj;
 }
+
+void removeHeightmap(GameObjectHeightmap& heightmapObj){
+  delete[] heightmapObj.heightmap.data;
+}
