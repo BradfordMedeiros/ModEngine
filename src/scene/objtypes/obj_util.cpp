@@ -20,3 +20,20 @@ void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs,
     pairs.push_back(std::pair<std::string, std::string>("blur", common.onBlur));
   }
 }
+
+TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded){
+  glm::vec2 textureoffset = attr.stringAttributes.find("textureoffset") == attr.stringAttributes.end() ? glm::vec2(0.f, 0.f) : parseVec2(attr.stringAttributes.at("textureoffset"));
+  glm::vec2 texturetiling = attr.stringAttributes.find("texturetiling") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturetiling"));
+  glm::vec2 texturesize = attr.stringAttributes.find("texturesize") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturesize"));
+  std::string textureOverloadName = attr.stringAttributes.find("texture") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("texture");
+  int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName).textureId;
+
+  TextureInformation info {
+    .textureoffset = textureoffset,
+    .texturetiling = texturetiling,
+    .texturesize = texturesize,
+    .textureOverloadName = textureOverloadName,
+    .textureOverloadId = textureOverloadId,
+  };
+  return info;
+}

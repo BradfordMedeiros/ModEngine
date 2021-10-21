@@ -5,23 +5,6 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded){
-  glm::vec2 textureoffset = attr.stringAttributes.find("textureoffset") == attr.stringAttributes.end() ? glm::vec2(0.f, 0.f) : parseVec2(attr.stringAttributes.at("textureoffset"));
-  glm::vec2 texturetiling = attr.stringAttributes.find("texturetiling") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturetiling"));
-  glm::vec2 texturesize = attr.stringAttributes.find("texturesize") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturesize"));
-  std::string textureOverloadName = attr.stringAttributes.find("texture") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("texture");
-  int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName).textureId;
-
-  TextureInformation info {
-    .textureoffset = textureoffset,
-    .texturetiling = texturetiling,
-    .texturesize = texturesize,
-    .textureOverloadName = textureOverloadName,
-    .textureOverloadId = textureOverloadId,
-  };
-  return info;
-}
-
 static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texturesize", "texture", "discard", "emission", "tint" };
 GameObjectMesh createMesh(
   GameobjAttributes& attr, 
@@ -156,19 +139,6 @@ GameObjectEmitter createEmitter(std::function<void(float, float, int, GameobjAtt
   return obj;
 }
 
-GameObjectHeightmap createHeightmap(GameobjAttributes& attr, std::function<Mesh(MeshData&)> loadMesh, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto mapName = attr.stringAttributes.find("map") != attr.stringAttributes.end() ? attr.stringAttributes.at("map") : "";
-  auto dim = attr.numAttributes.find("dim") != attr.numAttributes.end() ? attr.numAttributes.at("dim") : -1;
-  auto heightmap = loadAndAllocateHeightmap(mapName, dim);
-  auto meshData = generateHeightmapMeshdata(heightmap);
-  GameObjectHeightmap obj{
-    .heightmap = heightmap,
-    .mesh = loadMesh(meshData),
-    .texture = texinfoFromFields(attr, ensureTextureLoaded),
-  };
-  return obj;
-}
-
 GameObjectNavmesh createNavmesh(Mesh& navmesh){
   GameObjectNavmesh obj {
     .mesh = navmesh,
@@ -206,6 +176,8 @@ std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObj
   return {};    
 }
 
+void removeDoNothing(GameObjectObj& obj){}
+
 std::vector<ObjectType> objTypes = {
   ObjectType {
     .name = "geo",
@@ -213,6 +185,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createGeo,
     .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
     .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "camera",
@@ -220,6 +193,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createCamera,
     .objectAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "portal",
@@ -227,6 +201,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createPortal,
     .objectAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "light",
@@ -234,6 +209,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createLight,
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "sound",
@@ -241,6 +217,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "text",
@@ -248,6 +225,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
     .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "layout",
@@ -255,6 +233,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUILayout,
     .objectAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "navconnection",
@@ -262,6 +241,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createNavConns,
     .objectAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "ui",
@@ -269,6 +249,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUIButton,
     .objectAttributes = nothingObjAttr,
     .serialize = convertSerialize<GameObjectUIButton>(serializeButton),
+    .removeObject = removeDoNothing,
   },
   ObjectType {
     .name = "slider",
@@ -276,8 +257,19 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUISlider,
     .objectAttributes = nothingObjAttr, 
     .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
+    .removeObject = removeDoNothing,
+  },
+  ObjectType {
+    .name = "heightmap",
+    .variantType = getVariantIndex(GameObjectHeightmap{}),
+    .createObj = createHeightmap,
+    .objectAttributes = nothingObjAttr, 
+    .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
   },
 };
+
+
 
 
 void addObject(
@@ -296,6 +288,7 @@ void addObject(
   ObjectTypeUtil util {
     .meshes = meshes,
     .ensureTextureLoaded = ensureTextureLoaded,
+    .loadMesh = loadMesh,
   };
   for (auto &objType : objTypes){
     if (objectType == objType.name){
@@ -313,8 +306,6 @@ void addObject(
     mapping[id] = GameObjectRoot{};
   }else if (objectType == "emitter"){
     mapping[id] = createEmitter(addEmitter, attr);
-  }else if (objectType == "heightmap"){
-    mapping[id] = createHeightmap(attr, loadMesh, ensureTextureLoaded);
   }else if (objectType == "navmesh"){
     mapping[id] = createNavmesh(meshes.at("./res/models/ui/node.obj").mesh);
   }else{
@@ -634,12 +625,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     return;
   }
 
-  auto heightmapObj = std::get_if<GameObjectHeightmap>(&toRender);
-  if (heightmapObj != NULL){
-    assert(false);
-    return;
-  }
-
   assert(false);
 }
 
@@ -765,13 +750,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
   auto emitterObj = std::get_if<GameObjectEmitter>(&objectToSerialize);
   if (emitterObj != NULL){
     std::cout << "ERROR: EMITTER SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-    assert(false);
-    return {};
-  }
-
-  auto heightmapObj = std::get_if<GameObjectHeightmap>(&objectToSerialize);
-  if (heightmapObj != NULL){
-    std::cout << "ERROR: HEIGHTMAP SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
     assert(false);
     return {};
   }

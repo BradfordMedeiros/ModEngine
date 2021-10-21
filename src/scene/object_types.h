@@ -8,7 +8,6 @@
 #include <variant>
 #include "./common/mesh.h"
 #include "./types/voxels.h"
-#include "./types/heightmap.h"
 #include "./types/ainav.h"
 #include "./types/emitter.h"
 #include "./serialization.h"
@@ -22,6 +21,7 @@
 #include "./objtypes/obj_uibutton.h"
 #include "./objtypes/obj_uislider.h"
 #include "./objtypes/obj_navconn.h"
+#include "./objtypes/obj_heightmap.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -32,14 +32,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-struct TextureInformation {
-  glm::vec2 textureoffset;
-  glm::vec2 texturetiling;
-  glm::vec2 texturesize;
-  std::string textureOverloadName;
-  int textureOverloadId;
-};
 
 struct GameObjectMesh {
   std::vector<std::string> meshNames;
@@ -60,11 +52,6 @@ struct GameObjectVoxel {
 struct GameObjectRoot {};
 
 struct GameObjectEmitter{};
-struct GameObjectHeightmap{
-  HeightMapData heightmap;
-  Mesh mesh;
-  TextureInformation texture;
-};
 
 struct GameObjectNavmesh {
   Mesh mesh;
@@ -202,6 +189,7 @@ struct ObjectType {
   std::function<GameObjectObj(GameobjAttributes&, ObjectTypeUtil&)> createObj;
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
+  std::function<void(GameObjectObj&)> removeObject;
 };
 
 
