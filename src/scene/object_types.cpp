@@ -5,39 +5,6 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texturesize", "texture", "discard", "emission", "tint" };
-GameObjectMesh createMesh(
-  GameobjAttributes& attr, 
-  std::map<std::string, MeshRef>& meshes, 
-  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded,
-  std::function<Texture(std::string)> ensureTextureLoaded
-){
-  // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
-  // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
-  std::string rootMeshName = attr.stringAttributes.find("mesh") == attr.stringAttributes.end()  ? "" : attr.stringAttributes.at("mesh");
-  auto meshNamesForObj = ensureMeshLoaded(rootMeshName, meshFieldsToCopy);
-  std::vector<std::string> meshNames;
-  std::vector<Mesh> meshesToRender;
-  for (auto meshName : meshNamesForObj){
-    std::cout << "trying to get mesh name: " << meshName << std::endl;
-    meshNames.push_back(meshName);
-    meshesToRender.push_back(meshes.at(meshName).mesh);  
-  }
-
-  GameObjectMesh obj {
-    .meshNames = meshNames,
-    .meshesToRender = meshesToRender,
-    .isDisabled = attr.stringAttributes.find("disabled") != attr.stringAttributes.end(),
-    .nodeOnly = meshNames.size() == 0,
-    .rootMesh = rootMeshName,
-    .texture = texinfoFromFields(attr, ensureTextureLoaded),
-    .discardAmount = attr.numAttributes.find("discard") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("discard"),
-    .emissionAmount = attr.numAttributes.find("emission") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("emission"),
-    .tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint"),
-  };
-  return obj;
-}
-
 GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
   auto textureString = attr.stringAttributes.find("fromtextures") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("fromtextures");
   auto voxel = createVoxels(parseVoxelState(attr.stringAttributes.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
@@ -194,7 +161,17 @@ std::vector<ObjectType> objTypes = {
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
+  ObjectType {
+    .name = "default",
+    .variantType = getVariantIndex(GameObjectMesh{}),
+    .createObj = createMesh,
+    .objectAttributes = convertElementValue<GameObjectMesh>(meshObjAttr), 
+    .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
+    .removeObject = removeDoNothing,
+  },
 };
+
+
 
 void addObject(
   objid id, 
@@ -214,6 +191,7 @@ void addObject(
     .ensureTextureLoaded = ensureTextureLoaded,
     .loadMesh = loadMesh,
     .addEmitter = addEmitter,
+    .ensureMeshLoaded = ensureMeshLoaded,
   };
   for (auto &objType : objTypes){
     if (objectType == objType.name){
@@ -222,9 +200,7 @@ void addObject(
     }
   }
 
-  if (objectType == "default"){
-    mapping[id] = createMesh(attr, meshes, ensureMeshLoaded, ensureTextureLoaded);
-  }else if(objectType == "voxel"){
+  if(objectType == "voxel"){
     auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
     mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
   }else if (objectType == "root"){
@@ -520,17 +496,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     }
   }
 
-  auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-  if (meshObj != NULL){
-    if (meshObj -> meshNames.size() > 0){
-      _attributes.stringAttributes["mesh"] = meshObj -> meshNames.at(0);
-    }
-    _attributes.stringAttributes["isDisabled"] = meshObj -> isDisabled ? "true" : "false";
-    _attributes.vecAttributes["tint"] = meshObj -> tint;
-    return;
-  }  
-
-
   auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
   if (voxelObj != NULL){
     // not yet implemented
@@ -596,34 +561,6 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   }
   assert(false);
 }
-
-void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
-  if (texture.textureoffset.x != 0.f && texture.textureoffset.y != 0.f){
-    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(texture.textureoffset)));
-  }
-  if (texture.textureOverloadName != ""){
-    pairs.push_back(std::pair<std::string, std::string>("texture", texture.textureOverloadName));
-  }
-  if (texture.texturesize.x != 1.f && texture.texturesize.y != 1.f){
-    pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
-  }
-}
-
-std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.rootMesh != ""){
-    pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh));
-  }
-  if (obj.isDisabled){
-    pairs.push_back(std::pair<std::string, std::string>("disabled", "true"));
-  }
-  addSerializedTextureInformation(pairs, obj.texture);
-  if (!isIdentityVec(obj.tint)){
-    pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
-  }
-
-  return pairs;  
-}
   
 std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj, std::function<std::string(int)> textureName){
   std::vector<std::pair<std::string, std::string>> pairs;
@@ -643,11 +580,6 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     if (variantIndex == objType.variantType){
       return objType.serialize(objectToSerialize);
     }
-  }
-
-  auto meshObject = std::get_if<GameObjectMesh>(&objectToSerialize);
-  if (meshObject != NULL){
-    return serializeMesh(*meshObject);
   }
 
   auto voxelObject = std::get_if<GameObjectVoxel>(&objectToSerialize);

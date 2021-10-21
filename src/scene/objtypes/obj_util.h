@@ -25,6 +25,7 @@ struct ObjectTypeUtil {
   std::function<Texture(std::string)>& ensureTextureLoaded;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
+  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded;
 };
 
 GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes);

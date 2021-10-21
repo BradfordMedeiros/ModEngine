@@ -23,6 +23,7 @@
 #include "./objtypes/obj_navmesh.h"
 #include "./objtypes/obj_heightmap.h"
 #include "./objtypes/obj_emitter.h"
+#include "./objtypes/obj_mesh.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -33,18 +34,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-struct GameObjectMesh {
-  std::vector<std::string> meshNames;
-  std::vector<Mesh> meshesToRender;   // @TODO  I shouldn't be storing the actual mesh here.  Instead I should just be referencing global meshes
-  bool isDisabled;
-  bool nodeOnly;
-  std::string rootMesh;
-  TextureInformation texture;
-  float discardAmount;
-  float emissionAmount;
-  glm::vec3 tint;
-};
 
 struct GameObjectVoxel {
   Voxels voxel;
