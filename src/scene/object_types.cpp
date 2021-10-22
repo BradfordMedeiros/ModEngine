@@ -5,15 +5,6 @@ std::map<objid, GameObjectObj> getObjectMapping() {
 	return objectMapping;
 }
 
-GameObjectVoxel createVoxel(GameobjAttributes& attr, std::function<void()> onVoxelBoundInfoChanged, unsigned int defaultTexture, std::function<Texture(std::string)> ensureTextureLoaded){
-  auto textureString = attr.stringAttributes.find("fromtextures") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("fromtextures");
-  auto voxel = createVoxels(parseVoxelState(attr.stringAttributes.at("from"), textureString, defaultTexture, ensureTextureLoaded), onVoxelBoundInfoChanged, defaultTexture);
-  GameObjectVoxel obj {
-    .voxel = voxel,
-  };
-  return obj;
-}
-
 std::size_t getVariantIndex(GameObjectObj gameobj){
   return gameobj.index();
 }
@@ -32,8 +23,8 @@ std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementV
 
 //  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
 template<typename T>
-std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj)> convertSerialize(std::function<void(T&)> serialize) {   
-  return [](GameObjectObj& obj) -> std::vector<std::pair<std::string, std::string>> {
+std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj, ObjectSerializeUtil& util)> convertSerialize(std::function<void(T&, ObjectSerializeUtil&)> serialize) {   
+  return [](GameObjectObj& obj, ObjectSerializeUtil& util) -> std::vector<std::pair<std::string, std::string>> {
     return {};
   };
 }
@@ -48,7 +39,7 @@ std::function<void(GameObjectObj& obj)> convertRemove(std::function<void(T&)> rm
   };
 }
 
-std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj){
+std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj, ObjectSerializeUtil& util){
   std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
   assert(false);
   return {};    
@@ -62,6 +53,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
     .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -70,6 +62,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
     .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -78,6 +71,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
     .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -86,6 +80,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
+    .setAttributes = convertElementValue<GameObjectLight>(setLightAttributes),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
     .removeObject = removeDoNothing,
   },
@@ -94,6 +89,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
+    .setAttributes = nothingObjAttr,
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
     .removeObject = convertRemove<GameObjectSound>(removeSound),
   },
@@ -102,6 +98,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIText{}),
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -110,6 +107,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUILayout{}),
     .createObj = createUILayout,
     .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -118,6 +116,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectNavConns{}),
     .createObj = createNavConns,
     .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -126,6 +125,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIButton{}),
     .createObj = createUIButton,
     .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
     .serialize = convertSerialize<GameObjectUIButton>(serializeButton),
     .removeObject = removeDoNothing,
   },
@@ -134,6 +134,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUISlider{}),
     .createObj = createUISlider,
     .objectAttributes = nothingObjAttr, 
+    .setAttributes = nothingObjAttr,
     .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
     .removeObject = removeDoNothing,
   },
@@ -142,6 +143,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
     .objectAttributes = nothingObjAttr, 
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
   },
@@ -150,6 +152,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectNavmesh{}),
     .createObj = createNavmesh,
     .objectAttributes = nothingObjAttr, 
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -158,6 +161,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectEmitter{}),
     .createObj = createEmitter,
     .objectAttributes = nothingObjAttr, 
+    .setAttributes = nothingObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -165,12 +169,21 @@ std::vector<ObjectType> objTypes = {
     .name = "default",
     .variantType = getVariantIndex(GameObjectMesh{}),
     .createObj = createMesh,
-    .objectAttributes = convertElementValue<GameObjectMesh>(meshObjAttr), 
+    .objectAttributes = convertElementValue<GameObjectMesh>(meshObjAttr),
+    .setAttributes = convertElementValue<GameObjectMesh>(setMeshAttributes),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
     .removeObject = removeDoNothing,
   },
+  ObjectType {
+    .name = "voxel", 
+    .variantType = getVariantIndex(GameObjectVoxel{}),
+    .createObj = createVoxel, 
+    .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
+    .serialize = convertSerialize<GameObjectVoxel>(serializeVoxel),
+    .removeObject  = removeDoNothing,
+  },
 };
-
 
 
 void addObject(
@@ -192,6 +205,7 @@ void addObject(
     .loadMesh = loadMesh,
     .addEmitter = addEmitter,
     .ensureMeshLoaded = ensureMeshLoaded,
+    .onCollisionChange = onCollisionChange,
   };
   for (auto &objType : objTypes){
     if (objectType == objType.name){
@@ -200,10 +214,7 @@ void addObject(
     }
   }
 
-  if(objectType == "voxel"){
-    auto defaultVoxelTexture = ensureTextureLoaded("./res/textures/wood.jpg");
-    mapping[id] = createVoxel(attr, onCollisionChange, defaultVoxelTexture.textureId, ensureTextureLoaded);
-  }else if (objectType == "root"){
+  if (objectType == "root"){
     mapping[id] = GameObjectRoot{};
   }else{
     std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
@@ -496,37 +507,18 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
     }
   }
 
-  auto voxelObj = std::get_if<GameObjectVoxel>(&toRender);
-  if (voxelObj != NULL){
-    // not yet implemented
-    assert(false);
-    return;
-  } 
-
   assert(false);
 }
 
 // TODO -> this needs updating hard.  
 void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled){
- GameObjectObj& toRender = mapping.at(id);
-  auto meshObj = std::get_if<GameObjectMesh>(&toRender);
-  if (meshObj != NULL){
-    if (attributes.stringAttributes.find("isDisabled") != attributes.stringAttributes.end()){
-      meshObj -> isDisabled = attributes.stringAttributes.at("isDisabled") == "true";;
+  GameObjectObj& toRender = mapping.at(id);
+  auto variantIndex = toRender.index();
+  for (auto &objType : objTypes){
+    if (variantIndex == objType.variantType){
+      objType.setAttributes(toRender, attributes);
+      return;
     }
-    if (attributes.stringAttributes.find("textureoffset") != attributes.stringAttributes.end()){
-      meshObj -> texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
-    }
-    if (attributes.vecAttributes.find("tint") != attributes.vecAttributes.end()){
-      meshObj -> tint = attributes.vecAttributes.at("tint");
-    }
-    return;
-  }
-
-  auto lightObj = std::get_if<GameObjectLight>(&toRender);
-  if (lightObj != NULL){   
-    lightObj -> color = attributes.vecAttributes.at("color");
-    return;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
@@ -555,46 +547,26 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
     return;
   }
 
-  auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
-  if (cameraObj != NULL){
-    return; 
-  }
   assert(false);
 }
   
-std::vector<std::pair<std::string, std::string>> serializeVoxel(GameObjectVoxel obj, std::function<std::string(int)> textureName){
-  std::vector<std::pair<std::string, std::string>> pairs;
-  auto serializedData = serializeVoxelState(obj.voxel, textureName);
-
-  pairs.push_back(std::pair<std::string, std::string>("from", serializedData.voxelState));
-  if (serializedData.textureState != ""){
-    pairs.push_back(std::pair<std::string, std::string>("fromtextures", serializedData.textureState));
-  }
-  return pairs;
-}  
-
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){
   GameObjectObj objectToSerialize = mapping.at(id);
   auto variantIndex = objectToSerialize.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
-      return objType.serialize(objectToSerialize);
+      ObjectSerializeUtil serializeUtil {
+        .textureName = getTextureName,
+      };
+      return objType.serialize(objectToSerialize, serializeUtil);
     }
   }
 
-  auto voxelObject = std::get_if<GameObjectVoxel>(&objectToSerialize);
-  if (voxelObject != NULL){
-    return serializeVoxel(*voxelObject, getTextureName);
-  }
   auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
   if (rootObject != NULL){
     return {};
   }
 
-  auto rootObj = std::get_if<GameObjectRoot>(&objectToSerialize);
-  if (rootObj != NULL){
-    return {};
-  }
   assert(false);  
   return {};
 }

@@ -26,7 +26,13 @@ struct ObjectTypeUtil {
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
   std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded;
+  std::function<void()> onCollisionChange;
 };
+
+struct ObjectSerializeUtil {
+  std::function<std::string(int)> textureName;
+};
+
 
 GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes);
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common);

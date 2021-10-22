@@ -7,7 +7,6 @@
 #include <vector>
 #include <variant>
 #include "./common/mesh.h"
-#include "./types/voxels.h"
 #include "./types/ainav.h"
 #include "./serialization.h"
 #include "./objtypes/obj_geo.h"
@@ -24,6 +23,7 @@
 #include "./objtypes/obj_heightmap.h"
 #include "./objtypes/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
+#include "./objtypes/obj_voxel.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -34,10 +34,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-struct GameObjectVoxel {
-  Voxels voxel;
-};
 
 struct GameObjectRoot {};
 
@@ -172,7 +168,8 @@ struct ObjectType {
   std::size_t variantType;
   std::function<GameObjectObj(GameobjAttributes&, ObjectTypeUtil&)> createObj;
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
-  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
+  std::function<void(GameObjectObj&, GameobjAttributes&)> setAttributes;
+  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
   std::function<void(GameObjectObj&)> removeObject;
 };
 

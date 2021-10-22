@@ -31,8 +31,12 @@ void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes){
   _attributes.vecAttributes["color"] = lightObj.color;
 }
 
-std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight obj){
+std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   pairs.push_back(std::pair<std::string, std::string>("color", serializeVec(obj.color)));
   return pairs;
-} 
+}
+
+void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes){
+  lightObj.color = attributes.vecAttributes.at("color");
+}

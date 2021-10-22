@@ -15,7 +15,7 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
   return obj;
 }
 
-std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider& obj){
+std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   addSerializeCommon(pairs, obj.common);
   if (obj.onSlide != ""){

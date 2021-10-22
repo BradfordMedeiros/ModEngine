@@ -39,7 +39,7 @@ void addSerializedTextureInformation(std::vector<std::pair<std::string, std::str
     pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
   }
 }
-std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj){
+std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   if (obj.rootMesh != ""){
     pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh));
@@ -61,4 +61,17 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
   }
   _attributes.stringAttributes["isDisabled"] = meshObj.isDisabled ? "true" : "false";
   _attributes.vecAttributes["tint"] = meshObj.tint;
+}
+
+void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes){
+  if (attributes.stringAttributes.find("isDisabled") != attributes.stringAttributes.end()){
+    meshObj.isDisabled = attributes.stringAttributes.at("isDisabled") == "true";;
+  }
+  if (attributes.stringAttributes.find("textureoffset") != attributes.stringAttributes.end()){
+    //std::cout << "setting texture offset" << std::endl;
+    meshObj.texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
+  }
+  if (attributes.vecAttributes.find("tint") != attributes.vecAttributes.end()){
+    meshObj.tint = attributes.vecAttributes.at("tint");
+  }
 }

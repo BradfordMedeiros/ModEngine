@@ -17,7 +17,7 @@ void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes){
   _attributes.stringAttributes["loop"] = soundObj.loop ? "true" : "false";
 }
 
-std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj){
+std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   if (obj.clip != ""){
     pairs.push_back(std::pair<std::string, std::string>("clip", obj.clip));

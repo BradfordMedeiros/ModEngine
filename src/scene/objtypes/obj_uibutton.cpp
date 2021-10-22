@@ -27,7 +27,7 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
   return obj;
 }
 
-std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj){
+std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   addSerializeCommon(pairs, obj.common);
   if (obj.canToggle != true){

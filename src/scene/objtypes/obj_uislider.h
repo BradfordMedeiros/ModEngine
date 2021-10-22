@@ -15,6 +15,6 @@ struct GameObjectUISlider {
 };
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util);
-std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider& obj);
+std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider& obj, ObjectSerializeUtil& util);
 
 #endif

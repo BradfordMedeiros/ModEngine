@@ -20,6 +20,6 @@ struct GameObjectUIButton {
 };
 
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util);
-std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj);
+std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj, ObjectSerializeUtil& util);
 
 #endif
