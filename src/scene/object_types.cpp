@@ -53,7 +53,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
     .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
-    .setAttributes = nothingObjAttr,
+    .setAttributes = convertElementValue<GameObjectGeo>(setGeoObjAttributes),
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -98,7 +98,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIText{}),
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
-    .setAttributes = nothingObjAttr,
+    .setAttributes = convertElementValue<GameObjectUIText>(setUITextAttributes),
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -525,25 +525,6 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   if (emitterObj != NULL){
     auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
     setEmitterEnabled(enabled);
-    return;
-  }
-
-  auto geoObj = std::get_if<GameObjectGeo>(&toRender);
-  if (geoObj != NULL){
-    if (attributes.stringAttributes.find("points") != attributes.stringAttributes.end()){
-      geoObj -> points = parsePoints(attributes.stringAttributes.at("points"));
-    }
-    return;
-  }
-
-  auto textObj = std::get_if<GameObjectUIText>(&toRender);
-  if (textObj != NULL){
-    if (attributes.stringAttributes.find("value") != attributes.stringAttributes.end()){
-      textObj -> value = attributes.stringAttributes.at("value");
-    }
-    if (attributes.numAttributes.find("spacing") != attributes.numAttributes.end()){
-      textObj -> deltaOffset = attributes.numAttributes.at("spacing");
-    }
     return;
   }
 

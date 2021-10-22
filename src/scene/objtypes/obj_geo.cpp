@@ -48,3 +48,9 @@ void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes){
    _attributes.stringAttributes["shape"] = "sphere";
   }
 }
+
+void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes){
+  if (attributes.stringAttributes.find("points") != attributes.stringAttributes.end()){
+    geoObj.points = parsePoints(attributes.stringAttributes.at("points"));
+  } 
+}

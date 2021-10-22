@@ -15,5 +15,6 @@ GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<glm::vec3> parsePoints(std::string value);
 
 void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes);
+void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes);
 
 #endif
