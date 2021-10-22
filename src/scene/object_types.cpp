@@ -11,7 +11,6 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
 
 void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
 
-
 template<typename T>
 std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementValue(std::function<void(T&, GameobjAttributes&)> getAttr) {   
   return [getAttr](GameObjectObj& obj, GameobjAttributes& attr) -> void {
@@ -34,20 +33,32 @@ std::function<void(GameObjectObj& obj)> convertRemove(std::function<void(T&)> rm
   return [rmObject](GameObjectObj& obj) -> void {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
-    std::cout << "obj instance not null, going to call teh fn" << std::endl;
     rmObject(*objInstance);
   };
 }
 
 std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj, ObjectSerializeUtil& util){
-  std::cout << "ERROR: GEO SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
+  std::cout << "ERROR: SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
   assert(false);
   return {};    
 }
 
 void removeDoNothing(GameObjectObj& obj){}
 
+GameObjectObj createRoot(GameobjAttributes& attr, ObjectTypeUtil& util){
+  return GameObjectRoot{};
+}
+
 std::vector<ObjectType> objTypes = {
+  ObjectType {
+    .name = "root",
+    .variantType = getVariantIndex(GameObjectRoot{}),
+    .createObj = createRoot,
+    .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingObjAttr,
+    .serialize = serializeNotImplemented,
+    .removeObject = removeDoNothing,
+  },
   ObjectType {
     .name = "geo",
     .variantType = getVariantIndex(GameObjectGeo{}),
@@ -213,13 +224,9 @@ void addObject(
       return;
     }
   }
-
-  if (objectType == "root"){
-    mapping[id] = GameObjectRoot{};
-  }else{
-    std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
-    assert(false);
-  }
+  std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
+  assert(false);
+  
 }
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
