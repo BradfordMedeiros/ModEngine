@@ -555,11 +555,7 @@ std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, s
     }
   }
 
-  auto rootObject = std::get_if<GameObjectRoot>(&objectToSerialize);
-  if (rootObject != NULL){
-    return {};
-  }
-
+  std::cout << "obj type not supported" << std::endl;
   assert(false);  
   return {};
 }
