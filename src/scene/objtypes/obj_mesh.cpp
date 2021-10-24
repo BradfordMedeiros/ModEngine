@@ -63,7 +63,7 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
   _attributes.vecAttributes["tint"] = meshObj.tint;
 }
 
-void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes){
+void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   if (attributes.stringAttributes.find("isDisabled") != attributes.stringAttributes.end()){
     meshObj.isDisabled = attributes.stringAttributes.at("isDisabled") == "true";;
   }

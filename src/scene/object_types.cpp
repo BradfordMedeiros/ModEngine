@@ -10,6 +10,8 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
 }
 
 void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
+void nothingSetObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes, ObjectSetAttribUtil& util){ }// do nothing 
+
 
 template<typename T>
 std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementValue(std::function<void(T&, GameobjAttributes&)> getAttr) {   
@@ -19,6 +21,16 @@ std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementV
     getAttr(*objInstance, attr);
   };
 }
+
+template<typename T>
+std::function<void(GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil&)> convertElementSetValue(std::function<void(T&, GameobjAttributes&, ObjectSetAttribUtil&)> setAttr) {   
+  return [setAttr](GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil& util) -> void {
+    auto objInstance = std::get_if<T>(&obj);
+    assert(objInstance != NULL);
+    setAttr(*objInstance, attr, util);
+  };
+}
+
 
 //  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
 template<typename T>
@@ -55,7 +67,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectRoot{}),
     .createObj = createRoot,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -64,7 +76,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectGeo{}),
     .createObj = createGeo,
     .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
-    .setAttributes = convertElementValue<GameObjectGeo>(setGeoObjAttributes),
+    .setAttributes = convertElementSetValue<GameObjectGeo>(setGeoObjAttributes),
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -73,7 +85,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -82,7 +94,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -91,7 +103,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectLight{}),
     .createObj = createLight,
     .objectAttributes = convertElementValue<GameObjectLight>(lightObjAttr),
-    .setAttributes = convertElementValue<GameObjectLight>(setLightAttributes),
+    .setAttributes = convertElementSetValue<GameObjectLight>(setLightAttributes),
     .serialize = convertSerialize<GameObjectLight>(serializeLight),
     .removeObject = removeDoNothing,
   },
@@ -100,7 +112,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
     .removeObject = convertRemove<GameObjectSound>(removeSound),
   },
@@ -109,7 +121,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIText{}),
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
-    .setAttributes = convertElementValue<GameObjectUIText>(setUITextAttributes),
+    .setAttributes = convertElementSetValue<GameObjectUIText>(setUITextAttributes),
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -118,7 +130,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUILayout{}),
     .createObj = createUILayout,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -127,7 +139,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectNavConns{}),
     .createObj = createNavConns,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -136,7 +148,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIButton{}),
     .createObj = createUIButton,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = convertSerialize<GameObjectUIButton>(serializeButton),
     .removeObject = removeDoNothing,
   },
@@ -145,7 +157,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUISlider{}),
     .createObj = createUISlider,
     .objectAttributes = nothingObjAttr, 
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
     .removeObject = removeDoNothing,
   },
@@ -154,7 +166,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
     .objectAttributes = nothingObjAttr, 
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
   },
@@ -163,7 +175,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectNavmesh{}),
     .createObj = createNavmesh,
     .objectAttributes = nothingObjAttr, 
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -172,7 +184,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectEmitter{}),
     .createObj = createEmitter,
     .objectAttributes = nothingObjAttr, 
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
@@ -181,7 +193,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectMesh{}),
     .createObj = createMesh,
     .objectAttributes = convertElementValue<GameObjectMesh>(meshObjAttr),
-    .setAttributes = convertElementValue<GameObjectMesh>(setMeshAttributes),
+    .setAttributes = convertElementSetValue<GameObjectMesh>(setMeshAttributes),
     .serialize = convertSerialize<GameObjectMesh>(serializeMesh),
     .removeObject = removeDoNothing,
   },
@@ -190,7 +202,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectVoxel{}),
     .createObj = createVoxel, 
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
     .serialize = convertSerialize<GameObjectVoxel>(serializeVoxel),
     .removeObject  = removeDoNothing,
   },
@@ -520,18 +532,14 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
   auto variantIndex = toRender.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
-      objType.setAttributes(toRender, attributes);
+      ObjectSetAttribUtil util {
+        .setEmitterEnabled = setEmitterEnabled,
+      };
+      objType.setAttributes(toRender, attributes, util);
       return;
     }
   }
-
-  auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
-  if (emitterObj != NULL){
-    auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
-    setEmitterEnabled(enabled);
-    return;
-  }
-
+  std::cout << "obj type not supported" << std::endl;
   assert(false);
 }
   

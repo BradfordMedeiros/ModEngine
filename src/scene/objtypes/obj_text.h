@@ -11,6 +11,6 @@ struct GameObjectUIText {
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);
 void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes);
-void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes);
+void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif

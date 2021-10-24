@@ -95,3 +95,8 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
 void removeEmitter(GameObjectEmitter& heightmapObj, ObjectRemoveUtil& util){
   util.rmEmitter();
 }
+
+void setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
+  util.setEmitterEnabled(enabled);
+}

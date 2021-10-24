@@ -9,5 +9,7 @@ struct GameObjectEmitter{};
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util);
 void removeEmitter(GameObjectEmitter& heightmapObj, ObjectRemoveUtil& util);
+void setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+
 
 #endif

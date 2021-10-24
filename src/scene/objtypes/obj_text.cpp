@@ -15,11 +15,11 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.stringAttributes["spacing"] = std::to_string(textObj.deltaOffset);
 }
 
-void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes){
+void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   if (attributes.stringAttributes.find("value") != attributes.stringAttributes.end()){
     textObj.value = attributes.stringAttributes.at("value");
   }
   if (attributes.numAttributes.find("spacing") != attributes.numAttributes.end()){
     textObj.deltaOffset = attributes.numAttributes.at("spacing");
   }
-} 
+}

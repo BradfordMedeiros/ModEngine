@@ -20,6 +20,6 @@ struct GameObjectMesh {
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util);
 void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes);
-void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes);
+void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif

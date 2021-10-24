@@ -15,6 +15,6 @@ struct GameObjectLight {
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util);
 void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight& obj, ObjectSerializeUtil& util);
-void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes);
+void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif
