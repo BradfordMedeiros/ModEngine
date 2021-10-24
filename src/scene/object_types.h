@@ -170,9 +170,8 @@ struct ObjectType {
   std::function<void(GameObjectObj&, GameobjAttributes&)> objectAttributes;
   std::function<void(GameObjectObj&, GameobjAttributes&)> setAttributes;
   std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&, ObjectSerializeUtil&)> serialize;
-  std::function<void(GameObjectObj&)> removeObject;
+  std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
 };
-
 
 
 void addObject(

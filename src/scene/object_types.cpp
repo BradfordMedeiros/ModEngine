@@ -29,11 +29,11 @@ std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& ob
 }
 
 template<typename T>
-std::function<void(GameObjectObj& obj)> convertRemove(std::function<void(T&)> rmObject) {   
-  return [rmObject](GameObjectObj& obj) -> void {
+std::function<void(GameObjectObj& obj, ObjectRemoveUtil&)> convertRemove(std::function<void(T&, ObjectRemoveUtil&)> rmObject) {   
+  return [rmObject](GameObjectObj& obj, ObjectRemoveUtil& util) -> void {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
-    rmObject(*objInstance);
+    rmObject(*objInstance, util);
   };
 }
 
@@ -43,7 +43,7 @@ std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObj
   return {};    
 }
 
-void removeDoNothing(GameObjectObj& obj){}
+void removeDoNothing(GameObjectObj& obj, ObjectRemoveUtil& util){}
 
 GameObjectObj createRoot(GameobjAttributes& attr, ObjectTypeUtil& util){
   return GameObjectRoot{};
@@ -239,17 +239,14 @@ void removeObject(
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
       std::cout << "type is: " << objType.name << std::endl;
-      objType.removeObject(Object);
+      ObjectRemoveUtil util { .rmEmitter = rmEmitter };
+      objType.removeObject(Object, util);
       mapping.erase(id);
       return;
     }
   }
-
-  auto emitterObj = std::get_if<GameObjectEmitter>(&Object);
-  if (emitterObj != NULL){
-    rmEmitter();
-  }
-  mapping.erase(id);
+  std::cout << "object type not implemented" << std::endl;
+  assert(false);
 }
 
 int renderDefaultNode(GLint shaderProgram, Mesh& mesh){

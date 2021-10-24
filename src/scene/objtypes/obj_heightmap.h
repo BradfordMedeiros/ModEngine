@@ -12,6 +12,6 @@ struct GameObjectHeightmap{
 };
 
 GameObjectHeightmap createHeightmap(GameobjAttributes& attr, ObjectTypeUtil& util);
-void removeHeightmap(GameObjectHeightmap& heightmapObj);
+void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util);
 
 #endif

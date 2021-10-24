@@ -91,3 +91,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   util.addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled, deleteType);
   return obj;
 }
+
+void removeEmitter(GameObjectEmitter& heightmapObj, ObjectRemoveUtil& util){
+  util.rmEmitter();
+}

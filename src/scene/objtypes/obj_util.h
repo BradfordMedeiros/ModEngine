@@ -33,6 +33,9 @@ struct ObjectSerializeUtil {
   std::function<std::string(int)> textureName;
 };
 
+struct ObjectRemoveUtil {
+  std::function<void()> rmEmitter;
+};
 
 GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes);
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common);

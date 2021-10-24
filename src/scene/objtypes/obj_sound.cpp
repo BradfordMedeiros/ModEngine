@@ -28,6 +28,6 @@ std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound&
   return pairs;
 }  
 
-void removeSound(GameObjectSound& soundObj){
+void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util){
   unloadSoundState(soundObj.source, soundObj.clip); 
 }
