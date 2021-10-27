@@ -76,6 +76,7 @@ void applyPhysicsRotation(World& world, objid index, float offsetX, float offset
 void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, float offsetX, float offsetY, Axis manipulatorAxis);
 void physicsLocalTransformSet(World& world, objid index, Transformation transform);
 
+bool hasPhysicsBody(World& world, objid id);
 void updatePhysicsBody(World& world, objid id);
 
 void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, SysInterface interface);

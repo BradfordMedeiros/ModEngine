@@ -357,7 +357,9 @@ void enforceAllLayouts(World& world){
   auto layouts = layoutsSortedByOrder(world);
   for (auto layout : layouts){
     enforceLayout(world, layout.id, layout.layout, fullTransformation(world.sandbox, layout.id).position);
-    updatePhysicsBody(world, layout.id);
+    if (hasPhysicsBody(world, layout.id)){
+      updatePhysicsBody(world, layout.id);
+    }
   }
 }
 

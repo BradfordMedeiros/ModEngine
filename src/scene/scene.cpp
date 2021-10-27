@@ -288,6 +288,10 @@ void rmRigidBody(World& world, objid id){
   world.rigidbodys.erase(id);
 }
 
+
+bool hasPhysicsBody(World& world, objid id){
+  return world.rigidbodys.find(id) != world.rigidbodys.end();
+}
 void updatePhysicsBody(World& world, objid id){
   auto rigidBody = world.rigidbodys.at(id);
   assert(rigidBody != NULL);
@@ -606,7 +610,7 @@ void addObjectToWorld(
         return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels, id);
       },
       [&world, id]() -> void {
-        assert(false); // think about what this should do better!
+        //assert(false); // think about what this should do better!
         updatePhysicsBody(world, id);
       },
       [&world, &interface, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
