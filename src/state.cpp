@@ -154,7 +154,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.takeScreenshot = false,
     .highlight = true,
     .multiselect = false,
-    .editor = EditorContent{},
+    .editor = EditorContent{ .activeObj = 0 },
     .isRecording = false,
     .recordingIndex = -1,
     .renderMode = RENDER_FINAL,

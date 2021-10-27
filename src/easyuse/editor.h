@@ -12,17 +12,20 @@ struct EditorItem {
 };
 
 struct EditorContent {
+  objid activeObj;
   std::vector<EditorItem> selectedObjs;
   std::vector<EditorItem> clipboardObjs;
 };
 
 void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool reset);
+void setNoActiveObj(EditorContent& editor);
 void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard);
 void clearSelectedIndexs(EditorContent& editor);
 void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject);
 void setClipboardFromSelected(EditorContent& editor);
 bool isSelected(EditorContent& editor, objid id);
 objid selected(EditorContent& editor);
+objid activeSelected(EditorContent& editor);
 std::vector<objid> selectedIds(EditorContent& editor);
 
 #endif

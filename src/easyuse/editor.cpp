@@ -32,6 +32,10 @@ void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool re
       });
     }
   }
+  editor.activeObj = id;
+}
+void setNoActiveObj(EditorContent& editor){
+  editor.activeObj = 0;
 }
 void unsetSelectedIndex(EditorContent& editor, objid id, bool clearFromClipboard){
   std::vector<EditorItem> selectedObjs;
@@ -79,6 +83,10 @@ objid selected(EditorContent& editor){
     return editor.selectedObjs.at(editor.selectedObjs.size() - 1).id;
   }
   return -1;
+}
+
+objid activeSelected(EditorContent& editor){
+  return editor.activeObj;
 }
 
 std::vector<objid> selectedIds(EditorContent& editor){

@@ -110,6 +110,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
     onManipulatorMouseRelease();
+    setNoActiveObj(state.editor);
   }
 
   schemeBindings.onMouseCallback(button, action, mods);

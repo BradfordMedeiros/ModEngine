@@ -1234,13 +1234,7 @@ int main(int argc, char* argv[]){
     state.lastHoverIndex = state.currentHoverIndex;
     state.currentHoverIndex = hoveredId;
 
-    if (selectItemCalled){
-      if (state.hoveredIdInScene){
-        selectItem(hoveredId, hoveredItemColor);
-      }else{
-        notSelectItem();
-      }
-      selectItemCalled = false;
+    if (state.editor.activeObj != 0){
       applyUICoord(
         world.objectMapping, 
         [](std::string topic, float value) -> void { 
@@ -1250,10 +1244,19 @@ int main(int argc, char* argv[]){
           };
           channelMessages.push(message);
         }, 
-        selected(state.editor), 
+        state.editor.activeObj, 
         uvCoord.x, 
         uvCoord.y
       );
+    }
+
+    if (selectItemCalled){
+      if (state.hoveredIdInScene){
+        selectItem(hoveredId, hoveredItemColor);
+      }else{
+        notSelectItem();
+      }
+      selectItemCalled = false;
     }
     onManipulatorUpdate(
       getGameObjectPos, 
