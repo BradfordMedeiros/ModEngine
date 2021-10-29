@@ -1234,7 +1234,7 @@ int main(int argc, char* argv[]){
     state.lastHoverIndex = state.currentHoverIndex;
     state.currentHoverIndex = hoveredId;
 
-    if (state.editor.activeObj != 0){
+    if (state.editor.activeObj != 0 && hoveredId == state.editor.activeObj){
       applyUICoord(
         world.objectMapping, 
         [](std::string topic, float value) -> void { 
