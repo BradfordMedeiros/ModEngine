@@ -63,8 +63,7 @@ void main(){
     vec4 emissionColor = texture(emissionTexture, adjustedTexCoord);
     vec4 opacityColor = texture(opacityTexture, adjustedTexCoord);
 
-    bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;     // This is being derived from emission map but going to use different map (in progress)
-
+    bool discardTexture = hasOpacityTexture && opacityColor.r < discardTexAmount;   
     vec4 texColor;
     if (discardTexture){
         discard;
