@@ -327,8 +327,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
 
   for (auto [id, newPos] : newPositions){
     std::cout << "setting: " << id << " to " << print(newPos) << std::endl;
-    //auto offset = layoutType == LAYOUT_VERTICAL ? glm::vec3(0, -1 * halfBoundHeight, 0.f) : glm::vec3(-1 * halfBoundWidth, 0, 0.f);
-    auto offset = glm::vec3(0.f, 0.f, 0.f);
+    auto offset = layoutType == LAYOUT_VERTICAL ? glm::vec3(0, -1 * halfBoundHeight, 0.f) : glm::vec3(-1 * halfBoundWidth, 0, 0.f);
     physicsTranslateSet(world, id, newPos + offset, false);
   }
  
