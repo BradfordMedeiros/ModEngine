@@ -241,6 +241,9 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
   std::vector<BoundInfo> infos;
   std::cout << "infos:----------------------" << std::endl;
   for (auto id : ids){
+
+    std::cout << "bounding info: id: " << id << " - " << print(fullTransformation(world.sandbox, id).position) << std::endl;
+
     auto transformedBoundInfo =  transformBoundInfo(
       getPhysicsInfoForGameObject(world, id).boundInfo, 
       fullModelTransform(world.sandbox, id)
@@ -309,15 +312,28 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
     }  
   }
   
+  for (auto [id, newPos] : newPositions){
+    std::cout << "setting: " << id << " to " << print(newPos) << std::endl;
+    physicsTranslateSet(world, id, newPos, false);
+  }
+
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
 
-  // Offset each element starting from the left 
-  auto boundingWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
-  auto boundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
+  auto boundWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
+  auto boundHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
+  auto halfBoundWidth = boundWidth / 2.f;
+  auto halfBoundHeight = boundHeight / 2.f;
+  std::cout << "bound values: " << boundWidth << " - " << boundHeight << std::endl;
+
   for (auto [id, newPos] : newPositions){
-    auto offset = layoutType == LAYOUT_HORIZONTAL ? glm::vec3(boundingWidth / 2, 0.f, 0.f) : glm::vec3(0.f, boundingHeight / 2, 0.f);
-    physicsTranslateSet(world, id, newPos - offset, false);
+    std::cout << "setting: " << id << " to " << print(newPos) << std::endl;
+    //auto offset = layoutType == LAYOUT_VERTICAL ? glm::vec3(0, -1 * halfBoundHeight, 0.f) : glm::vec3(-1 * halfBoundWidth, 0, 0.f);
+    auto offset = glm::vec3(0.f, 0.f, 0.f);
+    physicsTranslateSet(world, id, newPos + offset, false);
   }
+ 
+
+
   layoutObject -> boundInfo.xMin -= layoutObject -> margin;
   layoutObject -> boundInfo.xMax += layoutObject -> margin;
   layoutObject -> boundInfo.yMin -= layoutObject -> margin;
