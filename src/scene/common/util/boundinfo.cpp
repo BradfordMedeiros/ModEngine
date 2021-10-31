@@ -53,13 +53,13 @@ glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float d
 std::vector<glm::vec4> boundInfoToPoints(BoundInfo boundInfo){
   std::vector<glm::vec4> points;
   points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, -1 * boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(boundInfo.xMin, -1 * boundInfo.yMax, -1 * boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(boundInfo.xMax, -1 * boundInfo.yMax, boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(-1 * boundInfo.xMin, boundInfo.yMin, boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(-1 * boundInfo.xMax, boundInfo.yMin, -1 * boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(-1 * boundInfo.xMin, -1 * boundInfo.yMax, -1 * boundInfo.zMin, 1.f));
-  points.push_back(glm::vec4(-1 * boundInfo.xMax, -1 * boundInfo.yMax, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMin, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMin, boundInfo.zMax, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMin, boundInfo.zMax, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMin, boundInfo.yMax, boundInfo.zMax, 1.f));
+  points.push_back(glm::vec4(boundInfo.xMax, boundInfo.yMax, boundInfo.zMax, 1.f));
   return points;
 }
 
