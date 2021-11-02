@@ -534,6 +534,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
+  glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 0);  
 
   // Some texture needs to be bound, who cares what. 
   // Probably conceptual fix would be to add "hasMainTexture"
