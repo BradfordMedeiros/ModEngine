@@ -45,11 +45,11 @@ BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, floa
   float leftAlign = calculateLeftAlign(0, word.size(), false, offsetDelta);
   float right = leftAlign + (offsetDelta * word.size());
 
-  std::cout << "calculate bound info text" << std::endl;
+  /*std::cout << "calculate bound info text" << std::endl;
   std::cout << "font size: " << fontSize << std::endl;
   std::cout << "offset delta: " << offsetDelta << std::endl;
   std::cout << "left align: " << leftAlign << std::endl;
-  std::cout << "right: " << right << std::endl;
+  std::cout << "right: " << right << std::endl;*/
 
   auto halfWidth = (right - leftAlign) / 2.f;
 

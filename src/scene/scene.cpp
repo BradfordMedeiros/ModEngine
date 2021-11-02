@@ -43,7 +43,6 @@ NameAndMeshObjName getMeshesForGroupId(World& world, objid groupId){
 
 PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){  
   GameObject obj = getGameObject(world.sandbox, index);
-  std::cout << "index is: " << index << std::endl;
   auto gameObjV = world.objectMapping.at(index); 
 
   BoundInfo boundInfo = {

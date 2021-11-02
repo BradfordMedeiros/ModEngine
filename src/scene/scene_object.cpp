@@ -239,17 +239,12 @@ void emit(World& world, objid id, NewParticleOptions particleOpts){
 
 BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
   std::vector<BoundInfo> infos;
-  std::cout << "infos:----------------------" << std::endl;
   for (auto id : ids){
-
-    std::cout << "bounding info: id: " << id << " - " << print(fullTransformation(world.sandbox, id).position) << std::endl;
-
     auto transformedBoundInfo =  transformBoundInfo(
       getPhysicsInfoForGameObject(world, id).boundInfo, 
       fullModelTransform(world.sandbox, id)
     );
-    std::cout << "bound info: " << std::endl;
-    printBoundInfo(transformedBoundInfo);
+    //printBoundInfo(transformedBoundInfo);
     infos.push_back(transformedBoundInfo);
   }
   auto bounding = getMaxUnionBoundingInfo(infos); 
@@ -259,23 +254,17 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
 }
 
 
-void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm::vec3 layoutPos){
-  auto elements = layoutObject -> elements;
-  auto currentSceneId = sceneId(world.sandbox, id);
-  auto spacing = layoutObject -> spacing;
-  auto layoutType = layoutObject -> type;
-
-  // Also parenting/transforms use the relative transform, so nesting (in scenegraph) can get fucked
-  // Should consoilate the vertical/horizontal cases in terms of code, identical just dereffing different properties (x vs y)
+std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
+  auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
+  auto horizontal = rootPosition.x;
+  auto fixedY = rootPosition.y;
+  auto vertical = rootPosition.y;
+  auto fixedX = rootPosition.x;
+  
   std::vector<objid> elementIds;
   std::map<objid, glm::vec3> newPositions;
 
-  // Measure elements, and place them offset from one another
-  // Starts at origin of element since cannot know how wide it is until after measuring
   if (layoutType == LAYOUT_HORIZONTAL){
-    auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
-    auto horizontal = rootPosition.x;
-    auto fixedY = rootPosition.y;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
@@ -289,12 +278,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
       newPos.y = fixedY;
       newPositions[obj.id] = newPos;
       horizontal += effectiveSpacing;
-      elementIds.push_back(obj.id);
     }
   }else if (layoutType == LAYOUT_VERTICAL){
-    auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
-    auto vertical = rootPosition.y;
-    auto fixedX = rootPosition.x;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
@@ -308,30 +293,48 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
       newPos.y = top;
       newPositions[obj.id] = newPos;
       vertical += effectiveSpacing;
-      elementIds.push_back(obj.id);
     }  
+  }else{
+    std::cout << "layout type not supported" << std::endl;
+    assert(false);
+  }
+  return newPositions;
+}
+
+
+void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
+  std::cout << "enforcing layout: " << getGameObject(world, layout.id).name << std::endl;
+
+  auto layoutPos = fullTransformation(world.sandbox, id).position;
+  auto elements = layoutObject -> elements;
+  auto layoutType = layoutObject -> type;
+
+  // Figure out positions, starting from origin (layout should center elements so not quite right yet)
+  auto newPositions = calcPositions(world, id, layoutObject -> elements, sceneId(world.sandbox, id), layoutObject -> spacing, layoutType);
+  std::vector<objid> elementIds;
+  for (auto &[id, _] : newPositions){
+    elementIds.push_back(id);
   }
   
+  // Put elements into correct positions, so we can create a bounding box around them 
   for (auto [id, newPos] : newPositions){
-    std::cout << "setting: " << id << " to " << print(newPos) << std::endl;
     physicsTranslateSet(world, id, newPos, false);
   }
 
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
 
-  auto boundWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
-  auto boundHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
-  auto halfBoundWidth = boundWidth / 2.f;
-  auto halfBoundHeight = boundHeight / 2.f;
-  std::cout << "bound values: " << boundWidth << " - " << boundHeight << std::endl;
+  auto halfBoundWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) / 2.f;
+  auto halfBoundHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) / 2.f;
 
+  // Offset all elements to the correct positions, so that they're centered
   for (auto [id, newPos] : newPositions){
-    std::cout << "setting: " << id << " to " << print(newPos) << std::endl;
     auto offset = layoutType == LAYOUT_VERTICAL ? glm::vec3(0, -1 * halfBoundHeight, 0.f) : glm::vec3(-1 * halfBoundWidth, 0, 0.f);
     physicsTranslateSet(world, id, newPos + offset, false);
+    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
+    if (layoutObject != NULL){
+      enforceLayout(world, id, layoutObject);
+    }
   }
- 
-
 
   layoutObject -> boundInfo.xMin -= layoutObject -> margin;
   layoutObject -> boundInfo.xMax += layoutObject -> margin;
@@ -340,6 +343,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject, glm
   layoutObject -> boundInfo.zMin -= layoutObject -> margin;
   layoutObject -> boundInfo.zMax += layoutObject -> margin;
   layoutObject -> boundOrigin = layoutPos;
+
+
 }
 
 struct UILayoutAndId {
@@ -370,8 +375,8 @@ std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
 
 void enforceAllLayouts(World& world){
   auto layouts = layoutsSortedByOrder(world);
-  for (auto layout : layouts){
-    enforceLayout(world, layout.id, layout.layout, fullTransformation(world.sandbox, layout.id).position);
+  for (auto &layout : layouts){
+    enforceLayout(world, layout.id, layout.layout);
     if (hasPhysicsBody(world, layout.id)){
       updatePhysicsBody(world, layout.id);
     }
