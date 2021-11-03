@@ -90,6 +90,17 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
   return info;
 }
 
+BoundInfo centerBoundInfo(BoundInfo& currInfo){
+  auto halfWidth = (currInfo.xMax - currInfo.xMin) / 2.f;
+  auto halfHeight = (currInfo.yMax - currInfo.yMin) / 2.f;
+  auto halfDepth = (currInfo.zMax - currInfo.zMin) / 2.f;
+  return BoundInfo{
+    .xMin = -1 * halfWidth, .xMax = halfWidth,
+    .yMin = -1 * halfHeight, .yMax = halfHeight,
+    .zMin = -1 * halfDepth, .zMax = halfDepth,
+  };
+}
+
 BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
   auto boundInfoPoints =  boundInfoToPoints(boundInfo);
   auto firstPointTransformed =  transform * boundInfoPoints.at(0);
@@ -123,3 +134,4 @@ BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform){
   } 
   return BoundInfo { .xMin = minX, .xMax = maxX, .yMin = minY, .yMax = maxY, .zMin = minZ, .zMax = maxZ };
 }
+

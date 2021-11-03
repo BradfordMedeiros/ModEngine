@@ -26,6 +26,7 @@ BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos);
 void printBoundInfo(BoundInfo info);
 glm::mat4 getMatrixForBoundRatio(boundRatio ratio, glm::mat4 currentMatrix);
 glm::vec3 getScaleEquivalent(BoundInfo info1, float width, float height, float depth);
+BoundInfo centerBoundInfo(BoundInfo& info);
 BoundInfo transformBoundInfo(BoundInfo boundInfo, glm::mat4 transform);
 
 #endif 
