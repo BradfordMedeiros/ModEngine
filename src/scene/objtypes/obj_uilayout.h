@@ -10,7 +10,6 @@ struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
   std::vector<std::string> elements;
-  int order;
   BoundInfo boundInfo;
   glm::vec3 boundOrigin;
   bool showBackpanel;

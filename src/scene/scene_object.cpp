@@ -352,7 +352,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     physicsTranslateSet(world, id, fullNewPos, false);
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
     if (layoutObject != NULL){
-      enforceLayout(world, id, layoutObject);
+      // Could just technically move the elements by the change from the holder position, but whatever for now
+      enforceLayout(world, id, layoutObject); 
     }
   }
 
@@ -370,7 +371,7 @@ struct UILayoutAndId {
   GameObjectUILayout* layout;
 };
 
-std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
+std::vector<UILayoutAndId> allLayouts(World& world){
   std::vector<UILayoutAndId> layouts;
   auto layoutIndexs = getGameObjectsIndex<GameObjectUILayout>(world.objectMapping);
   for (auto id : layoutIndexs){
@@ -381,22 +382,13 @@ std::vector<UILayoutAndId> layoutsSortedByOrder(World& world){
       .layout = layoutObject,
     });
   }
-  std::sort(
-    std::begin(layouts), 
-    std::end(layouts), 
-    [](UILayoutAndId layout1, UILayoutAndId layout2) { 
-      return layout1.layout -> order < layout2.layout -> order; 
-    }
-  );
   return layouts;
 }
 
 void enforceAllLayouts(World& world){
-  auto layouts = layoutsSortedByOrder(world);
+  auto layouts = allLayouts(world);
   for (auto &layout : layouts){
-    if (getGameObject(world, layout.id).name == "(holder"){
-      enforceLayout(world, layout.id, layout.layout);
-    }
+    enforceLayout(world, layout.id, layout.layout);
     if (hasPhysicsBody(world, layout.id)){
       updatePhysicsBody(world, layout.id);
     }

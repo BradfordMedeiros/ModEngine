@@ -8,7 +8,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
     elements = split(attr.stringAttributes.at("elements"), ',');
   }
-  auto order = (attr.numAttributes.find("order") == attr.numAttributes.end()) ? 0 : attr.numAttributes.at("order");
   auto showBackpanel = (attr.stringAttributes.find("backpanel") != attr.stringAttributes.end() && attr.stringAttributes.at("backpanel") == "true");
   auto tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint");
   auto margin = attr.numAttributes.find("margin") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("margin");
@@ -22,7 +21,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .type = type,
     .spacing = spacing,
     .elements = elements,
-    .order = order,
     .boundInfo = boundInfo,
     .boundOrigin = glm::vec3(0.f, 0.f, 0.f),
     .showBackpanel = showBackpanel,
