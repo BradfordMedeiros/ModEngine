@@ -261,7 +261,7 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
 
 
 std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
-  auto rootPosition = getGameObject(world.sandbox, id).transformation.position;
+  auto rootPosition = fullTransformation(world.sandbox, id).position; 
   auto horizontal = rootPosition.x;
   auto fixedY = rootPosition.y;
   auto vertical = rootPosition.y;
@@ -275,9 +275,6 @@ std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
       auto boundingWidth = (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin);
       auto objectWidth =  boundingWidth * physicsInfo.transformation.scale.x;
-      std::cout << "bounding width for: " << obj.name << " " << boundingWidth << std::endl;
-      std::cout << "object width for: " << obj.name << " " << objectWidth << std::endl;
-
       auto left = horizontal + objectWidth / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
 
@@ -293,9 +290,6 @@ std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
       auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
       auto objectHeight =  boundingHeight * physicsInfo.transformation.scale.y;
-      std::cout << "bounding height for: " << obj.name << " " << boundingHeight << std::endl;
-      std::cout << "object height for: " << obj.name << " " << objectHeight<< std::endl;
-
       auto top = vertical + objectHeight / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
 
@@ -314,8 +308,6 @@ std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std
 
 
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
-  std::cout << "enforcing layout: " << getGameObject(world, id).name << "\n---------------------" << std::endl;
-
   auto layoutPos = fullTransformation(world.sandbox, id).position;
   auto elements = layoutObject -> elements;
   auto layoutType = layoutObject -> type;
@@ -334,10 +326,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto newPositions = calcPositions(world, id, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutType);
   std::vector<objid> elementIds;
 
-  std::cout << "measured positions: \n";
   for (auto &[id, pos] : newPositions){
     elementIds.push_back(id);
-    std::cout << "obj: " << getGameObject(world, id).name << " - " << print(pos) << std::endl;
   }
   std::cout << std::endl;
   
@@ -346,8 +336,6 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   // Put elements into correct positions, so we can create a bounding box around them 
   for (auto [id, newPos] : newPositions){
     physicsTranslateSet(world, id, newPos, false);
-    
-    std::cout << "setting position: " << getGameObject(world, id).name << " to: " << print(newPos) << std::endl;
   }
 
   layoutObject -> boundInfo = createBoundingAround(world, elementIds);
@@ -360,6 +348,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   for (auto [id, newPos] : newPositions){
     auto offset = layoutType == LAYOUT_VERTICAL ? glm::vec3(0, -1 * halfBoundHeight, 0.f) : glm::vec3(-1 * halfBoundWidth, 0, 0.f);
     auto fullNewPos = newPos + offset;
+    std::cout << "setting position of " << getGameObject(world, id).name << " to: " << print(fullNewPos) << std::endl;
     physicsTranslateSet(world, id, fullNewPos, false);
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
     if (layoutObject != NULL){
@@ -374,8 +363,6 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   layoutObject -> boundInfo.zMin -= layoutObject -> margin;
   layoutObject -> boundInfo.zMax += layoutObject -> margin;
   layoutObject -> boundOrigin = layoutPos;
-
-  std::cout << "finished enforcing layout---------------------------\n";
 }
 
 struct UILayoutAndId {
