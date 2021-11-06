@@ -385,6 +385,8 @@ std::vector<UILayoutAndId> allLayouts(World& world){
   return layouts;
 }
 
+// layout has redundant enforcement for nested hierachies, works, but inefficient, since will reinforce if nested
+// esp if continuously done (or excessively nested i guess) should create the hierachy and only enforce each once
 void enforceAllLayouts(World& world){
   auto layouts = allLayouts(world);
   for (auto &layout : layouts){
