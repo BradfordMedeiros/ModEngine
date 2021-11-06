@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 
 
 in vec3 FragPos;
 in vec3 Normal;
@@ -42,6 +42,8 @@ uniform bool lightsisdir[MAX_LIGHTS];
 uniform float emissionAmount;
 uniform float discardTexAmount;
 uniform float time;
+
+bool enableAttenutation = true;
 
 void main(){
    // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
@@ -103,11 +105,13 @@ void main(){
         float quadratic = attenuationTerms.z;
         float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
 
-        //totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
-        //totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
-
-        totalDiffuse = totalDiffuse + (diffuse * lightscolor[i]);
-        totalSpecular = totalSpecular + (specular * lightscolor[i]);
+        if (enableAttenutation){
+          totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
+          totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
+        }else{
+          totalDiffuse = totalDiffuse + (diffuse * lightscolor[i]);
+          totalSpecular = totalSpecular + (specular * lightscolor[i]);
+        }
     }
 
     vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
