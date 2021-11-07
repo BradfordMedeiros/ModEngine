@@ -60,6 +60,7 @@ struct engineState {
   float bloomAmount;
   bool enableFog;
   glm::vec4 fogColor;
+  float exposure;
 
   bool takeScreenshot;
   bool highlight;

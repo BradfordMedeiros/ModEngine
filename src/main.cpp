@@ -661,7 +661,7 @@ void takeScreenshot(std::string filepath){
 void genFramebufferTexture(unsigned int *texture){
   glGenTextures(1, texture);
   glBindTexture(GL_TEXTURE_2D, *texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
@@ -858,14 +858,15 @@ int main(int argc, char* argv[]){
      std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
      state.currentScreenWidth = width;
      state.currentScreenHeight = height;
+
      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
 
@@ -1354,7 +1355,6 @@ int main(int argc, char* argv[]){
     if (showDebugInfo){
       renderVector(shaderProgram, view, glm::mat4(1.0f));
     }
-    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
 
     handleInput(window);
     glfwPollEvents();
@@ -1411,6 +1411,7 @@ int main(int argc, char* argv[]){
     glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
     glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);
     glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 1.1f);
+    glUniform1f(glGetUniformLocation(finalProgram, "exposure"), state.exposure);
 
     glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);
     glUniform1i(glGetUniformLocation(finalProgram, "bloomTexture"), 1);
@@ -1441,6 +1442,10 @@ int main(int argc, char* argv[]){
     }
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    glDisable(GL_DEPTH_TEST);
+    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
+    glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){
       state.takeScreenshot = false;

@@ -13,6 +13,9 @@ uniform float near;
 uniform float far;
 uniform float mincutoff;
 uniform float maxcuttoff;
+uniform float exposure;
+
+bool enableGammaCorrection = false;
 
 void calculateFogEffect(in float depthAmount, out vec4 fogAmount){
   if (depthAmount < mincutoff || depthAmount > maxcuttoff){
@@ -43,5 +46,11 @@ void main(){
   }else{
     FragColor = fogEffect + texture(framebufferTexture, TexCoords);
   }
-  
+
+  vec3 color = vec3(1.0) - exp(-FragColor.rgb * exposure);
+  if (enableGammaCorrection){
+    color = pow(color, vec3(1.0 / 2.2));  
+  }
+
+  FragColor = vec4(color, FragColor.a);
 }

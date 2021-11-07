@@ -72,6 +72,16 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value) -> void { 
+      auto amount = std::get_if<float>(&value);
+      if (amount != NULL){
+        state.exposure = *amount;
+      }
+    },
+    .object = "exposure",
+    .attribute = "amount",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value) -> void { 
       auto skyboxTexture = std::get_if<std::string>(&value);
       if (skyboxTexture != NULL){
         std::cout << "state: update skybox: " << *skyboxTexture << std::endl;
@@ -151,6 +161,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.bloomAmount = 1.f,   
     .enableFog = true,  
     .fogColor = glm::vec4(0.f, 0.f, 0.f, 1.f), 
+    .exposure = 1.f,
   	.takeScreenshot = false,
     .highlight = true,
     .multiselect = false,
