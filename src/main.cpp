@@ -688,6 +688,15 @@ std::map<std::string, std::string> getArgs(){
   return args;
 }
 
+float exposureAmount(){
+  float elapsed = now - state.exposureStart;
+  float amount = elapsed / 1.f;   
+  float exposureA = glm::clamp(amount, 0.f, 1.f);
+  float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
+  std::cout << "exposure: (" << exposureA << " - " << state.oldExposure << ", " << state.targetExposure << ", " << effectiveExposure << ")" << std::endl;
+  return effectiveExposure;
+}
+
 
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
@@ -1036,7 +1045,7 @@ int main(int argc, char* argv[]){
     interface,
     defaultMeshesToLoad
   );
-  setInitialState(state, "./res/world.state"); 
+  setInitialState(state, "./res/world.state", now); 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
   }
@@ -1411,6 +1420,8 @@ int main(int argc, char* argv[]){
     glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
     glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);
     glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 1.1f);
+
+    state.exposure = exposureAmount();
     glUniform1f(glGetUniformLocation(finalProgram, "exposure"), state.exposure);
 
     glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);

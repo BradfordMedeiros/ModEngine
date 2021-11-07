@@ -336,7 +336,7 @@ void setState(std::string stateName){
 }
 
 void setWorldState(std::vector<ObjectValue> values){
-  setState(state, values);
+  setState(state, values, now);
 }
 
 void setFloatState(std::string stateName, float value){
@@ -551,3 +551,4 @@ void removeLocks(objid owner){
     activeLocks.erase(lockname);
   }
 }
+

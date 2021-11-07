@@ -3,14 +3,14 @@
 extern World world;
 
 struct ObjectStateMapping {
-  std::function<void(engineState& state, AttributeValue)> attr;
+  std::function<void(engineState& state, AttributeValue, float)> attr;
   std::string object;
   std::string attribute;
 };
 
 std::vector<ObjectStateMapping> mapping = {
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto enabled = std::get_if<std::string>(&value);
       if (enabled != NULL){
         state.enableDiffuse = *enabled == "true";
@@ -20,7 +20,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "enabled",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto enabled = std::get_if<std::string>(&value);
       if (enabled != NULL){
         state.enableSpecular = *enabled == "true";
@@ -30,7 +30,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "enabled",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
       if (color != NULL){
         auto fogColor = *color;
@@ -41,7 +41,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "color",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto enabled = std::get_if<std::string>(&value);
       if (enabled != NULL){
         state.enableFog = *enabled == "true";
@@ -51,7 +51,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "enabled",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto enabled = std::get_if<std::string>(&value);
       if (enabled != NULL){
         state.enableBloom = *enabled == "true";
@@ -61,7 +61,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "enabled",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto amount = std::get_if<float>(&value);
       if (amount != NULL){
         state.bloomAmount = *amount;
@@ -71,17 +71,20 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "amount",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto amount = std::get_if<float>(&value);
       if (amount != NULL){
-        state.exposure = *amount;
+        state.exposureStart = now;
+        state.targetExposure = *amount;
+        state.oldExposure = state.exposure;
+        std::cout << "target exposure: " << state.targetExposure << " but the old exposure: " << state.oldExposure << std::endl;
       }
     },
     .object = "exposure",
     .attribute = "amount",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto skyboxTexture = std::get_if<std::string>(&value);
       if (skyboxTexture != NULL){
         std::cout << "state: update skybox: " << *skyboxTexture << std::endl;
@@ -92,7 +95,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "texture",
   },
   ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value) -> void { 
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto skyboxColor = std::get_if<glm::vec3>(&value);
       if (skyboxColor != NULL){
         std::cout << "state: update skybox color: " << print(*skyboxColor) << std::endl;
@@ -104,11 +107,11 @@ std::vector<ObjectStateMapping> mapping = {
   },
 };
 
-void setState(engineState& state, ObjectValue& value){
+void setState(engineState& state, ObjectValue& value, float now){
   for (auto &stateMap : mapping){
     std::cout << "comparing to: " << stateMap.object << " - " << stateMap.attribute << std::endl;
     if (value.object == stateMap.object && value.attribute == stateMap.attribute){
-      stateMap.attr(state, value.value);
+      stateMap.attr(state, value.value, now);
       return;
     }
   }
@@ -116,9 +119,9 @@ void setState(engineState& state, ObjectValue& value){
   assert(false);
 }
 
-void setState(engineState& state, std::vector<ObjectValue>& values){
+void setState(engineState& state, std::vector<ObjectValue>& values, float now){
   for (auto &value : values){
-    setState(state, value);
+    setState(state, value, now);
   }
 }
 
@@ -160,7 +163,10 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.enableBloom = false, 
   	.bloomAmount = 1.f,   
     .enableFog = true,  
-    .fogColor = glm::vec4(0.f, 0.f, 0.f, 1.f), 
+    .fogColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
+    .exposureStart = 0.f,
+    .oldExposure = 1.f,
+    .targetExposure = 1.f,
     .exposure = 1.f,
   	.takeScreenshot = false,
     .highlight = true,
@@ -185,7 +191,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 	return state;
 }
 
-void setInitialState(engineState& state, std::string file){
+void setInitialState(engineState& state, std::string file, float now){
   auto tokens = parseFormat(loadFile(file));
   for (auto &token : tokens){
     ObjectValue objValue {
@@ -193,6 +199,6 @@ void setInitialState(engineState& state, std::string file){
       .attribute = token.attribute,
       .value = parseAttributeValue(token.payload),
     };
-    setState(state, objValue); 
+    setState(state, objValue, now); 
   }
 }

@@ -60,7 +60,12 @@ struct engineState {
   float bloomAmount;
   bool enableFog;
   glm::vec4 fogColor;
+  
+  float exposureStart;
+  float oldExposure;
+  float targetExposure;
   float exposure;
+
 
   bool takeScreenshot;
   bool highlight;
@@ -87,7 +92,7 @@ struct engineState {
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
-void setState(engineState& state, std::vector<ObjectValue>& values);
-void setInitialState(engineState& state, std::string file);
+void setState(engineState& state, std::vector<ObjectValue>& values, float now);
+void setInitialState(engineState& state, std::string file, float now);
 
 #endif
