@@ -1,0 +1,30 @@
+# Demonstrates different material roughness values for pbr
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+ball1:mesh:./res/models/box/pbrsphere.gltf
+ball1:scale:1 1 1 
+ball1:position:-8 1 0 
+
+ball2:mesh:./res/models/box/pbrsphere.gltf
+ball2:scale:1 1 1 
+ball2:position:-4 1 0 
+
+ball3:mesh:./res/models/box/pbrsphere.gltf
+ball3:scale:1 1 1 
+ball3:position:0 1 0 
+
+ball4:mesh:./res/models/box/pbrsphere.gltf
+ball4:scale:1 1 1 
+ball4:position:4 1 0 
+
+ball5:mesh:./res/models/box/pbrsphere.gltf
+ball5:scale:1 1 1 
+ball5:position:8 1 0 
+
+!light:position:0 2 5
+!light:color:0.1 0.1 0.1
+!light:attenuation:0 0.002 0
+!light:type:directional
