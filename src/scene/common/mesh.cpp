@@ -45,6 +45,11 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     opacity = ensureLoadTexture(meshData.opacityTexturePath);
   }
 
+  Texture roughness;
+  if (meshData.hasRoughnessTexture){
+    roughness = ensureLoadTexture(meshData.roughnessTexturePath);
+  }
+
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, normal));
 
@@ -81,6 +86,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
     .hasOpacityTexture = meshData.hasOpacityTexture,
     .opacityTexture = opacity,
     .hasCubemapTexture = false,
+    .hasRoughnessTexture = meshData.hasRoughnessTexture,
+    .roughnessTexture = roughness,
     .numElements = meshData.indices.size(),
     .boundInfo = meshData.boundInfo,
     .bones = meshData.bones,
@@ -128,6 +135,7 @@ Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[],
     .hasEmissionTexture = false,
     .hasOpacityTexture = false,
     .hasCubemapTexture = false,
+    .hasRoughnessTexture = false,
     .numElements = numIndices,
     .boundInfo = boundInfo,
     .bones = bones,
@@ -186,6 +194,10 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   glUniform1i(glGetUniformLocation(shaderProgram, "hasCubemapTexture"), mesh.hasCubemapTexture);
   glActiveTexture(GL_TEXTURE0 + 4);
   glBindTexture(GL_TEXTURE_CUBE_MAP, mesh.cubemapTexture.textureId);
+
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasRoughnessTexture"), mesh.hasRoughnessTexture);
+  glActiveTexture(GL_TEXTURE0 + 5);
+  glBindTexture(GL_TEXTURE_2D, mesh.roughnessTexture.textureId);
 
   glActiveTexture(GL_TEXTURE0); 
   glDrawElements(GL_TRIANGLES, mesh.numElements, GL_UNSIGNED_INT, 0);

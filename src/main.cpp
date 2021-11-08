@@ -385,7 +385,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
   glUniform1i(glGetUniformLocation(shader, "lightDepthTexture"), 3);
   glUniform1i(glGetUniformLocation(shader, "cubemapTexture"), 4);
-
+  glUniform1i(glGetUniformLocation(shader, "roughnessTexture"), 5);
 
   glActiveTexture(GL_TEXTURE0); 
 
@@ -693,7 +693,6 @@ float exposureAmount(){
   float amount = elapsed / 1.f;   
   float exposureA = glm::clamp(amount, 0.f, 1.f);
   float effectiveExposure = glm::mix(state.oldExposure, state.targetExposure, exposureA);
-  std::cout << "exposure: (" << exposureA << " - " << state.oldExposure << ", " << state.targetExposure << ", " << effectiveExposure << ")" << std::endl;
   return effectiveExposure;
 }
 

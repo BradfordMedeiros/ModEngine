@@ -288,6 +288,7 @@ void dumpVerticesData(std::string modelPath, MeshData& model){
 std::string getTexturePath(aiTextureType type, std::string modelPath,  aiMaterial* material){
   aiString texturePath;
   material -> GetTexture(type, 0, &texturePath);
+
   std::filesystem::path modellocation = std::filesystem::canonical(modelPath).parent_path();
   std::filesystem::path relativePath = std::filesystem::weakly_canonical(modellocation / texturePath.C_Str()); //  / is append operator 
   return relativePath.string();
@@ -346,6 +347,16 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
      opacityTexturePath = getTexturePath(aiTextureType_OPACITY, modelPath, material);
    }
 
+   // This is weird in assimp... this is the roughness/metallic map....
+   // See https://github.com/assimp/assimp/blob/master/include/assimp/pbrmaterial.h#L57
+   // #define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE aiTextureType_UNKNOWN, 0
+   int roughnessTextureCount = material -> GetTextureCount(aiTextureType_UNKNOWN);
+   assert(roughnessTextureCount == 0 || roughnessTextureCount == 1);
+   std::string roughnessTexturePath;
+   if (roughnessTextureCount == 1){
+     roughnessTexturePath = getTexturePath(aiTextureType_UNKNOWN, modelPath, material);
+   }
+
    MeshData model = {
      .vertices = vertices,
      .indices = indices,       
@@ -355,6 +366,8 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
      .hasEmissionTexture = emissionTextureCount == 1,
      .opacityTexturePath = opacityTexturePath,
      .hasOpacityTexture = opacityTextureCount == 1,
+     .roughnessTexturePath = roughnessTexturePath,
+     .hasRoughnessTexture = roughnessTextureCount == 1,
      .boundInfo = getBounds(vertices),
      .bones = boneInfo.bones,
    };

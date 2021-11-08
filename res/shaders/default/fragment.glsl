@@ -13,6 +13,7 @@ uniform sampler2D emissionTexture;
 uniform sampler2D opacityTexture;
 uniform sampler2D lightDepthTexture;
 uniform samplerCube cubemapTexture;
+uniform sampler2D roughnessTexture;
 
 uniform vec3 tint;
 uniform vec3 cameraPosition;
@@ -23,6 +24,7 @@ uniform bool hasDiffuseTexture;
 uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
+uniform bool hasRoughnessTexture;
 
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
