@@ -16,7 +16,8 @@ GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
 
   // constant, linear, quadratic
   // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
-  auto attenuation = attr.vecAttributes.find("attenuation") == attr.vecAttributes.end() ? glm::vec3(1.0, 0.007, 0.0002) : attr.vecAttributes.at("attenuation");
+  // physically accurate ish would be to attenuate based on 1 / r^2  hence the 0 0 1 default
+  auto attenuation = attr.vecAttributes.find("attenuation") == attr.vecAttributes.end() ? glm::vec3(0, 0, 1) : attr.vecAttributes.at("attenuation");
 
   GameObjectLight obj {
     .color = color,
