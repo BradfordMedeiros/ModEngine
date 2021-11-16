@@ -110,7 +110,7 @@ void main(){
     if (discardTexture){
         discard;
     }else{
-        texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
+        texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? vec4(emissionColor.rgb, 0) : vec4(0, 0, 0, 0));
     }
     if (texColor.a < 0.1){
       discard;
