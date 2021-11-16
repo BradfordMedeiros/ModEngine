@@ -47,6 +47,44 @@ uniform float time;
 
 bool enableAttenutation = true;
 
+vec3 calculatePhongLight(){
+  vec3 ambient = vec3(0.1, 0.1, 0.1);     
+  vec3 totalDiffuse  = vec3(0.2, 0.2, 0.2);
+  vec3 totalSpecular = vec3(0.2, 0.2, 0.2);
+
+  for (int i = 0; i < min(numlights, MAX_LIGHTS); i++){
+    vec3 lightPos = lights[i];
+    vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
+    vec3 normal = normalize(Normal);
+
+    float angle = dot(lightDir, normalize(-lightsdir[i]));
+    if (angle < lightsmaxangle[i]){
+        continue;
+    }
+
+    vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
+
+    vec3 viewDir = normalize(cameraPosition - FragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);  
+    vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
+ 
+    float distanceToLight = length(lightPos - FragPos);
+    vec3 attenuationTerms = lightsatten[i];
+    float constant = attenuationTerms.x;
+    float linear = attenuationTerms.y;
+    float quadratic = attenuationTerms.z;
+    float attenuation = enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;  
+
+    totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
+    totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
+  }
+
+  vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
+  vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
+  vec3 color = ambient + diffuseValue + specularValue;
+  return color;
+}
+
 void main(){
    // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
     // real close => 0 , real far => 1
@@ -74,52 +112,11 @@ void main(){
     }else{
         texColor = diffuseColor + emissionAmount * (hasEmissionTexture ? emissionColor : vec4(0, 0, 0, 0));
     }
-
     if (texColor.a < 0.1){
       discard;
     }
 
-    vec3 ambient = vec3(0.1, 0.1, 0.1);     
-    vec3 totalSpecular = vec3(0.2, 0.2, 0.2);
-    vec3 totalDiffuse  = vec3(0.2, 0.2, 0.2);
-    
-    for (int i = 0; i < min(numlights, MAX_LIGHTS); i++){
-        vec3 lightPos = lights[i];
-        vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
-        vec3 normal = normalize(Normal);
-
-        float angle = dot(lightDir, normalize(-lightsdir[i]));
-        if (angle < lightsmaxangle[i]){
-            continue;
-        }
-
-        vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
-
-        vec3 viewDir = normalize(cameraPosition - FragPos);
-        vec3 reflectDir = reflect(-lightDir, normal);  
-        vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
- 
-        float distanceToLight = length(lightPos - FragPos);
-
-        vec3 attenuationTerms = lightsatten[i];
-        float constant = attenuationTerms.x;
-        float linear = attenuationTerms.y;
-        float quadratic = attenuationTerms.z;
-        float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
-
-        if (enableAttenutation){
-          totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
-          totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
-        }else{
-          totalDiffuse = totalDiffuse + (diffuse * lightscolor[i]);
-          totalSpecular = totalSpecular + (specular * lightscolor[i]);
-        }
-    }
-
-    vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
-    vec3 specularValue = enableSpecular ? totalSpecular : vec3(0, 0, 0);
-    vec4 color = vec4(ambient + diffuseValue + specularValue, 1.0) * texColor;
-
+    vec4 color = vec4(calculatePhongLight(), 1.0) * texColor;
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 
@@ -131,8 +128,5 @@ void main(){
       BloomColor = vec4(FragColor.rgb, 1.0);
     }else{
       BloomColor = vec4(0.0, 0.0, 0.0, 0.0);    
-    }
-
-       
+    }       
 }
-
