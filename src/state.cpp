@@ -31,6 +31,16 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto enabled = std::get_if<std::string>(&value);
+      if (enabled != NULL){
+        state.enablePBR = *enabled == "true";
+      }
+    },
+    .object = "pbr",
+    .attribute = "enabled",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
       if (color != NULL){
         auto fogColor = *color;
@@ -155,6 +165,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .mouseIsDown = false,
 		.enableDiffuse = true,
 		.enableSpecular = true,
+    .enablePBR = false,
 		.showBoneWeight = false,
   	.useBoneTransform = true,
   	.textureIndex = 0,

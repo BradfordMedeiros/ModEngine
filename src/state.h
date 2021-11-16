@@ -49,6 +49,7 @@ struct engineState {
   bool mouseIsDown;
   bool enableDiffuse;
   bool enableSpecular;
+  bool enablePBR;
   bool showBoneWeight;
   bool useBoneTransform;
   int textureIndex;
