@@ -20,6 +20,7 @@ uniform vec3 cameraPosition;
 
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
+uniform bool enablePBR;
 uniform bool hasDiffuseTexture;
 uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
@@ -47,12 +48,27 @@ uniform float time;
 
 bool enableAttenutation = true;
 
+int getNumLights(){
+  return min(numlights, MAX_LIGHTS);
+}
+
+float calcAttenutation(int lightNumber){
+  vec3 lightPos = lights[lightNumber];
+  float distanceToLight = length(lightPos - FragPos);
+  vec3 attenuationTerms = lightsatten[lightNumber];
+  float constant = attenuationTerms.x;
+  float linear = attenuationTerms.y;
+  float quadratic = attenuationTerms.z;
+  float attenuation = enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;
+  return attenuation;
+}
+
 vec3 calculatePhongLight(){
   vec3 ambient = vec3(0.1, 0.1, 0.1);     
   vec3 totalDiffuse  = vec3(0.2, 0.2, 0.2);
   vec3 totalSpecular = vec3(0.2, 0.2, 0.2);
 
-  for (int i = 0; i < min(numlights, MAX_LIGHTS); i++){
+  for (int i = 0; i < getNumLights(); i++){
     vec3 lightPos = lights[i];
     vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
     vec3 normal = normalize(Normal);
@@ -63,17 +79,10 @@ vec3 calculatePhongLight(){
     }
 
     vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
-
     vec3 viewDir = normalize(cameraPosition - FragPos);
     vec3 reflectDir = reflect(-lightDir, normal);  
     vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
- 
-    float distanceToLight = length(lightPos - FragPos);
-    vec3 attenuationTerms = lightsatten[i];
-    float constant = attenuationTerms.x;
-    float linear = attenuationTerms.y;
-    float quadratic = attenuationTerms.z;
-    float attenuation = enableAttenutation ? (1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)))) : 1;  
+    float attenuation = calcAttenutation(i);
 
     totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
     totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
@@ -84,6 +93,76 @@ vec3 calculatePhongLight(){
   vec3 color = ambient + diffuseValue + specularValue;
   return color;
 }
+
+
+//////////
+// Background: https://www.scitepress.org/Papers/2021/102527/102527.pdf
+ //  https://www.scitepress.org/Papers/2021/102527/102527.pdf
+
+// approximation for fraction of light that gets reflected (not refracted)
+vec3 fresnelSchlick(float angle, vec3 F0){
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - angle, 0.0, 1.0), 5);
+} 
+
+const float PI = 3.14159265359;
+
+// Approximation for the fraction the microfacets aligned to halfway vector 
+float trowbridgereitzGGX(vec3 N, vec3 H, float roughness){
+    float a = roughness * roughness;
+    float asquared     = a * a;
+    float nOnH  = max(dot(N, H), 0.0);
+    return asquared / (PI * pow(((nOnH * nOnH) * (asquared - 1.0) + 1.0), 2));   //  "Practically in applications 1.5<γ<3"
+}
+
+//  Approximation for fraction of not occluded geometry (do to one microfacet overlapping the ray of another)
+float schlickGGX(float nOnV, float roughness){
+    float r = roughness + 1.0;
+    float k = (r * r) / 8.0;
+    return nOnV / (nOnV * (1.0 - k) + k);
+}
+float smith(vec3 N, vec3 V, vec3 L, float roughness){
+    float nOnV = max(dot(N, V), 0.0);
+    float nOnL = max(dot(N, L), 0.0);
+    float ggx2  = schlickGGX(nOnV, roughness);
+    float ggx1  = schlickGGX(nOnL, roughness);
+    return ggx1 * ggx2;
+}
+
+float ao = 3.2;
+vec4 calcTotalRadiance(
+  vec3 albedo, 
+  float metallic, 
+  float roughness // 1 is rough, disperes light, 0 is metallic, darker with highlights. perfectly smooth is just dark so pick something small
+){ 
+    vec3 N = normalize(Normal);
+    vec3 V = normalize(cameraPosition - FragPos);  
+    vec3 F0 = mix(vec3(0.04), albedo, metallic);
+
+    vec3 Lo = vec3(0.0);
+    for(int i = 0; i < getNumLights(); ++i){
+        vec3 L = normalize(lights[i] - FragPos);
+        vec3 H = normalize(V + L);
+        float attenuation = calcAttenutation(i);
+        vec3 radiance     = lightscolor[i] * attenuation;        
+        
+        float D = trowbridgereitzGGX(N, H, roughness);        
+        float G = smith(N, V, L, roughness);      
+        vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+        
+        vec3 kS = F;
+        vec3 kD = (1.0 - metallic) * (vec3(1.0) - kS);
+        
+        vec3 specular = (D * G * F) / (4 * max(dot(N, V), 0) * max(dot(N, L), 0) + 0.0001);  
+            
+        float nOnL = max(dot(N, L), 0.0);                
+        Lo += ((kD * albedo / PI) + specular) * radiance * nOnL; 
+    }
+
+    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec4 color = vec4(ambient + Lo, 1);
+    return color;
+}
+////////////////////
 
 void main(){
    // vec3 shadowCoord = sshadowCoord.xyz / sshadowCoord.w;
@@ -116,7 +195,8 @@ void main(){
       discard;
     }
 
-    vec4 color = vec4(calculatePhongLight(), 1.0) * texColor;
+
+    vec4 color = enablePBR ? calcTotalRadiance(texColor.rgb, 1, 1) : vec4(calculatePhongLight(), 1.0) * texColor;
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 
