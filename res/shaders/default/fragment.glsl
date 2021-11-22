@@ -129,7 +129,7 @@ float smith(vec3 N, vec3 V, vec3 L, float roughness){
 }
 
 float ao = 3.2;
-vec4 calcTotalRadiance(
+vec4 calcCookTorrence(
   vec3 albedo, 
   float metallic, 
   float roughness // 1 is rough, disperes light, 0 is metallic, darker with highlights. perfectly smooth is just dark so pick something small
@@ -196,7 +196,7 @@ void main(){
     }
 
 
-    vec4 color = enablePBR ? calcTotalRadiance(texColor.rgb, 1, 1) : vec4(calculatePhongLight(), 1.0) * texColor;
+    vec4 color = enablePBR ? calcCookTorrence(texColor.rgb, 1, 1) : vec4(calculatePhongLight(), 1.0) * texColor;
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 

@@ -1,0 +1,25 @@
+# Demonstrates basic usage of hdr
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+platform:script:./res/scenes/features/lighting/hdr.scm
+
+wall1:mesh:./res/models/box/box.obj
+wall1:scale:2 5 5
+wall1:position:-5 0 0 
+
+wall2:mesh:./res/models/box/box.obj
+wall2:scale:2 5 5
+wall2:position:5 0 0 
+
+wall3:mesh:./res/models/box/box.obj
+wall3:scale:5 5 1
+wall3:position:0 0 -4
+
+wall4:mesh:./res/models/box/box.obj
+wall4:scale:5 1 5
+wall4:position:0 4 0
+
+!light:position:0 2 0 
+!light:color:20 20 20

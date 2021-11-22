@@ -7,6 +7,7 @@ platform:position:0 -5 0
 ball1:mesh:./res/models/box/pbrsphere.gltf
 ball1:scale:1 1 1 
 ball1:position:-8 1 0 
+ball1:texture:./res/textures/blacktop.jpg
 
 ball2:mesh:./res/models/box/pbrsphere.gltf
 ball2:scale:1 1 1 
@@ -25,6 +26,6 @@ ball5:scale:1 1 1
 ball5:position:8 1 0 
 
 !light:position:0 2 5
-!light:color:0.1 0.1 0.1
-!light:attenuation:0 0.002 0
-!light:type:directional
+!light:color:1 1 1
+!light:attenuation:0.5 0 0
+#!light:type:directional
