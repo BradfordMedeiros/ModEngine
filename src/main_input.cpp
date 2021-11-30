@@ -681,7 +681,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = [&state]() -> void {
       std::cout << "saving heightmap" << std::endl;
-      saveHeightmap(world, selected(state.editor));
+      saveHeightmap(world, selected(state.editor), "./res/heightmaps/testmap.png");
     }
   }, 
   InputDispatch{
@@ -714,8 +714,16 @@ std::vector<InputDispatch> inputFns = {
       std::cout << "splitting heightmap!" << std::endl;
       auto heightmapId = selected(state.editor);
       std::cout << "heightmap id: " << heightmapId << std::endl;
+      std::string heightmapBaseName = "./res/heightmaps/";
       if (heightmapId != -1 && isHeightmap(world, heightmapId)){
         std::cout << "want to split heightmap: " << heightmapId << std::endl;
+        auto hm = getHeightmap(world, heightmapId);
+        auto newHeightmaps = splitHeightmap(hm.heightmap);
+        for (int i = 0; i < newHeightmaps.size(); i++){
+          auto newHm = newHeightmaps.at(i);
+          auto newMapPath = heightmapBaseName + "splitmap_" + std::to_string(i) + ".png";
+          saveHeightmap(newHm, newMapPath);
+        }
       }else{
         std::cout << "no heightmap to split" << std::endl;
       }

@@ -38,7 +38,7 @@ void applyMasking(
 );
 
 HeightmapMask loadMask(std::string brushFile);
-void saveHeightmap(HeightMapData& heightmap);
+void saveHeightmap(HeightMapData& heightmap, std::string filepath);
 
 std::vector<HeightMapData> splitHeightmap(HeightMapData& heightmap);
 HeightMapData joinHeightmaps(std::vector<HeightMapData>& heightmaps);

@@ -136,13 +136,18 @@ void applyHeightmapMasking(World& world, objid id, float amount, float uvx, floa
     updatePhysicsBody(world, id); 
   }, hm.mesh, shouldAverage);
 }
-void saveHeightmap(World& world, objid id){
+
+GameObjectHeightmap& getHeightmap(World& world, objid id){
   auto heightmaps = getHeightmaps(world.objectMapping);
   if (heightmaps.find(id) == heightmaps.end()){
-    return;
+    assert(false);
   }
   GameObjectHeightmap& hm = *heightmaps.at(id);
-  saveHeightmap(hm.heightmap);
+  return hm; 
+}
+void saveHeightmap(World& world, objid id, std::string filepath){
+  auto hm = getHeightmap(world, id);
+  saveHeightmap(hm.heightmap, filepath);
 }
 bool isHeightmap(World& world, objid id){
   auto obj = world.objectMapping.at(id);

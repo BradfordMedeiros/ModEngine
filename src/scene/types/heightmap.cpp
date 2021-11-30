@@ -244,7 +244,7 @@ HeightmapMask loadMask(std::string brushFile){
   return mask;
 }
 
-void saveHeightmap(HeightMapData& heightmap){
+void saveHeightmap(HeightMapData& heightmap, std::string filepath){
   char* newData = new char[heightmap.width * heightmap.height * 3];
   for (int i = 0; i < heightmap.height; i++){
     for (int j = 0; j < heightmap.width; j++){
@@ -257,12 +257,18 @@ void saveHeightmap(HeightMapData& heightmap){
        newData[byteOffset + 2] = 0;
     } 
   }
-  stbi_write_png("./res/heightmaps/testmap.png", heightmap.height, heightmap.width,  3, newData, 0); 
+  std::cout << "save heightmap: " << filepath << std::endl;
+  stbi_write_png(filepath.c_str(), heightmap.height, heightmap.width,  3, newData, 0); 
   delete[] newData;
 }
 
 std::vector<HeightMapData> splitHeightmap(HeightMapData& heightmap){
-  assert(false);
+  std::vector<HeightMapData> heightmaps;
+  //  assert(false);
+  heightmaps.push_back(heightmap);
+  heightmaps.push_back(heightmap);
+
+  return heightmaps;
 }
 HeightMapData joinHeightmaps(std::vector<HeightMapData>& heightmaps){
   assert(false);
