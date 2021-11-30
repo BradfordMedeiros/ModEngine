@@ -685,6 +685,16 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
+    .sourceKey = 'S',  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      std::cout << "rechunking heightmap!" << std::endl;
+      
+    }
+  }, 
+  InputDispatch{
     .sourceKey = 'A',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,

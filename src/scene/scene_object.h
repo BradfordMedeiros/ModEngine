@@ -31,6 +31,7 @@ std::optional<Texture> textureForId(World& world, objid id);
 
 void applyHeightmapMasking(World& world, objid id, float amount, float uvx, float uvy, bool shouldAverage);
 void saveHeightmap(World& world, objid id);
+bool isHeightmap(World& world, objid id);
 
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target);
 

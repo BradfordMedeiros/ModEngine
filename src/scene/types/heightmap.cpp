@@ -260,3 +260,10 @@ void saveHeightmap(HeightMapData& heightmap){
   stbi_write_png("./res/heightmaps/testmap.png", heightmap.height, heightmap.width,  3, newData, 0); 
   delete[] newData;
 }
+
+std::vector<HeightMapData> splitHeightmap(HeightMapData& heightmap){
+  assert(false);
+}
+HeightMapData joinHeightmaps(std::vector<HeightMapData>& heightmaps){
+  assert(false);
+}

@@ -144,6 +144,10 @@ void saveHeightmap(World& world, objid id){
   GameObjectHeightmap& hm = *heightmaps.at(id);
   saveHeightmap(hm.heightmap);
 }
+bool isHeightmap(World& world, objid id){
+  auto obj = world.objectMapping.at(id);
+  return std::get_if<GameObjectHeightmap>(&obj) != NULL;
+}
 
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
   NavGraph  navgraph { };
