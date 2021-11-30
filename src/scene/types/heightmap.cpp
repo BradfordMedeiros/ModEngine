@@ -267,9 +267,8 @@ std::vector<HeightMapData> splitHeightmap(HeightMapData& heightmap){
   //  assert(false);
   heightmaps.push_back(heightmap);
   heightmaps.push_back(heightmap);
-
   return heightmaps;
 }
 HeightMapData joinHeightmaps(std::vector<HeightMapData>& heightmaps){
-  assert(false);
+  return heightmaps.at(0);
 }

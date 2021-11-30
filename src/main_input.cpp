@@ -699,10 +699,15 @@ std::vector<InputDispatch> inputFns = {
         }
       }
       std::cout << "want to join heightmaps (size = " << selectedHeightmaps.size() << ") = [ ";
+
+      std::vector<HeightMapData> heightmaps;
       for (auto id : selectedHeightmaps){
         std::cout << id << " ";
+        heightmaps.push_back(getHeightmap(world, id).heightmap);
       }
       std::cout << "]" << std::endl;
+      auto heightmapData = joinHeightmaps(heightmaps);
+      saveHeightmap(heightmapData, "./res/heightmaps/joinedmap.png");
     }
   },
   InputDispatch{
