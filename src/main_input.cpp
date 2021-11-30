@@ -685,13 +685,40 @@ std::vector<InputDispatch> inputFns = {
     }
   }, 
   InputDispatch{
-    .sourceKey = 'S',  
+    .sourceKey = 'J',  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 340,  // shift,
+    .prereqKey = 'R',  // shift,
     .hasPreq = true,
     .fn = [&state]() -> void {
       std::cout << "rechunking heightmap!" << std::endl;
-      
+      auto selectedObjects = selectedIds(state.editor);
+      std::vector<objid> selectedHeightmaps;
+      for (auto id : selectedObjects){
+        if (isHeightmap(world, id)){
+          selectedHeightmaps.push_back(id);
+        }
+      }
+      std::cout << "want to join heightmaps (size = " << selectedHeightmaps.size() << ") = [ ";
+      for (auto id : selectedHeightmaps){
+        std::cout << id << " ";
+      }
+      std::cout << "]" << std::endl;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'S',  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'R',  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      std::cout << "splitting heightmap!" << std::endl;
+      auto heightmapId = selected(state.editor);
+      std::cout << "heightmap id: " << heightmapId << std::endl;
+      if (heightmapId != -1 && isHeightmap(world, heightmapId)){
+        std::cout << "want to split heightmap: " << heightmapId << std::endl;
+      }else{
+        std::cout << "no heightmap to split" << std::endl;
+      }
     }
   }, 
   InputDispatch{
