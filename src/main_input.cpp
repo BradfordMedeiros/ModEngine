@@ -350,7 +350,7 @@ void onMouseButton(){
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
   
   auto id = state.currentHoverIndex;
-  if (!isVoxel(world, id)){
+  if (!idExists(world.sandbox, id) || !isVoxel(world, id)){
     return;
   }
   auto layer = layerByName(getGameObject(world, id).layer);
