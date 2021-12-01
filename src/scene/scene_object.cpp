@@ -99,7 +99,7 @@ bool isVoxel(World& world, objid id){
   return std::get_if<GameObjectVoxel>(&obj) != NULL;
 }
 
-void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection){
+void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection, int textureId){
   auto voxel = getVoxel(world, id);
   if (!voxel.has_value()){
     return;
@@ -117,7 +117,7 @@ void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toP
   if (collidedVoxels.size() > 0){
     auto collision = collidedVoxels.at(0);
     voxelPtr -> voxel.selectedVoxels.push_back(collision);
-    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, 2);
+    applyTextureToCube(voxelPtr -> voxel, voxelPtr -> voxel.selectedVoxels, textureId);
   } 
 }
 

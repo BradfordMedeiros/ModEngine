@@ -26,7 +26,7 @@ void maybeTeleportObjects(World& world, objid obj1Id, objid obj2Id);
 
 std::optional<GameObjectVoxel*> getVoxel(World& world, objid id);
 bool isVoxel(World& world, objid id);
-void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection);
+void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection, int textureId);
 
 std::optional<Texture> textureForId(World& world, objid id);
 

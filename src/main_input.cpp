@@ -360,7 +360,7 @@ void onMouseButton(){
     .fromPos = defaultCamera.transformation.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
   };
-  handleVoxelRaycast(world, id, line.fromPos, line.toPos);
+  handleVoxelRaycast(world, id, line.fromPos, line.toPos, drawParams.activeTextureIndex);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
