@@ -348,16 +348,19 @@ LayerInfo layerByName(std::string layername){
 
 void onMouseButton(){    
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;
-  for (auto id : selectedIds(state.editor)){
-    auto layer = layerByName(getGameObject(world, id).layer);
-    auto proj = projectionFromLayer(layer);
-    auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
-    Line line = {
-      .fromPos = defaultCamera.transformation.position,
-      .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
-    };
-    handleVoxelRaycast(world, id, line.fromPos, line.toPos);
+  
+  auto id = state.currentHoverIndex;
+  if (!isVoxel(world, id)){
+    return;
   }
+  auto layer = layerByName(getGameObject(world, id).layer);
+  auto proj = projectionFromLayer(layer);
+  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  Line line = {
+    .fromPos = defaultCamera.transformation.position,
+    .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),
+  };
+  handleVoxelRaycast(world, id, line.fromPos, line.toPos);
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths){
@@ -682,7 +685,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "saving heightmap" << std::endl;
       auto selectedId = selected(state.editor);
-      if (selectedId != -1){
+      if (selectedId != -1 && isHeightmap(world, selectedId)){
         saveHeightmap(world, selectedId, "./res/heightmaps/testmap.png");
       }
     }
