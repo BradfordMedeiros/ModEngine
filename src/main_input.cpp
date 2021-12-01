@@ -681,7 +681,10 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = [&state]() -> void {
       std::cout << "saving heightmap" << std::endl;
-      saveHeightmap(world, selected(state.editor), "./res/heightmaps/testmap.png");
+      auto selectedId = selected(state.editor);
+      if (selectedId != -1){
+        saveHeightmap(world, selectedId, "./res/heightmaps/testmap.png");
+      }
     }
   }, 
   InputDispatch{
