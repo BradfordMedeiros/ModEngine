@@ -94,6 +94,10 @@ std::optional<GameObjectVoxel*> getVoxel(World& world, objid id){
   }
   return voxelObject;
 }
+bool isVoxel(World& world, objid id){
+  auto obj = world.objectMapping.at(id);
+  return std::get_if<GameObjectVoxel>(&obj) != NULL;
+}
 
 void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toPosDirection){
   auto voxel = getVoxel(world, id);

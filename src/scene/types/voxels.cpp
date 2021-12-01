@@ -350,3 +350,12 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
 }
 
 
+std::vector<Voxels> splitVoxel(Voxels& voxel){
+  std::vector<Voxels> voxels;
+  voxels.push_back(voxel);
+  return voxels;
+}
+
+Voxels joinVoxels(std::vector<Voxels>& voxels){
+  return voxels.at(0);
+}

@@ -687,50 +687,77 @@ std::vector<InputDispatch> inputFns = {
   InputDispatch{
     .sourceKey = 'J',  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 'R',  // shift,
+    .prereqKey = 'R',  
     .hasPreq = true,
     .fn = [&state]() -> void {
-      std::cout << "rechunking heightmap!" << std::endl;
+      std::cout << "rechunking data!" << std::endl;
       auto selectedObjects = selectedIds(state.editor);
+
       std::vector<objid> selectedHeightmaps;
+      std::vector<objid> selectedVoxels;
       for (auto id : selectedObjects){
         if (isHeightmap(world, id)){
           selectedHeightmaps.push_back(id);
+        }else if (isVoxel(world, id)){
+          selectedVoxels.push_back(id);
         }
       }
       std::cout << "want to join heightmaps (size = " << selectedHeightmaps.size() << ") = [ ";
-
       std::vector<HeightMapData> heightmaps;
       for (auto id : selectedHeightmaps){
         std::cout << id << " ";
         heightmaps.push_back(getHeightmap(world, id).heightmap);
       }
       std::cout << "]" << std::endl;
-      auto heightmapData = joinHeightmaps(heightmaps);
-      saveHeightmap(heightmapData, "./res/heightmaps/joinedmap.png");
+
+      std::vector<Voxels> voxels;
+      for (auto id : selectedVoxels){
+        auto voxel = getVoxel(world, id);
+        voxels.push_back(voxel.value() -> voxel);
+      }
+
+      if (heightmaps.size() > 0){
+        auto heightmapData = joinHeightmaps(heightmaps);
+        saveHeightmap(heightmapData, "./res/heightmaps/joinedmap.png");
+      }
+      if (voxels.size() > 0){
+        auto voxelData = joinVoxels(voxels);
+        std::cout << "joined voxel data! size = " << voxels.size() << std::endl;
+        // todo -> write the voxel somewhere or something 
+      }
+
     }
   },
   InputDispatch{
     .sourceKey = 'S',  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 'R',  // shift,
+    .prereqKey = 'R',  
     .hasPreq = true,
     .fn = [&state]() -> void {
-      std::cout << "splitting heightmap!" << std::endl;
-      auto heightmapId = selected(state.editor);
-      std::cout << "heightmap id: " << heightmapId << std::endl;
-      std::string heightmapBaseName = "./res/heightmaps/";
-      if (heightmapId != -1 && isHeightmap(world, heightmapId)){
-        std::cout << "want to split heightmap: " << heightmapId << std::endl;
-        auto hm = getHeightmap(world, heightmapId);
+      std::cout << "splitting data!" << std::endl;
+      auto objectId = selected(state.editor);
+      if (objectId == -1){
+        std::cout << "no object to split" << std::endl;
+        return;
+      }
+      if (isHeightmap(world, objectId)){
+        std::string heightmapBaseName = "./res/heightmaps/";
+        std::cout << "want to split heightmap: " << objectId << std::endl;
+        auto hm = getHeightmap(world, objectId);
         auto newHeightmaps = splitHeightmap(hm.heightmap);
         for (int i = 0; i < newHeightmaps.size(); i++){
           auto newHm = newHeightmaps.at(i);
           auto newMapPath = heightmapBaseName + "splitmap_" + std::to_string(i) + ".png";
           saveHeightmap(newHm, newMapPath);
         }
-      }else{
-        std::cout << "no heightmap to split" << std::endl;
+      }else if (isVoxel(world, objectId)){
+        std::cout << "split voxel placeholder" << std::endl;
+        auto voxel = getVoxel(world, objectId);
+        if (voxel.has_value()){
+          auto voxels = voxel.value();
+          auto newVoxels = splitVoxel(voxels -> voxel);
+          std::cout << "new voxel size: " << newVoxels.size() << std::endl;
+        }
       }
     }
   }, 

@@ -56,4 +56,7 @@ std::vector<VoxelAddress> raycastVoxels(Voxels& chunk, glm::vec3 rayPosition, gl
 void expandVoxels(Voxels& voxel, int x, int y, int z);
 std::vector<VoxelBody> getVoxelBodies(Voxels& voxels);
 
+std::vector<Voxels> splitVoxel(Voxels& voxel);
+Voxels joinVoxels(std::vector<Voxels>& voxels);
+
 #endif
