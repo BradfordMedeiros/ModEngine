@@ -209,27 +209,7 @@ std::vector<ObjectType> objTypes = {
 };
 
 
-void addObject(
-  objid id, 
-  std::string objectType, 
-  GameobjAttributes& attr,
-  std::map<objid, GameObjectObj>& mapping, 
-  std::map<std::string, MeshRef>& meshes, 
-  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded,
-  std::function<Texture(std::string)> ensureTextureLoaded,
-  std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
-  std::function<void()> onCollisionChange,
-  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter,
-  std::function<Mesh(MeshData&)> loadMesh
-){
-  ObjectTypeUtil util {
-    .meshes = meshes,
-    .ensureTextureLoaded = ensureTextureLoaded,
-    .loadMesh = loadMesh,
-    .addEmitter = addEmitter,
-    .ensureMeshLoaded = ensureMeshLoaded,
-    .onCollisionChange = onCollisionChange,
-  };
+void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping,  std::map<std::string, MeshRef>& meshes, ObjectTypeUtil util){
   for (auto &objType : objTypes){
     if (objectType == objType.name){
       mapping[id] = objType.createObj(attr, util);
@@ -238,8 +218,8 @@ void addObject(
   }
   std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   assert(false);
-  
 }
+
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 

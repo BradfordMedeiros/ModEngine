@@ -174,19 +174,7 @@ struct ObjectType {
 };
 
 
-void addObject(
-  objid id, 
-  std::string objectType, 
-  GameobjAttributes& attr,
-  std::map<objid, GameObjectObj>& mapping, 
-  std::map<std::string, MeshRef>& meshes,
-  std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded,
-  std::function<Texture(std::string)> ensureTextureLoaded,
-  std::function<Texture(std::string filepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels)> ensureTextureDataLoaded,
-  std::function<void()> onCollisionChange,
-  std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter,
-  std::function<Mesh(MeshData&)> loadMesh
-);
+void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping,  std::map<std::string, MeshRef>& meshes, ObjectTypeUtil util);
 
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 

@@ -571,61 +571,65 @@ void addObjectToWorld(
   std::string rootMeshName
 ){
     auto id = getIdForName(world.sandbox, name, sceneId);
-
-    addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes,
-      [&world, sceneId, id, name, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
-        if (meshName == ""){
-          return {};
-        }
-        if (data == NULL){
-          ModelData data = loadModel(name, meshName); 
-          idToModelVertexs[id] = getVertexsFromModelData(data);
-          world.animations[id] = data.animations;
-
-          for (auto [meshId, meshData] : data.meshIdToMeshData){
-            auto meshPath = nameForMeshId(meshName, meshId);
-            loadMeshData(world, meshPath, meshData, id);
-          } 
-
-          auto newSerialObjs = multiObjAdd(
-            world.sandbox,
-            sceneId,
-            id,
-            0,
-            data.childToParent, 
-            data.nodeTransform, 
-            data.names, 
-            generateAdditionalFields(meshName, data, attr, fieldsToCopy),
-            getId
-          );
-
-          for (auto &[name, objAttr] : newSerialObjs){
-            addObjectToWorld(world, sceneId, name, getId, interface, objAttr, idToModelVertexs, &data, meshName);
-          }
-          return meshNamesForNode(data, meshName, name);
-        }
-        return meshNamesForNode(*data, rootMeshName, name);  
-      }, 
-      [&world, id](std::string texturepath) -> Texture {
-        std::cout << "Custom texture loading: " << texturepath << std::endl;
-        return loadTextureWorld(world, texturepath, id);
-      },
-      [&world, id](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight, int numChannels) -> Texture {
-        return loadTextureDataWorld(world, texturepath, data, textureWidth, textureHeight, numChannels, id);
-      },
-      [&world, id]() -> void {
-        //assert(false); // think about what this should do better!
-        updatePhysicsBody(world, id);
-      },
-      [&world, &interface, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
-        addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
-      },
-      [&world, id](MeshData& meshdata) -> Mesh {
-        return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
-          return loadTextureWorld(world, texture, id);
-        });    
+    auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
+      return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
+        return loadTextureWorld(world, texture, id);
+      });    
+    };
+    auto addEmitterObject = [&world, &interface, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
+      addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
+    };
+    auto onCollisionChange = [&world, id]() -> void {
+      //assert(false); // think about what this should do better!
+      updatePhysicsBody(world, id);
+    };
+    auto ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
+      std::cout << "Custom texture loading: " << texturepath << std::endl;
+      return loadTextureWorld(world, texturepath, id);
+    };
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
+      if (meshName == ""){
+        return {};
       }
-    );
+      if (data == NULL){
+        ModelData data = loadModel(name, meshName); 
+        idToModelVertexs[id] = getVertexsFromModelData(data);
+        world.animations[id] = data.animations;
+
+        for (auto [meshId, meshData] : data.meshIdToMeshData){
+          auto meshPath = nameForMeshId(meshName, meshId);
+          loadMeshData(world, meshPath, meshData, id);
+        } 
+
+        auto newSerialObjs = multiObjAdd(
+          world.sandbox,
+          sceneId,
+          id,
+          0,
+          data.childToParent, 
+          data.nodeTransform, 
+          data.names, 
+          generateAdditionalFields(meshName, data, attr, fieldsToCopy),
+          getId
+        );
+
+        for (auto &[name, objAttr] : newSerialObjs){
+          addObjectToWorld(world, sceneId, name, getId, interface, objAttr, idToModelVertexs, &data, meshName);
+        }
+        return meshNamesForNode(data, meshName, name);
+      }
+      return meshNamesForNode(*data, rootMeshName, name);  
+    }; 
+
+    ObjectTypeUtil util {
+      .meshes = world.meshes,
+      .ensureTextureLoaded = ensureTextureLoaded,
+      .loadMesh = loadMeshObject,
+      .addEmitter = addEmitterObject,
+      .ensureMeshLoaded = ensureMeshLoaded,
+      .onCollisionChange = onCollisionChange
+    };
+   addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes, util);
 }
 
 std::string getTextureById(World& world, int id){
