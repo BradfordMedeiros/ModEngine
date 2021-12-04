@@ -174,7 +174,7 @@ struct ObjectType {
 };
 
 
-void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping,  std::map<std::string, MeshRef>& meshes, ObjectTypeUtil util);
+void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping, ObjectTypeUtil util);
 
 void removeObject(
   std::map<objid, GameObjectObj>& mapping, 

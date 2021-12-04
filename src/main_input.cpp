@@ -716,10 +716,9 @@ std::vector<InputDispatch> inputFns = {
       }
       std::cout << "]" << std::endl;
 
-      std::vector<Voxels> voxels;
+      std::vector<objid> voxels;
       for (auto id : selectedVoxels){
-        auto voxel = getVoxel(world, id);
-        voxels.push_back(voxel.value() -> voxel);
+        voxels.push_back(id);
       }
 
       if (heightmaps.size() > 0){
@@ -727,8 +726,32 @@ std::vector<InputDispatch> inputFns = {
         saveHeightmap(heightmapData, "./res/heightmaps/joinedmap.png");
       }
       if (voxels.size() > 0){
-        auto voxelData = joinVoxels(voxels);
         std::cout << "joined voxel data! size = " << voxels.size() << std::endl;
+        
+        auto objAttrs = objectAttributes(world, voxels.at(0));
+        auto gameobj = gameObjectFromFields("]default_voxel", -1, objAttrs);
+        std::vector<Voxels> voxelBodies;
+        std::vector<glm::vec3> scales;
+
+        for (auto id : voxels){
+          voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
+          scales.push_back(glm::vec3(1.f, 1.f, 1.f));
+        }
+        auto voxelData = joinVoxels(voxelBodies, scales);
+        GameObjectVoxel vox {
+          .voxel = voxelData,
+        };
+     
+        std::vector<std::string> children;
+        ObjectSerializeUtil util {
+          .textureName = [](int id) -> std::string {
+            return getTextureById(world, id); // can be not loaded...
+          }
+        };
+        auto additionalFields = serializeVoxel(vox, util);
+        auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
+        std::cout << "serialized voxel: \n" << serializedObj << std::endl;
+        //serializeVoxel(vox);
         // todo -> write the voxel somewhere or something 
       }
 

@@ -629,7 +629,7 @@ void addObjectToWorld(
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange
     };
-   addObject(id, getType(name, fields), attr, world.objectMapping, world.meshes, util);
+   addObject(id, getType(name, fields), attr, world.objectMapping, util);
 }
 
 std::string getTextureById(World& world, int id){
@@ -652,17 +652,13 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
 } 
 
 std::string serializeObject(World& world, objid id, std::string overridename){
-  return serializeObject(
-    world.sandbox, 
-    id, 
-    [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-      return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
-        return getTextureById(world, textureId);
-      });
-    }, 
-    false,
-    overridename
-  );
+  auto gameobj = getGameObject(world.sandbox, id);
+  auto gameobjecth = getGameObjectH(world.sandbox, id);
+  auto children = childnames(world.sandbox, gameobjecth);
+  auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
+    return getTextureById(world, textureId);
+  });
+  return serializeObjectSandbox(gameobj, id, gameobjecth.groupId, additionalFields, children, false, overridename);
 }
 
 void addSerialObjectsToWorld(

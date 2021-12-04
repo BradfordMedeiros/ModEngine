@@ -209,7 +209,7 @@ std::vector<ObjectType> objTypes = {
 };
 
 
-void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping,  std::map<std::string, MeshRef>& meshes, ObjectTypeUtil util){
+void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping, ObjectTypeUtil util){
   for (auto &objType : objTypes){
     if (objectType == objType.name){
       mapping[id] = objType.createObj(attr, util);

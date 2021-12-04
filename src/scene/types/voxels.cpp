@@ -356,6 +356,55 @@ std::vector<Voxels> splitVoxel(Voxels& voxel){
   return voxels;
 }
 
-Voxels joinVoxels(std::vector<Voxels>& voxels){
-  return voxels.at(0);
+// for now just join along adjacent x axis as if they were oriented the same way
+// in practice it should:
+// calculate the relative offset (x,y,z)
+// calculate the new size
+// resolve potential conflicts by joining 
+// constraint: orientation is the same (although could resolve 90 degree turns)
+// constaint: scale is the same (although could resolve for multiples)
+
+Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<glm::vec3>& scales){
+  std::vector<std::vector<std::vector<int>>> cubes;
+  std::vector<std::vector<std::vector<unsigned int>>> textures;
+
+  for (int voxelId = 0; voxelId < voxels.size(); voxelId++){
+    auto voxel = voxels.at(voxelId);
+    for (int x = 0; x < voxel.numWidth; x++){
+      std::vector<std::vector<int>> yzplane;
+      std::vector<std::vector<unsigned int>> yzplaneTexs;
+      for (int y = 0; y < voxel.numHeight; y++){
+        std::vector<int> zvoxs;
+        std::vector<unsigned int> zvoxsTexs;
+        for (int z = 0; z < voxel.numDepth; z++){
+          //glm::ivec3 offset(0, 0, 0);
+          zvoxs.push_back(voxel.cubes.at(x).at(y).at(z));
+          zvoxsTexs.push_back(voxel.textures.at(x).at(y).at(z));
+        }
+        yzplane.push_back(zvoxs);
+        yzplaneTexs.push_back(zvoxsTexs);
+      }
+      cubes.push_back(yzplane);
+      textures.push_back(yzplaneTexs);
+    } 
+  }
+
+  int numWidth = cubes.size();
+  int numHeight = cubes.size() == 0 ? 0 : cubes.at(0).size();
+  int numDepth = (cubes.size() == 0 || cubes.at(0).size() == 0) ? 0 : cubes.at(0).at(0).size();
+  Voxels vox = {
+    .cubes = cubes,
+    .textures = textures,
+    .numWidth = numWidth,
+    .numHeight = numHeight,
+    .numDepth = numDepth,
+    .boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth),
+    .selectedVoxels = {},
+    .onVoxelBoundInfoChanged = []() -> void {
+      assert(false);
+    },
+    .defaultTextureId = voxels.at(0).defaultTextureId,
+  };
+
+  return vox;
 }
