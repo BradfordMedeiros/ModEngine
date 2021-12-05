@@ -364,31 +364,70 @@ std::vector<Voxels> splitVoxel(Voxels& voxel){
 // constraint: orientation is the same (although could resolve 90 degree turns)
 // constaint: scale is the same (although could resolve for multiples)
 
+glm::ivec3 getTotalSize(){
+  return glm::ivec3(4, 2, 2);
+}
+
+void createCubeContainer(
+  glm::ivec3 totalSize,
+  int defaultTextureId,
+  std::vector<std::vector<std::vector<int>>>& cubes,
+  std::vector<std::vector<std::vector<unsigned int>>>& textures
+){
+  for (int x = 0; x < totalSize.x /*voxel.numWidth + voxelOffset.x*/; x++){
+    std::vector<std::vector<int>> yzplane;
+    std::vector<std::vector<unsigned int>> yzplaneTexs;
+    for (int y = 0; y <  totalSize.y /*voxel.numHeight*/; y++){
+      std::vector<int> zvoxs;
+      std::vector<unsigned int> zvoxsTexs;
+      for (int z = 0; z < totalSize.z /* voxel.numDepth*/; z++){
+          //glm::ivec3 offset(0, 0, 0);
+        zvoxs.push_back(0);
+        zvoxsTexs.push_back(defaultTextureId);
+      }
+      yzplane.push_back(zvoxs);
+      yzplaneTexs.push_back(zvoxsTexs);
+    }
+    cubes.push_back(yzplane);
+    textures.push_back(yzplaneTexs);
+  } 
+}
+
+glm::ivec3 getVoxelOffset(){
+  return glm::ivec3(0, 0, 0);
+}
+
+
+void placeVoxelInContainer(
+  std::vector<std::vector<std::vector<int>>>& cubes,
+  std::vector<std::vector<std::vector<unsigned int>>>& textures,
+  Voxels& voxel, 
+  glm::ivec3 offset
+){
+  for (int x = 0; x < voxel.numWidth; x++){
+    for (int y = 0; y < voxel.numHeight; y++){
+      for (int z = 0; z < voxel.numDepth; z++){
+        int xoffset = offset.x + x;
+        int yoffset = offset.y + y;
+        int zoffset = offset.z + z;
+        std::cout << "setting: (" << xoffset << ", " << y << ", " << z << ") - " << voxel.cubes.at(x).at(y).at(z) << std::endl;
+        cubes.at(xoffset).at(yoffset).at(zoffset) = voxel.cubes.at(x).at(y).at(z);
+        textures.at(xoffset).at(yoffset).at(zoffset) = voxel.textures.at(x).at(y).at(z);
+      }
+    }
+  }
+}
+
 Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<glm::vec3>& scales){
   std::vector<std::vector<std::vector<int>>> cubes;
   std::vector<std::vector<std::vector<unsigned int>>> textures;
-
+  createCubeContainer(getTotalSize(), voxels.at(0).defaultTextureId, cubes, textures);
+  int offset = 0;
   for (int voxelId = 0; voxelId < voxels.size(); voxelId++){
     auto voxel = voxels.at(voxelId);
-    for (int x = 0; x < voxel.numWidth; x++){
-      std::vector<std::vector<int>> yzplane;
-      std::vector<std::vector<unsigned int>> yzplaneTexs;
-      for (int y = 0; y < voxel.numHeight; y++){
-        std::vector<int> zvoxs;
-        std::vector<unsigned int> zvoxsTexs;
-        for (int z = 0; z < voxel.numDepth; z++){
-          //glm::ivec3 offset(0, 0, 0);
-          zvoxs.push_back(voxel.cubes.at(x).at(y).at(z));
-          zvoxsTexs.push_back(voxel.textures.at(x).at(y).at(z));
-        }
-        yzplane.push_back(zvoxs);
-        yzplaneTexs.push_back(zvoxsTexs);
-      }
-      cubes.push_back(yzplane);
-      textures.push_back(yzplaneTexs);
-    } 
+    placeVoxelInContainer(cubes, textures, voxel, glm::ivec3(offset, 0, 0));    
+    offset += voxel.numWidth;
   }
-
   int numWidth = cubes.size();
   int numHeight = cubes.size() == 0 ? 0 : cubes.at(0).size();
   int numDepth = (cubes.size() == 0 || cubes.at(0).size() == 0) ? 0 : cubes.at(0).at(0).size();
