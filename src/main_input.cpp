@@ -731,13 +731,13 @@ std::vector<InputDispatch> inputFns = {
         auto objAttrs = objectAttributes(world, voxels.at(0));
         auto gameobj = gameObjectFromFields("]default_voxel", -1, objAttrs);
         std::vector<Voxels> voxelBodies;
-        std::vector<glm::vec3> scales;
+        std::vector<Transformation> transforms;
 
         for (auto id : voxels){
           voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
-          scales.push_back(glm::vec3(1.f, 1.f, 1.f));
+          transforms.push_back(getGameObject(world, id).transformation);
         }
-        auto voxelData = joinVoxels(voxelBodies, scales);
+        auto voxelData = joinVoxels(voxelBodies, transforms);
         GameObjectVoxel vox {
           .voxel = voxelData,
         };

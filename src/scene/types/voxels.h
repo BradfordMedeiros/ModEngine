@@ -57,6 +57,6 @@ void expandVoxels(Voxels& voxel, int x, int y, int z);
 std::vector<VoxelBody> getVoxelBodies(Voxels& voxels);
 
 std::vector<Voxels> splitVoxel(Voxels& voxel);
-Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<glm::vec3>& scales);
+Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<Transformation>& transforms);
 
 #endif

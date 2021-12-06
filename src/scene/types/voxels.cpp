@@ -365,8 +365,61 @@ std::vector<Voxels> splitVoxel(Voxels& voxel){
 // constaint: scale is the same (although could resolve for multiples)
 
 glm::ivec3 getTotalSize(){
-  return glm::ivec3(4, 2, 2);
+  return glm::ivec3(20, 8, 20);
 }
+
+glm::ivec3 transformToPos(Transformation& transform){
+  auto trans = glm::ivec3(transform.position.x, transform.position.y, transform.position.z);
+  std::cout << "trans: (" << trans.x << ", " << trans.y << ", " << trans.z << ")" << std::endl;
+  return trans;
+}
+
+struct RootTransformInfo {
+  glm::ivec3 voxPosOffset;
+  glm::vec3 scale;
+};
+
+RootTransformInfo getRootTransform(std::vector<Transformation>& transforms){
+  assert(transforms.size() >= 0);
+  auto rootTrans = transforms.at(0);
+  auto voxPosOffset = transformToPos(rootTrans);
+  auto rootScale = rootTrans.scale;
+  for (int i = 1; i < transforms.size(); i++){
+    auto trans = transforms.at(i);
+    auto transPos = transformToPos(trans);
+    if (transPos.x < voxPosOffset.x){
+      voxPosOffset.x = transPos.x;
+      rootScale.x = trans.scale.x;
+    }
+    if (transPos.y < voxPosOffset.y){
+      voxPosOffset.y = transPos.y;
+      rootScale.y = trans.scale.y;
+    }
+    if (transPos.z < voxPosOffset.z){
+      voxPosOffset.z = transPos.z;
+      rootScale.z = trans.scale.z;
+    }
+  }
+  return RootTransformInfo {
+    .voxPosOffset = voxPosOffset,
+    .scale = rootScale,
+  };
+}
+// voxel offset should probably be relative to the initial one I guess?
+glm::ivec3 getVoxelOffset(RootTransformInfo rootTransform, Transformation& transform){
+  // make sure same rotation
+
+  // If the voxels were different sizes, joining the cubes wouldn't work!
+  // (but it would be cool to support multiple multiples of sizes and resampling so you could...)
+  if (!aboutEqual(rootTransform.scale, transform.scale)){
+    std::cout << "scales need to be equal" << std::endl;
+    std::cout << "root scale: " << print(rootTransform.scale) << " but original scale: " << print(transform.scale) << std::endl;
+    assert(false);
+  }
+  return transformToPos(transform) - rootTransform.voxPosOffset;
+}
+
+
 
 void createCubeContainer(
   glm::ivec3 totalSize,
@@ -393,11 +446,6 @@ void createCubeContainer(
   } 
 }
 
-glm::ivec3 getVoxelOffset(){
-  return glm::ivec3(0, 0, 0);
-}
-
-
 void placeVoxelInContainer(
   std::vector<std::vector<std::vector<int>>>& cubes,
   std::vector<std::vector<std::vector<unsigned int>>>& textures,
@@ -411,22 +459,30 @@ void placeVoxelInContainer(
         int yoffset = offset.y + y;
         int zoffset = offset.z + z;
         std::cout << "setting: (" << xoffset << ", " << y << ", " << z << ") - " << voxel.cubes.at(x).at(y).at(z) << std::endl;
-        cubes.at(xoffset).at(yoffset).at(zoffset) = voxel.cubes.at(x).at(y).at(z);
-        textures.at(xoffset).at(yoffset).at(zoffset) = voxel.textures.at(x).at(y).at(z);
+        bool noVoxelInSpace = cubes.at(xoffset).at(yoffset).at(zoffset) == 0;
+        if (noVoxelInSpace){
+          cubes.at(xoffset).at(yoffset).at(zoffset) = voxel.cubes.at(x).at(y).at(z);
+          textures.at(xoffset).at(yoffset).at(zoffset) = voxel.textures.at(x).at(y).at(z);
+        }
       }
     }
   }
 }
 
-Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<glm::vec3>& scales){
+Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<Transformation>& transforms){
+  std::vector<glm::vec3> offsets;
+
+  auto rootTransform = getRootTransform(transforms);
+  for (auto transform : transforms){
+    offsets.push_back(getVoxelOffset(rootTransform, transform));
+    std::cout << "Offset: " << print(offsets.at(offsets.size() - 1)) << std::endl;
+  }
   std::vector<std::vector<std::vector<int>>> cubes;
   std::vector<std::vector<std::vector<unsigned int>>> textures;
   createCubeContainer(getTotalSize(), voxels.at(0).defaultTextureId, cubes, textures);
-  int offset = 0;
   for (int voxelId = 0; voxelId < voxels.size(); voxelId++){
     auto voxel = voxels.at(voxelId);
-    placeVoxelInContainer(cubes, textures, voxel, glm::ivec3(offset, 0, 0));    
-    offset += voxel.numWidth;
+    placeVoxelInContainer(cubes, textures, voxel, offsets.at(voxelId));    
   }
   int numWidth = cubes.size();
   int numHeight = cubes.size() == 0 ? 0 : cubes.at(0).size();
@@ -444,6 +500,6 @@ Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<glm::vec3>& scales){
     },
     .defaultTextureId = voxels.at(0).defaultTextureId,
   };
-
   return vox;
 }
+
