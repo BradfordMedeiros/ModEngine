@@ -363,14 +363,30 @@ std::vector<Voxels> splitVoxel(Voxels& voxel){
 // resolve potential conflicts by joining 
 // constraint: orientation is the same (although could resolve 90 degree turns)
 // constaint: scale is the same (although could resolve for multiples)
+glm::ivec3 calcVoxelSize(glm::ivec3 offset, Voxels& voxel){
+  return glm::ivec3(voxel.numWidth + offset.x, voxel.numHeight + offset.y, voxel.numDepth + offset.z); 
+}
 
-glm::ivec3 getTotalSize(){
-  return glm::ivec3(20, 8, 20);
+glm::ivec3 getTotalSize(std::vector<glm::ivec3>& offsets, std::vector<Voxels>& voxels){
+  assert(offsets.size() == voxels.size() && offsets.size() > 0);
+  auto totalSize = calcVoxelSize(offsets.at(0), voxels.at(0));
+  for (int i = 1; i < offsets.size(); i++){
+    auto voxSize = calcVoxelSize(offsets.at(i), voxels.at(i));
+    if (voxSize.x > totalSize.x){
+      totalSize.x = voxSize.x;
+    }
+    if (voxSize.y > totalSize.y){
+      totalSize.y = voxSize.y;
+    }
+    if (voxSize.z > totalSize.z){
+      totalSize.z = voxSize.z;
+    }
+  }
+  return totalSize;
 }
 
 glm::ivec3 transformToPos(Transformation& transform){
   auto trans = glm::ivec3(transform.position.x, transform.position.y, transform.position.z);
-  std::cout << "trans: (" << trans.x << ", " << trans.y << ", " << trans.z << ")" << std::endl;
   return trans;
 }
 
@@ -425,7 +441,6 @@ bool isUnitAligned(glm::vec3 pos1, glm::vec3 pos2){
 // voxel offset should probably be relative to the initial one I guess?
 glm::ivec3 getVoxelOffset(RootTransformInfo rootTransform, Transformation& transform){
   // make sure same rotation
-
   // If the voxels were different sizes, joining the cubes wouldn't work!
   // (but it would be cool to support multiple multiples of sizes and resampling so you could...)
   if (!aboutEqual(rootTransform.scale, transform.scale)){
@@ -442,7 +457,6 @@ glm::ivec3 getVoxelOffset(RootTransformInfo rootTransform, Transformation& trans
 
   return transformToPos(transform) - rootTransform.voxPosOffset;
 }
-
 
 
 void createCubeContainer(
@@ -495,17 +509,15 @@ void placeVoxelInContainer(
 
 Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<Transformation>& transforms){
   std::vector<glm::ivec3> offsets;
-
   auto rootTransform = getRootTransform(transforms);
-
   for (auto transform : transforms){
     offsets.push_back(getVoxelOffset(rootTransform, transform));
-    std::cout << "Offset: " << print(offsets.at(offsets.size() - 1)) << std::endl;
   }
-
   std::vector<std::vector<std::vector<int>>> cubes;
   std::vector<std::vector<std::vector<unsigned int>>> textures;
-  createCubeContainer(getTotalSize(), voxels.at(0).defaultTextureId, cubes, textures);
+  auto totalSize = getTotalSize(offsets, voxels);
+  //std::cout << "total size is: " << print(totalSize) << std::endl;
+  createCubeContainer(totalSize, voxels.at(0).defaultTextureId, cubes, textures);
   for (int voxelId = 0; voxelId < voxels.size(); voxelId++){
     auto voxel = voxels.at(voxelId);
     placeVoxelInContainer(cubes, textures, voxel, offsets.at(voxelId));    
