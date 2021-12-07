@@ -151,6 +151,9 @@ std::string print(glm::vec3 vec){
   stream << vec.x << " " << vec.y << " " << vec.z;
   return stream.str();
 }
+std::string print(glm::ivec3 vec){
+  return print(glm::vec3(vec.x, vec.y, vec.z));
+}
 std::string print(glm::vec2 vec){
   std::stringstream stream;
   stream << vec.x << " " << vec.y;
@@ -259,7 +262,7 @@ std::string serializeVec(glm::vec2 vec){
 std::string serializeRotation(glm::quat rotation){
   std::cout << "serialize rotation is wrong" << std::endl;
   // updated the parseQuat but not this.  This shoudl return a vector in the direction of the rotation
-  assert(false);
+ // assert(false);
   glm::vec3 angles = eulerAngles(rotation);
   return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z); 
 }

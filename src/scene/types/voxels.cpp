@@ -376,6 +376,7 @@ glm::ivec3 transformToPos(Transformation& transform){
 
 struct RootTransformInfo {
   glm::ivec3 voxPosOffset;
+  glm::vec3 pos;
   glm::vec3 scale;
 };
 
@@ -384,27 +385,43 @@ RootTransformInfo getRootTransform(std::vector<Transformation>& transforms){
   auto rootTrans = transforms.at(0);
   auto voxPosOffset = transformToPos(rootTrans);
   auto rootScale = rootTrans.scale;
+  auto rootPos = rootTrans.position;
   for (int i = 1; i < transforms.size(); i++){
     auto trans = transforms.at(i);
     auto transPos = transformToPos(trans);
     if (transPos.x < voxPosOffset.x){
       voxPosOffset.x = transPos.x;
       rootScale.x = trans.scale.x;
+      rootPos.x = trans.position.x;
     }
     if (transPos.y < voxPosOffset.y){
       voxPosOffset.y = transPos.y;
       rootScale.y = trans.scale.y;
+      rootPos.y = trans.position.y;
     }
     if (transPos.z < voxPosOffset.z){
       voxPosOffset.z = transPos.z;
       rootScale.z = trans.scale.z;
+      rootPos.z = trans.position.z;
     }
   }
   return RootTransformInfo {
     .voxPosOffset = voxPosOffset,
+    .pos = rootPos,
     .scale = rootScale,
   };
 }
+
+bool isUnitAligned(glm::vec3 pos1, glm::vec3 pos2){
+  auto xDiff = fmod(abs(pos1.x - pos2.x), 1.0f);
+  auto yDiff = fmod(abs(pos1.y - pos2.y), 1.0f); 
+  auto zDiff = fmod(abs(pos1.z - pos2.z), 1.0f);
+  auto xAligned = aboutEqual(xDiff, 0.f) || aboutEqual(xDiff, 1.f);  // need to check against 1.f since floating point messiness w/ fmod
+  auto yAligned = aboutEqual(yDiff, 0.f) || aboutEqual(yDiff, 1.f);
+  auto zAligned = aboutEqual(zDiff, 0.f) || aboutEqual(zDiff, 1.f);
+  return xAligned && yAligned && zAligned;
+}
+
 // voxel offset should probably be relative to the initial one I guess?
 glm::ivec3 getVoxelOffset(RootTransformInfo rootTransform, Transformation& transform){
   // make sure same rotation
@@ -416,6 +433,13 @@ glm::ivec3 getVoxelOffset(RootTransformInfo rootTransform, Transformation& trans
     std::cout << "root scale: " << print(rootTransform.scale) << " but original scale: " << print(transform.scale) << std::endl;
     assert(false);
   }
+
+  if (!isUnitAligned(rootTransform.pos, transform.position)){
+    std::cout << "positions must be unit align along interval of mod(a-b, 1) == 0" << std::endl;
+    std::cout << print(rootTransform.pos) << " vs " << print(transform.position) << std::endl;
+    assert(false);
+  }
+
   return transformToPos(transform) - rootTransform.voxPosOffset;
 }
 
@@ -470,13 +494,15 @@ void placeVoxelInContainer(
 }
 
 Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<Transformation>& transforms){
-  std::vector<glm::vec3> offsets;
+  std::vector<glm::ivec3> offsets;
 
   auto rootTransform = getRootTransform(transforms);
+
   for (auto transform : transforms){
     offsets.push_back(getVoxelOffset(rootTransform, transform));
     std::cout << "Offset: " << print(offsets.at(offsets.size() - 1)) << std::endl;
   }
+
   std::vector<std::vector<std::vector<int>>> cubes;
   std::vector<std::vector<std::vector<unsigned int>>> textures;
   createCubeContainer(getTotalSize(), voxels.at(0).defaultTextureId, cubes, textures);
