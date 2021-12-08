@@ -1416,6 +1416,8 @@ int main(int argc, char* argv[]){
         glUniform1i(glGetUniformLocation(blurProgram, "depthTexture"), 1);        
         glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), true);
         glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
+        glUniform1f(glGetUniformLocation(blurProgram, "minBlurDistance"), 0.05);
+        glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), 0.1);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
 

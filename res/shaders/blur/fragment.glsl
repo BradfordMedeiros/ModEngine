@@ -8,12 +8,12 @@ in vec2 TexCoords;
 uniform sampler2D framebufferTexture;
 uniform sampler2D depthTexture;
 uniform bool useDepthTexture;
+uniform float minBlurDistance;
+uniform float maxBlurDistance;
 
 uniform bool firstpass;
 uniform float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);; // source learnopengl.com 
 
-float minBlurDistance = 0.05;
-float maxBlurDistance = 0.1;
 bool shouldBlur(){
    float near = 0.1;
    float far = 100;

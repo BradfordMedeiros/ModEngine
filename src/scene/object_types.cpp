@@ -84,9 +84,9 @@ std::vector<ObjectType> objTypes = {
     .name = "camera",
     .variantType = getVariantIndex(GameObjectCamera{}),
     .createObj = createCamera,
-    .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingSetObjAttr,
-    .serialize = serializeNotImplemented,
+    .objectAttributes = convertElementValue<GameObjectCamera>(cameraObjAttr),
+    .setAttributes = convertElementSetValue<GameObjectCamera>(setCameraAttributes),
+    .serialize = convertSerialize<GameObjectCamera>(serializeCamera),
     .removeObject = removeDoNothing,
   },
   ObjectType {
