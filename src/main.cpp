@@ -1323,6 +1323,7 @@ int main(int argc, char* argv[]){
       glBindFramebuffer(GL_FRAMEBUFFER, fbo);
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
       glClearColor(0.0, 0.0, 0.0, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
@@ -1388,7 +1389,7 @@ int main(int argc, char* argv[]){
       glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), false);
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture3, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
 
       glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1400,7 +1401,7 @@ int main(int argc, char* argv[]){
    
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0); // blur only has 1 color attachment?
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0); 
       glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
       glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
