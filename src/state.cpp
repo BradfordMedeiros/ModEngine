@@ -115,6 +115,17 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "skybox",
     .attribute = "color",
   },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto dovEnabled = std::get_if<std::string>(&value);
+      if (dovEnabled != NULL){
+        std::cout << "state: update dof: " << *dovEnabled << std::endl;
+        state.enableDof = *dovEnabled == "enabled";
+      }     
+    },
+    .object = "dof",
+    .attribute = "state",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -198,6 +209,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .activeCameraObj = NULL,
     .skybox = "",
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
+    .enableDof = false,
 	};
 	return state;
 }

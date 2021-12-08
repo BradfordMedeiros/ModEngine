@@ -1,12 +1,13 @@
 
-#fog:color:0.01 0
-#fog:enabled:true
+fog:color:0 0 0
+fog:enabled:false
 
 diffuse:enabled:true
 specular:enabled:true
 bloom:enabled:true
 
+#pbr:enabled:true
 
 skybox:texture:./res/textures/skyboxs/desert/
-skybox:color:0.2 0.2 0.2
-
+#skybox:color:0.2 0.2 0.2
+dof:state:enabled

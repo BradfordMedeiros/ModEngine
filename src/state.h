@@ -90,6 +90,8 @@ struct engineState {
 
   std::string skybox;
   glm::vec3 skyboxcolor;
+
+  bool enableDof;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

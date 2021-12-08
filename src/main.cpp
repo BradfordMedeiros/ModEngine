@@ -1408,6 +1408,42 @@ int main(int argc, char* argv[]){
       glDrawArrays(GL_TRIANGLES, 0, 6);
     )
 
+
+    PROFILE("DOF-RENDERING",
+      if (state.enableDof){
+        glUseProgram(blurProgram);
+        glUniform1i(glGetUniformLocation(blurProgram, "framebufferTexture"), 0);        
+        glUniform1i(glGetUniformLocation(blurProgram, "depthTexture"), 1);        
+        glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), true);
+        glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
+
+        glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
+
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
+
+        glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 6); 
+      }
+    )
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
