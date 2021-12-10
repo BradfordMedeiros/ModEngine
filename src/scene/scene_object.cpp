@@ -5,7 +5,7 @@ std::vector<LightInfo> getLightInfo(World& world){
   std::vector<LightInfo> lights;
   for (int i = 0; i < lightsIndexs.size(); i++){
     auto objectId =  lightsIndexs.at(i);
-    auto objectLight = world.objectMapping.at(objectId);
+    GameObjectObj& objectLight = world.objectMapping.at(objectId);
     auto lightObject = std::get_if<GameObjectLight>(&objectLight);
 
     auto lightTransform = fullTransformation(world.sandbox, objectId);
@@ -20,7 +20,7 @@ std::vector<LightInfo> getLightInfo(World& world){
 }
 
 PortalInfo getPortalInfo(World& world, objid id){
-  auto objectPortal = world.objectMapping.at(id);
+  GameObjectObj& objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
   
   auto cameraId = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).id;
@@ -50,7 +50,7 @@ std::vector<PortalInfo> getPortalInfo(World& world){
 }
 
 bool isPortal(World& world, objid id){
-  auto objectPortal = world.objectMapping.at(id);
+  GameObjectObj& objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
   return portalObject != NULL;
 }
@@ -95,7 +95,7 @@ std::optional<GameObjectVoxel*> getVoxel(World& world, objid id){
   return voxelObject;
 }
 bool isVoxel(World& world, objid id){
-  auto obj = world.objectMapping.at(id);
+  GameObjectObj& obj = world.objectMapping.at(id);
   return std::get_if<GameObjectVoxel>(&obj) != NULL;
 }
 
@@ -154,16 +154,15 @@ void saveHeightmap(World& world, objid id, std::string filepath){
   saveHeightmap(hm.heightmap, filepath);
 }
 bool isHeightmap(World& world, objid id){
-  auto obj = world.objectMapping.at(id);
+  GameObjectObj& obj = world.objectMapping.at(id);
   return std::get_if<GameObjectHeightmap>(&obj) != NULL;
 }
 
 GameObjectCamera& getCamera(World& world, objid id){
-  auto obj = world.objectMapping.at(id);
-  auto cameraObj = std::get_if<GameObjectCamera>(&obj);
+  GameObjectObj& obj = world.objectMapping.at(id);
+  GameObjectCamera*  cameraObj = std::get_if<GameObjectCamera>(&obj);
   assert(cameraObj != NULL);
-  GameObjectCamera& camera = *cameraObj;
-  return camera;
+  return *cameraObj;
 }
 
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
@@ -223,7 +222,7 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
     if (selected == -1 || !idExists(world.sandbox, selected)){
       return;
     }
-    auto gameObjV = world.objectMapping.at(selected); 
+    GameObjectObj& gameObjV = world.objectMapping.at(selected); 
     auto meshObj = std::get_if<GameObjectMesh>(&gameObjV); 
     if (meshObj != NULL){
       // @TODO this is resizing based upon first mesh only, which is questionable
