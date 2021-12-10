@@ -207,6 +207,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .groupSelection = true,
     .pauseWorldTiming = false,
     .activeCameraObj = NULL,
+    .activeCameraData = NULL,
     .skybox = "",
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
     .enableDof = false,

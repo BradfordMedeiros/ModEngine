@@ -1,23 +1,48 @@
 #include "./obj_camera.h"
 
+void setCameraAttr(GameObjectCamera& cameraObj, GameobjAttributes& attr){
+  if (attr.stringAttributes.find("dof") != attr.stringAttributes.end()){
+    cameraObj.enableDof = attr.stringAttributes.at("dof") == "enabled";
+  }
+  if (attr.numAttributes.find("minblur") != attr.numAttributes.end()){
+    cameraObj.minBlurDistance = attr.numAttributes.at("minblur");
+  }
+  if (attr.numAttributes.find("maxblur") != attr.numAttributes.end()){
+    cameraObj.maxBlurDistance = attr.numAttributes.at("maxblur");
+  }
+}
+
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto enableDof = attr.stringAttributes.find("dof") != attr.stringAttributes.end() ? attr.stringAttributes.at("dof") == "enabled" : false;
-  auto minBlurDistance = attr.numAttributes.find("minblur") != attr.numAttributes.end() ? attr.numAttributes.at("minblur") : 0.05f;
-  auto maxBlurDistance = attr.numAttributes.find("maxblur") != attr.numAttributes.end() ? attr.numAttributes.at("maxblur") : 0.1f;
   GameObjectCamera obj {
-    .enableDof = enableDof,
-    .minBlurDistance = minBlurDistance,
-    .maxBlurDistance = maxBlurDistance,
+    .enableDof = false,
+    .minBlurDistance = 0.05f,
+    .maxBlurDistance = 0.1f,
   };
+  setCameraAttr(obj, attr);
+  std::cout << "camera: " << obj.enableDof << std::endl;
   return obj;
 }
 
 std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj, ObjectSerializeUtil& util){
-  assert(false);
+  std::vector<std::pair<std::string, std::string>> pairs;
+  if (obj.enableDof){
+    pairs.push_back(std::pair<std::string, std::string>("dof", "enabled"));
+  }
+  if (!aboutEqual(obj.minBlurDistance, 0.05f)){
+    pairs.push_back(std::pair<std::string, std::string>("minblur", std::to_string(obj.minBlurDistance)));
+  }
+  if (!aboutEqual(obj.maxBlurDistance, 0.1f)){
+    pairs.push_back(std::pair<std::string, std::string>("maxblur", std::to_string(obj.maxBlurDistance)));
+  }
+  return pairs;
 }
-void cameraObjAttr(GameObjectCamera& meshObj, GameobjAttributes& _attributes){
-  assert(false);
+void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
+  assert(false); 
+  _attributes.stringAttributes["dof"] = cameraObj.enableDof ? "enabled" : "disabled";
+  _attributes.numAttributes["minblur"] = cameraObj.minBlurDistance;
+  _attributes.numAttributes["maxblur"] = cameraObj.maxBlurDistance;
 }
-void setCameraAttributes(GameObjectCamera& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  assert(false);
+
+void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  setCameraAttr(cameraObj, attributes);
 }

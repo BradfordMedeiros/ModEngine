@@ -87,6 +87,7 @@ struct engineState {
   bool groupSelection;
   bool pauseWorldTiming;
   GameObject* activeCameraObj;
+  GameObjectCamera* activeCameraData;
 
   std::string skybox;
   glm::vec3 skyboxcolor;

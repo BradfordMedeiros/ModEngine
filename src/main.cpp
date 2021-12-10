@@ -1408,16 +1408,24 @@ int main(int argc, char* argv[]){
       glDrawArrays(GL_TRIANGLES, 0, 6);
     )
 
+    bool depthEnabled = false;
+    float minBlurDistance = 0.05f;
+    float maxBlurDistance = 0.1f;
+    if (state.activeCameraData != NULL){
+      depthEnabled = state.activeCameraData -> enableDof;
+      minBlurDistance = state.activeCameraData -> minBlurDistance;
+      maxBlurDistance = state.activeCameraData -> maxBlurDistance;
+    }
 
     PROFILE("DOF-RENDERING",
-      if (state.enableDof){
+      if (depthEnabled){
         glUseProgram(blurProgram);
         glUniform1i(glGetUniformLocation(blurProgram, "framebufferTexture"), 0);        
         glUniform1i(glGetUniformLocation(blurProgram, "depthTexture"), 1);        
         glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), true);
         glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
-        glUniform1f(glGetUniformLocation(blurProgram, "minBlurDistance"), 0.05);
-        glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), 0.1);
+        glUniform1f(glGetUniformLocation(blurProgram, "minBlurDistance"), minBlurDistance);
+        glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), maxBlurDistance);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
 

@@ -377,6 +377,7 @@ Transformation getCameraTransform(){
     if (lerpAmount >= 1){
       state.cameraInterp.shouldInterpolate = false;
       state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
+      state.activeCameraData = &getCamera(world, state.activeCameraObj -> id);
       schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
     }
     auto oldCameraPosition = fullTransformation(world.sandbox, state.activeCameraObj -> id);
@@ -388,6 +389,7 @@ Transformation getCameraTransform(){
 void maybeResetCamera(int32_t id){
   if (state.activeCameraObj != NULL &&  id == state.activeCameraObj -> id){
     state.activeCameraObj = NULL;
+    state.activeCameraData = NULL;
     std::cout << "active camera reset" << std::endl;
   }
   if (state.cameraInterp.targetCam == id){
@@ -412,8 +414,11 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
   }
 
   state.activeCameraObj = &getGameObject(world, cameraId);
+  state.activeCameraData = &getCamera(world, cameraId);
   setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
   schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
+  std::cout << "set active camera to id: " << cameraId << std::endl;
+  std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
 }
 void setActiveCamera(std::string name, objid sceneId){
   auto object = getGameObjectByName(name, sceneId);
@@ -428,6 +433,7 @@ void nextCamera(){
   auto cameraIndexs = getGameObjectsIndex<GameObjectCamera>(world.objectMapping);
   if (cameraIndexs.size() == 0){  // if we do not have a camera in the scene, we use default
     state.activeCameraObj = NULL;
+    state.activeCameraData = NULL;
     return;
   }
 

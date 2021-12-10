@@ -505,6 +505,7 @@ std::vector<InputDispatch> inputFns = {
       std::cout << "Camera option: " << (state.useDefaultCamera ? "default" : "new") << std::endl;
       if (state.useDefaultCamera){
         state.activeCameraObj = NULL;
+        state.activeCameraData = NULL;
       }else{
         nextCamera();
       }

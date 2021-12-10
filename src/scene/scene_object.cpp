@@ -158,6 +158,14 @@ bool isHeightmap(World& world, objid id){
   return std::get_if<GameObjectHeightmap>(&obj) != NULL;
 }
 
+GameObjectCamera& getCamera(World& world, objid id){
+  auto obj = world.objectMapping.at(id);
+  auto cameraObj = std::get_if<GameObjectCamera>(&obj);
+  assert(cameraObj != NULL);
+  GameObjectCamera& camera = *cameraObj;
+  return camera;
+}
+
 glm::vec3 aiNavigate(World& world, objid id, glm::vec3 target){
   NavGraph  navgraph { };
 
