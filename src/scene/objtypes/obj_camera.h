@@ -9,6 +9,7 @@ struct GameObjectCamera {
   bool enableDof;
   float minBlurDistance;
   float maxBlurDistance;
+  std::string target;
 };
 
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util);

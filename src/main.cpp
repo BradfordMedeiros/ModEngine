@@ -697,6 +697,13 @@ float exposureAmount(){
   return effectiveExposure;
 }
 
+float getViewspaceDepth(glm::mat4& transView, const char* elementName){
+  auto elements = getByName(world.sandbox, elementName);
+  assert(elements.size() == 1);
+  auto elementId = elements.at(0);
+  auto viewPosition = transView * fullModelTransform(world.sandbox, elementId);
+  return getTransformationFromMatrix(viewPosition).position.z;
+}
 
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
@@ -1376,7 +1383,6 @@ int main(int argc, char* argv[]){
 
     portalIdCache.clear();
 
-
     // depends on framebuffer texture, outputs to framebuffer texture 2
     // Blurring draws the framebuffer texture 
     // The blur program blurs it one in one direction and saves in framebuffer texture 3 
@@ -1411,10 +1417,18 @@ int main(int argc, char* argv[]){
     bool depthEnabled = false;
     float minBlurDistance = 0.05f;
     float maxBlurDistance = 0.1f;
+    float targetDepth = 0.f;
+    // auto depthForElement = getViewspaceDepth(view, "platform");
+    //std::cout << "element depth is: " << depthForElement << std::endl;
+
     if (state.activeCameraData != NULL){
       depthEnabled = state.activeCameraData -> enableDof;
       minBlurDistance = state.activeCameraData -> minBlurDistance;
       maxBlurDistance = state.activeCameraData -> maxBlurDistance;
+      if (state.activeCameraData -> target != ""){
+        targetDepth = getViewspaceDepth(view, "platform");
+        std::cout << "target depth: " << targetDepth << std::endl;
+      }
     }
 
     PROFILE("DOF-RENDERING",
