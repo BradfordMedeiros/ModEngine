@@ -1412,8 +1412,8 @@ int main(int argc, char* argv[]){
     )
 
     bool depthEnabled = false;
-    float minBlurDistance = 0.05f;
-    float maxBlurDistance = 0.1f;
+    float minBlurDistance = 0.f;
+    float maxBlurDistance = 0.f;
     float targetDepth = 0.f;
     float nearplane = 0.1f;
     float farplane = 100.f;
@@ -1428,7 +1428,11 @@ int main(int argc, char* argv[]){
         auto elements = getByName(world.sandbox, state.activeCameraData -> target);
         assert(elements.size() == 1);
         auto elementId = elements.at(0);
-        targetDepth = getViewspaceDepth(view, elementId);
+        auto halfBlurDistance = (maxBlurDistance - minBlurDistance) * 0.5f;
+        targetDepth = -1 * getViewspaceDepth(view, elementId);
+        minBlurDistance = targetDepth - halfBlurDistance;
+        maxBlurDistance = targetDepth + halfBlurDistance;
+        std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
         auto layerName = getGameObject(world, elementId).layer;
         auto targetObjLayer = layerByName(layerName);
         nearplane = targetObjLayer.nearplane;

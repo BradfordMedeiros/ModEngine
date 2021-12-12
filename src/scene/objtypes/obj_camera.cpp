@@ -18,8 +18,8 @@ void setCameraAttr(GameObjectCamera& cameraObj, GameobjAttributes& attr){
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectCamera obj {
     .enableDof = false,
-    .minBlurDistance = 0.05f,
-    .maxBlurDistance = 0.1f,
+    .minBlurDistance = 0.f,
+    .maxBlurDistance = 10.f,
     .target = "",
   };
   setCameraAttr(obj, attr);
