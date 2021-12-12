@@ -697,10 +697,7 @@ float exposureAmount(){
   return effectiveExposure;
 }
 
-float getViewspaceDepth(glm::mat4& transView, const char* elementName){
-  auto elements = getByName(world.sandbox, elementName);
-  assert(elements.size() == 1);
-  auto elementId = elements.at(0);
+float getViewspaceDepth(glm::mat4& transView, objid elementId){
   auto viewPosition = transView * fullModelTransform(world.sandbox, elementId);
   return getTransformationFromMatrix(viewPosition).position.z;
 }
@@ -1418,6 +1415,8 @@ int main(int argc, char* argv[]){
     float minBlurDistance = 0.05f;
     float maxBlurDistance = 0.1f;
     float targetDepth = 0.f;
+    float nearplane = 0.1f;
+    float farplane = 100.f;
     // auto depthForElement = getViewspaceDepth(view, "platform");
     //std::cout << "element depth is: " << depthForElement << std::endl;
 
@@ -1426,8 +1425,14 @@ int main(int argc, char* argv[]){
       minBlurDistance = state.activeCameraData -> minBlurDistance;
       maxBlurDistance = state.activeCameraData -> maxBlurDistance;
       if (state.activeCameraData -> target != ""){
-        targetDepth = getViewspaceDepth(view, "platform");
-        std::cout << "target depth: " << targetDepth << std::endl;
+        auto elements = getByName(world.sandbox, state.activeCameraData -> target);
+        assert(elements.size() == 1);
+        auto elementId = elements.at(0);
+        targetDepth = getViewspaceDepth(view, elementId);
+        auto layerName = getGameObject(world, elementId).layer;
+        auto targetObjLayer = layerByName(layerName);
+        nearplane = targetObjLayer.nearplane;
+        farplane = targetObjLayer.farplane;
       }
     }
 
@@ -1440,6 +1445,8 @@ int main(int argc, char* argv[]){
         glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
         glUniform1f(glGetUniformLocation(blurProgram, "minBlurDistance"), minBlurDistance);
         glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), maxBlurDistance);
+        glUniform1f(glGetUniformLocation(blurProgram, "near"), nearplane);
+        glUniform1f(glGetUniformLocation(blurProgram, "far"), farplane);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
 
