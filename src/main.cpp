@@ -1391,6 +1391,8 @@ int main(int argc, char* argv[]){
       glUseProgram(blurProgram);
       glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), false);
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
+      glUniform1i(glGetUniformLocation(blurProgram, "amount"), state.bloomBlurAmount);
+
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
 
@@ -1451,6 +1453,7 @@ int main(int argc, char* argv[]){
         glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), maxBlurDistance);
         glUniform1f(glGetUniformLocation(blurProgram, "near"), nearplane);
         glUniform1f(glGetUniformLocation(blurProgram, "far"), farplane);
+        glUniform1i(glGetUniformLocation(blurProgram, "amount"), state.bloomBlurAmount);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
 

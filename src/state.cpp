@@ -84,6 +84,16 @@ std::vector<ObjectStateMapping> mapping = {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto amount = std::get_if<float>(&value);
       if (amount != NULL){
+        state.bloomBlurAmount = static_cast<int>(*amount);
+      }
+    },
+    .object = "bloomblur",
+    .attribute = "amount",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto amount = std::get_if<float>(&value);
+      if (amount != NULL){
         state.exposureStart = now;
         state.targetExposure = *amount;
         state.oldExposure = state.exposure;
@@ -184,6 +194,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .shouldTerrainPaint = false,
   	.enableBloom = false, 
   	.bloomAmount = 1.f,   
+    .bloomBlurAmount = 5,
     .enableFog = true,  
     .fogColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
     .exposureStart = 0.f,

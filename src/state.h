@@ -59,6 +59,7 @@ struct engineState {
   
   bool enableBloom;
   float bloomAmount;
+  int bloomBlurAmount;
   bool enableFog;
   glm::vec4 fogColor;
   
