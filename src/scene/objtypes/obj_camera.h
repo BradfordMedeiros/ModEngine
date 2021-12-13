@@ -9,6 +9,7 @@ struct GameObjectCamera {
   bool enableDof;
   float minBlurDistance;
   float maxBlurDistance;
+  unsigned int blurAmount;
   std::string target;
 };
 

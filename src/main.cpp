@@ -1419,6 +1419,7 @@ int main(int argc, char* argv[]){
     float targetDepth = 0.f;
     float nearplane = 0.1f;
     float farplane = 100.f;
+    unsigned int blurAmount = 1;
     // auto depthForElement = getViewspaceDepth(view, "platform");
     //std::cout << "element depth is: " << depthForElement << std::endl;
 
@@ -1426,6 +1427,7 @@ int main(int argc, char* argv[]){
       depthEnabled = state.activeCameraData -> enableDof;
       minBlurDistance = state.activeCameraData -> minBlurDistance;
       maxBlurDistance = state.activeCameraData -> maxBlurDistance;
+      blurAmount = state.activeCameraData -> blurAmount;
       if (state.activeCameraData -> target != ""){
         auto elements = getByName(world.sandbox, state.activeCameraData -> target);
         assert(elements.size() == 1);
@@ -1453,7 +1455,7 @@ int main(int argc, char* argv[]){
         glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), maxBlurDistance);
         glUniform1f(glGetUniformLocation(blurProgram, "near"), nearplane);
         glUniform1f(glGetUniformLocation(blurProgram, "far"), farplane);
-        glUniform1i(glGetUniformLocation(blurProgram, "amount"), state.bloomBlurAmount);
+        glUniform1i(glGetUniformLocation(blurProgram, "amount"), blurAmount);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
 

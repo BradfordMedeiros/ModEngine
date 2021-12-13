@@ -10,34 +10,35 @@ uniform sampler2D depthTexture;
 uniform bool useDepthTexture;
 uniform float minBlurDistance;
 uniform float maxBlurDistance;
+uniform float near;
+uniform float far;
+uniform int amount;
 
 uniform bool firstpass;
-uniform float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);; // source learnopengl.com 
 
 bool shouldBlur(){
-   float near = 0.1;
-   float far = 100;
-   float depth  = texture(depthTexture, TexCoords).r;
-   float z = depth * 2.0 - 1.0; 
-   float depthAmount  = ((2.0 * near * far) / (far + near - z * (far - near))) / far;  // fraction of near/far
-    bool blur = !useDepthTexture || (depthAmount < minBlurDistance || depthAmount > maxBlurDistance);
-    return blur;
+  float depth  = texture(depthTexture, TexCoords).r;
+  float z = depth * 2.0 - 1.0; 
+  float depthAmount  = ((2.0 * near * far) / (far + near - z * (far - near)));  // fraction of near/far
+  bool blur = !useDepthTexture || (depthAmount < minBlurDistance || depthAmount > maxBlurDistance);
+  return blur;
 }
 
+// box filter blur for now
+// guassian would look better
 void main(){
     bool blur = shouldBlur();
     if (blur){
-      vec3 result = texture(framebufferTexture, TexCoords).rgb * weight[0];
+      vec3 result = vec3(0, 0, 0);
       vec2 texSize = 1.0 / textureSize(framebufferTexture, 0);
+      float weight = 1.0 / ((2 * amount) - 1);
       if (firstpass){
-        for (int i = 1; i < 5; i++){
-          result += weight[i] * texture(framebufferTexture, TexCoords + vec2(texSize.x * i, 0.0)).rgb;
-          result += weight[i] * texture(framebufferTexture, TexCoords - vec2(texSize.x * i, 0.0)).rgb;
+        for (int i = (-amount + 1); i < amount; i++){
+          result += weight * texture(framebufferTexture, TexCoords + vec2(texSize.x * i, 0.0)).rgb;
         }
       }else{
-        for (int i = 1; i < 5; i++){
-          result += weight[i] * texture(framebufferTexture, TexCoords + vec2(0.0, texSize.y * i)).rgb;
-          result += weight[i] * texture(framebufferTexture, TexCoords - vec2(0.0, texSize.y * i)).rgb;
+        for (int i = (-amount + 1); i < amount; i++){
+          result += weight * texture(framebufferTexture, TexCoords + vec2(0.0, texSize.y * i)).rgb;
         }
       }
       FragColor = vec4(result.rgb, 1.0);
