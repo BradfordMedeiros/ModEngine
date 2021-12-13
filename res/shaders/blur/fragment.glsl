@@ -13,7 +13,6 @@ uniform float maxBlurDistance;
 uniform float near;
 uniform float far;
 uniform int amount;
-
 uniform bool firstpass;
 
 bool shouldBlur(){
@@ -24,6 +23,9 @@ bool shouldBlur(){
   return blur;
 }
 
+int numSamples = 4;
+float weight = 1.0 / ((2 * numSamples) -1);
+
 // box filter blur for now
 // guassian would look better
 void main(){
@@ -31,14 +33,14 @@ void main(){
     if (blur){
       vec3 result = vec3(0, 0, 0);
       vec2 texSize = 1.0 / textureSize(framebufferTexture, 0);
-      float weight = 1.0 / ((2 * amount) - 1);
+      float offsetPerSample = amount / numSamples;
       if (firstpass){
-        for (int i = (-amount + 1); i < amount; i++){
-          result += weight * texture(framebufferTexture, TexCoords + vec2(texSize.x * i, 0.0)).rgb;
+        for (int i = (-numSamples + 1); i < numSamples; i++){
+          result += weight * texture(framebufferTexture, TexCoords + vec2(texSize.x * i * offsetPerSample, 0.0)).rgb;
         }
       }else{
-        for (int i = (-amount + 1); i < amount; i++){
-          result += weight * texture(framebufferTexture, TexCoords + vec2(0.0, texSize.y * i)).rgb;
+        for (int i = (-numSamples + 1); i < numSamples; i++){
+          result += weight * texture(framebufferTexture, TexCoords + vec2(0.0, texSize.y * i * offsetPerSample)).rgb;
         }
       }
       FragColor = vec4(result.rgb, 1.0);
