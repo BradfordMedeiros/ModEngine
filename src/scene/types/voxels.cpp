@@ -354,40 +354,51 @@ std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelT
   voxels.push_back(VoxelChunkFragment{
     .x = 0,
     .y = 0,
+    .z = 0,
+    .offsetx = 0,
+    .offsety = 0,
+    .offsetz = 0,
     .voxel = voxel,
   });
   return voxels;
 }
+
+std::string voxelHashAddress(int x, int y, int z){
+  return std::to_string(x) + ":" + std::to_string(y) + ":" + std::to_string(z);
+}
+
 std::vector<VoxelChunkFragment> groupVoxelChunks(std::vector<VoxelChunkFragment>& fragments){
-  std::map<int, std::map<int, std::vector<Voxels>>> voxelMapping;
+  std::map<std::string, std::vector<VoxelChunkFragment>> voxelMapping;
   for (auto &fragment : fragments){
-    if (voxelMapping.find(fragment.x) == voxelMapping.end()){
-      voxelMapping[fragment.x] = {};
+    auto fragHash = voxelHashAddress(fragment.x, fragment.y, fragment.z);
+    if (voxelMapping.find(fragHash) == voxelMapping.end()){
+      voxelMapping[fragHash] = {};
     }
-    if (voxelMapping.at(fragment.x).find(fragment.y) == voxelMapping.at(fragment.x).end()){
-      voxelMapping.at(fragment.x)[fragment.y] = {};
-    }
-    voxelMapping.at(fragment.x).at(fragment.y).push_back(fragment.voxel);
+    voxelMapping.at(fragHash).push_back(fragment);
   }
 
   std::vector<VoxelChunkFragment> newVoxels;
-  for (auto &[x, yToVoxels] : voxelMapping){
-    for (auto &[y, voxels] : yToVoxels){
-      std::vector<Transformation> transforms;
-      auto transform = Transformation {
-        .position = glm::vec3(0.f, 0.f, 0.f),
+  for (auto &[_, voxelFragments] : voxelMapping){
+    std::vector<Transformation> transformations;
+    std::vector<Voxels> voxels;
+    for (auto &voxelFragment : voxelFragments){
+      transformations.push_back(Transformation{
+        .position = glm::vec3(voxelFragment.offsetx, voxelFragment.offsety, voxelFragment.offsetx),
         .scale = glm::vec3(1.f, 1.f, 1.f),
         .rotation = glm::identity<glm::quat>(),
-      };
-      transforms.push_back(transform);
-      newVoxels.push_back(VoxelChunkFragment {
-        .x = x,
-        .y = y,
-        .voxel = joinVoxels(voxels, transforms),
       });
+      voxels.push_back(voxelFragment.voxel);
     }
+    newVoxels.push_back(VoxelChunkFragment{
+      .x = voxelFragments.at(0).x,
+      .y = voxelFragments.at(0).y,
+      .z = voxelFragments.at(0).z,
+      .offsetx = 0,
+      .offsety = 0,
+      .offsetz = 0,
+      .voxel = joinVoxels(voxels, transformations),
+    });
   }
-
   return newVoxels;
 }
 
@@ -530,7 +541,7 @@ void placeVoxelInContainer(
         int xoffset = offset.x + x;
         int yoffset = offset.y + y;
         int zoffset = offset.z + z;
-        std::cout << "setting: (" << xoffset << ", " << y << ", " << z << ") - " << voxel.cubes.at(x).at(y).at(z) << std::endl;
+        //std::cout << "setting: (" << xoffset << ", " << y << ", " << z << ") - " << voxel.cubes.at(x).at(y).at(z) << std::endl;
         bool noVoxelInSpace = cubes.at(xoffset).at(yoffset).at(zoffset) == 0;
         if (noVoxelInSpace){
           cubes.at(xoffset).at(yoffset).at(zoffset) = voxel.cubes.at(x).at(y).at(z);

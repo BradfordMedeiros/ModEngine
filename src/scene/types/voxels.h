@@ -59,6 +59,10 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels);
 struct VoxelChunkFragment {
   int x;
   int y;
+  int z;
+  int offsetx;
+  int offsety;
+  int offsetz;
   Voxels voxel;
 };
 std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelTransform, float chunksize);
