@@ -785,12 +785,13 @@ std::vector<InputDispatch> inputFns = {
         auto voxel = getVoxel(world, objectId);
         if (voxel.has_value()){
           auto voxels = voxel.value();
-          auto newVoxels = splitVoxel(voxels -> voxel);
+          auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId).transformation, 5);
+          auto newVoxels = groupVoxelChunks(voxelFragments);
           std::cout << "new voxel size: " << newVoxels.size() << std::endl;
         }
       }
     }
-  }, 
+  },  
   InputDispatch{
     .sourceKey = 'A',  
     .sourceType = BUTTON_PRESS,

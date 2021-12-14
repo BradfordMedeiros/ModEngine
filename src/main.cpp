@@ -1442,7 +1442,7 @@ int main(int argc, char* argv[]){
         targetDepth = -1 * getViewspaceDepth(view, elementId);
         minBlurDistance = targetDepth - halfBlurDistance;
         maxBlurDistance = targetDepth + halfBlurDistance;
-        std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
+        //std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
         auto layerName = getGameObject(world, elementId).layer;
         auto targetObjLayer = layerByName(layerName);
         nearplane = targetObjLayer.nearplane;

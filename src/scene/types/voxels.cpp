@@ -349,11 +349,46 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
   return bodies;
 }
 
-
-std::vector<Voxels> splitVoxel(Voxels& voxel){
-  std::vector<Voxels> voxels;
-  voxels.push_back(voxel);
+std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelTransform, float chunksize){
+  std::vector<VoxelChunkFragment> voxels;
+  voxels.push_back(VoxelChunkFragment{
+    .x = 0,
+    .y = 0,
+    .voxel = voxel,
+  });
   return voxels;
+}
+std::vector<VoxelChunkFragment> groupVoxelChunks(std::vector<VoxelChunkFragment>& fragments){
+  std::map<int, std::map<int, std::vector<Voxels>>> voxelMapping;
+  for (auto &fragment : fragments){
+    if (voxelMapping.find(fragment.x) == voxelMapping.end()){
+      voxelMapping[fragment.x] = {};
+    }
+    if (voxelMapping.at(fragment.x).find(fragment.y) == voxelMapping.at(fragment.x).end()){
+      voxelMapping.at(fragment.x)[fragment.y] = {};
+    }
+    voxelMapping.at(fragment.x).at(fragment.y).push_back(fragment.voxel);
+  }
+
+  std::vector<VoxelChunkFragment> newVoxels;
+  for (auto &[x, yToVoxels] : voxelMapping){
+    for (auto &[y, voxels] : yToVoxels){
+      std::vector<Transformation> transforms;
+      auto transform = Transformation {
+        .position = glm::vec3(0.f, 0.f, 0.f),
+        .scale = glm::vec3(1.f, 1.f, 1.f),
+        .rotation = glm::identity<glm::quat>(),
+      };
+      transforms.push_back(transform);
+      newVoxels.push_back(VoxelChunkFragment {
+        .x = x,
+        .y = y,
+        .voxel = joinVoxels(voxels, transforms),
+      });
+    }
+  }
+
+  return newVoxels;
 }
 
 // for now just join along adjacent x axis as if they were oriented the same way
@@ -438,7 +473,6 @@ bool isUnitAligned(glm::vec3 pos1, glm::vec3 pos2){
   return xAligned && yAligned && zAligned;
 }
 
-// voxel offset should probably be relative to the initial one I guess?
 glm::ivec3 getVoxelOffset(RootTransformInfo rootTransform, Transformation& transform){
   // make sure same rotation
   // If the voxels were different sizes, joining the cubes wouldn't work!
