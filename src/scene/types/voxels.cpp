@@ -349,6 +349,9 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
   return bodies;
 }
 
+bool voxelHasCoordinate(Voxels& voxel, int x, int y, int z){
+  return (voxel.cubes.size() > x) && (voxel.cubes.at(x).size() > y) && (voxel.cubes.at(x).at(y).size() > z);
+}
 VoxelChunkFragment getVoxelChunk(bool& _chunkHasBlocks, Voxels& fromVoxel, int chunksize, int chunkx, int chunky, int chunkz){
   _chunkHasBlocks = false; 
   std::vector<std::vector<std::vector<int>>> cubes;
@@ -373,10 +376,15 @@ VoxelChunkFragment getVoxelChunk(bool& _chunkHasBlocks, Voxels& fromVoxel, int c
   for (int x = 0; x < chunksize; x++){
     for (int y = 0; y < chunksize; y++){
       for (int z = 0; z < chunksize; z++){
-        auto voxelValue = fromVoxel.cubes.at(chunksize * chunkx).at(chunksize * chunky).at(chunksize * chunkz);
+        auto xCoord = chunksize * chunkx + x;
+        auto yCoord = chunksize * chunky + y;
+        auto zCoord = chunksize * chunkz + z;
+        bool hasCoord = voxelHasCoordinate(fromVoxel, xCoord, yCoord, zCoord);
+        auto voxelValue = hasCoord ? fromVoxel.cubes.at(xCoord).at(yCoord).at(zCoord) : 0;
+        auto textureValue = hasCoord ? fromVoxel.textures.at(xCoord).at(yCoord).at(zCoord) : fromVoxel.defaultTextureId;
         _chunkHasBlocks = _chunkHasBlocks || (voxelValue != 0);
         cubes.at(x).at(y).at(z) = voxelValue;
-        textures.at(x).at(y).at(z) = voxelValue;
+        textures.at(x).at(y).at(z) = textureValue;
       }
     }
   }
