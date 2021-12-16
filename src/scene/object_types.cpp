@@ -493,8 +493,7 @@ int renderObject(
   return 0;
 }
 
-void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& _attributes){
-  GameObjectObj& toRender = mapping.at(id);
+void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes){
   auto variantIndex = toRender.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
@@ -502,7 +501,6 @@ void objectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Gameobj
       return;
     }
   }
-
   assert(false);
 }
 

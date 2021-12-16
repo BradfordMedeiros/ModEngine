@@ -493,6 +493,22 @@ void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
   remapper.lastFrameDown = lastFrameDown;
 }
 
+void printVoxelInfo(Voxels& voxelData){
+  GameObjectVoxel vox {
+    .voxel = voxelData,
+  };
+  auto gameobj = gameObjectFromFields("]default_voxel", -1, {});
+  std::vector<std::string> children;
+  ObjectSerializeUtil util {
+    .textureName = [](int id) -> std::string {
+      return getTextureById(world, id); // can be not loaded...
+    }
+  };
+  auto additionalFields = serializeVoxel(vox, util);
+  auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
+  std::cout << "serialized voxel: \n" << serializedObj << std::endl;
+}
+
 float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
   InputDispatch{
@@ -728,32 +744,14 @@ std::vector<InputDispatch> inputFns = {
       }
       if (voxels.size() > 0){
         std::cout << "joined voxel data! size = " << voxels.size() << std::endl;
-        
-        auto objAttrs = objectAttributes(world, voxels.at(0));
-        auto gameobj = gameObjectFromFields("]default_voxel", -1, objAttrs);
         std::vector<Voxels> voxelBodies;
         std::vector<Transformation> transforms;
-
         for (auto id : voxels){
           voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
           transforms.push_back(getGameObject(world, id).transformation);
         }
-        auto voxelData = joinVoxels(voxelBodies, transforms);
-        GameObjectVoxel vox {
-          .voxel = voxelData,
-        };
-     
-        std::vector<std::string> children;
-        ObjectSerializeUtil util {
-          .textureName = [](int id) -> std::string {
-            return getTextureById(world, id); // can be not loaded...
-          }
-        };
-        auto additionalFields = serializeVoxel(vox, util);
-        auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
-        std::cout << "serialized voxel: \n" << serializedObj << std::endl;
-        //serializeVoxel(vox);
-        // todo -> write the voxel somewhere or something 
+        auto voxelData = joinVoxels(voxelBodies, transforms);;
+        printVoxelInfo(voxelData);
       }
 
     }
@@ -787,6 +785,7 @@ std::vector<InputDispatch> inputFns = {
           auto voxels = voxel.value();
           auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId).transformation, 5);
           auto newVoxels = groupVoxelChunks(voxelFragments);
+          std::cout << "voxel fragments: " << voxelFragments.size() << std::endl;
           std::cout << "new voxel size: " << newVoxels.size() << std::endl;
         }
       }

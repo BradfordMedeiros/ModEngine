@@ -859,11 +859,15 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   return addSerialObject(world, sceneId, name, interface, attrObj, attrObj.children, gameobj, idsAdded);
 }
 
-GameobjAttributes objectAttributes(World& world, objid id){
+GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
   GameobjAttributes attr {};
-  objectAttributes(world.objectMapping, id, attr);
-  getAllAttributes(getGameObject(world, id), attr);
+  objectAttributes(gameobjObj, attr);
+  getAllAttributes(gameobj, attr);
   return attr;
+}
+
+GameobjAttributes objectAttributes(World& world, objid id){
+  return objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet){

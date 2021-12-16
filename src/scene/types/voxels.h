@@ -65,7 +65,7 @@ struct VoxelChunkFragment {
   int offsetz;
   Voxels voxel;
 };
-std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelTransform, float chunksize);
+std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelTransform, int chunksize);
 std::vector<VoxelChunkFragment> groupVoxelChunks(std::vector<VoxelChunkFragment>& fragments);
 
 Voxels joinVoxels(std::vector<Voxels>& voxels, std::vector<Transformation>& transforms);

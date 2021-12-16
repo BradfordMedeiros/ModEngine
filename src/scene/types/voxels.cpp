@@ -349,18 +349,89 @@ std::vector<VoxelBody> getVoxelBodies(Voxels& voxels){
   return bodies;
 }
 
-std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelTransform, float chunksize){
-  std::vector<VoxelChunkFragment> voxels;
-  voxels.push_back(VoxelChunkFragment{
-    .x = 0,
-    .y = 0,
-    .z = 0,
+VoxelChunkFragment getVoxelChunk(bool& _chunkHasBlocks, Voxels& fromVoxel, int chunksize, int chunkx, int chunky, int chunkz){
+  _chunkHasBlocks = false; 
+  std::vector<std::vector<std::vector<int>>> cubes;
+  std::vector<std::vector<std::vector<unsigned int>>> textures;
+  for (int x = 0; x < chunksize; x++){
+    std::vector<std::vector<int>> yzplane;
+    std::vector<std::vector<unsigned int>> yzplaneTexs;
+    for (int y = 0; y < chunksize; y++){
+      std::vector<int> zValues;
+      std::vector<unsigned int> zValuesTexs;
+      for (int z = 0; z < chunksize; z++){
+        zValues.push_back(0);
+        zValuesTexs.push_back(0);
+      } 
+      yzplane.push_back(zValues);
+      yzplaneTexs.push_back(zValuesTexs);
+    }
+    cubes.push_back(yzplane);
+    textures.push_back(yzplaneTexs);
+  }
+
+  for (int x = 0; x < chunksize; x++){
+    for (int y = 0; y < chunksize; y++){
+      for (int z = 0; z < chunksize; z++){
+        auto voxelValue = fromVoxel.cubes.at(chunksize * chunkx).at(chunksize * chunky).at(chunksize * chunkz);
+        _chunkHasBlocks = _chunkHasBlocks || (voxelValue != 0);
+        cubes.at(x).at(y).at(z) = voxelValue;
+        textures.at(x).at(y).at(z) = voxelValue;
+      }
+    }
+  }
+  auto numWidth = chunksize;
+  auto numHeight = chunksize;
+  auto numDepth = chunksize;
+  Voxels voxel {
+    .cubes = cubes,
+    .textures = textures,
+    .numWidth = numWidth,
+    .numHeight = numHeight,
+    .numDepth = numDepth,
+    .boundInfo = generateVoxelBoundInfo(cubes, numWidth, numHeight, numDepth),
+    .selectedVoxels = {},
+    .onVoxelBoundInfoChanged = []() -> void {
+      std::cout << "on voxel bound info change not implemented" << std::endl;
+      assert(false);
+    },
+    .defaultTextureId = fromVoxel.defaultTextureId,
+
+  };
+
+  return VoxelChunkFragment{
+    .x = chunkx,
+    .y = chunky,
+    .z = chunkz,
     .offsetx = 0,
     .offsety = 0,
     .offsetz = 0,
     .voxel = voxel,
-  });
-  return voxels;
+  };
+}
+
+std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelTransform, int chunksize){
+  std::vector<VoxelChunkFragment> voxelFragments;
+  // eg 16 / 4 = 4, 17 / 4 = 5
+  auto widthChunks = (voxel.numWidth / chunksize) + ((voxel.numWidth % chunksize) == 0 ? 0 : 1);
+  auto heightChunks = (voxel.numHeight / chunksize) + ((voxel.numHeight % chunksize) == 0 ? 0 : 1);
+  auto depthChunks = (voxel.numDepth / chunksize) + ((voxel.numDepth % chunksize) == 0 ? 0 : 1);
+
+  std::cout << "split voxel, numchunks: (" << widthChunks << ", " << heightChunks << ", " << depthChunks << ") - chunk size: " << chunksize << " - voxel size (" << voxel.numWidth << ", " << voxel.numHeight <<  ", " << voxel.numDepth << ")" << std::endl;
+
+  for (int x = 0; x < widthChunks; x++){
+    for (int y = 0; y < heightChunks; y++){
+      for (int z = 0; z < depthChunks; z++){
+        bool chunkHasBlocks = false;
+        auto voxelFragment = getVoxelChunk(chunkHasBlocks, voxel, chunksize, x, y, z);
+        std::cout << "chunk: (" << x << ", " << y << ", " << z << ") - hasblocks? " << chunkHasBlocks << std::endl;
+        if (chunkHasBlocks){
+          voxelFragments.push_back(voxelFragment);
+        }
+      }
+    }
+  }
+  return voxelFragments;
 }
 
 std::string voxelHashAddress(int x, int y, int z){
