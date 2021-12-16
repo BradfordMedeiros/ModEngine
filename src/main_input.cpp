@@ -779,14 +779,14 @@ std::vector<InputDispatch> inputFns = {
           saveHeightmap(newHm, newMapPath);
         }
       }else if (isVoxel(world, objectId)){
-        std::cout << "split voxel placeholder" << std::endl;
+        std::cout << "Splitting voxel:" << std::endl;
         auto voxel = getVoxel(world, objectId);
         if (voxel.has_value()){
           auto voxels = voxel.value();
-          auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId).transformation, 4);
+          auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId).transformation, 2);
           auto newVoxels = groupVoxelChunks(voxelFragments);
-          std::cout << "voxel fragments: " << voxelFragments.size() << std::endl;
-          std::cout << "new voxel size: " << newVoxels.size() << std::endl;
+          std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
+          std::cout << "New Voxels size: " << newVoxels.size() << std::endl;
 
           for (auto voxelFragment : newVoxels){
             printVoxelInfo(voxelFragment.voxel);
