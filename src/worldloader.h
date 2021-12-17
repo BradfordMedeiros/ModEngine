@@ -41,11 +41,12 @@ void handleChunkLoading(
   DynamicLoading& loadingInfo, 
   std::function<glm::vec3(objid)> getPos, 
   objid(*loadScene)(std::string sceneFile, glm::vec3 offset, std::string parentNode), 
-  void(*unloadScene)(objid sceneId)
+  void(*unloadScene)(objid sceneId),
+  glm::vec3* additionalLoadAround
 );
 objid addLoadingAround(DynamicLoading& loadingInfo, objid id);
 void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle);
-
+ChunkAddress decodeChunkHash(std::string& chunkhash, bool* out_validResult);
 
 
 #endif

@@ -118,7 +118,7 @@ DynamicLoading createDynamicLoading(std::string chunkfile){
   auto mappingInfo = parseChunkMapping(chunkfile);
   DynamicLoading loading = {
     .mappingInfo = mappingInfo,
-    .chunkRadius = 1, 
+    .chunkRadius = 0, 
   };
   return loading;
 }
@@ -215,23 +215,33 @@ std::string chunkloadingDebugInfo(ChunkLoadingInfo& info){
   return debugInfo;
 }
 
+ChunkAddress chunkAddressForPos(DynamicLoading& loadingInfo, glm::vec3 pos){
+  return ChunkAddress{
+    .x = round(pos.x / loadingInfo.mappingInfo.chunkSize), 
+    .y = round(pos.y / loadingInfo.mappingInfo.chunkSize), 
+    .z = round(pos.z / loadingInfo.mappingInfo.chunkSize),
+  };
+}
+
 // instead of keeping in memory here which chunks are loaded or not, it's probably better for this to requery the 
 // main scene system for a list of loaded chunks
 void handleChunkLoading(
   DynamicLoading& loadingInfo, 
   std::function<glm::vec3(objid)> getPos, 
   objid(*loadScene)(std::string sceneFile, glm::vec3 offset, std::string parentNode), 
-  void(*unloadScene)(objid sceneId)
+  void(*unloadScene)(objid sceneId),
+  glm::vec3* additionalLoadAround
 ){
   std::vector<ChunkAddress> loadingPos;
 
+  //std::cout << "ids loading around size: " << loadingInfo.idsLoadAround.size() << std::endl;
+  //std::cout << "additional loading pos: " << (additionalLoadAround == NULL ? "NULL" : print(*additionalLoadAround)) << std::endl;
   for (auto &[id, _] : loadingInfo.idsLoadAround){
     auto pos = getPos(id);
-    loadingPos.push_back(ChunkAddress{
-      .x = round(pos.x / loadingInfo.mappingInfo.chunkSize), 
-      .y = round(pos.y / loadingInfo.mappingInfo.chunkSize), 
-      .z = round(pos.z / loadingInfo.mappingInfo.chunkSize),
-    });
+    loadingPos.push_back(chunkAddressForPos(loadingInfo, pos));
+  }
+  if (additionalLoadAround != NULL){
+    loadingPos.push_back(chunkAddressForPos(loadingInfo, *additionalLoadAround));
   }
 
   auto chunksShouldBeLoaded = getChunksShouldBeLoaded(loadingInfo, loadingInfo.chunkRadius, loadingPos); 

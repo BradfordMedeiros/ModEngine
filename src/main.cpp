@@ -450,6 +450,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
     auto newShader = getShaderByName(shader, shaderProgram);
+
+    // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
     setShaderData(newShader, proj, view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
 
     if (state.visualizeNormals){
@@ -1197,8 +1199,6 @@ int main(int argc, char* argv[]){
     );
     
     view = renderView(viewTransform.position, viewTransform.rotation);
-
-    glfwSwapBuffers(window);
     
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
@@ -1299,7 +1299,8 @@ int main(int argc, char* argv[]){
           return getGameObjectPosition(id, true);
         }, 
         loadSceneParentOffset, 
-        removeObjectById
+        removeObjectById,
+        state.useDefaultCamera ? &viewTransform.position : NULL
       );
     }
 
@@ -1546,6 +1547,8 @@ int main(int argc, char* argv[]){
       state.takeScreenshot = false;
       saveScreenshot(screenshotPath);
     }
+
+    glfwSwapBuffers(window);
   )})
 
   std::cout << "LIFECYCLE: program exiting" << std::endl;

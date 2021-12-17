@@ -188,7 +188,7 @@ VoxelSerialization serializeVoxelState(Voxels& voxels, std::function<std::string
 }
 
 void applyTextureToCube(Voxels& chunk, int x, int y, int z, int textureId){    
-  std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ") -- " << textureId << std::endl;
+  //std::cout << "need to apply to mesh texture to (" << x << ", " << y << ", " << z << ") -- " << textureId << std::endl;
   chunk.textures.at(x).at(y).at(z) = textureId;
 }
 void applyTextureToCube(Voxels& chunk, std::vector<VoxelAddress> voxels, int textureId){

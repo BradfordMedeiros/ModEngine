@@ -345,11 +345,12 @@ int renderObject(
     auto voxelBodies = getVoxelBodies(voxelObj -> voxel);
 
     int numTriangles = 0;
+    // todo instance these
     for (int i = 0; i < voxelBodies.size(); i++){
       auto voxelBody = voxelBodies.at(i);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, voxelBody.position + glm::vec3(0.5f, 0.5f, 0.5f))));
       drawMesh(*defaultMeshes.voxelCubeMesh, shaderProgram, voxelBody.textureId);   
-      numTriangles = numTriangles = defaultMeshes.voxelCubeMesh -> numTriangles; 
+      numTriangles = numTriangles + defaultMeshes.voxelCubeMesh -> numTriangles; 
     }
     return numTriangles;
   }

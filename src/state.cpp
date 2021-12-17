@@ -162,7 +162,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.showCameras = false,
 		.isRotateSelection = false,
 		.selectedName = "no object selected",
-		.useDefaultCamera = false,
+		.useDefaultCamera = true,
 		.moveRelativeEnabled = false,
 	  .currentScreenWidth = initialScreenWidth,
 		.currentScreenHeight = initialScreenHeight,

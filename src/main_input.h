@@ -13,6 +13,7 @@
 #include "./benchmark.h"
 #include "./common/profiling.h"
 #include "./easyuse/manipulator.h"
+#include "./worldchunking.h"
 
 struct JoyStickInfo {
   int index;

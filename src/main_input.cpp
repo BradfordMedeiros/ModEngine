@@ -13,6 +13,7 @@ extern float deltaTime;
 extern Benchmark benchmark;
 extern bool selectItemCalled;
 extern std::vector<LayerInfo> layers;
+extern DynamicLoading dynamicLoading;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -793,6 +794,15 @@ std::vector<InputDispatch> inputFns = {
           }
         }
       }
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'T',  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'R',  
+    .hasPreq = true,
+    .fn = []() -> void {
+      rechunkAllCells(dynamicLoading, 4);
     }
   },  
   InputDispatch{
