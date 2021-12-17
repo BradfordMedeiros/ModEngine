@@ -1,38 +1,71 @@
+////////////
+fragmentization:
+for every cell in worldloading:
+  fragments = splitvoxel(cell)  // select a voxel by some convention naming, not all voxels
+  write fragments to correct new chunks or current chunk ]voxel_fragment:data/etc
+
+for ever cell in worldloading
+  join all fragments(cell)
+
+//////////////
+https://learnopengl.com/Advanced-OpenGL/Instancing
+renderObject speed up (how can measure the time for this?)
+///
+
+next: offline tool for removing and object, adding a new object
+- then just expose as guile script (for now?) a way to call rechunk (maybe it can just be an arg?)
+
+then
+probably split voxels again?
+=> figure out how to resize voxel and join things right
 
 
-- initial angular velocity
+what does it look like at the end:
+?
 
 
-==================================
-goal: 10/10 => finish initial gun pass
 
-- rm-obj mainobj doesn't really work
-should teleport now!
-guile: uncaught throw to wrong-type-arg: (#f Wrong type (expecting ~A): ~S (exact integer #<gameobj 55dd70f1c2c0>) (#<gameobj 55dd70f1c2c0>))
-AL lib: (EE) alc_cleanup: 1 device not closed
+- imposters? 
+==> pick a scene to load, render it to a texture
+==> or should this done with models (what about just a scenefile thing and then  it doesn't matter :)? )
+load on a cool quad 
+- just keep as a single fn for now probably (no reason to )
+===> probably can use this code for cubemap generation?
 
-* scale the guns to something reasonable, then polish up some guns
-guns - bloom as fn of shooting time:
-angle = (random theta) 
-d = (random max diameter)  fn(time to recover, (bloom per shot) ^ 2 bloom per shot, max bloom)  <- linear , maybe inst
-x = d * cos(angle)
-y = d * cos(angle)
+would like:  
+- make manipulator tool better
+
+
+====================================
+
+
+# ./build/modengine -w ./res/scenes/chunks.mapping -g 100 -i -r ./res/scenes/features/loading.p.rawscene
+
+- start the voxel stuff
+  ==> let's just pick a dimension, and then start building voxels, and have a neighbor voxel cell in another scene
+  ==> build something cool i guess
+  ==> then  add that structure to the voxel open world loading thing
+  ==> then see if can do a resize functionality with the voxels
+  ==> build build build?
+
+==============================================================================
+
+
+
+=> cannot scale a physics object with the manipulator tool thing
+- tighten up exact on layouts (default bound info issue or something?)
+end of october:
+another pass at layout + try to create a basic ui
+- mockup in photoshop to try to get a feel of the goal?
+- until end of month
+- create third person controller, make enemy animate, etc etc 
+
+/////////////////////////
 
 - detect ground via raycast
-- rotational sway up/down (allow quaternion multiplication via scheme instead of having to use setfrontdelta??)
-
-=========> this only works for weapons that have 0 0 -1 initial rotation, since the setfrontdelta function is used improperly
-- fix setfrontdelta/moverelative shit
 
 
-
-============== GOAL END OF SEPTEMBER ==================================
-Note: I don't think the movement has to feel perfect, or even that good yet
-but is important that the main functional aspects are defined
-
-========================================================================
-
-|            |
+|           |
 |           |
 |  AND THEN |
 |           |
@@ -47,19 +80,14 @@ GO HAM ON THE EDITOR -> VOXELS + TERRAIN
   --> solve for pos = fn(obj_rel_to_solve, chunk_index_new, chunk_size_new) such that obj_rel_to_solve < chunk_size_new
   ====> i guess?
   
-============== GOAL END OF OCTOBER ==================================
-
-NOVEMBER 
-- basic enemy ai
-  => detect enemy
-  => engage enemy
-  => simple follow ai
-  => etc
 - messaging for enemies and take damage
 - navmesh generation based on voxel word (and generally?)
-
+==> https://youtu.be/2mJZzU6-coo?t=1561 cool navmesh visualization
 
 ========================================================================
+=> rm  guile since  want generalized bindings export
+=> simplifies dependendenices, should be easier to port 
+
 MAKE WORK IN DOCKER BUILD!!! + AUTOMATED BUILDS ON CI 
 MAKE WORK ON WINDOWS!!!!
 ======================================================
@@ -81,10 +109,7 @@ bug: ui has to be like ~ -z = 80, to render behind text, why come? Can this valu
 bug: look into openal audio types, dont want to use big wav files
 bug: initially loaded scripts have fake ids
 bug: rotation is a 3 vec string attribute, should probably be a vec4 attribute
-bug: makeobjattr caused &jump-sound is outside of the scene (huh?)
 ==> what is the proper behavior?
-
-
 core loop:
 =====> make all input events and state modifications happen before rendering
 
@@ -100,10 +125,9 @@ OBJTYPES
 ===============================================
 emitter upgrades: 
 - maybe the delta stuff should be relative to the parent?  
-and thenfore solve: - enemy should then start shooting projectiles at the player
+- emitter -> sponsor float values
 
 better voxels - editing
-
 bugs:
 - layout bound info gets centered, but the layout should be aligned from the left
 - revisit layouts and try to get nice ui working for editor
@@ -112,7 +136,7 @@ layout bugs:
 -> bounding box seems to be wrong still (try w/ text no work?)
 -> should have a flex layout
 
-- video no longer work wtf shit
+- reimplement video and correctly
 - painting seems to mismap the uvs
 
 
@@ -182,15 +206,15 @@ SQL BUGS
 select name, modelpath, fire-animation from guns where name = " gunname  ==> gunname should require quotes, but requires they have no quotes instead
 
 
-SCRIPTING
+SCRIPTING -> migrate to C/++ api so lots of this irrelevant now
 ================
+- generalize scripting interface to call into generalized c api\
 - guile should print a stacktrace
 - consider when the script should be loaded.
-  > ran into unloading issue during scene loading since can remove object, code assumes no object has been removed during loading:
   -> scene/addSerialObjectsToWorld:453 -> that load script can remove object from the list
   -> bug: onMessage tries to remove itself from script, doesn't work
     guile: uncaught throw to wrong-type-arg: (set-current-module Wrong type argument in position ~A (expecting ~A): ~S (1 module (((((((Segmentation fault (core dumped)
-
+- make manipulator into a script instead?
 
 - ability to auto reload script when notice a change (probably rate limit?)
 => way to globally address obj by name -> maybe <sceneid>:objname? ? 
@@ -204,15 +228,17 @@ MIGHT NOT BE BUGS BUT LOOKOUT FOR
 =========================
 - make everything time independent
 - playclip rm &jumpsound doesn't error but rm &gunsound does error when play null clip
-====> eulerToQuat / serializeQuat has +/- PI...why?
 scenebox positioning and stuff like that
+- verify setfrontdelta does what i think it does
+bug: makeobjattr caused &jump-sound is outside of the scene (huh?)
 
 
 BORDERLINE
 ==============
 - if object is added but belongs to no layer, probably should have some warning? 
 - could get input at fps independent of rendering (same for physics)
-- emitter types for +values must be strings instead of native types
+==> get input handling in order.
+// draw-line can't work unless called during specific handlers
 
 
 COOL BUT NOT YET
@@ -227,7 +253,6 @@ ambient occulusion
 normal mapping
 pbr
 fix shadows
-depth of field
 
 
 PHYSICS
@@ -254,14 +279,16 @@ OTHER
 =============
 PLAY VS EDIT MODES IN EDITOR? 
 ==> what does this really mean? 
+=> probably attrs have current value vs starting value
 
+random ideas:
+be able to address things in the scenegraph like a filesystem "../path/to/node/../whatever"
 
+* scale the guns to something reasonable, then polish up some guns
+guns - bloom as fn of shooting time:
+angle = (random theta) 
+d = (random max diameter)  fn(time to recover, (bloom per shot) ^ 2 bloom per shot, max bloom)  <- linear , maybe inst
+x = d * cos(angle)
+y = d * cos(angle)
 
-
-
-
-
-
-
-
-
+make blur better (guassian, better handling of sampling stuff), camera aperature etc
