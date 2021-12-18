@@ -14,6 +14,7 @@
 #include "./common/profiling.h"
 #include "./easyuse/manipulator.h"
 #include "./worldchunking.h"
+#include "./scene/scene_offline.h"
 
 struct JoyStickInfo {
   int index;

@@ -1169,4 +1169,43 @@ std::vector<InputDispatch> inputFns = {
       std::cout << "pause world timing: " << state.pauseWorldTiming << std::endl;
     }
   },
+
+  // Testing offline scene functions
+  InputDispatch{
+    .sourceKey = 'N', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'L', 
+    .hasPreq = true,
+    .fn = []() -> void {
+      offlineNewScene("./build/testscene.rawscene");
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'D', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'L', 
+    .hasPreq = true,
+    .fn = []() -> void {
+      offlineDeleteScene("./build/testscene.rawscene");
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'C', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'L', 
+    .hasPreq = true,
+    .fn = []() -> void {
+      offlineCopyScene("./build/testscene.rawscene", "./build/testscene2.rawscene");
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'R', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'L', 
+    .hasPreq = true,
+    .fn = []() -> void {
+      offlineRemoveElement("./build/testscene.rawscene", "someitem");
+    }
+  },
+  ////////////////////////////////////
 };
