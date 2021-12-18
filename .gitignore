@@ -1,4 +1,5 @@
 build
+bench
 .CMakeLists.txt.swp
 *.swp
 *.swo

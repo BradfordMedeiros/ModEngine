@@ -23,6 +23,5 @@ void offlineRemoveElement(std::string scenepath, std::string elementName){
     }
     newTokens.push_back(token);
   }
-
-  std::cout << "old vs new: " << tokens.size() << " vs " << newTokens.size() << std::endl;
+  saveFile(scenepath, serializeSceneTokens(newTokens));
 }

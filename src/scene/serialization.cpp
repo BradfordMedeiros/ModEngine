@@ -34,6 +34,14 @@ std::vector<Token> parseFormat(std::string content) {
   return dtokens;
 }
 
+std::string serializeSceneTokens(std::vector<Token>& tokens){
+  std::string sceneData = "";
+  for (auto &token : tokens){
+    sceneData = sceneData + token.target + ":" + token.attribute + ":" + token.payload + "\n";
+  }
+  return sceneData;
+}
+
 
 std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
