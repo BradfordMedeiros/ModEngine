@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include "assert.h"
+#include "../common/util.h"
+#include "./serialization.h"
 
 void offlineNewScene(std::string scenepath);
 void offlineDeleteScene(std::string scenepath);
