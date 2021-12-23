@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include "./worldloader.h"
+#include "./scene/scene_offline.h"
+#include "./scene/scene.h"
 
 void rechunkAllCells(DynamicLoading& loadingInfo, int newchunksize);
 

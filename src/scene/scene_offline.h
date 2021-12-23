@@ -14,7 +14,6 @@ void offlineCopyScene(std::string scenepath, std::string newScenepath);
 void offlineRemoveElement(std::string scenepath, std::string elementName);
 void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs);
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName);
-std::vector<std::string> getElements(std::string scenepath);
-
+std::vector<std::string> offlineGetElements(std::string scenepath);
 
 #endif

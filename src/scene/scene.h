@@ -109,4 +109,5 @@ void setProperties(World& world, objid id, Properties& properties);
 std::string sceneNameForSceneId(World& world, objid sceneId);
 void loadSkybox(World& world, std::string skyboxpath);
 
+std::string getType(std::string name);
 #endif

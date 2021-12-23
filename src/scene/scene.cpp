@@ -526,9 +526,9 @@ std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName
   return additionalFieldsMap;
 }
 
-std::string getType(std::string name, std::vector<Field> additionalFields){
+std::string getType(std::string name){
   std::string type = "default";
-  for (Field field : additionalFields){
+  for (Field field : fields){
     if (name[0] == field.prefix){
       type = field.type;
     }
@@ -629,7 +629,7 @@ void addObjectToWorld(
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange
     };
-   addObject(id, getType(name, fields), attr, world.objectMapping, util);
+   addObject(id, getType(name), attr, world.objectMapping, util);
 }
 
 std::string getTextureById(World& world, int id){
