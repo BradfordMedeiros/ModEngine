@@ -1207,5 +1207,14 @@ std::vector<InputDispatch> inputFns = {
       offlineRemoveElement("./build/testscene.rawscene", "someitem");
     }
   },
+  InputDispatch{
+    .sourceKey = 'A', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 'L', 
+    .hasPreq = true,
+    .fn = []() -> void {
+      offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}});
+    }
+  },
   ////////////////////////////////////
 };

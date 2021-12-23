@@ -25,3 +25,36 @@ void offlineRemoveElement(std::string scenepath, std::string elementName){
   }
   saveFile(scenepath, serializeSceneTokens(newTokens));
 }
+
+void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
+  std::cout << "offline: set element attributes: " << elementName << " from: " << scenepath << " ";
+  for (auto &[key, val] : attrs){
+    std::cout << "(" << key << ", " << val << ") ";
+  }
+  std::cout << std::endl;
+
+  auto tokens = parseFormat(loadFile(scenepath));
+  std::vector<Token> newTokens;
+  for (auto token : tokens){
+    if (token.target == elementName){
+      continue;
+    }
+    newTokens.push_back(token);
+  }
+
+  for (auto &[key, val] : attrs){
+    newTokens.push_back(Token{
+      .target = elementName,
+      .attribute = key,
+      .payload = val,
+    });
+  }
+  if (attrs.size() == 0){
+    newTokens.push_back(Token{
+      .target = elementName,
+      .attribute = "position", 
+      .payload = "0 0 0",
+    });
+  }
+  saveFile(scenepath, serializeSceneTokens(newTokens));
+}
