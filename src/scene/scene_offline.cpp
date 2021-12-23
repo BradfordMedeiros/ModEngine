@@ -58,3 +58,29 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
   }
   saveFile(scenepath, serializeSceneTokens(newTokens));
 }
+
+std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName){
+  std::vector<Token> element;
+  element.push_back(Token{
+    .target = "one",
+    .attribute = "attr",
+    .payload = "value",
+  });
+  element.push_back(Token{
+    .target = "one",
+    .attribute = "another",
+    .payload = "value2",
+  });
+  return element;
+}
+
+std::vector<std::string> getElements(std::string scenepath){
+  std::vector<std::string> elements;
+  auto tokens = parseFormat(loadFile(scenepath));
+  for (auto &token : tokens){
+    if (std::find(elements.begin(), elements.end(), token.target) == elements.end()){
+      elements.push_back(token.target);
+    }
+  }
+  return elements;
+}
