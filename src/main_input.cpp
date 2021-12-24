@@ -770,7 +770,7 @@ std::vector<InputDispatch> inputFns = {
         return;
       }
       if (isHeightmap(world, objectId)){
-        std::string heightmapBaseName = "./res/heightmaps/";
+        std::string heightmapBaseName = ". /res/heightmaps/";
         std::cout << "want to split heightmap: " << objectId << std::endl;
         auto hm = getHeightmap(world, objectId);
         auto newHeightmaps = splitHeightmap(hm.heightmap);
