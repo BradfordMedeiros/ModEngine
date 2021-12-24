@@ -695,3 +695,13 @@ void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id){
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp){
   // placeholder unused for now
 }
+
+std::string getType(std::string name){
+  std::string type = "default";
+  for (Field field : fields){
+    if (name[0] == field.prefix){
+      type = field.type;
+    }
+  }
+  return type;
+}

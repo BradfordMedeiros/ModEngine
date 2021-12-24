@@ -526,16 +526,6 @@ std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName
   return additionalFieldsMap;
 }
 
-std::string getType(std::string name){
-  std::string type = "default";
-  for (Field field : fields){
-    if (name[0] == field.prefix){
-      type = field.type;
-    }
-  }
-  return type;
-}
-
 std::string nameForMeshId(std::string& rootmesh, int32_t meshId){
   return rootmesh + "::" + std::to_string(meshId);
 }
@@ -720,14 +710,8 @@ objid addSerialObject(
     idsAdded.push_back(newId);
     return newId;
   };
-
   addGameObjectToScene(world.sandbox, sceneId, name, gameobjectObj, children);
-
-  std::map<std::string, GameobjAttributes> additionalFieldsMap;
-  additionalFieldsMap[name] = attr;
-
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, additionalFieldsMap);
-
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, attr }});
   return getIdForName(world.sandbox, name, sceneId);
 }
 

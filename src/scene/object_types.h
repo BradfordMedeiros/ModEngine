@@ -161,6 +161,8 @@ static std::vector fields = {
   geoField,
 };
 
+std::string getType(std::string name);
+
 std::map<objid, GameObjectObj> getObjectMapping();
 
 struct ObjectType {
