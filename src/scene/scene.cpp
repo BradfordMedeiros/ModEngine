@@ -821,13 +821,7 @@ void removeAllScenesFromWorld(World& world, SysInterface interface){
 }
 
 
-objid addObjectToScene(
-  World& world, 
-  objid sceneId, 
-  std::string name, 
-  GameobjAttributes attributes,
-  SysInterface interface
-){
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
 
@@ -839,24 +833,16 @@ objid addObjectToScene(
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
-  auto tokens = parseFormat(serializedObj);
-  auto serialAttrs = deserializeSceneTokens(tokens);
-
-  std::cout << "SERIAL ATTR SIZE: " << serialAttrs.size() << std::endl;
+  auto serialAttrs = deserializeSceneTokens(parseFormat(serializedObj));
   if (serialAttrs.size() > 1){
     std::cout << "SERIALIZATION GOT MORE THAN 1 OBJECT.  Either bad data or has child element, got " << serialAttrs.size() << std::endl;
   }
   assert(serialAttrs.size() == 1);
-  
-  auto name = serialAttrs.begin() -> first;
   GameobjAttributes& attrObj = serialAttrs.begin() -> second;
-
-  std::vector<objid> idsAdded;
-  auto idToAdd = useObjId ? id : getUniqueObjId();
-  idsAdded.push_back(idToAdd);
-
-  auto gameobj = gameObjectFromFields(name, idToAdd, attrObj);
-  return addSerialObject(world, sceneId, name, interface, attrObj, attrObj.children, gameobj, idsAdded);
+  if (useObjId){
+    attrObj.numAttributes["id"] = id;
+  }
+  return addObjectToScene(world, sceneId, serialAttrs.begin() -> first, attrObj, interface);
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
