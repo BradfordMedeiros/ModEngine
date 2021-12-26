@@ -49,5 +49,8 @@ struct ModelData {
 ModelData loadModel(std::string rootname, std::string modelPath);
 std::vector<glm::vec3> getVertexsFromModelData(ModelData& data);
 
+std::string nameForMeshId(std::string& rootmesh, int32_t meshId);
+std::vector<std::string> meshNamesForNode(ModelData& modelData, std::string& rootmesh, std::string nodeName);
+
 #endif 
 

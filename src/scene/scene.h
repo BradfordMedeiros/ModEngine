@@ -43,7 +43,7 @@ World createWorld(
   std::vector<std::string> defaultMeshes
 );
 
-void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid> idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributes> additionalFields);
+void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributes> additionalFields);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
