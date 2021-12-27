@@ -446,18 +446,14 @@ World createWorld(
   std::vector<std::string> defaultMeshes
 ){
   auto objectMapping = getObjectMapping();
-  EmitterSystem emitters { .emitters = {}, .additionalParticlesToRemove = {} };
-  std::set<objid> entitiesToUpdate;
-
-
   World world = {
     .physicsEnvironment = initPhysics(onObjectEnter, onObjectLeave, debugDrawer),
     .objectMapping = objectMapping,
-    .emitters = emitters,
+    .emitters = EmitterSystem { .emitters = {}, .additionalParticlesToRemove = {} },
     .onObjectUpdate = onObjectUpdate,
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
-    .entitiesToUpdate = entitiesToUpdate,
+    .entitiesToUpdate = {},
     .sandbox = createSceneSandbox(layers),
   };
 
