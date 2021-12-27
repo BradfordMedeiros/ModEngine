@@ -46,14 +46,21 @@ World createWorld(
 void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributes> additionalFields);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
 
 objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface);
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface);
 void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
 void removeAllScenesFromWorld(World& world, SysInterface interface);
 
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface);
+
+struct GameObjPair {
+  GameObject gameobj;
+  GameObjectObj gameobjObj;
+};
+GameObjPair createObjectForScene();
+
 void removeObjectFromScene(World& world, objid id, SysInterface interface);
 void copyObjectToScene(World& world, objid id, SysInterface interface);
 

@@ -513,6 +513,35 @@ std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName
   return additionalFieldsMap;
 }
 
+std::string getTextureById(World& world, int id){
+  for (auto &[textureName, texture] : world.textures){
+    if (texture.texture.textureId == id){
+      return textureName;
+    }
+  }
+  std::cout << "TEXTURE : lookup: could not find texture with id: " << id << std::endl;
+  assert(false);
+  return "";
+}
+
+std::string serializeScene(World& world, objid sceneId, bool includeIds){
+  return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
+    return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
+      return getTextureById(world, textureId);
+    });
+  }, includeIds);
+} 
+
+std::string serializeObject(World& world, objid id, std::string overridename){
+  auto gameobj = getGameObject(world.sandbox, id);
+  auto gameobjecth = getGameObjectH(world.sandbox, id);
+  auto children = childnames(world.sandbox, gameobjecth);
+  auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
+    return getTextureById(world, textureId);
+  });
+  return serializeObjectSandbox(gameobj, id, gameobjecth.groupId, additionalFields, children, false, overridename);
+}
+
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
@@ -525,6 +554,7 @@ void addObjectToWorld(
   std::string rootMeshName
 ){
     auto id = getIdForName(world.sandbox, name, sceneId);
+
     auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
       return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
         return loadTextureWorld(world, texture, id);
@@ -583,36 +613,9 @@ void addObjectToWorld(
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange
     };
-   addObject(id, getType(name), attr, world.objectMapping, util);
-}
 
-std::string getTextureById(World& world, int id){
-  for (auto &[textureName, texture] : world.textures){
-    if (texture.texture.textureId == id){
-      return textureName;
-    }
-  }
-  std::cout << "TEXTURE : lookup: could not find texture with id: " << id << std::endl;
-  assert(false);
-  return "";
-}
-
-std::string serializeScene(World& world, objid sceneId, bool includeIds){
-  return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
-    return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
-      return getTextureById(world, textureId);
-    });
-  }, includeIds);
-} 
-
-std::string serializeObject(World& world, objid id, std::string overridename){
-  auto gameobj = getGameObject(world.sandbox, id);
-  auto gameobjecth = getGameObjectH(world.sandbox, id);
-  auto children = childnames(world.sandbox, gameobjecth);
-  auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
-    return getTextureById(world, textureId);
-  });
-  return serializeObjectSandbox(gameobj, id, gameobjecth.groupId, additionalFields, children, false, overridename);
+    auto gameobjObj = createObjectType(id, getType(name), attr, util);
+    addObjectType(world.objectMapping, gameobjObj, id);
 }
 
 void addSerialObjectsToWorld(
@@ -765,7 +768,6 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAtt
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, attributes }});
   return getIdForName(world.sandbox, name, sceneId);
 }
-
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
   auto serialAttrs = deserializeSceneTokens(parseFormat(serializedObj));
   if (serialAttrs.size() > 1){
@@ -777,6 +779,11 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     attrObj.numAttributes["id"] = id;
   }
   return addObjectToScene(world, sceneId, serialAttrs.begin() -> first, attrObj, interface);
+}
+
+GameObjPair createObjectForScene(){
+  GameObjPair gameobjPair{};
+  return gameobjPair;
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
