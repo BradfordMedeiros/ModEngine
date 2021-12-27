@@ -208,16 +208,20 @@ std::vector<ObjectType> objTypes = {
   },
 };
 
-
-void addObject(objid id, std::string objectType, GameobjAttributes& attr, std::map<objid, GameObjectObj>& mapping, ObjectTypeUtil util){
+GameObjectObj createObjectType(objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util){
   for (auto &objType : objTypes){
     if (objectType == objType.name){
-      mapping[id] = objType.createObj(attr, util);
-      return;
+      return objType.createObj(attr, util);
     }
   }
   std::cout << "ERROR: error object type " << objectType << " invalid" << std::endl;
   assert(false);
+  return GameObjectObj{};
+}
+
+void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id){
+  assert(mapping.find(id) == mapping.end());
+  mapping[id] = gameobj;
 }
 
 void removeObject(
