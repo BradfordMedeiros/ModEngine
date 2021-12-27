@@ -177,3 +177,17 @@ MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& poin
   return meshdata;
 }
 
+
+MeshData generateTestMesh(){
+  std::vector<glm::vec3> face = {
+    glm::vec4(0.f, 0.f, 0.f, 1.f),
+    glm::vec4(1.f, 0.f, 0.f, 1.f),
+    glm::vec4(0.5f, 1.f, 0.f, 1.f),
+  };
+  std::vector<glm::vec3> points = {
+    glm::vec3(0.f, 0.f, 0.f),
+    glm::vec3(0.f, 0.f, 5.f),
+    glm::vec3(1.f, 0.f, 7.f),
+  };
+  return generateMesh(face, points);
+}

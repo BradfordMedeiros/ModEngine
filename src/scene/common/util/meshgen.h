@@ -9,5 +9,6 @@
 #include "../../../translations.h"
 
 MeshData generateMesh(std::vector<glm::vec3>& face, std::vector<glm::vec3>& points);
+MeshData  generateTestMesh();
 
 #endif
