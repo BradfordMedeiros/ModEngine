@@ -60,17 +60,13 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
 }
 
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName){
+  auto tokens = parseFormat(loadFile(scenepath));
   std::vector<Token> element;
-  element.push_back(Token{
-    .target = "one",
-    .attribute = "attr",
-    .payload = "value",
-  });
-  element.push_back(Token{
-    .target = "one",
-    .attribute = "another",
-    .payload = "value2",
-  });
+  for (auto token : tokens){
+    if (token.target == elementName){
+      element.push_back(token);
+    }
+  }
   return element;
 }
 
