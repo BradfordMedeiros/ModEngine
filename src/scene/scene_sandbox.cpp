@@ -3,7 +3,7 @@
 void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id);
 void removeObjectFromCache(Scene& mainScene, objid id);
 
-objid addObjectToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
+objid sandboxAddToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
   assert(name == gameobjectObj.name);
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
@@ -75,7 +75,7 @@ SceneDeserialization createSceneFromParsedContent(
 
   scene.sceneToNameToId[sceneId] = {};
   for (auto [name, gameobjectObj] : gameobjs){
-    auto addedId = addObjectToScene(scene, sceneId, -1, name, gameobjectObj);
+    auto addedId = sandboxAddToScene(scene, sceneId, -1, name, gameobjectObj);
   }
 
   for (auto [name, gameobj] : serialGameAttrs){
@@ -141,7 +141,7 @@ std::map<std::string, GameobjAttributes> addSubsceneToRoot(
     auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
-    auto addedId = addObjectToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
+    auto addedId = sandboxAddToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
     addedIds.push_back(addedId);
     scene.idToGameObjectsH.at(id).groupId = rootId;
   }
@@ -183,7 +183,7 @@ std::string serializeObjectSandbox(GameObject& gameobj, objid id, objid groupId,
 }
 
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children){
-  auto addedId = addObjectToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
+  auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
   for (auto child : children){
     if (sandbox.mainScene.sceneToNameToId.at(sceneId).find(child) == sandbox.mainScene.sceneToNameToId.at(sceneId).end()){
        // @TODO - shouldn't be an error should automatically create instead
@@ -373,7 +373,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   auto rootObj = gameObjectFromFields("root", mainScene.rootId, rootGameObject()); 
-  auto rootObjId = addObjectToScene(mainScene, 0, -1, rootObj.name, rootObj);
+  auto rootObjId = sandboxAddToScene(mainScene, 0, -1, rootObj.name, rootObj);
   addObjectToCache(mainScene, layers, rootObjId);
 
   SceneSandbox sandbox {
