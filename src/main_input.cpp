@@ -14,6 +14,7 @@ extern Benchmark benchmark;
 extern bool selectItemCalled;
 extern std::vector<LayerInfo> layers;
 extern DynamicLoading dynamicLoading;
+extern SysInterface interface;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -802,7 +803,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'R',  
     .hasPreq = true,
     .fn = []() -> void {
-      rechunkAllCells(dynamicLoading, 4);
+      rechunkAllCells(world, dynamicLoading, 4, interface);
     }
   },  
   InputDispatch{

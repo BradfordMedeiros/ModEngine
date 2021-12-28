@@ -6,6 +6,6 @@
 #include "./scene/scene_offline.h"
 #include "./scene/scene.h"
 
-void rechunkAllCells(DynamicLoading& loadingInfo, int newchunksize);
+void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface);
 
 #endif

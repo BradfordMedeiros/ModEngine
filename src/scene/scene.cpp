@@ -459,7 +459,7 @@ World createWorld(
 
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, interface, {{ "root", GameobjAttributes{}}});
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, interface, {{ "root", GameobjAttributes{}}}, false);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -551,7 +551,8 @@ void addObjectToWorld(
   GameobjAttributes attr,
   std::map<objid, std::vector<glm::vec3>>& idToModelVertexs,
   ModelData* data,
-  std::string rootMeshName
+  std::string rootMeshName,
+  bool returnObjectOnly
 ){
     auto id = getIdForName(world.sandbox, name, sceneId);
 
@@ -571,7 +572,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName, returnObjectOnly](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
       if (meshName == ""){
         return {};
       }
@@ -598,7 +599,7 @@ void addObjectToWorld(
         );
 
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, name, getId, interface, objAttr, idToModelVertexs, &data, meshName);
+          addObjectToWorld(world, sceneId, name, getId, interface, objAttr, idToModelVertexs, &data, meshName, returnObjectOnly);
         }
         return meshNamesForNode(data, meshName, name);
       }
@@ -624,12 +625,16 @@ void addSerialObjectsToWorld(
   std::vector<objid>& idsAdded,
   std::function<objid()> getNewObjectId,
   SysInterface interface,
-  std::map<std::string, GameobjAttributes> nameToAttr
+  std::map<std::string, GameobjAttributes> nameToAttr,
+  bool returnObjectOnly
 ){
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, attr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, name, getNewObjectId, interface, attr, idToModelVertexs, NULL, "");
+    addObjectToWorld(world, sceneId, name, getNewObjectId, interface, attr, idToModelVertexs, NULL, "", returnObjectOnly);
+  }
+  if (returnObjectOnly){
+    return;
   }
   for (auto id : idsAdded){
     std::vector<glm::vec3> modelVerts = {};
@@ -658,7 +663,7 @@ void addSerialObjectsToWorld(
 
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface){
   auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData);
-  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields, false);
   return sceneId;
 }
 
@@ -751,21 +756,31 @@ void removeAllScenesFromWorld(World& world, SysInterface interface){
   }
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface){
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, SysInterface interface, bool returnOnly){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
-
-  std::vector<objid> idsAdded;
   auto idToAdd = useObjId ? id : getUniqueObjId();
-  idsAdded.push_back(idToAdd);
-  auto gameobjectObj = gameObjectFromFields(name, idToAdd, attributes);
-  auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = getUniqueObjId();
-    idsAdded.push_back(newId);
-    return newId;
+  GameObjPair gameobjPair{
+    .gameobj = gameObjectFromFields(name, idToAdd, attributes),
   };
-  addGameObjectToScene(world.sandbox, sceneId, name, gameobjectObj, attributes.children);
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, attributes }});
+  if (!returnOnly){
+    std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
+    auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
+      auto newId = getUniqueObjId();
+      idsAdded.push_back(newId);
+      return newId;
+    };
+    addGameObjectToScene(world.sandbox, sceneId, name, gameobjPair.gameobj, attributes.children);
+    addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, attributes }}, returnOnly);
+  }
+  return gameobjPair;
+}
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, SysInterface interface){
+  return createObjectForScene(world, sceneId, name, attributes, interface, true);
+}
+
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface){
+  createObjectForScene(world, sceneId, name, attributes, interface, false).gameobj;
   return getIdForName(world.sandbox, name, sceneId);
 }
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
@@ -779,11 +794,6 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
     attrObj.numAttributes["id"] = id;
   }
   return addObjectToScene(world, sceneId, serialAttrs.begin() -> first, attrObj, interface);
-}
-
-GameObjPair createObjectForScene(){
-  GameObjPair gameobjPair{};
-  return gameobjPair;
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
