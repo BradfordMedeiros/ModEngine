@@ -608,14 +608,14 @@ void addObjectToWorld(
       return meshNamesForNode(*data, rootMeshName, name);  
     }; 
 
-    if (false && returnObjectOnly){
+    if (returnObjectOnly){
       ObjectTypeUtil util {
         .meshes = world.meshes,
-        //.ensureTextureLoaded = ensureTextureLoaded,
-        //.loadMesh = loadMeshObject,
-        //.addEmitter = addEmitterObject,
-        //.ensureMeshLoaded = ensureMeshLoaded,
-        //.onCollisionChange = onCollisionChange
+        .ensureTextureLoaded = [](std::string) -> Texture { return Texture{}; },
+        .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
+        .addEmitter =  [](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
+        .ensureMeshLoaded = [](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> { return {}; },
+        .onCollisionChange = []() -> void {},
       }; 
       auto gameobjObj = createObjectType(getType(name), attr, util);
       returnobjs.push_back(gameobjObj);
