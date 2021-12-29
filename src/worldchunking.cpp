@@ -41,14 +41,14 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
       auto sceneTokensSerialized = serializeSceneTokens(elementTokens);
       std::cout << sceneTokensSerialized << std::endl;
       std::cout << "------END TOKENS---------" << std::endl;
-      addObjectToScene(world, -1, "testvoxel", {}, interface);
 
-      /*auto gameobjPair = createObjectForScene();
+      std::cout << "creating object for scene: " << voxelname << std::endl;
+      auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized, interface);
       auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
       if (voxelObj == NULL){
         std::cout << "is not a voxel" << std::endl;
         assert(false);
-      }*/
+      }
     }
 
       // then get the voxel elements + gameobj

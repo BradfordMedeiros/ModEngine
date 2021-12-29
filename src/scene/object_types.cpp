@@ -208,7 +208,7 @@ std::vector<ObjectType> objTypes = {
   },
 };
 
-GameObjectObj createObjectType(objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util){
+GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util){
   for (auto &objType : objTypes){
     if (objectType == objType.name){
       return objType.createObj(attr, util);

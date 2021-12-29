@@ -175,7 +175,7 @@ struct ObjectType {
   std::function<void(GameObjectObj&, ObjectRemoveUtil&)> removeObject;
 };
 
-GameObjectObj createObjectType(objid id, std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
+GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util);
 void addObjectType(std::map<objid, GameObjectObj>& mapping, GameObjectObj& gameobj, objid id);
 
 void removeObject(
