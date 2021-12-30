@@ -44,11 +44,13 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
 
       std::cout << "creating object for scene: " << voxelname << std::endl;
       auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized, interface);
+      std::cout << "created the voxel obj" << std::endl;
       auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
-      if (voxelObj == NULL){
+     if (voxelObj == NULL){
         std::cout << "is not a voxel" << std::endl;
-        assert(false);
-      }
+       assert(false);
+     }
+     std::cout << "yes i made a voxel!" << std::endl;
     }
 
       // then get the voxel elements + gameobj

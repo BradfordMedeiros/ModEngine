@@ -112,7 +112,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
   return attributes;
 }
 
-std::map<std::string, GameobjAttributes> addSubsceneToRoot(
+std::map<std::string, GameobjAttributesWithId> addSubsceneToRoot(
   Scene& scene, 
   std::vector<LayerInfo>& layers,
   objid sceneId,
@@ -124,7 +124,7 @@ std::map<std::string, GameobjAttributes> addSubsceneToRoot(
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId
 ){
-  std::map<std::string,  GameobjAttributes> nameToAdditionalFields;
+  std::map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
   std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
   std::vector<objid> addedIds;
@@ -136,7 +136,10 @@ std::map<std::string, GameobjAttributes> addSubsceneToRoot(
     objid id = getNewObjectId();
     nodeIdToRealId[nodeId] = id;
 
-    nameToAdditionalFields[names.at(nodeId)] = additionalFields.at(nodeId);
+    nameToAdditionalFields[names.at(nodeId)] = GameobjAttributesWithId{
+      .id = id,
+      .attr = additionalFields.at(nodeId),
+    };
 
     auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
@@ -680,8 +683,17 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     addObjectToCache(sandbox.mainScene, sandbox.layers, id);
   }
 
+
+  std::map<std::string, GameobjAttributesWithId>  additionalFields;
+  for (auto &[name, attr] : deserializedScene.additionalFields){
+    additionalFields[name] = GameobjAttributesWithId{
+      .id = sandbox.mainScene.sceneToNameToId.at(sceneId).at(name),
+      .attr = attr,
+    };
+  }
+
   AddSceneDataValues data  {
-    .additionalFields = deserializedScene.additionalFields,
+    .additionalFields = additionalFields,
     .idsAdded = idsAdded,
   };
   return data;
@@ -696,7 +708,7 @@ bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
 }    
 
-std::map<std::string, GameobjAttributes> multiObjAdd(
+std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId,

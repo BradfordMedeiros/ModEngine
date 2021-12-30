@@ -85,15 +85,19 @@ glm::mat4 fullModelTransform(SceneSandbox& sandbox, objid id);
 Transformation fullTransformation(SceneSandbox& sandbox, objid id);
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleton, objid sceneId);
 
+struct GameobjAttributesWithId {
+  objid id;
+  GameobjAttributes attr;
+};
 struct AddSceneDataValues {
-  std::map<std::string, GameobjAttributes>  additionalFields;
+  std::map<std::string, GameobjAttributesWithId>  additionalFields;
   std::vector<objid> idsAdded;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
-std::map<std::string, GameobjAttributes> multiObjAdd(
+std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,
   objid rootId,

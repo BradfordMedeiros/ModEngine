@@ -460,7 +460,7 @@ World createWorld(
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
   std::vector<GameObjectObj> addedGameobjObjs = {};
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, interface, {{ "root", GameobjAttributes{}}}, false, addedGameobjObjs);
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, interface, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, false, addedGameobjObjs);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -546,6 +546,7 @@ std::string serializeObject(World& world, objid id, std::string overridename){
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
+  objid id,
   std::string name,
   std::function<objid()> getId,
   SysInterface interface,
@@ -556,8 +557,6 @@ void addObjectToWorld(
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
-    auto id = getIdForName(world.sandbox, name, sceneId);
-
     auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
       return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
         return loadTextureWorld(world, texture, id);
@@ -601,7 +600,7 @@ void addObjectToWorld(
         );
 
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, name, getId, interface, objAttr, idToModelVertexs, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, getId, interface, objAttr.attr, idToModelVertexs, &data, meshName, returnObjectOnly, returnobjs);
         }
         return meshNamesForNode(data, meshName, name);
       }
@@ -639,14 +638,14 @@ void addSerialObjectsToWorld(
   std::vector<objid>& idsAdded,
   std::function<objid()> getNewObjectId,
   SysInterface interface,
-  std::map<std::string, GameobjAttributes> nameToAttr,
+  std::map<std::string, GameobjAttributesWithId> nameToAttr,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& gameobjObjs
 ){
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
-  for (auto &[name, attr] : nameToAttr){
+  for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, name, getNewObjectId, interface, attr, idToModelVertexs, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, interface, objAttr.attr, idToModelVertexs, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
@@ -656,6 +655,7 @@ void addSerialObjectsToWorld(
     if (idToModelVertexs.find(id) != idToModelVertexs.end()){
       modelVerts = idToModelVertexs.at(id);
     }
+    std::cout << "id is: " << id << std::endl;
     auto physicsBody = addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts); 
     if (physicsBody != NULL){
       auto transform = fullTransformation(world.sandbox, id);
@@ -789,7 +789,7 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
     addGameObjectToScene(world.sandbox, sceneId, name, gameobjPair.gameobj, attributes.children);
   }
   std::vector<GameObjectObj> addedGameobjObjs = {};
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, attributes }}, returnOnly, addedGameobjObjs);
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, returnOnly, addedGameobjObjs);
   if (returnOnly){
     assert(addedGameobjObjs.size() == 1);
     gameobjPair.gameobjObj = addedGameobjObjs.at(0);
@@ -797,16 +797,12 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   }
   return gameobjPair;
 }
-GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj, SysInterface interface){
-  GameobjAttributes attr {};
-  return createObjectForScene(world, sceneId, name, attr, interface, true);
-}
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface){
-  createObjectForScene(world, sceneId, name, attributes, interface, false).gameobj;
-  return getIdForName(world.sandbox, name, sceneId);
-}
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
+struct SingleObjDeserialization {
+  std::string name;
+  GameobjAttributes attr;
+};
+SingleObjDeserialization deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId){
   auto serialAttrs = deserializeSceneTokens(parseFormat(serializedObj));
   if (serialAttrs.size() > 1){
     std::cout << "SERIALIZATION GOT MORE THAN 1 OBJECT.  Either bad data or has child element, got " << serialAttrs.size() << std::endl;
@@ -815,8 +811,26 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   GameobjAttributes& attrObj = serialAttrs.begin() -> second;
   if (useObjId){
     attrObj.numAttributes["id"] = id;
-  }
-  return addObjectToScene(world, sceneId, serialAttrs.begin() -> first, attrObj, interface);
+  } 
+  return SingleObjDeserialization{
+    .name = serialAttrs.begin() -> first,
+    .attr = attrObj,
+  };
+}
+
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj, SysInterface interface){
+  auto singleObj = deserializeSingleObj(serializedObj, -1, false);
+  assert(singleObj.name == name);
+  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attr, interface, true);
+}
+
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface){
+  createObjectForScene(world, sceneId, name, attributes, interface, false).gameobj;
+  return getIdForName(world.sandbox, name, sceneId);
+}
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
+  auto singleObj = deserializeSingleObj(serializedObj, id, useObjId);
+  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attr, interface);
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
