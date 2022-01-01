@@ -1,5 +1,23 @@
 #include "./worldchunking.h"
 
+std::string serializeVoxelDefault(World& world, Voxels& voxelData){
+ GameObjectVoxel vox {
+    .voxel = voxelData,
+  };
+  auto gameobj = gameObjectFromFields("]default_voxel", -1, {});
+  std::vector<std::string> children;
+  ObjectSerializeUtil util {
+    .textureName = [&world](int id) -> std::string {
+      return getTextureById(world, id); // can be not loaded...
+    }
+  };
+  auto additionalFields = serializeVoxel(vox, util);
+  auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
+  return serializedObj;
+}
+void printVoxelInfo(World& world, Voxels& voxelData){
+  std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelData) << std::endl;
+}
 
 std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std::string& chunkHash){
   std::vector<std::string> voxelsInScene;
@@ -46,11 +64,24 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
       auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized, interface);
       std::cout << "created the voxel obj" << std::endl;
       auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
-     if (voxelObj == NULL){
+      if (voxelObj == NULL){
         std::cout << "is not a voxel" << std::endl;
-       assert(false);
-     }
-     std::cout << "yes i made a voxel!" << std::endl;
+        assert(false);
+      }
+
+      // todo -> probably should be full transformation right
+      // but that depends on it being hooked up to scenegraph which this isn't...
+      auto voxelFragments = splitVoxel(voxelObj -> voxel, gameobjPair.gameobj.transformation, 2);
+      //auto newVoxels = groupVoxelChunks(voxelFragments);
+      std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
+      for (auto &voxelFragment : voxelFragments){
+        std::cout << "fragment info: " << voxelChunkFragmentInfoToString(voxelFragment) << std::endl;
+        printVoxelInfo(world, voxelFragment.voxel);
+      }
+
+      //std::cout << "New Voxels size: " << newVoxels.size() << std::endl;
+
+     
     }
 
       // then get the voxel elements + gameobj

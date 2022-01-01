@@ -442,6 +442,11 @@ std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelT
   return voxelFragments;
 }
 
+std::string voxelChunkFragmentInfoToString(VoxelChunkFragment& fragment){
+  std::string data = std::string("(") + print(glm::vec3(fragment.x, fragment.y, fragment.z)) + ") - (" + print(glm::vec3(fragment.offsetx, fragment.offsety, fragment.offsetz)) + ")";
+  return data;
+}
+
 std::string voxelHashAddress(int x, int y, int z){
   return std::to_string(x) + ":" + std::to_string(y) + ":" + std::to_string(z);
 }

@@ -495,22 +495,6 @@ void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
   remapper.lastFrameDown = lastFrameDown;
 }
 
-void printVoxelInfo(Voxels& voxelData){
-  GameObjectVoxel vox {
-    .voxel = voxelData,
-  };
-  auto gameobj = gameObjectFromFields("]default_voxel", -1, {});
-  std::vector<std::string> children;
-  ObjectSerializeUtil util {
-    .textureName = [](int id) -> std::string {
-      return getTextureById(world, id); // can be not loaded...
-    }
-  };
-  auto additionalFields = serializeVoxel(vox, util);
-  auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
-  std::cout << "serialized voxel: \n" << serializedObj << std::endl;
-}
-
 float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
   InputDispatch{
@@ -753,7 +737,7 @@ std::vector<InputDispatch> inputFns = {
           transforms.push_back(getGameObject(world, id).transformation);
         }
         auto voxelData = joinVoxels(voxelBodies, transforms);;
-        printVoxelInfo(voxelData);
+        printVoxelInfo(world, voxelData);
       }
 
     }
@@ -791,7 +775,7 @@ std::vector<InputDispatch> inputFns = {
           std::cout << "New Voxels size: " << newVoxels.size() << std::endl;
 
           for (auto voxelFragment : newVoxels){
-            printVoxelInfo(voxelFragment.voxel);
+            printVoxelInfo(world, voxelFragment.voxel);
           }
         }
       }
