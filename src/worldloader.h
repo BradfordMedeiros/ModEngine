@@ -47,6 +47,6 @@ void handleChunkLoading(
 objid addLoadingAround(DynamicLoading& loadingInfo, objid id);
 void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle);
 ChunkAddress decodeChunkHash(std::string& chunkhash, bool* out_validResult);
-
+std::string encodeChunkHash(ChunkAddress chunk);
 
 #endif

@@ -793,7 +793,6 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   if (returnOnly){
     assert(addedGameobjObjs.size() == 1);
     gameobjPair.gameobjObj = addedGameobjObjs.at(0);
-    std::cout << "adding gameobjobj thing!" << std::endl;
   }
   return gameobjPair;
 }

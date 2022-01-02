@@ -425,7 +425,7 @@ std::vector<VoxelChunkFragment> splitVoxel(Voxels& voxel, Transformation& voxelT
   auto heightChunks = (voxel.numHeight / chunksize) + ((voxel.numHeight % chunksize) == 0 ? 0 : 1);
   auto depthChunks = (voxel.numDepth / chunksize) + ((voxel.numDepth % chunksize) == 0 ? 0 : 1);
 
-  std::cout << "split voxel, numchunks: (" << widthChunks << ", " << heightChunks << ", " << depthChunks << ") - chunk size: " << chunksize << " - voxel size (" << voxel.numWidth << ", " << voxel.numHeight <<  ", " << voxel.numDepth << ")" << std::endl;
+  std::cout << "split voxel, new num chunks: (" << widthChunks << ", " << heightChunks << ", " << depthChunks << ") - chunk size: " << chunksize << " - original voxel size (" << voxel.numWidth << ", " << voxel.numHeight <<  ", " << voxel.numDepth << ")" << std::endl;
 
   for (int x = 0; x < widthChunks; x++){
     for (int y = 0; y < heightChunks; y++){

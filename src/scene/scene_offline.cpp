@@ -9,12 +9,12 @@ void offlineDeleteScene(std::string scenepath){
   std::remove(scenepath.c_str());
 }
 void offlineCopyScene(std::string scenepath, std::string newScenepath){
-  std::cout << "offline: copy scene: " << scenepath << " from: " << newScenepath << std::endl;
+  std::cout << "offline: copy scene: " << scenepath << " in file: " << newScenepath << std::endl;
   saveFile(newScenepath, loadFile(scenepath));
 }
 
 void offlineRemoveElement(std::string scenepath, std::string elementName){
-  std::cout << "offline: remove element: " << elementName << " from: " << scenepath << std::endl;
+  std::cout << "offline: remove element: " << elementName << " in file: " << scenepath << std::endl;
   auto tokens = parseFormat(loadFile(scenepath));
   std::vector<Token> newTokens;
   for (auto token : tokens){
@@ -27,7 +27,7 @@ void offlineRemoveElement(std::string scenepath, std::string elementName){
 }
 
 void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
-  std::cout << "offline: set element attributes: " << elementName << " from: " << scenepath << " ";
+  std::cout << "offline: set element attributes: " << elementName << " in file: " << scenepath << " - ";
   for (auto &[key, val] : attrs){
     std::cout << "(" << key << ", " << val << ") ";
   }
