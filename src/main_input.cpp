@@ -736,8 +736,8 @@ std::vector<InputDispatch> inputFns = {
           voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
           transforms.push_back(getGameObject(world, id).transformation);
         }
-        auto voxelData = joinVoxels(voxelBodies, transforms);;
-        printVoxelInfo(world, voxelData);
+        auto voxelData = joinVoxels(voxelBodies, transforms);
+        std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelData) << std::endl;
       }
 
     }
@@ -775,7 +775,7 @@ std::vector<InputDispatch> inputFns = {
           std::cout << "New Voxels size: " << newVoxels.size() << std::endl;
 
           for (auto voxelFragment : newVoxels){
-            printVoxelInfo(world, voxelFragment.voxel);
+            std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelFragment.voxel) << std::endl;
           }
         }
       }

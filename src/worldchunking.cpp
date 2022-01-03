@@ -15,9 +15,6 @@ std::string serializeVoxelDefault(World& world, Voxels& voxelData){
   auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
   return serializedObj;
 }
-void printVoxelInfo(World& world, Voxels& voxelData){
-  std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelData) << std::endl;
-}
 
 std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std::string& chunkHash){
   std::vector<std::string> voxelsInScene;
@@ -104,8 +101,7 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
       std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
       for (auto &voxelFragment : voxelFragments){
         std::cout << "fragment info: " << voxelChunkFragmentInfoToString(voxelFragment) << std::endl;
-        printVoxelInfo(world, voxelFragment.voxel);
-        //serializeVoxelDefault(world, voxelFragment.voxel);
+        std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelFragment.voxel) << std::endl;
 
         auto fragmentSceneFile = scenefileForFragment(loadingInfo, chunkValue, voxelFragment);
         if (!fragmentSceneFile.alreadyExists){
