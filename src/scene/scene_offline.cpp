@@ -83,3 +83,13 @@ std::vector<std::string> offlineGetElements(std::string scenepath){
   }
   return elements;
 }
+
+void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName){
+  auto elements = offlineGetElement(fromScene, elementName);
+  offlineRemoveElement(fromScene, elementName);
+  std::vector<std::pair<std::string, std::string>> attrs;
+  for (auto element : elements){
+    attrs.push_back({element.attribute, element.payload});
+  }
+  offlineSetElementAttributes(toScene, elementName, attrs);
+}

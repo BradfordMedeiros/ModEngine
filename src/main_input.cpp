@@ -1162,7 +1162,12 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineNewScene("./build/testscene.rawscene");
+      //offlineNewScene("./build/testscene.rawscene");
+      //offlineMoveElement(
+      //  "./res/scenes/world/voxelchunksmall_000.rawscene", 
+      //  "./res/scenes/world/empty.rawscene", 
+      //  "]default_voxel"
+      //);
     }
   },
   InputDispatch{
