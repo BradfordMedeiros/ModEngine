@@ -120,11 +120,13 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
           std::cout << "source: (hash, file, fragment address): (" <<  chunkHash << ", " << scenefile << ", " << fragmentSceneFile.fragmenthash << ")" << std::endl; 
           assert(offlineGetElement(fragmentSceneFile.name, name).size() == 0);
         }
-        offlineSetElementAttributes(
-          fragmentSceneFile.name, 
-          name, 
-          {{ "test_attr", "test_value" }}
-        );
+        auto serializedObj = serializeVoxelDefault(world, voxelFragment.voxel);
+        auto tokens = parseFormat(serializedObj);
+        std::vector<std::pair<std::string, std::string>> attrs;
+        for (auto &token : tokens){
+          attrs.push_back({ token.attribute, token.payload });
+        }
+        offlineSetElementAttributes(fragmentSceneFile.name, name, attrs);
       }
       offlineRemoveElement(outputFileForChunkHash(loadingInfo, chunkHash), voxelname);
     }
