@@ -41,7 +41,17 @@ std::string outputFileForChunkHash(DynamicLoading& loadingInfo, std::string chun
 bool hashHasMapping(DynamicLoading& loadingInfo, std::string chunkhash){
   return loadingInfo.mappingInfo.chunkHashToSceneFile.find(chunkhash) != loadingInfo.mappingInfo.chunkHashToSceneFile.end();
 }
-std::string scenefileForFragment(DynamicLoading& loadingInfo, std::string& chunkHash, VoxelChunkFragment& fragment){
+
+struct fragmentSceneFile {
+  bool alreadyExists;
+  std::string name;
+  std::string fragmenthash;
+};
+std::string newChunkFile(ChunkAddress& address){
+  return std::string("./res/scenes/world/genscene_" + std::to_string(address.x) + "." + std::to_string(address.y) + "." + std::to_string(address.z)) + "_rechunked.rawscene";
+}
+
+fragmentSceneFile scenefileForFragment(DynamicLoading& loadingInfo, std::string& chunkHash, VoxelChunkFragment& fragment){
   bool isValid = false;
   auto chunkAddress = decodeChunkHash(chunkHash, &isValid);
   ChunkAddress addressWithFragment {
@@ -50,18 +60,14 @@ std::string scenefileForFragment(DynamicLoading& loadingInfo, std::string& chunk
     .z = chunkAddress.z + fragment.z,
   };
   auto encodedHash = encodeChunkHash(addressWithFragment);
-
   assert(isValid);
-  if (!hashHasMapping(loadingInfo, encodedHash)){
-    std::cout << "no mapping for: " << encodedHash << std::endl;
-    assert(false);
-  }
-  auto fileForFragment = outputFileForChunkHash(loadingInfo, encodedHash);
-  std::cout << "scenefile for fragment: chunkaddress: " << print(glm::vec3(chunkAddress.x, chunkAddress.y, chunkAddress.z)) << " - " << fileForFragment << std::endl;
-  return fileForFragment;
-}
-std::string fragmentElementName(std::string& fromFile){
-  return std::string("]voxelfragment_") + fromFile;
+  auto fragmentSceneFileExists = hashHasMapping(loadingInfo, encodedHash);
+  auto name = fragmentSceneFileExists ? outputFileForChunkHash(loadingInfo, encodedHash) : newChunkFile(addressWithFragment);
+  return fragmentSceneFile {
+    .alreadyExists = offlineSceneExists(name),
+    .name = name,
+    .fragmenthash = encodedHash,
+  };
 }
 
 void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
@@ -100,23 +106,30 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
         std::cout << "fragment info: " << voxelChunkFragmentInfoToString(voxelFragment) << std::endl;
         printVoxelInfo(world, voxelFragment.voxel);
         //serializeVoxelDefault(world, voxelFragment.voxel);
+
+        auto fragmentSceneFile = scenefileForFragment(loadingInfo, chunkValue, voxelFragment);
+        if (!fragmentSceneFile.alreadyExists){
+          offlineNewScene(fragmentSceneFile.name);  
+        }
+
+        auto elementName = std::string("]voxelfragment_") + voxelname + "_from_" + chunkValue;
+        auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName).size() > 0;
+        auto name = elementAlreadyExists ? (elementName + "_" + std::to_string(getUniqueObjId())) : elementName;
+        if (elementAlreadyExists){
+          std::cout << "warning: " <<  elementName << " already exists in " << fragmentSceneFile.name << std::endl;
+          std::cout << "source: (hash, file, fragment address): (" <<  chunkHash << ", " << scenefile << ", " << fragmentSceneFile.fragmenthash << ")" << std::endl; 
+          assert(offlineGetElement(fragmentSceneFile.name, name).size() == 0);
+        }
         offlineSetElementAttributes(
-          scenefileForFragment(loadingInfo, chunkValue, voxelFragment), 
-          fragmentElementName(scenefile), 
+          fragmentSceneFile.name, 
+          name, 
           {{ "test_attr", "test_value" }}
         );
-
       }
+      offlineRemoveElement(outputFileForChunkHash(loadingInfo, chunkHash), voxelname);
     }
-
-      // then get the voxel elements + gameobj
-      // then split
-      // then serialize
-      // then offline add to scene
-
-    //
-
-    //auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId).transformation, 2);
   }
+
+  // then iterate over chunk hash scene files and the join voxels in all scenes
 
 }

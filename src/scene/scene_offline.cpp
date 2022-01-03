@@ -8,6 +8,9 @@ void offlineDeleteScene(std::string scenepath){
   std::cout << "offline: delete new scene: " << scenepath << std::endl;
   std::remove(scenepath.c_str());
 }
+bool offlineSceneExists(std::string scenepath){
+  return fileExists(scenepath);
+}
 void offlineCopyScene(std::string scenepath, std::string newScenepath){
   std::cout << "offline: copy scene: " << scenepath << " in file: " << newScenepath << std::endl;
   saveFile(newScenepath, loadFile(scenepath));

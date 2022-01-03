@@ -16,6 +16,11 @@ void saveFile(std::string filepath, std::string content){
   file.close();
 }
 
+bool fileExists(std::string path){
+  std::ifstream infile(path);
+  return infile.good();
+}
+
 std::vector<std::string> listAllFiles(std::filesystem::path path) {
   std::vector<std::string> files;
   for(auto &file: std::filesystem::recursive_directory_iterator(path)) {

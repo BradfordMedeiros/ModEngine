@@ -20,6 +20,7 @@
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
+bool fileExists(std::string path);
 std::optional<std::string> getExtension(std::string file);
 std::optional<std::string> getPreExtension(std::string file);
 std::vector<std::string> listFilesWithExtensions(std::string folder, std::vector<std::string> extensions);
