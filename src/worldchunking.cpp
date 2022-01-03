@@ -66,6 +66,55 @@ fragmentSceneFile scenefileForFragment(DynamicLoading& loadingInfo, std::string&
     .fragmenthash = encodedHash,
   };
 }
+std::vector<fragmentSceneFile> getSceneFilesForFragments(DynamicLoading& loadingInfo, std::string& chunkHash, std::vector<VoxelChunkFragment>& fragments){
+  std::vector<fragmentSceneFile> scenefiles;
+  for (auto &fragment : fragments){
+    scenefiles.push_back(scenefileForFragment(loadingInfo, chunkHash, fragment));
+  }
+  return scenefiles;
+}
+
+void ensureAllTargetFilesExist(std::vector<fragmentSceneFile>& sceneFilesForFragments){
+  for (auto &fragmentSceneFile : sceneFilesForFragments){
+    if (!fragmentSceneFile.alreadyExists){
+      offlineNewScene(fragmentSceneFile.name);  
+    }
+  }
+}
+
+void addFragmentToScene(World& world, fragmentSceneFile& fragmentSceneFile, VoxelChunkFragment& voxelFragment, std::string& voxelname, std::string& chunkValue){
+  auto elementName = std::string("]voxelfragment_") + voxelname + "_from_" + chunkValue;
+  auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName).size() > 0;
+  auto name = elementAlreadyExists ? (elementName + "_" + std::to_string(getUniqueObjId())) : elementName;
+  if (elementAlreadyExists){
+    std::cout << "warning: " <<  elementName << " already exists in " << fragmentSceneFile.name << std::endl;
+    //std::cout << "source: (hash, file, fragment address): (" <<  chunkHash << ", " << scenefile << ", " << fragmentSceneFile.fragmenthash << ")" << std::endl; 
+    assert(offlineGetElement(fragmentSceneFile.name, name).size() == 0);
+  }
+  auto serializedObj = serializeVoxelDefault(world, voxelFragment.voxel);
+  auto tokens = parseFormat(serializedObj);
+  std::vector<std::pair<std::string, std::string>> attrs;
+  for (auto &token : tokens){
+    attrs.push_back({ token.attribute, token.payload });
+  }
+  offlineSetElementAttributes(fragmentSceneFile.name, name, attrs);
+}
+
+std::vector<VoxelChunkFragment> fragmentsForVoxelname(World& world, SysInterface& interface, std::string& scenefile, std::string& voxelname){
+  std::cout << "splitting: " << voxelname << std::endl;;
+  auto elementTokens = offlineGetElement(scenefile, voxelname);
+  auto sceneTokensSerialized = serializeSceneTokens(elementTokens);
+  auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized, interface);
+  auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
+  if (voxelObj == NULL){
+    std::cout << "is not a voxel" << std::endl;
+    assert(false);
+  }
+  // todo -> probably should be full transformation right
+  // but that depends on it being hooked up to scenegraph which this isn't...
+  return splitVoxel(voxelObj -> voxel, gameobjPair.gameobj.transformation, 2);
+}
+
 
 void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
   std::cout << "Start: voxel rechunking" << std::endl;
@@ -77,52 +126,16 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
   } 
 
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
-    bool valid = false;
     std::string chunkValue = chunkHash;
-    auto chunk = decodeChunkHash(chunkValue, &valid);
-    assert(valid);
-
     std::cout << "processing chunk hash: " << chunkHash << std::endl;
     auto voxelnamesInChunk = getVoxelsForChunkhash(loadingInfo, chunkValue);
     for (auto &voxelname : voxelnamesInChunk){
-      std::cout << "splitting: " << voxelname << std::endl;;
-      auto elementTokens = offlineGetElement(scenefile, voxelname);
-      auto sceneTokensSerialized = serializeSceneTokens(elementTokens);
-      auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized, interface);
-      auto voxelObj = std::get_if<GameObjectVoxel>(&gameobjPair.gameobjObj);
-      if (voxelObj == NULL){
-        std::cout << "is not a voxel" << std::endl;
-        assert(false);
-      }
-      // todo -> probably should be full transformation right
-      // but that depends on it being hooked up to scenegraph which this isn't...
-      auto voxelFragments = splitVoxel(voxelObj -> voxel, gameobjPair.gameobj.transformation, 2);
-      //auto newVoxels = groupVoxelChunks(voxelFragments);
+      auto voxelFragments = fragmentsForVoxelname(world, interface, scenefile, voxelname);
+      auto sceneFilesForFragments = getSceneFilesForFragments(loadingInfo, chunkValue, voxelFragments);
+      ensureAllTargetFilesExist(sceneFilesForFragments);
       std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
-      for (auto &voxelFragment : voxelFragments){
-        std::cout << "fragment info: " << voxelChunkFragmentInfoToString(voxelFragment) << std::endl;
-        std::cout << "serialized voxel: \n" << serializeVoxelDefault(world, voxelFragment.voxel) << std::endl;
-
-        auto fragmentSceneFile = scenefileForFragment(loadingInfo, chunkValue, voxelFragment);
-        if (!fragmentSceneFile.alreadyExists){
-          offlineNewScene(fragmentSceneFile.name);  
-        }
-
-        auto elementName = std::string("]voxelfragment_") + voxelname + "_from_" + chunkValue;
-        auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName).size() > 0;
-        auto name = elementAlreadyExists ? (elementName + "_" + std::to_string(getUniqueObjId())) : elementName;
-        if (elementAlreadyExists){
-          std::cout << "warning: " <<  elementName << " already exists in " << fragmentSceneFile.name << std::endl;
-          std::cout << "source: (hash, file, fragment address): (" <<  chunkHash << ", " << scenefile << ", " << fragmentSceneFile.fragmenthash << ")" << std::endl; 
-          assert(offlineGetElement(fragmentSceneFile.name, name).size() == 0);
-        }
-        auto serializedObj = serializeVoxelDefault(world, voxelFragment.voxel);
-        auto tokens = parseFormat(serializedObj);
-        std::vector<std::pair<std::string, std::string>> attrs;
-        for (auto &token : tokens){
-          attrs.push_back({ token.attribute, token.payload });
-        }
-        offlineSetElementAttributes(fragmentSceneFile.name, name, attrs);
+      for (int i = 0; i < voxelFragments.size(); i++){
+        addFragmentToScene(world, sceneFilesForFragments.at(i), voxelFragments.at(i), voxelname, chunkValue);
       }
       offlineRemoveElement(outputFileForChunkHash(loadingInfo, chunkHash), voxelname);
     }
