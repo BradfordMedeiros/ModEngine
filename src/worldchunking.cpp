@@ -1,21 +1,5 @@
 #include "./worldchunking.h"
 
-std::string serializeVoxelDefault(World& world, Voxels& voxelData){
- GameObjectVoxel vox {
-    .voxel = voxelData,
-  };
-  auto gameobj = gameObjectFromFields("]default_voxel", -1, {});
-  std::vector<std::string> children;
-  ObjectSerializeUtil util {
-    .textureName = [&world](int id) -> std::string {
-      return getTextureById(world, id); // can be not loaded...
-    }
-  };
-  auto additionalFields = serializeVoxel(vox, util);
-  auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
-  return serializedObj;
-}
-
 std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std::string& chunkHash){
   std::vector<std::string> voxelsInScene;
   auto hasSceneFile = loadingInfo.mappingInfo.chunkHashToSceneFile.find(chunkHash) != loadingInfo.mappingInfo.chunkHashToSceneFile.end();
@@ -82,6 +66,21 @@ void ensureAllTargetFilesExist(std::vector<fragmentSceneFile>& sceneFilesForFrag
   }
 }
 
+std::string serializeVoxelDefault(World& world, Voxels& voxelData){
+ GameObjectVoxel vox {
+    .voxel = voxelData,
+  };
+  auto gameobj = gameObjectFromFields("]default_voxel", -1, {});
+  std::vector<std::string> children;
+  ObjectSerializeUtil util {
+    .textureName = [&world](int id) -> std::string {
+      return getTextureById(world, id); // can be not loaded...
+    }
+  };
+  auto additionalFields = serializeVoxel(vox, util);
+  auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
+  return serializedObj;
+}
 void addFragmentToScene(World& world, fragmentSceneFile& fragmentSceneFile, VoxelChunkFragment& voxelFragment, std::string& voxelname, std::string& chunkValue){
   auto elementName = std::string("]voxelfragment_") + voxelname + "_from_" + chunkValue;
   auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName).size() > 0;
@@ -115,6 +114,9 @@ std::vector<VoxelChunkFragment> fragmentsForVoxelname(World& world, SysInterface
   return splitVoxel(voxelObj -> voxel, gameobjPair.gameobj.transformation, 2);
 }
 
+void joinFragmentsInScenefile(std::string& scenefile){
+
+}
 
 void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
   std::cout << "Start: voxel rechunking" << std::endl;
@@ -125,6 +127,8 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
     offlineCopyScene(scenefile, outputFileForChunkHash(loadingInfo, chunkhash));
   } 
 
+
+  std::set<std::string> filesWithFragments;  // includes elements that were split from the mapping only, maybe it should check bigger set of files
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
     std::string chunkValue = chunkHash;
     std::cout << "processing chunk hash: " << chunkHash << std::endl;
@@ -135,12 +139,28 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
       ensureAllTargetFilesExist(sceneFilesForFragments);
       std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
       for (int i = 0; i < voxelFragments.size(); i++){
+        filesWithFragments.insert(sceneFilesForFragments.at(i).name);
         addFragmentToScene(world, sceneFilesForFragments.at(i), voxelFragments.at(i), voxelname, chunkValue);
       }
       offlineRemoveElement(outputFileForChunkHash(loadingInfo, chunkHash), voxelname);
     }
   }
 
+  for (auto filesWithFragment : filesWithFragments){
+    joinFragmentsInScenefile(filesWithFragment);
+  }
+
+
+
   // then iterate over chunk hash scene files and the join voxels in all scenes
 
 }
+
+     /*   std::cout << "joined voxel data! size = " << voxels.size() << std::endl;
+        std::vector<Voxels> voxelBodies;
+        std::vector<Transformation> transforms;
+        for (auto id : voxels){
+          voxelBodies.push_back(getVoxel(world, id).value() -> voxel);
+          transforms.push_back(getGameObject(world, id).transformation);
+        }
+        auto voxelData = joinVoxels(voxelBodies, transforms);*/
