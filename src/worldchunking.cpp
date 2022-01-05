@@ -154,7 +154,6 @@ void joinFragmentsInScenefile(World& world, SysInterface& interface, std::string
   for (auto &fragmentname : fragmentNames){
     offlineRemoveElement(scenefile, fragmentname);
   }
-  // then add the joined object
 }
 
 void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){

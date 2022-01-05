@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <queue>
 #include "assert.h"
 #include "../common/util.h"
 #include "./serialization.h"
@@ -18,5 +19,6 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName);
 std::vector<std::string> offlineGetElements(std::string scenepath);
 void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName);
+void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName);
 
 #endif

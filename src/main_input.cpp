@@ -789,7 +789,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       rechunkAllCells(world, dynamicLoading, 4, interface);
     }
-  },  
+  },
   InputDispatch{
     .sourceKey = 'A',  
     .sourceType = BUTTON_PRESS,
@@ -1163,6 +1163,13 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = []() -> void {
       //offlineNewScene("./build/testscene.rawscene");
+
+      std::cout << "move element with parent" << std::endl;
+      offlineMoveElementAndChildren(
+        "./res/scenes/world/elementwithparent.rawscene", 
+        "./res/scenes/world/empty.rawscene", 
+        "someparentelement"
+      );
       //offlineMoveElement(
       //  "./res/scenes/world/voxelchunksmall_000.rawscene", 
       //  "./res/scenes/world/empty.rawscene", 

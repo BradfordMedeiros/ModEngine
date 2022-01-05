@@ -24,6 +24,7 @@ struct Field {
 };
 
 std::vector<Token> parseFormat(std::string content);
+std::string getTokenPayload(std::vector<Token>& tokens, std::string attribute);
 std::string serializeSceneTokens(std::vector<Token>& tokens);
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");

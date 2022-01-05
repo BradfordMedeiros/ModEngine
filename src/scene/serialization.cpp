@@ -15,6 +15,7 @@ std::optional<Token> parseToken(std::string content) {
   return std::nullopt;
 }
 
+
 std::vector<Token> parseFormat(std::string content) {
   std::vector<Token> dtokens;
   std::vector<std::string> lines = split(content, '\n');
@@ -32,6 +33,16 @@ std::vector<Token> parseFormat(std::string content) {
     }
   }
   return dtokens;
+}
+
+std::string getTokenPayload(std::vector<Token>& tokens, std::string attribute){
+  for (auto &token : tokens){
+    if(token.attribute == attribute){
+      return token.payload;
+    }
+  }
+  assert(false);
+  return "";
 }
 
 std::string serializeSceneTokens(std::vector<Token>& tokens){

@@ -52,13 +52,6 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
       .payload = val,
     });
   }
-  if (attrs.size() == 0){
-    newTokens.push_back(Token{
-      .target = elementName,
-      .attribute = "position", 
-      .payload = "0 0 0",
-    });
-  }
   saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
@@ -91,5 +84,39 @@ void offlineMoveElement(std::string fromScene, std::string toScene, std::string 
   for (auto element : elements){
     attrs.push_back({element.attribute, element.payload});
   }
+  if (attrs.size() == 0){
+    std::cout << "element " << elementName << " not found in " << fromScene << std::endl;
+   // assert(false);
+  }
   offlineSetElementAttributes(toScene, elementName, attrs);
+}
+
+std::vector<std::string> offlineNodeAndChildren(std::string fromScene, std::string elementName){
+  auto tokens = parseFormat(loadFile(fromScene));
+  auto elementsToAttrs = deserializeSceneTokens(tokens);
+
+  std::vector<std::string> allChildren;
+  std::queue<std::string> elements;
+  elements.push(elementName);
+  if (elementsToAttrs.find(elementName) == elementsToAttrs.end()){
+    return {};
+  }
+
+  while (!elements.empty()){
+    auto nextElement = elements.front();
+    allChildren.push_back(nextElement);
+    elements.pop();
+
+    auto nextElementChildren = elementsToAttrs.at(nextElement).children;
+    for (auto element : nextElementChildren){
+      elements.push(element);
+    }
+  }
+  return allChildren;
+}
+void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName){
+  auto children = offlineNodeAndChildren(fromScene, elementName);
+  for (auto child : children){
+    offlineMoveElement(fromScene, toScene, child);
+  }
 }
