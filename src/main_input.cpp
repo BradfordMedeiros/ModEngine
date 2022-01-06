@@ -787,7 +787,8 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'R',  
     .hasPreq = true,
     .fn = []() -> void {
-      rechunkAllCells(world, dynamicLoading, 4, interface);
+      //rechunkAllVoxels(world, dynamicLoading, 4, interface);
+      rechunkAllObjects(world, dynamicLoading, 4, interface);
     }
   },
   InputDispatch{

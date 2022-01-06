@@ -1,6 +1,6 @@
 #include "./worldloader.h"
 
-ChunkAddress decodeChunkHash(std::string& chunkhash, bool* out_validResult){
+ChunkAddress decodeChunkHash(std::string chunkhash, bool* out_validResult){
   bool isValidResult = false;
   auto parts = split(chunkhash, '.');
 
@@ -18,6 +18,10 @@ ChunkAddress decodeChunkHash(std::string& chunkhash, bool* out_validResult){
 }
 std::string encodeChunkHash(ChunkAddress chunk){
   return std::to_string(chunk.x) + "." + std::to_string(chunk.y) + "." + std::to_string(chunk.z);
+}
+
+bool chunkAddressEqual(ChunkAddress& address1, ChunkAddress& address2){
+  return (address1.x == address2.x) && (address1.y == address2.y) && (address1.z == address2.z);
 }
 
 std::string sceneFileForChunk(ChunkMappingInfo& mappingInfo, ChunkAddress& chunk){

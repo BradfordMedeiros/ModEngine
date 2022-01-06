@@ -5,7 +5,6 @@
 #include <vector>
 #include "./scene/scene_sandbox_test.h"
 #include "./translations_test.h"
-#include "./common/util_test.h"
 
 int runTests();
 

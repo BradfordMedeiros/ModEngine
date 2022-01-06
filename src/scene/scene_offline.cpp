@@ -55,6 +55,12 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
   saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
+// like set element but preserves the old attributes
+void offlineUpdateElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
+  std::cout << "not yet implemented" << std::endl;
+  assert(false);
+}
+
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName){
   auto tokens = parseFormat(loadFile(scenepath));
   std::vector<Token> element;
@@ -75,6 +81,10 @@ std::vector<std::string> offlineGetElements(std::string scenepath){
     }
   }
   return elements;
+}
+
+std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
+  return {};
 }
 
 void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName){

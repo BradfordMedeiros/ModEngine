@@ -7,6 +7,7 @@
 #include "./scene/scene.h"
 
 std::string serializeVoxelDefault(World& world, Voxels& voxelData);
-void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface);
+void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface);
+void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface);
 
 #endif

@@ -37,18 +37,23 @@ std::string newChunkFile(ChunkAddress& address){
   return std::string("./res/scenes/world/genscene_" + std::to_string(address.x) + "." + std::to_string(address.y) + "." + std::to_string(address.z)) + "_rechunked.rawscene";
 }
 
+std::string finalOutputfileForChunkHash(DynamicLoading& loadingInfo, std::string encodedHash, ChunkAddress& address){
+  auto fragmentSceneFileExists = hashHasMapping(loadingInfo, encodedHash);
+  auto name = fragmentSceneFileExists ? outputFileForChunkHash(loadingInfo, encodedHash) : newChunkFile(address);
+  return name;
+}
+
 fragmentSceneFile scenefileForFragment(DynamicLoading& loadingInfo, std::string& chunkHash, VoxelChunkFragment& fragment){
   bool isValid = false;
   auto chunkAddress = decodeChunkHash(chunkHash, &isValid);
+  assert(isValid);
   ChunkAddress addressWithFragment {
     .x = chunkAddress.x + fragment.x,
     .y = chunkAddress.y + fragment.y,
     .z = chunkAddress.z + fragment.z,
   };
   auto encodedHash = encodeChunkHash(addressWithFragment);
-  assert(isValid);
-  auto fragmentSceneFileExists = hashHasMapping(loadingInfo, encodedHash);
-  auto name = fragmentSceneFileExists ? outputFileForChunkHash(loadingInfo, encodedHash) : newChunkFile(addressWithFragment);
+  auto name = finalOutputfileForChunkHash(loadingInfo, encodedHash, addressWithFragment);
   return fragmentSceneFile {
     .alreadyExists = offlineSceneExists(name),
     .name = name,
@@ -156,7 +161,7 @@ void joinFragmentsInScenefile(World& world, SysInterface& interface, std::string
   }
 }
 
-void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
+void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
   std::cout << "Start: voxel rechunking" << std::endl;
   std::cout << "num chunk hashes: " << loadingInfo.mappingInfo.chunkHashToSceneFile.size() << std::endl;
   std::vector<ChunkAddress> chunks;
@@ -186,4 +191,47 @@ void rechunkAllCells(World& world, DynamicLoading& loadingInfo, int newchunksize
   for (auto filesWithFragment : filesWithFragments){
     joinFragmentsInScenefile(world, interface, filesWithFragment);
   }
+}
+
+std::vector<glm::vec3> getPositionForElements(){
+  return {};
+}
+
+// based on the chunk size, determine the min and max positions based on the chunk size
+struct ChunkPositionAddress {
+  ChunkAddress address;
+  glm::vec3 position;
+};
+std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>& positions){
+  return {};
+}
+
+void updateChunkSizeInMappingFile(int newchunksize){
+  std::cout << "not yet implemented - update chunksize" << std::endl;
+}
+//////////
+// still needs if that chunk does not have a scene file, create it
+// update the mapping in the mapping file 
+
+void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
+  for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
+    bool valid = false;
+    auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);
+    assert(false);
+    auto elements = offlineGetElementsNoChildren(scenefile);
+    auto positions = getPositionForElements();
+    auto chunkPositionAddresses = chunkAddressForPosition(positions);
+    for (int i = 0; i < chunkPositionAddresses.size(); i++){
+      ChunkPositionAddress& chunkPositionAddress = chunkPositionAddresses.at(i);
+      auto elementName = elements.at(i);
+      auto chunksEqual = chunkAddressEqual(fileChunkAddress, chunkPositionAddress.address);
+      if (!chunksEqual){
+        auto sceneFileToWrite = finalOutputfileForChunkHash(loadingInfo, encodeChunkHash(chunkPositionAddress.address), chunkPositionAddress.address);
+        offlineMoveElementAndChildren(scenefile, sceneFileToWrite, elementName);
+        offlineUpdateElementAttributes(sceneFileToWrite, elementName, {{ "position", "0 0 0" }});
+      }
+    }
+  }
+  updateChunkSizeInMappingFile(newchunksize);
+  // and here probably need to update the names of the new outputs files so the mapping works correctly!
 }

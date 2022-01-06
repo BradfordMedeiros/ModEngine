@@ -16,8 +16,10 @@ bool offlineSceneExists(std::string scenepath);
 void offlineCopyScene(std::string scenepath, std::string newScenepath);
 void offlineRemoveElement(std::string scenepath, std::string elementName);
 void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs);
+void offlineUpdateElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs);
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName);
 std::vector<std::string> offlineGetElements(std::string scenepath);
+std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath);
 void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName);
 void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName);
 
