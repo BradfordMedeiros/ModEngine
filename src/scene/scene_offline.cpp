@@ -101,7 +101,21 @@ std::vector<std::string> offlineGetElements(std::string scenepath){
 }
 
 std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
-  return {};
+  auto tokens = parseFormat(loadFile(scenepath));
+  auto elementsToAttrs = deserializeSceneTokens(tokens);
+  std::set<std::string> allChildren;
+  for (auto &[_, elementToAttr] : elementsToAttrs){
+    for (auto child : elementToAttr.children){
+      allChildren.insert(child);
+    }
+  }
+  std::vector<std::string> elements;
+  for (auto &[elementName, _] : elementsToAttrs){
+    if (allChildren.find(elementName) == allChildren.end()){
+      elements.push_back(elementName);
+    }
+  }
+  return elements;
 }
 
 void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName){

@@ -1166,11 +1166,27 @@ std::vector<InputDispatch> inputFns = {
       //offlineNewScene("./build/testscene.rawscene");
 
       std::cout << "move element with parent" << std::endl;
-      offlineMoveElementAndChildren(
+      /*offlineMoveElementAndChildren(
         "./res/scenes/world/elementwithparent.rawscene", 
         "./res/scenes/world/empty.rawscene", 
         "someparentelement"
-      );
+      );*/
+      /*offlineUpdateElementAttributes(
+        "./res/scenes/world/elementwithparent.rawscene",
+        "someparentelement",
+        {{ "anewfield", "regular_field" }}
+      );*/
+
+      auto elements = offlineGetElementsNoChildren("./res/scenes/world/elementwithparent.rawscene");
+      std::cout << "elements in scene that are not children" << std::endl;
+      for (auto element : elements){
+        std::cout << element << " ";
+      }
+      if (elements.size() == 0){
+        std::cout << "(none)";
+      }
+      std::cout << std::endl;
+
       //offlineMoveElement(
       //  "./res/scenes/world/voxelchunksmall_000.rawscene", 
       //  "./res/scenes/world/empty.rawscene", 
