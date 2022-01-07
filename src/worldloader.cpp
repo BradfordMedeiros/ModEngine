@@ -116,6 +116,19 @@ ChunkMappingInfo parseChunkMapping(std::string filepath){
   return chunkMapping;
 }
 
+std::string serializeChunkMappingInfo(ChunkMappingInfo& mappingInfo){
+  std::string content = "";
+  content = content + "chunksize:" + std::to_string(mappingInfo.chunkSize) + "\n";
+  content = content + "default:" + mappingInfo.defaultScene + "\n";
+  for (auto &[chunkhash, scenefile] : mappingInfo.chunkHashToSceneFile){
+    content = content + chunkhash + ":" + scenefile + "\n";
+  }
+  return content;
+}
+void saveChunkMappingInfo(DynamicLoading& world, std::string filepath){
+  saveFile(filepath, serializeChunkMappingInfo(world.mappingInfo));
+}
+
 // @TODO currently dynamic chunkloading assumes it has exclusive access to scene management (or at least that loadscene/unload scene gives it that).
 // This causes the use case of, for example, a user loading a scene in code manually to have this unload the scene if the scene file happens to match that, which is questionable behavior
 DynamicLoading createDynamicLoading(std::string chunkfile){

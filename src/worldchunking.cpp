@@ -206,9 +206,6 @@ std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>
   return {};
 }
 
-void updateChunkSizeInMappingFile(int newchunksize){
-  std::cout << "not yet implemented - update chunksize" << std::endl;
-}
 //////////
 // still needs if that chunk does not have a scene file, create it
 // update the mapping in the mapping file 
@@ -217,7 +214,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
     bool valid = false;
     auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);
-    assert(false);
+    assert(valid);
     auto elements = offlineGetElementsNoChildren(scenefile);
     auto positions = getPositionForElements();
     auto chunkPositionAddresses = chunkAddressForPosition(positions);
@@ -232,6 +229,12 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
       }
     }
   }
-  updateChunkSizeInMappingFile(newchunksize);
+
+  DynamicLoading newLoading = loadingInfo;
+  std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
+  newLoading.mappingInfo.chunkSize = 500;
+  saveChunkMappingInfo(newLoading, "./res/scenes/chunk_copy.mapping");
+  std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
+
   // and here probably need to update the names of the new outputs files so the mapping works correctly!
 }

@@ -37,6 +37,8 @@ struct DynamicLoading {
 
 DynamicLoading createDynamicLoading(std::string chunkfile);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
+std::string serializeChunkMappingInfo(ChunkMappingInfo& mappingInfo);
+void saveChunkMappingInfo(DynamicLoading& world, std::string filepath);
 void handleChunkLoading(
   DynamicLoading& loadingInfo, 
   std::function<glm::vec3(objid)> getPos, 
