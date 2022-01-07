@@ -31,11 +31,6 @@ void offlineRemoveElement(std::string scenepath, std::string elementName){
 
 void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
   std::cout << "offline: set element attributes: " << elementName << " in file: " << scenepath << " - ";
-  for (auto &[key, val] : attrs){
-    std::cout << "(" << key << ", " << val << ") ";
-  }
-  std::cout << std::endl;
-
   auto tokens = parseFormat(loadFile(scenepath));
   std::vector<Token> newTokens;
   for (auto token : tokens){
@@ -57,8 +52,30 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
 
 // like set element but preserves the old attributes
 void offlineUpdateElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
-  std::cout << "not yet implemented" << std::endl;
-  assert(false);
+  std::cout << "offline: update element attributes: " << elementName << " in file: " << scenepath << " - ";
+  auto tokens = parseFormat(loadFile(scenepath));
+  std::vector<Token> newTokens;
+
+  std::map<std::string, std::string> elementTokens;
+  for (auto token : tokens){
+    if (token.target == elementName){
+      elementTokens[token.attribute] = token.payload;
+      continue;
+    }
+    newTokens.push_back(token);
+  }
+  for (auto attr : attrs){
+    elementTokens[attr.first] = attr.second;
+  }
+
+  for (auto &[key, val] : elementTokens){
+    newTokens.push_back(Token{
+      .target = elementName,
+      .attribute = key,
+      .payload = val,
+    });
+  }
+  saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
 std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName){
