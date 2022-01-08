@@ -193,8 +193,16 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
   }
 }
 
-std::vector<glm::vec3> getPositionForElements(){
-  return {};
+std::vector<glm::vec3> getPositionForElements(std::string scenefile, std::vector<std::string>& elements){
+  std::vector<glm::vec3> positions;
+  for (auto element : elements){
+    auto position = offlineGetElementAttr(scenefile, element, "position");
+    glm::vec3 pos(0.f, 0.f, 0.f);
+    bool isPosition = maybeParseVec(position, pos);
+    assert(isPosition);
+    positions.push_back(pos);
+  }
+  return positions;
 }
 
 // based on the chunk size, determine the min and max positions based on the chunk size
@@ -216,7 +224,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
     auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);
     assert(valid);
     auto elements = offlineGetElementsNoChildren(scenefile);
-    auto positions = getPositionForElements();
+    auto positions = getPositionForElements(scenefile, elements);
     auto chunkPositionAddresses = chunkAddressForPosition(positions);
     for (int i = 0; i < chunkPositionAddresses.size(); i++){
       ChunkPositionAddress& chunkPositionAddress = chunkPositionAddresses.at(i);
