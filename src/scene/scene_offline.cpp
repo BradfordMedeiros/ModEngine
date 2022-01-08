@@ -89,6 +89,17 @@ std::vector<Token> offlineGetElement(std::string scenepath, std::string elementN
   return element;
 }
 
+std::string offlineGetElementAttr(std::string scenepath, std::string elementName, std::string attr){
+  auto tokens = offlineGetElement(scenepath, elementName);
+  for (auto token : tokens){
+    if (token.attribute == attr){
+      return token.payload;
+    }
+  }
+  assert(false);
+  return "";
+}
+
 std::vector<std::string> offlineGetElements(std::string scenepath){
   std::vector<std::string> elements;
   auto tokens = parseFormat(loadFile(scenepath));
