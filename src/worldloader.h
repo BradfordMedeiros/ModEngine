@@ -51,5 +51,6 @@ void removeLoadingAround(DynamicLoading& loadingInfo, objid loadingHandle);
 ChunkAddress decodeChunkHash(std::string chunkhash, bool* out_validResult);
 std::string encodeChunkHash(ChunkAddress chunk);
 bool chunkAddressEqual(ChunkAddress& address1, ChunkAddress& address2);
+ChunkAddress chunkAddressForPos(glm::vec3 pos, int chunksize);
 
 #endif

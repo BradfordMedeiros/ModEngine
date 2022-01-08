@@ -210,8 +210,23 @@ struct ChunkPositionAddress {
   ChunkAddress address;
   glm::vec3 position;
 };
-std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>& positions){
-  return {};
+
+ChunkPositionAddress chunkAddressForPosition(glm::vec3& position, int chunksize){
+  auto chunkAddress = chunkAddressForPos(position, chunksize);
+  float xPos = position.x - (chunkAddress.x * chunksize);
+  float yPos = position.y - (chunkAddress.y * chunksize);
+  float zPos = position.z - (chunkAddress.z * chunksize);
+  return ChunkPositionAddress{
+    .address = chunkAddress,
+    .position = glm::vec3(xPos, yPos, zPos),
+  };
+}
+std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>& positions, int chunksize){
+  std::vector<ChunkPositionAddress> chunkaddresses;
+  for (auto &position : positions){
+    chunkaddresses.push_back(chunkAddressForPosition(position, chunksize));
+  }
+  return chunkaddresses;
 }
 
 //////////
@@ -225,7 +240,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
     assert(valid);
     auto elements = offlineGetElementsNoChildren(scenefile);
     auto positions = getPositionForElements(scenefile, elements);
-    auto chunkPositionAddresses = chunkAddressForPosition(positions);
+    auto chunkPositionAddresses = chunkAddressForPosition(positions, newchunksize);
     for (int i = 0; i < chunkPositionAddresses.size(); i++){
       ChunkPositionAddress& chunkPositionAddress = chunkPositionAddresses.at(i);
       auto elementName = elements.at(i);

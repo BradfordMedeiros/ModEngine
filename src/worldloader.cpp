@@ -232,11 +232,11 @@ std::string chunkloadingDebugInfo(ChunkLoadingInfo& info){
   return debugInfo;
 }
 
-ChunkAddress chunkAddressForPos(DynamicLoading& loadingInfo, glm::vec3 pos){
+ChunkAddress chunkAddressForPos(glm::vec3 pos, int chunksize){
   return ChunkAddress{
-    .x = round(pos.x / loadingInfo.mappingInfo.chunkSize), 
-    .y = round(pos.y / loadingInfo.mappingInfo.chunkSize), 
-    .z = round(pos.z / loadingInfo.mappingInfo.chunkSize),
+    .x = round(pos.x / chunksize), 
+    .y = round(pos.y / chunksize), 
+    .z = round(pos.z / chunksize),
   };
 }
 
@@ -255,10 +255,10 @@ void handleChunkLoading(
   //std::cout << "additional loading pos: " << (additionalLoadAround == NULL ? "NULL" : print(*additionalLoadAround)) << std::endl;
   for (auto &[id, _] : loadingInfo.idsLoadAround){
     auto pos = getPos(id);
-    loadingPos.push_back(chunkAddressForPos(loadingInfo, pos));
+    loadingPos.push_back(chunkAddressForPos(pos, loadingInfo.mappingInfo.chunkSize));
   }
   if (additionalLoadAround != NULL){
-    loadingPos.push_back(chunkAddressForPos(loadingInfo, *additionalLoadAround));
+    loadingPos.push_back(chunkAddressForPos(*additionalLoadAround, loadingInfo.mappingInfo.chunkSize));
   }
 
   auto chunksShouldBeLoaded = getChunksShouldBeLoaded(loadingInfo, loadingInfo.chunkRadius, loadingPos); 
