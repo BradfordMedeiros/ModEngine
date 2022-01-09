@@ -99,8 +99,8 @@ ChunkMappingInfo parseChunkMapping(std::string filepath){
     }
   }
 
-  if (numDefaultFiles != 1){
-    std::cout << "mapping file needs a default entry got " << numDefaultFiles << std::endl;
+  if (numDefaultFiles != 0 && numDefaultFiles != 1){
+    std::cout << "mapping file can only have one default entry" << numDefaultFiles << std::endl;
     assert(false);
   }
   if (numChunkSizes != 0 && numChunkSizes != 1){
@@ -119,7 +119,9 @@ ChunkMappingInfo parseChunkMapping(std::string filepath){
 std::string serializeChunkMappingInfo(ChunkMappingInfo& mappingInfo){
   std::string content = "";
   content = content + "chunksize:" + std::to_string(mappingInfo.chunkSize) + "\n";
-  content = content + "default:" + mappingInfo.defaultScene + "\n";
+  if (mappingInfo.defaultScene != ""){
+    content = content + "default:" + mappingInfo.defaultScene + "\n";
+  }
   for (auto &[chunkhash, scenefile] : mappingInfo.chunkHashToSceneFile){
     content = content + chunkhash + ":" + scenefile + "\n";
   }
@@ -271,25 +273,30 @@ void handleChunkLoading(
   for (auto &chunk : chunkLoading.chunksToUnload){
     std::cout << "INFO: CHUNK MANAGEMENT: unload: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto chunkHash = encodeChunkHash(chunk);
-    objid sceneId = loadingInfo.chunkHashToSceneId.at(chunkHash);
-    std::cout << "INFO: CHUNK MANAGEMENT: want to unload id: " << sceneId << std::endl;
-    unloadScene(sceneId);
-    loadingInfo.chunkHashToSceneId.erase(chunkHash);
+    bool hasScene = loadingInfo.chunkHashToSceneId.find(chunkHash) != loadingInfo.chunkHashToSceneId.end();
+    if (hasScene){
+      objid sceneId = loadingInfo.chunkHashToSceneId.at(chunkHash);
+      std::cout << "INFO: CHUNK MANAGEMENT: want to unload id: " << sceneId << std::endl;
+      unloadScene(sceneId);
+      loadingInfo.chunkHashToSceneId.erase(chunkHash);
+    }
   }
   for (auto &chunk : chunkLoading.chunksToLoad){
     std::cout << "INFO: CHUNK MANAGEMENT: load: " << "(" << chunk.x << "," << chunk.y << "," << chunk.z << ")" << std::endl;
     auto sceneFile = sceneFileForChunk(loadingInfo.mappingInfo, chunk);
-    auto sceneId = loadScene(
-      sceneFile, 
-      glm::vec3(
-        chunk.x * loadingInfo.mappingInfo.chunkSize, 
-        chunk.y * loadingInfo.mappingInfo.chunkSize, 
-        chunk.z * loadingInfo.mappingInfo.chunkSize
-      ),
-      std::to_string(chunk.x) + ", " + std::to_string(chunk.y) + ", " + std::to_string(chunk.z)
-    );
-    std::cout << "INFO: CHUNK MANAGEMENT: want to load id: " << sceneId << std::endl;
-    loadingInfo.chunkHashToSceneId[encodeChunkHash(chunk)] = sceneId;
+    if (sceneFile != ""){
+      auto sceneId = loadScene(
+        sceneFile, 
+        glm::vec3(
+          chunk.x * loadingInfo.mappingInfo.chunkSize, 
+          chunk.y * loadingInfo.mappingInfo.chunkSize, 
+          chunk.z * loadingInfo.mappingInfo.chunkSize
+        ),
+        std::to_string(chunk.x) + ", " + std::to_string(chunk.y) + ", " + std::to_string(chunk.z)
+      );
+      std::cout << "INFO: CHUNK MANAGEMENT: want to load id: " << sceneId << std::endl;
+      loadingInfo.chunkHashToSceneId[encodeChunkHash(chunk)] = sceneId;
+    }
   }
 
   loadingInfo.loadedChunks = chunksShouldBeLoaded;
