@@ -728,7 +728,7 @@ int main(int argc, char* argv[]){
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
-   ("b,bootstrapper", "Run the server as a server bootstrapper only", cxxopts::value<bool>()->default_value("false"))
+   ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
    ("p,physics", "Enable physics", cxxopts::value<bool>()->default_value("false"))
    ("y,debugphysics", "Enable physics debug drawing", cxxopts::value<bool>()->default_value("false"))
    ("n,noinput", "Disable default input (still allows custom input handling in scripts)", cxxopts::value<bool>()->default_value("false"))

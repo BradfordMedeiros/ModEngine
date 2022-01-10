@@ -234,11 +234,31 @@ std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>
   return chunkaddresses;
 }
 
+
+void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping){
+  std::vector<std::string> chunkHashToDelete;
+  for (auto &[chunkHash, scenefile] : chunkMapping){
+    auto hasNoElements = offlineGetElements(scenefile).size() == 0;
+    if (hasNoElements){
+      chunkHashToDelete.push_back(chunkHash);
+    }
+  }
+  for (auto &chunkHash : chunkHashToDelete){
+    auto sceneFile = chunkMapping.at(chunkHash);
+    chunkMapping.erase(chunkHash);
+    offlineDeleteScene(sceneFile);
+  }
+}
 //////////
 // still needs if that chunk does not have a scene file, create it
 // update the mapping in the mapping file 
 
 void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
+  // known problems
+  // 2. treats each chunk as if the output file is unique even though can repeat. Probably should get a real unique name, 
+  // 3. if element already exists in target file it just overrides it!
+  // and then at the end merge the files if they are equal 
+
   std::cout << "rechunk all objects from " << loadingInfo.mappingInfo.chunkSize << " to " << newchunksize << std::endl;
 
   std::map<std::string, std::string> newChunksMapping;
@@ -277,9 +297,12 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
     }
   }
 
+
+
   DynamicLoading newLoading = loadingInfo;
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
   newLoading.mappingInfo.chunkSize = newchunksize;
+  removeEmptyScenes(newChunksMapping);
   newLoading.mappingInfo.chunkHashToSceneFile = newChunksMapping;
   saveChunkMappingInfo(newLoading, "./res/scenes/chunk_copy.mapping");
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
