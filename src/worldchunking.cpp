@@ -21,8 +21,11 @@ std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std:
   return {};
 }
 
-std::string outputFileForChunkHash(DynamicLoading& loadingInfo, std::string chunkhash){
-  return loadingInfo.mappingInfo.chunkHashToSceneFile.at(chunkhash) + "_rechunked.rawscene";
+std::string originalSceneFileName(DynamicLoading& loadingInfo, std::string chunkhash){
+  return loadingInfo.mappingInfo.chunkHashToSceneFile.at(chunkhash);
+}
+std::string newOutputFileForScene(std::string originalSceneName){
+  return originalSceneName + "_rechunked.rawscene";
 }
 bool hashHasMapping(DynamicLoading& loadingInfo, std::string chunkhash){
   return loadingInfo.mappingInfo.chunkHashToSceneFile.find(chunkhash) != loadingInfo.mappingInfo.chunkHashToSceneFile.end();
@@ -39,7 +42,7 @@ std::string newChunkFile(ChunkAddress& address){
 
 std::string finalOutputfileForChunkHash(DynamicLoading& loadingInfo, std::string encodedHash, ChunkAddress& address){
   auto fragmentSceneFileExists = hashHasMapping(loadingInfo, encodedHash);
-  auto name = fragmentSceneFileExists ? outputFileForChunkHash(loadingInfo, encodedHash) : newChunkFile(address);
+  auto name = fragmentSceneFileExists ? newOutputFileForScene(originalSceneFileName(loadingInfo, encodedHash)) : newChunkFile(address);
   return name;
 }
 
@@ -167,7 +170,7 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
   std::vector<ChunkAddress> chunks;
 
   for (auto &[chunkhash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
-    offlineCopyScene(scenefile, outputFileForChunkHash(loadingInfo, chunkhash));
+    offlineCopyScene(scenefile, newOutputFileForScene(originalSceneFileName(loadingInfo, chunkhash)));
   } 
 
   std::set<std::string> filesWithFragments;  // includes elements that were split from the mapping only, maybe it should check bigger set of files
@@ -184,7 +187,7 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
         filesWithFragments.insert(sceneFilesForFragments.at(i).name);
         addFragmentToScene(world, sceneFilesForFragments.at(i), voxelFragments.at(i), voxelname, chunkValue);
       }
-      offlineRemoveElement(outputFileForChunkHash(loadingInfo, chunkHash), voxelname);
+      offlineRemoveElement(newOutputFileForScene(originalSceneFileName(loadingInfo, chunkHash)), voxelname);
     }
   }
 
@@ -193,14 +196,16 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
   }
 }
 
-std::vector<glm::vec3> getPositionForElements(std::string scenefile, std::vector<std::string>& elements){
+std::vector<glm::vec3> getPositionForElements(std::string scenefile, std::vector<std::string>& elements, ChunkAddress& fromChunk, int oldchunksize){
   std::vector<glm::vec3> positions;
+  glm::vec3 chunkOffset(fromChunk.x * oldchunksize, fromChunk.y * oldchunksize, fromChunk.z * oldchunksize);
+  //std::cout << "Chunk offset: " << print(chunkOffset) << std::endl;
   for (auto element : elements){
     auto position = offlineGetElementAttr(scenefile, element, "position");
     glm::vec3 pos(0.f, 0.f, 0.f);
     bool isPosition = maybeParseVec(position, pos);
     assert(isPosition);
-    positions.push_back(pos);
+    positions.push_back(pos + chunkOffset);
   }
   return positions;
 }
@@ -234,28 +239,48 @@ std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>
 // update the mapping in the mapping file 
 
 void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
+  std::cout << "rechunk all objects from " << loadingInfo.mappingInfo.chunkSize << " to " << newchunksize << std::endl;
+
+  std::map<std::string, std::string> newChunksMapping;
+  for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
+    auto copiedSceneName = newOutputFileForScene(scenefile);
+    newChunksMapping[chunkHash] = copiedSceneName;
+    offlineCopyScene(scenefile, copiedSceneName);
+  }
+
+  auto oldchunksize = loadingInfo.mappingInfo.chunkSize;
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
     bool valid = false;
     auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);
+    auto outputSceneFile = newChunksMapping.at(chunkHash);
     assert(valid);
     auto elements = offlineGetElementsNoChildren(scenefile);
-    auto positions = getPositionForElements(scenefile, elements);
+    auto positions = getPositionForElements(scenefile, elements, fileChunkAddress, oldchunksize);
     auto chunkPositionAddresses = chunkAddressForPosition(positions, newchunksize);
     for (int i = 0; i < chunkPositionAddresses.size(); i++){
       ChunkPositionAddress& chunkPositionAddress = chunkPositionAddresses.at(i);
       auto elementName = elements.at(i);
       auto chunksEqual = chunkAddressEqual(fileChunkAddress, chunkPositionAddress.address);
       if (!chunksEqual){
-        auto sceneFileToWrite = finalOutputfileForChunkHash(loadingInfo, encodeChunkHash(chunkPositionAddress.address), chunkPositionAddress.address);
-        offlineMoveElementAndChildren(scenefile, sceneFileToWrite, elementName);
-        offlineUpdateElementAttributes(sceneFileToWrite, elementName, {{ "position", "0 0 0" }});
+        auto encodedTargetChunkHash = encodeChunkHash(chunkPositionAddress.address);
+        auto sceneFileToWrite = finalOutputfileForChunkHash(loadingInfo, encodedTargetChunkHash, chunkPositionAddress.address);
+        std::cout << "RECHUNKING: " << scenefile << " moving element: " << elementName << " to " << sceneFileToWrite <<  std::endl;
+        if (!offlineSceneExists(sceneFileToWrite)){
+          offlineNewScene(sceneFileToWrite);
+        }
+        newChunksMapping[encodedTargetChunkHash] = sceneFileToWrite;        
+        offlineMoveElementAndChildren(outputSceneFile, sceneFileToWrite, elementName);
+        offlineUpdateElementAttributes(sceneFileToWrite, elementName, {{ "position", serializeVec(chunkPositionAddress.position) }});
+      }else{
+        std::cout << "RECHUNKING: " << scenefile << " not moving element: " << elementName << std::endl;
       }
     }
   }
 
   DynamicLoading newLoading = loadingInfo;
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
-  newLoading.mappingInfo.chunkSize = 500;
+  newLoading.mappingInfo.chunkSize = newchunksize;
+  newLoading.mappingInfo.chunkHashToSceneFile = newChunksMapping;
   saveChunkMappingInfo(newLoading, "./res/scenes/chunk_copy.mapping");
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
 
