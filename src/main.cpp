@@ -743,6 +743,7 @@ int main(int argc, char* argv[]){
    ("j,extensions", "SO files to load", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
    ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
+   ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
    ("h,help", "Print help")
   ;        
 
@@ -1081,6 +1082,10 @@ int main(int argc, char* argv[]){
   //loadAllTextures();
   
   dynamicLoading = createDynamicLoading(worldfile);
+  if (result["rechunk"].as<int>()){
+    rechunkAllObjects(world, dynamicLoading, result["rechunk"].as<int>(), interface);
+    return 0;
+  }
 
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto rawScene : rawScenes){
