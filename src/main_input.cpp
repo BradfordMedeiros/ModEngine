@@ -782,16 +782,6 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 'T',  
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 'R',  
-    .hasPreq = true,
-    .fn = []() -> void {
-      //rechunkAllVoxels(world, dynamicLoading, 4, interface);
-      rechunkAllObjects(world, dynamicLoading, 50, interface);
-    }
-  },
-  InputDispatch{
     .sourceKey = 'A',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 340,  // shift,
