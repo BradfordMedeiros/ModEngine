@@ -111,6 +111,11 @@ std::vector<std::string> offlineGetElements(std::string scenepath){
   return elements;
 }
 
+bool offlineElementExists(std::string scenepath, std::string elementName){
+  auto elements = offlineGetElement(scenepath, elementName);
+  return elements.size() > 0;
+}
+
 std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
   auto tokens = parseFormat(loadFile(scenepath));
   auto elementsToAttrs = deserializeSceneTokens(tokens);
@@ -130,6 +135,10 @@ std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
 }
 
 void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName){
+  if (offlineElementExists(toScene, elementName)){
+    std::cout << "scene offline: " << elementName << " already exists in " << toScene << std::endl;
+    assert(false);
+  }
   auto elements = offlineGetElement(fromScene, elementName);
   offlineRemoveElement(fromScene, elementName);
   std::vector<std::pair<std::string, std::string>> attrs;
