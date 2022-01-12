@@ -256,8 +256,7 @@ void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping){
 void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
   // known problems
   // 2. treats each chunk as if the output file is unique even though can repeat. Probably should get a real unique name, 
-  // 3. if element already exists in target file it just overrides it!
-  // and then at the end merge the files if they are equal 
+  // 3. should have option to automatically fix name collisions 
 
   std::cout << "rechunk all objects from " << loadingInfo.mappingInfo.chunkSize << " to " << newchunksize << std::endl;
 
@@ -289,7 +288,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
           offlineNewScene(sceneFileToWrite);
         }
         newChunksMapping[encodedTargetChunkHash] = sceneFileToWrite;        
-        offlineMoveElementAndChildren(outputSceneFile, sceneFileToWrite, elementName);
+        offlineMoveElementAndChildren(outputSceneFile, sceneFileToWrite, elementName, true);
         offlineUpdateElementAttributes(sceneFileToWrite, elementName, {{ "position", serializeVec(chunkPositionAddress.position) }});
       }else{
         std::cout << "RECHUNKING: " << scenefile << " not moving element: " << elementName << std::endl;

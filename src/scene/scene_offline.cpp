@@ -134,10 +134,26 @@ std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
   return elements;
 }
 
-void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName){
+void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision){
+  std::string targetElementName = elementName;
   if (offlineElementExists(toScene, elementName)){
     std::cout << "scene offline: " << elementName << " already exists in " << toScene << std::endl;
-    assert(false);
+    if (!renameOnCollision){
+      assert(false);
+    }
+    bool renamed = false;
+
+    for(int indexNumber = 0; indexNumber < 100; indexNumber++){  // 100 arbitrary limit
+      indexNumber++;
+      std::string newElementName = elementName + "_" + std::to_string(indexNumber);
+      if (!offlineElementExists(toScene, newElementName)){
+        targetElementName = newElementName;
+        renamed = true;
+        std::cout << "renamed to elementName: " << targetElementName << std::endl;
+        break;
+      }
+    }
+    assert(renamed);
   }
   auto elements = offlineGetElement(fromScene, elementName);
   offlineRemoveElement(fromScene, elementName);
@@ -149,7 +165,7 @@ void offlineMoveElement(std::string fromScene, std::string toScene, std::string 
     std::cout << "element " << elementName << " not found in " << fromScene << std::endl;
    // assert(false);
   }
-  offlineSetElementAttributes(toScene, elementName, attrs);
+  offlineSetElementAttributes(toScene, targetElementName, attrs);
 }
 
 std::vector<std::string> offlineNodeAndChildren(std::string fromScene, std::string elementName){
@@ -175,9 +191,9 @@ std::vector<std::string> offlineNodeAndChildren(std::string fromScene, std::stri
   }
   return allChildren;
 }
-void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName){
+void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision){
   auto children = offlineNodeAndChildren(fromScene, elementName);
   for (auto child : children){
-    offlineMoveElement(fromScene, toScene, child);
+    offlineMoveElement(fromScene, toScene, child, renameOnCollision);
   }
 }

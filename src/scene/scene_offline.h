@@ -21,7 +21,7 @@ std::vector<Token> offlineGetElement(std::string scenepath, std::string elementN
 std::string offlineGetElementAttr(std::string scenepath, std::string elementName, std::string attr);
 std::vector<std::string> offlineGetElements(std::string scenepath);
 std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath);
-void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName);
-void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName);
+void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision = false);
+void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision);
 
 #endif
