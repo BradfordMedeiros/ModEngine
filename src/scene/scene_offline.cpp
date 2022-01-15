@@ -197,3 +197,9 @@ void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, s
     offlineMoveElement(fromScene, toScene, child, renameOnCollision);
   }
 }
+
+size_t offlineHashSceneContent(std::string scenepath1){
+  auto sceneOne = loadFile(scenepath1);
+  std::hash<std::string> hashStr;
+  return hashStr(sceneOne);
+}

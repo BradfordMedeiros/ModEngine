@@ -23,5 +23,6 @@ std::vector<std::string> offlineGetElements(std::string scenepath);
 std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath);
 void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision = false);
 void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision);
+size_t offlineHashSceneContent(std::string scenepath1);
 
 #endif
