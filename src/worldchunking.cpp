@@ -249,20 +249,49 @@ void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping){
     offlineDeleteScene(sceneFile);
   }
 }
+
+std::map<std::string, std::string> getHashesToConsolidateScenefiles(std::map<std::string, std::string>& chunkMapping){
+  std::map<size_t, std::vector<std::string>> hashedSceneToChunkHashs;
+  for (auto &[chunkHash, scenefile] : chunkMapping){
+    auto hashedScene = offlineHashSceneContent(scenefile);
+    if (hashedSceneToChunkHashs.find(hashedScene) == hashedSceneToChunkHashs.end()){
+      hashedSceneToChunkHashs[hashedScene] = {};
+    }
+    hashedSceneToChunkHashs.at(hashedScene).push_back(chunkHash);
+  }
+  std::map<std::string, std::string> chunkHashToNewSceneFiles;
+  for (auto &[_, chunkhashs] : hashedSceneToChunkHashs){
+    auto firstHashSceneFile = chunkMapping.at(chunkhashs.at(0));
+    for (int i = 1; i < chunkhashs.size(); i++){
+      chunkHashToNewSceneFiles[chunkhashs.at(i)] = firstHashSceneFile;
+    }
+  }
+  return chunkHashToNewSceneFiles;
+}
+
+void consolidateSameScenes(std::map<std::string, std::string>& chunkMapping){
+  std::cout << "consolidating same scenes" << std::endl;
+  auto chunkHashToNewSceneFiles = getHashesToConsolidateScenefiles(chunkMapping);
+  for (auto &[chunkhash, newSceneFile] : chunkHashToNewSceneFiles){
+    auto oldSceneFile = chunkMapping.at(chunkhash);
+    offlineDeleteScene(oldSceneFile);  
+    chunkMapping.at(chunkhash) = newSceneFile;
+  }
+}
+
 //////////
 // still needs if that chunk does not have a scene file, create it
 // update the mapping in the mapping file 
 
 void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksize, SysInterface interface){
-  // known problems
-  // 2. treats each chunk as if the output file is unique even though can repeat. Probably should get a real unique name, 
-  // 3. should have option to automatically fix name collisions 
-
   std::cout << "rechunk all objects from " << loadingInfo.mappingInfo.chunkSize << " to " << newchunksize << std::endl;
 
   std::map<std::string, std::string> newChunksMapping;
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
-    auto copiedSceneName = newOutputFileForScene(scenefile);
+    bool valid = false;
+    auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);
+    assert(valid);
+    auto copiedSceneName = newChunkFile(fileChunkAddress);
     newChunksMapping[chunkHash] = copiedSceneName;
     offlineCopyScene(scenefile, copiedSceneName);
   }
@@ -282,7 +311,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
       auto chunksEqual = chunkAddressEqual(fileChunkAddress, chunkPositionAddress.address);
       if (!chunksEqual){
         auto encodedTargetChunkHash = encodeChunkHash(chunkPositionAddress.address);
-        auto sceneFileToWrite = finalOutputfileForChunkHash(loadingInfo, encodedTargetChunkHash, chunkPositionAddress.address);
+        auto sceneFileToWrite = newChunkFile(chunkPositionAddress.address);
         std::cout << "RECHUNKING: " << scenefile << " moving element: " << elementName << " to " << sceneFileToWrite <<  std::endl;
         if (!offlineSceneExists(sceneFileToWrite)){
           offlineNewScene(sceneFileToWrite);
@@ -302,6 +331,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
   newLoading.mappingInfo.chunkSize = newchunksize;
   removeEmptyScenes(newChunksMapping);
+  consolidateSameScenes(newChunksMapping);
   newLoading.mappingInfo.chunkHashToSceneFile = newChunksMapping;
   saveChunkMappingInfo(newLoading, "./res/scenes/chunk_copy.mapping");
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
