@@ -27,22 +27,6 @@ struct physicsOpts {
   float layer;
 };
 
-struct SerializationObject {
-  bool hasId;
-  int id;
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::quat rotation;
-  std::vector<std::string> children;
-  physicsOpts physics;
-  std::string lookat;
-  std::string layer;
-  std::string script;
-  std::string fragshader;
-  bool netsynchronize;
-  GameobjAttributes additionalFields;
-};
-
 struct GameObject {
   objid id;
   std::string name;

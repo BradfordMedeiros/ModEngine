@@ -1,5 +1,21 @@
 #include "./serialobject.h"
 
+struct SerializationObject {
+  bool hasId;
+  int id;
+  glm::vec3 position;
+  glm::vec3 scale;
+  glm::quat rotation;
+  std::vector<std::string> children;
+  physicsOpts physics;
+  std::string lookat;
+  std::string layer;
+  std::string script;
+  std::string fragshader;
+  bool netsynchronize;
+  GameobjAttributes additionalFields;
+};
+
 void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes, glm::vec3* defaultValue){
   if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
     *value = attributes.vecAttributes.at(key);
@@ -109,25 +125,9 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   object.children = attributes.children;
 }
 
-SerializationObject getDefaultObject(){
-  GameobjAttributes attr{ };
-  SerializationObject obj{};
-  setSerialObjFromAttr(obj, attr);
-  return obj;
-}
-
-GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& serialObj){
-  std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, double> numAttributes;
-  std::map<std::string, glm::vec3> vecAttributes;
-
-  GameobjAttributes attributes {
-    .stringAttributes = stringAttributes,
-    .numAttributes = numAttributes,
-    .vecAttributes = vecAttributes,
-  };
-  auto defaultObject = getDefaultObject();
-  setSerialObjFromAttr(defaultObject, attributes);
+GameObject gameObjectFromParam(std::string name, objid id, GameobjAttributes& attributes){
+  SerializationObject serialObj{};
+  setSerialObjFromAttr(serialObj, attributes);
 
   GameObject gameObject = {
     .id = id,
@@ -148,15 +148,8 @@ GameObject gameObjectFromParam(std::string name, objid id, SerializationObject& 
   return gameObject;
 }
 
-SerializationObject serialObjectFromFields(GameobjAttributes attributes){
-  auto defaultObject = getDefaultObject();
-  setSerialObjFromAttr(defaultObject, attributes); 
-  return defaultObject;
-}
-
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
-  auto serialObj = serialObjectFromFields(attributes);
-  return gameObjectFromParam(name, id, serialObj);
+  return gameObjectFromParam(name, id, attributes);
 }
 
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
