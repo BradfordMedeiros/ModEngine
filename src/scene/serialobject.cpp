@@ -125,7 +125,7 @@ void setSerialObjFromAttr(SerializationObject& object, GameobjAttributes& attrib
   object.children = attributes.children;
 }
 
-GameObject gameObjectFromParam(std::string name, objid id, GameobjAttributes& attributes){
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
   SerializationObject serialObj{};
   setSerialObjFromAttr(serialObj, attributes);
 
@@ -146,10 +146,6 @@ GameObject gameObjectFromParam(std::string name, objid id, GameobjAttributes& at
   };
 
   return gameObject;
-}
-
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
-  return gameObjectFromParam(name, id, attributes);
 }
 
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
