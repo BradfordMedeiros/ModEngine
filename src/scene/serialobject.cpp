@@ -24,7 +24,7 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
   if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
     object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
   }
-  
+
   auto identityVec = glm::vec3(1.f, 1.f, 1.f);
   auto zeroVec = glm::vec3(0.f, 0.f, 0.f);
   auto defaultGravity = glm::vec3(0.f, -9.81f, 0.f);
@@ -101,6 +101,7 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
   }else{
     object.transformation.rotation = glm::identity<glm::quat>();
   }
+  object.attr = attributes; // lots of redundant information here, should only set attrs that aren't consumed elsewhere
 }
 
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){

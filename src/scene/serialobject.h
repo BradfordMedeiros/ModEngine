@@ -37,6 +37,7 @@ struct GameObject {
   std::string script;
   std::string fragshader;
   bool netsynchronize;
+  GameobjAttributes attr;
 };
 
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes);

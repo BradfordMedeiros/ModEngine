@@ -833,7 +833,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
-  GameobjAttributes attr {};
+  auto attr = gameobj.attr;
   objectAttributes(gameobjObj, attr);
   getAllAttributes(gameobj, attr);
   return attr;
