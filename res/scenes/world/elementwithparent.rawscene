@@ -1,0 +1,6 @@
+achildelement:position:0 1 0
+elementa:position:0 0 0
+elementb:position:0 0 0
+someparentelement:anewfield:regular_field
+someparentelement:child:achildelement,anotherchild,elementa
+someparentelement:position:0 1 0

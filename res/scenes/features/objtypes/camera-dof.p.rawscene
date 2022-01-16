@@ -1,0 +1,25 @@
+# Demonstrates camera system
+
+>dofcam:position:0 0 0
+>dofcam:dof:enabled
+>dofcam:target:platform
+>dofcam:minblur:4
+>dofcam:maxblur:10
+>dofcam:bluramount:30
+
+>dofcam2:position:0 0 0
+>dofcam2:dof:enabled
+>dofcam2:target:platform2
+>dofcam2:minblur:4
+>dofcam2:maxblur:10
+>dofcam2:bluramount:10
+
+#>camera:position:0 0 1
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:1 1 1
+platform:position:0 0 -2
+
+platform2:mesh:./res/models/box/box.obj
+platform2:scale:1 1 1
+platform2:position:-3 0 -10
