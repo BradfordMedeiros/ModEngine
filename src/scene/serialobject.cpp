@@ -166,12 +166,15 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
   for (auto [field, fieldValue] : attr.stringAttributes){
     setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.stringAttributes[field] = fieldValue;
   }
   for (auto [field, fieldValue] : attr.numAttributes){
     setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.numAttributes[field] = fieldValue;
   }
   for (auto [field, fieldValue] : attr.vecAttributes){
     setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.vecAttributes[field] = fieldValue;
   }
 }
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
