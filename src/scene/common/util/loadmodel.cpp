@@ -237,8 +237,9 @@ void renameRootNode(ModelData& data, std::string rootname, std::string realrootn
       // bone.name
       if (bone.name == realrootname){
         bone.name == rootname;
+        assert(false);   // figure out when this happens
       }else{
-        bone.name = generateNodeName(rootname, bone.name.c_str());
+        bone.name = generateNodeName("root:", bone.name.c_str());
       }
     }
   }

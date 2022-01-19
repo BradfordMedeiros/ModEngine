@@ -21,6 +21,7 @@ struct TextureInformation {
 };
 
 struct ObjectTypeUtil {
+  std::function<Mesh(std::string)> createMeshCopy;
   std::map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)> ensureTextureLoaded;
   std::function<Mesh(MeshData&)> loadMesh;

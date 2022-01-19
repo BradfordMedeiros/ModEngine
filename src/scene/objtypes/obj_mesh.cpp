@@ -11,7 +11,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   for (auto meshName : meshNamesForObj){
     std::cout << "trying to get mesh name: " << meshName << std::endl;
     meshNames.push_back(meshName);
-    meshesToRender.push_back(util.meshes.at(meshName).mesh);  
+    meshesToRender.push_back(util.createMeshCopy(meshName));  
   }
 
   GameObjectMesh obj {

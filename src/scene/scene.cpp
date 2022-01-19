@@ -414,6 +414,18 @@ void freeMeshRefsByOwner(World& world, int ownerId){
   }
 }
 
+std::function<Mesh(std::string)> getCreateMeshCopy(World& world, std::string rootname){
+  return [&world, rootname](std::string meshname) -> Mesh {
+    Mesh meshCopy = world.meshes.at(meshname).mesh;
+    for (auto &bone : meshCopy.bones){
+      auto suffix = bone.name.substr(5, bone.name.size() - 5); // bones all names root:whatever 
+      auto newBoneName = rootname + suffix;
+      bone.name = newBoneName;
+    }
+    return meshCopy;
+  };
+}
+
 void loadSkybox(World& world, std::string skyboxpath){
   if (world.meshes.find("skybox") != world.meshes.end()){
     freeMeshRef(world, "skybox");
@@ -548,6 +560,7 @@ void addObjectToWorld(
   objid sceneId, 
   objid id,
   std::string name,
+  std::string topName,
   std::function<objid()> getId,
   SysInterface interface,
   GameobjAttributes attr,
@@ -557,6 +570,7 @@ void addObjectToWorld(
   bool returnObjectOnly,
   std::vector<GameObjectObj>& returnobjs // only added to if returnObjOnly = true
 ){
+
     auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
       return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
         return loadTextureWorld(world, texture, id);
@@ -573,7 +587,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &interface, &idToModelVertexs, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> {
       if (meshName == ""){
         return {};
       }
@@ -600,15 +614,17 @@ void addObjectToWorld(
         );
 
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, getId, interface, objAttr.attr, idToModelVertexs, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, interface, objAttr.attr, idToModelVertexs, &data, meshName, returnObjectOnly, returnobjs);
         }
         return meshNamesForNode(data, meshName, name);
       }
       return meshNamesForNode(*data, rootMeshName, name);  
     }; 
 
+    std::cout << "rootname create mesh: " << name << std::endl;
     if (returnObjectOnly){
       ObjectTypeUtil util {
+        .createMeshCopy = getCreateMeshCopy(world, topName),
         .meshes = world.meshes,
         .ensureTextureLoaded = [](std::string) -> Texture { return Texture{}; },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
@@ -621,6 +637,7 @@ void addObjectToWorld(
       return;
     }
     ObjectTypeUtil util {
+      .createMeshCopy = getCreateMeshCopy(world, topName),
       .meshes = world.meshes,
       .ensureTextureLoaded = ensureTextureLoaded,
       .loadMesh = loadMeshObject,
@@ -645,7 +662,7 @@ void addSerialObjectsToWorld(
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, objAttr.id, name, getNewObjectId, interface, objAttr.attr, idToModelVertexs, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, interface, objAttr.attr, idToModelVertexs, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
