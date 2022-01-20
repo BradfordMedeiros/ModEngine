@@ -5,9 +5,11 @@ Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   
-  GLint format = GL_RGB;
-  if (numChannels == 4) {
-    format = GL_RGBA;
+  GLint format = GL_RGBA;
+  bool numChannelsValid = (numChannels == 3 || numChannels == 4);
+  if (!numChannelsValid){
+    std::cout << "Num channels: " << numChannels << " (width, height) = (" << textureWidth << ", " << textureHeight << ") " << std::endl;
+    assert(false);
   }
   
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  // https://stackoverflow.com/questions/15983607/opengl-texture-tilted
@@ -15,7 +17,7 @@ Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
   
   Texture tex {
@@ -28,11 +30,12 @@ Texture loadTexture(std::string textureFilePath){
   std::cout << "Event: loading texture: " << textureFilePath << std::endl;
 
   int textureWidth, textureHeight, numChannels;
-  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
+  int forcedChannels = 4;
+  unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
   if (!data){
     throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
   }
-  auto texture = loadTextureData(data, textureWidth, textureHeight, numChannels);
+  auto texture = loadTextureData(data, textureWidth, textureHeight, forcedChannels); // forced to have 4
   stbi_image_free(data);
   return texture;
 }
