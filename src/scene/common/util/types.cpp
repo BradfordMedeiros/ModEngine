@@ -15,6 +15,11 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
   return transform;  
 }
 
+glm::vec3 relativeOffset(glm::mat4 from, glm::mat4 to){
+  auto toRelativeToFrom = from * to;
+  return getTransformationFromMatrix(toRelativeToFrom).position;
+}
+
 glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
   glm::mat4 modelMatrix = glm::translate(initialModel, position);
   modelMatrix = modelMatrix * glm::toMat4(rotation);
