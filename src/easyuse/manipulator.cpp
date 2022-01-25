@@ -8,7 +8,6 @@ objid getManipulatorId(){
   return manipulatorId;
 }
 void unspawnManipulator(std::function<void(objid)> removeObjectById){
-  return;
   std::cout << "unspawn manipulator called" << std::endl;
   if (manipulatorId != 0){
     removeObjectById(manipulatorId);
@@ -25,7 +24,6 @@ void onManipulatorSelectItem(
   std::function<glm::vec3(objid)> getPosition,
   std::function<void(objid, glm::vec3)> setPosition
 ){
-  return;
   auto isTargetManipulator =  selectedItem == manipulatorId;
   auto manipulatorExists = manipulatorId != 0;
 
@@ -54,8 +52,89 @@ void onManipulatorSelectItem(
   }
 }
 void onManipulatorMouseRelease(){
-  return;
   manipulatorObject = NOAXIS;
+}
+
+struct ManipulatorTarget {
+  glm::vec3 manipulatorNew;
+  glm::vec3 targetNew;
+  bool shouldSet;
+};
+ManipulatorTarget newManipulatorValues(
+  std::function<glm::vec3(objid)> getPosition, 
+  std::function<glm::vec3(objid)> getScale,
+  glm::mat4 cameraViewMatrix, 
+  ManipulatorMode mode,
+  float mouseX, 
+  float mouseY
+){
+  if (mouseX < 10 && mouseX > -10.f){
+    mouseX = 0.f;
+  }
+  if (mouseY < 10 && mouseY > -10.f){
+    mouseY = 0.f;
+  }
+  glm::vec4 moveVector = cameraViewMatrix * glm::vec4(mouseX, mouseY, 0, 0.f);
+  glm::vec3 vecc = glm::vec3(moveVector.x, moveVector.y, moveVector.z);
+  auto xVector = glm::dot(vecc, glm::vec3(1.f, 0.f, 0.f));
+  auto yVector = glm::dot(vecc, glm::vec3(0.f, 1.f, 0.f));
+  auto zVector = glm::dot(vecc, glm::vec3(0.f, 0.f, -1.f));
+  auto moveVec = glm::vec3(xVector, yVector, zVector);
+  if (mode == TRANSLATE){
+    auto targetPosition = getPosition(manipulatorTarget);
+    auto manipulatorPosition = getPosition(manipulatorId);
+    if (manipulatorObject == XAXIS){
+      auto position = manipulatorPosition + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
+      return ManipulatorTarget {
+        .manipulatorNew = position,
+        .targetNew = position,
+        .shouldSet = true,
+      };
+    }else if (manipulatorObject == YAXIS){
+      auto position = manipulatorPosition + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
+      return ManipulatorTarget {
+        .manipulatorNew = position,
+        .targetNew = position,
+        .shouldSet = true,
+      };
+    }else if (manipulatorObject == ZAXIS){
+      auto position = manipulatorPosition + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
+      return ManipulatorTarget {
+        .manipulatorNew = position,
+        .targetNew = position,
+        .shouldSet = true,
+      };
+    }
+  }else if (mode == SCALE){
+    auto targetScale = getScale(manipulatorTarget);
+    if (manipulatorObject == XAXIS){
+      auto scale = targetScale + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
+      return ManipulatorTarget {
+        .manipulatorNew = scale,
+        .targetNew = scale,
+        .shouldSet = true,
+      };
+    }else if (manipulatorObject == YAXIS){
+      auto scale = targetScale + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
+      return ManipulatorTarget {
+        .manipulatorNew = scale,
+        .targetNew = scale,
+        .shouldSet = true,
+      };
+    }else if (manipulatorObject == ZAXIS){
+      auto scale = targetScale + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
+      return ManipulatorTarget {
+        .manipulatorNew = scale,
+        .targetNew = scale,
+        .shouldSet = true,
+      };
+    } 
+  }
+  return ManipulatorTarget {
+    .manipulatorNew = glm::vec3(0.f, 0.f, 0.f),
+    .targetNew = glm::vec3(0.f, 0.f, 0.f),
+    .shouldSet = false,
+  };
 }
 
 void onManipulatorUpdate(
@@ -66,58 +145,25 @@ void onManipulatorUpdate(
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
   float mouseX, 
-  float mouseY
+  float mouseY,
+  glm::vec3 mousePosition
 ){
-  return;
-  if (mouseX < 10 && mouseX > -10.f){
-    mouseX = 0.f;
-  }
-  if (mouseY < 10 && mouseY > -10.f){
-    mouseY = 0.f;
-  }
-
-  glm::vec4 moveVector = cameraViewMatrix * glm::vec4(mouseX, mouseY, 0, 0.f);
-  glm::vec3 vecc = glm::vec3(moveVector.x, moveVector.y, moveVector.z);
-  auto xVector = glm::dot(vecc, glm::vec3(1.f, 0.f, 0.f));
-  auto yVector = glm::dot(vecc, glm::vec3(0.f, 1.f, 0.f));
-  auto zVector = glm::dot(vecc, glm::vec3(0.f, 0.f, -1.f));
-  auto moveVec = glm::vec3(xVector, yVector, zVector);
-
   if (manipulatorId != 0 && manipulatorTarget != 0){
+    auto newValues = newManipulatorValues(getPosition, getScale, cameraViewMatrix, mode, mouseX, mouseY);
+    std::cout << "info: manipulator: (shouldset, id, target, movevec) => (" << newValues.shouldSet << ", " << manipulatorId << ", " << manipulatorTarget << ", " << print(newValues.targetNew) << ")" << std::endl; 
+    if (!newValues.shouldSet){
+      return;
+    }
     if (mode == TRANSLATE){
-      auto targetPosition = getPosition(manipulatorTarget);
-      auto manipulatorPosition = getPosition(manipulatorId);
-      if (manipulatorObject == XAXIS){
-        auto position = manipulatorPosition + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
-        setPosition(manipulatorTarget, position);
-        setPosition(manipulatorId, position);
-      }else if (manipulatorObject == YAXIS){
-        auto position = manipulatorPosition + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
-        setPosition(manipulatorTarget, position);
-        setPosition(manipulatorId, position);
-      }else if (manipulatorObject == ZAXIS){
-        auto position = manipulatorPosition + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
-        setPosition(manipulatorTarget, position);
-        setPosition(manipulatorId, position);
-      }
+      setPosition(manipulatorTarget, newValues.manipulatorNew);
+      setPosition(manipulatorId, newValues.targetNew);
     }else if (mode == SCALE){
-      auto targetScale = getScale(manipulatorTarget);
-      if (manipulatorObject == XAXIS){
-        auto scale = targetScale + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
-        setScale(manipulatorTarget, scale);
-      }else if (manipulatorObject == YAXIS){
-        auto scale = targetScale + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
-        setScale(manipulatorTarget, scale);
-      }else if (manipulatorObject == ZAXIS){
-        auto scale = targetScale + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
-        setScale(manipulatorTarget, scale);
-      }      
+      setScale(manipulatorTarget, newValues.targetNew);
     }
   }
 }
 
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
-  return;
   std::cout << "on manipulator unselect" << std::endl;
   unspawnManipulator(removeObjectById);
 }

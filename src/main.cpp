@@ -271,8 +271,9 @@ void selectItem(objid selectedId, Color pixelColor){
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
 
-void notSelectItem(){
+void onSelectNullItem(){
   auto manipulatorId = getManipulatorId();
+  std::cout << "manipulatorId: " << manipulatorId << std::endl;
   if (manipulatorId != 0){
     onManipulatorUnselect(removeObjectById);
     unsetSelectedIndex(state.editor, manipulatorId, true);
@@ -298,9 +299,9 @@ void loadAllTextures(){
   for (auto texturePath : listFilesWithExtensions(textureFolderPath, { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
   }
-  for (auto texturePath : listFilesWithExtensions("/home/brad/automate/mosttrusted/gameresources/build/", { "png", "jpg" })){
+  /*for (auto texturePath : listFilesWithExtensions("/home/brad/automate/mosttrusted/gameresources/build/", { "png", "jpg" })){
     loadTextureWorld(world, texturePath, -1);
-  }
+  }*/
 }
 
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
@@ -1277,10 +1278,13 @@ int main(int argc, char* argv[]){
     }
 
     if (selectItemCalled){
+      std::cout << "INFO: select item called" << std::endl;
       if (state.hoveredIdInScene){
+        std::cout << "INFO: select item called -> id in scene!" << std::endl;
         selectItem(hoveredId, hoveredItemColor);
       }else{
-        notSelectItem();
+        std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
+        onSelectNullItem();
       }
       selectItemCalled = false;
     }
@@ -1292,7 +1296,8 @@ int main(int argc, char* argv[]){
       view, 
       state.manipulatorMode, 
       state.offsetX, 
-      state.offsetY
+      state.offsetY,
+      glm::vec3(0.f, 0.f, 0.f)
     );
     handlePainting(uvCoord);
     handleTerrainPainting(uvCoord);
