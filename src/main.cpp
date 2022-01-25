@@ -254,8 +254,8 @@ void selectItem(objid selectedId, Color pixelColor){
         0,
         "manipulator", 
         { 
-          {"mesh", "./res/models/ui/manipulator.fbx" }, 
-          {"layer", "no_depth" }
+          {"mesh", "./res/models/ui/manipulator.gltf" }, 
+          {"layer", "scale" }
         }, 
         {}, 
         {}
@@ -475,7 +475,16 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
       glUniform1f(glGetUniformLocation(newShader, "emissionAmount"), meshObj -> emissionAmount); 
     }
 
-    glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    if (layer.scale){
+      auto transform = getTransformationFromMatrix(modelMatrix);
+      auto offset = distanceToSecondFromFirst(view, modelMatrix);
+      transform.scale *=  glm::tan(layer.fov / 2.0) * offset.z; // glm::tan might not be correct
+      auto mat = matrixFromComponents(transform);
+      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(mat));
+    }else{
+      glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    }
+
     glUniform1f(glGetUniformLocation(newShader, "time"), getTotalTime());
 
     bool isPortal = false;

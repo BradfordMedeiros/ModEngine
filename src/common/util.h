@@ -97,6 +97,7 @@ struct LayerInfo {
   std::string name;
   int zIndex;
   bool orthographic;
+  bool scale;
   int depthBufferLayer;
   float fov;
   float nearplane;

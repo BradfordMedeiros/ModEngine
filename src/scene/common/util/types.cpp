@@ -15,8 +15,8 @@ Transformation getTransformationFromMatrix(glm::mat4 matrix){
   return transform;  
 }
 
-glm::vec3 relativeOffset(glm::mat4 from, glm::mat4 to){
-  auto toRelativeToFrom = from * to;
+glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x){
+  auto toRelativeToFrom = y * x;
   return getTransformationFromMatrix(toRelativeToFrom).position;
 }
 
