@@ -63,12 +63,24 @@ glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offse
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh){
   return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
 }
+
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight){
   glm::mat4 inversionMatrix = glm::inverse(projection * view);
   float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
   float screenYPosNdi = convertBase(cursorTop, 0.f, screenHeight, -1.f, 1.f);
   glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
+  std::cout << "direction is: " << print(glm::vec3(direction.x, direction.y, direction.z)) << std::endl;
   return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
+}
+
+glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec2 lockvalues){
+  auto rayFromCursor = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
+
+  glm::vec3 rightVec(1.f, 0.f, 0.f);
+  auto answer = glm::cross(rayFromCursor, rightVec);
+  std::cout << "cross product is: " << print(answer) << std::endl;
+
+  return glm::vec3(0.f, 0.f, 0.f);
 }
 
 glm::quat quatFromDirection(glm::vec3 direction){ 

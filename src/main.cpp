@@ -1297,6 +1297,20 @@ int main(int argc, char* argv[]){
       }
       selectItemCalled = false;
     }
+
+    /*,
+      glm::vec2(state.cursorLeft, state.cursorTop),
+      layers.at(0).fov*/
+    auto projectedPosition = projectCursorPositionOntoAxis(
+      projectionFromLayer(layers.at(0)),
+      view,
+      glm::vec2(state.cursorLeft, state.cursorTop), 
+      glm::vec2(state.currentScreenWidth, state.currentScreenHeight),
+      XAXIS, 
+      glm::vec2(2, -5)
+    );
+    std::cout << "projected position: " << print(projectedPosition) << std::endl;
+
     onManipulatorUpdate(
       getGameObjectPos, 
       setGameObjectPosition, 
@@ -1305,8 +1319,7 @@ int main(int argc, char* argv[]){
       view, 
       state.manipulatorMode, 
       state.offsetX, 
-      state.offsetY,
-      glm::vec3(0.f, 0.f, 0.f)
+      state.offsetY
     );
     handlePainting(uvCoord);
     handleTerrainPainting(uvCoord);

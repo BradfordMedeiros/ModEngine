@@ -13,7 +13,6 @@ void onManipulatorUpdate(
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
   float mouseX, 
-  float mouseY,
-  glm::vec3 mousePosition
+  float mouseY
 );
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById);

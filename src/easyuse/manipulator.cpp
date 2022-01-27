@@ -145,8 +145,7 @@ void onManipulatorUpdate(
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
   float mouseX, 
-  float mouseY,
-  glm::vec3 mousePosition
+  float mouseY
 ){
   if (manipulatorId != 0 && manipulatorTarget != 0){
     auto newValues = newManipulatorValues(getPosition, getScale, cameraViewMatrix, mode, mouseX, mouseY);
