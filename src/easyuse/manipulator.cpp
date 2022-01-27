@@ -60,14 +60,58 @@ struct ManipulatorTarget {
   glm::vec3 targetNew;
   bool shouldSet;
 };
+
+bool manipulatorInstantClickMode = true;
+ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
+  auto targetPosition = getPosition(manipulatorTarget);
+  glm::vec2 lockValues(0.f, 0.f);
+  if (axis == XAXIS){
+    lockValues.x = targetPosition.y;
+    lockValues.y = targetPosition.z;
+  }else if (axis == YAXIS){
+    lockValues.x = targetPosition.x;
+    lockValues.y = targetPosition.z;
+  }else if (axis == ZAXIS){
+    lockValues.x = targetPosition.x;
+    lockValues.y = targetPosition.y;
+  }else{
+    return ManipulatorTarget {
+      .manipulatorNew = glm::vec3(0.f, 0.f, 0.f),
+      .targetNew = glm::vec3(0.f, 0.f, 0.f),
+      .shouldSet = false,
+    };
+  }
+
+  auto newPosition = projectCursorPositionOntoAxis(
+    projection,
+    view,
+    cursorPos,  
+    screensize, 
+    axis,  
+    lockValues
+  );
+
+  return ManipulatorTarget {
+    .manipulatorNew = newPosition,
+    .targetNew = newPosition,
+    .shouldSet = true,
+  };
+}
 ManipulatorTarget newManipulatorValues(
   std::function<glm::vec3(objid)> getPosition, 
   std::function<glm::vec3(objid)> getScale,
+  glm::mat4 projection, 
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
   float mouseX, 
-  float mouseY
+  float mouseY,
+  glm::vec2 cursorPos,
+  glm::vec2 screensize
 ){
+  if (manipulatorInstantClickMode){
+    return newValuesInstanceClick(getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
+  }
+
   if (mouseX < 10 && mouseX > -10.f){
     mouseX = 0.f;
   }
@@ -142,13 +186,16 @@ void onManipulatorUpdate(
   std::function<void(objid, glm::vec3)> setPosition, 
   std::function<glm::vec3(objid)> getScale,
   std::function<void(objid, glm::vec3)> setScale,
+  glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
   float mouseX, 
-  float mouseY
+  float mouseY,
+  glm::vec2 cursorPos,
+  glm::vec2 screensize
 ){
   if (manipulatorId != 0 && manipulatorTarget != 0){
-    auto newValues = newManipulatorValues(getPosition, getScale, cameraViewMatrix, mode, mouseX, mouseY);
+    auto newValues = newManipulatorValues(getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
     std::cout << "info: manipulator: (shouldset, id, target, movevec) => (" << newValues.shouldSet << ", " << manipulatorId << ", " << manipulatorTarget << ", " << print(newValues.targetNew) << ")" << std::endl; 
     if (!newValues.shouldSet){
       return;

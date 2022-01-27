@@ -74,11 +74,37 @@ glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float curs
 }
 
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec2 lockvalues){
-  auto rayFromCursor = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
+  auto screenWidth = screensize.x;
+  auto screenHeight = screensize.y;
+  auto cursorLeft = cursorPos.x;
+  auto cursorTop = cursorPos.y;
+  glm::mat4 inversionMatrix = glm::inverse(projection * view);
+  float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
+  float screenYPosNdi = convertBase(cursorTop, 0.f, screenHeight, -1.f, 1.f);
+  glm::vec4 actualCursor = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
+  glm::vec2 cursorClip =  glm::vec2(screenXPosNdi, -screenYPosNdi);
 
-  glm::vec3 rightVec(1.f, 0.f, 0.f);
-  auto answer = glm::cross(rayFromCursor, rightVec);
-  std::cout << "cross product is: " << print(answer) << std::endl;
+  std::cout << "cursorPos: " << print(glm::vec3(actualCursor.x, actualCursor.y, actualCursor.z)) << std::endl;
+  std::cout << "cursorClip: " << print(cursorClip) << std::endl;
+
+  glm::vec3 perspectiveCursorTarget(0.f, 0.f, 0.f);
+  if (manipulatorAxis == XAXIS){
+    perspectiveCursorTarget.x = actualCursor.x;
+    perspectiveCursorTarget.y = lockvalues.x;
+    perspectiveCursorTarget.z = lockvalues.y;
+  }else if (manipulatorAxis == YAXIS){
+    perspectiveCursorTarget.x = lockvalues.x;
+    perspectiveCursorTarget.y = actualCursor.y;
+    perspectiveCursorTarget.z = lockvalues.y;
+  }else if (manipulatorAxis == ZAXIS){
+
+  }else{
+    assert(false);
+  }
+
+  std::cout << "perspectiveCursorTarget: " << print(perspectiveCursorTarget) << std::endl;
+
+
 
   return glm::vec3(0.f, 0.f, 0.f);
 }

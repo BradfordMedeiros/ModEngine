@@ -1316,10 +1316,13 @@ int main(int argc, char* argv[]){
       setGameObjectPosition, 
       getGameObjectScale,
       setGameObjectScale,
+      projectionFromLayer(layers.at(0)),
       view, 
       state.manipulatorMode, 
       state.offsetX, 
-      state.offsetY
+      state.offsetY,
+      glm::vec2(state.cursorLeft, state.cursorTop),
+      glm::vec2(state.currentScreenWidth, state.currentScreenHeight)
     );
     handlePainting(uvCoord);
     handleTerrainPainting(uvCoord);
