@@ -61,36 +61,23 @@ struct ManipulatorTarget {
   bool shouldSet;
 };
 
-bool manipulatorInstantClickMode = true;
+bool manipulatorInstantClickMode = false;
 ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
-  auto targetPosition = getPosition(manipulatorTarget);
-  glm::vec2 lockValues(0.f, 0.f);
-  if (axis == XAXIS){
-    lockValues.x = targetPosition.y;
-    lockValues.y = targetPosition.z;
-  }else if (axis == YAXIS){
-    lockValues.x = targetPosition.x;
-    lockValues.y = targetPosition.z;
-  }else if (axis == ZAXIS){
-    lockValues.x = targetPosition.x;
-    lockValues.y = targetPosition.y;
-  }else{
+  if (axis != XAXIS && axis != YAXIS && axis != ZAXIS){
     return ManipulatorTarget {
       .manipulatorNew = glm::vec3(0.f, 0.f, 0.f),
       .targetNew = glm::vec3(0.f, 0.f, 0.f),
       .shouldSet = false,
     };
   }
-
   auto newPosition = projectCursorPositionOntoAxis(
     projection,
     view,
     cursorPos,  
     screensize, 
     axis,  
-    lockValues
+    getPosition(manipulatorTarget)
   );
-
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
     .targetNew = newPosition,

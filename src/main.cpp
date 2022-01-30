@@ -1307,7 +1307,7 @@ int main(int argc, char* argv[]){
       glm::vec2(state.cursorLeft, state.cursorTop), 
       glm::vec2(state.currentScreenWidth, state.currentScreenHeight),
       XAXIS, 
-      glm::vec2(2, -5)
+      glm::vec3(2, -5, -5)
     );
     std::cout << "projected position: " << print(projectedPosition) << std::endl;
 

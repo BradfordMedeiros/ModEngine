@@ -156,6 +156,11 @@ std::string print(glm::vec3 vec){
   stream << vec.x << " " << vec.y << " " << vec.z;
   return stream.str();
 }
+std::string print(glm::vec4 vec){
+  std::stringstream stream;
+  stream << vec.x << " " << vec.y << " " << vec.z << " " << vec.w;
+  return stream.str();
+}
 std::string print(glm::ivec3 vec){
   return print(glm::vec3(vec.x, vec.y, vec.z));
 }

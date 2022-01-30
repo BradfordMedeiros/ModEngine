@@ -73,7 +73,7 @@ glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float curs
   return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
 }
 
-glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec2 lockvalues){
+glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues){
   auto screenWidth = screensize.x;
   auto screenHeight = screensize.y;
   auto cursorLeft = cursorPos.x;
@@ -84,29 +84,42 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   glm::vec4 actualCursor = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
   glm::vec2 cursorClip =  glm::vec2(screenXPosNdi, -screenYPosNdi);
 
-  std::cout << "cursorPos: " << print(glm::vec3(actualCursor.x, actualCursor.y, actualCursor.z)) << std::endl;
-  std::cout << "cursorClip: " << print(cursorClip) << std::endl;
 
-  glm::vec3 perspectiveCursorTarget(0.f, 0.f, 0.f);
+  glm::vec4 perspectiveCursorTarget(lockvalues.x, lockvalues.y, lockvalues.z, 1.f);
   if (manipulatorAxis == XAXIS){
     perspectiveCursorTarget.x = actualCursor.x;
-    perspectiveCursorTarget.y = lockvalues.x;
-    perspectiveCursorTarget.z = lockvalues.y;
   }else if (manipulatorAxis == YAXIS){
-    perspectiveCursorTarget.x = lockvalues.x;
     perspectiveCursorTarget.y = actualCursor.y;
-    perspectiveCursorTarget.z = lockvalues.y;
   }else if (manipulatorAxis == ZAXIS){
-
+    perspectiveCursorTarget.z = actualCursor.x;
   }else{
     assert(false);
   }
 
+  auto tempCursorVal = glm::inverse(projection) * perspectiveCursorTarget;
+  perspectiveCursorTarget = tempCursorVal;
+  if (manipulatorAxis == XAXIS){
+    perspectiveCursorTarget.y = lockvalues.y;
+    perspectiveCursorTarget.z = lockvalues.z;
+  }else if (manipulatorAxis == YAXIS){
+    perspectiveCursorTarget.x = lockvalues.x;
+    perspectiveCursorTarget.z = lockvalues.z;
+  }else if (manipulatorAxis == ZAXIS){
+    perspectiveCursorTarget.x = lockvalues.x; // this is kind of weird...
+    perspectiveCursorTarget.y = lockvalues.y;
+  }else{
+    assert(false);
+  }
+  
+
+  std::cout << "cursorPos: " << print(glm::vec3(actualCursor.x, actualCursor.y, actualCursor.z)) << std::endl;
+  std::cout << "cursorClip: " << print(cursorClip) << std::endl;
   std::cout << "perspectiveCursorTarget: " << print(perspectiveCursorTarget) << std::endl;
+  std::cout << "tempCursorVal: " << print(tempCursorVal) << std::endl;
 
 
 
-  return glm::vec3(0.f, 0.f, 0.f);
+  return glm::vec3(perspectiveCursorTarget.x, perspectiveCursorTarget.y, perspectiveCursorTarget.z);
 }
 
 glm::quat quatFromDirection(glm::vec3 direction){ 

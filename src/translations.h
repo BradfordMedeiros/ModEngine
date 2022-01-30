@@ -19,7 +19,7 @@ glm::quat applyRotation(glm::quat currentOrientation, float offsetX, float offse
 float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBaseLow, float toBaseHigh);
 
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorTop, float screenWidth, float screenHeight);
-glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec2 lockvalues);
+glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues);
 
 glm::quat quatFromDirection(glm::vec3 direction);
 glm::vec3 directionFromQuat(glm::quat direction);
