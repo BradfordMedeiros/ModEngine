@@ -61,7 +61,7 @@ struct ManipulatorTarget {
   bool shouldSet;
 };
 
-bool manipulatorInstantClickMode = false;
+bool manipulatorInstantClickMode = true;
 ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
   if (axis != XAXIS && axis != YAXIS && axis != ZAXIS){
     return ManipulatorTarget {
@@ -183,7 +183,7 @@ void onManipulatorUpdate(
 ){
   if (manipulatorId != 0 && manipulatorTarget != 0){
     auto newValues = newManipulatorValues(getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
-    std::cout << "info: manipulator: (shouldset, id, target, movevec) => (" << newValues.shouldSet << ", " << manipulatorId << ", " << manipulatorTarget << ", " << print(newValues.targetNew) << ")" << std::endl; 
+    //std::cout << "info: manipulator: (shouldset, id, target, movevec) => (" << newValues.shouldSet << ", " << manipulatorId << ", " << manipulatorTarget << ", " << print(newValues.targetNew) << ")" << std::endl; 
     if (!newValues.shouldSet){
       return;
     }

@@ -1298,19 +1298,6 @@ int main(int argc, char* argv[]){
       selectItemCalled = false;
     }
 
-    /*,
-      glm::vec2(state.cursorLeft, state.cursorTop),
-      layers.at(0).fov*/
-    auto projectedPosition = projectCursorPositionOntoAxis(
-      projectionFromLayer(layers.at(0)),
-      view,
-      glm::vec2(state.cursorLeft, state.cursorTop), 
-      glm::vec2(state.currentScreenWidth, state.currentScreenHeight),
-      XAXIS, 
-      glm::vec3(2, -5, -5)
-    );
-    std::cout << "projected position: " << print(projectedPosition) << std::endl;
-
     onManipulatorUpdate(
       getGameObjectPos, 
       setGameObjectPosition, 
