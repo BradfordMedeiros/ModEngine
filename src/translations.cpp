@@ -73,53 +73,50 @@ glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float curs
   return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
 }
 
+float zDepth(float nearPlane, float farPlane, float depth){
+  return ((1 / depth) - (1 / nearPlane)) / ((1 / farPlane) - (1 / nearPlane));
+}
+
+glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, float depth){
+  auto zValue = zDepth(0.1f, 1000.f, depth);  // don't use hardcoded clip planes
+  auto worldpos = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
+  return worldpos;
+}
+
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues){
-  auto screenWidth = screensize.x;
-  auto screenHeight = screensize.y;
-  auto cursorLeft = cursorPos.x;
-  auto cursorTop = cursorPos.y;
-  glm::mat4 inversionMatrix = glm::inverse(projection * view);
-  float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
-  float screenYPosNdi = convertBase(cursorTop, 0.f, screenHeight, -1.f, 1.f);
-  glm::vec4 actualCursor = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
+  auto viewTarget = view * glm::vec4(lockvalues.x, lockvalues.y, lockvalues.z, 1.f);
+  auto zValue = zDepth(0.1f, 1000.f, viewTarget.z);
+
+  auto worldPosWrongLength = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
+
+
+  float screenXPosNdi = convertBase(cursorPos.x, 0.f, screensize.x, -1.f, 1.f);
+  float screenYPosNdi = convertBase(cursorPos.y, 0.f, screensize.y, -1.f, 1.f);
   glm::vec2 cursorClip =  glm::vec2(screenXPosNdi, -screenYPosNdi);
-
-
-  glm::vec4 perspectiveCursorTarget(lockvalues.x, lockvalues.y, lockvalues.z, 1.f);
-  if (manipulatorAxis == XAXIS){
-    perspectiveCursorTarget.x = actualCursor.x;
-  }else if (manipulatorAxis == YAXIS){
-    perspectiveCursorTarget.y = actualCursor.y;
-  }else if (manipulatorAxis == ZAXIS){
-    perspectiveCursorTarget.z = actualCursor.x;
-  }else{
-    assert(false);
-  }
-
-  auto tempCursorVal = glm::inverse(projection) * perspectiveCursorTarget;
-  perspectiveCursorTarget = tempCursorVal;
-  if (manipulatorAxis == XAXIS){
-    perspectiveCursorTarget.y = lockvalues.y;
-    perspectiveCursorTarget.z = lockvalues.z;
-  }else if (manipulatorAxis == YAXIS){
-    perspectiveCursorTarget.x = lockvalues.x;
-    perspectiveCursorTarget.z = lockvalues.z;
-  }else if (manipulatorAxis == ZAXIS){
-    perspectiveCursorTarget.x = lockvalues.x; // this is kind of weird...
-    perspectiveCursorTarget.y = lockvalues.y;
-  }else{
-    assert(false);
-  }
+  glm::vec4 actualCursor = glm::inverse(view) * glm::vec4(cursorClip.x, cursorClip.y, 0.f, 1.0f);
+  glm::vec3 cursor = glm::vec3(actualCursor.x, actualCursor.y, actualCursor.z);
+  auto cursorToTarget = lockvalues - cursor;
+  auto cursorToTargetLength = glm::length(cursorToTarget);
+  auto projLineDirection = glm::normalize(worldPosWrongLength - cursor);
+  auto projectionLength = cursorToTargetLength / glm::dot(projLineDirection, glm::normalize(cursorToTarget));
   
+  auto newZValue = zDepth(0.1f, 1000.f, projectionLength);
+  auto worldPos = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, newZValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
 
-  std::cout << "cursorPos: " << print(glm::vec3(actualCursor.x, actualCursor.y, actualCursor.z)) << std::endl;
-  std::cout << "cursorClip: " << print(cursorClip) << std::endl;
-  std::cout << "perspectiveCursorTarget: " << print(perspectiveCursorTarget) << std::endl;
-  std::cout << "tempCursorVal: " << print(tempCursorVal) << std::endl;
+  if (manipulatorAxis == XAXIS){
+    lockvalues.x =  worldPos.x;
+  }else if (manipulatorAxis == YAXIS){
+    lockvalues.y =  worldPos.y;
+  }
+  std::cout << std::endl;
+  std::cout << "projectionLength: " << projectionLength << std::endl;
+  std::cout << "cursor: " << print(cursorPos) << std::endl;
+  std::cout << "screen: " << print(screensize) << std::endl;
+  std::cout << "worldpos: " << print(worldPosWrongLength) << std::endl;
 
 
-
-  return glm::vec3(perspectiveCursorTarget.x, perspectiveCursorTarget.y, perspectiveCursorTarget.z);
+  return lockvalues;
+  //return glm::vec3(perspectiveCursorTarget.x, perspectiveCursorTarget.y, perspectiveCursorTarget.z);
 }
 
 glm::quat quatFromDirection(glm::vec3 direction){ 
