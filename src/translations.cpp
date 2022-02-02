@@ -77,17 +77,38 @@ float zDepth(float nearPlane, float farPlane, float depth){
   return ((1 / depth) - (1 / nearPlane)) / ((1 / farPlane) - (1 / nearPlane));
 }
 
-glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, float depth){
-  auto zValue = zDepth(0.1f, 1000.f, depth);  // don't use hardcoded clip planes
+glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, float nearPlane, float farPlane, glm::vec2 cursorPos, glm::vec2 screensize, float depth){
+  auto zValue = zDepth(nearPlane, farPlane, depth);  // don't use hardcoded clip planes
   auto worldpos = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
   return worldpos;
 }
 
+// todo verify this w/ tests
+bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, float tError, float* _t){
+  // math explanation here:
+  // x = origin_x + dir_x * t, same for y, z components
+  // two lines, and then set them equal, eg for x
+  // origin_x1 + dir_x1 * t = origin_x2 + dir_x2 * t
+  // (origin_x1 - origin_x2) = (dir_x2 - dir_x1) * t
+  // (origin_x1 - origin_x2) / (dir_x2 - dir_x1) = t
+  // verify all t's are the same, else they do not intersect
+
+  auto x_t = (ray1From.x - ray2From.x) / (ray2Dir.x - ray1Dir.x);
+  auto y_t = (ray1From.y - ray2From.y) / (ray2Dir.y - ray1Dir.z);
+  auto z_t = (ray1From.z - ray2From.y) / (ray2Dir.y - ray1Dir.z);
+  bool allTsSame = abs(abs(x_t - y_t) - abs(x_t - z_t)) < tError;
+  *_t = x_t;
+  return allTsSame;
+}
+
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues){
-  auto viewTarget = view * glm::vec4(lockvalues.x, lockvalues.y, lockvalues.z, 1.f);
+  
+
+  /*auto viewTarget = view * glm::vec4(lockvalues.x, lockvalues.y, lockvalues.z, 1.f);
   auto zValue = zDepth(0.1f, 1000.f, viewTarget.z);
 
-  auto worldPosWrongLength = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
+
+  dfsdafo worldPosWrongLength = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
 
 
   float screenXPosNdi = convertBase(cursorPos.x, 0.f, screensize.x, -1.f, 1.f);
@@ -113,7 +134,7 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   std::cout << "cursor: " << print(cursorPos) << std::endl;
   std::cout << "screen: " << print(screensize) << std::endl;
   std::cout << "worldpos: " << print(worldPosWrongLength) << std::endl;
-
+  */
 
   return lockvalues;
   //return glm::vec3(perspectiveCursorTarget.x, perspectiveCursorTarget.y, perspectiveCursorTarget.z);
