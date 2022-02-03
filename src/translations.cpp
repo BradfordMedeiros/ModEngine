@@ -90,15 +90,43 @@ float calculateIntersectionU(
   bool *valid
 ){
   float num = (ray1DirCoord2 * (ray1FromCoord1 - ray2FromCoord1)) + (ray1DirCoord1 * (ray2FromCoord2 - ray1FromCoord2));
+  if (aboutEqual(num, 0)){   // this means the vectors are parallel
+    std::cout << "num is zero!" << std::endl;
+  }
   float denom = (ray1DirCoord2 * ray2DirCoord1) - (ray1DirCoord1 * ray2DirCoord2); 
-  if (aboutEqual(denom, 0)){  
+  if (aboutEqual(denom, 0)){   // this means the vectors are parallel
     *valid = false;
+    std::cout << "denom is zero!" << std::endl;
     return 0.f;
   }
   *valid = true;
   return num / denom;
 }
 
+// eg (1, 2, 3) (-2, -4, -6) => -0.5, -0.5, -0.5
+// but also remember
+// eg (1, 1, 0) (2, 2, 0)  => 0.5 0.5 NaN, so check zero cases
+bool linesParallel(glm::vec3 ray1Dir, glm::vec3 ray2Dir){
+  float xMultiple = ray1Dir.x / ray2Dir.x;
+  bool xZero = aboutEqual(ray1Dir.x, 0) && aboutEqual(ray2Dir.x, 0);
+  float yMultiple = ray1Dir.y / ray2Dir.y;
+  bool yZero = aboutEqual(ray1Dir.y, 0) && aboutEqual(ray2Dir.y, 0);
+  float zMultiple = ray1Dir.z / ray2Dir.z;
+  bool zZero = aboutEqual(ray1Dir.z, 0) && aboutEqual(ray2Dir.z, 0);
+  bool allValuesEqual = true;
+  if (!xZero && !yZero){
+    allValuesEqual = allValuesEqual && aboutEqual(xMultiple, yMultiple);
+  }
+  if (!xZero && !zZero){
+    allValuesEqual = allValuesEqual && aboutEqual(xMultiple, zMultiple);
+  }
+  if (!yZero && !zZero){
+    allValuesEqual = allValuesEqual && aboutEqual(yMultiple, zMultiple);
+  }  
+  return allValuesEqual;
+}
+
+// TODO - check if there is a nice glm function i can use instead of this code
 bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, glm::vec3* _intersectPoint){
   // math explanation here to derive the below equation:
   // line is represented parametrically eg
@@ -117,6 +145,14 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   if (aboutEqual(ray1From, ray2From)){
     *_intersectPoint = ray1From;
     return true;
+  }
+  if (linesParallel(ray1Dir, ray2Dir)){
+    if (linesParallel(ray1Dir, ray1From - ray2From)){
+     *_intersectPoint = ray1From; 
+     return true;
+    }
+    // parellel vectors don't touch unless they both lie along the same line
+    return false;
   }
   bool xyValid = false;
   auto uValueXY= calculateIntersectionU(

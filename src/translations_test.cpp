@@ -39,7 +39,7 @@ struct calcLineIntersectionTestValues {
 // eg (1 + t, 3 + 2t, 2) for a line
 void calcLineIntersectionTest(){
   std::vector<calcLineIntersectionTestValues> lineTests = {
-    calcLineIntersectionTestValues { // maybe this one should intersects?  
+    calcLineIntersectionTestValues { // point at origin
       .fromPos = glm::vec3(0.f, 0.f, 0.f),
       .fromDir = glm::vec3(0.f, 0.f, 0.f),
       .toPos = glm::vec3(0.f, 0.f, 0.f),
@@ -47,14 +47,14 @@ void calcLineIntersectionTest(){
       .intersectionPoint = glm::vec3(0.f, 0.f, 0.f),
       .intersects = true,
     },
-    calcLineIntersectionTestValues { // maybe this one should intersects?  
+    calcLineIntersectionTestValues { // up dir offset by x = 1 aka parellel vectors
       .fromPos = glm::vec3(1.f, 0.f, 0.f),
       .fromDir = glm::vec3(0.f, 1.f, 0.f),
       .toPos = glm::vec3(2.f, 0.f, 0.f),
       .toDir = glm::vec3(0.f, 1.f, 0.f),
       .intersects = false,
     },
-    calcLineIntersectionTestValues { // maybe this one should intersects?  
+    calcLineIntersectionTestValues { // same origin point, different dirs
       .fromPos = glm::vec3(0.f, 0.f, 0.f),
       .fromDir = glm::vec3(0.f, 1.f, 0.f),
       .toPos = glm::vec3(0.f, 0.f, 0.f),
@@ -62,13 +62,34 @@ void calcLineIntersectionTest(){
       .intersectionPoint = glm::vec3(0.f, 0.f, 0.f),
       .intersects = true,
     },
-    calcLineIntersectionTestValues {
+    calcLineIntersectionTestValues {  // two vectors that intersect from different points
       .fromPos = glm::vec3(0.f, 0.f, 0.f),
       .fromDir = glm::vec3(1.f, 1.f, 0.f),
       .toPos = glm::vec3(1.f, 2.f, 1.f),
       .toDir = glm::vec3(0.f, 1.f, 1.f),
       .intersectionPoint = glm::vec3(1.f, 1.f, 0.f),
       .intersects = true,
+    },
+    calcLineIntersectionTestValues {    // one points above the other, dirs are up and down
+      .fromPos = glm::vec3(0.f, 0.f, 0.f),
+      .fromDir = glm::vec3(0.f, 1.f, 0.f),
+      .toPos = glm::vec3(0.f, 2.f, 0.f),
+      .toDir = glm::vec3(0.f, -1.f, 0.f),
+      .intersects = true,
+    },
+    calcLineIntersectionTestValues {    // diagnol and parellel
+      .fromPos = glm::vec3(0.f, 0.f, 0.f),
+      .fromDir = glm::vec3(-2.f, -2.f, 0.f),
+      .toPos = glm::vec3(2.f, 2.f, 0.f),
+      .toDir = glm::vec3(1.f, 1.f, 0.f),
+      .intersects = true,
+    },
+    calcLineIntersectionTestValues {    //  parellel but not on same line, kind of like diagnol case
+      .fromPos = glm::vec3(0.f, 0.f, 0.f),
+      .fromDir = glm::vec3(-2.f, -2.f, 0.f),
+      .toPos = glm::vec3(2.f, 2.f, -1.f),
+      .toDir = glm::vec3(1.f, 1.f, 0.f),
+      .intersects = false,
     },
   };
 
