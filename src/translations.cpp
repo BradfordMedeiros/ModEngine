@@ -91,8 +91,9 @@ float calculateIntersectionU(
 ){
   float num = (ray1DirCoord2 * (ray1FromCoord1 - ray2FromCoord1)) + (ray1DirCoord1 * (ray2FromCoord2 - ray1FromCoord2));
   float denom = (ray1DirCoord2 * ray2DirCoord1) - (ray1DirCoord1 * ray2DirCoord2); 
-  if (aboutEqual(denom, 0)){
+  if (aboutEqual(denom, 0)){  
     *valid = false;
+    return 0.f;
   }
   *valid = true;
   return num / denom;
@@ -102,11 +103,14 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   // math explanation here to derive the below equation:
   // line is represented parametrically eg
   // (1 + t, 3 + 2, 0 + t)
-  // then it's like x = ray1from_x + ray1Dir.x * t,   x = ray2from_x + ray1Dir.x * u
-  // then solve the system of equations using x and y (two equations) to get value of variable, say u, solve for t
+  // then it's like line1) x = ray1from_x + ray1Dir.x * t,  line2) x = ray2from_x + ray1Dir.x * u
+  // then solve the system of equations using x and y (two equations) to get value of variable, say u, solve for t.
+  // notice that x in line 1, is equal to x in line 2 when they intersect.  CalculuateIntersectionU above refers to this u value.
+
   // then plug those values back in to find x y and z points
   // repeat using second system of equations using x and z. 
   // verify that the point is the same
+
   // effectively this solves intersection by considering 2 dimensions at a time, and then verifying samenamess to get back into 3d
   // to solve system of equations, find a common multiple and then multiplying one by -1 
   // if solved you get the equation coded below
