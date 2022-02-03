@@ -103,27 +103,8 @@ float calculateIntersectionU(
   return num / denom;
 }
 
-// eg (1, 2, 3) (-2, -4, -6) => -0.5, -0.5, -0.5
-// but also remember
-// eg (1, 1, 0) (2, 2, 0)  => 0.5 0.5 NaN, so check zero cases
 bool linesParallel(glm::vec3 ray1Dir, glm::vec3 ray2Dir){
-  float xMultiple = ray1Dir.x / ray2Dir.x;
-  bool xZero = aboutEqual(ray1Dir.x, 0) && aboutEqual(ray2Dir.x, 0);
-  float yMultiple = ray1Dir.y / ray2Dir.y;
-  bool yZero = aboutEqual(ray1Dir.y, 0) && aboutEqual(ray2Dir.y, 0);
-  float zMultiple = ray1Dir.z / ray2Dir.z;
-  bool zZero = aboutEqual(ray1Dir.z, 0) && aboutEqual(ray2Dir.z, 0);
-  bool allValuesEqual = true;
-  if (!xZero && !yZero){
-    allValuesEqual = allValuesEqual && aboutEqual(xMultiple, yMultiple);
-  }
-  if (!xZero && !zZero){
-    allValuesEqual = allValuesEqual && aboutEqual(xMultiple, zMultiple);
-  }
-  if (!yZero && !zZero){
-    allValuesEqual = allValuesEqual && aboutEqual(yMultiple, zMultiple);
-  }  
-  return allValuesEqual;
+  return aboutEqual(glm::length(glm::cross(ray1Dir, ray2Dir)), 0);
 }
 
 // TODO - check if there is a nice glm function i can use instead of this code
