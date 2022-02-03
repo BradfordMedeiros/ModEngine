@@ -46,6 +46,10 @@ std::vector<TestCase> tests = {
   TestCase {
     .name = "moveRelativeRotateRight",
     .test = moveRelativeRotateRight,
+  },
+  TestCase {
+    .name = "calcLineIntersectionTest",
+    .test = calcLineIntersectionTest,
   }
 };
 

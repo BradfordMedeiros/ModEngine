@@ -6,4 +6,7 @@
 void moveRelativeIdentityTest();
 void moveRelativeRotateRight();
 
+void calcLineIntersectionTest();
+
+
 #endif

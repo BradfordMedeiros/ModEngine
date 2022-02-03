@@ -83,22 +83,59 @@ glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, float nearP
   return worldpos;
 }
 
-// todo verify this w/ tests
-bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, float tError, float* _t){
-  // math explanation here:
-  // x = origin_x + dir_x * t, same for y, z components
-  // two lines, and then set them equal, eg for x
-  // origin_x1 + dir_x1 * t = origin_x2 + dir_x2 * t
-  // (origin_x1 - origin_x2) = (dir_x2 - dir_x1) * t
-  // (origin_x1 - origin_x2) / (dir_x2 - dir_x1) = t
-  // verify all t's are the same, else they do not intersect
+// Solves the value of the parametrized u for the ray2 parametrize equation
+float calculateIntersectionU(
+  float ray1FromCoord1, float ray1DirCoord1, float ray2FromCoord1, float ray2DirCoord1,
+  float ray1FromCoord2, float ray1DirCoord2, float ray2FromCoord2, float ray2DirCoord2,
+  bool *valid
+){
+  float num = (ray1DirCoord2 * (ray1FromCoord1 - ray2FromCoord1)) + (ray1DirCoord1 * (ray2FromCoord2 - ray1FromCoord2));
+  float denom = (ray1DirCoord2 * ray2DirCoord1) - (ray1DirCoord1 * ray2DirCoord2); 
+  if (aboutEqual(denom, 0)){
+    *valid = false;
+  }
+  *valid = true;
+  return num / denom;
+}
 
-  auto x_t = (ray1From.x - ray2From.x) / (ray2Dir.x - ray1Dir.x);
-  auto y_t = (ray1From.y - ray2From.y) / (ray2Dir.y - ray1Dir.z);
-  auto z_t = (ray1From.z - ray2From.y) / (ray2Dir.y - ray1Dir.z);
-  bool allTsSame = abs(abs(x_t - y_t) - abs(x_t - z_t)) < tError;
-  *_t = x_t;
-  return allTsSame;
+bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, glm::vec3* _intersectPoint){
+  // math explanation here to derive the below equation:
+  // line is represented parametrically eg
+  // (1 + t, 3 + 2, 0 + t)
+  // then it's like x = ray1from_x + ray1Dir.x * t,   x = ray2from_x + ray1Dir.x * u
+  // then solve the system of equations using x and y (two equations) to get value of variable, say u, solve for t
+  // then plug those values back in to find x y and z points
+  // repeat using second system of equations using x and z. 
+  // verify that the point is the same
+  // effectively this solves intersection by considering 2 dimensions at a time, and then verifying samenamess to get back into 3d
+  // to solve system of equations, find a common multiple and then multiplying one by -1 
+  // if solved you get the equation coded below
+  if (aboutEqual(ray1From, ray2From)){
+    *_intersectPoint = ray1From;
+    return true;
+  }
+  bool xyValid = false;
+  auto uValueXY= calculateIntersectionU(
+    ray1From.x, ray1Dir.x, ray2From.x, ray2Dir.x,
+    ray1From.y, ray1Dir.y, ray2From.y, ray2Dir.y,
+    &xyValid
+  );
+  bool xzValid = false;
+  auto uValueXZ = calculateIntersectionU(
+    ray1From.x, ray1Dir.x, ray2From.x, ray2Dir.x,
+    ray1From.z, ray1Dir.z, ray2From.z, ray2Dir.z,
+    &xzValid
+  );
+
+  if (!xyValid || !xzValid || !aboutEqual(uValueXY, uValueXZ)){
+    *_intersectPoint = glm::vec3(0.f, 0.f, 0.f);
+    return false;
+  }
+  auto xCoord = ray2From.x + (ray2Dir.x * uValueXY);
+  auto yCoord = ray2From.y + (ray2Dir.y * uValueXY);
+  auto zCoord = ray2From.z + (ray2Dir.z * uValueXY);
+  *_intersectPoint = glm::vec3(xCoord, yCoord, zCoord);
+  return true;
 }
 
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues){
