@@ -69,7 +69,7 @@ glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float curs
   float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
   float screenYPosNdi = convertBase(cursorTop, 0.f, screenHeight, -1.f, 1.f);
   glm::vec4 direction = inversionMatrix * glm::vec4(screenXPosNdi, -screenYPosNdi, 1.0f, 1.0f);
-  std::cout << "direction is: " << print(glm::vec3(direction.x, direction.y, direction.z)) << std::endl;
+  //std::cout << "direction is: " << print(glm::vec3(direction.x, direction.y, direction.z)) << std::endl;
   return glm::normalize(glm::vec3(direction.x, direction.y, direction.z));
 }
 
@@ -83,26 +83,6 @@ glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, float nearP
   return worldpos;
 }
 
-// Solves the value of the parametrized u for the ray2 parametrize equation
-float calculateIntersectionU(
-  float ray1FromCoord1, float ray1DirCoord1, float ray2FromCoord1, float ray2DirCoord1,
-  float ray1FromCoord2, float ray1DirCoord2, float ray2FromCoord2, float ray2DirCoord2,
-  bool *valid
-){
-  float num = (ray1DirCoord2 * (ray1FromCoord1 - ray2FromCoord1)) + (ray1DirCoord1 * (ray2FromCoord2 - ray1FromCoord2));
-  if (aboutEqual(num, 0)){   // this means the vectors are parallel
-    std::cout << "num is zero!" << std::endl;
-  }
-  float denom = (ray1DirCoord2 * ray2DirCoord1) - (ray1DirCoord1 * ray2DirCoord2); 
-  if (aboutEqual(denom, 0)){   // this means the vectors are parallel
-    *valid = false;
-    std::cout << "denom is zero!" << std::endl;
-    return 0.f;
-  }
-  *valid = true;
-  return num / denom;
-}
-
 bool linesParallel(glm::vec3 ray1Dir, glm::vec3 ray2Dir){
   return aboutEqual(glm::length(glm::cross(ray1Dir, ray2Dir)), 0);
 }
@@ -110,92 +90,117 @@ bool linesParallel(glm::vec3 ray1Dir, glm::vec3 ray2Dir){
 // TODO - check if there is a nice glm function i can use instead of this code
 bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, glm::vec3* _intersectPoint){
   // math explanation here to derive the below equation:
-  // line is represented parametrically eg
-  // (1 + t, 3 + 2, 0 + t)
-  // then it's like line1) x = ray1from_x + ray1Dir.x * t,  line2) x = ray2from_x + ray1Dir.x * u
-  // then solve the system of equations using x and y (two equations) to get value of variable, say u, solve for t.
-  // notice that x in line 1, is equal to x in line 2 when they intersect.  CalculuateIntersectionU above refers to this u value.
+  glm::mat2 matrix1XY(1.f);
+  matrix1XY[0][0] = ray1Dir.x;
+  matrix1XY[1][0] = -1 * ray2Dir.x;
+  matrix1XY[0][1] = ray1Dir.y;
+  matrix1XY[1][1] = -1 * ray2Dir.y;
 
-  // then plug those values back in to find x y and z points
-  // repeat using second system of equations using x and z. 
-  // verify that the point is the same
+  glm::mat2 matrix1XZ(1.f);
+  matrix1XZ[0][0] = ray1Dir.x;
+  matrix1XZ[1][0] = -1 * ray2Dir.x;
+  matrix1XZ[0][1] = ray1Dir.z;
+  matrix1XZ[1][1] = -1 * ray2Dir.z;
 
-  // effectively this solves intersection by considering 2 dimensions at a time, and then verifying samenamess to get back into 3d
-  // to solve system of equations, find a common multiple and then multiplying one by -1 
-  // if solved you get the equation coded below
+  glm::mat2 initialPointsXY(1.f);
+  initialPointsXY[0][0] = ray2From.x - ray1From.x;
+  initialPointsXY[0][1] = ray2From.y - ray1From.y;
+
+  glm::mat2 initialPointsXZ(1.f);
+  initialPointsXZ[0][0] = ray2From.x - ray1From.x;
+  initialPointsXZ[0][1] = ray2From.z - ray1From.z;
+
+  auto matrixXYInverse = glm::inverse(matrix1XY);
+  auto XYisInvertible = (matrixXYInverse * matrix1XY) == glm::mat2(1.f);
+
+  auto matrixXZInverse = glm::inverse(matrix1XZ);
+  auto XZIsInvertible = (matrixXZInverse * matrix1XZ) == glm::mat2(1.f);
+
+
+  std::vector<glm::vec3> solutions;
+   // then instead here, check if either was invertible, and then use those points and as the solution
+  // if both were, verify that the values are the same 
+  if (XYisInvertible){
+    glm::mat2 solution = matrixXYInverse * initialPointsXY;
+    float t = solution[0][0];
+    auto xIntersection = ray1From.x + ray1Dir.x * t;
+    auto yIntersection = ray1From.y + ray1Dir.y * t;
+    auto zIntersection = ray1From.z + ray1Dir.z * t;
+    glm::vec3 intersectionPoint(xIntersection, yIntersection, zIntersection);
+    solutions.push_back(intersectionPoint);
+  }
+  if (XZIsInvertible){
+    glm::mat2 solution2 = matrixXZInverse * initialPointsXZ;
+    float t = solution2[0][0];
+    auto xIntersection = ray1From.x + ray1Dir.x * t;
+    auto yIntersection = ray1From.y + ray1Dir.y * t;
+    auto zIntersection = ray1From.z + ray1Dir.z * t;
+    glm::vec3 intersectionPoint(xIntersection, yIntersection, zIntersection);
+    solutions.push_back(intersectionPoint);
+  }
+
+  if (solutions.size() == 1){
+    // this should check if the t value works for the other point here i think
+ //   std::cout << "todo check secondary solution" << std::endl;
+    *_intersectPoint = solutions.at(0);
+    return true;
+  }else if (solutions.size() == 2){
+    if (!aboutEqual(solutions.at(0), solutions.at(1))){
+      return false;
+    }
+    *_intersectPoint = solutions.at(0);
+    return true;
+  }
+
   if (aboutEqual(ray1From, ray2From)){
     *_intersectPoint = ray1From;
     return true;
   }
-  if (linesParallel(ray1Dir, ray2Dir)){
-    if (linesParallel(ray1Dir, ray1From - ray2From)){
-     *_intersectPoint = ray1From; 
-     return true;
-    }
-    // parellel vectors don't touch unless they both lie along the same line
-    return false;
+  auto ray1ToRay2Dir = ray2From - ray1From;
+  if (linesParallel(ray1ToRay2Dir, ray1Dir)){
+    *_intersectPoint = ray1From;
+    return true;
   }
-  bool xyValid = false;
-  auto uValueXY= calculateIntersectionU(
-    ray1From.x, ray1Dir.x, ray2From.x, ray2Dir.x,
-    ray1From.y, ray1Dir.y, ray2From.y, ray2Dir.y,
-    &xyValid
-  );
-  bool xzValid = false;
-  auto uValueXZ = calculateIntersectionU(
-    ray1From.x, ray1Dir.x, ray2From.x, ray2Dir.x,
-    ray1From.z, ray1Dir.z, ray2From.z, ray2Dir.z,
-    &xzValid
-  );
-
-  if (!xyValid || !xzValid || !aboutEqual(uValueXY, uValueXZ)){
-    *_intersectPoint = glm::vec3(0.f, 0.f, 0.f);
-    return false;
+  if (linesParallel(ray1ToRay2Dir, ray2Dir)){
+    *_intersectPoint = ray1From;
+    return true;
   }
-  auto xCoord = ray2From.x + (ray2Dir.x * uValueXY);
-  auto yCoord = ray2From.y + (ray2Dir.y * uValueXY);
-  auto zCoord = ray2From.z + (ray2Dir.z * uValueXY);
-  *_intersectPoint = glm::vec3(xCoord, yCoord, zCoord);
-  return true;
+  return false;
 }
 
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues){
-  
-
-  /*auto viewTarget = view * glm::vec4(lockvalues.x, lockvalues.y, lockvalues.z, 1.f);
-  auto zValue = zDepth(0.1f, 1000.f, viewTarget.z);
-
-
-  dfsdafo worldPosWrongLength = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, zValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
-
-
-  float screenXPosNdi = convertBase(cursorPos.x, 0.f, screensize.x, -1.f, 1.f);
-  float screenYPosNdi = convertBase(cursorPos.y, 0.f, screensize.y, -1.f, 1.f);
-  glm::vec2 cursorClip =  glm::vec2(screenXPosNdi, -screenYPosNdi);
-  glm::vec4 actualCursor = glm::inverse(view) * glm::vec4(cursorClip.x, cursorClip.y, 0.f, 1.0f);
-  glm::vec3 cursor = glm::vec3(actualCursor.x, actualCursor.y, actualCursor.z);
-  auto cursorToTarget = lockvalues - cursor;
-  auto cursorToTargetLength = glm::length(cursorToTarget);
-  auto projLineDirection = glm::normalize(worldPosWrongLength - cursor);
-  auto projectionLength = cursorToTargetLength / glm::dot(projLineDirection, glm::normalize(cursorToTarget));
-  
-  auto newZValue = zDepth(0.1f, 1000.f, projectionLength);
-  auto worldPos = glm::unProjectNO (glm::vec3((screensize.x - cursorPos.x), cursorPos.y, newZValue), view, projection, glm::vec4(0, 0, screensize.x, screensize.y));
+  auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
+  glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
+  auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
+  glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
 
   if (manipulatorAxis == XAXIS){
-    lockvalues.x =  worldPos.x;
-  }else if (manipulatorAxis == YAXIS){
-    lockvalues.y =  worldPos.y;
+    target.y = positionFrom.y;
   }
-  std::cout << std::endl;
-  std::cout << "projectionLength: " << projectionLength << std::endl;
-  std::cout << "cursor: " << print(cursorPos) << std::endl;
-  std::cout << "screen: " << print(screensize) << std::endl;
-  std::cout << "worldpos: " << print(worldPosWrongLength) << std::endl;
-  */
+  if (manipulatorAxis == YAXIS){
+    target.x = positionFrom.x;
+  }
+  if (manipulatorAxis == ZAXIS){
+    target.x = positionFrom.x;
+  }
 
+  glm::vec3 targetDir(1.0f, 0.f, 0.f);
+  glm::vec3 projectedPoint(0.f, 0.f, 0.f);
+
+  bool lineIntersects = calcLineIntersection(positionFrom, selectDir, target, targetDir, &projectedPoint);
+  if (!lineIntersects){
+    return lockvalues;
+  }
+  if (manipulatorAxis == XAXIS){
+    lockvalues.x = projectedPoint.x;
+  }
+  if (manipulatorAxis == YAXIS){
+    lockvalues.y = projectedPoint.y;
+  }
+  if (manipulatorAxis == ZAXIS){
+    lockvalues.z = projectedPoint.z;
+  }
   return lockvalues;
-  //return glm::vec3(perspectiveCursorTarget.x, perspectiveCursorTarget.y, perspectiveCursorTarget.z);
 }
 
 glm::quat quatFromDirection(glm::vec3 direction){ 

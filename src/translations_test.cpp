@@ -62,6 +62,8 @@ void calcLineIntersectionTest(){
       .intersectionPoint = glm::vec3(0.f, 0.f, 0.f),
       .intersects = true,
     },
+
+    ////asdf
     calcLineIntersectionTestValues {  // two vectors that intersect from different points
       .fromPos = glm::vec3(0.f, 0.f, 0.f),
       .fromDir = glm::vec3(1.f, 1.f, 0.f),
@@ -91,18 +93,34 @@ void calcLineIntersectionTest(){
       .toDir = glm::vec3(1.f, 1.f, 0.f),
       .intersects = false,
     },
+    calcLineIntersectionTestValues {    
+      .fromPos = glm::vec3(0.f, 1.82497f, 28.8326f),
+      .fromDir = glm::vec3(0.2577f, 0.f, -0.966186f),
+      .toPos = glm::vec3(-5.f, 1.82497f, 0.f),
+      .toDir = glm::vec3(1.f, 0.f, 0.f),
+      .intersectionPoint = glm::vec3(7.6902, 1.82497f, 0.f),  // not sure about exactness and rounding errors here
+      .intersects = true,
+    },
   };
+
+
+
+  //(frompos, selectionray, targetpos, targetdir)    
+
 
   for (int i = 0; i < lineTests.size(); i++){
     glm::vec3 intersectPoint(0.f, 0.f, 0.f);
+    std::cout << "test: " << i << std::endl;
     auto lineTest = lineTests.at(i);
     bool intersects = calcLineIntersection(lineTest.fromPos, lineTest.fromDir, lineTest.toPos, lineTest.toDir, &intersectPoint);
     if (intersects != lineTest.intersects){
-      throw std::logic_error("incorrect line intersection value for line index: " + std::to_string(i) + " actual: " + (intersects ? "true" : "false"));
+      throw std::logic_error("incorrect line intersection determination for line index: " + std::to_string(i) + " actual: " + (intersects ? "true" : "false"));
     }else if(intersects){
       auto intersectionCorrect = aboutEqual(intersectPoint, lineTest.intersectionPoint);
       if (!intersectionCorrect){
-        throw std::logic_error("incorrect line intersection value for line index: " + std::to_string(i) + " actual: " + (intersects ? "true" : "false"));
+        throw std::logic_error("incorrect line intersection point for line index: " + std::to_string(i) + " actual: " + print(intersectPoint));
+      }else{
+        std::cout << "intersection correct: " << print(intersectPoint) << std::endl;
       }
     }
   }
