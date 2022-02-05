@@ -255,10 +255,12 @@ void selectItem(objid selectedId, Color pixelColor){
         "manipulator", 
         { 
           {"mesh", "./res/models/ui/manipulator.gltf" }, 
-          {"layer", "scale" }
+          {"layer", "scale" },
         }, 
         {}, 
-        {}
+        {
+          {"scale", glm::vec3(7.f, 7.f, 7.f)}
+        }
       );
     },
     removeObjectById,
@@ -1299,6 +1301,9 @@ int main(int argc, char* argv[]){
     }
 
     onManipulatorUpdate(
+      [](glm::vec3 frompos, glm::vec3 topos) -> void {
+        addLineNextCycle(frompos, topos, true, getUniqueObjId());
+      },
       getGameObjectPos, 
       setGameObjectPosition, 
       getGameObjectScale,

@@ -61,8 +61,15 @@ struct ManipulatorTarget {
   bool shouldSet;
 };
 
+
+void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3)> drawLine, glm::vec3 fromPos, glm::vec3 direction){
+  glm::vec3 normalizedDirection = glm::normalize(direction);
+  glm::vec3 fullOffset = glm::vec3(normalizedDirection.x * 10, normalizedDirection.y * 10, normalizedDirection.z * 10);
+  drawLine(fromPos, fromPos + fullOffset);
+}
+
 bool manipulatorInstantClickMode = true;
-ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
+ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3)> drawLine, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
   if (axis != XAXIS && axis != YAXIS && axis != ZAXIS){
     return ManipulatorTarget {
       .manipulatorNew = glm::vec3(0.f, 0.f, 0.f),
@@ -70,6 +77,8 @@ ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosi
       .shouldSet = false,
     };
   }
+
+  ProjectCursorDebugInfo projectCursorInfo{};
   auto newPosition = projectCursorPositionOntoAxis(
     projection,
     view,
@@ -77,15 +86,22 @@ ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosi
     screensize, 
     axis,  
     getPosition(manipulatorTarget),
-    NULL
+    &projectCursorInfo
   );
+  drawDirectionalLine(drawLine, projectCursorInfo.ray1From, projectCursorInfo.ray1Dir);
+  drawDirectionalLine(drawLine, projectCursorInfo.ray2From, projectCursorInfo.ray2Dir);
+  if (projectCursorInfo.intersects){
+   //; drawLine(projectCursorInfo.intersectionPoint, projectCursorInfo.intersectionPoint + glm::vec3(0, 2.f, 0));
+  }
+
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
     .targetNew = newPosition,
-    .shouldSet = true,
+    .shouldSet = projectCursorInfo.intersects,
   };
 }
 ManipulatorTarget newManipulatorValues(
+  std::function<void(glm::vec3, glm::vec3)> drawLine,
   std::function<glm::vec3(objid)> getPosition, 
   std::function<glm::vec3(objid)> getScale,
   glm::mat4 projection, 
@@ -97,7 +113,7 @@ ManipulatorTarget newManipulatorValues(
   glm::vec2 screensize
 ){
   if (manipulatorInstantClickMode){
-    return newValuesInstanceClick(getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
+    return newValuesInstanceClick(drawLine, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
   }
 
   if (mouseX < 10 && mouseX > -10.f){
@@ -170,6 +186,7 @@ ManipulatorTarget newManipulatorValues(
 }
 
 void onManipulatorUpdate(
+  std::function<void(glm::vec3, glm::vec3)> drawLine,
   std::function<glm::vec3(objid)> getPosition, 
   std::function<void(objid, glm::vec3)> setPosition, 
   std::function<glm::vec3(objid)> getScale,
@@ -183,7 +200,7 @@ void onManipulatorUpdate(
   glm::vec2 screensize
 ){
   if (manipulatorId != 0 && manipulatorTarget != 0){
-    auto newValues = newManipulatorValues(getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
+    auto newValues = newManipulatorValues(drawLine, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
     //std::cout << "info: manipulator: (shouldset, id, target, movevec) => (" << newValues.shouldSet << ", " << manipulatorId << ", " << manipulatorTarget << ", " << print(newValues.targetNew) << ")" << std::endl; 
     if (!newValues.shouldSet){
       return;
