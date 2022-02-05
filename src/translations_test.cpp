@@ -101,7 +101,17 @@ void calcLineIntersectionTest(){
       .intersectionPoint = glm::vec3(7.6902, 1.82497f, 0.f),  // not sure about exactness and rounding errors here
       .intersects = true,
     },
+    calcLineIntersectionTestValues {    
+      .fromPos = glm::vec3(-2.56473f, 3.11289f, 8.85043f),
+      .fromDir = glm::vec3(-0.138966f, -0.121712f, -0.982789f),
+      .toPos = glm::vec3(-5.f, 3.11289f, 0.f),
+      .toDir = glm::vec3(1.f, 0.f, 0.f),
+      .intersects = false,
+    },
   };
+
+
+
 
 
 

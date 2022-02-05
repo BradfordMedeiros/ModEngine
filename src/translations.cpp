@@ -87,6 +87,13 @@ bool linesParallel(glm::vec3 ray1Dir, glm::vec3 ray2Dir){
   return aboutEqual(glm::length(glm::cross(ray1Dir, ray2Dir)), 0);
 }
 
+glm::vec3 calcIntersectionFromT(glm::vec3 from, glm::vec3 dir, float t){
+  auto x = from.x + (dir.x * t);
+  auto y = from.y + (dir.y * t);
+  auto z = from.z + (dir.z * t);
+  return glm::vec3(x, y, z);
+}
+
 // TODO - check if there is a nice glm function i can use instead of this code
 bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, glm::vec3* _intersectPoint){
   // math explanation here to derive the below equation:
@@ -102,13 +109,13 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   matrix1XZ[0][1] = ray1Dir.z;
   matrix1XZ[1][1] = -1 * ray2Dir.z;
 
-  glm::mat2 initialPointsXY(1.f);
-  initialPointsXY[0][0] = ray2From.x - ray1From.x;
-  initialPointsXY[0][1] = ray2From.y - ray1From.y;
+  glm::vec2 initialPointsXY(1.f, 1.f);
+  initialPointsXY.x = ray2From.x - ray1From.x;
+  initialPointsXY.y = ray2From.y - ray1From.y;
 
-  glm::mat2 initialPointsXZ(1.f);
-  initialPointsXZ[0][0] = ray2From.x - ray1From.x;
-  initialPointsXZ[0][1] = ray2From.z - ray1From.z;
+  glm::vec2 initialPointsXZ(1.f, 1.f);
+  initialPointsXZ[0] = ray2From.x - ray1From.x;
+  initialPointsXZ[1] = ray2From.z - ray1From.z;
 
   auto matrixXYInverse = glm::inverse(matrix1XY);
   auto XYisInvertible = (matrixXYInverse * matrix1XY) == glm::mat2(1.f);
@@ -117,38 +124,52 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   auto XZIsInvertible = (matrixXZInverse * matrix1XZ) == glm::mat2(1.f);
 
 
-  std::vector<glm::vec3> solutions;
+  std::vector<std::pair<float, float>> solutions;
    // then instead here, check if either was invertible, and then use those points and as the solution
   // if both were, verify that the values are the same 
   if (XYisInvertible){
-    glm::mat2 solution = matrixXYInverse * initialPointsXY;
-    float t = solution[0][0];
-    auto xIntersection = ray1From.x + ray1Dir.x * t;
-    auto yIntersection = ray1From.y + ray1Dir.y * t;
-    auto zIntersection = ray1From.z + ray1Dir.z * t;
-    glm::vec3 intersectionPoint(xIntersection, yIntersection, zIntersection);
-    solutions.push_back(intersectionPoint);
+    glm::vec2 solution = matrixXYInverse * initialPointsXY;
+    float t = solution.x;
+    float u = solution.y;
+    solutions.push_back({t, u});
   }
   if (XZIsInvertible){
-    glm::mat2 solution2 = matrixXZInverse * initialPointsXZ;
-    float t = solution2[0][0];
-    auto xIntersection = ray1From.x + ray1Dir.x * t;
-    auto yIntersection = ray1From.y + ray1Dir.y * t;
-    auto zIntersection = ray1From.z + ray1Dir.z * t;
-    glm::vec3 intersectionPoint(xIntersection, yIntersection, zIntersection);
-    solutions.push_back(intersectionPoint);
+    glm::vec2 solution2 = matrixXZInverse * initialPointsXZ;
+    float t = solution2.x;
+    float u = solution2.y;
+    solutions.push_back({t, u});
   }
 
   if (solutions.size() == 1){
     // this should check if the t value works for the other point here i think
  //   std::cout << "todo check secondary solution" << std::endl;
-    *_intersectPoint = solutions.at(0);
-    return true;
-  }else if (solutions.size() == 2){
-    if (!aboutEqual(solutions.at(0), solutions.at(1))){
+    auto rayOneIntersectT = calcIntersectionFromT(ray1From, ray1Dir, solutions.at(0).first);
+    auto rayTwoIntersectU = calcIntersectionFromT(ray2From, ray2Dir, solutions.at(0).second);
+    if (!aboutEqual(rayOneIntersectT, rayTwoIntersectU)){
+      std::cout << "0: t and u are providing different solutions" << std::endl;
+      std::cout << "(t, u) - " << solutions.at(0).first << " - " << solutions.at(0).second << std::endl;
+      std::cout << "from t: " << print(rayOneIntersectT) << std::endl;
+      std::cout << "from u: " << print(rayTwoIntersectU) << std::endl;
       return false;
     }
-    *_intersectPoint = solutions.at(0);
+    *_intersectPoint = rayOneIntersectT;
+    return true;
+  }else if (solutions.size() == 2){
+    if (!aboutEqual(solutions.at(0).first, solutions.at(1).first) || !aboutEqual(solutions.at(0).second, solutions.at(1).second)){
+      return false;
+    }
+    auto rayOneIntersectT = calcIntersectionFromT(ray1From, ray1Dir, solutions.at(0).first);
+    auto rayTwoIntersectU = calcIntersectionFromT(ray2From, ray2Dir, solutions.at(0).second);
+    if (!aboutEqual(rayOneIntersectT, rayTwoIntersectU)){
+      std::cout << "1: t and u are providing different solutions" << std::endl;
+      std::cout << "ray1from, ray1dir: " << print(ray1From) << ", " << print(ray1Dir) << std::endl;
+      std::cout << "ray2from, ray2dir: " << print(ray2From) << ", " << print(ray2Dir) << std::endl;
+      std::cout << "(t, u) - " << solutions.at(0).first << " - " << solutions.at(0).second << std::endl;
+      std::cout << "from t: " << print(rayOneIntersectT) << std::endl;
+      std::cout << "from u: " << print(rayTwoIntersectU) << std::endl;
+      return false;
+    }
+    *_intersectPoint = rayOneIntersectT;
     return true;
   }
 
