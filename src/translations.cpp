@@ -147,6 +147,8 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
     auto rayTwoIntersectU = calcIntersectionFromT(ray2From, ray2Dir, solutions.at(0).second);
     if (!aboutEqual(rayOneIntersectT, rayTwoIntersectU)){
       std::cout << "0: t and u are providing different solutions" << std::endl;
+      std::cout << "ray1from, ray1dir: " << print(ray1From) << ", " << print(ray1Dir) << std::endl;
+      std::cout << "ray2from, ray2dir: " << print(ray2From) << ", " << print(ray2Dir) << std::endl;
       std::cout << "(t, u) - " << solutions.at(0).first << " - " << solutions.at(0).second << std::endl;
       std::cout << "from t: " << print(rayOneIntersectT) << std::endl;
       std::cout << "from u: " << print(rayTwoIntersectU) << std::endl;
@@ -189,7 +191,7 @@ bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2F
   return false;
 }
 
-glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues){
+glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo){
   auto positionFrom4 = glm::inverse(view) * glm::vec4(0.f, 0.f, 0.f, 1.0);
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
   auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
@@ -197,19 +199,32 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
 
   if (manipulatorAxis == XAXIS){
     target.y = positionFrom.y;
+    selectDir.y = 0.f;
   }
   if (manipulatorAxis == YAXIS){
-    target.x = positionFrom.x;
+   // target.x = positionFrom.x;
+   // selectDir.x = 0.f;
   }
   if (manipulatorAxis == ZAXIS){
     target.x = positionFrom.x;
+    selectDir.x = 0.f;
   }
 
-  glm::vec3 targetDir(1.0f, 0.f, 0.f);
+  glm::vec3 targetDir(0.f, 0.f, 0.f);
+  if (manipulatorAxis == XAXIS){
+    targetDir = glm::vec3(1.f, 0.f, 0.f);
+  }else if (manipulatorAxis == YAXIS){
+    std::cout << "setting to y axis!" << std::endl;
+    targetDir = glm::vec3(0.f, 1.f, 0.f);
+  }else if (manipulatorAxis == ZAXIS){
+    targetDir = glm::vec3(0.f, 0.f, -1.f);
+  }
+
   glm::vec3 projectedPoint(0.f, 0.f, 0.f);
 
   bool lineIntersects = calcLineIntersection(positionFrom, selectDir, target, targetDir, &projectedPoint);
   if (!lineIntersects){
+    std::cout << "does not intersect!" << std::endl;
     return lockvalues;
   }
   if (manipulatorAxis == XAXIS){
@@ -220,6 +235,15 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   }
   if (manipulatorAxis == ZAXIS){
     lockvalues.z = projectedPoint.z;
+  }
+
+  if (_debugInfo != NULL){
+    _debugInfo -> ray1From = positionFrom;
+    _debugInfo -> ray1Dir = selectDir;
+    _debugInfo -> ray2From = target;
+    _debugInfo -> ray2Dir = targetDir;
+    _debugInfo -> intersectionPoint = projectedPoint;
+    _debugInfo -> intersects = lineIntersects;
   }
   return lockvalues;
 }

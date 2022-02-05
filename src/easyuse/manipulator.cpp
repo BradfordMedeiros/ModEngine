@@ -76,7 +76,8 @@ ManipulatorTarget newValuesInstanceClick(std::function<glm::vec3(objid)> getPosi
     cursorPos,  
     screensize, 
     axis,  
-    getPosition(manipulatorTarget)
+    getPosition(manipulatorTarget),
+    NULL
   );
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
