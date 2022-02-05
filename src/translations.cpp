@@ -197,53 +197,47 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
 
-  if (manipulatorAxis == XAXIS){
-    target.y = positionFrom.y;
-    selectDir.y = 0.f;
-  }
-  if (manipulatorAxis == YAXIS){
-    target.x = positionFrom.x;
-    selectDir.x = 0.f;
-  }
-  if (manipulatorAxis == ZAXIS){
-    target.x = positionFrom.x;
-    selectDir.x = 0.f;
-  }
-
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){
     targetDir = glm::vec3(1.f, 0.f, 0.f);
   }else if (manipulatorAxis == YAXIS){
-    std::cout << "setting to y axis!" << std::endl;
     targetDir = glm::vec3(0.f, 1.f, 0.f);
   }else if (manipulatorAxis == ZAXIS){
     targetDir = glm::vec3(0.f, 0.f, -1.f);
   }
 
-  glm::vec3 projectedPoint(0.f, 0.f, 0.f);
+  auto distance = glm::distance(positionFrom, target);
+  auto angleBetween = glm::dot(glm::normalize(selectDir), glm::normalize(targetDir));
+  auto radians = glm::acos(angleBetween);
+  auto projectedDistance = distance / glm::sin(radians);
+  auto projectAmount = glm::normalize(selectDir) * projectedDistance;
+  auto alongAxis = distance * glm::cos(radians);
+  auto alongAxisDir  = glm::normalize(targetDir) * alongAxis;
+  auto finalPos = positionFrom + alongAxisDir;
 
-  std::cout << "target is at: " << print(target) << std::endl;
-  bool lineIntersects = calcLineIntersection(positionFrom, selectDir, target, targetDir, &projectedPoint);
-  if (lineIntersects){
+  auto targetPosition = positionFrom + projectAmount;
+  auto targetDelta = targetPosition - lockvalues;
     if (manipulatorAxis == XAXIS){
-      lockvalues.x = projectedPoint.x;
+      lockvalues.x = finalPos.x;
+     // lockvalues.x = lockvalues.x + targetDelta.x;
     }
     if (manipulatorAxis == YAXIS){
-      lockvalues.y = projectedPoint.y;
+      lockvalues.y = finalPos.y;
+     // lockvalues.y = lockvalues.y + targetDelta.y;
     }
     if (manipulatorAxis == ZAXIS){
-      lockvalues.z = projectedPoint.z;
+      lockvalues.z = finalPos.z;
+
+     // lockvalues.z = lockvalues.z + targetDelta.z;
     }
-  }
-  std::cout << "intersects?: " << lineIntersects << std::endl;
 
   if (_debugInfo != NULL){
     _debugInfo -> ray1From = positionFrom;
     _debugInfo -> ray1Dir = selectDir;
     _debugInfo -> ray2From = target;
-    _debugInfo -> ray2Dir = targetDir;
-    _debugInfo -> intersectionPoint = projectedPoint;
-    _debugInfo -> intersects = lineIntersects;
+    _debugInfo -> ray2Dir = selectDir;
+    _debugInfo -> intersectionPoint = positionFrom;
+    _debugInfo -> intersects = true;
   }
   return lockvalues;
 }
