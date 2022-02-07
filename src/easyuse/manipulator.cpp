@@ -62,7 +62,7 @@ struct ManipulatorTarget {
 };
 
 
-void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction){
+void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction, LineColor color){
   glm::vec3 normalizedDirection = glm::normalize(direction);
   auto rotation = quatFromDirection(normalizedDirection);
   for (int i = 0; i < 10; i++){
@@ -70,9 +70,8 @@ void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> dr
     auto leftDash = newPos + rotation * glm::vec3(-0.1f, -0.01f, 0.5f);
     auto rightDash = newPos + rotation * glm::vec3(0.1f, -0.01f, 0.5f);
     std::cout << "drawLine from: " << print(leftDash) << " to " << print(rightDash) << std::endl;
-
-    drawLine(leftDash, newPos, GREEN);
-    drawLine(rightDash, newPos, GREEN);
+    drawLine(leftDash, newPos, color);
+    drawLine(rightDash, newPos, color);
   }
 
 }
@@ -101,23 +100,14 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
   clearLines();
 
   // actual lengths
-  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
-  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
-  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
+  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
+  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
 
 
   // directions
-  drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir);
-  //drawDirectionalLine(drawLine, projectCursorInfo.target, projectCursorInfo.targetAxis);
-
-  //drawDirectionalLine(drawLine, projectCursorInfo.ray2From, projectCursorInfo.ray2Dir);
-
-  /*
-    _debugInfo -> projectedTarget = adjTargetPos;
-    _debugInfo -> target = target;
-    _debugInfo -> intersectionPoint = finalPosition;
-    _debugInfo -> selectDir = selectDir;
-    _debugInfo -> targetAxis = targetDir;*/
+  drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
+  drawDirectionalLine(drawLine, projectCursorInfo.target, projectCursorInfo.targetAxis, RED);
 
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
