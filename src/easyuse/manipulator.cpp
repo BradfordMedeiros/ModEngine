@@ -64,7 +64,7 @@ struct ManipulatorTarget {
 
 void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3)> drawLine, glm::vec3 fromPos, glm::vec3 direction){
   glm::vec3 normalizedDirection = glm::normalize(direction);
-  glm::vec3 fullOffset = glm::vec3(normalizedDirection.x * 10, normalizedDirection.y * 10, normalizedDirection.z * 10);
+  glm::vec3 fullOffset = glm::vec3(normalizedDirection.x * 30, normalizedDirection.y * 30, normalizedDirection.z * 30);
   drawLine(fromPos, fromPos + fullOffset);
 }
 
@@ -88,16 +88,14 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
     getPosition(manipulatorTarget),
     &projectCursorInfo
   );
-  drawDirectionalLine(drawLine, projectCursorInfo.ray1From, projectCursorInfo.ray1Dir);
-  drawDirectionalLine(drawLine, projectCursorInfo.ray2From, projectCursorInfo.ray2Dir);
-  if (projectCursorInfo.intersects){
-   //; drawLine(projectCursorInfo.intersectionPoint, projectCursorInfo.intersectionPoint + glm::vec3(0, 2.f, 0));
-  }
+  //drawDirectionalLine(drawLine, projectCursorInfo.ray1From, projectCursorInfo.ray1Dir);
+  //drawDirectionalLine(drawLine, projectCursorInfo.ray2From, projectCursorInfo.ray2Dir);
+
 
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
     .targetNew = newPosition,
-    .shouldSet = projectCursorInfo.intersects,
+    .shouldSet = true,
   };
 }
 ManipulatorTarget newManipulatorValues(
@@ -187,6 +185,7 @@ ManipulatorTarget newManipulatorValues(
 
 void onManipulatorUpdate(
   std::function<void(glm::vec3, glm::vec3)> drawLine,
+  std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
   std::function<void(objid, glm::vec3)> setPosition, 
   std::function<glm::vec3(objid)> getScale,

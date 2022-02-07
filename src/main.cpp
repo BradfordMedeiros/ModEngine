@@ -1304,6 +1304,9 @@ int main(int argc, char* argv[]){
       [](glm::vec3 frompos, glm::vec3 topos) -> void {
         addLineNextCycle(frompos, topos, true, getUniqueObjId());
       },
+      []() -> void {
+
+      },
       getGameObjectPos, 
       setGameObjectPosition, 
       getGameObjectScale,

@@ -8,6 +8,7 @@ void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName, s
 void onManipulatorMouseRelease();
 void onManipulatorUpdate(
   std::function<void(glm::vec3, glm::vec3)> drawLine,
+  std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
   std::function<void(objid, glm::vec3)> setPosition, 
   std::function<glm::vec3(objid)> getScale,

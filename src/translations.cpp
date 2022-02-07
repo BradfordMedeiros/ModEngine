@@ -196,7 +196,6 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
   glm::vec3 positionFrom(positionFrom4.x, positionFrom4.y, positionFrom4.z);
   auto selectDir = getCursorRayDirection(projection, view, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
   glm::vec3 target(lockvalues.x, lockvalues.y, lockvalues.z);
-
   glm::vec3 targetDir(0.f, 0.f, 0.f);
   if (manipulatorAxis == XAXIS){
     targetDir = glm::vec3(1.f, 0.f, 0.f);
@@ -206,38 +205,47 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
     targetDir = glm::vec3(0.f, 0.f, -1.f);
   }
 
-  auto distance = glm::distance(positionFrom, target);
-  auto angleBetween = glm::dot(glm::normalize(selectDir), glm::normalize(targetDir));
-  auto radians = glm::acos(angleBetween);
-  auto projectedDistance = distance / glm::sin(radians);
-  auto projectAmount = glm::normalize(selectDir) * projectedDistance;
-  auto alongAxis = distance * glm::cos(radians);
-  auto alongAxisDir  = glm::normalize(targetDir) * alongAxis;
-  auto finalPos = positionFrom + alongAxisDir;
+  ///
+  // 1
+  auto radians = glm::acos(glm::dot(selectDir, glm::normalize(targetDir)));
+  std::cout << "angle: " << glm::degrees(radians) << std::endl;
 
-  auto targetPosition = positionFrom + projectAmount;
-  auto targetDelta = targetPosition - lockvalues;
-    if (manipulatorAxis == XAXIS){
-      lockvalues.x = finalPos.x;
-     // lockvalues.x = lockvalues.x + targetDelta.x;
-    }
-    if (manipulatorAxis == YAXIS){
-      lockvalues.y = finalPos.y;
-     // lockvalues.y = lockvalues.y + targetDelta.y;
-    }
-    if (manipulatorAxis == ZAXIS){
-      lockvalues.z = finalPos.z;
+  // 3
+  glm::vec3 adjTargetPos = positionFrom;
+  if (manipulatorAxis == XAXIS){
+    adjTargetPos.z = target.z;
+  }
+  if (manipulatorAxis == YAXIS){
+    adjTargetPos.x = target.x;
+  }
+  if (manipulatorAxis == ZAXIS){
+    adjTargetPos.x = target.x;
+    adjTargetPos.y = target.y;
+  }
+  std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
 
-     // lockvalues.z = lockvalues.z + targetDelta.z;
-    }
+  auto distanceToAdjTarget = glm::distance(positionFrom, adjTargetPos);
+  auto distanceFinal = distanceToAdjTarget / glm::sin(radians);
+  auto offsetFinal = selectDir * distanceFinal;
+  auto finalPosition = positionFrom + offsetFinal;
+
+  if (manipulatorAxis == XAXIS){
+    lockvalues.x = finalPosition.x;
+  }
+  if (manipulatorAxis == YAXIS){
+    lockvalues.y = finalPosition.y;
+  }
+  if (manipulatorAxis == ZAXIS){
+    lockvalues.z = finalPosition.z;
+  }
 
   if (_debugInfo != NULL){
-    _debugInfo -> ray1From = positionFrom;
-    _debugInfo -> ray1Dir = selectDir;
-    _debugInfo -> ray2From = target;
-    _debugInfo -> ray2Dir = selectDir;
-    _debugInfo -> intersectionPoint = positionFrom;
-    _debugInfo -> intersects = true;
+    _debugInfo -> positionFrom = positionFrom;
+    _debugInfo -> projectedTarget = adjTargetPos;
+    _debugInfo -> target = target;
+    _debugInfo -> intersectionPoint = finalPosition;
+    _debugInfo -> selectDir = selectDir;
+    _debugInfo -> targetAxis = targetDir;
   }
   return lockvalues;
 }

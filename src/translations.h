@@ -23,12 +23,12 @@ glm::vec3 projectCursorAtDepth(glm::mat4 projection, glm::mat4 view, float nearP
 bool calcLineIntersection(glm::vec3 ray1From, glm::vec3 ray1Dir, glm::vec3 ray2From, glm::vec3 ray2Dir, glm::vec3* _intersectPoint);
 
 struct ProjectCursorDebugInfo {
-  glm::vec3 ray1From;
-  glm::vec3 ray1Dir;
-  glm::vec3 ray2From;
-  glm::vec3 ray2Dir;
+  glm::vec3 positionFrom;
+  glm::vec3 projectedTarget;
+  glm::vec3 target;
   glm::vec3 intersectionPoint;
-  bool intersects;
+  glm::vec3 selectDir;
+  glm::vec3 targetAxis;
 };
 glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis manipulatorAxis, glm::vec3 lockvalues, ProjectCursorDebugInfo* _debugInfo);
 
