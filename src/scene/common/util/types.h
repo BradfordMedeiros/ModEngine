@@ -45,6 +45,8 @@ struct Line {
   glm::vec3 toPos;
 };
 
+enum LineColor { RED, GREEN, BLUE };
+
 struct VoxelBody {
   glm::vec3 position;
   unsigned int textureId;

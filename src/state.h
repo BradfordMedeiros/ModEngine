@@ -40,6 +40,7 @@ struct engineState {
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
   Axis manipulatorAxis;
+  objid manipulatorLineId;
 
   bool firstMouse;
   float lastX;

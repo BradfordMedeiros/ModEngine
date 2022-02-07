@@ -62,14 +62,14 @@ struct ManipulatorTarget {
 };
 
 
-void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3)> drawLine, glm::vec3 fromPos, glm::vec3 direction){
+void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction){
   glm::vec3 normalizedDirection = glm::normalize(direction);
   glm::vec3 fullOffset = glm::vec3(normalizedDirection.x * 30, normalizedDirection.y * 30, normalizedDirection.z * 30);
-  drawLine(fromPos, fromPos + fullOffset);
+  drawLine(fromPos, fromPos + fullOffset, RED);
 }
 
 bool manipulatorInstantClickMode = true;
-ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3)> drawLine, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
+ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
   if (axis != XAXIS && axis != YAXIS && axis != ZAXIS){
     return ManipulatorTarget {
       .manipulatorNew = glm::vec3(0.f, 0.f, 0.f),
@@ -88,9 +88,28 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
     getPosition(manipulatorTarget),
     &projectCursorInfo
   );
-  //drawDirectionalLine(drawLine, projectCursorInfo.ray1From, projectCursorInfo.ray1Dir);
+
+  clearLines();
+
+  // actual lengths
+  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
+  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
+
+
+  // directions
+  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir);
+  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetDir);
+  //drawDirectionalLine(drawLine, projectCursorInfo.target, projectCursorInfo.targetAxis);
+
   //drawDirectionalLine(drawLine, projectCursorInfo.ray2From, projectCursorInfo.ray2Dir);
 
+  /*
+    _debugInfo -> projectedTarget = adjTargetPos;
+    _debugInfo -> target = target;
+    _debugInfo -> intersectionPoint = finalPosition;
+    _debugInfo -> selectDir = selectDir;
+    _debugInfo -> targetAxis = targetDir;*/
 
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
@@ -99,7 +118,8 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
   };
 }
 ManipulatorTarget newManipulatorValues(
-  std::function<void(glm::vec3, glm::vec3)> drawLine,
+  std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
+  std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
   std::function<glm::vec3(objid)> getScale,
   glm::mat4 projection, 
@@ -111,7 +131,7 @@ ManipulatorTarget newManipulatorValues(
   glm::vec2 screensize
 ){
   if (manipulatorInstantClickMode){
-    return newValuesInstanceClick(drawLine, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
+    return newValuesInstanceClick(drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
   }
 
   if (mouseX < 10 && mouseX > -10.f){
@@ -184,7 +204,7 @@ ManipulatorTarget newManipulatorValues(
 }
 
 void onManipulatorUpdate(
-  std::function<void(glm::vec3, glm::vec3)> drawLine,
+  std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
   std::function<void(objid, glm::vec3)> setPosition, 
@@ -199,7 +219,7 @@ void onManipulatorUpdate(
   glm::vec2 screensize
 ){
   if (manipulatorId != 0 && manipulatorTarget != 0){
-    auto newValues = newManipulatorValues(drawLine, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
+    auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
     //std::cout << "info: manipulator: (shouldset, id, target, movevec) => (" << newValues.shouldSet << ", " << manipulatorId << ", " << manipulatorTarget << ", " << print(newValues.targetNew) << ")" << std::endl; 
     if (!newValues.shouldSet){
       return;

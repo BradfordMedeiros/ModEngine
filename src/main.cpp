@@ -73,6 +73,7 @@ struct PermaLine {
   Line line;
   objid lineid;
   objid owner;
+  LineColor color;
 };
 std::vector<PermaLine> permaLines;
 
@@ -306,7 +307,7 @@ void loadAllTextures(){
   }*/
 }
 
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color){
   if (permaline){
     auto lineId = getUniqueObjId();
     permaLines.push_back(
@@ -317,6 +318,7 @@ objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid
         },
         .lineid = lineId,
         .owner = owner, 
+        .color = color,
       }
     );   
     return lineId;
@@ -328,6 +330,10 @@ objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid
   lines.push_back(line);
   return 0;
 }
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+  return addLineNextCycle(fromPos, toPos, permaline, owner, GREEN);
+}
+
 void freeLine(objid lineId){
   std::vector<PermaLine> newLines;
   for (auto &line : permaLines){
@@ -340,7 +346,7 @@ void freeLine(objid lineId){
     permaLines.push_back(line);
   }
 }
-void removePermalines(objid owner){
+void removeLinesByOwner(objid owner){
   std::vector<PermaLine> newLines;
   for (auto &line : permaLines){
     if (owner != line.owner){
@@ -546,6 +552,19 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
   return numTriangles;
 }
 
+void drawPermaLines(GLint shaderProgram, LineColor color, glm::vec3 tint){
+  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
+  if (permaLines.size() > 0){
+    std::vector<Line> lines;
+    for (auto permaline : permaLines){
+      if (permaline.color == color){
+        lines.push_back(permaline.line);
+      }
+    }
+    drawLines(lines);
+  }  
+}
+
 void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   auto projection = projectionFromLayer(layers.at(0));
   glUseProgram(shaderProgram);
@@ -580,14 +599,10 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   }
   drawCoordinateSystem(100.f);
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
-  if (permaLines.size() > 0){
-    std::vector<Line> lines;
-    for (auto permaline : permaLines){
-     lines.push_back(permaline.line);
-    }
-    drawLines(lines);
-  }
+
+  drawPermaLines(shaderProgram, RED, glm::vec3(1.f, 0.f, 0.f));
+  drawPermaLines(shaderProgram, GREEN, glm::vec3(0.f, 1.f, 0.f));
+  drawPermaLines(shaderProgram, BLUE, glm::vec3(0.f, 0.f, 1.f));
 
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
   if (lines.size() > 0){
@@ -1033,7 +1048,7 @@ int main(int argc, char* argv[]){
         extensionsUnloadScript(extensions, id);
       }); 
       removeLocks(id);
-      removePermalines(id);
+      removeLinesByOwner(id);
     },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime
@@ -1301,11 +1316,14 @@ int main(int argc, char* argv[]){
     }
 
     onManipulatorUpdate(
-      [](glm::vec3 frompos, glm::vec3 topos) -> void {
-        addLineNextCycle(frompos, topos, true, getUniqueObjId());
+      [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
+        if (state.manipulatorLineId == 0){
+          state.manipulatorLineId = getUniqueObjId();
+        }
+        addLineNextCycle(frompos, topos, true, state.manipulatorLineId, color);
       },
       []() -> void {
-
+        removeLinesByOwner(state.manipulatorLineId);
       },
       getGameObjectPos, 
       setGameObjectPosition, 
