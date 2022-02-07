@@ -1132,7 +1132,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       //onDebugKey();
       std::cout << "group selection: " << state.groupSelection << std::endl;
-      state.groupSelection = !state.groupSelection;
+      //state.groupSelection = !state.groupSelection;
     }
   },
   InputDispatch{

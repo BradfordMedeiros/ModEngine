@@ -64,8 +64,17 @@ struct ManipulatorTarget {
 
 void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction){
   glm::vec3 normalizedDirection = glm::normalize(direction);
-  glm::vec3 fullOffset = glm::vec3(normalizedDirection.x * 30, normalizedDirection.y * 30, normalizedDirection.z * 30);
-  drawLine(fromPos, fromPos + fullOffset, RED);
+  auto rotation = quatFromDirection(normalizedDirection);
+  for (int i = 0; i < 10; i++){
+    auto newPos = fromPos + glm::vec3(normalizedDirection.x * i, normalizedDirection.y * i, normalizedDirection.z * i);
+    auto leftDash = newPos + rotation * glm::vec3(-0.1f, -0.01f, 0.5f);
+    auto rightDash = newPos + rotation * glm::vec3(0.1f, -0.01f, 0.5f);
+    std::cout << "drawLine from: " << print(leftDash) << " to " << print(rightDash) << std::endl;
+
+    drawLine(leftDash, newPos, GREEN);
+    drawLine(rightDash, newPos, GREEN);
+  }
+
 }
 
 bool manipulatorInstantClickMode = true;
@@ -92,14 +101,13 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
   clearLines();
 
   // actual lengths
-  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
-  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
-  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
+  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
+  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
 
 
   // directions
-  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir);
-  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetDir);
+  drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir);
   //drawDirectionalLine(drawLine, projectCursorInfo.target, projectCursorInfo.targetAxis);
 
   //drawDirectionalLine(drawLine, projectCursorInfo.ray2From, projectCursorInfo.ray2Dir);
