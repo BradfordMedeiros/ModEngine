@@ -69,12 +69,20 @@ void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> dr
     auto newPos = fromPos + glm::vec3(normalizedDirection.x * i, normalizedDirection.y * i, normalizedDirection.z * i);
     auto leftDash = newPos + rotation * glm::vec3(-0.1f, -0.01f, 0.5f);
     auto rightDash = newPos + rotation * glm::vec3(0.1f, -0.01f, 0.5f);
-    std::cout << "drawLine from: " << print(leftDash) << " to " << print(rightDash) << std::endl;
+    //std::cout << "drawLine from: " << print(leftDash) << " to " << print(rightDash) << std::endl;
     drawLine(leftDash, newPos, color);
     drawLine(rightDash, newPos, color);
   }
-
 }
+
+void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 position){
+  drawLine(position + glm::vec3(0.f, 2.f, 0.f), position + glm::vec3(0.f, -2.f, 0.f), RED);
+  drawLine(position + glm::vec3(2.f, 0.f, 0.f), position + glm::vec3(-2.f, 0.f, 0.f), RED);
+  drawLine(position + glm::vec3(0.f, 0.f, -2.f), position + glm::vec3(0.f, 0.f, 2.f), RED);
+}
+
+
+
 
 bool manipulatorInstantClickMode = true;
 ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
@@ -101,6 +109,7 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
 
   // actual lengths
   drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+  drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
   drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
   drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
 
