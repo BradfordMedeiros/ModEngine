@@ -1134,6 +1134,7 @@ int main(int argc, char* argv[]){
   glfwSetCharCallback(window, keyCharCallback);
   glfwSetDropCallback(window, drop_callback);
   glfwSetJoystickCallback(joystickCallback);
+  glfwSwapInterval(state.swapInterval);
 
   unsigned int frameCount = 0;
   float previous = now;
@@ -1170,6 +1171,7 @@ int main(int argc, char* argv[]){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   setShouldProfile(shouldBenchmark);
+
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){

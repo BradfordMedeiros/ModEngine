@@ -136,6 +136,18 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "dof",
     .attribute = "state",
   },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto swapInterval = std::get_if<float>(&value);
+      if (swapInterval != NULL){
+        int value = static_cast<int>(*swapInterval);
+        std::cout << "state: swap interval: " << value << std::endl;
+        state.swapInterval = value;
+      }     
+    },
+    .object = "rendering",
+    .attribute = "swapinterval",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -223,6 +235,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .skybox = "",
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
     .enableDof = false,
+    .swapInterval = 0,
 	};
 	return state;
 }

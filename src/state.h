@@ -95,6 +95,8 @@ struct engineState {
   glm::vec3 skyboxcolor;
 
   bool enableDof;
+
+  int swapInterval;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
