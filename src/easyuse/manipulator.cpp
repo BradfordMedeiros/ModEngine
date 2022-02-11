@@ -76,9 +76,10 @@ void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> dr
 }
 
 void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 position){
-  drawLine(position + glm::vec3(0.f, 2.f, 0.f), position + glm::vec3(0.f, -2.f, 0.f), RED);
-  drawLine(position + glm::vec3(2.f, 0.f, 0.f), position + glm::vec3(-2.f, 0.f, 0.f), RED);
-  drawLine(position + glm::vec3(0.f, 0.f, -2.f), position + glm::vec3(0.f, 0.f, 2.f), RED);
+  float length = 5.f;
+  drawLine(position + glm::vec3(0.f, length * 2.f, 0.f), position + glm::vec3(0.f, length * -2.f, 0.f), RED);
+  drawLine(position + glm::vec3(length * 2.f, 0.f, 0.f), position + glm::vec3(length *  -2.f, 0.f, 0.f), RED);
+  drawLine(position + glm::vec3(0.f, 0.f, length *  -2.f), position + glm::vec3(0.f, 0.f, length *  2.f), RED);
 }
 
 
@@ -116,7 +117,7 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
 
   // directions
   drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
-  drawDirectionalLine(drawLine, projectCursorInfo.target, projectCursorInfo.targetAxis, RED);
+  drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
 
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
