@@ -97,6 +97,11 @@ struct engineState {
   bool enableDof;
 
   int swapInterval;
+
+  bool nativeViewport;
+  glm::ivec2 viewportSize;
+  glm::ivec2 viewportoffset;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

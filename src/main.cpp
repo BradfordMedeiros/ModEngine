@@ -222,7 +222,7 @@ void handlePainting(UVCoord uvsToPaint){
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
-  glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+  glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
 }
 void handleTerrainPainting(UVCoord uvCoord){
   if (state.shouldTerrainPaint && state.mouseIsDown){
@@ -907,6 +907,9 @@ int main(int argc, char* argv[]){
      std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
      state.currentScreenWidth = width;
      state.currentScreenHeight = height;
+     if (state.nativeViewport){
+       state.viewportSize = glm::ivec2(width, height);
+     }
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -917,7 +920,7 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
 
      updateDepthTexturesSize();
      updatePortalTexturesSize();
@@ -1541,7 +1544,6 @@ int main(int argc, char* argv[]){
       }
     )
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
     glUseProgram(finalProgram); 

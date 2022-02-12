@@ -148,6 +148,29 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "swapinterval",
   },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto viewportSizeStr = std::get_if<std::string>(&value);
+      if (viewportSizeStr != NULL){
+        state.nativeViewport = false;
+        state.viewportSize = parseVec2(*viewportSizeStr);
+        std::cout << "viewport size: " << print(state.viewportSize) << std::endl;
+      }     
+    },
+    .object = "rendering",
+    .attribute = "viewport",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto viewportSizeStr = std::get_if<std::string>(&value);
+      if (viewportSizeStr != NULL){
+        state.viewportoffset = parseVec2(*viewportSizeStr);
+        std::cout << "viewport offsetset: " << print(state.viewportoffset) << std::endl;
+      }     
+    },
+    .object = "rendering",
+    .attribute = "viewportoffset",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -236,6 +259,9 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
     .enableDof = false,
     .swapInterval = 0,
+    .nativeViewport = true,
+    .viewportSize = glm::ivec2(0, 0),
+    .viewportoffset = glm::ivec2(0, 0),
 	};
 	return state;
 }
