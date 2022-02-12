@@ -171,6 +171,29 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "viewportoffset",
   },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto resolutionStr = std::get_if<std::string>(&value);
+      if (resolutionStr != NULL){
+        state.nativeResolution = false;
+        state.resolution = parseVec2(*resolutionStr);
+        std::cout << "resolution: " << print(state.resolution) << std::endl;
+      }     
+    },
+    .object = "rendering",
+    .attribute = "resolution",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto borderTexture = std::get_if<std::string>(&value);
+      if (borderTexture != NULL){
+        state.borderTexture = *borderTexture;
+        std::cout << "border texture: " << state.borderTexture << std::endl;
+      }     
+    },
+    .object = "rendering",
+    .attribute = "border",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -260,8 +283,11 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .enableDof = false,
     .swapInterval = 0,
     .nativeViewport = true,
+    .nativeResolution = true,
     .viewportSize = glm::ivec2(0, 0),
     .viewportoffset = glm::ivec2(0, 0),
+    .resolution = glm::ivec2(0, 0),
+    .borderTexture = "",
 	};
 	return state;
 }
