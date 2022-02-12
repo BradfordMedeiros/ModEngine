@@ -192,7 +192,7 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-void handlePainting(UVCoord uvsToPaint){
+void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   if (!canPaint || !state.shouldPaint){
     return;
   }
@@ -222,7 +222,6 @@ void handlePainting(UVCoord uvsToPaint){
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
-  glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
 }
 void handleTerrainPainting(UVCoord uvCoord){
   if (state.shouldTerrainPaint && state.mouseIsDown){
@@ -920,8 +919,6 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
-
      updateDepthTexturesSize();
      updatePortalTexturesSize();
 
@@ -1236,7 +1233,8 @@ int main(int argc, char* argv[]){
     );
     
     view = renderView(viewTransform.position, viewTransform.rotation);
-    
+    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);  // render stuff to full screen 
+ 
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
@@ -1342,7 +1340,8 @@ int main(int argc, char* argv[]){
       glm::vec2(state.cursorLeft, state.cursorTop),
       glm::vec2(state.currentScreenWidth, state.currentScreenHeight)
     );
-    handlePainting(uvCoord);
+    handlePaintingModifiesViewport(uvCoord);
+    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight); 
     handleTerrainPainting(uvCoord);
      
     if (useChunkingSystem){
@@ -1589,6 +1588,7 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }
 
+    glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
     glDisable(GL_DEPTH_TEST);
