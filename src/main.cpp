@@ -259,7 +259,7 @@ void selectItem(objid selectedId, Color pixelColor){
         }, 
         {}, 
         {
-          {"scale", glm::vec3(7.f, 7.f, 7.f)}
+          //{"scale", glm::vec3(7.f, 7.f, 7.f)}
         }
       );
     },
@@ -736,6 +736,10 @@ float getViewspaceDepth(glm::mat4& transView, objid elementId){
   return getTransformationFromMatrix(viewPosition).position.z;
 }
 
+GLFWwindow* window = NULL;
+GLFWmonitor* monitor = NULL;
+const GLFWvidmode* mode = NULL;
+
 int main(int argc, char* argv[]){
   signal(SIGABRT, signalHandler);  
 
@@ -835,12 +839,13 @@ int main(int argc, char* argv[]){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  monitor = glfwGetPrimaryMonitor();
+  mode = glfwGetVideoMode(monitor);
   state.currentScreenWidth = mode->width;
   state.currentScreenHeight = mode->height;
- 
-  GLFWwindow* window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", result["fullscreen"].as<bool>() ? monitor : NULL, NULL);
+  state.fullscreen = result["fullscreen"].as<bool>();
+  window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", NULL, NULL);\
+  toggleFullScreen(state.fullscreen);
 
   if (window == NULL){
     std::cerr << "ERROR: failed to create window" << std::endl;
@@ -1573,11 +1578,15 @@ int main(int argc, char* argv[]){
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
 
+    //std::cout << "? size: " << (state.nativeResolution ? "native" : "fixed") << " " << print(state.resolution) << std::endl;
+
+    //  Border rendering
     if (state.borderTexture != ""){
       glBindTexture(GL_TEXTURE_2D, world.textures.at(state.borderTexture).texture.textureId);
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glClear(GL_DEPTH_BUFFER_BIT);
     }
+    //////////////////////////////////////////////////////////
 
     if (state.renderMode == RENDER_FINAL){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);

@@ -15,6 +15,9 @@ extern bool selectItemCalled;
 extern std::vector<LayerInfo> layers;
 extern DynamicLoading dynamicLoading;
 extern SysInterface interface;
+extern GLFWwindow* window;
+extern GLFWmonitor* monitor;
+extern const GLFWvidmode* mode;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -493,6 +496,14 @@ void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
     }
   } 
   remapper.lastFrameDown = lastFrameDown;
+}
+
+void toggleFullScreen(bool fullscreen){
+  if (fullscreen){
+    glfwSetWindowMonitor(window, monitor, 0, 0, mode -> width, mode->height, 0);
+  }else{
+    glfwSetWindowMonitor(window, NULL, 0, 0, 400, 600, 0);
+  }
 }
 
 float cameraSpeed = 1.f;
@@ -1220,5 +1231,14 @@ std::vector<InputDispatch> inputFns = {
       offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}});
     }
   },
-  ////////////////////////////////////
+  InputDispatch{
+    .sourceKey = GLFW_KEY_ENTER, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,
+    .hasPreq = true,
+    .fn = []() -> void {
+      state.fullscreen = !state.fullscreen;
+      toggleFullScreen(state.fullscreen);
+    }
+  },
 };

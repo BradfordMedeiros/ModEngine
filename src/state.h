@@ -98,6 +98,7 @@ struct engineState {
 
   // Rendering options 
   int swapInterval;
+  bool fullscreen;
   bool nativeViewport;
   bool nativeResolution;
   glm::ivec2 viewportSize;

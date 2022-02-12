@@ -282,6 +282,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
     .enableDof = false,
     .swapInterval = 0,
+    .fullscreen = false,
     .nativeViewport = true,
     .nativeResolution = true,
     .viewportSize = glm::ivec2(0, 0),
