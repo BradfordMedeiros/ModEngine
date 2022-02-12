@@ -1,23 +1,32 @@
 
-fog:color:0 0 0
-fog:enabled:false
 
+### Lighting ###
 diffuse:enabled:true
 specular:enabled:true
 bloom:enabled:false
-
+#bloom:amount:1
+#bloomblur:amount:1
+#exposure:amount:2
 pbr:enabled:false
+###############################
 
+### Post Process ###
+fog:color:0 0 0
+fog:enabled:false
+###############################
+
+### Effects ###
+#dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
 #skybox:color:0.2 0.2 0.2
-#dof:state:enabled
+###############################
 
-#rendering:swapinterval:1  # vsync enabled
+### Window/Rendering ###
+#rendering:swapinterval:1  # 1 = vsync enabled, 0 disabled
+#rendering:viewport:500 500
+#rendering:viewportoffset:320 0
+#rendering:border:./res/textures/skyboxs/desert/bottom.jpg
+#rendering:resolution:512 512
+rendering:fullscreen:false
 
-
-# These work correctly for eg text rendering (i think ortho proj in general?) but not perspective
-rendering:viewport:2180 980
-#rendering:viewportoffset:128 32
-#rendering:border:./res/textures/grid.png
-#rendering:resolution:1920 1080
 
