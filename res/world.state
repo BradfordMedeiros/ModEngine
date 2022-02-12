@@ -4,10 +4,20 @@ fog:enabled:false
 
 diffuse:enabled:true
 specular:enabled:true
-bloom:enabled:true
+bloom:enabled:false
 
-#pbr:enabled:true
+pbr:enabled:false
 
 skybox:texture:./res/textures/skyboxs/desert/
 #skybox:color:0.2 0.2 0.2
-dof:state:enabled
+#dof:state:enabled
+
+#rendering:swapinterval:1  # vsync enabled
+
+
+# These work correctly for eg text rendering (i think ortho proj in general?) but not perspective
+rendering:viewport:2180 980
+#rendering:viewportoffset:128 32
+#rendering:border:./res/textures/grid.png
+#rendering:resolution:1920 1080
+
