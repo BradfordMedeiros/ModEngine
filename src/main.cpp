@@ -1106,7 +1106,7 @@ int main(int argc, char* argv[]){
     .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
   };
 
-  //loadAllTextures();
+  loadAllTextures();
   
   dynamicLoading = createDynamicLoading(worldfile);
   if (result["rechunk"].as<int>()){
@@ -1573,6 +1573,11 @@ int main(int argc, char* argv[]){
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
 
+    if (state.borderTexture != ""){
+      glBindTexture(GL_TEXTURE_2D, world.textures.at(state.borderTexture).texture.textureId);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glClear(GL_DEPTH_BUFFER_BIT);
+    }
 
     if (state.renderMode == RENDER_FINAL){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture);
@@ -1587,7 +1592,6 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_BLOOM){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }
-
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
