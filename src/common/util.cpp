@@ -256,12 +256,25 @@ std::vector<float> parseFloatVec(std::string value){
   return floats;
 }
 
+bool maybeParseBool(std::string value, bool* _value){
+  if (value == "true"){
+    *_value = true;
+    return true;
+  }
+  if (value == "false"){
+    *_value = false;
+    return true;
+  }
+  return false;
+}
+
 glm::quat eulerToQuat(glm::vec3 eulerAngles){
   return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
 glm::quat parseQuat(std::string payload){
   return orientationFromPos(glm::vec3(0, 0, 0), (parseVec(payload)));
 }
+
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
 }

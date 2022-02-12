@@ -50,9 +50,11 @@ glm::vec3 parseVec(std::string positionRaw);
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
 glm::vec2 parseVec2(std::string positionRaw);
 std::vector<float> parseFloatVec(std::string value);
+bool maybeParseBool(std::string value, bool* _value);
 bool maybeParseFloat(std::string value, float& _number);
 glm::quat eulerToQuat(glm::vec3 eulerAngles);
 glm::quat parseQuat(std::string payload);
+
 glm::vec3 quatToVec(glm::quat quat);
 glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition);
 

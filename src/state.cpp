@@ -194,6 +194,18 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "border",
   },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto fullscreen = std::get_if<std::string>(&value);
+      if (fullscreen != NULL){
+        auto valid = maybeParseBool(*fullscreen, &state.fullscreen);
+        assert(valid);
+        std::cout << "fullscreen: " << (state.fullscreen ? "true" : "false") << std::endl;
+      }     
+    },
+    .object = "rendering",
+    .attribute = "fullscreen",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){

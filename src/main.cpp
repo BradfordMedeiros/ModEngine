@@ -841,11 +841,9 @@ int main(int argc, char* argv[]){
 
   monitor = glfwGetPrimaryMonitor();
   mode = glfwGetVideoMode(monitor);
-  state.currentScreenWidth = mode->width;
-  state.currentScreenHeight = mode->height;
-  state.fullscreen = result["fullscreen"].as<bool>();
+  state.currentScreenWidth = mode -> width;
+  state.currentScreenHeight = mode -> height;
   window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", NULL, NULL);\
-  toggleFullScreen(state.fullscreen);
 
   if (window == NULL){
     std::cerr << "ERROR: failed to create window" << std::endl;
@@ -1090,7 +1088,11 @@ int main(int argc, char* argv[]){
     interface,
     defaultMeshesToLoad
   );
+
+  state.fullscreen = result["fullscreen"].as<bool>(); // merge flags and world.state concept
   setInitialState(state, "./res/world.state", now); 
+
+
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
   }
@@ -1140,6 +1142,7 @@ int main(int argc, char* argv[]){
   glfwSetDropCallback(window, drop_callback);
   glfwSetJoystickCallback(joystickCallback);
   glfwSwapInterval(state.swapInterval);
+  toggleFullScreen(state.fullscreen);
 
   unsigned int frameCount = 0;
   float previous = now;
