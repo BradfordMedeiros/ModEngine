@@ -86,14 +86,12 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
       return;
     }
 
-    float sensitivity = 0.05;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
+    float rotateSensitivity = 0.05;
     if (state.isRotateSelection){
-      rotateCamera(xoffset, -yoffset);   // -y offset because mouse move forward is negative, which is ok, but inverted
+      rotateCamera(xoffset * rotateSensitivity, -yoffset * rotateSensitivity);   // -y offset because mouse move forward is negative, which is ok, but inverted
     }else{
-      state.cursorLeft += (int)(xoffset * 15);
-      state.cursorTop  -= (int)(yoffset * 15);
+      state.cursorLeft = xpos;
+      state.cursorTop = ypos;
     }
 }
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
