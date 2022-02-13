@@ -48,6 +48,8 @@ struct engineState {
   float offsetX;
   float offsetY;
   bool mouseIsDown;
+  bool captureCursor;
+
   bool enableDiffuse;
   bool enableSpecular;
   bool enablePBR;

@@ -854,8 +854,6 @@ int main(int argc, char* argv[]){
 
   if (headlessmode){
     glfwHideWindow(window);
-  }else{
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
   }
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
@@ -1143,6 +1141,7 @@ int main(int argc, char* argv[]){
   glfwSetJoystickCallback(joystickCallback);
   glfwSwapInterval(state.swapInterval);
   toggleFullScreen(state.fullscreen);
+  toggleCursor(state.captureCursor); 
 
   unsigned int frameCount = 0;
   float previous = now;

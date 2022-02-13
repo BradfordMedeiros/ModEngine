@@ -1,5 +1,4 @@
 
-
 ### Lighting ###
 diffuse:enabled:true
 specular:enabled:true
@@ -30,3 +29,5 @@ skybox:texture:./res/textures/skyboxs/desert/
 rendering:fullscreen:false
 
 
+### input stuff ###
+#mouse:capturecursor:true

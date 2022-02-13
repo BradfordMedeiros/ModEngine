@@ -206,6 +206,18 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "fullscreen",
   },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto captureCursor = std::get_if<std::string>(&value);
+      if (captureCursor != NULL){
+        auto valid = maybeParseBool(*captureCursor, &state.captureCursor);
+        assert(valid);
+        std::cout << "captureCursor: " << (state.captureCursor ? "true" : "false") << std::endl;
+      }     
+    },
+    .object = "mouse",
+    .attribute = "capturecursor",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -255,6 +267,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.offsetX = 0,
 		.offsetY = 0,
     .mouseIsDown = false,
+    .captureCursor = false,
 		.enableDiffuse = true,
 		.enableSpecular = true,
     .enablePBR = false,

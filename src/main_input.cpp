@@ -503,6 +503,10 @@ void toggleFullScreen(bool fullscreen){
     glfwSetWindowMonitor(window, NULL, 0, 0, 400, 600, 0);
   }
 }
+void toggleCursor(bool focusCursor){
+  std::cout << "toggle cursor: " << focusCursor << std::endl;
+  glfwSetInputMode(window, GLFW_CURSOR, focusCursor ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN);  
+}
 
 float cameraSpeed = 1.f;
 std::vector<InputDispatch> inputFns = {
@@ -1237,6 +1241,16 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.fullscreen = !state.fullscreen;
       toggleFullScreen(state.fullscreen);
+    }
+  },
+  InputDispatch{
+    .sourceKey = 'C',
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,
+    .hasPreq = true,
+    .fn = []() -> void {
+      state.captureCursor = !state.captureCursor;
+      toggleCursor(state.captureCursor);
     }
   },
 };
