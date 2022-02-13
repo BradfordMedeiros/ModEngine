@@ -1249,26 +1249,27 @@ int main(int argc, char* argv[]){
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
 
     std::vector<glm::mat4> lightMatrixs;
-
-    for (int i = 0; i < lights.size(); i++){
-      setActiveDepthTexture(i + 1);
-      auto light = lights.at(i);
-      auto lightView = renderView(light.pos, light.rotation);
+    PROFILE(
+      "RENDERING-SHADOWMAPS",
+      for (int i = 0; i < lights.size(); i++){
+        setActiveDepthTexture(i + 1);
+        auto light = lights.at(i);
+        auto lightView = renderView(light.pos, light.rotation);
     
-      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
-      glEnable(GL_DEPTH_TEST);
-      glClearColor(255.0, 255.0, 255.0, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(255.0, 255.0, 255.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
-      auto lightProjview = lightProjection * lightView;
-      lightMatrixs.push_back(lightProjview);
+        glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
+        auto lightProjview = lightProjection * lightView;
+        lightMatrixs.push_back(lightProjview);
 
-      renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
-    }
+        renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
+    })
 
     PROFILE(
       "RENDERING-SELECTION",
