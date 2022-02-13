@@ -109,15 +109,15 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
   clearLines();
 
   // actual lengths
-  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
   drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
-  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
-  drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
+  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
+  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
 
 
   // directions
-  drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
-  drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
+  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
+  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
 
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
