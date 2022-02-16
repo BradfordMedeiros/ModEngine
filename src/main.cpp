@@ -930,7 +930,7 @@ int main(int argc, char* argv[]){
      updatePortalTexturesSize();
 
 
-     orthoProj = glm::ortho(0.0f, (float)state.resolution.x, 0.0f, (float)state.resolution.y, -1.0f, 1.0f);  
+     orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
   }; 
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
@@ -1615,7 +1615,7 @@ int main(int argc, char* argv[]){
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
     glDisable(GL_DEPTH_TEST);
-    glViewport(0, 0, state.resolution.x, state.resolution.y);
+    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
     renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
     glEnable(GL_DEPTH_TEST);
 
