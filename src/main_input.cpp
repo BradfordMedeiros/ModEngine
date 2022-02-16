@@ -337,8 +337,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 glm::mat4 projectionFromLayer(LayerInfo& layer){
-  return glm::perspective(glm::radians(layer.fov), (float)state.currentScreenWidth / state.currentScreenHeight, layer.nearplane, layer.farplane); 
+  // this means that as the window is dragged wider (say 2560x1980) you simply see more
+  return glm::perspective(glm::radians(layer.fov), (float)state.viewportSize.x / (float)state.viewportSize.y, layer.nearplane, layer.farplane); 
+
+  // this would show a constant amount in the screen, but then just stretch it, which might be more "fair" for a  multiplayer game, but looks super shitty
+  // if i care about "fair" should just use a smaller viewport configuration and not render to whole scene
+  // this is not how it should be done, but leaving this just since it is conceptually interesting :)
+  //return glm::perspective(glm::radians(layer.fov), (float)state.resolution.x / (float)state.resolution.y, layer.nearplane, layer.farplane); 
 }
+
 LayerInfo layerByName(std::string layername){
   for (auto &layer : layers){
     if (layer.name == layername){

@@ -108,7 +108,7 @@ std::vector<ObjectStateMapping> mapping = {
       auto skyboxTexture = std::get_if<std::string>(&value);
       if (skyboxTexture != NULL){
         std::cout << "state: update skybox: " << *skyboxTexture << std::endl;
-        loadSkybox(world, *skyboxTexture); 
+        state.skybox = *skyboxTexture;
       }     
     },
     .object = "skybox",

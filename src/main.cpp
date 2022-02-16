@@ -115,7 +115,7 @@ void updateDepthTexturesSize(){
   for (int i = 0; i < numDepthTextures; i++){
     glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
     // GL_DEPTH_COMPONENT32F
-    glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_STENCIL, state.currentScreenWidth, state.currentScreenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_STENCIL, state.resolution.x, state.resolution.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   }
 }
 void generateDepthTextures(){
@@ -140,7 +140,7 @@ void setActiveDepthTexture(int index){
 void updatePortalTexturesSize(){
   for (int i = 0; i < numPortalTextures; i++){
     glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);   
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);   
   }
 }
 void generatePortalTextures(){
@@ -641,7 +641,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   }
 
   if(!state.isRotateSelection){
-     drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
+     drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.resolution.y - state.cursorTop, 20, 20);
   }
 
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
@@ -659,7 +659,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
   drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
   drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
-  drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.currentScreenWidth) + "||" + std::to_string(state.currentScreenHeight) + ")", 10, 90, 3);
+  drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", 10, 90, 3);
   
   if (selected(state.editor) != -1){
     auto selectedIndex = selected(state.editor);
@@ -694,7 +694,7 @@ void takeScreenshot(std::string filepath){
 void genFramebufferTexture(unsigned int *texture){
   glGenTextures(1, texture);
   glBindTexture(GL_TEXTURE_2D, *texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -834,6 +834,9 @@ int main(int argc, char* argv[]){
   std::cout << "LIFECYCLE: program starting" << std::endl;
   disableInput = result["noinput"].as<bool>();
 
+  state.fullscreen = result["fullscreen"].as<bool>(); // merge flags and world.state concept
+  setInitialState(state, "./res/world.state", now); 
+
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -910,22 +913,24 @@ int main(int argc, char* argv[]){
      if (state.nativeViewport){
        state.viewportSize = glm::ivec2(width, height);
      }
+     if (state.nativeResolution){
+       state.resolution = glm::ivec2(width, height);
+     }
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.currentScreenWidth, state.currentScreenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      updateDepthTexturesSize();
      updatePortalTexturesSize();
 
 
-     // TODO orthoproj is using current screen width and height.  Switch this to match NDI for simplification. 
-     orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
+     orthoProj = glm::ortho(0.0f, (float)state.resolution.x, 0.0f, (float)state.resolution.y, -1.0f, 1.0f);  
   }; 
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
@@ -1032,7 +1037,6 @@ int main(int argc, char* argv[]){
   );
   registerGuileTypes(extensions);
 
-
   schemeBindings = getSchemeCallbacks();
   if(bootStrapperMode){
     netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
@@ -1087,9 +1091,9 @@ int main(int argc, char* argv[]){
     defaultMeshesToLoad
   );
 
-  state.fullscreen = result["fullscreen"].as<bool>(); // merge flags and world.state concept
-  setInitialState(state, "./res/world.state", now); 
-
+  if (state.skybox != ""){
+    loadSkybox(world, state.skybox); 
+  }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
     loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
@@ -1240,8 +1244,8 @@ int main(int argc, char* argv[]){
     );
     
     view = renderView(viewTransform.position, viewTransform.rotation);
-    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);  // render stuff to full screen 
- 
+    glViewport(0, 0, state.resolution.x, state.resolution.y);
+
     std::vector<LightInfo> lights = getLightInfo(world);
     std::vector<PortalInfo> portals = getPortalInfo(world);
     assert(portals.size() <= numPortalTextures);
@@ -1289,8 +1293,8 @@ int main(int argc, char* argv[]){
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
 
-    auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
-    Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.resolution.y);
+    Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.resolution.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
     
     state.lastHoveredIdInScene = state.hoveredIdInScene;
@@ -1346,10 +1350,10 @@ int main(int argc, char* argv[]){
       state.offsetX, 
       state.offsetY,
       glm::vec2(state.cursorLeft, state.cursorTop),
-      glm::vec2(state.currentScreenWidth, state.currentScreenHeight)
+      glm::vec2(state.resolution.x, state.resolution.y)
     );
     handlePaintingModifiesViewport(uvCoord);
-    glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight); 
+    glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord);
      
     if (useChunkingSystem){
@@ -1413,7 +1417,7 @@ int main(int argc, char* argv[]){
       numTriangles = renderWorld(world, shaderProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
-    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.currentScreenHeight);
+    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.resolution.y);
     if (shouldCallItemSelected){
       auto selectedId = selected(state.editor);
       if (selectedId != -1){
@@ -1585,6 +1589,7 @@ int main(int argc, char* argv[]){
 
     //  Border rendering
     if (state.borderTexture != ""){
+      glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
       glBindTexture(GL_TEXTURE_2D, world.textures.at(state.borderTexture).texture.textureId);
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -1605,9 +1610,12 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
+    glBindVertexArray(quadVAO);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
     glDisable(GL_DEPTH_TEST);
+    glViewport(0, 0, state.resolution.x, state.resolution.y);
     renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
     glEnable(GL_DEPTH_TEST);
 
