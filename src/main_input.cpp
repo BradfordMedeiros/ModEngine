@@ -365,7 +365,7 @@ void onMouseButton(){
   }
   auto layer = layerByName(getGameObject(world, id).layer);
   auto proj = projectionFromLayer(layer);
-  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
+  auto rayDirection = getCursorRayDirection(proj, view, state.cursorLeft, state.currentScreenHeight - state.cursorTop, state.currentScreenWidth, state.currentScreenHeight);
   Line line = {
     .fromPos = defaultCamera.transformation.position,
     .toPos = glm::vec3(rayDirection.x * 1000, rayDirection.y * 1000, rayDirection.z * 1000),

@@ -1302,8 +1302,8 @@ int main(int argc, char* argv[]){
 
     auto adjustedCoords = pixelCoordsRelativeToViewport();
     std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
-    auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.resolution.y);
-    Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.resolution.y);
+    auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
+    Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
     
     state.lastHoveredIdInScene = state.hoveredIdInScene;
@@ -1358,7 +1358,7 @@ int main(int argc, char* argv[]){
       state.manipulatorMode, 
       state.offsetX, 
       state.offsetY,
-      glm::vec2(state.cursorLeft, state.cursorTop),
+      glm::vec2(adjustedCoords.x, adjustedCoords.y),
       glm::vec2(state.resolution.x, state.resolution.y)
     );
     handlePaintingModifiesViewport(uvCoord);
@@ -1426,7 +1426,7 @@ int main(int argc, char* argv[]){
       numTriangles = renderWorld(world, shaderProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
     )
 
-    Color pixelColor = getPixelColor(state.cursorLeft, state.cursorTop, state.resolution.y);
+    Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     if (shouldCallItemSelected){
       auto selectedId = selected(state.editor);
       if (selectedId != -1){

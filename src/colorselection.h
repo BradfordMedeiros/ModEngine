@@ -14,7 +14,7 @@ struct Color {
   GLfloat a;
 };
 
-Color getPixelColor(GLint x, GLint y, unsigned int currentScreenHeight);
+Color getPixelColor(GLint x, GLint y);
 objid getIdFromColor(Color color);
 glm::vec4 getColorFromGameobject(objid id);
 
@@ -23,7 +23,7 @@ struct UVCoord {
   GLfloat y;
 };
 
-UVCoord getUVCoord(GLint x, GLint y, unsigned int currentScreenHeight);
+UVCoord getUVCoord(GLint x, GLint y);
 glm::vec3 uvToNDC(UVCoord coord);
 
 void saveScreenshot(std::string& filepath);
