@@ -736,6 +736,13 @@ float getViewspaceDepth(glm::mat4& transView, objid elementId){
   return getTransformationFromMatrix(viewPosition).position.z;
 }
 
+glm::ivec2 pixelCoordsRelativeToViewport(){
+  int adjustedCursorX = (((float)(state.cursorLeft - state.viewportoffset.x)) / (float)state.viewportSize.x) * state.resolution.x;
+  int cursorBottom = (state.currentScreenHeight - state.cursorTop);
+  int adjustedCursorY = (((float)(cursorBottom - state.viewportoffset.y)) / (float)state.viewportSize.y) * state.resolution.y;
+  return glm::ivec2(adjustedCursorX, adjustedCursorY);
+}
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1293,6 +1300,8 @@ int main(int argc, char* argv[]){
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
 
+    auto adjustedCoords = pixelCoordsRelativeToViewport();
+    std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(state.cursorLeft, state.cursorTop, state.resolution.y);
     Color hoveredItemColor = getPixelColor(state.cursorLeft, state.cursorTop, state.resolution.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
