@@ -22,12 +22,13 @@ skybox:texture:./res/textures/skyboxs/desert/
 
 ### Window/Rendering ###
 #rendering:swapinterval:1  # 1 = vsync enabled, 0 disabled
-#rendering:viewport:500 500
-#rendering:viewportoffset:320 0
+#rendering:viewport:1000 500
+#rendering:viewportoffset:320 300
 #rendering:border:./res/textures/skyboxs/desert/bottom.jpg
-#rendering:resolution:512 512
-rendering:fullscreen:false
-
+#rendering:resolution:5000 4000
+#rendering:fullscreen:true
+rendering:antialiasing:msaa
 
 ### input stuff ###
 #mouse:capturecursor:true
+

@@ -273,14 +273,6 @@ void selectItem(objid selectedId, Color pixelColor){
   state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
 
-void onSelectNullItem(){
-  auto manipulatorId = getManipulatorId();
-  std::cout << "manipulatorId: " << manipulatorId << std::endl;
-  if (manipulatorId != 0){
-    onManipulatorUnselect(removeObjectById);
-    unsetSelectedIndex(state.editor, manipulatorId, true);
-  }
-}
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal){
   auto obj1Id = getIdForCollisionObject(world, obj1);
@@ -373,6 +365,16 @@ void drawTraversalPositions(){
     auto fromPos = traversalPositions.at(i);
     auto toPos = parentTraversalPositions.at(i);
     addLineNextCycle(fromPos, toPos, false, 0);
+  }
+}
+
+void onSelectNullItem(){
+  auto manipulatorId = getManipulatorId();
+  std::cout << "manipulatorId: " << manipulatorId << std::endl;
+  if (manipulatorId != 0){
+    onManipulatorUnselect(removeObjectById);
+    removeLinesByOwner(state.manipulatorLineId);
+    unsetSelectedIndex(state.editor, manipulatorId, true);
   }
 }
 
@@ -1301,7 +1303,6 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
 
     auto adjustedCoords = pixelCoordsRelativeToViewport();
-    std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
@@ -1594,7 +1595,7 @@ int main(int argc, char* argv[]){
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
 
-    //std::cout << "? size: " << (state.nativeResolution ? "native" : "fixed") << " " << print(state.resolution) << std::endl;
+    std::cout << "antialiasigng " << (state.antialiasingMode == ANTIALIASING_NONE ? "none" : "msaa") << std::endl;
 
     //  Border rendering
     if (state.borderTexture != ""){

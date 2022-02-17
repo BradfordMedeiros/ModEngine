@@ -16,6 +16,8 @@ struct CamInterpolation {
   objid targetCam;
 };
 
+enum ANTIALIASING_TYPE { ANTIALIASING_NONE, ANTIALIASING_MSAA };
+
 struct engineState {
   bool visualizeNormals;
   bool showCameras;
@@ -107,6 +109,7 @@ struct engineState {
   glm::ivec2 viewportoffset;
   glm::ivec2 resolution;
   std::string borderTexture;
+  ANTIALIASING_TYPE antialiasingMode;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

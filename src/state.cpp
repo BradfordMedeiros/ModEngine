@@ -208,6 +208,26 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto antialiasing = std::get_if<std::string>(&value);
+      if (antialiasing != NULL){
+        auto isNone = *antialiasing == "none";
+        auto isMsaa = *antialiasing == "msaa";
+        if (!isNone && !isMsaa){
+          std::cout << "invalid anti-aliasing mode: " << *antialiasing << std::endl;
+          assert(false);
+        }
+        if (isNone){
+          state.antialiasingMode = ANTIALIASING_NONE;
+        }else if (isMsaa){
+          state.antialiasingMode = ANTIALIASING_MSAA;
+        }
+      }     
+    },
+    .object = "rendering",
+    .attribute = "antialiasing",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto captureCursor = std::get_if<std::string>(&value);
       if (captureCursor != NULL){
         auto valid = maybeParseBool(*captureCursor, &state.captureCursor);
@@ -314,6 +334,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .viewportoffset = glm::ivec2(0, 0),
     .resolution = glm::ivec2(0, 0),
     .borderTexture = "",
+    .antialiasingMode = ANTIALIASING_NONE,
 	};
 	return state;
 }
