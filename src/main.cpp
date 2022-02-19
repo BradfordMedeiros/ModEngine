@@ -761,8 +761,11 @@ struct RenderStep {
   unsigned int colorAttachment1;
   unsigned int depthTextureIndex;
   unsigned int shader;
+  unsigned int quadTexture;
   bool hasColorAttachment1;
+  bool renderWorld;
   bool renderSkybox;
+  bool renderQuad;
   bool blend;
   bool enableStencil;
 };
@@ -799,10 +802,38 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       glStencilFunc(GL_ALWAYS, 1, 0xFF);   
     }
 
-    triangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraPosition);
+    if (renderStep.renderWorld){
+      auto worldTriangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraPosition);
+      triangles += worldTriangles;
+    }
     glDisable(GL_STENCIL_TEST);
+
+    if (renderStep.renderQuad){
+      glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
+      glBindVertexArray(quadVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 6);      
+    }
   )
   return triangles;
+}
+
+void renderBloom(unsigned int blurProgram){
+  setActiveDepthTexture(0);
+  glUseProgram(blurProgram);
+  glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), false);
+  glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
+  glUniform1i(glGetUniformLocation(blurProgram, "amount"), state.bloomBlurAmount);  // wrong
+  
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+
+  glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glDisable(GL_STENCIL_TEST);
+
+  glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+  glBindVertexArray(quadVAO);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 GLFWwindow* window = NULL;
@@ -1234,8 +1265,11 @@ int main(int argc, char* argv[]){
     .colorAttachment1 = 0,
     .depthTextureIndex = 0,
     .shader = selectionProgram,
+    .quadTexture = 0,
     .hasColorAttachment1 = false,
+    .renderWorld = true,
     .renderSkybox = false,
+    .renderQuad = false,
     .blend = false,
     .enableStencil = false,
   };
@@ -1246,8 +1280,11 @@ int main(int argc, char* argv[]){
     .colorAttachment1 = framebufferTexture2,
     .depthTextureIndex = 0,
     .shader = shaderProgram,
+    .quadTexture = 0,
     .hasColorAttachment1 = true,
+    .renderWorld = true,
     .renderSkybox = true,
+    .renderQuad = false,
     .blend = true,
     .enableStencil = true,
   };
@@ -1510,24 +1547,10 @@ int main(int argc, char* argv[]){
     // then we take framebuffer texture 3, and use that like the original framebuffer texture
     // run it through again, blurring in other fucking direction 
     // We swap to attachment 2 which was just the old bloom attachment for final render pass
+    // Big bug:  doesn't sponsor depth value, also just kind of looks bad
     PROFILE("BLOOM-RENDERING",
-      setActiveDepthTexture(1);
-      glUseProgram(blurProgram);
-      glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), false);
-      glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
-      glUniform1i(glGetUniformLocation(blurProgram, "amount"), state.bloomBlurAmount);
-
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
-
-      glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glDisable(GL_STENCIL_TEST);
-
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
-      glBindVertexArray(quadVAO);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-   
+      renderBloom(blurProgram);
+     
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0); 
