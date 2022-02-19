@@ -956,25 +956,10 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
-  float quadVertices[] = {
-    -1.0f,  1.0f,  0.0f, 1.0f,
-    -1.0f, -1.0f,  0.0f, 0.0f,
-     1.0f, -1.0f,  1.0f, 0.0f,
-    -1.0f,  1.0f,  0.0f, 1.0f,
-    1.0f, -1.0f,  1.0f, 0.0f,
-    1.0f,  1.0f,  1.0f, 1.0f
-  };
-  unsigned int quadVBO;
-  glGenVertexArrays(1, &quadVAO);
-  glGenBuffers(1, &quadVBO);
-  glBindVertexArray(quadVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-  glEnableVertexAttribArray(0); 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-  
+  quadVAO = loadFullscreenQuadVAO();
+ 
+  //////////////////////////////
+
   auto onFramebufferSizeChange = [](GLFWwindow* window, int width, int height) -> void {
      std::cout << "EVENT: framebuffer resized:  new size-  " << "width("<< width << ")" << " height(" << height << ")" << std::endl;
      state.currentScreenWidth = width;
@@ -1242,6 +1227,31 @@ int main(int argc, char* argv[]){
   assert(!hasFramelimit || speedMultiplier == 1000);
   assert(fpsLag < 0 || speedMultiplier == 1000);
 
+  RenderStep selectionRender {
+    .name = "RENDERING-SELECTION",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 0,
+    .shader = selectionProgram,
+    .hasColorAttachment1 = false,
+    .renderSkybox = false,
+    .blend = false,
+    .enableStencil = false,
+  };
+  RenderStep mainRender {
+    .name = "MAIN_RENDERING",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture,
+    .colorAttachment1 = framebufferTexture2,
+    .depthTextureIndex = 0,
+    .shader = shaderProgram,
+    .hasColorAttachment1 = true,
+    .renderSkybox = true,
+    .blend = true,
+    .enableStencil = true,
+  };
+
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -1251,7 +1261,6 @@ int main(int argc, char* argv[]){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   setShouldProfile(shouldBenchmark);
-
 
   PROFILE("MAINLOOP",
   while (!glfwWindowShouldClose(window)){
@@ -1344,18 +1353,7 @@ int main(int argc, char* argv[]){
         renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
     })
 
-    RenderStep selectionRender {
-      .name = "RENDERING-SELECTION",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture,
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 0,
-      .shader = selectionProgram,
-      .hasColorAttachment1 = false,
-      .renderSkybox = false,
-      .blend = false,
-      .enableStencil = false,
-    };
+
     RenderContext renderContext {
       .world = world,
       .view = view,
@@ -1470,20 +1468,6 @@ int main(int argc, char* argv[]){
       }
       portalIdCache = nextPortalCache;
     )
-
-    RenderStep mainRender {
-      .name = "MAIN_RENDERING",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture,
-      .colorAttachment1 = framebufferTexture2,
-      .depthTextureIndex = 0,
-      .shader = shaderProgram,
-      .hasColorAttachment1 = true,
-      .renderSkybox = true,
-      .blend = true,
-      .enableStencil = true,
-    };
-
 
     numTriangles = renderWithProgram(renderContext, mainRender);
       /////////////////
