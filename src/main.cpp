@@ -745,6 +745,66 @@ glm::ivec2 pixelCoordsRelativeToViewport(){
   return glm::ivec2(adjustedCursorX, adjustedCursorY);
 }
 
+
+struct RenderContext {
+  World& world;
+  glm::mat4 view;
+  std::vector<LightInfo> lights;
+  std::vector<PortalInfo> portals;
+  std::vector<glm::mat4> lightProjview;
+  glm::vec3 cameraPosition;
+};
+struct RenderStep {
+  const char* name;
+  unsigned int fbo;
+  unsigned int colorAttachment0;
+  unsigned int colorAttachment1;
+  unsigned int depthTextureIndex;
+  unsigned int shader;
+  bool hasColorAttachment1;
+  bool renderSkybox;
+  bool blend;
+  bool enableStencil;
+};
+
+int renderWithProgram(RenderContext& context, RenderStep& renderStep){
+  int triangles = 0;
+  PROFILE(
+  renderStep.name,
+    setActiveDepthTexture(renderStep.depthTextureIndex);
+    glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
+    if (renderStep.hasColorAttachment1){
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
+    }
+    glClearColor(0.0, 0.0, 0.0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+
+    if (renderStep.renderSkybox){
+      glDepthMask(GL_FALSE);
+      renderSkybox(renderStep.shader, context.view, context.cameraPosition);  // Probably better to render this at the end 
+      glDepthMask(GL_TRUE);    
+    }
+    glEnable(GL_DEPTH_TEST);
+    if (renderStep.blend){
+      glEnable(GL_BLEND);
+    }else{
+      glDisable(GL_BLEND);
+    }
+
+    if (renderStep.enableStencil){
+      glEnable(GL_STENCIL_TEST);
+      glStencilMask(0xFF);
+      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+    }
+
+    triangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraPosition);
+    glDisable(GL_STENCIL_TEST);
+  )
+  return triangles;
+}
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1284,19 +1344,28 @@ int main(int argc, char* argv[]){
         renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
     })
 
-    PROFILE(
-      "RENDERING-SELECTION",
-
-      setActiveDepthTexture(0);
-      // 1ST pass draws selection program shader to be able to handle selection 
-      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-      glEnable(GL_DEPTH_TEST);
-      glClearColor(0.0, 0.0, 0.0, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glDisable(GL_BLEND);
-    
-      renderWorld(world, selectionProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
-    )
+    RenderStep selectionRender {
+      .name = "RENDERING-SELECTION",
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture,
+      .colorAttachment1 = 0,
+      .depthTextureIndex = 0,
+      .shader = selectionProgram,
+      .hasColorAttachment1 = false,
+      .renderSkybox = false,
+      .blend = false,
+      .enableStencil = false,
+    };
+    RenderContext renderContext {
+      .world = world,
+      .view = view,
+      .lights = lights,
+      .portals = portals,
+      .lightProjview = lightMatrixs,
+      .cameraPosition = viewTransform.position,
+    };
+    // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
+    renderWithProgram(renderContext, selectionRender);
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -1402,30 +1471,22 @@ int main(int argc, char* argv[]){
       portalIdCache = nextPortalCache;
     )
 
-    PROFILE("MAIN_RENDERING",
-      setActiveDepthTexture(0);
+    RenderStep mainRender {
+      .name = "MAIN_RENDERING",
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture,
+      .colorAttachment1 = framebufferTexture2,
+      .depthTextureIndex = 0,
+      .shader = shaderProgram,
+      .hasColorAttachment1 = true,
+      .renderSkybox = true,
+      .blend = true,
+      .enableStencil = true,
+    };
 
-      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
-      glClearColor(0.0, 0.0, 0.0, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
-
-      glDepthMask(GL_FALSE);
-      glDisable(GL_STENCIL_TEST);
-      renderSkybox(shaderProgram, view, viewTransform.position);  // Probably better to render this at the end 
-      glDepthMask(GL_TRUE);
-      glEnable(GL_DEPTH_TEST);
-      glEnable(GL_STENCIL_TEST);
-
-      glStencilMask(0xFF);
-      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
-      glStencilFunc(GL_ALWAYS, 1, 0xFF);
-
-      numTriangles = renderWorld(world, shaderProgram, NULL, view, glm::mat4(1.0f), lights, portals, lightMatrixs, viewTransform.position);
-    )
+    numTriangles = renderWithProgram(renderContext, mainRender);
+      /////////////////
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     if (shouldCallItemSelected){
@@ -1444,8 +1505,6 @@ int main(int argc, char* argv[]){
         schemeBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
-
-    glDisable(GL_STENCIL_TEST);
 
     if (showDebugInfo){
       renderVector(shaderProgram, view, glm::mat4(1.0f));
@@ -1594,8 +1653,6 @@ int main(int argc, char* argv[]){
 
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(finalProgram, "framebufferTexture"), 0);
-
-    std::cout << "antialiasigng " << (state.antialiasingMode == ANTIALIASING_NONE ? "none" : "msaa") << std::endl;
 
     //  Border rendering
     if (state.borderTexture != ""){
