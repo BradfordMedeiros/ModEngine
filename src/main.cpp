@@ -783,7 +783,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   renderStep.name,
     // important - should call glUseProgram here, otherwise this is setting values on potentially the wrong shader
     for (auto &uniform : renderStep.intUniforms){
-      glUniform1i(glGetUniformLocation(blurProgram, uniform.uniformName), uniform.value);
+      glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName), uniform.value);
     }
 
     setActiveDepthTexture(renderStep.depthTextureIndex);
