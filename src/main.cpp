@@ -754,6 +754,12 @@ struct RenderContext {
   std::vector<glm::mat4> lightProjview;
   glm::vec3 cameraPosition;
 };
+
+struct RenderDataInt {
+  const char* uniformName;
+  int value;
+};
+
 struct RenderStep {
   const char* name;
   unsigned int fbo;
@@ -768,12 +774,18 @@ struct RenderStep {
   bool renderQuad;
   bool blend;
   bool enableStencil;
+  std::vector<RenderDataInt> intUniforms;
 };
 
 int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
   PROFILE(
   renderStep.name,
+    // important - should call glUseProgram here, otherwise this is setting values on potentially the wrong shader
+    for (auto &uniform : renderStep.intUniforms){
+      glUniform1i(glGetUniformLocation(blurProgram, uniform.uniformName), uniform.value);
+    }
+
     setActiveDepthTexture(renderStep.depthTextureIndex);
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
@@ -817,23 +829,9 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-void renderBloom(unsigned int blurProgram){
-  setActiveDepthTexture(0);
-  glUseProgram(blurProgram);
-  glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), false);
-  glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
-  glUniform1i(glGetUniformLocation(blurProgram, "amount"), state.bloomBlurAmount);  // wrong
-  
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
-
-  glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_STENCIL_TEST);
-
-  glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
-  glBindVertexArray(quadVAO);
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+void renderBloom(RenderContext& context, RenderStep& renderStep){
+  glUseProgram(renderStep.shader);
+  renderWithProgram(context, renderStep);
 }
 
 GLFWwindow* window = NULL;
@@ -1272,6 +1270,7 @@ int main(int argc, char* argv[]){
     .renderQuad = false,
     .blend = false,
     .enableStencil = false,
+    .intUniforms = {},
   };
   RenderStep mainRender {
     .name = "MAIN_RENDERING",
@@ -1287,6 +1286,7 @@ int main(int argc, char* argv[]){
     .renderQuad = false,
     .blend = true,
     .enableStencil = true,
+    .intUniforms = {},
   };
 
   if (result["skiploop"].as<bool>()){
@@ -1548,8 +1548,29 @@ int main(int argc, char* argv[]){
     // run it through again, blurring in other fucking direction 
     // We swap to attachment 2 which was just the old bloom attachment for final render pass
     // Big bug:  doesn't sponsor depth value, also just kind of looks bad
+    RenderStep bloomStep {
+      .name = "BLOOM-RENDERING",
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture3,
+      .colorAttachment1 = 0,
+      .depthTextureIndex = 0,
+      .shader = blurProgram,
+      .quadTexture = framebufferTexture2,
+      .hasColorAttachment1 = true,
+      .renderWorld = false,
+      .renderSkybox = false,
+      .renderQuad = true,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {
+        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
+        RenderDataInt { .uniformName = "firstpass",       .value = true },
+        RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
+      },
+    };
+
     PROFILE("BLOOM-RENDERING",
-      renderBloom(blurProgram);
+      renderBloom(renderContext, bloomStep);
      
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
