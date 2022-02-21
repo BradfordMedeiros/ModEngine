@@ -1,5 +1,45 @@
 #include "./renderstages.h"
 
+std::vector<RenderStep> parseAdditionalRenderSteps(
+  unsigned int fbo,
+  unsigned int framebufferTexture, 
+  unsigned int framebufferTexture2
+){
+  std::vector<std::string> additionalShaders = { 
+    "./res/shaders/greyscale",
+    "./res/shaders/tintcolor" 
+  };
+  
+  std::vector<RenderStep> additionalRenderSteps;
+  for (int i  = 0; i < additionalShaders.size(); i++){
+    auto shaderPath = additionalShaders.at(i);
+    unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
+    bool isEvenIndex = (i % 2) == 0;
+    RenderStep renderStep {
+      .name = shaderPath.c_str(),
+      .fbo = fbo,
+      .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
+      .colorAttachment1 = 0,
+      .depthTextureIndex = 0,
+      .shader = shaderProgram,
+      .quadTexture = isEvenIndex ? framebufferTexture : framebufferTexture2,
+      .hasColorAttachment1 = false,
+      .renderWorld = false,
+      .renderSkybox = false,
+      .renderQuad = true,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {
+       // RenderDataInt { .uniformName = "redtint", .value = 2 },
+      },
+    };
+    additionalRenderSteps.push_back(renderStep);
+  }
+  return additionalRenderSteps;
+}
+
+
+
 // These steps generally assume more knowledge about the pipeline state than would like
 // Should make all rendering steps use stages and specify ordering in this
 RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,  RenderShaders shaders){
@@ -86,33 +126,7 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     },
   };
 
-  std::vector<RenderStep> additionalRenderSteps;
-  std::vector<std::string> additionalShaders = { 
-    "./res/shaders/greyscale",
-    "./res/shaders/tintcolor" 
-  };
-  for (auto &shaderPath : additionalShaders){
-    unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
-    RenderStep renderStep {
-      .name = shaderPath.c_str(),
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture2,
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 0,
-      .shader = shaderProgram,
-      .quadTexture = framebufferTexture,
-      .hasColorAttachment1 = false,
-      .renderWorld = false,
-      .renderSkybox = false,
-      .renderQuad = true,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {
-        RenderDataInt { .uniformName = "redtint", .value = 2 },
-      },
-    };
-    additionalRenderSteps.push_back(renderStep);
-  }
+  auto additionalRenderSteps = parseAdditionalRenderSteps(fbo, framebufferTexture, framebufferTexture2);
 
   RenderStages stages {
     .selection = selectionRender,
