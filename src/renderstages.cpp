@@ -86,7 +86,33 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     },
   };
 
-  std::vector<RenderStep> additionalRenderSteps;  
+  std::vector<RenderStep> additionalRenderSteps;
+  std::vector<std::string> additionalShaders = { 
+    "./res/shaders/greyscale",
+    "./res/shaders/tintcolor" 
+  };
+  for (auto &shaderPath : additionalShaders){
+    unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
+    RenderStep renderStep {
+      .name = shaderPath.c_str(),
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture2,
+      .colorAttachment1 = 0,
+      .depthTextureIndex = 0,
+      .shader = shaderProgram,
+      .quadTexture = framebufferTexture,
+      .hasColorAttachment1 = false,
+      .renderWorld = false,
+      .renderSkybox = false,
+      .renderQuad = true,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {
+        RenderDataInt { .uniformName = "redtint", .value = 2 },
+      },
+    };
+    additionalRenderSteps.push_back(renderStep);
+  }
 
   RenderStages stages {
     .selection = selectionRender,

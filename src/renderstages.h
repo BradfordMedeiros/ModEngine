@@ -2,6 +2,7 @@
 #define MOD_RENDERSTAGES
 
 #include <vector>
+#include "./shaders.h"
 
 struct RenderShaders {
   unsigned int blurProgram;
