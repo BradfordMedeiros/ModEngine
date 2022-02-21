@@ -781,7 +781,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
   PROFILE(
   renderStep.name,
-    // important - should call glUseProgram here, otherwise this is setting values on potentially the wrong shader
+    glUseProgram(renderStep.shader);
     for (auto &uniform : renderStep.intUniforms){
       glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName), uniform.value);
     }
@@ -815,6 +815,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
 
     if (renderStep.renderWorld){
+      // important - redundant call to glUseProgram
       auto worldTriangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraPosition);
       triangles += worldTriangles;
     }
@@ -827,11 +828,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
   )
   return triangles;
-}
-
-void renderBloom(RenderContext& context, RenderStep& renderStep){
-  glUseProgram(renderStep.shader);
-  renderWithProgram(context, renderStep);
 }
 
 GLFWwindow* window = NULL;
@@ -1570,8 +1566,8 @@ int main(int argc, char* argv[]){
     };
 
     PROFILE("BLOOM-RENDERING",
-      renderBloom(renderContext, bloomStep);
-     
+      renderWithProgram(renderContext, bloomStep);
+
       glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0); 
