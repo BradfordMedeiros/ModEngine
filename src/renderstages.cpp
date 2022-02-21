@@ -1,18 +1,51 @@
 #include "./renderstages.h"
 
+struct DeserializedRenderStage {
+  std::string name;
+  std::string shader;
+};
+
+int indexForRenderStage(std::vector<DeserializedRenderStage>& shaders, std::string& name){
+  for (int i = 0; i < shaders.size(); i++){
+    if (shaders.at(i).name == name){
+      return i;
+    }
+  }
+  return -1;  
+}
+std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile){
+  auto tokens = parseFormat(loadFile(postprocessingFile));
+  std::vector<DeserializedRenderStage> additionalShaders;
+  for (auto token : tokens){
+    std::cout << "render stages: (" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
+    auto indexForStage = indexForRenderStage(additionalShaders, token.target);
+    if (indexForStage == -1){
+      additionalShaders.push_back(DeserializedRenderStage{
+        .name = token.target,
+      });
+      indexForStage = additionalShaders.size() - 1;
+    }
+    if (token.attribute == "shader"){
+      additionalShaders.at(indexForStage).shader = token.payload;
+    }else{
+      std::cout << "parse render stages: " << token.target << " - attribute is not supported: " << token.attribute << std::endl;
+      assert(false);
+    }
+  }
+
+  return additionalShaders; 
+}
+
 std::vector<RenderStep> parseAdditionalRenderSteps(
+  std::string postprocessingFile,
   unsigned int fbo,
   unsigned int framebufferTexture, 
   unsigned int framebufferTexture2
 ){
-  std::vector<std::string> additionalShaders = { 
-    "./res/shaders/greyscale",
-    "./res/shaders/tintcolor" 
-  };
-  
+  auto additionalShaders = parseRenderStages(postprocessingFile);
   std::vector<RenderStep> additionalRenderSteps;
   for (int i  = 0; i < additionalShaders.size(); i++){
-    auto shaderPath = additionalShaders.at(i);
+    auto shaderPath = additionalShaders.at(i).shader;
     unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
@@ -126,7 +159,7 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     },
   };
 
-  auto additionalRenderSteps = parseAdditionalRenderSteps(fbo, framebufferTexture, framebufferTexture2);
+  auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2);
 
   RenderStages stages {
     .selection = selectionRender,

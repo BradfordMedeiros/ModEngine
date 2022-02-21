@@ -1,0 +1,7 @@
+# ! indicates a uniform 
+# ? hints type of the uniform
+
+greyscale:shader:./res/shaders/greyscale
+tintcolor:shader:./res/shaders/tintcolor
+
+

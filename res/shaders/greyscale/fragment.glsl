@@ -5,7 +5,7 @@ in vec2 TexCoords;
 uniform sampler2D framebufferTexture;
 
 void main(){
-  vec3 baseColor = texture(framebufferTexture, TexCoords).rgb;
+  vec4 baseColor = texture(framebufferTexture, TexCoords);
   float average = (baseColor.r + baseColor.g + baseColor.b) / 3;
-  FragColor = vec4(average.r, average.g, average.b, 1.0);
+  FragColor = vec4(average, average, average, baseColor.a);
 }

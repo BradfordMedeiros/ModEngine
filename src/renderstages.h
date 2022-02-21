@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "./shaders.h"
+#include "./scene/serialization.h"
 
 struct RenderShaders {
   unsigned int blurProgram;
