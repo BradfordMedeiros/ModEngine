@@ -1,11 +1,7 @@
 #include "./renderstages.h"
 
-/*
-  RenderStep selection;
-  RenderStep main;
-  RenderStep bloom1;
-  RenderStep bloom2;
-  */
+// These steps generally assume more knowledge about the pipeline state than would like
+// Should make all rendering steps use stages and specify ordering in this
 RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,  RenderShaders shaders){
   RenderStep selectionRender {
     .name = "RENDERING-SELECTION",
@@ -46,55 +42,65 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     // run it through again, blurring in other fucking direction 
     // We swap to attachment 2 which was just the old bloom attachment for final render pass
     // Big bug:  doesn't sponsor depth value, also just kind of looks bad
-    RenderStep bloomStep1 {
-      .name = "BLOOM-RENDERING-FIRST",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture3,
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 0,
-      .shader = shaders.blurProgram,
-      .quadTexture = framebufferTexture2,
-      .hasColorAttachment1 = true,
-      .renderWorld = false,
-      .renderSkybox = false,
-      .renderQuad = true,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {
-        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
-        RenderDataInt { .uniformName = "firstpass",       .value = true },
-        //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-        RenderDataInt { .uniformName = "amount",          .value = 5 }
-      },
-    };
+  RenderStep bloomStep1 {
+    .name = "BLOOM-RENDERING-FIRST",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture3,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 0,
+    .shader = shaders.blurProgram,
+    .quadTexture = framebufferTexture2,
+    .hasColorAttachment1 = true,
+    .renderWorld = false,
+    .renderSkybox = false,
+    .renderQuad = true,
+    .blend = true,
+    .enableStencil = false,
+    .intUniforms = {
+      RenderDataInt { .uniformName = "useDepthTexture", .value = false },
+      RenderDataInt { .uniformName = "firstpass",       .value = true },
+      //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
+      RenderDataInt { .uniformName = "amount",          .value = 5 }
+    },
+  };
 
-    RenderStep bloomStep2 {
-      .name = "BLOOM-RENDERING-SECOND",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture2,
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 0,
-      .shader = shaders.blurProgram,
-      .quadTexture = framebufferTexture3,
-      .hasColorAttachment1 = true,
-      .renderWorld = false,
-      .renderSkybox = false,
-      .renderQuad = true,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {
-        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
-        RenderDataInt { .uniformName = "firstpass",       .value = false },
-        //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-        RenderDataInt { .uniformName = "amount",          .value = 5 }
-      },
-    };
+  RenderStep bloomStep2 {
+    .name = "BLOOM-RENDERING-SECOND",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture2,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 0,
+    .shader = shaders.blurProgram,
+    .quadTexture = framebufferTexture3,
+    .hasColorAttachment1 = true,
+    .renderWorld = false,
+    .renderSkybox = false,
+    .renderQuad = true,
+    .blend = true,
+    .enableStencil = false,
+    .intUniforms = {
+      RenderDataInt { .uniformName = "useDepthTexture", .value = false },
+      RenderDataInt { .uniformName = "firstpass",       .value = false },
+      //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
+      RenderDataInt { .uniformName = "amount",          .value = 5 }
+    },
+  };
+
+  std::vector<RenderStep> additionalRenderSteps;  
 
   RenderStages stages {
     .selection = selectionRender,
     .main = mainRender,
     .bloom1 = bloomStep1,
     .bloom2 = bloomStep2,
+    .additionalRenderSteps = additionalRenderSteps,
   };
   return stages;
+}
+
+unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2
+  if (stages.additionalRenderSteps.size() % 2 == 1){
+    return stages.main.colorAttachment1;  
+  }
+  return stages.main.colorAttachment0;   
 }

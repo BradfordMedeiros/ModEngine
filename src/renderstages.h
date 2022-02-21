@@ -36,6 +36,7 @@ struct RenderStages {
   RenderStep main;
   RenderStep bloom1;
   RenderStep bloom2;
+  std::vector<RenderStep> additionalRenderSteps;
 };
 
 RenderStages loadRenderStages(
@@ -45,5 +46,7 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture3,
   RenderShaders shaders
 );
+
+unsigned int finalRenderingTexture(RenderStages& stages);
 
 #endif

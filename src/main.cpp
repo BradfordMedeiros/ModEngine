@@ -1565,6 +1565,10 @@ int main(int argc, char* argv[]){
       }
     )
 
+    for (auto &renderStep : renderStages.additionalRenderSteps){
+      renderWithProgram(renderContext, renderStep);
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
     glUseProgram(finalProgram); 
@@ -1605,7 +1609,7 @@ int main(int argc, char* argv[]){
     //////////////////////////////////////////////////////////
 
     if (state.renderMode == RENDER_FINAL){
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+      glBindTexture(GL_TEXTURE_2D, finalRenderingTexture(renderStages));
     }else if (state.renderMode == RENDER_PORTAL){
       assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
