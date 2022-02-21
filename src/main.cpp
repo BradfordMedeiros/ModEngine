@@ -1544,8 +1544,8 @@ int main(int argc, char* argv[]){
     // run it through again, blurring in other fucking direction 
     // We swap to attachment 2 which was just the old bloom attachment for final render pass
     // Big bug:  doesn't sponsor depth value, also just kind of looks bad
-    RenderStep bloomStep {
-      .name = "BLOOM-RENDERING",
+    RenderStep bloomStep1 {
+      .name = "BLOOM-RENDERING-FIRST",
       .fbo = fbo,
       .colorAttachment0 = framebufferTexture3,
       .colorAttachment1 = 0,
@@ -1565,16 +1565,30 @@ int main(int argc, char* argv[]){
       },
     };
 
-    PROFILE("BLOOM-RENDERING",
-      renderWithProgram(renderContext, bloomStep);
+    RenderStep bloomStep2 {
+      .name = "BLOOM-RENDERING-SECOND",
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture2,
+      .colorAttachment1 = 0,
+      .depthTextureIndex = 0,
+      .shader = blurProgram,
+      .quadTexture = framebufferTexture3,
+      .hasColorAttachment1 = true,
+      .renderWorld = false,
+      .renderSkybox = false,
+      .renderQuad = true,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {
+        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
+        RenderDataInt { .uniformName = "firstpass",       .value = false },
+        RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
+      },
+    };
 
-      glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0); 
-      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
-      glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+    PROFILE("BLOOM-RENDERING",
+      renderWithProgram(renderContext, bloomStep1);
+      renderWithProgram(renderContext, bloomStep2);
     )
 
     bool depthEnabled = false;
