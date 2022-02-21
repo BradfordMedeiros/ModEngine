@@ -28,6 +28,7 @@
 #include "./netscene.h"
 #include "./worldtiming.h"
 #include "./main_test.h"
+#include "./renderstages.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -755,28 +756,6 @@ struct RenderContext {
   glm::vec3 cameraPosition;
 };
 
-struct RenderDataInt {
-  const char* uniformName;
-  int value;
-};
-
-struct RenderStep {
-  const char* name;
-  unsigned int fbo;
-  unsigned int colorAttachment0;
-  unsigned int colorAttachment1;
-  unsigned int depthTextureIndex;
-  unsigned int shader;
-  unsigned int quadTexture;
-  bool hasColorAttachment1;
-  bool renderWorld;
-  bool renderSkybox;
-  bool renderQuad;
-  bool blend;
-  bool enableStencil;
-  std::vector<RenderDataInt> intUniforms;
-};
-
 int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
   PROFILE(
@@ -1041,6 +1020,12 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
   blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
 
+  auto renderStages = loadRenderStages(fbo, framebufferTexture, framebufferTexture2, framebufferTexture3, RenderShaders {
+    .blurProgram = blurProgram,
+    .selectionProgram = selectionProgram,
+    .shaderProgram = shaderProgram,
+  });
+
   fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
   Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
  
@@ -1252,39 +1237,6 @@ int main(int argc, char* argv[]){
   assert(!hasFramelimit || speedMultiplier == 1000);
   assert(fpsLag < 0 || speedMultiplier == 1000);
 
-  RenderStep selectionRender {
-    .name = "RENDERING-SELECTION",
-    .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = 0,
-    .depthTextureIndex = 0,
-    .shader = selectionProgram,
-    .quadTexture = 0,
-    .hasColorAttachment1 = false,
-    .renderWorld = true,
-    .renderSkybox = false,
-    .renderQuad = false,
-    .blend = false,
-    .enableStencil = false,
-    .intUniforms = {},
-  };
-  RenderStep mainRender {
-    .name = "MAIN_RENDERING",
-    .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = framebufferTexture2,
-    .depthTextureIndex = 0,
-    .shader = shaderProgram,
-    .quadTexture = 0,
-    .hasColorAttachment1 = true,
-    .renderWorld = true,
-    .renderSkybox = true,
-    .renderQuad = false,
-    .blend = true,
-    .enableStencil = true,
-    .intUniforms = {},
-  };
-
   if (result["skiploop"].as<bool>()){
     goto cleanup;
   }
@@ -1396,7 +1348,7 @@ int main(int argc, char* argv[]){
       .cameraPosition = viewTransform.position,
     };
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
-    renderWithProgram(renderContext, selectionRender);
+    renderWithProgram(renderContext, renderStages.selection);
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -1502,7 +1454,7 @@ int main(int argc, char* argv[]){
       portalIdCache = nextPortalCache;
     )
 
-    numTriangles = renderWithProgram(renderContext, mainRender);
+    numTriangles = renderWithProgram(renderContext, renderStages.main);
       /////////////////
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
@@ -1537,58 +1489,9 @@ int main(int argc, char* argv[]){
 
     portalIdCache.clear();
 
-    // depends on framebuffer texture, outputs to framebuffer texture 2
-    // Blurring draws the framebuffer texture 
-    // The blur program blurs it one in one direction and saves in framebuffer texture 3 
-    // then we take framebuffer texture 3, and use that like the original framebuffer texture
-    // run it through again, blurring in other fucking direction 
-    // We swap to attachment 2 which was just the old bloom attachment for final render pass
-    // Big bug:  doesn't sponsor depth value, also just kind of looks bad
-    RenderStep bloomStep1 {
-      .name = "BLOOM-RENDERING-FIRST",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture3,
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 0,
-      .shader = blurProgram,
-      .quadTexture = framebufferTexture2,
-      .hasColorAttachment1 = true,
-      .renderWorld = false,
-      .renderSkybox = false,
-      .renderQuad = true,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {
-        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
-        RenderDataInt { .uniformName = "firstpass",       .value = true },
-        RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-      },
-    };
-
-    RenderStep bloomStep2 {
-      .name = "BLOOM-RENDERING-SECOND",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture2,
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 0,
-      .shader = blurProgram,
-      .quadTexture = framebufferTexture3,
-      .hasColorAttachment1 = true,
-      .renderWorld = false,
-      .renderSkybox = false,
-      .renderQuad = true,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {
-        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
-        RenderDataInt { .uniformName = "firstpass",       .value = false },
-        RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-      },
-    };
-
     PROFILE("BLOOM-RENDERING",
-      renderWithProgram(renderContext, bloomStep1);
-      renderWithProgram(renderContext, bloomStep2);
+      renderWithProgram(renderContext, renderStages.bloom1);
+      renderWithProgram(renderContext, renderStages.bloom2);
     )
 
     bool depthEnabled = false;
