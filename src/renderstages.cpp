@@ -105,7 +105,7 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
       }else if (uniformValue.type == RENDER_BOOL){
         auto isTrue = uniformValue.rawValue == "true";
         auto isFalse = uniformValue.rawValue == "false";
-        if (!isTrue || !isFalse){
+        if (!isTrue && !isFalse){
           std::cout << "render stages: uniform type unspecified for: " << uniformname << " of wrong type, expected true/false" << std::endl;
           assert(false);
         }
