@@ -5,13 +5,16 @@ in vec2 TexCoords;
 uniform sampler2D framebufferTexture;
 
 uniform int redtint;
+uniform float mult;
+uniform bool enable;
+
+uniform vec3 colortint;
 
 void main(){
-  vec4 baseColor = texture(framebufferTexture, TexCoords).rgba;
+  vec3 baseColor = texture(framebufferTexture, TexCoords).rgb;
+  if (enable){
+    baseColor = baseColor * colortint;
+  }
 
-  baseColor.r = baseColor.r * 5;
-  baseColor.g = baseColor.g * 0.4;
-  baseColor.b = baseColor.b = 0.4;
-
-  FragColor = baseColor;
+  FragColor = vec4(baseColor.rgb, 1) ;
 }

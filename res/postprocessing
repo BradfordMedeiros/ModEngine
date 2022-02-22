@@ -1,7 +1,22 @@
 # ! indicates a uniform 
 # ? hints type of the uniform
 
-greyscale:shader:./res/shaders/greyscale
+
 tintcolor:shader:./res/shaders/tintcolor
 
+tintcolor:!redtint:5
+tintcolor:?redtint:int
 
+tintcolor:!mult:0.8
+tintcolor:?mult:float
+
+tintcolor:!enable:true
+tintcolor:?enable:bool
+
+tintcolor:!amount:3.4
+tintcolor:?amount:float
+
+tintcolor:!colortint:5 1 1
+tintcolor:?colortint:vec3
+
+greyscale:shader:./res/shaders/greyscale
