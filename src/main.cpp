@@ -762,7 +762,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   renderStep.name,
     glUseProgram(renderStep.shader);
     for (auto &uniform : renderStep.intUniforms){
-      glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName), uniform.value);
+      glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
     }
 
     setActiveDepthTexture(renderStep.depthTextureIndex);

@@ -21,10 +21,26 @@ int indexForRenderStage(std::vector<DeserializedRenderStage>& shaders, std::stri
   }
   return -1;  
 }
+
+void ensureUniformExists(
+  std::map<int, std::map<std::string, RenderStageUniformTypeValue>>& stagenameToUniformToValue,
+  int stageindex,
+  std::string& uniformName
+){
+  if (stagenameToUniformToValue.find(stageindex) == stagenameToUniformToValue.end()){
+    stagenameToUniformToValue[stageindex] = {};
+  }
+  if (stagenameToUniformToValue.at(stageindex).find(uniformName) == stagenameToUniformToValue.at(stageindex).end()){
+    stagenameToUniformToValue.at(stageindex)[uniformName] = RenderStageUniformTypeValue { 
+      .type = RENDER_UNSPECIFIED,
+      .rawValue = "",
+    };
+  }
+}
 std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile){
   auto tokens = parseFormat(loadFile(postprocessingFile));
-
   std::vector<DeserializedRenderStage> additionalShaders;
+  std::map<int, std::map<std::string, RenderStageUniformTypeValue>> stagenameToUniformToValue;
 
   for (auto token : tokens){
     std::cout << "render stages: (" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
@@ -43,18 +59,66 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
       additionalShaders.at(indexForStage).shader = token.payload;
     }else if (isUniform || isHint){
       auto attribute = token.attribute.substr(1, token.attribute.size());
+      ensureUniformExists(stagenameToUniformToValue, indexForStage, attribute);
       assert(attribute.size() > 0);
       if (isUniform){
         std::cout << token.attribute << " render stages: is a uniform" << std::endl;
+        stagenameToUniformToValue.at(indexForStage).at(attribute).rawValue = token.payload;
       }
       if (isHint){
         std::cout << token.attribute << " render stages: is a hint" << std::endl;
+        if (token.payload == "int"){
+          stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_INT;
+        }else if (token.payload == "bool"){
+          stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_BOOL;          
+        }else if (token.payload == "float"){
+          stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_FLOAT;
+        }else{
+          std::cout << "render stages: invalid type: " << token.payload << std::endl;
+          assert(false);
+        }
       }
     }else{
       std::cout << "parse render stages: " << token.target << " - attribute is not supported: " << token.attribute << std::endl;
       assert(false);
     }
   }
+
+  // ensure every render step has a shader
+  for (auto &additionalShader : additionalShaders){
+    if (additionalShader.shader == ""){
+      std::cout << "render stages: must specify a shader for: " << additionalShader.name << std::endl;
+    }
+  }
+
+  for (auto &[stageIndex, uniformNameToValue] : stagenameToUniformToValue){
+    for (auto &[uniformname, uniformValue] : uniformNameToValue){ 
+      if (uniformValue.type == RENDER_INT){
+        additionalShaders.at(stageIndex).intUniforms.push_back(RenderDataInt{
+          .uniformName = uniformname,
+          .value = std::atoi(uniformValue.rawValue.c_str()),
+        });
+      }else if (uniformValue.type == RENDER_BOOL){
+        auto isTrue = uniformValue.rawValue == "true";
+        auto isFalse = uniformValue.rawValue == "false";
+        if (!isTrue || !isFalse){
+          std::cout << "render stages: uniform type unspecified for: " << uniformname << " of wrong type, expected true/false" << std::endl;
+          assert(false);
+        }
+        additionalShaders.at(stageIndex).intUniforms.push_back(RenderDataInt{
+          .uniformName = uniformname,
+          .value = isTrue ? true : false,
+        });
+      }else if (uniformValue.type == RENDER_FLOAT){
+        std::cout << "render stages -- floats not yet implemented" << std::endl;
+        assert(false); 
+      }else{
+        std::cout << "render stages: uniform type unspecified for: " << uniformname << std::endl;
+        assert(false);
+      }
+    }
+  }
+
 
   return additionalShaders; 
 }

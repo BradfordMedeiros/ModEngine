@@ -12,11 +12,11 @@ struct RenderShaders {
 };
 
 struct RenderDataInt {
-  const char* uniformName;
+  std::string uniformName;
   int value;
 };
 struct RenderDataFloat {
-  const char* uniformName;
+  std::string uniformName;
   float value;
 };
 
