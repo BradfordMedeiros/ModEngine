@@ -93,6 +93,10 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
 
   for (auto &[stageIndex, uniformNameToValue] : stagenameToUniformToValue){
     for (auto &[uniformname, uniformValue] : uniformNameToValue){ 
+      if (uniformValue.rawValue == ""){
+        std::cout << "render stages: uniform value not provided for: " << uniformname << std::endl;
+        assert(false);
+      }
       if (uniformValue.type == RENDER_INT){
         additionalShaders.at(stageIndex).intUniforms.push_back(RenderDataInt{
           .uniformName = uniformname,
