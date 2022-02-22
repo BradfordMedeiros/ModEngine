@@ -5,9 +5,10 @@ struct DeserializedRenderStage {
   std::string shader;
   std::vector<RenderDataInt> intUniforms;
   std::vector<RenderDataFloat> floatUniforms;
+  std::vector<RenderDataVec3> vec3Uniforms;
 };
 
-enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_INT };
+enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_INT, RENDER_VEC3 };
 struct RenderStageUniformTypeValue {
   RenderStageUniformType type;
   std::string rawValue;
@@ -73,6 +74,8 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
           stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_BOOL;          
         }else if (token.payload == "float"){
           stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_FLOAT;
+        }else if (token.payload == "vec3"){
+          stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_VEC3;
         }else{
           std::cout << "render stages: invalid type: " << token.payload << std::endl;
           assert(false);
@@ -118,6 +121,11 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
           .uniformName = uniformname,
           .value = std::atof(uniformValue.rawValue.c_str()),
         });
+      }else if (uniformValue.type == RENDER_VEC3){
+        additionalShaders.at(stageIndex).vec3Uniforms.push_back(RenderDataVec3{
+          .uniformName = uniformname,
+          .value = parseVec(uniformValue.rawValue),
+        });
       }else{
         std::cout << "render stages: uniform type unspecified for: " << uniformname << std::endl;
         assert(false);
@@ -158,6 +166,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .enableStencil = false,
       .intUniforms = additionalShader.intUniforms,
       .floatUniforms = additionalShader.floatUniforms,
+      .vec3Uniforms = additionalShader.vec3Uniforms,
     };
     additionalRenderSteps.push_back(renderStep);
   }
