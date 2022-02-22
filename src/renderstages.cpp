@@ -3,6 +3,14 @@
 struct DeserializedRenderStage {
   std::string name;
   std::string shader;
+  std::vector<RenderDataInt> intUniforms;
+  std::vector<RenderDataFloat> floatUniforms;
+};
+
+enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_INT };
+struct RenderStageUniformTypeValue {
+  RenderStageUniformType type;
+  std::string rawValue;
 };
 
 int indexForRenderStage(std::vector<DeserializedRenderStage>& shaders, std::string& name){
@@ -15,7 +23,9 @@ int indexForRenderStage(std::vector<DeserializedRenderStage>& shaders, std::stri
 }
 std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile){
   auto tokens = parseFormat(loadFile(postprocessingFile));
+
   std::vector<DeserializedRenderStage> additionalShaders;
+
   for (auto token : tokens){
     std::cout << "render stages: (" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
     auto indexForStage = indexForRenderStage(additionalShaders, token.target);
@@ -25,8 +35,21 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
       });
       indexForStage = additionalShaders.size() - 1;
     }
+
+    auto isUniform = token.attribute.at(0) == '!';
+    auto isHint = token.attribute.at(0) == '?';
+
     if (token.attribute == "shader"){
       additionalShaders.at(indexForStage).shader = token.payload;
+    }else if (isUniform || isHint){
+      auto attribute = token.attribute.substr(1, token.attribute.size());
+      assert(attribute.size() > 0);
+      if (isUniform){
+        std::cout << token.attribute << " render stages: is a uniform" << std::endl;
+      }
+      if (isHint){
+        std::cout << token.attribute << " render stages: is a hint" << std::endl;
+      }
     }else{
       std::cout << "parse render stages: " << token.target << " - attribute is not supported: " << token.attribute << std::endl;
       assert(false);
@@ -45,7 +68,8 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   auto additionalShaders = parseRenderStages(postprocessingFile);
   std::vector<RenderStep> additionalRenderSteps;
   for (int i  = 0; i < additionalShaders.size(); i++){
-    auto shaderPath = additionalShaders.at(i).shader;
+    auto additionalShader = additionalShaders.at(i);
+    auto shaderPath = additionalShader.shader;
     unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
@@ -62,9 +86,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .renderQuad = true,
       .blend = true,
       .enableStencil = false,
-      .intUniforms = {
-       // RenderDataInt { .uniformName = "redtint", .value = 2 },
-      },
+      .intUniforms = additionalShader.intUniforms,
     };
     additionalRenderSteps.push_back(renderStep);
   }

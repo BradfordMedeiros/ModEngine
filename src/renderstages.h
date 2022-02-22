@@ -15,6 +15,10 @@ struct RenderDataInt {
   const char* uniformName;
   int value;
 };
+struct RenderDataFloat {
+  const char* uniformName;
+  float value;
+};
 
 struct RenderStep {
   const char* name;
