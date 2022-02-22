@@ -35,6 +35,7 @@ struct RenderStep {
   bool blend;
   bool enableStencil;
   std::vector<RenderDataInt> intUniforms;
+  std::vector<RenderDataFloat> floatUniforms;
 };
 
 struct RenderStages {

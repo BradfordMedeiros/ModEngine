@@ -764,6 +764,9 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     for (auto &uniform : renderStep.intUniforms){
       glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
     }
+    for (auto &uniform : renderStep.floatUniforms){
+      glUniform1f(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
+    }
 
     setActiveDepthTexture(renderStep.depthTextureIndex);
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);

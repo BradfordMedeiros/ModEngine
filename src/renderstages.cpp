@@ -114,8 +114,10 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
           .value = isTrue ? true : false,
         });
       }else if (uniformValue.type == RENDER_FLOAT){
-        std::cout << "render stages -- floats not yet implemented" << std::endl;
-        assert(false); 
+        additionalShaders.at(stageIndex).floatUniforms.push_back(RenderDataFloat{
+          .uniformName = uniformname,
+          .value = std::atof(uniformValue.rawValue.c_str()),
+        });
       }else{
         std::cout << "render stages: uniform type unspecified for: " << uniformname << std::endl;
         assert(false);
@@ -155,6 +157,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .blend = true,
       .enableStencil = false,
       .intUniforms = additionalShader.intUniforms,
+      .floatUniforms = additionalShader.floatUniforms,
     };
     additionalRenderSteps.push_back(renderStep);
   }
