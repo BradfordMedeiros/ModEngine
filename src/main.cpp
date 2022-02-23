@@ -770,6 +770,11 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     for (auto &uniform : renderStep.vec3Uniforms){
       glUniform3fv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
     }
+    for (auto &uniform : renderStep.floatArrUniforms){
+      for (int i = 0; i < uniform.value.size(); i++){
+        glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
+      }
+    }
 
     setActiveDepthTexture(renderStep.depthTextureIndex);
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
@@ -1571,7 +1576,7 @@ int main(int argc, char* argv[]){
       }
     )
 
-    for (auto &renderStep : renderStages.additionalRenderSteps){
+    for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
       renderWithProgram(renderContext, renderStep);
     }
 

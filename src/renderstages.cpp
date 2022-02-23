@@ -5,10 +5,11 @@ struct DeserializedRenderStage {
   std::string shader;
   std::vector<RenderDataInt> intUniforms;
   std::vector<RenderDataFloat> floatUniforms;
+  std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
 };
 
-enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_INT, RENDER_VEC3 };
+enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_ARR_FLOAT, RENDER_INT, RENDER_VEC3 };
 struct RenderStageUniformTypeValue {
   RenderStageUniformType type;
   std::string rawValue;
@@ -74,6 +75,8 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
           stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_BOOL;          
         }else if (token.payload == "float"){
           stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_FLOAT;
+        }else if (token.payload == "arr-float"){
+          stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_ARR_FLOAT;
         }else if (token.payload == "vec3"){
           stagenameToUniformToValue.at(indexForStage).at(attribute).type = RENDER_VEC3;
         }else{
@@ -91,6 +94,7 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
   for (auto &additionalShader : additionalShaders){
     if (additionalShader.shader == ""){
       std::cout << "render stages: must specify a shader for: " << additionalShader.name << std::endl;
+      assert(false);
     }
   }
 
@@ -120,6 +124,11 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
         additionalShaders.at(stageIndex).floatUniforms.push_back(RenderDataFloat{
           .uniformName = uniformname,
           .value = std::atof(uniformValue.rawValue.c_str()),
+        });
+      }else if (uniformValue.type == RENDER_ARR_FLOAT){
+        additionalShaders.at(stageIndex).floatArrUniforms.push_back(RenderDataFloatArr{
+          .uniformName = uniformname,
+          .value = parseFloatVec(uniformValue.rawValue),
         });
       }else if (uniformValue.type == RENDER_VEC3){
         additionalShaders.at(stageIndex).vec3Uniforms.push_back(RenderDataVec3{
@@ -166,6 +175,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .enableStencil = false,
       .intUniforms = additionalShader.intUniforms,
       .floatUniforms = additionalShader.floatUniforms,
+      .floatArrUniforms = additionalShader.floatArrUniforms,
       .vec3Uniforms = additionalShader.vec3Uniforms,
     };
     additionalRenderSteps.push_back(renderStep);

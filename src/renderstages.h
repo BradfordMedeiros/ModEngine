@@ -19,6 +19,10 @@ struct RenderDataFloat {
   std::string uniformName;
   float value;
 };
+struct RenderDataFloatArr {
+  std::string uniformName;
+  std::vector<float> value;
+};
 struct RenderDataVec3 {
   std::string uniformName;
   glm::vec3 value;
@@ -40,6 +44,7 @@ struct RenderStep {
   bool enableStencil;
   std::vector<RenderDataInt> intUniforms;
   std::vector<RenderDataFloat> floatUniforms;
+  std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
 };
 

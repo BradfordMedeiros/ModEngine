@@ -1,22 +1,13 @@
 # ! indicates a uniform 
 # ? hints type of the uniform
 
+# attribute types:
+# renderstep_name:shader:./path/to/shader
 
-tintcolor:shader:./res/shaders/tintcolor
-
-tintcolor:!redtint:5
-tintcolor:?redtint:int
-
-tintcolor:!mult:0.8
-tintcolor:?mult:float
-
-tintcolor:!enable:true
-tintcolor:?enable:bool
-
-tintcolor:!amount:3.4
-tintcolor:?amount:float
-
-tintcolor:!colortint:5 1 1
-tintcolor:?colortint:vec3
-
-greyscale:shader:./res/shaders/greyscale
+conv1:shader:./res/shaders/convolution
+conv1:!firstpass:true
+conv1:?firstpass:bool
+conv1:!amount:20
+conv1:?amount:float
+conv1:!kernel:-1 -1 -1 -1 8 -1 -1 -1 -1;
+conv1:?kernel:arr-float
