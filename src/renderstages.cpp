@@ -7,6 +7,7 @@ struct DeserializedRenderStage {
   std::vector<RenderDataFloat> floatUniforms;
   std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderTexture> textures;
 };
 
 enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_ARR_FLOAT, RENDER_INT, RENDER_VEC3 };
@@ -56,9 +57,22 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
 
     auto isUniform = token.attribute.at(0) == '!';
     auto isHint = token.attribute.at(0) == '?';
+    auto isTexture = token.attribute.at(0) == '&';
 
     if (token.attribute == "shader"){
       additionalShaders.at(indexForStage).shader = token.payload;
+    }else if (isTexture){
+      auto textureNameInShader = token.attribute.substr(1, token.attribute.size());
+      assert(textureNameInShader.size() > 0);
+      additionalShaders.at(indexForStage).textures.push_back(RenderTexture{
+        .nameInShader = textureNameInShader,
+        .textureName = token.payload,
+      });
+
+      if (additionalShaders.at(indexForStage).textures.size() > 2){
+        std::cout << "render steps -> only two textures supported" << std::endl;
+        assert(false);
+      }
     }else if (isUniform || isHint){
       auto attribute = token.attribute.substr(1, token.attribute.size());
       ensureUniformExists(stagenameToUniformToValue, indexForStage, attribute);
@@ -177,6 +191,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .floatUniforms = additionalShader.floatUniforms,
       .floatArrUniforms = additionalShader.floatArrUniforms,
       .vec3Uniforms = additionalShader.vec3Uniforms,
+      .textures = additionalShader.textures,
     };
     additionalRenderSteps.push_back(renderStep);
   }
@@ -203,6 +218,10 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     .blend = false,
     .enableStencil = false,
     .intUniforms = {},
+    .floatUniforms = {},
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {},
   };
   RenderStep mainRender {
     .name = "MAIN_RENDERING",
@@ -219,6 +238,10 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     .blend = true,
     .enableStencil = true,
     .intUniforms = {},
+    .floatUniforms = {},
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {},
   };
     // depends on framebuffer texture, outputs to framebuffer texture 2
     // Blurring draws the framebuffer texture 
@@ -247,6 +270,10 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
       //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
       RenderDataInt { .uniformName = "amount",          .value = 5 }
     },
+    .floatUniforms = {},
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {},
   };
 
   RenderStep bloomStep2 {
@@ -269,6 +296,10 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
       //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
       RenderDataInt { .uniformName = "amount",          .value = 5 }
     },
+    .floatUniforms = {},
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {},
   };
 
   auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2);

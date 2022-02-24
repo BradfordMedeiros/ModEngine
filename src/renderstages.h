@@ -28,6 +28,11 @@ struct RenderDataVec3 {
   glm::vec3 value;
 };
 
+struct RenderTexture {
+  std::string nameInShader;
+  std::string textureName;  
+};
+
 struct RenderStep {
   const char* name;
   unsigned int fbo;
@@ -46,6 +51,7 @@ struct RenderStep {
   std::vector<RenderDataFloat> floatUniforms;
   std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderTexture> textures;
 };
 
 struct RenderStages {
