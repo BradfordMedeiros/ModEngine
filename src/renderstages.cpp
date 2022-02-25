@@ -324,7 +324,7 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     .selection = selectionRender,
     .main = mainRender,
     .bloom1 = bloomStep1,
-    .bloom2 = bloomStep2,+
+    .bloom2 = bloomStep2,
     .additionalRenderSteps = additionalRenderSteps,
   };
   return stages;
