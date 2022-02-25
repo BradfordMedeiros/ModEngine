@@ -134,7 +134,6 @@ void generateDepthTextures(){
 void setActiveDepthTexture(int index){
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
   unsigned int texture = depthTextures[index];
-  glBindTexture(GL_TEXTURE_2D, texture);
   // GL_DEPTH_ATTACHMENT
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 }
