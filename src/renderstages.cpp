@@ -40,7 +40,7 @@ void ensureUniformExists(
     };
   }
 }
-std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile){
+std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile, unsigned int fb0, unsigned int fb1){
   auto tokens = parseFormat(loadFile(postprocessingFile));
   std::vector<DeserializedRenderStage> additionalShaders;
   std::map<int, std::map<std::string, RenderStageUniformTypeValue>> stagenameToUniformToValue;
@@ -63,10 +63,26 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
       additionalShaders.at(indexForStage).shader = token.payload;
     }else if (isTexture){
       auto textureNameInShader = token.attribute.substr(1, token.attribute.size());
+      auto isFramebufferType = token.payload.at(0) == '$';
+      std::cout << "is framebuffer: " << (isFramebufferType ? "framebuffer" : "normal tex") << std::endl;
+      int framebufferTextureId = 0;
+      if (isFramebufferType){
+        if (token.payload == "$fb0"){
+          framebufferTextureId = fb0;
+        }else if (token.payload == "$fb1"){
+          framebufferTextureId = fb1;
+        }else{
+          std::cout << "invalid framebuffer number: " << token.payload << std::endl;
+          assert(false);
+        }
+      }
+
       assert(textureNameInShader.size() > 0);
       additionalShaders.at(indexForStage).textures.push_back(RenderTexture{
         .nameInShader = textureNameInShader,
+        .type = isFramebufferType ? RENDER_TEXTURE_FRAMEBUFFER : RENDER_TEXTURE_REGULAR,
         .textureName = token.payload,
+        .framebufferTextureId = framebufferTextureId,
       });
 
       if (additionalShaders.at(indexForStage).textures.size() > 2){
@@ -166,7 +182,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   unsigned int framebufferTexture, 
   unsigned int framebufferTexture2
 ){
-  auto additionalShaders = parseRenderStages(postprocessingFile);
+  auto additionalShaders = parseRenderStages(postprocessingFile, framebufferTexture, framebufferTexture2);
   std::vector<RenderStep> additionalRenderSteps;
   for (int i  = 0; i < additionalShaders.size(); i++){
     auto additionalShader = additionalShaders.at(i);
@@ -174,7 +190,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
     unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
-      .name = shaderPath.c_str(),
+      .name = additionalShader.name,
       .fbo = fbo,
       .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
       .colorAttachment1 = 0,
@@ -308,7 +324,7 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     .selection = selectionRender,
     .main = mainRender,
     .bloom1 = bloomStep1,
-    .bloom2 = bloomStep2,
+    .bloom2 = bloomStep2,+
     .additionalRenderSteps = additionalRenderSteps,
   };
   return stages;
@@ -319,4 +335,42 @@ unsigned int finalRenderingTexture(RenderStages& stages){   // additional render
     return stages.main.colorAttachment1;  
   }
   return stages.main.colorAttachment0;   
+}
+
+std::string renderStageToString(RenderStep& step){
+  std::string text = step.name + "\n---------\n";
+  text = text + "shader: " + std::to_string(step.shader) + "\n";
+  text = text + "colorAttachment0: " + std::to_string(step.colorAttachment0) + "\n";
+  text = text + "colorAttachment1: " + std::to_string(step.colorAttachment1) + " (has attachment = " + (step.hasColorAttachment1 ? "true" : "false") + ")\n";
+  text = text + "renderWorld: " + (step.renderWorld ? "true" : "false") + "\n";
+  text = text + "renderSkybox: " + (step.renderSkybox ? "true" : "false") + "\n";
+  text = text + "renderQuad: " + (step.renderQuad ? "true" : "false") + "\n";
+
+
+  return text;
+}
+std::string renderStagesToString(RenderStages& stages){
+  std::string renderingSystem = "\n digraph rendering { \n";
+
+  renderingSystem = renderingSystem + "\"" + renderStageToString(stages.selection) + "\" -> \"?\" \n";
+  renderingSystem = renderingSystem + "\"" + renderStageToString(stages.main) + "\" -> \"?\" \n";
+  renderingSystem = renderingSystem + "\"" + renderStageToString(stages.bloom1) + "\" -> \"?\" \n";
+  renderingSystem = renderingSystem + "\"" + renderStageToString(stages.bloom2) + "\" -> \"?\" \n";
+
+  for (int i = 0; i < stages.additionalRenderSteps.size(); i++){
+    auto& additionalStep = stages.additionalRenderSteps.at(i);
+    RenderStep* nextStep = NULL;
+    if (i < (stages.additionalRenderSteps.size() - 1)){
+      nextStep = &stages.additionalRenderSteps.at(i+1);
+    }
+
+    auto leftSide = std::string("\"") + renderStageToString(additionalStep) + " \"" ;
+    auto hasRightSide = nextStep != NULL;
+    auto rightSide = !hasRightSide ? "" : (std::string("\"") + renderStageToString(*nextStep) + " \"");
+    auto fullLine = !hasRightSide ? leftSide : (leftSide + " -> " + rightSide);
+    renderingSystem = renderingSystem + fullLine + "\n";
+
+  }
+  renderingSystem = renderingSystem + "}";
+  return renderingSystem;
 }

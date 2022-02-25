@@ -58,6 +58,7 @@ NetCode netcode { };
 engineState state = getDefaultState(1920, 1080);
 
 World world;
+RenderStages renderStages;
 DefaultMeshes defaultMeshes;
 
 SysInterface interface;
@@ -759,7 +760,7 @@ struct RenderContext {
 int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
   PROFILE(
-  renderStep.name,
+  renderStep.name.c_str(),
     glUseProgram(renderStep.shader);
     for (auto &uniform : renderStep.intUniforms){
       glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
@@ -775,13 +776,16 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
         glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
       }
     }
-
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
       int activeTextureOffset = 6 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
       glUniform1i(glGetUniformLocation(renderStep.shader, textureData.nameInShader.c_str()), activeTextureOffset);
       glActiveTexture(GL_TEXTURE0 + activeTextureOffset);
-      glBindTexture(GL_TEXTURE_2D, world.textures.at(textureData.textureName).texture.textureId);
+      if (textureData.type == RENDER_TEXTURE_REGULAR){
+        glBindTexture(GL_TEXTURE_2D, world.textures.at(textureData.textureName).texture.textureId);
+      }else{
+        glBindTexture(GL_TEXTURE_2D, textureData.framebufferTextureId);
+      }
     }
     glActiveTexture(GL_TEXTURE0);
 
@@ -1040,7 +1044,7 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
   blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
 
-  auto renderStages = loadRenderStages(fbo, framebufferTexture, framebufferTexture2, framebufferTexture3, RenderShaders {
+  renderStages = loadRenderStages(fbo, framebufferTexture, framebufferTexture2, framebufferTexture3, RenderShaders {
     .blurProgram = blurProgram,
     .selectionProgram = selectionProgram,
     .shaderProgram = shaderProgram,

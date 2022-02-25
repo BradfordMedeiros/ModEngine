@@ -28,13 +28,16 @@ struct RenderDataVec3 {
   glm::vec3 value;
 };
 
+enum RenderTextureType { RENDER_TEXTURE_REGULAR, RENDER_TEXTURE_FRAMEBUFFER };
 struct RenderTexture {
   std::string nameInShader;
-  std::string textureName;  
+  RenderTextureType type;
+  std::string textureName;
+  int framebufferTextureId;
 };
 
 struct RenderStep {
-  const char* name;
+  std::string name;
   unsigned int fbo;
   unsigned int colorAttachment0;
   unsigned int colorAttachment1;
@@ -71,5 +74,6 @@ RenderStages loadRenderStages(
 );
 
 unsigned int finalRenderingTexture(RenderStages& stages);
+std::string renderStagesToString(RenderStages& stages);
 
 #endif

@@ -1,6 +1,7 @@
 #include "./main_input.h"
 
 extern World world;
+extern RenderStages renderStages;
 extern engineState state;
 extern SchemeBindingCallbacks schemeBindings;
 extern bool disableInput;
@@ -1260,4 +1261,15 @@ std::vector<InputDispatch> inputFns = {
       toggleCursor(state.captureCursor);
     }
   },
+  InputDispatch{
+    .sourceKey = 'R',
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,
+    .hasPreq = true,
+    .fn = []() -> void {
+      std::cout << renderStagesToString(renderStages) << std::endl;
+    }
+  },
 };
+
+
