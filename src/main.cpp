@@ -832,6 +832,167 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
+void renderDof(RenderContext& renderContext){
+  bool depthEnabled = false;
+  float minBlurDistance = 0.f;
+  float maxBlurDistance = 0.f;
+  float targetDepth = 0.f;
+  float nearplane = 0.1f;
+  float farplane = 100.f;
+  unsigned int blurAmount = 1;
+
+  if (state.activeCameraData != NULL){
+    depthEnabled = state.activeCameraData -> enableDof;
+    minBlurDistance = state.activeCameraData -> minBlurDistance;
+    maxBlurDistance = state.activeCameraData -> maxBlurDistance;
+    blurAmount = state.activeCameraData -> blurAmount;
+
+    if (state.activeCameraData -> target != ""){
+      auto elements = getByName(world.sandbox, state.activeCameraData -> target);
+      assert(elements.size() == 1);
+      auto elementId = elements.at(0);
+      auto halfBlurDistance = (maxBlurDistance - minBlurDistance) * 0.5f;
+      targetDepth = -1 * getViewspaceDepth(view, elementId);
+      minBlurDistance = targetDepth - halfBlurDistance;
+      maxBlurDistance = targetDepth + halfBlurDistance;
+      //std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
+      auto layerName = getGameObject(world, elementId).layer;
+      auto targetObjLayer = layerByName(layerName);
+      nearplane = targetObjLayer.nearplane;
+      farplane = targetObjLayer.farplane;
+    }
+  }
+
+  RenderStep dof1{
+    .name = "DOF-RENDERING",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture3,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+    .shader = blurProgram,
+    .quadTexture = framebufferTexture3,
+    .hasColorAttachment1 = false,
+    .renderWorld = false,
+    .renderSkybox = false,
+    .renderQuad = true,
+    .blend = false,
+    .enableStencil = false,
+    .intUniforms = {
+      RenderDataInt { .uniformName = "firstpass", .value = true },
+      RenderDataInt{ .uniformName = "amount", .value = blurAmount },
+    },
+    .floatUniforms = {
+      RenderDataFloat{ .uniformName = "minBlurDistance", .value = minBlurDistance },
+      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = maxBlurDistance },
+      RenderDataFloat{ .uniformName = "near", .value = nearplane },
+      RenderDataFloat{ .uniformName = "far", .value = farplane },
+    },
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {
+      RenderTexture {
+        .nameInShader = "framebufferTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = framebufferTexture3,
+      },
+      RenderTexture {
+        .nameInShader = "depthTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = depthTextures[0],
+      },
+    },
+  };
+
+ RenderStep dof2{
+    .name = "DOF-RENDERING-2",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+    .shader = blurProgram,
+    .quadTexture = framebufferTexture3,
+    .hasColorAttachment1 = false,
+    .renderWorld = false,
+    .renderSkybox = false,
+    .renderQuad = true,
+    .blend = false,
+    .enableStencil = false,
+    .intUniforms = {
+      RenderDataInt { .uniformName = "firstpass", .value = false },
+      RenderDataInt{ .uniformName = "amount", .value = blurAmount },
+    },
+    .floatUniforms = {
+      RenderDataFloat{ .uniformName = "minBlurDistance", .value = minBlurDistance },
+      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = maxBlurDistance },
+      RenderDataFloat{ .uniformName = "near", .value = nearplane },
+      RenderDataFloat{ .uniformName = "far", .value = farplane },
+    },
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {
+      RenderTexture {
+        .nameInShader = "framebufferTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = framebufferTexture3,
+      },
+      RenderTexture {
+        .nameInShader = "depthTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = depthTextures[0],
+      },
+    },
+  };
+
+  if (depthEnabled){
+    PROFILE("DOF-RENDERING",
+      glUseProgram(blurProgram);
+      glUniform1i(glGetUniformLocation(blurProgram, "framebufferTexture"), 0);        
+      glUniform1i(glGetUniformLocation(blurProgram, "depthTexture"), 1);        
+      glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), true);
+      glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
+      glUniform1f(glGetUniformLocation(blurProgram, "minBlurDistance"), minBlurDistance);
+      glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), maxBlurDistance);
+      glUniform1f(glGetUniformLocation(blurProgram, "near"), nearplane);
+      glUniform1f(glGetUniformLocation(blurProgram, "far"), farplane);
+      glUniform1i(glGetUniformLocation(blurProgram, "amount"), blurAmount);
+
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
+
+      glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
+
+      glBindVertexArray(quadVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+
+      //renderWithProgram(renderContext, dof1);
+      //second pass blurring vertically
+      //renderWithProgram(renderContext, dof2);
+      
+      glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
+
+      glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glDrawArrays(GL_TRIANGLES, 0, 6); 
+    )
+  }
+}
+
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1517,76 +1678,7 @@ int main(int argc, char* argv[]){
       renderWithProgram(renderContext, renderStages.bloom2);
     )
 
-    bool depthEnabled = false;
-    float minBlurDistance = 0.f;
-    float maxBlurDistance = 0.f;
-    float targetDepth = 0.f;
-    float nearplane = 0.1f;
-    float farplane = 100.f;
-    unsigned int blurAmount = 1;
-    // auto depthForElement = getViewspaceDepth(view, "platform");
-    //std::cout << "element depth is: " << depthForElement << std::endl;
-
-    if (state.activeCameraData != NULL){
-      depthEnabled = state.activeCameraData -> enableDof;
-      minBlurDistance = state.activeCameraData -> minBlurDistance;
-      maxBlurDistance = state.activeCameraData -> maxBlurDistance;
-      blurAmount = state.activeCameraData -> blurAmount;
-      if (state.activeCameraData -> target != ""){
-        auto elements = getByName(world.sandbox, state.activeCameraData -> target);
-        assert(elements.size() == 1);
-        auto elementId = elements.at(0);
-        auto halfBlurDistance = (maxBlurDistance - minBlurDistance) * 0.5f;
-        targetDepth = -1 * getViewspaceDepth(view, elementId);
-        minBlurDistance = targetDepth - halfBlurDistance;
-        maxBlurDistance = targetDepth + halfBlurDistance;
-        //std::cout << "dof info: (" << minBlurDistance << " " << maxBlurDistance << " " << targetDepth << ")" << std::endl;
-        auto layerName = getGameObject(world, elementId).layer;
-        auto targetObjLayer = layerByName(layerName);
-        nearplane = targetObjLayer.nearplane;
-        farplane = targetObjLayer.farplane;
-      }
-    }
-
-    PROFILE("DOF-RENDERING",
-      if (depthEnabled){
-        glUseProgram(blurProgram);
-        glUniform1i(glGetUniformLocation(blurProgram, "framebufferTexture"), 0);        
-        glUniform1i(glGetUniformLocation(blurProgram, "depthTexture"), 1);        
-        glUniform1i(glGetUniformLocation(blurProgram, "useDepthTexture"), true);
-        glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), true);
-        glUniform1f(glGetUniformLocation(blurProgram, "minBlurDistance"), minBlurDistance);
-        glUniform1f(glGetUniformLocation(blurProgram, "maxBlurDistance"), maxBlurDistance);
-        glUniform1f(glGetUniformLocation(blurProgram, "near"), nearplane);
-        glUniform1f(glGetUniformLocation(blurProgram, "far"), farplane);
-        glUniform1i(glGetUniformLocation(blurProgram, "amount"), blurAmount);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture3, 0);
-
-        glClearColor(0.f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
-
-        glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        glUniform1i(glGetUniformLocation(blurProgram, "firstpass"), false);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, depthTextures[0]);
-
-        glClearColor(0.f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 6); 
-      }
-    )
+    renderDof(renderContext);
 
     for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
       renderWithProgram(renderContext, renderStep);
