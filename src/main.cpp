@@ -842,10 +842,10 @@ std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderCo
       .shader = shaderProgram,
       .quadTexture = framebufferTexture,
       .hasColorAttachment1 = false,
-      .renderWorld = false,
+      .renderWorld = true,
       .renderSkybox = false,
-      .renderQuad = true,
-      .blend = false,
+      .renderQuad = false,
+      .blend = true,
       .enableStencil = false,
       .intUniforms = {
         //RenderDataInt { .uniformName = "firstpass", .value = true },
@@ -855,14 +855,7 @@ std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderCo
       },
       .floatArrUniforms = {},
       .vec3Uniforms = {},
-      .textures = {
-        RenderTexture {
-          .nameInShader = "framebufferTexture",
-          .type = RENDER_TEXTURE_FRAMEBUFFER,
-          .textureName = "",
-          .framebufferTextureId = framebufferTexture,
-        },
-      },
+      .textures = {},
   };    
 
   auto setPortalToRender = [&portalRendering](int portalNumber) -> void {
@@ -879,7 +872,7 @@ std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderCo
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalRendering.colorAttachment0, 0);
     glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     // Render Skybox code -> need to think harder about stencil
     glDepthMask(GL_FALSE);
     renderSkybox(portalRendering.shader, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
@@ -1562,7 +1555,7 @@ int main(int argc, char* argv[]){
     assert(portals.size() <= numPortalTextures);
 
     PROFILE("PORTAL_RENDERING", 
-        portalIdCache = renderPortals(shaderProgram, renderContext);
+      portalIdCache = renderPortals(shaderProgram, renderContext);
     )
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
