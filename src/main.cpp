@@ -1562,14 +1562,12 @@ int main(int argc, char* argv[]){
       renderWithProgram(renderContext, renderStages.bloom1);
       renderWithProgram(renderContext, renderStages.bloom2);
     )
-
     if (depthEnabled){
       PROFILE("DOF-RENDERING",
         renderWithProgram(renderContext, renderStages.dof1);
         renderWithProgram(renderContext, renderStages.dof2);
       )
     }
-
     for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
       renderWithProgram(renderContext, renderStep);
     }
