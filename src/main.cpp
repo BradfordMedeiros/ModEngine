@@ -753,7 +753,7 @@ struct RenderContext {
   std::vector<LightInfo> lights;
   std::vector<PortalInfo> portals;
   std::vector<glm::mat4> lightProjview;
-  glm::vec3 cameraPosition;
+  Transformation cameraTransform;
 };
 
 int renderWithProgram(RenderContext& context, RenderStep& renderStep){
@@ -799,7 +799,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 
     if (renderStep.renderSkybox){
       glDepthMask(GL_FALSE);
-      renderSkybox(renderStep.shader, context.view, context.cameraPosition);  // Probably better to render this at the end 
+      renderSkybox(renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
       glDepthMask(GL_TRUE);    
     }
     glEnable(GL_DEPTH_TEST);
@@ -818,7 +818,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
-      auto worldTriangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraPosition);
+      auto worldTriangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position);
       triangles += worldTriangles;
     }
     glDisable(GL_STENCIL_TEST);
@@ -830,6 +830,27 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
   )
   return triangles;
+}
+
+std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderContext& context){
+  std::map<objid, unsigned int> nextPortalCache;
+  for (int i = 0; i < context.portals.size(); i++){
+    auto portal = context.portals.at(i);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
+    glClearColor(0.0, 0.0, 0.0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    auto portalViewMatrix = renderPortalView(portal, context.cameraTransform);
+    // Render Skybox code -> need to think harder about stencil
+    glDepthMask(GL_FALSE);
+    renderSkybox(shaderProgram, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
+    glDepthMask(GL_TRUE);
+    /////////////////////////////
+
+    renderWorld(context.world, shaderProgram, NULL, portalViewMatrix, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, portal.cameraPos);
+    nextPortalCache[portal.id] = portalTextures[i];
+  }
+  return nextPortalCache;
 }
 
 RenderStagesDofInfo getDofInfo(bool* _shouldRender){
@@ -1410,7 +1431,7 @@ int main(int argc, char* argv[]){
       .lights = lights,
       .portals = portals,
       .lightProjview = lightMatrixs,
-      .cameraPosition = viewTransform.position,
+      .cameraTransform = viewTransform,
     };
 
     bool depthEnabled = false;
@@ -1501,26 +1522,9 @@ int main(int argc, char* argv[]){
 
     assert(portals.size() <= numPortalTextures);
 
+
     PROFILE("PORTAL_RENDERING", 
-      std::map<objid, unsigned int> nextPortalCache;
-      for (int i = 0; i < portals.size(); i++){
-        auto portal = portals.at(i);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalTextures[i], 0);
-        glClearColor(0.0, 0.0, 0.0, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        auto portalViewMatrix = renderPortalView(portal, viewTransform);
-        // Render Skybox code -> need to think harder about stencil
-        glDepthMask(GL_FALSE);
-        renderSkybox(shaderProgram, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
-        glDepthMask(GL_TRUE);
-        /////////////////////////////
-
-        renderWorld(world, shaderProgram, NULL, portalViewMatrix, glm::mat4(1.0f), lights, portals, lightMatrixs, portal.cameraPos);
-      
-        nextPortalCache[portal.id] = portalTextures[i];
-      }
-      portalIdCache = nextPortalCache;
+        portalIdCache = renderPortals(shaderProgram, renderContext);
     )
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
