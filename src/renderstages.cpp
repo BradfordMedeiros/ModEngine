@@ -367,48 +367,12 @@ RenderStages loadRenderStages(
     },
   };
 
-  RenderStep dof2{
-    .name = "DOF-RENDERING-2",
-    .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = 0,
-    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-    .shader = shaders.blurProgram,
-    .quadTexture = framebufferTexture3,
-    .hasColorAttachment1 = false,
-    .renderWorld = false,
-    .renderSkybox = false,
-    .renderQuad = true,
-    .blend = false,
-    .enableStencil = false,
-    .intUniforms = {
-      RenderDataInt { .uniformName = "firstpass", .value = false },
-      RenderDataInt{ .uniformName = "amount", .value = 0 },
-      RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
-    },
-    .floatUniforms = {
-      RenderDataFloat{ .uniformName = "minBlurDistance", .value = 0 },
-      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = 0 },
-      RenderDataFloat{ .uniformName = "near", .value = 0 },
-      RenderDataFloat{ .uniformName = "far", .value = 0 },
-    },
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .textures = {
-      RenderTexture {
-        .nameInShader = "framebufferTexture",
-        .type = RENDER_TEXTURE_FRAMEBUFFER,
-        .textureName = "",
-        .framebufferTextureId = framebufferTexture3,
-      },
-      RenderTexture {
-        .nameInShader = "depthTexture",
-        .type = RENDER_TEXTURE_FRAMEBUFFER,
-        .textureName = "",
-        .framebufferTextureId = depthTextures[0],
-      },
-    },
-  };
+  RenderStep dof2 = dof1;
+  dof2.name = "DOF-RENDERING-2";
+  dof2.colorAttachment0 = framebufferTexture;
+  dof2.quadTexture = framebufferTexture3;
+  dof2.intUniforms.at(0).value = false;
+  dof2.textures.at(0).framebufferTextureId = framebufferTexture3;
 
   auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2);
 
