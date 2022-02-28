@@ -62,6 +62,8 @@ struct RenderStages {
   RenderStep main;
   RenderStep bloom1;
   RenderStep bloom2;
+  RenderStep dof1;
+  RenderStep dof2;
   std::vector<RenderStep> additionalRenderSteps;
 };
 
@@ -70,8 +72,19 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture, 
   unsigned int framebufferTexture2,
   unsigned int framebufferTexture3,
+  unsigned int* depthTextures,
+  int numDepthTextures,
   RenderShaders shaders
 );
+
+struct RenderStagesDofInfo {
+  int blurAmount;
+  float minBlurDistance;
+  float maxBlurDistance;
+  float nearplane;
+  float farplane;
+};
+void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo);
 
 unsigned int finalRenderingTexture(RenderStages& stages);
 std::string renderStagesToString(RenderStages& stages);

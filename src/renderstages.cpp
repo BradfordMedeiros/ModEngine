@@ -218,7 +218,13 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
 
 // These steps generally assume more knowledge about the pipeline state than would like
 // Should make all rendering steps use stages and specify ordering in this
-RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,  RenderShaders shaders){
+RenderStages loadRenderStages(
+  unsigned int fbo, 
+  unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,
+  unsigned int* depthTextures, int numDepthTextures,
+  RenderShaders shaders
+){
+  assert(numDepthTextures > 1);
   RenderStep selectionRender {
     .name = "RENDERING-SELECTION",
     .fbo = fbo,
@@ -318,6 +324,92 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     .textures = {},
   };
 
+  RenderStep dof1{
+    .name = "DOF-RENDERING",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture3,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+    .shader = shaders.blurProgram,
+    .quadTexture = framebufferTexture,
+    .hasColorAttachment1 = false,
+    .renderWorld = false,
+    .renderSkybox = false,
+    .renderQuad = true,
+    .blend = false,
+    .enableStencil = false,
+    .intUniforms = {
+      RenderDataInt { .uniformName = "firstpass", .value = true },
+      RenderDataInt{ .uniformName = "amount", .value = 0 },             // updates during updateRenderStages 
+      RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
+    },
+    .floatUniforms = {
+      RenderDataFloat{ .uniformName = "minBlurDistance", .value = 0 },  // updates during updateRenderStages
+      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = 0 },  // updates during updateRenderStages
+      RenderDataFloat{ .uniformName = "near", .value = 0 },             // updates during updateRenderStages
+      RenderDataFloat{ .uniformName = "far", .value = 0 },              // updates during updateRenderStages
+    },
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {
+      RenderTexture {
+        .nameInShader = "framebufferTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = framebufferTexture,
+      },
+      RenderTexture {
+        .nameInShader = "depthTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = depthTextures[0],
+      },
+    },
+  };
+
+  RenderStep dof2{
+    .name = "DOF-RENDERING-2",
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture,
+    .colorAttachment1 = 0,
+    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+    .shader = shaders.blurProgram,
+    .quadTexture = framebufferTexture3,
+    .hasColorAttachment1 = false,
+    .renderWorld = false,
+    .renderSkybox = false,
+    .renderQuad = true,
+    .blend = false,
+    .enableStencil = false,
+    .intUniforms = {
+      RenderDataInt { .uniformName = "firstpass", .value = false },
+      RenderDataInt{ .uniformName = "amount", .value = 0 },
+      RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
+    },
+    .floatUniforms = {
+      RenderDataFloat{ .uniformName = "minBlurDistance", .value = 0 },
+      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = 0 },
+      RenderDataFloat{ .uniformName = "near", .value = 0 },
+      RenderDataFloat{ .uniformName = "far", .value = 0 },
+    },
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .textures = {
+      RenderTexture {
+        .nameInShader = "framebufferTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = framebufferTexture3,
+      },
+      RenderTexture {
+        .nameInShader = "depthTexture",
+        .type = RENDER_TEXTURE_FRAMEBUFFER,
+        .textureName = "",
+        .framebufferTextureId = depthTextures[0],
+      },
+    },
+  };
+
   auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2);
 
   RenderStages stages {
@@ -325,9 +417,24 @@ RenderStages loadRenderStages(unsigned int fbo, unsigned int framebufferTexture,
     .main = mainRender,
     .bloom1 = bloomStep1,
     .bloom2 = bloomStep2,
+    .dof1 = dof1,
+    .dof2 = dof2,
     .additionalRenderSteps = additionalRenderSteps,
   };
   return stages;
+}
+
+void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo){ 
+  stages.dof1.intUniforms.at(1).value = dofInfo.blurAmount;
+  stages.dof1.floatUniforms.at(0).value = dofInfo.minBlurDistance;
+  stages.dof1.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
+  stages.dof1.floatUniforms.at(2).value = dofInfo.nearplane;
+  stages.dof1.floatUniforms.at(3).value = dofInfo.farplane;
+  stages.dof2.intUniforms.at(1).value = dofInfo.blurAmount;
+  stages.dof2.floatUniforms.at(0).value = dofInfo.minBlurDistance;
+  stages.dof2.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
+  stages.dof2.floatUniforms.at(2).value = dofInfo.nearplane;
+  stages.dof2.floatUniforms.at(3).value = dofInfo.farplane;
 }
 
 unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2

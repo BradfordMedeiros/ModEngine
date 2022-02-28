@@ -832,7 +832,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-void renderDof(RenderContext& renderContext){
+RenderStagesDofInfo getDofInfo(bool* _shouldRender){
   bool depthEnabled = false;
   float minBlurDistance = 0.f;
   float maxBlurDistance = 0.f;
@@ -862,99 +862,15 @@ void renderDof(RenderContext& renderContext){
       farplane = targetObjLayer.farplane;
     }
   }
-
-  RenderStep dof1{
-    .name = "DOF-RENDERING",
-    .fbo = fbo,
-    .colorAttachment0 = framebufferTexture3,
-    .colorAttachment1 = 0,
-    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-    .shader = blurProgram,
-    .quadTexture = framebufferTexture,
-    .hasColorAttachment1 = false,
-    .renderWorld = false,
-    .renderSkybox = false,
-    .renderQuad = true,
-    .blend = false,
-    .enableStencil = false,
-    .intUniforms = {
-      RenderDataInt { .uniformName = "firstpass", .value = true },
-      RenderDataInt{ .uniformName = "amount", .value = blurAmount },
-      RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
-    },
-    .floatUniforms = {
-      RenderDataFloat{ .uniformName = "minBlurDistance", .value = minBlurDistance },
-      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = maxBlurDistance },
-      RenderDataFloat{ .uniformName = "near", .value = nearplane },
-      RenderDataFloat{ .uniformName = "far", .value = farplane },
-    },
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .textures = {
-      RenderTexture {
-        .nameInShader = "framebufferTexture",
-        .type = RENDER_TEXTURE_FRAMEBUFFER,
-        .textureName = "",
-        .framebufferTextureId = framebufferTexture,
-      },
-      RenderTexture {
-        .nameInShader = "depthTexture",
-        .type = RENDER_TEXTURE_FRAMEBUFFER,
-        .textureName = "",
-        .framebufferTextureId = depthTextures[0],
-      },
-    },
-  };
-
-  RenderStep dof2{
-    .name = "DOF-RENDERING-2",
-    .fbo = fbo,
-    .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = 0,
-    .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-    .shader = blurProgram,
-    .quadTexture = framebufferTexture3,
-    .hasColorAttachment1 = false,
-    .renderWorld = false,
-    .renderSkybox = false,
-    .renderQuad = true,
-    .blend = false,
-    .enableStencil = false,
-    .intUniforms = {
-      RenderDataInt { .uniformName = "firstpass", .value = false },
-      RenderDataInt{ .uniformName = "amount", .value = blurAmount },
-      RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
-    },
-    .floatUniforms = {
-      RenderDataFloat{ .uniformName = "minBlurDistance", .value = minBlurDistance },
-      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = maxBlurDistance },
-      RenderDataFloat{ .uniformName = "near", .value = nearplane },
-      RenderDataFloat{ .uniformName = "far", .value = farplane },
-    },
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .textures = {
-      RenderTexture {
-        .nameInShader = "framebufferTexture",
-        .type = RENDER_TEXTURE_FRAMEBUFFER,
-        .textureName = "",
-        .framebufferTextureId = framebufferTexture3,
-      },
-      RenderTexture {
-        .nameInShader = "depthTexture",
-        .type = RENDER_TEXTURE_FRAMEBUFFER,
-        .textureName = "",
-        .framebufferTextureId = depthTextures[0],
-      },
-    },
-  };
-
-  if (depthEnabled){
-    PROFILE("DOF-RENDERING",
-      renderWithProgram(renderContext, dof1);
-      renderWithProgram(renderContext, dof2);
-    )
-  }
+  *_shouldRender = depthEnabled;
+  RenderStagesDofInfo info {
+    .blurAmount = blurAmount,
+    .minBlurDistance = minBlurDistance,
+    .maxBlurDistance = maxBlurDistance,
+    .nearplane = nearplane,
+    .farplane = farplane,
+  };  
+  return info;
 }
 
 
@@ -1169,7 +1085,7 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
   blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
 
-  renderStages = loadRenderStages(fbo, framebufferTexture, framebufferTexture2, framebufferTexture3, RenderShaders {
+  renderStages = loadRenderStages(fbo, framebufferTexture, framebufferTexture2, framebufferTexture3, depthTextures, numDepthTextures, RenderShaders {
     .blurProgram = blurProgram,
     .selectionProgram = selectionProgram,
     .shaderProgram = shaderProgram,
@@ -1496,6 +1412,10 @@ int main(int argc, char* argv[]){
       .lightProjview = lightMatrixs,
       .cameraPosition = viewTransform.position,
     };
+
+    bool depthEnabled = false;
+    auto dofInfo = getDofInfo(&depthEnabled);
+    updateRenderStages(renderStages, dofInfo);
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
 
@@ -1643,7 +1563,12 @@ int main(int argc, char* argv[]){
       renderWithProgram(renderContext, renderStages.bloom2);
     )
 
-    renderDof(renderContext);
+    if (depthEnabled){
+      PROFILE("DOF-RENDERING",
+        renderWithProgram(renderContext, renderStages.dof1);
+        renderWithProgram(renderContext, renderStages.dof2);
+      )
+    }
 
     for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
       renderWithProgram(renderContext, renderStep);
