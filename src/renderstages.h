@@ -60,11 +60,16 @@ struct RenderStep {
 struct RenderStages {
   RenderStep selection;
   RenderStep main;
+  RenderStep portal;
   RenderStep bloom1;
   RenderStep bloom2;
   RenderStep dof1;
   RenderStep dof2;
   std::vector<RenderStep> additionalRenderSteps;
+
+  // dependent data
+  unsigned int* portalTextures;
+  int numPortalTextures;  
 };
 
 RenderStages loadRenderStages(
@@ -72,8 +77,8 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture, 
   unsigned int framebufferTexture2,
   unsigned int framebufferTexture3,
-  unsigned int* depthTextures,
-  int numDepthTextures,
+  unsigned int* depthTextures, int numDepthTextures,
+  unsigned int* portalTextures, int numPortalTextures,
   RenderShaders shaders
 );
 
@@ -85,6 +90,7 @@ struct RenderStagesDofInfo {
   float farplane;
 };
 void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo);
+void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber);
 
 unsigned int finalRenderingTexture(RenderStages& stages);
 std::string renderStagesToString(RenderStages& stages);

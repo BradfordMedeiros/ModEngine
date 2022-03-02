@@ -222,9 +222,11 @@ RenderStages loadRenderStages(
   unsigned int fbo, 
   unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,
   unsigned int* depthTextures, int numDepthTextures,
+  unsigned int* portalTextures, int numPortalTextures,
   RenderShaders shaders
 ){
   assert(numDepthTextures > 1);
+  assert(numPortalTextures > 1);
   RenderStep selectionRender {
     .name = "RENDERING-SELECTION",
     .fbo = fbo,
@@ -265,6 +267,26 @@ RenderStages loadRenderStages(
     .vec3Uniforms = {},
     .textures = {},
   };
+  RenderStep portalRender {
+      .name = "PORTAL-RENDERING",
+      .fbo = fbo,
+      .colorAttachment0 = portalTextures[0], // this gets updated
+      .colorAttachment1 = 0,
+      .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+      .shader = shaders.shaderProgram,
+      .quadTexture = framebufferTexture,
+      .hasColorAttachment1 = false,
+      .renderWorld = true,
+      .renderSkybox = true,
+      .renderQuad = false,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {},
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .textures = {},
+  };    
     // depends on framebuffer texture, outputs to framebuffer texture 2
     // Blurring draws the framebuffer texture 
     // The blur program blurs it one in one direction and saves in framebuffer texture 3 
@@ -379,11 +401,14 @@ RenderStages loadRenderStages(
   RenderStages stages {
     .selection = selectionRender,
     .main = mainRender,
+    .portal = portalRender,
     .bloom1 = bloomStep1,
     .bloom2 = bloomStep2,
     .dof1 = dof1,
     .dof2 = dof2,
     .additionalRenderSteps = additionalRenderSteps,
+    .portalTextures = portalTextures,
+    .numPortalTextures = numPortalTextures,
   };
   return stages;
 }
@@ -399,6 +424,11 @@ void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo){
   stages.dof2.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
   stages.dof2.floatUniforms.at(2).value = dofInfo.nearplane;
   stages.dof2.floatUniforms.at(3).value = dofInfo.farplane;
+}
+
+void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber){
+  assert(portalNumber < stages.numPortalTextures);
+  stages.portal.colorAttachment0 = stages.portalTextures[portalNumber];
 }
 
 unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2

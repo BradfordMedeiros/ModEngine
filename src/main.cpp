@@ -833,36 +833,12 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 }
 
 std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderContext& context){
-  RenderStep renderStep {
-      .name = "PORTAL-RENDERING",
-      .fbo = fbo,
-      .colorAttachment0 = portalTextures[0], // this gets updated
-      .colorAttachment1 = 0,
-      .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-      .shader = shaderProgram,
-      .quadTexture = framebufferTexture,
-      .hasColorAttachment1 = false,
-      .renderWorld = true,
-      .renderSkybox = true,
-      .renderQuad = false,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {},
-      .floatUniforms = {},
-      .floatArrUniforms = {},
-      .vec3Uniforms = {},
-      .textures = {},
-  };    
-
-  auto setPortalToRender = [&renderStep](int portalNumber) -> void {
-    renderStep.colorAttachment0 = portalTextures[portalNumber];
-  };
-
+  auto renderStep = renderStages.portal;
   std::map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
     auto portalViewMatrix = renderPortalView(portal, context.cameraTransform);
-    setPortalToRender(i);
+    renderStagesSetPortal(renderStages, i);
     RenderContext portalRenderContext {
       .world = context.world,
       .view = portalViewMatrix,
@@ -1130,11 +1106,16 @@ int main(int argc, char* argv[]){
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
   blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
 
-  renderStages = loadRenderStages(fbo, framebufferTexture, framebufferTexture2, framebufferTexture3, depthTextures, numDepthTextures, RenderShaders {
-    .blurProgram = blurProgram,
-    .selectionProgram = selectionProgram,
-    .shaderProgram = shaderProgram,
-  });
+  renderStages = loadRenderStages(fbo, 
+    framebufferTexture, framebufferTexture2, framebufferTexture3, 
+    depthTextures, numDepthTextures,
+    portalTextures, numPortalTextures,
+    RenderShaders {
+      .blurProgram = blurProgram,
+      .selectionProgram = selectionProgram,
+      .shaderProgram = shaderProgram,
+    }
+  );
 
   fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
   Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
