@@ -30,8 +30,7 @@ PortalInfo getPortalInfo(World& world, objid id){
   auto portalFullTransform = fullTransformation(world.sandbox, id);
 
   PortalInfo info {
-    .cameraPos = cameraFullTransform.position,
-    .cameraRotation = cameraFullTransform.rotation,
+    .cameraTransform = cameraFullTransform,
     .portalPos = portalFullTransform.position,
     .portalRotation = portalFullTransform.rotation,
     .perspective = portalObject -> perspective,
@@ -57,10 +56,10 @@ bool isPortal(World& world, objid id){
 
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform){
   if (!info.perspective){
-    return renderView(info.cameraPos, info.cameraRotation);
+    return renderView(info.cameraTransform.position, info.cameraTransform.rotation);
   }
   auto cameraToPortalOffset = transform.position - info.portalPos;
-  return glm::inverse(renderView(glm::vec3(0.f, 0.f, 0.f), info.portalRotation) *  glm::inverse(renderView(cameraToPortalOffset, transform.rotation))) * renderView(info.cameraPos, info.cameraRotation);
+  return glm::inverse(renderView(glm::vec3(0.f, 0.f, 0.f), info.portalRotation) *  glm::inverse(renderView(cameraToPortalOffset, transform.rotation))) * renderView(info.cameraTransform.position, info.cameraTransform.rotation);
 }
 
 // TODO - needs to be done relative to parent, not local space
