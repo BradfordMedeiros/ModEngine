@@ -833,8 +833,8 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 }
 
 std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderContext& context){
-  RenderStep portalRendering {
-      .name = "DOF-RENDERING",
+  RenderStep renderStep {
+      .name = "PORTAL-RENDERING",
       .fbo = fbo,
       .colorAttachment0 = portalTextures[0], // this gets updated
       .colorAttachment1 = 0,
@@ -843,44 +843,36 @@ std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderCo
       .quadTexture = framebufferTexture,
       .hasColorAttachment1 = false,
       .renderWorld = true,
-      .renderSkybox = false,
+      .renderSkybox = true,
       .renderQuad = false,
       .blend = true,
       .enableStencil = false,
-      .intUniforms = {
-        //RenderDataInt { .uniformName = "firstpass", .value = true },
-      },
-      .floatUniforms = {
-        //RenderDataFloat{ .uniformName = "minBlurDistance", .value = 0 },  // updates during updateRenderStages
-      },
+      .intUniforms = {},
+      .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
       .textures = {},
   };    
 
-  auto setPortalToRender = [&portalRendering](int portalNumber) -> void {
-    portalRendering.colorAttachment0 = portalTextures[portalNumber];
+  auto setPortalToRender = [&renderStep](int portalNumber) -> void {
+    renderStep.colorAttachment0 = portalTextures[portalNumber];
   };
-
 
   std::map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
     auto portalViewMatrix = renderPortalView(portal, context.cameraTransform);
-
     setPortalToRender(i);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, portalRendering.colorAttachment0, 0);
-    glClearColor(0.0, 0.0, 0.0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Render Skybox code -> need to think harder about stencil
-    glDepthMask(GL_FALSE);
-    renderSkybox(portalRendering.shader, portalViewMatrix, portal.cameraPos);  // Probably better to render this at the end 
-    glDepthMask(GL_TRUE);
-    /////////////////////////////
-
-    renderWorld(context.world, portalRendering.shader, NULL, portalViewMatrix, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, portal.cameraPos);
-    nextPortalCache[portal.id] = portalRendering.colorAttachment0;
+    RenderContext portalRenderContext {
+      .world = context.world,
+      .view = portalViewMatrix,
+      .lights = context.lights,
+      .portals = context.portals,
+      .lightProjview = context.lightProjview,
+      .cameraTransform = portal.cameraTransform,
+    };
+    renderWithProgram(portalRenderContext, renderStep);
+    nextPortalCache[portal.id] = renderStep.colorAttachment0;
   }
   return nextPortalCache;
 }
