@@ -455,6 +455,7 @@ std::string renderStagesToString(RenderStages& stages){
 
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.selection) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.main) + "\" -> \"?\" \n";
+  renderingSystem = renderingSystem + "\"" + renderStageToString(stages.portal) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.bloom1) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.bloom2) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.dof1) + "\" -> \"?\" \n";

@@ -833,7 +833,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
 }
 
 std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderContext& context){
-  auto renderStep = renderStages.portal;
   std::map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
@@ -847,9 +846,11 @@ std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderCo
       .lightProjview = context.lightProjview,
       .cameraTransform = portal.cameraTransform,
     };
-    renderWithProgram(portalRenderContext, renderStep);
-    nextPortalCache[portal.id] = renderStep.colorAttachment0;
+    std::cout << "portal transform:  " << i << " " << print(portal.cameraTransform.position) << std::endl;
+    renderWithProgram(portalRenderContext, renderStages.portal);
+    nextPortalCache[portal.id] = renderStages.portal.colorAttachment0;
   }
+  std::cout << std::endl;
   return nextPortalCache;
 }
 
