@@ -832,7 +832,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderContext& context){
+std::map<objid, unsigned int> renderPortals(RenderContext& context){
   std::map<objid, unsigned int> nextPortalCache;
   for (int i = 0; i < context.portals.size(); i++){
     auto portal = context.portals.at(i);
@@ -852,6 +852,104 @@ std::map<objid, unsigned int> renderPortals(unsigned int shaderProgram, RenderCo
   }
   std::cout << std::endl;
   return nextPortalCache;
+}
+
+    
+
+std::vector<glm::mat4> renderShadowMaps(unsigned int selectionProgram, std::vector<LightInfo>& lights, std::vector<PortalInfo>& portals){
+  std::vector<glm::mat4> lightMatrixs;
+  for (int i = 0; i < lights.size(); i++){
+    setActiveDepthTexture(i + 1);
+    auto light = lights.at(i);
+    auto lightView = renderView(light.pos, light.rotation);
+    glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
+    auto lightProjview = lightProjection * lightView;
+    lightMatrixs.push_back(lightProjview);
+    
+    //// core rendering //////////////////////////
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(255.0, 255.0, 255.0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
+    ///////////////////////////////
+
+    /*    glUseProgram(renderStep.shader);
+    for (auto &uniform : renderStep.intUniforms){
+      glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
+    }
+    for (auto &uniform : renderStep.floatUniforms){
+      glUniform1f(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
+    }
+    for (auto &uniform : renderStep.vec3Uniforms){
+      glUniform3fv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
+    }
+    for (auto &uniform : renderStep.floatArrUniforms){
+      for (int i = 0; i < uniform.value.size(); i++){
+        glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
+      }
+    }
+    for (int i = 0; i < renderStep.textures.size(); i++){
+      auto &textureData = renderStep.textures.at(i);
+      int activeTextureOffset = 6 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
+      glUniform1i(glGetUniformLocation(renderStep.shader, textureData.nameInShader.c_str()), activeTextureOffset);
+      glActiveTexture(GL_TEXTURE0 + activeTextureOffset);
+      if (textureData.type == RENDER_TEXTURE_REGULAR){
+        glBindTexture(GL_TEXTURE_2D, world.textures.at(textureData.textureName).texture.textureId);
+      }else{
+        glBindTexture(GL_TEXTURE_2D, textureData.framebufferTextureId);
+      }
+    }
+    glActiveTexture(GL_TEXTURE0);
+
+    setActiveDepthTexture(renderStep.depthTextureIndex);
+    glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
+    if (renderStep.hasColorAttachment1){
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
+    }
+    glClearColor(0.0, 0.0, 0.0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+
+    if (renderStep.renderSkybox){
+      glDepthMask(GL_FALSE);
+      renderSkybox(renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
+      glDepthMask(GL_TRUE);    
+    }
+    glEnable(GL_DEPTH_TEST);
+    if (renderStep.blend){
+      glEnable(GL_BLEND);
+    }else{
+      glDisable(GL_BLEND);
+    }
+
+    if (renderStep.enableStencil){
+      glEnable(GL_STENCIL_TEST);
+      glStencilMask(0xFF);
+      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+    }
+
+    if (renderStep.renderWorld){
+      // important - redundant call to glUseProgram
+      auto worldTriangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position);
+      triangles += worldTriangles;
+    }
+    glDisable(GL_STENCIL_TEST);
+
+    if (renderStep.renderQuad){
+      glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
+      glBindVertexArray(quadVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 6);      
+    }*/
+
+
+  }
+  return lightMatrixs;
 }
 
 RenderStagesDofInfo getDofInfo(bool* _shouldRender){
@@ -1410,25 +1508,8 @@ int main(int argc, char* argv[]){
     std::vector<glm::mat4> lightMatrixs;
     PROFILE(
       "RENDERING-SHADOWMAPS",
-      for (int i = 0; i < lights.size(); i++){
-        setActiveDepthTexture(i + 1);
-        auto light = lights.at(i);
-        auto lightView = renderView(light.pos, light.rotation);
-    
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
-
-        glEnable(GL_DEPTH_TEST);
-        glClearColor(255.0, 255.0, 255.0, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
-        auto lightProjview = lightProjection * lightView;
-        lightMatrixs.push_back(lightProjview);
-
-        renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
-    })
+      lightMatrixs = renderShadowMaps(selectionProgram, lights, portals);
+    )
 
 
     RenderContext renderContext {
@@ -1529,7 +1610,7 @@ int main(int argc, char* argv[]){
     assert(portals.size() <= numPortalTextures);
 
     PROFILE("PORTAL_RENDERING", 
-      portalIdCache = renderPortals(shaderProgram, renderContext);
+      portalIdCache = renderPortals(renderContext);
     )
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
