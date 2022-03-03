@@ -4,8 +4,7 @@
 #include "./scene.h"
 
 struct LightInfo {
-  glm::vec3 pos;
-  glm::quat rotation;
+  Transformation transform;
   GameObjectLight light;
 };
 std::vector<LightInfo> getLightInfo(World& world);

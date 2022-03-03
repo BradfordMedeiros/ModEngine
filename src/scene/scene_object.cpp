@@ -10,8 +10,7 @@ std::vector<LightInfo> getLightInfo(World& world){
 
     auto lightTransform = fullTransformation(world.sandbox, objectId);
     LightInfo light {
-      .pos = lightTransform.position,
-      .rotation = lightTransform.rotation,
+      .transform = lightTransform,
       .light = *lightObject,
     };
     lights.push_back(light);
