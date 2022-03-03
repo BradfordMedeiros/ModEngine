@@ -247,6 +247,27 @@ RenderStages loadRenderStages(
     .vec3Uniforms = {},
     .textures = {},
   };
+  RenderStep shadowMapRender {
+      .name = "SHADOWMAP-RENDERING",
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture, 
+      .colorAttachment1 = framebufferTexture2,
+      .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+      .shader = shaders.selectionProgram,
+      .quadTexture = 0,
+      .hasColorAttachment1 = true,
+      .renderWorld = true,
+      .renderSkybox = false,
+      .renderQuad = false,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {},
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .textures = {},
+  };
+
   RenderStep mainRender {
     .name = "MAIN_RENDERING",
     .fbo = fbo,
@@ -400,6 +421,7 @@ RenderStages loadRenderStages(
 
   RenderStages stages {
     .selection = selectionRender,
+    .shadowmap = shadowMapRender,
     .main = mainRender,
     .portal = portalRender,
     .bloom1 = bloomStep1,
@@ -409,6 +431,7 @@ RenderStages loadRenderStages(
     .additionalRenderSteps = additionalRenderSteps,
     .portalTextures = portalTextures,
     .numPortalTextures = numPortalTextures,
+    .numDepthTextures = numDepthTextures,
   };
   return stages;
 }
@@ -429,6 +452,10 @@ void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo){
 void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber){
   assert(portalNumber < stages.numPortalTextures);
   stages.portal.colorAttachment0 = stages.portalTextures[portalNumber];
+}
+void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber){
+  assert(shadowmapNumber < (stages.numDepthTextures - 1));
+  stages.shadowmap.depthTextureIndex = shadowmapNumber + 1;
 }
 
 unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2
@@ -454,6 +481,7 @@ std::string renderStagesToString(RenderStages& stages){
   std::string renderingSystem = "\n digraph rendering { \n";
 
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.selection) + "\" -> \"?\" \n";
+  renderingSystem = renderingSystem + "\"" + renderStageToString(stages.shadowmap) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.main) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.portal) + "\" -> \"?\" \n";
   renderingSystem = renderingSystem + "\"" + renderStageToString(stages.bloom1) + "\" -> \"?\" \n";

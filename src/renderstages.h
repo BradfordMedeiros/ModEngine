@@ -59,6 +59,7 @@ struct RenderStep {
 
 struct RenderStages {
   RenderStep selection;
+  RenderStep shadowmap;
   RenderStep main;
   RenderStep portal;
   RenderStep bloom1;
@@ -70,6 +71,7 @@ struct RenderStages {
   // dependent data
   unsigned int* portalTextures;
   int numPortalTextures;  
+  int numDepthTextures;
 };
 
 RenderStages loadRenderStages(
@@ -91,6 +93,7 @@ struct RenderStagesDofInfo {
 };
 void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo);
 void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber);
+void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber);
 
 unsigned int finalRenderingTexture(RenderStages& stages);
 std::string renderStagesToString(RenderStages& stages);
