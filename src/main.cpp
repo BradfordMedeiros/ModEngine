@@ -857,38 +857,14 @@ std::map<objid, unsigned int> renderPortals(RenderContext& context){
   return nextPortalCache;
 }
 
-    
-
-std::vector<glm::mat4> renderShadowMaps(RenderContext& context, unsigned int selectionProgram, std::vector<LightInfo>& lights, std::vector<PortalInfo>& portals){
-  RenderStep renderStep {
-      .name = "PORTAL-RENDERING",
-      .fbo = fbo,
-      .colorAttachment0 = framebufferTexture, 
-      .colorAttachment1 = framebufferTexture2,
-      .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
-      .shader = selectionProgram,
-      .quadTexture = 0,
-      .hasColorAttachment1 = true,
-      .renderWorld = true,
-      .renderSkybox = false,
-      .renderQuad = false,
-      .blend = true,
-      .enableStencil = false,
-      .intUniforms = {},
-      .floatUniforms = {},
-      .floatArrUniforms = {},
-      .vec3Uniforms = {},
-      .textures = {},
-  };   
-
+std::vector<glm::mat4> renderShadowMaps(RenderContext& context){
   std::vector<glm::mat4> lightMatrixs;
-  for (int i = 0; i < lights.size(); i++){
-    auto light = lights.at(i);
+  for (int i = 0; i < context.lights.size(); i++){
+    auto light = context.lights.at(i);
     auto lightView = renderView(light.transform.position, light.transform.rotation);
     glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
     auto lightProjview = lightProjection * lightView;
     lightMatrixs.push_back(lightProjview);
-
 
     RenderContext lightRenderContext {
       .world = context.world,
@@ -899,12 +875,8 @@ std::vector<glm::mat4> renderShadowMaps(RenderContext& context, unsigned int sel
       .cameraTransform = light.transform,
       .projection = lightProjection,
     };
-
-    auto setLightIndex = [&renderStep](unsigned int lightNumber) -> void {
-      renderStep.depthTextureIndex = lightNumber + 1;
-    };
-    setLightIndex(i);
-    renderWithProgram(lightRenderContext, renderStep);
+    renderStagesSetShadowmap(renderStages, i);
+    renderWithProgram(lightRenderContext, renderStages.shadowmap);
   }
   return lightMatrixs;
 }
@@ -1475,7 +1447,7 @@ int main(int argc, char* argv[]){
     std::vector<glm::mat4> lightMatrixs;
     PROFILE(
       "RENDERING-SHADOWMAPS",
-      lightMatrixs = renderShadowMaps(renderContext, selectionProgram, lights, portals);
+      lightMatrixs = renderShadowMaps(renderContext);
     )
 
     renderContext.lightProjview = lightMatrixs;
