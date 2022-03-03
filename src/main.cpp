@@ -412,10 +412,10 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
 
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
-    glm::vec3 position = lights.at(i).pos;
+    glm::vec3 position = lights.at(i).transform.position;
     glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
     glUniform3fv(glGetUniformLocation(shader, ("lightscolor[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.color));
-    glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).rotation)));
+    glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(lights.at(i).transform.rotation)));
     glUniform3fv(glGetUniformLocation(shader, ("lightsatten[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(lights.at(i).light.attenuation));
     glUniform1f(glGetUniformLocation(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str()), lights.at(i).light.maxangle);
     glUniform1i(glGetUniformLocation(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str()), lights.at(i).light.type == LIGHT_DIRECTIONAL);
@@ -856,29 +856,53 @@ std::map<objid, unsigned int> renderPortals(RenderContext& context){
 
     
 
-std::vector<glm::mat4> renderShadowMaps(unsigned int selectionProgram, std::vector<LightInfo>& lights, std::vector<PortalInfo>& portals){
+std::vector<glm::mat4> renderShadowMaps(RenderContext& context, unsigned int selectionProgram, std::vector<LightInfo>& lights, std::vector<PortalInfo>& portals){
+  RenderStep renderStep {
+      .name = "PORTAL-RENDERING",
+      .fbo = fbo,
+      .colorAttachment0 = framebufferTexture, 
+      .colorAttachment1 = framebufferTexture2,
+      .depthTextureIndex = 1, // but maybe use 0?  doesn't really matter
+      .shader = selectionProgram,
+      .quadTexture = 0,
+      .hasColorAttachment1 = true,
+      .renderWorld = true,
+      .renderSkybox = false,
+      .renderQuad = false,
+      .blend = true,
+      .enableStencil = false,
+      .intUniforms = {},
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .textures = {},
+  };   
+
   std::vector<glm::mat4> lightMatrixs;
   for (int i = 0; i < lights.size(); i++){
-    setActiveDepthTexture(i + 1);
     auto light = lights.at(i);
-    auto lightView = renderView(light.pos, light.rotation);
+    auto lightView = renderView(light.transform.position, light.transform.rotation);
     glm::mat4 lightProjection = glm::ortho<float>(-2000, 2000,-2000, 2000, 1.f, 3000);  // need to choose these values better
     auto lightProjview = lightProjection * lightView;
     lightMatrixs.push_back(lightProjview);
-    
+
+
+    RenderContext lightRenderContext {
+      .world = context.world,
+      .view = lightView,
+      .lights = context.lights,
+      .portals = context.portals,
+      .lightProjview = context.lightProjview,
+      .cameraTransform = light.transform,
+    };
+
+    auto setLightIndex = [&renderStep](unsigned int lightNumber) -> void {
+      renderStep.depthTextureIndex = lightNumber + 1;
+    };
+    setLightIndex(i);
+
     //// core rendering //////////////////////////
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
-
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(255.0, 255.0, 255.0, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.pos); 
-    ///////////////////////////////
-
-    /*    glUseProgram(renderStep.shader);
+    glUseProgram(renderStep.shader);
     for (auto &uniform : renderStep.intUniforms){
       glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
     }
@@ -905,28 +929,30 @@ std::vector<glm::mat4> renderShadowMaps(unsigned int selectionProgram, std::vect
       }
     }
     glActiveTexture(GL_TEXTURE0);
-
     setActiveDepthTexture(renderStep.depthTextureIndex);
+
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
     if (renderStep.hasColorAttachment1){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
     }
+
     glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     if (renderStep.renderSkybox){
       glDepthMask(GL_FALSE);
-      renderSkybox(renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
+      renderSkybox(renderStep.shader, lightView, context.cameraTransform.position);  
       glDepthMask(GL_TRUE);    
     }
+
     glEnable(GL_DEPTH_TEST);
     if (renderStep.blend){
       glEnable(GL_BLEND);
     }else{
       glDisable(GL_BLEND);
     }
-
     if (renderStep.enableStencil){
       glEnable(GL_STENCIL_TEST);
       glStencilMask(0xFF);
@@ -936,18 +962,18 @@ std::vector<glm::mat4> renderShadowMaps(unsigned int selectionProgram, std::vect
 
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
-      auto worldTriangles = renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position);
-      triangles += worldTriangles;
+//      renderWorld(context.world, renderStep.shader, NULL, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position);
+
+      renderWorld(lightRenderContext.world, renderStep.shader, &lightProjection, lightRenderContext.view, glm::mat4(1.0f), lightRenderContext.lights, lightRenderContext.portals, lightRenderContext.lightProjview, lightRenderContext.cameraTransform.position); 
+
+      //renderWorld(world, selectionProgram, &lightProjection, lightView, glm::mat4(1.0f), lights, portals, {}, light.transform.position); 
     }
     glDisable(GL_STENCIL_TEST);
-
     if (renderStep.renderQuad){
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
       glBindVertexArray(quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);      
-    }*/
-
-
+    }
   }
   return lightMatrixs;
 }
@@ -1505,21 +1531,23 @@ int main(int argc, char* argv[]){
 
     // depth buffer from point of view SMf 1 light source (all eventually, but 1 for now)
 
-    std::vector<glm::mat4> lightMatrixs;
-    PROFILE(
-      "RENDERING-SHADOWMAPS",
-      lightMatrixs = renderShadowMaps(selectionProgram, lights, portals);
-    )
-
-
     RenderContext renderContext {
       .world = world,
       .view = view,
       .lights = lights,
       .portals = portals,
-      .lightProjview = lightMatrixs,
+      .lightProjview = {},
       .cameraTransform = viewTransform,
     };
+
+    std::vector<glm::mat4> lightMatrixs;
+    PROFILE(
+      "RENDERING-SHADOWMAPS",
+      lightMatrixs = renderShadowMaps(renderContext, selectionProgram, lights, portals);
+    )
+
+    renderContext.lightProjview = lightMatrixs;
+
 
     bool depthEnabled = false;
     auto dofInfo = getDofInfo(&depthEnabled);
