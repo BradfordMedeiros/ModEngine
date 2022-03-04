@@ -7,6 +7,7 @@ struct DeserializedRenderStage {
   std::vector<RenderDataFloat> floatUniforms;
   std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderDataBuiltIn> builtInUniforms;
   std::vector<RenderTexture> textures;
 };
 
@@ -57,6 +58,7 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
 
     auto isUniform = token.attribute.at(0) == '!';
     auto isHint = token.attribute.at(0) == '?';
+    auto isBuiltInUniform = token.attribute.at(0) == '@';
     auto isTexture = token.attribute.at(0) == '&';
 
     if (token.attribute == "shader"){
@@ -114,6 +116,12 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
           assert(false);
         }
       }
+    }else if (isBuiltInUniform){
+      auto attribute = token.attribute.substr(1, token.attribute.size());
+      additionalShaders.at(indexForStage).builtInUniforms.push_back(RenderDataBuiltIn{
+        .uniformName = attribute,
+        .builtin = token.payload,
+      });
     }else{
       std::cout << "parse render stages: " << token.target << " - attribute is not supported: " << token.attribute << std::endl;
       assert(false);
@@ -207,6 +215,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .floatUniforms = additionalShader.floatUniforms,
       .floatArrUniforms = additionalShader.floatArrUniforms,
       .vec3Uniforms = additionalShader.vec3Uniforms,
+      .builtInUniforms = additionalShader.builtInUniforms,
       .textures = additionalShader.textures,
     };
     additionalRenderSteps.push_back(renderStep);
@@ -245,6 +254,7 @@ RenderStages loadRenderStages(
     .floatUniforms = {},
     .floatArrUniforms = {},
     .vec3Uniforms = {},
+    .builtInUniforms = {},
     .textures = {},
   };
   RenderStep shadowMapRender {
@@ -265,6 +275,7 @@ RenderStages loadRenderStages(
       .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
+      .builtInUniforms = {},
       .textures = {},
   };
 
@@ -286,6 +297,7 @@ RenderStages loadRenderStages(
     .floatUniforms = {},
     .floatArrUniforms = {},
     .vec3Uniforms = {},
+    .builtInUniforms = {},
     .textures = {},
   };
   RenderStep portalRender {
@@ -306,6 +318,7 @@ RenderStages loadRenderStages(
       .floatUniforms = {},
       .floatArrUniforms = {},
       .vec3Uniforms = {},
+      .builtInUniforms = {},
       .textures = {},
   };    
     // depends on framebuffer texture, outputs to framebuffer texture 2
@@ -338,6 +351,7 @@ RenderStages loadRenderStages(
     .floatUniforms = {},
     .floatArrUniforms = {},
     .vec3Uniforms = {},
+    .builtInUniforms = {},
     .textures = {},
   };
 
@@ -364,6 +378,7 @@ RenderStages loadRenderStages(
     .floatUniforms = {},
     .floatArrUniforms = {},
     .vec3Uniforms = {},
+    .builtInUniforms = {},
     .textures = {},
   };
 
@@ -394,6 +409,7 @@ RenderStages loadRenderStages(
     },
     .floatArrUniforms = {},
     .vec3Uniforms = {},
+    .builtInUniforms = {},
     .textures = {
       RenderTexture {
         .nameInShader = "framebufferTexture",

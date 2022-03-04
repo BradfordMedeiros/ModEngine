@@ -27,6 +27,10 @@ struct RenderDataVec3 {
   std::string uniformName;
   glm::vec3 value;
 };
+struct RenderDataBuiltIn {
+  std::string uniformName;
+  std::string builtin;
+};
 
 enum RenderTextureType { RENDER_TEXTURE_REGULAR, RENDER_TEXTURE_FRAMEBUFFER };
 struct RenderTexture {
@@ -54,6 +58,7 @@ struct RenderStep {
   std::vector<RenderDataFloat> floatUniforms;
   std::vector<RenderDataFloatArr> floatArrUniforms;
   std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderDataBuiltIn> builtInUniforms;
   std::vector<RenderTexture> textures;
 };
 
