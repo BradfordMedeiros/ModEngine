@@ -857,11 +857,11 @@ std::map<objid, unsigned int> renderPortals(RenderContext& context){
       .cameraTransform = portal.cameraTransform,
       .projection = context.projection,
     };
-    std::cout << "portal transform:  " << i << " " << print(portal.cameraTransform.position) << std::endl;
+    //std::cout << "portal transform:  " << i << " " << print(portal.cameraTransform.position) << std::endl;
     renderWithProgram(portalRenderContext, renderStages.portal);
     nextPortalCache[portal.id] = renderStages.portal.colorAttachment0;
   }
-  std::cout << std::endl;
+  //std::cout << std::endl;
   return nextPortalCache;
 }
 
