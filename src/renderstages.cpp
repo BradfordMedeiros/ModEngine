@@ -485,8 +485,9 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
   if (step != NULL){
     for (auto &uniform : step -> floatUniforms){
       if (value.attribute == uniform.uniformName){
-        std::cout << "uniform type not supported" << std::endl;
-        assert(false);
+        auto floatValue = std::get_if<float>(&value.value);
+        assert(floatValue != NULL);
+        uniform.value = *floatValue;
       }
     }
     for (auto &uniform : step -> intUniforms){
@@ -503,8 +504,9 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
     }
     for (auto &uniform : step -> vec3Uniforms){
       if (value.attribute == uniform.uniformName){
-        std::cout << "uniform type not supported" << std::endl;
-        assert(false);
+        auto vec3Value = std::get_if<glm::vec3>(&value.value);
+        assert(vec3Value != NULL);
+        uniform.value = *vec3Value;
       }     
     }
     for (auto &uniform : step -> builtInUniforms){
