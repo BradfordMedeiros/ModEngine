@@ -776,6 +776,17 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
         glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
       }
     }
+      std::vector<RenderDataBuiltIn> builtInUniforms;
+    for (auto &uniform : renderStep.builtInUniforms){  // todo -> avoid string comparisons
+      if (uniform.builtin == "resolution"){
+        //glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
+
+        glUniform2iv(glGetUniformLocation(drawingProgram, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
+      }else{
+        std::cout << "uniform not supported: " << uniform.builtin << std::endl;
+        assert(false);
+      }
+    }
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
       int activeTextureOffset = 6 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
