@@ -17,11 +17,9 @@
 (define (amount) (* 0.1 (toggle-elapsed)))
 
 (define (onFrame)
-  (format #t "on key thing\n")
   (set-wstate (list 
     (list "$borders" "uvamount" (amount))
   ))
-
 )
 
 (define (toggle-letter-box)
