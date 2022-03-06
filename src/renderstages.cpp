@@ -492,14 +492,17 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
     }
     for (auto &uniform : step -> intUniforms){
       if (value.attribute == uniform.uniformName){
-        std::cout << "uniform type not supported" << std::endl;       
-        assert(false);
+        auto floatValue = std::get_if<float>(&value.value);
+        assert(floatValue != NULL);
+        auto intvalue = static_cast<int>(*floatValue);
+        uniform.value = intvalue;
       }      
     }
     for (auto &uniform : step -> floatArrUniforms){
       if (value.attribute == uniform.uniformName){
-        std::cout << "uniform type not supported" << std::endl;
-        assert(false);
+        auto strValue = std::get_if<std::string>(&value.value);
+        assert(strValue != NULL);
+        uniform.value = parseFloatVec(*strValue);
       }      
     }
     for (auto &uniform : step -> vec3Uniforms){
