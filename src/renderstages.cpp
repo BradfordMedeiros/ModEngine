@@ -488,6 +488,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         auto floatValue = std::get_if<float>(&value.value);
         assert(floatValue != NULL);
         uniform.value = *floatValue;
+        return;
       }
     }
     for (auto &uniform : step -> intUniforms){
@@ -496,6 +497,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         assert(floatValue != NULL);
         auto intvalue = static_cast<int>(*floatValue);
         uniform.value = intvalue;
+        return;
       }      
     }
     for (auto &uniform : step -> floatArrUniforms){
@@ -503,6 +505,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         auto strValue = std::get_if<std::string>(&value.value);
         assert(strValue != NULL);
         uniform.value = parseFloatVec(*strValue);
+        return;
       }      
     }
     for (auto &uniform : step -> vec3Uniforms){
@@ -510,6 +513,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         auto vec3Value = std::get_if<glm::vec3>(&value.value);
         assert(vec3Value != NULL);
         uniform.value = *vec3Value;
+        return;
       }     
     }
     for (auto &uniform : step -> builtInUniforms){
@@ -520,7 +524,10 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
     }
     std::cout << "No uniform named: " << value.attribute << std::endl;
     assert(false);
-  } 
+  }else{
+    std::cout << "could not find stage name: " << value.object << std::endl;
+    assert(false);
+  }
 }
 
 unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2
