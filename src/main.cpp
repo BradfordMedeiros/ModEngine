@@ -776,12 +776,9 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
         glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
       }
     }
-      std::vector<RenderDataBuiltIn> builtInUniforms;
     for (auto &uniform : renderStep.builtInUniforms){  // todo -> avoid string comparisons
       if (uniform.builtin == "resolution"){
-        //glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
-
-        glUniform2iv(glGetUniformLocation(drawingProgram, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
+        glUniform2iv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
       }else{
         std::cout << "uniform not supported: " << uniform.builtin << std::endl;
         assert(false);
