@@ -17,6 +17,7 @@
 #include "./worldloader.h"
 #include "./netscene.h"
 #include "./worldtiming.h"
+#include "./renderstages.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 

@@ -100,6 +100,8 @@ void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo);
 void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber);
 void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber);
 
+void setRenderStageState(RenderStages& stages, ObjectValue& value);
+
 unsigned int finalRenderingTexture(RenderStages& stages);
 std::string renderStagesToString(RenderStages& stages);
 

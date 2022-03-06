@@ -474,6 +474,50 @@ void renderStagesSetShadowmap(RenderStages& stages, unsigned int shadowmapNumber
   stages.shadowmap.depthTextureIndex = shadowmapNumber + 1;
 }
 
+void setRenderStageState(RenderStages& stages, ObjectValue& value){
+  RenderStep* step = NULL;
+  for (auto &stage : stages.additionalRenderSteps){
+    if (stage.name == value.object){
+      step = &stage;
+      break;
+    }
+  } 
+  if (step != NULL){
+    for (auto &uniform : step -> floatUniforms){
+      if (value.attribute == uniform.uniformName){
+        std::cout << "uniform type not supported" << std::endl;
+        assert(false);
+      }
+    }
+    for (auto &uniform : step -> intUniforms){
+      if (value.attribute == uniform.uniformName){
+        std::cout << "uniform type not supported" << std::endl;       
+        assert(false);
+      }      
+    }
+    for (auto &uniform : step -> floatArrUniforms){
+      if (value.attribute == uniform.uniformName){
+        std::cout << "uniform type not supported" << std::endl;
+        assert(false);
+      }      
+    }
+    for (auto &uniform : step -> vec3Uniforms){
+      if (value.attribute == uniform.uniformName){
+        std::cout << "uniform type not supported" << std::endl;
+        assert(false);
+      }     
+    }
+    for (auto &uniform : step -> builtInUniforms){
+      if (value.attribute == uniform.uniformName){
+        std::cout << "uniform type not supported" << std::endl;
+        assert(false);
+      }     
+    }
+    std::cout << "No uniform named: " << value.attribute << std::endl;
+    assert(false);
+  } 
+}
+
 unsigned int finalRenderingTexture(RenderStages& stages){   // additional render steps ping pong result between framebufferTexture and framebufferTexture2
   if (stages.additionalRenderSteps.size() % 2 == 1){
     return stages.main.colorAttachment1;  

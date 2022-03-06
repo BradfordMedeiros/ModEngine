@@ -1,6 +1,7 @@
 #include "./main_api.h"
 
 extern World world;
+extern RenderStages renderStages;
 extern SysInterface interface;
 extern WorldTiming timings;
 extern engineState state;
@@ -336,7 +337,23 @@ void setState(std::string stateName){
 }
 
 void setWorldState(std::vector<ObjectValue> values){
-  setState(state, values, now);
+  std::vector<ObjectValue> renderStagesValues;
+  std::vector<ObjectValue> otherValues;
+  for (auto &value: values){
+    bool isRenderValue = value.object.at(0) == '$';
+    if (isRenderValue){
+      auto translatedObject = value.object.substr(1, value.object.size());
+      value.object = translatedObject;
+      renderStagesValues.push_back(value);
+    }else{
+      otherValues.push_back(value);
+    }
+  }
+
+  for (auto &renderStagesValue : renderStagesValues){
+    setRenderStageState(renderStages, renderStagesValue);
+  }
+  setState(state, otherValues, now);
 }
 
 void setFloatState(std::string stateName, float value){
