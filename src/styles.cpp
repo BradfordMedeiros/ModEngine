@@ -82,14 +82,23 @@ int matchingTokenForAttribute(std::vector<Token>& tokens, std::string attribute)
   return -1;
 }
 
+struct StyleNewPayloadForIndex {
+  int index;
+  std::string newPayload;
+};  
 void applyStyles(std::vector<Token>& tokens, std::vector<Style>& styles){
   std::vector<Token> additionalTokens;
+  std::vector<StyleNewPayloadForIndex> newPayloads;
+
   for (auto &style : styles){
     auto matchingElements = matchingElementsNames(tokens, style);
     for (auto &element : matchingElements){
       auto tokenIndex = matchingTokenForAttribute(tokens, style.attribute);
       if (tokenIndex != -1){
-        tokens.at(tokenIndex).payload = style.payload;
+        newPayloads.push_back(StyleNewPayloadForIndex{
+          .index = tokenIndex,
+          .newPayload = style.payload,
+        });
         continue;
       }
       additionalTokens.push_back(Token{
@@ -98,6 +107,10 @@ void applyStyles(std::vector<Token>& tokens, std::vector<Style>& styles){
         .payload = style.payload,
       });
     }
+  }
+
+  for (auto &newPayload : newPayloads){
+    tokens.at(newPayload.index).payload = newPayload.newPayload;
   }
   for (auto &additionalToken : additionalTokens){
     tokens.push_back(additionalToken);
