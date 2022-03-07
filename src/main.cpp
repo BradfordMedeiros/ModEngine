@@ -29,6 +29,7 @@
 #include "./worldtiming.h"
 #include "./main_test.h"
 #include "./renderstages.h"
+#include "./styles.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
