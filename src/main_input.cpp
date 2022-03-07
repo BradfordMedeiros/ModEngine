@@ -1270,6 +1270,19 @@ std::vector<InputDispatch> inputFns = {
       std::cout << renderStagesToString(renderStages) << std::endl;
     }
   },
-};
+  InputDispatch{
+    .sourceKey = 'S',
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,
+    .hasPreq = true,
+    .fn = []() -> void {
+      auto styles = loadStyles("./res/test.style");
+      auto tokens = parseFormat(loadFile("./res/scenes/example.p.rawscene"));
+      applyStyles(tokens, styles);
+      auto serializedContent = serializeSceneTokens(tokens);
+      std::cout << serializedContent << std::endl;
 
+    }
+  },
+};
 

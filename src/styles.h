@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include "./scene/serialization.h"
 
 /*
@@ -14,7 +15,7 @@ platform:tint:10 10 10  #any element named platform
 ,red=1 0 0       # any element with payload
 */
 
-enum StyleSelectorType { STYLE_SELECTOR_NAME, STYLE_SELECTOR_ATTRIBUTE };
+enum StyleSelectorType { STYLE_SELECTOR_NAME, STYLE_SELECTOR_ATTRIBUTE, STYLE_SELECTOR_PAYLOAD };
 struct Style {
   StyleSelectorType type;
   std::string target;
@@ -22,6 +23,7 @@ struct Style {
   std::string payload;
 };
 
-std::vector<Style> loadStyles(std::string& filepath);
+std::vector<Style> loadStyles(std::string filepath);
+void applyStyles(std::vector<Token>& tokens, std::vector<Style>& styles);
 
 #endif
