@@ -8,7 +8,7 @@ StyleSelectorType getStyleSelectorType(std::string& target){
   if (firstElement == '.'){
     return STYLE_SELECTOR_ATTRIBUTE;
   }
-  if (firstElement == '.'){
+  if (firstElement == ','){
     return STYLE_SELECTOR_PAYLOAD;
   }
   std::cout << "get style selector - invalid selector: " << firstElement << std::endl;
@@ -43,16 +43,34 @@ std::vector<Style> loadStyles(std::string filepath){
 
 std::set<std::string> matchingElementsNames(std::vector<Token>& tokens, Style& style){
   std::set<std::string> matchingElements;
-  if (style.type != STYLE_SELECTOR_NAME){
-    std::cout << "matching element name must be name" << std::endl;
-    assert(false);
-  }
-  for (auto &token : tokens){
-    if (token.target == style.target){
-      matchingElements.insert(token.target);
+  if (style.type == STYLE_SELECTOR_NAME){
+    for (auto &token : tokens){
+      if (token.target == style.target){
+        matchingElements.insert(token.target);
+      }
     }
+    return matchingElements;
   }
-  return matchingElements;
+  if (style.type == STYLE_SELECTOR_ATTRIBUTE){
+    for (auto &token : tokens){
+      if (token.attribute == style.target){
+        matchingElements.insert(token.target);
+      }
+    }
+    return matchingElements;   
+  }
+  if (style.type == STYLE_SELECTOR_PAYLOAD){
+    for (auto &token : tokens){
+      if (token.payload == style.target){
+        matchingElements.insert(token.target);
+      }
+    }
+    return matchingElements;      
+  }
+
+  std::cout << "invalid selector type" << std::endl;
+  assert(false);
+  return {};
 }
 int matchingTokenForAttribute(std::vector<Token>& tokens, std::string attribute){
   for (int i = 0; i < tokens.size(); i++){
