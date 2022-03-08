@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <set>
-#include "./scene/serialization.h"
+#include "./serialization.h"
 
 /*
 platform:tint:10 10 10  #any element named platform

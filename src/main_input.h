@@ -16,7 +16,7 @@
 #include "./worldchunking.h"
 #include "./scene/scene_offline.h"
 #include "./renderstages.h"
-#include "./styles.h"
+#include "./scene/styles.h"
 
 struct JoyStickInfo {
   int index;
