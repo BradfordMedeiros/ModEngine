@@ -140,6 +140,10 @@ std::vector<std::string> filterWhitespace(std::vector<std::string> values){
   return newStrings;
 }
 
+std::vector<std::string> splitNoWhitespace(std::string string, char character){
+  return filterWhitespace(split(string, character));
+}
+
 std::vector<std::string> filterComments(std::vector<std::string> values){
   std::vector<std::string> newStrings;
   for (auto value : values){

@@ -15,25 +15,41 @@ StyleSelectorType getStyleSelectorType(std::string& target){
   assert(false);
   return STYLE_SELECTOR_NAME; 
 }
-std::string getStyleSelectorTarget(StyleSelectorType& type, std::string target){
+
+std::string selectorTypeToString(StyleSelectorType& type){
   if (type == STYLE_SELECTOR_NAME){
-    return target;
+    return "STYLE_SELECTOR_NAME";
   }
   if (type == STYLE_SELECTOR_ATTRIBUTE){
-    return target;
+    return "STYLE_SELECTOR_ATTRIBUTE";
   }
-  return target;
+  if (type == STYLE_SELECTOR_PAYLOAD){
+    return "STYLE_SELECTOR_PAYLOAD";
+  }
+  return "UNKNOWN TYPE - bug";
+}
+
+std::vector<StyleSelectorQuery> parseStyleSelectorQuery(std::string tokentarget){
+  std::vector<StyleSelectorQuery> selectors;
+  auto selectorQueries = splitNoWhitespace(tokentarget, ' ');
+  for (auto selectorQuery : selectorQueries){
+    auto type = getStyleSelectorType(selectorQuery);
+    auto target = selectorQuery.substr(1, selectorQuery.size());
+    std::cout << "selectorQuery is: " << selectorQuery << " ( " << selectorTypeToString(type) << " )" << " - " << target << std::endl;
+    selectors.push_back(StyleSelectorQuery{
+      .type = type,
+      .target = target,
+    });
+  }
+  return selectors;
 }
 
 std::vector<Style> loadStyles(std::string filepath){
   auto tokens = parseFormat(loadFile(filepath));
   std::vector<Style> styles;
   for (auto &token : tokens){
-    auto type = getStyleSelectorType(token.target);
-    auto target = getStyleSelectorTarget(type, token.target.substr(1, token.target.size()));
     styles.push_back(Style{
-      .type = type,
-      .target = target,
+      .queries = parseStyleSelectorQuery(token.target), 
       .attribute = token.attribute,
       .payload = token.payload,
     });
@@ -41,36 +57,42 @@ std::vector<Style> loadStyles(std::string filepath){
   return styles;
 }
 
+bool matchesSelectorQuery(Token& token, StyleSelectorQuery& query){
+  if (query.type == STYLE_SELECTOR_NAME){
+    if (token.target == query.target){
+      return true;
+    }
+  }else if (query.type == STYLE_SELECTOR_ATTRIBUTE){
+    if (token.attribute == query.target){
+      return true;
+    }
+  }else if (query.type == STYLE_SELECTOR_PAYLOAD){
+    if (token.payload == query.target){
+      return true;
+    }
+  }else{
+    std::cout << "invalid query type" << std::endl;
+    assert(false);
+  }
+  return false;
+}
+bool matchesAllQueries(Token& token, std::vector<StyleSelectorQuery>& queries){
+  for (auto &query : queries){
+    bool matches = matchesSelectorQuery(token, query);
+    if (!matches){
+      return false;
+    }
+  }
+  return true;
+}
 std::set<std::string> matchingElementsNames(std::vector<Token>& tokens, Style& style){
   std::set<std::string> matchingElements;
-  if (style.type == STYLE_SELECTOR_NAME){
-    for (auto &token : tokens){
-      if (token.target == style.target){
-        matchingElements.insert(token.target);
-      }
+  for (auto &token : tokens){
+    if (matchesAllQueries(token, style.queries)){
+      matchingElements.insert(token.target);
     }
-    return matchingElements;
   }
-  if (style.type == STYLE_SELECTOR_ATTRIBUTE){
-    for (auto &token : tokens){
-      if (token.attribute == style.target){
-        matchingElements.insert(token.target);
-      }
-    }
-    return matchingElements;   
-  }
-  if (style.type == STYLE_SELECTOR_PAYLOAD){
-    for (auto &token : tokens){
-      if (token.payload == style.target){
-        matchingElements.insert(token.target);
-      }
-    }
-    return matchingElements;      
-  }
-
-  std::cout << "invalid selector type" << std::endl;
-  assert(false);
-  return {};
+  return matchingElements;
 }
 int matchingTokenForAttribute(std::vector<Token>& tokens, std::string attribute){
   for (int i = 0; i < tokens.size(); i++){
@@ -89,7 +111,6 @@ struct StyleNewPayloadForIndex {
 void applyStyles(std::vector<Token>& tokens, std::vector<Style>& styles){
   std::vector<Token> additionalTokens;
   std::vector<StyleNewPayloadForIndex> newPayloads;
-
   for (auto &style : styles){
     auto matchingElements = matchingElementsNames(tokens, style);
     for (auto &element : matchingElements){
@@ -108,18 +129,10 @@ void applyStyles(std::vector<Token>& tokens, std::vector<Style>& styles){
       });
     }
   }
-
   for (auto &newPayload : newPayloads){
     tokens.at(newPayload.index).payload = newPayload.newPayload;
   }
   for (auto &additionalToken : additionalTokens){
     tokens.push_back(additionalToken);
   }
-  // if STYLE_SELECTOR_NAME
-  // determine all elements that match
-  // if element
-  // then get token index that has the attribute if it exists and modify that token attribute payload if exists
-  // else append a new token for the element with that attribute payload pair
-
-
 }

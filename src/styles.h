@@ -16,9 +16,12 @@ platform:tint:10 10 10  #any element named platform
 */
 
 enum StyleSelectorType { STYLE_SELECTOR_NAME, STYLE_SELECTOR_ATTRIBUTE, STYLE_SELECTOR_PAYLOAD };
-struct Style {
+struct StyleSelectorQuery {
   StyleSelectorType type;
   std::string target;
+};
+struct Style {
+  std::vector<StyleSelectorQuery> queries;
   std::string attribute;
   std::string payload;
 };
