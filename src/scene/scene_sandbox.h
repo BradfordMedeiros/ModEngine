@@ -18,6 +18,7 @@
 #include "../common/util.h"
 #include "./serialization.h"
 #include "./serialobject.h"
+#include "./styles.h"
 
 struct GameObjectH {
   objid id;
@@ -93,7 +94,7 @@ struct AddSceneDataValues {
   std::map<std::string, GameobjAttributesWithId>  additionalFields;
   std::vector<objid> idsAdded;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 

@@ -646,13 +646,15 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
 }
 
 
-SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId){
-  return createSceneFromParsedContent(sceneId, parseFormat(content), getNewObjectId);
+SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<Style>& styles){
+  auto tokens = parseFormat(content);
+  applyStyles(tokens, styles);
+  return createSceneFromParsedContent(sceneId, tokens, getNewObjectId);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
 
-  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId);
+  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, styles);
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;

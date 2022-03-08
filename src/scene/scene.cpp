@@ -694,7 +694,8 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface){
-  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData);
+  auto styles = loadStyles("./res/test.style");
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles);
   std::vector<GameObjectObj> addedGameobjObjs = {};
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields, false, addedGameobjObjs);
   return sceneId;
