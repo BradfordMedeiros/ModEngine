@@ -1,2 +1,8 @@
-;platform:scale:100 1 100
-;platform .makeblue:tint:0 0 1
+
+# ;nameselector:attribute:value
+# .classselector:attribute:value
+# ,payloadselector:attribute:value
+# ;name .oneclass .anotherclass:attribute:value  #multiple requirements for selector (and)
+
+;*basicbutton1:tint:0.2 0.2 0.2
+;*basicbutton1:ontint:0.8 0.8 0.8

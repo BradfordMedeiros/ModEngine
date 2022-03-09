@@ -1,4 +1,11 @@
-## Layers zindex: <int>, depth: <int>, ortho: true/false, fov: <float> ##
+## Layers 
+# zindex: <int>
+# depth: <int>          
+# ortho: true/false  (false)
+# fov: <float> 
+# scale: true/false  (false)
+# view: true / false (true)
+
 ### default name override the default view layer.
 
 transparency:zindex:1
@@ -13,3 +20,6 @@ ui:ortho:true
 scale:zindex:2
 scale:depth:2
 scale:scale:true
+
+basicui:view:false
+basicui:ortho:true

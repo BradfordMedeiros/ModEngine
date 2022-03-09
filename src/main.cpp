@@ -463,7 +463,8 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
     auto newShader = getShaderByName(shader, shaderProgram);
 
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
-    setShaderData(newShader, proj, view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
+
+    setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));

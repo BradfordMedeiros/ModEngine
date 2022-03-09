@@ -12,6 +12,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
         .zIndex = 0,
         .orthographic = false,
         .scale = false,
+        .disableViewTransform = false,
         .depthBufferLayer = 0,
         .fov = 45.f,
         .nearplane = 0.1f,
@@ -41,6 +42,15 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
         std::cout << "WARNING: layers: scale" << token.payload << " is not a valid option" << std::endl;
         assert(false);
       }
+    }else if (token.attribute == "view"){
+      if (token.payload == "true"){
+        layers2[token.target].disableViewTransform = false;
+      }else if (token.payload == "false"){
+        layers2[token.target].disableViewTransform = true;
+      }else{
+        std::cout << "WARNING: layers: view" << token.payload << " is not a valid option" << std::endl;
+        assert(false);
+      }      
     }else if (token.attribute == "near"){
       layers2[token.target].nearplane = std::atof(token.payload.c_str());
     }else if (token.attribute == "far"){
@@ -58,6 +68,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
       .zIndex = 0,
       .orthographic = false,
       .scale = false,
+      .disableViewTransform = false,
       .depthBufferLayer = 0,
       .fov = 45.f,
       .nearplane = 0.1f,
