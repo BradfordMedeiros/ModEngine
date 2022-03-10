@@ -109,6 +109,7 @@ struct LayerInfo {
   float fov;
   float nearplane;
   float farplane;
+  int selectIndex;
 };
 int numUniqueDepthLayers(std::vector<LayerInfo> layers);
 
