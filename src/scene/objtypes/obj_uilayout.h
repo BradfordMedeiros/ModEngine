@@ -7,10 +7,10 @@
 
 enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
 
-enum UILayoutMinWidthType { UILayoutNone, UILayoutPercent };
-struct UILayoutMinWidth {
-  bool hasMinWidth;
-  UILayoutMinWidthType type;
+enum UILayoutMinSizeType { UILayoutNone, UILayoutPercent };
+struct UILayoutMinSize {
+  bool hasMinSize;
+  UILayoutMinSizeType type;
   float amount;
 };
 struct GameObjectUILayout {
@@ -23,7 +23,8 @@ struct GameObjectUILayout {
   glm::vec3 tint;
   float margin;
   TextureInformation texture;
-  UILayoutMinWidth minwidth;
+  UILayoutMinSize minwidth;
+  UILayoutMinSize minheight;
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);

@@ -13,12 +13,20 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto margin = attr.numAttributes.find("margin") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("margin");
 
   bool hasMinWidth = attr.numAttributes.find("minwidth") != attr.numAttributes.end();
-  float amount = hasMinWidth ? attr.numAttributes.at("minwidth") : 0.f;
+  float minWidthAmount = hasMinWidth ? attr.numAttributes.at("minwidth") : 0.f;
 
-  UILayoutMinWidth minwidth {
-    .hasMinWidth = hasMinWidth,
+  UILayoutMinSize minwidth {
+    .hasMinSize = hasMinWidth,
     .type = hasMinWidth ? UILayoutPercent : UILayoutNone,
-    .amount = amount,
+    .amount = minWidthAmount,
+  };
+
+  bool hasMinHeight = attr.numAttributes.find("minheight") != attr.numAttributes.end();
+  float minHeightAmount = hasMinHeight ? attr.numAttributes.at("minheight") : 0.f;
+  UILayoutMinSize minheight {
+    .hasMinSize = hasMinHeight,
+    .type = hasMinHeight ? UILayoutPercent : UILayoutNone,
+    .amount = minHeightAmount,
   };
   
   BoundInfo boundInfo {
@@ -37,6 +45,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .margin = margin,
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
     .minwidth = minwidth,
+    .minheight = minheight,
   };
   return obj;
 }

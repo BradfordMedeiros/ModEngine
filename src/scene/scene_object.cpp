@@ -327,7 +327,6 @@ std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std
 
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutPos = fullTransformation(world.sandbox, id).position;
-  auto elements = layoutObject -> elements;
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
 
@@ -377,8 +376,29 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   layoutObject -> boundInfo.xMin -= layoutObject -> margin;
   layoutObject -> boundInfo.xMax += layoutObject -> margin;
+
+  if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
+    bool isMinWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) >= layoutObject -> minwidth.amount;
+    if (!isMinWidth){
+      float width = layoutObject -> minwidth.amount; 
+      float halfWidth = width / 2.f;
+      layoutObject -> boundInfo.xMin = -1 * halfWidth;;   // should this actually be centered?
+      layoutObject -> boundInfo.xMax = halfWidth;
+    }
+  }
+
   layoutObject -> boundInfo.yMin -= layoutObject -> margin;
   layoutObject -> boundInfo.yMax += layoutObject -> margin;
+  if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
+    bool isMinHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) >= layoutObject -> minheight.amount;
+    if (!isMinHeight){
+      float height = layoutObject -> minheight.amount;  // 2 is fullscreen since ndi goes from (x,y) -> ((-1, 1), (-1, 1))
+      float halfHeight = height / 2.f;
+      layoutObject -> boundInfo.yMin = -1 * halfHeight;;
+      layoutObject -> boundInfo.yMax = halfHeight;
+    }
+  }
+
   layoutObject -> boundInfo.zMin -= layoutObject -> margin;
   layoutObject -> boundInfo.zMax += layoutObject -> margin;
   layoutObject -> boundOrigin = layoutPos;
