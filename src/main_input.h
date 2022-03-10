@@ -28,6 +28,7 @@ void debugInfo(std::string infoType, std::string filepath);
 
 glm::mat4 projectionFromLayer(LayerInfo& layer);
 LayerInfo layerByName(std::string layername);
+LayerInfo getLayerForId(objid id);
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods);

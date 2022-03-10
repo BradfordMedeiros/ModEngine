@@ -1503,7 +1503,7 @@ int main(int argc, char* argv[]){
 
     if (selectItemCalled){
       std::cout << "INFO: select item called" << std::endl;
-      if (state.hoveredIdInScene){
+      if (state.hoveredIdInScene && getLayerForId(hoveredId).selectIndex != -1){
         std::cout << "INFO: select item called -> id in scene!" << std::endl;
         selectItem(hoveredId, hoveredItemColor);
       }else{

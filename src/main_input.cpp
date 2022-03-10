@@ -356,6 +356,9 @@ LayerInfo layerByName(std::string layername){
   assert(false);
   return LayerInfo{};
 }
+LayerInfo getLayerForId(objid id){
+  return layerByName(getGameObject(world, id).layer);
+}
 
 void onMouseButton(){    
   std::cout << scenegraphAsDotFormat(world.sandbox, world.objectMapping) << std::endl;

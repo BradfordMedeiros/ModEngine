@@ -17,6 +17,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
         .fov = 45.f,
         .nearplane = 0.1f,
         .farplane = 1000.f,
+        .selectIndex = 0,
       };
     }
 
@@ -57,6 +58,8 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
       layers2[token.target].farplane = std::atof(token.payload.c_str());
     }else if (token.attribute == "fov"){
       layers2[token.target].fov = std::atof(token.payload.c_str());
+    }else if (token.attribute == "selection"){
+      layers2[token.target].selectIndex = std::atoi(token.payload.c_str());
     }else{
       std::cout << "WARNING: layers: " << token.attribute << " is not a valid option" << std::endl;
     }
@@ -73,6 +76,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
       .fov = 45.f,
       .nearplane = 0.1f,
       .farplane = 1000.f,
+      .selectIndex = 0,
     });
   }else{
     layers2.at("default").name = "";    
