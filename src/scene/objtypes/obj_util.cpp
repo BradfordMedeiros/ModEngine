@@ -37,3 +37,15 @@ TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Text
   };
   return info;
 }
+
+void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
+  if (texture.textureoffset.x != 0.f && texture.textureoffset.y != 0.f){
+    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(texture.textureoffset)));
+  }
+  if (texture.textureOverloadName != ""){
+    pairs.push_back(std::pair<std::string, std::string>("texture", texture.textureOverloadName));
+  }
+  if (texture.texturesize.x != 1.f && texture.texturesize.y != 1.f){
+    pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
+  }
+}

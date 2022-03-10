@@ -28,17 +28,6 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   return obj;
 }
 
-void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
-  if (texture.textureoffset.x != 0.f && texture.textureoffset.y != 0.f){
-    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(texture.textureoffset)));
-  }
-  if (texture.textureOverloadName != ""){
-    pairs.push_back(std::pair<std::string, std::string>("texture", texture.textureOverloadName));
-  }
-  if (texture.texturesize.x != 1.f && texture.texturesize.y != 1.f){
-    pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
-  }
-}
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   if (obj.rootMesh != ""){

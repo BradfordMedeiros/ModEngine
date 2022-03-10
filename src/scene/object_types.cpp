@@ -293,10 +293,10 @@ int renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
 
+      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
       drawMesh(meshToRender, shaderProgram, meshObj -> texture.textureOverloadId, -1, drawPoints);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
@@ -464,21 +464,20 @@ int renderObject(
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));     
+
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(layoutObj -> texture.textureoffset));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(layoutObj -> texture.texturetiling));
+    glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(layoutObj -> texture.texturesize));
+
     int layoutVertexCount = 0;
     if (showDebug){
       layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     if (layoutObj -> showBackpanel){
-      auto boundWidth = layoutObj -> boundInfo.xMax - layoutObj  -> boundInfo.xMin;
-      auto boundheight = layoutObj -> boundInfo.yMax - layoutObj -> boundInfo.yMin;
-      auto zFightingBias = glm::vec3(0.f, 0.f, -0.001f);  
-      auto rectModel = glm::scale(glm::translate(glm::mat4(1.0f), layoutObj -> boundOrigin + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f));
+      auto rectModel = layoutBackpanelModelTransform(*layoutObj);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(rectModel));
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
-      drawMesh(*defaultMeshes.unitXYRect, shaderProgram);
+      drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);   
       layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;
     }
     return layoutVertexCount;

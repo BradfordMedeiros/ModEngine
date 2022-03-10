@@ -375,8 +375,8 @@ void onSelectNullItem(){
   if (manipulatorId != 0){
     onManipulatorUnselect(removeObjectById);
     removeLinesByOwner(state.manipulatorLineId);
-    unsetSelectedIndex(state.editor, manipulatorId, true);
   }
+  clearSelectedIndexs(state.editor); 
 }
 
 std::map<std::string, GLint> shaderNameToId;
@@ -571,15 +571,18 @@ void drawPermaLines(GLint shaderProgram, LineColor color, glm::vec3 tint){
 void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   auto projection = projectionFromLayer(layers.at(0));
   glUseProgram(shaderProgram);
+
+  // this list is incomplete, it probably would be better to just use a separate shader maybe too
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projview"), 1, GL_FALSE, glm::value_ptr(projection * view));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
   glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
   glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 0);  
-
-  // Some texture needs to be bound, who cares what. 
-  // Probably conceptual fix would be to add "hasMainTexture"
-  glBindTexture(GL_TEXTURE_2D, world.textures.at("./res/textures/wood.jpg").texture.textureId);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasDiffuseTexture"), false);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasEmissionTexture"), false);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasOpacityTexture"), false);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasCubemapTexture"), false);
+  glUniform1i(glGetUniformLocation(shaderProgram, "hasRoughnessTexture"), false);
 
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
@@ -1155,7 +1158,7 @@ int main(int argc, char* argv[]){
   );
 
   fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
-  Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair029.png", loadTexture);
+  Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair008.png", loadTexture);
  
   createStaticSchemeBindings(
     listSceneId,
