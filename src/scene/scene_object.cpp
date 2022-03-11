@@ -324,6 +324,55 @@ std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std
   return newPositions;
 }
 
+glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float halfBoundWidth, float halfBoundHeight){
+ if (layoutType == LAYOUT_VERTICAL){
+    auto horizontalAdjustement = 0.f;
+    if (horizontal == UILayoutFlowPositive){
+      horizontalAdjustement = halfBoundWidth;
+    }else if (horizontal == UILayoutFlowNegative){
+      horizontalAdjustement = -1 * halfBoundWidth;
+    }
+    return glm::vec3(horizontalAdjustement, 0.f, 0.f);
+  }else{
+    auto verticalAdjustement = 0.f;
+    if (vertical == UILayoutFlowPositive){
+      verticalAdjustement = halfBoundHeight;
+    }else if (vertical == UILayoutFlowNegative){
+      verticalAdjustement = -1 * halfBoundHeight;
+    }
+    return glm::vec3(0.f, verticalAdjustement, 0.f);
+  }
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+
+glm::vec3 layoutPositionOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float halfBoundWidth, float halfBoundHeight){
+  if (layoutType == LAYOUT_VERTICAL){
+    if (vertical == UILayoutFlowNone){
+      return glm::vec3(0.f, -1 * halfBoundHeight, 0.f);
+    }else if (vertical == UILayoutFlowPositive){
+      return glm::vec3(0.f, 0.f , 0.f);
+    }else if (vertical == UILayoutFlowNegative){
+      return glm::vec3(0.f, -2 * halfBoundHeight, 0.f);
+    }else{
+      std::cout << "vertical layout flow not yet implemented" << std::endl;
+      assert(false);
+    }
+  }else{
+    if (horizontal == UILayoutFlowNone){
+      return glm::vec3(-1 * halfBoundWidth, 0.f, 0.f);
+    }else if (horizontal == UILayoutFlowPositive){
+      return glm::vec3(0.f, 0.f, 0.f);
+    }else if (horizontal == UILayoutFlowNegative){
+      return glm::vec3(-2 * halfBoundWidth, 0.f, 0.f);
+    }else{
+      std::cout << "horizontal layout flow not yet implemented" << std::endl;
+      assert(false);
+    }    
+  }
+  std::cout << "layout type not implemented" << std::endl;
+  assert(false);
+  return  glm::vec3(0.f, 0.f, 0.f);
+}
 
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutPos = fullTransformation(world.sandbox, id).position;
@@ -361,10 +410,11 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto halfBoundHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) / 2.f;
   std::cout << "1/2 bound width: (" << halfBoundWidth << ", " << halfBoundHeight << ")" << std::endl;
 
+  auto offset = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight);
+  auto alignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight);
   // Offset all elements to the correct positions, so that they're centered
   for (auto [id, newPos] : newPositions){
-    auto offset = layoutType == LAYOUT_VERTICAL ? glm::vec3(0, -1 * halfBoundHeight, 0.f) : glm::vec3(-1 * halfBoundWidth, 0, 0.f);
-    auto fullNewPos = newPos + offset;
+    auto fullNewPos = newPos + offset + alignOffset;
     std::cout << "setting position of " << getGameObject(world, id).name << " to: " << print(fullNewPos) << std::endl;
     physicsTranslateSet(world, id, fullNewPos, false);
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
