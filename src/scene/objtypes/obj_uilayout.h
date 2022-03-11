@@ -13,6 +13,8 @@ struct UILayoutMinSize {
   UILayoutMinSizeType type;
   float amount;
 };
+enum UILayoutFlowType { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive };
+
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
@@ -25,6 +27,8 @@ struct GameObjectUILayout {
   TextureInformation texture;
   UILayoutMinSize minwidth;
   UILayoutMinSize minheight;
+  UILayoutFlowType horizontal;
+  UILayoutFlowType vertical;
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);
