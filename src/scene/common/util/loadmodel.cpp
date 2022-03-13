@@ -358,6 +358,13 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
      roughnessTexturePath = getTexturePath(aiTextureType_UNKNOWN, modelPath, material);
    }
 
+   int normalTextureCount = material -> GetTextureCount(aiTextureType_NORMALS);
+   assert(normalTextureCount == 0 || normalTextureCount == 1);
+   std::string normalTexturePath;
+   if (normalTextureCount == 1){
+     normalTexturePath = getTexturePath(aiTextureType_NORMALS, modelPath, material);
+   }
+
    MeshData model = {
      .vertices = vertices,
      .indices = indices,       
@@ -369,6 +376,8 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
      .hasOpacityTexture = opacityTextureCount == 1,
      .roughnessTexturePath = roughnessTexturePath,
      .hasRoughnessTexture = roughnessTextureCount == 1,
+     .normalTexturePath = normalTexturePath,
+     .hasNormalTexture = normalTextureCount == 1,
      .boundInfo = getBounds(vertices),
      .bones = boneInfo.bones,
    };

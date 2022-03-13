@@ -36,6 +36,8 @@ struct MeshData {
   bool hasOpacityTexture;
   std::string roughnessTexturePath;
   bool hasRoughnessTexture;
+  std::string normalTexturePath;
+  bool hasNormalTexture;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
 };

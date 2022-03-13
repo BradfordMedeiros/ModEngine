@@ -790,7 +790,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
-      int activeTextureOffset = 6 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
+      int activeTextureOffset = 7 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values
       glUniform1i(glGetUniformLocation(renderStep.shader, textureData.nameInShader.c_str()), activeTextureOffset);
       glActiveTexture(GL_TEXTURE0 + activeTextureOffset);
       if (textureData.type == RENDER_TEXTURE_REGULAR){

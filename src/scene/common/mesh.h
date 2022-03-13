@@ -26,6 +26,8 @@ struct Mesh {
   Texture cubemapTexture;
   bool hasRoughnessTexture;
   Texture roughnessTexture;
+  bool hasNormalTexture;
+  Texture normalTexture;
   long unsigned int numElements;
   BoundInfo boundInfo;
   std::vector<Bone> bones;
