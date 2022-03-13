@@ -363,6 +363,8 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
    std::string normalTexturePath;
    if (normalTextureCount == 1){
      normalTexturePath = getTexturePath(aiTextureType_NORMALS, modelPath, material);
+     std::cout << "normal maps not yet supported" << std::endl;
+     assert(false);
    }
 
    MeshData model = {
