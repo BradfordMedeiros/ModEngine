@@ -1,0 +1,30 @@
+
+### ROW 1
+*basicbutton1:ontexture:./res/textures/wood.jpg
+*basicbutton1:offtexture:./res/textures/window.png
+*basicbutton1:position:0.1 0 0
+*basicbutton1:state:on
+*basicbutton1:ontint:0 0 1
+*basicbutton1:layer:basicui
+*basicbutton1:scale:0.1 0.1 0.1
+
+*basicbutton2:ontexture:./res/textures/wood.jpg
+*basicbutton2:offtexture:./res/textures/window.png
+*basicbutton2:position:0.1 0 0
+*basicbutton2:state:on
+*basicbutton2:ontint:0 0 1
+*basicbutton2:layer:basicui
+*basicbutton2:scale:0.1 0.1 0.1
+
+(row1:type:vertical
+(row1:elements:*basicbutton1,*basicbutton2
+(row1:backpanel:true
+(row1:tint:1.0 0.1 0.1
+(row1:margin:0.02
+
+(row1:layer:basicui
+#(row1:minwidth:1
+#(row1:minheight:1
+
+(row1:align-horizontal:center
+(row1:align-vertical:down
