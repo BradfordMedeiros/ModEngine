@@ -384,7 +384,31 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   std::cout << "1/2 bound width: (" << halfBoundWidth << ", " << halfBoundHeight << ")" << std::endl;
 
   auto offset = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight);
+
+  auto alignHalfWidth = halfBoundWidth;
+  if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
+    bool isMinWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) >= layoutObject -> minwidth.amount;
+    if (!isMinWidth){
+      float width = layoutObject -> minwidth.amount; 
+      float halfWidth = width / 2.f;
+      layoutObject -> boundInfo.xMin = -1 * halfWidth;;   // should this actually be centered?
+      layoutObject -> boundInfo.xMax = halfWidth;
+      alignHalfWidth = halfWidth;
+    }
+  }
+  auto alignHalfHeight = halfBoundHeight;
+  if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
+    bool isMinHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) >= layoutObject -> minheight.amount;
+    if (!isMinHeight){
+      float height = layoutObject -> minheight.amount;  // 2 is fullscreen since ndi goes from (x,y) -> ((-1, 1), (-1, 1))
+      float halfHeight = height / 2.f;
+      layoutObject -> boundInfo.yMin = -1 * halfHeight;;
+      layoutObject -> boundInfo.yMax = halfHeight;
+      alignHalfHeight = halfHeight;
+    }
+  }
   auto alignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight, layoutObject -> margin);
+  auto boundOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, alignHalfWidth, alignHalfHeight, layoutObject -> margin);
 
   std::cout << "top align offset: " << print(alignOffset) << std::endl;
   // Offset all elements to the correct positions, so that they're centered
@@ -402,33 +426,15 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   layoutObject -> boundInfo.xMin -= layoutObject -> margin;
   layoutObject -> boundInfo.xMax += layoutObject -> margin;
 
-  if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
-    bool isMinWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) >= layoutObject -> minwidth.amount;
-    if (!isMinWidth){
-      float width = layoutObject -> minwidth.amount; 
-      float halfWidth = width / 2.f;
-      layoutObject -> boundInfo.xMin = -1 * halfWidth;;   // should this actually be centered?
-      layoutObject -> boundInfo.xMax = halfWidth;
-    }
-  }
+
 
   layoutObject -> boundInfo.yMin -= layoutObject -> margin;
   layoutObject -> boundInfo.yMax += layoutObject -> margin;
-  if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
-    bool isMinHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) >= layoutObject -> minheight.amount;
-    if (!isMinHeight){
-      float height = layoutObject -> minheight.amount;  // 2 is fullscreen since ndi goes from (x,y) -> ((-1, 1), (-1, 1))
-      float halfHeight = height / 2.f;
-      layoutObject -> boundInfo.yMin = -1 * halfHeight;;
-      layoutObject -> boundInfo.yMax = halfHeight;
-    }
-  }
-
   layoutObject -> boundInfo.zMin -= layoutObject -> margin;
   layoutObject -> boundInfo.zMax += layoutObject -> margin;
 
   std::cout << "layoutpos, offset, alignOffset : " << print(layoutPos) << " " << print(offset) << " " << print(alignOffset) << std::endl;
-  layoutObject -> boundOrigin = layoutPos + alignOffset;
+  layoutObject -> boundOrigin = layoutPos + boundOffset;
 }
 
 struct UILayoutAndId {
