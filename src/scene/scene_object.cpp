@@ -391,9 +391,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     if (!isMinWidth){
       float width = layoutObject -> minwidth.amount; 
       float halfWidth = width / 2.f;
-      layoutObject -> boundInfo.xMin = -1 * halfWidth;;   // should this actually be centered?
-      layoutObject -> boundInfo.xMax = halfWidth;
-      alignHalfWidth = halfWidth;
+      layoutObject -> boundInfo.xMin = -1 * halfWidth + layoutObject -> margin;  
+      layoutObject -> boundInfo.xMax = halfWidth - layoutObject -> margin;
+      alignHalfWidth = halfWidth - layoutObject -> margin;
     }
   }
   auto alignHalfHeight = halfBoundHeight;
@@ -402,9 +402,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     if (!isMinHeight){
       float height = layoutObject -> minheight.amount;  // 2 is fullscreen since ndi goes from (x,y) -> ((-1, 1), (-1, 1))
       float halfHeight = height / 2.f;
-      layoutObject -> boundInfo.yMin = -1 * halfHeight;;
-      layoutObject -> boundInfo.yMax = halfHeight;
-      alignHalfHeight = halfHeight;
+      layoutObject -> boundInfo.yMin = -1 * halfHeight + layoutObject -> margin;
+      layoutObject -> boundInfo.yMax = halfHeight - layoutObject -> margin;
+      alignHalfHeight = halfHeight - layoutObject -> margin;
     }
   }
   auto alignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight, layoutObject -> margin);
