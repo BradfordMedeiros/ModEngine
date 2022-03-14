@@ -29,6 +29,15 @@ UILayoutFlowType layoutAlignFromAttr(GameobjAttributes& attr, const char* attrna
   return alignType;
 }
 
+float getMargin(GameobjAttributes& attr, const char* attrname, float defaultMargin, bool* valueSpecified){
+  bool marginTypeSpecified = attr.numAttributes.find(attrname) != attr.numAttributes.end();
+  *valueSpecified = marginTypeSpecified;
+  if (!marginTypeSpecified){
+    return defaultMargin;
+  }
+  return attr.numAttributes.at(attrname);
+}
+
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
   auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
@@ -39,7 +48,34 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   }
   auto showBackpanel = (attr.stringAttributes.find("backpanel") != attr.stringAttributes.end() && attr.stringAttributes.at("backpanel") == "true");
   auto tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint");
-  auto margin = attr.numAttributes.find("margin") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("margin");
+  
+  bool marginSpecified = attr.numAttributes.find("margin") != attr.numAttributes.end();
+  auto margin = !marginSpecified ? 0.f : attr.numAttributes.at("margin");
+
+  bool marginLeftSpecified = false;
+  float marginLeft = getMargin(attr, "margin-left", margin, &marginLeftSpecified);
+  
+  bool marginRightSpecified = false;
+  float marginRight = getMargin(attr, "margin-right", margin, &marginRightSpecified);
+
+  bool marginTopSpecified = false;
+  float marginTop = getMargin(attr, "margin-top", margin, &marginTopSpecified);
+
+  bool marginBottomSpecified = false;
+  float marginBottom = getMargin(attr, "margin-bottom", margin, &marginBottomSpecified);
+
+  LayoutMargin marginValues {
+    .margin = margin,
+    .marginLeft = marginLeft,
+    .marginRight = margin,
+    .marginBottom = margin,
+    .marginTop = margin,
+    .marginSpecified = marginSpecified,
+    .marginLeftSpecified = marginLeftSpecified,
+    .marginRightSpecified = marginRightSpecified,
+    .marginBottomSpecified = marginBottomSpecified,
+    .marginTopSpecified = marginTopSpecified,
+  };
 
   auto minwidth = layoutMinSizeFromAttr(attr, "minwidth");
   auto minheight = layoutMinSizeFromAttr(attr, "minheight");
@@ -59,7 +95,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .boundOrigin = glm::vec3(0.f, 0.f, 0.f),
     .showBackpanel = showBackpanel,
     .tint = tint,
-    .margin = margin,
+    .marginValues = marginValues,
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
     .minwidth = minwidth,
     .minheight = minheight,

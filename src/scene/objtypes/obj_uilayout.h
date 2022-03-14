@@ -15,6 +15,18 @@ struct UILayoutMinSize {
 };
 enum UILayoutFlowType { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive };
 
+struct LayoutMargin {
+  float margin;
+  float marginLeft;
+  float marginRight;
+  float marginBottom;
+  float marginTop;
+  bool marginSpecified;
+  bool marginLeftSpecified;
+  bool marginRightSpecified;
+  bool marginBottomSpecified;
+  bool marginTopSpecified;
+};
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
@@ -23,7 +35,7 @@ struct GameObjectUILayout {
   glm::vec3 boundOrigin;
   bool showBackpanel;
   glm::vec3 tint;
-  float margin;
+  LayoutMargin marginValues;
   TextureInformation texture;
   UILayoutMinSize minwidth;
   UILayoutMinSize minheight;
