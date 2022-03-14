@@ -324,18 +324,18 @@ std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std
   return newPositions;
 }
 
-glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float halfBoundWidth, float halfBoundHeight){
+glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float halfBoundWidth, float halfBoundHeight, float margin){
   float horizontalOffset = 0.f;
   if (horizontal == UILayoutFlowNegative){
-    horizontalOffset = -1 * halfBoundWidth;
+    horizontalOffset = -1 * halfBoundWidth - margin;
   }else if (horizontal == UILayoutFlowPositive){
-    horizontalOffset = halfBoundWidth;
+    horizontalOffset = halfBoundWidth + margin;
   }
   float verticalOffset = 0.f;
   if (vertical == UILayoutFlowNegative){
-    verticalOffset = -1 * halfBoundHeight;
+    verticalOffset = -1 * halfBoundHeight - margin;
   }else if (vertical == UILayoutFlowPositive){
-    verticalOffset = halfBoundHeight;
+    verticalOffset = halfBoundHeight + margin;
   }
   return glm::vec3(horizontalOffset, verticalOffset, 0.f);
 }
@@ -384,7 +384,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   std::cout << "1/2 bound width: (" << halfBoundWidth << ", " << halfBoundHeight << ")" << std::endl;
 
   auto offset = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight);
-  auto alignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight);
+  auto alignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight, layoutObject -> margin);
 
   std::cout << "top align offset: " << print(alignOffset) << std::endl;
   // Offset all elements to the correct positions, so that they're centered
