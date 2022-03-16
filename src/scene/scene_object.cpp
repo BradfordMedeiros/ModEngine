@@ -359,8 +359,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       physicsTranslateSet(world, id, anchorElementPos, false);
     }else{
       std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
+      assert(false);
     }
-
   }
 
   auto layoutPos = fullTransformation(world.sandbox, id).position;
