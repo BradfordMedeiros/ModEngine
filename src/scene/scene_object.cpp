@@ -375,21 +375,13 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   // Figure out positions, starting from origin (layout should center elements so not quite right yet)
   auto newPositions = calcPositions(world, id, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutType);
-  std::vector<objid> elementIds;
-
-  for (auto &[id, pos] : newPositions){
-    elementIds.push_back(id);
-  }
-  std::cout << std::endl;
-  
-  auto obj = id;
 
   // Put elements into correct positions, so we can create a bounding box around them 
   for (auto [id, newPos] : newPositions){
     physicsTranslateSet(world, id, newPos, false);
   }
 
-  layoutObject -> boundInfo = createBoundingAround(world, elementIds);
+  layoutObject -> boundInfo = createBoundingAround(world, mapKeys<objid, glm::vec3>(newPositions));
 
   auto halfBoundWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) / 2.f;
   auto halfBoundHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) / 2.f;

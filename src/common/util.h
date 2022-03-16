@@ -128,4 +128,15 @@ typedef void (*func_t)();
 bool aboutEqual(float one, float two);
 bool aboutEqual(glm::vec3 one, glm::vec3 two);
 
+template<typename T, typename N>
+std::vector<T> mapKeys(std::map<T, N>& values){   
+  std::vector<T> transformedValues;
+  for (auto &[id, _]: values){
+    transformedValues.push_back(id);
+  }
+  return transformedValues;
+}
+
 #endif
+
+
