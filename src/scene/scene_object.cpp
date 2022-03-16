@@ -323,7 +323,9 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
   return newPositions;
 }
 
-glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float halfBoundWidth, float halfBoundHeight, float margin){
+glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float boundWidth, float boundHeight, float margin){
+  float halfBoundWidth = 0.5f * boundWidth;
+  float halfBoundHeight = 0.5f * boundHeight;
   float horizontalOffset = 0.f;
   if (horizontal == UILayoutFlowNegative){
     horizontalOffset = -1 * halfBoundWidth - margin;
@@ -377,36 +379,46 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   layoutObject -> boundInfo = createBoundingAround(world, mapKeys<objid, glm::vec3>(newPositions));
 
   auto elementsBoundingWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
-  auto halfElementsBoundingWidth = elementsBoundingWidth / 2.f;
   auto elementsBoundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
-  auto halfElementsBoundingHeight = elementsBoundingHeight / 2.f;
+  
+  layoutObject -> boundInfo.xMin -= layoutObject -> marginValues.margin;
+  layoutObject -> boundInfo.xMax += layoutObject -> marginValues.margin;
+  layoutObject -> boundInfo.yMin -= layoutObject -> marginValues.margin;
+  layoutObject -> boundInfo.yMax += layoutObject -> marginValues.margin;
+  layoutObject -> boundInfo.zMin -= layoutObject -> marginValues.margin;
+  layoutObject -> boundInfo.zMax += layoutObject -> marginValues.margin;
 
-  auto offsetForElements = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, elementsBoundingWidth, elementsBoundingHeight);
-
-  auto alignHalfWidth = halfElementsBoundingWidth;
+  auto boundingWidth = elementsBoundingWidth;
   if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
     bool isMinWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) >= layoutObject -> minwidth.amount;
     if (!isMinWidth){
       float width = layoutObject -> minwidth.amount; 
       float halfWidth = width / 2.f;
-      layoutObject -> boundInfo.xMin = -1 * halfWidth + layoutObject -> marginValues.margin;  
-      layoutObject -> boundInfo.xMax = halfWidth - layoutObject -> marginValues.margin;
-      alignHalfWidth = halfWidth - layoutObject -> marginValues.margin;
+      layoutObject -> boundInfo.xMin = -1 * halfWidth;  
+      layoutObject -> boundInfo.xMax = halfWidth;
+      boundingWidth = width;
     }
   }
-  auto alignHalfHeight = halfElementsBoundingHeight;
+  auto boundingHeight = elementsBoundingHeight;
   if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
     bool isMinHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) >= layoutObject -> minheight.amount;
     if (!isMinHeight){
       float height = layoutObject -> minheight.amount;  // 2 is fullscreen since ndi goes from (x,y) -> ((-1, 1), (-1, 1))
       float halfHeight = height / 2.f;
-      layoutObject -> boundInfo.yMin = -1 * halfHeight + layoutObject -> marginValues.margin;
-      layoutObject -> boundInfo.yMax = halfHeight - layoutObject -> marginValues.margin;
-      alignHalfHeight = halfHeight - layoutObject -> marginValues.margin;
+      layoutObject -> boundInfo.yMin = -1 * halfHeight;
+      layoutObject -> boundInfo.yMax = halfHeight;
+      boundingHeight = height;
     }
   }
-  auto elementsAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfElementsBoundingWidth, halfElementsBoundingHeight, layoutObject -> marginValues.margin);
-  auto boundingAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, alignHalfWidth, alignHalfHeight, layoutObject -> marginValues.margin);
+
+  // this updates posns of elemenets as if they're centered around the origin (they're from the posn of the layout obj)
+  auto offsetForElements = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, elementsBoundingWidth, elementsBoundingHeight); 
+  
+  // this adjusts the initial posn of elements for the alignment params
+  auto elementsAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, elementsBoundingWidth, elementsBoundingHeight, layoutObject -> marginValues.margin);
+
+  // this adjusts the position for the bounding origin for alignment params
+  auto boundingAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, boundingWidth, boundingHeight, layoutObject -> marginValues.margin);
 
   // Offset all elements to the correct positions, so that they're centered
   for (auto [id, newPos] : newPositions){
@@ -419,12 +431,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     }
   }
 
-  layoutObject -> boundInfo.xMin -= layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.xMax += layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.yMin -= layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.yMax += layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.zMin -= layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.zMax += layoutObject -> marginValues.margin;
+
   layoutObject -> boundOrigin = layoutPos + boundingAlignOffset;
 }
 
