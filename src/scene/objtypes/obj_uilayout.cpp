@@ -82,6 +82,12 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto horizontal = layoutAlignFromAttr(attr, "align-horizontal", "left", "right");
   auto vertical = layoutAlignFromAttr(attr, "align-vertical", "down", "up");
 
+  auto anchorTarget = attr.stringAttributes.find("anchor") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("anchor");
+  auto anchorOffset = attr.vecAttributes.find("anchor-offset") == attr.vecAttributes.end() ? glm::vec3(0.f, 0.f, 0.f) : attr.vecAttributes.at("anchor-offset");
+  LayoutAnchor anchor = {
+    .target = anchorTarget,
+    .offset = anchorOffset,
+  };
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
     .yMin = 0, .yMax = 0,
@@ -96,6 +102,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .showBackpanel = showBackpanel,
     .tint = tint,
     .marginValues = marginValues,
+    .anchor = anchor,
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
     .minwidth = minwidth,
     .minheight = minheight,

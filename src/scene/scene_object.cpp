@@ -348,10 +348,22 @@ glm::vec3 layoutPositionOffset(UILayoutType layoutType, UILayoutFlowType horizon
 }
 
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
-  auto layoutPos = fullTransformation(world.sandbox, id).position;
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
 
+  if (layoutObject -> anchor.target != ""){
+    auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
+    if (anchorElement.has_value()){
+      auto anchorId = anchorElement.value();
+      auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + layoutObject -> anchor.offset;
+      physicsTranslateSet(world, id, anchorElementPos, false);
+    }else{
+      std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
+    }
+
+  }
+
+  auto layoutPos = fullTransformation(world.sandbox, id).position;
   for (auto element : layoutObject -> elements){
     auto elementId = getGameObject(world.sandbox, element, currentSceneId).id;
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(elementId));

@@ -27,6 +27,10 @@ struct LayoutMargin {
   bool marginBottomSpecified;
   bool marginTopSpecified;
 };
+struct LayoutAnchor {
+  std::string target;
+  glm::vec3 offset;
+};
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
@@ -36,6 +40,7 @@ struct GameObjectUILayout {
   bool showBackpanel;
   glm::vec3 tint;
   LayoutMargin marginValues;
+  LayoutAnchor anchor;
   TextureInformation texture;
   UILayoutMinSize minwidth;
   UILayoutMinSize minheight;
