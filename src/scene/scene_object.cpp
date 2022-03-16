@@ -278,8 +278,7 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
 }
 
 
-std::map<objid, glm::vec3> calcPositions(World& world, objid id, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
-  auto rootPosition = fullTransformation(world.sandbox, id).position; 
+std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
   auto horizontal = rootPosition.x;
   auto fixedY = rootPosition.y;
   auto vertical = rootPosition.y;
@@ -340,7 +339,9 @@ glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal
   return glm::vec3(horizontalOffset, verticalOffset, 0.f);
 }
 
-glm::vec3 layoutPositionOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float halfBoundWidth, float halfBoundHeight){
+glm::vec3 layoutPositionOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float boundWidth, float boundHeight){
+  float halfBoundWidth = 0.5f * boundWidth;
+  float halfBoundHeight = 0.5f * boundHeight;
   if (layoutType == LAYOUT_HORIZONTAL){
     return glm::vec3(-1 * halfBoundWidth, 0, 0);
   }
@@ -351,45 +352,38 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
 
-  if (layoutObject -> anchor.target != ""){
-    auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
-    if (anchorElement.has_value()){
-      auto anchorId = anchorElement.value();
-      auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + layoutObject -> anchor.offset;
-      physicsTranslateSet(world, id, anchorElementPos, false);
-    }else{
-      std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
-      assert(false);
+  { // Set position of the layout based on anchor target
+    if (layoutObject -> anchor.target != ""){
+      auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
+      if (anchorElement.has_value()){
+        auto anchorId = anchorElement.value();
+        auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + layoutObject -> anchor.offset;
+        physicsTranslateSet(world, id, anchorElementPos, false);
+      }else{
+        std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
+        assert(false);
+      }
     }
   }
 
+  enforceLayoutsByName(world, layoutObject -> elements, currentSceneId);
   auto layoutPos = fullTransformation(world.sandbox, id).position;
-  for (auto element : layoutObject -> elements){
-    auto elementId = getGameObject(world.sandbox, element, currentSceneId).id;
-    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(elementId));
-    if (layoutObject != NULL){
-      enforceLayout(world, elementId, layoutObject);
-    }
-  }
-
-
-  // Figure out positions, starting from origin (layout should center elements so not quite right yet)
-  auto newPositions = calcPositions(world, id, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutType);
-
-  // Put elements into correct positions, so we can create a bounding box around them 
-  for (auto [id, newPos] : newPositions){
+  // Figure out positions, starting from rootPosition (layout should center elements so not quite right yet)
+  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutType);
+  for (auto [id, newPos] : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
     physicsTranslateSet(world, id, newPos, false);
   }
 
   layoutObject -> boundInfo = createBoundingAround(world, mapKeys<objid, glm::vec3>(newPositions));
 
-  auto halfBoundWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) / 2.f;
-  auto halfBoundHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) / 2.f;
-  std::cout << "1/2 bound width: (" << halfBoundWidth << ", " << halfBoundHeight << ")" << std::endl;
+  auto elementsBoundingWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
+  auto halfElementsBoundingWidth = elementsBoundingWidth / 2.f;
+  auto elementsBoundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
+  auto halfElementsBoundingHeight = elementsBoundingHeight / 2.f;
 
-  auto offset = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight);
+  auto offsetForElements = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, elementsBoundingWidth, elementsBoundingHeight);
 
-  auto alignHalfWidth = halfBoundWidth;
+  auto alignHalfWidth = halfElementsBoundingWidth;
   if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
     bool isMinWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) >= layoutObject -> minwidth.amount;
     if (!isMinWidth){
@@ -400,7 +394,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       alignHalfWidth = halfWidth - layoutObject -> marginValues.margin;
     }
   }
-  auto alignHalfHeight = halfBoundHeight;
+  auto alignHalfHeight = halfElementsBoundingHeight;
   if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
     bool isMinHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) >= layoutObject -> minheight.amount;
     if (!isMinHeight){
@@ -411,14 +405,12 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       alignHalfHeight = halfHeight - layoutObject -> marginValues.margin;
     }
   }
-  auto alignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfBoundWidth, halfBoundHeight, layoutObject -> marginValues.margin);
-  auto boundOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, alignHalfWidth, alignHalfHeight, layoutObject -> marginValues.margin);
+  auto elementsAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, halfElementsBoundingWidth, halfElementsBoundingHeight, layoutObject -> marginValues.margin);
+  auto boundingAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, alignHalfWidth, alignHalfHeight, layoutObject -> marginValues.margin);
 
-  std::cout << "top align offset: " << print(alignOffset) << std::endl;
   // Offset all elements to the correct positions, so that they're centered
   for (auto [id, newPos] : newPositions){
-    auto fullNewPos = newPos + offset  + alignOffset;
-    std::cout << "setting position of " << getGameObject(world, id).name << " to: " << print(fullNewPos) << std::endl;
+    auto fullNewPos = newPos + offsetForElements + elementsAlignOffset;
     physicsTranslateSet(world, id, fullNewPos, false);
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
     if (layoutObject != NULL){
@@ -433,7 +425,17 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   layoutObject -> boundInfo.yMax += layoutObject -> marginValues.margin;
   layoutObject -> boundInfo.zMin -= layoutObject -> marginValues.margin;
   layoutObject -> boundInfo.zMax += layoutObject -> marginValues.margin;
-  layoutObject -> boundOrigin = layoutPos + boundOffset;
+  layoutObject -> boundOrigin = layoutPos + boundingAlignOffset;
+}
+
+void enforceLayoutsByName(World& world, std::vector<std::string>& elements, objid currentSceneId){
+  for (auto element : elements){
+    auto elementId = getGameObject(world.sandbox, element, currentSceneId).id;
+    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(elementId));
+    if (layoutObject != NULL){
+      enforceLayout(world, elementId, layoutObject);
+    }
+  }
 }
 
 struct UILayoutAndId {
