@@ -67,9 +67,9 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   LayoutMargin marginValues {
     .margin = margin,
     .marginLeft = marginLeft,
-    .marginRight = margin,
-    .marginBottom = margin,
-    .marginTop = margin,
+    .marginRight = marginRight,
+    .marginBottom = marginBottom,
+    .marginTop = marginTop,
     .marginSpecified = marginSpecified,
     .marginLeftSpecified = marginLeftSpecified,
     .marginRightSpecified = marginRightSpecified,
