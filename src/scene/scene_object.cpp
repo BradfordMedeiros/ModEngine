@@ -323,48 +323,21 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
   return newPositions;
 }
 
-glm::vec3 layoutAlignOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float boundWidth, float boundHeight, float margin){
-  float halfBoundWidth = 0.5f * boundWidth;
-  float halfBoundHeight = 0.5f * boundHeight;
-  float horizontalOffset = 0.f;
-  if (horizontal == UILayoutFlowNegative){
-    horizontalOffset = -1 * halfBoundWidth - margin;
-  }else if (horizontal == UILayoutFlowPositive){
-    horizontalOffset = halfBoundWidth + margin;
-  }
-  float verticalOffset = 0.f;
-  if (vertical == UILayoutFlowNegative){
-    verticalOffset = -1 * halfBoundHeight - margin;
-  }else if (vertical == UILayoutFlowPositive){
-    verticalOffset = halfBoundHeight + margin;
-  }
-  return glm::vec3(horizontalOffset, verticalOffset, 0.f);
-}
-
-glm::vec3 layoutPositionOffset(UILayoutType layoutType, UILayoutFlowType horizontal, UILayoutFlowType vertical, float boundWidth, float boundHeight){
-  float halfBoundWidth = 0.5f * boundWidth;
-  float halfBoundHeight = 0.5f * boundHeight;
-  if (layoutType == LAYOUT_HORIZONTAL){
-    return glm::vec3(-1 * halfBoundWidth, 0, 0);
-  }
-  return glm::vec3(0, -1 * halfBoundHeight, 0);
-}
 
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
 
-  { // Set position of the layout based on anchor target
-    if (layoutObject -> anchor.target != ""){
-      auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
-      if (anchorElement.has_value()){
-        auto anchorId = anchorElement.value();
-        auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + layoutObject -> anchor.offset;
-        physicsTranslateSet(world, id, anchorElementPos, false);
-      }else{
-        std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
-        assert(false);
-      }
+   // Set position of the layout based on anchor target
+  if (layoutObject -> anchor.target != ""){
+    auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
+    if (anchorElement.has_value()){
+      auto anchorId = anchorElement.value();
+      auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + layoutObject -> anchor.offset;
+      physicsTranslateSet(world, id, anchorElementPos, false);
+    }else{
+      std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
+      assert(false);
     }
   }
 
@@ -378,51 +351,67 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   layoutObject -> boundInfo = createBoundingAround(world, mapKeys<objid, glm::vec3>(newPositions));
 
-  auto elementsBoundingWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
-  auto elementsBoundingHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
-  
-  layoutObject -> boundInfo.xMin -= layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.xMax += layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.yMin -= layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.yMax += layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.zMin -= layoutObject -> marginValues.margin;
-  layoutObject -> boundInfo.zMax += layoutObject -> marginValues.margin;
 
-  auto boundingWidth = elementsBoundingWidth;
+  float elementsWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
+  float elementsHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
+
+  float boundingWidth = elementsWidth + layoutObject -> marginValues.marginLeft + layoutObject -> marginValues.marginRight;
+  float boundingHeight = elementsHeight + layoutObject -> marginValues.marginBottom + layoutObject -> marginValues.marginTop;
+
   if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
-    bool isMinWidth = (layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin) >= layoutObject -> minwidth.amount;
-    if (!isMinWidth){
-      float width = layoutObject -> minwidth.amount; 
-      float halfWidth = width / 2.f;
-      layoutObject -> boundInfo.xMin = -1 * halfWidth;  
-      layoutObject -> boundInfo.xMax = halfWidth;
-      boundingWidth = width;
+    if (boundingWidth < layoutObject -> minwidth.amount){
+      boundingWidth = layoutObject -> minwidth.amount;
     }
   }
-  auto boundingHeight = elementsBoundingHeight;
   if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
-    bool isMinHeight = (layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin) >= layoutObject -> minheight.amount;
-    if (!isMinHeight){
-      float height = layoutObject -> minheight.amount;  // 2 is fullscreen since ndi goes from (x,y) -> ((-1, 1), (-1, 1))
-      float halfHeight = height / 2.f;
-      layoutObject -> boundInfo.yMin = -1 * halfHeight;
-      layoutObject -> boundInfo.yMax = halfHeight;
-      boundingHeight = height;
+    if (boundingHeight < layoutObject -> minheight.amount){
+      boundingHeight = layoutObject -> minheight.amount;
     }
   }
 
-  // this updates posns of elemenets as if they're centered around the origin (they're from the posn of the layout obj)
-  auto offsetForElements = layoutPositionOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, elementsBoundingWidth, elementsBoundingHeight); 
-  
-  // this adjusts the initial posn of elements for the alignment params
-  auto elementsAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, elementsBoundingWidth, elementsBoundingHeight, layoutObject -> marginValues.margin);
 
-  // this adjusts the position for the bounding origin for alignment params
-  auto boundingAlignOffset = layoutAlignOffset(layoutType, layoutObject -> horizontal, layoutObject -> vertical, boundingWidth, boundingHeight, layoutObject -> marginValues.margin);
+  ////
+  float halfElementsWidth = 0.5f * elementsWidth;
+  float halfElementsHeight = 0.5f * elementsHeight;
+
+  float halfBoundingWidth = 0.5f * boundingWidth;
+  float halfBoundingHeight = 0.5f * boundingHeight;
+
+  layoutObject -> boundInfo.xMin = -1 * halfBoundingWidth;
+  layoutObject -> boundInfo.xMax = halfBoundingWidth;
+  layoutObject -> boundInfo.yMin = -1 * halfBoundingHeight;
+  layoutObject -> boundInfo.yMax = halfBoundingHeight;
+  /////
+
+
+  // Elements start from layout pos, this makes it relative to the bottom left side of bounding
+  auto elementsLeftSideOffset = glm::vec3(0.f, 0.f, 0.f);
+  if (layoutObject -> type == LAYOUT_HORIZONTAL){
+    elementsLeftSideOffset = glm::vec3(-1 * halfBoundingWidth,  -1 * halfBoundingHeight + halfElementsHeight, 0.f);
+  }else if (layoutObject -> type == LAYOUT_VERTICAL){
+    elementsLeftSideOffset = glm::vec3(-1 * halfBoundingWidth + halfElementsWidth,  -1 * halfBoundingHeight, 0.f);
+  }
+  
+  // Applies the margin.
+  auto elementsAlignOffset = glm::vec3(layoutObject -> marginValues.marginLeft, layoutObject -> marginValues.marginBottom, 0.f);
+
+  // This moves all elements and the bounding box to adjust for the align
+  auto mainAlignmentOffset = glm::vec3(0.f, 0.f, 0.f);
+  if (layoutObject -> horizontal == UILayoutFlowNegative){
+    mainAlignmentOffset.x = -1 * halfBoundingWidth;
+  }else if (layoutObject -> horizontal == UILayoutFlowPositive){
+    mainAlignmentOffset.x = halfBoundingWidth;
+  }
+  if (layoutObject -> vertical == UILayoutFlowNegative){
+    mainAlignmentOffset.y = -1 * halfBoundingHeight;
+  }else if (layoutObject -> vertical == UILayoutFlowPositive){
+    mainAlignmentOffset.y = halfBoundingHeight;
+  }
+
 
   // Offset all elements to the correct positions, so that they're centered
   for (auto [id, newPos] : newPositions){
-    auto fullNewPos = newPos + offsetForElements + elementsAlignOffset;
+    auto fullNewPos = newPos + elementsLeftSideOffset + elementsAlignOffset + mainAlignmentOffset;
     physicsTranslateSet(world, id, fullNewPos, false);
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
     if (layoutObject != NULL){
@@ -431,8 +420,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     }
   }
 
-
-  layoutObject -> boundOrigin = layoutPos + boundingAlignOffset;
+  layoutObject -> boundOrigin = layoutPos + mainAlignmentOffset;
 }
 
 void enforceLayoutsByName(World& world, std::vector<std::string>& elements, objid currentSceneId){
