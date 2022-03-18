@@ -31,6 +31,11 @@ struct LayoutAnchor {
   std::string target;
   glm::vec3 offset;
 };
+struct LayoutBorder {
+  float borderSize;
+  glm::vec3 borderColor;
+  bool hasBorder;
+};
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
@@ -46,6 +51,7 @@ struct GameObjectUILayout {
   UILayoutMinSize minheight;
   UILayoutFlowType horizontal;
   UILayoutFlowType vertical;
+  LayoutBorder border;
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);

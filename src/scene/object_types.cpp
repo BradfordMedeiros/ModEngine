@@ -475,10 +475,24 @@ int renderObject(
     }
     if (layoutObj -> showBackpanel){
       auto rectModel = layoutBackpanelModelTransform(*layoutObj);
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(rectModel));
+
+      bool hasBorder = layoutObj -> border.hasBorder;
+      auto borderSize = layoutObj -> border.borderSize;
+      glm::vec3 mainScale = hasBorder ? (glm::vec3(1.f, 1.f, 1.f) - glm::vec3(borderSize, borderSize, borderSize)) : glm::vec3(1.f, 1.f, 1.f);  // the scaling here i think is off since is shouldn't be relative to the scaled transform or something
+
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(rectModel, mainScale)));
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
       drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);   
-      layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;
+      if (hasBorder){
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(rectModel));
+        glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
+        drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);      
+      }
+ 
+      layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;  // todo get vertex count from the drawmesh calls
+      if (hasBorder){
+        layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;
+      }
     }
     return layoutVertexCount;
   }

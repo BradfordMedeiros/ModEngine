@@ -16,15 +16,21 @@
 *basicbutton2:layer:basicui
 *basicbutton2:scale:0.1 0.1 0.1
 
-(row1:type:vertical
+(row1:type:horizontal
 (row1:elements:*basicbutton1,*basicbutton2
 (row1:backpanel:true
-(row1:tint:1.0 0.1 0.1
-(row1:margin:0.02
+
+(row1:margin:0.2
+
+(row1:position:0 0 0
 
 (row1:layer:basicui
 #(row1:minwidth:1
-#(row1:minheight:1
+(row1:minheight:1
 
-(row1:align-horizontal:center
-(row1:align-vertical:down
+(row1:border-size:0.02
+(row1:border-color:0.3 0.3 0.3
+(row1:tint:1.0 0.1 0.1
+
+(row1:align-horizontal:left
+(row1:align-vertical:up

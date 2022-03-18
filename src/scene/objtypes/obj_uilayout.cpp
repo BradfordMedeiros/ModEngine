@@ -88,6 +88,17 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .target = anchorTarget,
     .offset = anchorOffset,
   };
+
+  bool hasBorder = attr.numAttributes.find("border-size") != attr.numAttributes.end();
+  auto borderSize = hasBorder ? attr.numAttributes.at("border-size") : 0.f;
+  assert(borderSize <= 1.f);
+  auto borderColor = attr.vecAttributes.find("border-color") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("border-color");
+  LayoutBorder border {
+    .borderSize = borderSize,
+    .borderColor = borderColor,
+    .hasBorder = hasBorder,
+  };
+
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
     .yMin = 0, .yMax = 0,
@@ -108,6 +119,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .minheight = minheight,
     .horizontal = horizontal,
     .vertical = vertical,
+    .border = border,
   };
   return obj;
 }
