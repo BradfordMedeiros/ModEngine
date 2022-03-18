@@ -474,17 +474,16 @@ int renderObject(
       layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     if (layoutObj -> showBackpanel){
-      auto rectModel = layoutBackpanelModelTransform(*layoutObj);
-
       bool hasBorder = layoutObj -> border.hasBorder;
       auto borderSize = layoutObj -> border.borderSize;
-      glm::vec3 mainScale = hasBorder ? (glm::vec3(1.f, 1.f, 1.f) - glm::vec3(borderSize, borderSize, borderSize)) : glm::vec3(1.f, 1.f, 1.f);  // the scaling here i think is off since is shouldn't be relative to the scaled transform or something
-
-      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(rectModel, mainScale)));
+      glm::vec3 minusScale = hasBorder ? glm::vec3(borderSize, borderSize, borderSize) : glm::vec3(0.f, 0.f, 0.f);  
+      auto innerScale = layoutBackpanelModelTransform(*layoutObj, minusScale);
+      glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(innerScale));
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
       drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);   
       if (hasBorder){
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(rectModel));
+        auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(outerScale));
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
         drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);      
       }
