@@ -401,6 +401,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "lightDepthTexture"), 3);
   glUniform1i(glGetUniformLocation(shader, "cubemapTexture"), 4);
   glUniform1i(glGetUniformLocation(shader, "roughnessTexture"), 5);
+  glUniform1i(glGetUniformLocation(shader, "normalTexture"), 6);
 
   glActiveTexture(GL_TEXTURE0); 
 
