@@ -3,6 +3,7 @@
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
+in mat3 TangentToWorld;
 in vec4 sshadowCoord;
 
 layout (location = 0) out vec4 FragColor;
@@ -14,6 +15,7 @@ uniform sampler2D opacityTexture;
 uniform sampler2D lightDepthTexture;
 uniform samplerCube cubemapTexture;
 uniform sampler2D roughnessTexture;
+uniform sampler2D normalTexture;
 
 uniform vec3 tint;
 uniform vec3 cameraPosition;
@@ -26,6 +28,7 @@ uniform bool hasEmissionTexture;
 uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
 uniform bool hasRoughnessTexture;
+uniform bool hasNormalTexture;
 
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
@@ -46,7 +49,7 @@ uniform float emissionAmount;
 uniform float discardTexAmount;
 uniform float time;
 
-bool enableAttenutation = true;
+bool enableAttenutation = false;
 
 int getNumLights(){
   return min(numlights, MAX_LIGHTS);
@@ -63,15 +66,14 @@ float calcAttenutation(int lightNumber){
   return attenuation;
 }
 
-vec3 calculatePhongLight(){
-  vec3 ambient = vec3(0.1, 0.1, 0.1);     
-  vec3 totalDiffuse  = vec3(0.2, 0.2, 0.2);
-  vec3 totalSpecular = vec3(0.2, 0.2, 0.2);
+vec3 calculatePhongLight(vec3 normal){
+  vec3 ambient = vec3(0.4, 0.4, 0.4);     
+  vec3 totalDiffuse  = vec3(0, 0, 0);     
+  vec3 totalSpecular = vec3(0, 0, 0);     
 
   for (int i = 0; i < getNumLights(); i++){
     vec3 lightPos = lights[i];
     vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
-    vec3 normal = normalize(Normal);
 
     float angle = dot(lightDir, normalize(-lightsdir[i]));
     if (angle < lightsmaxangle[i]){
@@ -130,11 +132,11 @@ float smith(vec3 N, vec3 V, vec3 L, float roughness){
 
 float ao = 3.2;
 vec4 calcCookTorrence(
+  vec3 N,
   vec3 albedo, 
   float metallic, 
   float roughness // 1 is rough, disperes light, 0 is metallic, darker with highlights. perfectly smooth is just dark so pick something small
 ){ 
-    vec3 N = normalize(Normal);
     vec3 V = normalize(cameraPosition - FragPos);  
     vec3 F0 = mix(vec3(0.04), albedo, metallic);
 
@@ -158,7 +160,7 @@ vec4 calcCookTorrence(
         Lo += ((kD * albedo / PI) + specular) * radiance * nOnL; 
     }
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 ambient = vec3(0.53) * albedo * ao;
     vec4 color = vec4(ambient + Lo, 1);
     return color;
 }
@@ -195,12 +197,26 @@ void main(){
       discard;
     }
 
+    vec3 normal = normalize(Normal);
 
-    vec4 color = enablePBR ? calcCookTorrence(texColor.rgb, 1, 1) : vec4(calculatePhongLight(), 1.0) * texColor;
+
+    if (hasNormalTexture){
+      vec3 normalTexColor = texture(normalTexture, adjustedTexCoord).rgb ;
+      normal = TangentToWorld * normalize(vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
+    }
+
+    /*if (hasNormalTexture){
+      vec3 normalTexColor = texture(normalTexture, adjustedTexCoord).rgb ;
+      normal = normalize(vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
+    }*/
+//    texColor = texture(normalTexture, adjustedTexCoord).rgba;
+  
+
+    vec4 color = enablePBR ? calcCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal), 1.0) * texColor;
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 
-    FragColor = vec4(tint * color.xyz * shadowDelta, color.w);
+    FragColor = /*(hasNormalTexture ? vec4(1, 0, 0, 1) : vec4(0, 0, 1, 1)) **/ vec4(tint * color.xyz * shadowDelta, color.w);
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;

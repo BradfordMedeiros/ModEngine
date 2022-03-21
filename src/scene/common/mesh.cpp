@@ -61,6 +61,9 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoords));
 
+  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, tangent));
+
   for (auto vertex : meshData.vertices){
     for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
       if (vertex.boneIndexes[i] > 50){
@@ -72,12 +75,14 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
 
   // this is directly coupled to :  ./util/loadmodel.h Vertex struct definition
   for (int i = 0; i < NUM_BONES_PER_VERTEX; i++){
-    glEnableVertexAttribArray(3 + i);
-    glVertexAttribIPointer(3 + i, 1, GL_BYTE, sizeof(Vertex), (void*) (offsetof(Vertex, boneIndexes) + (sizeof(int32_t) * i)));    
+    glEnableVertexAttribArray(4 + i);
+    glVertexAttribIPointer(4 + i, 1, GL_BYTE, sizeof(Vertex), (void*) (offsetof(Vertex, boneIndexes) + (sizeof(int32_t) * i)));    
 
-    glEnableVertexAttribArray(3 + NUM_BONES_PER_VERTEX + i);
-    glVertexAttribPointer(3 + NUM_BONES_PER_VERTEX + i, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, boneWeights) + (sizeof(float) * i)));
+    glEnableVertexAttribArray(4 + NUM_BONES_PER_VERTEX + i);
+    glVertexAttribPointer(4 + NUM_BONES_PER_VERTEX + i, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, boneWeights) + (sizeof(float) * i)));
   }
+
+
 
   
   Mesh mesh = {

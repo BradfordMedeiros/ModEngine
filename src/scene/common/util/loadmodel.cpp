@@ -307,6 +307,7 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
      Vertex vertex;
      vertex.position = glm::vec3(mesh -> mVertices[i].x, mesh -> mVertices[i].y, mesh -> mVertices[i].z);
      vertex.normal = glm::vec3(mesh -> mNormals[i].x, mesh -> mNormals[i].y, mesh -> mNormals[i].z); 
+     vertex.tangent = glm::vec3(mesh -> mTangents[i].x, mesh -> mTangents[i].y, mesh -> mTangents[i].z);
      setDefaultBoneIndexesAndWeights(boneInfo.vertexBoneWeight, i, vertex.boneIndexes, vertex.boneWeights, NUM_BONES_PER_VERTEX);
 
      // load one layer of texture coordinates for now
@@ -363,8 +364,6 @@ MeshData processMesh(std::string rootname, aiMesh* mesh, const aiScene* scene, s
    std::string normalTexturePath;
    if (normalTextureCount == 1){
      normalTexturePath = getTexturePath(aiTextureType_NORMALS, modelPath, material);
-     std::cout << "normal maps not yet supported" << std::endl;
-     assert(false);
    }
 
    MeshData model = {
@@ -503,7 +502,7 @@ void printDebugModelData(ModelData& data, std::string modelPath){
 // Should have parent/child relations and a hierarchy but todo.
 ModelData loadModel(std::string rootname, std::string modelPath){
    Assimp::Importer import;
-   const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals);
+   const aiScene* scene = import.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
    if (!scene || scene -> mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene -> mRootNode){
       std::cerr << "error loading model" << std::endl;
       throw std::runtime_error("Error loading model: does the file " + modelPath + " exist and is valid?");
