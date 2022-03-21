@@ -333,13 +333,41 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
     if (anchorElement.has_value()){
       auto anchorId = anchorElement.value();
-      auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + layoutObject -> anchor.offset;
+      auto anchorBoundInfo = getPhysicsInfoForGameObject(world, id).boundInfo;
+      std::cout << "minx, maxx" << anchorBoundInfo.xMin << " " << anchorBoundInfo.xMax << std::endl;
+      std::cout << "anchor target: " << layoutObject -> anchor.target << std::endl;
+
+      auto boundDirectionOffset = layoutObject -> anchor.offset;
+      if (layoutObject -> anchor.horizontal == UILayoutFlowPositive){
+        boundDirectionOffset.x += anchorBoundInfo.xMax;
+      }else if (layoutObject -> anchor.horizontal == UILayoutFlowNegative){
+        boundDirectionOffset.x += anchorBoundInfo.xMin;
+      }
+      if (layoutObject -> anchor.vertical == UILayoutFlowPositive){
+        boundDirectionOffset.y += anchorBoundInfo.yMax;
+      }else if (layoutObject -> anchor.vertical == UILayoutFlowNegative){
+        boundDirectionOffset.y += anchorBoundInfo.yMin;
+      }
+
+      std::cout << "anchor boundoffset: " << print(boundDirectionOffset) << std::endl;
+      auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + boundDirectionOffset;
+      std::cout << "anchor pos: " << print(anchorElementPos) << std::endl;
       physicsTranslateSet(world, id, anchorElementPos, false);
-    }else{
+    
+      }else{
       std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
       assert(false);
     }
   }
+
+  std::cout << "anchor direction: " << std::endl;
+  auto anchorHorzCentered = layoutObject -> anchor.horizontal == UILayoutFlowNone;
+  auto anchorVertCentered = layoutObject -> anchor.vertical == UILayoutFlowNone;
+
+  std::cout << "anchor centered(horz, vert) : " << (anchorHorzCentered ? "true" : "false") << " , " << (anchorVertCentered ? "true" : "false") << std::endl;
+  std::cout << "------------------------------" << std::endl;
+
+
 
   enforceLayoutsByName(world, layoutObject -> elements, currentSceneId);
   auto layoutPos = fullTransformation(world.sandbox, id).position;
