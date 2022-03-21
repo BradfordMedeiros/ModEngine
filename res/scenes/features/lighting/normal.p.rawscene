@@ -1,0 +1,17 @@
+# Includes model that demos emission texture 
+
+
+
+
+
+platform2:mesh:./res/models/normalbox.gltf
+platform2:scale:100 100 100
+platform2:position:0 0 0
+platform2:rotation:0 1 0
+platform2:texturetiling:5 5
+
+
+
+!light:tint:100 100 100
+
+
