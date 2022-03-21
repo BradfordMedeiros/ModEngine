@@ -27,9 +27,12 @@ struct LayoutMargin {
   bool marginBottomSpecified;
   bool marginTopSpecified;
 };
+
 struct LayoutAnchor {
   std::string target;
   glm::vec3 offset;
+  UILayoutFlowType horizontal;
+  UILayoutFlowType vertical;
 };
 struct LayoutBorder {
   float borderSize;

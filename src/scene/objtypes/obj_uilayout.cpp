@@ -84,9 +84,13 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
 
   auto anchorTarget = attr.stringAttributes.find("anchor") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("anchor");
   auto anchorOffset = attr.vecAttributes.find("anchor-offset") == attr.vecAttributes.end() ? glm::vec3(0.f, 0.f, 0.f) : attr.vecAttributes.at("anchor-offset");
+  auto anchorHorizontal = layoutAlignFromAttr(attr, "anchor-dir-horizontal", "left", "right");
+  auto anchorVertical = layoutAlignFromAttr(attr, "anchor-dir-vertical", "down", "up");
   LayoutAnchor anchor = {
     .target = anchorTarget,
     .offset = anchorOffset,
+    .horizontal = anchorHorizontal,
+    .vertical = anchorVertical,
   };
 
   bool hasBorder = attr.numAttributes.find("border-size") != attr.numAttributes.end();
