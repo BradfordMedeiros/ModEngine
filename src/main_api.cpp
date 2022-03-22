@@ -61,8 +61,19 @@ std::vector<std::string> listSceneFiles(){
   return listFilesWithExtensions("./res/scenes", { "rawscene" });
 }
 
-int32_t loadScene(std::string sceneFile){
+int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
+
+  std::cout << "load scene------------------" << std::endl;
+  for (auto &token : additionalTokens){
+    for (auto &value : token){
+      std::cout << value << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  std::cout << "-------------------------" << std::endl;
+
   return addSceneToWorld(world, sceneFile, interface);
 }
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
@@ -70,7 +81,7 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
 
   auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, {}, {}, {{"position", offset}});
   std::cout << "load scene offset: " << print(offset) << std::endl;
-  auto sceneId = loadScene(sceneFile);
+  auto sceneId = loadScene(sceneFile, {});
   auto rootId = rootIdForScene(world.sandbox, sceneId);
   makeParent(world.sandbox, rootId, nodeOffsetId);
   return nodeOffsetId;

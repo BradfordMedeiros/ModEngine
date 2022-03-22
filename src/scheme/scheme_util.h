@@ -24,5 +24,6 @@ void maybeCallFuncString(const char* function, const char* payload);
 SCM fromAttributeValue(AttributeValue& value);
 GameobjAttributes scmToAttributes(SCM scmAttributes);
 ObjectValue scmListToObjectValue(SCM list);
+std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues);
 
 #endif

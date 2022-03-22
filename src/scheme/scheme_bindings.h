@@ -10,7 +10,7 @@
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
-  int32_t (*loadScene)(std::string),
+  int32_t (*loadScene)(std::string, std::vector<std::vector<std::string>>),  
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
   std::vector<int32_t> (*listScenes)(),  

@@ -3,9 +3,14 @@
 int32_t (*_listSceneId)(int32_t objid);
 
 // Main Api
-int32_t (*_loadScene)(std::string);
-SCM scm_loadScene(SCM value){
-  auto sceneId = _loadScene(scm_to_locale_string(value));
+int32_t (*_loadScene)(std::string, std::vector<std::vector<std::string>>);
+SCM scm_loadScene(SCM value, SCM additionalValues){
+  auto additionalValuesDefined = !scm_is_eq(additionalValues, SCM_UNDEFINED);
+  std::vector<std::vector<std::string>> additionalValuesList;
+  if (additionalValuesDefined){
+    additionalValuesList = scmToStringList(additionalValues);
+  }
+  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList);
   return scm_from_int32(sceneId);
 }
 
@@ -767,7 +772,7 @@ void onScriptUnload(){
 std::vector<func_t> _registerGuileFns;
 ////////////
 void defineFunctions(objid id, bool isServer, bool isFreeScript){
-  scm_c_define_gsubr("load-scene", 1, 0, 0, (void *)scm_loadScene);
+  scm_c_define_gsubr("load-scene", 1, 1, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
@@ -890,7 +895,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
-  int32_t (*loadScene)(std::string),  
+  int32_t (*loadScene)(std::string, std::vector<std::vector<std::string>>),  
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
   std::vector<int32_t> (*listScenes)(),  

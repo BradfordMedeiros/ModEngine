@@ -170,3 +170,20 @@ ObjectValue scmListToObjectValue(SCM list){
     .value = value,
   };
 }
+
+std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues){
+  std::vector<std::vector<std::string>> tokens;
+  auto numElements = toUnsignedInt(scm_length(additionalValues));
+  for (int i = 0; i < numElements; i++){
+      std::vector<std::string> token;
+      auto objectTokenSCMList = scm_list_ref(additionalValues, scm_from_unsigned_integer(i));
+      auto tokenLength = toUnsignedInt(scm_length(objectTokenSCMList));
+      for (int j = 0; j < tokenLength; j++){
+        auto tokenStr = scm_list_ref(objectTokenSCMList, scm_from_unsigned_integer(j));
+        token.push_back(scm_to_locale_string(tokenStr));
+      }
+      assert(token.size() == 3);
+      tokens.push_back(token);
+  }
+  return tokens;
+}

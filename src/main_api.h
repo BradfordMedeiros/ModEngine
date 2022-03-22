@@ -43,7 +43,7 @@ void clearImpulse(int32_t index);
 void loadScriptFromWorld(std::string script, objid id, objid sceneId);
 
 std::vector<std::string> listSceneFiles();
-int32_t loadScene(std::string sceneFile);
+int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens);
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();
