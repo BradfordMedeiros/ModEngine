@@ -1,5 +1,3 @@
-
-
 )text_2:layer:basicui
 )text_2:scale:0.005 0.015 0.005
 )text_2:value:OPTIONS MENU
@@ -27,6 +25,16 @@
 (options:border-size:0.02
 (options:border-color:0 1 0
 
+#(background:layer:basicui
+#(background:backpanel:true
+#(background:minwidth:2
+#(background:minheight:2
+#(background:position:0 0 0
+#(background:tint:0 0 0
+#(background:elements:)getridofthistext
+#)getridofthistext:layer:basicui
+#)getridofthistext:scale:0.005 0.015 0.005
+#)getridofthistext:value:
 
 (dialog:layer:basicui
 (dialog:type:vertical

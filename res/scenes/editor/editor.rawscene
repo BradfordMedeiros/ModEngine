@@ -1,0 +1,92 @@
+
+#$header:include:./res/scenes/editor/header.rawscene  # like copy and pasting the values of the header, basically a macro
+#$header:import:./res/scenes/editor/header.rawscene   # imports elements as children under header?
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+
+)menuitem_0:layer:basicui
+)menuitem_0:scale:0.01 0.01 0.01
+)menuitem_0:value:file
+)menuitem_1:layer:basicui
+)menuitem_1:scale:0.01 0.01 0.01
+)menuitem_1:value:misc
+(menubar:elements:)menuitem_0,)menuitem_1
+*buttonname_0:layer:basicui
+*buttonname_0:scale:0.02 0.02 0.02
+)text_0:layer:basicui
+)text_0:scale:0.005 0.015 0.005
+)text_0:value:HIDE
+*buttonname_1:layer:basicui
+*buttonname_1:scale:0.02 0.02 0.02
+)text_1:layer:basicui
+)text_1:scale:0.005 0.015 0.005
+)text_1:value:SCENE INFO
+*buttonname_2:layer:basicui
+*buttonname_2:scale:0.02 0.02 0.02
+)text_2:layer:basicui
+)text_2:scale:0.005 0.015 0.005
+)text_2:value:SCENEGRAPH
+*buttonname_3:layer:basicui
+*buttonname_3:scale:0.02 0.02 0.02
+)text_3:layer:basicui
+)text_3:scale:0.005 0.015 0.005
+)text_3:value:OBJECT DETAILS
+*buttonname_4:layer:basicui
+*buttonname_4:scale:0.02 0.02 0.02
+)text_4:layer:basicui
+)text_4:scale:0.005 0.015 0.005
+)text_4:value:WORLD STATE
+*buttonname_5:layer:basicui
+*buttonname_5:scale:0.02 0.02 0.02
+)text_5:layer:basicui
+)text_5:scale:0.005 0.015 0.005
+)text_5:value:MESHES
+*buttonname_6:layer:basicui
+*buttonname_6:scale:0.02 0.02 0.02
+)text_6:layer:basicui
+)text_6:scale:0.005 0.015 0.005
+)text_6:value:LIGHTS
+*buttonname_7:layer:basicui
+*buttonname_7:scale:0.02 0.02 0.02
+)text_7:layer:basicui
+)text_7:scale:0.005 0.015 0.005
+)text_7:value:CAMERAS
+*buttonname_8:layer:basicui
+*buttonname_8:scale:0.02 0.02 0.02
+)text_8:layer:basicui
+)text_8:scale:0.005 0.015 0.005
+)text_8:value:HEIGHTMAPS
+*buttonname_9:layer:basicui
+*buttonname_9:scale:0.01 0.01 0.01
+)text_9:layer:basicui
+)text_9:scale:0.005 0.015 0.005
+)text_9:value:VOXEL
+
+
+(menubar:layer:basicui
+(menubar:position:-1 1 0
+(menubar:type:horizontal
+(menubar:backpanel:true
+(menubar:tint:0.2 0.2 0.2
+(menubar:margin-bottom:0.02
+#(menubar:margin-left:0.02
+(menubar:align-vertical:down
+(menubar:align-horizontal:right
+(menubar:minwidth:2
+(menubar:border-color:1 0.5 0.5
+
+(row2:elements:*buttonname_0,)text_0,*buttonname_1,)text_1,*buttonname_2,)text_2,*buttonname_3,)text_3,*buttonname_4,)text_4,*buttonname_5,)text_5,*buttonname_6,)text_6,*buttonname_7,)text_7,*buttonname_8,)text_8,*buttonname_9,)text_9
+(row2:layer:basicui
+(row2:anchor:(menubar
+(row2:anchor-offset:0 -0.04 0
+(row2:anchor-direction:down
+(row2:type:horizontal
+(row2:backpanel:true
+(row2:tint:0.2 0.2 0.2
+(row2:margin:0.02
+(row2:spacing:0.05
+(row2:align-vertical:down
+(row2:align-horizontal:right
+(row2:minwidth:2

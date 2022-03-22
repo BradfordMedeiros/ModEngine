@@ -79,18 +79,22 @@
 ?>
 
 (menubar:layer:basicui
-(menubar:position:-0.9 0.97 -1  # 0.42, 0.97 is kind of arbitary, needs to be aligned from the left/top.  The actual width is measured and a function of text size and button size, really want layout alignment stuff
+(menubar:position:-1 1 0
 (menubar:type:horizontal
 (menubar:backpanel:true
 (menubar:tint:1.0 0.1 0.1
-(menubar:margin:0.02
-(menubar:spacing:0.02
+#(menubar:margin:0.02
+#(menubar:spacing:0.02
+(menubar:align-vertical:down
+(menubar:align-horizontal:right
 
 
 (row2:layer:basicui
-(row2:position:0.42 0.91 -1 
+(row2:position:0 0 0
 (row2:type:horizontal
 (row2:backpanel:true
 (row2:tint:1.0 0.1 0.1
-(row2:margin:0.02
-(row2:spacing:0.05
+#(row2:margin:0.02
+#(row2:spacing:0.05
+(row2:align-vertical:down
+(row2:align-horizontal:right
