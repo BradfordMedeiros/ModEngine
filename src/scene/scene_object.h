@@ -47,6 +47,7 @@ bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 void emit(World& world, objid id, NewParticleOptions particleOpts);
 
 void enforceLayoutsByName(World& world, std::vector<std::string>& elements, objid currentSceneId);
+void enforceLayout(World& world, objid layoutId);
 void enforceAllLayouts(World& world);
 
 void createGeneratedMesh(World& world, std::vector<glm::vec3>& face, std::vector<glm::vec3>& points, std::string destMesh);

@@ -492,6 +492,12 @@ SCM scmSetWorldState(SCM value){
   return SCM_UNSPECIFIED;
 }
 
+void (*_enforceLayout)(objid);
+SCM scmEnforceLayout(SCM value){
+  _enforceLayout(toUnsignedInt(value));
+  return SCM_UNSPECIFIED;
+}
+
 glm::vec3 (*_navPosition)(objid, glm::vec3 pos);
 SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
@@ -641,11 +647,11 @@ void onMouseCallback(int button, int action, int mods){
     scm_call_3(func_symbol, scm_from_int(button), scm_from_int(action), scm_from_int(mods));
   }
 }
-void onMouseMoveCallback(double xPos, double yPos){
+void onMouseMoveCallback(double xPos, double yPos, float xNdc, float yNdc){
   const char* function = "onMouseMove";
   if (symbolDefined(function)){
     SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
-    scm_call_2(func_symbol, scm_from_double(xPos), scm_from_double(yPos));
+    scm_call_4(func_symbol, scm_from_double(xPos), scm_from_double(yPos), scm_from_double(xNdc), scm_from_double(yNdc));
   }
 }
 void onScrollCallback(double amount){
@@ -852,6 +858,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("screenshot", 1, 0, 0, (void*)scmSaveScreenshot);
   scm_c_define_gsubr("set-state", 1, 1, 0, (void*)scmSetState);
   scm_c_define_gsubr("set-wstate", 1, 0, 0, (void*)scmSetWorldState);
+  scm_c_define_gsubr("enforce-layout", 1, 0, 0, (void*)scmEnforceLayout);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
@@ -949,6 +956,7 @@ void createStaticSchemeBindings(
   bool (*unlock)(std::string, objid),
   void (*debugInfo)(std::string infoType, std::string filepath),
   void (*setWorldState)(std::vector<ObjectValue> values),
+  void (*enforceLayout)(objid layoutId),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1026,6 +1034,7 @@ void createStaticSchemeBindings(
   _saveScreenshot = saveScreenshot;
   _setState = setState;
   _setWorldState = setWorldState;
+  _enforceLayout = enforceLayout;
 
   _setFloatState = setFloatState;
   _setIntState = setIntState;

@@ -137,13 +137,14 @@ void onMouseCallbackAllScripts(int button, int action, int mods){
     onMouseCallback(button, action, mods);
   }
 }
-void onMouseMoveCallbackAllScripts(double xPos, double yPos){
+
+void onMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){
   for (auto &[_, scriptModule] : scriptnameToModule){
     if (!scriptModule.isvalid){
       continue;
     }
     scm_set_current_module(scriptModule.module);
-    onMouseMoveCallback(xPos, yPos);
+    onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
   }
 }
 void onScrollCallbackAllScripts(double amount){

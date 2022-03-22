@@ -448,6 +448,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     }
   }
 
+  std::cout << getGameObject(world, id).name << " - Bound origin: " << print(layoutObject -> boundOrigin) << std::endl;
   layoutObject -> boundOrigin = layoutPos + mainAlignmentOffset;
 }
 
@@ -461,34 +462,23 @@ void enforceLayoutsByName(World& world, std::vector<std::string>& elements, obji
   }
 }
 
-struct UILayoutAndId {
-  objid id;
-  GameObjectUILayout* layout;
-};
 
-std::vector<UILayoutAndId> allLayouts(World& world){
-  std::vector<UILayoutAndId> layouts;
-  auto layoutIndexs = getGameObjectsIndex<GameObjectUILayout>(world.objectMapping);
-  for (auto id : layoutIndexs){
-    GameObjectObj& obj = world.objectMapping.at(id);
-    GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&obj);
-    layouts.push_back(UILayoutAndId{
-      .id = id,
-      .layout = layoutObject,
-    });
+void enforceLayout(World& world, objid layoutId){
+  GameObjectObj& obj = world.objectMapping.at(layoutId);
+  GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&obj);
+  assert(layoutObject != NULL);
+  enforceLayout(world, layoutId, layoutObject);
+  if (hasPhysicsBody(world, layoutId)){
+    updatePhysicsBody(world, layoutId);
   }
-  return layouts;
 }
 
 // layout has redundant enforcement for nested hierachies, works, but inefficient, since will reinforce if nested
 // esp if continuously done (or excessively nested i guess) should create the hierachy and only enforce each once
 void enforceAllLayouts(World& world){
-  auto layouts = allLayouts(world);
-  for (auto &layout : layouts){
-    enforceLayout(world, layout.id, layout.layout);
-    if (hasPhysicsBody(world, layout.id)){
-      updatePhysicsBody(world, layout.id);
-    }
+  auto layoutIds = getGameObjectsIndex<GameObjectUILayout>(world.objectMapping);
+  for (auto &layoutId : layoutIds){
+    enforceLayout(world, layoutId);
   }
 }
 

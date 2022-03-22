@@ -575,3 +575,6 @@ void removeLocks(objid owner){
   }
 }
 
+void enforceLayout(objid layoutId){
+  enforceLayout(world, layoutId);
+}

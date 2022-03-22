@@ -12,7 +12,7 @@ typedef void(*func)();
 typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
 typedef void(*colfun)(int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
-typedef void(*mousemovecallback)(double xPos, double yPos);
+typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNdc);
 typedef void(*scrollcallback)(double amount);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);

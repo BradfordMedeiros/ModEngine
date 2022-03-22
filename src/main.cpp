@@ -1229,6 +1229,7 @@ int main(int argc, char* argv[]){
     unlock,
     debugInfo,
     setWorldState,
+    enforceLayout,
     extensions.registerGuileFns
   );
   registerGuileTypes(extensions);

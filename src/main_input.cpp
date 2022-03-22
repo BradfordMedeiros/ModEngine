@@ -96,8 +96,10 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
     }
 }
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  onMouse(disableInput, window, state, xpos, ypos, rotateCamera);  
-  schemeBindings.onMouseMoveCallback(state.offsetX, state.offsetY); 
+  onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
+  float xNdc = 2 * (state.cursorLeft / (float)state.resolution.x) - 1;
+  float yNdc = -1 * (2 * (state.cursorTop  / (float)state.resolution.y) - 1);
+  schemeBindings.onMouseMoveCallback(state.offsetX, state.offsetY, xNdc, yNdc); 
   processManipulator();
 }
 

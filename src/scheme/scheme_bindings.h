@@ -76,6 +76,7 @@ void createStaticSchemeBindings(
   bool (*unlock)(std::string, objid),
   void (*debugInfo)(std::string infoType, std::string filepath),
   void (*setWorldState)(std::vector<ObjectValue> values),
+  void (*enforceLayout)(objid layoutId),
   std::vector<func_t> registerGuileFns
 );
 
@@ -87,7 +88,7 @@ void onCollisionExit(int32_t obj1);
 void onGlobalCollisionEnter(int32_t obj1, int32_t obj2, glm::vec3 contactPos, glm::vec3 normal, glm::vec3 oppositeNormal);
 void onGlobalCollisionExit(int32_t obj1, int32_t obj2);
 void onMouseCallback(int button, int action, int mods);
-void onMouseMoveCallback(double xPos, double yPos);
+void onMouseMoveCallback(double xPos, double yPos, float xNdc, float yNdc);
 void onScrollCallback(double amount);
 void onObjectSelected(int32_t index, glm::vec3 color);
 void onObjectHover(int32_t index);

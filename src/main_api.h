@@ -141,4 +141,6 @@ bool lock(std::string key, objid owner);
 bool unlock(std::string key, objid owner);
 void removeLocks(objid owner);
 
+void enforceLayout(objid layoutId);
+
 #endif
