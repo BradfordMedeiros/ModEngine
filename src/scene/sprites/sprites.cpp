@@ -26,15 +26,18 @@ float calculateLeftAlign(float left, int numWords, bool center, float offsetDelt
   return leftAlign;
 }
 
-void drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, bool center, float offsetDelta){
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, bool center, float offsetDelta){
   float leftAlign = calculateLeftAlign(left, word.size(), center, offsetDelta);
-
+  int numTriangles = 0;
   for (char& character : word){
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
-      drawSprite(shaderProgram, fontMeshes.at((int)character), leftAlign, top, fontSize, fontSize, model);
+      Mesh& fontMesh = fontMeshes.at((int)character);
+      drawSprite(shaderProgram, fontMesh, leftAlign, top, fontSize, fontSize, model);
+      numTriangles += fontMesh.numTriangles;
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
+  return numTriangles;
 }
 
 void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
