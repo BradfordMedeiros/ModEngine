@@ -1,0 +1,26 @@
+
+# Effectively this is a nested list of text items, and then anchor it to the target
+
+)text_0:layer:basicui
+)text_0:scale:0.005 0.015 0.005
+)text_0:value:[ITEM LIST]
+
+)text_1:layer:basicui
+)text_1:scale:0.005 0.015 0.005
+)text_1:value:item 1
+
+)text_2:layer:basicui
+)text_2:scale:0.005 0.015 0.005
+)text_2:value:item 2
+
+(dialog:layer:basicui
+(dialog:type:vertical
+(dialog:backpanel:true
+(dialog:tint:0 0 0
+(dialog:spacing:0.1
+(dialog:elements:)text_2,)text_1,)text_0
+(dialog:border-size:0.001
+(dialog:border-color:0.2 0.2 1
+(dialog:position:0 0 0
+(dialog:margin:0.05
+(dialog:minwidth:0.25
