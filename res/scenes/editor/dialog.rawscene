@@ -24,6 +24,7 @@
 (options:tint:1 0 0
 (options:border-size:0.02
 (options:border-color:0 1 0
+(options:script:./res/scenes/editor/dialogactions.scm
 
 #(background:layer:basicui
 #(background:backpanel:true
@@ -46,6 +47,7 @@
 (dialog:border-size:0.01
 (dialog:border-color:0.2 0.2 1
 (dialog:script:./res/scenes/editor/dialogmove.scm
+(dialog:position:0 0 0
 
 
 

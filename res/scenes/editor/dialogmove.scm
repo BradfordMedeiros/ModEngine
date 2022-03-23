@@ -1,28 +1,44 @@
 (define objSelected #f)
 (define hoveringObj #f)
 
+(define currNdi #f)
+(define ndiMouseDown #f)
+(define objposMouseDown #f)
+; should calculate ndi when mouse down, and then on mouse move, this is delta 
+; then add delta to gameobj-pos when the pos was down
+
 (define (onMouse button action mods)
-  (format #t "on mouse: ~a ~a ~a\n" button action mods)
   (if (and (equal? button 0) (equal? action 0))
     (begin
-      (format #t "mouse up\n")
       (set! objSelected #f)
+      (set! ndiMouseDown #f)
+      (set! objposMouseDown #f)
     )
   )
   (if (and (equal? button 0) (equal? action 1) hoveringObj)
     (begin
-      (format #t "mouse down\n")
       (set! objSelected #t)
+      (set! ndiMouseDown currNdi)
+      (set! objposMouseDown (gameobj-pos mainobj))
     )
   )
 )
 
+(define (calcNdiOffset)
+  (define diffX (- (car currNdi) (car ndiMouseDown)))
+  (define diffY (- (cadr currNdi) (cadr ndiMouseDown)))
+  (define newx (+ diffX (car objposMouseDown)))
+  (define newy (+ diffY (cadr objposMouseDown)))
+  (define oldz (caddr objposMouseDown))
+  (list newx newy oldz)
+)
+
 (define (onMouseMove xpos ypos ndcx ndcy)
-  (define offset (list ndcx ndcy 0))
-  (format #t "ndcx: ~a, ndcy: ~a\n" ndcx ndcy)
+  (set! currNdi (list ndcx ndcy))
+  ;(format #t "ndcx: ~a, ndcy: ~a\n" ndcx ndcy)
   (if objSelected 
     (begin
-      (gameobj-setpos! mainobj offset)
+      (gameobj-setpos! mainobj (calcNdiOffset))
       (enforce-layout (gameobj-id mainobj))
     )
   )
