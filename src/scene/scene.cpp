@@ -701,8 +701,9 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
   return sceneId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface){
-  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), loadFile(sceneFile), interface);
+objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens){
+  auto sceneData = loadFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
+  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), sceneData, interface);
 }
 
 // todo finish removing data like eg clearing meshes, animations,etc

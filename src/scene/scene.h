@@ -47,7 +47,7 @@ void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& id
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 
 
-objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface);
+objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens);
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface);
 void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
 void removeAllScenesFromWorld(World& world, SysInterface interface);

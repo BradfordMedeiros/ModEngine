@@ -63,18 +63,15 @@ std::vector<std::string> listSceneFiles(){
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
-
-  std::cout << "load scene------------------" << std::endl;
-  for (auto &token : additionalTokens){
-    for (auto &value : token){
-      std::cout << value << " ";
-    }
-    std::cout << std::endl;
+  std::vector<Token> addedTokens;
+  for (auto &tokens : additionalTokens){
+    addedTokens.push_back(Token{
+      .target = tokens.at(0),
+      .attribute = tokens.at(1),
+      .payload = tokens.at(2),
+    });
   }
-
-  std::cout << "-------------------------" << std::endl;
-
-  return addSceneToWorld(world, sceneFile, interface);
+  return addSceneToWorld(world, sceneFile, interface, addedTokens);
 }
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;

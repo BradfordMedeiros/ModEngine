@@ -265,9 +265,9 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
       transMatr
     );
 
-    std::cout << "create bounding: " << getGameObject(world, id).name << std::endl;
-    std::cout << "position: " << print(transform.position) << std::endl;
-    printBoundInfo(transformedBoundInfo);
+    //std::cout << "create bounding: " << getGameObject(world, id).name << std::endl;
+    //std::cout << "position: " << print(transform.position) << std::endl;
+    //printBoundInfo(transformedBoundInfo);
     infos.push_back(transformedBoundInfo);
   }
   auto unionBounding = getMaxUnionBoundingInfo(infos);
@@ -334,8 +334,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     if (anchorElement.has_value()){
       auto anchorId = anchorElement.value();
       auto anchorBoundInfo = getPhysicsInfoForGameObject(world, id).boundInfo;
-      std::cout << "minx, maxx" << anchorBoundInfo.xMin << " " << anchorBoundInfo.xMax << std::endl;
-      std::cout << "anchor target: " << layoutObject -> anchor.target << std::endl;
+      //std::cout << "minx, maxx" << anchorBoundInfo.xMin << " " << anchorBoundInfo.xMax << std::endl;
+      //std::cout << "anchor target: " << layoutObject -> anchor.target << std::endl;
 
       auto boundDirectionOffset = layoutObject -> anchor.offset;
       if (layoutObject -> anchor.horizontal == UILayoutFlowPositive){
@@ -349,9 +349,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
         boundDirectionOffset.y += anchorBoundInfo.yMin;
       }
 
-      std::cout << "anchor boundoffset: " << print(boundDirectionOffset) << std::endl;
+      //std::cout << "anchor boundoffset: " << print(boundDirectionOffset) << std::endl;
       auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + boundDirectionOffset;
-      std::cout << "anchor pos: " << print(anchorElementPos) << std::endl;
+      //std::cout << "anchor pos: " << print(anchorElementPos) << std::endl;
       physicsTranslateSet(world, id, anchorElementPos, false);
     
       }else{
@@ -360,12 +360,12 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     }
   }
 
-  std::cout << "anchor direction: " << std::endl;
+  //std::cout << "anchor direction: " << std::endl;
   auto anchorHorzCentered = layoutObject -> anchor.horizontal == UILayoutFlowNone;
   auto anchorVertCentered = layoutObject -> anchor.vertical == UILayoutFlowNone;
 
-  std::cout << "anchor centered(horz, vert) : " << (anchorHorzCentered ? "true" : "false") << " , " << (anchorVertCentered ? "true" : "false") << std::endl;
-  std::cout << "------------------------------" << std::endl;
+  //std::cout << "anchor centered(horz, vert) : " << (anchorHorzCentered ? "true" : "false") << " , " << (anchorVertCentered ? "true" : "false") << std::endl;
+  //std::cout << "------------------------------" << std::endl;
 
 
 
@@ -448,7 +448,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     }
   }
 
-  std::cout << getGameObject(world, id).name << " - Bound origin: " << print(layoutObject -> boundOrigin) << std::endl;
+  //std::cout << getGameObject(world, id).name << " - Bound origin: " << print(layoutObject -> boundOrigin) << std::endl;
   layoutObject -> boundOrigin = layoutPos + mainAlignmentOffset;
 }
 
