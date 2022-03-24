@@ -6,11 +6,11 @@ AlignType alignTypeFromAttr(GameobjAttributes& attr){
   if (hasAlign){
     auto alignValue = attr.stringAttributes.at("align");
     if (alignValue == "left"){
-      alignValue = NEGATIVE_ALIGN;
+      align = NEGATIVE_ALIGN;
     }else if (alignValue == "center"){
-      alignValue = CENTER_ALIGN;
+      align = CENTER_ALIGN;
     }else if (alignValue == "right"){
-      alignValue = POSITIVE_ALIGN;
+      align = POSITIVE_ALIGN;
     }else{
       std::cout << "text: invalid align value: " << alignValue << std::endl;
       assert(false);
@@ -38,6 +38,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
   auto tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint");
   auto align = alignTypeFromAttr(attr);
+  assert(align != POSITIVE_ALIGN);
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,

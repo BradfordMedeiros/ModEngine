@@ -99,7 +99,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
 
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
   if (textObj != NULL){
-    boundInfo = boundInfoForCenteredText(textObj -> value, 1, textObj -> deltaOffset); // overly coupled to drawing functions passed in, should decouple
+    boundInfo = boundInfoForCenteredText(textObj -> value, 1, textObj -> deltaOffset, textObj -> align); 
   }
 
   PhysicsInfo info = {
