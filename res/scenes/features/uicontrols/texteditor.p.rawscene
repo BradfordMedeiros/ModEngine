@@ -2,14 +2,22 @@
 (background:layer:basicui
 (background:border-size:0.02
 (background:border-color:0.2 0.2 0.2
-(background:tint:0.1 0.1 0.1
+#(background:tint:0.1 0.1 0.1
 (background:minwidth:2
 (background:minheight:2
-(background:elements:)sometext
+(background:elements:somelement
 (background:backpanel:true
 (background:margin-bottom:1
 (background:script:./res/scenes/features/uicontrols/texteditor.scm
+(background:texture:./res/scenes/features/uicontrols/texteditor.png
+
+somelement:position:0 0 0
 
 )sometext:layer:basicui
-)sometext:value:This is editable text.  Edit the text yo!
-)sometext:scale:0.005 0.01 0.01
+)sometext:value:This is editable text. Edit the text yo!
+)sometext:scale:0.010 0.02 0.02
+)sometext:align:center
+
+)sometext:wraptype:char
+)sometext:wrapamount:30 
+
