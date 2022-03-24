@@ -4,11 +4,17 @@
 #include "../../common/util.h"
 #include "./obj_util.h"
 
+enum UITextWrapType { WRAP_NONE, WRAP_CHARACTERS };
+struct UITextWrap {
+  UITextWrapType type;
+  float wrapamount;
+};
 struct GameObjectUIText {
   std::string value;
   float deltaOffset;
   glm::vec3 tint;
   AlignType align;
+  UITextWrap wrap;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);

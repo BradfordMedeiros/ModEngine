@@ -33,17 +33,56 @@ std::string alignTypeToStr(AlignType type){
   return "";
 }
 
+UITextWrap wrapTypeFromAttr(GameobjAttributes& attr){
+  auto hasWrapType = attr.stringAttributes.find("wraptype") != attr.stringAttributes.end();
+  auto wrapType = WRAP_NONE;
+  int wrapamount = -1;
+  if (hasWrapType){
+    auto wrapContent = attr.stringAttributes.at("wraptype");
+    if (wrapContent == "char"){
+      wrapType = WRAP_CHARACTERS;
+    }else if (wrapContent == "none"){
+      // do nothing
+    }else{
+      std::cout << "invalid wrap type: " << wrapContent << std::endl;
+      assert(false);
+    }
+  }
+
+  auto hasWrapAmount = attr.numAttributes.find("wrapamount") != attr.numAttributes.end();
+  if (hasWrapAmount){
+    wrapamount = attr.numAttributes.at("wrapamount");
+  }
+ 
+  return UITextWrap {
+    .type = WRAP_NONE,
+    .wrapamount = wrapamount,
+  };
+}
+std::string wrapTypeToStr(UITextWrap wrap){
+  if (wrap.type  == WRAP_NONE){
+    return "none";
+  }
+  if (wrap.type == WRAP_CHARACTERS){
+    return "char";
+  }
+  assert(false);
+  return "";
+}
+
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
   auto tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint");
   auto align = alignTypeFromAttr(attr);
   assert(align != POSITIVE_ALIGN);
+  auto wrap = wrapTypeFromAttr(attr);
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
     .tint = tint,
     .align = align,
+    .wrap = wrap,
   };
   return obj;
 }
@@ -53,6 +92,8 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.stringAttributes["spacing"] = std::to_string(textObj.deltaOffset);
   attributes.vecAttributes["tint"] = textObj.tint;
   attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
+  attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
+  attributes.stringAttributes["wrapamount"] = std::to_string(textObj.wrap.wrapamount);
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -67,5 +108,8 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   }
   if (attributes.stringAttributes.find("align") != attributes.stringAttributes.end()){
     textObj.align = alignTypeFromAttr(attributes);
+  }
+  if (attributes.stringAttributes.find("wraptype") != attributes.stringAttributes.end()){
+    textObj.wrap = wrapTypeFromAttr(attributes);
   }
 }
