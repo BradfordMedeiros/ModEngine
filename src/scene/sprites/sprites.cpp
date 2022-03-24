@@ -20,20 +20,42 @@ void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float cente
   drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height, glm::mat4(1.f));
 }
 
-float calculateLeftAlign(float left, int numWords, float offsetDelta, AlignType align){
+float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
   bool center = align == CENTER_ALIGN;
   // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
-  float leftAlign = !center ? left : ((left  - ((numWords / 2) * offsetDelta) + ((numWords % 2) ? 0.f : (0.5f * offsetDelta))));
+  float leftAlign = !center ? left : ((left  - ((numLetters / 2) * offsetDelta) + ((numLetters % 2) ? 0.f : (0.5f * offsetDelta))));
   return leftAlign;
 }
 
+int findLineBreakSize(std::string& word){
+  int biggestSize = 0;
+  int currentSize = 0;
+  for (int i = 0; i < word.size(); i++){
+    if (word.at(i) == '\n'){
+      if (currentSize > biggestSize){
+        biggestSize = currentSize;
+      }
+      currentSize = 0;
+    }
+    currentSize++;
+  }
+  return biggestSize;
+}
 int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align){
-  float leftAlign = calculateLeftAlign(left, word.size(), offsetDelta, align);
+  auto largestLineBreakSize = findLineBreakSize(word);
+  float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
+  float leftAlign = originalleftAlign;
+  float topAlign = 0;
   int numTriangles = 0;
   for (char& character : word){
+    if (character == '\n'){
+      leftAlign = originalleftAlign;
+      topAlign -= offsetDelta;
+      continue;
+    }
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       Mesh& fontMesh = fontMeshes.at((int)character);
-      drawSprite(shaderProgram, fontMesh, leftAlign, top, fontSize, fontSize, model);
+      drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSize, fontSize, model);
       numTriangles += fontMesh.numTriangles;
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
