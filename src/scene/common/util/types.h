@@ -66,6 +66,8 @@ struct PhysicsInfo {
   Transformation transformation;
 };
 
+enum AlignType { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN };
+
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x);
 void printTransformInformation(Transformation transform);

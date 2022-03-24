@@ -8,6 +8,7 @@ struct GameObjectUIText {
   std::string value;
   float deltaOffset;
   glm::vec3 tint;
+  AlignType align;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);
