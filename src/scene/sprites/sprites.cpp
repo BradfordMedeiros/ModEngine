@@ -39,6 +39,9 @@ int findLineBreakSize(std::string& word){
     }
     currentSize++;
   }
+  if (currentSize > biggestSize){
+    biggestSize = currentSize;
+  }
   return biggestSize;
 }
 int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align){
