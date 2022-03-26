@@ -27,7 +27,7 @@ float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignTyp
   return leftAlign;
 }
 
-int findLineBreakSize(std::string& word){
+int findLineBreakSize(std::string& word, TextWrap wrap){
   int biggestSize = 0;
   int currentSize = 0;
   for (int i = 0; i < word.size(); i++){
@@ -38,6 +38,12 @@ int findLineBreakSize(std::string& word){
       currentSize = 0;
     }
     currentSize++;
+    if (wrap.type == WRAP_CHARACTERS && currentSize >= wrap.wrapamount){
+      if (currentSize > biggestSize){
+        biggestSize = currentSize;
+      }
+      currentSize = 0;
+    }
   }
   if (currentSize > biggestSize){
     biggestSize = currentSize;
@@ -45,15 +51,19 @@ int findLineBreakSize(std::string& word){
   return biggestSize;
 }
 int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap){
-  auto largestLineBreakSize = findLineBreakSize(word);
+  auto largestLineBreakSize = findLineBreakSize(word, wrap);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;
   float topAlign = 0;
   int numTriangles = 0;
+  int numCharactersOnLine = 0;
   for (char& character : word){
-    if (character == '\n'){
+    if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       topAlign -= offsetDelta;
+      numCharactersOnLine = 0;
+    }
+    if (character == '\n'){
       continue;
     }
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
@@ -62,6 +72,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       numTriangles += fontMesh.numTriangles;
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
+    numCharactersOnLine++;
   }
   return numTriangles;
 }

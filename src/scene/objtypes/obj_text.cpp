@@ -55,7 +55,7 @@ TextWrap wrapTypeFromAttr(GameobjAttributes& attr){
   }
  
   return TextWrap {
-    .type = WRAP_NONE,
+    .type = wrapType,
     .wrapamount = wrapamount,
   };
 }
