@@ -67,6 +67,11 @@ struct PhysicsInfo {
 };
 
 enum AlignType { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN };
+enum TextWrapType { WRAP_NONE, WRAP_CHARACTERS };
+struct TextWrap {
+  TextWrapType type;
+  float wrapamount;
+};
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x);

@@ -33,7 +33,7 @@ std::string alignTypeToStr(AlignType type){
   return "";
 }
 
-UITextWrap wrapTypeFromAttr(GameobjAttributes& attr){
+TextWrap wrapTypeFromAttr(GameobjAttributes& attr){
   auto hasWrapType = attr.stringAttributes.find("wraptype") != attr.stringAttributes.end();
   auto wrapType = WRAP_NONE;
   int wrapamount = -1;
@@ -54,12 +54,12 @@ UITextWrap wrapTypeFromAttr(GameobjAttributes& attr){
     wrapamount = attr.numAttributes.at("wrapamount");
   }
  
-  return UITextWrap {
+  return TextWrap {
     .type = WRAP_NONE,
     .wrapamount = wrapamount,
   };
 }
-std::string wrapTypeToStr(UITextWrap wrap){
+std::string wrapTypeToStr(TextWrap wrap){
   if (wrap.type  == WRAP_NONE){
     return "none";
   }
