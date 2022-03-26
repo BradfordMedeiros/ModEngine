@@ -15,6 +15,7 @@ struct GameObjectUIText {
   glm::vec3 tint;
   AlignType align;
   UITextWrap wrap;
+  int maxlength;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);
