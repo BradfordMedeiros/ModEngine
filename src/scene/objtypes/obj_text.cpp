@@ -112,9 +112,13 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   if (attributes.stringAttributes.find("align") != attributes.stringAttributes.end()){
     textObj.align = alignTypeFromAttr(attributes);
   }
+  
+  auto wrap = wrapTypeFromAttr(attributes);
   if (attributes.stringAttributes.find("wraptype") != attributes.stringAttributes.end()){
-    assert(false); // this is wrong
-    textObj.wrap = wrapTypeFromAttr(attributes);
+    textObj.wrap.type = wrap.type;
+  }
+  if (attributes.stringAttributes.find("wrapamount") != attributes.stringAttributes.end()){
+    textObj.wrap.wrapamount = wrap.wrapamount;
   }
   if (attributes.numAttributes.find("maxlength") != attributes.numAttributes.end()){
     textObj.maxlength = attributes.numAttributes.at("maxlength");
