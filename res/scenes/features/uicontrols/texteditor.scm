@@ -8,11 +8,12 @@
   )
 )
 
+
 (define currentText "")
 (define (lessIndex) (max 0 (- (string-length currentText) 1)))
 (define (onKey key scancode action mods)
   (format #t "key is ~a\n" key)
-  (if (= action 0)
+  (if (= action 1)
     (begin
       (if (= key 259)
         (set! currentText (substring currentText 0 (lessIndex)))
@@ -32,6 +33,30 @@
     )
   )
 )
+
+(define scrollspeed 0.5)
+(define (scrollup)
+  (define objattr (gameobj-attr (lsobj-name ")sometext")))
+  (define yoffset (cadr (assoc "offsety" objattr)))
+  (gameobj-setattr! (lsobj-name ")sometext") 
+    (list (list "offsety" (+ yoffset scrollspeed)))
+  ) 
+)
+(define (scrolldown)
+  (define objattr (gameobj-attr (lsobj-name ")sometext")))
+  (define yoffset (cadr (assoc "offsety" objattr)))
+  (gameobj-setattr! (lsobj-name ")sometext") 
+    (list (list "offsety" (- yoffset scrollspeed)))
+  ) 
+)
+
+(define (onScroll amount)
+  (if (> amount 0)
+    (scrollup)
+    (scrolldown)
+  )
+)
+;; 264/ 265 up down arrow
 
 
 (define (write-tofile)

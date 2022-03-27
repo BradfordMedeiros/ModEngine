@@ -14,10 +14,20 @@
 somelement:position:0 0 0
 
 )sometext:layer:basicui
-)sometext:value:This is editable text. Edit the text yo!
+)sometext:value:This is the initial text.  This is some cool stuff right.This is some cool stuff right.This is some cool stuff right.This is some cool stuff right.This is some cool stuff right.This is some cool stuff right.This is some cool stuff right.This is some cool stuff right.
 )sometext:scale:0.010 0.02 0.02
 )sometext:align:center
 
 )sometext:wraptype:char
-)sometext:wrapamount:30 
+)sometext:wrapamount:20
+)sometext:position:-0.95 0.7 0
+
+)sometext:align:left
+
+)sometext:maxheight:5
+)sometext:maxwidth:10
+)sometext:offsety:2
+
+
+
 
