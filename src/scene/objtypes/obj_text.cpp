@@ -70,6 +70,26 @@ std::string wrapTypeToStr(TextWrap wrap){
   return "";
 }
 
+float valueFromAttr(GameobjAttributes& attr, const char* key, float defaultValue){
+  if (attr.numAttributes.find(key) == attr.numAttributes.end()){
+    return defaultValue;
+  }
+  return attr.numAttributes.at(key);
+}
+TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
+  float maxwidth = valueFromAttr(attr, "maxwidth", -1);
+  float maxheight = valueFromAttr(attr, "maxheight", -1);
+  float offsetx = 0;
+  float offsety = 0;
+  return TextVirtualization{
+    .maxwidth = maxwidth,
+    .maxheight = maxheight,
+    .offsetx = 0,
+    .offsety = 0,
+  };
+}
+
+
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
@@ -83,6 +103,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
     .tint = tint,
     .align = align,
     .wrap = wrap,
+    .virtualization = virtualizationFromAttr(attr),
   };
   return obj;
 }

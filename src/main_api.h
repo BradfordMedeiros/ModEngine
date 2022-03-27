@@ -78,7 +78,7 @@ void removeObjectById(int32_t id);
 void copyObject(int32_t id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize);
-int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap);
+int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization);
 
 std::vector<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay);

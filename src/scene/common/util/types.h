@@ -72,6 +72,12 @@ struct TextWrap {
   TextWrapType type;
   float wrapamount;
 };
+struct TextVirtualization {
+  float maxwidth;
+  float maxheight;
+  float offsetx;
+  float offsety;
+};
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);
 glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x);

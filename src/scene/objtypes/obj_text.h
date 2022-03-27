@@ -4,14 +4,13 @@
 #include "../../common/util.h"
 #include "./obj_util.h"
 
-
-
 struct GameObjectUIText {
   std::string value;
   float deltaOffset;
   glm::vec3 tint;
   AlignType align;
   TextWrap wrap;
+  TextVirtualization virtualization;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);

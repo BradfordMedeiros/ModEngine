@@ -50,7 +50,7 @@ int findLineBreakSize(std::string& word, TextWrap wrap){
   }
   return biggestSize;
 }
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap){
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){
   auto largestLineBreakSize = findLineBreakSize(word, wrap);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;
@@ -78,11 +78,11 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 }
 
 void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f });
+  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxwidth = -1, .maxheight = -1, .offsetx = 0, .offsety = 0 });
 }
 
 BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float offsetDelta, AlignType type){
-  assert(type == CENTER_ALIGN);
+  //assert(type == CENTER_ALIGN);
   float leftAlign = calculateLeftAlign(0, word.size(), offsetDelta, NEGATIVE_ALIGN);
   float right = leftAlign + (offsetDelta * word.size());
 
