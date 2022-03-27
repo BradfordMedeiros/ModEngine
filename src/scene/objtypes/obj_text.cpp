@@ -89,6 +89,12 @@ TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
   };
 }
 
+void restrictWidth(GameObjectUIText& text){
+  std::cout << "value: " << text.value << " - " << text.value.size() << std::endl;
+  if (text.value.size() > text.maxwidth){
+    text.value = text.value.substr(0, text.maxwidth);
+  }
+}
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
@@ -97,6 +103,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto align = alignTypeFromAttr(attr);
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
+  auto maxwidth = attr.numAttributes.find("maxwidth") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("maxwidth");
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -104,7 +111,9 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
     .align = align,
     .wrap = wrap,
     .virtualization = virtualizationFromAttr(attr),
+    .maxwidth = maxwidth,
   };
+  restrictWidth(obj);
   return obj;
 }
 
@@ -119,6 +128,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
   attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
+  attributes.numAttributes["maxwidth"] = textObj.maxwidth;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -155,4 +165,8 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   if (attributes.numAttributes.find("offsety") != attributes.numAttributes.end()){
     textObj.virtualization.offsety = attributes.numAttributes.at("offsety");
   }
+  if (attributes.numAttributes.find("maxwidth") != attributes.numAttributes.end()){
+    textObj.maxwidth = attributes.numAttributes.at("maxwidth");
+  }
+  restrictWidth(textObj);
 }
