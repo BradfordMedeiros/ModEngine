@@ -51,28 +51,44 @@ int findLineBreakSize(std::string& word, TextWrap wrap){
   return biggestSize;
 }
 int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){
+  /*  float maxwidth;
+  float maxheight;
+  float offsetx;
+  float offsety;*/
+
   auto largestLineBreakSize = findLineBreakSize(word, wrap);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;
-  float topAlign = 0;
   int numTriangles = 0;
+
   int numCharactersOnLine = 0;
+  int lineNumber = 0;
+
   for (char& character : word){
     if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
-      topAlign -= offsetDelta;
       numCharactersOnLine = 0;
+      lineNumber++;
     }
     if (character == '\n'){
       continue;
     }
+
+    numCharactersOnLine++;
+    if (numCharactersOnLine < virtualization.offsetx){
+      continue;
+    }
+    if (lineNumber < virtualization.offsety){
+      continue;
+    }
+    float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
+
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       Mesh& fontMesh = fontMeshes.at((int)character);
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSize, fontSize, model);
       numTriangles += fontMesh.numTriangles;
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
-    numCharactersOnLine++;
   }
   return numTriangles;
 }

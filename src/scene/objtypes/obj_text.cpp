@@ -79,13 +79,13 @@ float valueFromAttr(GameobjAttributes& attr, const char* key, float defaultValue
 TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
   float maxwidth = valueFromAttr(attr, "maxwidth", -1);
   float maxheight = valueFromAttr(attr, "maxheight", -1);
-  float offsetx = 0;
-  float offsety = 0;
+  float offsetx = valueFromAttr(attr, "offsetx", 0);
+  float offsety = valueFromAttr(attr, "offsety", 0);
   return TextVirtualization{
     .maxwidth = maxwidth,
     .maxheight = maxheight,
-    .offsetx = 0,
-    .offsety = 0,
+    .offsetx = offsetx,
+    .offsety = offsety,
   };
 }
 
@@ -115,6 +115,10 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
   attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
   attributes.stringAttributes["wrapamount"] = std::to_string(textObj.wrap.wrapamount);
+  attributes.numAttributes["maxwidth"] = textObj.virtualization.maxwidth;
+  attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
+  attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
+  attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -137,5 +141,18 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   }
   if (attributes.stringAttributes.find("wrapamount") != attributes.stringAttributes.end()){
     textObj.wrap.wrapamount = wrap.wrapamount;
+  }
+
+  if (attributes.numAttributes.find("maxwidth") != attributes.numAttributes.end()){
+    textObj.virtualization.maxwidth = attributes.numAttributes.at("maxwidth");
+  }
+  if (attributes.numAttributes.find("maxheight") != attributes.numAttributes.end()){
+    textObj.virtualization.maxheight = attributes.numAttributes.at("maxheight");
+  }
+  if (attributes.numAttributes.find("offsetx") != attributes.numAttributes.end()){
+    textObj.virtualization.offsetx = attributes.numAttributes.at("offsetx");
+  }
+  if (attributes.numAttributes.find("offsety") != attributes.numAttributes.end()){
+    textObj.virtualization.offsety = attributes.numAttributes.at("offsety");
   }
 }
