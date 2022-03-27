@@ -81,6 +81,9 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
     if (lineNumber < virtualization.offsety){
       continue;
     }
+    if (lineNumber - virtualization.offsety >= virtualization.maxheight){
+      break;
+    }
     float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
 
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
