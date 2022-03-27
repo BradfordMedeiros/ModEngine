@@ -77,26 +77,23 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto align = alignTypeFromAttr(attr);
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
-  auto maxlength = attr.numAttributes.find("maxlength") == attr.numAttributes.end() ? attr.numAttributes.at("maxlength") : -1;
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
     .tint = tint,
     .align = align,
     .wrap = wrap,
-    .maxlength = maxlength,
   };
   return obj;
 }
 
 void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes){
-  attributes.stringAttributes["value"] = textObj.value; // should this be limited with maxlength or only that in rendering?
+  attributes.stringAttributes["value"] = textObj.value; 
   attributes.stringAttributes["spacing"] = std::to_string(textObj.deltaOffset);
   attributes.vecAttributes["tint"] = textObj.tint;
   attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
   attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
   attributes.stringAttributes["wrapamount"] = std::to_string(textObj.wrap.wrapamount);
-  attributes.numAttributes["maxlength"] = textObj.maxlength;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -119,8 +116,5 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   }
   if (attributes.stringAttributes.find("wrapamount") != attributes.stringAttributes.end()){
     textObj.wrap.wrapamount = wrap.wrapamount;
-  }
-  if (attributes.numAttributes.find("maxlength") != attributes.numAttributes.end()){
-    textObj.maxlength = attributes.numAttributes.at("maxlength");
   }
 }
