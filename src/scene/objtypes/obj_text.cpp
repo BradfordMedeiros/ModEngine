@@ -103,7 +103,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto align = alignTypeFromAttr(attr);
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
-  auto maxwidth = attr.numAttributes.find("maxwidth") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("maxwidth");
+  auto maxwidth = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -128,7 +128,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
   attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
-  attributes.numAttributes["maxwidth"] = textObj.maxwidth;
+  attributes.numAttributes["charlimit"] = textObj.maxwidth;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -165,8 +165,8 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   if (attributes.numAttributes.find("offsety") != attributes.numAttributes.end()){
     textObj.virtualization.offsety = attributes.numAttributes.at("offsety");
   }
-  if (attributes.numAttributes.find("maxwidth") != attributes.numAttributes.end()){
-    textObj.maxwidth = attributes.numAttributes.at("maxwidth");
+  if (attributes.numAttributes.find("charlimit") != attributes.numAttributes.end()){
+    textObj.maxwidth = attributes.numAttributes.at("charlimit");
   }
   restrictWidth(textObj);
 }
