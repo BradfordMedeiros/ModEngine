@@ -81,6 +81,6 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed);
 
 void printRigidBodyInfo(btRigidBody* body);
 
-std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);
+std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance);
 
 #endif 

@@ -281,12 +281,15 @@ btRigidBody* addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
   }
 
   if (rigidBody != NULL){
-    world.rigidbodys[id] = rigidBody;   
+    world.rigidbodys[id] = PhysicsValue {
+      .body = rigidBody,
+      .offset = glm::vec3(0.f, 0.f, 0.f),
+    };   
   }
   return rigidBody;
 }
 void rmRigidBody(World& world, objid id){
-  auto rigidBodyPtr = world.rigidbodys.at(id);
+  auto rigidBodyPtr = world.rigidbodys.at(id).body;
   assert(rigidBodyPtr != NULL);
   rmRigidBody(world.physicsEnvironment, rigidBodyPtr);
   world.rigidbodys.erase(id);
@@ -297,7 +300,7 @@ bool hasPhysicsBody(World& world, objid id){
   return world.rigidbodys.find(id) != world.rigidbodys.end();
 }
 void updatePhysicsBody(World& world, objid id){
-  auto rigidBody = world.rigidbodys.at(id);
+  auto rigidBody = world.rigidbodys.at(id).body;
   assert(rigidBody != NULL);
   glm::vec3 oldScale = getScale(rigidBody);
   rmRigidBody(world, id);
@@ -709,7 +712,7 @@ objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interfac
 // todo finish removing data like eg clearing meshes, animations,etc
 void removeObjectById(World& world, objid objectId, std::string name, SysInterface interface, std::string scriptName, bool netsynchronized){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
-    auto rigidBody = world.rigidbodys.at(objectId);
+    auto rigidBody = world.rigidbodys.at(objectId).body;
     assert(rigidBody != NULL);
     rmRigidBody(world.physicsEnvironment, rigidBody);
     world.rigidbodys.erase(objectId);
@@ -864,7 +867,7 @@ GameobjAttributes objectAttributes(World& world, objid id){
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet){
   physicsLocalTransformSet(world, id, gameobj.transformation);
-  btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id) : NULL;
+  btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
 
   if (body != NULL){
     rigidBodyOpts opts {
@@ -906,15 +909,17 @@ void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative
   if (relative){
     updateRelativePosition(world.sandbox, index, pos);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      auto body =  world.rigidbodys.at(index);
+      PhysicsValue& phys = world.rigidbodys.at(index);
+      auto body =  phys.body;
       auto pos = fullTransformation(world.sandbox, index).position;
-      setPosition(body, pos);
+      setPosition(body, pos + phys.offset);
     }
   }else{
     updateAbsolutePosition(world.sandbox, index, pos);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      auto body =  world.rigidbodys.at(index);
-      setPosition(body, pos);
+      PhysicsValue& phys = world.rigidbodys.at(index);
+      auto body = phys.body;
+      setPosition(body, pos + phys.offset);
     }
   }
   world.entitiesToUpdate.insert(index);
@@ -930,14 +935,14 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
   if (relative){
     updateRelativeRotation(world.sandbox, index, rotation);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      auto body =  world.rigidbodys.at(index);
+      auto body =  world.rigidbodys.at(index).body;
       auto rot = fullTransformation(world.sandbox, index).rotation;
       setRotation(body, rot);
     }
   }else{
     updateAbsoluteRotation(world.sandbox, index, rotation);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-      auto body =  world.rigidbodys.at(index);
+      auto body =  world.rigidbodys.at(index).body;
       auto rot = fullTransformation(world.sandbox, index).rotation;
       setRotation(body, rot);
     }
@@ -955,7 +960,7 @@ void physicsScaleSet(World& world, objid index, glm::vec3 scale){
 
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
     auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
-    auto body =  world.rigidbodys.at(index);
+    auto body =  world.rigidbodys.at(index).body;
     setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
   }
   world.entitiesToUpdate.insert(index);
@@ -969,21 +974,22 @@ void applyPhysicsScaling(World& world, objid index, float lastX, float lastY, fl
 void physicsLocalTransformSet(World& world, objid index, Transformation transform){
   updateRelativeTransform(world.sandbox, index, transform);
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto body =  world.rigidbodys.at(index);
+    PhysicsValue& phys = world.rigidbodys.at(index);
+    auto body = phys.body;
     auto fullTransform = fullTransformation(world.sandbox, index);
-    setTransform(body, fullTransform.position, fullTransform.scale, fullTransform.rotation);
+    setTransform(body, fullTransform.position + phys.offset, fullTransform.scale, fullTransform.rotation);
   }
 }
 
-void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, btRigidBody*>& rigidbodys){
+void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
     updateAbsoluteTransform(world.sandbox, i, Transformation {
-      .position = getPosition(rigidBody),
-      .scale = getScale(rigidBody),
-      .rotation = getRotation(rigidBody),
+      .position = getPosition(rigidBody.body) - rigidBody.offset,
+      .scale = getScale(rigidBody.body),
+      .rotation = getRotation(rigidBody.body),
     });
-    clampMaxVelocity(rigidBody, gameobj.physicsOptions.maxspeed);
+    clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
   }
 }
 

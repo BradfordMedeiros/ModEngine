@@ -117,8 +117,8 @@ void printPhysicsInfo(PhysicsInfo physicsInfo){
   std::cout << "box: (" << physicsInfo.transformation.scale.x << ", " << physicsInfo.transformation.scale.y << ", " << physicsInfo.transformation.scale.z << ")" << std::endl;
 }
 
-void dumpPhysicsInfo(std::map<objid, btRigidBody*>& rigidbodys){
-  for (auto [i, rigidBody]: rigidbodys){
-    std::cout << "PHYSICS:" << std::to_string(i) << ":" <<  print(getPosition(rigidBody));
+void dumpPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys){
+  for (auto [i, physicsBody]: rigidbodys){
+    std::cout << "PHYSICS:" << std::to_string(i) << ":" <<  print(getPosition(physicsBody.body));
   }
 }

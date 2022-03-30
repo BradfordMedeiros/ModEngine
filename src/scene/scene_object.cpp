@@ -232,8 +232,8 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
 }
 
 objid getIdForCollisionObject(World& world, const btCollisionObject* body){
-  for (auto const&[id, rigidbody] : world.rigidbodys){
-    if (rigidbody == body){
+  for (auto const&[id, physicsObj] : world.rigidbodys){
+    if (physicsObj.body == body){
       return id;
     }
   }

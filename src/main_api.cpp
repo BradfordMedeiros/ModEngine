@@ -28,7 +28,7 @@ std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    //
 
 
 btRigidBody* getRigidBody(int32_t index){
-  return world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index);
+  return world.rigidbodys.find(index) == world.rigidbodys.end() ? NULL : world.rigidbodys.at(index).body;
 }
 void applyImpulse(int32_t index, glm::vec3 impulse){
   auto rigidBody = getRigidBody(index);

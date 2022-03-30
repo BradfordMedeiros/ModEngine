@@ -16,6 +16,6 @@ std::string debugLoadedMeshes(std::map<std::string, MeshRef>& meshes);
 std::string debugAnimations(std::map<objid, std::vector<Animation>>& animations);
 
 void printPhysicsInfo(PhysicsInfo physicsInfo);
-void dumpPhysicsInfo(std::map<objid, btRigidBody*>& rigidbodys);
+void dumpPhysicsInfo(std::map<objid, PhysicsValue>& rigidbodys);
 
 #endif

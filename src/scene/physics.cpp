@@ -325,7 +325,7 @@ bool AllHitsRayResultCallbackCustomFilter::needsCollision(btBroadphaseProxy* pro
   return true;
 }
 
-std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
+std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, PhysicsValue>& rigidbodys, glm::vec3 posFrom, glm::quat direction, float maxDistance){
   std::vector<HitObject> hitobjects;
   AllHitsRayResultCallbackCustomFilter result(glmToBt(posFrom),glmToBt(posFrom));
  
@@ -339,8 +339,8 @@ std::vector<HitObject> raycast(physicsEnv& env, std::map<objid, btRigidBody*>& r
     auto hitPoint = btPosFrom.lerp(btPosTo, result.m_hitFractions[i]);
     auto hitNormal = result.m_hitNormalWorld[i];
     bool found = false;
-    for (auto &[objid, rigidbody] : rigidbodys){
-      if (rigidbody == obj){
+    for (auto &[objid, physicsObj] : rigidbodys){
+      if (physicsObj.body == obj){
         hitobjects.push_back(HitObject{
           .id = objid,
           .point = btToGlm(hitPoint),  
