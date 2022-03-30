@@ -95,7 +95,7 @@ void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, st
   drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxwidth = -1, .maxheight = -1, .offsetx = 0, .offsety = 0 });
 }
 
-BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){
+BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
   //assert(type == CENTER_ALIGN);
   auto largestLineBreakSize = findLineBreakSize(word, wrap);
   float leftAlign = calculateLeftAlign(0, largestLineBreakSize, offsetDelta, align);
@@ -108,6 +108,8 @@ BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, floa
   std::cout << "right: " << right << std::endl;*/
 
   auto halfWidth = (right - leftAlign) / 2.f;
+
+  *_offset = glm::vec3(halfWidth - 0.5f * offsetDelta, 0.f, 0.f);
 
   BoundInfo info {
     .xMin = -1 * halfWidth, .xMax = halfWidth,
