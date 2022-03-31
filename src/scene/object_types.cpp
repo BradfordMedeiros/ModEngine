@@ -206,6 +206,15 @@ std::vector<ObjectType> objTypes = {
     .serialize = convertSerialize<GameObjectVoxel>(serializeVoxel),
     .removeObject  = removeDoNothing,
   },
+  ObjectType {
+    .name = "custom", 
+    .variantType = getVariantIndex(GameObjectCustom{}),
+    .createObj = createCustom, 
+    .objectAttributes = nothingObjAttr,
+    .setAttributes = nothingSetObjAttr,
+    .serialize = serializeNotImplemented,
+    .removeObject  = removeDoNothing,
+  },
 };
 
 GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util){

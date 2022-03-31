@@ -24,6 +24,7 @@
 #include "./objtypes/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
 #include "./objtypes/obj_voxel.h"
+#include "./objtypes/obj_custom.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -53,7 +54,8 @@ typedef std::variant<
   GameObjectUISlider,
   GameObjectUIText,
   GameObjectUILayout,
-  GameObjectGeo
+  GameObjectGeo,
+  GameObjectCustom
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
@@ -142,6 +144,11 @@ static Field geoField {
   .type = "geo",
 };
 
+static Field customField {
+  .prefix = '|',
+  .type = "custom",
+};
+
 static std::vector fields = { 
   obj, 
   camera, 
@@ -159,6 +166,7 @@ static std::vector fields = {
   uiTextField,
   uiLayoutField,
   geoField,
+  customField,
 };
 
 std::string getType(std::string name);
