@@ -9,6 +9,8 @@ struct SysInterface {
   std::function<void(std::string, objid)> unloadScript;
   std::function<void(objid)> stopAnimation;
   std::function<float()> getCurrentTime;
+  std::function<void()> onCreateCustomElement;
+  std::function<void()> onRemoveCustomElement;
 };
 
 #endif

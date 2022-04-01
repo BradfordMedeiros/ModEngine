@@ -651,9 +651,7 @@ void addObjectToWorld(
       .addEmitter = addEmitterObject,
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange,
-      .onCreateCustomElement = []() -> void {
-        std::cout << "custom element: on create element!" << std::endl;
-      },
+      .onCreateCustomElement = interface.onCreateCustomElement,
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
     addObjectType(world.objectMapping, gameobjObj, id);
@@ -733,12 +731,8 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
     },
-    [&world, name]() -> void {
-      removeEmitter(world.emitters, name);
-    },
-    []() -> void {
-      std::cout << "custom element: remove" << std::endl;
-    }
+    [&world, name]() -> void { removeEmitter(world.emitters, name); },
+    interface.onRemoveCustomElement
   );
   
   world.onObjectDelete(objectId, netsynchronized);

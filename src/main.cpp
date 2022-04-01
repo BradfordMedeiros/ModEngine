@@ -29,6 +29,7 @@
 #include "./worldtiming.h"
 #include "./main_test.h"
 #include "./renderstages.h"
+#include "./customobj.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -529,9 +530,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
         return drawSphere();
       },
       defaultMeshes,
-      []() -> void {
-        std::cout << "custom mesh: render mesh" << std::endl;
-      }
+      renderCustomObj
     );
     numTriangles = numTriangles + trianglesDrawn;
 
@@ -1256,7 +1255,9 @@ int main(int argc, char* argv[]){
       removeLinesByOwner(id);
     },
     .stopAnimation = stopAnimation,
-    .getCurrentTime = getTotalTime
+    .getCurrentTime = getTotalTime,
+    .onCreateCustomElement = createCustomObj,
+    .onRemoveCustomElement = removeCustomObj
   };
 
   std::vector<std::string> defaultMeshesToLoad {
