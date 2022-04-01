@@ -1,7 +1,10 @@
 #include "./obj_custom.h"
 
 GameObjectCustom createCustom(GameobjAttributes& attr, ObjectTypeUtil& util){
-  std::cout << "create custom not implemented" << std::endl;
-  assert(false);
+  util.onCreateCustomElement();
   return GameObjectCustom{};
+}
+
+void removeCustom(GameObjectCustom& customObj, ObjectRemoveUtil& util){
+  util.onRemoveCustomElement();
 }

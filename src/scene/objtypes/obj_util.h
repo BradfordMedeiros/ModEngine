@@ -28,6 +28,7 @@ struct ObjectTypeUtil {
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
   std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded;
   std::function<void()> onCollisionChange;
+  std::function<void()> onCreateCustomElement;
 };
 
 struct ObjectSerializeUtil {
@@ -36,6 +37,7 @@ struct ObjectSerializeUtil {
 
 struct ObjectRemoveUtil {
   std::function<void()> rmEmitter;
+  std::function<void()> onRemoveCustomElement;
 };
 
 struct ObjectSetAttribUtil {

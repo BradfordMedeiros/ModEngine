@@ -650,7 +650,10 @@ void addObjectToWorld(
       .loadMesh = loadMeshObject,
       .addEmitter = addEmitterObject,
       .ensureMeshLoaded = ensureMeshLoaded,
-      .onCollisionChange = onCollisionChange
+      .onCollisionChange = onCollisionChange,
+      .onCreateCustomElement = []() -> void {
+        std::cout << "custom element: on create element!" << std::endl;
+      },
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
     addObjectType(world.objectMapping, gameobjObj, id);
@@ -732,6 +735,9 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
     },
     [&world, name]() -> void {
       removeEmitter(world.emitters, name);
+    },
+    []() -> void {
+      std::cout << "custom element: remove" << std::endl;
     }
   );
   

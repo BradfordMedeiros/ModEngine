@@ -8,6 +8,6 @@ struct GameObjectCustom {
 };
 
 GameObjectCustom createCustom(GameobjAttributes& attr, ObjectTypeUtil& util);
-
+void removeCustom(GameObjectCustom& customObj, ObjectRemoveUtil& util);
 
 #endif

@@ -213,7 +213,7 @@ std::vector<ObjectType> objTypes = {
     .objectAttributes = nothingObjAttr,
     .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
-    .removeObject  = removeDoNothing,
+    .removeObject  = convertRemove<GameObjectCustom>(removeCustom),
   },
 };
 
@@ -237,14 +237,15 @@ void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
-  std::function<void()> rmEmitter
+  std::function<void()> rmEmitter,
+  std::function<void()> onRemoveCustomElement
 ){
   auto Object = mapping.at(id); 
   auto variantIndex = Object.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
       std::cout << "type is: " << objType.name << std::endl;
-      ObjectRemoveUtil util { .rmEmitter = rmEmitter };
+      ObjectRemoveUtil util { .rmEmitter = rmEmitter, .onRemoveCustomElement = onRemoveCustomElement };
       objType.removeObject(Object, util);
       mapping.erase(id);
       return;
@@ -516,6 +517,12 @@ int renderObject(
     auto defaultNodeVertexCount = geoObj -> type == GEOSPHERE ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     return defaultNodeVertexCount + sphereVertexCount;
   }
+
+  auto customObj = std::get_if<GameObjectCustom>(&toRender);
+  if (customObj != NULL){
+    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+  }
+
   return 0;
 }
 
