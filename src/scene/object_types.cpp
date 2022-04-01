@@ -278,7 +278,8 @@ int renderObject(
   bool drawPoints,
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
-  DefaultMeshes& defaultMeshes
+  DefaultMeshes& defaultMeshes,
+  std::function<void()> onRender
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -520,7 +521,12 @@ int renderObject(
 
   auto customObj = std::get_if<GameObjectCustom>(&toRender);
   if (customObj != NULL){
-    return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+    int vertexCount;
+    if (showDebug){
+      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+    }
+    onRender();
+    return vertexCount;
   }
 
   return 0;

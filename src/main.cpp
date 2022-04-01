@@ -528,7 +528,10 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
         glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
         return drawSphere();
       },
-      defaultMeshes
+      defaultMeshes,
+      []() -> void {
+        std::cout << "custom mesh: render mesh" << std::endl;
+      }
     );
     numTriangles = numTriangles + trianglesDrawn;
 
@@ -1312,7 +1315,7 @@ int main(int argc, char* argv[]){
     .nav = &world.meshes.at("./res/models/ui/node.obj").mesh,
   };
 
-  loadAllTextures();
+  //loadAllTextures();
   
   dynamicLoading = createDynamicLoading(worldfile);
   if (result["rechunk"].as<int>()){
