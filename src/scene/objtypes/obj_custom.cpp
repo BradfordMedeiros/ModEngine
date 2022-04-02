@@ -1,7 +1,10 @@
 #include "./obj_custom.h"
 
 GameObjectCustom createCustom(GameobjAttributes& attr, ObjectTypeUtil& util){
-  util.onCreateCustomElement(util.id, "native:basic_test");
+  bool hasCScript = attr.stringAttributes.find("cscript") != attr.stringAttributes.end();
+  if (hasCScript){
+    util.onCreateCustomElement(util.id, attr.stringAttributes.at("cscript").c_str());
+  }
   return GameObjectCustom{};
 }
 

@@ -29,7 +29,7 @@ struct CustomObjBinding {
 
 std::vector<CustomObjBinding> bindings = {
   CustomObjBinding {
-    .name = "native:basic_test",
+    .name = "native/basic_test",
     .create = createBasicTest,
     .remove = removeBasicTest,
     .render = renderBasicTest,
@@ -63,14 +63,20 @@ void createCustomObj(int id, const char* name){
   };
 }
 void removeCustomObj(int id){
-  auto objInstance = customObjInstances.at(id);
-  auto binding = getCustomObjBinding(objInstance.name.c_str());
-  binding -> remove(objInstance.data);
+  auto instanceExists = customObjInstances.find(id) != customObjInstances.end();
+  if (instanceExists){
+    auto objInstance = customObjInstances.at(id);
+    auto binding = getCustomObjBinding(objInstance.name.c_str());
+    binding -> remove(objInstance.data);   
+  }
 }
 void renderCustomObj(int id){
-  auto objInstance = customObjInstances.at(id);
-  auto binding = getCustomObjBinding(objInstance.name.c_str());
-  binding -> render(objInstance.data);
+  auto instanceExists = customObjInstances.find(id) != customObjInstances.end();
+  if (instanceExists){
+    auto objInstance = customObjInstances.at(id);
+    auto binding = getCustomObjBinding(objInstance.name.c_str());
+    binding -> render(objInstance.data);   
+  }
 }
 
 
