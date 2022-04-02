@@ -29,7 +29,7 @@
 #include "./worldtiming.h"
 #include "./main_test.h"
 #include "./renderstages.h"
-#include "./customobj.h"
+#include "./customobj/customobj.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
