@@ -238,7 +238,7 @@ void removeObject(
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter,
-  std::function<void()> onRemoveCustomElement
+  std::function<void(void*)> onRemoveCustomElement
 ){
   auto Object = mapping.at(id); 
   auto variantIndex = Object.index();
