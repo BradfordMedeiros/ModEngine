@@ -49,7 +49,7 @@ CustomObjBinding* getCustomObjBinding(const char* name){
   return NULL;
 }
 
-void* createCustomObj(){
+void createCustomObj(){
   // i guess pick a name, id pair
   auto id = 5;
   auto name = "native:basic_test";
@@ -62,7 +62,7 @@ void* createCustomObj(){
     .data = data,
   };
 }
-void removeCustomObj(void* data){
+void removeCustomObj(){
   auto id = 5;
   auto objInstance = customObjInstances.at(id);
   auto binding = getCustomObjBinding(objInstance.name.c_str());

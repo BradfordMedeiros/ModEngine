@@ -6,5 +6,5 @@ GameObjectCustom createCustom(GameobjAttributes& attr, ObjectTypeUtil& util){
 }
 
 void removeCustom(GameObjectCustom& customObj, ObjectRemoveUtil& util){
-  util.onRemoveCustomElement(NULL);
+  util.onRemoveCustomElement();
 }

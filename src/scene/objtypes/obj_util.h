@@ -37,7 +37,7 @@ struct ObjectSerializeUtil {
 
 struct ObjectRemoveUtil {
   std::function<void()> rmEmitter;
-  std::function<void(void*)> onRemoveCustomElement;
+  std::function<void()> onRemoveCustomElement;
 };
 
 struct ObjectSetAttribUtil {

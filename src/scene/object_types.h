@@ -191,7 +191,7 @@ void removeObject(
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter,
-  std::function<void(void*)> onRemoveCustomElement
+  std::function<void(void)> onRemoveCustomElement
 );
 
 struct DefaultMeshes {
