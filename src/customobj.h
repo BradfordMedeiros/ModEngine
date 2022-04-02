@@ -7,8 +7,8 @@
 #include <functional>
 #include <assert.h>
 
-void createCustomObj();
-void removeCustomObj();
-void renderCustomObj();
+void createCustomObj(int id, const char* name);
+void removeCustomObj(int id);
+void renderCustomObj(int id);
 
 #endif

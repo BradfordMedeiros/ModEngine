@@ -238,14 +238,14 @@ void removeObject(
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter,
-  std::function<void(void)> onRemoveCustomElement
+  std::function<void(int)> onRemoveCustomElement
 ){
   auto Object = mapping.at(id); 
   auto variantIndex = Object.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
       std::cout << "type is: " << objType.name << std::endl;
-      ObjectRemoveUtil util { .rmEmitter = rmEmitter, .onRemoveCustomElement = onRemoveCustomElement };
+      ObjectRemoveUtil util { .id = id, .rmEmitter = rmEmitter, .onRemoveCustomElement = onRemoveCustomElement };
       objType.removeObject(Object, util);
       mapping.erase(id);
       return;
@@ -279,7 +279,7 @@ int renderObject(
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  std::function<void()> onRender
+  std::function<void(int)> onRender
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -525,7 +525,7 @@ int renderObject(
     if (showDebug){
       vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
-    onRender();
+    onRender(id);
     return vertexCount;
   }
 

@@ -21,6 +21,7 @@ struct TextureInformation {
 };
 
 struct ObjectTypeUtil {
+  objid id;
   std::function<Mesh(std::string)> createMeshCopy;
   std::map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)> ensureTextureLoaded;
@@ -28,7 +29,7 @@ struct ObjectTypeUtil {
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
   std::function<std::vector<std::string>(std::string, std::vector<std::string>)> ensureMeshLoaded;
   std::function<void()> onCollisionChange;
-  std::function<void()> onCreateCustomElement;
+  std::function<void(int, const char*)> onCreateCustomElement;
 };
 
 struct ObjectSerializeUtil {
@@ -36,8 +37,9 @@ struct ObjectSerializeUtil {
 };
 
 struct ObjectRemoveUtil {
+  objid id;
   std::function<void()> rmEmitter;
-  std::function<void()> onRemoveCustomElement;
+  std::function<void(int)> onRemoveCustomElement;
 };
 
 struct ObjectSetAttribUtil {

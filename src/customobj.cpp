@@ -6,13 +6,17 @@
 
 void* createBasicTest(){
   std::cout << "custom binding: create basic" << std::endl;
-  return NULL;
+  int* value = new int;
+  *value = random();
+  return value;
 }
 void removeBasicTest(void* data){
+  int* value = (int*)data;
+  delete value;
   std::cout << "custom binding: remove basic" << std::endl;
 }
-void renderBasicTest(){
-  std::cout << "custom binding: render basic" << std::endl;
+void renderBasicTest(void* data){
+  std::cout << "custom binding: render basic, value: " << *((int*)data) << std::endl;
 }
 
 
@@ -20,7 +24,7 @@ struct CustomObjBinding {
   std::string name;
   std::function<void*()> create;
   std::function<void(void*)> remove;
-  std::function<void()> render;
+  std::function<void(void*)> render;
 };
 
 std::vector<CustomObjBinding> bindings = {
@@ -49,11 +53,7 @@ CustomObjBinding* getCustomObjBinding(const char* name){
   return NULL;
 }
 
-void createCustomObj(){
-  // i guess pick a name, id pair
-  auto id = 5;
-  auto name = "native:basic_test";
-
+void createCustomObj(int id, const char* name){
   assert(customObjInstances.find(id) == customObjInstances.end());
   auto binding = getCustomObjBinding(name);
   auto data = binding -> create();
@@ -62,17 +62,15 @@ void createCustomObj(){
     .data = data,
   };
 }
-void removeCustomObj(){
-  auto id = 5;
+void removeCustomObj(int id){
   auto objInstance = customObjInstances.at(id);
   auto binding = getCustomObjBinding(objInstance.name.c_str());
   binding -> remove(objInstance.data);
 }
-void renderCustomObj(){
-  auto id = 5;
+void renderCustomObj(int id){
   auto objInstance = customObjInstances.at(id);
   auto binding = getCustomObjBinding(objInstance.name.c_str());
-  binding -> render();
+  binding -> render(objInstance.data);
 }
 
 

@@ -631,6 +631,7 @@ void addObjectToWorld(
     std::cout << "rootname create mesh: " << name << std::endl;
     if (returnObjectOnly){
       ObjectTypeUtil util {
+        .id = id,
         .createMeshCopy = getCreateMeshCopy(world, topName),
         .meshes = world.meshes,
         .ensureTextureLoaded = [](std::string) -> Texture { return Texture{}; },
@@ -638,12 +639,14 @@ void addObjectToWorld(
         .addEmitter =  [](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
         .ensureMeshLoaded = [](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> { return {}; },
         .onCollisionChange = []() -> void {},
+        .onCreateCustomElement = interface.onCreateCustomElement,
       }; 
       auto gameobjObj = createObjectType(getType(name), attr, util);
       returnobjs.push_back(gameobjObj);
       return;
     }
     ObjectTypeUtil util {
+      .id = id,
       .createMeshCopy = getCreateMeshCopy(world, topName),
       .meshes = world.meshes,
       .ensureTextureLoaded = ensureTextureLoaded,

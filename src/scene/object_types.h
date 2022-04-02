@@ -191,7 +191,7 @@ void removeObject(
   objid id, 
   std::function<void(std::string)> unbindCamera,
   std::function<void()> rmEmitter,
-  std::function<void(void)> onRemoveCustomElement
+  std::function<void(int)> onRemoveCustomElement
 );
 
 struct DefaultMeshes {
@@ -219,7 +219,7 @@ int renderObject(
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  std::function<void()> onRender
+  std::function<void(int)> onRender
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
