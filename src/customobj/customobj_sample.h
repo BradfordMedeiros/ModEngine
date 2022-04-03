@@ -5,6 +5,6 @@
 #include <iostream>
 #include "./customobj_binding.h"
 
-CustomObjBinding sampleBindingPlugin();
+CustomObjBinding sampleBindingPlugin(CustomApiBindings& api);
 
 #endif

@@ -1163,7 +1163,13 @@ int main(int argc, char* argv[]){
   fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
   Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair008.png", loadTexture);
  
-  registerAllBindings({ sampleBindingPlugin() });
+  CustomApiBindings pluginApi{
+    .listSceneId = listSceneId,
+    .loadScene = loadScene,
+    .unloadScene = unloadScene,
+    .unloadAllScenes = unloadAllScenes,
+  };
+  registerAllBindings({ sampleBindingPlugin(pluginApi) });
   createStaticSchemeBindings(
     listSceneId,
     loadScene,

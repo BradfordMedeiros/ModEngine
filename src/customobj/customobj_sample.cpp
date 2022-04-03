@@ -6,19 +6,20 @@ void* createBasicTest(){
   *value = random();
   return value;
 }
-void removeBasicTest(void* data){
-  int* value = (int*)data;
-  delete value;
-  std::cout << "custom binding: remove basic" << std::endl;
-}
+
 void renderBasicTest(void* data){
   std::cout << "custom binding: render basic, value: " << *((int*)data) << std::endl;
 }
 
-CustomObjBinding sampleBindingPlugin(){
-  auto binding = createCustomBinding("native/basic_test");
+CustomObjBinding sampleBindingPlugin(CustomApiBindings& api){
+  auto binding = createCustomBinding("native/basic_test", api);
   binding.create = createBasicTest;
-  binding.remove = removeBasicTest;
+  binding.remove = [&api] (void* data) -> void {
+    int* value = (int*)data;
+    delete value;
+    std::cout << "custom binding: remove basic" << std::endl;
+    api.loadScene("./res/scenes/features/textures/scrolling.p.rawscene", {});
+  };
   binding.render = renderBasicTest;
   return binding;
 }
