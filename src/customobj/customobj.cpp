@@ -7,8 +7,14 @@
 std::vector<CustomObjBinding> bindings = {};
 
 void registerAllBindings(std::vector<CustomObjBinding> pluginBindings){
+  std::set<std::string> names;
   for (auto &plugin : pluginBindings){
     bindings.push_back(plugin);
+    if (names.count(plugin.name) > 0){
+      std::cout << "plugin name duplicate: " << plugin.name << std::endl;
+      assert(false);
+    }
+    names.insert(plugin.name);
   }
 }
 

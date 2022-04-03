@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <assert.h>
 #include "./customobj_binding.h"
 #include "./customobj_sample.h"
