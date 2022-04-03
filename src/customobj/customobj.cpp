@@ -4,53 +4,9 @@
    Should port the scheme scripting to C++, and then these just become ordinary api methods
 */
 
-
-void* createBasicTest(){
-  std::cout << "custom binding: create basic" << std::endl;
-  int* value = new int;
-  *value = random();
-  return value;
-}
-void removeBasicTest(void* data){
-  int* value = (int*)data;
-  delete value;
-  std::cout << "custom binding: remove basic" << std::endl;
-}
-void renderBasicTest(void* data){
-  std::cout << "custom binding: render basic, value: " << *((int*)data) << std::endl;
-}
-
-struct CustomObjBinding {
-  std::string name;
-  std::function<void*()> create;
-  std::function<void(void*)> remove;
-  std::function<void(void*)> render;
-};
-
-
-CustomObjBinding createCustomBinding(const char* name){
-  CustomObjBinding defaultBinding { 
-    .name = name,
-    .create = [](void) -> void* { return NULL; },
-    .remove = [](void*) -> void { },
-    .render = [](void*) -> void { },
-  };
-  return defaultBinding;
-}
-std::vector<CustomObjBinding> registerBindingPlugin(){
-  std::vector<CustomObjBinding> bindings;
-  auto binding = createCustomBinding("native/basic_test");
-  binding.create = createBasicTest;
-  binding.remove = removeBasicTest;
-  binding.render = renderBasicTest;
-  bindings.push_back(binding);
-  return bindings;
-}
-
 std::vector<CustomObjBinding> bindings = {};
 
-void registerAllBindings(){
-  auto pluginBindings = registerBindingPlugin();
+void registerAllBindings(std::vector<CustomObjBinding> pluginBindings){
   for (auto &plugin : pluginBindings){
     bindings.push_back(plugin);
   }
