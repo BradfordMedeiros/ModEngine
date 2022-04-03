@@ -1179,6 +1179,22 @@ int main(int argc, char* argv[]){
     .setActiveCamera = setActiveCamera,
     .drawText = drawText,
     .drawLine = addLineNextCycle,
+    .freeLine = freeLine,
+    .getGameObjectNameForId = getGameObjectName,
+    .getGameObjectAttr = getGameObjectAttr,
+    .setGameObjectAttr = setGameObjectAttr,
+    .getGameObjectPos = getGameObjectPosition,
+    .setGameObjectPos = setGameObjectPosition,
+    .setGameObjectPosRelative = setGameObjectPositionRelative,
+    .getGameObjectRotation = getGameObjectRotation,
+    .setGameObjectRot = setGameObjectRotationRelative,
+    .setFrontDelta = setFrontDelta,
+    .moveRelative = moveRelative,
+    .moveRelativeVec = moveRelative,
+    .orientationFromPos = orientationFromPos,
+    .getGameObjectByName = getGameObjectByName,
+    .applyImpulse = applyImpulse,
+    .applyImpulseRel = applyImpulseRel,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi) });
   createStaticSchemeBindings(

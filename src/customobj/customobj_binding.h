@@ -22,24 +22,23 @@ struct CustomApiBindings {
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime);
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize);
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner);
+  void (*freeLine)(int32_t lineid);
+  std::string (*getGameObjectNameForId)(int32_t id);
+  GameobjAttributes (*getGameObjectAttr)(int32_t id);
+  void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr);
+  glm::vec3 (*getGameObjectPos)(int32_t index, bool world);
+  void (*setGameObjectPos)(int32_t index, glm::vec3 pos);
+  void (*setGameObjectPosRelative)(int32_t index, glm::vec3 pos);
+  glm::quat (*getGameObjectRotation)(int32_t index, bool world);
+  void (*setGameObjectRot)(int32_t index, glm::quat rotation);
+  glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
+  glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance);
+  glm::vec3 (*moveRelativeVec)(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec);
+  glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos);
+  std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId);
+  void (*applyImpulse)(int32_t index, glm::vec3 impulse);
+  void (*applyImpulseRel)(int32_t index, glm::vec3 impulse);
 /*
-
-  void (*freeLine)(int32_t lineid),
-  std::string (*getGameObjectNameForId)(int32_t id),
-  GameobjAttributes getGameObjectAttr(int32_t id),
-  void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
-  glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
-  void (*setGameObjectPos)(int32_t index, glm::vec3 pos),
-  void (*setGameObjectPosRelative)(int32_t index, glm::vec3 pos),
-  glm::quat (*getGameObjectRotation)(int32_t index, bool world),
-  void (*setGameObjectRot)(int32_t index, glm::quat rotation),
-  glm::quat (*setFrontDelta)(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta),
-  glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
-  glm::vec3 (*moveRelativeVec)(glm::vec3 posFrom, glm::quat orientation, glm::vec3 vec),
-  glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
-  std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
-  void (*applyImpulse)(int32_t index, glm::vec3 impulse),
-  void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
   void (*clearImpulse)(int32_t index),
   std::vector<std::string> (*listAnimations)(int32_t id),
   void playAnimation(int32_t id, std::string animationToPlay),
