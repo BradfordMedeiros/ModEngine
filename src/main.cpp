@@ -1168,6 +1168,17 @@ int main(int argc, char* argv[]){
     .loadScene = loadScene,
     .unloadScene = unloadScene,
     .unloadAllScenes = unloadAllScenes,
+    .listScenes = listScenes,
+    .listSceneFiles = listSceneFiles,
+    .sendLoadScene = sendLoadScene,
+    .createScene = createScene,
+    .moveCamera = moveCamera,
+    .rotateCamera = rotateCamera,
+    .removeObjectById = removeObjectById,
+    .getObjectsByType = getObjectsByType,
+    .setActiveCamera = setActiveCamera,
+    .drawText = drawText,
+    .drawLine = addLineNextCycle,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi) });
   createStaticSchemeBindings(
