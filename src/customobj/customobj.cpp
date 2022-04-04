@@ -62,5 +62,65 @@ void renderCustomObj(int id){
 }
 
 
+//// Callbacks ////
+void onCFrameAllScripts(){
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCustomObjBinding(objInstance.name.c_str());
+    binding -> onFrame();
+  }
+}
 
+void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
+}
+void onCCollisionExitAllScripts(int32_t obj1, int32_t obj2){
+}
+void onCMouseCallbackAllScripts(int button, int action, int mods){
+}
+void onCMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){
+}
+void onCScrollCallbackAllScripts(double amount){
+}
+void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
+}
+void onCObjectHoverAllScripts(int32_t index, bool isHover){
+}
+void onCKeyCallbackAllScripts(int key, int scancode, int action, int mods){
+}
+void onCKeyCharCallbackAllScripts(unsigned int codepoint){
+}
 
+void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
+}
+void onCMessageAllScripts(std::queue<StringString>& messages){
+}
+
+void onCTcpMessageAllScripts(std::string& message){
+}
+void onCUdpMessageAllScripts(std::string& message){
+}
+
+void onCPlayerJoinedAllScripts(std::string& connectionHash){
+}
+void onCPlayerLeaveAllScripts(std::string& connectionHash){
+}
+
+CScriptBindingCallbacks getCScriptBindingCallbacks(){
+  return CScriptBindingCallbacks {
+    .onFrame = onCFrameAllScripts,
+    .onCollisionEnter = onCCollisionEnterAllScripts,
+    .onCollisionExit = onCCollisionExitAllScripts,
+    .onMouseCallback = onCMouseCallbackAllScripts,
+    .onMouseMoveCallback = onCMouseMoveCallbackAllScripts,
+    .onScrollCallback = onCScrollCallbackAllScripts,
+    .onObjectSelected = onCObjectSelectedAllScripts,
+    .onObjectHover = onCObjectHoverAllScripts,
+    .onKeyCallback = onCKeyCallbackAllScripts,
+    .onKeyCharCallback = onCKeyCharCallbackAllScripts,
+    .onCameraSystemChange = onCCameraSystemChangeAllScripts,
+    .onMessage = onCMessageAllScripts,
+    .onTcpMessage = onCTcpMessageAllScripts,
+    .onUdpMessage = onCUdpMessageAllScripts,
+    .onPlayerJoined = onCPlayerJoinedAllScripts,
+    .onPlayerLeave = onCPlayerLeaveAllScripts,
+  };
+}

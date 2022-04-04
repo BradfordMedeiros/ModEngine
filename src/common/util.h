@@ -17,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <queue>
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
@@ -136,6 +137,22 @@ std::vector<T> mapKeys(std::map<T, N>& values){
   }
   return transformedValues;
 }
+
+
+/* Move back into customobj, just here to share between this an scheme for now */
+typedef void(*func)();
+typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
+typedef void(*colfun)(int32_t obj1, int32_t obj2);
+typedef void(*mousecallback)(int button, int action, int mods);
+typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNdc);
+typedef void(*scrollcallback)(double amount);
+typedef void(*keycallback)(int key, int scancode, int action, int mods);
+typedef void(*keycharcallback)(unsigned int codepoint);
+typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
+typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
+typedef void(*stringboolFunc)(std::string, bool value);
+typedef void(*messagefunc)(std::queue<StringString>&);
+typedef void(*stringfunc)(std::string&);
 
 #endif
 

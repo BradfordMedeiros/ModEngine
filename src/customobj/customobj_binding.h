@@ -77,10 +77,7 @@ struct CustomApiBindings {
   void (*debugInfo)(std::string infoType, std::string filepath);
   void (*setWorldState)(std::vector<ObjectValue> values);
   void (*enforceLayout)(objid layoutId);
-  
-
   //std::vector<func_t> registerGuileFns
-
 };
 
 struct CustomObjBinding {
@@ -89,6 +86,10 @@ struct CustomObjBinding {
   std::function<void*()> create;
   std::function<void(void*)> remove;
   std::function<void(void*)> render;
+
+  // Other callbacks
+  func onFrame;
+
 };
 
 CustomObjBinding createCustomBinding(const char* name, CustomApiBindings& api);
