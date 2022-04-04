@@ -38,45 +38,48 @@ struct CustomApiBindings {
   std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId);
   void (*applyImpulse)(int32_t index, glm::vec3 impulse);
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse);
-/*
-  void (*clearImpulse)(int32_t index),
-  std::vector<std::string> (*listAnimations)(int32_t id),
-  void playAnimation(int32_t id, std::string animationToPlay),
-  std::vector<std::string>(*listClips)(),
-  void (*playClip)(std::string, objid sceneId),
-  std::vector<std::string> (*listModels)(),
-  void (*sendNotifyMessage)(std::string message, std::string value),
-  double (*timeSeconds)(),
-  double (*timeElapsed)(),
-  void (*saveScene)(bool includeIds, objid sceneId), 
-  std::map<std::string, std::string> (*listServers)(),
-  std::string (*connectServer)(std::string server),
-  void (*disconnectServer)(),
-  void (*sendMessageTcp)(std::string data),
-  void (*sendMessageUdp)(std::string data),
-  void (*playRecording)(objid id, std::string recordingPath),
-  void (*stopRecording)(objid id, std::string recordingPath),
-  objid (*createRecording)(objid id),
-  void (*saveRecording)(objid recordingId, std::string filepath),
-  objid (*makeObjectAttr)(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
-  void (*makeParent)(objid child, objid parent),
-  std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
-  void (*saveScreenshot)(std::string),
-  void (*setState)(std::string),
-  void (*setFloatState)(std::string stateName, float value),
-  void (*setIntState)(std::string stateName, int value),
-  glm::vec3 (*navPosition)(objid, glm::vec3 pos),
-  void (*emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity),
-  objid (*loadAround)(objid),
-  void (*rmLoadAround)(objid),
-  void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string),
-  std::map<std::string, std::string> (*getArgs)(),
-  bool (*lock)(std::string, objid),
-  bool (*unlock)(std::string, objid),
-  void (*debugInfo)(std::string infoType, std::string filepath),
-  void (*setWorldState)(std::vector<ObjectValue> values),
-  void (*enforceLayout)(objid layoutId),
-  std::vector<func_t> registerGuileFns*/
+  void (*clearImpulse)(int32_t index);
+  std::vector<std::string> (*listAnimations)(int32_t id);
+  void (*playAnimation)(int32_t id, std::string animationToPlay);
+  std::vector<std::string>(*listClips)();
+  void (*playClip)(std::string, objid sceneId);
+
+  ///////////
+  std::vector<std::string> (*listModels)();
+  void (*sendNotifyMessage)(std::string message, std::string value);
+  double (*timeSeconds)();
+  double (*timeElapsed)();
+  void (*saveScene)(bool includeIds, objid sceneId);
+  std::map<std::string, std::string> (*listServers)();
+  std::string (*connectServer)(std::string server);
+  void (*disconnectServer)();
+  void (*sendMessageTcp)(std::string data);
+  void (*sendMessageUdp)(std::string data);
+  void (*playRecording)(objid id, std::string recordingPath);
+  void (*stopRecording)(objid id, std::string recordingPath);
+  objid (*createRecording)(objid id);
+  void (*saveRecording)(objid recordingId, std::string filepath);
+  objid (*makeObjectAttr)(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes);
+  void (*makeParent)(objid child, objid parent);
+  std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
+  void (*saveScreenshot)(std::string);
+  void (*setState)(std::string);
+  void (*setFloatState)(std::string stateName, float value);
+  void (*setIntState)(std::string stateName, int value);
+  glm::vec3 (*navPosition)(objid, glm::vec3 pos);
+  void (*emit)(objid id, std::optional<glm::vec3> initPosition, std::optional<glm::quat> initOrientation, std::optional<glm::vec3> initVelocity, std::optional<glm::vec3> initAvelocity);
+  objid (*loadAround)(objid);
+  void (*rmLoadAround)(objid);
+  void (*generateMesh)(std::vector<glm::vec3> face, std::vector<glm::vec3> points, std::string);
+  std::map<std::string, std::string> (*getArgs)();
+  bool (*lock)(std::string, objid);
+  bool (*unlock)(std::string, objid);
+  void (*debugInfo)(std::string infoType, std::string filepath);
+  void (*setWorldState)(std::vector<ObjectValue> values);
+  void (*enforceLayout)(objid layoutId);
+  
+
+  //std::vector<func_t> registerGuileFns
 
 };
 
