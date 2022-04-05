@@ -97,6 +97,8 @@ glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
 
 SchemeBindingCallbacks schemeBindings;
+CScriptBindingCallbacks cBindings;
+
 std::queue<StringString> channelMessages;
 KeyRemapper keyMapper;
 extern std::vector<InputDispatch> inputFns;
@@ -283,9 +285,11 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
   auto obj2Name = getGameObject(world, obj2Id).name;
   maybeTeleportObjects(world, obj1Id, obj2Id);
   schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
+  cBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
   schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
+  cBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
 }
 
 
@@ -693,6 +697,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
 
 void onClientMessage(std::string message){
   schemeBindings.onTcpMessage(message);
+  cBindings.onTcpMessage(message);
 }
 
 std::string screenshotPath = "./res/textures/screenshot.png";
@@ -1308,8 +1313,10 @@ int main(int argc, char* argv[]){
   registerGuileTypes(extensions);
 
   schemeBindings = getSchemeCallbacks();
+  cBindings = getCScriptBindingCallbacks();
   if(bootStrapperMode){
-    netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
+    //netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
+    netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave);
   }
 
 
@@ -1654,6 +1661,7 @@ int main(int argc, char* argv[]){
       auto selectedId = selected(state.editor);
       if (selectedId != -1){
         schemeBindings.onObjectSelected(selectedId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+        cBindings.onObjectSelected(selectedId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       }
       shouldCallItemSelected = false;
     }
@@ -1661,9 +1669,11 @@ int main(int argc, char* argv[]){
     if (state.lastHoverIndex != state.currentHoverIndex){
       if (state.lastHoveredIdInScene){
         schemeBindings.onObjectHover(state.lastHoverIndex, false);
+        cBindings.onObjectHover(state.lastHoverIndex, false);
       }
       if (state.hoveredIdInScene){
         schemeBindings.onObjectHover(state.currentHoverIndex, true);
+        cBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
 
@@ -1675,7 +1685,9 @@ int main(int argc, char* argv[]){
     glfwPollEvents();
     
     schemeBindings.onFrame();
+    cBindings.onFrame();
     schemeBindings.onMessage(channelMessages);  // modifies the queue
+    cBindings.onMessage(channelMessages);
     extensionsOnFrame(extensions);
     unloadScriptsCleanup();
 

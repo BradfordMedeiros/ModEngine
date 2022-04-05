@@ -21,6 +21,7 @@ extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
 extern std::map<std::string, objid> activeLocks;
 extern SchemeBindingCallbacks schemeBindings;
+extern CScriptBindingCallbacks cBindings;
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByName(world, name, sceneId);
@@ -407,6 +408,7 @@ Transformation getCameraTransform(){
       state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
       state.activeCameraData = &getCamera(world, state.activeCameraObj -> id);
       schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
+      cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
     }
     auto oldCameraPosition = fullTransformation(world.sandbox, state.activeCameraObj -> id);
     auto newCameraPosition = fullTransformation(world.sandbox, state.cameraInterp.targetCam);
@@ -445,6 +447,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
   state.activeCameraData = &getCamera(world, cameraId);
   setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
   schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
+  cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
   std::cout << "set active camera to id: " << cameraId << std::endl;
   std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
 }
