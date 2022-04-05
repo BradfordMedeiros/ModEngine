@@ -639,7 +639,6 @@ void addObjectToWorld(
         .addEmitter =  [](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
         .ensureMeshLoaded = [](std::string meshName, std::vector<std::string> fieldsToCopy) -> std::vector<std::string> { return {}; },
         .onCollisionChange = []() -> void {},
-        .onCreateCustomElement = interface.onCreateCustomElement,
       }; 
       auto gameobjObj = createObjectType(getType(name), attr, util);
       returnobjs.push_back(gameobjObj);
@@ -654,7 +653,6 @@ void addObjectToWorld(
       .addEmitter = addEmitterObject,
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange,
-      .onCreateCustomElement = interface.onCreateCustomElement,
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
     addObjectType(world.objectMapping, gameobjObj, id);
@@ -695,6 +693,7 @@ void addSerialObjectsToWorld(
     auto obj = getGameObject(world, id);
     if (obj.script != ""){
       interface.loadScript(obj.script, id, sceneId);
+      interface.loadCScript(obj.script, id, sceneId);
     }
   }
 
@@ -734,8 +733,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
     },
-    [&world, name]() -> void { removeEmitter(world.emitters, name); },
-    interface.onRemoveCustomElement
+    [&world, name]() -> void { removeEmitter(world.emitters, name); }
   );
   
   world.onObjectDelete(objectId, netsynchronized);
@@ -744,6 +742,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   freeAnimationsForOwner(world, objectId);
   if (scriptName != ""){
     interface.unloadScript(scriptName, objectId);
+    interface.unloadCScript(scriptName, objectId);
   }
 }
 

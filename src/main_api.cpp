@@ -52,6 +52,9 @@ void clearImpulse(int32_t index){
 }
 
 void loadScriptFromWorld(std::string script, objid id, objid sceneId){
+  if (script == "native/basic_test"){
+    return;
+  }
   auto name = getGameObject(world, id).name;
   std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
   loadScript(script, id, sceneId, bootStrapperMode, false);

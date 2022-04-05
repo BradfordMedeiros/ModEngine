@@ -190,8 +190,7 @@ void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
-  std::function<void()> rmEmitter,
-  std::function<void(int)> onRemoveCustomElement
+  std::function<void()> rmEmitter
 );
 
 struct DefaultMeshes {

@@ -1319,16 +1319,28 @@ int main(int argc, char* argv[]){
   interface = SysInterface {
     .loadScript = loadScriptFromWorld,
     .unloadScript = [&extensions](std::string scriptpath, objid id) -> void {
+      if (scriptpath == "native/basic_test"){
+        return;
+      }
       unloadScript(scriptpath, id, [&extensions, id]() -> void {
         extensionsUnloadScript(extensions, id);
       }); 
       removeLocks(id);
       removeLinesByOwner(id);
     },
+    .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
+      //    .onCreateCustomElement = createCustomObj,
+      createCustomObj(id, script.c_str());
+
+    },
+    .unloadCScript = [&extensions](std::string scriptpath, objid id) -> void {
+      extensionsUnloadScript(extensions, id);
+      removeCustomObj(id);
+      removeLocks(id);
+      removeLinesByOwner(id);
+    },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime,
-    .onCreateCustomElement = createCustomObj,
-    .onRemoveCustomElement = removeCustomObj
   };
 
   std::vector<std::string> defaultMeshesToLoad {
