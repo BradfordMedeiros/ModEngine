@@ -1,4 +1,4 @@
-#include "./customobj_sample.h"
+#include "./cscript_sample.h"
 
 void* createBasicTest(){
   std::cout << "custom binding: create basic" << std::endl;

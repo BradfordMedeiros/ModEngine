@@ -17,7 +17,7 @@
 #include "./netscene.h"
 #include "./worldtiming.h"
 #include "./renderstages.h"
-#include "./customobj/customobj.h"
+#include "./cscript/cscript.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 

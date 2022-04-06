@@ -1,13 +1,13 @@
-#ifndef MOD_CUSTOMOBJ
-#define MOD_CUSTOMOBJ
+#ifndef MOD_CSCRIPT
+#define MOD_CSCRIPT
 
 #include <iostream>
 #include <vector>
 #include <map>
 #include <set>
 #include <assert.h>
-#include "./customobj_binding.h"
-#include "./customobj_sample.h"
+#include "./cscript_binding.h"
+#include "./cscript_sample.h"
 
 void registerAllBindings(std::vector<CustomObjBinding> pluginBindings);
 void createCustomObj(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript);

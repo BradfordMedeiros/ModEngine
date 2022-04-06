@@ -1,5 +1,5 @@
-#ifndef MOD_CUSTOMOBJ_BINDING
-#define MOD_CUSTOMOBJ_BINDING
+#ifndef MOD_CSCRIPT_BINDING
+#define MOD_CSCRIPT_BINDING
 
 #include <string>
 #include <functional>

@@ -1,4 +1,4 @@
-#include "./customobj_binding.h"
+#include "./cscript_binding.h"
 
 CustomObjBinding createCustomBinding(const char* name, CustomApiBindings& api){
   CustomObjBinding defaultBinding { 

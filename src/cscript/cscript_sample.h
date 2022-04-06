@@ -1,9 +1,9 @@
-#ifndef MOD_CUSTOMOBJ_SAMPLE
-#define MOD_CUSTOMOBJ_SAMPLE
+#ifndef MOD_CSCRIPT_SAMPLE
+#define MOD_CSCRIPT_SAMPLE
 
 #include <vector>
 #include <iostream>
-#include "./customobj_binding.h"
+#include "./cscript_binding.h"
 
 CustomObjBinding sampleBindingPlugin(CustomApiBindings& api);
 

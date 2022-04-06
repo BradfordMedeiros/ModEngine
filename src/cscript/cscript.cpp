@@ -1,4 +1,4 @@
-#include "./customobj.h"
+#include "./cscript.h"
 
 /* This should be temporary to try out rendering in C++ 
    Should port the scheme scripting to C++, and then these just become ordinary api methods
