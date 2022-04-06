@@ -29,6 +29,7 @@
 #include "./renderstages.h"
 #include "./cscript/cscript.h"
 #include "./cscript/cscripts/cscript_sample.h"
+#include "./cscript/cscripts/cscript_scheme.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -1229,7 +1230,7 @@ int main(int argc, char* argv[]){
     .setWorldState = setWorldState,
     .enforceLayout = enforceLayout,
   };
-  registerAllBindings({ sampleBindingPlugin(pluginApi) });
+  registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 
   cBindings = getCScriptBindingCallbacks();
   if(bootStrapperMode){
