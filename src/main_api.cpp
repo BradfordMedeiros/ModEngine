@@ -20,7 +20,6 @@ extern NetCode netcode;
 extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
 extern std::map<std::string, objid> activeLocks;
-extern SchemeBindingCallbacks schemeBindings;
 extern CScriptBindingCallbacks cBindings;
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
@@ -50,15 +49,6 @@ void clearImpulse(int32_t index){
   if (rigidBody != NULL){
     clearImpulse(rigidBody);
   }
-}
-
-void loadScriptFromWorld(std::string script, objid id, objid sceneId){
-  if (script == "native/basic_test"){
-    return;
-  }
-  auto name = getGameObject(world, id).name;
-  std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-  loadScript(script, id, sceneId, bootStrapperMode, false);
 }
 
 std::vector<std::string> listSceneFiles(){
@@ -407,7 +397,6 @@ Transformation getCameraTransform(){
       state.cameraInterp.shouldInterpolate = false;
       state.activeCameraObj = &getGameObject(world, state.cameraInterp.targetCam);
       state.activeCameraData = &getCamera(world, state.activeCameraObj -> id);
-      schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
       cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
     }
     auto oldCameraPosition = fullTransformation(world.sandbox, state.activeCameraObj -> id);
@@ -446,7 +435,6 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
   state.activeCameraObj = &getGameObject(world, cameraId);
   state.activeCameraData = &getCamera(world, cameraId);
   setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
-  schemeBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
   cBindings.onCameraSystemChange(state.activeCameraObj -> name, state.useDefaultCamera);
   std::cout << "set active camera to id: " << cameraId << std::endl;
   std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;

@@ -3,7 +3,6 @@
 
 #include <GLFW/glfw3.h>
 #include "./scene/scene.h"
-#include "./scheme/scriptmanager.h"
 #include "./main_api.h"
 #include "./easyuse/easy_use.h"
 #include "./easyuse/editor.h"

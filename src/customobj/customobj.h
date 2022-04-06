@@ -10,7 +10,7 @@
 #include "./customobj_sample.h"
 
 void registerAllBindings(std::vector<CustomObjBinding> pluginBindings);
-void createCustomObj(int id, const char* name);
+void createCustomObj(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript);
 void removeCustomObj(int id);
 void renderCustomObj(int id);
 

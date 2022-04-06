@@ -7,7 +7,6 @@
 #include "./scene/scene_object.h"
 #include "./state.h"
 #include "./scene/physics.h"
-#include "./scheme/scriptmanager.h"
 #include "./scene/sprites/sprites.h"
 #include "./scene/types/sound.h"
 #include "./network/servers.h"
@@ -40,8 +39,6 @@ void setCameraRotation(glm::quat orientation);
 void applyImpulse(int32_t index, glm::vec3 impulse);
 void applyImpulseRel(int32_t index, glm::vec3 impulse);
 void clearImpulse(int32_t index);
-
-void loadScriptFromWorld(std::string script, objid id, objid sceneId);
 
 std::vector<std::string> listSceneFiles();
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens);

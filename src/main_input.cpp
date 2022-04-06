@@ -3,7 +3,7 @@
 extern World world;
 extern RenderStages renderStages;
 extern engineState state;
-extern SchemeBindingCallbacks schemeBindings;
+extern CScriptBindingCallbacks cBindings;
 extern bool disableInput;
 extern KeyRemapper keyMapper;
 extern bool useYAxis;
@@ -99,7 +99,7 @@ void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
   float xNdc = 2 * (state.cursorLeft / (float)state.resolution.x) - 1;
   float yNdc = -1 * (2 * (state.cursorTop  / (float)state.resolution.y) - 1);
-  schemeBindings.onMouseMoveCallback(state.offsetX, state.offsetY, xNdc, yNdc); 
+  cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, xNdc, yNdc);
   processManipulator();
 }
 
@@ -119,7 +119,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
     setNoActiveObj(state.editor);
   }
 
-  schemeBindings.onMouseCallback(button, action, mods);
+  cBindings.onMouseCallback(button, action, mods);
 
   if (button == 0){
     for (auto voxelData : getSelectedVoxels()){
@@ -220,8 +220,8 @@ void scroll_callback(GLFWwindow *window, engineState& state, double xoffset, dou
 
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
-  schemeBindings.onScrollCallback(yoffset);
-  
+  cBindings.onScrollCallback(yoffset);
+
   if (selected(state.editor) != -1 && idExists(world.sandbox, selected(state.editor))){
     maybeChangeTexture(selected(state.editor));
   }
@@ -241,7 +241,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 
 
 void keyCharCallback(unsigned int codepoint){
-  schemeBindings.onKeyCharCallback(codepoint); 
+  cBindings.onKeyCharCallback(codepoint);
   //std::cout << "Key is: " << codepoint << std::endl;
   applyKey(world.objectMapping, codepoint, [](std::string text) -> void {
     std::cout << "set text placeholder: " << text << std::endl;
@@ -272,7 +272,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   if (state.printKeyStrokes){
     std::cout << "key: " << key << " action: " << action << std::endl;
   }
-  schemeBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
+  cBindings.onKeyCallback(getKeyRemapping(keyMapper, key), scancode, action, mods);
 
   // below stuff is editor/misc stuff
   if (key == 259){  // backspace

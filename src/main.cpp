@@ -8,7 +8,6 @@
 #include "./scene/animation/animation.h"
 #include "./scene/animation/playback.h"
 #include "./scene/animation/recorder.h"
-#include "./scheme/scriptmanager.h"
 #include "./shaders.h"
 #include "./translations.h"
 #include "./colorselection.h"
@@ -24,7 +23,6 @@
 #include "./easyuse/manipulator.h"
 #include "./common/profiling.h"
 #include "./benchmark.h"
-#include "./extensions.h"
 #include "./netscene.h"
 #include "./worldtiming.h"
 #include "./main_test.h"
@@ -96,7 +94,6 @@ std::map<objid, unsigned int> portalIdCache;
 glm::mat4 orthoProj;
 unsigned int uiShaderProgram;
 
-SchemeBindingCallbacks schemeBindings;
 CScriptBindingCallbacks cBindings;
 
 std::queue<StringString> channelMessages;
@@ -284,11 +281,9 @@ void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2,
   auto obj1Name = getGameObject(world, obj1Id).name;
   auto obj2Name = getGameObject(world, obj2Id).name;
   maybeTeleportObjects(world, obj1Id, obj2Id);
-  schemeBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
   cBindings.onCollisionEnter(obj1Id, obj2Id, contactPos, normal, normal * glm::vec3(-1.f, -1.f, -1.f)); 
 }
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2){
-  schemeBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
   cBindings.onCollisionExit(getIdForCollisionObject(world, obj1), getIdForCollisionObject(world, obj2));
 }
 
@@ -696,7 +691,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
 }
 
 void onClientMessage(std::string message){
-  schemeBindings.onTcpMessage(message);
   cBindings.onTcpMessage(message);
 }
 
@@ -977,7 +971,6 @@ int main(int argc, char* argv[]){
    ("l,benchmark", "Benchmark file to write results", cxxopts::value<std::string>()->default_value(""))
    ("e,timetoexit", "Time to run the engine before exiting in ms", cxxopts::value<int>()->default_value("0"))
    ("q,headlessmode", "Hide the window of the game engine", cxxopts::value<bool>()->default_value("false"))
-   ("j,extensions", "SO files to load", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
    ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
@@ -1013,9 +1006,6 @@ int main(int argc, char* argv[]){
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
-
-  auto extensions = loadExtensions(result["extensions"].as<std::vector<std::string>>());
-  extensionsInit(extensions, currentModuleId, getArgs);
 
   keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
 
@@ -1239,83 +1229,9 @@ int main(int argc, char* argv[]){
     .enforceLayout = enforceLayout,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi) });
-  createStaticSchemeBindings(
-    listSceneId,
-    loadScene,
-    unloadScene,
-    unloadAllScenes,
-    listScenes,
-    listSceneFiles,
-    sendLoadScene,
-    createScene,
-    moveCamera, 
-    rotateCamera, 
-    removeObjectById, 
-    getObjectsByType, 
-    setActiveCamera,
-    drawText,
-    addLineNextCycle,
-    freeLine,
-    getGameObjectName,
-    getGameObjectAttr,
-    setGameObjectAttr,
-    getGameObjectPosition,
-    setGameObjectPosition,
-    setGameObjectPositionRelative,
-    getGameObjectRotation,
-    setGameObjectRotationRelative,
-    setFrontDelta,
-    moveRelative,
-    moveRelative,
-    orientationFromPos,
-    getGameObjectByName,
-    applyImpulse,
-    applyImpulseRel,
-    clearImpulse,
-    listAnimations,
-    playAnimation,
-    listSounds,
-    playSoundState,
-    listModels,
-    sendNotifyMessage,
-    timeSeconds,
-    timeElapsed,
-    saveScene,
-    listServers,
-    connectServer,
-    disconnectServer,
-    sendMessageToActiveServer,
-    sendDataUdp,
-    playRecording,
-    stopRecording,
-    createRecording,
-    saveRecording,
-    makeObjectAttr,
-    makeParent,
-    raycastW,
-    takeScreenshot,
-    setState,
-    setFloatState,
-    setIntState,
-    navPosition, 
-    emit,
-    addLoadingAround,
-    removeLoadingAround,
-    createGeneratedMesh,
-    getArgs,
-    lock,
-    unlock,
-    debugInfo,
-    setWorldState,
-    enforceLayout,
-    extensions.registerGuileFns
-  );
-  registerGuileTypes(extensions);
 
-  schemeBindings = getSchemeCallbacks();
   cBindings = getCScriptBindingCallbacks();
   if(bootStrapperMode){
-    //netcode = initNetCode(schemeBindings.onPlayerJoined, schemeBindings.onPlayerLeave);
     netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave);
   }
 
@@ -1324,24 +1240,23 @@ int main(int argc, char* argv[]){
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
   interface = SysInterface {
-    .loadScript = loadScriptFromWorld,
-    .unloadScript = [&extensions](std::string scriptpath, objid id) -> void {
-      if (scriptpath == "native/basic_test"){
-        return;
-      }
-      unloadScript(scriptpath, id, [&extensions, id]() -> void {
-        extensionsUnloadScript(extensions, id);
-      }); 
-      removeLocks(id);
-      removeLinesByOwner(id);
-    },
     .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
       //    .onCreateCustomElement = createCustomObj,
-      createCustomObj(id, script.c_str());
-
+      /*  if (script == "native/basic_test"){
+     return;
+       }
+      auto name = getGameObject(world, id).name;
+      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
+     loadScript(script, id, sceneId, bootStrapperMode, false /*freescript*/ ;
+      createCustomObj(id, script.c_str(), sceneId, bootStrapperMode, false);
+      /*  /*if (script == "native/basic_test"){
+        return;
+      }
+       auto name = getGameObject(world, id).name;
+      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
+      loadScript(script, id, sceneId, bootStrapperMode, false);*/
     },
-    .unloadCScript = [&extensions](std::string scriptpath, objid id) -> void {
-      extensionsUnloadScript(extensions, id);
+    .unloadCScript = [](std::string scriptpath, objid id) -> void {
       removeCustomObj(id);
       removeLocks(id);
       removeLinesByOwner(id);
@@ -1387,7 +1302,7 @@ int main(int argc, char* argv[]){
   }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    loadScript(script, getUniqueObjId(), -1, bootStrapperMode, true);
+    createCustomObj(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
   }
 
   bool fpsFixed = result["fps-fixed"].as<bool>();
@@ -1660,7 +1575,6 @@ int main(int argc, char* argv[]){
     if (shouldCallItemSelected){
       auto selectedId = selected(state.editor);
       if (selectedId != -1){
-        schemeBindings.onObjectSelected(selectedId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
         cBindings.onObjectSelected(selectedId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       }
       shouldCallItemSelected = false;
@@ -1668,11 +1582,9 @@ int main(int argc, char* argv[]){
 
     if (state.lastHoverIndex != state.currentHoverIndex){
       if (state.lastHoveredIdInScene){
-        schemeBindings.onObjectHover(state.lastHoverIndex, false);
         cBindings.onObjectHover(state.lastHoverIndex, false);
       }
       if (state.hoveredIdInScene){
-        schemeBindings.onObjectHover(state.currentHoverIndex, true);
         cBindings.onObjectHover(state.currentHoverIndex, true);
       }
     }
@@ -1684,13 +1596,8 @@ int main(int argc, char* argv[]){
     handleInput(window);
     glfwPollEvents();
     
-    schemeBindings.onFrame();
     cBindings.onFrame();
-    schemeBindings.onMessage(channelMessages);  // modifies the queue
     cBindings.onMessage(channelMessages);
-    extensionsOnFrame(extensions);
-    unloadScriptsCleanup();
-
     portalIdCache.clear();
 
     PROFILE("BLOOM-RENDERING",
@@ -1786,7 +1693,6 @@ int main(int argc, char* argv[]){
     deinitPhysics(world.physicsEnvironment); 
     stopSoundSystem();
     glfwTerminate(); 
-    unloadExtensions(extensions);
 
   return 0;
 }

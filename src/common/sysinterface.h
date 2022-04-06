@@ -5,8 +5,6 @@
 #include "./util.h"
 
 struct SysInterface {
-  std::function<void(std::string, objid, objid)> loadScript;
-  std::function<void(std::string, objid)> unloadScript;
   std::function<void(std::string, objid, objid)> loadCScript;
   std::function<void(std::string, objid)> unloadCScript;
   std::function<void(objid)> stopAnimation;

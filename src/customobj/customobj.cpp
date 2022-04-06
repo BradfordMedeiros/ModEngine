@@ -35,7 +35,7 @@ CustomObjBinding* getCustomObjBinding(const char* name){
   return NULL;
 }
 
-void createCustomObj(int id, const char* name){
+void createCustomObj(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript){
   assert(customObjInstances.find(id) == customObjInstances.end());
   auto binding = getCustomObjBinding(name);
   auto data = binding -> create();
@@ -66,6 +66,7 @@ void renderCustomObj(int id){
 void onCFrameAllScripts(){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCustomObjBinding(objInstance.name.c_str());
+    assert(binding != NULL);
     binding -> onFrame();
   }
 }

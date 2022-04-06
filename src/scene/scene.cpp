@@ -692,7 +692,6 @@ void addSerialObjectsToWorld(
   for (auto id : idsAdded){
     auto obj = getGameObject(world, id);
     if (obj.script != ""){
-      interface.loadScript(obj.script, id, sceneId);
       interface.loadCScript(obj.script, id, sceneId);
     }
   }
@@ -741,7 +740,6 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   freeTextureRefsByOwner(world, objectId);
   freeAnimationsForOwner(world, objectId);
   if (scriptName != ""){
-    interface.unloadScript(scriptName, objectId);
     interface.unloadCScript(scriptName, objectId);
   }
 }
