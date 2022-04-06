@@ -7,6 +7,8 @@ CustomObjBinding createCustomBinding(const char* name, CustomApiBindings& api){
     .create = [](void) -> void* { return NULL; },
     .remove = [](void*) -> void { },
     .render = [](void*) -> void { },
+    
+    .onFrame = []() -> void { },
   };
   return defaultBinding;
 }
