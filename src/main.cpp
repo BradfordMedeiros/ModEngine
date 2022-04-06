@@ -28,6 +28,7 @@
 #include "./main_test.h"
 #include "./renderstages.h"
 #include "./cscript/cscript.h"
+#include "./cscript/cscripts/cscript_sample.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
