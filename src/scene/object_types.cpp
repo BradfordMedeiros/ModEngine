@@ -208,12 +208,12 @@ std::vector<ObjectType> objTypes = {
   },
   ObjectType {
     .name = "custom", 
-    .variantType = getVariantIndex(GameObjectCustom{}),
-    .createObj = createCustom, 
+    .variantType = getVariantIndex(GameObjectNil{}),
+    .createObj = createNil, 
     .objectAttributes = nothingObjAttr,
     .setAttributes = nothingSetObjAttr,
     .serialize = serializeNotImplemented,
-    .removeObject  = convertRemove<GameObjectCustom>(removeCustom),
+    .removeObject  = removeDoNothing,
   },
 };
 
@@ -518,7 +518,7 @@ int renderObject(
     return defaultNodeVertexCount + sphereVertexCount;
   }
 
-  auto customObj = std::get_if<GameObjectCustom>(&toRender);
+  auto customObj = std::get_if<GameObjectNil>(&toRender);
   if (customObj != NULL){
     int vertexCount;
     if (showDebug){

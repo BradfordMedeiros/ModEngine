@@ -24,7 +24,7 @@
 #include "./objtypes/obj_emitter.h"
 #include "./objtypes/obj_mesh.h"
 #include "./objtypes/obj_voxel.h"
-#include "./objtypes/obj_custom.h"
+#include "./objtypes/obj_nil.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -55,7 +55,7 @@ typedef std::variant<
   GameObjectUIText,
   GameObjectUILayout,
   GameObjectGeo,
-  GameObjectCustom
+  GameObjectNil
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
