@@ -1,0 +1,284 @@
+#include "./scriptmanager.h"
+
+struct ScriptModule {
+  objid id;
+  objid sceneId;
+  SCM module;
+  bool isvalid;
+};
+static std::map<std::string, ScriptModule> scriptnameToModule;
+
+// IMPORTANT BUG --> the create/destroy of modules probably a huge memory leak. 
+// Need to figure out how to properly bring the up/down (global module tree?)
+
+std::string getScriptName(std::string scriptpath, objid id){
+  return scriptpath + ":" + std::to_string(id);
+}
+
+objid currentModuleId(){
+  SCM module = scm_current_module();
+  for (auto &[script, scriptModule] : scriptnameToModule){
+    //std::cout << "Current module id: Checking module: " << scriptModule.id << std::endl;
+    if (module == scriptModule.module){
+      return scriptModule.id;
+    }
+  }
+  assert(false);
+}
+
+objid currentSceneId(){
+  SCM module = scm_current_module();
+  for (auto &[script, scriptModule] : scriptnameToModule){
+    std::cout << "Current scene id: Checking module: " << scriptModule.id << std::endl;
+    if (module == scriptModule.module){
+      return scriptModule.sceneId;
+    }
+  }
+  assert(false); 
+}
+
+void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, bool isFreeScript){ 
+  auto script = getScriptName(scriptpath, id);
+
+  std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
+  assert(scriptnameToModule.find(script) == scriptnameToModule.end());
+  SCM module = scm_c_define_module(script.c_str(), NULL, NULL);         // should think about what we should name the module
+  scriptnameToModule[script] = ScriptModule {
+    .id = id,
+    .sceneId = sceneId,
+    .module = module,
+    .isvalid = true,
+  };                    
+  scm_set_current_module(module);
+  defineFunctions(id, isServer, isFreeScript);
+  scm_c_primitive_load(scriptpath.c_str());
+  onFrame();
+}
+
+// @TODO -- need to figure out how to really unload a module.
+// I don't know this actually causes this module to be garbage collected.
+void unloadScript(std::string scriptpath, objid id, std::function<void()> additionalUnload){
+  auto script = getScriptName(scriptpath, id);
+  auto module = scriptnameToModule.at(script).module;
+  scm_set_current_module(module);
+
+  additionalUnload();
+  onScriptUnload();
+
+  std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
+  assert(scriptnameToModule.find(script) != scriptnameToModule.end());
+  scriptnameToModule.at(script).isvalid = false;
+}
+void unloadScriptsCleanup(){
+  std::vector<std::string> scriptsToRemove;
+  for (auto &[script, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      scriptsToRemove.push_back(script);
+    }
+  } 
+  for (auto script : scriptsToRemove){
+    scriptnameToModule.erase(script);
+  }
+}
+
+void onFrameAllScripts(){
+  for (auto &[script, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onFrame();
+  }
+}
+
+void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    auto moduleId = currentModuleId();
+    if (moduleId == obj1){
+      onCollisionEnter(obj2, pos, oppositeNormal);
+    }else if (moduleId == obj2){
+      onCollisionEnter(obj1, pos, normal);
+    }
+  }
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    scm_set_current_module(scriptModule.module);
+    onGlobalCollisionEnter(obj1, obj2, pos, normal, oppositeNormal);
+  }
+}
+void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    auto moduleId = currentModuleId();
+    if (moduleId == obj1){
+      onCollisionExit(obj2);
+    }else if (moduleId == obj2){
+      onCollisionExit(obj1);
+    }
+  }
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    scm_set_current_module(scriptModule.module);
+    onGlobalCollisionExit(obj1, obj2);
+  }
+}
+
+void onMouseCallbackAllScripts(int button, int action, int mods){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onMouseCallback(button, action, mods);
+  }
+}
+
+void onMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
+  }
+}
+void onScrollCallbackAllScripts(double amount){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onScrollCallback(amount);
+  }
+}
+
+void onObjectSelectedAllScripts(int32_t index, glm::vec3 color){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onObjectSelected(index, color);
+  }
+}
+void onObjectHoverAllScripts(int32_t index, bool isHover){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    if (isHover){
+      onObjectHover(index);
+    }else{
+      onObjectUnhover(index);
+    }
+  }  
+}
+void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onKeyCallback(key, scancode, action, mods);
+  }
+}
+void onKeyCharCallbackAllScripts(unsigned int codepoint){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onKeyCharCallback(codepoint);
+  }
+}
+
+void onCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onCameraSystemChange(camera, usingBuiltInCamera);
+  }
+}
+void onMessageAllScripts(std::queue<StringString>& messages){
+  while (!messages.empty()){
+    auto message = messages.front();
+    messages.pop();
+
+    for (auto &[name, scriptModule] : scriptnameToModule){
+      if (!scriptModule.isvalid){
+        continue;
+      }
+      scm_set_current_module(scriptModule.module);
+      onAttrMessage(message.strTopic, message.strValue);
+    }
+  }
+}
+
+void onTcpMessageAllScripts(std::string& message){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onTcpMessage(message);
+  } 
+}
+void onUdpMessageAllScripts(std::string& message){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onUdpMessage(message);
+  } 
+}
+
+void onPlayerJoinedAllScripts(std::string& connectionHash){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onPlayerJoined(connectionHash);
+  } 
+}
+void onPlayerLeaveAllScripts(std::string& connectionHash){
+  for (auto &[_, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
+    }
+    scm_set_current_module(scriptModule.module);
+    onPlayerLeave(connectionHash);
+  } 
+}
+
+SchemeBindingCallbacks getSchemeCallbacks(){
+  SchemeBindingCallbacks callbackFuncs = {
+    .onFrame = onFrameAllScripts,
+    .onCollisionEnter = onCollisionEnterAllScripts,
+    .onCollisionExit = onCollisionExitAllScripts,
+    .onMouseCallback = onMouseCallbackAllScripts,
+    .onMouseMoveCallback = onMouseMoveCallbackAllScripts,
+    .onScrollCallback = onScrollCallbackAllScripts,
+    .onObjectSelected = onObjectSelectedAllScripts,
+    .onObjectHover = onObjectHoverAllScripts,
+    .onKeyCallback = onKeyCallbackAllScripts,
+    .onKeyCharCallback = onKeyCharCallbackAllScripts,
+    .onCameraSystemChange = onCameraSystemChangeAllScripts,
+    .onMessage = onMessageAllScripts,
+    .onTcpMessage = onTcpMessageAllScripts,
+    .onUdpMessage = onUdpMessageAllScripts,
+    .onPlayerJoined = onPlayerJoinedAllScripts,
+    .onPlayerLeave = onPlayerLeaveAllScripts,
+  };
+
+  return callbackFuncs;
+}
