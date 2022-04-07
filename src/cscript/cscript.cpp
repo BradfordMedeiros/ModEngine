@@ -32,20 +32,6 @@ bool patternMatchesScriptName(std::string pattern, std::string scriptname){
 
 /* matching strategy: matches based upon registration order, * is a wildcard which matches anything*/
 CScriptBinding* getCScriptBinding(const char* name){
-  // thingiscool  =|= this*cool
-  // thingcoolcool
-
-  // thing1 index   thing2 index
-  // not wildcard
-  //  if letter in thing 2
-    //  if match advance both
-    //  if no match FAIL
-  // if wildcard in thing2
-    // two scenarios:
-    // scenario1: if only wildcard match advance left 
-    // scenario2: if match letter and wildcard, then 
-        // create two matchers, and advance both
-
   for (auto &customObj : bindings){
     if (patternMatchesScriptName(customObj.bindingMatcher, name)){
       return &customObj;
