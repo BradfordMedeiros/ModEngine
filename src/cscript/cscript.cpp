@@ -55,7 +55,7 @@ void unloadCScript(int id){
   if (instanceExists){
     auto objInstance = customObjInstances.at(id);
     auto binding = getCScriptBinding(objInstance.name.c_str());
-    binding -> remove(objInstance.data);   
+    binding -> remove(objInstance.name, id, objInstance.data);   
   }
 }
 void renderCustomObj(int id){

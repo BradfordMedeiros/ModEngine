@@ -14,7 +14,7 @@ void renderBasicTest(void* data){
 CScriptBinding sampleBindingPlugin(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/samplescript", api);
   binding.create = createBasicTest;
-  binding.remove = [&api] (void* data) -> void {
+  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
     int* value = (int*)data;
     delete value;
     std::cout << "custom binding: remove basic" << std::endl;

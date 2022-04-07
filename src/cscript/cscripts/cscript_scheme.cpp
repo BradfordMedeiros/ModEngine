@@ -99,7 +99,10 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   );
 
   binding.create = createSchemeScript;
-  binding.remove = [&api] (void* data) -> void {};
+  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
+    std::cout << "todo -> scheme -> unload script here" << std::endl;
+    unloadScript(scriptname, id);
+  };
 
   return binding;
 }

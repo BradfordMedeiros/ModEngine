@@ -32,7 +32,7 @@ objid currentModuleId();
 objid currentSceneId();
 SchemeBindingCallbacks getSchemeCallbacks();
 void loadScript(std::string script, objid id, objid sceneId, bool isServer, bool isFreeScript);
-void unloadScript(std::string script, objid id, std::function<void()> additionalUnload);
+void unloadScript(std::string script, objid id);
 void unloadScriptsCleanup();
 
 #endif

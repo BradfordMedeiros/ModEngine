@@ -57,12 +57,11 @@ void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, 
 
 // @TODO -- need to figure out how to really unload a module.
 // I don't know this actually causes this module to be garbage collected.
-void unloadScript(std::string scriptpath, objid id, std::function<void()> additionalUnload){
+void unloadScript(std::string scriptpath, objid id){
   auto script = getScriptName(scriptpath, id);
   auto module = scriptnameToModule.at(script).module;
   scm_set_current_module(module);
 
-  additionalUnload();
   onScriptUnload();
 
   std::cout << "SYSTEM: UNLOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;

@@ -7,7 +7,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* { 
         return NULL; 
     },
-    .remove = [](void*) -> void { },
+    .remove = [](std::string scriptname, objid id, void*) -> void { },
     .render = [](void*) -> void { },
     
     .onFrame = []() -> void { },
