@@ -4,7 +4,9 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
   CScriptBinding defaultBinding { 
     .bindingMatcher = bindingMatcher,
     .api = api,
-    .create = [](void) -> void* { return NULL; },
+    .create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* { 
+        return NULL; 
+    },
     .remove = [](void*) -> void { },
     .render = [](void*) -> void { },
     

@@ -1,6 +1,6 @@
 #include "./cscript_sample.h"
 
-void* createBasicTest(){
+void* createBasicTest(std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript){
   std::cout << "custom binding: create basic" << std::endl;
   int* value = new int;
   *value = random();

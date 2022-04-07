@@ -84,7 +84,7 @@ struct CustomApiBindings {
 struct CScriptBinding {
   std::string bindingMatcher;
   CustomApiBindings& api;
-  std::function<void*()> create;
+  std::function<void*(std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript)> create;
   std::function<void(void*)> remove;
   std::function<void(void*)> render;
 

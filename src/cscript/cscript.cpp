@@ -58,7 +58,7 @@ CScriptBinding* getCScriptBinding(const char* name){
 void loadCScript(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript){
   assert(customObjInstances.find(id) == customObjInstances.end());
   auto binding = getCScriptBinding(name);
-  auto data = binding -> create();
+  auto data = binding -> create(name, id, sceneId, bootstrapperMode, isFreeScript);
   customObjInstances[id] = CustomObjInstance {
     .name = name,
     .data = data,
@@ -157,8 +157,8 @@ void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera
   }
 }
 void onCMessageAllScripts(std::queue<StringString>& messages){
-  std::cout << "not yet implemented" << std::endl; // this one is weird since the scheme fn would dequeue a queue
- // assert(false);
+  //std::cout << "on c message not yet implemented" << std::endl; // this one is weird since the scheme fn would dequeue a queue
+  //assert(false);
 }
 
 void onCTcpMessageAllScripts(std::string& message){

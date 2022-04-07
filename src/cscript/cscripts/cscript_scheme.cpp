@@ -2,12 +2,7 @@
 
 auto schemeCallbacks = getSchemeCallbacks();
 
-void* createSchemeScript(){
-  std::string scriptname = "./res/scripts/color.scm";
-  objid id = 4;
-  objid sceneId = 5;
-  bool isServer = false;
-  bool isFreeScript = false;
+void* createSchemeScript(std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript){
   loadScript(scriptname, id, sceneId, isServer, isFreeScript);
   return NULL;
 }
