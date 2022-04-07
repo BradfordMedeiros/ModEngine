@@ -6,11 +6,12 @@
 #include <map>
 #include <set>
 #include <assert.h>
+#include <regex>
 #include "./cscript_binding.h"
 
-void registerAllBindings(std::vector<CustomObjBinding> pluginBindings);
-void createCustomObj(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript);
-void removeCustomObj(int id);
+void registerAllBindings(std::vector<CScriptBinding> pluginBindings);
+void loadCScript(int id, const char* name, int sceneId, bool bootstrapperMode, bool isFreeScript);
+void unloadCScript(int id);
 void renderCustomObj(int id);
 
 struct CScriptBindingCallbacks {

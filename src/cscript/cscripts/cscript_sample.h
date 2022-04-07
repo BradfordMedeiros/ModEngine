@@ -5,6 +5,6 @@
 #include <iostream>
 #include "../cscript_binding.h"
 
-CustomObjBinding sampleBindingPlugin(CustomApiBindings& api);
+CScriptBinding sampleBindingPlugin(CustomApiBindings& api);
 
 #endif

@@ -1,11 +1,35 @@
 #include "./cscript_scheme.h"
 
+auto schemeCallbacks = getSchemeCallbacks();
+
 void* createSchemeScript(){
+  std::string scriptname = "./res/scripts/color.scm";
+  objid id = 4;
+  objid sceneId = 5;
+  bool isServer = false;
+  bool isFreeScript = false;
+  loadScript(scriptname, id, sceneId, isServer, isFreeScript);
   return NULL;
 }
 
-CustomObjBinding cscriptSchemeBinding(CustomApiBindings& api){
-  auto binding = createCustomBinding("./res/scripts/color.scm", api);
+CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
+  auto binding = createCScriptBinding("./res/scripts/color.scm", api);
+  binding.onFrame = schemeCallbacks.onFrame;
+  //binding.onCollisionEnter = schemeCallbacks.onCollisionEnter;
+  //binding.onCollisionExit = schemeCallbacks.onCollisionExit;
+  binding.onMouseCallback = schemeCallbacks.onMouseCallback;
+  binding.onMouseMoveCallback = schemeCallbacks.onMouseMoveCallback;
+  binding.onScrollCallback = schemeCallbacks.onScrollCallback;
+  binding.onObjectSelected = schemeCallbacks.onObjectSelected;
+  binding.onObjectHover = schemeCallbacks.onObjectHover;
+  binding.onKeyCallback = schemeCallbacks.onKeyCallback;
+  binding.onKeyCharCallback = schemeCallbacks.onKeyCharCallback;
+  binding.onCameraSystemChange = schemeCallbacks.onCameraSystemChange;
+  //binding.onMessage = schemeCallbacks.onMessage;
+  binding.onTcpMessage = schemeCallbacks.onTcpMessage;
+  binding.onUdpMessage = schemeCallbacks.onUdpMessage;
+  binding.onPlayerJoined = schemeCallbacks.onPlayerJoined;
+  binding.onPlayerLeave = schemeCallbacks.onPlayerLeave;
 
   createStaticSchemeBindings(
     api.listSceneId,
@@ -80,8 +104,7 @@ CustomObjBinding cscriptSchemeBinding(CustomApiBindings& api){
   );
 
   binding.create = createSchemeScript;
-  binding.remove = [&api] (void* data) -> void {
-    
-  };
+  binding.remove = [&api] (void* data) -> void {};
+
   return binding;
 }

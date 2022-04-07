@@ -1250,7 +1250,7 @@ int main(int argc, char* argv[]){
       auto name = getGameObject(world, id).name;
       std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
      loadScript(script, id, sceneId, bootStrapperMode, false /*freescript*/ ;
-      createCustomObj(id, script.c_str(), sceneId, bootStrapperMode, false);
+      loadCScript(id, script.c_str(), sceneId, bootStrapperMode, false);
       /*  /*if (script == "native/basic_test"){
         return;
       }
@@ -1259,7 +1259,7 @@ int main(int argc, char* argv[]){
       loadScript(script, id, sceneId, bootStrapperMode, false);*/
     },
     .unloadCScript = [](std::string scriptpath, objid id) -> void {
-      removeCustomObj(id);
+      unloadCScript(id);
       removeLocks(id);
       removeLinesByOwner(id);
     },
@@ -1304,7 +1304,7 @@ int main(int argc, char* argv[]){
   }
 
   for (auto script : result["scriptpath"].as<std::vector<std::string>>()){
-    createCustomObj(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
+    loadCScript(getUniqueObjId(), script.c_str(), -1, bootStrapperMode, true);
   }
 
   bool fpsFixed = result["fps-fixed"].as<bool>();

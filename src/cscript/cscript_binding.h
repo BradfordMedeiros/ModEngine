@@ -80,8 +80,9 @@ struct CustomApiBindings {
   //std::vector<func_t> registerGuileFns
 };
 
-struct CustomObjBinding {
-  std::string name;
+
+struct CScriptBinding {
+  std::string bindingMatcher;
   CustomApiBindings& api;
   std::function<void*()> create;
   std::function<void(void*)> remove;
@@ -89,9 +90,23 @@ struct CustomObjBinding {
 
   // Other callbacks
   func onFrame;
-
+  //colposfun onCollisionEnter;
+  //colfun onCollisionExit;
+  mousecallback onMouseCallback;
+  mousemovecallback onMouseMoveCallback;
+  scrollcallback onScrollCallback;
+  onobjectSelectedFunc onObjectSelected;
+  onobjectHoverFunc onObjectHover;
+  keycallback onKeyCallback;
+  keycharcallback onKeyCharCallback;
+  stringboolFunc onCameraSystemChange;
+  //messagefunc onMessage;
+  stringfunc onTcpMessage;
+  stringfunc onUdpMessage;
+  stringfunc onPlayerJoined;
+  stringfunc onPlayerLeave;
 };
 
-CustomObjBinding createCustomBinding(const char* name, CustomApiBindings& api);
+CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBindings& api);
 
 #endif

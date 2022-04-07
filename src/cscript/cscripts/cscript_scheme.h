@@ -6,6 +6,6 @@
 #include "../cscript_binding.h"
 #include "./scheme/scheme_bindings.h"
 
-CustomObjBinding cscriptSchemeBinding(CustomApiBindings& api);
+CScriptBinding cscriptSchemeBinding(CustomApiBindings& api);
 
 #endif

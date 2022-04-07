@@ -11,8 +11,8 @@ void renderBasicTest(void* data){
   std::cout << "custom binding: render basic, value: " << *((int*)data) << std::endl;
 }
 
-CustomObjBinding sampleBindingPlugin(CustomApiBindings& api){
-  auto binding = createCustomBinding("native/basic_test", api);
+CScriptBinding sampleBindingPlugin(CustomApiBindings& api){
+  auto binding = createCScriptBinding("native/*", api);
   binding.create = createBasicTest;
   binding.remove = [&api] (void* data) -> void {
     int* value = (int*)data;
