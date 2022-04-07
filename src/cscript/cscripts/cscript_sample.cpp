@@ -12,7 +12,7 @@ void renderBasicTest(void* data){
 }
 
 CScriptBinding sampleBindingPlugin(CustomApiBindings& api){
-  auto binding = createCScriptBinding("native/.*", api);
+  auto binding = createCScriptBinding("native/samplescript", api);
   binding.create = createBasicTest;
   binding.remove = [&api] (void* data) -> void {
     int* value = (int*)data;
