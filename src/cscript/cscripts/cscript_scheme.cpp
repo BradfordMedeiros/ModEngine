@@ -13,7 +13,7 @@ void* createSchemeScript(){
 }
 
 CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
-  auto binding = createCScriptBinding("./res/scripts/color.scm", api);
+  auto binding = createCScriptBinding(".*\\.scm", api);
   binding.onFrame = schemeCallbacks.onFrame;
   //binding.onCollisionEnter = schemeCallbacks.onCollisionEnter;
   //binding.onCollisionExit = schemeCallbacks.onCollisionExit;

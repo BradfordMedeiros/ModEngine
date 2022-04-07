@@ -25,12 +25,9 @@ struct CustomObjInstance {
 std::map<int, CustomObjInstance> customObjInstances = {};
 
 bool patternMatchesScriptName(std::string pattern, std::string scriptname){
-  //std::basic_regex reg(pattern);
-  //auto matches = std::regex_match(scriptname, reg);
-  //std::cout << "pattern: " << pattern << " " << scriptname << " : " << matches << std::endl;
-  //assert(false);
-  //return matches;
-  return pattern == scriptname;
+  std::basic_regex reg(pattern);
+  auto matches = std::regex_match(scriptname, reg);
+  return matches;
 }
 
 /* matching strategy: matches based upon registration order, * is a wildcard which matches anything*/
