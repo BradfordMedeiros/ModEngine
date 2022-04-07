@@ -7,6 +7,10 @@ void* createSchemeScript(std::string scriptname, objid id, objid sceneId, bool i
   return NULL;
 }
 
+void* unloadSchemeScript(std::string scriptname, objid id, void* data) {
+  unloadScript(scriptname, id);
+}
+
 CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding(".*\\.scm", api);
   binding.onFrame = schemeCallbacks.onFrame;
@@ -99,10 +103,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   );
 
   binding.create = createSchemeScript;
-  binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
-    std::cout << "todo -> scheme -> unload script here" << std::endl;
-    unloadScript(scriptname, id);
-  };
+  binding.remove = unloadSchemeScript;
 
   return binding;
 }
