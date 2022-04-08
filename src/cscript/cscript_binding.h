@@ -100,7 +100,7 @@ struct CScriptBinding {
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
   stringboolFunc onCameraSystemChange;
-  //messagefunc onMessage;
+  string2func onMessage;
   stringfunc onTcpMessage;
   stringfunc onUdpMessage;
   stringfunc onPlayerJoined;

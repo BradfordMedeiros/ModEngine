@@ -13,6 +13,8 @@ void* unloadSchemeScript(std::string scriptname, objid id, void* data) {
 
 CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding(".*\\.scm", api);
+
+  // this is totally all wrong....since this is for all scripts...not just one
   binding.onFrame = schemeCallbacks.onFrame;
   binding.onCollisionEnter = schemeCallbacks.onCollisionEnter;
   binding.onCollisionExit = schemeCallbacks.onCollisionExit;
@@ -24,7 +26,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   binding.onKeyCallback = schemeCallbacks.onKeyCallback;
   binding.onKeyCharCallback = schemeCallbacks.onKeyCharCallback;
   binding.onCameraSystemChange = schemeCallbacks.onCameraSystemChange;
-  //binding.onMessage = schemeCallbacks.onMessage;
+  binding.onMessage = schemeCallbacks.onMessage;
   binding.onTcpMessage = schemeCallbacks.onTcpMessage;
   binding.onUdpMessage = schemeCallbacks.onUdpMessage;
   binding.onPlayerJoined = schemeCallbacks.onPlayerJoined;

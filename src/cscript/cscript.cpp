@@ -148,9 +148,26 @@ void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera
     binding -> onCameraSystemChange(camera, usingBuiltInCamera);
   }
 }
-void onCMessageAllScripts(std::queue<StringString>& messages){
+void onCMessageAllScripts(std::string& topic, AttributeValue& value){
   //std::cout << "on c message not yet implemented" << std::endl; // this one is weird since the scheme fn would dequeue a queue
   //assert(false);
+  /*while (!messages.empty()){
+    auto message = messages.front();
+    messages.pop();
+
+    for (auto &[instanceId, objInstance] : customObjInstances){
+      auto binding = getCScriptBinding(objInstance.name.c_str());
+      assert(binding != NULL);
+      //binding -> onCameraSystemChange(camera, usingBuiltInCamera);
+    }
+    /*for (auto &[name, scriptModule] : scriptnameToModule){
+      if (!scriptModule.isvalid){
+        continue;
+      }
+      scm_set_current_module(scriptModule.module);
+      onAttrMessage(message.strTopic, message.strValue);
+    }
+  }*/
 }
 
 void onCTcpMessageAllScripts(std::string& message){

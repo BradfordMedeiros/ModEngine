@@ -153,6 +153,7 @@ typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*stringboolFunc)(std::string, bool value);
 typedef void(*messagefunc)(std::queue<StringString>&);
 typedef void(*stringfunc)(std::string&);
+typedef void(*string2func)(std::string&, AttributeValue&);
 
 #endif
 

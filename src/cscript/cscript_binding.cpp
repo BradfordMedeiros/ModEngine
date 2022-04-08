@@ -12,6 +12,8 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     
     .onFrame = []() -> void { },
 
+    .onCollisionEnter = [](int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {},
+    .onCollisionExit = [](int32_t obj1, int32_t obj2) -> void { },
     .onMouseCallback = [](int button, int action, int mods) -> void { },
     .onMouseMoveCallback = [](double xPos, double yPos, float xNdc, float yNdc) -> void { },
     .onScrollCallback = [](double amount) -> void{ },
@@ -21,7 +23,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onKeyCallback = [](int key, int scancode, int action, int mods) -> void {},
     .onKeyCharCallback = [](unsigned int codepoint) -> void {},
     .onCameraSystemChange = [](std::string, bool) -> void {},
-    //.onMessage = []() -> void {},
+    .onMessage = [](std::string& topic, AttributeValue& value) -> void {},
     .onTcpMessage = [](std::string&) -> void {},
     .onUdpMessage = [](std::string&) -> void {},
     .onPlayerJoined = [](std::string&) -> void {},

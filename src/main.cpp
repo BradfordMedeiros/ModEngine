@@ -1599,7 +1599,12 @@ int main(int argc, char* argv[]){
     glfwPollEvents();
     
     cBindings.onFrame();
-    cBindings.onMessage(channelMessages);
+    while (!channelMessages.empty()){
+      auto message = channelMessages.front();
+      channelMessages.pop();
+      cBindings.onMessage(message.strTopic, message.strValue);
+    }
+    
     portalIdCache.clear();
 
     PROFILE("BLOOM-RENDERING",

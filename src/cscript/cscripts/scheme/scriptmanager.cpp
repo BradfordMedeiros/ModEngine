@@ -206,8 +206,8 @@ void onCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera)
     onCameraSystemChange(camera, usingBuiltInCamera);
   }
 }
-void onMessageAllScripts(std::queue<StringString>& messages){
-  while (!messages.empty()){
+void onMessageAllScripts(std::string& topic, AttributeValue& value){
+  /*while (!messages.empty()){
     auto message = messages.front();
     messages.pop();
 
@@ -218,7 +218,7 @@ void onMessageAllScripts(std::queue<StringString>& messages){
       scm_set_current_module(scriptModule.module);
       onAttrMessage(message.strTopic, message.strValue);
     }
-  }
+  }*/
 }
 
 void onTcpMessageAllScripts(std::string& message){
