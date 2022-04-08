@@ -90,8 +90,8 @@ struct CScriptBinding {
 
   // Other callbacks
   func onFrame;
-  //colposfun onCollisionEnter;
-  //colfun onCollisionExit;
+  colposfun onCollisionEnter;
+  colfun onCollisionExit;
   mousecallback onMouseCallback;
   mousemovecallback onMouseMoveCallback;
   scrollcallback onScrollCallback;

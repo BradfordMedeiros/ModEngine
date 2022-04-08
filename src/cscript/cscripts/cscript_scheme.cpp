@@ -14,8 +14,8 @@ void* unloadSchemeScript(std::string scriptname, objid id, void* data) {
 CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding(".*\\.scm", api);
   binding.onFrame = schemeCallbacks.onFrame;
-  //binding.onCollisionEnter = schemeCallbacks.onCollisionEnter;
-  //binding.onCollisionExit = schemeCallbacks.onCollisionExit;
+  binding.onCollisionEnter = schemeCallbacks.onCollisionEnter;
+  binding.onCollisionExit = schemeCallbacks.onCollisionExit;
   binding.onMouseCallback = schemeCallbacks.onMouseCallback;
   binding.onMouseMoveCallback = schemeCallbacks.onMouseMoveCallback;
   binding.onScrollCallback = schemeCallbacks.onScrollCallback;

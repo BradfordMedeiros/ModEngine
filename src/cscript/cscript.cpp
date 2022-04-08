@@ -78,12 +78,18 @@ void onCFrameAllScripts(){
 }
 
 void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
-  std::cout << "not yet implemented" << std::endl;
-  assert(false);
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCScriptBinding(objInstance.name.c_str());
+    assert(binding != NULL);
+    binding -> onCollisionEnter(obj1, obj2, pos, normal, oppositeNormal);
+  }
 }
 void onCCollisionExitAllScripts(int32_t obj1, int32_t obj2){
-  std::cout << "not yet implemented" << std::endl;
-  assert(false);
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCScriptBinding(objInstance.name.c_str());
+    assert(binding != NULL);
+    binding -> onCollisionExit(obj1, obj2);
+  }
 }
 void onCMouseCallbackAllScripts(int button, int action, int mods){
   for (auto &[instanceId, objInstance] : customObjInstances){
