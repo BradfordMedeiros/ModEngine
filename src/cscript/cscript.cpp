@@ -110,21 +110,21 @@ void onCScrollCallbackAllScripts(double amount){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onScrollCallback(amount);
+    binding -> onScrollCallback(instanceId, amount);
   }
 }
 void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onObjectSelected(index, color);
+    binding -> onObjectSelected(instanceId, index, color);
   }
 }
 void onCObjectHoverAllScripts(int32_t index, bool isHover){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onObjectHover(index, isHover);
+    binding -> onObjectHover(instanceId, index, isHover);
   }
 }
 void onCKeyCallbackAllScripts(int key, int scancode, int action, int mods){

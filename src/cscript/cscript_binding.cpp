@@ -15,10 +15,10 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onCollisionExit = [](objid scriptId, int32_t obj1, int32_t obj2) -> void { },
     .onMouseCallback = [](objid scriptId, int button, int action, int mods) -> void { },
     .onMouseMoveCallback = [](objid scriptId, double xPos, double yPos, float xNdc, float yNdc) -> void { },
+    .onScrollCallback = [](objid scriptId, double amount) -> void{ },
+    .onObjectSelected = [](objid scriptId, int32_t index, glm::vec3 color) -> void {},
+    .onObjectHover = [](objid scriptId, int32_t index, bool hoverOn) -> void {},
     
-    .onScrollCallback = [](double amount) -> void{ },
-    .onObjectSelected = [](int32_t index, glm::vec3 color) -> void {},
-    .onObjectHover = [](int32_t index, bool hoverOn) -> void {},
     .onKeyCallback = [](int key, int scancode, int action, int mods) -> void {},
     .onKeyCharCallback = [](unsigned int codepoint) -> void {},
     .onCameraSystemChange = [](std::string, bool) -> void {},

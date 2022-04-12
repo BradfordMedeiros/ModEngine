@@ -146,37 +146,34 @@ void onMouseMoveCallbackAllScripts(objid scriptId, double xPos, double yPos, flo
   scm_set_current_module(scriptModule.module);
   onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
 }
-void onScrollCallbackAllScripts(double amount){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onScrollCallback(amount);
+void onScrollCallbackAllScripts(objid scriptId, double amount){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onScrollCallback(amount);  
 }
 
-void onObjectSelectedAllScripts(int32_t index, glm::vec3 color){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onObjectSelected(index, color);
+void onObjectSelectedAllScripts(objid scriptId, int32_t index, glm::vec3 color){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onObjectSelected(index, color);
 }
-void onObjectHoverAllScripts(int32_t index, bool isHover){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    if (isHover){
-      onObjectHover(index);
-    }else{
-      onObjectUnhover(index);
-    }
-  }  
+void onObjectHoverAllScripts(int32_t scriptId, int32_t index, bool isHover){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  if (isHover){
+    onObjectHover(index);
+  }else{
+    onObjectUnhover(index);
+  }
 }
 void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){
   for (auto &[_, scriptModule] : scriptnameToModule){

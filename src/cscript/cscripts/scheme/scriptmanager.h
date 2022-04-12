@@ -15,10 +15,10 @@ struct SchemeBindingCallbacks {
   id_colfun onCollisionExit;
   id_mousecallback onMouseCallback;
   id_mousemovecallback onMouseMoveCallback;
+  id_scrollcallback onScrollCallback;
+  id_onobjectSelectedFunc onObjectSelected;
+  id_onobjectHoverFunc onObjectHover;
   
-  scrollcallback onScrollCallback;
-  onobjectSelectedFunc onObjectSelected;
-  onobjectHoverFunc onObjectHover;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
   stringboolFunc onCameraSystemChange;

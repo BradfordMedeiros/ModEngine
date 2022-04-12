@@ -150,12 +150,15 @@ typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*id_mousecallback)(int32_t id, int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNdc);
 typedef void(*id_mousemovecallback)(int32_t id, double xPos, double yPos, float xNdc, float yNdc);
-
 typedef void(*scrollcallback)(double amount);
+typedef void(*id_scrollcallback)(int32_t id, double amount);
+typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
+typedef void(*id_onobjectSelectedFunc)(int32_t id, int32_t index, glm::vec3 color);
+typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
+typedef void(*id_onobjectHoverFunc)(int32_t id, int32_t index, bool hoverOn);
+
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);
-typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
-typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*stringboolFunc)(std::string, bool value);
 typedef void(*messagefunc)(std::queue<StringString>&);
 typedef void(*stringfunc)(std::string&);

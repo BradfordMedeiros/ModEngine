@@ -94,10 +94,10 @@ struct CScriptBinding {
   id_colfun onCollisionExit;
   id_mousecallback onMouseCallback;
   id_mousemovecallback onMouseMoveCallback;
-
-  scrollcallback onScrollCallback;
-  onobjectSelectedFunc onObjectSelected;
-  onobjectHoverFunc onObjectHover;
+  id_scrollcallback onScrollCallback;
+  id_onobjectSelectedFunc onObjectSelected;
+  id_onobjectHoverFunc onObjectHover;
+  
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
   stringboolFunc onCameraSystemChange;
