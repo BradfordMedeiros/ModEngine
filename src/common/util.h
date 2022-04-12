@@ -141,10 +141,16 @@ std::vector<T> mapKeys(std::map<T, N>& values){
 
 /* Move back into customobj, just here to share between this an scheme for now */
 typedef void(*func)();
+typedef void(*id_func)(int32_t id);
 typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
+typedef void(*id_colposfun)(int32_t id, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
 typedef void(*colfun)(int32_t obj1, int32_t obj2);
+typedef void(*id_colfun)(int32_t id, int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
+typedef void(*id_mousecallback)(int32_t id, int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNdc);
+typedef void(*id_mousemovecallback)(int32_t id, double xPos, double yPos, float xNdc, float yNdc);
+
 typedef void(*scrollcallback)(double amount);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);

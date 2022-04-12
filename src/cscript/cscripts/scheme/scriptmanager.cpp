@@ -8,6 +8,19 @@ struct ScriptModule {
 };
 static std::map<std::string, ScriptModule> scriptnameToModule;
 
+std::string scriptnameForId(objid id){
+  for (auto &[name, module] : scriptnameToModule){
+    if (module.id == id){
+      return name;
+    }
+  }
+  assert(false);
+  return "";
+}
+ScriptModule& moduleForId(objid id){
+  return scriptnameToModule.at(scriptnameForId(id));
+}
+
 // IMPORTANT BUG --> the create/destroy of modules probably a huge memory leak. 
 // Need to figure out how to properly bring the up/down (global module tree?)
 
@@ -80,71 +93,58 @@ void unloadScriptsCleanup(){
   }
 }
 
-void onFrameAllScripts(){
-  for (auto &[script, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onFrame();
+void onFrameAllScripts(objid scriptId){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onFrame();
 }
 
-void onCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    auto moduleId = currentModuleId();
-    if (moduleId == obj1){
-      onCollisionEnter(obj2, pos, oppositeNormal);
-    }else if (moduleId == obj2){
-      onCollisionEnter(obj1, pos, normal);
-    }
+void onCollisionEnterAllScripts(objid scriptId, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    scm_set_current_module(scriptModule.module);
-    onGlobalCollisionEnter(obj1, obj2, pos, normal, oppositeNormal);
+  scm_set_current_module(scriptModule.module);
+  if (scriptId == obj1){
+    onCollisionEnter(obj2, pos, oppositeNormal);
+  }else if (scriptId == obj2){
+    onCollisionEnter(obj1, pos, normal);
   }
+  onGlobalCollisionEnter(obj1, obj2, pos, normal, oppositeNormal);
 }
-void onCollisionExitAllScripts(int32_t obj1, int32_t obj2){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    auto moduleId = currentModuleId();
-    if (moduleId == obj1){
-      onCollisionExit(obj2);
-    }else if (moduleId == obj2){
-      onCollisionExit(obj1);
-    }
+void onCollisionExitAllScripts(objid scriptId, int32_t obj1, int32_t obj2){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    scm_set_current_module(scriptModule.module);
-    onGlobalCollisionExit(obj1, obj2);
-  }
+  scm_set_current_module(scriptModule.module);
+  if (scriptId == obj1){
+    onCollisionExit(obj2);
+  }else if (scriptId == obj2){
+    onCollisionExit(obj1);
+  } 
+  onGlobalCollisionExit(obj1, obj2);
 }
 
-void onMouseCallbackAllScripts(int button, int action, int mods){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onMouseCallback(button, action, mods);
+void onMouseCallbackAllScripts(objid scriptId, int button, int action, int mods){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onMouseCallback(button, action, mods);
 }
 
-void onMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
+void onMouseMoveCallbackAllScripts(objid scriptId, double xPos, double yPos, float xNdc, float yNdc){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
 }
 void onScrollCallbackAllScripts(double amount){
   for (auto &[_, scriptModule] : scriptnameToModule){
@@ -207,18 +207,13 @@ void onCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera)
   }
 }
 void onMessageAllScripts(std::string& topic, AttributeValue& value){
-  /*while (!messages.empty()){
-    auto message = messages.front();
-    messages.pop();
-
-    for (auto &[name, scriptModule] : scriptnameToModule){
-      if (!scriptModule.isvalid){
-        continue;
-      }
-      scm_set_current_module(scriptModule.module);
-      onAttrMessage(message.strTopic, message.strValue);
+  for (auto &[name, scriptModule] : scriptnameToModule){
+    if (!scriptModule.isvalid){
+      continue;
     }
-  }*/
+    scm_set_current_module(scriptModule.module);
+    onAttrMessage(topic, value);
+  }
 }
 
 void onTcpMessageAllScripts(std::string& message){

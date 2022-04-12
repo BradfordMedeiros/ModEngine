@@ -69,11 +69,12 @@ void renderCustomObj(int id){
 
 
 //// Callbacks ////
+
 void onCFrameAllScripts(){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onFrame();
+    binding -> onFrame(instanceId);
   }
 }
 
@@ -81,28 +82,28 @@ void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm:
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onCollisionEnter(obj1, obj2, pos, normal, oppositeNormal);
+    binding -> onCollisionEnter(instanceId, obj1, obj2, pos, normal, oppositeNormal);
   }
 }
 void onCCollisionExitAllScripts(int32_t obj1, int32_t obj2){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onCollisionExit(obj1, obj2);
+    binding -> onCollisionExit(instanceId, obj1, obj2);
   }
 }
 void onCMouseCallbackAllScripts(int button, int action, int mods){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMouseCallback(button, action, mods);
+    binding -> onMouseCallback(instanceId, button, action, mods);
   }
 }
 void onCMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
+    binding -> onMouseMoveCallback(instanceId, xPos, yPos, xNdc, yNdc);
   }
 }
 void onCScrollCallbackAllScripts(double amount){
@@ -149,25 +150,11 @@ void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera
   }
 }
 void onCMessageAllScripts(std::string& topic, AttributeValue& value){
-  //std::cout << "on c message not yet implemented" << std::endl; // this one is weird since the scheme fn would dequeue a queue
-  //assert(false);
-  /*while (!messages.empty()){
-    auto message = messages.front();
-    messages.pop();
-
-    for (auto &[instanceId, objInstance] : customObjInstances){
-      auto binding = getCScriptBinding(objInstance.name.c_str());
-      assert(binding != NULL);
-      //binding -> onCameraSystemChange(camera, usingBuiltInCamera);
-    }
-    /*for (auto &[name, scriptModule] : scriptnameToModule){
-      if (!scriptModule.isvalid){
-        continue;
-      }
-      scm_set_current_module(scriptModule.module);
-      onAttrMessage(message.strTopic, message.strValue);
-    }
-  }*/
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCScriptBinding(objInstance.name.c_str());
+    assert(binding != NULL);
+    binding -> onMessage(topic, value);
+  }
 }
 
 void onCTcpMessageAllScripts(std::string& message){

@@ -10,11 +10,12 @@
 #include "../../../common/util.h"
 
 struct SchemeBindingCallbacks {
-  func onFrame;
-  colposfun onCollisionEnter;
-  colfun onCollisionExit;
-  mousecallback onMouseCallback;
-  mousemovecallback onMouseMoveCallback;
+  id_func onFrame;
+  id_colposfun onCollisionEnter;
+  id_colfun onCollisionExit;
+  id_mousecallback onMouseCallback;
+  id_mousemovecallback onMouseMoveCallback;
+  
   scrollcallback onScrollCallback;
   onobjectSelectedFunc onObjectSelected;
   onobjectHoverFunc onObjectHover;

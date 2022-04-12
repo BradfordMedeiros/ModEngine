@@ -7,19 +7,21 @@ void* createSchemeScript(std::string scriptname, objid id, objid sceneId, bool i
   return NULL;
 }
 
-void* unloadSchemeScript(std::string scriptname, objid id, void* data) {
+void unloadSchemeScript(std::string scriptname, objid id, void* data) {
   unloadScript(scriptname, id);
 }
 
 CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding(".*\\.scm", api);
 
-  // this is totally all wrong....since this is for all scripts...not just one
   binding.onFrame = schemeCallbacks.onFrame;
+
+  // todo convert these callbacks to be parameterized by id 
   binding.onCollisionEnter = schemeCallbacks.onCollisionEnter;
   binding.onCollisionExit = schemeCallbacks.onCollisionExit;
   binding.onMouseCallback = schemeCallbacks.onMouseCallback;
   binding.onMouseMoveCallback = schemeCallbacks.onMouseMoveCallback;
+  
   binding.onScrollCallback = schemeCallbacks.onScrollCallback;
   binding.onObjectSelected = schemeCallbacks.onObjectSelected;
   binding.onObjectHover = schemeCallbacks.onObjectHover;

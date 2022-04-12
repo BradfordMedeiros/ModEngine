@@ -10,14 +10,13 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .remove = [](std::string scriptname, objid id, void*) -> void { },
     .render = [](void*) -> void { },
     
-    .onFrame = []() -> void { },
-
-    .onCollisionEnter = [](int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {},
-    .onCollisionExit = [](int32_t obj1, int32_t obj2) -> void { },
-    .onMouseCallback = [](int button, int action, int mods) -> void { },
-    .onMouseMoveCallback = [](double xPos, double yPos, float xNdc, float yNdc) -> void { },
-    .onScrollCallback = [](double amount) -> void{ },
+    .onFrame = [](objid scriptId) -> void { },
+    .onCollisionEnter = [](objid scriptId, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {},
+    .onCollisionExit = [](objid scriptId, int32_t obj1, int32_t obj2) -> void { },
+    .onMouseCallback = [](objid scriptId, int button, int action, int mods) -> void { },
+    .onMouseMoveCallback = [](objid scriptId, double xPos, double yPos, float xNdc, float yNdc) -> void { },
     
+    .onScrollCallback = [](double amount) -> void{ },
     .onObjectSelected = [](int32_t index, glm::vec3 color) -> void {},
     .onObjectHover = [](int32_t index, bool hoverOn) -> void {},
     .onKeyCallback = [](int key, int scancode, int action, int mods) -> void {},
