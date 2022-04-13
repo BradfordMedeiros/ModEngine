@@ -98,9 +98,9 @@ struct CScriptBinding {
   id_onobjectSelectedFunc onObjectSelected;
   id_onobjectHoverFunc onObjectHover;
   id_keycallback onKeyCallback;
+  id_keycharcallback onKeyCharCallback;
+  id_stringboolFunc onCameraSystemChange;
 
-  keycharcallback onKeyCharCallback;
-  stringboolFunc onCameraSystemChange;
   string2func onMessage;
   stringfunc onTcpMessage;
   stringfunc onUdpMessage;

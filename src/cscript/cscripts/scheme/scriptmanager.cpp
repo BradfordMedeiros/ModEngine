@@ -183,25 +183,24 @@ void onKeyCallbackAllScripts(int32_t scriptId, int key, int scancode, int action
   scm_set_current_module(scriptModule.module);
   onKeyCallback(key, scancode, action, mods);  
 }
-void onKeyCharCallbackAllScripts(unsigned int codepoint){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onKeyCharCallback(codepoint);
+void onKeyCharCallbackAllScripts(int32_t scriptId, unsigned int codepoint){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onKeyCharCallback(codepoint);
 }
 
-void onCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onCameraSystemChange(camera, usingBuiltInCamera);
+void onCameraSystemChangeAllScripts(int32_t scriptId, std::string camera, bool usingBuiltInCamera){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onCameraSystemChange(camera, usingBuiltInCamera);  
 }
+
 void onMessageAllScripts(std::string& topic, AttributeValue& value){
   for (auto &[name, scriptModule] : scriptnameToModule){
     if (!scriptModule.isvalid){

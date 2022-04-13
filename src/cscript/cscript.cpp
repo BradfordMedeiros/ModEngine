@@ -138,7 +138,7 @@ void onCKeyCharCallbackAllScripts(unsigned int codepoint){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onKeyCharCallback(codepoint);
+    binding -> onKeyCharCallback(instanceId, codepoint);
   }
 }
 
@@ -146,7 +146,7 @@ void onCCameraSystemChangeAllScripts(std::string camera, bool usingBuiltInCamera
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onCameraSystemChange(camera, usingBuiltInCamera);
+    binding -> onCameraSystemChange(instanceId, camera, usingBuiltInCamera);
   }
 }
 void onCMessageAllScripts(std::string& topic, AttributeValue& value){

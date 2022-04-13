@@ -158,9 +158,11 @@ typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*id_onobjectHoverFunc)(int32_t id, int32_t index, bool hoverOn);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*id_keycallback)(int32_t id, int key, int scancode, int action, int mods);
-
 typedef void(*keycharcallback)(unsigned int codepoint);
+typedef void(*id_keycharcallback)(int32_t id, unsigned int codepoint);
 typedef void(*stringboolFunc)(std::string, bool value);
+typedef void(*id_stringboolFunc)(int32_t id, std::string, bool value);
+
 typedef void(*messagefunc)(std::queue<StringString>&);
 typedef void(*stringfunc)(std::string&);
 typedef void(*string2func)(std::string&, AttributeValue&);
