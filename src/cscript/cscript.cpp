@@ -153,7 +153,7 @@ void onCMessageAllScripts(std::string& topic, AttributeValue& value){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMessage(topic, value);
+    binding -> onMessage(instanceId, topic, value);
   }
 }
 
@@ -161,14 +161,14 @@ void onCTcpMessageAllScripts(std::string& message){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onTcpMessage(message);
+    binding -> onTcpMessage(instanceId, message);
   }
 }
 void onCUdpMessageAllScripts(std::string& message){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onUdpMessage(message);
+    binding -> onUdpMessage(instanceId, message);
   }
 }
 

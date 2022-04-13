@@ -201,33 +201,30 @@ void onCameraSystemChangeAllScripts(int32_t scriptId, std::string camera, bool u
   onCameraSystemChange(camera, usingBuiltInCamera);  
 }
 
-void onMessageAllScripts(std::string& topic, AttributeValue& value){
-  for (auto &[name, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onAttrMessage(topic, value);
+void onMessageAllScripts(objid scriptId, std::string& topic, AttributeValue& value){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onAttrMessage(topic, value);
 }
 
-void onTcpMessageAllScripts(std::string& message){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onTcpMessage(message);
-  } 
+void onTcpMessageAllScripts(objid scriptId, std::string& message){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  onTcpMessage(message);  
 }
-void onUdpMessageAllScripts(std::string& message){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onUdpMessage(message);
-  } 
+void onUdpMessageAllScripts(objid scriptId, std::string& message){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  onUdpMessage(message);
 }
 
 void onPlayerJoinedAllScripts(std::string& connectionHash){

@@ -162,10 +162,12 @@ typedef void(*keycharcallback)(unsigned int codepoint);
 typedef void(*id_keycharcallback)(int32_t id, unsigned int codepoint);
 typedef void(*stringboolFunc)(std::string, bool value);
 typedef void(*id_stringboolFunc)(int32_t id, std::string, bool value);
+typedef void(*string2func)(std::string&, AttributeValue&);
+typedef void(*id_string2func)(int32_t, std::string&, AttributeValue&);
+typedef void(*stringfunc)(std::string&);
+typedef void(*id_stringfunc)(int32_t, std::string&);
 
 typedef void(*messagefunc)(std::queue<StringString>&);
-typedef void(*stringfunc)(std::string&);
-typedef void(*string2func)(std::string&, AttributeValue&);
 
 #endif
 

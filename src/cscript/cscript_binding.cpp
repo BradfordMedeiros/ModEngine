@@ -21,10 +21,10 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onKeyCallback = [](objid scriptId, int key, int scancode, int action, int mods) -> void {},
     .onKeyCharCallback = [](objid scriptId, unsigned int codepoint) -> void {},
     .onCameraSystemChange = [](objid scriptId, std::string, bool) -> void {},
-    
-    .onMessage = [](std::string& topic, AttributeValue& value) -> void {},
-    .onTcpMessage = [](std::string&) -> void {},
-    .onUdpMessage = [](std::string&) -> void {},
+    .onMessage = [](objid scriptId, std::string& topic, AttributeValue& value) -> void {},
+    .onTcpMessage = [](objid scriptId, std::string&) -> void {},
+    .onUdpMessage = [](objid scriptId, std::string&) -> void {},
+
     .onPlayerJoined = [](std::string&) -> void {},
     .onPlayerLeave = [](std::string&) -> void {},
   };

@@ -21,10 +21,10 @@ struct SchemeBindingCallbacks {
   id_keycallback onKeyCallback;
   id_keycharcallback onKeyCharCallback;
   id_stringboolFunc onCameraSystemChange;
+  id_string2func onMessage;
+  id_stringfunc onTcpMessage;
+  id_stringfunc onUdpMessage;
   
-  string2func onMessage;
-  stringfunc onTcpMessage;
-  stringfunc onUdpMessage;
   stringfunc onPlayerJoined;
   stringfunc onPlayerLeave;
 };

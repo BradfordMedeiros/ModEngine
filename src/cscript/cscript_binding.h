@@ -100,10 +100,10 @@ struct CScriptBinding {
   id_keycallback onKeyCallback;
   id_keycharcallback onKeyCharCallback;
   id_stringboolFunc onCameraSystemChange;
-
-  string2func onMessage;
-  stringfunc onTcpMessage;
-  stringfunc onUdpMessage;
+  id_string2func onMessage;
+  id_stringfunc onTcpMessage;
+  id_stringfunc onUdpMessage;
+  
   stringfunc onPlayerJoined;
   stringfunc onPlayerLeave;
 };
