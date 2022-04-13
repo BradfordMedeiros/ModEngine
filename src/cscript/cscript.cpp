@@ -176,14 +176,14 @@ void onCPlayerJoinedAllScripts(std::string& connectionHash){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onPlayerJoined(connectionHash);
+    binding -> onPlayerJoined(instanceId, connectionHash);
   }
 }
 void onCPlayerLeaveAllScripts(std::string& connectionHash){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onPlayerLeave(connectionHash);
+    binding -> onPlayerLeave(instanceId, connectionHash);
   }
 }
 

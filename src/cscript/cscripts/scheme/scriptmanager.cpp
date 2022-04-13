@@ -227,23 +227,21 @@ void onUdpMessageAllScripts(objid scriptId, std::string& message){
   onUdpMessage(message);
 }
 
-void onPlayerJoinedAllScripts(std::string& connectionHash){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onPlayerJoined(connectionHash);
-  } 
+void onPlayerJoinedAllScripts(objid scriptId, std::string& connectionHash){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  onPlayerJoined(connectionHash);
 }
-void onPlayerLeaveAllScripts(std::string& connectionHash){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onPlayerLeave(connectionHash);
-  } 
+void onPlayerLeaveAllScripts(objid scriptId, std::string& connectionHash){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  onPlayerLeave(connectionHash);
 }
 
 SchemeBindingCallbacks getSchemeCallbacks(){

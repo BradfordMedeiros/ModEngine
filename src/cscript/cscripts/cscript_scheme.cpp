@@ -24,7 +24,6 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   binding.onScrollCallback = schemeCallbacks.onScrollCallback;
   binding.onObjectSelected = schemeCallbacks.onObjectSelected;
   binding.onObjectHover = schemeCallbacks.onObjectHover;
-  
   binding.onKeyCallback = schemeCallbacks.onKeyCallback;
   binding.onKeyCharCallback = schemeCallbacks.onKeyCharCallback;
   binding.onCameraSystemChange = schemeCallbacks.onCameraSystemChange;

@@ -24,9 +24,8 @@ struct SchemeBindingCallbacks {
   id_string2func onMessage;
   id_stringfunc onTcpMessage;
   id_stringfunc onUdpMessage;
-  
-  stringfunc onPlayerJoined;
-  stringfunc onPlayerLeave;
+  id_stringfunc onPlayerJoined;
+  id_stringfunc onPlayerLeave;
 };
 
 objid currentModuleId();

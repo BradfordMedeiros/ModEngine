@@ -103,9 +103,8 @@ struct CScriptBinding {
   id_string2func onMessage;
   id_stringfunc onTcpMessage;
   id_stringfunc onUdpMessage;
-  
-  stringfunc onPlayerJoined;
-  stringfunc onPlayerLeave;
+  id_stringfunc onPlayerJoined;
+  id_stringfunc onPlayerLeave;
 };
 
 CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBindings& api);

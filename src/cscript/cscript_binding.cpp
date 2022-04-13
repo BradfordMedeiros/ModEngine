@@ -24,9 +24,8 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onMessage = [](objid scriptId, std::string& topic, AttributeValue& value) -> void {},
     .onTcpMessage = [](objid scriptId, std::string&) -> void {},
     .onUdpMessage = [](objid scriptId, std::string&) -> void {},
-
-    .onPlayerJoined = [](std::string&) -> void {},
-    .onPlayerLeave = [](std::string&) -> void {},
+    .onPlayerJoined = [](objid scriptId, std::string&) -> void {},
+    .onPlayerLeave = [](objid scriptId, std::string&) -> void {},
   };
   return defaultBinding;
 }
