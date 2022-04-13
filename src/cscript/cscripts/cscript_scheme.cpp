@@ -32,6 +32,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   binding.onUdpMessage = schemeCallbacks.onUdpMessage;
   binding.onPlayerJoined = schemeCallbacks.onPlayerJoined;
   binding.onPlayerLeave = schemeCallbacks.onPlayerLeave;
+  // notice binding.render not implemented
 
   createStaticSchemeBindings(
     api.listSceneId,

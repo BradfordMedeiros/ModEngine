@@ -8,8 +8,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
         return NULL; 
     },
     .remove = [](std::string scriptname, objid id, void*) -> void { },
-    .render = [](void*) -> void { },
-    
+
     .onFrame = [](objid scriptId) -> void { },
     .onCollisionEnter = [](objid scriptId, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal) -> void {},
     .onCollisionExit = [](objid scriptId, int32_t obj1, int32_t obj2) -> void { },
@@ -26,6 +25,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onUdpMessage = [](objid scriptId, std::string&) -> void {},
     .onPlayerJoined = [](objid scriptId, std::string&) -> void {},
     .onPlayerLeave = [](objid scriptId, std::string&) -> void {},
+    .render = [](void*) -> void { },
   };
   return defaultBinding;
 }

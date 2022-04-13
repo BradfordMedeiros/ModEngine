@@ -86,7 +86,6 @@ struct CScriptBinding {
   CustomApiBindings& api;
   std::function<void*(std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript)> create;
   std::function<void(std::string scriptname, objid id, void*)> remove;
-  std::function<void(void*)> render;
 
   // Other callbacks
   id_func onFrame;
@@ -105,6 +104,7 @@ struct CScriptBinding {
   id_stringfunc onUdpMessage;
   id_stringfunc onPlayerJoined;
   id_stringfunc onPlayerLeave;
+  std::function<void(void*)> render;
 };
 
 CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBindings& api);
