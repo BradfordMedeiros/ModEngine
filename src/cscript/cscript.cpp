@@ -131,7 +131,7 @@ void onCKeyCallbackAllScripts(int key, int scancode, int action, int mods){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onKeyCallback(key, scancode, action, mods);
+    binding -> onKeyCallback(instanceId, key, scancode, action, mods);
   }
 }
 void onCKeyCharCallbackAllScripts(unsigned int codepoint){

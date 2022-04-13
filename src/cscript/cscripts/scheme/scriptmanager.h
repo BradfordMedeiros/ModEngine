@@ -18,8 +18,8 @@ struct SchemeBindingCallbacks {
   id_scrollcallback onScrollCallback;
   id_onobjectSelectedFunc onObjectSelected;
   id_onobjectHoverFunc onObjectHover;
+  id_keycallback onKeyCallback;
   
-  keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
   stringboolFunc onCameraSystemChange;
   string2func onMessage;

@@ -175,14 +175,13 @@ void onObjectHoverAllScripts(int32_t scriptId, int32_t index, bool isHover){
     onObjectUnhover(index);
   }
 }
-void onKeyCallbackAllScripts(int key, int scancode, int action, int mods){
-  for (auto &[_, scriptModule] : scriptnameToModule){
-    if (!scriptModule.isvalid){
-      continue;
-    }
-    scm_set_current_module(scriptModule.module);
-    onKeyCallback(key, scancode, action, mods);
+void onKeyCallbackAllScripts(int32_t scriptId, int key, int scancode, int action, int mods){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
   }
+  scm_set_current_module(scriptModule.module);
+  onKeyCallback(key, scancode, action, mods);  
 }
 void onKeyCharCallbackAllScripts(unsigned int codepoint){
   for (auto &[_, scriptModule] : scriptnameToModule){
