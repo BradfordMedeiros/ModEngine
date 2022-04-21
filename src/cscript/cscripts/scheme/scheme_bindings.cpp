@@ -1,6 +1,12 @@
 #include "./scheme_bindings.h"
 
 int32_t (*_listSceneId)(int32_t objid);
+SCM scm_listSceneId(SCM id){
+  auto objId = scm_to_int32(id);
+  auto sceneId = _listSceneId(objId);
+  return scm_from_int32(sceneId);
+}
+
 
 // Main Api
 int32_t (*_loadScene)(std::string, std::vector<std::vector<std::string>>);
@@ -781,12 +787,13 @@ void onScriptUnload(){
 std::vector<func_t> _registerGuileFns;
 ////////////
 void defineFunctions(objid id, bool isServer, bool isFreeScript){
+  scm_c_define_gsubr("list-sceneid", 1, 0, 0, (void *)scm_listSceneId);
   scm_c_define_gsubr("load-scene", 1, 1, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
-  scm_c_define_gsubr("parent-scene", 0, 0, 0, (void *)scm_parentScene);
-  scm_c_define_gsubr("child-scenes", 0, 0, 0, (void *)scm_childScenes);
+  scm_c_define_gsubr("parent-scene", 1, 0, 0, (void *)scm_parentScene);
+  scm_c_define_gsubr("child-scenes", 1, 0, 0, (void *)scm_childScenes);
   scm_c_define_gsubr("list-scenefiles", 0, 0, 0, (void *)scm_listSceneFiles);
   scm_c_define_gsubr("create-scene", 1, 0, 0, (void *)scm_createScene);
 
