@@ -1,0 +1,5 @@
+(define (onMouse button action mods)
+  (format #t "lsobj script: BASIC: id is: ~a\n" (gameobj-id (lsobj-name "someotherobject")))
+  (format #t "lsobj script: PARENT: id is: ~a\n" (gameobj-id (lsobj-name ".PARENT/someotherobject")))
+  ;(format #t "lsobj script: ID BY SCENE: id is: ~a\n" (gameobj-id (lsobj-name ".3039485/someotherobject")))
+)
