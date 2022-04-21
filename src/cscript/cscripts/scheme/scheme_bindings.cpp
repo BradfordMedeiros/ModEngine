@@ -42,12 +42,14 @@ SCM scm_listScenes(){
 }
 
 objid (*_parentScene)(objid sceneId);
-SCM scm_parentScene(){
-  return SCM_UNSPECIFIED;
+SCM scm_parentScene(SCM sceneId){
+  auto parentSceneId = _parentScene(scm_to_int32(sceneId));
+  return scm_from_int32(parentSceneId);
 }
 std::vector<objid> (*_childScenes)(objid sceneId);
-SCM scm_childScenes(){
-  return SCM_UNSPECIFIED;
+SCM scm_childScenes(SCM sceneId){
+  auto childScenes = _childScenes(scm_to_int32(sceneId));
+  return listToSCM(childScenes);
 }
 
 void (*_createScene)(std::string scenename);

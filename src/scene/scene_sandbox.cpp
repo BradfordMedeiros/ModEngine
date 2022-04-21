@@ -767,8 +767,25 @@ objid sceneId(SceneSandbox& sandbox, objid id){
 objid parentSceneId(SceneSandbox& sandbox, objid sceneId){
   return 0;
 }
+
 std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId){
-  return {};
+  auto rootObjId = rootIdForScene(sandbox, sceneId);
+  auto allIds = getChildrenIdsAndParent(sandbox.mainScene, rootObjId);
+
+  std::set<objid> uniqueSceneIds;
+  for (auto id : allIds){
+    auto sceneId = getGameObjectH(sandbox, id).sceneId;
+    uniqueSceneIds.insert(sceneId);
+  }
+
+  std::vector<objid> allSceneIds;
+  for (auto id : uniqueSceneIds){
+    if (id != sceneId){
+      allSceneIds.push_back(id);
+    }
+  }
+
+  return allSceneIds;
 }
 
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){

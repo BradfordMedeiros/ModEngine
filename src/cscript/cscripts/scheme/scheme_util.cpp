@@ -37,6 +37,13 @@ std::vector<glm::vec3> listToVecVec3(SCM vecList){
   return vecPoints;
 }
 
+SCM listToSCM(std::vector<objid> idList){
+  SCM list = scm_make_list(scm_from_unsigned_integer(idList.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < idList.size(); i++){
+    scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_unsigned_integer(idList.at(i))); 
+  }
+  return list;
+}
 SCM listToSCM(std::vector<std::string> stringList){
   auto listSize = stringList.size();
   SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));
