@@ -24,3 +24,8 @@
 (dialog:position:0 0 0
 (dialog:margin:0.05
 (dialog:minwidth:0.25
+
+## extra anchor target
+#(dialog:anchor:)menuitem_0
+#(dialog:anchor-offset:0.02 -0.3 0
+

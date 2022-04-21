@@ -22,6 +22,7 @@
     }
   }
 
+
   #### Navigation controls 
 
   $menu_text_attr = [
@@ -44,31 +45,24 @@
   $row2_elements = [];
   $text_buttons = [
     ["value" => "HIDE"],
-    ["value" => "SCENE INFO"],
-    ["value" => "SCENEGRAPH"],
-    ["value" => "OBJECT DETAILS"],
-    ["value" => "WORLD STATE"],
-    ["value" => "MESHES"],
-    ["value" => "LIGHTS"],
-    ["value" => "CAMERAS"],
-    ["value" => "HEIGHTMAPS"],
-    ["value" => "VOXEL"],
+    ["value" => "TEST"],
+    #["value" => "SCENE INFO"],
+    #["value" => "SCENEGRAPH"],
+    #["value" => "OBJECT DETAILS"],
+    #["value" => "WORLD STATE"],
+    #["value" => "MESHES"],
+    #["value" => "LIGHTS"],
+    #["value" => "CAMERAS"],
+    #["value" => "HEIGHTMAPS"],
+    #["value" => "VOXEL"],
   ];
 
   $text_attr = [
     "layer" => "basicui",
     "scale" => "0.01 0.01 0.01",
   ];
-  $button_attr = [
-    "layer" => "basicui",
-    "scale" => "0.02 0.02 0.02",
-  ];
 
   for ($i = 0; $i < count($text_buttons); $i++){
-    $button_name = "*buttonname_" . $i;
-    createElement($button_name, $button_attr, []);
-    array_push($row2_elements, $button_name);
-
     $textfield_name = ")text_" . $i;
     createElement($textfield_name, $text_attr, $text_buttons[$i]);
     array_push($row2_elements, $textfield_name);
@@ -82,19 +76,28 @@
 (menubar:position:-1 1 0
 (menubar:type:horizontal
 (menubar:backpanel:true
-(menubar:tint:1.0 0.1 0.1
-#(menubar:margin:0.02
-#(menubar:spacing:0.02
+(menubar:tint:0.2 0.2 0.2
+(menubar:margin:0.02
+(menubar:spacing:0.02
 (menubar:align-vertical:down
 (menubar:align-horizontal:right
+(menubar:margin-bottom:0.02
+(menubar:minwidth:2
+(menubar:border-color:1 0.5 0.5
+(menubar:script:./res/scenes/editor/editor.scm
 
 
 (row2:layer:basicui
 (row2:position:0 0 0
 (row2:type:horizontal
 (row2:backpanel:true
-(row2:tint:1.0 0.1 0.1
-#(row2:margin:0.02
-#(row2:spacing:0.05
+(row2:tint:0.2 0.2 0.2
+(row2:margin:0.02
+(row2:spacing:0.05
 (row2:align-vertical:down
 (row2:align-horizontal:right
+(row2:anchor:(menubar
+(row2:anchor-offset:0 -0.04 0
+(row2:anchor-direction:down
+(row2:minwidth:2
+
