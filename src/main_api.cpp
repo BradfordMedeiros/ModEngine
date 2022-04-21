@@ -55,6 +55,13 @@ std::vector<std::string> listSceneFiles(){
   return listFilesWithExtensions("./res/scenes", { "rawscene" });
 }
 
+objid parentScene(objid sceneId){
+  return parentSceneId(world.sandbox, sceneId);
+}
+std::vector<objid> childScenes(objid sceneId){
+  return childSceneIds(world.sandbox, sceneId);
+}
+
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   std::vector<Token> addedTokens;

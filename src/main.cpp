@@ -1167,6 +1167,8 @@ int main(int argc, char* argv[]){
     .unloadAllScenes = unloadAllScenes,
     .listScenes = listScenes,
     .listSceneFiles = listSceneFiles,
+    .parentScene = parentScene,
+    .childScenes = childScenes,
     .sendLoadScene = sendLoadScene,
     .createScene = createScene,
     .moveCamera = moveCamera,

@@ -35,6 +35,15 @@ SCM scm_listScenes(){
   return list;
 }
 
+objid (*_parentScene)(objid sceneId);
+SCM scm_parentScene(){
+  return SCM_UNSPECIFIED;
+}
+std::vector<objid> (*_childScenes)(objid sceneId);
+SCM scm_childScenes(){
+  return SCM_UNSPECIFIED;
+}
+
 void (*_createScene)(std::string scenename);
 SCM scm_createScene(SCM filepath){
   _createScene(scm_to_locale_string(filepath));
@@ -776,6 +785,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
+  scm_c_define_gsubr("parent-scene", 0, 0, 0, (void *)scm_parentScene);
+  scm_c_define_gsubr("child-scenes", 0, 0, 0, (void *)scm_childScenes);
   scm_c_define_gsubr("list-scenefiles", 0, 0, 0, (void *)scm_listSceneFiles);
   scm_c_define_gsubr("create-scene", 1, 0, 0, (void *)scm_createScene);
 
@@ -900,6 +911,8 @@ void createStaticSchemeBindings(
   void (*unloadAllScenes)(),
   std::vector<int32_t> (*listScenes)(),  
   std::vector<std::string> (*listSceneFiles)(),
+  objid (*parentScene)(objid sceneId),
+  std::vector<objid> (*childScenes)(objid sceneId),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  
@@ -973,6 +986,8 @@ void createStaticSchemeBindings(
   _unloadScene = unloadScene;
   _unloadAllScenes = unloadAllScenes;
   _listScenes = listScenes;
+  _parentScene = parentScene;
+  _childScenes = childScenes;
   _listSceneFiles = listSceneFiles;
   _sendLoadScene = sendLoadScene;
   _createScene = createScene;

@@ -41,6 +41,9 @@ void applyImpulseRel(int32_t index, glm::vec3 impulse);
 void clearImpulse(int32_t index);
 
 std::vector<std::string> listSceneFiles();
+objid parentScene(objid sceneId);
+std::vector<objid> childScenes(objid sceneId);
+
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens);
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
 void unloadScene(int32_t sceneId);

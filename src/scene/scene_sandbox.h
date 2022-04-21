@@ -113,6 +113,9 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
+objid parentSceneId(SceneSandbox& sandbox, objid sceneId);
+std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId);
+
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);

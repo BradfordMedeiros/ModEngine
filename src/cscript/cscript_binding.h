@@ -13,6 +13,8 @@ struct CustomApiBindings {
   void (*unloadAllScenes)();
   std::vector<int32_t> (*listScenes)();
   std::vector<std::string> (*listSceneFiles)();
+  objid (*parentScene)(objid sceneId);
+  std::vector<objid> (*childScenes)(objid sceneId);
   void (*sendLoadScene)(int32_t id);
   void (*createScene)(std::string scenename);
   void (*moveCamera)(glm::vec3);

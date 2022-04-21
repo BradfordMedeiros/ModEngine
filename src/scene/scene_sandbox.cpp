@@ -764,6 +764,13 @@ objid sceneId(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.idToGameObjectsH.at(id).sceneId;
 }
 
+objid parentSceneId(SceneSandbox& sandbox, objid sceneId){
+  return 0;
+}
+std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId){
+  return {};
+}
+
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name){
   std::vector<objid> ids;
   for (auto &[id, gameobj] : sandbox.mainScene.idToGameObjects){
