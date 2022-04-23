@@ -225,7 +225,7 @@ std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid id){
 
 void pruneSceneId(SceneSandbox& sandbox, objid sceneId){
   sandbox.sceneIdToRootObj.erase(sceneId);
-  sandbox.sceneIdToSceneName.erase(sceneId);
+  sandbox.sceneIdToSceneMetadata.erase(sceneId);
   sandbox.mainScene.sceneToNameToId.erase(sceneId); 
 }
 void maybePruneScenes(SceneSandbox& sandbox){
@@ -651,7 +651,7 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
   applyStyles(tokens, styles);
   return createSceneFromParsedContent(sceneId, tokens, getNewObjectId);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
 
   SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, styles);
@@ -670,7 +670,10 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
   auto rootId = deserializedScene.scene.rootId;
   sandbox.sceneIdToRootObj[deserializedScene.scene.idToGameObjectsH.at(rootId).sceneId] = rootId;
-  sandbox.sceneIdToSceneName[sceneId] = sceneFileName;
+  sandbox.sceneIdToSceneMetadata[sceneId] = SceneMetadata{
+    .scenefile = sceneFileName,
+    .name = name,
+  }; 
 
   enforceParentRelationship(sandbox.mainScene, rootId, sandbox.mainScene.rootId);
 
@@ -764,8 +767,22 @@ objid sceneId(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.idToGameObjectsH.at(id).sceneId;
 }
 
-objid parentSceneId(SceneSandbox& sandbox, objid sceneId){
-  return 0;
+
+bool parentSceneId(SceneSandbox& sandbox, objid sceneId, objid* _parentSceneId){
+  auto currObjId = rootIdForScene(sandbox, sceneId);
+  while (true){
+    auto gameobjH = getGameObjectH(sandbox, currObjId); 
+    if (gameobjH.parentId == -1){
+      break;
+    }
+    currObjId = gameobjH.parentId;
+    if (gameobjH.sceneId != sceneId){
+      *_parentSceneId = gameobjH.sceneId;
+      return true;
+    }
+  }
+  *_parentSceneId = 0;
+  return false;
 }
 
 std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId){
@@ -804,4 +821,13 @@ int getNumberOfObjects(SceneSandbox& sandbox){
 
 int getNumberScenesLoaded(SceneSandbox& sandbox){
   return sandbox.mainScene.sceneToNameToId.size();
+}
+
+std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name){
+  for (auto &[sceneId, metadata] : sandbox.sceneIdToSceneMetadata){
+    if (metadata.name == name){
+      return sceneId;
+    }
+  }
+  return std::nullopt;
 }

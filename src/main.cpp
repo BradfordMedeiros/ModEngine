@@ -1169,6 +1169,7 @@ int main(int argc, char* argv[]){
     .listSceneFiles = listSceneFiles,
     .parentScene = parentScene,
     .childScenes = childScenes,
+    .sceneIdByName = sceneIdByName,
     .sendLoadScene = sendLoadScene,
     .createScene = createScene,
     .moveCamera = moveCamera,
@@ -1335,7 +1336,7 @@ int main(int argc, char* argv[]){
 
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto rawScene : rawScenes){
-    loadScene(rawScene, {});
+    loadScene(rawScene, {}, std::nullopt);
   }
   
 

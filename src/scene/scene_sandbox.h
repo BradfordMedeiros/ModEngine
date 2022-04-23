@@ -48,9 +48,14 @@ struct SceneDeserialization {
   std::map<std::string, GameobjAttributes>  additionalFields;
 };
 
+struct SceneMetadata {
+  std::string scenefile;
+  std::optional<std::string> name;
+};
+
 struct SceneSandbox {
   std::map<objid, objid> sceneIdToRootObj;
-  std::map<objid, std::string> sceneIdToSceneName;
+  std::map<objid, SceneMetadata> sceneIdToSceneMetadata;
   Scene mainScene;
   std::vector<LayerInfo> layers;
 };
@@ -94,7 +99,7 @@ struct AddSceneDataValues {
   std::map<std::string, GameobjAttributesWithId>  additionalFields;
   std::vector<objid> idsAdded;
 };
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles);
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
 bool sceneExists(SceneSandbox& sandbox, objid sceneId);
 
@@ -113,12 +118,13 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
 void makeParent(SceneSandbox& sandbox, objid child, objid parent);
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId);
 objid sceneId(SceneSandbox& sandbox, objid id);
-objid parentSceneId(SceneSandbox& sandbox, objid sceneId);
+bool parentSceneId(SceneSandbox& sandbox, objid sceneId, objid* _parentSceneId);
 std::vector<objid> childSceneIds(SceneSandbox& sandbox, objid sceneId);
 
 std::vector<objid> getByName(SceneSandbox& sandbox, std::string name);
 int getNumberOfObjects(SceneSandbox& sandbox);
 int getNumberScenesLoaded(SceneSandbox& sandbox);
+std::optional<objid> sceneIdByName(SceneSandbox& sandbox, std::string name);
 
 void updateAbsoluteTransform(SceneSandbox& sandbox, objid id, Transformation transform);
 void updateRelativeTransform(SceneSandbox& sandbox, objid id, Transformation transform);

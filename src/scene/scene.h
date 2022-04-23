@@ -47,8 +47,8 @@ void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& id
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 
 
-objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens);
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface);
+objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens, std::optional<std::string> name);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface, std::optional<std::string> name);
 void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
 void removeAllScenesFromWorld(World& world, SysInterface interface);
 
@@ -112,7 +112,7 @@ struct Properties {
 Properties getProperties(World& world, objid id);
 void setProperties(World& world, objid id, Properties& properties);
 
-std::string sceneNameForSceneId(World& world, objid sceneId);
+std::string sceneFileForSceneId(World& world, objid sceneId);
 void loadSkybox(World& world, std::string skyboxpath);
 
 std::string getType(std::string name);

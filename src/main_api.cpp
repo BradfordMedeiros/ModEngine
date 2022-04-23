@@ -55,14 +55,15 @@ std::vector<std::string> listSceneFiles(){
   return listFilesWithExtensions("./res/scenes", { "rawscene" });
 }
 
-objid parentScene(objid sceneId){
-  return parentSceneId(world.sandbox, sceneId);
+bool parentScene(objid sceneId, objid* _parentSceneId){
+  return parentSceneId(world.sandbox, sceneId, _parentSceneId);
 }
+
 std::vector<objid> childScenes(objid sceneId){
   return childSceneIds(world.sandbox, sceneId);
 }
 
-int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens){
+int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   std::vector<Token> addedTokens;
   for (auto &tokens : additionalTokens){
@@ -72,17 +73,22 @@ int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> a
       .payload = tokens.at(2),
     });
   }
-  return addSceneToWorld(world, sceneFile, interface, addedTokens);
+  return addSceneToWorld(world, sceneFile, interface, addedTokens, name);
 }
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
 
   auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, {}, {}, {{"position", offset}});
   std::cout << "load scene offset: " << print(offset) << std::endl;
-  auto sceneId = loadScene(sceneFile, {});
+  auto sceneId = loadScene(sceneFile, {}, std::nullopt);
   auto rootId = rootIdForScene(world.sandbox, sceneId);
   makeParent(world.sandbox, rootId, nodeOffsetId);
   return nodeOffsetId;
+}
+
+int32_t sceneIdByName(std::string name){
+  assert(false);
+  return 0;
 }
 
 void unloadScene(int32_t sceneId){  
@@ -95,7 +101,7 @@ void unloadAllScenes(){
 
 // @TODO - save all the scenes in the world
 void saveScene(bool includeIds, objid sceneId){
-  auto fileToSave = sceneNameForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
+  auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
   auto fileExtension = getPreExtension(fileToSave);
 

@@ -702,17 +702,17 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface){
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface, std::optional<std::string> name){
   auto styles = loadStyles("./res/default.style");
-  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name);
   std::vector<GameObjectObj> addedGameobjObjs = {};
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields, false, addedGameobjObjs);
   return sceneId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens){
+objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens, std::optional<std::string> name){
   auto sceneData = loadFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
-  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), sceneData, interface);
+  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), sceneData, interface, name);
 }
 
 // todo finish removing data like eg clearing meshes, animations,etc
@@ -1094,6 +1094,6 @@ void setProperties(World& world, objid id, Properties& properties){
   getGameObject(world, id).transformation = properties.transformation;
 }
 
-std::string sceneNameForSceneId(World& world, objid sceneId){
-  return world.sandbox.sceneIdToSceneName.at(sceneId);
+std::string sceneFileForSceneId(World& world, objid sceneId){
+  return world.sandbox.sceneIdToSceneMetadata.at(sceneId).scenefile;
 }

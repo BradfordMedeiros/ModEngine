@@ -9,14 +9,19 @@ SCM scm_listSceneId(SCM id){
 
 
 // Main Api
-int32_t (*_loadScene)(std::string, std::vector<std::vector<std::string>>);
-SCM scm_loadScene(SCM value, SCM additionalValues){
+int32_t (*_loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name);
+SCM scm_loadScene(SCM value, SCM additionalValues, SCM name){
   auto additionalValuesDefined = !scm_is_eq(additionalValues, SCM_UNDEFINED);
   std::vector<std::vector<std::string>> additionalValuesList;
   if (additionalValuesDefined){
     additionalValuesList = scmToStringList(additionalValues);
   }
-  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList);
+  auto scenenameDefined = !scm_is_eq(name, SCM_UNDEFINED);
+  std::optional<std::string> scenename = std::nullopt;
+  if (scenenameDefined){
+    scenename = scm_to_locale_string(name);
+  }
+  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList, scenename);
   return scm_from_int32(sceneId);
 }
 
@@ -40,10 +45,13 @@ SCM scm_listScenes(){
   }
   return list;
 }
-
-objid (*_parentScene)(objid sceneId);
+bool (*_parentScene)(objid sceneId, objid* parentSceneId);
 SCM scm_parentScene(SCM sceneId){
-  auto parentSceneId = _parentScene(scm_to_int32(sceneId));
+  objid parentSceneId = 0;
+  bool hasParentScene = _parentScene(scm_to_int32(sceneId), &parentSceneId);
+  if (!hasParentScene){
+    return SCM_BOOL_F;
+  }
   return scm_from_int32(parentSceneId);
 }
 std::vector<objid> (*_childScenes)(objid sceneId);
@@ -56,6 +64,11 @@ void (*_createScene)(std::string scenename);
 SCM scm_createScene(SCM filepath){
   _createScene(scm_to_locale_string(filepath));
   return SCM_UNSPECIFIED;
+}
+
+objid (*_sceneIdByName)(std::string name);
+SCM scm_sceneIdByName(SCM name){
+  return scm_from_int32(_sceneIdByName(scm_to_locale_string(name)));
 }
 
 std::vector<std::string> (*_listSceneFiles)();
@@ -790,7 +803,7 @@ std::vector<func_t> _registerGuileFns;
 ////////////
 void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("list-sceneid", 1, 0, 0, (void *)scm_listSceneId);
-  scm_c_define_gsubr("load-scene", 1, 1, 0, (void *)scm_loadScene);
+  scm_c_define_gsubr("load-scene", 1, 2, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
@@ -798,6 +811,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("child-scenes", 1, 0, 0, (void *)scm_childScenes);
   scm_c_define_gsubr("list-scenefiles", 0, 0, 0, (void *)scm_listSceneFiles);
   scm_c_define_gsubr("create-scene", 1, 0, 0, (void *)scm_createScene);
+  scm_c_define_gsubr("lsscene-name", 1, 0, 0, (void *)scm_sceneIdByName);
 
   scm_c_define_gsubr("send-load-scene", 1, 0, 0, (void *)scm_sendLoadScene);
 
@@ -915,13 +929,14 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
-  int32_t (*loadScene)(std::string, std::vector<std::vector<std::string>>),  
+  int32_t (*loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name),
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
   std::vector<int32_t> (*listScenes)(),  
   std::vector<std::string> (*listSceneFiles)(),
-  objid (*parentScene)(objid sceneId),
+  bool (*parentScene)(objid sceneId, objid* parentSceneId),
   std::vector<objid> (*childScenes)(objid sceneId),
+  objid (*sceneIdByName)(std::string name),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  
