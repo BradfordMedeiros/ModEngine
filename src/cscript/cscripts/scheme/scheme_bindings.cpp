@@ -68,8 +68,11 @@ SCM scm_createScene(SCM filepath){
 
 std::optional<objid> (*_sceneIdByName)(std::string name);
 SCM scm_sceneIdByName(SCM name){
-  //return scm_from_int32(_sceneIdByName(scm_to_locale_string(name)));
-  return SCM_UNSPECIFIED;
+  auto sceneId = _sceneIdByName(scm_to_locale_string(name));
+  if (!sceneId.has_value()){
+    return SCM_BOOL_F;
+  }
+  return scm_from_int32(sceneId.value());
 }
 
 std::vector<std::string> (*_listSceneFiles)();
@@ -1013,6 +1016,7 @@ void createStaticSchemeBindings(
   _listScenes = listScenes;
   _parentScene = parentScene;
   _childScenes = childScenes;
+  _sceneIdByName = sceneIdByName;
   _listSceneFiles = listSceneFiles;
   _sendLoadScene = sendLoadScene;
   _createScene = createScene;
