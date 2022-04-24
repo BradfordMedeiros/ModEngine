@@ -66,9 +66,10 @@ SCM scm_createScene(SCM filepath){
   return SCM_UNSPECIFIED;
 }
 
-objid (*_sceneIdByName)(std::string name);
+std::optional<objid> (*_sceneIdByName)(std::string name);
 SCM scm_sceneIdByName(SCM name){
-  return scm_from_int32(_sceneIdByName(scm_to_locale_string(name)));
+  //return scm_from_int32(_sceneIdByName(scm_to_locale_string(name)));
+  return SCM_UNSPECIFIED;
 }
 
 std::vector<std::string> (*_listSceneFiles)();
@@ -936,7 +937,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listSceneFiles)(),
   bool (*parentScene)(objid sceneId, objid* parentSceneId),
   std::vector<objid> (*childScenes)(objid sceneId),
-  objid (*sceneIdByName)(std::string name),
+  std::optional<objid> (*sceneIdByName)(std::string name),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  

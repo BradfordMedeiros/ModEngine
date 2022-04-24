@@ -46,7 +46,7 @@ std::vector<objid> childScenes(objid sceneId);
 
 int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name);
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName);
-int32_t sceneIdByName(std::string name);
+std::optional<objid> sceneIdByName(std::string name);
 
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();

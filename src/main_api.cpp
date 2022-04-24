@@ -86,9 +86,8 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
   return nodeOffsetId;
 }
 
-int32_t sceneIdByName(std::string name){
-  assert(false);
-  return 0;
+std::optional<objid> sceneIdByName(std::string name){
+  return sceneIdByName(world.sandbox, name);
 }
 
 void unloadScene(int32_t sceneId){  
