@@ -653,6 +653,12 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
 }
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
+  for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
+    if (metadata.name == name && name != std::nullopt){
+      std::cout << "scene name already exists: " << name.value() << std::endl;
+      assert(false);
+    }
+  }
 
   SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, styles);
 
