@@ -1,0 +1,3 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:20 20 20
+platform:position:0 30 -100
