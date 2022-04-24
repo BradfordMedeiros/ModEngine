@@ -1170,6 +1170,7 @@ int main(int argc, char* argv[]){
     .parentScene = parentScene,
     .childScenes = childScenes,
     .sceneIdByName = sceneIdByName,
+    .rootIdForScene = rootIdForScene,
     .sendLoadScene = sendLoadScene,
     .createScene = createScene,
     .moveCamera = moveCamera,

@@ -90,6 +90,10 @@ std::optional<objid> sceneIdByName(std::string name){
   return sceneIdByName(world.sandbox, name);
 }
 
+objid rootIdForScene(objid sceneId){
+  return rootIdForScene(world.sandbox, sceneId);
+}
+
 void unloadScene(int32_t sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
   removeSceneFromWorld(world, sceneId, interface);

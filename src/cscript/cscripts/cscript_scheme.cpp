@@ -44,6 +44,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.parentScene,
     api.childScenes,
     api.sceneIdByName,
+    api.rootIdForScene,
     api.sendLoadScene,
     api.createScene,
     api.moveCamera,  

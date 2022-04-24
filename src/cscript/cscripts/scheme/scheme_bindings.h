@@ -18,6 +18,7 @@ void createStaticSchemeBindings(
   bool (*parentScene)(objid sceneId, objid* _parentSceneId),
   std::vector<objid> (*childScenes)(objid sceneId),
   std::optional<objid> (*sceneIdByName)(std::string name),
+  objid (*rootIdForScene)(objid sceneId),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  
