@@ -1,10 +1,10 @@
-(define uiOption "file")
 (define uilist 
   (list
     (list "file" (list "open" "save" "load" "quit"))
     (list "misc" (list "fullscreen"))
   )
 )
+(define menuOptions (map car uilist))
 
 (define (textvalue name content)
   (list name
@@ -35,9 +35,28 @@
   (append baselist  joinedElements)
 )
 
-(load-scene "./res/scenes/editor/popover.rawscene" (popover-options (cadr (assoc uiOption uilist))))
+(define sceneId #f)
+(define (change-popover uiOption)
+  (if sceneId
+    (unload-scene sceneId)
+  )
+  (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options (cadr (assoc uiOption uilist)))))
+  
+)
 
-;(define (onObjSelected gameobj color)
-;  (format #t "on object selected: ~a ~a" gameobj color)
-;  (format #t "name: ~a\n" (gameobj-name gameobj))
-;)
+
+(define (onObjSelected gameobj color)
+  (define popoptionPair (assoc "popoption" (gameobj-attr gameobj)))
+  (define popoption (if popoptionPair (cadr popoptionPair) ""))
+  (define isInList (not (equal? #f (member popoption menuOptions))))
+  (format #t "popoption: ~a\n" popoption)
+  (if isInList
+    (change-popover popoption)
+  )
+)
+
+
+
+; Make the selection type populate the popover correctly 
+
+
