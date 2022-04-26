@@ -41,7 +41,8 @@
     (unload-scene sceneId)
   )
   (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options (cadr (assoc uiOption uilist)))))
-  
+  (format #t "object id: ~a\n" (lsobj-name "(dialog" sceneId))
+  (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
 )
 
 

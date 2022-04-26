@@ -31,12 +31,17 @@
   ];
   $menu_elements = [];
   $menu_bar= [
-    ["value" => "file", "items" => ["runoptions", "quit"]],
-    ["value" => "misc", "items" => ["fullscreen (alt + enter)", "info"]],
+    ["value" => "file", "popoption" => "file"],
+    ["value" => "misc", "popoption" => "misc"],
   ];
   for ($i = 0; $i < count($menu_bar); $i++){
     $textfield_name = ")menuitem_" . $i;
-    createElement($textfield_name, $menu_text_attr, ["value" => $menu_bar[$i]["value"]]);
+    createElement($textfield_name, $menu_text_attr, 
+      [
+        "value" => $menu_bar[$i]["value"], 
+        "popoption" => $menu_bar[$i]["popoption"]
+      ]
+    );
     array_push($menu_elements, $textfield_name);
   }
   echo ("(menubar:elements:" . implode(",", $menu_elements) . "\n");
