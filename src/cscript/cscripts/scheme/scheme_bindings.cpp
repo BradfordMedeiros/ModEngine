@@ -371,11 +371,11 @@ SCM getGameObjectId(SCM value){
   return scm_from_int32(getGameobjId(value));
 }
 
-std::optional<objid> (*_getGameObjectByName)(std::string name, objid sceneId);
+std::optional<objid> (*_getGameObjectByName)(std::string name, objid sceneId, bool sceneIdExplicit);
 SCM getGameObjByName(SCM value, SCM scmSceneId){
   auto sceneIdDefined = !scm_is_eq(scmSceneId, SCM_UNDEFINED);
   auto sceneId = sceneIdDefined ? scm_to_int32(scmSceneId) : _listSceneId(currentModuleId());
-  auto id = _getGameObjectByName(scm_to_locale_string(value), sceneId);
+  auto id = _getGameObjectByName(scm_to_locale_string(value), sceneId, sceneIdDefined);
   if (!id.has_value()){
     return scm_from_bool(false);
   }
@@ -971,7 +971,7 @@ void createStaticSchemeBindings(
   glm::vec3 (*moveRelative)(glm::vec3 pos, glm::quat orientation, float distance),
   glm::vec3 (*moveRelativeVec)(glm::vec3 pos, glm::quat orientation, glm::vec3 distance),
   glm::quat (*orientationFromPos)(glm::vec3 fromPos, glm::vec3 toPos),
-  std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId),
+  std::optional<objid> (*getGameObjectByName)(std::string name, objid sceneId, bool sceneIdExplicit),
   void (*applyImpulse)(int32_t index, glm::vec3 impulse),
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
   void (*clearImpulse)(int32_t index),

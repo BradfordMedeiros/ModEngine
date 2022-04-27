@@ -57,7 +57,7 @@ Animation getAnimation(World& world, int32_t groupId, std::string animationToPla
 
 
 glm::mat4 getModelMatrix(World& world, objid idScene, std::string name, std::string skeletonRoot){
-  auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
+  auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
   if (gameobj.has_value()){
     return armatureTransform(world.sandbox, gameobj.value() -> id, skeletonRoot, idScene);
   }
@@ -74,7 +74,7 @@ std::function<glm::mat4(std::string, std::string)> scopeGetModelMatrix(World& wo
 
 std::function<void(std::string name, glm::mat4 pose)> scopeSetPose(World& world, objid idScene){
   return [&world, idScene](std::string name, glm::mat4 pose) -> void {
-    auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene);
+    auto gameobj =  maybeGetGameObjectByName(world.sandbox, name, idScene, false);
     if (gameobj.has_value()){
       physicsLocalTransformSet(world, gameobj.value() -> id, getTransformationFromMatrix(pose));
     }else{

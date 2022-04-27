@@ -91,7 +91,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePh
 
 NameAndMeshObjName getMeshesForGroupId(World& world, objid id);
 
-std::optional<objid> getGameObjectByName(World& world, std::string name, objid sceneId);
+std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit);
 GameObject& getGameObject(World& world, objid id);
 GameObject& getGameObject(World& world, std::string name, objid sceneId);
 

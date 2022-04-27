@@ -330,7 +330,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
    // Set position of the layout based on anchor target
   if (layoutObject -> anchor.target != ""){
-    auto anchorElement = getGameObjectByName(world, layoutObject -> anchor.target, currentSceneId);
+    auto anchorElement = getGameObjectByNamePrefix(world, layoutObject -> anchor.target, currentSceneId, false);
     if (anchorElement.has_value()){
       auto anchorId = anchorElement.value();
       auto anchorBoundInfo = getPhysicsInfoForGameObject(world, id).boundInfo;

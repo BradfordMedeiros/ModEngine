@@ -22,8 +22,8 @@ extern DynamicLoading dynamicLoading;
 extern std::map<std::string, objid> activeLocks;
 extern CScriptBindingCallbacks cBindings;
 
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
-  return getGameObjectByName(world, name, sceneId);
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
+  return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
 }
 
 
@@ -456,7 +456,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
   std::cout << "camera data: " << state.activeCameraData -> enableDof << ", " << state.activeCameraData -> minBlurDistance << ", " << state.activeCameraData -> maxBlurDistance << std::endl;
 }
 void setActiveCamera(std::string name, objid sceneId){
-  auto object = getGameObjectByName(name, sceneId);
+  auto object = getGameObjectByName(name, sceneId, false);
   if (!object.has_value()){
     std::cout << "ERROR SETTING CAMERA: does the camera: " << name << " exist?" << std::endl;
     assert(false);
@@ -500,7 +500,7 @@ void setCameraRotation(glm::quat orientation){
 
 void playSoundState(std::string source, objid sceneId){
   std::cout << "Info: play sound: " << source << std::endl;
-  auto gameobj = getGameObjectByName(world, source, sceneId);
+  auto gameobj = getGameObjectByName(source, sceneId, false);
   if (gameobj.has_value()){
     playSoundState(world.objectMapping, gameobj.value()); 
   }else{

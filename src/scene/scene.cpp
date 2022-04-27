@@ -4,15 +4,15 @@ GameObject& getGameObject(World& world, objid id){
   return getGameObject(world.sandbox, id);
 }
 
-std::optional<objid> getGameObjectByName(World& world, std::string name, objid sceneId){
-  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId);
+std::optional<objid> getGameObjectByNamePrefix(World& world, std::string name, objid sceneId, bool sceneIdExplicit){
+  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId, true);
   if (obj.has_value()){
     return obj.value() -> id;
   }
   return std::nullopt;
 }
 GameObject& getGameObject(World& world, std::string name, objid sceneId){
-  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId);
+  auto obj = maybeGetGameObjectByName(world.sandbox, name, sceneId, false);
   if (obj.has_value()){
     return *obj.value();
   }
@@ -1005,12 +1005,23 @@ void updateSoundPositions(World& world){
 }
 
 void enforceLookAt(World& world){
+  bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName);
+
   forEveryGameobj(world.sandbox, [&world](objid id, GameObject& gameobj) -> void {
     std::string lookAt = gameobj.lookat;                      
     if (lookAt == "" || lookAt == gameobj.name){
       return;
     }
     auto sceneId = getGameObjectH(world.sandbox, id).sceneId;
+
+    auto parsedSceneId = 0;
+    std::string parsedSearchName = "";
+    auto hasParsedName = extractSceneIdFromName(lookAt, &parsedSceneId, &parsedSearchName);
+    if (hasParsedName){
+      sceneId = parsedSceneId;
+      lookAt = parsedSearchName;
+    }
+
     if(idExists(world.sandbox, lookAt, sceneId)){
       glm::vec3 fromPos = fullTransformation(world.sandbox, id).position;
       glm::vec3 targetPosition = fullTransformation(world.sandbox, getGameObject(world.sandbox, lookAt, sceneId).id).position;

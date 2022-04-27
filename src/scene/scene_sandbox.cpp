@@ -339,7 +339,7 @@ objid getGroupId(Scene& scene, objid id){
   return scene.idToGameObjectsH.at(id).groupId; 
 }
 objid getIdForName(SceneSandbox& sandbox, std::string name, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, name, sceneId);
+  auto gameobj = maybeGetGameObjectByName(sandbox, name, sceneId, false);
   return gameobj.value() -> id;
 }
 bool idExists(Scene& scene, objid id){
@@ -400,9 +400,39 @@ std::vector<objid> allSceneIds(SceneSandbox& sandbox){
   return sceneIds;
 } 
 
-std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId){
+
+// something like .2041308683/testobject
+bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName){
+  if (name.at(0) == '.'){
+    auto parts = split(name, '/');
+    assert(parts.size() >= 2);
+    auto prefixSize = parts.at(0).size();
+    auto prefix = name.substr(1, prefixSize - 1);
+    auto rest = name.substr(prefixSize + 1, name.size());
+    auto sceneId = std::atoi(prefix.c_str());
+    *_id = sceneId;
+    *_searchName = rest;
+    return true;
+  }
+  *_id = 0;
+  *_searchName = "";
+  return false;
+}
+
+std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId, bool enablePrefixMatch){
+  auto sceneToSearchIn = sceneId;
+  auto effectiveName = name;
+  if (enablePrefixMatch){
+    objid prefixSceneId = 0;
+    std::string restString = "";
+    auto validPrefix = extractSceneIdFromName(name, &prefixSceneId, &restString);
+    if (validPrefix){
+      sceneToSearchIn = prefixSceneId;
+      effectiveName = restString;
+    }
+  }
   for (auto &[id, gameObj]: sandbox.mainScene.idToGameObjects){
-    if (gameObj.name == name && (sandbox.mainScene.idToGameObjectsH.at(id).sceneId == sceneId)){
+    if (gameObj.name == effectiveName && (sandbox.mainScene.idToGameObjectsH.at(id).sceneId == sceneToSearchIn)){
       return &gameObj;      
     }
   }
@@ -421,13 +451,13 @@ bool idExists(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.idToGameObjects.find(id) != sandbox.mainScene.idToGameObjects.end();
 }
 bool idExists(SceneSandbox& sandbox, std::string name, objid sceneId){
-  return maybeGetGameObjectByName(sandbox, name, sceneId).has_value();
+  return maybeGetGameObjectByName(sandbox, name, sceneId, false).has_value();
 }
 GameObject& getGameObject(SceneSandbox& sandbox, objid id){
   return getGameObject(sandbox.mainScene, id);
 }
 GameObject& getGameObject(SceneSandbox& sandbox, std::string name, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, name, sceneId);
+  auto gameobj = maybeGetGameObjectByName(sandbox, name, sceneId, false);
   GameObject& obj = *(gameobj.value()); 
   return obj;
 }
@@ -435,7 +465,7 @@ GameObjectH& getGameObjectH(SceneSandbox& sandbox, objid id){
   return getGameObjectH(sandbox.mainScene, id);
 }
 GameObjectH& getGameObjectH(SceneSandbox& sandbox, std::string name, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, name, sceneId);
+  auto gameobj = maybeGetGameObjectByName(sandbox, name, sceneId, false);
   GameObject& obj = *(gameobj.value()); 
   GameObjectH& objh = getGameObjectH(sandbox, obj.id);
   return objh;
@@ -625,7 +655,7 @@ Transformation fullTransformation(SceneSandbox& sandbox, objid id){
   return getTransformationFromMatrix(fullModelTransform(sandbox, id));
 }
 glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeletonRoot, objid sceneId){
-  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId);
+  auto gameobj = maybeGetGameObjectByName(sandbox, skeletonRoot, sceneId, false);
   assert(gameobj.has_value());
  
   auto groupTransform = fullModelTransform(sandbox, gameobj.value() -> id);

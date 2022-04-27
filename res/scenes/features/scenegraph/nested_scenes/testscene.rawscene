@@ -1,0 +1,5 @@
+testobject:mesh:./res/models/box/box.obj
+testobject:scale:20 20 20
+testobject:position:0 20 -50
+
+>testscenecamera:position:0 5 0

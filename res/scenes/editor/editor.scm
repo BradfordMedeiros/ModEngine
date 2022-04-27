@@ -1,3 +1,5 @@
+(define mainSceneId (list-sceneid (gameobj-id mainobj)))
+
 (define uilist 
   (list
     (list "file" (reverse (list "open" "save" "load" "quit")))
@@ -35,12 +37,15 @@
   (define mappedAction (assoc action nameAction))
   (if mappedAction ((cadr mappedAction)))
 )
-(define (popover-options menuOptions)
+
+[define popItemPrefix ")text_"]
+(define popItemPrefixLength (string-length popItemPrefix))
+(define (popover-options elementName menuOptions)
   (define index -1)
   (define (nextName)
     (format #t "next value\n")
     (set! index (+ index 1))
-    (string-append ")text_" (number->string index))
+    (string-append popItemPrefix (number->string index))
   )
   (define (create-value text) (textvalue (nextName) text text))
 
@@ -49,25 +54,34 @@
   (define elements (map cadr val))
   (define joinedNames (string-join itemnames ","))
   (define joinedElements (apply append elements))
-  (define baselist (list (list "(dialog" "elements" joinedNames)))
+  (define baselist (list 
+    (list "(dialog" "elements" joinedNames)
+    (list "(dialog" "anchor" elementName)
+  ))
   (format #t "joinedNames: ~a\n" joinedNames)
   (format #t "joinedElements name: ~a\n" joinedElements)
+  (format #t "element name is: ~a\n" elementName)
   (append baselist  joinedElements)
 )
 
 (define sceneId #f)
-(define (change-popover uiOption)
-  (if sceneId
-    (unload-scene sceneId)
-  )
-  (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options (cadr (assoc uiOption uilist)))))
+(define (maybe-unload-popover) 
+  (if sceneId (unload-scene sceneId))
+  (set! sceneId #f)
+)
+(define (change-popover elementName uiOption)
+  (maybe-unload-popover)
+  (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist)))))
   (format #t "object id: ~a\n" (lsobj-name "(dialog" sceneId))
   (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
+  (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
+
 )
 
 
-(define (isPopoverElement name) (if (< (string-length name) 4) #f (equal? (substring name 0 6) ")text_")) )
+(define (isPopoverElement name) (if (< (string-length name) popItemPrefixLength) #f (equal? (substring name 0 popItemPrefixLength) ")text_")) )
 
+(define (fullElementName localname) (string-append "." (number->string mainSceneId) "/" localname))
 (define (onObjSelected gameobj color)
   (define objattrs (gameobj-attr gameobj))
   (define popoptionPair (assoc "popoption" objattrs))
@@ -75,17 +89,15 @@
   (define popoption (if popoptionPair (cadr popoptionPair) ""))
   (define isInList (not (equal? #f (member popoption menuOptions))))
   (define elementName (gameobj-name gameobj))
+  (define ispopover (isPopoverElement elementName))
   (format #t "popoption: ~a\n" popoption)
   (if isInList
-    (change-popover popoption)
+    (change-popover (fullElementName elementName) popoption)
   )
-  (if (and (isPopoverElement elementName) popactionPair) 
+  (if (and ispopover popactionPair) 
     (popoverAction (cadr popactionPair))
   )
+  (if (not (or isInList ispopover)) (maybe-unload-popover))
 )
-
-
-
-; Make the selection type populate the popover correctly 
 
 

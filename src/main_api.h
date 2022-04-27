@@ -59,7 +59,7 @@ void createScene(std::string scenename);
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);
 
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId);
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
 std::vector<int32_t> getObjectsByType(std::string type);
 std::string getGameObjectName(int32_t index);
 GameobjAttributes getGameObjectAttr(int32_t id);

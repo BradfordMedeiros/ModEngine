@@ -654,7 +654,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   if(!state.isRotateSelection){
      drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
   }
-
+  
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
 
   std::string manipulatorAxisString;

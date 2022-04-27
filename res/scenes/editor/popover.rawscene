@@ -26,6 +26,7 @@
 (dialog:minwidth:0.25
 
 ## extra anchor target
-#(dialog:anchor:)menuitem_0
-#(dialog:anchor-offset:0.02 -0.3 0
+(dialog:anchor-offset:0.02 -0.06 0
+#(dialog:anchor-dir-horizontal:right
+(dialog:anchor-dir-vertical:down
 
