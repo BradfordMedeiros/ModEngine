@@ -17,9 +17,21 @@
       (load-scene 
         "./res/scenes/editor/dialog.rawscene" 
         (list
+          (list "(options" "elements" ")option_1,)option_2,)option_3")
           (list ")text_2" "value" "TEST TITLE HERE")
           (list ")text_main" "value" "test text here")
-          ;(list "options" "elements" ")option_1,)option_2,)option_3")
+
+          (list ")option_1" "layer" "basicui")
+          (list ")option_1" "scale" "0.005 0.015 0.005")
+          (list ")option_1" "value" "CANCEL")
+
+          (list ")option_2" "layer" "basicui")
+          (list ")option_2" "scale" "0.005 0.015 0.005")
+          (list ")option_2" "value" "OK")
+
+          (list ")option_3" "layer" "basicui")
+          (list ")option_3" "scale" "0.005 0.015 0.005")
+          (list ")option_3" "value" "what is this")
         )
       )
     )

@@ -4,39 +4,15 @@
 )text_main:layer:basicui
 )text_main:scale:0.005 0.015 0.005
 
-)option_1:layer:basicui
-)option_1:scale:0.005 0.015 0.005
-)option_1:value:CANCEL
-
-)option_2:layer:basicui
-)option_2:scale:0.005 0.015 0.005
-)option_2:value:OK
-
-)option_3:layer:basicui
-)option_3:scale:0.005 0.015 0.005
-)option_3:value:THIS IS ANOTHER VALUE
-
 (options:position:0 0 1
 (options:layer:basicui
 (options:type:horizontal
 (options:backpanel:true
 (options:margin:0.1
 (options:spacing:0.05
-(options:elements:)option_1,)option_2,)option_3
 (options:tint:1 0 0
 (options:border-size:0.02
 (options:border-color:0 1 0
-
-#(background:layer:basicui
-#(background:backpanel:true
-#(background:minwidth:2
-#(background:minheight:2
-#(background:position:0 0 0
-#(background:tint:0 0 0
-#(background:elements:)getridofthistext
-#)getridofthistext:layer:basicui
-#)getridofthistext:scale:0.005 0.015 0.005
-#)getridofthistext:value:
 
 (dialog:layer:basicui
 (dialog:type:vertical
@@ -49,8 +25,5 @@
 (dialog:border-color:0.2 0.2 1
 (dialog:script:./res/scenes/editor/dialogmove.scm
 (dialog:position:0 0 0
-
-
-
 
 
