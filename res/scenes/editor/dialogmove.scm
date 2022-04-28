@@ -57,3 +57,5 @@
     (set! hoveringObj #f)
   )
 )
+
+(enforce-layout (gameobj-id (lsobj-name "(dialog")))

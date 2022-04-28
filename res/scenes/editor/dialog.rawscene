@@ -1,10 +1,8 @@
 )text_2:layer:basicui
 )text_2:scale:0.005 0.015 0.005
-)text_2:value:OPTIONS MENU
 
 )text_main:layer:basicui
 )text_main:scale:0.005 0.015 0.005
-)text_main:value:THIS IS PLACEHOLDER TEXT THAT SHOULD BE UPDATED TO SAY STUFF
 
 )option_1:layer:basicui
 )option_1:scale:0.005 0.015 0.005
@@ -14,17 +12,20 @@
 )option_2:scale:0.005 0.015 0.005
 )option_2:value:OK
 
+)option_3:layer:basicui
+)option_3:scale:0.005 0.015 0.005
+)option_3:value:THIS IS ANOTHER VALUE
+
 (options:position:0 0 1
 (options:layer:basicui
 (options:type:horizontal
 (options:backpanel:true
 (options:margin:0.1
 (options:spacing:0.05
-(options:elements:)option_1,)option_2
+(options:elements:)option_1,)option_2,)option_3
 (options:tint:1 0 0
 (options:border-size:0.02
 (options:border-color:0 1 0
-(options:script:./res/scenes/editor/dialogactions.scm
 
 #(background:layer:basicui
 #(background:backpanel:true

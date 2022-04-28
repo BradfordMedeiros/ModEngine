@@ -7,11 +7,35 @@
   )
 )
 
+
+;;;;;;;;; dialog stuff
+(define dialogSceneId #f)
+(define (change-dialog)
+  (format #t "DIALOG CREATION PLACEHOLDER\n")
+  (if (not dialogSceneId)
+    (set! dialogSceneId 
+      (load-scene 
+        "./res/scenes/editor/dialog.rawscene" 
+        (list
+          (list ")text_2" "value" "TEST TITLE HERE")
+          (list ")text_main" "value" "test text here")
+          ;(list "options" "elements" ")option_1,)option_2,)option_3")
+        )
+      )
+    )
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define nameAction (list
   (list "open" (lambda () (format #t "open placeholder\n")) )
   (list "save" (lambda () ( format #t "save placeholder\n")) )
   (list "load" (lambda () ( format #t "load placeholder\n")) )
-  (list "quit" (lambda () (exit 0)) )
+  (list "quit" (lambda () 
+    (change-dialog)
+    ;(exit 0)
+  ))
   (list "fullscreen" (lambda () 
       (format #t "toggling fullscreen\n")
       (set-wstate (list
@@ -64,24 +88,34 @@
   (append baselist  joinedElements)
 )
 
-(define sceneId #f)
+(define sceneId #f);,
+(define currOption #f)
 (define (maybe-unload-popover) 
   (if sceneId (unload-scene sceneId))
   (set! sceneId #f)
+  (set! currOption #f)
 )
 (define (change-popover elementName uiOption)
+  (define isAlreadyLoaded (equal? currOption uiOption))
+  (format #t "POPOVER: is already loaded: ~a\n" isAlreadyLoaded)
   (maybe-unload-popover)
-  (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist)))))
-  (format #t "object id: ~a\n" (lsobj-name "(dialog" sceneId))
-  (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
-  (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
-
+  (if (not isAlreadyLoaded)
+    (begin
+      (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist)))))
+      (set! currOption uiOption)
+      (format #t "object id: ~a\n" (lsobj-name "(dialog" sceneId))
+      (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
+      (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
+    )
+  )
 )
 
 
 (define (isPopoverElement name) (if (< (string-length name) popItemPrefixLength) #f (equal? (substring name 0 popItemPrefixLength) ")text_")) )
 
 (define (fullElementName localname) (string-append "." (number->string mainSceneId) "/" localname))
+
+(define (onObjUnselected) (maybe-unload-popover))
 (define (onObjSelected gameobj color)
   (define objattrs (gameobj-attr gameobj))
   (define popoptionPair (assoc "popoption" objattrs))
@@ -93,11 +127,11 @@
   (format #t "popoption: ~a\n" popoption)
   (if isInList
     (change-popover (fullElementName elementName) popoption)
+    (maybe-unload-popover)
   )
   (if (and ispopover popactionPair) 
     (popoverAction (cadr popactionPair))
   )
   (if (not (or isInList ispopover)) (maybe-unload-popover))
 )
-
 
