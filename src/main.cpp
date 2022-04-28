@@ -47,6 +47,7 @@ GameObject defaultCamera = GameObject {
 };
 
 bool showDebugInfo = false;
+bool showCursor = false;
 std::string shaderFolderPath;
 
 bool disableInput = false;
@@ -236,7 +237,7 @@ bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 void selectItem(objid selectedId, Color pixelColor){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
-  if (!showDebugInfo){
+  if (!showCursor){
     return;
   }
 
@@ -643,18 +644,19 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded){
+void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded, bool showCursor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
 
+  if (showCursor){
+    if(!state.isRotateSelection){
+       drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
+    }
+  }
   if (!showDebugInfo){
     return;
   }
 
-  if(!state.isRotateSelection){
-     drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
-  }
-  
   drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
 
   std::string manipulatorAxisString;
@@ -959,6 +961,7 @@ int main(int argc, char* argv[]){
    ("fps-speed", "Fps speed multiplier", cxxopts::value<int>()->default_value("1000"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
+   ("cursor", "Show cursor", cxxopts::value<bool>() -> default_value("true"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
    ("b,bootstrapper", "Run the server in bootstrapper only", cxxopts::value<bool>()->default_value("false"))
@@ -1023,6 +1026,7 @@ int main(int argc, char* argv[]){
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
+  showCursor = result["cursor"].as<bool>() || showDebugInfo;
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
@@ -1526,6 +1530,7 @@ int main(int argc, char* argv[]){
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
         onSelectNullItem();
+        cBindings.onObjectUnselected();
       }
       selectItemCalled = false;
     }
@@ -1684,7 +1689,7 @@ int main(int argc, char* argv[]){
     
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded);
+    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded, showCursor);
     glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){

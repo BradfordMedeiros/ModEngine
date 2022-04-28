@@ -99,6 +99,7 @@ struct CScriptBinding {
   id_mousemovecallback onMouseMoveCallback;
   id_scrollcallback onScrollCallback;
   id_onobjectSelectedFunc onObjectSelected;
+  id_func onObjectUnselected;
   id_onobjectHoverFunc onObjectHover;
   id_keycallback onKeyCallback;
   id_keycharcallback onKeyCharCallback;

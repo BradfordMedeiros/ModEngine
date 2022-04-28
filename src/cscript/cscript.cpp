@@ -120,6 +120,13 @@ void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
     binding -> onObjectSelected(instanceId, index, color);
   }
 }
+void onCObjectUnselectedAllScripts(){
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCScriptBinding(objInstance.name.c_str());
+    assert(binding != NULL);
+    binding -> onObjectUnselected(instanceId);
+  }
+}
 void onCObjectHoverAllScripts(int32_t index, bool isHover){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
@@ -196,6 +203,7 @@ CScriptBindingCallbacks getCScriptBindingCallbacks(){
     .onMouseMoveCallback = onCMouseMoveCallbackAllScripts,
     .onScrollCallback = onCScrollCallbackAllScripts,
     .onObjectSelected = onCObjectSelectedAllScripts,
+    .onObjectUnselected = onCObjectUnselectedAllScripts,
     .onObjectHover = onCObjectHoverAllScripts,
     .onKeyCallback = onCKeyCallbackAllScripts,
     .onKeyCharCallback = onCKeyCharCallbackAllScripts,

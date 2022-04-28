@@ -95,6 +95,7 @@ void onMouseCallback(int button, int action, int mods);
 void onMouseMoveCallback(double xPos, double yPos, float xNdc, float yNdc);
 void onScrollCallback(double amount);
 void onObjectSelected(int32_t index, glm::vec3 color);
+void onObjectUnselected();
 void onObjectHover(int32_t index);
 void onObjectUnhover(int32_t index);
 void onKeyCallback(int key, int scancode, int action, int mods);

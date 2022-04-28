@@ -718,6 +718,14 @@ void onObjectSelected(int32_t index, glm::vec3 color){
   }
 }
 
+void onObjectUnselected(){
+  const char* function = "onObjUnselected";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_0(func_symbol);
+  }
+}
+
 void callObjIdFunc(const char* function, objid index){
   if (symbolDefined(function)){
     auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");

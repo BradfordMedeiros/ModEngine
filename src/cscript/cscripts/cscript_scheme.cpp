@@ -23,6 +23,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
   binding.onMouseMoveCallback = schemeCallbacks.onMouseMoveCallback;
   binding.onScrollCallback = schemeCallbacks.onScrollCallback;
   binding.onObjectSelected = schemeCallbacks.onObjectSelected;
+  binding.onObjectUnselected = schemeCallbacks.onObjectUnselected;
   binding.onObjectHover = schemeCallbacks.onObjectHover;
   binding.onKeyCallback = schemeCallbacks.onKeyCallback;
   binding.onKeyCharCallback = schemeCallbacks.onKeyCharCallback;

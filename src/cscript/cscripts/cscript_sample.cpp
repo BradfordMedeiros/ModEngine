@@ -18,7 +18,7 @@ CScriptBinding sampleBindingPlugin(CustomApiBindings& api){
     int* value = (int*)data;
     delete value;
     std::cout << "custom binding: remove basic" << std::endl;
-    api.loadScene("./res/scenes/features/textures/scrolling.p.rawscene", {});
+    api.loadScene("./res/scenes/features/textures/scrolling.p.rawscene", {}, std::nullopt);
   };
   binding.render = renderBasicTest;
   return binding;

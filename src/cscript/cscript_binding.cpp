@@ -16,6 +16,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onMouseMoveCallback = [](objid scriptId, double xPos, double yPos, float xNdc, float yNdc) -> void { },
     .onScrollCallback = [](objid scriptId, double amount) -> void{ },
     .onObjectSelected = [](objid scriptId, int32_t index, glm::vec3 color) -> void {},
+    .onObjectUnselected = [](objid scriptId) -> void {},
     .onObjectHover = [](objid scriptId, int32_t index, bool hoverOn) -> void {},
     .onKeyCallback = [](objid scriptId, int key, int scancode, int action, int mods) -> void {},
     .onKeyCharCallback = [](objid scriptId, unsigned int codepoint) -> void {},

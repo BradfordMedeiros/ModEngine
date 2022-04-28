@@ -22,6 +22,7 @@ struct CScriptBindingCallbacks {
   mousemovecallback onMouseMoveCallback;
   scrollcallback onScrollCallback;
   onobjectSelectedFunc onObjectSelected;
+  func onObjectUnselected;
   onobjectHoverFunc onObjectHover;
   keycallback onKeyCallback;
   keycharcallback onKeyCharCallback;
