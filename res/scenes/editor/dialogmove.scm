@@ -58,4 +58,4 @@
   )
 )
 
-(enforce-layout (gameobj-id (lsobj-name "(dialog")))
+(enforce-layout (gameobj-id mainobj))
