@@ -2,12 +2,20 @@
 
 (define uilist 
   (list
-    (list "file" (reverse (list "open" "save" "load" "quit")))
+    (list "file" (reverse (list "load" "quit")))
     (list "misc" (reverse (list "fullscreen")))
   )
 )
 
 (define dialogMap (list
+  (list "load" (list 
+    "Load Layout" 
+    "layouts enable different ui workflows"
+    (list 
+      (list "CANCEL" (lambda() (maybe-unload-dialog)))
+      (list "LOAD"   (lambda() (format #t "load placeholder\n")))
+    )
+  ))
   (list "quit" (list 
     "Confirm QUIT" 
     "are you sure you want to quit?"
@@ -30,18 +38,7 @@
 )
 
 (define nameAction (list
-  (list "open" (lambda () 
-    (format #t "open placeholder\n")) 
-    #f
-  )
-  (list "save" (lambda () 
-    ( format #t "save placeholder\n")) 
-    #f
-  )
-  (list "load" (lambda () 
-    ( format #t "load placeholder\n")) 
-    #f
-  )
+  (list "load" (get-change-dialog "load"))
   (list "quit" (get-change-dialog "quit"))
   (list "fullscreen" (lambda () 
       (format #t "toggling fullscreen\n")
