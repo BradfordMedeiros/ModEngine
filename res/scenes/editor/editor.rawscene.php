@@ -49,8 +49,8 @@
   ### buttons with text next to them
   $row2_elements = [];
   $text_buttons = [
-    ["value" => "HIDE"],
-    ["value" => "TEST"],
+    ["value" => "hide", "dialogoption" => "hide"],
+    ["value" => "test", "dialogoption" => "test"],
     #["value" => "SCENE INFO"],
     #["value" => "SCENEGRAPH"],
     #["value" => "OBJECT DETAILS"],
