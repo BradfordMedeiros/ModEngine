@@ -61,6 +61,9 @@
       (set! sidePanelSceneId 
         (load-scene 
           "./res/scenes/editor/dock/testpanel.rawscene" 
+          (list 
+            (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")
+          )
           ;(append 
           ;  (list
           ;    (list "(options" "elements" (string-join (map car dialogOpts) ","))
