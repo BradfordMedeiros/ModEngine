@@ -7,56 +7,137 @@
   )
 )
 
-
-;;;;;;;;; dialog stuff
-(define dialogSceneId #f)
-(define (change-dialog)
-  (format #t "DIALOG CREATION PLACEHOLDER\n")
-  (if (not dialogSceneId)
-    (set! dialogSceneId 
-      (load-scene 
-        "./res/scenes/editor/dialog.rawscene" 
-        (list
-          (list "(options" "elements" ")option_1,)option_2,)option_3")
-          (list ")text_2" "value" "TEST TITLE HERE")
-          (list ")text_main" "value" "test text here")
-
-          (list ")option_1" "layer" "basicui")
-          (list ")option_1" "scale" "0.005 0.015 0.005")
-          (list ")option_1" "value" "CANCEL")
-
-          (list ")option_2" "layer" "basicui")
-          (list ")option_2" "scale" "0.005 0.015 0.005")
-          (list ")option_2" "value" "OK")
-
-          (list ")option_3" "layer" "basicui")
-          (list ")option_3" "scale" "0.005 0.015 0.005")
-          (list ")option_3" "value" "what is this")
-        )
-      )
+(define dialogMap (list
+  (list "quit" (list 
+    "Confirm QUIT" 
+    "are you sure you want to quit?"
+    (list 
+      (list "CANCEL" (lambda() (maybe-unload-dialog)))
+      (list "QUIT"   (lambda() (exit 1)))
     )
+  ))
+))
+(define (get-from-dialog-map value) (cadr (assoc value dialogMap)))
+(define (get-option-from-dialog-map value option) 
+  (define dialogMapping (get-from-dialog-map value))
+  (assoc option (caddr dialogMapping))
+)
+(define (get-fn-for-dialog-option value option) (cadr (get-option-from-dialog-map value option)))
+(define (get-change-dialog value)
+  (let ((quitValues (get-from-dialog-map value)))
+    (lambda() (change-dialog (car quitValues) (cadr quitValues) (caddr quitValues)) #t)
   )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (define nameAction (list
-  (list "open" (lambda () (format #t "open placeholder\n")) )
-  (list "save" (lambda () ( format #t "save placeholder\n")) )
-  (list "load" (lambda () ( format #t "load placeholder\n")) )
-  (list "quit" (lambda () 
-    (change-dialog)
-    ;(exit 0)
-  ))
+  (list "open" (lambda () 
+    (format #t "open placeholder\n")) 
+    #f
+  )
+  (list "save" (lambda () 
+    ( format #t "save placeholder\n")) 
+    #f
+  )
+  (list "load" (lambda () 
+    ( format #t "load placeholder\n")) 
+    #f
+  )
+  (list "quit" (get-change-dialog "quit"))
   (list "fullscreen" (lambda () 
       (format #t "toggling fullscreen\n")
       (set-wstate (list
         (list "rendering" "fullscreen" "true") ; doesn't actually toggle since fullscreen state never updates to match internal with set-wstate
       ))
+      #f
     )
   )
 ))
- 
+
+;;;;;;;;;;;;;
+
+
+(define (genNextName prefix)
+  (define index -1)
+  (define (nextName)
+    (format #t "next value\n")
+    (set! index (+ index 1))
+    (string-append prefix (number->string index))
+  )
+  nextName
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; DIALOG
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (dialog-option name value index)
+  (list name
+    (list 
+      (list name "layer" "basicui")
+      (list name "scale" "0.005 0.015 0.005")
+      (list name "value" value)
+      (list name "option_index" (number->string index))
+    )
+  )
+)
+
+(define (dialog-options options)
+  (define nextName (genNextName ")option_"))
+  (define index -1)
+  (define (val-to-option option) 
+    (set! index (+ index 1))
+    (dialog-option (nextName) (car option) index)
+  )
+  (define values (map val-to-option options))
+  values
+)
+
+(define dialogSceneId #f)
+(define activeDialogName #f)
+(define (change-dialog title subtitle options)
+  (format #t "DIALOG CREATION PLACEHOLDER\n")
+  (if (not dialogSceneId)
+    (let ((dialogOpts (dialog-options options)))
+      (set! dialogSceneId 
+        (load-scene 
+          "./res/scenes/editor/dialog.rawscene" 
+          (append 
+            (list
+              (list "(options" "elements" (string-join (map car dialogOpts) ","))
+              (list ")text_2" "value" title)
+              (list ")text_main" "value" subtitle)
+            ) 
+              (apply append (map cadr dialogOpts))
+            )
+        )
+      )
+    )
+  )
+)
+(define (maybe-unload-dialog)
+  (unload-scene dialogSceneId)
+  (set! dialogSceneId #f)
+  (set! activeDialogName #f)
+)
+
+(define (resolve-option-name name attr)  ; check that it's )option_ and then use the option_index value to find what option # it is 
+  (define value (assoc "option_index" attr))
+  (define isOptionName (and (>= (string-length name) 8) (equal? (substring name 0 8) ")option_")))
+  (if isOptionName
+    (let ((intValue (inexact->exact (floor (cadr value)))))
+      (car (list-ref (caddr (get-from-dialog-map activeDialogName)) intValue))
+    )  
+    ""
+  )
+)
+(define (handle-dialog-click name attr)
+  (define optionname (resolve-option-name name attr))
+  (if (and activeDialogName (not (equal? optionname "")))
+    ((get-fn-for-dialog-option activeDialogName optionname))
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; POPOVER
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define menuOptions (map car uilist))
 
 (define (textvalue name content action)
@@ -71,18 +152,22 @@
 )
 (define (popoverAction action)
   (define mappedAction (assoc action nameAction))
-  (if mappedAction ((cadr mappedAction)))
+  (define actionName (car mappedAction))
+  (if mappedAction 
+    (let ((openedDialog ((cadr mappedAction))))
+      (if (equal? openedDialog #t)
+        (set! activeDialogName actionName)
+        (set! activeDialogName #f)
+      )
+    )
+  )
 )
 
 [define popItemPrefix ")text_"]
 (define popItemPrefixLength (string-length popItemPrefix))
+
 (define (popover-options elementName menuOptions)
-  (define index -1)
-  (define (nextName)
-    (format #t "next value\n")
-    (set! index (+ index 1))
-    (string-append popItemPrefix (number->string index))
-  )
+  (define nextName (genNextName popItemPrefix))
   (define (create-value text) (textvalue (nextName) text text))
 
   (define val (map create-value menuOptions))
@@ -145,5 +230,7 @@
     (popoverAction (cadr popactionPair))
   )
   (if (not (or isInList ispopover)) (maybe-unload-popover))
+
+  (handle-dialog-click elementName objattrs)
 )
 
