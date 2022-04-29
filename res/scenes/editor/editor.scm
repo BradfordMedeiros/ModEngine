@@ -50,6 +50,38 @@
   )
 ))
 
+
+
+;;;;;;;;;;;;
+; Sidepanel 
+(define sidePanelSceneId #f)
+(define (change-sidepanel scene)
+  (if (not sidePanelSceneId)
+    (let ((x 2));((dialogOpts (dialog-options options)))
+      (set! sidePanelSceneId 
+        (load-scene 
+          "./res/scenes/editor/dock/testpanel.rawscene" 
+          ;(append 
+          ;  (list
+          ;    (list "(options" "elements" (string-join (map car dialogOpts) ","))
+          ;    (list ")text_2" "value" title)
+          ;    (list ")text_main" "value" subtitle)
+          ;  ) 
+          ;    (apply append (map cadr dialogOpts))
+          ;  )
+        )
+      )
+      (format #t "sidepanel id is: ~a\n" sidePanelSceneId)
+      (enforce-layout (gameobj-id (lsobj-name "(test_panel" sidePanelSceneId)))
+    )
+  )
+)
+(define (maybe-unload-sidepanel)
+  (if sidePanelSceneId (unload-scene sidePanelSceneId))
+  (set! sidePanelSceneId #f)
+)
+
+
 ;;;;;;;;;;;;;
 
 
@@ -90,7 +122,6 @@
 (define dialogSceneId #f)
 (define activeDialogName #f)
 (define (change-dialog title subtitle options)
-  (format #t "DIALOG CREATION PLACEHOLDER\n")
   (if (not dialogSceneId)
     (let ((dialogOpts (dialog-options options)))
       (set! dialogSceneId 
@@ -110,7 +141,7 @@
   )
 )
 (define (maybe-unload-dialog)
-  (unload-scene dialogSceneId)
+  (if dialogSceneId (unload-scene dialogSceneId))
   (set! dialogSceneId #f)
   (set! activeDialogName #f)
 )
@@ -215,19 +246,30 @@
   (define popoptionPair (assoc "popoption" objattrs))
   (define popactionPair (assoc "popaction" objattrs))
   (define popoption (if popoptionPair (cadr popoptionPair) ""))
-  (define isInList (not (equal? #f (member popoption menuOptions))))
+  (define hasPopoption (not (equal? #f (member popoption menuOptions))))
   (define elementName (gameobj-name gameobj))
   (define ispopover (isPopoverElement elementName))
+
+  (define dialogOptionPair (assoc "dialogoption" objattrs))
+  (define dialogoption (if dialogOptionPair (cadr dialogOptionPair) ""))
+
+
   (format #t "popoption: ~a\n" popoption)
-  (if isInList
+  (if hasPopoption
     (change-popover (fullElementName elementName) popoption)
     (maybe-unload-popover)
   )
   (if (and ispopover popactionPair) 
     (popoverAction (cadr popactionPair))
   )
-  (if (not (or isInList ispopover)) (maybe-unload-popover))
-
+  (if (not (or hasPopoption ispopover)) (maybe-unload-popover))
   (handle-dialog-click elementName objattrs)
+
+  (if (not (equal? dialogoption ""))
+    (if (equal? dialogoption "HIDE")
+      (maybe-unload-sidepanel)
+      (change-sidepanel dialogoption)
+    )
+  )
 )
 
