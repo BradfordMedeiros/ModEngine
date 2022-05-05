@@ -15,23 +15,6 @@
 
 
 <?php 
-  
-  /*(keyval0:layer:basicui
-(keyval0:type:horizontal
-(keyval0:backpanel:true
-(keyval0:tint:0.1 0.1 0.1
-(keyval0:margin:0.02
-(keyval0:spacing:0.02
-(keyval0:elements:)key0,)val0
-
-)key0:value:key 0
-)key0:layer:basicui
-)key0:scale:0.01 0.01 0.01
-
-)val0:value:value 0
-)val0:layer:basicui
-)val0:scale:0.01 0.01 0.01
-*/
   function createElement($name, $attr, $more_attr){
     foreach ($attr as $key => $value){
       echo ($name . ":" . $key . ":" . $value . "\n");
@@ -51,7 +34,7 @@
     "layer" => "basicui",
     "type" => "horizontal",
     "backpanel" => "true",
-    "tint" => "0.8 0.1 0.1",  # doesn't show up since z ordering
+    "tint" => "0 0 0",  # doesn't show up since z ordering
     "margin" => "0.02",
     "spacing" => "0.02",
   ];
