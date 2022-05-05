@@ -56,24 +56,18 @@
 ; Sidepanel 
 (define sidePanelSceneId #f)
 (define (change-sidepanel scene)
+  (maybe-unload-sidepanel)
   (if (not sidePanelSceneId)
-    (let ((x 2));((dialogOpts (dialog-options options)))
+    (begin
       (set! sidePanelSceneId 
         (load-scene 
-          "./res/scenes/editor/dock/testpanel.rawscene" 
+          scene
           (list 
             (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")
           )
-          ;(append 
-          ;  (list
-          ;    (list "(options" "elements" (string-join (map car dialogOpts) ","))
-          ;    (list ")text_2" "value" title)
-          ;    (list ")text_main" "value" subtitle)
-          ;  ) 
-          ;    (apply append (map cadr dialogOpts))
-          ;  )
         )
       )
+      (format #t "editor: load scene: ~a\n" scene)
       (format #t "sidepanel id is: ~a\n" sidePanelSceneId)
       (enforce-layout (gameobj-id (lsobj-name "(test_panel" sidePanelSceneId)))
     )
