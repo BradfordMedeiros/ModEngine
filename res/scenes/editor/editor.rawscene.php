@@ -51,6 +51,7 @@
   $text_buttons = [
     ["value" => "hide", "dialogoption" => "HIDE"],
     ["value" => "test", "dialogoption" => "./res/scenes/editor/dock/testpanel.rawscene"],
+    ["value" => "OBJECT DETAILS", "dialogoption" => "./res/scenes/editor/dock/details.rawscene"],
     #["value" => "SCENE INFO"],
     #["value" => "SCENEGRAPH"],
     #["value" => "OBJECT DETAILS"],

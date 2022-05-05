@@ -55,7 +55,8 @@
 ;;;;;;;;;;;;
 ; Sidepanel 
 (define sidePanelSceneId #f)
-(define (change-sidepanel scene)
+(define (change-sidepanel scene anchorElementName)
+  (format #t "change sidepanel: elementname: ~a\n" anchorElementName)
   (maybe-unload-sidepanel)
   (if (not sidePanelSceneId)
     (begin
@@ -63,7 +64,8 @@
         (load-scene 
           scene
           (list 
-            (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")
+            ;(list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")  ; doesn't work with anchored element since both rewrite position
+            ;(list "(test_panel" "anchor" anchorElementName)
           )
         )
       )
@@ -250,7 +252,6 @@
   (define dialogOptionPair (assoc "dialogoption" objattrs))
   (define dialogoption (if dialogOptionPair (cadr dialogOptionPair) ""))
 
-
   (format #t "popoption: ~a\n" popoption)
   (if hasPopoption
     (change-popover (fullElementName elementName) popoption)
@@ -265,7 +266,7 @@
   (if (not (equal? dialogoption ""))
     (if (equal? dialogoption "HIDE")
       (maybe-unload-sidepanel)
-      (change-sidepanel dialogoption)
+      (change-sidepanel dialogoption (fullElementName "(menubar"))
     )
   )
 )
