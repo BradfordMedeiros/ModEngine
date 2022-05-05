@@ -24,11 +24,25 @@
     }
   }
 
+  $keyvaluePairs = [
+    ["label" => "Current Object", "value" => "platform"],
+    ["label" => "position", "value" => "- 0 0 0"],
+    ["label" => "scale", "value" => "- 1 1 1"],
+  ];
+  
   $test_panel_elements = [")title"];
-  $default_keyvalue =  [
+  $default_text_style = [
     "layer" => "basicui", 
     "scale" => "0.01 0.01 0.01",
   ];
+  $extra_key_attrs = [
+    "tint" => "2 2 2",
+  ];
+  $extra_value_attrs = [
+    "tint" => "1 1 1",
+  ];
+  $default_key = array_merge($default_text_style, $extra_key_attrs);
+  $default_value = array_merge($default_text_style, $extra_value_attrs);
 
   $default_keyvalueLayout = [
     "layer" => "basicui",
@@ -38,19 +52,13 @@
     "margin" => "0.02",
     "spacing" => "0.02",
   ];
-   
-  $keyvaluePairs = [
-    ["label" => "Current Object", "value" => "platform"],
-    ["label" => "position", "value" => "- 0 0 0"],
-    ["label" => "scale", "value" => "- 1 1 1"],
-  ];
 
   for ($i = 0; $i < count($keyvaluePairs); $i++){
     $keyname = ")key_" . $i;
-    createElement($keyname, $default_keyvalue, [ "value" => $keyvaluePairs[$i]["label"] ]);
+    createElement($keyname, $default_key, [ "value" => $keyvaluePairs[$i]["label"] ]);
 
     $valuename = ")value_" . $i;
-    createElement($valuename, $default_keyvalue, [ "value" => $keyvaluePairs[$i]["value"] ]);
+    createElement($valuename, $default_value, [ "value" => $keyvaluePairs[$i]["value"] ]);
 
     $keyvalueLayout = "(keyval_" . $i;
     createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
