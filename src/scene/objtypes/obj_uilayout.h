@@ -39,6 +39,13 @@ struct LayoutBorder {
   glm::vec3 borderColor;
   bool hasBorder;
 };
+
+enum LayoutContentAlignmentType { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive };
+struct LayoutContentAlignment {
+  LayoutContentAlignmentType vertical;
+  LayoutContentAlignmentType horizontal;
+};
+
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
@@ -55,6 +62,7 @@ struct GameObjectUILayout {
   UILayoutFlowType horizontal;
   UILayoutFlowType vertical;
   LayoutBorder border;
+  LayoutContentAlignment alignment;
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);

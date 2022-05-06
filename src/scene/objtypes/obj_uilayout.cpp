@@ -38,6 +38,24 @@ float getMargin(GameobjAttributes& attr, const char* attrname, float defaultMarg
   return attr.numAttributes.at(attrname);
 }
 
+LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos){
+  bool hasAlign = attr.stringAttributes.find(attrname) != attr.stringAttributes.end();
+  auto alignType = LayoutContentAlignment_Negative;
+  if (hasAlign){
+    if (attr.stringAttributes.at(attrname) == neg){
+      alignType = LayoutContentAlignment_Negative;
+    }else if (attr.stringAttributes.at(attrname) == pos){
+      alignType = LayoutContentAlignment_Positive;
+    }else if (attr.stringAttributes.at(attrname) == "center"){
+      alignType = LayoutContentAlignment_Neutral;
+    }else{
+      std::cout << "invalid align items type" << std::endl;
+      assert(false);
+    }
+  }
+  return alignType;
+}
+
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
   auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
@@ -103,6 +121,11 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .hasBorder = hasBorder,
   };
 
+  LayoutContentAlignment alignment {
+    .vertical = layoutContentAlignment(attr, "align-items-vertical", "down", "up"),
+    .horizontal = layoutContentAlignment(attr, "align-items-horizontal", "left", "right"),
+  };
+
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
     .yMin = 0, .yMax = 0,
@@ -124,6 +147,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .horizontal = horizontal,
     .vertical = vertical,
     .border = border,
+    .alignment = alignment,
   };
   return obj;
 }
