@@ -466,7 +466,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   }else if (layoutObject -> alignment.vertical == LayoutContentAlignment_Positive){
     auto remainderTop = boundingHeight - elementsHeight;
     alignItemsAdjustment += glm::vec3(0.f, remainderTop, 0.f);
-    marginOffset += glm::vec3(0.f, -1.f * layoutObject -> marginValues.marginBottom, 0.f);
+    marginOffset += glm::vec3(0.f, -1.f * layoutObject -> marginValues.marginTop, 0.f);
   }else{
     std::cout << "enforce layout: invalid vertical align items" << std::endl;
     assert(false);
