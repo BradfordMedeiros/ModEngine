@@ -1,18 +1,5 @@
 
 
-(test_panel:layer:basicui
-(test_panel:type:vertical
-(test_panel:backpanel:true
-(test_panel:tint:0.1 0.1 0.1
-
-(test_panel:minwidth:1
-(test_panel:minheight:0.4
-
-)title:value:Object Details
-)title:layer:basicui
-)title:scale:0.01 0.01 0.01
-
-
 )key_0:layer:basicui
 )key_0:scale:0.01 0.01 0.01
 )key_0:tint:2 2 2
@@ -22,15 +9,19 @@
 )value_0:tint:1 1 1
 )value_0:value:platform
 (keyval_0:layer:basicui
-(keyval_0:type:horizontal
+(keyval_0:type:vertical
 (keyval_0:backpanel:true
 (keyval_0:tint:0 0 0
-(keyval_0:margin:0.02
-(keyval_0:spacing:0.02
+
+(keyval_0:margin:0.05
+(keyval_0:margin-right:0
+(keyval_0:minwidth:1
+(keyval_0:minheight:1
+
+#(keyval_0:spacing:0.1
 (keyval_0:elements:)key_0,)value_0
+(keyval_0:align-items-horizontal:center   # left/center/right
+(keyval_0:align-items-vertical:center     # up/center/down
 
-(keyval_0:align-items-horizontal:right
 
-
-(test_panel:elements:(keyval_0,)title
 
