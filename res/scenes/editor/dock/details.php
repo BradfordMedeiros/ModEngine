@@ -5,13 +5,18 @@
 (test_panel:backpanel:true
 (test_panel:tint:0.1 0.1 0.1
 (test_panel:margin:0.02
+(test_panel:margin-top:0.1
 (test_panel:spacing:0.02
-(test_panel:minwidth:1
+(test_panel:minwidth:0.6
 (test_panel:minheight:2
+
+(test_panel:align-items-horizontal:left   # left/center/right
+(test_panel:align-items-vertical:up     # up/center/down
 
 )title:value:Object Details
 )title:layer:basicui
 )title:scale:0.01 0.01 0.01
+)title:tint:1 1 2
 
 
 <?php 
@@ -51,6 +56,7 @@
     "tint" => "0 0 0",  # doesn't show up since z ordering
     "margin" => "0.02",
     "spacing" => "0.02",
+    "minwidth" => "0.5",
   ];
 
   for ($i = 0; $i < count($keyvaluePairs); $i++){
