@@ -49,7 +49,7 @@ LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const
     }else if (attr.stringAttributes.at(attrname) == "center"){
       alignType = LayoutContentAlignment_Neutral;
     }else{
-      std::cout << "invalid align items type" << std::endl;
+      std::cout << "invalid align items type: " << attr.stringAttributes.at(attrname) << std::endl;
       assert(false);
     }
   }

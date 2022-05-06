@@ -420,8 +420,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     elementsLeftSideOffset = glm::vec3(-1 * halfBoundingWidth + halfElementsWidth,  -1 * halfBoundingHeight, 0.f);
   }
   
-  // Applies the margin.
-  auto elementsAlignOffset = glm::vec3(layoutObject -> marginValues.marginLeft, layoutObject -> marginValues.marginBottom, 0.f);
+
 
   // This moves all elements and the bounding box to adjust for the align
   auto mainAlignmentOffset = glm::vec3(0.f, 0.f, 0.f);
@@ -436,10 +435,48 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     mainAlignmentOffset.y = halfBoundingHeight;
   }
 
+  // Items alighment code.  Measure the bounding width / height and move from left,right  / top,down or center
+
+  std::cout << std::endl;
+
+  // Applies the margin.
+  glm::vec3 marginOffset(0.f, 0.f, 0.f);
+  glm::vec3 alignItemsAdjustment(0.f, 0.f, 0.f);
+  if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Negative){
+    marginOffset += glm::vec3(layoutObject -> marginValues.marginLeft, 0.f, 0.f);
+    // do nothing this is the default
+  }else if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Neutral){
+    auto distanceToCenterFromLeft = boundingWidth - elementsWidth;
+    alignItemsAdjustment += glm::vec3(distanceToCenterFromLeft * 0.5f, 0.f, 0.f);
+  }else if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Positive){
+    auto remainderRight = boundingWidth - elementsWidth;
+    alignItemsAdjustment += glm::vec3(remainderRight, 0.f, 0.f);
+    marginOffset += glm::vec3(-1.f * layoutObject -> marginValues.marginRight, 0.f, 0.f);
+  }else{
+    std::cout << "enforce layout: invalid horizontal align items" << std::endl;
+    assert(false);
+  }
+
+  if (layoutObject -> alignment.vertical == LayoutContentAlignment_Negative){
+    marginOffset += glm::vec3(0.f, layoutObject -> marginValues.marginBottom, 0.f);
+    // do nothing this is the default
+  }else if (layoutObject -> alignment.vertical == LayoutContentAlignment_Neutral){
+    auto distanceToCenterFromBottom = boundingHeight - elementsHeight;
+    alignItemsAdjustment += glm::vec3(0.f, distanceToCenterFromBottom * 0.5f, 0.f);
+  }else if (layoutObject -> alignment.vertical == LayoutContentAlignment_Positive){
+    auto remainderTop = boundingHeight - elementsHeight;
+    alignItemsAdjustment += glm::vec3(0.f, remainderTop, 0.f);
+    marginOffset += glm::vec3(0.f, -1.f * layoutObject -> marginValues.marginBottom, 0.f);
+  }else{
+    std::cout << "enforce layout: invalid vertical align items" << std::endl;
+    assert(false);
+  }
+
+  auto totalAdjustment = elementsLeftSideOffset + marginOffset + mainAlignmentOffset + alignItemsAdjustment;
 
   // Offset all elements to the correct positions, so that they're centered
   for (auto [id, newPos] : newPositions){
-    auto fullNewPos = newPos + elementsLeftSideOffset + elementsAlignOffset + mainAlignmentOffset;
+    auto fullNewPos = newPos + totalAdjustment;
     physicsTranslateSet(world, id, fullNewPos, false);
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
     if (layoutObject != NULL){
