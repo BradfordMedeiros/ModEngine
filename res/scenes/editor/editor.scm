@@ -81,6 +81,55 @@
 )
 
 
+(define xLocationToSnappingPosition
+  (list 
+    (list 0.5 (list 0.75 0 0))
+    (list most-negative-fixnum (list -0.75  0 0))
+  )
+)
+(define (getSnappingValue searchVal vals)
+  (define firstValue (car vals))
+  (define firstValThreshold (car firstValue))
+  (format #t "searching value: ~a\n" searchVal)
+  (if (> searchVal firstValThreshold)
+    firstValue
+    (if (> (length vals) 1)
+      (getSnappingValue searchVal (cdr vals))
+      #f
+    )
+  )
+)
+(define (applySnapping gameobj)
+  (define snapXLocation (car (gameobj-pos gameobj)))
+  (define snappingPair (getSnappingValue snapXLocation xLocationToSnappingPosition))
+  (if snappingPair
+    (begin
+      (format #t "should snap the pair: ~a!\n" snapXLocation)
+      (format #t "snapping pair is: ~a\n" snappingPair)
+      (format #t "snapping position: ~a\n" (cadr snappingPair))
+      (gameobj-setpos! gameobj (cadr snappingPair))
+    )
+  )
+)
+
+(define (handle-side-panel-drop id) 
+  (define gameobj (gameobj-by-id id))
+  (define pos (gameobj-pos gameobj))
+  (applySnapping gameobj)
+  (format #t "dialog pos is: ~a\n" pos)
+  (format #t "dialog move start: ~a ~a\n" id (gameobj-name (gameobj-by-id id)))  
+)
+
+(define (onMessage key value)
+  (if (equal? key "dialogmove-drag-start") (handle-side-panel-drop (string->number value)))
+  (if (equal? key "dialogmove-drag-stop")
+    (begin
+      (format #t "dialog move stop: ~a ~a\n" (string->number value) (gameobj-name (gameobj-by-id (string->number value))))
+    )
+  )
+)
+
+
 ;;;;;;;;;;;;;
 
 
