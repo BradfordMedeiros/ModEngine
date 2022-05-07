@@ -100,7 +100,7 @@
   (list name
     (list 
       (list name "layer" "basicui")
-      (list name "scale" "0.005 0.015 0.005")
+      (list name "scale" "0.004 0.01 0.004")
       (list name "value" value)
       (list name "option_index" (number->string index))
     )
@@ -171,7 +171,7 @@
   (list name
     (list 
       (list name "layer" "basicui")
-      (list name "scale" "0.005 0.015 0.005")
+      (list name "scale" "0.004 0.01 0.004")
       (list name "value" content)
       (list name "popaction" action)
     )
