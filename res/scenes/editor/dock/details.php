@@ -1,5 +1,9 @@
-
-
+<?php
+  if (count ($argv) < 2){
+    print("Must define which detail to build\n");
+    exit(1);
+  }
+?>
 (test_panel:layer:basicui
 (test_panel:type:vertical
 (test_panel:backpanel:true
@@ -13,6 +17,7 @@
 (test_panel:align-items-vertical:up     # up/center/down
 (test_panel:border-size:0.004
 (test_panel:border-color:0.3 0.3 0.3
+(test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
 
 )title:value:Object Details
 )title:layer:basicui
@@ -30,10 +35,18 @@
     }
   }
 
-  $keyvaluePairs = [
-    ["label" => "Current Object", "value" => "platform"],
-    ["label" => "position", "value" => "- 0 0 0"],
-    ["label" => "scale", "value" => "- 1 1 1"],
+  $target_type = $argv[1];
+
+  $mappingPerType = [
+    "object_details" => [
+      ["label" => "Current Object", "value" => "platform"],
+      ["label" => "position", "value" => "- 0 0 0"],
+      ["label" => "scale", "value" => "- 1 1 1"],
+    ],
+    "world_state" => [
+      ["label" => "bloom", "value" => "enabled"],
+      ["label" => "color", "value" => "- 1 1 1"],
+    ],
   ];
   
   $test_panel_elements = [")title"];
@@ -60,6 +73,7 @@
     "minwidth" => "0.4",
   ];
 
+  $keyvaluePairs = $mappingPerType[$target_type];
   for ($i = 0; $i < count($keyvaluePairs); $i++){
     $keyname = ")key_" . $i;
     createElement($keyname, $default_key, [ "value" => $keyvaluePairs[$i]["label"] ]);

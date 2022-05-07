@@ -2,9 +2,10 @@
 all:
 	@php ./editor.rawscene.php > ./editor.rawscene
 	@php ./dock/testpanel.php > ./dock/testpanel.rawscene
-	@php ./dock/details.php > ./dock/details.rawscene
-
+	@php ./dock/details.php object_details > ./dock/object_details.rawscene
+	@php ./dock/details.php world_state > ./dock/world_state.rawscene
 clean:
 	@rm ./editor.rawscene
 	@rm ./dock/testpanel.rawscene
-	@rm ./dock/details.rawscene
+	@rm ./dock/object_details.rawscene
+	@rm ./dock/world_state.rawscene

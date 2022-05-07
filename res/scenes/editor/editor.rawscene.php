@@ -50,11 +50,10 @@
   $row2_elements = [];
   $text_buttons = [
     ["value" => "hide", "dialogoption" => "HIDE"],
-    ["value" => "test", "dialogoption" => "./res/scenes/editor/dock/testpanel.rawscene"],
-    ["value" => "OBJECT DETAILS", "dialogoption" => "./res/scenes/editor/dock/details.rawscene"],
-    #["value" => "SCENE INFO"],
+    //["value" => "test", "dialogoption" => "./res/scenes/editor/dock/testpanel.rawscene"],
+    ["value" => "OBJECT DETAILS", "dialogoption" => "./res/scenes/editor/dock/object_details.rawscene"],
+    ["value" => "SCENE INFO", "dialogoption" => "./res/scenes/editor/dock/world_state.rawscene"],
     #["value" => "SCENEGRAPH"],
-    #["value" => "OBJECT DETAILS"],
     #["value" => "WORLD STATE"],
     #["value" => "MESHES"],
     #["value" => "LIGHTS"],
