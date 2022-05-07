@@ -7,9 +7,19 @@
 ; should calculate ndi when mouse down, and then on mouse move, this is delta 
 ; then add delta to gameobj-pos when the pos was down
 
+(define (onDraggableStart)
+  (format #t "draggable start dialog move ~a\n" mainobj)
+  (sendnotify "dialogmove-drag-start" (number->string (gameobj-id mainobj)))
+)
+(define (onDraggableRelease)
+  (format #t "draggable release dialog move ~a\n" mainobj)
+  (sendnotify "dialogmove-drag-stop" (number->string (gameobj-id mainobj)))
+)
+
 (define (onMouse button action mods)
   (if (and (equal? button 0) (equal? action 0))
     (begin
+      (if objSelected (onDraggableRelease))
       (set! objSelected #f)
       (set! ndiMouseDown #f)
       (set! objposMouseDown #f)
@@ -17,6 +27,7 @@
   )
   (if (and (equal? button 0) (equal? action 1) hoveringObj)
     (begin
+      (onDraggableStart)
       (set! objSelected #t)
       (set! ndiMouseDown currNdi)
       (set! objposMouseDown (gameobj-pos mainobj))
