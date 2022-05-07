@@ -27,7 +27,7 @@
 
   $menu_text_attr = [
     "layer" => "basicui",
-    "scale" => "0.01 0.01 0.01",
+    "scale" => "0.004 0.01 0.004",
   ];
   $menu_elements = [];
   $menu_bar= [
@@ -65,7 +65,8 @@
 
   $text_attr = [
     "layer" => "basicui",
-    "scale" => "0.01 0.01 0.01",
+    "scale" => "0.004 0.01 0.004",
+
   ];
 
   for ($i = 0; $i < count($text_buttons); $i++){

@@ -7,15 +7,16 @@
 (test_panel:margin:0.02
 (test_panel:margin-top:0.1
 (test_panel:spacing:0.02
-(test_panel:minwidth:0.6
 (test_panel:minheight:2
 
 (test_panel:align-items-horizontal:left   # left/center/right
 (test_panel:align-items-vertical:up     # up/center/down
+(test_panel:border-size:0.004
+(test_panel:border-color:0.3 0.3 0.3
 
 )title:value:Object Details
 )title:layer:basicui
-)title:scale:0.01 0.01 0.01
+)title:scale:0.008 0.02 0.008
 )title:tint:1 1 2
 
 
@@ -38,13 +39,13 @@
   $test_panel_elements = [")title"];
   $default_text_style = [
     "layer" => "basicui", 
-    "scale" => "0.01 0.01 0.01",
+    "scale" => "0.004 0.01 0.004",
   ];
   $extra_key_attrs = [
-    "tint" => "2 2 2",
+   // "tint" => "2 2 2",
   ];
   $extra_value_attrs = [
-    "tint" => "1 1 1",
+    //"tint" => "1 1 1",
   ];
   $default_key = array_merge($default_text_style, $extra_key_attrs);
   $default_value = array_merge($default_text_style, $extra_value_attrs);
@@ -53,10 +54,10 @@
     "layer" => "basicui",
     "type" => "horizontal",
     "backpanel" => "true",
-    "tint" => "0 0 0",  # doesn't show up since z ordering
+    "tint" => "0.05 0.05 0.05",  # doesn't show up since z ordering
     "margin" => "0.02",
     "spacing" => "0.02",
-    "minwidth" => "0.5",
+    "minwidth" => "0.4",
   ];
 
   for ($i = 0; $i < count($keyvaluePairs); $i++){
