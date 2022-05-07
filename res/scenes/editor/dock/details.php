@@ -19,7 +19,6 @@
 (test_panel:border-color:0.3 0.3 0.3
 (test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
 
-)title:value:Object Details
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
 )title:tint:1 1 2
@@ -39,15 +38,24 @@
 
   $mappingPerType = [
     "object_details" => [
-      ["label" => "Current Object", "value" => "platform"],
-      ["label" => "position", "value" => "- 0 0 0"],
-      ["label" => "scale", "value" => "- 1 1 1"],
+      "title" => "Object Details",
+      "items" => [
+        ["label" => "Current Object", "value" => "platform"],
+        ["label" => "position", "value" => "- 0 0 0"],
+        ["label" => "scale", "value" => "- 1 1 1"],
+      ]
     ],
     "world_state" => [
-      ["label" => "bloom", "value" => "enabled"],
-      ["label" => "color", "value" => "- 1 1 1"],
+      "title" => "World State",
+      "items" => [
+        ["label" => "bloom", "value" => "enabled"],
+        ["label" => "color", "value" => "- 1 1 1"],
+      ],
     ],
   ];
+
+  $detailType = $mappingPerType[$target_type];
+  echo (")title:value:" . $detailType["title"] . "\n");
   
   $test_panel_elements = [")title"];
   $default_text_style = [
@@ -73,7 +81,7 @@
     "minwidth" => "0.4",
   ];
 
-  $keyvaluePairs = $mappingPerType[$target_type];
+  $keyvaluePairs = $detailType["items"];
   for ($i = 0; $i < count($keyvaluePairs); $i++){
     $keyname = ")key_" . $i;
     createElement($keyname, $default_key, [ "value" => $keyvaluePairs[$i]["label"] ]);
