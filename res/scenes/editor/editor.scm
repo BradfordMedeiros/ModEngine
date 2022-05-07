@@ -83,20 +83,16 @@
 
 (define xLocationToSnappingPosition
   (list 
-    (list 0.5 (list 0.75 0 0))
+    (list 0 (list 0.75 0 0))
     (list most-negative-fixnum (list -0.75  0 0))
   )
 )
 (define (getSnappingValue searchVal vals)
   (define firstValue (car vals))
   (define firstValThreshold (car firstValue))
-  (format #t "searching value: ~a\n" searchVal)
   (if (> searchVal firstValThreshold)
     firstValue
-    (if (> (length vals) 1)
-      (getSnappingValue searchVal (cdr vals))
-      #f
-    )
+    (if (> (length vals) 1) (getSnappingValue searchVal (cdr vals)) #f)
   )
 )
 (define (applySnapping gameobj)
