@@ -437,7 +437,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   // Items alighment code.  Measure the bounding width / height and move from left,right  / top,down or center
 
-  std::cout << std::endl;
+  //std::cout << std::endl;
 
   // Applies the margin.
   glm::vec3 marginOffset(0.f, 0.f, 0.f);
