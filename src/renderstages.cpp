@@ -211,6 +211,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .renderQuad = true,
       .blend = true,
       .enableStencil = false,
+      .allowShaderOverride = false,
       .intUniforms = additionalShader.intUniforms,
       .floatUniforms = additionalShader.floatUniforms,
       .floatArrUniforms = additionalShader.floatArrUniforms,
@@ -250,6 +251,7 @@ RenderStages loadRenderStages(
     .renderQuad = false,
     .blend = false,
     .enableStencil = false,
+    .allowShaderOverride = false,
     .intUniforms = {},
     .floatUniforms = {},
     .floatArrUniforms = {},
@@ -271,6 +273,7 @@ RenderStages loadRenderStages(
       .renderQuad = false,
       .blend = true,
       .enableStencil = false,
+      .allowShaderOverride = false,
       .intUniforms = {},
       .floatUniforms = {},
       .floatArrUniforms = {},
@@ -293,6 +296,7 @@ RenderStages loadRenderStages(
     .renderQuad = false,
     .blend = true,
     .enableStencil = true,
+    .allowShaderOverride = true,
     .intUniforms = {},
     .floatUniforms = {},
     .floatArrUniforms = {},
@@ -314,6 +318,7 @@ RenderStages loadRenderStages(
       .renderQuad = false,
       .blend = true,
       .enableStencil = false,
+      .allowShaderOverride = false,
       .intUniforms = {},
       .floatUniforms = {},
       .floatArrUniforms = {},
@@ -342,6 +347,7 @@ RenderStages loadRenderStages(
     .renderQuad = true,
     .blend = true,
     .enableStencil = false,
+    .allowShaderOverride = false,
     .intUniforms = {
       RenderDataInt { .uniformName = "useDepthTexture", .value = false },
       RenderDataInt { .uniformName = "firstpass",       .value = true },
@@ -369,6 +375,7 @@ RenderStages loadRenderStages(
     .renderQuad = true,
     .blend = true,
     .enableStencil = false,
+    .allowShaderOverride = false,
     .intUniforms = {
       RenderDataInt { .uniformName = "useDepthTexture", .value = false },
       RenderDataInt { .uniformName = "firstpass",       .value = false },
@@ -396,6 +403,7 @@ RenderStages loadRenderStages(
     .renderQuad = true,
     .blend = false,
     .enableStencil = false,
+    .allowShaderOverride = false,
     .intUniforms = {
       RenderDataInt { .uniformName = "firstpass", .value = true },
       RenderDataInt{ .uniformName = "amount", .value = 0 },             // updates during updateRenderStages 

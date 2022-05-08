@@ -383,8 +383,8 @@ void onSelectNullItem(){
 }
 
 std::map<std::string, GLint> shaderNameToId;
-GLint getShaderByName(std::string fragShaderName, GLint shaderProgram){
-  if (fragShaderName == ""){
+GLint getShaderByName(std::string fragShaderName, GLint shaderProgram, bool allowShaderOverride){
+  if (fragShaderName == "" || !allowShaderOverride){
     return shaderProgram;
   }
   if (shaderNameToId.find(fragShaderName) == shaderNameToId.end()){
@@ -443,13 +443,13 @@ glm::vec3 getTintIfSelected(bool isSelected){
   return glm::vec3(1.f, 1.f, 1.f);
 }
 
-int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
+int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, glm::mat4* projection, glm::mat4 view,  glm::mat4 model, std::vector<LightInfo>& lights, std::vector<PortalInfo> portals, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
   glUseProgram(shaderProgram);
   clearTraversalPositions();
   int numTriangles = 0;
   int numDepthClears = 0;
 
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -464,7 +464,7 @@ int renderWorld(World& world,  GLint shaderProgram, glm::mat4* projection, glm::
     addPositionToRender(modelMatrix, parentModelMatrix);
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-    auto newShader = getShaderByName(shader, shaderProgram);
+    auto newShader = getShaderByName(shader, shaderProgram, allowShaderOverride);
 
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
 
@@ -838,7 +838,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.renderWorld){
       // important - redundant call to glUseProgram
       glm::mat4* projection = context.projection.has_value() ? &context.projection.value() : NULL;
-      auto worldTriangles = renderWorld(context.world, renderStep.shader, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position);
+      auto worldTriangles = renderWorld(context.world, renderStep.shader, renderStep.allowShaderOverride, projection, context.view, glm::mat4(1.0f), context.lights, context.portals, context.lightProjview, context.cameraTransform.position);
       triangles += worldTriangles;
     }
     glDisable(GL_STENCIL_TEST);

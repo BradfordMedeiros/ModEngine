@@ -54,6 +54,7 @@ struct RenderStep {
   bool renderQuad;
   bool blend;
   bool enableStencil;
+  bool allowShaderOverride;
   std::vector<RenderDataInt> intUniforms;
   std::vector<RenderDataFloat> floatUniforms;
   std::vector<RenderDataFloatArr> floatArrUniforms;
