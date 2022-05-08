@@ -65,6 +65,7 @@
           scene
           (list 
             (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")  ; doesn't work with anchored element since both rewrite position
+            (list "(test_panel" "dialogmove-restrictx" "true")
             ;(list "(test_panel" "anchor" anchorElementName)
           )
         )

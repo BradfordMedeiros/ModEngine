@@ -4,6 +4,10 @@
 (define currNdi #f)
 (define ndiMouseDown #f)
 (define objposMouseDown #f)
+(define restrictAttrName "dialogmove-restrictx")
+(define dialogAttr (assoc restrictAttrName (gameobj-attr mainobj)))
+(define restrictXAxis (if dialogAttr (equal? "true" (cadr dialogAttr)) #f))
+
 ; should calculate ndi when mouse down, and then on mouse move, this is delta 
 ; then add delta to gameobj-pos when the pos was down
 
@@ -41,7 +45,10 @@
   (define newx (+ diffX (car objposMouseDown)))
   (define newy (+ diffY (cadr objposMouseDown)))
   (define oldz (caddr objposMouseDown))
-  (list newx newy oldz)
+  (if restrictXAxis
+    (list newx (cadr objposMouseDown) oldz)
+    (list newx newy oldz)
+  )
 )
 
 (define (onMouseMove xpos ypos ndcx ndcy)
