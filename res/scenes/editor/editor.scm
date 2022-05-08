@@ -66,6 +66,7 @@
           (list 
             (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")  ; doesn't work with anchored element since both rewrite position
             (list "(test_panel" "dialogmove-restrictx" "true")
+            (list "(test_panel" "editor-shouldsnap" "true")
             ;(list "(test_panel" "anchor" anchorElementName)
           )
         )
@@ -107,16 +108,18 @@
   )
 )
 
-(define (handle-side-panel-drop id) 
+(define (maybe-handle-side-panel-drop id) 
   (define gameobj (gameobj-by-id id))
   (define pos (gameobj-pos gameobj))
-  (applySnapping gameobj)
+  (define snapValue (assoc "editor-shouldsnap" (gameobj-attr gameobj)))
+  (define shouldSnap (if snapValue (equal? "true" (cadr snapValue)) #f))
+  (if shouldSnap (applySnapping gameobj))
 )
 
 (define (onMessage key value)
   ;(if (equal? key "dialogmove-drag-start") )
   (if (equal? key "dialogmove-drag-stop") 
-    (handle-side-panel-drop (string->number value))
+    (maybe-handle-side-panel-drop (string->number value))
   )
 )
 
