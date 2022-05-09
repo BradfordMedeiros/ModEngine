@@ -17,6 +17,11 @@ wall_face_forward:texture:./res/textures/wood.jpg
 wall_face_forward:position:0 0 0
 wall_face_forward:rotation:0 0 1 0  
 
+wall_face_back:mesh:./res/models/box/spriteplane.dae
+wall_face_back:texture:./res/textures/wood.jpg
+wall_face_back:position:0 0 2
+wall_face_back:rotation:0 0 -1 0
+
 wall_face_forward_right:mesh:./res/models/box/spriteplane.dae
 wall_face_forward_right:texture:./res/textures/wood.jpg
 wall_face_forward_right:position:2 0 0
