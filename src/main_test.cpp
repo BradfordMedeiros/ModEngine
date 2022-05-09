@@ -50,6 +50,10 @@ std::vector<TestCase> tests = {
   TestCase {
     .name = "calcLineIntersectionTest",
     .test = calcLineIntersectionTest,
+  },
+  TestCase {
+    .name = "utilParseAndSerializeQuat",
+    .test = utilParseAndSerializeQuat,
   }
 };
 

@@ -49,6 +49,7 @@ std::string print(glm::mat4 mat);
 std::string print(glm::mat3 mat);
 std::string print(glm::mat2 mat);
 glm::vec3 parseVec(std::string positionRaw);
+glm::vec4 parseVec4(std::string positionRaw);
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
 glm::vec2 parseVec2(std::string positionRaw);
 std::vector<float> parseFloatVec(std::string value);
@@ -62,7 +63,7 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition);
 
 std::string serializeVec(glm::vec3 vec);
 std::string serializeVec(glm::vec2 vec);
-std::string serializeRotation(glm::quat rotation);
+std::string serializeQuat(glm::quat rotation);
 
 
 float maxvalue(float x, float y, float z);
@@ -128,6 +129,7 @@ typedef void (*func_t)();
 
 bool aboutEqual(float one, float two);
 bool aboutEqual(glm::vec3 one, glm::vec3 two);
+bool aboutEqual(glm::vec4 one, glm::vec4 two);
 
 template<typename T, typename N>
 std::vector<T> mapKeys(std::map<T, N>& values){   

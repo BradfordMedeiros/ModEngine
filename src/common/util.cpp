@@ -226,6 +226,12 @@ glm::vec3 parseVec(std::string positionRaw){;
   in >> x >> y >> z;
   return glm::vec3(x, y, z);
 }
+glm::vec4 parseVec4(std::string positionRaw){
+  float x, y, z, w;
+  std::istringstream in(positionRaw);
+  in >> x >> y >> z >> w;
+  return glm::vec4(x, y, z, w);  
+}
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec){
   auto parts = filterWhitespace(split(positionRaw, ' '));
   if (parts.size() != 3){
@@ -276,8 +282,18 @@ glm::quat eulerToQuat(glm::vec3 eulerAngles){
   return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
 glm::quat parseQuat(std::string payload){
-  return orientationFromPos(glm::vec3(0, 0, 0), (parseVec(payload)));
+  glm::vec4 vecXYZRotation = parseVec4(payload);
+  return glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(vecXYZRotation.x, vecXYZRotation.y, vecXYZRotation.z));
 }
+
+std::string serializeQuat(glm::quat rotation){
+  std::cout << "serialize rotation is wrong" << std::endl;
+  // updated the parseQuat but not this.  This shoudl return a vector in the direction of the rotation
+  assert(false);
+  glm::vec3 angles = eulerAngles(rotation);
+  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z); 
+}
+
 
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
@@ -288,9 +304,9 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
   // Should look more into the math!  How to pick up vector properly? 
   if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){    
-    return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, 1))));
+    return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, 1))))); // why 0 0 1?  If forward vector I would expect 0 0 -1 since that's forward here
   }
-  return glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0))));
+  return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
 }
 
 std::string serializeVec(glm::vec3 vec){
@@ -298,13 +314,6 @@ std::string serializeVec(glm::vec3 vec){
 }
 std::string serializeVec(glm::vec2 vec){
   return std::to_string(vec.x) + " " + std::to_string(vec.y);
-}
-std::string serializeRotation(glm::quat rotation){
-  std::cout << "serialize rotation is wrong" << std::endl;
-  // updated the parseQuat but not this.  This shoudl return a vector in the direction of the rotation
- // assert(false);
-  glm::vec3 angles = eulerAngles(rotation);
-  return std::to_string(angles.x) + " " + std::to_string(angles.y) + " " + std::to_string(angles.z); 
 }
 
 float maxvalue(float x, float y, float z){
@@ -457,4 +466,7 @@ bool aboutEqual(float one, float two){
 }
 bool aboutEqual(glm::vec3 one, glm::vec3 two){
   return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z);
+}
+bool aboutEqual(glm::vec4 one, glm::vec4 two){
+  return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z) && aboutEqual(one.w, two.w);
 }

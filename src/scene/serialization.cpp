@@ -191,7 +191,7 @@ std::string serializeObj(
   if (!isIdentityVec(gameobject.transformation.scale)){
     sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
   }
-  sceneData = sceneData + gameobjectName + ":rotation:" + serializeRotation(gameobject.transformation.rotation) + "\n";
+  sceneData = sceneData + gameobjectName + ":rotation:" + serializeQuat(gameobject.transformation.rotation) + "\n";
 
   if (gameobject.physicsOptions.enabled){
     sceneData = sceneData + gameobjectName + ":physics:enabled" + "\n"; 
