@@ -1,0 +1,59 @@
+wall_face_left:mesh:./res/models/box/spriteplane.dae
+wall_face_left:texture:./res/textures/wood.jpg
+wall_face_left:position:-4 0 0
+wall_face_left:rotation:-1 0 0 0
+
+wall_face_forward_left:mesh:./res/models/box/spriteplane.dae
+wall_face_forward_left:texture:./res/textures/wood.jpg
+wall_face_forward_left:position:-2 0 0
+wall_face_forward_left:rotation:-1 0 1 0
+
+wall_face_forward:mesh:./res/models/box/spriteplane.dae
+wall_face_forward:texture:./res/textures/wood.jpg
+wall_face_forward:position:0 0 0
+wall_face_forward:rotation:0 0 1 0
+
+wall_face_forward_right:mesh:./res/models/box/spriteplane.dae
+wall_face_forward_right:texture:./res/textures/wood.jpg
+wall_face_forward_right:position:2 0 0
+wall_face_forward_right:rotation:1 0 1 0
+
+wall_face_right:mesh:./res/models/box/spriteplane.dae
+wall_face_right:texture:./res/textures/wood.jpg
+wall_face_right:position:4 0 0
+wall_face_right:rotation:1 0 0 0
+
+wall_face_right_rot45:mesh:./res/models/box/spriteplane.dae
+wall_face_right_rot45:texture:./res/textures/wood.jpg
+wall_face_right_rot45:position:4 0 -2
+wall_face_right_rot45:rotation:1 0 0 45
+
+wall_face_up:mesh:./res/models/box/spriteplane.dae
+wall_face_up:texture:./res/textures/wood.jpg
+wall_face_up:position:0 4 0
+wall_face_up:rotation:0 1 0 0
+
+wall_face_forward_up:mesh:./res/models/box/spriteplane.dae
+wall_face_forward_up:texture:./res/textures/wood.jpg
+wall_face_forward_up:position:0 2 0
+wall_face_forward_up:rotation:0 1 1 0
+
+wall_face_down:mesh:./res/models/box/spriteplane.dae
+wall_face_down:texture:./res/textures/wood.jpg
+wall_face_down:position:0 -4 0
+wall_face_down:rotation:0 -1 0 0
+
+wall_face_forward_down:mesh:./res/models/box/spriteplane.dae
+wall_face_forward_down:texture:./res/textures/wood.jpg
+wall_face_forward_down:position:0 -2 0
+wall_face_forward_down:rotation:0 -1 1 0
+
+wall_face_forward_down_rot_45:mesh:./res/models/box/spriteplane.dae
+wall_face_forward_down_rot_45:texture:./res/textures/wood.jpg
+wall_face_forward_down_rot_45:position:0 -2 -2
+wall_face_forward_down_rot_45:rotation:0 -1 1 45
+
+wall_face_forward_down_rot_-45:mesh:./res/models/box/spriteplane.dae
+wall_face_forward_down_rot_-45:texture:./res/textures/wood.jpg
+wall_face_forward_down_rot_-45:position:0 -2 -4
+wall_face_forward_down_rot_-45:rotation:0 -1 1 -45
