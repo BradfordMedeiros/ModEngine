@@ -1,3 +1,7 @@
+# Rotation field is a vec4, where the the first 3 elements represent the axis, and the 4th the rotation on the axis in degrees
+# See https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation, for example, to make something
+# Coordinate system is +x right, +y up, -z forward
+
 wall_face_left:mesh:./res/models/box/spriteplane.dae
 wall_face_left:texture:./res/textures/wood.jpg
 wall_face_left:position:-4 0 0
@@ -11,7 +15,7 @@ wall_face_forward_left:rotation:-1 0 1 0
 wall_face_forward:mesh:./res/models/box/spriteplane.dae
 wall_face_forward:texture:./res/textures/wood.jpg
 wall_face_forward:position:0 0 0
-wall_face_forward:rotation:0 0 1 0
+wall_face_forward:rotation:0 0 1 0  
 
 wall_face_forward_right:mesh:./res/models/box/spriteplane.dae
 wall_face_forward_right:texture:./res/textures/wood.jpg
