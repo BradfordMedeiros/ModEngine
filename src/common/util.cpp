@@ -290,38 +290,26 @@ glm::quat parseQuat(std::string payload){
   auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), parsedVec);
   auto rotateAngle = glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(0, 0, 1));
   return  direction * rotateAngle;
-  /*auto angleRadians = glm::radians(vecXYZRotation.w);
-  auto x = vecXYZRotation.x * glm::sin(angleRadians * 0.5f);
-  auto y = vecXYZRotation.y * glm::sin(angleRadians * 0.5f);
-  auto z = vecXYZRotation.z * glm::sin(angleRadians * 0.5f);
-  auto w = glm::cos(angleRadians * 0.5f);
-  auto rotQuat = glm::quat(w, x, y, z);
-  return rotQuat;*/
 }
 
+//http://www.euclideanspace.com/maths/geometry/rotations/for/decomposition/
 std::string serializeQuat(glm::quat rotation){
-
-  // almost but not quite, why?
-  /*auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
-  auto rotateAngle = glm::inverse(direction) * rotation;
-  auto rotAngle = glm::acos(rotateAngle.w) * 2.f;
-  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, glm::degrees(rotAngle))); */
-
   auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  //auto direction = rotation * glm::vec3(0, 1, 0);
-  //auto remainingAngle =  direction * glm::inverse(rotation) ;
-  //auto rotAngle = glm::angle(remainingAngle);
+  
+  auto rotationValue = glm::angleAxis(glm::radians(0.f), axis);
+  auto rotationNoAngle = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
+  auto leftoverRotation = glm::inverse(rotationNoAngle) * rotation;
+  auto rotatedAxis = leftoverRotation * glm::vec3(0.f, 0.f, -1.f); 
 
-  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, glm::degrees(0.f))); 
+  auto angle = glm::angle(leftoverRotation);
+
+  std::cout << "regular axis is: " << print(axis) << std::endl;
+  std::cout << "rotated axis is: " << print(rotatedAxis) << std::endl;
+  std::cout << "angle is: " << glm::degrees(angle) << std::endl;
+
+  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, glm::degrees(angle))); 
 
 }
-
-/*x = RotationAxis.x * sin(RotationAngle / 2)
-y = RotationAxis.y * sin(RotationAngle / 2)
-z = RotationAxis.z * sin(RotationAngle / 2)
-w = cos(RotationAngle / 2)*/
-
 
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 
@@ -332,7 +320,7 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
   // Should look more into the math!  How to pick up vector properly? 
   if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){   
-    return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, 1))))); // why 0 0 1?  If forward vector I would expect 0 0 -1 since that's forward here
+    return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, -1))))); 
   }
   return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
 }

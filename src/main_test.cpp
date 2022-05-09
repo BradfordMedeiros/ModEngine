@@ -53,7 +53,11 @@ std::vector<TestCase> tests = {
   },
   TestCase {
     .name = "utilParseAndSerializeQuat",
-    .test = utilParseAndSerializeQuat,
+    .test = utilParseAndSerializeQuatTest,
+  },
+  TestCase {
+    .name = "orientationFromPosTest",
+    .test = orientationFromPosTest,
   },
   TestCase {
     .name = "directionToQuatConversionTest",

@@ -3,7 +3,8 @@
 
 #include "./util.h"
 
-void utilParseAndSerializeQuat();
+void utilParseAndSerializeQuatTest();
+void orientationFromPosTest();
 
 #endif
 
