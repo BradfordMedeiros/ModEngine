@@ -21,6 +21,7 @@ scale:zindex:2
 scale:depth:2
 scale:scale:true
 
+basicui:zindex:4
 basicui:view:false
 basicui:ortho:true
-basicui:selection:-1
+#basicui:selection:-1
