@@ -254,6 +254,6 @@ glm::quat quatFromDirection(glm::vec3 direction){
   return orientationFromPos(glm::vec3(0.f, 0.f, 0.f), direction);
 }
 glm::vec3 directionFromQuat(glm::quat direction){
-  return direction * glm::vec3(0, 1, 0);
+  return direction * glm::vec3(0, 0, -1.f);
 }
 

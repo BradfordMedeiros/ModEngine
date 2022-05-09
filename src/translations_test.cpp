@@ -110,14 +110,6 @@ void calcLineIntersectionTest(){
     },
   };
 
-
-
-
-
-
-  //(frompos, selectionray, targetpos, targetdir)    
-
-
   for (int i = 0; i < lineTests.size(); i++){
     glm::vec3 intersectPoint(0.f, 0.f, 0.f);
     std::cout << "test: " << i << std::endl;
@@ -132,6 +124,26 @@ void calcLineIntersectionTest(){
       }else{
         std::cout << "intersection correct: " << print(intersectPoint) << std::endl;
       }
+    }
+  }
+}
+
+void directionToQuatConversionTest(){
+  std::vector<glm::vec3> directions = {
+    glm::vec3(1.f, 0.f, 0.f),
+    glm::vec3(0.f, 1.f, 0.f),
+    glm::vec3(0.f, 0.f, -1.f),
+    glm::vec3(-2.f, 0.f, -1.f),
+    glm::vec3(0.f, -2.f, -1.f),
+    glm::vec3(3.f, 2.f, 4.f),
+    glm::vec3(3.34f, 2.23f, 444.34f),
+  };
+
+  for (auto direction : directions){
+    auto quat = quatFromDirection(direction);
+    auto derivedDirection = directionFromQuat(quat);
+    if (!aboutEqualNormalized(direction, derivedDirection)){
+      throw std::logic_error("Could not rederive direction: " + print(direction) + " got: " + print(derivedDirection));
     }
   }
 }

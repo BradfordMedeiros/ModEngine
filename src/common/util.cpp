@@ -281,22 +281,46 @@ bool maybeParseBool(std::string value, bool* _value){
 glm::quat eulerToQuat(glm::vec3 eulerAngles){
   return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
+
+// im misunderstanding what the quaternion represnts, thais is only for the single rotation,
+// so what i could do, is simply rotate 
 glm::quat parseQuat(std::string payload){
- glm::vec4 vecXYZRotation = parseVec4(payload);
+  glm::vec4 vecXYZRotation = parseVec4(payload);
   auto parsedVec = glm::normalize(glm::vec3(vecXYZRotation.x, vecXYZRotation.y, vecXYZRotation.z));
   auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), parsedVec);
   auto rotateAngle = glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(0, 0, 1));
   return  direction * rotateAngle;
+  /*auto angleRadians = glm::radians(vecXYZRotation.w);
+  auto x = vecXYZRotation.x * glm::sin(angleRadians * 0.5f);
+  auto y = vecXYZRotation.y * glm::sin(angleRadians * 0.5f);
+  auto z = vecXYZRotation.z * glm::sin(angleRadians * 0.5f);
+  auto w = glm::cos(angleRadians * 0.5f);
+  auto rotQuat = glm::quat(w, x, y, z);
+  return rotQuat;*/
 }
 
 std::string serializeQuat(glm::quat rotation){
-  std::cout << "serialize rotation is wrong" << std::endl;
-  // updated the parseQuat but not this.  This shoudl return a vector in the direction of the rotation
-  rotation = glm::normalize(rotation);
-  glm::vec3 quatAxis = glm::axis(rotation);
-  float angle = glm::degrees(glm::angle(rotation));
-  return serializeVec(glm::vec4(quatAxis.x, quatAxis.y, quatAxis.z, angle)); 
+
+  // almost but not quite, why?
+  /*auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
+  auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
+  auto rotateAngle = glm::inverse(direction) * rotation;
+  auto rotAngle = glm::acos(rotateAngle.w) * 2.f;
+  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, glm::degrees(rotAngle))); */
+
+  auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
+  //auto direction = rotation * glm::vec3(0, 1, 0);
+  //auto remainingAngle =  direction * glm::inverse(rotation) ;
+  //auto rotAngle = glm::angle(remainingAngle);
+
+  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, glm::degrees(0.f))); 
+
 }
+
+/*x = RotationAxis.x * sin(RotationAngle / 2)
+y = RotationAxis.y * sin(RotationAngle / 2)
+z = RotationAxis.z * sin(RotationAngle / 2)
+w = cos(RotationAngle / 2)*/
 
 
 glm::vec3 quatToVec(glm::quat quat){
@@ -307,7 +331,7 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   // https://stackoverflow.com/questions/18151845/converting-glmlookat-matrix-to-quaternion-and-back/29992778
   // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
   // Should look more into the math!  How to pick up vector properly? 
-  if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){    
+  if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){   
     return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, 1))))); // why 0 0 1?  If forward vector I would expect 0 0 -1 since that's forward here
   }
   return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
@@ -473,6 +497,9 @@ bool aboutEqual(float one, float two){
 }
 bool aboutEqual(glm::vec3 one, glm::vec3 two){
   return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z);
+}
+bool aboutEqualNormalized(glm::vec3 one, glm::vec3 two){
+  return aboutEqual(glm::normalize(one), glm::normalize(two));
 }
 bool aboutEqual(glm::vec4 one, glm::vec4 two){
   return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z) && aboutEqual(one.w, two.w);

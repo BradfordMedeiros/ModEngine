@@ -8,5 +8,6 @@ void moveRelativeRotateRight();
 
 void calcLineIntersectionTest();
 
+void directionToQuatConversionTest();
 
 #endif
