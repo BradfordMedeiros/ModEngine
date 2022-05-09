@@ -282,13 +282,17 @@ glm::quat eulerToQuat(glm::vec3 eulerAngles){
   return glm::quat(glm::vec3(eulerAngles.x, eulerAngles.y, eulerAngles.z));
 }
 glm::quat parseQuat(std::string payload){
-  glm::vec4 vecXYZRotation = parseVec4(payload);
-  return glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(vecXYZRotation.x, vecXYZRotation.y, vecXYZRotation.z));
+ glm::vec4 vecXYZRotation = parseVec4(payload);
+  auto parsedVec = glm::normalize(glm::vec3(vecXYZRotation.x, vecXYZRotation.y, vecXYZRotation.z));
+  auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), parsedVec);
+  auto rotateAngle = glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(0, 0, 1));
+  return  direction * rotateAngle;
 }
 
 std::string serializeQuat(glm::quat rotation){
   std::cout << "serialize rotation is wrong" << std::endl;
   // updated the parseQuat but not this.  This shoudl return a vector in the direction of the rotation
+  rotation = glm::normalize(rotation);
   glm::vec3 quatAxis = glm::axis(rotation);
   float angle = glm::degrees(glm::angle(rotation));
   return serializeVec(glm::vec4(quatAxis.x, quatAxis.y, quatAxis.z, angle)); 
