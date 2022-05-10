@@ -112,8 +112,9 @@
   (if sidePanelSceneId (unload-scene sidePanelSceneId))
   (update-snap-pos panelIndex #f) 
 )
+
 (define (maybe-unload-sidepanel-all)
-  (format #t "unload side panel placeholder\n")
+  (for-each (lambda (sceneId) (maybe-unload-sidepanel-by-scene sceneId)) snappingPositionToSceneId)
 )
 
 (define (getSnappingValue searchVal vals index)
@@ -137,6 +138,9 @@
     #f
   )
 )
+
+; get snapping index
+; if snapping index is occupied 
 
 (define (maybe-handle-side-panel-drop id) 
   (define gameobj (gameobj-by-id id))
