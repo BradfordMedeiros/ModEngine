@@ -67,6 +67,7 @@
             (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")  ; doesn't work with anchored element since both rewrite position
             (list "(test_panel" "dialogmove-restrictx" "true")
             (list "(test_panel" "editor-shouldsnap" "true")
+            (list ")window_x" "script" "./res/scenes/editor/dock/details.scm")
             ;(list "(test_panel" "anchor" anchorElementName)
           )
         )
@@ -122,6 +123,12 @@
 (define (onMessage key value)
   (if (equal? key "dialogmove-drag-stop") 
     (maybe-handle-side-panel-drop (string->number value))
+  )
+  (if (equal? key "dock-self-remove")
+    (begin
+      (maybe-unload-sidepanel)
+      (format #t "should unload the dock because x was clicked\n")
+    )
   )
 )
 

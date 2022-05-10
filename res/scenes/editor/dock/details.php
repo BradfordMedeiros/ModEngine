@@ -19,7 +19,13 @@
 (test_panel:border-color:0.3 0.3 0.3
 (test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
 
-(test_panel:child:(banner_title_background_right,(banner_title_background_left
+)window_x:layer:basicui
+)window_x:scale:0.008 0.016 0.008
+)window_x:tint:0.8 0.8 0.8
+)window_x:value:x
+)window_x:position:0.18 0.95 0
+
+(test_panel:child:(banner_title_background_right,(banner_title_background_left,)window_x
 )banner_title_right:layer:basicui
 )banner_title_right:scale:0.008 0.01 0.004
 )banner_title_right:tint:2 2 2
