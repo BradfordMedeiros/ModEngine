@@ -250,6 +250,10 @@
   (define baselist (list 
     (list "(dialog" "elements" joinedNames)
     (list "(dialog" "anchor" elementName)
+    (list "(dialog" "anchor-offset" "-0.04 -0.07 0")
+    (list "(dialog" "anchor-dir-horizontal" "right")
+    (list "(dialog" "anchor-dir-vertical" "down")
+
   ))
   (format #t "joinedNames: ~a\n" joinedNames)
   (format #t "joinedElements name: ~a\n" joinedElements)
