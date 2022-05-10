@@ -79,10 +79,9 @@
 )
 
 (define (change-sidepanel snappingIndex scene anchorElementName)
-  (define sidePanelSceneId (get-snap-id snappingIndex))
   (format #t "change sidepanel: elementname: ~a\n" anchorElementName)
   (maybe-unload-sidepanel snappingIndex)
-  (if (not sidePanelSceneId)
+  (if (not (get-snap-id snappingIndex))
     (begin
       (update-snap-pos snappingIndex
         (load-scene 
