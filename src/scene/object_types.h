@@ -218,7 +218,8 @@ int renderObject(
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  std::function<void(int)> onRender
+  std::function<void(int)> onRender,
+  std::function<glm::vec3(objid)> fullPosition
 );
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);

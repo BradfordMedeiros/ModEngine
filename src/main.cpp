@@ -532,7 +532,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         return drawSphere();
       },
       defaultMeshes,
-      renderCustomObj
+      renderCustomObj,
+      getGameObjectPos
     );
     numTriangles = numTriangles + trianglesDrawn;
 

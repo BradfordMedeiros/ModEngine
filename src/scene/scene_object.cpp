@@ -484,9 +484,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       enforceLayout(world, id, layoutObject); 
     }
   }
-
-  //std::cout << getGameObject(world, id).name << " - Bound origin: " << print(layoutObject -> boundOrigin) << std::endl;
-  layoutObject -> boundOrigin = layoutPos + mainAlignmentOffset;
+  layoutObject -> panelDisplayOffset = mainAlignmentOffset;
 }
 
 void enforceLayoutsByName(World& world, std::vector<std::string>& elements, objid currentSceneId){

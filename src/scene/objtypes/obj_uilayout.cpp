@@ -136,7 +136,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .spacing = spacing,
     .elements = elements,
     .boundInfo = boundInfo,
-    .boundOrigin = glm::vec3(0.f, 0.f, 0.f),
+    .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
     .showBackpanel = showBackpanel,
     .tint = tint,
     .marginValues = marginValues,
@@ -152,9 +152,9 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   return obj;
 }
 
-glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale){
+glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale, glm::vec3 layoutPos){
   auto boundWidth = layoutObj.boundInfo.xMax - layoutObj.boundInfo.xMin;
   auto boundheight = layoutObj.boundInfo.yMax - layoutObj.boundInfo.yMin;
   auto zFightingBias = glm::vec3(0.f, 0.f, -0.001f);  
-  return glm::scale(glm::translate(glm::mat4(1.0f), layoutObj.boundOrigin + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f) - minusScale);
+  return glm::scale(glm::translate(glm::mat4(1.0f), layoutObj.panelDisplayOffset + layoutPos + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f) - minusScale);
 }

@@ -278,7 +278,8 @@ int renderObject(
   std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
-  std::function<void(int)> onRender
+  std::function<void(int)> onRender,
+  std::function<glm::vec3(objid)> fullPosition
 ){
   GameObjectObj& toRender = mapping.at(id);
   auto meshObj = std::get_if<GameObjectMesh>(&toRender);
@@ -484,15 +485,16 @@ int renderObject(
       layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     if (layoutObj -> showBackpanel){
+      auto position = fullPosition(id);
       bool hasBorder = layoutObj -> border.hasBorder;
       auto borderSize = layoutObj -> border.borderSize;
       glm::vec3 minusScale = hasBorder ? glm::vec3(borderSize, borderSize, borderSize) : glm::vec3(0.f, 0.f, 0.f);  
-      auto innerScale = layoutBackpanelModelTransform(*layoutObj, minusScale);
+      auto innerScale = layoutBackpanelModelTransform(*layoutObj, minusScale, position);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(innerScale));
       glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
       drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);   
       if (hasBorder){
-        auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f));
+        auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f), position);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(outerScale));
         glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
         drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);      

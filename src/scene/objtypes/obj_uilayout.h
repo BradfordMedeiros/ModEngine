@@ -51,7 +51,7 @@ struct GameObjectUILayout {
   float spacing;
   std::vector<std::string> elements;
   BoundInfo boundInfo;
-  glm::vec3 boundOrigin;
+  glm::vec3 panelDisplayOffset;
   bool showBackpanel;
   glm::vec3 tint;
   LayoutMargin marginValues;
@@ -66,6 +66,6 @@ struct GameObjectUILayout {
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);
-glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale);
+glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale, glm::vec3 layoutPos);
 
 #endif
