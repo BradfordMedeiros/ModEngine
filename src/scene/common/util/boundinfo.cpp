@@ -65,6 +65,9 @@ std::vector<glm::vec4> boundInfoToPoints(BoundInfo boundInfo){
 
 // This should take into account things being centered (or not)
 BoundInfo getMaxUnionBoundingInfo(std::vector<BoundInfo> infos){
+  if (infos.size() == 0){
+    return BoundInfo { .xMin = 0.f, .xMax = 0.f, .yMin = 0.f, .yMax = 0.f, .zMin = 0.f, .zMax = 0.f };
+  }
   BoundInfo info = infos.at(0);
   for (int i = 1; i < infos.size(); i++){
     auto currInfo = infos.at(i);
