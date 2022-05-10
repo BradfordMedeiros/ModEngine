@@ -1,6 +1,6 @@
 (define (onObjSelected gameobj color)
   (if (equal? (gameobj-id gameobj) (gameobj-id mainobj))
-    (sendnotify "dock-self-remove" "true")
+    (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
   )
 )
 

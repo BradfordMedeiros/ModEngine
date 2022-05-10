@@ -54,13 +54,37 @@
 
 ;;;;;;;;;;;;
 ; Sidepanel 
-(define sidePanelSceneId #f)
-(define (change-sidepanel scene anchorElementName)
+(define snappingPositionToSceneId
+  (list #f #f #f #f)
+)
+(define xLocationToSnappingPosition
+  (list 
+    (list 0.99 (list 1.2 -0.1 0))
+    (list 0 (list 0.8 -0.1 0))
+    (list -1.1 (list -0.8 -0.1 0))
+    (list most-negative-fixnum (list -1.2 -0.1 0))
+  )
+)
+
+(define (get-snap-id index) (list-ref snappingPositionToSceneId index))
+(define (delete-snap-pos sceneId)
+  (define oldIndex  (list-index snappingPositionToSceneId sceneId))
+  (if oldIndex
+    (list-set! snappingPositionToSceneId oldIndex #f)
+  )
+) 
+(define (update-snap-pos index sceneId) 
+  (delete-snap-pos sceneId)
+  (list-set! snappingPositionToSceneId index sceneId)
+)
+
+(define (change-sidepanel snappingIndex scene anchorElementName)
+  (define sidePanelSceneId (get-snap-id snappingIndex))
   (format #t "change sidepanel: elementname: ~a\n" anchorElementName)
-  (maybe-unload-sidepanel)
+  (maybe-unload-sidepanel snappingIndex)
   (if (not sidePanelSceneId)
     (begin
-      (set! sidePanelSceneId 
+      (update-snap-pos snappingIndex
         (load-scene 
           scene
           (list 
@@ -73,41 +97,44 @@
         )
       )
       (format #t "editor: load scene: ~a\n" scene)
-      (format #t "sidepanel id is: ~a\n" sidePanelSceneId)
-      (enforce-layout (gameobj-id (lsobj-name "(test_panel" sidePanelSceneId)))
+      (format #t "sidepanel id is: ~a\n" (get-snap-id snappingIndex))
+      (enforce-layout (gameobj-id (lsobj-name "(test_panel" (get-snap-id snappingIndex))))
     )
   )
 )
-(define (maybe-unload-sidepanel)
+
+(define (maybe-unload-sidepanel-by-scene sceneIndex)
+  (define snapIndex (list-index snappingPositionToSceneId sceneIndex))
+  (if snapIndex (maybe-unload-sidepanel snapIndex))
+)
+(define (maybe-unload-sidepanel panelIndex)
+  (define sidePanelSceneId (get-snap-id panelIndex))
   (if sidePanelSceneId (unload-scene sidePanelSceneId))
-  (set! sidePanelSceneId #f)
+  (update-snap-pos panelIndex #f) 
+)
+(define (maybe-unload-sidepanel-all)
+  (format #t "unload side panel placeholder\n")
 )
 
-
-(define xLocationToSnappingPosition
-  (list 
-    (list 0.99 (list 1.2 -0.1 0))
-    (list 0 (list 0.8 -0.1 0))
-    (list -1.1 (list -0.8 -0.1 0))
-    (list most-negative-fixnum (list -1.2 -0.1 0))
-  )
-)
-(define (getSnappingValue searchVal vals)
+(define (getSnappingValue searchVal vals index)
   (define firstValue (car vals))
   (define firstValThreshold (car firstValue))
   (if (> searchVal firstValThreshold)
-    firstValue
-    (if (> (length vals) 1) (getSnappingValue searchVal (cdr vals)) #f)
+    (list index firstValue)
+    (if (> (length vals) 1) (getSnappingValue searchVal (cdr vals) (- index 1)) #f)
   )
 )
+
 (define (applySnapping gameobj)
   (define snapXLocation (car (gameobj-pos gameobj)))
-  (define snappingPair (getSnappingValue snapXLocation xLocationToSnappingPosition))
-  (if snappingPair
-    (let ((snappingPos (cadr snappingPair)))
+  (define indexToSnappingPair (getSnappingValue snapXLocation xLocationToSnappingPosition (- (length xLocationToSnappingPosition) 1)))
+  (if indexToSnappingPair
+    (let* ((snappingPair (cadr indexToSnappingPair)) (snappingPos (cadr snappingPair)))
       (gameobj-setpos! gameobj snappingPos)
       (enforce-layout (gameobj-id gameobj))
+      (car indexToSnappingPair)
     )
+    #f
   )
 )
 
@@ -116,9 +143,14 @@
   (define pos (gameobj-pos gameobj))
   (define snapValue (assoc "editor-shouldsnap" (gameobj-attr gameobj)))
   (define shouldSnap (if snapValue (equal? "true" (cadr snapValue)) #f))
-  (if shouldSnap (applySnapping gameobj))
+  (define sceneId (list-sceneid id))
+  (if shouldSnap 
+    (update-snap-pos 
+      (applySnapping gameobj) 
+      sceneId
+    )
+  )
 )
-
 
 (define (onMessage key value)
   (if (equal? key "dialogmove-drag-stop") 
@@ -126,7 +158,7 @@
   )
   (if (equal? key "dock-self-remove")
     (begin
-      (maybe-unload-sidepanel)
+      (maybe-unload-sidepanel-by-scene (list-sceneid (string->number value)))
       (format #t "should unload the dock because x was clicked\n")
     )
   )
@@ -321,9 +353,17 @@
 
   (if (not (equal? dialogoption ""))
     (cond
-      ((equal? dialogoption "HIDE") (maybe-unload-sidepanel))
-      (#t (change-sidepanel dialogoption (fullElementName "(menubar")))
+      ((equal? dialogoption "HIDE") (maybe-unload-sidepanel-all))
+      (#t (change-sidepanel 1 dialogoption (fullElementName "(menubar")))
     )
   )
 )
 
+
+(define (onKeyChar key)
+  (format #t "on key char: ~a\n" key)
+  ; ".
+  (if (equal? key 46)
+    (format #t "snapping positions: ~a\n" snappingPositionToSceneId)
+  ) 
+)
