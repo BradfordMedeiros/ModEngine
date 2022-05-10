@@ -273,7 +273,7 @@
       (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist)))))
       (set! currOption uiOption)
       (format #t "object id: ~a\n" (lsobj-name "(dialog" sceneId))
-      (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
+      (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))  ; wait....why need two passed?
       (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))
     )
   )

@@ -19,6 +19,37 @@
 (test_panel:border-color:0.3 0.3 0.3
 (test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
 
+(test_panel:child:(banner_title_background_right,(banner_title_background_left
+)banner_title_right:layer:basicui
+)banner_title_right:scale:0.008 0.01 0.004
+)banner_title_right:tint:2 2 2
+)banner_title_right:value:Object Details
+)banner_title_right:rotation:0 0 -1 -90
+(banner_title_background_right:position:0.23 0 0
+(banner_title_background_right:layer:basicui
+(banner_title_background_right:backpanel:true
+(banner_title_background_right:tint:0 0 0.8
+(banner_title_background_right:minheight:2
+(banner_title_background_right:minwidth:0.02
+(banner_title_background_right:border-size:0.002
+(banner_title_background_right:border-color:0 0 0
+(banner_title_background_right:child:)banner_title_right
+
+)banner_title_left:layer:basicui
+)banner_title_left:scale:0.008 0.01 0.004
+)banner_title_left:tint:2 2 2
+)banner_title_left:value:Object Details
+)banner_title_left:rotation:0 0 -1 -90
+(banner_title_background_left:position:-0.23 0 0
+(banner_title_background_left:layer:basicui
+(banner_title_background_left:backpanel:true
+(banner_title_background_left:tint:0 0 0.8
+(banner_title_background_left:minheight:2
+(banner_title_background_left:minwidth:0.02
+(banner_title_background_left:border-size:0.002
+(banner_title_background_left:border-color:0 0 0
+(banner_title_background_left:child:)banner_title_left
+
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
 )title:tint:1 1 2
