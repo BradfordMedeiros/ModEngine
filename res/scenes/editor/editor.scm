@@ -77,6 +77,11 @@
   (delete-snap-pos sceneId)
   (list-set! snappingPositionToSceneId index sceneId)
 )
+(define (snap-slot-occuplied index)
+  (define valueInSlot (list-ref snappingPositionToSceneId index))
+  (not (equal? valueInSlot #f))
+)
+
 
 (define (change-sidepanel snappingIndex scene anchorElementName)
   (format #t "change sidepanel: elementname: ~a\n" anchorElementName)
@@ -124,22 +129,26 @@
     (if (> (length vals) 1) (getSnappingValue searchVal (cdr vals) (- index 1)) #f)
   )
 )
-
-(define (applySnapping gameobj)
+(define (get-snapping-pair-by-loc gameobj)
   (define snapXLocation (car (gameobj-pos gameobj)))
   (define indexToSnappingPair (getSnappingValue snapXLocation xLocationToSnappingPosition (- (length xLocationToSnappingPosition) 1)))
-  (if indexToSnappingPair
-    (let* ((snappingPair (cadr indexToSnappingPair)) (snappingPos (cadr snappingPair)))
-      (gameobj-setpos! gameobj snappingPos)
-      (enforce-layout (gameobj-id gameobj))
-      (car indexToSnappingPair)
-    )
-    #f
-  )
+  indexToSnappingPair
 )
 
-; get snapping index
-; if snapping index is occupied 
+(define (get-current-snapping-pair gameobjid)
+  (define oldIndex  (list-index snappingPositionToSceneId gameobjid))
+  (list oldIndex (list-ref xLocationToSnappingPosition (- (length xLocationToSnappingPosition) 1 oldIndex)))
+)
+
+
+(define (applySnapping gameobj indexToSnappingPair)
+  (let* ((snappingPair (cadr indexToSnappingPair)) (snappingPos (cadr snappingPair)))
+    (gameobj-setpos! gameobj snappingPos)
+    (enforce-layout (gameobj-id gameobj))
+    (car indexToSnappingPair)
+  )  
+)
+
 
 (define (maybe-handle-side-panel-drop id) 
   (define gameobj (gameobj-by-id id))
@@ -148,9 +157,12 @@
   (define shouldSnap (if snapValue (equal? "true" (cadr snapValue)) #f))
   (define sceneId (list-sceneid id))
   (if shouldSnap 
-    (update-snap-pos 
-      (applySnapping gameobj) 
-      sceneId
+    (let ((snappingPair (get-snapping-pair-by-loc gameobj)))
+      ;(format #t "snapping pair is: ~a\n" snappingPair)
+      (if (and snappingPair (not (snap-slot-occuplied (car snappingPair))))
+        (update-snap-pos (applySnapping gameobj snappingPair) sceneId)
+        (update-snap-pos (applySnapping gameobj (get-current-snapping-pair sceneId)) sceneId)
+      )
     )
   )
 )
