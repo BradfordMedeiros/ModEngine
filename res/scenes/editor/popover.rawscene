@@ -16,7 +16,7 @@
 (dialog:layer:basicui
 (dialog:type:vertical
 (dialog:backpanel:true
-(dialog:tint:0 0 0
+(dialog:tint:0 0 0 1
 (dialog:spacing:0.1
 #(dialog:elements:)text_2,)text_1,)text_0
 (dialog:border-size:0.001

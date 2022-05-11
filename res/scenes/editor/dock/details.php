@@ -7,7 +7,7 @@
 (test_panel:layer:basicui
 (test_panel:type:vertical
 (test_panel:backpanel:true
-(test_panel:tint:0.1 0.1 0.1
+(test_panel:tint:0.1 0.1 0.1 1
 (test_panel:margin:0.02
 (test_panel:margin-top:0.1
 (test_panel:spacing:0.02
@@ -21,20 +21,20 @@
 
 )window_x:layer:basicui
 )window_x:scale:0.008 0.016 0.008
-)window_x:tint:0.8 0.8 0.8
+)window_x:tint:0.8 0.8 0.8 1
 )window_x:value:x
 )window_x:position:0.18 0.95 0
 
 (test_panel:child:(banner_title_background_right,(banner_title_background_left,)window_x
 )banner_title_right:layer:basicui
 )banner_title_right:scale:0.008 0.01 0.004
-)banner_title_right:tint:2 2 2
+)banner_title_right:tint:2 2 2 1
 )banner_title_right:value:Object Details
 )banner_title_right:rotation:0 0 -1 -90
 (banner_title_background_right:position:0.23 0 0
 (banner_title_background_right:layer:basicui
 (banner_title_background_right:backpanel:true
-(banner_title_background_right:tint:0 0 0.8
+(banner_title_background_right:tint:0 0 0.8 1
 (banner_title_background_right:minheight:2
 (banner_title_background_right:minwidth:0.02
 (banner_title_background_right:border-size:0.002
@@ -43,13 +43,13 @@
 
 )banner_title_left:layer:basicui
 )banner_title_left:scale:0.008 0.01 0.004
-)banner_title_left:tint:2 2 2
+)banner_title_left:tint:2 2 2 1
 )banner_title_left:value:Object Details
 )banner_title_left:rotation:0 0 -1 -90
 (banner_title_background_left:position:-0.23 0 0
 (banner_title_background_left:layer:basicui
 (banner_title_background_left:backpanel:true
-(banner_title_background_left:tint:0 0 0.8
+(banner_title_background_left:tint:0 0 0.8 1
 (banner_title_background_left:minheight:2
 (banner_title_background_left:minwidth:0.02
 (banner_title_background_left:border-size:0.002
@@ -58,7 +58,7 @@
 
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
-)title:tint:1 1 2
+)title:tint:1 1 2 1
 
 
 <?php 
@@ -100,10 +100,10 @@
     "scale" => "0.004 0.01 0.004",
   ];
   $extra_key_attrs = [
-   // "tint" => "2 2 2",
+   // "tint" => "2 2 2 1",
   ];
   $extra_value_attrs = [
-    //"tint" => "1 1 1",
+    //"tint" => "1 1 1 1",
   ];
   $default_key = array_merge($default_text_style, $extra_key_attrs);
   $default_value = array_merge($default_text_style, $extra_value_attrs);
@@ -112,7 +112,7 @@
     "layer" => "basicui",
     "type" => "horizontal",
     "backpanel" => "true",
-    "tint" => "0.05 0.05 0.05",  # doesn't show up since z ordering
+    "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
     "margin" => "0.02",
     "spacing" => "0.02",
     "minwidth" => "0.4",

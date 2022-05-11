@@ -51,6 +51,7 @@ std::string print(glm::mat2 mat);
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec4 parseVec4(std::string positionRaw);
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
+bool maybeParseVec4(std::string positionRaw, glm::vec4& _vec);
 glm::vec2 parseVec2(std::string positionRaw);
 std::vector<float> parseFloatVec(std::string value);
 bool maybeParseBool(std::string value, bool* _value);

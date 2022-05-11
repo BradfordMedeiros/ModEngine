@@ -4,7 +4,7 @@
 (test_panel:layer:basicui
 (test_panel:type:horizontal
 (test_panel:backpanel:true
-(test_panel:tint:1.0 0.1 0.1
+(test_panel:tint:1.0 0.1 0.1 1
 (test_panel:margin:0.02
 (test_panel:spacing:0.02
 (test_panel:elements:)test_panel_placeholder

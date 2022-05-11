@@ -9,8 +9,7 @@
 struct DrawingParams{
   float opacity;
   glm::vec3 scale;
-  glm::vec3 tint;
-
+  glm::vec4 tint;
   int activeTextureIndex;
 };
 

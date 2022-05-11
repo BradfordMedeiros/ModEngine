@@ -111,6 +111,14 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
     attributes.vecAttr.vec3[attribute] = vec;
     return;
   }
+
+  glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
+  bool isVec4 = maybeParseVec4(payload, vec4);
+  if (isVec4){
+    attributes.vecAttr.vec4[attribute] = vec4;
+    return;
+  }
+
   float number = 0.f;
   bool isFloat = maybeParseFloat(payload, number);
   if (isFloat){
@@ -157,6 +165,9 @@ bool isDefaultPosition(glm::vec3 pos){
 }
 bool isIdentityVec(glm::vec3 scale){
   return scale.x = 1 && scale.y == 1 && scale.z == 1;
+}
+bool isIdentityVec(glm::vec4 vec){
+  return vec.x = 1 && vec.y == 1 && vec.z == 1 && vec.w == 1;
 }
 bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;

@@ -251,6 +251,26 @@ bool maybeParseVec(std::string positionRaw, glm::vec3& _vec){
   _vec.z = vecParts[2];
   return true;
 }
+bool maybeParseVec4(std::string positionRaw, glm::vec4& _vec){
+  auto parts = filterWhitespace(split(positionRaw, ' '));
+  if (parts.size() != 4){
+    return false;
+  }
+  float vecParts[4] = { 0, 0, 0, 0 };
+  for (int i = 0; i < 4; i++){
+    float number;
+    bool isFloat = maybeParseFloat(parts.at(i), number);
+    if (!isFloat){
+      return false;
+    }
+    vecParts[i] = number;
+  }
+  _vec.x = vecParts[0];
+  _vec.y = vecParts[1];
+  _vec.z = vecParts[2];
+  _vec.w = vecParts[3];
+  return true; 
+}
 glm::vec2 parseVec2(std::string positionRaw){;
   float x, y;
   std::istringstream in(positionRaw);

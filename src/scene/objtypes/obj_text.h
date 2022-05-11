@@ -7,7 +7,7 @@
 struct GameObjectUIText {
   std::string value;
   float deltaOffset;
-  glm::vec3 tint;
+  glm::vec4 tint;
   AlignType align;
   TextWrap wrap;
   TextVirtualization virtualization;

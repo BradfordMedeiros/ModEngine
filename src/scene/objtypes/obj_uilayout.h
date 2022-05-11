@@ -36,7 +36,7 @@ struct LayoutAnchor {
 };
 struct LayoutBorder {
   float borderSize;
-  glm::vec3 borderColor;
+  glm::vec4 borderColor;
   bool hasBorder;
 };
 
@@ -53,7 +53,7 @@ struct GameObjectUILayout {
   BoundInfo boundInfo;
   glm::vec3 panelDisplayOffset;
   bool showBackpanel;
-  glm::vec3 tint;
+  glm::vec4 tint;
   LayoutMargin marginValues;
   LayoutAnchor anchor;
   TextureInformation texture;

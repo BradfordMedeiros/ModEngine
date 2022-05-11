@@ -1,12 +1,13 @@
 #include "./serialobject.h"
 
-void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes, glm::vec3* defaultValue){
+void safeVec3Set(glm::vec3* value, const char* key, GameobjAttributes& attributes, glm::vec3* defaultValue){
   if (attributes.vecAttr.vec3.find(key) != attributes.vecAttr.vec3.end()){
     *value = attributes.vecAttr.vec3.at(key);
   }else if (defaultValue != NULL){
     *value = *defaultValue;
   }
 }
+
 void safeFloatSet(float* value, const char* key, GameobjAttributes& attributes, float* defaultValue){
   if (attributes.numAttributes.find(key) != attributes.numAttributes.end()){
     *value = attributes.numAttributes.at(key);
@@ -29,13 +30,13 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
   auto zeroVec = glm::vec3(0.f, 0.f, 0.f);
   auto defaultGravity = glm::vec3(0.f, -9.81f, 0.f);
 
-  safeVecSet(&object.transformation.position, "position", attributes, &zeroVec);
-  safeVecSet(&object.transformation.scale, "scale", attributes, &identityVec);
-  safeVecSet(&object.physicsOptions.angularFactor, "physics_angle", attributes, &identityVec);
-  safeVecSet(&object.physicsOptions.linearFactor, "physics_linear", attributes, &identityVec);
-  safeVecSet(&object.physicsOptions.gravity, "physics_gravity", attributes, &defaultGravity);
-  safeVecSet(&object.physicsOptions.velocity, "physics_velocity", attributes, &zeroVec);
-  safeVecSet(&object.physicsOptions.angularVelocity, "physics_avelocity", attributes, &zeroVec);
+  safeVec3Set(&object.transformation.position, "position", attributes, &zeroVec);
+  safeVec3Set(&object.transformation.scale, "scale", attributes, &identityVec);
+  safeVec3Set(&object.physicsOptions.angularFactor, "physics_angle", attributes, &identityVec);
+  safeVec3Set(&object.physicsOptions.linearFactor, "physics_linear", attributes, &identityVec);
+  safeVec3Set(&object.physicsOptions.gravity, "physics_gravity", attributes, &defaultGravity);
+  safeVec3Set(&object.physicsOptions.velocity, "physics_velocity", attributes, &zeroVec);
+  safeVec3Set(&object.physicsOptions.angularVelocity, "physics_avelocity", attributes, &zeroVec);
 
   auto oneValue = 1.f;
   auto negOneValue = -1.f;
@@ -176,6 +177,10 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
     setAttribute(gameobj, field, fieldValue);
     gameobj.attr.vecAttr.vec3[field] = fieldValue;
   }
+  for (auto [field, fieldValue] : attr.vecAttr.vec4){
+    setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.vecAttr.vec4[field] = fieldValue;
+  }
 }
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.vecAttr.vec3["position"] = gameobj.transformation.position;
@@ -237,6 +242,15 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
     assert(valueTwo != NULL);
     return *valueOne + *valueTwo;
   }
+
+
+  auto value4One = std::get_if<glm::vec4>(&one);
+  auto value4Two = std::get_if<glm::vec4>(&one);
+  if (value4One != NULL){
+    assert(value4Two != NULL);
+    return *value4One + *value4Two;
+  }
+
   auto fValueOne = std::get_if<float>(&one);
   auto fValueTwo = std::get_if<float>(&two);
   if (fValueOne != NULL){

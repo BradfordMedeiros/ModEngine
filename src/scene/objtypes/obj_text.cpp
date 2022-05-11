@@ -99,7 +99,7 @@ void restrictWidth(GameObjectUIText& text){
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
-  auto tint = attr.vecAttr.vec3.find("tint") == attr.vecAttr.vec3.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttr.vec3.at("tint");
+  auto tint = attr.vecAttr.vec4.find("tint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("tint");
   auto align = alignTypeFromAttr(attr);
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
@@ -138,8 +138,8 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   if (attributes.numAttributes.find("spacing") != attributes.numAttributes.end()){
     textObj.deltaOffset = attributes.numAttributes.at("spacing");
   }
-  if (attributes.vecAttr.vec3.find("tint") != attributes.vecAttr.vec3.end()){
-    textObj.tint = attributes.vecAttr.vec3.at("tint");
+  if (attributes.vecAttr.vec4.find("tint") != attributes.vecAttr.vec4.end()){
+    textObj.tint = attributes.vecAttr.vec4.at("tint");
   }
   if (attributes.stringAttributes.find("align") != attributes.stringAttributes.end()){
     textObj.align = alignTypeFromAttr(attributes);

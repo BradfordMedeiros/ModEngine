@@ -304,7 +304,7 @@ int renderObject(
       glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), useBoneTransform);
       glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), hasBones);    
 
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(meshObj -> tint));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
@@ -411,7 +411,7 @@ int renderObject(
 
     for (auto navPoint : navPoints){
       std::cout << "points: " << print(navPoint.fromPoint) << ", " << print(navPoint.toPoint) << std::endl;
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
       glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(
           glm::scale(glm::translate(glm::mat4(1.0f), navPoint.fromPoint), glm::vec3(10.f, 1.f, 10.f))
@@ -420,7 +420,7 @@ int renderObject(
       drawMesh(*defaultMeshes.nav, shaderProgram);
       numTriangles = numTriangles + defaultMeshes.nav -> numTriangles;
 
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
       glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(
           glm::scale(glm::translate(glm::mat4(1.0f), navPoint.toPoint), glm::vec3(5.f, 2.f, 10.f))
@@ -440,7 +440,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     if (uiObj -> hasOnTint && uiObj -> toggleOn){
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> onTint));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> onTint));
     }
     auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
     drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId); 
@@ -466,7 +466,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(glm::vec2(0.f, 0.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
     return drawWord(shaderProgram, id, textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization);
   }
 
@@ -491,12 +491,12 @@ int renderObject(
       glm::vec3 minusScale = hasBorder ? glm::vec3(borderSize, borderSize, borderSize) : glm::vec3(0.f, 0.f, 0.f);  
       auto innerScale = layoutBackpanelModelTransform(*layoutObj, minusScale, position);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(innerScale));
-      glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
       drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);   
       if (hasBorder){
         auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f), position);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(outerScale));
-        glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
+        glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
         drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);      
       }
  

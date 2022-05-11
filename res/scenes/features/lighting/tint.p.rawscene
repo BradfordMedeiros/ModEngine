@@ -1,12 +1,16 @@
 
 box1:mesh:./res/models/box/box.obj
-box1:tint:1.0 0 0
+box1:tint:1.0 0 0 1
 box1:position:-3 0 -15
 
 box2:mesh:./res/models/box/box.obj
-box2:tint:0 1.0 0
+box2:tint:0 1.0 0 1
 box2:position:0 0 -15
 
 box3:mesh:./res/models/box/box.obj
-box3:tint:0 0 1.0
+box3:tint:0 0 1.0 1
 box3:position:3 0 -15
+
+box4:mesh:./res/models/box/box.obj
+box4:tint:5 0 0 0.2
+box4:position:6 0 -15

@@ -16,7 +16,7 @@ struct GameObjectUIButton {
   std::string onToggleOn;
   std::string onToggleOff;
   bool hasOnTint;
-  glm::vec3 onTint;
+  glm::vec4 onTint;
 };
 
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util);

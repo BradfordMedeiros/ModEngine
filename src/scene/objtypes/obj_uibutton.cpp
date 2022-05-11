@@ -8,7 +8,7 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto onToggleOn = attr.stringAttributes.find("on") != attr.stringAttributes.end() ? attr.stringAttributes.at("on") : "";
   auto onToggleOff = attr.stringAttributes.find("off") != attr.stringAttributes.end() ? attr.stringAttributes.at("off") : "";
   auto hasOnTint  = attr.vecAttr.vec3.find("ontint") != attr.vecAttr.vec3.end();
-  auto onTint = hasOnTint ? attr.vecAttr.vec3.at("ontint") : glm::vec3(1.f, 1.f, 1.f);
+  auto onTint = hasOnTint ? attr.vecAttr.vec4.at("ontint") : glm::vec4(1.f, 1.f, 1.f, 1.f);
 
   GameObjectUIButton obj { 
     .common = parseCommon(attr, util.meshes),

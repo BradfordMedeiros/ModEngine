@@ -82,7 +82,7 @@
 (menubar:position:-1 1 0
 (menubar:type:horizontal
 (menubar:backpanel:true
-(menubar:tint:0.2 0.2 0.2
+(menubar:tint:0.2 0.2 0.2 1
 (menubar:margin:0.02
 (menubar:spacing:0.02
 (menubar:align-vertical:down
@@ -97,7 +97,7 @@
 (row2:position:0 0 0
 (row2:type:horizontal
 (row2:backpanel:true
-(row2:tint:0.2 0.2 0.2
+(row2:tint:0.2 0.2 0.2 1
 (row2:margin:0.02
 (row2:spacing:0.05
 (row2:align-vertical:down

@@ -65,7 +65,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     elements = split(attr.stringAttributes.at("elements"), ',');
   }
   auto showBackpanel = (attr.stringAttributes.find("backpanel") != attr.stringAttributes.end() && attr.stringAttributes.at("backpanel") == "true");
-  auto tint = attr.vecAttr.vec3.find("tint") == attr.vecAttr.vec3.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttr.vec3.at("tint");
+  auto tint = attr.vecAttr.vec4.find("tint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("tint");
   
   bool marginSpecified = attr.numAttributes.find("margin") != attr.numAttributes.end();
   auto margin = !marginSpecified ? 0.f : attr.numAttributes.at("margin");
@@ -114,7 +114,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   bool hasBorder = attr.numAttributes.find("border-size") != attr.numAttributes.end();
   auto borderSize = hasBorder ? attr.numAttributes.at("border-size") : 0.f;
   assert(borderSize <= 1.f);
-  auto borderColor = attr.vecAttr.vec3.find("border-color") == attr.vecAttr.vec3.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttr.vec3.at("border-color");
+  auto borderColor = attr.vecAttr.vec4.find("border-color") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("border-color");
   LayoutBorder border {
     .borderSize = borderSize,
     .borderColor = borderColor,

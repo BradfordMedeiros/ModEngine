@@ -10,14 +10,14 @@
 (options:backpanel:true
 (options:margin:0.1
 (options:spacing:0.05
-(options:tint:1 0 0
+(options:tint:1 0 0 1
 (options:border-size:0.02
 (options:border-color:0 1 0
 
 (dialog:layer:basicui
 (dialog:type:vertical
 (dialog:backpanel:true
-(dialog:tint:0 0 0
+(dialog:tint:0 0 0 1
 (dialog:margin:0.02
 (dialog:spacing:0.05
 (dialog:elements:(options,)text_main,)text_2

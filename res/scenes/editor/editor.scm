@@ -77,7 +77,7 @@
   (delete-snap-pos sceneId)
   (list-set! snappingPositionToSceneId index sceneId)
 )
-(define (snap-slot-occuplied index)
+(define (snap-slot-occupied index)
   (define valueInSlot (list-ref snappingPositionToSceneId index))
   (not (equal? valueInSlot #f))
 )
@@ -159,7 +159,7 @@
   (if shouldSnap 
     (let ((snappingPair (get-snapping-pair-by-loc gameobj)))
       ;(format #t "snapping pair is: ~a\n" snappingPair)
-      (if (and snappingPair (not (snap-slot-occuplied (car snappingPair))))
+      (if (and snappingPair (not (snap-slot-occupied (car snappingPair))))
         (update-snap-pos (applySnapping gameobj snappingPair) sceneId)
         (update-snap-pos (applySnapping gameobj (get-current-snapping-pair sceneId)) sceneId)
       )

@@ -14,7 +14,7 @@ struct GameObjectMesh {
   TextureInformation texture;
   float discardAmount;
   float emissionAmount;
-  glm::vec3 tint;
+  glm::vec4 tint;
 };
 
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);

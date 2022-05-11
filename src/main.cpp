@@ -221,7 +221,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
     )
   );
   glUniform1f(glGetUniformLocation(drawingProgram, "opacity"), drawParams.opacity);
-  glUniform3fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
+  glUniform4fv(glGetUniformLocation(drawingProgram, "tint"), 1, glm::value_ptr(drawParams.tint));
 
   glBindTexture(GL_TEXTURE_2D, activeTextureId());
   glBindVertexArray(quadVAO);
@@ -432,7 +432,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     }
   }
   /////////////////////////////
-  glUniform3fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(color));
+  glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
 }
 
@@ -561,8 +561,8 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   return numTriangles;
 }
 
-void drawPermaLines(GLint shaderProgram, LineColor color, glm::vec3 tint){
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
+void drawPermaLines(GLint shaderProgram, LineColor color, glm::vec4 tint){
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
   if (permaLines.size() > 0){
     std::vector<Line> lines;
     for (auto permaline : permaLines){
@@ -581,7 +581,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   // this list is incomplete, it probably would be better to just use a separate shader maybe too
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projview"), 1, GL_FALSE, glm::value_ptr(projection * view));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
   glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);    
   glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 0);  
   glUniform1i(glGetUniformLocation(shaderProgram, "hasDiffuseTexture"), false);
@@ -595,7 +595,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   if (numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
     drawGrid3DCentered(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 0.f)));
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
   }else{
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
@@ -604,7 +604,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
         if (snapGridSize > 0){
           auto position = getGameObjectPosition(selectedObj, false);
           drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
-          glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.05, 1.f, 1.f)));     
+          glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 1.f, 1.f)));     
         }
       }
     }
@@ -612,16 +612,16 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   drawCoordinateSystem(100.f);
 
 
-  drawPermaLines(shaderProgram, RED, glm::vec3(1.f, 0.f, 0.f));
-  drawPermaLines(shaderProgram, GREEN, glm::vec3(0.f, 1.f, 0.f));
-  drawPermaLines(shaderProgram, BLUE, glm::vec3(0.f, 0.f, 1.f));
+  drawPermaLines(shaderProgram, RED, glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawPermaLines(shaderProgram, GREEN, glm::vec4(0.f, 1.f, 0.f, 1.f));
+  drawPermaLines(shaderProgram, BLUE, glm::vec4(0.f, 0.f, 1.f, 1.f));
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(1.f, 0.f, 0.f)));
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
   if (lines.size() > 0){
    drawLines(lines);
   }
 
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec3(0.f, 1.f, 0.f)));
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
   if (bluelines.size() > 0){
    drawLines(bluelines);
   }
@@ -641,7 +641,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
   setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(state.skyboxcolor));
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z, 1.f)));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
