@@ -4,7 +4,7 @@ GameobjAttributes particleFields(GameobjAttributes& attributes){
   GameobjAttributes attr {
     .stringAttributes = {},
     .numAttributes = {},
-    .vecAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
   for (auto [key, value] : attributes.stringAttributes){
     if (key.at(0) == '+' && key.size() > 1){
@@ -18,10 +18,16 @@ GameobjAttributes particleFields(GameobjAttributes& attributes){
       attr.numAttributes[newKey] = value;
     }
   }
-  for (auto [key, value] : attributes.vecAttributes){
+  for (auto [key, value] : attributes.vecAttr.vec3){
     if (key.at(0) == '+' && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      attr.vecAttributes[newKey] = value;
+      attr.vecAttr.vec3[newKey] = value;
+    }
+  }
+  for (auto [key, value] : attributes.vecAttr.vec4){
+    if (key.at(0) == '+' && key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      attr.vecAttr.vec4[newKey] = value;
     }
   }
   return attr;
@@ -34,7 +40,7 @@ struct ValueVariance {
 };
 std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   std::map<std::string, ValueVariance> values;
-  for (auto [key, _] : attributes.vecAttributes){
+  for (auto [key, _] : attributes.vecAttr.vec3){
     if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
       values[newKey] = ValueVariance {
@@ -45,7 +51,7 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
     }
   }
   
-  for (auto [key, value] : attributes.vecAttributes){
+  for (auto [key, value] : attributes.vecAttr.vec3){
     if (key.size() > 1){
       auto newKey = key.substr(1, key.size());
       if (key.at(0) == '!'){
@@ -58,6 +64,12 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
       }*/
     }
   }
+
+  if (attributes.vecAttr.vec4.size() > 0){
+    std::cout << "emitter not implemented for vec4 type" << std::endl;
+    assert(false);
+  }
+
   std::vector<EmitterDelta> deltas;
   for (auto [key, value] : values){
     deltas.push_back(EmitterDelta{

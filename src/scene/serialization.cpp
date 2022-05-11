@@ -58,11 +58,11 @@ std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
-bool addVecFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+bool addVec3Fields(GameobjAttributes& attributes, std::string attribute, std::string payload){
   auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "physics_velocity", "physics_avelocity" };
   for (auto field : fields){
     if (attribute == field){
-      attributes.vecAttributes[attribute] = parseVec(payload);
+      attributes.vecAttr.vec3[attribute] = parseVec(payload);
       return true;
     }
   }
@@ -89,7 +89,7 @@ bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::
   return false;
 }
 bool addFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  bool addedVecField = addVecFields(attributes, attribute, payload);
+  bool addedVecField = addVec3Fields(attributes, attribute, payload);
   if (addedVecField){
     return true;
   }
@@ -108,7 +108,7 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   glm::vec3 vec(0.f, 0.f, 0.f);
   bool isVec = maybeParseVec(payload, vec);
   if (isVec){
-    attributes.vecAttributes[attribute] = vec;
+    attributes.vecAttr.vec3[attribute] = vec;
     return;
   }
   float number = 0.f;

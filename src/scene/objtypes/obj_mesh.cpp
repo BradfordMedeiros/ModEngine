@@ -23,7 +23,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
     .discardAmount = attr.numAttributes.find("discard") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("discard"),
     .emissionAmount = attr.numAttributes.find("emission") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("emission"),
-    .tint = attr.vecAttributes.find("tint") == attr.vecAttributes.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttributes.at("tint"),
+    .tint = attr.vecAttr.vec3.find("tint") == attr.vecAttr.vec3.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttr.vec3.at("tint"),
   };
   return obj;
 }
@@ -49,7 +49,7 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
     _attributes.stringAttributes["mesh"] = meshObj.meshNames.at(0);
   }
   _attributes.stringAttributes["isDisabled"] = meshObj.isDisabled ? "true" : "false";
-  _attributes.vecAttributes["tint"] = meshObj.tint;
+  _attributes.vecAttr.vec3["tint"] = meshObj.tint;
 }
 
 void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -60,7 +60,7 @@ void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, O
     //std::cout << "setting texture offset" << std::endl;
     meshObj.texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
   }
-  if (attributes.vecAttributes.find("tint") != attributes.vecAttributes.end()){
-    meshObj.tint = attributes.vecAttributes.at("tint");
+  if (attributes.vecAttr.vec3.find("tint") != attributes.vecAttr.vec3.end()){
+    meshObj.tint = attributes.vecAttr.vec3.at("tint");
   }
 }

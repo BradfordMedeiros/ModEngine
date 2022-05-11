@@ -1,8 +1,8 @@
 #include "./serialobject.h"
 
 void safeVecSet(glm::vec3* value, const char* key, GameobjAttributes& attributes, glm::vec3* defaultValue){
-  if (attributes.vecAttributes.find(key) != attributes.vecAttributes.end()){
-    *value = attributes.vecAttributes.at(key);
+  if (attributes.vecAttr.vec3.find(key) != attributes.vecAttr.vec3.end()){
+    *value = attributes.vecAttr.vec3.at(key);
   }else if (defaultValue != NULL){
     *value = *defaultValue;
   }
@@ -172,14 +172,14 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
     setAttribute(gameobj, field, fieldValue);
     gameobj.attr.numAttributes[field] = fieldValue;
   }
-  for (auto [field, fieldValue] : attr.vecAttributes){
+  for (auto [field, fieldValue] : attr.vecAttr.vec3){
     setAttribute(gameobj, field, fieldValue);
-    gameobj.attr.vecAttributes[field] = fieldValue;
+    gameobj.attr.vecAttr.vec3[field] = fieldValue;
   }
 }
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
-  _attr.vecAttributes["position"] = gameobj.transformation.position;
-  _attr.vecAttributes["scale"] = gameobj.transformation.scale;
+  _attr.vecAttr.vec3["position"] = gameobj.transformation.position;
+  _attr.vecAttr.vec3["scale"] = gameobj.transformation.scale;
 
   _attr.stringAttributes["lookat"] = gameobj.lookat;
   _attr.stringAttributes["layer"] = gameobj.layer;

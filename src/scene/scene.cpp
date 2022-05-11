@@ -517,15 +517,19 @@ std::map<objid, GameobjAttributes> generateAdditionalFields(std::string meshName
     for (auto field : fieldsToCopy){
       assert(obj.stringAttributes.find(field) == obj.stringAttributes.end());
       assert(obj.numAttributes.find(field) == obj.numAttributes.end());
-      assert(obj.vecAttributes.find(field) == obj.vecAttributes.end());
+      assert(obj.vecAttr.vec3.find(field) == obj.vecAttr.vec3.end());
+      assert(obj.vecAttr.vec4.find(field) == obj.vecAttr.vec4.end());
       if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
         obj.stringAttributes[field] = attr.stringAttributes.at(field);
       }
       if (attr.numAttributes.find(field) != attr.numAttributes.end()){
         obj.numAttributes[field] = attr.numAttributes.at(field);
       }
-      if (attr.vecAttributes.find(field) != attr.vecAttributes.end()){
-        obj.vecAttributes[field] = attr.vecAttributes.at(field);
+      if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
+        obj.vecAttr.vec3[field] = attr.vecAttr.vec3.at(field);
+      }
+      if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+        obj.vecAttr.vec4[field] = attr.vecAttr.vec4.at(field);
       }
     }
   }
@@ -899,7 +903,7 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
   );
   GameObject& obj = getGameObject(world, id);
   setAllAttributes(obj, attr);
-  afterAttributesSet(world, id, obj, attr.vecAttributes.find("physics_velocity") != attr.vecAttributes.end());
+  afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end());
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
   GameObject& gameobj = getGameObject(world, id);
@@ -1045,12 +1049,12 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     timeElapsed,
     [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-      attributes.vecAttributes["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
+      attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
       if (particleOpts.velocity.has_value()){
-        attributes.vecAttributes["physics_velocity"] = particleOpts.velocity.value();
+        attributes.vecAttr.vec3["physics_velocity"] = particleOpts.velocity.value();
       }
       if (particleOpts.angularVelocity.has_value()){
-        attributes.vecAttributes["physics_avelocity"] = particleOpts.angularVelocity.value();
+        attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
       }
       objid objectAdded = addObjectToScene(
         world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface

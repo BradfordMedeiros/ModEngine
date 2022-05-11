@@ -68,6 +68,14 @@ SCM vec3ToScmList(glm::vec3 vec){
   scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(vec.z));
   return list;
 }
+SCM vec4ToScmList(glm::vec4 vec){
+  SCM list = scm_make_list(scm_from_unsigned_integer(4), scm_from_unsigned_integer(0));
+  scm_list_set_x (list, scm_from_unsigned_integer(0), scm_from_double(vec.x));
+  scm_list_set_x (list, scm_from_unsigned_integer(1), scm_from_double(vec.y));
+  scm_list_set_x (list, scm_from_unsigned_integer(2), scm_from_double(vec.z));
+  scm_list_set_x (list, scm_from_unsigned_integer(3), scm_from_double(vec.w));
+  return list;
+}
 
 bool symbolDefinedInModule(const char* symbol, SCM module){
   return scm_to_bool(scm_defined_p(scm_string_to_symbol(scm_from_locale_string(symbol)), module));
@@ -91,7 +99,8 @@ void maybeCallFuncString(const char* function, const char* payload){
 GameobjAttributes scmToAttributes(SCM scmAttributes){
   std::map<std::string, double> numAttributes;
   std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, glm::vec3> vecAttributes;
+  std::map<std::string, glm::vec3> vec3Attributes;
+  std::map<std::string, glm::vec4> vec4Attributes;
 
   auto numElements = toUnsignedInt(scm_length(scmAttributes));
   for (int i = 0; i < numElements; i++){
@@ -101,7 +110,7 @@ GameobjAttributes scmToAttributes(SCM scmAttributes){
     auto attrName = scm_to_locale_string(scm_list_ref(propertyPair, scm_from_unsigned_integer(0)));
     assert(
       stringAttributes.find(attrName) == stringAttributes.end() &&
-      vecAttributes.find(attrName) == vecAttributes.end()
+      vec3Attributes.find(attrName) == vec3Attributes.end()
     );
 
     auto attrValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(1));
@@ -116,21 +125,34 @@ GameobjAttributes scmToAttributes(SCM scmAttributes){
     }else if (isString){
       stringAttributes[attrName] = scm_to_locale_string(attrValue);
     }else{
-      auto vec3ListLength = toUnsignedInt(scm_length(attrValue));
-      assert(vec3ListLength == 3);
+      auto vecListLength = toUnsignedInt(scm_length(attrValue));
+      assert(vecListLength == 3 || vecListLength == 4);
 
-      double values[] = {0, 0, 0};
-      for (int j = 0; j < vec3ListLength; j++){
-        auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
-        values[j] = scm_to_double(vecValue);
+      if (vecListLength == 3){
+        double values[] = {0, 0, 0};
+        for (int j = 0; j < vecListLength; j++){
+          auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
+          values[j] = scm_to_double(vecValue);
+        }
+        vec3Attributes[attrName] = glm::vec3(values[0], values[1], values[2]);
+      }else{
+        double values[] = {0, 0, 0, 0};
+        for (int j = 0; j < vecListLength; j++){
+          auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
+          values[j] = scm_to_double(vecValue);
+        }
+        vec4Attributes[attrName] = glm::vec4(values[0], values[1], values[2], values[3]);
       }
-      vecAttributes[attrName] = glm::vec3(values[0], values[1], values[2]);
+
     }
   }
   GameobjAttributes attrs { 
     .stringAttributes = stringAttributes,
     .numAttributes = numAttributes,
-    .vecAttributes = vecAttributes,
+    .vecAttr = vectorAttributes {
+      .vec3 = vec3Attributes,
+      .vec4 = vec4Attributes
+    },
   };
   return attrs;
 }
@@ -152,6 +174,10 @@ SCM fromAttributeValue(AttributeValue& value){
   auto vecValue = std::get_if<glm::vec3>(&value);
   if (vecValue != NULL){
     return vec3ToScmList(*vecValue);
+  }
+  auto vec4Value = std::get_if<glm::vec4>(&value);
+  if (vec4Value != NULL){
+    return vec4ToScmList(*vec4Value);
   }
   auto floatValue = std::get_if<float>(&value);
   if (floatValue != NULL){

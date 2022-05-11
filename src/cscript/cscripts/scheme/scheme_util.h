@@ -18,6 +18,7 @@ SCM listToSCM(std::vector<objid> idList);
 SCM listToSCM(std::vector<std::string> stringList);
 SCM listToSCM(std::vector<std::vector<std::string>> stringList);
 SCM vec3ToScmList(glm::vec3 vec);
+SCM vec4ToScmList(glm::vec4 vec);
 bool symbolDefinedInModule(const char* symbol, SCM module);
 bool symbolDefined(const char* symbol);
 void maybeCallFunc(const char* function);

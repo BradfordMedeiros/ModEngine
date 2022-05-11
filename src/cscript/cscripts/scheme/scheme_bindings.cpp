@@ -122,12 +122,12 @@ objid (*_makeObjectAttr)(
   std::string name, 
   std::map<std::string, std::string> stringAttributes,
   std::map<std::string, double> numAttributes,
-  std::map<std::string, glm::vec3> vecAttributes
+  vectorAttributes vecAttr
 );
 SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
   auto sceneId = _listSceneId(currentModuleId());
   auto attrs = scmToAttributes(scmAttributes);
-  objid id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attrs.stringAttributes, attrs.numAttributes, attrs.vecAttributes);
+  objid id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attrs.stringAttributes, attrs.numAttributes, attrs.vecAttr);
   return scm_from_int32(id);
 }
 
@@ -218,7 +218,7 @@ SCM scmGetGameObjectById(SCM scmId){
 GameobjAttributes (*_getGameObjectAttr)(int32_t id);
 SCM scmGetGameObjectAttr(SCM gameobj){
   auto attr = _getGameObjectAttr(getGameobjId(gameobj));
-  int totalSize = attr.stringAttributes.size() + attr.numAttributes.size() + attr.vecAttributes.size();
+  int totalSize = attr.stringAttributes.size() + attr.numAttributes.size() + attr.vecAttr.vec3.size() + attr.vecAttr.vec4.size();
   SCM list = scm_make_list(scm_from_unsigned_integer(totalSize), scm_from_unsigned_integer(0));
 
   int index = 0;
@@ -236,10 +236,17 @@ SCM scmGetGameObjectAttr(SCM gameobj){
     scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
     index++;   
   }
-  for (auto &[key, value] : attr.vecAttributes){
+  for (auto &[key, value] : attr.vecAttr.vec3){
     SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
     scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
     scm_list_set_x(attributePair, scm_from_unsigned_integer(1), vec3ToScmList(value));
+    scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
+    index++;   
+  }
+  for (auto &[key, value] : attr.vecAttr.vec4){
+    SCM attributePair = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(0), scm_from_locale_string(key.c_str()));
+    scm_list_set_x(attributePair, scm_from_unsigned_integer(1), vec4ToScmList(value));
     scm_list_set_x(list, scm_from_unsigned_integer(index), attributePair);
     index++;   
   }
@@ -786,6 +793,11 @@ void onAttrMessage(std::string message, AttributeValue value){
       scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), vec3ToScmList(*vecValue)); 
       return;
     }
+    auto vec4Value = std::get_if<glm::vec4>(&value);
+    if (vec4Value != NULL){
+      scm_call_2(func_symbol, scm_from_locale_string(message.c_str()), vec4ToScmList(*vec4Value)); 
+      return;
+    }
     std::cout << "invalid type" << std::endl;
     assert(false);
   }  
@@ -1001,7 +1013,7 @@ void createStaticSchemeBindings(
   void (*stopRecording)(objid id, std::string recordingPath),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
-  objid (*makeObjectAttr)(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, std::map<std::string, glm::vec3> vecAttributes),
+  objid (*makeObjectAttr)(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, vectorAttributes vecAttr),
   void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),

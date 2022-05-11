@@ -74,7 +74,7 @@ typedef int32_t objid;
 objid getUniqueObjId();
 std::string getUniqueObjectName();
 
-typedef std::variant<glm::vec3, std::string, float> AttributeValue;
+typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
 AttributeValue parseAttributeValue(std::string payload);
 
 struct StringString {
@@ -116,11 +116,14 @@ struct LayerInfo {
 };
 int numUniqueDepthLayers(std::vector<LayerInfo> layers);
 
+struct vectorAttributes {
+  std::map<std::string, glm::vec3> vec3;
+  std::map<std::string, glm::vec4> vec4;
+};
 struct GameobjAttributes {
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, double> numAttributes;
-  std::map<std::string, glm::vec3> vecAttributes;
-  
+  vectorAttributes vecAttr;
   // todo get rid of these fields
   std::vector<std::string> children;
 };

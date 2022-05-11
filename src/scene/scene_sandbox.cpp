@@ -104,10 +104,14 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
       {"fragshader", gameobj.fragshader},
       {"layer", gameobj.layer},
     },
-    .vecAttributes = {
-      {"position", transform.position },
-      {"scale",    transform.scale    },
+    .vecAttr = {
+      .vec3 = {
+        {"position", transform.position },
+        {"scale",    transform.scale    },
+      },
+      .vec4 = {},
     },
+   
   };
   return attributes;
 }
