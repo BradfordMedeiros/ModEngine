@@ -92,7 +92,7 @@
 (define (generateGetDataForAttr attributeData)
   (lambda(attrField) 
     (let ((fieldPair (assoc attrField attributeData)))
-      (if fieldPair (cadr fieldPair) #f) 
+      (if fieldPair (cadr fieldPair) "< no data source >") 
     )
   )
 )
@@ -115,3 +115,12 @@
 )
 
 (populateData)
+
+;;;;;;;;;;;;;;;
+
+(define (onKeyChar key)
+  ; ".
+  (if (equal? key 46)
+    (format #t "Submit bindings placeholder\n")
+  ) 
+)
