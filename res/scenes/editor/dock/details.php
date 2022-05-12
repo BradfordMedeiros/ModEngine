@@ -16,7 +16,7 @@
 (test_panel:align-items-horizontal:left   # left/center/right
 (test_panel:align-items-vertical:up     # up/center/down
 (test_panel:border-size:0.004
-(test_panel:border-color:0.3 0.3 0.3
+(test_panel:border-color:0.3 0.3 0.3 1
 (test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
 
 )window_x:layer:basicui
@@ -73,6 +73,18 @@
 
   $target_type = $argv[1];
 
+  # data sources ideas (not implemented)
+  /*
+      # data bindings should be based upon per pain writing a script to return key:value map
+      # in that script i can then eg write  a sql or gameobj-attr functions or whatever
+
+  */
+  # types:
+  # label: simple read-only display of text data. 
+  # key: left side text display
+  # value: right side text display
+  # binding: 
+
   $mappingPerType = [
     "object_details" => [
       "title" => "Object Details",
@@ -91,10 +103,9 @@
           ],
         ],
         [
-          "type" => "label",
+          "type" => "textinput",
           "data" => [
-            "key" => "scale", 
-            "value" => "- 1 1 1"
+            "key" => "light-type", 
           ],
         ],
       ]
@@ -150,14 +161,22 @@
   $keyvaluePairs = $detailType["items"];
   for ($i = 0; $i < count($keyvaluePairs); $i++){
     $type = $keyvaluePairs[$i]["type"];
-    if ($type == "label"){
-      $keyname = ")key_" . $i;
+    $keyname = ")key_" . $i;
+    $data = $keyvaluePairs[$i]["data"];
 
-      $data = $keyvaluePairs[$i]["data"];
+    if ($type == "label"){
       createElement($keyname, $default_key, [ "value" => $data["key"] ]);
 
       $valuename = ")value_" . $i;
       createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
+
+      $keyvalueLayout = "(keyval_" . $i;
+      createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
+    }else if ($type == "textinput"){
+      createElement($keyname, $default_key, [ "value" => $data["key"] ]);
+
+      $valuename = ")value_" . $i;
+      createElement($valuename, $default_value, [ "value" =>  "placeholder value" ]);
 
       $keyvalueLayout = "(keyval_" . $i;
       createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);

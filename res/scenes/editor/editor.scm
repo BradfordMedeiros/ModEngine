@@ -375,10 +375,10 @@
 )
 
 
-(define (onKeyChar key)
-  (format #t "on key char: ~a\n" key)
-  ; ".
-  (if (equal? key 46)
-    (format #t "snapping positions: ~a\n" snappingPositionToSceneId)
-  ) 
-)
+;(define (onKeyChar key)
+;  (format #t "on key char: ~a\n" key)
+;  ; ".
+;  (if (equal? key 46)
+;    (format #t "snapping positions: ~a\n" snappingPositionToSceneId)
+;  ) 
+;)
