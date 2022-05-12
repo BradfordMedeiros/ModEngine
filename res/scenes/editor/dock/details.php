@@ -92,7 +92,9 @@
         [ "type" => "label", 
           "data" => [
             "key" => "Current Object", 
-            "value" => "platform"
+            "value" => [
+              "binding" => "object_name",
+            ],
           ]
         ],
         [
@@ -106,6 +108,7 @@
           "type" => "textinput",
           "data" => [
             "key" => "light-type", 
+            "value" => "placeholder value"
           ],
         ],
       ]
@@ -140,10 +143,9 @@
     "scale" => "0.004 0.01 0.004",
   ];
   $extra_key_attrs = [
-   // "tint" => "2 2 2 1",
   ];
   $extra_value_attrs = [
-    //"tint" => "1 1 1 1",
+    "details-editabletext" => "true"
   ];
   $default_key = array_merge($default_text_style, $extra_key_attrs);
   $default_value = array_merge($default_text_style, $extra_value_attrs);
@@ -168,7 +170,11 @@
       createElement($keyname, $default_key, [ "value" => $data["key"] ]);
 
       $valuename = ")value_" . $i;
-      createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
+      if (is_string($data["value"])){
+        createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
+      }else{
+        createElement($valuename, $default_value, [ "value" =>  "", "details-binding" => $data["value"]["binding"]] );
+      }
 
       $keyvalueLayout = "(keyval_" . $i;
       createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
@@ -176,7 +182,11 @@
       createElement($keyname, $default_key, [ "value" => $data["key"] ]);
 
       $valuename = ")value_" . $i;
-      createElement($valuename, $default_value, [ "value" =>  "placeholder value" ]);
+      if (is_string($data["value"])){
+        createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
+      }else{
+        createElement($valuename, $default_value, [ "value" =>  "", "details-binding" => $data["value"]["binding"]] );
+      }
 
       $keyvalueLayout = "(keyval_" . $i;
       createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
