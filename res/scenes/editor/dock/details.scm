@@ -1,4 +1,5 @@
 (define mainSceneId (list-sceneid (gameobj-id mainobj)))
+(define mainpanelId (gameobj-id (lsobj-name "(test_panel")))
 
 (define (isManagedText gameobj)
   (and 
@@ -14,6 +15,7 @@
       (list "value" text)
     )
   )
+  (enforce-layout mainpanelId)
 )
 
 (define (lessIndex currentText) (max 0 (- (string-length currentText) 1)))
@@ -75,4 +77,41 @@
   (if (equal? action 1)
     (processFocusedElement key)
   )
+
+  (format #t "elements with attr: marked ~a\n" (lsobj-attr "marked"))
+  (format #t "element names: ~a\n" (map gameobj-name (lsobj-attr "marked")))
 )
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (create-attr-pair gameobj) (list gameobj (gameobj-attr gameobj)))
+(define (get-binded-elements) (map create-attr-pair (lsobj-attr "details-binding")))
+(define (extract-binding-element attr-pair) (list (car attr-pair) (cadr (assoc "details-binding" (cadr attr-pair)))))
+(define (all-obj-to-bindings) (map extract-binding-element (get-binded-elements)))
+(define (generateGetDataForAttr attributeData)
+  (lambda(attrField) 
+    (let ((fieldPair (assoc attrField attributeData)))
+      (if fieldPair (cadr fieldPair) #f) 
+    )
+  )
+)
+(define (update-binding attrpair getDataForAttr) 
+  (gameobj-setattr! (car attrpair) 
+    (list (list "value" (getDataForAttr (cadr attrpair))))
+  )
+  attrpair
+)
+(define (populateData)
+  (define dataValues   
+    (list
+      (list "object_name" "test object")
+      (list "lighttype" "bright")
+      (list "position" "- 0 0 0")
+    )
+  )
+  (define getDataForAttr (generateGetDataForAttr dataValues))
+  (map (lambda(attrpair) (update-binding attrpair getDataForAttr)) (all-obj-to-bindings))
+)
+
+(populateData)
