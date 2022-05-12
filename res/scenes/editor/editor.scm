@@ -1,5 +1,8 @@
 (define mainSceneId (list-sceneid (gameobj-id mainobj)))
 
+(enforce-layout (gameobj-id (lsobj-name "(row2")))
+(enforce-layout (gameobj-id (lsobj-name "(menubar")))
+
 (define uilist 
   (list
     (list "file" (reverse (list "load" "quit")))
