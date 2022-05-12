@@ -872,6 +872,22 @@ GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameob
 GameobjAttributes objectAttributes(World& world, objid id){
   return objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
 }
+bool objectHasAttribute(World& world, objid id, std::string type){
+  auto attrs = objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
+  if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
+    return true;
+  }
+  if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
+    return true;
+  }
+  if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
+    return true;
+  }  
+  if (attrs.vecAttr.vec4.find(type) != attrs.vecAttr.vec4.end()){
+    return true;
+  }  
+  return false;
+}
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet){
   physicsLocalTransformSet(world, id, gameobj.transformation);

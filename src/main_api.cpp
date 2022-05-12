@@ -149,7 +149,14 @@ std::vector<int32_t> getObjectsByType(std::string type){
   return getGameObjectsIndex(world.objectMapping);
 }
 std::vector<int32_t> getObjectsByAttr(std::string type, int32_t sceneId){
-  return { 4, 29, 393 };
+  auto objIds = listObjInScene(world.sandbox, sceneId);
+  std::vector<objid> idsWithAttrs;
+  for (auto id : objIds){
+    if (objectHasAttribute(world, id, type)){
+      idsWithAttrs.push_back(id);
+    }
+  }
+  return idsWithAttrs;
 }
 
 std::string getGameObjectName(int32_t index){
