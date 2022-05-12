@@ -77,16 +77,45 @@
     "object_details" => [
       "title" => "Object Details",
       "items" => [
-        ["label" => "Current Object", "value" => "platform"],
-        ["label" => "position", "value" => "- 0 0 0"],
-        ["label" => "scale", "value" => "- 1 1 1"],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Current Object", 
+            "value" => "platform"
+          ]
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "position", 
+            "value" => "- 0 0 0"
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "scale", 
+            "value" => "- 1 1 1"
+          ],
+        ],
       ]
     ],
     "world_state" => [
       "title" => "World State",
       "items" => [
-        ["label" => "bloom", "value" => "enabled"],
-        ["label" => "color", "value" => "- 1 1 1"],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "bloom", 
+            "value" => "enabled"
+          ],
+        ],
+        [
+          "type" => "label", 
+          "data" => [
+            "key" => "color", 
+            "value" => "- 1 1 1"
+          ]
+        ]
       ],
     ],
   ];
@@ -120,14 +149,22 @@
 
   $keyvaluePairs = $detailType["items"];
   for ($i = 0; $i < count($keyvaluePairs); $i++){
-    $keyname = ")key_" . $i;
-    createElement($keyname, $default_key, [ "value" => $keyvaluePairs[$i]["label"] ]);
+    $type = $keyvaluePairs[$i]["type"];
+    if ($type == "label"){
+      $keyname = ")key_" . $i;
 
-    $valuename = ")value_" . $i;
-    createElement($valuename, $default_value, [ "value" => $keyvaluePairs[$i]["value"] ]);
+      $data = $keyvaluePairs[$i]["data"];
+      createElement($keyname, $default_key, [ "value" => $data["key"] ]);
 
-    $keyvalueLayout = "(keyval_" . $i;
-    createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
+      $valuename = ")value_" . $i;
+      createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
+
+      $keyvalueLayout = "(keyval_" . $i;
+      createElement($keyvalueLayout, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
+    }else{
+      print("Key value pairs: invalid type - " . $type . "\n");
+      exit(1);
+    }
 
     echo ("\n");
 
