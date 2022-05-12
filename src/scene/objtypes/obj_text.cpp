@@ -120,7 +120,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
 void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes){
   attributes.stringAttributes["value"] = textObj.value; 
   attributes.stringAttributes["spacing"] = std::to_string(textObj.deltaOffset);
-  attributes.vecAttr.vec3["tint"] = textObj.tint;
+  attributes.vecAttr.vec4["tint"] = textObj.tint;
   attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
   attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
   attributes.stringAttributes["wrapamount"] = std::to_string(textObj.wrap.wrapamount);
