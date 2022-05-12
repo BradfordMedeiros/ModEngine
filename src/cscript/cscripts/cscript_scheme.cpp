@@ -52,6 +52,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.rotateCamera,
     api.removeObjectById,
     api.getObjectsByType,
+    api.getObjectsByAttr,
     api.setActiveCamera,
     api.drawText,
     api.drawLine,

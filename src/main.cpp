@@ -1182,6 +1182,7 @@ int main(int argc, char* argv[]){
     .rotateCamera = rotateCamera,
     .removeObjectById = removeObjectById,
     .getObjectsByType = getObjectsByType,
+    .getObjectsByAttr = getObjectsByAttr,
     .setActiveCamera = setActiveCamera,
     .drawText = drawText,
     .drawLine = addLineNextCycle,

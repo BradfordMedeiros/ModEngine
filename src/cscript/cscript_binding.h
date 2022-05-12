@@ -23,6 +23,7 @@ struct CustomApiBindings {
   void (*rotateCamera)(float xoffset, float yoffset);
   void (*removeObjectById)(int32_t id);
   std::vector<int32_t> (*getObjectsByType)(std::string);
+  std::vector<int32_t> (*getObjectsByAttr)(std::string, int32_t);
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime);
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize);
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner);

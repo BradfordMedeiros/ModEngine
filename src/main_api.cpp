@@ -148,6 +148,10 @@ std::vector<int32_t> getObjectsByType(std::string type){
   }
   return getGameObjectsIndex(world.objectMapping);
 }
+std::vector<int32_t> getObjectsByAttr(std::string type, int32_t sceneId){
+  return { 4, 29, 393 };
+}
+
 std::string getGameObjectName(int32_t index){
   return getGameObject(world, index).name;
 }

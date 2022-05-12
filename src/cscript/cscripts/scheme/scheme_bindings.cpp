@@ -183,18 +183,26 @@ SCM createGameObject(int32_t id){
   return scm_make_foreign_object_1(gameObjectType, obj); 
 }
 
-std::vector<int32_t> (*getObjByType)(std::string);
-SCM lsObjectsByType(SCM value){
-  std::string objectType = scm_to_locale_string(value);
-  std::vector indexes = getObjByType(objectType);
+SCM indexListToSCM(std::vector<int32_t> indexes){
   SCM list = scm_make_list(scm_from_unsigned_integer(indexes.size()), scm_from_unsigned_integer(0));
-  
   for (unsigned int i = 0; i < indexes.size(); i++){
     auto obj = (gameObject *)scm_gc_malloc(sizeof(gameObject), "gameobj");
     obj->id = indexes[i];
     scm_list_set_x (list, scm_from_unsigned_integer(i),  scm_make_foreign_object_1(gameObjectType, obj));
   }
   return list;
+}
+
+std::vector<int32_t> (*getObjByType)(std::string);
+SCM lsObjectsByType(SCM value){
+  std::string objectType = scm_to_locale_string(value);
+  return indexListToSCM(getObjByType(objectType));
+}
+
+std::vector<int32_t> (*_getObjectsByAttr)(std::string, int32_t);
+SCM scm_getObjectsByAttr(SCM value){
+  auto sceneId = currentSceneId();
+  return indexListToSCM(_getObjectsByAttr(scm_to_locale_string(value), sceneId));
 }
 
 int32_t getGameobjId(SCM value){
@@ -853,6 +861,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
   scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
+  scm_c_define_gsubr("lsobj-attr", 1, 0, 0, (void *)scm_getObjectsByAttr);
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
   scm_c_define_gsubr("draw-text", 4, 0, 0, (void*)scmDrawText);
@@ -975,6 +984,7 @@ void createStaticSchemeBindings(
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(int32_t id),
   std::vector<int32_t> (*getObjectsByType)(std::string),
+  std::vector<int32_t> (*getObjectsByAttr)(std::string, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner),
@@ -1054,6 +1064,7 @@ void createStaticSchemeBindings(
   rotateCam = rotateCamera;
   removeObjById = removeObjectById;
   getObjByType = getObjectsByType;
+  _getObjectsByAttr = getObjectsByAttr;
   _setActiveCamera = setActiveCamera;
   
   _drawText = drawText;
