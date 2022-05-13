@@ -105,13 +105,6 @@
             ],
           ]
         ],
-        /*[
-          "type" => "label",
-          "data" => [
-            "key" => "position", 
-            "value" => "- 0 0 0"
-          ],
-        ],*/
         [
           "type" => "options",
           "data" => [
@@ -121,6 +114,12 @@
               "directional", "spotlight", "point",
             ],
             "selected" => 0,
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable physics", 
           ],
         ],
       ]
@@ -156,6 +155,7 @@
   $typeToTemplate = [
     "label" => "./dock/details_textfield.php",
     "options" => "./dock/details_options.php",
+    "checkbox" => "./dock/details_checkbox.php",
   ];
 
 
