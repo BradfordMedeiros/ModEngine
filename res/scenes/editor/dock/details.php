@@ -69,20 +69,29 @@
     }
   }
 
+  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id){
+    $default_text_style = [
+      "layer" => "basicui", 
+      "scale" => "0.004 0.01 0.004",
+    ];
+    $extra_key_attrs = [];
+    $extra_value_attrs = [ "details-editabletext" => "true" ];
+    $default_key = array_merge($default_text_style, $extra_key_attrs);
+    $default_value = array_merge($default_text_style, $extra_value_attrs);
+    $default_keyvalueLayout = [
+      "layer" => "basicui",
+      "type" => "horizontal",
+      "backpanel" => "true",
+      "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
+      "margin" => "0.02",
+      "spacing" => "0.02",
+      "minwidth" => "0.36",
+    ];
+
+    include $file;
+  }
+
   $target_type = $argv[1];
-
-  # data sources ideas (not implemented)
-  /*
-      # data bindings should be based upon per pain writing a script to return key:value map
-      # in that script i can then eg write  a sql or gameobj-attr functions or whatever
-
-  */
-  # types:
-  # label: simple read-only display of text data. 
-  # key: left side text display
-  # value: right side text display
-  # binding: 
-
 
   $mappingPerType = [
     "object_details" => [
@@ -96,13 +105,13 @@
             ],
           ]
         ],
-        [
+        /*[
           "type" => "label",
           "data" => [
             "key" => "position", 
             "value" => "- 0 0 0"
           ],
-        ],
+        ],*/
         [
           "type" => "options",
           "data" => [
@@ -119,7 +128,7 @@
     "world_state" => [
       "title" => "World State",
       "items" => [
-        [
+      /*  [
           "type" => "label",
           "data" => [
             "key" => "bloom", 
@@ -132,7 +141,7 @@
             "key" => "color", 
             "value" => "- 1 1 1"
           ]
-        ]
+        ]*/
       ],
     ],
   ];
@@ -141,99 +150,29 @@
   echo (")title:value:" . $detailType["title"] . "\n");
   
   $test_panel_elements = [")title"];
-  $default_text_style = [
-    "layer" => "basicui", 
-    "scale" => "0.004 0.01 0.004",
-  ];
-  $extra_key_attrs = [
-  ];
-  $extra_value_attrs = [
-    "details-editabletext" => "true"
-  ];
-  $default_key = array_merge($default_text_style, $extra_key_attrs);
-  $default_value = array_merge($default_text_style, $extra_value_attrs);
-
-  $default_keyvalueLayout = [
-    "layer" => "basicui",
-    "type" => "horizontal",
-    "backpanel" => "true",
-    "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
-    "margin" => "0.02",
-    "spacing" => "0.02",
-    "minwidth" => "0.36",
-  ];
 
   $keyvaluePairs = $detailType["items"];
+
+  $typeToTemplate = [
+    "label" => "./dock/details_textfield.php",
+    "options" => "./dock/details_options.php",
+  ];
+
+
   for ($i = 0; $i < count($keyvaluePairs); $i++){
     $type = $keyvaluePairs[$i]["type"];
     $data = $keyvaluePairs[$i]["data"];
-
     $unique_control_id = "key_" . $i;
-    if ($type == "label"){
-      $keyname = ")key_" . $i;
-      createElement($keyname, $default_key, [ "value" => $data["key"] ]);
 
-      $valuename = ")value_" . $i;
-      if (is_string($data["value"])){
-        createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
-      }else{
-        createElement($valuename, $default_value, [ "value" =>  "", "details-binding" => $data["value"]["binding"]] );
-      }
-
-      $rootElementName = "(" . $unique_control_id;
-      createElement($rootElementName, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
-      array_push($test_panel_elements, $rootElementName);
-    }else if ($type == "options"){
-      $titleName = ")" . $unique_control_id . "_label";
-      createElement($titleName, $default_text_style, [ "value" => "light-type" ]);
-
-      $options = $data["options"];
-      $optionElements = [];
-      for ($optionIndex = 0; $optionIndex < count($options); $optionIndex++){
-        $optionName = $options[$optionIndex];
-        $isSelected = $data["selected"] == $optionIndex;
-        $optionElementName = ")" . $unique_control_id . "_" . "option_" . $optionIndex;
-        $attrs = [ "value" => $optionName ];
-        if ($isSelected){
-          $attrs["tint"] = "0 0 4 1";
-        }
-        createElement($optionElementName, $default_key, $attrs);
-        array_push($optionElements, $optionElementName);
-      }
-
-      $optionsLayout = "(" . $unique_control_id . "_options";
-      createElement($optionsLayout, $default_keyvalueLayout, [ "elements" => implode(",", $optionElements) ]);
-      $rootElementName = "(" . $unique_control_id;
-      createElement($rootElementName, $default_keyvalueLayout, [ 
-        "tint" => "0 0 1 0.8", 
-        "type" => "vertical", 
-        "elements" => $optionsLayout . "," . $titleName  
-      ]);
-      array_push($test_panel_elements, $rootElementName);
-    }else{
-      print("Key value pairs: invalid type - " . $type . "\n");
-      exit(1);
-    }
+    $rootElementName = "(" . $unique_control_id;
+    $templateFile = $typeToTemplate[$type];
+    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id);
+    array_push($test_panel_elements, $rootElementName);
 
     echo ("\n");
-
-
   }
 
   $test_panel_elements =  array_reverse($test_panel_elements);
-
   echo ("(test_panel:elements:" . implode(",", $test_panel_elements) . "\n");
-
-/*
-
-
-)key_2_option1:layer:basicui
-)key_2_option1:scale:0.004 0.01 0.004
-)key_2_option1:value:point
-
-)key_2_option2:layer:basicui
-)key_2_option2:scale:0.004 0.01 0.004
-)key_2_option2:value:directional
-*/
 ?>
 
