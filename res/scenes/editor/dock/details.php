@@ -83,6 +83,7 @@
   # value: right side text display
   # binding: 
 
+
   $mappingPerType = [
     "object_details" => [
       "title" => "Object Details",
@@ -110,6 +111,7 @@
             "options" => [
               "directional", "spotlight", "point",
             ],
+            "selected" => 0,
           ],
         ],
       ]
@@ -189,8 +191,13 @@
       $optionElements = [];
       for ($optionIndex = 0; $optionIndex < count($options); $optionIndex++){
         $optionName = $options[$optionIndex];
+        $isSelected = $data["selected"] == $optionIndex;
         $optionElementName = ")" . $unique_control_id . "_" . "option_" . $optionIndex;
-        createElement($optionElementName, $default_key, [ "value" => $optionName ]);
+        $attrs = [ "value" => $optionName ];
+        if ($isSelected){
+          $attrs["tint"] = "0 0 4 1";
+        }
+        createElement($optionElementName, $default_key, $attrs);
         array_push($optionElements, $optionElementName);
       }
 
