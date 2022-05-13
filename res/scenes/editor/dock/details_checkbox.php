@@ -1,17 +1,38 @@
-)title:value:Object Details
-)key_0:layer:basicui
-)key_0:scale:0.004 0.01 0.004
-)key_0:value:Current Object
-)value_0:layer:basicui
-)value_0:scale:0.004 0.01 0.004
-)value_0:details-editabletext:true
-)value_0:value:
-)value_0:details-binding:object_name
-(key_0:layer:basicui
-(key_0:type:horizontal
-(key_0:backpanel:true
-(key_0:tint:0.05 0.05 0.05 1
-(key_0:margin:0.02
-(key_0:spacing:0.02
-(key_0:minwidth:0.36
-(key_0:elements:)key_0,)value_0
+<?php
+  /*
+  eg
+    )key_2_checkbox_label:layer:basicui
+    )key_2_checkbox_label:scale:0.004 0.01 0.004
+    )key_2_checkbox_label:value:checkbox name
+    *key_2_checkbox_check:layer:basicui
+    *key_2_checkbox_check:scale:0.02 -0.05 0.02
+    *key_2_checkbox_check:cantoggle:true
+    *key_2_checkbox_check:ontexture:./res/scenes/editor/dock/checked.png
+    *key_2_checkbox_check:offtexture:./res/scenes/editor/dock/unchecked.png
+    (key_2:layer:basicui
+    (key_2:type:horizontalfas
+    (key_2:backpanel:true
+    (key_2:tint:0.05 0.05 0.05 1
+    (key_2:margin:0.02
+    (key_2:spacing:0.02
+    (key_2:minwidth:0.36
+    (key_2:elements:)key_2_checkbox_label,*key_2_checkbox_check
+  */
+
+  $labelName = ")" . $unique_control_id . "_" . "checkbox_label";
+  createElement($labelName, $default_key, [ 
+    "value" => $data["key"],
+    "tint" => "5 5 5 1",
+  ]);
+
+  $checkboxName = "*" . $unique_control_id . "_" . "checkbox_check";
+  createElement($checkboxName, $default_text_style, [ 
+      "cantoggle" => "true",
+      "scale" => "0.02 -0.05 0.02",  # negative since some bug with button textures, should fix
+      "ontexture" => "./res/scenes/editor/dock/checked.png",
+      "offtexture" => "./res/scenes/editor/dock/unchecked.png",
+      "ontint" => "5 5 5 1",
+    ]
+  );
+  createElement($rootElementName, $default_keyvalueLayout, [ "spacing" => "0.25", "tint" => "0 0 0 0.1", "elements" =>  $labelName . "," . $checkboxName ]);
+?>
