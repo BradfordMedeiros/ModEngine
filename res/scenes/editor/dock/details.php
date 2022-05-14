@@ -94,8 +94,17 @@
   $target_type = $argv[1];
 
 
-  $vec3Type = [ "float", "float", "float" ];
-  $vec4Type = [ "float", "float", "float", "float" ];
+  $vec3Type = [
+    [ "type" => "float", "name" => "x", "value" => ".-3.4" ], 
+    [ "type" => "float", "name" => "y",  "value" => "..345" ], 
+    [ "type" => "slider", "name" => "z",  "value" => ".4.34" ]
+  ];
+  $vec4Type = [
+    [ "type" => "float", "name" => "x", "value" => ".-3.4" ], 
+    [ "type" => "float", "name" => "y",  "value" => "..345" ], 
+    [ "type" => "float", "name" => "z",  "value" => ".4.34" ],
+    [ "type" => "float", "name" => "w",  "value" => ".4.34" ]
+  ];
 
   $mappingPerType = [
     "object_details" => [
@@ -120,32 +129,37 @@
             "selected" => 1,
           ],
         ],
-        /*[
-          "type" => "numeric",
-          "data" => [
-            "key" => "position", 
-            "valueType" => $vec3Type,
-          ],
-        ],*/
         [
           "type" => "checkbox",
           "data" => [
             "key" => "enable physics", 
           ],
         ],
-        /*[
-          "type" => "list",
+        [
+          "type" => "numeric",
           "data" => [
-            "key" => "Create Objects",
-            "values" => [
-              "light", "camera", "heightmap",
-            ],
+            "key" => "scale", 
+            "value" => $vec3Type,
           ],
-        ],*/
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "position", 
+            "value" => $vec3Type,
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "rotation", 
+            "value" => $vec4Type,
+          ],
+        ],
         /*[
           "type" => "list",
           "data" => [
-            "key" => "Meshes To Add",
+            "key" => "Object Types",
             "values" => [
               "./res/scenes/editor/dock/images/camera.png", 
               "./res/scenes/editor/dock/images/light.png",
