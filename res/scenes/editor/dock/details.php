@@ -93,6 +93,10 @@
 
   $target_type = $argv[1];
 
+
+  $vec3Type = [ "float", "float", "float" ];
+  $vec4Type = [ "float", "float", "float", "float" ];
+
   $mappingPerType = [
     "object_details" => [
       "title" => "Object Details",
@@ -113,15 +117,54 @@
             "options" => [
               "directional", "spotlight", "point",
             ],
-            "selected" => 0,
+            "selected" => 1,
           ],
         ],
+        /*[
+          "type" => "numeric",
+          "data" => [
+            "key" => "position", 
+            "valueType" => $vec3Type,
+          ],
+        ],*/
         [
           "type" => "checkbox",
           "data" => [
             "key" => "enable physics", 
           ],
         ],
+        /*[
+          "type" => "list",
+          "data" => [
+            "key" => "Create Objects",
+            "values" => [
+              "light", "camera", "heightmap",
+            ],
+          ],
+        ],*/
+        /*[
+          "type" => "list",
+          "data" => [
+            "key" => "Meshes To Add",
+            "values" => [
+              "./res/scenes/editor/dock/images/camera.png", 
+              "./res/scenes/editor/dock/images/light.png",
+              "./res/scenes/editor/dock/images/sound.png", 
+              "./res/scenes/editor/dock/images/heightmap.png", 
+              "./res/scenes/editor/dock/images/voxel.png", 
+
+            ],
+          ],
+        ],*/
+        /*[
+          "type" => "list",
+          "data" => [
+            "key" => "Meshes To Add",
+            "values" => [
+              "Cool Model 1", "Cool Model 2"
+            ],
+          ],
+        ],*/
       ]
     ],
     "world_state" => [
@@ -156,6 +199,8 @@
     "label" => "./dock/details_textfield.php",
     "options" => "./dock/details_options.php",
     "checkbox" => "./dock/details_checkbox.php",
+    "list" => "./dock/details_list.php",
+    "numeric" => "./dock/details_numeric.php",
   ];
 
 

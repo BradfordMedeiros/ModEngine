@@ -29,8 +29,8 @@
   createElement($checkboxName, $default_text_style, [ 
       "cantoggle" => "true",
       "scale" => "0.02 -0.05 0.02",  # negative since some bug with button textures, should fix
-      "ontexture" => "./res/scenes/editor/dock/checked.png",
-      "offtexture" => "./res/scenes/editor/dock/unchecked.png",
+      "ontexture" => "./res/scenes/editor/dock/images/checked.png",
+      "offtexture" => "./res/scenes/editor/dock/images/unchecked.png",
       "ontint" => "5 5 5 1",
     ]
   );
