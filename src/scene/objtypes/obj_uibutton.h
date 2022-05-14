@@ -17,6 +17,7 @@ struct GameObjectUIButton {
   std::string onToggleOff;
   bool hasOnTint;
   glm::vec4 onTint;
+  glm::vec4 tint;
 };
 
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util);

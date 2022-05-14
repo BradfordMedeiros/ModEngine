@@ -442,7 +442,7 @@ int renderObject(
     if (uiObj -> hasOnTint && uiObj -> toggleOn){
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> onTint));
     }else{
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> tint));
     }
     auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
     drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId); 

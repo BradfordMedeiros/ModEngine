@@ -163,12 +163,6 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
 bool isDefaultPosition(glm::vec3 pos){
   return pos.x == 0 && pos.y == 0 && pos.z == 0;
 }
-bool isIdentityVec(glm::vec3 scale){
-  return scale.x = 1 && scale.y == 1 && scale.z == 1;
-}
-bool isIdentityVec(glm::vec4 vec){
-  return vec.x = 1 && vec.y == 1 && vec.z == 1 && vec.w == 1;
-}
 bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }

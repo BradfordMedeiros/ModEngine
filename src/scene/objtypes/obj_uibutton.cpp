@@ -9,6 +9,7 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto onToggleOff = attr.stringAttributes.find("off") != attr.stringAttributes.end() ? attr.stringAttributes.at("off") : "";
   auto hasOnTint  = attr.vecAttr.vec4.find("ontint") != attr.vecAttr.vec4.end();
   auto onTint = hasOnTint ? attr.vecAttr.vec4.at("ontint") : glm::vec4(1.f, 1.f, 1.f, 1.f);
+  auto tint = attr.vecAttr.vec4.find("tint") != attr.vecAttr.vec4.end() ? attr.vecAttr.vec4.at("tint") : glm::vec4(1.f, 1.f, 1.f, 1.f);
 
   GameObjectUIButton obj { 
     .common = parseCommon(attr, util.meshes),
@@ -23,6 +24,7 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
     .onToggleOff = onToggleOff,
     .hasOnTint = hasOnTint,
     .onTint = onTint,
+    .tint = tint,
   };
   return obj;
 }
@@ -47,6 +49,12 @@ std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIBut
   }
   if (obj.initialState == true){
     pairs.push_back(std::pair<std::string, std::string>("state", "on"));
+  }
+  if (obj.hasOnTint && !isIdentityVec(obj.onTint)){
+    pairs.push_back(std::pair<std::string, std::string>("ontint", serializeVec(obj.onTint)));
+  }
+  if (!isIdentityVec(obj.tint)){
+    pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
   }
   return pairs;
 }

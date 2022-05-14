@@ -518,3 +518,10 @@ bool aboutEqualNormalized(glm::vec3 one, glm::vec3 two){
 bool aboutEqual(glm::vec4 one, glm::vec4 two){
   return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z) && aboutEqual(one.w, two.w);
 }
+
+bool isIdentityVec(glm::vec3 scale){
+  return scale.x = 1 && scale.y == 1 && scale.z == 1;
+}
+bool isIdentityVec(glm::vec4 vec){
+  return vec.x = 1 && vec.y == 1 && vec.z == 1 && vec.w == 1;
+}

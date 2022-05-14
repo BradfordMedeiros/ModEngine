@@ -137,6 +137,9 @@ bool aboutEqual(glm::vec3 one, glm::vec3 two);
 bool aboutEqualNormalized(glm::vec3 one, glm::vec3 two);
 bool aboutEqual(glm::vec4 one, glm::vec4 two);
 
+bool isIdentityVec(glm::vec3 scale);
+bool isIdentityVec(glm::vec4 vec);
+
 template<typename T, typename N>
 std::vector<T> mapKeys(std::map<T, N>& values){   
   std::vector<T> transformedValues;
