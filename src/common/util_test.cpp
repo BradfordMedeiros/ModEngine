@@ -13,6 +13,7 @@ void utilParseAndSerializeQuatTest() {
     "0 1 0 30",
     "0 0 -1 30",
     "0 -1 0 250",
+    "2 -1 0 250",
   };
   int numFailingTests = 0;
   std::string errorStr = "\n";
@@ -25,7 +26,7 @@ void utilParseAndSerializeQuatTest() {
     auto serializedParsed = parseVec4(serializeQuat(parseQuat(rawQuatsTests.at(i))));
     if (!aboutEqual(normalizedRaw4, serializedParsed)){
       numFailingTests++;
-      errorStr = errorStr + "test: " + std::to_string(i) + " - " + "got : " + print(serializedParsed) + " but wanted: " + print(normalizedRaw4) + "\n";
+      errorStr = errorStr + "test: " + std::to_string(i) + " - " + "got : " + print(serializedParsed) + " but wanted: " + print(normalizedRaw4) + " - original: " + print(rawParsed) + "\n";
     }   
   }
   if (errorStr != ""){

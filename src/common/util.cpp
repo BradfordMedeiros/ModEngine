@@ -173,6 +173,12 @@ std::string print(glm::vec2 vec){
   stream << vec.x << " " << vec.y;
   return stream.str();
 }
+
+std::string rawprint(glm::quat quat){
+  std::stringstream stream;
+  stream << quat.x << " " << quat.y << " " << quat.z << " " << quat.w;
+  return stream.str();
+}
 std::string print(glm::quat quat){
   glm::vec3 radianAngles = glm::eulerAngles(quat);
   auto degreeX = glm::degrees(radianAngles.x);
@@ -506,7 +512,7 @@ std::string print(GameobjAttributes& attr){
 }
 
 bool aboutEqual(float one, float two){
-  float delta = 0.00001f;
+  float delta = 0.0001f;
   return one > (two - delta) && one < (two + delta);
 }
 bool aboutEqual(glm::vec3 one, glm::vec3 two){
