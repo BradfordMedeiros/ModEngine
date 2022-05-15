@@ -667,9 +667,9 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
       if (id == uiId && uiControl -> canToggle){
         uiControl -> toggleOn = !uiControl -> toggleOn;
         if (uiControl -> toggleOn && uiControl -> onToggleOn != ""){
-          sendNotify(uiControl -> onToggleOn, "");
+          sendNotify(uiControl -> onToggleOn, std::to_string(id));
         }else if (uiControl -> onToggleOff != ""){
-          sendNotify(uiControl -> onToggleOff, "");
+          sendNotify(uiControl -> onToggleOff, std::to_string(id));
         }
       }
 
