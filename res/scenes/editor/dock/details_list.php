@@ -32,9 +32,12 @@
     $listItemName = "*" . $unique_control_id . "_" . "list_item_" . $i;
     createElement($listItemName, $default_text_style, [
       "scale" => "0.04 -0.1 0.04",  # negative since some bug with button textures, should fix
-      "ontexture" => $value,
-      "offtexture" => $value,
+      "ontexture" => $value["image"],
+      "offtexture" => $value["image"],
       "ontint" => "5 5 5 1",
+      "on" => "dialog-button-action",
+      "off" => "dialog-button-action",
+      "button-action" => $value["action"],
     ]);
     array_push($listElementNames, $listItemName);
   }

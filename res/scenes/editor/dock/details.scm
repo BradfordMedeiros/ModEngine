@@ -102,6 +102,7 @@
   )
   attrpair
 )
+
 (define (populateData)
   (define dataValues   
     (list
@@ -123,4 +124,29 @@
   (if (equal? key 46)
     (format #t "Submit bindings placeholder\n")
   ) 
+)
+
+(define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
+(define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
+(define buttonToAction
+  (list
+    (list "create-camera" createCameraPlaceholder)
+    (list "create-light" createLightPlaceholder)
+  )
+)
+(define (perform-button-action obj)
+  (define attrActions (assoc "button-action" (gameobj-attr obj)))
+  (format #t "attr actions: ~a\n " attrActions)
+  (if attrActions
+    (let ((action (assoc (cadr attrActions) buttonToAction)))
+      (if action
+        ((cadr action))
+      )
+    )
+  )
+)
+(define (onMessage key value)
+  (if (equal? key "dialog-button-action") 
+    (perform-button-action (gameobj-by-id (string->number value)))
+  )
 )

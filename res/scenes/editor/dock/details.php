@@ -156,29 +156,17 @@
             "value" => $vec4Type,
           ],
         ],
-        /*[
+        [
           "type" => "list",
           "data" => [
             "key" => "Object Types",
             "values" => [
-              "./res/scenes/editor/dock/images/camera.png", 
-              "./res/scenes/editor/dock/images/light.png",
-              "./res/scenes/editor/dock/images/sound.png", 
-              "./res/scenes/editor/dock/images/heightmap.png", 
-              "./res/scenes/editor/dock/images/voxel.png", 
-
+              ["image" => "./res/scenes/editor/dock/images/camera.png", "action" => "create-camera" ],
+              ["image" => "./res/scenes/editor/dock/images/light.png", "action" => "create-light" ],
+              ["image" => "./res/scenes/editor/dock/images/sound.png", "action" => "create-sound" ],
             ],
           ],
-        ],*/
-        /*[
-          "type" => "list",
-          "data" => [
-            "key" => "Meshes To Add",
-            "values" => [
-              "Cool Model 1", "Cool Model 2"
-            ],
-          ],
-        ],*/
+        ],
       ]
     ],
     "world_state" => [
