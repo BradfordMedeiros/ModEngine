@@ -318,23 +318,26 @@ glm::quat parseQuat(std::string payload){
   return  direction * rotateAngle;
 }
 
+float angleFromQuat(glm::quat rotation){
+  auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
+  float rotAnglex = glm::asin((rotation.x / axis.x)) * 2.f;
+  float rotAngley = glm::asin((rotation.y / axis.y)) * 2.f;
+  float rotAnglez = glm::asin((rotation.z / axis.z)) * 2.f;
+  float w = glm::acos(rotation.w) * 2.f;
+  return w;
+}
+
 //http://www.euclideanspace.com/maths/geometry/rotations/for/decomposition/
+// Fails serialization by .04 degrees... which is probably ok...but why, remnant of just float ops?  
+// At least would be nice to round the values to nearest degree maybe?  
 std::string serializeQuat(glm::quat rotation){
   auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  
-  auto rotationValue = glm::angleAxis(glm::radians(0.f), axis);
-  auto rotationNoAngle = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
-  auto leftoverRotation = glm::inverse(rotationNoAngle) * rotation;
-  auto rotatedAxis = leftoverRotation * glm::vec3(0.f, 0.f, -1.f); 
+  auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
+  float w = angleFromQuat(glm::inverse(axisOrientation) * rotation);
 
-  auto angle = glm::angle(leftoverRotation);
-
-  std::cout << "regular axis is: " << print(axis) << std::endl;
-  std::cout << "rotated axis is: " << print(rotatedAxis) << std::endl;
-  std::cout << "angle is: " << glm::degrees(angle) << std::endl;
-
-  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, glm::degrees(angle))); 
-
+  //std::cout << "(radians, degree) : " << w << " , " << glm::degrees(w) << std::endl;
+  float degreesAngle = glm::degrees(w);
+  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, degreesAngle)); 
 }
 
 glm::vec3 quatToVec(glm::quat quat){
@@ -346,7 +349,10 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   // This feels like a really bad hack, but if an object is just straight up, this returns NaN. 
   // Should look more into the math!  How to pick up vector properly? 
   if (fromPos.x == targetPosition.x && fromPos.z == targetPosition.z && !(fromPos.y == targetPosition.y)){   
-    return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 0, -1))))); 
+    if (fromPos.y < targetPosition.y){
+      return  glm::quat(glm::vec3(glm::radians(90.f), 0, 0));
+    }
+    return glm::quat(glm::vec3(glm::radians(-90.f), 0, 0));
   }
   return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
 }
