@@ -310,8 +310,7 @@ glm::quat eulerToQuat(glm::vec3 eulerAngles){
 
 // im misunderstanding what the quaternion represnts, thais is only for the single rotation,
 // so what i could do, is simply rotate 
-glm::quat parseQuat(std::string payload){
-  glm::vec4 vecXYZRotation = parseVec4(payload);
+glm::quat parseQuat(glm::vec4 vecXYZRotation){
   auto parsedVec = glm::normalize(glm::vec3(vecXYZRotation.x, vecXYZRotation.y, vecXYZRotation.z));
   auto direction = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), parsedVec);
   auto rotateAngle = glm::angleAxis(glm::radians(vecXYZRotation.w), glm::vec3(0, 0, 1));

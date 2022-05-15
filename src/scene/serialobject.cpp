@@ -96,9 +96,10 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
   if (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()){
     object.netsynchronize = attributes.stringAttributes.at("net") == "sync";
   }
+  safeVec3Set(&object.transformation.scale, "scale", attributes, &identityVec);
 
-  if (attributes.stringAttributes.find("rotation") != attributes.stringAttributes.end()){
-    object.transformation.rotation = parseQuat(attributes.stringAttributes.at("rotation"));
+  if (attributes.vecAttr.vec4.find("rotation") != attributes.vecAttr.vec4.end()){
+    object.transformation.rotation = parseQuat(attributes.vecAttr.vec4.at("rotation"));
   }else{
     object.transformation.rotation = glm::identity<glm::quat>();
   }

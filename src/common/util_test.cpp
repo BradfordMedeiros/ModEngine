@@ -24,9 +24,8 @@ void utilParseAndSerializeQuatTest() {
     auto rawquat = rawQuatsTests.at(i);
     auto rawParsed = parseVec4(rawquat);
     auto normalizedRaw = glm::normalize(glm::vec3(rawParsed.x, rawParsed.y, rawParsed.z));
-    std::cout << "\nrawParsed: " << print(rawParsed) + "\n";
     auto normalizedRaw4 = glm::vec4(normalizedRaw.x, normalizedRaw.y, normalizedRaw.z, rawParsed.w);
-    auto serializedParsed = parseVec4(serializeQuat(parseQuat(rawQuatsTests.at(i))));
+    auto serializedParsed = parseVec4(serializeQuat(parseQuat(parseVec4(rawQuatsTests.at(i)))));
     if (!aboutEqual(normalizedRaw4, serializedParsed)){
       numFailingTests++;
       errorStr = errorStr + "test: " + std::to_string(i) + " - " + "got : " + print(serializedParsed) + " but wanted: " + print(normalizedRaw4) + " - original: " + print(rawParsed) + "\n";

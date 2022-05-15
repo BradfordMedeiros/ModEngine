@@ -68,6 +68,16 @@ bool addVec3Fields(GameobjAttributes& attributes, std::string attribute, std::st
   }
   return false;
 }
+bool addVec4Fields(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  auto fields = { "rotation" };
+  for (auto field : fields){
+    if (attribute == field){
+      attributes.vecAttr.vec4[attribute] = parseVec4(payload);
+      return true;
+    }
+  }
+  return false;
+}
 bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
   auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed", "physics_layer" };
   for (auto field : fields){
@@ -79,7 +89,7 @@ bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::s
   return false;
 }
 bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "layer", "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net", "id", "rotation"};
+  auto fields = { "layer", "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net", "id" };
   for (auto field : fields){
     if (attribute == field){
       attributes.stringAttributes[attribute] = payload;
@@ -91,6 +101,10 @@ bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::
 bool addFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
   bool addedVecField = addVec3Fields(attributes, attribute, payload);
   if (addedVecField){
+    return true;
+  }
+  bool addedVec4Field = addVec4Fields(attributes, attribute, payload);
+  if (addedVec4Field){
     return true;
   }
   bool addedFloatField = addFloatFields(attributes, attribute, payload);

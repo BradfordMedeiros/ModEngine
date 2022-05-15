@@ -112,7 +112,6 @@ void calcLineIntersectionTest(){
 
   for (int i = 0; i < lineTests.size(); i++){
     glm::vec3 intersectPoint(0.f, 0.f, 0.f);
-    std::cout << "test: " << i << std::endl;
     auto lineTest = lineTests.at(i);
     bool intersects = calcLineIntersection(lineTest.fromPos, lineTest.fromDir, lineTest.toPos, lineTest.toDir, &intersectPoint);
     if (intersects != lineTest.intersects){
@@ -121,8 +120,6 @@ void calcLineIntersectionTest(){
       auto intersectionCorrect = aboutEqual(intersectPoint, lineTest.intersectionPoint);
       if (!intersectionCorrect){
         throw std::logic_error("incorrect line intersection point for line index: " + std::to_string(i) + " actual: " + print(intersectPoint));
-      }else{
-        std::cout << "intersection correct: " << print(intersectPoint) << std::endl;
       }
     }
   }
