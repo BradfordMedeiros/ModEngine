@@ -61,7 +61,9 @@ engineState state = getDefaultState(1920, 1080);
 
 World world;
 RenderStages renderStages;
-DefaultMeshes defaultMeshes;
+DefaultMeshes defaultMeshes;  
+
+Mesh* crosshairSprite;
 
 SysInterface interface;
 std::string textureFolderPath;
@@ -1163,8 +1165,7 @@ int main(int argc, char* argv[]){
   );
 
   fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
-  Mesh crosshairSprite = loadSpriteMesh("./res/textures/crosshairs/crosshair008.png", loadTexture);
- 
+
   CustomApiBindings pluginApi{
     .listSceneId = listSceneId,
     .loadScene = loadScene,
@@ -1306,8 +1307,10 @@ int main(int argc, char* argv[]){
     debuggerDrawer, 
     layers,
     interface,
-    defaultMeshesToLoad
+    defaultMeshesToLoad,
+    {   "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" }
   );
+  setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   if (state.skybox != ""){
     loadSkybox(world, state.skybox); 
@@ -1691,7 +1694,7 @@ int main(int argc, char* argv[]){
     
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-    renderUI(crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded, showCursor);
+    renderUI(*crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded, showCursor);
     glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){

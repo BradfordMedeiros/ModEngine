@@ -401,6 +401,20 @@ void addMesh(World& world, std::string meshpath){
   std::cout << "WARNING: add mesh does not load animations, bones for default meshes" << std::endl;
 }
 
+void addSpriteMesh(World& world, std::string meshPath){
+  int ownerId = -1;
+  if (world.meshes.find(meshPath) != world.meshes.end()){
+    world.meshes.at(meshPath).owners.insert(ownerId);
+  }else{
+    world.meshes[meshPath] = MeshRef {
+      .owners = { ownerId }, 
+      .mesh = loadSpriteMesh(meshPath, [&world, ownerId](std::string texture) -> Texture {
+        return loadTextureWorld(world, texture, ownerId);
+      })
+    };
+  }
+}
+
 void freeMeshRef(World& world, std::string meshname){
   std::cout << "INFO: freeing mesh: " << meshname  << std::endl;
   freeMesh(world.meshes.at(meshname).mesh);
@@ -462,7 +476,8 @@ World createWorld(
   btIDebugDraw* debugDrawer,
   std::vector<LayerInfo> layers,
   SysInterface interface,
-  std::vector<std::string> defaultMeshes
+  std::vector<std::string> defaultMeshes,
+  std::vector<std::string> spriteMeshes
 ){
   auto objectMapping = getObjectMapping();
   World world = {
@@ -484,6 +499,9 @@ World createWorld(
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
     addMesh(world, meshname);
+  }
+  for (auto &spriteMesh : spriteMeshes){
+    addSpriteMesh(world, spriteMesh);
   }
 
   loadSkybox(world, ""); 

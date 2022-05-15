@@ -118,6 +118,7 @@ void maybeChangeTexture(int index);
 void setTexture(objid index, std::string textureName);
 
 void setState(std::string stateName);
+void setCrosshairSprite();
 void setWorldState(std::vector<ObjectValue> values);
 void setFloatState(std::string stateName, float value);
 void setIntState(std::string stateName, int value);

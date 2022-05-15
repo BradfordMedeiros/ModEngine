@@ -238,6 +238,18 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "mouse",
     .attribute = "capturecursor",
   },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto crosshair = std::get_if<std::string>(&value);
+      if (crosshair != NULL){
+        state.crosshair = *crosshair;
+        return;
+      }
+      assert(false);
+    },
+    .object = "mouse",
+    .attribute = "crosshair",
+  }
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -335,6 +347,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .resolution = glm::ivec2(0, 0),
     .borderTexture = "",
     .antialiasingMode = ANTIALIASING_NONE,
+    .crosshair = "",
 	};
 	return state;
 }

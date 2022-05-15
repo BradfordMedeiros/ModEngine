@@ -110,6 +110,8 @@ struct engineState {
   glm::ivec2 resolution;
   std::string borderTexture;
   ANTIALIASING_TYPE antialiasingMode;
+
+  std::string crosshair;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

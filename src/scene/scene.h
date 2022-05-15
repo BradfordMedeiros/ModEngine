@@ -40,7 +40,8 @@ World createWorld(
   btIDebugDraw* debugDrawer,
   std::vector<LayerInfo> layers,
   SysInterface interface,
-  std::vector<std::string> defaultMeshes
+  std::vector<std::string> defaultMeshes,
+  std::vector<std::string> spriteMeshes
 );
 
 void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributesWithId> additionalFields, bool returnObjectOnly, std::vector<GameObjectObj>& gameobjObjs);

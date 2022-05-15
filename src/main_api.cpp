@@ -7,6 +7,8 @@ extern WorldTiming timings;
 extern engineState state;
 extern GameObject defaultCamera;
 extern std::map<unsigned int, Mesh> fontMeshes;
+extern Mesh* crosshairSprite;
+extern Mesh defaultCrosshairSprite;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
 extern std::queue<StringString> channelMessages;
@@ -365,6 +367,14 @@ void setState(std::string stateName){
   }
 }
 
+void  setCrosshairSprite(){
+  if (state.crosshair == ""){
+    crosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh;
+    return;
+  }
+  crosshairSprite = &world.meshes.at(state.crosshair).mesh;
+}
+
 void setWorldState(std::vector<ObjectValue> values){
   std::vector<ObjectValue> renderStagesValues;
   std::vector<ObjectValue> otherValues;
@@ -383,6 +393,9 @@ void setWorldState(std::vector<ObjectValue> values){
     setRenderStageState(renderStages, renderStagesValue);
   }
   setState(state, otherValues, now);
+
+  //// todo add updates for each state ... should check if it was changed in state maybe?
+  setCrosshairSprite();
 }
 
 void setFloatState(std::string stateName, float value){
