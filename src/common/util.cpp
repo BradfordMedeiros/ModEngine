@@ -319,12 +319,7 @@ glm::quat parseQuat(std::string payload){
 }
 
 float angleFromQuat(glm::quat rotation){
-  auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
-  float rotAnglex = glm::asin((rotation.x / axis.x)) * 2.f;
-  float rotAngley = glm::asin((rotation.y / axis.y)) * 2.f;
-  float rotAnglez = glm::asin((rotation.z / axis.z)) * 2.f;
-  float w = glm::acos(rotation.w) * 2.f;
-  return w;
+  return glm::acos(rotation.w) * 2.f;
 }
 
 //http://www.euclideanspace.com/maths/geometry/rotations/for/decomposition/
