@@ -211,20 +211,33 @@
     "world_state" => [
       "title" => "World State",
       "items" => [
-      /*  [
+        [
           "type" => "label",
           "data" => [
-            "key" => "bloom", 
-            "value" => "enabled"
+            "key" => "Number of Scenes", 
+            "value" => [
+              "binding" => "meta-numscenes",
+            ]
           ],
         ],
         [
-          "type" => "label", 
+          "type" => "label",
           "data" => [
-            "key" => "color", 
-            "value" => "- 1 1 1"
-          ]
-        ]*/
+            "key" => "Object Id", 
+            "value" => [
+              "binding" => "runtime-id",
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Scene Id", 
+            "value" => [
+              "binding" => "runtime-sceneid",
+            ]
+          ],
+        ],
       ],
     ],
       "object_tools" => [

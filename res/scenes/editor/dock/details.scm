@@ -22,6 +22,16 @@
   (set! dataValues (cons (list key value) newDataValues))
   (format #t "store:  data values is: ~a\n" dataValues)
 )
+(define (refillStore gameobj)
+  (clearStore)
+  (updateStoreValue (list "object_name" (gameobj-name gameobj)))
+  (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
+  (map updateStoreValue (gameobj-attr gameobj))
+
+  (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
+  (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
+  (updateStoreValue (list "runtime-sceneid" (number->string (list-sceneid (gameobj-id gameobj)))))
+)
 
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
 (define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
@@ -129,10 +139,8 @@
     (set! focusedElement #f)
   )
 
-  (clearStore)
-  (updateStoreValue (list "object_name" (gameobj-name gameobj)))
-  (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
-  (map updateStoreValue (gameobj-attr gameobj))
+  (refillStore gameobj)
+
   (handleListSelection gameobj (gameobj-attr gameobj))
   (populateData)
 )
