@@ -8,7 +8,7 @@
     $optionName = $options[$optionIndex];
     $isSelected = $data["selected"] == $optionIndex;
     $optionElementName = ")" . $unique_control_id . "_" . "option_" . $optionIndex;
-    $attrs = [ "value" => $optionName ];
+    $attrs = [ "value" => $optionName,  "details-group" => $rootElementName, "details-group-index" => $optionIndex  ];
     if ($isSelected){
       $attrs["tint"] = "0 0 4 1";
     }

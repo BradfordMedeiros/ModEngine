@@ -27,6 +27,8 @@
 
   $values = $data["values"];
   $listElementNames = [];
+
+  $listHolder = "(" . $unique_control_id . "_" . "list_holder";
   for ($i = 0; $i < count($values); $i++){
     $value = $values[$i];
     $listItemName = "*" . $unique_control_id . "_" . "list_item_" . $i;
@@ -42,7 +44,6 @@
     array_push($listElementNames, $listItemName);
   }
 
-  $listHolder = "(" . $unique_control_id . "_" . "list_holder";
   createElement($listHolder, $default_text_style, [
     "tint" => "1 0 0 1",
     "elements" => implode(",", $listElementNames),

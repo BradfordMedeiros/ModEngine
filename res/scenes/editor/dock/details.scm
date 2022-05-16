@@ -53,6 +53,23 @@
   )
 )
 
+
+(define (object-should-be-active gameobj id)   ; should use details-group-index instead
+  (list gameobj (equal? id (gameobj-id gameobj)))
+)
+(define (set-object-active-state gameobjActivePair)
+  (gameobj-setattr! (car gameobjActivePair) (list 
+    (list "tint" (if (cadr gameobjActivePair) (list 0 0 1 1) (list 1 1 1 1)))
+  ))
+)
+(define (handleListSelection gameobj detailsAttr)
+  (if detailsAttr
+    (let ((groupObjs (lsobj-attr "details-group" (cadr detailsAttr))))
+      (for-each set-object-active-state (map (lambda(obj) (object-should-be-active obj (gameobj-id gameobj))) groupObjs))
+    )
+  )
+)
+
 (define (onObjSelected gameobj color)
   (if (equal? (gameobj-id gameobj) (gameobj-id mainobj))
     (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
@@ -66,6 +83,7 @@
     (set! focusedElement #f)
   )
 
+  (handleListSelection gameobj (assoc "details-group"  (gameobj-attr gameobj)))
 )
 
 ;; todo remove - no items in this layout, should require this 
