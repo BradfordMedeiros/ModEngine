@@ -47,4 +47,12 @@ void toggleCursor(bool focusCursor);
 
 void handleInput(GLFWwindow* window);
 
+struct PermaLine {
+  Line line;
+  objid lineid;
+  objid owner;
+  LineColor color;
+};
+void removeLinesByOwner(objid owner);
+
 #endif

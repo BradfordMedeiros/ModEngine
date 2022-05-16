@@ -128,6 +128,31 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   }
 }
 
+std::vector<PermaLine> permaLines;  // todo move all this line stuff behind some single cleaner interface
+void removeLinesByOwner(objid owner){
+  std::vector<PermaLine> newLines;
+  for (auto &line : permaLines){
+    if (owner != line.owner){
+      newLines.push_back(line);
+    }
+  }
+  permaLines.clear();
+  for (auto line : newLines){
+    permaLines.push_back(line);
+  }
+}
+
+void onSelectNullItem(){
+  auto manipulatorId = getManipulatorId();
+  std::cout << "manipulatorId: " << manipulatorId << std::endl;
+  if (manipulatorId != 0){
+    onManipulatorUnselect(removeObjectById);
+    removeLinesByOwner(state.manipulatorLineId); 
+  }
+  clearSelectedIndexs(state.editor); 
+  cBindings.onObjectUnselected();
+}
+
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
   if (disableInput){
     return;
@@ -135,6 +160,7 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
     state.enableManipulator = true;
     handleSerialization();
+    onSelectNullItem();
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE){
     state.enableManipulator = false;

@@ -75,13 +75,8 @@ DynamicLoading dynamicLoading;
 std::vector<Line> lines;
 std::vector<Line> bluelines;
 
-struct PermaLine {
-  Line line;
-  objid lineid;
-  objid owner;
-  LineColor color;
-};
-std::vector<PermaLine> permaLines;
+
+extern std::vector<PermaLine> permaLines;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
@@ -242,16 +237,9 @@ void selectItem(objid selectedId, Color pixelColor){
   if (!showCursor){
     return;
   }
-
-  applyPainting(selectedId);
-
   auto idToUse = state.groupSelection ? getGroupId(world.sandbox, selectedId) : selectedId;
-
   auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, idToUse);
-  applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
-
-  shouldCallItemSelected = true;
   onManipulatorSelectItem(
     idToUse, 
     selectedSubObj.name,
@@ -273,6 +261,12 @@ void selectItem(objid selectedId, Color pixelColor){
     getGameObjectPos,
     setGameObjectPosition
   );
+  if (idToUse == getManipulatorId()){
+    return;
+  }
+  applyPainting(selectedId);
+  applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
+  shouldCallItemSelected = true;
 
   setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
@@ -343,18 +337,7 @@ void freeLine(objid lineId){
     permaLines.push_back(line);
   }
 }
-void removeLinesByOwner(objid owner){
-  std::vector<PermaLine> newLines;
-  for (auto &line : permaLines){
-    if (owner != line.owner){
-      newLines.push_back(line);
-    }
-  }
-  permaLines.clear();
-  for (auto line : newLines){
-    permaLines.push_back(line);
-  }
-}
+
 
 std::vector<glm::vec3> traversalPositions;
 std::vector<glm::vec3> parentTraversalPositions;
@@ -372,16 +355,6 @@ void drawTraversalPositions(){
     auto toPos = parentTraversalPositions.at(i);
     addLineNextCycle(fromPos, toPos, false, 0);
   }
-}
-
-void onSelectNullItem(){
-  auto manipulatorId = getManipulatorId();
-  std::cout << "manipulatorId: " << manipulatorId << std::endl;
-  if (manipulatorId != 0){
-    onManipulatorUnselect(removeObjectById);
-    removeLinesByOwner(state.manipulatorLineId);
-  }
-  clearSelectedIndexs(state.editor); 
 }
 
 std::map<std::string, GLint> shaderNameToId;
@@ -1527,15 +1500,13 @@ int main(int argc, char* argv[]){
       );
     }
 
-    if (selectItemCalled){
+    if ((hoveredId != getManipulatorId()) && selectItemCalled){
       std::cout << "INFO: select item called" << std::endl;
       if (state.hoveredIdInScene && getLayerForId(hoveredId).selectIndex != -1){
         std::cout << "INFO: select item called -> id in scene!" << std::endl;
         selectItem(hoveredId, hoveredItemColor);
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
-        onSelectNullItem();
-        cBindings.onObjectUnselected();
       }
       selectItemCalled = false;
     }
