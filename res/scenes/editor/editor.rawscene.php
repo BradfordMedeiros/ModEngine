@@ -53,6 +53,8 @@
     //["value" => "test", "dialogoption" => "./res/scenes/editor/dock/testpanel.rawscene"],
     ["value" => "OBJECT DETAILS", "dialogoption" => "./res/scenes/editor/dock/object_details.rawscene"],
     ["value" => "SCENE INFO", "dialogoption" => "./res/scenes/editor/dock/world_state.rawscene"],
+    ["value" => "OBJECT TOOLS", "dialogoption" => "./res/scenes/editor/dock/object_tools.rawscene"],
+
     #["value" => "SCENEGRAPH"],
     #["value" => "WORLD STATE"],
     #["value" => "MESHES"],

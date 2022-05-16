@@ -4,6 +4,7 @@ all:
 	@php ./dock/testpanel.php > ./dock/testpanel.rawscene
 	@php ./dock/details.php object_details > ./dock/object_details.rawscene
 	@php ./dock/details.php world_state > ./dock/world_state.rawscene
+	@php ./dock/details.php object_tools > ./dock/object_tools.rawscene
 clean:
 	@rm ./editor.rawscene
 	@rm ./dock/testpanel.rawscene

@@ -12,8 +12,7 @@
   ) 
 )
 
-(define dataValues (list
-))
+(define dataValues (list))
 
 (define (clearStore) (set! dataValues (list)))
 (define (updateStoreValue keyvalue)
