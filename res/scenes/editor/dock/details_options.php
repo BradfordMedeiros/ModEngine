@@ -5,13 +5,13 @@
   $options = $data["options"];
   $optionElements = [];
   for ($optionIndex = 0; $optionIndex < count($options); $optionIndex++){
-    $optionName = $options[$optionIndex];
-    $isSelected = $data["selected"] == $optionIndex;
+    $optionName = $options[$optionIndex]["label"];
     $optionElementName = ")" . $unique_control_id . "_" . "option_" . $optionIndex;
-    $attrs = [ "value" => $optionName,  "details-group" => $rootElementName, "details-group-index" => $optionIndex  ];
-    if ($isSelected){
-      $attrs["tint"] = "0 0 4 1";
-    }
+    $attrs = [ 
+      "value" => $optionName,  
+      "details-group" => $data["selector"], 
+      "details-group-index" => $options[$optionIndex]["selector-index"],
+    ];
     createElement($optionElementName, $default_key, $attrs);
     array_push($optionElements, $optionElementName);
   }
