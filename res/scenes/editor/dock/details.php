@@ -118,7 +118,31 @@
             ],
           ]
         ],
-        [
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Mesh", 
+            "value" => [
+              "binding" => "mesh",
+            ],
+          ]
+        ],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Look at Target", 
+            "value" => [
+              "binding" => "lookat",
+            ],
+          ]
+        ],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Render Layer", 
+            "value" => [
+              "binding" => "layer",
+            ],
+          ]
+        ],
+        /*[
           "type" => "options",
           "data" => [
             "key" => "light-type", 
@@ -181,7 +205,7 @@
               ["image" => "./res/scenes/editor/dock/images/sound.png", "action" => "create-sound" ],
             ],
           ],
-        ],
+        ],*/
       ]
     ],
     "world_state" => [

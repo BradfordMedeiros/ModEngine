@@ -4,15 +4,26 @@
 ; 3. if dialog-button-action message is sent, will perform the action in value of attribute button-action for the corresponding object id in the message
 ; 4. manages value field (as text editor style functionality) for focused elements with details-editabletext:true
 
-(define dataValues                              
-  (list
-    (list "object_name" "test object")    
-    (list "lighttype" "bright")
-    (list "position" "- 0 0 0")
-    (list "lighttype-selector" "spot")
-    (list "lighttype-selector2" "point")
-  )
+
+(define (onKeyChar key)
+  ; ".
+  (if (equal? key 46)
+    (format #t "data values: ~a\n" dataValues)
+  ) 
 )
+
+(define dataValues (list
+))
+
+(define (clearStore) (set! dataValues (list)))
+(define (updateStoreValue keyvalue)
+  (define key (car keyvalue))
+  (define value (cadr keyvalue))
+  (define newDataValues (delete (assoc key dataValues) dataValues))
+  (set! dataValues (cons (list key value) newDataValues))
+  (format #t "store:  data values is: ~a\n" dataValues)
+)
+
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
 (define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
 (define buttonToAction
@@ -90,7 +101,6 @@
     (list "tint" (if (cadr gameobjActivePair) (list 0 0 1 1) (list 1 1 1 1)))
   ))
 )
-
 (define (update-group-values group selectedIndex)
   (define groupObjs (lsobj-attr "details-group" group))
   (for-each set-object-active-state (map (lambda(obj) (object-should-be-active obj selectedIndex)) groupObjs))
@@ -101,7 +111,8 @@
   (define selectedGroupIndex (assoc "details-group-index" selectedAttr))
   (if (and detailsAttr selectedGroupIndex) 
     (let ((group (cadr detailsAttr)) (selectedIndex (cadr selectedGroupIndex)))
-      (update-group-values group selectedIndex)
+      (updateStoreValue (list group selectedIndex))
+      (format #t "updated group: ~a with index ~a\n" group selectedIndex)
     )
   )
 )
@@ -119,7 +130,12 @@
     (set! focusedElement #f)
   )
 
+  (clearStore)
+  (updateStoreValue (list "object_name" (gameobj-name gameobj)))
+  (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
+  (map updateStoreValue (gameobj-attr gameobj))
   (handleListSelection gameobj (gameobj-attr gameobj))
+  (populateData)
 )
 
 ;; todo remove - no items in this layout, should require this 
@@ -209,16 +225,9 @@
   )
 )
 
-(populateData)
 
 ;;;;;;;;;;;;;;;
 
-(define (onKeyChar key)
-  ; ".
-  (if (equal? key 46)
-    (format #t "Submit bindings placeholder\n")
-  ) 
-)
 
 (define (perform-button-action obj)
   (define attrActions (assoc "button-action" (gameobj-attr obj)))
