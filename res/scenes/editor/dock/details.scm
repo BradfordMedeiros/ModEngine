@@ -1,3 +1,27 @@
+; 1. details-binding:<attribute value>, this makes the value property get populated with the value in this
+; 2. details-group:<attribute value>, details-index: <attributevalue>,  
+; ==> if element is selected with same group, the corresponding tint for all other elements is set low if detail-index is different, else high
+; 3. if dialog-button-action message is sent, will perform the action in value of attribute button-action for the corresponding object id in the message
+; 4. manages value field (as text editor style functionality) for focused elements with details-editabletext:true
+
+(define dataValues                              
+  (list
+    (list "object_name" "test object")    
+    (list "lighttype" "bright")
+    (list "position" "- 0 0 0")
+    (list "lighttype-selector" "spot")
+  )
+)
+(define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
+(define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
+(define buttonToAction
+  (list
+    (list "create-camera" createCameraPlaceholder)
+    (list "create-light" createLightPlaceholder)
+  )
+)
+
+
 (define mainSceneId (list-sceneid (gameobj-id mainobj)))
 (define mainpanelId (gameobj-id (lsobj-name "(test_panel")))
 
@@ -43,7 +67,6 @@
 (define (processFocusedElement key)
   (if focusedElement
     (begin
-      (format #t "process focus elmement placeholder: ~a\n" key)
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr) 
           (updateText focusedElement (getUpdatedText (gameobj-attr focusedElement) focusedElement key))
@@ -66,12 +89,18 @@
     (list "tint" (if (cadr gameobjActivePair) (list 0 0 1 1) (list 1 1 1 1)))
   ))
 )
+
+(define (update-group-values group selectedIndex)
+  (define groupObjs (lsobj-attr "details-group" group))
+  (for-each set-object-active-state (map (lambda(obj) (object-should-be-active obj selectedIndex)) groupObjs))
+)
+
 (define (handleListSelection gameobj selectedAttr)
   (define detailsAttr (assoc "details-group" selectedAttr))
   (define selectedGroupIndex (assoc "details-group-index" selectedAttr))
-  (if (and detailsAttr selectedGroupIndex)
-    (let ((groupObjs (lsobj-attr "details-group" (cadr detailsAttr))))
-      (for-each set-object-active-state (map (lambda(obj) (object-should-be-active obj (cadr selectedGroupIndex))) groupObjs))
+  (if (and detailsAttr selectedGroupIndex) 
+    (let ((group (cadr detailsAttr)) (selectedIndex (cadr selectedGroupIndex)))
+      (update-group-values group selectedIndex)
     )
   )
 )
@@ -101,9 +130,6 @@
   (if (equal? action 1)
     (processFocusedElement key)
   )
-
-  (format #t "elements with attr: marked ~a\n" (lsobj-attr "marked"))
-  (format #t "element names: ~a\n" (map gameobj-name (lsobj-attr "marked")))
 )
 
 
@@ -127,16 +153,30 @@
   attrpair
 )
 
-(define (populateData)
-  (define dataValues   
-    (list
-      (list "object_name" "test object")
-      (list "lighttype" "bright")
-      (list "position" "- 0 0 0")
-    )
+(define (extract-group-element attr-pair) 
+  (define attrPair (cadr attr-pair))
+  (list 
+    (car attr-pair) 
+    (cadr (assoc "details-group" attrPair))
   )
+)
+(define (get-group-elements) (map create-attr-pair (lsobj-attr "details-group")))
+(define (all-obj-to-group-bindings) (map extract-group-element (get-group-elements)))
+
+
+(define (populateData)
   (define getDataForAttr (generateGetDataForAttr dataValues))
   (map (lambda(attrpair) (update-binding attrpair getDataForAttr)) (all-obj-to-bindings))
+
+  (format #t "group binding elements: ~a\n" (all-obj-to-group-bindings))
+
+  ; just get a unique set from these, and then extract data from the data mapping, and update-group-values for each
+
+; group binding elements: ((#<gameobj 564a46003320> lighttype-selector) (#<gameobj 564a46003300> lighttype-selector) (#<gameobj 564a460032e0> lighttype-selector))
+  ;      (update-group-values group selectedIndex)
+   ;((#<gameobj 5606a6a15e80> lighttype-selector point) (#<gameobj 5606a6a15e60> lighttype-selector dir) (#<gameobj 5606a6a15e40> lighttype-selector spot))
+  ;      (update-group-values group selectedIndex)
+
 )
 
 (populateData)
@@ -150,14 +190,6 @@
   ) 
 )
 
-(define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
-(define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
-(define buttonToAction
-  (list
-    (list "create-camera" createCameraPlaceholder)
-    (list "create-light" createLightPlaceholder)
-  )
-)
 (define (perform-button-action obj)
   (define attrActions (assoc "button-action" (gameobj-attr obj)))
   (format #t "attr actions: ~a\n " attrActions)
