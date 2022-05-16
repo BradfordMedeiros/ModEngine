@@ -24,6 +24,7 @@ bool symbolDefined(const char* symbol);
 void maybeCallFunc(const char* function);
 void maybeCallFuncString(const char* function, const char* payload);
 SCM fromAttributeValue(AttributeValue& value);
+AttributeValue toAttributeValue(SCM attrValue);
 GameobjAttributes scmToAttributes(SCM scmAttributes);
 ObjectValue scmListToObjectValue(SCM list);
 std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues);

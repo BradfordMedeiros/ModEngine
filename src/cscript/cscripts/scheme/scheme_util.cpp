@@ -26,6 +26,13 @@ glm::vec3 listToVec3(SCM vecList){
   auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
   return glm::vec3(x, y, z);
 }
+glm::vec4 listToVec4(SCM vecList){
+  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
+  auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
+  auto w = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
+  return glm::vec4(x, y, z, w);
+}
 
 std::vector<glm::vec3> listToVecVec3(SCM vecList){
   std::vector<glm::vec3> vecPoints;
@@ -167,6 +174,12 @@ AttributeValue toAttributeValue(SCM attrValue){
   }
   if (isString){
     return scm_to_locale_string(attrValue);
+  }
+
+  auto numElements = toUnsignedInt(scm_length(attrValue));
+  assert(numElements == 3 || numElements == 4);
+  if (numElements == 3){
+    return listToVec4(attrValue);    
   }
   return listToVec3(attrValue);
 }

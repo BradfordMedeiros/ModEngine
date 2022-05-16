@@ -199,10 +199,15 @@ SCM lsObjectsByType(SCM value){
   return indexListToSCM(getObjByType(objectType));
 }
 
-std::vector<int32_t> (*_getObjectsByAttr)(std::string, int32_t);
-SCM scm_getObjectsByAttr(SCM value){
+std::vector<int32_t> (*_getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t);
+SCM scm_getObjectsByAttr(SCM attr, SCM scmValue){
   auto sceneId = currentSceneId();
-  return indexListToSCM(_getObjectsByAttr(scm_to_locale_string(value), sceneId));
+  auto valueDefined = !scm_is_eq(scmValue, SCM_UNDEFINED);
+  std::optional<AttributeValue> value = std::nullopt; 
+  if(valueDefined){
+    value = toAttributeValue(scmValue);
+  }
+  return indexListToSCM(_getObjectsByAttr(scm_to_locale_string(attr), value, sceneId));
 }
 
 int32_t getGameobjId(SCM value){
@@ -861,7 +866,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
   scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
-  scm_c_define_gsubr("lsobj-attr", 1, 0, 0, (void *)scm_getObjectsByAttr);
+  scm_c_define_gsubr("lsobj-attr", 1, 1, 0, (void *)scm_getObjectsByAttr);
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
   scm_c_define_gsubr("draw-text", 4, 0, 0, (void*)scmDrawText);
@@ -984,7 +989,7 @@ void createStaticSchemeBindings(
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(int32_t id),
   std::vector<int32_t> (*getObjectsByType)(std::string),
-  std::vector<int32_t> (*getObjectsByAttr)(std::string, int32_t),
+  std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner),

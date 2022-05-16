@@ -890,19 +890,48 @@ GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameob
 GameobjAttributes objectAttributes(World& world, objid id){
   return objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
 }
-bool objectHasAttribute(World& world, objid id, std::string type){
+bool objectHasAttribute(World& world, objid id, std::string type, std::optional<AttributeValue> value){
+  bool valueExists = value.has_value();
   auto attrs = objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
   if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
-    return true;
+    if (!valueExists){
+      return true;
+    }
+    auto valueStr = std::get_if<std::string>(&value.value());
+    if (valueStr == NULL){
+      return false;
+    }
+    return attrs.stringAttributes.at(type) == *valueStr;
   }
   if (attrs.numAttributes.find(type) != attrs.numAttributes.end()){
-    return true;
+    if (!valueExists){
+      return true;
+    }
+    auto valueFloat = std::get_if<float>(&value.value());
+    if (valueFloat == NULL){
+      return false;
+    }
+    return attrs.numAttributes.at(type) == *valueFloat;
   }
   if (attrs.vecAttr.vec3.find(type) != attrs.vecAttr.vec3.end()){
-    return true;
+    if (!valueExists){
+      return true;
+    }
+    auto vecFloat = std::get_if<glm::vec3>(&value.value());
+    if (vecFloat == NULL){
+      return false;
+    }
+    return attrs.vecAttr.vec3.at(type) == *vecFloat;
   }  
   if (attrs.vecAttr.vec4.find(type) != attrs.vecAttr.vec4.end()){
-    return true;
+    if (!valueExists){
+      return true;
+    }
+    auto vecFloat = std::get_if<glm::vec4>(&value.value());
+    if (vecFloat == NULL){
+      return false;
+    }
+    return attrs.vecAttr.vec4.at(type) == *vecFloat;
   }  
   return false;
 }
