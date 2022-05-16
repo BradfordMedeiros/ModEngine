@@ -10,6 +10,7 @@
     (list "lighttype" "bright")
     (list "position" "- 0 0 0")
     (list "lighttype-selector" "spot")
+    (list "lighttype-selector2" "point")
   )
 )
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
@@ -162,21 +163,50 @@
 )
 (define (get-group-elements) (map create-attr-pair (lsobj-attr "details-group")))
 (define (all-obj-to-group-bindings) (map extract-group-element (get-group-elements)))
+(define (get-details-group allobjs)
+  (define uniqueGroups (list))
 
+  (format #t "all objs: ~a\n" allobjs)
+  (for-each (lambda(objPair) 
+    (let ((detailsGroup (cadr objPair)))
+      (if (not (member detailsGroup uniqueGroups))
+        (set! uniqueGroups (cons detailsGroup uniqueGroups))
+      )
+    )
+  ) allobjs)
+  uniqueGroups
+)
+
+
+(define (get-group-value group)
+  (define groupValue (assoc group dataValues))
+  (if groupValue
+    (list group (cadr groupValue))
+    (list group #f)
+  )
+)
+(define (get-group-values )
+  (define uniqueGroups (get-details-group (all-obj-to-group-bindings)))
+  (map get-group-value uniqueGroups)
+)
 
 (define (populateData)
   (define getDataForAttr (generateGetDataForAttr dataValues))
-  (map (lambda(attrpair) (update-binding attrpair getDataForAttr)) (all-obj-to-bindings))
-
-  (format #t "group binding elements: ~a\n" (all-obj-to-group-bindings))
-
-  ; just get a unique set from these, and then extract data from the data mapping, and update-group-values for each
-
-; group binding elements: ((#<gameobj 564a46003320> lighttype-selector) (#<gameobj 564a46003300> lighttype-selector) (#<gameobj 564a460032e0> lighttype-selector))
-  ;      (update-group-values group selectedIndex)
-   ;((#<gameobj 5606a6a15e80> lighttype-selector point) (#<gameobj 5606a6a15e60> lighttype-selector dir) (#<gameobj 5606a6a15e40> lighttype-selector spot))
-  ;      (update-group-values group selectedIndex)
-
+  (for-each 
+    (lambda(attrpair) 
+      (update-binding attrpair getDataForAttr)
+    ) 
+    (all-obj-to-bindings)
+  )
+  (for-each 
+    (lambda(groupValuePair) 
+      (format #t "group value pair: ~a\n" groupValuePair)
+      (if (cadr groupValuePair)
+        (update-group-values (car groupValuePair) (cadr groupValuePair))
+      )
+    ) 
+    (get-group-values)
+  )
 )
 
 (populateData)

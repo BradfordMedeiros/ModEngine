@@ -132,6 +132,19 @@
           ],
         ],
         [
+          "type" => "options",
+          "data" => [
+            "key" => "light-type", 
+            "value" => "placeholder value",
+            "selector" => "lighttype-selector",
+            "options" => [
+              [ "label" => "directional", "selector-index" => "dir" ],
+              [ "label" => "spotlight", "selector-index" => "spot" ], 
+              [ "label" => "point", "selector-index" => "point" ],
+            ],
+          ],
+        ],
+        [
           "type" => "checkbox",
           "data" => [
             "key" => "enable physics", 
