@@ -1,15 +1,5 @@
 
-#$header:include:./res/scenes/editor/header.rawscene  # like copy and pasting the values of the header, basically a macro
-#$header:import:./res/scenes/editor/header.rawscene   # imports elements as children under header?
-
-<?php include "../example.p.rawscene"; ?>
-
-<?php 
-  /* include "./dock/testpanel.php"; */ 
-
-?>
-
-
+<?php /*include "../example.p.rawscene"; */ ?>
 
 <?php 
 

@@ -255,9 +255,9 @@
           "data" => [
             "key" => "Transform Mode",
             "values" => [
-              ["image" => "./res/scenes/editor/dock/images/camera.png", "action" => "create-camera" ],
-              ["image" => "./res/scenes/editor/dock/images/light.png", "action" => "create-light" ],
-              ["image" => "./res/scenes/editor/dock/images/sound.png", "action" => "create-sound" ],
+              ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "create-camera" ],
+              ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "create-light" ],
+              ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "create-sound" ],
             ],
           ],
         ],
