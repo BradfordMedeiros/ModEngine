@@ -129,12 +129,21 @@ void updateEmitters(
       for (auto delta : emitter.deltas){
         auto value = std::get_if<glm::vec3>(&delta.value);
         auto variance = std::get_if<glm::vec3>(&delta.variance);
+        auto valueVec4 = std::get_if<glm::vec4>(&delta.value);
+        auto varianceVec4 = std::get_if<glm::vec4>(&delta.variance);
         auto lifetimeEffect = calcLifetimeEffect(currentTime - particle.spawntime, emitter.lifetime, delta.lifetimeEffect);
         if (value != NULL && variance != NULL){
           auto randomFloatX = (((float)rand() * variance -> x) / RAND_MAX) * 2 - variance -> x;
           auto randomFloatY = (((float)rand() * variance -> y) / RAND_MAX) * 2 - variance -> y;
           auto randomFloatZ = (((float)rand() * variance -> z) / RAND_MAX) * 2 - variance -> z;
           updateParticle(particle.id, delta.attributeName, *value + (lifetimeEffect * glm::vec3(randomFloatX, randomFloatY, randomFloatZ)));
+        }else if (valueVec4 != NULL && varianceVec4 != NULL){
+          //  dup code for vec4 type from above, should consolidate
+          auto randomFloatX = (((float)rand() * varianceVec4 -> x) / RAND_MAX) * 2 - varianceVec4 -> x;
+          auto randomFloatY = (((float)rand() * varianceVec4 -> y) / RAND_MAX) * 2 - varianceVec4 -> y;
+          auto randomFloatZ = (((float)rand() * varianceVec4 -> z) / RAND_MAX) * 2 - varianceVec4 -> z;
+          auto randomFloatW = (((float)rand() * varianceVec4 -> w) / RAND_MAX) * 2 - varianceVec4 -> w;
+          updateParticle(particle.id, delta.attributeName, *valueVec4 + (lifetimeEffect * glm::vec4(randomFloatX, randomFloatY, randomFloatZ, randomFloatW)));
         }else{
           updateParticle(particle.id, delta.attributeName, delta.value);
         }

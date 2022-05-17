@@ -40,17 +40,30 @@ struct ValueVariance {
 };
 std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   std::map<std::string, ValueVariance> values;
+  ///////////////// Same code for diff types consolidate
   for (auto [key, _] : attributes.vecAttr.vec3){
     if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
       values[newKey] = ValueVariance {
-        .value = glm::vec3(0.f, 0.f, 0.f),
-        .variance = glm::vec3(0.f, 0.f, 0.f),
+        .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
+        .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
         .lifetimeEffect = {},
       };
     }
   }
+  for (auto [key, _] : attributes.vecAttr.vec4){
+    if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      values[newKey] = ValueVariance {
+        .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
+        .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
+        .lifetimeEffect = {},
+      };
+    }
+  }
+  ////////////////////////////////////////////////////////////
   
+  ///////////////// Same code for diff types
   for (auto [key, value] : attributes.vecAttr.vec3){
     if (key.size() > 1){
       auto newKey = key.substr(1, key.size());
@@ -64,11 +77,20 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
       }*/
     }
   }
-
-  if (attributes.vecAttr.vec4.size() > 0){
-    std::cout << "emitter not implemented for vec4 type" << std::endl;
-    assert(false);
+  for (auto [key, value] : attributes.vecAttr.vec4){
+    if (key.size() > 1){
+      auto newKey = key.substr(1, key.size());
+      if (key.at(0) == '!'){
+        values.at(newKey).value = value;
+      }else if (key.at(0) == '?'){
+        values.at(newKey).variance = value;
+      }
+      /*else if (key.at(0) == '%'){
+        values.at(newKey).lifetimeEffect = parseFloatVec(value);
+      }*/
+    }
   }
+  ////////////////////////////////////////////////////////////////
 
   std::vector<EmitterDelta> deltas;
   for (auto [key, value] : values){
