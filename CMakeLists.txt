@@ -5,6 +5,7 @@ project(modengine)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("CMAKE - ModEngine Debug")
   set(CMAKE_ENABLE_EXPORTS TRUE) # TODO -> modassert backtrace symbols
+  add_definitions(-DMODDEBUG)
 endif()
     
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
