@@ -442,6 +442,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     auto newShader = getShaderByName(shader, shaderProgram, allowShaderOverride);
 
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
+    MODTODO("improve shader state switches by looking into some sort of caching");
 
     setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
 

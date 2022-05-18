@@ -128,8 +128,9 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   }
 }
 
-std::vector<PermaLine> permaLines;  // todo move all this line stuff behind some single cleaner interface
+std::vector<PermaLine> permaLines;
 void removeLinesByOwner(objid owner){
+  MODTODO("move all this line stuff behind some single cleaner interface");
   std::vector<PermaLine> newLines;
   for (auto &line : permaLines){
     if (owner != line.owner){
@@ -412,7 +413,8 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
 
     std::string objectName = "random";
 
-    auto sceneId = 0;  //  todo -> which scene should it be loaded into?
+    auto sceneId = 0;  
+    MODTODO("dropping element into scene assumes sceneId " + sceneId);
 
     if (fileType == IMAGE_EXTENSION){
       setTexture(selected(state.editor), paths[i]);

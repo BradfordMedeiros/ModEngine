@@ -186,8 +186,6 @@ typedef void(*messagefunc)(std::queue<StringString>&);
 void assertWithBacktrace(bool isTrue, std::string message);
 void assertTodo(std::string message);
 
-// maybe Debug not DEBUG?
-
 #ifdef MODDEBUG
   #define modassert(m,x) assertWithBacktrace(m, x);
   #ifdef ASSERT_TODOS

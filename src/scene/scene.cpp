@@ -893,7 +893,7 @@ GameobjAttributes objectAttributes(World& world, objid id){
 
 bool objectHasAttribute(World& world, objid id, std::string type, std::optional<AttributeValue> value){
   bool valueExists = value.has_value();
-  auto attrs = objectAttributes(world.objectMapping.at(id), getGameObject(world, id));
+  auto attrs = objectAttributes(world, id);
   if (attrs.stringAttributes.find(type) != attrs.stringAttributes.end()){
     if (!valueExists){
       return true;

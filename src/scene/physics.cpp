@@ -276,7 +276,8 @@ void checkCollisions(physicsEnv& env){
 }
 
 void stepPhysicsSimulation(physicsEnv& env, float timestep){
-  env.dynamicsWorld -> stepSimulation(timestep, 0);   // TODO revisit # of substeps
+  MODTODO("step physics simulation substeps should have consideration");
+  env.dynamicsWorld -> stepSimulation(timestep, 0);  
   checkCollisions(env);
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> debugDrawWorld();
@@ -305,8 +306,9 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed){
   body -> setLinearVelocity(btVector3(xVelocity, yVelocity, zVelocity));
 }
 
-void deinitPhysics(physicsEnv env){   // @todo maybe clean up rigid bodies too but maybe not
+void deinitPhysics(physicsEnv env){
   std::cout << "INFO: DEINIT: physics system" << std::endl;
+  MODTODO("maybe clean up rigid bodies too but maybe not");
   delete env.filterCallback;
   delete env.dynamicsWorld;
   delete env.constraintSolver;
