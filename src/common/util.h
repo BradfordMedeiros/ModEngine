@@ -183,7 +183,16 @@ typedef void(*id_stringfunc)(int32_t, std::string&);
 typedef void(*messagefunc)(std::queue<StringString>&);
 
 void assertWithBacktrace(bool isTrue, std::string message);
-#define modassert(m,x) assertWithBacktrace(m,x);
+
+// maybe Debug not DEBUG?
+
+#ifdef MODDEBUG
+  #define modassert(m,x) assertWithBacktrace(m, x);
+#else
+  #define modassert(m,x) ;
+#endif
+
 
 #endif
+
 
