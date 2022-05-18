@@ -435,6 +435,31 @@ AttributeValue parseAttributeValue(std::string payload){
   return payload;
 }
 
+AttributeValue addAttributes(AttributeValue one, AttributeValue two){
+  auto valueOne = std::get_if<glm::vec3>(&one);
+  auto valueTwo = std::get_if<glm::vec3>(&two);
+  if (valueOne != NULL){
+    assert(valueTwo != NULL);
+    return *valueOne + *valueTwo;
+  }
+
+
+  auto value4One = std::get_if<glm::vec4>(&one);
+  auto value4Two = std::get_if<glm::vec4>(&one);
+  if (value4One != NULL){
+    assert(value4Two != NULL);
+    return *value4One + *value4Two;
+  }
+
+  auto fValueOne = std::get_if<float>(&one);
+  auto fValueTwo = std::get_if<float>(&two);
+  if (fValueOne != NULL){
+    assert(fValueTwo != NULL);
+    return *fValueOne + *valueTwo;
+  }
+  modassert(false, "string values not supported");
+}
+
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
   assert(percentage <= 1.f && percentage >= 0.f);
   auto attr1 = std::get_if<glm::vec3>(&key1);

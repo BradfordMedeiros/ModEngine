@@ -44,7 +44,6 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr);
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr);
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
-void applyAttributeDelta(GameObject& gameobj, std::string field, AttributeValue delta);
 AttributeValue parsePropertySuffix(std::string key, std::string value);
 
 #endif
