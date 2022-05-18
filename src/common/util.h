@@ -190,6 +190,8 @@ void assertTodo(std::string message);
   #define modassert(m,x) assertWithBacktrace(m, x);
   #ifdef ASSERT_TODOS
     #define MODTODO(m) assertTodo(m);
+  #else
+    #define MODTODO(m) ;
   #endif
 #else
   #define modassert(m,x) ;
