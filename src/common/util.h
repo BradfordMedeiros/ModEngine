@@ -80,6 +80,7 @@ std::string getUniqueObjectName();
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
 AttributeValue parseAttributeValue(std::string payload);
 AttributeValue addAttributes(AttributeValue one, AttributeValue two);
+std::string print(AttributeValue& value);
 
 struct StringString {
   std::string strTopic;

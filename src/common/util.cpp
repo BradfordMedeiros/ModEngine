@@ -461,6 +461,27 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
   return 0;
 }
 
+std::string print(AttributeValue& value){
+  auto attrStrValue = std::get_if<std::string>(&value);
+  if (attrStrValue != NULL){
+    std::cout << *attrStrValue << std::endl;
+  }
+  auto attrFloatValue = std::get_if<float>(&value);
+  if (attrFloatValue != NULL){
+    std::cout << *attrFloatValue << std::endl;
+  }
+  auto attrVec3Value = std::get_if<glm::vec3>(&value);
+  if (attrVec3Value != NULL){
+    std::cout << print(*attrVec3Value) << std::endl;
+  }
+  auto attrVec4Value = std::get_if<glm::vec4>(&value);
+  if (attrVec4Value != NULL){
+    std::cout << print(*attrVec4Value) << std::endl;
+  }
+  modassert(false, "invalid attribute type");
+  return "";
+}
+
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
   assert(percentage <= 1.f && percentage >= 0.f);
   auto attr1 = std::get_if<glm::vec3>(&key1);
