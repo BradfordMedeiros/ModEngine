@@ -531,3 +531,17 @@ bool isIdentityVec(glm::vec3 scale){
 bool isIdentityVec(glm::vec4 vec){
   return vec.x = 1 && vec.y == 1 && vec.z == 1 && vec.w == 1;
 }
+
+const int maxCallstack = 128;
+void assertWithBacktrace(bool isTrue, std::string message){
+    std::cout << message << std::endl;
+    void* callstack[maxCallstack];
+    int frames = backtrace(callstack, maxCallstack);
+    char** strs = backtrace_symbols(callstack, frames);
+    for (int i = 0; i < frames; ++i) {
+      printf("%s\n", strs[i]);
+    }
+    free(strs);
+    exit(1);
+ 
+}

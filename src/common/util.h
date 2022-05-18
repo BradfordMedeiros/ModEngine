@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <queue>
+#include <execinfo.h>
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
@@ -181,6 +182,8 @@ typedef void(*id_stringfunc)(int32_t, std::string&);
 
 typedef void(*messagefunc)(std::queue<StringString>&);
 
-#endif
+void assertWithBacktrace(bool isTrue, std::string message);
+#define modassert(m,x) assertWithBacktrace(m,x);
 
+#endif
 
