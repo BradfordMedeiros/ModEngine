@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(modengine)
 
+# TODO -> This should only be set for debug builds -> for backtrace
+set(CMAKE_ENABLE_EXPORTS TRUE)
+
 #Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
