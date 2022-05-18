@@ -1107,55 +1107,35 @@ void callbackEntities(World& world){
   world.entitiesToUpdate.clear();
 }
 
-std::optional<AttributeValue> getSingleAttribute(World&, objid id, std::string attribute){
+// Should speed up attribute getting/setting, esp single attribute here  
+std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::string attribute, GameObject& gameobj){
+  auto allAttrs = objectAttributes(world, id);
+  if (allAttrs.numAttributes.find(attribute) != allAttrs.numAttributes.end()){
+    return allAttrs.numAttributes.at(attribute);
+  }
+  if (allAttrs.stringAttributes.find(attribute) != allAttrs.stringAttributes.end()){
+    return allAttrs.stringAttributes.at(attribute);
+  }
+  if (allAttrs.vecAttr.vec3.find(attribute) != allAttrs.vecAttr.vec3.end()){
+    return allAttrs.vecAttr.vec3.at(attribute);
+  }
+  if (allAttrs.vecAttr.vec4.find(attribute) != allAttrs.vecAttr.vec4.end()){
+    return allAttrs.vecAttr.vec4.at(attribute);
+  }
   return std::nullopt;
-}
-AttributeValue attributeValue(GameObject& gameobj, std::string field){
-  if (field == "position"){
-    return gameobj.transformation.position;
-  }
-  if (field == "scale"){
-    return gameobj.transformation.scale;
-  } 
-  if (field == "physics_angle"){
-    return gameobj.physicsOptions.angularFactor;
-  } 
-  if (field == "physics_linear"){
-    return gameobj.physicsOptions.linearFactor;
-  } 
-  if (field == "physics_gravity"){
-    return gameobj.physicsOptions.gravity;
-  }   
-  if (field == "physics_velocity"){
-    return gameobj.physicsOptions.velocity;
-  }
-  if (field == "physics_avelocity"){
-    return gameobj.physicsOptions.angularVelocity;
-  }
-  if (field == "physics_friction"){
-    return gameobj.physicsOptions.friction;
-  }
-  if (field == "physics_restitution"){
-    return gameobj.physicsOptions.restitution;
-  }
-  if (field == "physics_mass"){
-    return gameobj.physicsOptions.mass;
-  }
-  if (field == "physics_maxspeed"){
-    return gameobj.physicsOptions.maxspeed;
-  }
-  if (field == "physics_layer"){
-    return gameobj.physicsOptions.layer;
-  }
-  modassert(false, "attribute not yet supported " + field);
-  return 0;
+
+  //return attributeValueFromSerialObject(gameobj, attribute);
 }
 
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
-void applyAttributeDelta(GameObject& gameobj, std::string field, AttributeValue delta){
-  setAttribute(gameobj, field, addAttributes(attributeValue(gameobj, field), delta));
+void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
+  GameObject& gameobj = getGameObject(world, id);
+  auto attribute = getSingleAttribute(world, id, field, gameobj);
+  modassert(attribute.has_value(), "attribute does not have a value: " + field);
+  auto attributeSum = addAttributes(attribute.value(), delta);
+  setAttribute(gameobj, field, attributeSum);
+  afterAttributesSet(world, id, gameobj, field == "physics_velocity");
 }
-
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
   updateEmitters(
@@ -1186,15 +1166,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     },
     [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
       std::cout << "update particle attr -- WARNING ADD FPS INDEPNDENC HERE: " << attribute << std::endl;
-
-      GameObject& gameobj = getGameObject(world, id);
-
-      /*auto optionalAttribute = getSingleAttribute(world, id, attribute);
-      modassert(optionalAttribute.has_value(), "attribute does not exist");
-      auto attributeValue = optionalAttribute.value();*/
-
-      applyAttributeDelta(gameobj, attribute, delta);
-      afterAttributesSet(world, id, gameobj, attribute == "physics_velocity");
+      applyAttributeDelta(world, id, attribute, delta);
     }
   );  
 
