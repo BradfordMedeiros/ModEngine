@@ -458,6 +458,7 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
     return *fValueOne + *valueTwo;
   }
   modassert(false, "string values not supported");
+  return 0;
 }
 
 AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, float percentage){  
@@ -570,4 +571,8 @@ void assertWithBacktrace(bool isTrue, std::string message){
     free(strs);
     exit(1);
   }
+}
+
+void assertTodo(std::string message){
+  assertWithBacktrace(false, "TODO hit: " + message);
 }

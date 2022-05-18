@@ -192,13 +192,15 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.stringAttributes["script"] = gameobj.script;
   _attr.stringAttributes["fragshader"] = gameobj.fragshader;
   _attr.stringAttributes["physics_type"] = gameobj.physicsOptions.isStatic ? "static" : "dynamic";
+
+
 }
 
 // property suffix looks like the parts of the tokens on the right hand side
 // eg position 10
 // eg tint 0.9 0.2 0.4
 AttributeValue parsePropertySuffix(std::string key, std::string value){
-  std::cout << "TODO -> combine parse property suffix with getAttribute in serialization" << std::endl;
+  MODTODO("combine parse property suffix with getAttribute in serialization");
   if (key == "position" || key == "scale"){
     return parseVec(value);
   }

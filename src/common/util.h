@@ -184,15 +184,20 @@ typedef void(*id_stringfunc)(int32_t, std::string&);
 typedef void(*messagefunc)(std::queue<StringString>&);
 
 void assertWithBacktrace(bool isTrue, std::string message);
+void assertTodo(std::string message);
 
 // maybe Debug not DEBUG?
 
 #ifdef MODDEBUG
   #define modassert(m,x) assertWithBacktrace(m, x);
+  #ifdef ASSERT_TODOS
+    #define MODTODO(m) assertTodo(m);
+  #else
+    #define MODTODO(m) ;
+  #endif
 #else
   #define modassert(m,x) ;
 #endif
-
 
 #endif
 
