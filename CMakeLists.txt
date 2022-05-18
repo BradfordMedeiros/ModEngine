@@ -2,8 +2,14 @@
 cmake_minimum_required(VERSION 3.8)
 project(modengine)
 
-# TODO -> This should only be set for debug builds -> for backtrace
-set(CMAKE_ENABLE_EXPORTS TRUE)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message("CMAKE - ModEngine Debug")
+  set(CMAKE_ENABLE_EXPORTS TRUE) # TODO -> modassert backtrace symbols
+endif()
+    
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  message("CMAKE - ModEngine Release")
+endif()
 
 #Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
