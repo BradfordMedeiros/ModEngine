@@ -321,17 +321,18 @@ float angleFromQuat(glm::quat rotation){
   return glm::acos(rotation.w) * 2.f;
 }
 
-//http://www.euclideanspace.com/maths/geometry/rotations/for/decomposition/
-// Fails serialization by .04 degrees... which is probably ok...but why, remnant of just float ops?  
-// At least would be nice to round the values to nearest degree maybe?  
-std::string serializeQuat(glm::quat rotation){
+glm::vec4 serializeQuatToVec4(glm::quat rotation){
   auto axis = rotation * glm::vec3(0.f, 0.f, -1.f);
   auto axisOrientation  = orientationFromPos(glm::vec3(0.f, 0.f, 0.f), axis);
   float w = angleFromQuat(glm::inverse(axisOrientation) * rotation);
-
   //std::cout << "(radians, degree) : " << w << " , " << glm::degrees(w) << std::endl;
   float degreesAngle = glm::degrees(w);
-  return serializeVec(glm::vec4(axis.x, axis.y, axis.z, degreesAngle)); 
+  return glm::vec4(axis.x, axis.y, axis.z, degreesAngle);  
+}
+// Fails serialization by .04 degrees... which is probably ok...but why, remnant of just float ops?  
+// At least would be nice to round the values to nearest degree maybe?  
+std::string serializeQuat(glm::quat rotation){
+  return serializeVec(serializeQuatToVec4(rotation)); 
 }
 
 glm::vec3 quatToVec(glm::quat quat){

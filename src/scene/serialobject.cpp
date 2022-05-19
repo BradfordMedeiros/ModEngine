@@ -121,7 +121,7 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
   if (field == "scale" && value != NULL){
      gameobj.transformation.scale = *value;
      return;
-  } 
+  }
   if (field == "physics_angle" && value != NULL){
      gameobj.physicsOptions.angularFactor = *value;
      return;
@@ -140,6 +140,13 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
   }
   if (field == "physics_avelocity" && value != NULL){
     gameobj.physicsOptions.angularVelocity = *value;
+    return;
+  }
+
+  auto vec4Value = std::get_if<glm::vec4>(&attr);
+  if (field == "rotation" && vec4Value != NULL){
+    MODTODO("probably use basic quaternion representation internally and just make the type outer layer for ease of use");
+    gameobj.transformation.rotation = parseQuat(*vec4Value);
     return;
   }
 
@@ -186,13 +193,13 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.vecAttr.vec3["position"] = gameobj.transformation.position;
   _attr.vecAttr.vec3["scale"] = gameobj.transformation.scale;
+  _attr.vecAttr.vec4["rotation"] = serializeQuatToVec4(gameobj.transformation.rotation); // these representation transformations could happen offline 
 
   _attr.stringAttributes["lookat"] = gameobj.lookat;
   _attr.stringAttributes["layer"] = gameobj.layer;
   _attr.stringAttributes["script"] = gameobj.script;
   _attr.stringAttributes["fragshader"] = gameobj.fragshader;
   _attr.stringAttributes["physics_type"] = gameobj.physicsOptions.isStatic ? "static" : "dynamic";
-
 
 }
 
