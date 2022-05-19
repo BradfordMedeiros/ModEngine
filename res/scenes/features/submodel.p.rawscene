@@ -1,0 +1,7 @@
+node:mesh:../gameresources/build/debug/twospike.gltf
+node:texture:./res/textures/grid.png
+
+node:tint:1 0 0 1
+node/Cube.001:tint:0 1 0 1
+node/Cube.002:tint:0 0 1 1
+
