@@ -184,7 +184,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectEmitter{}),
     .createObj = createEmitter,
     .objectAttributes = nothingObjAttr, 
-    .setAttributes = nothingSetObjAttr,
+    .setAttributes = convertElementSetValue<GameObjectEmitter>(setEmitterAttributes),
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },
