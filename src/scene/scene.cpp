@@ -1108,7 +1108,7 @@ void callbackEntities(World& world){
 }
 
 // Should speed up attribute getting/setting, esp single attribute here  
-std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::string attribute, GameObject& gameobj){
+std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::string attribute){
   auto allAttrs = objectAttributes(world, id);
   if (allAttrs.numAttributes.find(attribute) != allAttrs.numAttributes.end()){
     return allAttrs.numAttributes.at(attribute);
@@ -1123,18 +1123,43 @@ std::optional<AttributeValue> getSingleAttribute(World& world, objid id, std::st
     return allAttrs.vecAttr.vec4.at(attribute);
   }
   return std::nullopt;
+}
 
-  //return attributeValueFromSerialObject(gameobj, attribute);
+GameobjAttributes gameobjAttrFromValue(std::string& field, AttributeValue value){
+  GameobjAttributes attr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+    .children = {},
+  };
+  auto stringValue = std::get_if<std::string>(&value);
+  auto floatValue = std::get_if<float>(&value);
+  auto vec3Value = std::get_if<glm::vec3>(&value);
+  auto vec4Value = std::get_if<glm::vec4>(&value);
+  if (stringValue){
+    attr.stringAttributes[field] = *stringValue;
+  }else if (floatValue){
+    attr.numAttributes[field] = *floatValue;
+  }else if (vec3Value){
+    attr.vecAttr.vec3[field] = *vec3Value;
+  }else if (vec4Value){
+    attr.vecAttr.vec4[field] = *vec4Value;
+  }else{
+    modassert(false, "invalid attribute value type");
+  }
+  return attr;
 }
 
 // TODO -> eliminate all the strings in the fields and use some sort of symbol system
 void applyAttributeDelta(World& world, objid id, std::string field, AttributeValue delta){
   GameObject& gameobj = getGameObject(world, id);
-  auto attribute = getSingleAttribute(world, id, field, gameobj);
+  auto attribute = getSingleAttribute(world, id, field);
   modassert(attribute.has_value(), "attribute does not have a value: " + field);
   auto attributeSum = addAttributes(attribute.value(), delta);
-  setAttribute(gameobj, field, attributeSum);
-  afterAttributesSet(world, id, gameobj, field == "physics_velocity");
+  auto attrValue = gameobjAttrFromValue(field, attributeSum);
+
+  std::cout << "apply attribute: " << field << " " << print(attributeSum) << std::endl;
+  setAttributes(world, id, attrValue);
 }
 
 void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
@@ -1165,7 +1190,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       }
     },
     [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
-      std::cout << "update particle attr -- WARNING ADD FPS INDEPNDENC HERE: " << attribute << std::endl;
+      MODTODO("update particle attr -- WARNING ADD FPS INDEPNDENC HERE");
       applyAttributeDelta(world, id, attribute, delta);
     }
   );  

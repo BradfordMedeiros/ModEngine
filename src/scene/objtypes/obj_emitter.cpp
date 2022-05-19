@@ -33,18 +33,14 @@ GameobjAttributes particleFields(GameobjAttributes& attributes){
   return attr;
 }
 
-struct ValueVariance {
-  glm::vec3 value;
-  glm::vec3 variance;
-  std::vector<float> lifetimeEffect;
-};
 std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
-  std::map<std::string, ValueVariance> values;
+  std::map<std::string, EmitterDelta> values;
   ///////////////// Same code for diff types consolidate
   for (auto [key, _] : attributes.vecAttr.vec3){
     if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      values[newKey] = ValueVariance {
+      values[newKey] = EmitterDelta {
+        .attributeName = newKey,
         .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
         .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
         .lifetimeEffect = {},
@@ -54,7 +50,8 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   for (auto [key, _] : attributes.vecAttr.vec4){
     if ((key.at(0) == '!' || key.at(0) == '?' || key.at(0) == '%') && key.size() > 1){
       auto newKey = key.substr(1, key.size());
-      values[newKey] = ValueVariance {
+      values[newKey] = EmitterDelta {
+        .attributeName = newKey,
         .value = glm::vec4(0.f, 0.f, 0.f, 0.f),
         .variance = glm::vec4(0.f, 0.f, 0.f, 0.f),
         .lifetimeEffect = {},
@@ -65,6 +62,7 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   
   ///////////////// Same code for diff types
   for (auto [key, value] : attributes.vecAttr.vec3){
+    std::cout <<  "emitter: adding vec3 type for: " << key << std::endl;
     if (key.size() > 1){
       auto newKey = key.substr(1, key.size());
       if (key.at(0) == '!'){
@@ -78,6 +76,7 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
     }
   }
   for (auto [key, value] : attributes.vecAttr.vec4){
+    std::cout <<  "emitter: adding vec4 type for: " << key << std::endl;
     if (key.size() > 1){
       auto newKey = key.substr(1, key.size());
       if (key.at(0) == '!'){
@@ -101,6 +100,11 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
       .lifetimeEffect = value.lifetimeEffect,
     });
   }
+
+  for (auto &delta : deltas){
+    std::cout << "create emitter - " << delta.attributeName << " - " << print(delta.value) << " = " << print(delta.variance) << std::endl;
+  }
+
   return deltas;
 }
 

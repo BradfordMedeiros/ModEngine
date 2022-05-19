@@ -439,22 +439,22 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
   auto valueOne = std::get_if<glm::vec3>(&one);
   auto valueTwo = std::get_if<glm::vec3>(&two);
   if (valueOne != NULL){
-    assert(valueTwo != NULL);
+    modassert(valueTwo != NULL, "Incompatible types between vec3 value one and two");
     return *valueOne + *valueTwo;
   }
 
 
   auto value4One = std::get_if<glm::vec4>(&one);
-  auto value4Two = std::get_if<glm::vec4>(&one);
+  auto value4Two = std::get_if<glm::vec4>(&two);
   if (value4One != NULL){
-    assert(value4Two != NULL);
+    modassert(value4Two != NULL, "Incompatible types between vec4 value one and two");
     return *value4One + *value4Two;
   }
 
   auto fValueOne = std::get_if<float>(&one);
   auto fValueTwo = std::get_if<float>(&two);
   if (fValueOne != NULL){
-    assert(fValueTwo != NULL);
+    modassert(fValueTwo != NULL, "Incompatible types between float value one and two");
     return *fValueOne + *valueTwo;
   }
   modassert(false, "string values not supported");
@@ -464,19 +464,19 @@ AttributeValue addAttributes(AttributeValue one, AttributeValue two){
 std::string print(AttributeValue& value){
   auto attrStrValue = std::get_if<std::string>(&value);
   if (attrStrValue != NULL){
-    std::cout << *attrStrValue << std::endl;
+    return *attrStrValue + "[string]";
   }
   auto attrFloatValue = std::get_if<float>(&value);
   if (attrFloatValue != NULL){
-    std::cout << *attrFloatValue << std::endl;
+    return std::to_string(*attrFloatValue) + "[float]";
   }
   auto attrVec3Value = std::get_if<glm::vec3>(&value);
   if (attrVec3Value != NULL){
-    std::cout << print(*attrVec3Value) << std::endl;
+    return print(*attrVec3Value) + "[vec3]";
   }
   auto attrVec4Value = std::get_if<glm::vec4>(&value);
   if (attrVec4Value != NULL){
-    std::cout << print(*attrVec4Value) << std::endl;
+    return print(*attrVec4Value) + "[vec4]";
   }
   modassert(false, "invalid attribute type");
   return "";

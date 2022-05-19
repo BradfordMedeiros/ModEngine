@@ -1,13 +1,17 @@
-platform:mesh:./res/models/box/box.obj
-platform:scale:100 1 100
-platform:position:0 -5 0
+
 
 +particles:position:0 2 0
-+particles:limit:20
-+particles:rate:0.3
++particles:limit:1
++particles:rate:1
 +particles:duration:2
 
-+particles:+mesh:./res/models/box/box.obj
++particles:+mesh:./res/models/normalbox.gltf
 #+particles:!scale:0.1 0 0
-+particles:?position:0 1 0
 #+particles:physics_type:dynamic
+
++particles:+position:1 0 0
++particles:!position:0.002 0 0
+
++particles:+tint:1 0 0 1
++particles:!tint:0.02 -0.02 0.004 -0.01
+
