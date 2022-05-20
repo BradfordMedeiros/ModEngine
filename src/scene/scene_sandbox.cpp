@@ -101,7 +101,8 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj){
+GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields){
+  MODTODO("default inheritance of attributes...should there really be any (aside from transform");
   GameobjAttributes attributes {
     .stringAttributes = {
       {"fragshader", gameobj.fragshader},
@@ -111,11 +112,12 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
       .vec3 = {
         {"position", transform.position },
         {"scale",    transform.scale    },
+        // 
       },
       .vec4 = {},
     },
-   
   };
+  mergeAttributes(attributes, additionalFields);
   return attributes;
 }
 
@@ -148,7 +150,7 @@ std::map<std::string, GameobjAttributesWithId> addSubsceneToRoot(
       .attr = additionalFields.at(nodeId),
     };
 
-    auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj));
+    auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     auto addedId = sandboxAddToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
@@ -767,9 +769,6 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, std::string> names, 
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId){
-  for (auto &[id, additionalFields] : additionalFields){
-    std::cout << "multiobj: id, name: " << id << " - " << names.at(id) << std::endl;
-  }  
   auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sandbox.layers, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
   return nameToAdditionalFields;
 }
