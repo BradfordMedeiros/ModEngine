@@ -1,11 +1,10 @@
 #include "./obj_mesh.h"
 
-static std::vector<std::string> meshFieldsToCopy = { "textureoffset", "texturetiling", "texturesize", "texture", "discard", "emission", "tint" };
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
   // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
   std::string rootMeshName = attr.stringAttributes.find("mesh") == attr.stringAttributes.end()  ? "" : attr.stringAttributes.at("mesh");
-  auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName, meshFieldsToCopy);
+  auto meshNamesForObj = util.ensureMeshLoaded(rootMeshName);
   std::vector<std::string> meshNames;
   std::vector<Mesh> meshesToRender;
   for (auto meshName : meshNamesForObj){

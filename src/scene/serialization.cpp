@@ -142,6 +142,29 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   attributes.stringAttributes[attribute] = payload;
 }
 
+bool isSubelementToken(Token& token){
+  auto numTokens = split(token.target, '/');
+  return numTokens.size() > 1;
+}
+
+DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
+  std::vector<Token> mainTokens;
+  std::vector<Token> subelementTokens;
+  for (auto &token : tokens){
+    bool isSubelement = isSubelementToken(token);
+    if (isSubelement){
+      subelementTokens.push_back(token);
+    }else{
+      mainTokens.push_back(token);
+    }
+  }
+  std::cout << std::endl;
+  DividedTokens dividedTokens {
+    .mainTokens = mainTokens,
+    .subelementTokens = subelementTokens,
+  };
+  return dividedTokens;
+}
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
   std::map<std::string, GameobjAttributes> objectAttributes;
 

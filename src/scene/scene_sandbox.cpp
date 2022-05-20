@@ -50,7 +50,9 @@ SceneDeserialization createSceneFromParsedContent(
 ){
   Scene scene;
 
-  auto serialGameAttrs = deserializeSceneTokens(tokens);
+  auto dividedTokens = divideMainAndSubelementTokens(tokens);
+  auto serialGameAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
+  auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
 
   auto rootId = getNewObjectId();
   auto rootName = "~root:" + std::to_string(rootId);
@@ -94,6 +96,7 @@ SceneDeserialization createSceneFromParsedContent(
   SceneDeserialization deserializedScene {
     .scene = scene,
     .additionalFields = additionalFields,
+    .subelementAttributes = subelementAttrs,
   };
   return deserializedScene;
 }
@@ -740,6 +743,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   AddSceneDataValues data  {
     .additionalFields = additionalFields,
     .idsAdded = idsAdded,
+    .subelementAttributes = deserializedScene.subelementAttributes,
   };
   return data;
 }
@@ -763,6 +767,9 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, std::string> names, 
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId){
+  for (auto &[id, additionalFields] : additionalFields){
+    std::cout << "multiobj: id, name: " << id << " - " << names.at(id) << std::endl;
+  }  
   auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sandbox.layers, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
   return nameToAdditionalFields;
 }

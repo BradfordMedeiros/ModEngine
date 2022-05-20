@@ -598,3 +598,18 @@ void assertWithBacktrace(bool isTrue, std::string message){
 void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
 }
+
+void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
+  for (auto &[name, value] : fromAttributes.stringAttributes){
+    toAttributes.stringAttributes[name] = value;
+  }
+  for (auto &[name, value] : fromAttributes.numAttributes){
+    toAttributes.numAttributes[name] = value;
+  }
+  for (auto &[name, value] : fromAttributes.vecAttr.vec3){
+    toAttributes.vecAttr.vec3[name] = value;
+  }
+  for (auto &[name, value] : fromAttributes.vecAttr.vec4){
+    toAttributes.vecAttr.vec4[name] = value;
+  }
+}

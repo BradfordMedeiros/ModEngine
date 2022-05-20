@@ -125,7 +125,7 @@ static Field uiButtonField {
 };
 
 static Field uiSliderField {
-  .prefix = '/',
+  .prefix = '_',
   .type = "slider",
 };
 

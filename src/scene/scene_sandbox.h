@@ -45,7 +45,8 @@ struct Scene {
 
 struct SceneDeserialization {
   Scene scene;
-  std::map<std::string, GameobjAttributes>  additionalFields;
+  std::map<std::string, GameobjAttributes> additionalFields;
+  std::map<std::string, GameobjAttributes> subelementAttributes;
 };
 
 struct SceneMetadata {
@@ -99,6 +100,7 @@ struct GameobjAttributesWithId {
 struct AddSceneDataValues {
   std::map<std::string, GameobjAttributesWithId>  additionalFields;
   std::vector<objid> idsAdded;
+  std::map<std::string, GameobjAttributes> subelementAttributes;
 };
 AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name);
 void removeScene(SceneSandbox& sandbox, objid sceneId);
