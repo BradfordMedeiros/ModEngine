@@ -142,6 +142,9 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   attributes.stringAttributes[attribute] = payload;
 }
 
+std::string mainTargetElement(std::string target){
+  return split(target, '/').at(0);
+}
 bool isSubelementToken(Token& token){
   auto numTokens = split(token.target, '/');
   return numTokens.size() > 1;

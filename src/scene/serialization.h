@@ -31,6 +31,8 @@ struct DividedTokens {
   std::vector<Token> mainTokens;
   std::vector<Token> subelementTokens;
 };
+
+std::string mainTargetElement(std::string target);
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens);
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
