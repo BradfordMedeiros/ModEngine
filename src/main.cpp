@@ -30,6 +30,7 @@
 #include "./cscript/cscript.h"
 #include "./cscript/cscripts/cscript_sample.h"
 #include "./cscript/cscripts/cscript_scheme.h"
+#include "./lines.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -72,11 +73,6 @@ float deltaTime = 0.0f; // Time between current frame and last frame
 int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing certain calls like eg text)
 
 DynamicLoading dynamicLoading;
-std::vector<Line> lines;
-std::vector<Line> bluelines;
-
-
-extern std::vector<PermaLine> permaLines;
 
 std::map<unsigned int, Mesh> fontMeshes;
 
@@ -103,7 +99,8 @@ extern std::vector<InputDispatch> inputFns;
 std::map<std::string, objid> activeLocks;
 
 std::vector<LayerInfo> layers;
-  
+LineData lineData = createLines();
+
 
 // 0th depth texture is the main depth texture used for eg z buffer
 // other buffers are for the lights
@@ -298,46 +295,6 @@ void loadAllTextures(){
   }*/
 }
 
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color){
-  if (permaline){
-    auto lineId = getUniqueObjId();
-    permaLines.push_back(
-      PermaLine {
-        .line = Line{
-          .fromPos = fromPos,
-          .toPos = toPos,
-        },
-        .lineid = lineId,
-        .owner = owner, 
-        .color = color,
-      }
-    );   
-    return lineId;
-  }
-  Line line = {
-    .fromPos = fromPos,
-    .toPos = toPos
-  };
-  lines.push_back(line);
-  return 0;
-}
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
-  return addLineNextCycle(fromPos, toPos, permaline, owner, GREEN);
-}
-
-void freeLine(objid lineId){
-  std::vector<PermaLine> newLines;
-  for (auto &line : permaLines){
-    if (lineId != line.lineid){
-      newLines.push_back(line);
-    }
-  }
-  permaLines.clear();
-  for (auto line : newLines){
-    permaLines.push_back(line);
-  }
-}
-
 
 std::vector<glm::vec3> traversalPositions;
 std::vector<glm::vec3> parentTraversalPositions;
@@ -353,7 +310,7 @@ void drawTraversalPositions(){
   for (int i = 0; i < traversalPositions.size(); i++){
     auto fromPos = traversalPositions.at(i);
     auto toPos = parentTraversalPositions.at(i);
-    addLineNextCycle(fromPos, toPos, false, 0);
+    addLineNextCycle(lineData, fromPos, toPos, false, 0);
   }
 }
 
@@ -537,19 +494,6 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   return numTriangles;
 }
 
-void drawPermaLines(GLint shaderProgram, LineColor color, glm::vec4 tint){
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
-  if (permaLines.size() > 0){
-    std::vector<Line> lines;
-    for (auto permaline : permaLines){
-      if (permaline.color == color){
-        lines.push_back(permaline.line);
-      }
-    }
-    drawLines(lines);
-  }  
-}
-
 void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   auto projection = projectionFromLayer(layers.at(0));
   glUseProgram(shaderProgram);
@@ -588,21 +532,21 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   drawCoordinateSystem(100.f);
 
 
-  drawPermaLines(shaderProgram, RED, glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawPermaLines(shaderProgram, GREEN, glm::vec4(0.f, 1.f, 0.f, 1.f));
-  drawPermaLines(shaderProgram, BLUE, glm::vec4(0.f, 0.f, 1.f, 1.f));
+  drawPermaLines(lineData, shaderProgram, RED, glm::vec4(1.f, 0.f, 0.f, 1.f));
+  drawPermaLines(lineData, shaderProgram, GREEN, glm::vec4(0.f, 1.f, 0.f, 1.f));
+  drawPermaLines(lineData, shaderProgram, BLUE, glm::vec4(0.f, 0.f, 1.f, 1.f));
 
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
-  if (lines.size() > 0){
-   drawLines(lines);
+  if (lineData.lines.size() > 0){
+   drawLines(lineData.lines);
   }
 
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-  if (bluelines.size() > 0){
-   drawLines(bluelines);
+  if (lineData.bluelines.size() > 0){
+   drawLines(lineData.bluelines);
   }
-  lines.clear();
-  bluelines.clear();
+  lineData.lines.clear();
+  lineData.bluelines.clear();
 
   if (state.showCameras){
     drawTraversalPositions();   
@@ -917,6 +861,16 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
   return info;
 }
 
+
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color){
+  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, color);
+}
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner);
+}
+void freeLine(objid lineId){
+  freeLine(lineData, lineId);
+}
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1246,7 +1200,7 @@ int main(int argc, char* argv[]){
     .unloadCScript = [](std::string scriptpath, objid id) -> void {
       unloadCScript(id);
       removeLocks(id);
-      removeLinesByOwner(id);
+      removeLinesByOwner(lineData, id);
     },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime,
@@ -1517,10 +1471,10 @@ int main(int argc, char* argv[]){
         if (state.manipulatorLineId == 0){
           state.manipulatorLineId = getUniqueObjId();
         }
-        addLineNextCycle(frompos, topos, true, state.manipulatorLineId, color);
+        addLineNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color);
       },
       []() -> void {
-        removeLinesByOwner(state.manipulatorLineId);
+        removeLinesByOwner(lineData, state.manipulatorLineId);
       },
       getGameObjectPos, 
       setGameObjectPosition, 

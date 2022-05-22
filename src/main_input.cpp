@@ -19,6 +19,7 @@ extern SysInterface interface;
 extern GLFWwindow* window;
 extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
+extern LineData lineData;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -128,27 +129,12 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   }
 }
 
-std::vector<PermaLine> permaLines;
-void removeLinesByOwner(objid owner){
-  MODTODO("move all this line stuff behind some single cleaner interface");
-  std::vector<PermaLine> newLines;
-  for (auto &line : permaLines){
-    if (owner != line.owner){
-      newLines.push_back(line);
-    }
-  }
-  permaLines.clear();
-  for (auto line : newLines){
-    permaLines.push_back(line);
-  }
-}
-
 void onSelectNullItem(){
   auto manipulatorId = getManipulatorId();
   std::cout << "manipulatorId: " << manipulatorId << std::endl;
   if (manipulatorId != 0){
     onManipulatorUnselect(removeObjectById);
-    removeLinesByOwner(state.manipulatorLineId); 
+    removeLinesByOwner(lineData, state.manipulatorLineId); 
   }
   clearSelectedIndexs(state.editor); 
   cBindings.onObjectUnselected();

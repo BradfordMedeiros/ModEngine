@@ -16,6 +16,7 @@
 #include "./scene/scene_offline.h"
 #include "./renderstages.h"
 #include "./scene/styles.h"
+#include "./lines.h"
 
 struct JoyStickInfo {
   int index;
@@ -46,13 +47,5 @@ void toggleFullScreen(bool fullscreen);
 void toggleCursor(bool focusCursor);
 
 void handleInput(GLFWwindow* window);
-
-struct PermaLine {
-  Line line;
-  objid lineid;
-  objid owner;
-  LineColor color;
-};
-void removeLinesByOwner(objid owner);
 
 #endif
