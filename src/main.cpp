@@ -1462,6 +1462,7 @@ int main(int argc, char* argv[]){
         selectItem(hoveredId, hoveredItemColor);
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
+        cBindings.onObjectUnselected();
       }
       selectItemCalled = false;
     }

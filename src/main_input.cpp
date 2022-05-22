@@ -137,7 +137,6 @@ void onSelectNullItem(){
     removeLinesByOwner(lineData, state.manipulatorLineId); 
   }
   clearSelectedIndexs(state.editor); 
-  cBindings.onObjectUnselected();
 }
 
 void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
