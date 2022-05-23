@@ -35,10 +35,15 @@
 
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
 (define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
+(define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
+
 (define buttonToAction
   (list
     (list "create-camera" createCameraPlaceholder)
     (list "create-light" createLightPlaceholder)
+    (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
+    (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
+    (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
   )
 )
 
@@ -243,6 +248,7 @@
     (let ((action (assoc (cadr attrActions) buttonToAction)))
       (if action
         ((cadr action))
+        (format #t "no action for ~a\n" (cadr attrActions))
       )
     )
   )

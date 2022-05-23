@@ -249,6 +249,26 @@ std::vector<ObjectStateMapping> mapping = {
     },
     .object = "mouse",
     .attribute = "crosshair",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto mode = std::get_if<std::string>(&value);
+      if (mode == NULL){
+        modassert(false, "invalid manipulator mode type");
+        return;
+      }
+      if (*mode == "translate"){
+        state.manipulatorMode = TRANSLATE;
+      }else if (*mode == "scale"){
+        state.manipulatorMode = SCALE;
+      }else if (*mode == "rotate"){
+        state.manipulatorMode = ROTATE;
+      }else{
+        modassert(false, "invalid manipulator mode option: " + *mode);
+      }
+    },
+    .object = "tools",
+    .attribute = "manipulator-mode",
   }
 };
 
