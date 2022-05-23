@@ -596,7 +596,11 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
   drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
   drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
-  drawText("cursor: " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", 10, 90, 3);
+
+  float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
+  float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
+
+  drawText("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", 10, 90, 3);
   
   if (selected(state.editor) != -1){
     auto selectedIndex = selected(state.editor);
