@@ -240,7 +240,7 @@
         ],
       ],
     ],
-      "object_tools" => [
+    "object_tools" => [
       "title" => "Object Tools",
       "items" => [
          [
@@ -259,6 +259,18 @@
               ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "create-light" ],
               ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "create-sound" ],
             ],
+          ],
+        ],
+      ],
+    ],
+    "scenegraph" => [
+      "title" => "Scenegraph",
+      "items" => [
+         [
+          "type" => "label",
+          "data" => [
+            "key" => "Scenegraph placeholder", 
+            "value" => ""
           ],
         ],
       ],
