@@ -279,6 +279,7 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
 
 
 std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
+  //std::cout << "root position: " << print(rootPosition) << std::endl;
   auto horizontal = rootPosition.x;
   auto fixedY = rootPosition.y;
   auto vertical = rootPosition.y;
@@ -290,10 +291,12 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
-      auto boundingWidth = (physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin);
-      auto objectWidth =  boundingWidth * physicsInfo.transformation.scale.x;
+      auto boundingWidth = physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin;
+      auto objectWidth =  glm::abs(boundingWidth * physicsInfo.transformation.scale.x);
       auto left = horizontal + objectWidth / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
+
+      //std::cout << "(boundingWidth = " << boundingWidth << ", objectWidth = " << objectWidth << ")" << std::endl;
 
       glm::vec3 newPos = obj.transformation.position;
       newPos.x = left;
@@ -474,7 +477,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   auto totalAdjustment = elementsLeftSideOffset + marginOffset + mainAlignmentOffset + alignItemsAdjustment;
 
-  // Offset all elements to the correct positions, so that they're centered
+  //std::cout << "( elements(width, height) = " << print(glm::vec2(elementsWidth, elementsHeight)) << ", bounding(width, height) = " << print(glm::vec2(boundingWidth, boundingHeight)) << std::endl;
+  //std::cout << "( totalAdjustment = " << print(totalAdjustment) << ", elementsLeftSideOffset = " << print(elementsLeftSideOffset) << ", marginOffset = " << print(marginOffset) << ", mainAlignmentOffset = " << print(mainAlignmentOffset) << ", alignItemsAdjustment = " << print(alignItemsAdjustment) << " ) " << std::endl;
+
   for (auto [id, newPos] : newPositions){
     auto fullNewPos = newPos + totalAdjustment;
     physicsTranslateSet(world, id, fullNewPos, false);
