@@ -1,13 +1,15 @@
 #include "./benchmark.h"
 
-Benchmark createBenchmark(bool shouldBenchmark){
+Benchmark createBenchmark(bool shouldBenchmark, std::function<void(float)> drawScreenspaceLinePoint){
   Benchmark result{
     .shouldBenchmark = shouldBenchmark,
+    .drawScreenspaceLinePoint = drawScreenspaceLinePoint,
   };
   return result;
 }
 
 void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects, int numTriangles){
+  benchmark.drawScreenspaceLinePoint(frametime);
   if (!benchmark.shouldBenchmark){
     return;
   }

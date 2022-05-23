@@ -14,10 +14,11 @@ struct BenchmarkMeasurement {
 
 struct Benchmark {
   bool shouldBenchmark;
+  std::function<void(float)> drawScreenspaceLinePoint;
   std::vector<BenchmarkMeasurement> samples;
 };
 
-Benchmark createBenchmark(bool shouldBenchmark);
+Benchmark createBenchmark(bool shouldBenchmark, std::function<void(float)> drawScreenspaceLinePoint);
 void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects, int numTriangles);
 std::string benchmarkResult(Benchmark& benchmark);
 

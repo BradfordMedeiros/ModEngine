@@ -88,6 +88,8 @@ unsigned int portalTextures[16];
 std::map<objid, unsigned int> portalIdCache;
 
 glm::mat4 orthoProj;
+glm::mat4 ndiOrtho = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.0f, 1.0f);  
+
 unsigned int uiShaderProgram;
 
 CScriptBindingCallbacks cBindings;
@@ -108,7 +110,7 @@ const int numDepthTextures = 32;
 int activeDepthTexture = 0;
 
 DrawingParams drawParams = getDefaultDrawingParams();
-Benchmark benchmark = createBenchmark(false);
+Benchmark benchmark;
 
 void updateDepthTexturesSize(){
   for (int i = 0; i < numDepthTextures; i++){
@@ -568,6 +570,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
 void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded, bool showCursor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
   if (showCursor){
     if(!state.isRotateSelection){
@@ -613,6 +616,13 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
   drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
   drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
+  
+
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
+  drawScreenspaceLines(lineData, uiShaderProgram);
 }
 
 void onClientMessage(std::string message){
@@ -861,7 +871,6 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
   return info;
 }
 
-
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color){
   return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, color);
 }
@@ -963,7 +972,12 @@ int main(int argc, char* argv[]){
   auto shouldBenchmark = benchmarkFile != "";
   auto timetoexit = result["timetoexit"].as<int>();
 
-  benchmark = createBenchmark(shouldBenchmark);
+  benchmark = createBenchmark(shouldBenchmark, [](float amount) -> void {
+    if (rand() % 100 < 98){
+      return;
+    }  
+    addScreenspaceLine(lineData, now, /* fps */ 1.f / amount);
+  });
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
   disableInput = result["noinput"].as<bool>();

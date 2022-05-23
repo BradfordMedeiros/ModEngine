@@ -224,8 +224,7 @@ void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsi
   }
 }
 
-// returns # of verts drawn
-int drawLines(std::vector<Line> allLines){
+LineRenderData createLineRenderData(std::vector<Line>& allLines){
   std::vector<glm::vec3> lines;
   for (Line line : allLines){
     lines.push_back(line.fromPos);
@@ -253,13 +252,27 @@ int drawLines(std::vector<Line> allLines){
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
   glEnableVertexAttribArray(0);
-  glLineWidth(5);
-  glDrawElements(GL_LINES, indicies.size() , GL_UNSIGNED_INT, 0);
 
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &EBO);
-  glDeleteBuffers(1, &VBO);
-  return indicies.size();
+  return LineRenderData {
+    .VAO = VAO,
+    .EBO = EBO,
+    .VBO = VBO,
+    .numIndices = indicies.size(),
+  };
+}
+void freeLineRenderData(LineRenderData& lineData){
+  glDeleteVertexArrays(1, &lineData.VAO);
+  glDeleteBuffers(1, &lineData.EBO);
+  glDeleteBuffers(1, &lineData.VBO); 
+}
+
+// returns # of verts drawn
+int drawLines(std::vector<Line> allLines){
+  auto lineData = createLineRenderData(allLines);
+  glLineWidth(5);
+  glDrawElements(GL_LINES, lineData.numIndices , GL_UNSIGNED_INT, 0);
+  freeLineRenderData(lineData);
+  return lineData.numIndices;
 }
 
 Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture){

@@ -55,7 +55,16 @@ Mesh loadMesh(std::string defaultTexture, MeshData modelData, std::function<Text
 Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetx, float offsety, float width, float height, std::function<Texture(std::string)> ensureLoadTexture); // 2DMesh with subimage selection
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture);  // loads a 2d mesh with vertex centered around 0 to 1 x/y
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId = -1, unsigned int customOpacityTextureId = -1,  bool drawPoints = false);  						 // draws mesh and related texture info (no shader data supplied)
+
+struct LineRenderData {
+  unsigned int VAO;
+  unsigned int EBO;
+  unsigned int VBO;
+  unsigned int numIndices;
+};
+LineRenderData createLineRenderData(std::vector<Line>& allLines);
 int drawLines(std::vector<Line> allLines); // returns # of verts drawn
+void freeLineRenderData(LineRenderData& lineData);
 
 Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);
 void freeMesh(Mesh& mesh);
