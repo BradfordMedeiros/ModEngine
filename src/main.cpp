@@ -973,9 +973,7 @@ int main(int argc, char* argv[]){
   auto timetoexit = result["timetoexit"].as<int>();
 
   benchmark = createBenchmark(shouldBenchmark, [](float amount) -> void {
-    if (rand() % 100 < 98){
-      return;
-    }  
+    //std::cout << "screenspace line: " << now << " " << (1.f / amount) << std::endl;
     addScreenspaceLine(lineData, now, /* fps */ 1.f / amount);
   });
 
@@ -989,6 +987,7 @@ int main(int argc, char* argv[]){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  //glfwWindowHint(GLFW_DECORATED, false);
 
   monitor = glfwGetPrimaryMonitor();
   mode = glfwGetVideoMode(monitor);
