@@ -309,7 +309,7 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
       auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
-      auto objectHeight =  boundingHeight * physicsInfo.transformation.scale.y;
+      auto objectHeight = glm::abs(boundingHeight * physicsInfo.transformation.scale.y);
       auto top = vertical + objectHeight / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
 
