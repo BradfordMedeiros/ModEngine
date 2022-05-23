@@ -18,6 +18,7 @@
 (test_panel:border-size:0.004
 (test_panel:border-color:0.3 0.3 0.3 1
 (test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
+(test_panel:minwidth:0.44
 
 )window_x:layer:basicui
 )window_x:scale:0.008 0.016 0.008
