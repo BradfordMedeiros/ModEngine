@@ -63,7 +63,7 @@ struct LineRenderData {
   unsigned int numIndices;
 };
 LineRenderData createLineRenderData(std::vector<Line>& allLines);
-int drawLines(std::vector<Line> allLines); // returns # of verts drawn
+int drawLines(std::vector<Line> allLines, int linewidth = 5); // returns # of verts drawn
 void freeLineRenderData(LineRenderData& lineData);
 
 Mesh loadSkybox(std::string defaultTexture, std::string skyboxPath, std::string skyboxTexture, std::function<Texture(std::string)> ensureLoadTexture,  std::function<Texture(std::string)> ensureLoadCubemapTexture);
