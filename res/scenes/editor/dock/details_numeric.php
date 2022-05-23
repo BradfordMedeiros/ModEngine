@@ -15,7 +15,7 @@
       createElement($floatValueElementName, $default_value, [ "value" => $value[$i]["value"] ]);
       array_push($managedElements, $floatValueElementName);
     }else if ($controlType == "slider"){
-      $sliderElementName =  "/" . $unique_control_id . "_" . "numeric"  . $i . "_value";
+      $sliderElementName =  "_" . $unique_control_id . "_" . "numeric"  . $i . "_value";
       createElement($sliderElementName, $default_value, [ "scale" => "0.1 0.02 0.02" ]);
       array_push($managedElements, $sliderElementName);
     }else{
