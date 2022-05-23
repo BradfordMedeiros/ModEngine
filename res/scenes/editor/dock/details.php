@@ -84,7 +84,7 @@
       "type" => "horizontal",
       "backpanel" => "true",
       "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
-      "margin" => "0.02",
+      "margin" => "0.04",
       "spacing" => "0.02",
       "minwidth" => "0.36",
     ];
