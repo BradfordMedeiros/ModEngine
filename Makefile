@@ -4,6 +4,10 @@ release: modengine_release
 assimp:
 	@git submodule update --init --recursive
 
+buildtest: build
+	@echo "test project to evaluating (to evaluate dependencies)"
+	@(cd ./build && cmake -DBUILDTEST=True -DCMAKE_BUILD_TYPE=Debug .. && make all)	
+
 modengine: build resourcefiles
 	@echo "making modengine debug"
 	@(cd ./build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make all)
