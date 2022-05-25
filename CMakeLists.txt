@@ -178,6 +178,17 @@ endif()
 ## Bullet - physics -- this should come from the actual lib folder eventually but oh well for now.
 if (NOT NO_INCLUDE_BULLET)
   message("MODBUILD - Including Bullet")
+
+  # Options to speed up building by not building everything
+  # TODO -- verify how much time these bring down
+  # Tried once, build times reduced by  ( ~6m to ~50s / ~90%)
+  set(BUILD_CPU_DEMOS OFF CACHE BOOL "")
+  set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "")
+  set(BUILD_EXTRAS OFF CACHE BOOL "")
+  set(BUILD_UNIT_TESTS OFF CACHE BOOL "")
+  ####################################################
+
+  ####
   include(FindBullet)
   set(BULLET_DIR "${LIB_DIR}/bullet3") # where to find Bullet
   add_subdirectory("${BULLET_DIR}")
