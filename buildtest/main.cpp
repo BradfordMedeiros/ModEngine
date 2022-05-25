@@ -5,13 +5,25 @@
   #include <GLFW/glfw3.h>
 
   void glfwTest(){
-  	std::cout << "placeholder glfw test" << std::endl;
+    glfwInit();
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+   	//auto window = glfwCreateWindow(1000, 1000, "Build Test", NULL, NULL);
+    //glfwMakeContextCurrent(window);
+    /*while(!glfwWindowShouldClose(window)){
+       glfwPollEvents();
+	   glfwSwapBuffers(window);
+    }*/
+    glfwTerminate();
+  	std::cout << "GLFW Verified" << std::endl;
+
   }
 #endif
 
 #ifdef INCLUDE_GLAD
   void gladTest(){
-
+   	std::cout << "GLAD Test Not Implemented" << std::endl;
   }
 #endif
 
@@ -29,13 +41,13 @@
   #include <stb_image.h>
   #include <stb_image_write.h>
   void stbImageTest(){
-
+   	std::cout << "GLAD Test Not Implemented" << std::endl;
   }
 #endif
 
 #ifdef INCLUDE_OPENAL
   void openAlTest(){
-
+   	std::cout << "OpenAl Test Not Implemented" << std::endl;
   }
 #endif
 
@@ -55,13 +67,13 @@
 
 #ifdef INCLUDE_ASSIMP
   void assimpTest(){
-
+   	std::cout << "Assimp Test Not Implemented" << std::endl;
   }
 #endif
 
 #ifdef INCLUDE_BULLET
   void bulletTest(){
-  	
+   	std::cout << "Bullet Test Not Implemented" << std::endl;
   }
 #endif
 
