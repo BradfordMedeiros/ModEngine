@@ -17,13 +17,16 @@
     }*/
     glfwTerminate();
   	std::cout << "GLFW Verified" << std::endl;
-
   }
 #endif
 
 #ifdef INCLUDE_GLAD
+  #include <glad/glad.h>
   void gladTest(){
-   	std::cout << "GLAD Test Not Implemented" << std::endl;
+   	GLint x = 2;
+   	GLint y = 4;
+   	assert(x + y == 6);
+   	std::cout << "GLAD Verified" << std::endl;
   }
 #endif
 
@@ -41,7 +44,18 @@
   #include <stb_image.h>
   #include <stb_image_write.h>
   void stbImageTest(){
-   	std::cout << "GLAD Test Not Implemented" << std::endl;
+    int textureWidth = 0, textureHeight = 0, numChannels = 0;
+    auto texturePath = "./res/textures/wood.jpg";
+  	unsigned char* data = stbi_load(texturePath, &textureWidth, &textureHeight, &numChannels, 0); 
+  	if (!data){
+      throw std::runtime_error(std::string("failed loading texture ") + texturePath + ", reason: " + stbi_failure_reason());
+  	}
+  	assert(textureWidth != 0);
+  	assert(textureHeight != 0);
+  	assert(numChannels != 0);
+  	//std::cout << "texture: width = " << textureWidth << " height = " << textureHeight << " numChannels = " << numChannels << std::endl;
+	stbi_image_free(data);
+  	std::cout << "Stb Image Verified" << std::endl;
   }
 #endif
 
