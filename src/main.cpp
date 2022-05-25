@@ -997,7 +997,7 @@ int main(int argc, char* argv[]){
   mode = glfwGetVideoMode(monitor);
   state.currentScreenWidth = mode -> width;
   state.currentScreenHeight = mode -> height;
-  window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", NULL, NULL);\
+  window = glfwCreateWindow(state.currentScreenWidth, state.currentScreenHeight, "ModEngine", NULL, NULL);
 
   if (window == NULL){
     std::cerr << "ERROR: failed to create window" << std::endl;
