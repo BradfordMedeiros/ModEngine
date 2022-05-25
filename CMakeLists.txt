@@ -34,7 +34,7 @@ else()
     add_definitions(-DINCLUDE_GLAD)
   endif()
 
-  set(NO_INCLUDE_GLM FALSE)
+  set(NO_INCLUDE_GLM TRUE)
   if (NOT NO_INCLUDE_GLM)
     add_definitions(-DINCLUDE_GLM)
   endif()
@@ -44,9 +44,14 @@ else()
     add_definitions(-DINCLUDE_STB)
   endif()
   
-  set(NO_INCLUDE_OPENAL TRUE)
+  set(NO_INCLUDE_OPENAL FALSE)
   if (NOT NO_INCLUDE_OPENAL)
     add_definitions(-DINCLUDE_OPENAL)
+  endif()
+
+  set(NO_INCLUDE_GUILE TRUE)
+  if (NOT NO_INCLUDE_GUILE)
+    add_definitions(-DINCLUDE_GUILE)
   endif()
 
   set(NO_INCLUDE_CXXOPTS TRUE)
@@ -122,17 +127,24 @@ endif()
 
 # OpenAl - sound  @todo 
 if (NOT NO_INCLUDE_OPENAL)
-  message("MODBUILD - Including OpenAl")
   # This was a pain in the ass, probaly doing it wrong. 
   # See http://distro.ibiblio.org/rootlinux/rootlinux-ports/more/freealut/freealut-1.1.0/doc/alut.html#CompilingLinking
   # https://stackoverflow.com/questions/15452676/how-to-compile-openal-program-with-g-ubuntu/15452771
+  message("MODBUILD - Including OpenAl")
   target_link_libraries(${PROJECT_NAME} "openal")
   target_link_libraries(${PROJECT_NAME} "alut")
-  target_link_libraries(${PROJECT_NAME} "guile-2.2")
-  target_include_directories(${PROJECT_NAME} PRIVATE "/usr/include/guile/2.2")
 else()
   message("MODBUILD - Not Including OpenAl")
 endif()
+
+if (NOT NO_INCLUDE_GUILE)
+  message("MODBUILD - Including Guile")
+  target_link_libraries(${PROJECT_NAME} "guile-2.2")
+  target_include_directories(${PROJECT_NAME} PRIVATE "/usr/include/guile/2.2")
+else()
+  message("MODBUILD - Not Including Guile")
+endif()
+
 
 # Command line parsing - CXXopts 
 if (NOT NO_INCLUDE_CXXOPTS)

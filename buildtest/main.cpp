@@ -60,8 +60,28 @@
 #endif
 
 #ifdef INCLUDE_OPENAL
+  #include <AL/alut.h>
+  #include <cstring>
+
   void openAlTest(){
-   	std::cout << "OpenAl Test Not Implemented" << std::endl;
+    alutInit(NULL, NULL);
+    ALuint soundBuffer = alutCreateBufferFromFile("./res/sounds/sample.wav");
+  	ALenum error = alutGetError();
+  	assert(error == ALUT_ERROR_NO_ERROR);
+   	ALuint soundSource;
+  	alGenSources(1, &soundSource);
+  	alSourcei(soundSource, AL_BUFFER, soundBuffer);  
+  	//while(true){					// uncomment to play sound
+  	//	alSourcePlay(soundSource);
+  	//}
+    alutExit();
+    std::cout << "Alut Verified" << std::endl;
+  }
+#endif
+
+#ifdef INCLUDE_GUILE
+  void guileTest(){
+  	std::cout << "Guile test Not Implemented" << std::endl;
   }
 #endif
 
@@ -119,6 +139,10 @@ int main(int argc, char* argv[]){
 
 	#ifdef INCLUDE_OPENAL
 		openAlTest();
+	#endif
+
+	#ifdef INCLUDE_GUILE
+		guileTest();
 	#endif
 
 	#ifdef INCLUDE_CXXOPTS
