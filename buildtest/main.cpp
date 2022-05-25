@@ -80,8 +80,17 @@
 #endif
 
 #ifdef INCLUDE_ASSIMP
+  #include <assimp/Importer.hpp>
+  #include <assimp/scene.h>
+  #include <assimp/postprocess.h>
+
   void assimpTest(){
-   	std::cout << "Assimp Test Not Implemented" << std::endl;
+   	Assimp::Importer import;
+   	const aiScene* scene = import.ReadFile("./res/models/unit_rect/unit_rect.obj", aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
+   	assert(scene != NULL);
+   	assert(scene -> mNumMeshes > 0);
+   	assert(scene -> mRootNode != NULL);
+   	std::cout << "Assimp Verified" << std::endl;
   }
 #endif
 
