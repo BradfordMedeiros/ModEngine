@@ -44,7 +44,7 @@ else()
     add_definitions(-DINCLUDE_STB)
   endif()
   
-  set(NO_INCLUDE_OPENAL FALSE)
+  set(NO_INCLUDE_OPENAL TRUE)
   if (NOT NO_INCLUDE_OPENAL)
     add_definitions(-DINCLUDE_OPENAL)
   endif()
