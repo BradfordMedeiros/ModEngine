@@ -23,20 +23,52 @@ if (NOT BUILDTEST)
 else()
   message("Peforming Build Test")
   file(GLOB_RECURSE source_list "${CMAKE_CURRENT_SOURCE_DIR}/buildtest/*.cpp")
+
   set(NO_INCLUDE_GLFW TRUE)
+  if (NOT NO_INCLUDE_GLFW)
+    add_definitions(-DINCLUDE_GLFW)
+  endif()
+
   set(NO_INCLUDE_GLAD TRUE)
-  set(NO_INCLUDE_GLM TRUE)
+  if (NOT NO_INCLUDE_GLAD)
+    add_definitions(-DINCLUDE_GLAD)
+  endif()
+
+  set(NO_INCLUDE_GLM FALSE)
+  if (NOT NO_INCLUDE_GLM)
+    add_definitions(-DINCLUDE_GLM)
+  endif()
+
   set(NO_INCLUDE_STB TRUE)
+  if (NOT NO_INCLUDE_STB)
+    add_definitions(-DINCLUDE_STB)
+  endif()
+  
   set(NO_INCLUDE_OPENAL TRUE)
+  if (NOT NO_INCLUDE_OPENAL)
+    add_definitions(-DINCLUDE_OPENAL)
+  endif()
+
   set(NO_INCLUDE_CXXOPTS TRUE)
+  if (NOT NO_INCLUDE_CXXOPTS)
+    add_definitions(-DINCLUDE_CXXOPTS)
+  endif()
+  
   set(NO_INCLUDE_ASSIMP TRUE)
+  if (NOT NO_INCLUDE_ASSIMP)
+    add_definitions(-DINCLUDE_ASSIMP)
+  endif()
+
   set(NO_INCLUDE_BULLET TRUE)
+  if (NOT NO_INCLUDE_BULLET)
+    add_definitions(-DINCLUDE_ASSIMP)
+  endif()
+
   add_executable(${PROJECT_NAME} ${source_list})
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} "stdc++fs")
-
 
 # GLFW Library - window management 
 if (NOT NO_INCLUDE_GLFW)
