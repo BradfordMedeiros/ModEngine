@@ -64,9 +64,9 @@ else()
     add_definitions(-DINCLUDE_ASSIMP)
   endif()
 
-  set(NO_INCLUDE_BULLET TRUE)
+  set(NO_INCLUDE_BULLET FALSE)
   if (NOT NO_INCLUDE_BULLET)
-    add_definitions(-DINCLUDE_ASSIMP)
+    add_definitions(-DINCLUDE_BULLET)
   endif()
 
   add_executable(${PROJECT_NAME} ${source_list})
