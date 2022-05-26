@@ -2,6 +2,6 @@
 Type=Application
 Name=ModEditor
 Comment=
-Icon={{ROOT_DIRECTORY}}/icons/gameicon_editor.png
-Exec={{ROOT_DIRECTORY}}/gamedev_editor.sh
+Icon={{APP_DIRECTORY}}/icon.png
+Exec={{APP_DIRECTORY}}/run.sh
 Terminal=false
