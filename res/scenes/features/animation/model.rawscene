@@ -5,3 +5,7 @@ platform:position:0 -5 0
 nod:mesh:../gameresources/build/characters/plaguerobot.gltf
 nod:script:./res/scenes/features/animation/animate.scm
 nod:animation:nod
+nod:texture:./res/textures/grid.png
+nod:physics:enabled
+
+node:layer:graphlayer
