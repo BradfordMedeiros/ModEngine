@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=ModEditor
+Comment=
+Icon={{ROOT_DIRECTORY}}/icons/gameicon_editor.png
+Exec={{ROOT_DIRECTORY}}/gamedev_editor.sh
+Terminal=false
