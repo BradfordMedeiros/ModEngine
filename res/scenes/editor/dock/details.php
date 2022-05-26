@@ -244,13 +244,6 @@
     "object_tools" => [
       "title" => "Object Tools",
       "items" => [
-         [
-          "type" => "label",
-          "data" => [
-            "key" => "Manipulator Tools", 
-            "value" => ""
-          ],
-        ],
         [
           "type" => "list",
           "data" => [

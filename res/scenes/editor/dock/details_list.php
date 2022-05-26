@@ -56,6 +56,6 @@
     "tint" => "0 0 1 1", 
     "elements" => implode(",", $topLevelElements),
     "type" => "vertical",
-    "spacing" => "0.04",
+    #"spacing" => "0.04",
   ]);
 ?>
