@@ -2,7 +2,7 @@
 #define MOD_PHYSICS_COMMON
 
 #include <glm/gtc/quaternion.hpp>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 glm::vec3 btToGlm(btVector3 pos);
 btVector3 glmToBt(glm::vec3 pos);

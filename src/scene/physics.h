@@ -6,9 +6,9 @@
 #include <map>
 #include <optional>
 #include <glm/gtc/quaternion.hpp>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 
 #include "./collision_cache.h"

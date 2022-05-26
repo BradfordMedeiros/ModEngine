@@ -4,7 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 typedef void(*collisionPairPosFn)(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos, glm::vec3 normal);
 typedef void(*collisionPairFn)(const btCollisionObject* obj1, const btCollisionObject* obj2);
