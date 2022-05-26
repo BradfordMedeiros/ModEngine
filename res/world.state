@@ -2,22 +2,22 @@
 ### Lighting ###
 diffuse:enabled:true
 specular:enabled:true
-bloom:enabled:false
+#bloom:enabled:true
 #bloom:amount:1
 #bloomblur:amount:1
-#exposure:amount:2
-pbr:enabled:false
+#exposure:amount:0.4
+#pbr:enabled:true
 ###############################
 
 ### Post Process ###
-fog:color:0 0 0
-fog:enabled:false
+fog:color:5 0 5 1
+fog:enabled:true
 ###############################
 
 ### Effects ###
 #dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
-#skybox:color:0.2 0.2 0.2
+skybox:color:5 0.2 0.2 1
 ###############################
 
 ### Window/Rendering ###
