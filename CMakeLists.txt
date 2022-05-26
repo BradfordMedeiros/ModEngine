@@ -16,6 +16,7 @@ endif()
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
+message("current binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
 
 if (NOT BUILDTEST)
   file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
@@ -186,19 +187,11 @@ if (NOT NO_INCLUDE_BULLET)
   set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "")
   set(BUILD_EXTRAS OFF CACHE BOOL "")
   set(BUILD_UNIT_TESTS OFF CACHE BOOL "")
+  set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "")
   ####################################################
-
-  ####
-  include(FindBullet)
-  set(BULLET_DIR "${LIB_DIR}/bullet3") # where to find Bullet
-  add_subdirectory("${BULLET_DIR}")
-  #find_package(Bullet REQUIRED) # find Bullet and fill environment variables
-  
-  message("bullet include: ${BULLET_PHYSICS_SOURCE_DIR}")
-  message("bullet link: ${BULLET_LIBRARIES}")
-  
-  target_include_directories(${PROJECT_NAME} PRIVATE ${BULLET_PHYSICS_SOURCE_DIR})
-  target_link_libraries(${PROJECT_NAME} ${BULLET_LIBRARIES})
+  add_subdirectory(${LIB_DIR}/bullet3 bullet)
+  target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/bullet3/src/")
+  target_link_libraries(${PROJECT_NAME} "Bullet3Common;BulletDynamics;BulletInverseDynamics;BulletCollision;LinearMath;BulletSoftBody")
 else()
   message("MODBUILD - Not Including Bullet")
 endif()
