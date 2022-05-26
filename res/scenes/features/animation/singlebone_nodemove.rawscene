@@ -7,3 +7,4 @@ box:position:5 -3.92 0
 nodemove:mesh:../gameresources/build/debug/singlebone_nodemove.gltf
 nodemove:script:./res/scenes/features/animation/animate.scm
 nodemove:texture:./res/textures/blacktop.jpg
+nodemove:animation:nodemove

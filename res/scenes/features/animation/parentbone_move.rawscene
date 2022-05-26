@@ -5,3 +5,4 @@ platform:position:0 -5 0
 move:mesh:../gameresources/build/debug/parentbone.gltf
 move:script:./res/scenes/features/animation/animate.scm
 move:texture:./res/textures/wood.jpg
+move:animation:parentbone_move
