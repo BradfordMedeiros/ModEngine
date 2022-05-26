@@ -16,7 +16,6 @@ endif()
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
-message("current binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
 
 if (NOT BUILDTEST)
   file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
