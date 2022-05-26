@@ -17,7 +17,7 @@ uniform samplerCube cubemapTexture;
 uniform sampler2D roughnessTexture;
 uniform sampler2D normalTexture;
 
-uniform vec3 tint;
+uniform vec4 tint;
 uniform vec3 cameraPosition;
 
 uniform bool enableDiffuse;
@@ -171,7 +171,7 @@ void main(){
     // real close => 0 , real far => 1
 //    shadowCoord = shadowCoord * 0.5 + 0.5;
     if (hasCubemapTexture){
-      FragColor = vec4(tint.rgb, 1.0) * texture(cubemapTexture, FragPos);
+      FragColor = tint * texture(cubemapTexture, FragPos);
       return;
     }
 
@@ -216,7 +216,7 @@ void main(){
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
     float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
 
-    FragColor = /*(hasNormalTexture ? vec4(1, 0, 0, 1) : vec4(0, 0, 1, 1)) **/ vec4(tint * color.xyz * shadowDelta, color.w);
+    FragColor = /*(hasNormalTexture ? vec4(1, 0, 0, 1) : vec4(0, 0, 1, 1)) **/ tint *  vec4(color.xyz * shadowDelta, color.w);
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;
