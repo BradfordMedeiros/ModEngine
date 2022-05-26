@@ -112,6 +112,7 @@ struct engineState {
   ANTIALIASING_TYPE antialiasingMode;
 
   std::string crosshair;
+  std::string windowname;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

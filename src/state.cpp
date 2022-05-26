@@ -269,7 +269,19 @@ std::vector<ObjectStateMapping> mapping = {
     },
     .object = "tools",
     .attribute = "manipulator-mode",
-  }
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto windowname = std::get_if<std::string>(&value);
+      if (windowname != NULL){
+        state.windowname = *windowname;
+        return;
+      }
+      assert(false);
+    },
+    .object = "window",
+    .attribute = "name",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -368,6 +380,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .borderTexture = "",
     .antialiasingMode = ANTIALIASING_NONE,
     .crosshair = "",
+    .windowname = "ModEngine",
 	};
 	return state;
 }

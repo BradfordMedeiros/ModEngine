@@ -32,3 +32,4 @@ rendering:antialiasing:msaa
 ### input stuff ###
 #mouse:capturecursor:true
 
+#window:name:ModEngine Editor
