@@ -1,2 +1,4 @@
 
-)sometext:value:hello world
+)sometext:value:hello world cool stuff
+)sometext:physics:enabled
+)sometext:align:left
