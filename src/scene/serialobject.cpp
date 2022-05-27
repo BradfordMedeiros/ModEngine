@@ -171,6 +171,27 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
     gameobj.physicsOptions.layer = *fValue;
     return;
   }
+
+  auto strValue = std::get_if<std::string>(&attr);
+  if (field == "lookat" && strValue != NULL){
+    gameobj.lookat = *strValue;
+    return;
+  }
+  if (field == "script" && strValue != NULL){
+    assert(false); // cannot set script this way yet (would need to support load/unload)
+    gameobj.lookat = *strValue;
+    return;
+  }
+  if (field == "fragshader" && strValue != NULL){ 
+    assert(false);  // would need to recompile and stuff, need to implement
+    gameobj.lookat = *strValue;
+    return;
+  }
+  if (field == "layer" && strValue != NULL){
+    assert(false);  // should work already, but should verify 
+    gameobj.lookat = *strValue;
+    return;
+  }
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
   for (auto [field, fieldValue] : attr.stringAttributes){
