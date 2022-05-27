@@ -255,19 +255,49 @@ void emit(World& world, objid id, NewParticleOptions particleOpts){
 }
 
 
+bool isLayout(World& world, objid id){
+  GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
+  return (layoutObject != NULL);
+}
+
+
+// kind of nasty, layouts use an absolute boundinfo, where as everything else is scaled
+glm::vec3 fixScaleIfLayoutType(World& world, objid id, glm::vec3 actualScale){
+  if (isLayout(world, id)){
+    return glm::vec3(1.f, 1.f, 1.f);
+  }
+  return actualScale;
+}
+float fixScaleIfLayoutType(World& world, objid id, float scaleDimension){
+  if (isLayout(world, id)){
+    return 1.f;
+  }
+  return scaleDimension;
+}
+
 BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
   std::vector<BoundInfo> infos;
   for (auto id : ids){
-    auto transMatr = fullModelTransform(world.sandbox, id);
-    auto transform = getTransformationFromMatrix(transMatr);
+    
+    auto transform = fullTransformation(world.sandbox, id);    
+    transform.scale = fixScaleIfLayoutType(world, id, transform.scale);
+    
+    auto transMatr = matrixFromComponents(transform);
+
     auto transformedBoundInfo =  transformBoundInfo(
       getPhysicsInfoForGameObject(world, id).boundInfo, 
       transMatr
     );
 
-    //std::cout << "create bounding: " << getGameObject(world, id).name << std::endl;
-    //std::cout << "position: " << print(transform.position) << std::endl;
-    //printBoundInfo(transformedBoundInfo);
+    /*std::cout << "create bounding: " << getGameObject(world, id).name << std::endl;
+    std::cout << "position: " << print(transform.position) << std::endl;
+
+    std::cout << "transformed bounding: " << std::endl;
+    printBoundInfo(transformedBoundInfo);
+
+    std::cout << "raw bounding: " << std::endl;
+    printBoundInfo(getPhysicsInfoForGameObject(world, id).boundInfo);*/
+
     infos.push_back(transformedBoundInfo);
   }
   auto unionBounding = getMaxUnionBoundingInfo(infos);
@@ -292,7 +322,7 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
       auto boundingWidth = physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin;
-      auto objectWidth =  glm::abs(boundingWidth * physicsInfo.transformation.scale.x);
+      auto objectWidth =  glm::abs(boundingWidth * fixScaleIfLayoutType(world, obj.id, physicsInfo.transformation.scale.x));
       auto left = horizontal + objectWidth / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
 
@@ -309,7 +339,7 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
       auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
-      auto objectHeight = glm::abs(boundingHeight * physicsInfo.transformation.scale.y);
+      auto objectHeight = glm::abs(boundingHeight * fixScaleIfLayoutType(world, obj.id, physicsInfo.transformation.scale.y));
       auto top = vertical + objectHeight / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
 
@@ -370,9 +400,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   //std::cout << "anchor centered(horz, vert) : " << (anchorHorzCentered ? "true" : "false") << " , " << (anchorVertCentered ? "true" : "false") << std::endl;
   //std::cout << "------------------------------" << std::endl;
 
-
-
   enforceLayoutsByName(world, layoutObject -> elements, currentSceneId);
+  //std::cout << "enforcing layout: " << getGameObject(world, id).name << std::endl;
+
   auto layoutPos = fullTransformation(world.sandbox, id).position;
   // Figure out positions, starting from rootPosition (layout should center elements so not quite right yet)
   auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutType);
@@ -381,7 +411,9 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   }
 
   layoutObject -> boundInfo = createBoundingAround(world, mapKeys<objid, glm::vec3>(newPositions));
-
+  /*std::cout << "set bounding to: " << std::endl;
+  printBoundInfo(layoutObject -> boundInfo);
+  std::cout << std::endl;*/
 
   float elementsWidth = layoutObject -> boundInfo.xMax - layoutObject -> boundInfo.xMin;
   float elementsHeight = layoutObject -> boundInfo.yMax - layoutObject -> boundInfo.yMin;
