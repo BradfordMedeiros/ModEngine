@@ -32,6 +32,8 @@
     "ontexture" => "./res/scenes/editor/dock/images/checked.png",
     "offtexture" => "./res/scenes/editor/dock/images/unchecked.png",
     "ontint" => "5 5 5 1",
+    "on" => "editor-button-on",
+    "off" => "editor-button-off",
   ];
   if (is_bool($data["value"])){
     $buttonFields["state"] = $data["value"] ? "on" : "off";
