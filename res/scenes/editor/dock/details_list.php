@@ -44,7 +44,7 @@
     array_push($listElementNames, $listItemName);
   }
 
-  createElement($listHolder, $default_text_style, [
+  createElement($listHolder, $default_style, [
     "tint" => "1 0 0 1",
     "elements" => implode(",", $listElementNames),
     "backpanel" => "true",

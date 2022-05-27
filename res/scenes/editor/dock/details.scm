@@ -131,8 +131,13 @@
   )
 )
 
+
+(define (isSelectableItem layerAttr)
+  (if layerAttr (not (equal? "basicui" (cadr layerAttr))) #t)
+)
 (define (onObjSelected gameobj color)
-  (if (equal? (gameobj-id gameobj) (gameobj-id mainobj))
+  (define objattr (gameobj-attr gameobj))
+  (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
     (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
   )
 
@@ -144,9 +149,11 @@
     (set! focusedElement #f)
   )
 
-  (refillStore gameobj)
+  (if (isSelectableItem (assoc "layer" objattr))
+    (refillStore gameobj)
+  )
 
-  (handleListSelection gameobj (gameobj-attr gameobj))
+  (handleListSelection gameobj objattr)
   (populateData)
 )
 
