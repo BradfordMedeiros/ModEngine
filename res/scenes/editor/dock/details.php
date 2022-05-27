@@ -71,6 +71,7 @@
   }
 
   function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id){
+    $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
       "layer" => "basicui", 
       "scale" => "0.004 0.01 0.004",
@@ -119,7 +120,41 @@
             ],
           ]
         ],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Look at Target", 
+            "value" => [
+              "binding" => "lookat",
+            ],
+          ]
+        ],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "No Data Source Test", 
+            "value" => [
+              "binding" => "nodata",
+            ],
+          ]
+        ],
         [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable physics", 
+            "value" => [
+              "binding" => "physics",
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "some bullshit", 
+            "value" => true,
+          ],
+        ],
+        /*[
           "type" => "numeric",
           "data" => [
             "key" => "position", 
@@ -136,21 +171,13 @@
         ],
         [ "type" => "label", 
           "data" => [
-            "key" => "Look at Target", 
-            "value" => [
-              "binding" => "lookat",
-            ],
-          ]
-        ],
-        [ "type" => "label", 
-          "data" => [
             "key" => "Render Layer", 
             "value" => [
               "binding" => "layer",
             ],
           ]
-        ],
-        /*[
+        ],*/
+        [
           "type" => "options",
           "data" => [
             "key" => "light-type", 
@@ -162,7 +189,7 @@
               [ "label" => "point", "selector-index" => "point" ],
             ],
           ],
-        ],
+        ],/*
         [texture
           "type" => "options",
           "data" => [
@@ -174,12 +201,6 @@
               [ "label" => "spotlight", "selector-index" => "spot" ], 
               [ "label" => "point", "selector-index" => "point" ],
             ],
-          ],
-        ],
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "enable physics", 
           ],
         ],
         [

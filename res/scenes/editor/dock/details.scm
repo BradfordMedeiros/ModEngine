@@ -5,9 +5,12 @@
 ; 4. manages value field (as text editor style functionality) for focused elements with details-editabletext:true
 
 
-(define (isSubmitKey key) (equal? key 46))
+(define (isSubmitKey key) (equal? key 46))   ; ".
 (define (onKeyChar key)
-  ; ".
+  (format #t "key is: ~a\n" key)
+  (if (equal? key 44) ; comma
+    (format #t "~a\n" dataValues) 
+  )
   (if (and managedObj (isSubmitKey key))
     (begin
       (let ((updatedValues (filterUpdatedValues)))
@@ -191,13 +194,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (create-attr-pair gameobj) (list gameobj (gameobj-attr gameobj)))
-(define (get-binded-elements) (map create-attr-pair (lsobj-attr "details-binding")))
-(define (extract-binding-element attr-pair) (list (car attr-pair) (cadr (assoc "details-binding" (cadr attr-pair)))))
-(define (all-obj-to-bindings) (map extract-binding-element (get-binded-elements)))
-(define (generateGetDataForAttr attributeData)
+(define (get-binded-elements bindingType) (map create-attr-pair (lsobj-attr bindingType)))
+(define (extract-binding-element attr-pair bindingType) (list (car attr-pair) (cadr (assoc bindingType (cadr attr-pair)))))
+(define (all-obj-to-bindings bindingType) (map (lambda(attrPair) (extract-binding-element attrPair bindingType)) (get-binded-elements bindingType)))
+(define (generateGetDataForAttr attributeData defaultValue)
   (lambda(attrField) 
     (let ((fieldPair (assoc attrField attributeData)))
-      (if fieldPair (cadr fieldPair) "< no data source >") 
+      (if fieldPair (cadr fieldPair) defaultValue) 
     )
   )
 )
@@ -206,6 +209,17 @@
     (list (list "value" (getDataForAttr (cadr attrpair))))
   )
   attrpair
+)
+
+; should get from details-binding-on/off
+(define (convertEnableTextToBool text) (equal? text "enabled"))
+(define (update-toggle-binding attrpair getDataForAttr)
+  (define toggleEnableText (getDataForAttr (cadr attrpair)))
+  (define enableValue (convertEnableTextToBool toggleEnableText))
+  (format #t "placeholder update toggle: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
+  (gameobj-setattr! (car attrpair) 
+    (list (list "state" (if enableValue "on" "off")))
+  )
 )
 
 (define (extract-group-element attr-pair) 
@@ -245,12 +259,18 @@
 )
 
 (define (populateData)
-  (define getDataForAttr (generateGetDataForAttr dataValues))
   (for-each 
     (lambda(attrpair) 
-      (update-binding attrpair getDataForAttr)
+      (update-binding attrpair (generateGetDataForAttr dataValues "< no data source >"))
     ) 
-    (all-obj-to-bindings)
+    (all-obj-to-bindings "details-binding")
+  )
+  (for-each 
+    (lambda(attrpair) 
+      ;(update-binding attrpair getDataForAttr)
+      (update-toggle-binding attrpair (generateGetDataForAttr dataValues #f))
+    ) 
+    (all-obj-to-bindings "details-binding-toggle")  ;
   )
   (for-each 
     (lambda(groupValuePair) 
