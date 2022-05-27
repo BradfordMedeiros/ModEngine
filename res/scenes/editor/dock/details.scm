@@ -5,23 +5,34 @@
 ; 4. manages value field (as text editor style functionality) for focused elements with details-editabletext:true
 
 
+(define (isSubmitKey key) (equal? key 46))
 (define (onKeyChar key)
   ; ".
-  (if (equal? key 46)
-    (format #t "data values: ~a\n" dataValues)
+  (if (and managedObj (isSubmitKey key))
+    (begin
+      (let ((updatedValues (filterUpdatedValues)))
+        (format #t "values to update: ~a\n" updatedValues)
+        (gameobj-setattr! managedObj updatedValues)
+      )
+    )
   ) 
 )
 
+
 (define dataValues (list))
 
+(define (isUpdatedValue dataValue) (caddr dataValue))
+(define (getAttr dataValue) (list (car dataValue) (cadr dataValue)))
+(define (filterUpdatedValues) (map getAttr (filter isUpdatedValue dataValues)))
 (define (clearStore) (set! dataValues (list)))
-(define (updateStoreValue keyvalue)
+(define (updateStoreValueModified keyvalue modified)
   (define key (car keyvalue))
   (define value (cadr keyvalue))
   (define newDataValues (delete (assoc key dataValues) dataValues))
-  (set! dataValues (cons (list key value) newDataValues))
-  (format #t "store:  data values is: ~a\n" dataValues)
+  (set! dataValues (cons (list key value modified) newDataValues))
 )
+(define (updateStoreValue keyvalue) (updateStoreValueModified keyvalue #f))
+
 (define (refillStore gameobj)
   (clearStore)
   (updateStoreValue (list "object_name" (gameobj-name gameobj)))
@@ -60,12 +71,16 @@
 
 
 (define (updateText obj text)
+  (define detailBinding (cadr (assoc "details-binding" (gameobj-attr obj))))
   (gameobj-setattr! obj 
     (list
       (list "value" text)
     )
   )
   (enforce-layout mainpanelId)
+  (format #t "updating text: ~a\n" text)
+
+  (updateStoreValueModified (list detailBinding text) #t)
 )
 
 (define (lessIndex currentText) (max 0 (- (string-length currentText) 1)))
@@ -135,6 +150,8 @@
 (define (isSelectableItem layerAttr)
   (if layerAttr (not (equal? "basicui" (cadr layerAttr))) #t)
 )
+
+(define managedObj #f)
 (define (onObjSelected gameobj color)
   (define objattr (gameobj-attr gameobj))
   (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
@@ -150,11 +167,13 @@
   )
 
   (if (isSelectableItem (assoc "layer" objattr))
-    (refillStore gameobj)
+    (begin
+      (refillStore gameobj)
+      (set! managedObj gameobj)
+      (populateData)
+    )
   )
-
   (handleListSelection gameobj objattr)
-  (populateData)
 )
 
 ;; todo remove - no items in this layout, should require this 
@@ -163,7 +182,7 @@
 
 
 (define (onKey key scancode action mods)
-  (if (equal? action 1)
+  (if (and (equal? action 1) (not (isSubmitKey key)))
     (processFocusedElement key)
   )
 )
