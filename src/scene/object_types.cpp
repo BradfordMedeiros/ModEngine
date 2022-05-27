@@ -148,7 +148,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUIButton{}),
     .createObj = createUIButton,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingSetObjAttr,
+    .setAttributes = convertElementSetValue<GameObjectUIButton>(setUIButtonAttributes),
     .serialize = convertSerialize<GameObjectUIButton>(serializeButton),
     .removeObject = removeDoNothing,
   },
@@ -660,6 +660,7 @@ std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, obj
   return std::nullopt;
 }
 
+// This should be pulled out into standardized fn hooks
 void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string, std::string)> sendNotify){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUIButton>(&obj);

@@ -58,3 +58,10 @@ std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIBut
   }
   return pairs;
 }
+
+void setUIButtonAttributes(GameObjectUIButton& buttonObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  if (attributes.stringAttributes.find("state") != attributes.stringAttributes.end()){
+    buttonObj.toggleOn = attributes.stringAttributes.at("state") == "on"; 
+    MODTODO("set button state should call toggle on / off");
+  } 
+}
