@@ -41,9 +41,9 @@ GameObject defaultCamera = GameObject {
   .id = -1,
   .name = "defaultCamera",
   .transformation = Transformation {
-    .position = glm::vec3(0.f, -2.f, 0.f),
+    .position = glm::vec3(0.f, 0.f, 0.f),
     .scale = glm::vec3(1.0f, 1.0f, 1.0f),
-    .rotation = glm::quat(1.0, 0, 0, 0.0f),
+    .rotation = parseQuat(glm::vec4(0.f, 0.f, -1.f, 0.f)),
   }
 };
 
