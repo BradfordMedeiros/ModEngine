@@ -540,21 +540,21 @@ std::string print(GameobjAttributes& attr){
   std::string content = "";
   content = content + "string-attr[" + std::to_string(attr.stringAttributes.size()) + "]\n--------\n";
   for (auto &[key, value] : attr.stringAttributes){
-    content = content + key + ":" + value + "\n"; 
+    content = content + key + ":" + value + "\n\n"; 
   }
   content = content + "vec3-attr[" + std::to_string(attr.vecAttr.vec3.size()) + "]\n--------\n";
   for (auto &[key, value] : attr.vecAttr.vec3){
-    content = content + key + ":" + print(value) + "\n"; 
+    content = content + key + ":" + print(value) + "\n\n"; 
   }
 
   content = content + "vec4-attr[" + std::to_string(attr.vecAttr.vec4.size()) + "]\n--------\n";
   for (auto &[key, value] : attr.vecAttr.vec4){
-    content = content + key + ":" + print(value) + "\n"; 
+    content = content + key + ":" + print(value) + "\n\n"; 
   }
 
   content = content + "num-attr[" + std::to_string(attr.numAttributes.size()) + "]\n--------\n";
   for (auto &[key, value] : attr.numAttributes){
-    content = content + key + ":" + std::to_string(value) + "\n"; 
+    content = content + key + ":" + std::to_string(value) + "\n\n"; 
   }  
   return content;
 }
