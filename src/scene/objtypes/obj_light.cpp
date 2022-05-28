@@ -39,5 +39,5 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight&
 }
 
 void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  lightObj.color = attributes.vecAttr.vec3.at("color");
+  maybeSetVec3FromAttr(&lightObj.color, "color", attributes){
 }

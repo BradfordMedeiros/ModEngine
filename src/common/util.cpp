@@ -599,6 +599,28 @@ void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
 }
 
+bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes){
+  if (attributes.vecAttr.vec3.find(field) != attributes.vecAttr.vec3.end()){
+    *_valueToUpdate = attributes.vecAttr.vec3.at(field);
+    return true;
+  }
+  return false;
+}
+bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes){
+  if (attributes.vecAttr.vec4.find(field) != attributes.vecAttr.vec4.end()){
+    *_valueToUpdate = attributes.vecAttr.vec4.at(field);
+    return true;
+  }
+  return false;
+}
+bool maybeSetBoolFromStrAttr(bool* _valueToUpdate, const char* field, const char* trueValue, const char* falseValue, GameobjAttributes& attributes){
+  if (attributes.stringAttributes.find(field) != attributes.stringAttributes.end()){
+    *_valueToUpdate = attributes.stringAttributes.at(field) == trueValue ? true : false; 
+    return true;
+  }
+  return false;
+}
+
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.stringAttributes){
     toAttributes.stringAttributes[name] = value;
