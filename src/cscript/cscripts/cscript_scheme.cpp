@@ -108,6 +108,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.unlock,
     api.debugInfo,
     api.setWorldState,
+    api.setLayerState,
     api.enforceLayout,
     {}
   );

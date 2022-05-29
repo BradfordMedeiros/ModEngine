@@ -557,6 +557,21 @@ SCM scmSetWorldState(SCM value){
   return SCM_UNSPECIFIED;
 }
 
+void (*_setLayerState)(std::vector<StrValues> values);
+SCM scmSetLayerState(SCM value){
+  auto strList = scmToStringList(value);
+  std::vector<StrValues> values;
+  for (auto str : strList){
+    values.push_back(StrValues{
+      .target = str.at(0),
+      .attribute = str.at(1),
+      .payload = str.at(2),
+    });
+  }
+  _setLayerState(values);
+  return SCM_UNSPECIFIED;
+}
+
 void (*_enforceLayout)(objid);
 SCM scmEnforceLayout(SCM value){
   _enforceLayout(toUnsignedInt(value));
@@ -942,6 +957,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("screenshot", 1, 0, 0, (void*)scmSaveScreenshot);
   scm_c_define_gsubr("set-state", 1, 1, 0, (void*)scmSetState);
   scm_c_define_gsubr("set-wstate", 1, 0, 0, (void*)scmSetWorldState);
+  scm_c_define_gsubr("set-layer", 1, 0, 0, (void*)scmSetLayerState);
+
   scm_c_define_gsubr("enforce-layout", 1, 0, 0, (void*)scmEnforceLayout);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
@@ -1045,6 +1062,7 @@ void createStaticSchemeBindings(
   bool (*unlock)(std::string, objid),
   void (*debugInfo)(std::string infoType, std::string filepath),
   void (*setWorldState)(std::vector<ObjectValue> values),
+  void (*setLayerState)(std::vector<StrValues> values),
   void (*enforceLayout)(objid layoutId),
   std::vector<func_t> registerGuileFns
 ){
@@ -1128,6 +1146,7 @@ void createStaticSchemeBindings(
   _saveScreenshot = saveScreenshot;
   _setState = setState;
   _setWorldState = setWorldState;
+  _setLayerState = setLayerState;
   _enforceLayout = enforceLayout;
 
   _setFloatState = setFloatState;

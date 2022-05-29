@@ -108,6 +108,12 @@ struct ObjectValue {
   AttributeValue value;
 };
 
+struct StrValues {
+  std::string target;
+  std::string attribute;
+  std::string payload;
+};
+
 struct LayerInfo {
   std::string name;
   int zIndex;

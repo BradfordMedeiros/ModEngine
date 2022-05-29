@@ -398,6 +398,10 @@ void setWorldState(std::vector<ObjectValue> values){
   setCrosshairSprite();
 }
 
+void setLayerState(std::vector<StrValues> values){
+  setLayerOptions(world.sandbox.layers, values);
+}
+
 void setFloatState(std::string stateName, float value){
   if (stateName == "opacity"){
     drawParams.opacity = value;

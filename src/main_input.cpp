@@ -13,7 +13,6 @@ extern GameObject defaultCamera;
 extern float deltaTime;
 extern Benchmark benchmark;
 extern bool selectItemCalled;
-extern std::vector<LayerInfo> layers;
 extern DynamicLoading dynamicLoading;
 extern SysInterface interface;
 extern GLFWwindow* window;
@@ -362,7 +361,7 @@ glm::mat4 projectionFromLayer(LayerInfo& layer){
 }
 
 LayerInfo layerByName(std::string layername){
-  for (auto &layer : layers){
+  for (auto &layer : world.sandbox.layers){
     if (layer.name == layername){
       return layer;
     }

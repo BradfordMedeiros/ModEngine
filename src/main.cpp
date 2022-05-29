@@ -100,7 +100,6 @@ extern std::vector<InputDispatch> inputFns;
 
 std::map<std::string, objid> activeLocks;
 
-std::vector<LayerInfo> layers;
 LineData lineData = createLines();
 
 
@@ -383,7 +382,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   int numTriangles = 0;
   int numDepthClears = 0;
 
-  traverseSandbox(world.sandbox, [&world, &layers, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandbox(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
@@ -489,7 +488,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     addPositionToRender(modelMatrix, parentModelMatrix);
   });
   
-  auto maxExpectedClears = numUniqueDepthLayers(layers);
+  auto maxExpectedClears = numUniqueDepthLayers(world.sandbox.layers);
   if (numDepthClears > maxExpectedClears){
     std::cout << "num clears: " << numDepthClears << std::endl;
     std::cout << "num unique depth clears: " << maxExpectedClears << std::endl;
@@ -499,7 +498,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 }
 
 void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
-  auto projection = projectionFromLayer(layers.at(0));
+  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   glUseProgram(shaderProgram);
 
   // this list is incomplete, it probably would be better to just use a separate shader maybe too
@@ -558,7 +557,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
 }
 
 void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition){
-  auto projection = projectionFromLayer(layers.at(0));
+  auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   std::vector<LightInfo> lights = {};
   std::vector<glm::mat4> lightProjView = {};
 
@@ -953,7 +952,7 @@ int main(int argc, char* argv[]){
     }
   }
 
-  layers = parseLayerInfo(result["layers"].as<std::string>());
+  auto layers = parseLayerInfo(result["layers"].as<std::string>());
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
@@ -1186,6 +1185,7 @@ int main(int argc, char* argv[]){
     .unlock = unlock,
     .debugInfo = debugInfo,
     .setWorldState = setWorldState,
+    .setLayerState = setLayerState,
     .enforceLayout = enforceLayout,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });

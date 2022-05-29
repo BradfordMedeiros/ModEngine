@@ -1,5 +1,61 @@
 #include "./layers.h"
 
+void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& payload){
+  if (attribute == "zindex"){
+    layer.zIndex = std::atoi(payload.c_str());
+  }else if (attribute == "depth"){
+    layer.depthBufferLayer = std::atoi(payload.c_str());
+  }else if (attribute == "ortho"){
+    if (payload == "true"){
+      layer.orthographic = true;
+    }else if (payload == "false"){
+      layer.orthographic = false;
+    }else{
+      std::cout << "WARNING: layers: ortho" << payload << " is not a valid option" << std::endl;
+      assert(false);
+    }
+  }else if (attribute == "scale"){
+    if (payload == "true"){
+      layer.scale = true;
+    }else if (payload == "false"){
+      layer.scale = false;
+    }else{
+      std::cout << "WARNING: layers: scale" << payload << " is not a valid option" << std::endl;
+      assert(false);
+    }
+  }else if (attribute == "view"){
+    if (payload == "true"){
+      layer.disableViewTransform = false;
+    }else if (payload == "false"){
+      layer.disableViewTransform = true;
+    }else{
+      std::cout << "WARNING: layers: view" << payload << " is not a valid option" << std::endl;
+      assert(false);
+    }      
+  }else if (attribute == "visible"){
+    if (payload == "true"){
+      layer.visible = true;
+    }else if (payload == "false"){
+      layer.visible = false;
+    }else{
+      std::cout << "WARNING: layers: visible" << payload << " is not a valid option" << std::endl;
+      assert(false);
+    }      
+  }else if (attribute == "near"){
+    layer.nearplane = std::atof(payload.c_str());
+  }else if (attribute == "far"){
+    layer.farplane = std::atof(payload.c_str());
+  }else if (attribute == "fov"){
+    layer.fov = std::atof(payload.c_str());
+  }else if (attribute == "selection"){
+    layer.selectIndex = std::atoi(payload.c_str());
+  }else{
+    std::cout << "WARNING: layers: " << attribute << " is not a valid option" << std::endl;
+  }
+
+  std::cout << "set layer: " << attribute << " - " << payload  << " visible? " << layer.visible <<  std::endl;
+}
+
 std::vector<LayerInfo> parseLayerInfo(std::string file){
   std::cout << "parse layer info: " << file << std::endl;
   std::map<std::string, LayerInfo> layers2; 
@@ -21,58 +77,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
         .selectIndex = 0,
       };
     }
-
-    if (token.attribute == "zindex"){
-      layers2[token.target].zIndex = std::atoi(token.payload.c_str());
-    }else if (token.attribute == "depth"){
-      layers2[token.target].depthBufferLayer = std::atoi(token.payload.c_str());
-    }else if (token.attribute == "ortho"){
-      if (token.payload == "true"){
-        layers2[token.target].orthographic = true;
-      }else if (token.payload == "false"){
-        layers2[token.target].orthographic = false;
-      }else{
-        std::cout << "WARNING: layers: ortho" << token.payload << " is not a valid option" << std::endl;
-        assert(false);
-      }
-    }else if (token.attribute == "scale"){
-      if (token.payload == "true"){
-        layers2[token.target].scale = true;
-      }else if (token.payload == "false"){
-        layers2[token.target].scale = false;
-      }else{
-        std::cout << "WARNING: layers: scale" << token.payload << " is not a valid option" << std::endl;
-        assert(false);
-      }
-    }else if (token.attribute == "view"){
-      if (token.payload == "true"){
-        layers2[token.target].disableViewTransform = false;
-      }else if (token.payload == "false"){
-        layers2[token.target].disableViewTransform = true;
-      }else{
-        std::cout << "WARNING: layers: view" << token.payload << " is not a valid option" << std::endl;
-        assert(false);
-      }      
-    }else if (token.attribute == "visible"){
-      if (token.payload == "true"){
-        layers2[token.target].visible = true;
-      }else if (token.payload == "false"){
-        layers2[token.target].visible = false;
-      }else{
-        std::cout << "WARNING: layers: visible" << token.payload << " is not a valid option" << std::endl;
-        assert(false);
-      }      
-    }else if (token.attribute == "near"){
-      layers2[token.target].nearplane = std::atof(token.payload.c_str());
-    }else if (token.attribute == "far"){
-      layers2[token.target].farplane = std::atof(token.payload.c_str());
-    }else if (token.attribute == "fov"){
-      layers2[token.target].fov = std::atof(token.payload.c_str());
-    }else if (token.attribute == "selection"){
-      layers2[token.target].selectIndex = std::atoi(token.payload.c_str());
-    }else{
-      std::cout << "WARNING: layers: " << token.attribute << " is not a valid option" << std::endl;
-    }
+    setLayerOption(layers2.at(token.target), token.attribute, token.payload);
   }
   std::vector<LayerInfo> layers;
   if (layers2.find("default") == layers2.end()){
@@ -96,4 +101,22 @@ std::vector<LayerInfo> parseLayerInfo(std::string file){
     layers.push_back(layer);
   }
   return layers;
+}
+
+LayerInfo* findLayerByName(std::vector<LayerInfo>& layers, std::string& layername){
+  for (auto &layer : layers){
+    if (layer.name == layername){
+      std::cout << "layer name: " << layer.name << std::endl;
+      return &layer;
+    }
+  }
+  std::cout << "layer not found: " << layername << std::endl;
+  assert(false);
+  return NULL;
+}
+void setLayerOptions(std::vector<LayerInfo>& layers, std::vector<StrValues>& values){
+  for (auto &value : values){
+    LayerInfo& layer = *findLayerByName(layers, value.target);
+    setLayerOption(layer, value.attribute, value.payload);
+  }
 }

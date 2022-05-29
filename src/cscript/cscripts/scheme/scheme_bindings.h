@@ -81,6 +81,7 @@ void createStaticSchemeBindings(
   bool (*unlock)(std::string, objid),
   void (*debugInfo)(std::string infoType, std::string filepath),
   void (*setWorldState)(std::vector<ObjectValue> values),
+  void (*setLayerState)(std::vector<StrValues> values),
   void (*enforceLayout)(objid layoutId),
   std::vector<func_t> registerGuileFns
 );
