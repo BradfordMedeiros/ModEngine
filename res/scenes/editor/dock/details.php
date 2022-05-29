@@ -139,9 +139,9 @@
         [
           "type" => "checkbox",
           "data" => [
-            "key" => "enable physics", 
+            "key" => "toggle particles", 
             "value" => [
-              "binding" => "physics",
+              "binding" => "state",
               "binding-on" => "enabled",
               "binding-off" => "disabled",
             ],
@@ -150,8 +150,12 @@
         [
           "type" => "checkbox",
           "data" => [
-            "key" => "some bullshit", 
-            "value" => true,
+            "key" => "Toggle Red", 
+            "value" => [
+              "binding" => "tint",
+              "binding-on" => "0 1 0 1",
+              "binding-off" => "0 0 1 1",
+            ]
           ],
         ],
         /*[
@@ -273,6 +277,17 @@
               ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
               ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
               ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "set-rotate-mode" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "EoE Mode", 
+            "value" => [
+              "binding" => "editor-eoe-mode",
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
             ],
           ],
         ],

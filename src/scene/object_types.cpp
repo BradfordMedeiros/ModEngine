@@ -130,7 +130,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUILayout{}),
     .createObj = createUILayout,
     .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingSetObjAttr,
+    .setAttributes = convertElementSetValue<GameObjectUILayout>(setUILayoutAttributes),
     .serialize = serializeNotImplemented,
     .removeObject = removeDoNothing,
   },

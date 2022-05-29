@@ -6,31 +6,47 @@
 
 
 (define (isSubmitKey key) (equal? key 46))   ; ".
+(define (submitData)
+  (if managedObj
+    (begin
+      (let ((updatedValues (filterUpdatedObjectValues)))
+        (format #t "values to update: ~a\n" updatedValues)
+        (gameobj-setattr! managedObj updatedValues)
+
+        ;; temporary, just to get the effect, should change
+        (for-each (lambda(attrPair) 
+          (if (equal? "editor-eoe-mode" (car attrPair))
+            (begin
+              (format #t "new eoe mode: ~a\n" (cadr attrPair))
+              (format #t "not eoe -> ~a\n" attrPair)
+              (if (equal? (cadr attrPair) "enabled") (set! eoeMode #t))
+              (if (equal? (cadr attrPair) "disabled") (set! eoeMode #f))
+            )
+          )
+        ) updatedValues)
+      )
+    )
+  )
+)
 (define (onKeyChar key)
   (format #t "key is: ~a\n" key)
   (if (equal? key 44) ; comma
     (format #t "~a\n" dataValues) 
   )
-  (if (and managedObj (isSubmitKey key))
-    (begin
-      (let ((updatedValues (filterUpdatedValues)))
-        (format #t "values to update: ~a\n" updatedValues)
-        (gameobj-setattr! managedObj updatedValues)
-      )
-    )
-  ) 
+  (if (isSubmitKey key) (submitData))
 )
 
 
 (define dataValues (list))
 
-(define (isUpdatedValue dataValue) (caddr dataValue))
+(define (isUpdatedObjectValue dataValue) (equal? #t (caddr dataValue)))
 (define (getAttr dataValue) (list (car dataValue) (cadr dataValue)))
-(define (filterUpdatedValues) (map getAttr (filter isUpdatedValue dataValues)))
+(define (filterUpdatedObjectValues) (map getAttr (filter isUpdatedObjectValue dataValues)))
+
 (define (clearStore) (set! dataValues (list)))
 (define (updateStoreValueModified keyvalue modified)
   (define key (car keyvalue))
-  (define value (cadr keyvalue))
+  (define value (cadr keyvalue))  ; maybe guess the type here?
   (define newDataValues (delete (assoc key dataValues) dataValues))
   (set! dataValues (cons (list key value modified) newDataValues))
 )
@@ -42,6 +58,7 @@
   (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
   (map updateStoreValue (gameobj-attr gameobj))
 
+  (updateStoreValue (list "editor-eoe-mode" (if eoeMode "enabled" "disabled")))
   (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
   (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
   (updateStoreValue (list "runtime-sceneid" (number->string (list-sceneid (gameobj-id gameobj)))))
@@ -150,8 +167,16 @@
 )
 
 
+(define eoeMode #f)
 (define (isSelectableItem layerAttr)
-  (if layerAttr (not (equal? "basicui" (cadr layerAttr))) #t)
+  (if eoeMode 
+    (begin
+      (updateStoreValue (list "editor-eoe-mode" "disabled"))
+      (set! eoeMode #f)
+      #t
+    )
+    (and (not eoeMode)  (if layerAttr (not (equal? "basicui" (cadr layerAttr))) #t))
+  )
 )
 
 (define managedObj #f)
@@ -216,7 +241,7 @@
 (define (update-toggle-binding attrpair getDataForAttr)
   (define toggleEnableText (getDataForAttr (cadr attrpair)))
   (define enableValue (convertEnableTextToBool toggleEnableText))
-  (format #t "placeholder update toggle: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
+  (format #t "update toggle binding: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
   (gameobj-setattr! (car attrpair) 
     (list (list "state" (if enableValue "on" "off")))
   )
@@ -226,6 +251,7 @@
   (define detailsBinding (assoc "details-binding-toggle" objattr))
   (define onValue (assoc "details-binding-on" objattr))
   (define offValue (assoc "details-binding-off" objattr))
+  (format #t "on value, off value: ~a\n ~a\n" onValue offValue)
   (if (and detailsBinding on onValue)
     (updateStoreValueModified (list (cadr detailsBinding) (cadr onValue)) #t)
   )
@@ -316,9 +342,16 @@
     (perform-button-action (gameobj-by-id (string->number value)))
   )
   (if (equal? key "editor-button-on")
-    (toggleButtonBinding (string->number value) #t)
+    (begin
+      (toggleButtonBinding (string->number value) #t)
+      (submitData) ; remove
+    )
+
   )
   (if (equal? key "editor-button-off")
-    (toggleButtonBinding (string->number value) #f)
+    (begin
+      (toggleButtonBinding (string->number value) #f)
+      (submitData) ; remove
+    )
   )
 )

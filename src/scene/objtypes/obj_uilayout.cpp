@@ -158,3 +158,7 @@ glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3
   auto zFightingBias = glm::vec3(0.f, 0.f, -0.001f);  
   return glm::scale(glm::translate(glm::mat4(1.0f), layoutObj.panelDisplayOffset + layoutPos + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f) - minusScale);
 }
+
+void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  maybeSetVec4FromAttr(&layoutObj.tint, "tint", attributes);
+}
