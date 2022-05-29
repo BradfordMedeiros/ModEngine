@@ -114,6 +114,7 @@ struct LayerInfo {
   bool orthographic;
   bool scale;
   bool disableViewTransform;
+  bool visible;
   int depthBufferLayer;
   float fov;
   float nearplane;

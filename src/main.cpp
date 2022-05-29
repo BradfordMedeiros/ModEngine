@@ -451,26 +451,28 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
 
-    auto trianglesDrawn = renderObject(
-      newShader, 
-      id, 
-      world.objectMapping, 
-      state.showCameras, 
-      state.showBoneWeight,
-      state.useBoneTransform,
-      (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
-      modelMatrix,
-      state.drawPoints,
-      drawWord,
-      [&modelMatrix, &newShader](glm::vec3 pos) -> int {
-        glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
-        return drawSphere();
-      },
-      defaultMeshes,
-      renderCustomObj,
-      getGameObjectPos
-    );
-    numTriangles = numTriangles + trianglesDrawn;
+    if (layer.visible){
+      auto trianglesDrawn = renderObject(
+        newShader, 
+        id, 
+        world.objectMapping, 
+        state.showCameras, 
+        state.showBoneWeight,
+        state.useBoneTransform,
+        (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
+        modelMatrix,
+        state.drawPoints,
+        drawWord,
+        [&modelMatrix, &newShader](glm::vec3 pos) -> int {
+          glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(modelMatrix, pos)));
+          return drawSphere();
+        },
+        defaultMeshes,
+        renderCustomObj,
+        getGameObjectPos
+      );
+      numTriangles = numTriangles + trianglesDrawn;
+    }
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     if (isPortal && portalTextureInCache && isPerspectivePortal){

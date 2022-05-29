@@ -5,6 +5,7 @@
 # fov: <float> 
 # scale: true/false  (false)
 # view: true / false (true)
+# visible: true / false (true)
 
 ### default name override the default view layer.
 
@@ -25,3 +26,4 @@ basicui:zindex:4
 basicui:view:false
 basicui:ortho:true
 #basicui:selection:-1
+
