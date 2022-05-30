@@ -1,4 +1,5 @@
 #include <functional>
+#include <optional>
 #include "../common/util.h"
 #include "../scene/serialobject.h"  // todo prob dont depend on gameobj directly
 #include "../translations.h"
