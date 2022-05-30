@@ -87,7 +87,7 @@ void testpass(std::string target){
 #endif
 
 #ifdef INCLUDE_GUILE
-  #include <libguile.h>
+ #include <libguile.h>
 
   void guileTest(){
   	int listSize = 3;
@@ -135,8 +135,15 @@ void testpass(std::string target){
 #endif
 
 #ifdef INCLUDE_BULLET
+  #include <btBulletDynamicsCommon.h>
   void bulletTest(){
-   	std::cout << "Bullet Test Not Implemented" << std::endl;
+    auto colConfig = new btDefaultCollisionConfiguration();  
+    auto dispatcher = new btCollisionDispatcher(colConfig);  
+    auto broadphase = new btDbvtBroadphase();
+    auto constraintSolver = new btSequentialImpulseConstraintSolver();
+    auto dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, colConfig);
+    dynamicsWorld -> stepSimulation(100, 0);  
+    testpass("Bullet");
   }
 #endif
 
