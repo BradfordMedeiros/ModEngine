@@ -56,6 +56,9 @@ void onManipulatorSelectItem(
 }
 void onManipulatorMouseRelease(){
   manipulatorObject = NOAXIS;
+  std::cout << "reset initial drag position" << std::endl;
+  initialDragPosition = std::nullopt;
+  initialDragScale = std::nullopt;
 }
 
 struct ManipulatorTarget {
@@ -132,12 +135,6 @@ ManipulatorTarget newManipulatorValues(
   glm::vec2 cursorPos,
   glm::vec2 screensize
 ){
-  if (mouseX < 10 && mouseX > -10.f){
-    mouseX = 0.f;
-  }
-  if (mouseY < 10 && mouseY > -10.f){
-    mouseY = 0.f;
-  }
   glm::vec4 moveVector = cameraViewMatrix * glm::vec4(mouseX, mouseY, 0, 0.f);
   glm::vec3 vecc = glm::vec3(moveVector.x, moveVector.y, moveVector.z);
   auto xVector = glm::dot(vecc, glm::vec3(1.f, 0.f, 0.f));
@@ -216,6 +213,13 @@ void onManipulatorUpdate(
   glm::vec2 cursorPos,
   glm::vec2 screensize
 ){
+  if (mouseX < 10 && mouseX > -10.f){
+    mouseX = 0.f;
+  }
+  if (mouseY < 10 && mouseY > -10.f){
+    mouseY = 0.f;
+  }
+
   if (manipulatorId != 0 && manipulatorTarget != 0){
     if (manipulatorInstantClickMode){
       if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
@@ -234,11 +238,38 @@ void onManipulatorUpdate(
         //  2 - 2 = 0 units, so 1x original scale
         //  3 - 2 = 1 units, so 2x original scale
         //  4 - 2 = 2 units, so 3x original scale 
-        auto positionDiff = projectedPosition - initialDragPosition.value();  
-        auto relativeScale = (positionDiff + glm::vec3(1.f, 1.f, 1.f)) * initialDragScale.value();  // 
 
-        //std::cout << "(init, proj, diff) => " << "(" << print(initialDragPosition.value()) << ", " << print(projectedPosition) << ", " << print(scaleDiff) << ")" << std::endl;
-        
+        // for negative
+        // (-2) - (-2) = 0 units, so 1x original scale
+        // (-3) - (-2) = -1 units, so 2x original scale
+
+        auto manipulatorPosition = getPosition(manipulatorId);
+        auto effectProjPos = projectedPosition;
+        auto effectInitialPos = initialDragPosition.value();
+
+        bool draggingMoreNegX = projectedPosition.x < manipulatorPosition.x;
+        bool draggingMoreNegY = projectedPosition.y < manipulatorPosition.y;
+        bool draggingMoreNegZ = projectedPosition.z < manipulatorPosition.z;
+        if (draggingMoreNegX){
+          effectProjPos.x *= -1;
+          effectInitialPos.x *= -1;
+        }
+        if (draggingMoreNegY){
+          effectProjPos.y *= -1;
+          effectInitialPos.y *= -1;
+        }
+        if (draggingMoreNegZ){
+          effectProjPos.z *= -1;
+          effectInitialPos.z *= -1;         
+        }
+
+        //std::cout << "draggin more neg: " << draggingMoreNegX << " " << draggingMoreNegY << " " << draggingMoreNegZ << std::endl;
+s
+        auto positionDiff = effectProjPos - effectInitialPos;  
+        auto scaleFactor = positionDiff + glm::vec3(1.f, 1.f, 1.f);
+        auto relativeScale = scaleFactor *  initialDragScale.value();  
+
+        //std::cout << "(init, manpos, proj, diff) => " << "(" << print(initialDragPosition.value()) << ", " << print(manipulatorPosition) << ", " << print(projectedPosition) << ", " << print(relativeScale) << ")" << std::endl;
         setScale(manipulatorTarget, relativeScale);
       }
     }else{
@@ -261,9 +292,4 @@ void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
   std::cout << "on manipulator unselect" << std::endl;
   unspawnManipulator(removeObjectById);
 
-
-  // this needs to be moved to when the manipulator is not being dragged
-  std::cout << "reset initial drag position" << std::endl;
-  initialDragPosition = std::nullopt;
-  initialDragScale = std::nullopt;
 }

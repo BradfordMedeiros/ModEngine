@@ -205,12 +205,9 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
     targetDir = glm::vec3(0.f, 0.f, -1.f);
   }
 
-  ///
-  // 1
   auto radians = glm::acos(glm::dot(selectDir, glm::normalize(targetDir)));
-  std::cout << "angle: " << glm::degrees(radians) << std::endl;
+  //std::cout << "angle: " << glm::degrees(radians) << std::endl;
 
-  // 3
   glm::vec3 adjTargetPos = positionFrom;
   if (manipulatorAxis == XAXIS){
     adjTargetPos.z = target.z;
@@ -222,7 +219,7 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
     adjTargetPos.x = target.x;
     adjTargetPos.y = target.y;
   }
-  std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
+  //std::cout << "adjusted target pos: " << print(adjTargetPos) << std::endl;
 
   auto distanceToAdjTarget = glm::distance(positionFrom, adjTargetPos);
   auto distanceFinal = distanceToAdjTarget / glm::sin(radians);
