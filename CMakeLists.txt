@@ -64,7 +64,7 @@ else()
     add_definitions(-DINCLUDE_ASSIMP)
   endif()
 
-  set(NO_INCLUDE_BULLET FALSE)
+  set(NO_INCLUDE_BULLET TRUE)
   if (NOT NO_INCLUDE_BULLET)
     add_definitions(-DINCLUDE_BULLET)
   endif()
