@@ -179,6 +179,19 @@
   )
 )
 
+(define (maybe-perform-action objattr)
+  (define attrActions (assoc "details-action" objattr))
+  (format #t "attr actions: ~a\n " attrActions)
+  (if attrActions
+    (let ((action (assoc (cadr attrActions) buttonToAction)))
+      (if action
+        ((cadr action))
+        (format #t "no action for ~a\n" (cadr attrActions))
+      )
+    )
+  )
+)
+
 (define managedObj #f)
 (define (onObjSelected gameobj color)
   (define objattr (gameobj-attr gameobj))
@@ -202,6 +215,7 @@
     )
   )
   (handleListSelection gameobj objattr)
+  (maybe-perform-action objattr)
 )
 
 ;; todo remove - no items in this layout, should require this 
@@ -325,23 +339,7 @@
 
 ;;;;;;;;;;;;;;;
 
-
-(define (perform-button-action obj)
-  (define attrActions (assoc "button-action" (gameobj-attr obj)))
-  (format #t "attr actions: ~a\n " attrActions)
-  (if attrActions
-    (let ((action (assoc (cadr attrActions) buttonToAction)))
-      (if action
-        ((cadr action))
-        (format #t "no action for ~a\n" (cadr attrActions))
-      )
-    )
-  )
-)
 (define (onMessage key value)
-  (if (equal? key "dialog-button-action") 
-    (perform-button-action (gameobj-by-id (string->number value)))
-  )
   (if (equal? key "editor-button-on")
     (begin
       (toggleButtonBinding (string->number value) #t)

@@ -37,9 +37,7 @@
       "ontexture" => $value["image"],
       "offtexture" => $value["image"],
       "ontint" => "5 5 5 1",
-      "on" => "dialog-button-action",
-      "off" => "dialog-button-action",
-      "button-action" => $value["action"],
+      "details-action" => $value["action"],
     ]);
     array_push($listElementNames, $listItemName);
   }
@@ -52,10 +50,16 @@
 
 
   $topLevelElements = [$listHolder, $labelName];
-  createElement($rootElementName, $default_keyvalueLayout, [ 
+
+  $topLevelAttr = [ 
     "tint" => "0 0 1 1", 
     "elements" => implode(",", $topLevelElements),
     "type" => "vertical",
     #"spacing" => "0.04",
-  ]);
+  ];
+
+  if (array_key_exists("mode", $data)){
+    $topLevelAttr["details-list-mode"] = $data["mode"];
+  }
+  createElement($rootElementName, $default_keyvalueLayout, $topLevelAttr);
 ?>

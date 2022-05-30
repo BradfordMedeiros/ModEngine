@@ -273,6 +273,7 @@
           "type" => "list",
           "data" => [
             "key" => "Transform Mode",
+            "mode" => "oneof",
             "values" => [
               ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
               ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
