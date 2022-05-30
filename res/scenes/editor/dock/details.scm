@@ -236,13 +236,14 @@
   attrpair
 )
 
-; should get from details-binding-on/off
-(define (convertEnableTextToBool text) (equal? text "enabled"))
 (define (update-toggle-binding attrpair getDataForAttr)
   (define toggleEnableText (getDataForAttr (cadr attrpair)))
-  (define enableValue (convertEnableTextToBool toggleEnableText))
-  (format #t "update toggle binding: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
-  (gameobj-setattr! (car attrpair) 
+  (define gameobj (car attrpair))
+  (define bindingOn (assoc "details-binding-on" (gameobj-attr gameobj)))
+  (define enableValueStr (if bindingOn (cadr bindingOn) "enabled"))
+  (define enableValue (equal? enableValueStr toggleEnableText))
+  ;(format #t "update toggle binding: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
+  (gameobj-setattr! gameobj
     (list (list "state" (if enableValue "on" "off")))
   )
 )

@@ -153,8 +153,8 @@
             "key" => "Toggle Red", 
             "value" => [
               "binding" => "tint",
-              "binding-on" => "0 1 0 1",
-              "binding-off" => "0 0 1 1",
+              "binding-on" => "1 0 0 1",
+              "binding-off" => "1 1 1 1",
             ]
           ],
         ],
@@ -277,6 +277,17 @@
               ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
               ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
               ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "set-rotate-mode" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Move Relative", 
+            "value" => [
+              "binding" => "tools-manipulator-coord", # relative/absolute
+              "binding-on" => "relative",
+              "binding-off" => "absolute",
             ],
           ],
         ],

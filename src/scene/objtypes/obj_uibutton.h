@@ -22,6 +22,8 @@ struct GameObjectUIButton {
 
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj, ObjectSerializeUtil& util);
+
+void getUIButtonAttributes(GameObjectUIButton& textObj, GameobjAttributes& _attributes);
 void setUIButtonAttributes(GameObjectUIButton& buttonObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif
