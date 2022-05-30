@@ -86,6 +86,7 @@ void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine
 
 
 bool manipulatorInstantClickMode = true;
+bool drawDebugLines = true;
 ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
   if (axis != XAXIS && axis != YAXIS && axis != ZAXIS){
     return ManipulatorTarget {
@@ -109,15 +110,17 @@ ManipulatorTarget newValuesInstanceClick(std::function<void(glm::vec3, glm::vec3
   clearLines();
 
   // actual lengths
-  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
   drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
-  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
-  //drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
 
-
-  // directions
-  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
-  //drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
+  if (drawDebugLines){
+    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
+    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
+  
+    // directions
+    drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
+    drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
+  }
 
   return ManipulatorTarget {
     .manipulatorNew = newPosition,
@@ -236,6 +239,7 @@ void onManipulatorUpdate(
       setPosition(manipulatorTarget, newValues.manipulatorNew);
       setPosition(manipulatorId, newValues.targetNew);
     }else if (mode == SCALE){
+      std::cout << "set scale: " << print(newValues.targetNew) << std::endl;
       setScale(manipulatorTarget, newValues.targetNew);
     }
   }
