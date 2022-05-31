@@ -131,7 +131,7 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
 
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
-PhysicsValue addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool initialLoad, std::vector<glm::vec3> verts){
+PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::vector<glm::vec3> verts){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
     return PhysicsValue { .body = NULL, .offset = glm::vec3(0.f, 0.f, 0.f) };
@@ -276,7 +276,7 @@ PhysicsValue addPhysicsBody(World& world, objid id, glm::vec3 initialScale, bool
         getVoxelBodies(std::get_if<GameObjectVoxel>(&toRender) -> voxel),
         physicsOptions.isStatic,
         physicsOptions.hasCollisions,
-        initialScale,
+        physicsInfo.transformation.scale,
         opts
       );
     }
@@ -304,11 +304,13 @@ bool hasPhysicsBody(World& world, objid id){
   return world.rigidbodys.find(id) != world.rigidbodys.end();
 }
 void updatePhysicsBody(World& world, objid id){
-  auto rigidBody = world.rigidbodys.at(id).body;
-  assert(rigidBody != NULL);
-  glm::vec3 oldScale = getScale(rigidBody);
-  rmRigidBody(world, id);
-  addPhysicsBody(world, id, oldScale, false, {});
+  bool hasRigidBody = world.rigidbodys.find(id) != world.rigidbodys.end();
+  if (hasRigidBody){
+    auto rigidBody = world.rigidbodys.at(id).body;
+    assert(rigidBody != NULL);
+    rmRigidBody(world, id);
+  }
+  addPhysicsBody(world, id, false, {});
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
@@ -695,7 +697,7 @@ void addSerialObjectsToWorld(
       modelVerts = idToModelVertexs.at(id);
     }
     std::cout << "id is: " << id << std::endl;
-    auto phys = addPhysicsBody(world, id, glm::vec3(1.f, 1.f, 1.f), true, modelVerts); 
+    auto phys = addPhysicsBody(world, id, true, modelVerts); 
     if (phys.body != NULL){   // why do I need this?
       auto transform = fullTransformation(world.sandbox, id);
       setTransform(phys.body, transform.position + phys.offset, transform.scale, transform.rotation);
@@ -930,7 +932,13 @@ bool objectHasAttribute(World& world, objid id, std::string type, std::optional<
   return false;
 }
 
-void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet){
+void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
+  std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
+  if (physicsEnableChanged){
+    updatePhysicsBody(world, id);
+  }
+  std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;
+
   physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
 
@@ -958,9 +966,12 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
       setEmitterEnabled(world.emitters, id, enabled);
     }
   );
+
   GameObject& obj = getGameObject(world, id);
+  bool oldPhysicsEnabled = obj.physicsOptions.enabled;
   setAllAttributes(obj, attr);
-  afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end());
+  bool newPhysicsEnabled = obj.physicsOptions.enabled;
+  afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled);
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
   GameObject& gameobj = getGameObject(world, id);

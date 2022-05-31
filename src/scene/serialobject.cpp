@@ -192,6 +192,10 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
     gameobj.lookat = *strValue;
     return;
   }
+  if (field == "physics" && strValue != NULL){
+    gameobj.physicsOptions.enabled = *strValue == "enabled";
+    return;
+  }
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
   for (auto [field, fieldValue] : attr.stringAttributes){
