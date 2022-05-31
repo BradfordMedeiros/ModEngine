@@ -197,6 +197,7 @@ void setGameObjectScale(int32_t index, glm::vec3 scale){
 void setGameObjectRotation(int32_t index, glm::quat rotation){
   physicsRotateSet(world, index, rotation, false);
 }
+
 void setGameObjectRotationRelative(int32_t index, glm::quat rotation){
   physicsRotateSet(world, index, rotation, true);
 }
@@ -205,6 +206,9 @@ glm::quat getGameObjectRotation(int32_t index, bool isWorld){
     return fullTransformation(world.sandbox, index).rotation;
   }
   return getGameObject(world, index).transformation.rotation;
+}
+glm::quat getGameObjectRotationRelative(int32_t index){
+  return getGameObjectRotation(index, false);
 }
 
 objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, vectorAttributes vecAttr){

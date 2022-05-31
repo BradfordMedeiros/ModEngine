@@ -1500,6 +1500,8 @@ int main(int argc, char* argv[]){
       setGameObjectPosition, 
       getGameObjectScale,
       setGameObjectScale,
+      getGameObjectRotationRelative,
+      setGameObjectRotationRelative,
       projectionFromLayer(layers.at(0)),
       view, 
       state.manipulatorMode, 

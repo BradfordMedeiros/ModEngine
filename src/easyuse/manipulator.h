@@ -14,6 +14,8 @@ void onManipulatorUpdate(
   std::function<void(objid, glm::vec3)> setPosition, 
   std::function<glm::vec3(objid)> getScale,
   std::function<void(objid, glm::vec3)> setScale,
+  std::function<glm::quat(objid)> getRotation,
+  std::function<void(objid, glm::quat)> setRotation,
   glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,

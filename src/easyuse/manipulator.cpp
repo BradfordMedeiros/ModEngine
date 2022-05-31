@@ -6,6 +6,7 @@ Axis manipulatorObject = NOAXIS;
 
 std::optional<glm::vec3> initialDragPosition = std::nullopt;
 std::optional<glm::vec3> initialDragScale = std::nullopt;
+std::optional<glm::quat> initialDragRotation = std::nullopt;
 
 objid getManipulatorId(){
   return manipulatorId;
@@ -59,6 +60,7 @@ void onManipulatorMouseRelease(){
   std::cout << "reset initial drag position" << std::endl;
   initialDragPosition = std::nullopt;
   initialDragScale = std::nullopt;
+  initialDragRotation = std::nullopt;
 }
 
 struct ManipulatorTarget {
@@ -205,6 +207,8 @@ void onManipulatorUpdate(
   std::function<void(objid, glm::vec3)> setPosition, 
   std::function<glm::vec3(objid)> getScale,
   std::function<void(objid, glm::vec3)> setScale,
+  std::function<glm::quat(objid)> getRotation,
+  std::function<void(objid, glm::quat)> setRotation,
   glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
@@ -227,8 +231,9 @@ void onManipulatorUpdate(
       }
       auto projectedPosition = projectCursor(drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
       if (!initialDragPosition.has_value()){
-        initialDragPosition = projectedPosition;
+        initialDragPosition = projectedPosition;  // why is this not getPosition? 
         initialDragScale = getScale(manipulatorTarget);
+        initialDragRotation = getRotation(manipulatorTarget);
       }
     
       if (mode == TRANSLATE){
@@ -271,6 +276,21 @@ void onManipulatorUpdate(
 
         //std::cout << "(init, manpos, proj, diff) => " << "(" << print(initialDragPosition.value()) << ", " << print(manipulatorPosition) << ", " << print(projectedPosition) << ", " << print(relativeScale) << ")" << std::endl;
         setScale(manipulatorTarget, relativeScale);
+      }else if (mode == ROTATE){
+        std::cout << "rotate not yet implemneted" << std::endl;
+        auto manipulatorPosition = getPosition(manipulatorId);
+        auto effectProjPos = projectedPosition;
+        auto effectInitialPos = initialDragPosition.value();
+        auto positionDiff = effectProjPos - effectInitialPos;  
+
+        auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right
+        auto yRotation = (positionDiff.y / 3.1416) * 360;  // not quite right
+        auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
+        auto rotation = quatFromDirection(glm::normalize(glm::vec3(xRotation, yRotation, zRotation))); 
+
+        auto currentRotation = getRotation(manipulatorTarget);
+        setRotation(manipulatorTarget, setFrontDelta(initialDragRotation.value(), xRotation, yRotation, zRotation, 0.01f));
+        std::cout << "position diff: " << print(positionDiff) << " degrees: " << print(glm::vec3(xRotation, yRotation, zRotation)) << std::endl;
       }
     }else{
       auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
