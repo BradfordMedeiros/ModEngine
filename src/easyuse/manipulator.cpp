@@ -232,6 +232,11 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
   return positionDiff;
 }
 
+
+bool snapManipulatorPositions = false;
+bool snapManipulatorScales = false;
+bool snapManipulatorAngles = false;
+
 void onManipulatorUpdate(
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
@@ -269,21 +274,57 @@ void onManipulatorUpdate(
       }
     
       if (mode == TRANSLATE){
-        setPosition(manipulatorTarget, projectedPosition);
-        setPosition(manipulatorId, projectedPosition);
+        if (!snapManipulatorPositions){
+          setPosition(manipulatorTarget, projectedPosition);
+          setPosition(manipulatorId, projectedPosition);
+          return;
+        }
+        std::cout << "snap manipulator positions not yet implemented" << std::endl;
+        assert(false);
       }else if (mode == SCALE) {
-        auto scaleFactor = calcPositionDiff(projectedPosition, getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
-        auto relativeScale = scaleFactor *  initialDragScale.value();  
-        setScale(manipulatorTarget, relativeScale);
+        if (!snapManipulatorScales){
+          auto scaleFactor = calcPositionDiff(projectedPosition, getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
+          auto relativeScale = scaleFactor *  initialDragScale.value();  
+          setScale(manipulatorTarget, relativeScale);
+          return;
+        }
+        std::cout << "snap manipulator scales not yet implemented" << std::endl;
+        assert(false);
       }else if (mode == ROTATE){
         auto positionDiff = calcPositionDiff(projectedPosition, getPosition, false);
         auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right
         auto yRotation = (positionDiff.y / 3.1416) * 360;  // not quite right
         auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
-        setRotation(manipulatorTarget,
-          setFrontDelta(glm::identity<glm::quat>(), xRotation, yRotation, zRotation, 0.01f) *
-          initialDragRotation.value() 
-        );
+
+        if (!snapManipulatorAngles){
+          setRotation(manipulatorTarget,
+            setFrontDelta(glm::identity<glm::quat>(), xRotation, yRotation, zRotation, 0.01f) *
+            initialDragRotation.value() 
+          );
+          return;
+        }
+
+        int numXRotates = (int)(xRotation / 90.f);
+        int numYRotates = (int)(yRotation / 90.f);
+        int numZRotates = (int)(zRotation / 90.f);
+
+        std::cout << "rotations: (" << print(glm::vec3(xRotation, yRotation, zRotation)) << ")" << std::endl;
+        std::cout << "num rotates: (" << print(glm::vec3(numXRotates, numYRotates, numZRotates)) << ")" << std::endl;
+        
+
+        int numRotates = 0;
+        if (manipulatorObject == XAXIS){
+          numRotates = numXRotates;
+        }else if (manipulatorObject == YAXIS){
+          numRotates = numYRotates;
+        }else if (manipulatorObject == ZAXIS){
+          numRotates = numZRotates;
+        }
+        std::cout << "num rotates: " << numRotates << std::endl;
+        // xaxis should be manipulatorObject
+
+        auto newRotation = snapAngleByTurns(SNAP_ABSOLUTE, initialDragRotation.value(), manipulatorObject, numRotates);
+        setRotation(manipulatorTarget, newRotation);
       }
     }else{
       auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);

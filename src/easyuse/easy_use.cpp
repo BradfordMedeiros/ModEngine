@@ -71,6 +71,9 @@ glm::quat snapAngleUp(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
 glm::quat snapAngleDown(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
   return snapAngle(angle, rotationAxis, false, mode);
 }
+glm::quat snapAngleByTurns(SNAPPING_MODE, glm::quat angle, Axis rotationAxis, int numTurns){
+  return snapAngle(angle, rotationAxis, numTurns >= 0, SNAP_ABSOLUTE);
+}
 
 
 float getClosestPosition(float position, float snapAmount, bool isUp){
