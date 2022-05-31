@@ -264,7 +264,7 @@ void onManipulatorUpdate(
         }
 
         //std::cout << "draggin more neg: " << draggingMoreNegX << " " << draggingMoreNegY << " " << draggingMoreNegZ << std::endl;
-s
+
         auto positionDiff = effectProjPos - effectInitialPos;  
         auto scaleFactor = positionDiff + glm::vec3(1.f, 1.f, 1.f);
         auto relativeScale = scaleFactor *  initialDragScale.value();  
