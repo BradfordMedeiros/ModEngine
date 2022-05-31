@@ -280,7 +280,10 @@ void onManipulatorUpdate(
         auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right
         auto yRotation = (positionDiff.y / 3.1416) * 360;  // not quite right
         auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
-        setRotation(manipulatorTarget, setFrontDelta(initialDragRotation.value(), xRotation, yRotation, zRotation, 0.01f));
+        setRotation(manipulatorTarget,
+          setFrontDelta(glm::identity<glm::quat>(), xRotation, yRotation, zRotation, 0.01f) *
+          initialDragRotation.value() 
+        );
       }
     }else{
       auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);

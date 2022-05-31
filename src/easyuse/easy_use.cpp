@@ -34,6 +34,7 @@ float getClosestAngle(float angle, int snapAngle, bool isUp){
     }  
   }
   assert(false);
+  return 0.f;
 }
 glm::quat snapAngle(glm::quat angle, Axis rotationAxis, bool isUp, SNAPPING_MODE mode){
   glm::vec3 euler = glm::degrees(glm::eulerAngles(angle));
