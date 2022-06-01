@@ -130,6 +130,11 @@ glm::vec3 snapTranslateUp(SNAPPING_MODE mode, glm::vec3 currentPos, Axis transla
 glm::vec3 snapTranslateDown(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis){
   return snapVector(currentPos, translationAxis, false, snapTranslates.at(currentTranslateIndex), mode);
 }
+glm::vec3 snapTranslate(SNAPPING_MODE mode, glm::vec3 position){
+  std::cout << "snap translate not yet implemneted" << std::endl;
+  //assert(false);
+  return position;
+}
 
 static std::vector<float> snapScales = { 0.01, 0.1, 0.5, 1, 5, 10 };
 static int currentScaleIndex = 0;

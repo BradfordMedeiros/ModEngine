@@ -1508,7 +1508,12 @@ int main(int argc, char* argv[]){
       state.offsetX, 
       state.offsetY,
       glm::vec2(adjustedCoords.x, adjustedCoords.y),
-      glm::vec2(state.resolution.x, state.resolution.y)
+      glm::vec2(state.resolution.x, state.resolution.y),
+      [](glm::vec3 pos) -> glm::vec3 {  return snapTranslate(state.snappingMode, pos); },
+      [](glm::vec3 scale) -> glm::vec3 { return snapTranslate(state.snappingMode, scale); },
+      true,
+      false,
+      false
     );
     handlePaintingModifiesViewport(uvCoord);
     glViewport(0, 0, state.resolution.x, state.resolution.y);

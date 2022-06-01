@@ -3,7 +3,6 @@
 #include "../common/util.h"
 #include "../scene/serialobject.h"  // todo prob dont depend on gameobj directly
 #include "../translations.h"
-#include "./easy_use.h"
 
 objid getManipulatorId();
 void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName, std::function<objid(void)> makeManipulator, std::function<void(objid)> removeObjectById,   std::function<glm::vec3(objid)> getPosition, std::function<void(objid, glm::vec3)> setPosition);
@@ -23,6 +22,11 @@ void onManipulatorUpdate(
   float mouseX, 
   float mouseY,
   glm::vec2 cursorPos,
-  glm::vec2 screensize
+  glm::vec2 screensize,
+  std::function<glm::vec3(glm::vec3)> snapPosition,
+  std::function<glm::vec3(glm::vec3)> snapScale,
+  bool snapManipulatorPositions,
+  bool snapManipulatorScales,
+  bool snapManipulatorAngles
 );
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById);

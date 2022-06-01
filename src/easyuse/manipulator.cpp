@@ -233,8 +233,8 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
 }
 
 
-bool snapManipulatorPositions = false;
-bool snapManipulatorScales = false;
+bool snapManipulatorPositions = true;
+bool snapManipulatorScales = true;
 bool snapManipulatorAngles = false;
 
 void onManipulatorUpdate(
@@ -252,7 +252,12 @@ void onManipulatorUpdate(
   float mouseX, 
   float mouseY,
   glm::vec2 cursorPos,
-  glm::vec2 screensize
+  glm::vec2 screensize,
+  std::function<glm::vec3(glm::vec3)> snapPosition,
+  std::function<glm::vec3(glm::vec3)> snapScale,
+  bool snapManipulatorPositions,
+  bool snapManipulatorScales,
+  bool snapManipulatorAngles
 ){
   if (mouseX < 10 && mouseX > -10.f){
     mouseX = 0.f;
@@ -279,8 +284,9 @@ void onManipulatorUpdate(
           setPosition(manipulatorId, projectedPosition);
           return;
         }
-        std::cout << "snap manipulator positions not yet implemented" << std::endl;
-        assert(false);
+        auto newPosition = snapPosition(projectedPosition);
+        setPosition(manipulatorTarget, newPosition);
+        setPosition(manipulatorId, newPosition);
       }else if (mode == SCALE) {
         if (!snapManipulatorScales){
           auto scaleFactor = calcPositionDiff(projectedPosition, getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
@@ -323,8 +329,8 @@ void onManipulatorUpdate(
         std::cout << "num rotates: " << numRotates << std::endl;
         // xaxis should be manipulatorObject
 
-        auto newRotation = snapAngleByTurns(SNAP_ABSOLUTE, initialDragRotation.value(), manipulatorObject, numRotates);
-        setRotation(manipulatorTarget, newRotation);
+        //auto newRotation = snapAngleByTurns(SNAP_ABSOLUTE, initialDragRotation.value(), manipulatorObject, numRotates);
+        //setRotation(manipulatorTarget, newRotation);
       }
     }else{
       auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
