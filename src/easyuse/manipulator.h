@@ -25,6 +25,7 @@ void onManipulatorUpdate(
   glm::vec2 screensize,
   std::function<glm::vec3(glm::vec3)> snapPosition,
   std::function<glm::vec3(glm::vec3)> snapScale,
+  std::function<glm::quat(glm::quat, glm::quat)> snapRotate,
   bool snapManipulatorPositions,
   bool snapManipulatorScales,
   bool snapManipulatorAngles

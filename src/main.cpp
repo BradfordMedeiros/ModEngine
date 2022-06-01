@@ -1511,9 +1511,10 @@ int main(int argc, char* argv[]){
       glm::vec2(state.resolution.x, state.resolution.y),
       snapTranslate,
       snapScale,
+      snapRotate,
       true,
       true,
-      false
+      true
     );
     handlePaintingModifiesViewport(uvCoord);
     glViewport(0, 0, state.resolution.x, state.resolution.y);

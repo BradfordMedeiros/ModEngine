@@ -255,6 +255,7 @@ void onManipulatorUpdate(
   glm::vec2 screensize,
   std::function<glm::vec3(glm::vec3)> snapPosition,
   std::function<glm::vec3(glm::vec3)> snapScale,
+  std::function<glm::quat(glm::quat, glm::quat)> snapRotate,
   bool snapManipulatorPositions,
   bool snapManipulatorScales,
   bool snapManipulatorAngles
@@ -305,7 +306,7 @@ void onManipulatorUpdate(
 
         if (!snapManipulatorAngles){
           setRotation(manipulatorTarget,
-            setFrontDelta(glm::identity<glm::quat>(), xRotation, yRotation, zRotation, 0.01f) *
+            setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
             initialDragRotation.value() 
           );
           return;
@@ -328,10 +329,11 @@ void onManipulatorUpdate(
           numRotates = numZRotates;
         }
         std::cout << "num rotates: " << numRotates << std::endl;
+
         // xaxis should be manipulatorObject
 
-        //auto newRotation = snapAngleByTurns(SNAP_ABSOLUTE, initialDragRotation.value(), manipulatorObject, numRotates);
-        //setRotation(manipulatorTarget, newRotation);
+        auto newRotation =  snapRotate(glm::identity<glm::quat>(), setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f)) ;
+        setRotation(manipulatorTarget,initialDragRotation.value() * newRotation);
       }
     }else{
       auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);

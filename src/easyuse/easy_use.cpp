@@ -71,10 +71,6 @@ glm::quat snapAngleUp(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
 glm::quat snapAngleDown(SNAPPING_MODE mode, glm::quat angle, Axis rotationAxis){
   return snapAngle(angle, rotationAxis, false, mode);
 }
-glm::quat snapAngleByTurns(SNAPPING_MODE, glm::quat angle, Axis rotationAxis, int numTurns){
-  return snapAngle(angle, rotationAxis, numTurns >= 0, SNAP_ABSOLUTE);
-}
-
 
 float getClosestPosition(float position, float snapAmount, bool up){
   int multiple = position / snapAmount;
@@ -131,6 +127,25 @@ glm::vec3 snapVector(glm::vec3 position, float snapAmount){
   std::cout << "Current snapAmount: " << snapAmount << std::endl;
   std::cout << "rounding:" << print(position) << " to " << print(snappedPosition) << std::endl;
   return snappedPosition;
+}
+
+glm::quat snapRotate(glm::quat oldRotation, glm::quat newRotation){
+  auto deltaAngle = snapAngles.at(currentAngleIndex);
+  std::cout << "snap angle is: " << deltaAngle << std::endl;
+  glm::vec3 eulerOld = glm::degrees(glm::eulerAngles(oldRotation));
+  glm::vec3 eulerNew = glm::degrees(glm::eulerAngles(newRotation));
+  std::cout << "old / new " << print(eulerOld) << " / " << print(eulerNew) << std::endl;
+  
+
+  auto closestAngleX = getClosestPosition(eulerNew.x, deltaAngle);    
+  auto closestAngleY = getClosestPosition(eulerNew.y, deltaAngle);    
+  auto closestAngleZ = getClosestPosition(eulerNew.z, deltaAngle);    
+  glm::vec3 newAngle = glm::radians(glm::vec3(closestAngleX, closestAngleY, closestAngleZ));
+  glm::quat newRot = glm::quat(newAngle);
+
+  std::cout << "closest angle: " << closestAngleX << std::endl;
+
+  return newRot;
 }
 
 static std::vector<float> snapTranslates = { 0.01, 0.1, 0.5, 1, 5, 10 };

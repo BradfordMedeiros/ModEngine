@@ -9,7 +9,7 @@
 
 glm::quat snapAngleUp(SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis); 
 glm::quat snapAngleDown(SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis);
-glm::quat snapAngleByTurns(SNAPPING_MODE, glm::quat angle, Axis rotationAxis, int numTurns);
+glm::quat snapRotate(glm::quat oldRotation, glm::quat newRotation);
 
 glm::vec3 snapTranslateUp(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
 glm::vec3 snapTranslateDown(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
