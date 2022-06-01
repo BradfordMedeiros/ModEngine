@@ -1509,10 +1509,10 @@ int main(int argc, char* argv[]){
       state.offsetY,
       glm::vec2(adjustedCoords.x, adjustedCoords.y),
       glm::vec2(state.resolution.x, state.resolution.y),
-      [](glm::vec3 pos) -> glm::vec3 {  return snapTranslate(state.snappingMode, pos); },
-      [](glm::vec3 scale) -> glm::vec3 { return snapTranslate(state.snappingMode, scale); },
+      snapTranslate,
+      snapScale,
       true,
-      false,
+      true,
       false
     );
     handlePaintingModifiesViewport(uvCoord);

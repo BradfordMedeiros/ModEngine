@@ -286,7 +286,7 @@ std::vector<ObjectStateMapping> mapping = {
 
 void setState(engineState& state, ObjectValue& value, float now){
   for (auto &stateMap : mapping){
-    std::cout << "comparing to: " << stateMap.object << " - " << stateMap.attribute << std::endl;
+    //std::cout << "comparing to: " << stateMap.object << " - " << stateMap.attribute << std::endl;
     if (value.object == stateMap.object && value.attribute == stateMap.attribute){
       stateMap.attr(state, value.value, now);
       return;

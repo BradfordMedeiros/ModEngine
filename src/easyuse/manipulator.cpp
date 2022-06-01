@@ -273,7 +273,7 @@ void onManipulatorUpdate(
       }
       auto projectedPosition = projectCursor(drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
       if (!initialDragPosition.has_value()){
-        initialDragPosition = projectedPosition;  // why is this not getPosition? 
+        initialDragPosition = projectedPosition;  
         initialDragScale = getScale(manipulatorTarget);
         initialDragRotation = getRotation(manipulatorTarget);
       }
@@ -294,8 +294,9 @@ void onManipulatorUpdate(
           setScale(manipulatorTarget, relativeScale);
           return;
         }
-        std::cout << "snap manipulator scales not yet implemented" << std::endl;
-        assert(false);
+        auto scaleFactor = snapScale(calcPositionDiff(projectedPosition, getPosition, true)) + glm::vec3(1.f, 1.f, 1.f);
+        auto relativeScale = scaleFactor *  initialDragScale.value();  
+        setScale(manipulatorTarget, relativeScale);
       }else if (mode == ROTATE){
         auto positionDiff = calcPositionDiff(projectedPosition, getPosition, false);
         auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right

@@ -76,13 +76,25 @@ glm::quat snapAngleByTurns(SNAPPING_MODE, glm::quat angle, Axis rotationAxis, in
 }
 
 
-float getClosestPosition(float position, float snapAmount, bool isUp){
+float getClosestPosition(float position, float snapAmount, bool up){
   int multiple = position / snapAmount;
-  if (isUp){
+  if (up){
     return (multiple + 1) * snapAmount; 
   }
   return (multiple - 1) * snapAmount;
 };
+float getClosestPosition(float position, float snapAmount){
+  int multiple = position / snapAmount;
+  float amount = multiple * snapAmount;
+  float amountAndOne = (multiple + 1) * snapAmount;
+  float diffAmount = glm::abs(position - amount);
+  float diffAmountAndOne = glm::abs(position - amountAndOne);
+  if (diffAmount < diffAmountAndOne){
+    return amount;
+  }
+  return amountAndOne;
+};
+
 glm::vec3 snapVector(glm::vec3 current, Axis translationAxis, bool isUp, float snapAmount, SNAPPING_MODE mode){
   if (mode == SNAP_RELATIVE){
     if (translationAxis == NOAXIS || translationAxis == XAXIS){
@@ -111,6 +123,16 @@ glm::vec3 snapVector(glm::vec3 current, Axis translationAxis, bool isUp, float s
   return glm::vec3(0.f, 0.f, 0.f);
 }
 
+glm::vec3 snapVector(glm::vec3 position, float snapAmount){
+  float newX = getClosestPosition(position.x, snapAmount);    
+  float newY = getClosestPosition(position.y, snapAmount);    
+  float newZ = getClosestPosition(position.z, snapAmount);    
+  auto snappedPosition = glm::vec3(newX, newY, newZ);
+  std::cout << "Current snapAmount: " << snapAmount << std::endl;
+  std::cout << "rounding:" << print(position) << " to " << print(snappedPosition) << std::endl;
+  return snappedPosition;
+}
+
 static std::vector<float> snapTranslates = { 0.01, 0.1, 0.5, 1, 5, 10 };
 static int currentTranslateIndex = 0;
 void setSnapTranslateUp(){
@@ -130,10 +152,10 @@ glm::vec3 snapTranslateUp(SNAPPING_MODE mode, glm::vec3 currentPos, Axis transla
 glm::vec3 snapTranslateDown(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis){
   return snapVector(currentPos, translationAxis, false, snapTranslates.at(currentTranslateIndex), mode);
 }
-glm::vec3 snapTranslate(SNAPPING_MODE mode, glm::vec3 position){
-  std::cout << "snap translate not yet implemneted" << std::endl;
-  //assert(false);
-  return position;
+
+glm::vec3 snapTranslate(glm::vec3 position){
+  auto snapAmount = snapTranslates.at(currentTranslateIndex);
+  return snapVector(position, snapAmount);
 }
 
 static std::vector<float> snapScales = { 0.01, 0.1, 0.5, 1, 5, 10 };
@@ -154,6 +176,10 @@ glm::vec3 snapScaleUp(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translati
 }
 glm::vec3 snapScaleDown(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis){
   return snapVector(currentScale, translationAxis, false, snapScales.at(currentScaleIndex), mode);
+}
+glm::vec3 snapScale(glm::vec3 scale){
+  auto snapAmount = snapScales.at(currentScaleIndex);
+  return snapVector(scale, snapAmount);
 }
 
 float getSnapTranslateSize(){
