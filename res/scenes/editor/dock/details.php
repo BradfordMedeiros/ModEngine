@@ -98,8 +98,8 @@
 
   $vec3Type = [
     [ "type" => "float", "name" => "x", "value" => ".-3.4" ], 
-    [ "type" => "float", "name" => "y",  "value" => "..345" ], 
-    [ "type" => "slider", "name" => "z",  "value" => ".4.34" ]
+    //[ "type" => "float", "name" => "y",  "value" => "..345" ], 
+    //[ "type" => "slider", "name" => "z",  "value" => ".4.34" ]
   ];
   $vec4Type = [
     [ "type" => "float", "name" => "x", "value" => ".-3.4" ], 
@@ -120,7 +120,7 @@
             ],
           ]
         ],
-        [ "type" => "label", 
+        /*[ "type" => "label", 
           "data" => [
             "key" => "Look at Target", 
             "value" => [
@@ -150,6 +150,17 @@
         [
           "type" => "checkbox",
           "data" => [
+            "key" => "enable physics", 
+            "value" => [
+              "binding" => "physics",
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
             "key" => "Toggle Red", 
             "value" => [
               "binding" => "tint",
@@ -157,22 +168,31 @@
               "binding-off" => "1 1 1 1",
             ]
           ],
-        ],
-        /*[
+        ],*/
+        [
           "type" => "numeric",
           "data" => [
-            "key" => "position", 
-            "value" => $vec3Type,
+            "key" => "tint", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "x", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  0,
+                ]
+              ], 
+            ]
           ],
         ],
-        [ "type" => "label", 
+        /*[ "type" => "label", 
           "data" => [
             "key" => "Mesh", 
             "value" => [
               "binding" => "mesh",
             ],
           ]
-        ],
+        ],/*
         [ "type" => "label", 
           "data" => [
             "key" => "Render Layer", 
@@ -181,7 +201,7 @@
             ],
           ]
         ],*/
-        [
+        /*[
           "type" => "options",
           "data" => [
             "key" => "light-type", 
