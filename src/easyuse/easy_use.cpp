@@ -129,22 +129,18 @@ glm::vec3 snapVector(glm::vec3 position, float snapAmount){
   return snappedPosition;
 }
 
-glm::quat snapRotate(glm::quat oldRotation, glm::quat newRotation){
+glm::quat snapRotate(glm::quat newRotation, Axis snapAxis){
   auto deltaAngle = snapAngles.at(currentAngleIndex);
+  bool snapX = snapAxis == XAXIS || snapAxis == NOAXIS;
+  bool snapY = snapAxis == YAXIS || snapAxis == NOAXIS;
+  bool snapZ = snapAxis == ZAXIS || snapAxis == NOAXIS;
   std::cout << "snap angle is: " << deltaAngle << std::endl;
-  glm::vec3 eulerOld = glm::degrees(glm::eulerAngles(oldRotation));
   glm::vec3 eulerNew = glm::degrees(glm::eulerAngles(newRotation));
-  std::cout << "old / new " << print(eulerOld) << " / " << print(eulerNew) << std::endl;
-  
-
-  auto closestAngleX = getClosestPosition(eulerNew.x, deltaAngle);    
-  auto closestAngleY = getClosestPosition(eulerNew.y, deltaAngle);    
-  auto closestAngleZ = getClosestPosition(eulerNew.z, deltaAngle);    
-  glm::vec3 newAngle = glm::radians(glm::vec3(closestAngleX, closestAngleY, closestAngleZ));
+  auto snappedAngleX = snapX ? getClosestPosition(eulerNew.x, deltaAngle) : eulerNew.x;    
+  auto snappedAngleY = snapY ? getClosestPosition(eulerNew.y, deltaAngle) : eulerNew.y;    
+  auto snappedAngleZ = snapZ ? getClosestPosition(eulerNew.z, deltaAngle) : eulerNew.z;    
+  glm::vec3 newAngle = glm::radians(glm::vec3(snappedAngleX, snappedAngleY, snappedAngleZ));
   glm::quat newRot = glm::quat(newAngle);
-
-  std::cout << "closest angle: " << closestAngleX << std::endl;
-
   return newRot;
 }
 
