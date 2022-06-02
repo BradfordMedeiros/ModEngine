@@ -565,8 +565,8 @@ std::vector<InputDispatch> inputFns = {
   InputDispatch{
     .sourceKey = 'G',  // G 
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
+    //.prereqKey = 341,  // ctrl,
+    .hasPreq = false,
     .fn = [&state]() -> void {
       std::cout << "mode set to translate" << std::endl;
       state.manipulatorMode = TRANSLATE;
@@ -575,18 +575,18 @@ std::vector<InputDispatch> inputFns = {
   InputDispatch{
     .sourceKey = 'R',  // R
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
+    //.prereqKey = 341,  // ctrl,
+    .hasPreq = false,
     .fn = [&state]() -> void {
       std::cout << "mode set to rotate" << std::endl;
       state.manipulatorMode = ROTATE;
     }
   },
   InputDispatch{
-    .sourceKey = 'S',  // S
+    .sourceKey = 'T',  // S
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 341,  // ctrl,
-    .hasPreq = true,
+    //.prereqKey = 341,  // ctrl,
+    .hasPreq = false,
     .fn = [&state]() -> void {
       std::cout << "mode set to scale" << std::endl;
       state.manipulatorMode = SCALE;
@@ -874,6 +874,28 @@ std::vector<InputDispatch> inputFns = {
   InputDispatch{
     .sourceKey = 341,  // ctrl
     .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&cameraSpeed, &state]() -> void {
+      state.cameraFast = !state.cameraFast;
+      std::cout << "camera fast: " << state.cameraFast << std::endl;
+      cameraSpeed = state.cameraFast ? 1.f : 0.1f;
+    }
+  },
+  InputDispatch{
+    .sourceKey = GLFW_KEY_LEFT_ALT,  // ctrl
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = [&cameraSpeed, &state]() -> void {
+      state.cameraFast = !state.cameraFast;
+      std::cout << "camera fast: " << state.cameraFast << std::endl;
+      cameraSpeed = state.cameraFast ? 1.f : 0.1f;
+    }
+  },  
+  InputDispatch{
+    .sourceKey = 341,  // ctrl
+    .sourceType = BUTTON_RELEASE,
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = [&cameraSpeed, &state]() -> void {
