@@ -172,16 +172,40 @@
         [
           "type" => "numeric",
           "data" => [
-            "key" => "tint", 
+            "key" => "Tint", 
             "value" => [
               [ 
                 "type" => "float", 
-                "name" => "x", 
+                "name" => "Red", 
                 "value" => [ 
                   "binding" => "tint", 
-                  "binding-index" =>  0,
+                  "binding-index" =>  1,
                 ]
-              ], 
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Green", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  1,
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Blue", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  2,
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Alpha", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  3,
+                ]
+              ],
             ]
           ],
         ],

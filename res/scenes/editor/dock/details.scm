@@ -5,25 +5,26 @@
 ; 4. manages value field (as text editor style functionality) for focused elements with details-editabletext:true
 
 
-(define (isSubmitKey key) (equal? key 46))   ; ".
+(define (isSubmitKey key) (equal? key 47))   ; /
+(define (isControlKey key) (or (isSubmitKey key) (equal? key 44)))
 (define (submitData)
   (if managedObj
     (begin
       (let ((updatedValues (filterUpdatedObjectValues)))
         (format #t "values to update: ~a\n" updatedValues)
         (gameobj-setattr! managedObj updatedValues)
-
+        (format #t "submitted values!\n")
         ;; temporary, just to get the effect, should change
-        (for-each (lambda(attrPair) 
-          (if (equal? "editor-eoe-mode" (car attrPair))
-            (begin
-              (format #t "new eoe mode: ~a\n" (cadr attrPair))
-              (format #t "not eoe -> ~a\n" attrPair)
-              (if (equal? (cadr attrPair) "enabled") (set! eoeMode #t))
-              (if (equal? (cadr attrPair) "disabled") (set! eoeMode #f))
-            )
-          )
-        ) updatedValues)
+        ;(for-each (lambda(attrPair) 
+        ;  (if (equal? "editor-eoe-mode" (car attrPair))
+        ;    (begin
+        ;      (format #t "new eoe mode: ~a\n" (cadr attrPair))
+        ;      (format #t "not eoe -> ~a\n" attrPair)
+        ;      (if (equal? (cadr attrPair) "enabled") (set! eoeMode #t))
+        ;      (if (equal? (cadr attrPair) "disabled") (set! eoeMode #f))
+        ;    )
+        ;  )
+        ;) updatedValues)
       )
     )
   )
@@ -89,18 +90,44 @@
   )
 )
 
+(define (getDataValue attrField) 
+  (define value (assoc attrField dataValues))
+  (if value (cadr value) #f)
+)
 
+(define (makeTypeCorrect oldvalue newvalue)
+  (if (number? oldvalue)
+    (if (string? newvalue) 
+      (if (equal? (string-length newvalue) 0) 0 (string->number newvalue)) 
+      newvalue
+    )
+    newvalue
+  )
+)
+(define (getUpdatedValue detailBindingName detailBindingIndex newvalue)
+  (define oldvalue (getDataValue detailBindingName))
+  (if detailBindingIndex
+    (begin
+      (list-set! oldvalue detailBindingIndex (makeTypeCorrect (list-ref oldvalue detailBindingIndex) newvalue))
+      (format #t "oldvalue is now #s only ~a\n" (map number? oldvalue))
+      (list detailBindingName oldvalue)
+    )
+    (list detailBindingName newvalue)
+  )
+)
 (define (updateText obj text)
-  (define detailBindingPair (assoc "details-binding" (gameobj-attr obj)))
+  (define objattr (gameobj-attr obj))
+  (define detailBindingPair (assoc "details-binding" objattr))
+  (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
+  (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (gameobj-setattr! obj 
     (list
       (list "value" text)
     )
   )
-  (enforce-layout mainpanelId)
   (if detailBinding 
-    (updateStoreValueModified (list detailBinding text) #t)
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
   )
 )
 
@@ -225,7 +252,7 @@
 
 
 (define (onKey key scancode action mods)
-  (if (and (equal? action 1) (not (isSubmitKey key)))
+  (if (and (equal? action 1) (not (isControlKey key)))
     (processFocusedElement key)
   )
 )
@@ -235,18 +262,43 @@
 
 (define (create-attr-pair gameobj) (list gameobj (gameobj-attr gameobj)))
 (define (get-binded-elements bindingType) (map create-attr-pair (lsobj-attr bindingType)))
-(define (extract-binding-element attr-pair bindingType) (list (car attr-pair) (cadr (assoc bindingType (cadr attr-pair)))))
+(define (extract-binding-element attr-pair bindingType) 
+  (define attrs (cadr attr-pair))
+  (define detailBindingIndex (assoc "details-binding-index" attrs))
+  (list 
+    (car attr-pair) 
+    (cadr (assoc bindingType attrs))
+    (if detailBindingIndex (inexact->exact (cadr detailBindingIndex)) #f)
+  )
+)
 (define (all-obj-to-bindings bindingType) (map (lambda(attrPair) (extract-binding-element attrPair bindingType)) (get-binded-elements bindingType)))
-(define (generateGetDataForAttr attributeData defaultValue)
+
+(define (generateGetDataForAttr defaultValue)
   (lambda(attrField) 
-    (let ((fieldPair (assoc attrField attributeData)))
-      (if fieldPair (cadr fieldPair) defaultValue) 
+    (let ((fieldPair (getDataValue attrField)))
+      (if fieldPair fieldPair defaultValue) 
     )
   )
 )
 (define (update-binding attrpair getDataForAttr) 
-  (gameobj-setattr! (car attrpair) 
-    (list (list "value" (getDataForAttr (cadr attrpair))))
+  (define dataValue (getDataForAttr (cadr attrpair)))
+  (define bindingIndex (caddr attrpair))
+
+  (format #t "binding index: ~a ~a\n" bindingIndex (number? bindingIndex))
+  (if (and bindingIndex (list? dataValue) (< bindingIndex (length dataValue)))
+    (set! dataValue (list-ref dataValue bindingIndex))
+  )
+  (if (number? dataValue)
+    (set! dataValue (number->string dataValue))
+  )
+  (format #t "data value: ~a\n" dataValue)
+  (if (string? dataValue)
+    (begin
+      (gameobj-setattr! (car attrpair) 
+        (list (list "value" dataValue))
+      )
+    )
+    (format #t "warning not a string: ~a ~a ~a\n" attrpair dataValue bindingIndex)
   )
   attrpair
 )
@@ -315,14 +367,14 @@
 (define (populateData)
   (for-each 
     (lambda(attrpair) 
-      (update-binding attrpair (generateGetDataForAttr dataValues "< no data source >"))
+      (update-binding attrpair (generateGetDataForAttr  "< no data source >"))
     ) 
     (all-obj-to-bindings "details-binding")
   )
   (for-each 
     (lambda(attrpair) 
       ;(update-binding attrpair getDataForAttr)
-      (update-toggle-binding attrpair (generateGetDataForAttr dataValues #f))
+      (update-toggle-binding attrpair (generateGetDataForAttr  #f))
     ) 
     (all-obj-to-bindings "details-binding-toggle")  ;
   )

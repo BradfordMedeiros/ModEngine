@@ -21,7 +21,7 @@
       $attrValues = [ "value" => $textValue ];
       if ($hasBinding){
         $attrValues["details-binding"] = $value[$i]["value"]["binding"];
-        if (is_int($value[$i]["value"]["binding-index"])){
+        if (array_key_exists("binding-index", $value[$i]["value"])){
           $attrValues["details-binding-index"] = $value[$i]["value"]["binding-index"];
         }
       }
