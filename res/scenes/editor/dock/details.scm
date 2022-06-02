@@ -91,16 +91,17 @@
 
 
 (define (updateText obj text)
-  (define detailBinding (cadr (assoc "details-binding" (gameobj-attr obj))))
+  (define detailBindingPair (assoc "details-binding" (gameobj-attr obj)))
+  (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (gameobj-setattr! obj 
     (list
       (list "value" text)
     )
   )
   (enforce-layout mainpanelId)
-  (format #t "updating text: ~a\n" text)
-
-  (updateStoreValueModified (list detailBinding text) #t)
+  (if detailBinding 
+    (updateStoreValueModified (list detailBinding text) #t)
+  )
 )
 
 (define (lessIndex currentText) (max 0 (- (string-length currentText) 1)))
