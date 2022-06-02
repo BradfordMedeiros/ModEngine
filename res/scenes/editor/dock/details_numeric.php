@@ -12,7 +12,22 @@
     $managedElements = [ $floatLabelElementName ];
     if ($controlType == "float"){
       $floatValueElementName =  ")" . $unique_control_id . "_" . "numeric"  . $i . "_value";
-      createElement($floatValueElementName, $default_value, [ "value" => $value[$i]["value"] ]);
+
+      $hasBinding = !is_string($value[$i]);
+      $textValue = "";
+      if (! $hasBinding){
+        $textValue = $value[$i]["value"];
+      }
+      $attrValues = [ "value" => $textValue ];
+      if ($hasBinding){
+        $attrValues["details-binding"] = $value[$i]["value"]["binding"];
+        if (is_int($value[$i]["value"]["binding-index"])){
+          $attrValues["details-binding-index"] = $value[$i]["value"]["binding-index"];
+        }
+      }
+
+
+      createElement($floatValueElementName, $default_value, $attrValues);
       array_push($managedElements, $floatValueElementName);
     }else if ($controlType == "slider"){
       $sliderElementName =  "_" . $unique_control_id . "_" . "numeric"  . $i . "_value";
@@ -30,3 +45,4 @@
   $numericElements = array_reverse($numericElements);
   createElement($rootElementName, $default_keyvalueLayout, [ "elements" => implode(",", $numericElements), "type" => "vertical" ]);
 ?>
+
