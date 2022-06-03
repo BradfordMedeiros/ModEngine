@@ -12,6 +12,9 @@
     (begin
       (let ((updatedValues (filterUpdatedObjectValues)))
         (format #t "values to update: ~a\n" updatedValues)
+        (map (lambda(value) 
+          (format #t "number?: ~a\n" (map number? (cadr value)))
+        ) updatedValues)
         (gameobj-setattr! managedObj updatedValues)
         (format #t "submitted values!\n")
         ;; temporary, just to get the effect, should change
@@ -98,7 +101,7 @@
 (define (makeTypeCorrect oldvalue newvalue)
   (if (number? oldvalue)
     (if (string? newvalue) 
-      (if (equal? (string-length newvalue) 0) 0 (string->number newvalue)) 
+      (if (or (equal? (string-length newvalue) 0) (equal? "-" (substring newvalue 0 1))) 0 (string->number newvalue)) 
       newvalue
     )
     newvalue
@@ -166,11 +169,17 @@
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr) 
           (let ((newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key)))
-            (if (isEditableType "number" attr)
-              (if (or (string->number newText) (equal? 0 (string-length newText))) 
+            (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
+              (if (or number positiveNumber)
+                (if (or 
+                    (string->number newText) 
+                    (equal? 0 (string-length newText)) 
+                    (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
+                  ) 
+                  (updateText focusedElement newText)
+                )
                 (updateText focusedElement newText)
               )
-              (updateText focusedElement newText)
             )
           )
         )

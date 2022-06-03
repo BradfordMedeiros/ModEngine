@@ -187,6 +187,7 @@
                 "value" => [ 
                   "binding" => "tint", 
                   "binding-index" =>  1,
+                  "type" => "positive-number",
                 ]
               ],
               [ 

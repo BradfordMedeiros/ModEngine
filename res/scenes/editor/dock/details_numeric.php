@@ -21,15 +21,24 @@
       $attrValues = [ 
         "value" => $textValue, 
         "details-editabletext" => "true",
-        "details-editable-type" => "number", 
       ];
+      if (array_key_exists("type", $value[$i]["value"])){
+        $type = $value[$i]["value"]["type"];
+        if ($type != "number" && $type != "positive-number"){
+          print("invalid numeric type");
+          exit(1);
+        }
+        $attrValues["details-editable-type"] = $type;
+      }else{
+        $attrValues["details-editable-type"] = "number";
+      }
+
       if ($hasBinding){
         $attrValues["details-binding"] = $value[$i]["value"]["binding"];
         if (array_key_exists("binding-index", $value[$i]["value"])){
           $attrValues["details-binding-index"] = $value[$i]["value"]["binding-index"];
         }
       }
-
 
       createElement($floatValueElementName, $default_value, $attrValues);
       array_push($managedElements, $floatValueElementName);
