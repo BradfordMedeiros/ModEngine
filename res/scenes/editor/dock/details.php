@@ -146,7 +146,7 @@
             ],
           ],
         ],
-        [
+        */[
           "type" => "checkbox",
           "data" => [
             "key" => "enable physics", 
@@ -158,6 +158,22 @@
           ],
         ],
         [
+          "type" => "numeric",
+          "data" => [
+            "key" => "Gravity", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "Up/Down", 
+                "value" => [ 
+                  "binding" => "physics_gravity", 
+                  "binding-index" =>  1,
+                ]
+              ],
+            ]
+          ],
+        ],
+        /*[
           "type" => "checkbox",
           "data" => [
             "key" => "Toggle Red", 
@@ -178,7 +194,8 @@
                 "name" => "Red", 
                 "value" => [ 
                   "binding" => "tint", 
-                  "binding-index" =>  1,
+                  "binding-index" =>  0,
+                  "type" => "positive-number",
                 ]
               ],
               [ 
@@ -196,6 +213,7 @@
                 "value" => [ 
                   "binding" => "tint", 
                   "binding-index" =>  2,
+                  "type" => "positive-number",
                 ]
               ],
               [ 
@@ -204,6 +222,7 @@
                 "value" => [ 
                   "binding" => "tint", 
                   "binding-index" =>  3,
+                  "type" => "positive-number",
                 ]
               ],
             ]

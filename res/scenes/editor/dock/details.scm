@@ -11,23 +11,19 @@
   (if managedObj
     (begin
       (let ((updatedValues (filterUpdatedObjectValues)))
-        (format #t "values to update: ~a\n" updatedValues)
-        (map (lambda(value) 
-          (format #t "number?: ~a\n" (map number? (cadr value)))
-        ) updatedValues)
+        (format #t "submiit attrs: ~a\n" updatedValues)
         (gameobj-setattr! managedObj updatedValues)
-        (format #t "submitted values!\n")
         ;; temporary, just to get the effect, should change
-        ;(for-each (lambda(attrPair) 
-        ;  (if (equal? "editor-eoe-mode" (car attrPair))
-        ;    (begin
-        ;      (format #t "new eoe mode: ~a\n" (cadr attrPair))
-        ;      (format #t "not eoe -> ~a\n" attrPair)
-        ;      (if (equal? (cadr attrPair) "enabled") (set! eoeMode #t))
-        ;      (if (equal? (cadr attrPair) "disabled") (set! eoeMode #f))
-        ;    )
-        ;  )
-        ;) updatedValues)
+        (for-each (lambda(attrPair) 
+          (if (equal? "editor-eoe-mode" (car attrPair))
+            (begin
+              (format #t "new eoe mode: ~a\n" (cadr attrPair))
+              (format #t "not eoe -> ~a\n" attrPair)
+              (if (equal? (cadr attrPair) "enabled") (set! eoeMode #t))
+              (if (equal? (cadr attrPair) "disabled") (set! eoeMode #f))
+            )
+          )
+        ) updatedValues)
       )
     )
   )
@@ -101,7 +97,7 @@
 (define (makeTypeCorrect oldvalue newvalue)
   (if (number? oldvalue)
     (if (string? newvalue) 
-      (if (or (equal? (string-length newvalue) 0) (equal? "-" (substring newvalue 0 1))) 0 (string->number newvalue)) 
+      (if (or (equal? (string-length newvalue) 0) (equal? "-" (substring newvalue 0 (string-length newvalue)))) 0 (string->number newvalue)) 
       newvalue
     )
     newvalue
@@ -111,8 +107,11 @@
   (define oldvalue (getDataValue detailBindingName))
   (if detailBindingIndex
     (begin
+      (if (equal? oldvalue #f)
+        (set! oldvalue (list 0 0 0))  ; should come from some type hint
+      )
       (list-set! oldvalue detailBindingIndex (makeTypeCorrect (list-ref oldvalue detailBindingIndex) newvalue))
-      (format #t "oldvalue is now #s only ~a\n" (map number? oldvalue))
+      (format #t "old value: ~a ~a\n"  oldvalue (map number? oldvalue))
       (list detailBindingName oldvalue)
     )
     (list detailBindingName newvalue)
@@ -285,6 +284,16 @@
 
 (define (create-attr-pair gameobj) (list gameobj (gameobj-attr gameobj)))
 (define (get-binded-elements bindingType) (map create-attr-pair (lsobj-attr bindingType)))
+
+(define (not-found-from-attr attrs)
+  (define type (assoc "details-editable-type" attrs))
+  (set! type (if type (cadr type) type))
+  (if (or (equal? type "number") (equal? type "positive-number"))
+    (list 0 0 0 0)
+    "< no data source >"
+  )
+)
+
 (define (extract-binding-element attr-pair bindingType) 
   (define attrs (cadr attr-pair))
   (define detailBindingIndex (assoc "details-binding-index" attrs))
@@ -292,6 +301,7 @@
     (car attr-pair) 
     (cadr (assoc bindingType attrs))
     (if detailBindingIndex (inexact->exact (cadr detailBindingIndex)) #f)
+    (not-found-from-attr attrs)
   )
 )
 (define (all-obj-to-bindings bindingType) (map (lambda(attrPair) (extract-binding-element attrPair bindingType)) (get-binded-elements bindingType)))
@@ -387,10 +397,15 @@
   (map get-group-value uniqueGroups)
 )
 
+(define (notFoundData attrpair)
+  (define defaultValue (list-ref attrpair 3))
+  (format #t "not found: ~a\n" defaultValue)
+  defaultValue
+)
 (define (populateData)
   (for-each 
     (lambda(attrpair) 
-      (update-binding attrpair (generateGetDataForAttr  "< no data source >"))
+      (update-binding attrpair (generateGetDataForAttr  (notFoundData attrpair)))
     ) 
     (all-obj-to-bindings "details-binding")
   )
