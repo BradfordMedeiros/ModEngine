@@ -147,9 +147,16 @@
   currentText
 )
 
+
 (define (shouldUpdateText attr)
   (define editableText (assoc "details-editabletext" attr))
   (and editableText (equal? "true" (cadr editableText)))
+)
+(define (isEditableType type attr) 
+  (define editableText (assoc "details-editable-type" attr))
+  (define isEditableType (if editableText (equal? (cadr editableText) type) #f))
+  (format #t "is editable type: ~a ~a\n" type isEditableType)
+  isEditableType
 )
 
 (define focusedElement #f)
@@ -158,7 +165,14 @@
     (begin
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr) 
-          (updateText focusedElement (getUpdatedText (gameobj-attr focusedElement) focusedElement key))
+          (let ((newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key)))
+            (if (isEditableType "number" attr)
+              (if (or (string->number newText) (equal? 0 (string-length newText))) 
+                (updateText focusedElement newText)
+              )
+              (updateText focusedElement newText)
+            )
+          )
         )
       )
     )
