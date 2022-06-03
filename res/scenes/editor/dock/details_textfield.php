@@ -22,9 +22,9 @@
 
   $valuename = ")value_" . $i;
   if (is_string($data["value"])){
-    createElement($valuename, $default_value, [ "value" =>  $data["value"] ]);
+    createElement($valuename, $default_value, [ "value" =>  $data["value"], "details-editabletext" => "true"  ]);
   }else{
-    createElement($valuename, $default_value, [ "value" =>  "", "details-binding" => $data["value"]["binding"]] );
+    createElement($valuename, $default_value, [ "value" =>  "", "details-binding" => $data["value"]["binding"], "details-editabletext" => "true"  ] );
   }
   createElement($rootElementName, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
 ?>

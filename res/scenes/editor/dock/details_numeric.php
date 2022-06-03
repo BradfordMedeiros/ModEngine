@@ -18,7 +18,11 @@
       if (! $hasBinding){
         $textValue = $value[$i]["value"];
       }
-      $attrValues = [ "value" => $textValue ];
+      $attrValues = [ 
+        "value" => $textValue, 
+        "details-editabletext" => "true",
+        "details-editable-type" => "number", 
+      ];
       if ($hasBinding){
         $attrValues["details-binding"] = $value[$i]["value"]["binding"];
         if (array_key_exists("binding-index", $value[$i]["value"])){

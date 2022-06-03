@@ -77,9 +77,8 @@
       "scale" => "0.004 0.01 0.004",
     ];
     $extra_key_attrs = [];
-    $extra_value_attrs = [ "details-editabletext" => "true" ];
     $default_key = array_merge($default_text_style, $extra_key_attrs);
-    $default_value = array_merge($default_text_style, $extra_value_attrs);
+    $default_value = array_merge($default_text_style, []);
     $default_keyvalueLayout = [
       "layer" => "basicui",
       "type" => "horizontal",
