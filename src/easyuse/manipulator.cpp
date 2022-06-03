@@ -232,9 +232,6 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
   return positionDiff;
 }
 
-
-bool rotateSnapRelative  = false;
-
 void onManipulatorUpdate(
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
@@ -254,9 +251,7 @@ void onManipulatorUpdate(
   std::function<glm::vec3(glm::vec3)> snapPosition,
   std::function<glm::vec3(glm::vec3)> snapScale,
   std::function<glm::quat(glm::quat, Axis)> snapRotate,
-  bool snapManipulatorPositions,
-  bool snapManipulatorScales,
-  bool snapManipulatorAngles
+  ManipulatorOptions options
 ){
   if (mouseX < 10 && mouseX > -10.f){
     mouseX = 0.f;
@@ -278,7 +273,7 @@ void onManipulatorUpdate(
       }
     
       if (mode == TRANSLATE){
-        if (!snapManipulatorPositions){
+        if (!options.snapManipulatorPositions){
           setPosition(manipulatorTarget, projectedPosition);
           setPosition(manipulatorId, projectedPosition);
           return;
@@ -287,14 +282,24 @@ void onManipulatorUpdate(
         setPosition(manipulatorTarget, newPosition);
         setPosition(manipulatorId, newPosition);
       }else if (mode == SCALE) {
-        if (!snapManipulatorScales){
+        if (!options.snapManipulatorScales){
           auto scaleFactor = calcPositionDiff(projectedPosition, getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
           auto relativeScale = scaleFactor *  initialDragScale.value();  
           setScale(manipulatorTarget, relativeScale);
           return;
         }
-        auto scaleFactor = snapScale(calcPositionDiff(projectedPosition, getPosition, true)) + glm::vec3(1.f, 1.f, 1.f);
-        auto relativeScale = scaleFactor *  initialDragScale.value();  
+
+        auto positionDiff = calcPositionDiff(projectedPosition, getPosition, true);
+        auto scaleFactor = snapScale(positionDiff) ;
+        if (options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
+          auto vecLength = glm::length(scaleFactor);
+          bool negX = positionDiff.x < 0.f;
+          bool negY = positionDiff.y < 0.f;
+          bool negZ = positionDiff.z < 0.f;
+          auto compLength = glm::sqrt(vecLength * vecLength / 3.f);  // because sqrt(x^2 + y^2 + z^2) =  sqrt(3x^2) = veclength  
+          scaleFactor = glm::vec3(compLength * (negX ? -1.f : 1.f), compLength * (negY ? -1.f : 1.f), compLength * (negZ ? -1.f : 1.f));
+        }
+        auto relativeScale = scaleFactor *  initialDragScale.value() + initialDragScale.value();  
         setScale(manipulatorTarget, relativeScale);
       }else if (mode == ROTATE){
         auto positionDiff = calcPositionDiff(projectedPosition, getPosition, false);
@@ -302,7 +307,7 @@ void onManipulatorUpdate(
         auto yRotation = (positionDiff.y / 3.1416) * 360;  // not quite right
         auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
 
-        if (!snapManipulatorAngles){
+        if (!options.snapManipulatorAngles){
           setRotation(manipulatorTarget,
             setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
             initialDragRotation.value() 
@@ -328,7 +333,7 @@ void onManipulatorUpdate(
         }
         std::cout << "num rotates: " << numRotates << std::endl;
 
-        if (rotateSnapRelative){
+        if (options.rotateSnapRelative){
           auto newRotation = snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorObject) ;
           setRotation(manipulatorTarget, newRotation * initialDragRotation.value());          
         }else{

@@ -1,8 +1,20 @@
+#ifndef MOD_MANIPULATOR
+#define MOD_MANIPULATOR
+
 #include <functional>
 #include <optional>
 #include "../common/util.h"
 #include "../scene/serialobject.h"  // todo prob dont depend on gameobj directly
 #include "../translations.h"
+
+struct ManipulatorOptions {
+  bool snapManipulatorPositions;
+  bool snapManipulatorScales;
+  bool snapManipulatorAngles;
+  bool rotateSnapRelative;
+  bool preserveRelativeScale;
+};
+
 
 objid getManipulatorId();
 void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName, std::function<objid(void)> makeManipulator, std::function<void(objid)> removeObjectById,   std::function<glm::vec3(objid)> getPosition, std::function<void(objid, glm::vec3)> setPosition);
@@ -26,8 +38,8 @@ void onManipulatorUpdate(
   std::function<glm::vec3(glm::vec3)> snapPosition,
   std::function<glm::vec3(glm::vec3)> snapScale,
   std::function<glm::quat(glm::quat, Axis)> snapRotate,
-  bool snapManipulatorPositions,
-  bool snapManipulatorScales,
-  bool snapManipulatorAngles
+  ManipulatorOptions options
 );
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById);
+
+#endif

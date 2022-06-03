@@ -1512,9 +1512,13 @@ int main(int argc, char* argv[]){
       snapTranslate,
       snapScale,
       snapRotate,
-      true,
-      true,
-      true
+      ManipulatorOptions {
+         .snapManipulatorPositions = true,
+         .snapManipulatorScales = true,
+         .snapManipulatorAngles = true,
+         .rotateSnapRelative = true,
+         .preserveRelativeScale = true,
+      }
     );
     handlePaintingModifiesViewport(uvCoord);
     glViewport(0, 0, state.resolution.x, state.resolution.y);
