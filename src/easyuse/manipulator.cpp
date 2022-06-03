@@ -263,6 +263,7 @@ void onManipulatorUpdate(
   if (manipulatorId != 0 && manipulatorTarget != 0){
     if (manipulatorInstantClickMode){
       if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
+        setPosition(manipulatorId, getPosition(manipulatorTarget));
         return;
       }
       auto projectedPosition = projectCursor(drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);

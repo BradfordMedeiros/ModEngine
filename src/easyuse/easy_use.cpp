@@ -124,8 +124,8 @@ glm::vec3 snapVector(glm::vec3 position, float snapAmount){
   float newY = getClosestPosition(position.y, snapAmount);    
   float newZ = getClosestPosition(position.z, snapAmount);    
   auto snappedPosition = glm::vec3(newX, newY, newZ);
-  std::cout << "Current snapAmount: " << snapAmount << std::endl;
-  std::cout << "rounding:" << print(position) << " to " << print(snappedPosition) << std::endl;
+  //std::cout << "Current snapAmount: " << snapAmount << std::endl;
+  //std::cout << "rounding:" << print(position) << " to " << print(snappedPosition) << std::endl;
   return snappedPosition;
 }
 
