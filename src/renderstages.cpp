@@ -241,11 +241,11 @@ RenderStages loadRenderStages(
     .name = "RENDERING-SELECTION",
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture,
-    .colorAttachment1 = 0,
+    .colorAttachment1 = framebufferTexture2,  // this stores UV coord
     .depthTextureIndex = 0,
     .shader = shaders.selectionProgram,
     .quadTexture = 0,
-    .hasColorAttachment1 = false,
+    .hasColorAttachment1 = true,
     .renderWorld = true,
     .renderSkybox = false,
     .renderQuad = false,

@@ -32,6 +32,9 @@ glm::vec4 getColorFromGameobject(objid id){
   return idColor;
 }
 
+// Emphasis:  Color attachment 1 needs to save the uvCoordData 
+// eg: layout(location = 1) out vec2 UVCoords;
+// UVCoords = vec2(1, 2)
 UVCoord getUVCoord(GLint x, GLint y){
   glReadBuffer(GL_COLOR_ATTACHMENT1);
   UVCoord uvdata; 
