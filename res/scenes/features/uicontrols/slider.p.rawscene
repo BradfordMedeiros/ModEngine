@@ -1,4 +1,4 @@
 
-/basicslider:position:0 0 0
-/basicslider:onslide:slideamount
-/basicslider:script:./res/scenes/features/uicontrols/slider.scm
+_basicslider:position:0 0 0
+_basicslider:onslide:slideamount
+_basicslider:script:./res/scenes/features/uicontrols/slider.scm
