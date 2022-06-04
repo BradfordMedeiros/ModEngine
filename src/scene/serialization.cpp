@@ -3,7 +3,10 @@
 // format: <token>:<attribute>:<payload>
 std::optional<Token> parseToken(std::string content) {
   std::vector<std::string> validToken = split(content, ':');
-  assert(validToken.size() == 3);
+  if (validToken.size() != 3){
+    std::cout << "invalid token: " << content << " - size = " << validToken.size() << std::endl;
+    assert(false);
+  }
   Token token = { 
     .target = (validToken.size() > 0) ? trim(validToken.at(0)) : "",
     .attribute = (validToken.size() > 1) ? trim(validToken.at(1)) : "",
@@ -247,24 +250,8 @@ std::string serializeObj(
   if (!gameobject.physicsOptions.hasCollisions){
     sceneData = sceneData + gameobjectName + ":physics_collision:nocollide" + "\n"; 
   }
-  if (gameobject.physicsOptions.shape == BOX){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_box" + "\n"; 
-  }
-  if (gameobject.physicsOptions.shape == SPHERE){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_sphere" + "\n"; 
-  }
-  if (gameobject.physicsOptions.shape == CAPSULE){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_capsule" + "\n"; 
-  }
-  if (gameobject.physicsOptions.shape == CYLINDER){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_cylinder" + "\n"; 
-  } 
-  if (gameobject.physicsOptions.shape == CONVEXHULL){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_hull" + "\n"; 
-  } 
-  if (gameobject.physicsOptions.shape == SHAPE_EXACT){
-    sceneData = sceneData + gameobjectName + ":physics_shape:shape_exact" + "\n";
-  }
+
+  sceneData = sceneData + gameobjectName + ":physics_shape:" + physicsShapeValue(gameobject) + "\n";
  
   if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
     sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 

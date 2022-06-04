@@ -215,6 +215,33 @@ void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr){
     gameobj.attr.vecAttr.vec4[field] = fieldValue;
   }
 }
+
+std::string physicsShapeValue(GameObject& gameobject){
+  if (gameobject.physicsOptions.shape == BOX){
+    return "shape_box"; 
+  }
+  if (gameobject.physicsOptions.shape == SPHERE){
+    return "shape_sphere"; 
+  }
+  if (gameobject.physicsOptions.shape == CAPSULE){
+    return "shape_capsule"; 
+  }
+  if (gameobject.physicsOptions.shape == CYLINDER){
+    return "shape_cylinder"; 
+  } 
+  if (gameobject.physicsOptions.shape == CONVEXHULL){
+    return "shape_hull"; 
+  } 
+  if (gameobject.physicsOptions.shape == SHAPE_EXACT){
+    return "shape_exact";
+  }
+  if (gameobject.physicsOptions.shape == AUTOSHAPE){
+    return "shape_auto";
+  }
+  assert(false);
+  return "";
+}
+
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.vecAttr.vec3["position"] = gameobj.transformation.position;
   _attr.vecAttr.vec3["scale"] = gameobj.transformation.scale;
@@ -225,7 +252,7 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.stringAttributes["script"] = gameobj.script;
   _attr.stringAttributes["fragshader"] = gameobj.fragshader;
   _attr.stringAttributes["physics_type"] = gameobj.physicsOptions.isStatic ? "static" : "dynamic";
-
+  _attr.stringAttributes["physics_shape"] = physicsShapeValue(gameobj);
 }
 
 // property suffix looks like the parts of the tokens on the right hand side
@@ -238,3 +265,4 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
   }
   return value;
 }
+

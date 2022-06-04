@@ -43,6 +43,7 @@ struct GameObject {
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes);
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr);
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr);
+std::string physicsShapeValue(GameObject& gameobject);
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
 AttributeValue parsePropertySuffix(std::string key, std::string value);
 
