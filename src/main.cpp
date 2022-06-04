@@ -665,6 +665,7 @@ void onObjDelete(objid id){
  std::cout << "deleted obj id: " << id << std::endl;
   maybeResetCamera(id);
   unsetSelectedIndex(state.editor, id, true);
+  onManipulatorIdRemoved(id, removeObjectById);
 }
 
 std::map<std::string, std::string> args;

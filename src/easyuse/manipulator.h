@@ -41,5 +41,6 @@ void onManipulatorUpdate(
   ManipulatorOptions options
 );
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById);
+void onManipulatorIdRemoved(objid id, std::function<void(objid)> removeObjectById);
 
 #endif

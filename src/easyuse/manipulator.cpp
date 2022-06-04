@@ -362,5 +362,10 @@ void onManipulatorUpdate(
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
   std::cout << "on manipulator unselect" << std::endl;
   unspawnManipulator(removeObjectById);
+}
 
+void onManipulatorIdRemoved(objid id, std::function<void(objid)> removeObjectById){
+  if (id == manipulatorTarget){
+    onManipulatorUnselect(removeObjectById);
+  }
 }
