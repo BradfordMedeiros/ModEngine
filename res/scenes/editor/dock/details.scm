@@ -203,36 +203,6 @@
   (submitData)
 )
 
-
-(define (object-should-be-active gameobj selectedGroupIndex)   ; should use details-group and details-group-index instead
-  (define groupIndex (assoc "details-group-index" (gameobj-attr gameobj)))
-  (if groupIndex
-    (if (equal? (cadr groupIndex) selectedGroupIndex) (list gameobj #t) (list gameobj #f))
-    (list gameobj #f)
-  )
-)
-(define (set-object-active-state gameobjActivePair)
-  (gameobj-setattr! (car gameobjActivePair) (list 
-    (list "tint" (if (cadr gameobjActivePair) (list 0 0 1 1) (list 1 1 1 1)))
-  ))
-)
-(define (update-group-values group selectedIndex)
-  (define groupObjs (lsobj-attr "details-group" group))
-  (for-each set-object-active-state (map (lambda(obj) (object-should-be-active obj selectedIndex)) groupObjs))
-)
-
-(define (handleListSelection gameobj selectedAttr)
-  (define detailsAttr (assoc "details-group" selectedAttr))
-  (define selectedGroupIndex (assoc "details-group-index" selectedAttr))
-  (if (and detailsAttr selectedGroupIndex) 
-    (let ((group (cadr detailsAttr)) (selectedIndex (cadr selectedGroupIndex)))
-      (updateStoreValue (list group selectedIndex))
-      (format #t "updated group: ~a with index ~a\n" group selectedIndex)
-    )
-  )
-)
-
-
 (define eoeMode #f)
 (define (isSelectableItem layerAttr)
   (if eoeMode 
@@ -280,14 +250,12 @@
       (populateData)
     )
   )
-  (handleListSelection gameobj objattr)
   (maybe-perform-action objattr)
 )
 
 ;; todo remove - no items in this layout, should require this 
 (enforce-layout (gameobj-id (lsobj-name "(banner_title_background_right" )))
 (enforce-layout (gameobj-id (lsobj-name "(banner_title_background_left" )))
-
 
 (define (onKey key scancode action mods)
   (if (and (equal? action 1) (not (isControlKey key)))
@@ -358,9 +326,14 @@
   (define bindingOn (assoc "details-binding-on" (gameobj-attr gameobj)))
   (define enableValueStr (if bindingOn (cadr bindingOn) "enabled"))
   (define enableValue (equal? enableValueStr toggleEnableText))
+  (format #t "enable value str is: ~a for name ~a\n" enableValueStr (gameobj-name gameobj))
+  (format #t "toggle enable text: ~a\n" toggleEnableText)
   ;(format #t "update toggle binding: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
   (gameobj-setattr! gameobj
-    (list (list "state" (if enableValue "on" "off")))
+    (list 
+      (list "state" (if enableValue "on" "off"))
+      (list "tint"  (if enableValue (list 1 1 5 1) (list 1 1 1 1)))
+    )
   )
 )
 (define (toggleButtonBinding objid on)
@@ -375,42 +348,6 @@
   (if (and detailsBinding (not on) offValue)
     (updateStoreValueModified (list (cadr detailsBinding) (cadr offValue)) #t)
   )
-)
-
-(define (extract-group-element attr-pair) 
-  (define attrPair (cadr attr-pair))
-  (list 
-    (car attr-pair) 
-    (cadr (assoc "details-group" attrPair))
-  )
-)
-(define (get-group-elements) (map create-attr-pair (lsobj-attr "details-group")))
-(define (all-obj-to-group-bindings) (map extract-group-element (get-group-elements)))
-(define (get-details-group allobjs)
-  (define uniqueGroups (list))
-
-  (format #t "all objs: ~a\n" allobjs)
-  (for-each (lambda(objPair) 
-    (let ((detailsGroup (cadr objPair)))
-      (if (not (member detailsGroup uniqueGroups))
-        (set! uniqueGroups (cons detailsGroup uniqueGroups))
-      )
-    )
-  ) allobjs)
-  uniqueGroups
-)
-
-
-(define (get-group-value group)
-  (define groupValue (assoc group dataValues))
-  (if groupValue
-    (list group (cadr groupValue))
-    (list group #f)
-  )
-)
-(define (get-group-values )
-  (define uniqueGroups (get-details-group (all-obj-to-group-bindings)))
-  (map get-group-value uniqueGroups)
 )
 
 (define (notFoundData attrpair)
@@ -431,15 +368,6 @@
       (update-toggle-binding attrpair (generateGetDataForAttr  #f))
     ) 
     (all-obj-to-bindings "details-binding-toggle")  ;
-  )
-  (for-each 
-    (lambda(groupValuePair) 
-      (format #t "group value pair: ~a\n" groupValuePair)
-      (if (cadr groupValuePair)
-        (update-group-values (car groupValuePair) (cadr groupValuePair))
-      )
-    ) 
-    (get-group-values)
   )
 )
 

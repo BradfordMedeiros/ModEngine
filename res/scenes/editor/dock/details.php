@@ -157,6 +157,18 @@
             ],
           ],
         ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "physics-shape", 
+            "options" => [
+              [ "label" => "auto", "binding" => "physics_shape", "binding-on" => "shape_auto" ],
+              [ "label" => "box", "binding" => "physics_shape", "binding-on" => "shape_box" ],
+              [ "label" => "sphere", "binding" => "physics_shape", "binding-on" => "shape_sphere" ],
+   
+            ],
+          ],
+        ],
         /*[
           "type" => "numeric",
           "data" => [
