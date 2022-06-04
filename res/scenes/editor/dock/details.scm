@@ -185,6 +185,22 @@
       )
     )
   )
+  (submitData)
+)
+
+(define (onSlide objvalues)
+  (define obj (car objvalues))
+  (define slideAmount (cadr objvalues))
+  (define objattr (caddr objvalues))
+  (define detailBindingPair (assoc "details-binding" objattr))
+  (define detailBindingIndexPair (assoc "details-binding-index" objattr))
+  (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
+  (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
+  (format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
+  (if detailBinding 
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex slideAmount) #t)
+  )
+  (submitData)
 )
 
 
@@ -430,6 +446,13 @@
 
 ;;;;;;;;;;;;;;;
 
+(define (getSlidePercentage id)
+  (define gameobj (gameobj-by-id id))
+  (define gameobjAttr (gameobj-attr gameobj))
+  (define slideAmount (assoc "slideamount" gameobjAttr))
+  (if slideAmount (list gameobj (cadr slideAmount) gameobjAttr) #f)
+)
+
 (define (onMessage key value)
   (if (equal? key "editor-button-on")
     (begin
@@ -443,5 +466,8 @@
       (toggleButtonBinding (string->number value) #f)
       (submitData) ; remove
     )
+  )
+  (if (equal? key "details-editable-slide")
+    (format #t "slide: ~a\n" (onSlide (getSlidePercentage (string->number value))))
   )
 )

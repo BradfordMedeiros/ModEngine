@@ -10,18 +10,24 @@
     $controlType = $value[$i]["type"];
 
     $managedElements = [ $floatLabelElementName ];
+    $hasBinding = !is_string($value[$i]);
+    $textValue = "";
+    if (! $hasBinding){
+      $textValue = $value[$i]["value"];
+    }
+    $attrValues = [ 
+      "value" => $textValue, 
+      "details-editabletext" => "true",
+    ];
+    if ($hasBinding){
+      $attrValues["details-binding"] = $value[$i]["value"]["binding"];
+      if (array_key_exists("binding-index", $value[$i]["value"])){
+        $attrValues["details-binding-index"] = $value[$i]["value"]["binding-index"];
+      }
+    }
+
     if ($controlType == "float"){
       $floatValueElementName =  ")" . $unique_control_id . "_" . "numeric"  . $i . "_value";
-
-      $hasBinding = !is_string($value[$i]);
-      $textValue = "";
-      if (! $hasBinding){
-        $textValue = $value[$i]["value"];
-      }
-      $attrValues = [ 
-        "value" => $textValue, 
-        "details-editabletext" => "true",
-      ];
       if (array_key_exists("type", $value[$i]["value"])){
         $type = $value[$i]["value"]["type"];
         if ($type != "number" && $type != "positive-number"){
@@ -33,18 +39,13 @@
         $attrValues["details-editable-type"] = "number";
       }
 
-      if ($hasBinding){
-        $attrValues["details-binding"] = $value[$i]["value"]["binding"];
-        if (array_key_exists("binding-index", $value[$i]["value"])){
-          $attrValues["details-binding-index"] = $value[$i]["value"]["binding-index"];
-        }
-      }
-
       createElement($floatValueElementName, $default_value, $attrValues);
       array_push($managedElements, $floatValueElementName);
     }else if ($controlType == "slider"){
       $sliderElementName =  "_" . $unique_control_id . "_" . "numeric"  . $i . "_value";
-      createElement($sliderElementName, $default_value, [ "scale" => "0.1 0.02 0.02" ]);
+      $attrValues["scale"] = "0.1 0.02 0.02";
+      $attrValues["onslide"] = "details-editable-slide";
+      createElement($sliderElementName, $default_value, $attrValues);
       array_push($managedElements, $sliderElementName);
     }else{
       print("Invalid control type");

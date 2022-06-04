@@ -157,22 +157,22 @@
             ],
           ],
         ],
-        [
+        /*[
           "type" => "numeric",
           "data" => [
             "key" => "Gravity", 
             "value" => [
               [ 
-                "type" => "float", 
+                "type" => "slider", 
                 "name" => "Up/Down", 
                 "value" => [ 
                   "binding" => "physics_gravity", 
-                  "binding-index" =>  1,
+                  "binding-index" =>  0,
                 ]
               ],
             ]
           ],
-        ],
+        ],*/
         /*[
           "type" => "checkbox",
           "data" => [
@@ -199,7 +199,16 @@
                 ]
               ],
               [ 
-                "type" => "float", 
+                "type" => "slider", 
+                "name" => "", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  0,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "slider", 
                 "name" => "Green", 
                 "value" => [ 
                   "binding" => "tint", 
@@ -208,7 +217,7 @@
                 ]
               ],
               [ 
-                "type" => "float", 
+                "type" => "slider", 
                 "name" => "Blue", 
                 "value" => [ 
                   "binding" => "tint", 
@@ -217,7 +226,7 @@
                 ]
               ],
               [ 
-                "type" => "float", 
+                "type" => "slider", 
                 "name" => "Alpha", 
                 "value" => [ 
                   "binding" => "tint", 
