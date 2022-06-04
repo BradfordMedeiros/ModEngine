@@ -156,7 +156,7 @@ std::vector<ObjectType> objTypes = {
     .name = "slider",
     .variantType = getVariantIndex(GameObjectUISlider{}),
     .createObj = createUISlider,
-    .objectAttributes = nothingObjAttr, 
+    .objectAttributes = convertElementValue<GameObjectUISlider>(getUISliderAttributes), 
     .setAttributes = nothingSetObjAttr,
     .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
     .removeObject = removeDoNothing,
@@ -704,13 +704,13 @@ void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<v
   }*/
 }
 
-void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy){
+void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, std::string)> onSliderPercentage, objid id, float uvx, float uvy){
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUISlider>(&obj);
     if (uiControl != NULL && uiId == id){
       uiControl -> percentage = uvx;
       if (uiControl -> onSlide != ""){
-        onSliderPercentage(uiControl -> onSlide, uiControl -> percentage);
+        onSliderPercentage(uiControl -> onSlide, std::to_string(id));
       }
     }
   }

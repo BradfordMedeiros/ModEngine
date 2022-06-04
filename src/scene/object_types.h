@@ -246,7 +246,7 @@ bool isNavmesh(std::map<objid, GameObjectObj>& mapping, objid id);
 std::optional<Texture> textureForId(std::map<objid, GameObjectObj>& mapping, objid id);
 void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::function<void(std::string, std::string)> sendNotify);
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText);
-void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, float)> onSliderPercentage, objid id, float uvx, float uvy);
+void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, std::string)> onSliderPercentage, objid id, float uvx, float uvy);
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid, glm::vec3 position);
 void playSoundState(std::map<objid, GameObjectObj>& mapping, objid id);
 void onObjectFrame(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string texturepath, unsigned char* data, int textureWidth, int textureHeight)> updateTextureData, float timestamp);

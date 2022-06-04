@@ -1461,7 +1461,7 @@ int main(int argc, char* argv[]){
     if (state.editor.activeObj != 0 && hoveredId == state.editor.activeObj){
       applyUICoord(
         world.objectMapping, 
-        [](std::string topic, float value) -> void { 
+        [](std::string topic, std::string value) -> void { 
           StringString message {
             .strTopic = topic,
             .strValue = value,
