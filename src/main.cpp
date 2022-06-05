@@ -112,32 +112,6 @@ int activeDepthTexture = 0;
 DrawingParams drawParams = getDefaultDrawingParams();
 Benchmark benchmark;
 
-void updateDepthTexturesSize(unsigned int* textures, int numTextures){
-  for (int i = 0; i < numTextures; i++){
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
-    // GL_DEPTH_COMPONENT32F
-    glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_STENCIL, state.resolution.x, state.resolution.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-  }
-}
-void generateDepthTextures(unsigned int* textures, int numTextures){
-  glGenTextures(numTextures, textures);
-  for (int i = 0; i < numTextures; i++){
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    updateDepthTexturesSize(textures, numTextures);
-  }
-}
-
-void setActiveDepthTexture(int index){
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
-  unsigned int texture = depthTextures[index];
-  // GL_DEPTH_ATTACHMENT
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
-}
-
 void updatePortalTexturesSize(){
   for (int i = 0; i < numPortalTextures; i++){
     glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
@@ -736,7 +710,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
     glActiveTexture(GL_TEXTURE0);
 
-    setActiveDepthTexture(renderStep.depthTextureIndex);
+    setActiveDepthTexture(fbo, depthTextures, renderStep.depthTextureIndex);
     glBindFramebuffer(GL_FRAMEBUFFER, renderStep.fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderStep.colorAttachment0, 0);
     if (renderStep.hasColorAttachment1){
@@ -1023,9 +997,9 @@ int main(int argc, char* argv[]){
 
   genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
 
-  generateDepthTextures(depthTextures, numDepthTextures);
+  generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
   generatePortalTextures();
-  setActiveDepthTexture(0);
+  setActiveDepthTexture(fbo, depthTextures, 0);
 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
     std::cerr << "ERROR: framebuffer incomplete" << std::endl;
@@ -1056,7 +1030,7 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     updateDepthTexturesSize(depthTextures, numDepthTextures);
+     updateDepthTexturesSize(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
      updatePortalTexturesSize();
 
 
