@@ -21,6 +21,26 @@ void safeStringSet(std::string* value, const char* key, GameobjAttributes& attri
   }
 }
 
+ColliderShape parseShape(std::string& value){
+  if (value == "shape_sphere"){
+    return SPHERE;
+  }else if (value == "shape_box"){
+    return BOX;
+  }else if (value == "shape_capsule"){
+    return CAPSULE;
+  }else if (value == "shape_cylinder"){
+    return CYLINDER;
+  }else if (value == "shape_hull"){
+    return CONVEXHULL;
+  }else if (value == "shape_auto"){
+    return AUTOSHAPE;
+  }else if (value == "shape_exact"){
+    return SHAPE_EXACT;
+  }
+  return AUTOSHAPE;
+}
+
+
 void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
   if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
     object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
@@ -74,23 +94,7 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
 
   if (attributes.stringAttributes.find("physics_shape") != attributes.stringAttributes.end()){
     auto value = attributes.stringAttributes.at("physics_shape");
-    if (value == "shape_sphere"){
-      object.physicsOptions.shape = SPHERE;
-    }else if (value == "shape_box"){
-      object.physicsOptions.shape = BOX;
-    }else if (value == "shape_capsule"){
-      object.physicsOptions.shape = CAPSULE;
-    }else if (value == "shape_cylinder"){
-      object.physicsOptions.shape = CYLINDER;
-    }else if (value == "shape_hull"){
-      object.physicsOptions.shape = CONVEXHULL;
-    }else if (value == "shape_auto"){
-      object.physicsOptions.shape = AUTOSHAPE;
-    }else if (value == "shape_exact"){
-      object.physicsOptions.shape = SHAPE_EXACT;
-    }else{
-      object.physicsOptions.shape = AUTOSHAPE;
-    }
+    object.physicsOptions.shape = parseShape(value);
   }
 
   if (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()){
@@ -194,6 +198,10 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
   }
   if (field == "physics" && strValue != NULL){
     gameobj.physicsOptions.enabled = *strValue == "enabled";
+    return;
+  }
+  if (field == "physics_shape" && strValue != NULL){
+    gameobj.physicsOptions.shape = parseShape(*strValue);
     return;
   }
 } 
