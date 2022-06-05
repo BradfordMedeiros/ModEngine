@@ -76,7 +76,8 @@ std::string debugLoadedTextures(std::map<std::string, TextureRef>& textures){
     for (auto id : texture.owners){
       content = content + std::to_string(id) + " ";
     }
-    content = content + "]\n";
+    auto textureSize = getTextureSizeInfo(texture.texture);
+    content = content + "] width = " + std::to_string(textureSize.width) + ", height = " + std::to_string(textureSize.height) + "\n";
   }
   content = content + "\n";
   return content;

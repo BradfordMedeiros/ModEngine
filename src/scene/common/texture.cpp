@@ -123,3 +123,15 @@ void freeTexture(Texture& texture){
   std::cout << "Deleted texture: " << texture.textureId << std::endl;
   glDeleteTextures(1, &texture.textureId);
 }
+
+TextureSizeInfo getTextureSizeInfo(Texture& texture){
+  int width;
+  int height;
+  glBindTexture(GL_TEXTURE_2D, texture.textureId);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+  return TextureSizeInfo {
+    .width = width,
+    .height = height,
+  };
+}

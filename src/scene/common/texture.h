@@ -29,4 +29,12 @@ void updateTextureData(Texture& texture, unsigned char* data, int textureWidth, 
 void saveTextureData(std::string filepath, char* data, int width, int height);
 void freeTexture(Texture& texture);
 
+struct TextureSizeInfo {
+  int width;
+  int height;
+};
+
+// Side effect binding the texture
+TextureSizeInfo getTextureSizeInfo(Texture& texture);
+
 #endif

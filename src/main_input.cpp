@@ -1003,7 +1003,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = 346, 
+    .sourceKey = '0', // zero 
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
