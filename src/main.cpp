@@ -149,6 +149,15 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
+void renderScreenspaceLines(){
+  glUseProgram(uiShaderProgram);
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
+  drawScreenspaceLines(lineData, uiShaderProgram);
+}
+
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   if (!canPaint || !state.shouldPaint){
     return;
@@ -579,13 +588,6 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
   drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
   drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
-  
-
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
-  drawScreenspaceLines(lineData, uiShaderProgram);
 }
 
 void onClientMessage(std::string message){
@@ -1226,7 +1228,8 @@ int main(int argc, char* argv[]){
   };
 
   //loadAllTextures();
-  
+  //loadTextureWorldEmpty(world, "graphs:testplot", -1, 500, 500);
+
   dynamicLoading = createDynamicLoading(worldfile);
   if (result["rechunk"].as<int>()){
     rechunkAllObjects(world, dynamicLoading, result["rechunk"].as<int>(), interface);
@@ -1599,7 +1602,10 @@ int main(int argc, char* argv[]){
     
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
+    
     renderUI(*crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded, showCursor);
+    renderScreenspaceLines();
+
     glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){
