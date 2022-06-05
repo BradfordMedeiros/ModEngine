@@ -331,7 +331,7 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
     assert(false);
     return Texture  { .textureId = 0  };
   }
-  Texture texture = loadTextureEmpty(100, 100, 4);
+  Texture texture = loadTextureEmpty(textureWidth, textureHeight, 4);
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,

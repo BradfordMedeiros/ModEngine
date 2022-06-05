@@ -7,7 +7,8 @@
 #include "./easyuse/editor.h"
 #include "./scene/scene.h"
 
-enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM };
+enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS };
+std::string renderModeAsStr(RENDER_MODE mode);
 
 struct CamInterpolation {
   bool shouldInterpolate;

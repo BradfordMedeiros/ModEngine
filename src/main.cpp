@@ -154,7 +154,7 @@ void renderScreenspaceLines(){
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   drawScreenspaceLines(lineData, uiShaderProgram);
 }
 
@@ -588,6 +588,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
   drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
   drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
+  drawText(std::string("render mode: ") + renderModeAsStr(state.renderMode), 10, 230, 3);
 }
 
 void onClientMessage(std::string message){
@@ -1594,6 +1595,8 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
     }else if (state.renderMode == RENDER_BLOOM){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
+    }else if (state.renderMode == RENDER_GRAPHS){
+      std::cout << "Not yet implemented" << std::endl;
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glBindVertexArray(quadVAO);

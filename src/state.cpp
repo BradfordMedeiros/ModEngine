@@ -2,6 +2,29 @@
 
 extern World world;
 
+std::string renderModeAsStr(RENDER_MODE mode){
+  if (mode == RENDER_FINAL){
+    return "final";
+  }
+  if (mode == RENDER_PORTAL){
+    return "portal";
+  }
+  if (mode == RENDER_PAINT){
+    return "paint";
+  }
+  if (mode == RENDER_DEPTH){
+    return "depth";
+  }
+  if (mode == RENDER_BLOOM){
+    return "bloom";
+  }
+  if (mode == RENDER_GRAPHS){
+    return "graphs";
+  }
+  modassert(false, "invalid render mode");
+  return "";
+}
+
 struct ObjectStateMapping {
   std::function<void(engineState& state, AttributeValue, float)> attr;
   std::string object;

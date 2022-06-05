@@ -641,6 +641,16 @@ std::vector<InputDispatch> inputFns = {
       state.renderMode = RENDER_BLOOM;
       std::cout << "render mode: bloom" << std::endl;
     }
+  },
+  InputDispatch{
+    .sourceKey = '6', 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 340,  // shift,
+    .hasPreq = true,
+    .fn = [&state]() -> void {
+      state.renderMode = RENDER_GRAPHS;
+      std::cout << "render mode: graph" << std::endl;
+    }
   }, 
   InputDispatch{
     .sourceKey = 67,  // 4
