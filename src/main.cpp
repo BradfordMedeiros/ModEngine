@@ -112,24 +112,6 @@ int activeDepthTexture = 0;
 DrawingParams drawParams = getDefaultDrawingParams();
 Benchmark benchmark;
 
-void updatePortalTexturesSize(){
-  for (int i = 0; i < numPortalTextures; i++){
-    glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);   
-  }
-}
-void generatePortalTextures(){
-  glGenTextures(numPortalTextures, portalTextures);
-  for (int i = 0; i < numPortalTextures; i++){
-    glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    updatePortalTexturesSize();
-  }
-}
-
 float initialTime = 0;
 WorldTiming timings;
 
@@ -998,7 +980,7 @@ int main(int argc, char* argv[]){
   genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
 
   generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
-  generatePortalTextures();
+  generatePortalTextures(portalTextures, numPortalTextures, state.resolution.x, state.resolution.y);
   setActiveDepthTexture(fbo, depthTextures, 0);
 
   if (!glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
@@ -1031,8 +1013,7 @@ int main(int argc, char* argv[]){
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
      updateDepthTexturesSize(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
-     updatePortalTexturesSize();
-
+     updatePortalTexturesSize(portalTextures, numPortalTextures, state.resolution.x, state.resolution.y);
 
      orthoProj = glm::ortho(0.0f, (float)state.currentScreenWidth, 0.0f, (float)state.currentScreenHeight, -1.0f, 1.0f);  
   }; 

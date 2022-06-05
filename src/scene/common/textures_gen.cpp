@@ -34,3 +34,21 @@ void setActiveDepthTexture(unsigned int fbo, unsigned int* textures, int index){
   // GL_DEPTH_ATTACHMENT
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 }
+
+void generatePortalTextures(unsigned int* portalTextures, int numPortalTextures, unsigned int resolutionX, unsigned int resolutionY){
+  glGenTextures(numPortalTextures, portalTextures);
+  for (int i = 0; i < numPortalTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    updatePortalTexturesSize(portalTextures, numPortalTextures, resolutionX, resolutionY);
+  }
+}
+void updatePortalTexturesSize(unsigned int* portalTextures, int numPortalTextures, unsigned int resolutionX, unsigned int resolutionY){
+  for (int i = 0; i < numPortalTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, portalTextures[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, resolutionX, resolutionY, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);   
+  }
+}
