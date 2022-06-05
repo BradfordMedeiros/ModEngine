@@ -19,7 +19,7 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 
   // NULL is defined behavior, but the image is uninitialized and the image data itself therefore undefined values. 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); x
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
   Texture tex {
     .textureId = texture,
