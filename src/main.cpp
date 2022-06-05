@@ -149,8 +149,16 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-void renderScreenspaceLines(){
+bool didClearOnce = false;
+void renderScreenspaceLines(Texture& texture){
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glUseProgram(uiShaderProgram);
+  if (!didClearOnce){
+    didClearOnce = true;
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+  }
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
@@ -1229,7 +1237,7 @@ int main(int argc, char* argv[]){
   };
 
   //loadAllTextures();
-  //loadTextureWorldEmpty(world, "graphs:testplot", -1, 500, 500);
+  loadTextureWorldEmpty(world, "graphs-testplot", -1, 1000, 1000);
 
   dynamicLoading = createDynamicLoading(worldfile);
   if (result["rechunk"].as<int>()){
@@ -1468,9 +1476,15 @@ int main(int argc, char* argv[]){
     );
     handlePaintingModifiesViewport(uvCoord);
 
+    //////////////////////////////////////////////////////
     // should have allocated textures
     // then for everyline we are drawing we should draw to it 
-    // 
+    auto graphTexture = world.textures.at("graphs-testplot").texture;
+    glDisable(GL_DEPTH_TEST);
+    glViewport(0, 0, 1000, 1000);
+    renderScreenspaceLines(graphTexture);
+    glEnable(GL_DEPTH_TEST);
+    ////////////////////////
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord);
@@ -1544,6 +1558,8 @@ int main(int argc, char* argv[]){
       renderWithProgram(renderContext, renderStep);
     }
 
+
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
     glUseProgram(finalProgram); 
@@ -1596,18 +1612,16 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_BLOOM){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
-      std::cout << "Not yet implemented" << std::endl;
+      glBindTexture(GL_TEXTURE_2D, graphTexture.textureId);
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glBindVertexArray(quadVAO);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
+
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-    
     renderUI(*crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded, showCursor);
-    renderScreenspaceLines();
 
     glEnable(GL_DEPTH_TEST);
 

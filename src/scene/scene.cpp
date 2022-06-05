@@ -314,6 +314,7 @@ void updatePhysicsBody(World& world, objid id){
 }
 
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
+  std::cout << "load texture world: " << texturepath << std::endl;
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
@@ -327,6 +328,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
 }
 
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight){
+  std::cout << "load texture world empty: " << texturepath << std::endl;
   if (world.textures.find(texturepath) != world.textures.end()){
     assert(false);
     return Texture  { .textureId = 0  };
