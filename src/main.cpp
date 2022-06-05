@@ -31,6 +31,7 @@
 #include "./cscript/cscripts/cscript_sample.h"
 #include "./cscript/cscripts/cscript_scheme.h"
 #include "./lines.h"
+#include "./scene/common/textures_gen.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -111,24 +112,25 @@ int activeDepthTexture = 0;
 DrawingParams drawParams = getDefaultDrawingParams();
 Benchmark benchmark;
 
-void updateDepthTexturesSize(){
-  for (int i = 0; i < numDepthTextures; i++){
-    glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
+void updateDepthTexturesSize(unsigned int* textures, int numTextures){
+  for (int i = 0; i < numTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, textures[i]);
     // GL_DEPTH_COMPONENT32F
     glTexImage2D(GL_TEXTURE_2D, 0,  GL_DEPTH_STENCIL, state.resolution.x, state.resolution.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   }
 }
-void generateDepthTextures(){
-  glGenTextures(numDepthTextures, depthTextures);
-  for (int i = 0; i < numDepthTextures; i++){
-    glBindTexture(GL_TEXTURE_2D, depthTextures[i]);
+void generateDepthTextures(unsigned int* textures, int numTextures){
+  glGenTextures(numTextures, textures);
+  for (int i = 0; i < numTextures; i++){
+    glBindTexture(GL_TEXTURE_2D, textures[i]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    updateDepthTexturesSize();
+    updateDepthTexturesSize(textures, numTextures);
   }
 }
+
 void setActiveDepthTexture(int index){
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
   unsigned int texture = depthTextures[index];
@@ -640,16 +642,6 @@ void takeScreenshot(std::string filepath){
   screenshotPath = filepath;
 }
 
-void genFramebufferTexture(unsigned int *texture){
-  glGenTextures(1, texture);
-  glBindTexture(GL_TEXTURE_2D, *texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
 bool wroteCrash = false;
 void signalHandler(int signum) {
   if (showDebugInfo && !wroteCrash){
@@ -1023,15 +1015,15 @@ int main(int argc, char* argv[]){
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
 
-  genFramebufferTexture(&framebufferTexture);
+  genFramebufferTexture(&framebufferTexture, state.resolution.x, state.resolution.y);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
-  genFramebufferTexture(&framebufferTexture2);
+  genFramebufferTexture(&framebufferTexture2, state.resolution.x, state.resolution.y);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
-  genFramebufferTexture(&framebufferTexture3);
+  genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
 
-  generateDepthTextures();
+  generateDepthTextures(depthTextures, numDepthTextures);
   generatePortalTextures();
   setActiveDepthTexture(0);
 
@@ -1064,7 +1056,7 @@ int main(int argc, char* argv[]){
      glBindTexture(GL_TEXTURE_2D, framebufferTexture3);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, state.resolution.x, state.resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-     updateDepthTexturesSize();
+     updateDepthTexturesSize(depthTextures, numDepthTextures);
      updatePortalTexturesSize();
 
 
@@ -1522,6 +1514,11 @@ int main(int argc, char* argv[]){
       }
     );
     handlePaintingModifiesViewport(uvCoord);
+
+    // should have allocated textures
+    // then for everyline we are drawing we should draw to it 
+    // 
+
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord);
      
