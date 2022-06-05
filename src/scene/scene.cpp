@@ -325,6 +325,22 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   };
   return texture;
 }
+
+// this should load the texture for a texture of size width/height (maybe pass in a background color too?)
+// But not load any iamge on it
+// then for example, this can be used with the rendering line stufr :)
+Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight){
+  if (world.textures.find(texturepath) != world.textures.end()){
+    assert(false);
+    return Texture  { .textureId = 0  };
+  }
+  Texture texture = loadTextureEmpty(100, 100, 4);
+  world.textures[texturepath] = TextureRef {
+    .owners = { ownerId },
+    .texture = texture,
+  };
+  return texture;  
+}
 Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   if (world.textures.find(texturepath) != world.textures.end()){
     world.textures.at(texturepath).owners.insert(ownerId);

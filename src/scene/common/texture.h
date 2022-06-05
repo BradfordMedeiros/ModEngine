@@ -21,6 +21,7 @@ struct TextureRef {
   Texture texture;
 };
 
+Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels);
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels);
 Texture loadTexture(std::string textureFilePath);
 Texture loadCubemapTexture(std::string textureFilePathRoot);
