@@ -20,6 +20,7 @@
     $attrs = [ 
       "value" => $optionName,  
       "details-binding-toggle" => $binding,
+      "details-binding-set" => "true",
     ];
     if ($hasBindingIndex){
       $attrs["details-binding-index"] = $options[$optionIndex]["binding-index"];

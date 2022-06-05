@@ -25,6 +25,7 @@
           )
         ) updatedValues)
       )
+      (populateData)
     )
   )
 )
@@ -228,6 +229,23 @@
   )
 )
 
+(define (maybe-set-binding objattr)
+  (define shouldSet (if (assoc "details-binding-set" objattr) #t #f))
+  (define detailBindingPair (assoc "details-binding-toggle" objattr))
+  (define detailBindingIndexPair (assoc "details-binding-index" objattr))
+  (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
+  (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
+  (define bindingOn (assoc "details-binding-on" objattr))
+  (define enableValue (if bindingOn (cadr bindingOn) #f))
+
+  (format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
+  (if (and shouldSet enableValue detailBinding) 
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex enableValue) #t)
+  )
+  (submitData)
+
+)
+
 (define managedObj #f)
 (define (onObjSelected gameobj color)
   (define objattr (gameobj-attr gameobj))
@@ -251,6 +269,7 @@
     )
   )
   (maybe-perform-action objattr)
+  (maybe-set-binding objattr)
 )
 
 ;; todo remove - no items in this layout, should require this 

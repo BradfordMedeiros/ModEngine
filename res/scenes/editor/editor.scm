@@ -399,11 +399,11 @@
 )
 (define (isButton gameobj) (equal? "*" (substring (gameobj-name gameobj) 0 1)))
 (define (onObjHover gameobj)
-  (format #t "on obj hover: ~a\n" gameobj)
+  ;(format #t "on obj hover: ~a\n" gameobj)
   (if (isButton gameobj) (changeCursor #t))
 )
 
 (define (onObjUnhover gameobj)
-  (format #t "on obj unhover: ~a\n" gameobj)
+  ;(format #t "on obj unhover: ~a\n" gameobj)
   (changeCursor #f)
 )
