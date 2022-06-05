@@ -152,4 +152,6 @@ void removeLocks(objid owner);
 
 void enforceLayout(objid layoutId);
 
+void takeScreenshot(std::string filepath);
+
 #endif

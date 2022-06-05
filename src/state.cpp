@@ -350,6 +350,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .targetExposure = 1.f,
     .exposure = 1.f,
   	.takeScreenshot = false,
+    .screenshotPath = "",
     .highlight = true,
     .multiselect = false,
     .editor = EditorContent{ .activeObj = 0 },

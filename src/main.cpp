@@ -592,12 +592,6 @@ void onClientMessage(std::string message){
   cBindings.onTcpMessage(message);
 }
 
-std::string screenshotPath = "./res/textures/screenshot.png";
-void takeScreenshot(std::string filepath){
-  state.takeScreenshot = true;
-  screenshotPath = filepath;
-}
-
 bool wroteCrash = false;
 void signalHandler(int signum) {
   if (showDebugInfo && !wroteCrash){
@@ -1610,7 +1604,7 @@ int main(int argc, char* argv[]){
 
     if (state.takeScreenshot){
       state.takeScreenshot = false;
-      saveScreenshot(screenshotPath);
+      saveScreenshot(state.screenshotPath);
     }
 
     glfwSwapBuffers(window);

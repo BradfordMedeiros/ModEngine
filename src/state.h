@@ -75,6 +75,8 @@ struct engineState {
 
 
   bool takeScreenshot;
+  std::string screenshotPath;
+  
   bool highlight;
   bool multiselect;
   EditorContent editor;
