@@ -39,34 +39,12 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
 }
 
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
+  std::cout << "add line next cycle: " << textureId.has_value() << std::endl;
+  if (textureId.has_value()){
+    lineData.screenspaceLines.push_back(Line { .fromPos = fromPos, .toPos = toPos });
+    return 0;
+  }
   return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN);
-}
-
-bool firstTime = false;
-float lastX = -1.f;
-float lastY = 0.f;
-float rangeX = 30.f;
-float rangeY = 300.f;
-int sampleLimit = 100;
-
-void addScreenspaceLine(LineData& lineData, float xpos, float ypos){
-  if (firstTime){
-    firstTime = false;
-    lastX = xpos;
-    lastY = ypos;
-    return;
-  }
-  if (lineData.screenspaceLines.size() > sampleLimit){
-    lineData.screenspaceLines.clear();
-  }
-  lineData.screenspaceLines.push_back(
-    Line {
-      .fromPos = glm::vec3(lastX / rangeX, lastY / rangeY, 0.f),
-      .toPos = glm::vec3(xpos / rangeX, ypos / rangeY, 0.f),
-    }
-  );
-  lastX = xpos;
-  lastY = ypos;
 }
 
 void freeLine(LineData& lineData, objid lineId){
@@ -110,5 +88,6 @@ void drawPermaLines(LineData& lineData, GLint shaderProgram, LineColor color, gl
 }
 
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram){
+  std::cout << "number of lines being drawn: " << lineData.screenspaceLines.size() << std::endl;
   drawLines(lineData.screenspaceLines, 1);
 }

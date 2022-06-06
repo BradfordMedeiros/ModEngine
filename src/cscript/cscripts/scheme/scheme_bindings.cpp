@@ -147,7 +147,7 @@ std::optional<unsigned int> optionalTexId(SCM scmTextureId){
   std::optional<unsigned int> textureId = std::nullopt;
   auto textureIdDefined = !scm_is_eq(scmTextureId, SCM_UNDEFINED);
   if (textureIdDefined){
-    textureIdDefined =  toUnsignedInt(scmTextureId);
+    textureId = toUnsignedInt(scmTextureId);
   }
   return textureId;
 }

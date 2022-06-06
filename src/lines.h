@@ -27,8 +27,6 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
 void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);
 void drawPermaLines(LineData& lineData, GLint shaderProgram, LineColor color, glm::vec4 tint);
-
-void addScreenspaceLine(LineData& lineData, float xpos, float ypos); // ndi x,y => ([-1, 1], [-1, 1])
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram);
 
 #endif
