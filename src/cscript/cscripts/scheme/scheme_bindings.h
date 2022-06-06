@@ -83,8 +83,8 @@ void createStaticSchemeBindings(
   void (*setWorldState)(std::vector<ObjectValue> values),
   void (*setLayerState)(std::vector<StrValues> values),
   void (*enforceLayout)(objid layoutId),
-  void (*createTexture)(std::string name, unsigned int width, unsigned int height),
-  void (*freeTexture)(std::string name),
+  void (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
+  void (*freeTexture)(std::string name, objid ownerId),
   std::vector<func_t> registerGuileFns
 );
 

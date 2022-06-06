@@ -578,14 +578,14 @@ SCM scmEnforceLayout(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void (*_createTexture)(std::string name, unsigned int width, unsigned int height);
+void (*_createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId);
 SCM scmCreateTexture(SCM name, SCM width, SCM height){
-  _createTexture(scm_to_locale_string(name), toUnsignedInt(width), toUnsignedInt(height));
+  _createTexture(scm_to_locale_string(name), toUnsignedInt(width), toUnsignedInt(height), currentModuleId());
   return SCM_UNSPECIFIED;
 }
-void (*_freeTexture)(std::string name);
+void (*_freeTexture)(std::string name, objid ownerId);
 SCM scmFreeTexture(SCM name){
-  _freeTexture(scm_to_locale_string(name));
+  _freeTexture(scm_to_locale_string(name), currentModuleId());
   return SCM_UNSPECIFIED;
 }
 
@@ -1079,8 +1079,8 @@ void createStaticSchemeBindings(
   void (*setWorldState)(std::vector<ObjectValue> values),
   void (*setLayerState)(std::vector<StrValues> values),
   void (*enforceLayout)(objid layoutId),
-  void (*createTexture)(std::string name, unsigned int width, unsigned int height),
-  void (*freeTexture)(std::string name),
+  void (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
+  void (*freeTexture)(std::string name, objid ownerId),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();

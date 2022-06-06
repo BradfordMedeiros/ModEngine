@@ -636,13 +636,13 @@ void takeScreenshot(std::string filepath){
 
 
 
-void createTexture(std::string name, unsigned int width, unsigned int height){
+void createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
-  loadTextureWorldEmpty(world, name, -1, width, height);
+  loadTextureWorldEmpty(world, name, ownerId, width, height);
 }
 
-void freeTexture(std::string name){
+void freeTexture(std::string name, objid ownerId){
   MODTODO("delete texture -> use ownership id of the script being used");
   auto textureId = world.textures.at(name).texture.textureId;
-  freeTextureRefsIdByOwner(world, -1, textureId);
+  freeTextureRefsIdByOwner(world, ownerId, textureId);
 }

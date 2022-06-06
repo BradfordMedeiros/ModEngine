@@ -154,7 +154,7 @@ void enforceLayout(objid layoutId);
 
 void takeScreenshot(std::string filepath);
 
-void createTexture(std::string name, unsigned int width, unsigned int height);
-void freeTexture(std::string name); 
+void createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId);
+void freeTexture(std::string name, objid ownerId);
 
 #endif
