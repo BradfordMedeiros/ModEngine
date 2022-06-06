@@ -224,9 +224,12 @@ void copyObject(int32_t id){
   copyObjectToScene(world, id, interface);
 }
 
-void drawText(std::string word, float left, float top, unsigned int fontSize){
+void drawText(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId){
   auto adjustedTop = state.currentScreenHeight - top;
   drawWords(uiShaderProgram, fontMeshes, word, left, adjustedTop, fontSize);  
+}
+void drawText(std::string word, float left, float top, unsigned int fontSize){
+  drawText(word, left, top, fontSize, std::nullopt);  
 }
 
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){

@@ -38,7 +38,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
   return 0;
 }
 
-objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
   return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN);
 }
 

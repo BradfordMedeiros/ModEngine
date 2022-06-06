@@ -289,7 +289,7 @@ void drawTraversalPositions(){
   for (int i = 0; i < traversalPositions.size(); i++){
     auto fromPos = traversalPositions.at(i);
     auto toPos = parentTraversalPositions.at(i);
-    addLineNextCycle(lineData, fromPos, toPos, false, 0);
+    addLineNextCycle(lineData, fromPos, toPos, false, 0, std::nullopt);
   }
 }
 
@@ -836,9 +836,13 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color){
   return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, color);
 }
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
-  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner);
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
+  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, textureId);
 }
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
+  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, std::nullopt);
+}
+
 void freeLine(objid lineId){
   freeLine(lineData, lineId);
 }

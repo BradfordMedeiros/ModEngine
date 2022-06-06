@@ -84,6 +84,7 @@ objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std:
 void removeObjectById(int32_t id);
 void copyObject(int32_t id);
 
+void drawText(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId);
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization);
 

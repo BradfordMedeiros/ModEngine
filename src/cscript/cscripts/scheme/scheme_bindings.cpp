@@ -144,18 +144,19 @@ SCM removeObject(SCM value){
 }
 
 
-void (*_drawText)(std::string word, float left, float top, unsigned int fontSize);
+void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId);
 SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize){
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
     scm_to_double(top), 
-    toUnsignedInt(fontSize)
+    toUnsignedInt(fontSize),
+    std::nullopt
   );
   return SCM_UNSPECIFIED;
 }
 
-int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner);
+int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId);
 SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline){
   auto permalineDefined = !scm_is_eq(permaline, SCM_UNDEFINED);
   auto isPermaline = false;
@@ -163,7 +164,7 @@ SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline){
     isPermaline = scm_to_bool(permaline);
   }
 
-  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0);
+  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0, std::nullopt);
   return scm_from_int32(lineId);
 }
 void (*_freeLine)(int32_t lineid);
@@ -1023,8 +1024,8 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByType)(std::string),
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize),
-  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId),
+  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),
   GameobjAttributes getGameObjectAttr(int32_t id),
