@@ -151,6 +151,7 @@ void applyPainting(objid id){
 
 bool didClearOnce = false;
 void renderScreenspaceLines(Texture& texture){
+  glViewport(0, 0, 1000, 1000);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glUseProgram(uiShaderProgram);
@@ -1239,7 +1240,6 @@ int main(int argc, char* argv[]){
   };
 
   //loadAllTextures();
-  loadTextureWorldEmpty(world, "graphs-testplot", -1, 1000, 1000);
 
   dynamicLoading = createDynamicLoading(worldfile);
   if (result["rechunk"].as<int>()){
@@ -1481,12 +1481,19 @@ int main(int argc, char* argv[]){
     //////////////////////////////////////////////////////
     // should have allocated textures
     // then for everyline we are drawing we should draw to it 
-    auto graphTexture = world.textures.at("graphs-testplot").texture;
-    glDisable(GL_DEPTH_TEST);
-    glViewport(0, 0, 1000, 1000);
-    renderScreenspaceLines(graphTexture);
-    glEnable(GL_DEPTH_TEST);
-    ////////////////////////
+
+    int graphTexture = 0;
+    bool hasGraphTexture = world.textures.find("graphs-testplot") != world.textures.end();
+    if (hasGraphTexture){
+      auto graphTex = world.textures.at("graphs-testplot").texture;
+      graphTexture = graphTex.textureId;
+      hasGraphTexture = true;
+      glDisable(GL_DEPTH_TEST);
+      renderScreenspaceLines(graphTex);
+      glEnable(GL_DEPTH_TEST);
+      ////////////////////////    
+    }
+
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord);
@@ -1614,7 +1621,9 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_BLOOM){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
-      glBindTexture(GL_TEXTURE_2D, graphTexture.textureId);
+      if (hasGraphTexture){
+        glBindTexture(GL_TEXTURE_2D, graphTexture);
+      }
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glBindVertexArray(quadVAO);

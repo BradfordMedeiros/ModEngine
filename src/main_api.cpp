@@ -634,9 +634,15 @@ void takeScreenshot(std::string filepath){
   state.screenshotPath = filepath;
 }
 
+
+
 void createTexture(std::string name, unsigned int width, unsigned int height){
-  std::cout << "create texture placeholder: " << name << std::endl;
+  MODTODO("create texture -> use ownership id of the script being used");
+  loadTextureWorldEmpty(world, name, -1, width, height);
 }
+
 void freeTexture(std::string name){
-  std::cout << "free texture placeholder: " << name << std::endl;
+  MODTODO("delete texture -> use ownership id of the script being used");
+  auto textureId = world.textures.at(name).texture.textureId;
+  freeTextureRefsIdByOwner(world, -1, textureId);
 }

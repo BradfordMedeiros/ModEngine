@@ -1,0 +1,6 @@
+|loadscript:script:./res/scenes/features/createtexture.scm
+
+#graph:mesh:./res/models/box/spriteplane.dae
+#graph/Plane:texture:graphs-testplot
+
+

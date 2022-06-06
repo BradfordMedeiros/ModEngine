@@ -118,4 +118,7 @@ std::string sceneFileForSceneId(World& world, objid sceneId);
 void loadSkybox(World& world, std::string skyboxpath);
 
 std::string getType(std::string name);
+
+void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id);
+
 #endif
