@@ -633,3 +633,10 @@ void takeScreenshot(std::string filepath){
   state.takeScreenshot = true;
   state.screenshotPath = filepath;
 }
+
+void createTexture(std::string name, unsigned int width, unsigned int height){
+  std::cout << "create texture placeholder: " << name << std::endl;
+}
+void freeTexture(std::string name){
+  std::cout << "free texture placeholder: " << name << std::endl;
+}

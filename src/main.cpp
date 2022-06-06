@@ -1140,6 +1140,8 @@ int main(int argc, char* argv[]){
     .setWorldState = setWorldState,
     .setLayerState = setLayerState,
     .enforceLayout = enforceLayout,
+    .createTexture = createTexture,
+    .freeTexture = freeTexture,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 

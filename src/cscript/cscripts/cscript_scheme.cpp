@@ -110,6 +110,8 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.setWorldState,
     api.setLayerState,
     api.enforceLayout,
+    api.createTexture,
+    api.freeTexture,
     {}
   );
 

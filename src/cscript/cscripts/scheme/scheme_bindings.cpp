@@ -578,6 +578,18 @@ SCM scmEnforceLayout(SCM value){
   return SCM_UNSPECIFIED;
 }
 
+void (*_createTexture)(std::string name, unsigned int width, unsigned int height);
+SCM scmCreateTexture(SCM name, SCM width, SCM height){
+  _createTexture(scm_to_locale_string(name), toUnsignedInt(width), toUnsignedInt(height));
+  return SCM_UNSPECIFIED;
+}
+void (*_freeTexture)(std::string name);
+SCM scmFreeTexture(SCM name){
+  _freeTexture(scm_to_locale_string(name));
+  return SCM_UNSPECIFIED;
+}
+
+
 glm::vec3 (*_navPosition)(objid, glm::vec3 pos);
 SCM scmNavPosition(SCM obj, SCM pos){
   return vec3ToScmList(_navPosition(scm_to_int32(obj), listToVec3(pos)));
@@ -961,6 +973,9 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("enforce-layout", 1, 0, 0, (void*)scmEnforceLayout);
 
+  scm_c_define_gsubr("create-texture", 3, 0, 0, (void*)scmCreateTexture);
+  scm_c_define_gsubr("free-texture", 1, 0, 0, (void*)scmFreeTexture);
+
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
   scm_c_define_gsubr("emit", 1, 4, 0, (void*)scmEmit);
@@ -1064,6 +1079,8 @@ void createStaticSchemeBindings(
   void (*setWorldState)(std::vector<ObjectValue> values),
   void (*setLayerState)(std::vector<StrValues> values),
   void (*enforceLayout)(objid layoutId),
+  void (*createTexture)(std::string name, unsigned int width, unsigned int height),
+  void (*freeTexture)(std::string name),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1148,6 +1165,9 @@ void createStaticSchemeBindings(
   _setWorldState = setWorldState;
   _setLayerState = setLayerState;
   _enforceLayout = enforceLayout;
+
+  _createTexture = createTexture;
+  _freeTexture = freeTexture;
 
   _setFloatState = setFloatState;
   _setIntState = setIntState;
