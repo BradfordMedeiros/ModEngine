@@ -374,9 +374,12 @@ void freeTextureRef(World& world, std::string textureName){
   freeTexture(world.textures.at(textureName).texture);
   world.textures.erase(textureName);
 }
-void freeTextureRefsByOwner(World& world, int ownerId){
+
+void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id){
   for (auto &[name, textureRef] : world.textures){
-    textureRef.owners.erase(ownerId);
+    if (!id.has_value() || id.value() == textureRef.texture.textureId){
+      textureRef.owners.erase(ownerId);
+    }
   }
   std::vector<std::string> texturesToFree;
   for (auto &[name, textureRef] : world.textures){
@@ -387,6 +390,9 @@ void freeTextureRefsByOwner(World& world, int ownerId){
   for (auto textureName : texturesToFree){
     freeTextureRef(world, textureName);
   }  
+}
+void freeTextureRefsByOwner(World& world, int ownerId){
+  freeTextureRefsIdByOwner(world, ownerId, std::nullopt);
 }
 
 void freeAnimationsForOwner(World& world, objid id){
@@ -979,6 +985,12 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
     attr,
     [&world, id](bool enabled) -> void {
       setEmitterEnabled(world.emitters, id, enabled);
+    },
+    [&world, id](std::string texturepath) -> Texture {
+      return loadTextureWorld(world, texturepath, id);
+    },
+    [&world, id](int textureId){
+      freeTextureRefsIdByOwner(world, id, textureId);
     }
   );
 

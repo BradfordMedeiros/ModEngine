@@ -55,10 +55,7 @@ void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, O
   if (attributes.stringAttributes.find("isDisabled") != attributes.stringAttributes.end()){
     meshObj.isDisabled = attributes.stringAttributes.at("isDisabled") == "true";;
   }
-  if (attributes.stringAttributes.find("textureoffset") != attributes.stringAttributes.end()){
-    //std::cout << "setting texture offset" << std::endl;
-    meshObj.texture.textureoffset = parseVec2(attributes.stringAttributes.at("textureoffset"));
-  }
+  setTextureAttributes(meshObj.texture, attributes, util);
   if (attributes.vecAttr.vec4.find("tint") != attributes.vecAttr.vec4.end()){
     meshObj.tint = attributes.vecAttr.vec4.at("tint");
   }

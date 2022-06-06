@@ -49,3 +49,17 @@ void addSerializedTextureInformation(std::vector<std::pair<std::string, std::str
     pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
   }
 }
+
+void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util){
+  if (attr.stringAttributes.find("textureoffset") != attr.stringAttributes.end()){
+    //std::cout << "setting texture offset" << std::endl;
+    info.textureoffset = parseVec2(attr.stringAttributes.at("textureoffset"));
+  }
+  if (attr.stringAttributes.find("texture") != attr.stringAttributes.end()){
+    util.releaseTexture(info.textureOverloadId);
+    auto textureOverloadName = attr.stringAttributes.at("texture");
+    int textureOverloadId = util.ensureTextureLoaded(textureOverloadName).textureId;
+    info.textureOverloadName = textureOverloadName;
+    info.textureOverloadId = textureOverloadId;
+  }
+}

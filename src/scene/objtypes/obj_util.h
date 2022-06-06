@@ -42,11 +42,14 @@ struct ObjectRemoveUtil {
 
 struct ObjectSetAttribUtil {
   std::function<void(bool)> setEmitterEnabled;
+  std::function<Texture(std::string)> ensureTextureLoaded;
+  std::function<void(int)> releaseTexture;
 };
 
 GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes);
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common);
 TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded);
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture);
+void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util);
 
 #endif
