@@ -151,7 +151,9 @@ void applyPainting(objid id){
 
 bool didClearOnce = false;
 void renderScreenspaceLines(Texture& texture){
-  glViewport(0, 0, 1000, 1000);
+  auto texSize = getTextureSizeInfo(texture);
+  //std::cout << "tex size: " << texSize.width << " " << texSize.height << std::endl;
+  glViewport(0, 0, texSize.width, texSize.height);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
   glUseProgram(uiShaderProgram);
