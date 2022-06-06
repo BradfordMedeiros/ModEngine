@@ -143,28 +143,36 @@ SCM removeObject(SCM value){
   return SCM_UNSPECIFIED;
 }
 
+std::optional<unsigned int> optionalTexId(SCM scmTextureId){
+  std::optional<unsigned int> textureId = std::nullopt;
+  auto textureIdDefined = !scm_is_eq(scmTextureId, SCM_UNDEFINED);
+  if (textureIdDefined){
+    textureIdDefined =  toUnsignedInt(scmTextureId);
+  }
+  return textureId;
+}
 
 void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId);
-SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize){
+SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM scmTextureId){
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
     scm_to_double(top), 
     toUnsignedInt(fontSize),
-    std::nullopt
+    optionalTexId(scmTextureId)
   );
   return SCM_UNSPECIFIED;
 }
 
 int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId);
-SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline){
+SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline, SCM scmTextureId){
   auto permalineDefined = !scm_is_eq(permaline, SCM_UNDEFINED);
   auto isPermaline = false;
   if (permalineDefined){
     isPermaline = scm_to_bool(permaline);
   }
 
-  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0, std::nullopt);
+  auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0, optionalTexId(scmTextureId));
   return scm_from_int32(lineId);
 }
 void (*_freeLine)(int32_t lineid);
@@ -897,8 +905,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lsobj-attr", 1, 1, 0, (void *)scm_getObjectsByAttr);
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
-  scm_c_define_gsubr("draw-text", 4, 0, 0, (void*)scmDrawText);
-  scm_c_define_gsubr("draw-line", 2, 1, 0, (void*)scmDrawLine);
+  scm_c_define_gsubr("draw-text", 4, 1, 0, (void*)scmDrawText);
+  scm_c_define_gsubr("draw-line", 2, 2, 0, (void*)scmDrawLine);
   scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
   scm_c_define_gsubr("gameobj-pos", 1, 0, 0, (void *)scmGetGameObjectPos);
