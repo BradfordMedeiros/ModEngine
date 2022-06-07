@@ -513,11 +513,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
     }
   }
   drawCoordinateSystem(100.f);
-
-
-  drawPermaLines(lineData, shaderProgram, RED, glm::vec4(1.f, 0.f, 0.f, 1.f));
-  drawPermaLines(lineData, shaderProgram, GREEN, glm::vec4(0.f, 1.f, 0.f, 1.f));
-  drawPermaLines(lineData, shaderProgram, BLUE, glm::vec4(0.f, 0.f, 1.f, 1.f));
+  drawAllLines(lineData, shaderProgram, true);
 
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
   if (lineData.lines.size() > 0){

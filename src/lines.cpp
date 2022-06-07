@@ -21,6 +21,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
         .lineid = lineId,
         .owner = owner, 
         .color = color,
+        .textureId = std::nullopt,
       }
     );   
     return lineId;
@@ -69,17 +70,29 @@ void removeLinesByOwner(LineData& lineData, objid owner){
   }
 }
 
-void drawPermaLines(LineData& lineData, GLint shaderProgram, LineColor color, glm::vec4 tint){
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(tint));
-  if (lineData.permaLines.size() > 0){
-    std::vector<Line> lines;
-    for (auto permaline : lineData.permaLines){
-      if (permaline.color == color){
-        lines.push_back(permaline.line);
-      }
+void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color){
+  for (auto permaline : lineData.permaLines){
+    if (permaline.color == color){
+      lines.push_back(permaline.line);
     }
-    drawLines(lines);
   }
+}
+void drawAllLines(LineData& lineData, GLint shaderProgram, bool permalineOnly){
+  assert(permalineOnly);
+  
+  std::vector<Line> redLines;
+  std::vector<Line> greenLines;
+  std::vector<Line> blueLines;
+  addToLineList(lineData, redLines, RED);
+  addToLineList(lineData, greenLines, GREEN);
+  addToLineList(lineData, blueLines, BLUE);
+
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
+  drawLines(redLines);
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
+  drawLines(greenLines);
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
+  drawLines(blueLines);
 }
 
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram){
