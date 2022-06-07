@@ -546,7 +546,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelColor, int numObjects, int numScenesLoaded, bool showCursor){
+void renderUI(Mesh& crosshairSprite, Color pixelColor, int numObjects, int numScenesLoaded, bool showCursor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
@@ -560,7 +560,7 @@ void renderUI(Mesh& crosshairSprite, unsigned int currentFramerate, Color pixelC
     return;
   }
 
-  drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+  drawText(std::to_string(state.currentFramerate) + state.additionalText, 10, 20, 4);
 
   std::string manipulatorAxisString;
   if (state.manipulatorAxis == XAXIS){
@@ -940,7 +940,7 @@ int main(int argc, char* argv[]){
 
   benchmark = createBenchmark(shouldBenchmark, [](float amount) -> void {
     //std::cout << "screenspace line: " << now << " " << (1.f / amount) << std::endl;
-    addScreenspaceLine(lineData, now, /* fps */ 1.f / amount);
+    //addScreenspaceLine(lineData, now, /* fps */ 1.f / amount);
   });
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
@@ -1149,6 +1149,7 @@ int main(int argc, char* argv[]){
     .enforceLayout = enforceLayout,
     .createTexture = createTexture,
     .freeTexture = freeTexture,
+    .runStats = runStats,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 
@@ -1281,7 +1282,6 @@ int main(int argc, char* argv[]){
   float previous = now;
   float last60 = previous;
 
-  unsigned int currentFramerate = 0;
   std::cout << "INFO: render loop starting" << std::endl;
 
   GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
@@ -1352,7 +1352,7 @@ int main(int argc, char* argv[]){
       frameCount = 0;
       float timedelta = now - last60;
       last60 = now;
-      currentFramerate = floor((60.f/(timedelta) + 0.5f));
+      state.currentFramerate = floor((60.f/(timedelta) + 0.5f));
     }
 
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
@@ -1638,7 +1638,7 @@ int main(int argc, char* argv[]){
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-    renderUI(*crosshairSprite, currentFramerate, pixelColor, numObjects, numScenesLoaded, showCursor);
+    renderUI(*crosshairSprite, pixelColor, numObjects, numScenesLoaded, showCursor);
 
     glEnable(GL_DEPTH_TEST);
 

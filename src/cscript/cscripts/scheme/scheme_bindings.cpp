@@ -708,6 +708,12 @@ SCM scmParseAttr(SCM attrString){
   return fromAttributeValue(attrValue);
 }
 
+AttributeValue (*_runStats)(std::string field);
+SCM scmRunStats(SCM value){
+  auto stat = _runStats(scm_to_locale_string(value));
+  return fromAttributeValue(stat);
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -1007,11 +1013,12 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("parse-attr", 1, 0, 0, (void*)scmParseAttr);
 
+  scm_c_define_gsubr("runstat", 1, 0, 0, (void*)scmRunStats);
+
   for (auto registerFn : _registerGuileFns){
     registerFn();
   }
 }
-
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
@@ -1090,6 +1097,7 @@ void createStaticSchemeBindings(
   void (*enforceLayout)(objid layoutId),
   unsigned int (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
   void (*freeTexture)(std::string name, objid ownerId),
+  AttributeValue (*runStats)(std::string field),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1177,6 +1185,8 @@ void createStaticSchemeBindings(
 
   _createTexture = createTexture;
   _freeTexture = freeTexture;
+
+  _runStats = runStats;
 
   _setFloatState = setFloatState;
   _setIntState = setIntState;
