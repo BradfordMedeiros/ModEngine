@@ -405,7 +405,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .antialiasingMode = ANTIALIASING_NONE,
     .crosshair = "",
     .windowname = "ModEngine",
-    .currentFramerate = 0,
 	};
 	return state;
 }

@@ -19,6 +19,7 @@
 #include "./renderstages.h"
 #include "./cscript/cscript.h"
 #include "./layers.h"
+#include "./benchstats.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
@@ -157,7 +158,5 @@ void takeScreenshot(std::string filepath);
 
 unsigned int  createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId);
 void freeTexture(std::string name, objid ownerId);
-
-AttributeValue runStats(std::string field);
 
 #endif

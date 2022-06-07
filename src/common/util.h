@@ -79,6 +79,15 @@ objid getUniqueObjId();
 std::string getUniqueObjectName();
 
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
+template<typename T>
+T unwrapAttr(AttributeValue value) {   
+  T* unwrappedValue = std::get_if<T>(&value);
+  if (unwrappedValue == NULL){
+    assert(false);
+  }
+  return *unwrappedValue;
+}
+
 AttributeValue parseAttributeValue(std::string payload);
 AttributeValue addAttributes(AttributeValue one, AttributeValue two);
 std::string print(AttributeValue& value);

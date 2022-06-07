@@ -650,11 +650,3 @@ void freeTexture(std::string name, objid ownerId){
   auto textureId = world.textures.at(name).texture.textureId;
   freeTextureRefsIdByOwner(world, ownerId, textureId);
 }
-
-AttributeValue runStats(std::string field){
-  if (field == "fps"){
-    return static_cast<float>(state.currentFramerate);
-  }
-  modassert(false, "stat: " + field + " not yet implemented");
-  return "";
-}

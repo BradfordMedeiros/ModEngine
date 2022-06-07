@@ -103,6 +103,8 @@ std::map<std::string, objid> activeLocks;
 
 LineData lineData = createLines();
 
+auto fpsStat = statName("fps");
+
 
 // 0th depth texture is the main depth texture used for eg z buffer
 // other buffers are for the lights
@@ -560,7 +562,8 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, int numObjects, int numSc
     return;
   }
 
-  drawText(std::to_string(state.currentFramerate) + state.additionalText, 10, 20, 4);
+  auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
+  drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
 
   std::string manipulatorAxisString;
   if (state.manipulatorAxis == XAXIS){
@@ -1149,7 +1152,7 @@ int main(int argc, char* argv[]){
     .enforceLayout = enforceLayout,
     .createTexture = createTexture,
     .freeTexture = freeTexture,
-    .runStats = runStats,
+    .runStats = statValue,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 
@@ -1352,7 +1355,7 @@ int main(int argc, char* argv[]){
       frameCount = 0;
       float timedelta = now - last60;
       last60 = now;
-      state.currentFramerate = floor((60.f/(timedelta) + 0.5f));
+      registerStat(fpsStat, floor((60.f/(timedelta) + 0.5f)));
     }
 
     onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
