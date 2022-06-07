@@ -32,15 +32,18 @@ struct LineData {
 };
 
 LineData createLines();
+
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color);
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId);
 void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);
+
 void drawPermaLines(LineData& lineData, GLint shaderProgram, LineColor color, glm::vec4 tint);
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram);
 
 void addTextData(LineData& lineData, TextDrawingOptions text);
-void drawLineData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId);
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId);
+
 void disposeTempBufferedData(LineData& lineData);
 
 #endif

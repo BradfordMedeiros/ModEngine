@@ -93,7 +93,7 @@ void addTextData(LineData& lineData, TextDrawingOptions text){
 
 
 // Currently only handles the text
-void drawLineData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId){
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId){
   if (!textureId.has_value()){
     for (auto &text : lineData.text){
       if (!text.textureId.has_value()){
