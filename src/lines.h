@@ -4,6 +4,7 @@
 #include "./common/util.h"
 #include "./scene/common/util/types.h"
 #include "./scene/common/mesh.h"
+#include "./scene/sprites/sprites.h"
 #include <glad/glad.h>
 #include "glm/ext.hpp"
 
@@ -14,11 +15,22 @@ struct PermaLine {
   LineColor color;
 };
 
+struct TextDrawingOptions  {
+  std::string word;
+  float left;
+  float top;
+  unsigned int fontSize;
+  std::optional<unsigned int> textureId;
+};
+
 struct LineData {
   std::vector<Line> lines;
   std::vector<Line> bluelines;
   std::vector<PermaLine> permaLines;
   std::vector<Line> screenspaceLines;
+
+  std::vector<TextDrawingOptions> text;
+  std::vector<TextDrawingOptions> permaText;
 };
 
 LineData createLines();
@@ -28,5 +40,9 @@ void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);
 void drawPermaLines(LineData& lineData, GLint shaderProgram, LineColor color, glm::vec4 tint);
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram);
+
+void addTextData(LineData& lineData, TextDrawingOptions text);
+void drawLineData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId);
+void disposeTempBufferedData(LineData& lineData);
 
 #endif

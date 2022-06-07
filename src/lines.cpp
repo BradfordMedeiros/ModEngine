@@ -1,16 +1,13 @@
 #include "./lines.h"
 
 LineData createLines(){
-  std::vector<Line> lines;
-  std::vector<Line> bluelines;
-  std::vector<PermaLine> permaLines;
-  std::vector<Line> screenspaceLines;
-
   return LineData {
-    .lines = lines,
-    .bluelines = bluelines,
-    .permaLines = permaLines,
-    .screenspaceLines = screenspaceLines,
+    .lines = {},
+    .bluelines = {},
+    .permaLines = {},
+    .screenspaceLines = {},
+    .text = {},
+    .permaText = {}
   };
 }
 
@@ -90,4 +87,29 @@ void drawPermaLines(LineData& lineData, GLint shaderProgram, LineColor color, gl
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram){
   std::cout << "number of lines being drawn: " << lineData.screenspaceLines.size() << std::endl;
   drawLines(lineData.screenspaceLines, 1);
+}
+
+void addTextData(LineData& lineData, TextDrawingOptions text){
+  lineData.text.push_back(text);
+}
+
+
+// Currently only handles the text
+void drawLineData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId){
+  if (!textureId.has_value()){
+    for (auto &text : lineData.text){
+      if (!text.textureId.has_value()){
+        drawWords(uiShaderProgram, fontMeshes, text.word, text.left, text.top, text.fontSize);  
+      }
+    }
+  }else{
+    for (auto &text : lineData.text){
+      if (text.textureId.has_value() && text.textureId.value() == textureId.value()){
+        modassert(false, "drawing texture text not yet supported");
+      }
+    }
+  }
+}
+void disposeTempBufferedData(LineData& lineData){
+  lineData.text.clear();
 }

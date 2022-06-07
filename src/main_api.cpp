@@ -23,6 +23,7 @@ extern DrawingParams drawParams;
 extern DynamicLoading dynamicLoading;
 extern std::map<std::string, objid> activeLocks;
 extern CScriptBindingCallbacks cBindings;
+extern LineData lineData;
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
@@ -226,7 +227,13 @@ void copyObject(int32_t id){
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId){
   auto adjustedTop = state.currentScreenHeight - top;
-  drawWords(uiShaderProgram, fontMeshes, word, left, adjustedTop, fontSize);  
+  addTextData(lineData, TextDrawingOptions{
+    .word = word,
+    .left = left,
+    .top = adjustedTop,
+    .fontSize = fontSize,
+    .textureId = textureId,
+  });
 }
 void drawText(std::string word, float left, float top, unsigned int fontSize){
   drawText(word, left, top, fontSize, std::nullopt);  

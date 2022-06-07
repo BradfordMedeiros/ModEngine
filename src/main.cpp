@@ -1642,7 +1642,8 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
     renderUI(*crosshairSprite, pixelColor, numObjects, numScenesLoaded, showCursor);
-
+    drawLineData(lineData, uiShaderProgram, fontMeshes, std::nullopt);
+    disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 
     if (state.takeScreenshot){

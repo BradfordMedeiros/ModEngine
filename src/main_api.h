@@ -20,6 +20,7 @@
 #include "./cscript/cscript.h"
 #include "./layers.h"
 #include "./benchstats.h"
+#include "./lines.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
