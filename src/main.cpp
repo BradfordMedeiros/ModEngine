@@ -525,11 +525,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   }
 
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-  if (lineData.bluelines.size() > 0){
-   drawLines(lineData.bluelines);
-  }
   lineData.lines.clear();
-  lineData.bluelines.clear();
 
   if (state.showCameras){
     drawTraversalPositions();   

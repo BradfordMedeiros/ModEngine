@@ -3,7 +3,6 @@
 LineData createLines(){
   return LineData {
     .lines = {},
-    .bluelines = {},
     .permaLines = {},
     .screenspaceLines = {},
     .text = {},
