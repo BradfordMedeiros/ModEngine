@@ -8,7 +8,7 @@
 #include <glad/glad.h>
 #include "glm/ext.hpp"
 
-struct PermaLine {
+struct LineDrawingOptions {
   Line line;
   objid lineid;
   objid owner;
@@ -25,11 +25,10 @@ struct TextDrawingOptions  {
 
 struct LineData {
   std::vector<Line> lines;
-  std::vector<PermaLine> permaLines;
+  std::vector<LineDrawingOptions> permaLines;
   std::vector<Line> screenspaceLines;
 
   std::vector<TextDrawingOptions> text;
-  std::vector<TextDrawingOptions> permaText;
 };
 
 LineData createLines();

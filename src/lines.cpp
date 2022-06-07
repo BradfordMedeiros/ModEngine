@@ -6,7 +6,6 @@ LineData createLines(){
     .permaLines = {},
     .screenspaceLines = {},
     .text = {},
-    .permaText = {}
   };
 }
 
@@ -14,7 +13,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
   if (permaline){
     auto lineId = getUniqueObjId();
     lineData.permaLines.push_back(
-      PermaLine {
+      LineDrawingOptions {
         .line = Line{
           .fromPos = fromPos,
           .toPos = toPos,
@@ -44,7 +43,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
 }
 
 void freeLine(LineData& lineData, objid lineId){
-  std::vector<PermaLine> newLines;
+  std::vector<LineDrawingOptions> newLines;
   for (auto &line : lineData.permaLines){
     if (lineId != line.lineid){
       newLines.push_back(line);
@@ -58,7 +57,7 @@ void freeLine(LineData& lineData, objid lineId){
  
 void removeLinesByOwner(LineData& lineData, objid owner){
   MODTODO("move all this line stuff behind some single cleaner interface");
-  std::vector<PermaLine> newLines;
+  std::vector<LineDrawingOptions> newLines;
   for (auto &line : lineData.permaLines){
     if (owner != line.owner){
       newLines.push_back(line);
