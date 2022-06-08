@@ -2,7 +2,6 @@
 
 LineData createLines(){
   return LineData {
-    .lines = {},
     .permaLines = {},
     .screenspaceLines = {},
     .text = {},
@@ -10,29 +9,21 @@ LineData createLines(){
 }
 
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color){
-  if (permaline){
-    auto lineId = getUniqueObjId();
-    lineData.permaLines.push_back(
-      LineDrawingOptions {
-        .line = Line{
-          .fromPos = fromPos,
-          .toPos = toPos,
-        },
-        .lineid = lineId,
-        .owner = owner, 
-        .color = color,
-        .textureId = std::nullopt,
-        .permaLine = true,
-      }
-    );   
-    return lineId;
-  }
-  Line line = {
-    .fromPos = fromPos,
-    .toPos = toPos
-  };
-  lineData.lines.push_back(line);
-  return 0;
+  auto lineId = getUniqueObjId();
+  lineData.permaLines.push_back(
+    LineDrawingOptions {
+      .line = Line{
+        .fromPos = fromPos,
+        .toPos = toPos,
+      },
+      .lineid = lineId,
+      .owner = owner, 
+      .color = color,
+      .textureId = std::nullopt,
+      .permaLine = permaline,
+    }
+  );   
+  return lineId;
 }
 
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
@@ -70,6 +61,19 @@ void removeLinesByOwner(LineData& lineData, objid owner){
     lineData.permaLines.push_back(line);
   }
 }
+void removeTempLines(LineData& lineData){
+  std::vector<LineDrawingOptions> newLines;
+  for (auto &line : lineData.permaLines){
+    if (line.permaLine){
+      newLines.push_back(line);
+    }
+  }
+  lineData.permaLines.clear();
+  for (auto line : newLines){
+    lineData.permaLines.push_back(line);
+  }
+}
+
 
 void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color, bool permaLine){
   for (auto permaline : lineData.permaLines){
@@ -79,13 +83,13 @@ void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color
   }
 }
 
-void drawAllLines(LineData& lineData, GLint shaderProgram){
+void drawAllLines(LineData& lineData, GLint shaderProgram, bool permaLine){
   std::vector<Line> redLines;
   std::vector<Line> greenLines;
   std::vector<Line> blueLines;
-  addToLineList(lineData, redLines, RED, true);
-  addToLineList(lineData, greenLines, GREEN, true);
-  addToLineList(lineData, blueLines, BLUE, true);
+  addToLineList(lineData, redLines, RED, permaLine);
+  addToLineList(lineData, greenLines, GREEN, permaLine);
+  addToLineList(lineData, blueLines, BLUE, permaLine);
 
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
   drawLines(redLines);
@@ -93,15 +97,11 @@ void drawAllLines(LineData& lineData, GLint shaderProgram){
   drawLines(greenLines);
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
   drawLines(blueLines);
+}
 
-  ////////////////////////////////////////////////
-  
-
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
-  if (lineData.lines.size() > 0){
-   drawLines(lineData.lines);
-  }
-
+void drawAllLines(LineData& lineData, GLint shaderProgram){
+  drawAllLines(lineData, shaderProgram, true);
+  drawAllLines(lineData, shaderProgram, false);
 }
 
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram){
@@ -132,5 +132,5 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<uns
 }
 void disposeTempBufferedData(LineData& lineData){
   lineData.text.clear();
-  lineData.lines.clear();
+  removeTempLines(lineData);
 }
