@@ -18,7 +18,7 @@ struct Benchmark {
   std::vector<BenchmarkMeasurement> samples;
 };
 
-Benchmark createBenchmark(bool shouldBenchmark, std::function<void(float)> drawScreenspaceLinePoint);
+Benchmark createBenchmark(bool shouldBenchmark);
 void logBenchmarkTick(Benchmark& benchmark, float frametime, int numObjects, int numTriangles);
 std::string benchmarkResult(Benchmark& benchmark);
 

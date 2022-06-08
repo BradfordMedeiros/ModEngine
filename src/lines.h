@@ -27,20 +27,17 @@ struct TextDrawingOptions  {
 
 struct LineData {
   std::vector<LineDrawingOptions> permaLines;
-  std::vector<Line> screenspaceLines;
-
   std::vector<TextDrawingOptions> text;
 };
 
 LineData createLines();
 
-objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color);
+objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId);
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId);
 void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);
 
-void drawAllLines(LineData& lineData, GLint shaderProgram);
-void drawScreenspaceLines(LineData& lineData, GLint shaderProgram);
+void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
 
 void addTextData(LineData& lineData, TextDrawingOptions text);
 void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId);

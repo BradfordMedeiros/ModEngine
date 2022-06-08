@@ -168,7 +168,7 @@ void renderScreenspaceLines(Texture& texture){
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-  drawScreenspaceLines(lineData, uiShaderProgram);
+  drawAllLines(lineData, uiShaderProgram, texture.textureId);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -513,7 +513,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
     }
   }
   drawCoordinateSystem(100.f);
-  drawAllLines(lineData, shaderProgram);
+  drawAllLines(lineData, shaderProgram, std::nullopt);
 
   if (state.showCameras){
     drawTraversalPositions();   
@@ -922,10 +922,7 @@ int main(int argc, char* argv[]){
   auto shouldBenchmark = benchmarkFile != "";
   auto timetoexit = result["timetoexit"].as<int>();
 
-  benchmark = createBenchmark(shouldBenchmark, [](float amount) -> void {
-    //std::cout << "screenspace line: " << now << " " << (1.f / amount) << std::endl;
-    //addScreenspaceLine(lineData, now, /* fps */ 1.f / amount);
-  });
+  benchmark = createBenchmark(shouldBenchmark);
 
   std::cout << "LIFECYCLE: program starting" << std::endl;
   disableInput = result["noinput"].as<bool>();
