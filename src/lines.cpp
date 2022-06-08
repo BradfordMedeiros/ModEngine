@@ -2,14 +2,14 @@
 
 LineData createLines(){
   return LineData {
-    .permaLines = {},
+    .lines = {},
     .text = {},
   };
 }
 
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId){
   auto lineId = getUniqueObjId();
-  lineData.permaLines.push_back(
+  lineData.lines.push_back(
     LineDrawingOptions {
       .line = Line{
         .fromPos = fromPos,
@@ -31,40 +31,40 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
 
 void freeLine(LineData& lineData, objid lineId){
   std::vector<LineDrawingOptions> newLines;
-  for (auto &line : lineData.permaLines){
+  for (auto &line : lineData.lines){
     if (lineId != line.lineid){
       newLines.push_back(line);
     }
   }
-  lineData.permaLines.clear();
+  lineData.lines.clear();
   for (auto line : newLines){
-    lineData.permaLines.push_back(line);
+    lineData.lines.push_back(line);
   }
 }
  
 void removeLinesByOwner(LineData& lineData, objid owner){
   MODTODO("move all this line stuff behind some single cleaner interface");
   std::vector<LineDrawingOptions> newLines;
-  for (auto &line : lineData.permaLines){
+  for (auto &line : lineData.lines){
     if (owner != line.owner){
       newLines.push_back(line);
     }
   }
-  lineData.permaLines.clear();
+  lineData.lines.clear();
   for (auto line : newLines){
-    lineData.permaLines.push_back(line);
+    lineData.lines.push_back(line);
   }
 }
 void removeTempLines(LineData& lineData){
   std::vector<LineDrawingOptions> newLines;
-  for (auto &line : lineData.permaLines){
+  for (auto &line : lineData.lines){
     if (line.permaLine){
       newLines.push_back(line);
     }
   }
-  lineData.permaLines.clear();
+  lineData.lines.clear();
   for (auto line : newLines){
-    lineData.permaLines.push_back(line);
+    lineData.lines.push_back(line);
   }
 }
 
@@ -76,7 +76,7 @@ bool textureIdSame(std::optional<unsigned int> lineTexture, std::optional<unsign
   );
 }
 void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color, std::optional<unsigned int> textureId){
-  for (auto permaline : lineData.permaLines){
+  for (auto permaline : lineData.lines){
     if (permaline.color == color && textureIdSame(permaline.textureId, textureId)){
       lines.push_back(permaline.line);
     }
@@ -103,20 +103,10 @@ void addTextData(LineData& lineData, TextDrawingOptions text){
   lineData.text.push_back(text);
 }
 
-
-// Currently only handles the text
 void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId){
-  if (!textureId.has_value()){
-    for (auto &text : lineData.text){
-      if (!text.textureId.has_value()){
-        drawWords(uiShaderProgram, fontMeshes, text.word, text.left, text.top, text.fontSize);  
-      }
-    }
-  }else{
-    for (auto &text : lineData.text){
-      if (text.textureId.has_value() && text.textureId.value() == textureId.value()){
-        modassert(false, "drawing texture text not yet supported");
-      }
+  for (auto &text : lineData.text){
+    if (textureIdSame(text.textureId, textureId)){
+      drawWords(uiShaderProgram, fontMeshes, text.word, text.left, text.top, text.fontSize);  
     }
   }
 }
@@ -127,7 +117,7 @@ void disposeTempBufferedData(LineData& lineData){
 
 std::vector<unsigned int> textureIdsToRender(LineData& lineData){
   std::set<unsigned int> textureIds;
-  for (auto &line : lineData.permaLines){
+  for (auto &line : lineData.lines){
     if (line.textureId.has_value()){
       textureIds.insert(line.textureId.value());
     }

@@ -26,7 +26,7 @@ struct TextDrawingOptions  {
 };
 
 struct LineData {
-  std::vector<LineDrawingOptions> permaLines;
+  std::vector<LineDrawingOptions> lines;
   std::vector<TextDrawingOptions> text;
 };
 

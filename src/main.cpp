@@ -166,6 +166,7 @@ void renderScreenspaceLines(Texture& texture){
 
   if (!didClearOnce){ // TODO -> don't want this here, and it only works for 1 texture anyway
     didClearOnce = true;
+    std::cout << "clearing texture!" << std::endl;
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
@@ -175,6 +176,10 @@ void renderScreenspaceLines(Texture& texture){
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
+
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+  drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
