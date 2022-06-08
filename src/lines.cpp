@@ -125,3 +125,22 @@ void disposeTempBufferedData(LineData& lineData){
   lineData.text.clear();
   removeTempLines(lineData);
 }
+
+std::vector<unsigned int> textureIdsToRender(LineData& lineData){
+  std::set<unsigned int> textureIds;
+  for (auto &line : lineData.permaLines){
+    if (line.textureId.has_value()){
+      textureIds.insert(line.textureId.value());
+    }
+  }
+  for (auto &text : lineData.text){
+    if (text.textureId.has_value()){
+      textureIds.insert(text.textureId.value());
+    }
+  }
+  std::vector<unsigned int> textures;
+  for (auto id : textureIds){
+    textures.push_back(id);
+  }
+  return textures;
+}

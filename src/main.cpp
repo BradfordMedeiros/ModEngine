@@ -1466,21 +1466,20 @@ int main(int argc, char* argv[]){
     );
     handlePaintingModifiesViewport(uvCoord);
 
-    //////////////////////////////////////////////////////
-    // should have allocated textures
-    // then for everyline we are drawing we should draw to it 
 
     int graphTexture = 0;
     bool hasGraphTexture = world.textures.find("graphs-testplot") != world.textures.end();
-    if (hasGraphTexture){
-      auto graphTex = world.textures.at("graphs-testplot").texture;
-      graphTexture = graphTex.textureId;
-      hasGraphTexture = true;
-      glDisable(GL_DEPTH_TEST);
-      renderScreenspaceLines(graphTex);
-      glEnable(GL_DEPTH_TEST);
-      ////////////////////////    
+    auto screenspaceTextureIds = textureIdsToRender(lineData);
+    glDisable(GL_DEPTH_TEST);
+    for (auto textureId : screenspaceTextureIds){
+      Texture tex {
+        .textureId = textureId,
+      };
+      renderScreenspaceLines(tex);
     }
+    glEnable(GL_DEPTH_TEST);
+      
+   
 
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);

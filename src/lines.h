@@ -44,4 +44,6 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<uns
 
 void disposeTempBufferedData(LineData& lineData);
 
+std::vector<unsigned int> textureIdsToRender(LineData& lineData);
+
 #endif
