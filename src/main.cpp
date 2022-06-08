@@ -1474,8 +1474,6 @@ int main(int argc, char* argv[]){
     handlePaintingModifiesViewport(uvCoord);
 
 
-    int graphTexture = 0;
-    bool hasGraphTexture = world.textures.find("graphs-testplot") != world.textures.end();
     auto screenspaceTextureIds = textureIdsToRender(lineData);
     glDisable(GL_DEPTH_TEST);
     for (auto textureId : screenspaceTextureIds){
@@ -1615,8 +1613,10 @@ int main(int argc, char* argv[]){
     }else if (state.renderMode == RENDER_BLOOM){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
-      if (hasGraphTexture){
-        glBindTexture(GL_TEXTURE_2D, graphTexture);
+      if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
+        glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex));
+      }else{
+        std::cout << "cannot display graph texture index: " << state.textureIndex << std::endl;
       }
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);

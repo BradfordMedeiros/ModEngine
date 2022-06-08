@@ -26,7 +26,6 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
 }
 
 objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
-  std::cout << "add line next cycle: " << textureId.has_value() << std::endl;
   return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, textureId);
 }
 
