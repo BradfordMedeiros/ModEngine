@@ -43,7 +43,6 @@ void freeLine(LineData& lineData, objid lineId){
 }
  
 void removeLinesByOwner(LineData& lineData, objid owner){
-  MODTODO("move all this line stuff behind some single cleaner interface");
   std::vector<LineDrawingOptions> newLines;
   for (auto &line : lineData.lines){
     if (owner != line.owner){
@@ -53,6 +52,18 @@ void removeLinesByOwner(LineData& lineData, objid owner){
   lineData.lines.clear();
   for (auto line : newLines){
     lineData.lines.push_back(line);
+  }
+}
+void removeTempText(LineData& lineData){
+  std::vector<TextDrawingOptions> newText;
+  for (auto &text : lineData.text){
+    if (text.permaText){
+      newText.push_back(text);
+    }
+  }
+  lineData.text.clear();
+  for (auto text : newText){
+    lineData.text.push_back(text);
   }
 }
 void removeTempLines(LineData& lineData){
@@ -65,7 +76,7 @@ void removeTempLines(LineData& lineData){
   lineData.lines.clear();
   for (auto line : newLines){
     lineData.lines.push_back(line);
-  }
+  } 
 }
 
 
@@ -111,25 +122,7 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<uns
   }
 }
 void disposeTempBufferedData(LineData& lineData){
-  lineData.text.clear();
+  removeTempText(lineData);
   removeTempLines(lineData);
 }
 
-std::vector<unsigned int> textureIdsToRender(LineData& lineData){
-  std::set<unsigned int> textureIds;
-  for (auto &line : lineData.lines){
-    if (line.textureId.has_value()){
-      textureIds.insert(line.textureId.value());
-    }
-  }
-  for (auto &text : lineData.text){
-    if (text.textureId.has_value()){
-      textureIds.insert(text.textureId.value());
-    }
-  }
-  std::vector<unsigned int> textures;
-  for (auto id : textureIds){
-    textures.push_back(id);
-  }
-  return textures;
-}

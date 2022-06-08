@@ -225,18 +225,20 @@ void copyObject(int32_t id){
   copyObjectToScene(world, id, interface);
 }
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId){
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId){
   auto adjustedTop = state.currentScreenHeight - top;
+  std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addTextData(lineData, TextDrawingOptions{
     .word = word,
     .left = left,
     .top = adjustedTop,
     .fontSize = fontSize,
     .textureId = textureId,
+    .permaText = permatext,
   });
 }
 void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, std::nullopt);  
+  drawText(word, left, top, fontSize, false, std::nullopt);  
 }
 
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){
@@ -644,16 +646,28 @@ void takeScreenshot(std::string filepath){
   state.screenshotPath = filepath;
 }
 
-
+std::vector<unsigned int> userTextures;
+std::vector<unsigned int> textureIdsToRender(){
+  return userTextures;
+}
 
 unsigned int  createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
   auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height).textureId;
+  userTextures.push_back(textureID);
   return textureID;
 }
 
 void freeTexture(std::string name, objid ownerId){
   MODTODO("delete texture -> use ownership id of the script being used");
   auto textureId = world.textures.at(name).texture.textureId;
+
+  std::vector<unsigned int> remainingTextures;
+  for (auto id : userTextures){
+    if (id != textureId){
+      remainingTextures.push_back(id);
+    }
+  }
+  userTextures = remainingTextures;
   freeTextureRefsIdByOwner(world, ownerId, textureId);
 }

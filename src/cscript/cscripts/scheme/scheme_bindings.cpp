@@ -152,13 +152,22 @@ std::optional<unsigned int> optionalTexId(SCM scmTextureId){
   return textureId;
 }
 
-void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId);
-SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM scmTextureId){
+bool optionalBool(SCM scmValue, bool defaultValue){
+  auto valueDefined = !scm_is_eq(scmValue, SCM_UNDEFINED);
+  if (valueDefined){
+    return scm_to_bool(scmValue);
+  }
+  return defaultValue;
+}
+
+void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId);
+SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM permatext, SCM scmTextureId){
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
     scm_to_double(top), 
     toUnsignedInt(fontSize),
+    optionalBool(permatext, false),
     optionalTexId(scmTextureId)
   );
   return SCM_UNSPECIFIED;
@@ -166,12 +175,7 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM scmTextureId){
 
 int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId);
 SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline, SCM scmTextureId){
-  auto permalineDefined = !scm_is_eq(permaline, SCM_UNDEFINED);
-  auto isPermaline = false;
-  if (permalineDefined){
-    isPermaline = scm_to_bool(permaline);
-  }
-
+  auto isPermaline = optionalBool(permaline, false);
   auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0, optionalTexId(scmTextureId));
   return scm_from_int32(lineId);
 }
@@ -911,7 +915,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lsobj-attr", 1, 1, 0, (void *)scm_getObjectsByAttr);
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
-  scm_c_define_gsubr("draw-text", 4, 1, 0, (void*)scmDrawText);
+  scm_c_define_gsubr("draw-text", 4, 2, 0, (void*)scmDrawText);
   scm_c_define_gsubr("draw-line", 2, 2, 0, (void*)scmDrawLine);
   scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
@@ -1039,7 +1043,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByType)(std::string),
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, std::optional<unsigned int> textureId),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),

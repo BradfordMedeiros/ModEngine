@@ -23,6 +23,7 @@ struct TextDrawingOptions  {
   float top;
   unsigned int fontSize;
   std::optional<unsigned int> textureId;
+  bool permaText;
 };
 
 struct LineData {
@@ -44,6 +45,5 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<uns
 
 void disposeTempBufferedData(LineData& lineData);
 
-std::vector<unsigned int> textureIdsToRender(LineData& lineData);
 
 #endif

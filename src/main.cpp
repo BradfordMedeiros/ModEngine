@@ -165,7 +165,7 @@ void renderScreenspaceLines(Texture& texture){
   glUseProgram(uiShaderProgram);
 
   if (!didClearOnce){ // TODO -> don't want this here, and it only works for 1 texture anyway
-    didClearOnce = true;
+   // didClearOnce = true;
     std::cout << "clearing texture!" << std::endl;
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
@@ -1479,7 +1479,7 @@ int main(int argc, char* argv[]){
     handlePaintingModifiesViewport(uvCoord);
 
 
-    auto screenspaceTextureIds = textureIdsToRender(lineData);
+    auto screenspaceTextureIds = textureIdsToRender();
     glDisable(GL_DEPTH_TEST);
     for (auto textureId : screenspaceTextureIds){
       Texture tex {
@@ -1488,8 +1488,6 @@ int main(int argc, char* argv[]){
       renderScreenspaceLines(tex);
     }
     glEnable(GL_DEPTH_TEST);
-      
-   
 
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
@@ -1547,6 +1545,8 @@ int main(int argc, char* argv[]){
     if (showDebugInfo){
       renderVector(shaderProgram, view, glm::mat4(1.0f));
     }
+
+    
         
     portalIdCache.clear();
  
