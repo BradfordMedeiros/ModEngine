@@ -513,15 +513,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
     }
   }
   drawCoordinateSystem(100.f);
-  drawAllLines(lineData, shaderProgram, true);
-
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
-  if (lineData.lines.size() > 0){
-   drawLines(lineData.lines);
-  }
-
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-  lineData.lines.clear();
+  drawAllLines(lineData, shaderProgram);
 
   if (state.showCameras){
     drawTraversalPositions();   
@@ -1515,6 +1507,7 @@ int main(int argc, char* argv[]){
     )
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
+
       /////////////////
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
@@ -1535,10 +1528,6 @@ int main(int argc, char* argv[]){
       }
     }
 
-    if (showDebugInfo){
-      renderVector(shaderProgram, view, glm::mat4(1.0f));
-    }
-
     handleInput(window);
     glfwPollEvents();
     
@@ -1548,8 +1537,12 @@ int main(int argc, char* argv[]){
       channelMessages.pop();
       cBindings.onMessage(message.strTopic, message.strValue);
     }
-    
+    if (showDebugInfo){
+      renderVector(shaderProgram, view, glm::mat4(1.0f));
+    }
+        
     portalIdCache.clear();
+ 
 
     PROFILE("BLOOM-RENDERING",
       renderWithProgram(renderContext, renderStages.bloom1);
@@ -1564,7 +1557,6 @@ int main(int argc, char* argv[]){
     for (auto &renderStep : renderStages.additionalRenderSteps){ // probably should be the final render
       renderWithProgram(renderContext, renderStep);
     }
-
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

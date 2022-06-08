@@ -14,6 +14,7 @@ struct LineDrawingOptions {
   objid owner;
   LineColor color;
   std::optional<unsigned int> textureId;
+  bool permaLine;
 };
 
 struct TextDrawingOptions  {
@@ -39,7 +40,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
 void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);
 
-void drawAllLines(LineData& lineData, GLint shaderProgram, bool permalineOnly);
+void drawAllLines(LineData& lineData, GLint shaderProgram);
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram);
 
 void addTextData(LineData& lineData, TextDrawingOptions text);

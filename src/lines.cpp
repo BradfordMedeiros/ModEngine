@@ -22,6 +22,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
         .owner = owner, 
         .color = color,
         .textureId = std::nullopt,
+        .permaLine = true,
       }
     );   
     return lineId;
@@ -70,22 +71,21 @@ void removeLinesByOwner(LineData& lineData, objid owner){
   }
 }
 
-void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color){
+void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color, bool permaLine){
   for (auto permaline : lineData.permaLines){
-    if (permaline.color == color){
+    if (permaline.color == color && permaline.permaLine == permaLine){
       lines.push_back(permaline.line);
     }
   }
 }
-void drawAllLines(LineData& lineData, GLint shaderProgram, bool permalineOnly){
-  assert(permalineOnly);
-  
+
+void drawAllLines(LineData& lineData, GLint shaderProgram){
   std::vector<Line> redLines;
   std::vector<Line> greenLines;
   std::vector<Line> blueLines;
-  addToLineList(lineData, redLines, RED);
-  addToLineList(lineData, greenLines, GREEN);
-  addToLineList(lineData, blueLines, BLUE);
+  addToLineList(lineData, redLines, RED, true);
+  addToLineList(lineData, greenLines, GREEN, true);
+  addToLineList(lineData, blueLines, BLUE, true);
 
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
   drawLines(redLines);
@@ -93,6 +93,15 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, bool permalineOnly){
   drawLines(greenLines);
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
   drawLines(blueLines);
+
+  ////////////////////////////////////////////////
+  
+
+  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
+  if (lineData.lines.size() > 0){
+   drawLines(lineData.lines);
+  }
+
 }
 
 void drawScreenspaceLines(LineData& lineData, GLint shaderProgram){
@@ -123,4 +132,5 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<uns
 }
 void disposeTempBufferedData(LineData& lineData){
   lineData.text.clear();
+  lineData.lines.clear();
 }
