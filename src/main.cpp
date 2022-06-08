@@ -83,6 +83,7 @@ unsigned int framebufferTexture2;
 unsigned int framebufferTexture3;
 unsigned int fbo;
 unsigned int depthTextures[32];
+unsigned int textureDepthTextures[1];
 
 const int numPortalTextures = 16;
 unsigned int portalTextures[16];
@@ -154,15 +155,19 @@ void applyPainting(objid id){
 bool didClearOnce = false;
 void renderScreenspaceLines(Texture& texture){
   auto texSize = getTextureSizeInfo(texture);
-  //std::cout << "tex size: " << texSize.width << " " << texSize.height << std::endl;
   glViewport(0, 0, texSize.width, texSize.height);
+  updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
+  setActiveDepthTexture(fbo, textureDepthTextures, 0);
+
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture.textureId, 0);
   glUseProgram(uiShaderProgram);
-  if (!didClearOnce){
+
+  if (!didClearOnce){ // TODO -> don't want this here, and it only works for 1 texture anyway
     didClearOnce = true;
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f)
+    //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
@@ -974,6 +979,8 @@ int main(int argc, char* argv[]){
   genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
 
   generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
+  generateDepthTextures(textureDepthTextures, 1, state.resolution.x, state.resolution.y);
+
   generatePortalTextures(portalTextures, numPortalTextures, state.resolution.x, state.resolution.y);
   setActiveDepthTexture(fbo, depthTextures, 0);
 
