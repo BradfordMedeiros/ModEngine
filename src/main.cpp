@@ -162,6 +162,7 @@ void renderScreenspaceLines(Texture& texture){
   if (!didClearOnce){
     didClearOnce = true;
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
