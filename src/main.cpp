@@ -1150,6 +1150,8 @@ int main(int argc, char* argv[]){
     .freeTexture = freeTexture,
     .clearTexture = clearTexture,
     .runStats = statValue,
+    .stat = statName,
+    .logStat = registerStat,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 

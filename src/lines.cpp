@@ -99,14 +99,17 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
   addToLineList(lineData, blueLines, BLUE, textureId);
 
   if (redLines.size() > 0){
+    std::cout << "draw red lines: " << redLines.size() << std::endl;
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
     drawLines(redLines);    
   }
   if (greenLines.size() > 0){
+    std::cout << "draw green lines: " << greenLines.size() << std::endl;
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
     drawLines(greenLines);
   }
   if (blueLines.size() > 0){
+    std::cout << "draw blue lines: " << blueLines.size() << std::endl;
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
     drawLines(blueLines);    
   }
@@ -117,8 +120,10 @@ void addTextData(LineData& lineData, TextDrawingOptions text){
 }
 
 void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId){
+  std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &text : lineData.text){
     if (textureIdSame(text.textureId, textureId)){
+      std::cout << "drawing words: " << text.word << std::endl;
       drawWords(uiShaderProgram, fontMeshes, text.word, text.left, text.top, text.fontSize);  
     }
   }

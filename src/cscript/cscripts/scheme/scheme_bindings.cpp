@@ -723,6 +723,17 @@ SCM scmRunStats(SCM value){
   return fromAttributeValue(stat);
 }
 
+
+unsigned int (*_scmStat)(std::string);
+SCM scmStat(SCM name){
+  return scm_from_unsigned_integer(_scmStat(scm_to_locale_string(name)));
+}
+void (*_logStat)(unsigned int, AttributeValue amount);
+SCM scmLogStat(SCM statId, SCM amount){
+  _logStat(toUnsignedInt(statId), toAttributeValue(amount));
+  return SCM_UNSPECIFIED;
+}
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -1024,8 +1035,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("parse-attr", 1, 0, 0, (void*)scmParseAttr);
 
   scm_c_define_gsubr("runstat", 1, 0, 0, (void*)scmRunStats);
-  //scm_c_define_gsubr("logstat", 2, 0, 0, (void*)scmLogStat);
-  //scm_c_define_gsubr("stat", 1, 0, 0, (void*)scmStat);
+  scm_c_define_gsubr("stat", 1, 0, 0, (void*)scmStat);
+  scm_c_define_gsubr("logstat", 2, 0, 0, (void*)scmLogStat);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();
@@ -1111,6 +1122,8 @@ void createStaticSchemeBindings(
   void (*freeTexture)(std::string name, objid ownerId),
   void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear),
   AttributeValue (*runStats)(std::string field),
+  unsigned int (*scmStat)(std::string),
+  void (*logStat)(unsigned int, AttributeValue amount),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1201,6 +1214,8 @@ void createStaticSchemeBindings(
   _clearTexture = clearTexture;
 
   _runStats = runStats;
+  _scmStat = scmStat;
+  _logStat = logStat;
 
   _setFloatState = setFloatState;
   _setIntState = setIntState;

@@ -88,6 +88,8 @@ struct CustomApiBindings {
   void (*freeTexture)(std::string name, objid ownerId);
   void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear);
   AttributeValue (*runStats)(std::string field);
+  unsigned int (*stat)(std::string);
+  void (*logStat)(unsigned int, AttributeValue amount);
   //std::vector<func_t> registerGuileFns
 };
 

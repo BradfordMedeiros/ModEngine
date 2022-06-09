@@ -114,6 +114,8 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.freeTexture,
     api.clearTexture,
     api.runStats,
+    api.stat,
+    api.logStat,
     {}
   );
 
