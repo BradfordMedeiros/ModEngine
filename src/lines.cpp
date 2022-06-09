@@ -62,9 +62,7 @@ void removeTempText(LineData& lineData){
     }
   }
   lineData.text.clear();
-  for (auto text : newText){
-    lineData.text.push_back(text);
-  }
+  lineData.text = newText;
 }
 void removeTempLines(LineData& lineData){
   std::vector<LineDrawingOptions> newLines;
@@ -74,9 +72,7 @@ void removeTempLines(LineData& lineData){
     }
   }
   lineData.lines.clear();
-  for (auto line : newLines){
-    lineData.lines.push_back(line);
-  } 
+  lineData.lines = newLines;
 }
 
 
@@ -102,12 +98,18 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
   addToLineList(lineData, greenLines, GREEN, textureId);
   addToLineList(lineData, blueLines, BLUE, textureId);
 
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
-  drawLines(redLines);
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-  drawLines(greenLines);
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
-  drawLines(blueLines);
+  if (redLines.size() > 0){
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
+    drawLines(redLines);    
+  }
+  if (greenLines.size() > 0){
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
+    drawLines(greenLines);
+  }
+  if (blueLines.size() > 0){
+    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
+    drawLines(blueLines);    
+  }
 }
 
 void addTextData(LineData& lineData, TextDrawingOptions text){

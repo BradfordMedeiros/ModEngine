@@ -268,6 +268,7 @@ void freeLineRenderData(LineRenderData& lineData){
 
 // returns # of verts drawn
 int drawLines(std::vector<Line> allLines, int linewidth){
+  modassert(allLines.size() > 0, "draw lines - all lines must be non-zero size");
   auto lineData = createLineRenderData(allLines);
   glLineWidth(linewidth);
   glDrawElements(GL_LINES, lineData.numIndices , GL_UNSIGNED_INT, 0);
