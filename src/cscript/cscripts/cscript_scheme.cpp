@@ -112,6 +112,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.enforceLayout,
     api.createTexture,
     api.freeTexture,
+    api.clearTexture,
     api.runStats,
     {}
   );

@@ -1148,6 +1148,7 @@ int main(int argc, char* argv[]){
     .enforceLayout = enforceLayout,
     .createTexture = createTexture,
     .freeTexture = freeTexture,
+    .clearTexture = clearTexture,
     .runStats = statValue,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });

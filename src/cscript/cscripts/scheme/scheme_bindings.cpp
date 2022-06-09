@@ -602,6 +602,11 @@ SCM scmFreeTexture(SCM name){
   return SCM_UNSPECIFIED;
 }
 
+void (*_clearTexture)(unsigned int textureId, std::optional<bool> autoclear);
+SCM scmClearTexture(SCM textureId, SCM autoclearToggle){
+  return SCM_UNSPECIFIED;
+}
+
 
 glm::vec3 (*_navPosition)(objid, glm::vec3 pos);
 SCM scmNavPosition(SCM obj, SCM pos){
@@ -994,6 +999,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("create-texture", 3, 0, 0, (void*)scmCreateTexture);
   scm_c_define_gsubr("free-texture", 1, 0, 0, (void*)scmFreeTexture);
+  scm_c_define_gsubr("clear-texture", 1, 1, 0, (void*)scmClearTexture);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
@@ -1018,6 +1024,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("parse-attr", 1, 0, 0, (void*)scmParseAttr);
 
   scm_c_define_gsubr("runstat", 1, 0, 0, (void*)scmRunStats);
+  //scm_c_define_gsubr("logstat", 2, 0, 0, (void*)scmLogStat);
+  //scm_c_define_gsubr("stat", 1, 0, 0, (void*)scmStat);
 
   for (auto registerFn : _registerGuileFns){
     registerFn();
@@ -1101,6 +1109,7 @@ void createStaticSchemeBindings(
   void (*enforceLayout)(objid layoutId),
   unsigned int (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
   void (*freeTexture)(std::string name, objid ownerId),
+  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear),
   AttributeValue (*runStats)(std::string field),
   std::vector<func_t> registerGuileFns
 ){
@@ -1189,6 +1198,7 @@ void createStaticSchemeBindings(
 
   _createTexture = createTexture;
   _freeTexture = freeTexture;
+  _clearTexture = clearTexture;
 
   _runStats = runStats;
 

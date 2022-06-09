@@ -675,3 +675,7 @@ void freeTexture(std::string name, objid ownerId){
   userTextures = remainingTextures;
   freeTextureRefsIdByOwner(world, ownerId, textureId);
 }
+
+void clearTexture(unsigned int textureId, std::optional<bool> autoclear){
+  modassert(false, "clear texture not implemented");  
+}
