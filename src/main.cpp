@@ -178,11 +178,12 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear){
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
 
   //std::cout << "screenspace: textdata" << std::endl;
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
-  drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId);
 
+  auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ortho)); 
+  drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId,  texSize.height);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -1637,7 +1638,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
     renderUI(*crosshairSprite, pixelColor, numObjects, numScenesLoaded, showCursor);
-    drawTextData(lineData, uiShaderProgram, fontMeshes, std::nullopt);
+    drawTextData(lineData, uiShaderProgram, fontMeshes, std::nullopt,  state.currentScreenHeight);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 

@@ -226,12 +226,11 @@ void copyObject(int32_t id){
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId){
-  auto adjustedTop = state.currentScreenHeight - top;
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addTextData(lineData, TextDrawingOptions{
     .word = word,
     .left = left,
-    .top = adjustedTop,
+    .top = top,
     .fontSize = fontSize,
     .textureId = textureId,
     .permaText = permatext,
