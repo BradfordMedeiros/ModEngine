@@ -646,15 +646,19 @@ void takeScreenshot(std::string filepath){
   state.screenshotPath = filepath;
 }
 
-std::vector<unsigned int> userTextures;
-std::vector<unsigned int> textureIdsToRender(){
+
+std::vector<UserTexture> userTextures;
+std::vector<UserTexture> textureIdsToRender(){
   return userTextures;
 }
 
-unsigned int  createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
+unsigned int createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
   auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height).textureId;
-  userTextures.push_back(textureID);
+  userTextures.push_back(UserTexture{
+    .id = textureID,
+    .shouldClear = false,
+  });
   return textureID;
 }
 
@@ -662,10 +666,10 @@ void freeTexture(std::string name, objid ownerId){
   MODTODO("delete texture -> use ownership id of the script being used");
   auto textureId = world.textures.at(name).texture.textureId;
 
-  std::vector<unsigned int> remainingTextures;
-  for (auto id : userTextures){
-    if (id != textureId){
-      remainingTextures.push_back(id);
+  std::vector<UserTexture> remainingTextures;
+  for (auto userTexture : userTextures){
+    if (userTexture.id != textureId){
+      remainingTextures.push_back(userTexture);
     }
   }
   userTextures = remainingTextures;

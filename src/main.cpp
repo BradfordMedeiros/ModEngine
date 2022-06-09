@@ -153,7 +153,7 @@ void applyPainting(objid id){
 }
 
 bool didClearOnce = false;
-void renderScreenspaceLines(Texture& texture){
+void renderScreenspaceLines(Texture& texture, bool shouldClear){
   auto texSize = getTextureSizeInfo(texture);
   glViewport(0, 0, texSize.width, texSize.height);
   updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
@@ -164,10 +164,10 @@ void renderScreenspaceLines(Texture& texture){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture.textureId, 0);
   glUseProgram(uiShaderProgram);
 
-  if (!didClearOnce){ // TODO -> don't want this here, and it only works for 1 texture anyway
-   // didClearOnce = true;
+  if (shouldClear){ // TODO -> don't want this here, and it only works for 1 texture anyway
+    didClearOnce = true;
     std::cout << "clearing texture!" << std::endl;
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.f, 0.f, 1.f, 1.0f);
     //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
@@ -175,11 +175,16 @@ void renderScreenspaceLines(Texture& texture){
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+
+  std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
 
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
+  std::cout << "screenspace: textdata" << std::endl;
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
   drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId);
+
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -1479,17 +1484,6 @@ int main(int argc, char* argv[]){
     handlePaintingModifiesViewport(uvCoord);
 
 
-    auto screenspaceTextureIds = textureIdsToRender();
-    glDisable(GL_DEPTH_TEST);
-    for (auto textureId : screenspaceTextureIds){
-      Texture tex {
-        .textureId = textureId,
-      };
-      renderScreenspaceLines(tex);
-    }
-    glEnable(GL_DEPTH_TEST);
-
-
     glViewport(0, 0, state.resolution.x, state.resolution.y);
     handleTerrainPainting(uvCoord);
      
@@ -1546,7 +1540,7 @@ int main(int argc, char* argv[]){
       renderVector(shaderProgram, view, glm::mat4(1.0f));
     }
 
-    
+
         
     portalIdCache.clear();
  
@@ -1565,6 +1559,16 @@ int main(int argc, char* argv[]){
       renderWithProgram(renderContext, renderStep);
     }
 
+    auto screenspaceTextureIds = textureIdsToRender();
+    glDisable(GL_DEPTH_TEST);
+    for (auto userTexture : screenspaceTextureIds){
+      Texture tex {
+        .textureId = userTexture.id,
+      };
+      renderScreenspaceLines(tex, userTexture.shouldClear);
+    }
+    glEnable(GL_DEPTH_TEST);
+    
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
@@ -1619,7 +1623,7 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, framebufferTexture2);
     }else if (state.renderMode == RENDER_GRAPHS){
       if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
-        glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex));
+        glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
       }else{
         std::cout << "cannot display graph texture index: " << state.textureIndex << std::endl;
       }

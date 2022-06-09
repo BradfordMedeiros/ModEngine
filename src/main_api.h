@@ -157,7 +157,11 @@ void enforceLayout(objid layoutId);
 
 void takeScreenshot(std::string filepath);
 
-std::vector<unsigned int> textureIdsToRender();
+struct UserTexture {
+  unsigned int id;
+  bool shouldClear;
+};
+std::vector<UserTexture> textureIdsToRender();
 unsigned int  createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId);
 void freeTexture(std::string name, objid ownerId);
 
