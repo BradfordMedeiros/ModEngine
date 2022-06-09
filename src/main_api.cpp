@@ -227,7 +227,7 @@ void copyObject(int32_t id){
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId){
   auto adjustedTop = state.currentScreenHeight - top;
-  std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
+  //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addTextData(lineData, TextDrawingOptions{
     .word = word,
     .left = left,
@@ -652,12 +652,22 @@ std::vector<UserTexture> textureIdsToRender(){
   return userTextures;
 }
 
+UserTexture* userTextureById(unsigned int id){
+  for (auto &userTexture : userTextures){
+    if (userTexture.id == id){
+      return &userTexture;
+    }
+  }
+  assert(false);
+  return NULL;
+}
 unsigned int createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
   auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height).textureId;
   userTextures.push_back(UserTexture{
     .id = textureID,
-    .shouldClear = false,
+    .autoclear = false,
+    .shouldClear = true,
   });
   return textureID;
 }
@@ -677,5 +687,16 @@ void freeTexture(std::string name, objid ownerId){
 }
 
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear){
-  modassert(false, "clear texture not implemented");  
+  UserTexture& userTex = *userTextureById(textureId);
+  if (!autoclear.has_value()){
+    userTex.shouldClear = true;
+    return;
+  }
+  userTex.autoclear = autoclear.value();
+}
+
+void markUserTexturesCleared(){
+  for (auto &userTexture : userTextures){
+    userTexture.shouldClear = false;
+  }
 }

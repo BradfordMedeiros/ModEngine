@@ -152,7 +152,6 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-bool didClearOnce = false;
 void renderScreenspaceLines(Texture& texture, bool shouldClear){
   auto texSize = getTextureSizeInfo(texture);
   glViewport(0, 0, texSize.width, texSize.height);
@@ -165,8 +164,7 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear){
   glUseProgram(uiShaderProgram);
 
   if (shouldClear){ // TODO -> don't want this here, and it only works for 1 texture anyway
-    didClearOnce = true;
-    std::cout << "clearing texture!" << std::endl;
+    //std::cout << "clearing texture!" << std::endl;
     glClearColor(0.f, 0.f, 1.f, 1.0f);
     //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
@@ -176,10 +174,10 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear){
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
 
-  std::cout << "screenspace: lines" << std::endl;
+  //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
 
-  std::cout << "screenspace: textdata" << std::endl;
+  //std::cout << "screenspace: textdata" << std::endl;
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
@@ -1568,10 +1566,10 @@ int main(int argc, char* argv[]){
       Texture tex {
         .textureId = userTexture.id,
       };
-      renderScreenspaceLines(tex, userTexture.shouldClear);
+      renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear);
     }
     glEnable(GL_DEPTH_TEST);
-    
+    markUserTexturesCleared();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;

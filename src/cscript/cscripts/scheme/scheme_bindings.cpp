@@ -152,10 +152,16 @@ std::optional<unsigned int> optionalTexId(SCM scmTextureId){
   return textureId;
 }
 
-bool optionalBool(SCM scmValue, bool defaultValue){
+bool optionalBool(SCM scmValue, bool defaultValue, bool* _valueDefined){
   auto valueDefined = !scm_is_eq(scmValue, SCM_UNDEFINED);
   if (valueDefined){
+    if (_valueDefined){
+      *_valueDefined = true;  
+    }
     return scm_to_bool(scmValue);
+  }
+  if (_valueDefined){
+    *_valueDefined = false;
   }
   return defaultValue;
 }
@@ -167,7 +173,7 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM permatext, SCM sc
     scm_to_double(left), 
     scm_to_double(top), 
     toUnsignedInt(fontSize),
-    optionalBool(permatext, false),
+    optionalBool(permatext, false, NULL),
     optionalTexId(scmTextureId)
   );
   return SCM_UNSPECIFIED;
@@ -175,7 +181,7 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM permatext, SCM sc
 
 int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId);
 SCM scmDrawLine(SCM posFrom, SCM posTo, SCM permaline, SCM scmTextureId){
-  auto isPermaline = optionalBool(permaline, false);
+  auto isPermaline = optionalBool(permaline, false, NULL);
   auto lineId = _drawLine(listToVec3(posFrom), listToVec3(posTo), isPermaline, isPermaline ? currentModuleId() : 0, optionalTexId(scmTextureId));
   return scm_from_int32(lineId);
 }
@@ -604,6 +610,13 @@ SCM scmFreeTexture(SCM name){
 
 void (*_clearTexture)(unsigned int textureId, std::optional<bool> autoclear);
 SCM scmClearTexture(SCM textureId, SCM autoclearToggle){
+  std::optional<bool> shouldAutoClear = std::nullopt;
+  bool hasAutoClear = false;
+  auto autoClear = optionalBool(autoclearToggle, false, &hasAutoClear);
+  if (hasAutoClear){
+    shouldAutoClear =  autoClear;
+  }
+  _clearTexture(toUnsignedInt(textureId), shouldAutoClear);
   return SCM_UNSPECIFIED;
 }
 
