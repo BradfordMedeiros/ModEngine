@@ -667,6 +667,7 @@ unsigned int createTexture(std::string name, unsigned int width, unsigned int he
     .id = textureID,
     .autoclear = false,
     .shouldClear = true,
+    .clearColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
   });
   return textureID;
 }

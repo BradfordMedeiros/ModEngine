@@ -161,6 +161,7 @@ struct UserTexture {
   unsigned int id;
   bool autoclear;
   bool shouldClear;
+  glm::vec4 clearColor;
 };
 std::vector<UserTexture> textureIdsToRender();
 unsigned int  createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId);

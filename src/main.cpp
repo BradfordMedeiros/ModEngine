@@ -152,7 +152,7 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-void renderScreenspaceLines(Texture& texture, bool shouldClear){
+void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearColor){
   auto texSize = getTextureSizeInfo(texture);
   glViewport(0, 0, texSize.width, texSize.height);
   updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
@@ -165,7 +165,7 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear){
 
   if (shouldClear){ // TODO -> don't want this here, and it only works for 1 texture anyway
     //std::cout << "clearing texture!" << std::endl;
-    glClearColor(0.f, 0.f, 1.f, 1.0f);
+    glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
@@ -1567,7 +1567,7 @@ int main(int argc, char* argv[]){
       Texture tex {
         .textureId = userTexture.id,
       };
-      renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear);
+      renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor);
     }
     glEnable(GL_DEPTH_TEST);
     markUserTexturesCleared();
