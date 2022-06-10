@@ -105,7 +105,8 @@ std::map<std::string, objid> activeLocks;
 LineData lineData = createLines();
 
 auto fpsStat = statName("fps");
-
+auto numObjectsStat = statName("object-count");
+auto scenesLoadedStat = statName("scenes-loaded");
 
 // 0th depth texture is the main depth texture used for eg z buffer
 // other buffers are for the lights
@@ -547,7 +548,7 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-void renderUI(Mesh& crosshairSprite, Color pixelColor, int numObjects, int numScenesLoaded, bool showCursor){
+void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
@@ -599,8 +600,8 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, int numObjects, int numSc
   drawText("using object id: -1" , 40, 190, 3);
 
   drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
-  drawText(std::string("num gameobjects: ") + std::to_string(numObjects), 10, 210, 3);
-  drawText(std::string("num scenes loaded: ") + std::to_string(numScenesLoaded), 10, 220, 3);
+  drawText(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), 10, 210, 3);
+  drawText(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), 10, 220, 3);
   drawText(std::string("render mode: ") + renderModeAsStr(state.renderMode), 10, 230, 3);
 }
 
@@ -1342,7 +1343,8 @@ int main(int argc, char* argv[]){
     previous = now;
 
     int numObjects = getNumberOfObjects(world.sandbox);
-    int numScenesLoaded = getNumberScenesLoaded(world.sandbox);
+    registerStat(numObjectsStat, numObjects);
+    registerStat(scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
     if (!state.pauseWorldTiming){
@@ -1637,7 +1639,7 @@ int main(int argc, char* argv[]){
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-    renderUI(*crosshairSprite, pixelColor, numObjects, numScenesLoaded, showCursor);
+    renderUI(*crosshairSprite, pixelColor, showCursor);
     drawTextData(lineData, uiShaderProgram, fontMeshes, std::nullopt,  state.currentScreenHeight);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
