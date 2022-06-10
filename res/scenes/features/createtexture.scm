@@ -1,5 +1,5 @@
 (define texturename "graphs-testplot")
-(define xRangeSecs 20)
+(define xRangeSecs 10)
 (define yRange 400)
 (define gridLines (list 0.5 0 -0.5))
 (define statname "fps")
@@ -23,15 +23,18 @@
 )
 
 
-(define (convertX value) (- (* 2 (/ value xRangeSecs)) 1))
+(define (convertX value) (- (* 2 (/ (floor-remainder value xRangeSecs) xRangeSecs)) 1))
 (define (convertY value) (min 1 (max -1 (- (* 2 (/ value yRange)) 1))))
 (define (unconvertY value) (* yRange (* 0.5 (- value 1))))
 
-(define pointX #f)
-(define pointY #f)
+(define pointX 0)
+(define pointY 0)
 (define (plotPoint x y)
-	(if (and pointX pointY)
+	(define firstPoint (< x pointX))
+	(format #t "firstpoint: ~a\n" firstPoint)
+	(if (and pointX pointY (not firstPoint))
    	(draw-line (list pointX pointY 100) (list x y 100) #f textureId)
+   	(refreshGraph)
 	)
 	(set! pointX x)
 	(set! pointY y)
@@ -69,31 +72,20 @@
 
 (define (addPermaData)
 	(draw-grid)
-	(draw-text "ModAttributes" 20 30 4 #f textureId)
+	(draw-text "Performance - Graph of Framerate" 20 30 4 #f textureId)
 	(draw-text statname 950 30 4 #f textureId)
 	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
 	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
 )
 
-(define autoclear #t)
+(define (refreshGraph)
+	(clear-texture textureId )
+	(addPermaData)
+)
 (define (onKeyChar codepoint)
 	(format #t "codepoint: ~a\n" codepoint)
-	(if (equal? codepoint 44)  
-		(addPermaData)
-	) 
-	(if (equal? codepoint 46)  
-		;(addPermaData)
-		(begin
-			(set! autoclear (not autoclear))
-			(format #t "autoclear: ~a\n" autoclear)
-			(clear-texture textureId )
-			(addPermaData)
-		)
-	)           ; . 
-	(if (equal? codepoint 47)  (begin
-			(create-obj)
-		)
-	)                         ; / 
+	(if (equal? codepoint 44) (refreshGraph)) 
+	(if (equal? codepoint 47) (create-obj))                        
 )
 
 (define textureId #f)
