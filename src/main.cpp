@@ -1482,7 +1482,7 @@ int main(int argc, char* argv[]){
          .snapManipulatorScales = true,
          .snapManipulatorAngles = true,
          .rotateSnapRelative = true,
-         .preserveRelativeScale = true,
+         .preserveRelativeScale = false,
       }
     );
     handlePaintingModifiesViewport(uvCoord);
@@ -1564,14 +1564,12 @@ int main(int argc, char* argv[]){
     }
 
     auto screenspaceTextureIds = textureIdsToRender();
-    glDisable(GL_DEPTH_TEST);
     for (auto userTexture : screenspaceTextureIds){
       Texture tex {
         .textureId = userTexture.id,
       };
       renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor);
     }
-    glEnable(GL_DEPTH_TEST);
     markUserTexturesCleared();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
