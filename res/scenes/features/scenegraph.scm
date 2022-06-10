@@ -43,14 +43,14 @@
 (define (draw elementName depth height)
 	(define childElements (map cadr (filter (lambda(val) (equal? (car val) elementName)) depgraph)))
 	(define isExpanded #t)
-	(draw-text (selected elementName height) (calcX depth) (calcY height) 4 #f textureId)
+	(draw-text (selected elementName height) (calcX depth) (calcY height) 4 (list 0 1 0 1) textureId)
 	(if isExpanded
 		(format #t "draw child elements here\n")
 	)
 )
 
 (define (addPermaData)
-	(draw-text "Scenegraph" 20 30 4 #f textureId)
+	(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
 	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
 	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
 
@@ -60,15 +60,14 @@
 )
 
 (define (onGraphChange)
-	(clear-texture textureId)
+	(clear-texture textureId (list 1 1 1 0.2))
 	(addPermaData)
 )
 
 (define textureId #f)
 (define texturename texturename)
 (set! textureId (create-texture texturename 1000 1000))
-(addPermaData)
-
+(onGraphChange)
 
 (define (onKey key scancode action mods)
 	(if (equal? action 1)

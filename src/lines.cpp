@@ -124,6 +124,7 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<uns
   for (auto &text : lineData.text){
     if (textureIdSame(text.textureId, textureId)){
       //std::cout << "drawing words: " << text.word << std::endl;
+      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(text.tint));
       drawWords(uiShaderProgram, fontMeshes, text.word, text.left, height - text.top, text.fontSize);  
     }
   }

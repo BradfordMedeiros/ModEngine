@@ -166,15 +166,59 @@ bool optionalBool(SCM scmValue, bool defaultValue, bool* _valueDefined){
   return defaultValue;
 }
 
-void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId);
-SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM permatext, SCM scmTextureId){
+void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId);
+SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3){
+   bool value1Defined = !scm_is_eq(opt1, SCM_UNDEFINED);
+   bool value2Defined = !scm_is_eq(opt2, SCM_UNDEFINED);
+   bool value3Defined = !scm_is_eq(opt3, SCM_UNDEFINED);
+   std::optional<glm::vec4> color = std::nullopt;
+   bool isPermaText = false;
+   std::optional<unsigned int> textureId = std::nullopt;
+
+   bool colorDefined = false;
+   bool permaDefined = false;
+   bool textureIdDefined = false;
+
+   // Should really create a util for this pattern
+   // Basic idea is that you can omit the type for any slot, and pass arg to the next parameter and omit types on the right (types must be different to disttinguish)
+   if (value1Defined){
+      if (isList(opt1)){
+         color = listToVec4(opt1);
+         colorDefined = true;
+      }else if (scm_is_bool(opt1)){
+         isPermaText = scm_to_bool(opt1);
+         permaDefined = true;
+      }else{
+        textureId = toUnsignedInt(opt1);
+        textureIdDefined = true;
+      }
+   }
+   if (value2Defined){
+      if (scm_is_bool(opt2)){
+        assert(!permaDefined);
+        isPermaText = scm_to_bool(opt2);
+        permaDefined = true;
+      }else{
+        assert(!textureIdDefined);
+        textureId = toUnsignedInt(opt2);
+        textureIdDefined = true;
+      }
+   }
+   if (value3Defined){
+    assert(!textureIdDefined);
+    textureId = toUnsignedInt(opt3);
+    textureIdDefined = true;
+   }
+
+
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
     scm_to_double(top), 
     toUnsignedInt(fontSize),
-    optionalBool(permatext, false, NULL),
-    optionalTexId(scmTextureId)
+    isPermaText,
+    color,
+    textureId
   );
   return SCM_UNSPECIFIED;
 }
@@ -959,7 +1003,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lsobj-attr", 1, 1, 0, (void *)scm_getObjectsByAttr);
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
-  scm_c_define_gsubr("draw-text", 4, 2, 0, (void*)scmDrawText);
+  scm_c_define_gsubr("draw-text", 4, 3, 0, (void*)scmDrawText);
   scm_c_define_gsubr("draw-line", 2, 2, 0, (void*)scmDrawLine);
   scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
@@ -1090,7 +1134,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByType)(std::string),
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),

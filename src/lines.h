@@ -24,6 +24,7 @@ struct TextDrawingOptions  {
   unsigned int fontSize;
   std::optional<unsigned int> textureId;
   bool permaText;
+  glm::vec4 tint;
 };
 
 struct LineData {

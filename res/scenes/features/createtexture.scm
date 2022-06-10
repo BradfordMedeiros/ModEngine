@@ -31,7 +31,6 @@
 (define pointY 0)
 (define (plotPoint x y)
 	(define firstPoint (< x pointX))
-	(format #t "firstpoint: ~a\n" firstPoint)
 	(if (and pointX pointY (not firstPoint))
    	(draw-line (list pointX pointY 100) (list x y 100) #f textureId)
    	(refreshGraph)
@@ -44,7 +43,7 @@
 
 (define (convert res value) (* 0.5 res (+ value 1)))
 (define (label-grid-line yloc)
-	(draw-text (number->string (inexact->exact (round (unconvertY yloc)))) 10 (+ 20 (convert 1000 yloc)) 6 #f textureId)
+	(draw-text (number->string (inexact->exact (round (unconvertY yloc)))) 10  (+ 20 (convert 1000 yloc)) 6 #f textureId)
 	(draw-text (number->string (inexact->exact (round (unconvertY yloc)))) 950 (+ 20 (convert 1000 yloc)) 6 #f textureId)
 )
 (define (draw-grid) 
@@ -75,7 +74,7 @@
 	(draw-text "Performance - Graph of Framerate" 20 30 4 #f textureId)
 	(draw-text statname 950 30 4 #f textureId)
 	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
-	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
+	(draw-line (list -1 1 0) (list 1 1 0)  #f textureId)
 )
 
 (define (refreshGraph)

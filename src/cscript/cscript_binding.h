@@ -25,7 +25,7 @@ struct CustomApiBindings {
   std::vector<int32_t> (*getObjectsByType)(std::string);
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t);
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime);
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<unsigned int> textureId);
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId);
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<unsigned int> textureId);
   void (*freeLine)(int32_t lineid);
   std::string (*getGameObjectNameForId)(int32_t id);

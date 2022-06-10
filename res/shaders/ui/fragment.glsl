@@ -15,5 +15,5 @@ void main(){
   if(texColor.w < 0.1){
   	discard;
   }
-  FragColor = texColor;
+  FragColor = texColor * tint;
 }
