@@ -29,30 +29,39 @@
 (define offset 0)
 (define (calcX depth) (+ (* 20 depth) 20))
 (define (calcY depth) (+ (* 20 depth) 80 offset))
-
 (define (selected index name) (if (equal? index 2) (string-append ">" name) name))
 
-(define (draw elementName depth height)
-	(define childElements (map cadr (filter (lambda(val) (equal? (car val) "human")) depgraph)))
-	(define isExpanded #t)
+(define selectedIndex 1)
+(define maxIndex #f)
+(define (setSelectedIndex index)
+	(define adjustedIndex (max 0 index))
+	(set! selectedIndex (if maxIndex (min maxIndex adjustedIndex) adjustedIndex))
+	(onGraphChange)
+)
+(define (selected name index) (if (equal? selectedIndex index) (string-append ">" name) name))
 
-	(draw-text "human" (calcX depth) (calcY height) 4 #f textureId)
+(define (draw elementName depth height)
+	(define childElements (map cadr (filter (lambda(val) (equal? (car val) elementName)) depgraph)))
+	(define isExpanded #t)
+	(draw-text (selected elementName height) (calcX depth) (calcY height) 4 #f textureId)
 	(if isExpanded
 		(format #t "draw child elements here\n")
 	)
-
 )
+
 (define (addPermaData)
 	(draw-text "Scenegraph" 20 30 4 #f textureId)
 	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
 	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
 
 	(draw "human" 0 0)
+	(draw "human" 0 1)
+	(draw "human" 0 2)
+)
 
-	;(draw-text "leftarm" (calcX 1) (calcY 1) 4 #f textureId)
-	;(draw-text "left-hand" (calcX 2) (calcY 2) 4 #f textureId)
-	;(draw-text "left-elbow" (calcX 2) (calcY 3) 4 #f textureId)
-
+(define (onGraphChange)
+	(clear-texture textureId)
+	(addPermaData)
 )
 
 (define textureId #f)
@@ -61,12 +70,19 @@
 (addPermaData)
 
 
-(define (onKeyChar codepoint)
-	(if (equal? codepoint 47) (create-obj))                        
+(define (onKey key scancode action mods)
+	(if (equal? action 1)
+		(begin
+     	(if (equal? key 47) (create-obj))
+     	(if (equal? key 264) (setSelectedIndex (+ selectedIndex 1)))                    
+     	(if (equal? key 265) (setSelectedIndex (- selectedIndex 1)))
+		)
+	)
+	(format #t "selected index is: ~a\n" selectedIndex)
+
 )
 
 (define (onScroll amount)
   (set! offset (+ offset (* 10 amount)))
-	(clear-texture textureId)
-  (addPermaData)
+	(onGraphChange)
 )
