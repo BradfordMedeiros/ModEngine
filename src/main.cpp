@@ -164,10 +164,8 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture.textureId, 0);
   glUseProgram(uiShaderProgram);
 
-  if (shouldClear){ // TODO -> don't want this here, and it only works for 1 texture anyway
-    //std::cout << "clearing texture!" << std::endl;
+  if (shouldClear){ 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-    //glClearColor(((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), ((double) rand() / (RAND_MAX)), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 

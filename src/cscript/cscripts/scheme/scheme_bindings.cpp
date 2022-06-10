@@ -608,15 +608,30 @@ SCM scmFreeTexture(SCM name){
   return SCM_UNSPECIFIED;
 }
 
-void (*_clearTexture)(unsigned int textureId, std::optional<bool> autoclear);
-SCM scmClearTexture(SCM textureId, SCM autoclearToggle){
-  std::optional<bool> shouldAutoClear = std::nullopt;
-  bool hasAutoClear = false;
-  auto autoClear = optionalBool(autoclearToggle, false, &hasAutoClear);
-  if (hasAutoClear){
-    shouldAutoClear =  autoClear;
+void (*_clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color);
+SCM scmClearTexture(SCM textureId, SCM optValue1, SCM optValue2){
+  auto value1Defined = !scm_is_eq(optValue1, SCM_UNDEFINED);
+  auto value2Defined = !scm_is_eq(optValue2, SCM_UNDEFINED);
+
+  std::optional<bool> autoclear = std::nullopt;
+  std::optional<glm::vec4> color = std::nullopt;
+
+  bool foundClear = false;
+  if (value1Defined){
+    if (isList(optValue1)){
+      color = listToVec4(optValue1);
+      std::cout << "clear texture: " << print(color.value()) << std::endl;
+    }else{
+      autoclear = scm_to_bool(optValue1);
+      foundClear = true;
+    }
   }
-  _clearTexture(toUnsignedInt(textureId), shouldAutoClear);
+
+  if (value2Defined){
+    assert(!foundClear);
+    autoclear = scm_to_bool(optValue2);
+  }
+  _clearTexture(toUnsignedInt(textureId), autoclear, color);
   return SCM_UNSPECIFIED;
 }
 
@@ -1023,7 +1038,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("create-texture", 3, 0, 0, (void*)scmCreateTexture);
   scm_c_define_gsubr("free-texture", 1, 0, 0, (void*)scmFreeTexture);
-  scm_c_define_gsubr("clear-texture", 1, 1, 0, (void*)scmClearTexture);
+  scm_c_define_gsubr("clear-texture", 1, 2, 0, (void*)scmClearTexture);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
@@ -1133,7 +1148,7 @@ void createStaticSchemeBindings(
   void (*enforceLayout)(objid layoutId),
   unsigned int (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
   void (*freeTexture)(std::string name, objid ownerId),
-  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear),
+  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color),
   AttributeValue (*runStats)(std::string field),
   unsigned int (*scmStat)(std::string),
   void (*logStat)(unsigned int, AttributeValue amount),

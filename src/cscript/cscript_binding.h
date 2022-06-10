@@ -86,7 +86,7 @@ struct CustomApiBindings {
 
   unsigned int  (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId);
   void (*freeTexture)(std::string name, objid ownerId);
-  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear);
+  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color);
   AttributeValue (*runStats)(std::string field);
   unsigned int (*stat)(std::string);
   void (*logStat)(unsigned int, AttributeValue amount);

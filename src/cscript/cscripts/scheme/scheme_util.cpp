@@ -30,7 +30,7 @@ glm::vec4 listToVec4(SCM vecList){
   auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
   auto z = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
-  auto w = scm_to_double(scm_list_ref(vecList, scm_from_int64(2))); 
+  auto w = scm_to_double(scm_list_ref(vecList, scm_from_int64(3))); 
   return glm::vec4(x, y, z, w);
 }
 
@@ -66,6 +66,10 @@ SCM listToSCM(std::vector<std::vector<std::string>> stringList){
     scm_list_set_x (list, scm_from_unsigned_integer(i), listToSCM(stringList.at(i)));
   }
   return list;
+}
+
+bool isList(SCM vecList){
+  return scm_to_bool(scm_list_p(vecList));
 }
 
 SCM vec3ToScmList(glm::vec3 vec){
@@ -178,7 +182,7 @@ AttributeValue toAttributeValue(SCM attrValue){
 
   auto numElements = toUnsignedInt(scm_length(attrValue));
   assert(numElements == 3 || numElements == 4);
-  if (numElements == 3){
+  if (numElements == 4){
     return listToVec4(attrValue);    
   }
   return listToVec3(attrValue);

@@ -667,7 +667,7 @@ unsigned int createTexture(std::string name, unsigned int width, unsigned int he
     .id = textureID,
     .autoclear = false,
     .shouldClear = true,
-    .clearColor = glm::vec4(1.f, 1.f, 1.f, 0.2f),
+    .clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
   });
   return textureID;
 }
@@ -686,8 +686,11 @@ void freeTexture(std::string name, objid ownerId){
   freeTextureRefsIdByOwner(world, ownerId, textureId);
 }
 
-void clearTexture(unsigned int textureId, std::optional<bool> autoclear){
+void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color){
   UserTexture& userTex = *userTextureById(textureId);
+  if (color.has_value()){
+    userTex.clearColor = color.value();
+  }
   if (!autoclear.has_value()){
     userTex.shouldClear = true;
     return;
