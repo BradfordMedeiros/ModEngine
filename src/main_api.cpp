@@ -129,6 +129,18 @@ std::vector<int32_t> listScenes(){
   return allSceneIds(world.sandbox);
 }
 
+std::vector<StringPair> scenegraph(){
+  return {
+    StringPair { "body", "head"},
+    StringPair { "head", "ears"},
+    StringPair { "body", "legs"},
+    StringPair { "body", "right arm"},
+    StringPair { "body", "left arm"},
+    StringPair { "legs", "leftleg"},
+    StringPair { "legs", "rightleg"},
+  };
+}
+
 void sendLoadScene(int32_t id){
   sendLoadScene(world, netcode, bootStrapperMode, id);
 }

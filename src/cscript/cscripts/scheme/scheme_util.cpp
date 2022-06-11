@@ -59,6 +59,18 @@ SCM listToSCM(std::vector<std::string> stringList){
   }
   return list;
 }
+SCM listToSCM(std::vector<StringPair> stringList){
+  auto listSize = stringList.size();
+  SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));
+  for (int i = 0; i < listSize; i++){
+    SCM pairList = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x (pairList, scm_from_unsigned_integer(0), scm_from_locale_string(stringList.at(i).key.c_str()));
+    scm_list_set_x (pairList, scm_from_unsigned_integer(1), scm_from_locale_string(stringList.at(i).value.c_str()));
+    scm_list_set_x (list, scm_from_unsigned_integer(i), pairList);
+  }
+  return list;
+}
+
 SCM listToSCM(std::vector<std::vector<std::string>> stringList){
   auto listSize = stringList.size();
   SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));

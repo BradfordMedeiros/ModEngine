@@ -81,6 +81,11 @@ SCM scm_rootIdForScene(SCM sceneId){
   return scm_from_int32(rootId);
 }
 
+std::vector<StringPair> (*_scenegraph)();
+SCM scmScenegraph(SCM sceneId){
+  return listToSCM(_scenegraph());
+}
+
 std::vector<std::string> (*_listSceneFiles)();
 SCM scm_listSceneFiles(){
   auto scenes = _listSceneFiles();
@@ -990,6 +995,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("create-scene", 1, 0, 0, (void *)scm_createScene);
   scm_c_define_gsubr("lsscene-name", 1, 0, 0, (void *)scm_sceneIdByName);
   scm_c_define_gsubr("scene-rootid", 1, 0, 0, (void *)scm_rootIdForScene);
+  scm_c_define_gsubr("scenegraph", 0, 1, 0, (void*)scmScenegraph);
 
   scm_c_define_gsubr("send-load-scene", 1, 0, 0, (void *)scm_sendLoadScene);
 
@@ -1126,6 +1132,7 @@ void createStaticSchemeBindings(
   std::vector<objid> (*childScenes)(objid sceneId),
   std::optional<objid> (*sceneIdByName)(std::string name),
   objid (*rootIdForScene)(objid sceneId),
+  std::vector<StringPair> (*scenegraph)(),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  
@@ -1211,6 +1218,7 @@ void createStaticSchemeBindings(
   _childScenes = childScenes;
   _sceneIdByName = sceneIdByName;
   _rootIdForScene = rootIdForScene;
+  _scenegraph = scenegraph;
   _listSceneFiles = listSceneFiles;
   _sendLoadScene = sendLoadScene;
   _createScene = createScene;

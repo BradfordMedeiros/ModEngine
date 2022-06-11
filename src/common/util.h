@@ -92,6 +92,11 @@ AttributeValue parseAttributeValue(std::string payload);
 AttributeValue addAttributes(AttributeValue one, AttributeValue two);
 std::string print(AttributeValue& value);
 
+struct StringPair {
+  std::string key;
+  std::string value;
+};
+
 struct StringString {
   std::string strTopic;
   AttributeValue strValue;

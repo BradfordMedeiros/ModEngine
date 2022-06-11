@@ -1080,6 +1080,7 @@ int main(int argc, char* argv[]){
     .childScenes = childScenes,
     .sceneIdByName = sceneIdByName,
     .rootIdForScene = rootIdForScene,
+    .scenegraph = scenegraph,
     .sendLoadScene = sendLoadScene,
     .createScene = createScene,
     .moveCamera = moveCamera,

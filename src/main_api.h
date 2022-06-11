@@ -56,6 +56,8 @@ void unloadScene(int32_t sceneId);
 void unloadAllScenes();
 void saveScene(bool includeIds, objid sceneId);
 std::vector<int32_t> listScenes();
+std::vector<StringPair> scenegraph();
+
 void sendLoadScene(int32_t sceneId);
 void createScene(std::string scenename);
 
@@ -168,5 +170,6 @@ unsigned int  createTexture(std::string name, unsigned int width, unsigned int h
 void freeTexture(std::string name, objid ownerId);
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color);
 void markUserTexturesCleared();
+
 
 #endif

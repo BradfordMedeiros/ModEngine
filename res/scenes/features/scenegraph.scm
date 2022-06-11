@@ -17,18 +17,9 @@
   )
 )
 
-(define depgraph (list
-	(list "human" "leftarm")
-	(list "human" "rightarm")
-	(list "rightarm" "righthand")
-	(list "leftarm" "lefthand")
-	(list "human" "head")
-	(list "human" "legs")
-	(list "legs" "toes")
-	(list "toes" "toe1")
-	(list "toes" "toe2")
-	(list "wow" "another")
-))
+
+(define depgraph (scenegraph))
+(format #t "dep graph:\n~a\n" depgraph)
 
 (define expandState (list))
 
@@ -67,18 +58,28 @@
 	(draw-text (selected elementName expanded height) (calcX depth) (calcY height) 4 (list 0 1 0 1) textureId)
 )
 
+(define (elementExists element)
+	(define value (assoc element depgraph))
+	(if value #t (if (member element depgraph) #t #f))  ; check if 
+
+)
 (define (drawHierachy target depth getIndex)
 	(define childElements (map cadr (filter (lambda(val) (equal? (car val) target)) depgraph)))
 	(define isExpanded (checkExpanded target))
-	(draw target depth (getIndex) isExpanded)
-	(if isExpanded
-	  (for-each 
-	  	(lambda(target)
-	  		(format #t "draw target: ~a\n" target)
-	  		(drawHierachy target (+ depth 1) getIndex)
-	  	) 
-	  	childElements
-	  )
+	(define exists (elementExists target))
+	(if #t
+		(begin
+	    (draw target depth (getIndex) isExpanded)
+	    (if isExpanded
+	      (for-each 
+	      	(lambda(target)
+	      		(format #t "draw target: ~a\n" target)
+	      		(drawHierachy target (+ depth 1) getIndex)
+	      	) 
+	      	childElements
+	      )
+	    )
+		)
 	)
 )
 
@@ -91,7 +92,7 @@
 	(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
 	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
 	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
-	(drawHierachy "human" 0 getIndex)
+	(drawHierachy "body" 0 getIndex)
 )
 
 (define (onGraphChange)

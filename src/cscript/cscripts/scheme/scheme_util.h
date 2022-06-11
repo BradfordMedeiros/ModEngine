@@ -18,6 +18,7 @@ std::vector<glm::vec3> listToVecVec3(SCM vecList);
 SCM listToSCM(std::vector<objid> idList);
 SCM listToSCM(std::vector<std::string> stringList);
 SCM listToSCM(std::vector<std::vector<std::string>> stringList);
+SCM listToSCM(std::vector<StringPair> stringList);
 bool isList(SCM vecList);
 SCM vec3ToScmList(glm::vec3 vec);
 SCM vec4ToScmList(glm::vec4 vec);
