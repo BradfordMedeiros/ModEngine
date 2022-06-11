@@ -130,15 +130,17 @@ std::vector<int32_t> listScenes(){
 }
 
 std::vector<StringPair> scenegraph(){
-  return {
-    StringPair { "body", "head"},
-    StringPair { "head", "ears"},
-    StringPair { "body", "legs"},
-    StringPair { "body", "right arm"},
-    StringPair { "body", "left arm"},
-    StringPair { "legs", "leftleg"},
-    StringPair { "legs", "rightleg"},
-  };
+  std::vector<StringPair> parentToChild;
+  auto dotRelations = getDotRelations(world.sandbox, world.objectMapping);
+  for (auto &dotRelation : dotRelations){
+    if (dotRelation.parent.has_value()){
+      parentToChild.push_back(StringPair{
+        .key = dotRelation.parent.value().name,
+        .value = dotRelation.child.name,
+      });
+    }
+  }
+  return parentToChild;
 }
 
 void sendLoadScene(int32_t id){

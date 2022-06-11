@@ -7,7 +7,23 @@
 #include "./common/util/types.h"
 #include "./common/util/boundinfo.h"
 
+struct DotInfo {
+  std::string name;
+  objid id;
+  objid sceneId;
+  objid groupId;
+  glm::vec3 position;
+  glm::vec3 scale;
+  glm::quat rotation;
+  std::vector<std::string> meshes;
+};
+struct DotInfos {
+  DotInfo child;
+  std::optional<DotInfo> parent;
+};
+std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping);
 std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping);
+
 std::string debugAllGameObjects(SceneSandbox& sandbox);
 std::string debugAllGameObjectsH(SceneSandbox& sandbox);
 std::string debugTransformCache(SceneSandbox& sandbox);

@@ -1,36 +1,66 @@
 #include "./scene_debug.h"
 
-std::string getDotInfoForNode(std::string nodeName, int id, objid sceneId, objid groupId, glm::vec3 position, glm::vec3 scale, glm::quat rotation, std::vector<std::string> meshes){
-  return std::string("\"") + nodeName + "(id: " + std::to_string(id) + ", sceneId:" + std::to_string(sceneId) + ", " + "groupId: " + std::to_string(groupId) + 
-  ") pos: " + print(position) + " scale: " + print(scale) +  " rot: " + print(rotation) + 
-  " meshes: [" + join(meshes, ' ') + "]\"";
+std::string getDotInfoForNode(DotInfo& info){
+  return std::string("\"") + info.name + "(id: " + std::to_string(info.id) + ", sceneId:" + std::to_string(info.sceneId) + ", " + "groupId: " + std::to_string(info.groupId) + 
+  ") pos: " + print(info.position) + " scale: " + print(info.scale) +  " rot: " + print(info.rotation) + 
+  " meshes: [" + join(info.meshes, ' ') + "]\"";
+}
+
+std::vector<DotInfos> getDotRelations(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
+  std::vector<DotInfos> dotRelations;
+  forEveryGameobj(sandbox, [&sandbox, &objectMapping, &dotRelations](objid id, GameObject& childObj) -> void {
+    auto childObjH = getGameObjectH(sandbox, id);
+    DotInfo childInfo {
+      .name = childObj.name,
+      .id = childObjH.id,
+      .sceneId = childObjH.sceneId,
+      .groupId = childObjH.groupId,
+      .position = childObj.transformation.position,
+      .scale = childObj.transformation.scale,
+      .rotation = childObj.transformation.rotation, 
+      .meshes = getMeshNames(objectMapping, id),
+    };
+    if (id == 0){
+      dotRelations.push_back(DotInfos{
+        .child = childInfo,
+        .parent = std::nullopt,
+      });
+      return;   
+    }
+    auto parentId = childObjH.parentId;
+    auto parentObj = getGameObject(sandbox, parentId);
+    auto parentObjH = getGameObjectH(sandbox, parentId);
+    DotInfo parentInfo {
+      .name = parentObj.name,
+      .id = parentObj.id,
+      .sceneId = parentObjH.sceneId,
+      .groupId = parentObjH.groupId,
+      .position = parentObj.transformation.position,
+      .scale = parentObj.transformation.scale,
+      .rotation = parentObj.transformation.rotation, 
+      .meshes = getMeshNames(objectMapping, parentId),
+    };
+    dotRelations.push_back(DotInfos{
+      .child = childInfo,
+      .parent = parentInfo,
+    });
+  }); 
+  return dotRelations;
 }
 
 std::string scenegraphAsDotFormat(SceneSandbox& sandbox, std::map<objid, GameObjectObj>& objectMapping){
+  std::vector<DotInfos> dotRelations = getDotRelations(sandbox, objectMapping);
   std::string graph = "";
   std::string prefix = "strict graph {\n";
   std::string suffix = "}"; 
-
   std::string relations = "";
-
-  forEveryGameobj(sandbox, [&sandbox, &relations, &objectMapping](objid id, GameObject& childObj) -> void {
-    auto childObjH = getGameObjectH(sandbox, id);
-    auto parentId = childObjH.parentId;
-
-    if (id == 0){
-      relations =  relations + getDotInfoForNode(childObj.name, childObjH.id,  childObjH.sceneId, childObjH.groupId, childObj.transformation.position, childObj.transformation.scale, childObj.transformation.rotation, getMeshNames(objectMapping, id)) + "\n";
-      return;   
+  for (auto &dotInfo : dotRelations){
+    if (dotInfo.parent.has_value()){
+      relations = relations + getDotInfoForNode(dotInfo.parent.value()) + " -- " + getDotInfoForNode(dotInfo.child) + "\n";
+    }else{
+      relations =  relations + getDotInfoForNode(dotInfo.child) + "\n";
     }
-
-    auto parentObj = getGameObject(sandbox, parentId);
-    auto parentObjH = getGameObjectH(sandbox, parentId);
-
-    relations = relations + 
-     getDotInfoForNode(parentObj.name, parentObj.id, parentObjH.sceneId, parentObjH.groupId, parentObj.transformation.position, parentObj.transformation.scale, parentObj.transformation.rotation, getMeshNames(objectMapping, parentId)) 
-    + " -- " + 
-    getDotInfoForNode(childObj.name, childObjH.id,  childObjH.sceneId, childObjH.groupId, childObj.transformation.position, childObj.transformation.scale, childObj.transformation.rotation, getMeshNames(objectMapping, id)) + "\n";
-  }); 
-
+  }
   graph = graph + prefix + relations + suffix;
   return graph;
 }

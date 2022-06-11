@@ -19,7 +19,7 @@
 
 
 (define depgraph (scenegraph))
-(format #t "dep graph:\n~a\n" depgraph)
+(define (refreshDepGraph) (set! depgraph (scenegraph)))
 
 (define expandState (list))
 
@@ -92,10 +92,12 @@
 	(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
 	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
 	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
-	(drawHierachy "body" 0 getIndex)
+	(drawHierachy "root" 0 getIndex)
+	(set! maxIndex index)
 )
 
 (define (onGraphChange)
+	(refreshDepGraph)         ; should this really be done at this point?  Perhaps?!
 	(clear-texture textureId (list 1 1 1 0.2))
 	(addPermaData)
 )
