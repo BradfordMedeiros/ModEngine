@@ -1,4 +1,5 @@
-(define texturename "graphs-testplot")
+
+(define texturename (string-append "texture-" (number->string (gameobj-id mainobj))))
 
 (define (create-obj)
 	(format #t "create obj placeholder\n")
@@ -29,9 +30,7 @@
 	(list "wow" "another")
 ))
 
-(define expandState (list
-  ;	(list "human" #t)
-))
+(define expandState (list))
 
 (define selectedName #f)
 (define (toggleExpanded)
@@ -115,8 +114,6 @@
      	(if (equal? key 257) (toggleExpanded))
 		)
 	)
-	(format #t "selected index is: ~a\n" selectedIndex)
-
 )
 
 (define (onScroll amount)
