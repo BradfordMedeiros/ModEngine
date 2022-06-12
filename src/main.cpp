@@ -305,7 +305,7 @@ void drawTraversalPositions(){
   for (int i = 0; i < traversalPositions.size(); i++){
     auto fromPos = traversalPositions.at(i);
     auto toPos = parentTraversalPositions.at(i);
-    addLineNextCycle(lineData, fromPos, toPos, false, 0, std::nullopt);
+    addLineToNextCycle(lineData, fromPos, toPos, false, 0, GREEN, std::nullopt);
   }
 }
 
@@ -834,11 +834,12 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
   return info;
 }
 
-objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
-  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, textureId);
+objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId){
+  return addLineToNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, textureId);
 }
+
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
-  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, std::nullopt);
+  return addLineToNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, std::nullopt);
 }
 
 void freeLine(objid lineId){
@@ -1455,7 +1456,7 @@ int main(int argc, char* argv[]){
         if (state.manipulatorLineId == 0){
           state.manipulatorLineId = getUniqueObjId();
         }
-        addLineNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color);
+        addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
       },
       []() -> void {
         removeLinesByOwner(lineData, state.manipulatorLineId);

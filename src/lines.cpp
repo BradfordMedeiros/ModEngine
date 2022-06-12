@@ -7,7 +7,7 @@ LineData createLines(){
   };
 }
 
-objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId){
+objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId){
   auto lineId = getUniqueObjId();
   lineData.lines.push_back(
     LineDrawingOptions {
@@ -17,7 +17,7 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
       },
       .lineid = lineId,
       .owner = owner, 
-      .color = color,
+      .color = RED,
       .textureId = textureId,
       .permaLine = permaline,
     }
@@ -25,8 +25,20 @@ objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, b
   return lineId;
 }
 
-objid addLineNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<unsigned int> textureId){
-  return addLineNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, textureId);
+objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId){
+  std::optional<glm::vec4> tint = std::nullopt;
+  if (color == GREEN){
+    tint = glm::vec4(0.f, 1.f, 0.f, 1.f);
+    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId);
+  }else if (color == BLUE){
+    tint = glm::vec4(0.f, 0.f, 1.f, 1.f);
+    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId);
+  }else if (color == RED){
+    tint = glm::vec4(1.f, 0.f, 0.f, 1.f);
+    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId);
+  }
+  assert(false);
+  return 0;
 }
 
 void freeLine(LineData& lineData, objid lineId){

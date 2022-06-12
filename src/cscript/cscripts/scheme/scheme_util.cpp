@@ -249,3 +249,54 @@ std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues){
   }
   return tokens;
 }
+
+OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3){
+  bool value1Defined = !scm_is_eq(opt1, SCM_UNDEFINED);
+  bool value2Defined = !scm_is_eq(opt2, SCM_UNDEFINED);
+  bool value3Defined = !scm_is_eq(opt3, SCM_UNDEFINED);
+  std::optional<glm::vec4> color = std::nullopt;
+  bool isPermaText = false;
+  std::optional<unsigned int> textureId = std::nullopt;
+
+  bool colorDefined = false;
+  bool permaDefined = false;
+  bool textureIdDefined = false;
+
+  // Should really create a util for this pattern
+  // Basic idea is that you can omit the type for any slot, and pass arg to the next parameter and omit types on the right (types must be different to disttinguish)
+  if (value1Defined){
+     if (isList(opt1)){
+        color = listToVec4(opt1);
+        colorDefined = true;
+     }else if (scm_is_bool(opt1)){
+        isPermaText = scm_to_bool(opt1);
+        permaDefined = true;
+     }else{
+       textureId = toUnsignedInt(opt1);
+       textureIdDefined = true;
+     }
+  }
+  if (value2Defined){
+     if (scm_is_bool(opt2)){
+       assert(!permaDefined);
+       isPermaText = scm_to_bool(opt2);
+       permaDefined = true;
+     }else{
+       assert(!textureIdDefined);
+       textureId = toUnsignedInt(opt2);
+       textureIdDefined = true;
+     }
+  }
+  if (value3Defined){
+   assert(!textureIdDefined);
+   textureId = toUnsignedInt(opt3);
+   textureIdDefined = true;
+  }
+
+  OptionalValues opts {
+    .tint = color,
+    .textureId = textureId,
+    .perma = isPermaText,
+  };
+  return opts;
+}

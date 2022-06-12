@@ -32,4 +32,11 @@ GameobjAttributes scmToAttributes(SCM scmAttributes);
 ObjectValue scmListToObjectValue(SCM list);
 std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues);
 
+struct OptionalValues{
+  std::optional<glm::vec4> tint;
+  std::optional<unsigned int> textureId;
+  bool perma;
+};
+OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3);
+
 #endif
