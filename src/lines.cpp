@@ -2,14 +2,31 @@
 
 LineData createLines(){
   return LineData {
-    .lines = {},
+    .lineColors = {},
     .text = {},
   };
 }
 
+LineByColor* lineByColorOrMakeNew(LineData& lineData, glm::vec4 color){
+  for (auto &lineByColor : lineData.lineColors){
+    if (aboutEqual(color, lineByColor.tint)){
+      return &lineByColor;
+    }
+  }
+  lineData.lineColors.push_back(LineByColor{
+    .tint = color,
+    .lines = {},
+  });    
+  
+  return &lineData.lineColors.at(lineData.lineColors.size() - 1);
+}
 objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId){
   auto lineId = getUniqueObjId();
-  lineData.lines.push_back(
+  auto color = tint.has_value() ? tint.value() : glm::vec4(0.f, 1.f, 0.f, 1.f);
+  LineByColor* linesByColor = lineByColorOrMakeNew(lineData, color);
+  assert(linesByColor != NULL);
+
+  linesByColor -> lines.push_back(
     LineDrawingOptions {
       .line = Line{
         .fromPos = fromPos,
@@ -17,7 +34,6 @@ objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 to
       },
       .lineid = lineId,
       .owner = owner, 
-      .color = RED,
       .textureId = textureId,
       .permaLine = permaline,
     }
@@ -42,29 +58,41 @@ objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos,
 }
 
 void freeLine(LineData& lineData, objid lineId){
-  std::vector<LineDrawingOptions> newLines;
-  for (auto &line : lineData.lines){
-    if (lineId != line.lineid){
-      newLines.push_back(line);
+  std::vector<LineByColor> lineColors;
+  for (auto &lineByColor : lineData.lineColors){
+    std::vector<LineDrawingOptions> newLines;
+    for (auto &line : lineByColor.lines){
+      if (lineId != line.lineid){
+        newLines.push_back(line);
+      }
+    }
+    if (newLines.size() > 0){
+      lineColors.push_back(LineByColor{
+        .tint = lineByColor.tint,
+        .lines = newLines,
+      });
     }
   }
-  lineData.lines.clear();
-  for (auto line : newLines){
-    lineData.lines.push_back(line);
-  }
+  lineData.lineColors = lineColors;
 }
  
 void removeLinesByOwner(LineData& lineData, objid owner){
-  std::vector<LineDrawingOptions> newLines;
-  for (auto &line : lineData.lines){
-    if (owner != line.owner){
-      newLines.push_back(line);
+  std::vector<LineByColor> lineColors;
+  for (auto &lineByColor : lineData.lineColors){
+    std::vector<LineDrawingOptions> newLines;
+    for (auto &line : lineByColor.lines){
+      if (owner != line.owner){
+        newLines.push_back(line);
+      }
+    }
+    if (newLines.size() > 0){
+      lineColors.push_back(LineByColor{
+        .tint = lineByColor.tint,
+        .lines = newLines,
+      });
     }
   }
-  lineData.lines.clear();
-  for (auto line : newLines){
-    lineData.lines.push_back(line);
-  }
+  lineData.lineColors = lineColors;
 }
 void removeTempText(LineData& lineData){
   std::vector<TextDrawingOptions> newText;
@@ -77,14 +105,22 @@ void removeTempText(LineData& lineData){
   lineData.text = newText;
 }
 void removeTempLines(LineData& lineData){
-  std::vector<LineDrawingOptions> newLines;
-  for (auto &line : lineData.lines){
-    if (line.permaLine){
-      newLines.push_back(line);
+  std::vector<LineByColor> lineColors;
+  for (auto &lineByColor : lineData.lineColors){
+    std::vector<LineDrawingOptions> newLines;
+    for (auto &line : lineByColor.lines){
+      if (line.permaLine){
+        newLines.push_back(line);
+      }
+    }
+    if (newLines.size() > 0){
+      lineColors.push_back(LineByColor{
+        .tint = lineByColor.tint,
+        .lines = newLines,
+      });
     }
   }
-  lineData.lines.clear();
-  lineData.lines = newLines;
+  lineData.lineColors = lineColors;
 }
 
 
@@ -94,36 +130,21 @@ bool textureIdSame(std::optional<unsigned int> lineTexture, std::optional<unsign
     (lineTexture.has_value() && textureId.has_value() && lineTexture.value() == textureId.value())
   );
 }
-void addToLineList(LineData& lineData, std::vector<Line>& lines, LineColor color, std::optional<unsigned int> textureId){
-  for (auto permaline : lineData.lines){
-    if (permaline.color == color && textureIdSame(permaline.textureId, textureId)){
-      lines.push_back(permaline.line);
-    }
-  }
-}
+
 
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId){
-  std::vector<Line> redLines;
-  std::vector<Line> greenLines;
-  std::vector<Line> blueLines;
-  addToLineList(lineData, redLines, RED, textureId);
-  addToLineList(lineData, greenLines, GREEN, textureId);
-  addToLineList(lineData, blueLines, BLUE, textureId);
-
-  if (redLines.size() > 0){
-    //std::cout << "draw red lines: " << redLines.size() << std::endl;
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
-    drawLines(redLines);    
-  }
-  if (greenLines.size() > 0){
-    //std::cout << "draw green lines: " << greenLines.size() << std::endl;
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-    drawLines(greenLines);
-  }
-  if (blueLines.size() > 0){
-    //std::cout << "draw blue lines: " << blueLines.size() << std::endl;
-    glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 0.f, 1.f, 1.f)));
-    drawLines(blueLines);    
+  std::cout << "line by color size: " << lineData.lineColors.size() << std::endl;
+  for (auto &lineByColor : lineData.lineColors){
+    std::vector<Line> lines;
+    for (auto &line : lineByColor.lines){
+      if (textureIdSame(line.textureId, textureId)){
+        lines.push_back(line.line);
+      }
+    }
+    if (lines.size() > 0){
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
+      drawLines(lines); 
+    }
   }
 }
 

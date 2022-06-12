@@ -835,7 +835,7 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
 }
 
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId){
-  return addLineToNextCycle(lineData, fromPos, toPos, permaline, owner, GREEN, textureId);
+  return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, color, textureId);
 }
 
 objid addLineNextCycle(glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner){
