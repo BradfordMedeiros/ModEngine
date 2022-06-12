@@ -55,7 +55,15 @@
 	(if value (equal? #t (cadr value)) #t)
 )
 (define (draw elementName depth height expanded)
-	(draw-text (selected elementName expanded height) (calcX depth) (calcY height) 4 (list 0 1 0 1) textureId)
+	(define isSelected (equal? selectedIndex height))
+	(draw-text 
+		(selected elementName expanded height) 
+		(calcX depth) 
+		(calcY height) 
+		(if isSelected 5 4) 
+		(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
+		textureId
+	)
 )
 
 (define (elementExists element)
@@ -90,15 +98,19 @@
 		index
 	))
 	(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
-	(draw-line (list -1 0.9 0) (list 1 0.9 0) #f textureId)
-	(draw-line (list -1 1 0) (list 1 1 0) #f textureId)
+	(draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
+	(draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
+	(draw-line (list -1 1 0)   (list 1 1 0)   (list 0 1 1 1) #f textureId)
+;	(draw-line (list -1 0.9 0) (list 1 0.9 0)  #f textureId)
+;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
+
 	(drawHierachy "root" 0 getIndex)
 	(set! maxIndex index)
 )
 
 (define (onGraphChange)
 	(refreshDepGraph)         ; should this really be done at this point?  Perhaps?!
-	(clear-texture textureId (list 1 1 1 0.2))
+	(clear-texture textureId (list 0.1 0.1 0.1 0.8))
 	(addPermaData)
 )
 
