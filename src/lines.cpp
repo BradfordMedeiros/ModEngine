@@ -7,23 +7,25 @@ LineData createLines(){
   };
 }
 
-LineByColor* lineByColorOrMakeNew(LineData& lineData, glm::vec4 color){
+LineByColor* lineByColorOrMakeNew(LineData& lineData, glm::vec4 color, unsigned int linewidth){
   for (auto &lineByColor : lineData.lineColors){
-    if (aboutEqual(color, lineByColor.tint)){
+    if (aboutEqual(color, lineByColor.tint) && lineByColor.linewidth == linewidth){
       return &lineByColor;
     }
   }
   lineData.lineColors.push_back(LineByColor{
     .tint = color,
+    .linewidth = linewidth,
     .lines = {},
   });    
   
   return &lineData.lineColors.at(lineData.lineColors.size() - 1);
 }
-objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId){
+objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth){
   auto lineId = getUniqueObjId();
   auto color = tint.has_value() ? tint.value() : glm::vec4(0.f, 1.f, 0.f, 1.f);
-  LineByColor* linesByColor = lineByColorOrMakeNew(lineData, color);
+  auto lineWidth = linewidth.has_value() ? linewidth.value() : 5;
+  LineByColor* linesByColor = lineByColorOrMakeNew(lineData, color, lineWidth);
   assert(linesByColor != NULL);
 
   linesByColor -> lines.push_back(
@@ -45,13 +47,13 @@ objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos,
   std::optional<glm::vec4> tint = std::nullopt;
   if (color == GREEN){
     tint = glm::vec4(0.f, 1.f, 0.f, 1.f);
-    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId);
+    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId, std::nullopt);
   }else if (color == BLUE){
     tint = glm::vec4(0.f, 0.f, 1.f, 1.f);
-    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId);
+    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId, std::nullopt);
   }else if (color == RED){
     tint = glm::vec4(1.f, 0.f, 0.f, 1.f);
-    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId);
+    return addLineToNextCycleTint(lineData, fromPos, toPos, permaline, owner, tint, textureId, std::nullopt);
   }
   assert(false);
   return 0;
@@ -69,6 +71,7 @@ void freeLine(LineData& lineData, objid lineId){
     if (newLines.size() > 0){
       lineColors.push_back(LineByColor{
         .tint = lineByColor.tint,
+        .linewidth = lineByColor.linewidth,
         .lines = newLines,
       });
     }
@@ -88,6 +91,7 @@ void removeLinesByOwner(LineData& lineData, objid owner){
     if (newLines.size() > 0){
       lineColors.push_back(LineByColor{
         .tint = lineByColor.tint,
+        .linewidth = lineByColor.linewidth,
         .lines = newLines,
       });
     }
@@ -116,6 +120,7 @@ void removeTempLines(LineData& lineData){
     if (newLines.size() > 0){
       lineColors.push_back(LineByColor{
         .tint = lineByColor.tint,
+        .linewidth = lineByColor.linewidth,
         .lines = newLines,
       });
     }
@@ -143,7 +148,7 @@ void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigne
     }
     if (lines.size() > 0){
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(lineByColor.tint));
-      drawLines(lines); 
+      drawLines(lines, lineByColor.linewidth); 
     }
   }
 }

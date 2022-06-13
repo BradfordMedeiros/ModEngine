@@ -28,6 +28,7 @@ struct TextDrawingOptions  {
 
 struct LineByColor {
   glm::vec4 tint;
+  unsigned int linewidth;
   std::vector<LineDrawingOptions> lines;
 };
 struct LineData {
@@ -37,7 +38,7 @@ struct LineData {
 
 LineData createLines();
 
-objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId);
+objid addLineToNextCycleTint(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
 objid addLineToNextCycle(LineData& lineData, glm::vec3 fromPos, glm::vec3 toPos, bool permaline, objid owner, LineColor color, std::optional<unsigned int> textureId);
 void freeLine(LineData& lineData, objid lineId);
 void removeLinesByOwner(LineData& lineData, objid owner);

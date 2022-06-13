@@ -163,7 +163,7 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, S
   return SCM_UNSPECIFIED;
 }
 
-int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId);
+int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
 SCM scmDrawLine(SCM posFrom, SCM posTo, SCM opt1, SCM opt2, SCM opt3){
   auto opts = optionalOpts(opt1, opt2, opt3);
   auto lineId = _drawLine(
@@ -172,7 +172,8 @@ SCM scmDrawLine(SCM posFrom, SCM posTo, SCM opt1, SCM opt2, SCM opt3){
     opts.perma, 
     opts.perma ? currentModuleId() : 0, 
     opts.tint, 
-    opts.textureId
+    opts.textureId,
+    std::nullopt // not currently allowed since linewidth is iffy, need to update line rendering to just use quads
   );
   return scm_from_int32(lineId);
 }
@@ -1084,7 +1085,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId),
-  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId),
+  int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),
   GameobjAttributes getGameObjectAttr(int32_t id),
