@@ -18,10 +18,25 @@
 )
 
 
-(define depgraph (scenegraph))
-(define (refreshDepGraph) (set! depgraph (scenegraph)))
+(define (getscenegraph) (scenegraph))
+
+; parent, child, parent scene, child scene
+;(define (getscenegraph) (list
+;	(list "root"  "human"      (list 0 0))
+;	(list "human" "head"       (list 0 0))
+;	(list "human" "legs"       (list 0 0))
+;	(list "human" "right-leg"  (list 0 1))
+;	(list "legs"  "left-left"  (list 0 0))
+;	(list "legs"  "right-leg"  (list 0 0))
+;	(list "right-leg"  "right-toe"  (list 1 1))
+;	(list "human" "arms"       (list 0 0))
+;))
+
+(define depgraph (getscenegraph))
+(define (refreshDepGraph) (set! depgraph (getscenegraph)))
 
 (define expandState (list))
+(define (expandPath name sceneId) (string-append name ":" (number->string sceneId)))
 
 (define selectedName #f)
 (define (toggleExpanded)
@@ -46,18 +61,19 @@
 (define (selected name expanded index) 
 	(define isSelected (equal? selectedIndex index))
 	(define selectedPrefix (if isSelected "-" " "))
-	(if isSelected (set! selectedName name))
 	(if expanded (string-append selectedPrefix ">" name) (string-append selectedPrefix "^" name))
 )
 
-(define (checkExpanded elementName)
-	(define value (assoc elementName expandState))
+(define (checkExpanded elementName sceneId)
+	(define elementPath (expandPath elementName sceneId))
+	(define value (assoc elementPath expandState))
 	(if value (equal? #t (cadr value)) #t)
 )
-(define (draw elementName depth height expanded)
+(define (draw elementName sceneId depth height expanded)
 	(define isSelected (equal? selectedIndex height))
+	(if isSelected (set! selectedName (expandPath elementName sceneId)))
 	(draw-text 
-		(selected elementName expanded height) 
+		(selected (string-append elementName "(" (number->string sceneId) ")") expanded height) 
 		(calcX depth) 
 		(calcY height) 
 		(if isSelected 5 4) 
@@ -71,18 +87,31 @@
 	(if value #t (if (member element depgraph) #t #f))  ; check if 
 
 )
-(define (drawHierachy target depth getIndex)
-	(define childElements (map cadr (filter (lambda(val) (equal? (car val) target)) depgraph)))
-	(define isExpanded (checkExpanded target))
+
+(define (children target sceneId)
+		(filter 
+			(lambda(val)
+				(and 
+					(equal? (car val) target) 
+					(equal? (car (caddr val)) sceneId)
+				)
+			) 
+			depgraph
+		)
+	
+)
+(define (drawHierarchy target sceneId depth getIndex)
+	(define childElements (children target sceneId))
+	(define isExpanded (checkExpanded target sceneId))
 	(define exists (elementExists target))
 	(if #t
 		(begin
-	    (draw target depth (getIndex) isExpanded)
+	    (draw target sceneId depth (getIndex) isExpanded)
 	    (if isExpanded
 	      (for-each 
 	      	(lambda(target)
 	      		(format #t "draw target: ~a\n" target)
-	      		(drawHierachy target (+ depth 1) getIndex)
+	      		(drawHierarchy (cadr target) (cadr (caddr target)) (+ depth 1) getIndex)
 	      	) 
 	      	childElements
 	      )
@@ -104,7 +133,7 @@
 ;	(draw-line (list -1 0.9 0) (list 1 0.9 0)  #f textureId)
 ;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
 
-	(drawHierachy "root" 0 getIndex)
+	(drawHierarchy "root" 0 0 getIndex)
 	(set! maxIndex index)
 )
 

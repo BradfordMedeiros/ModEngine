@@ -129,14 +129,15 @@ std::vector<int32_t> listScenes(){
   return allSceneIds(world.sandbox);
 }
 
-std::vector<StringPair> scenegraph(){
-  std::vector<StringPair> parentToChild;
+std::vector<StringPairVec2> scenegraph(){
+  std::vector<StringPairVec2> parentToChild;
   auto dotRelations = getDotRelations(world.sandbox, world.objectMapping);
   for (auto &dotRelation : dotRelations){
     if (dotRelation.parent.has_value()){
-      parentToChild.push_back(StringPair{
+      parentToChild.push_back(StringPairVec2{
         .key = dotRelation.parent.value().name,
         .value = dotRelation.child.name,
+        .vec = glm::ivec2(dotRelation.parent.value().sceneId, dotRelation.child.sceneId),
       });
     }
   }

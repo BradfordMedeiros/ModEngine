@@ -81,9 +81,28 @@ SCM scm_rootIdForScene(SCM sceneId){
   return scm_from_int32(rootId);
 }
 
-std::vector<StringPair> (*_scenegraph)();
+std::vector<StringPairVec2> (*_scenegraph)();
 SCM scmScenegraph(SCM sceneId){
-  return listToSCM(_scenegraph());
+  auto sceneGraph = _scenegraph();
+  int listSize = sceneGraph.size();
+  
+  SCM list = scm_make_list(scm_from_unsigned_integer(listSize), scm_from_unsigned_integer(0));
+  for (int i = 0; i < listSize; i++){
+    auto relation = sceneGraph.at(i);
+    SCM pairList = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
+    scm_list_set_x (pairList, scm_from_unsigned_integer(0), scm_from_locale_string(relation.key.c_str()));
+
+    scm_list_set_x (pairList, scm_from_unsigned_integer(1), scm_from_locale_string(relation.value.c_str()));
+
+    SCM sceneList = scm_make_list(scm_from_unsigned_integer(2), scm_from_unsigned_integer(0));
+    scm_list_set_x(sceneList, scm_from_unsigned_integer(0), scm_from_unsigned_integer(relation.vec.x));
+    scm_list_set_x(sceneList, scm_from_unsigned_integer(1), scm_from_unsigned_integer(relation.vec.y));
+    scm_list_set_x(pairList, scm_from_unsigned_integer(2), sceneList);
+
+    scm_list_set_x (list, scm_from_unsigned_integer(i), pairList);
+  }
+
+  return list;
 }
 
 std::vector<std::string> (*_listSceneFiles)();
@@ -1075,7 +1094,7 @@ void createStaticSchemeBindings(
   std::vector<objid> (*childScenes)(objid sceneId),
   std::optional<objid> (*sceneIdByName)(std::string name),
   objid (*rootIdForScene)(objid sceneId),
-  std::vector<StringPair> (*scenegraph)(),
+  std::vector<StringPairVec2> (*scenegraph)(),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  

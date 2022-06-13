@@ -138,7 +138,6 @@ bool textureIdSame(std::optional<unsigned int> lineTexture, std::optional<unsign
 
 
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId){
-  std::cout << "line by color size: " << lineData.lineColors.size() << std::endl;
   for (auto &lineByColor : lineData.lineColors){
     std::vector<Line> lines;
     for (auto &line : lineByColor.lines){

@@ -19,7 +19,7 @@ void createStaticSchemeBindings(
   std::vector<objid> (*childScenes)(objid sceneId),
   std::optional<objid> (*sceneIdByName)(std::string name),
   objid (*rootIdForScene)(objid sceneId),
-  std::vector<StringPair> (*_scenegraph)(),
+  std::vector<StringPairVec2> (*_scenegraph)(),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  

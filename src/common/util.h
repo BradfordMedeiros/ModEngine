@@ -92,9 +92,10 @@ AttributeValue parseAttributeValue(std::string payload);
 AttributeValue addAttributes(AttributeValue one, AttributeValue two);
 std::string print(AttributeValue& value);
 
-struct StringPair {
+struct StringPairVec2 {
   std::string key;
   std::string value;
+  glm::ivec2 vec;
 };
 
 struct StringString {
