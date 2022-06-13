@@ -141,6 +141,14 @@ std::vector<StringPairVec2> scenegraph(){
       });
     }
   }
+
+  std::sort(parentToChild.begin(), parentToChild.end(), [](StringPairVec2 one, StringPairVec2 two) {
+    int value = one.key.compare(two.key);
+    if (value != 0){
+      return value < 0;
+    }
+    return one.value.compare(two.value) < 0;
+  });
   return parentToChild;
 }
 

@@ -954,11 +954,11 @@ bool objectHasAttribute(World& world, objid id, std::string type, std::optional<
 }
 
 void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool velocitySet, bool physicsEnableChanged){
-  std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
+  //std::cout << "rigid bodies old: " << world.rigidbodys.size() << std::endl;
   if (physicsEnableChanged){
     updatePhysicsBody(world, id);
   }
-  std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;
+  //std::cout << "rigid bodies new: " << world.rigidbodys.size() << std::endl;
 
   physicsLocalTransformSet(world, id, gameobj.transformation);
   btRigidBody* body = world.rigidbodys.find(id) != world.rigidbodys.end() ? world.rigidbodys.at(id).body : NULL;
