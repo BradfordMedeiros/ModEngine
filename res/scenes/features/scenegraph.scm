@@ -18,6 +18,15 @@
 )
 
 
+;(define (getscenegraph) (list
+;	(list "root" "mainfolder" (list 0 0))
+;	(list "root2" "mainfolder2" (list 0 1))
+;	(list "mainfolder" "folder1" (list 0 0))
+;	(list "mainfolder" "folder2" (list 0 0))
+;	(list "mainfolder" "folder3" (list 0 0))
+;	(list "folder3" "folder3-1" (list 0 0))
+;	(list "folder3" "folder3-2" (list 0 0))
+;))
 (define (getscenegraph) (scenegraph))
 
 ; parent, child, parent scene, child scene
@@ -120,6 +129,43 @@
 	)
 )
 
+;	(list "mainfolder" "folder1" (list 0 0))
+(define (fullParentName element) (list (car element) (car (caddr element))))
+(define (fullChildName element) (list (cadr element)  (cadr (caddr element))))
+
+(define (parentInList parentName parentSceneId children)
+	(if (equal? (length children) 0)
+		#f
+		(let* ((currElement (car children)) (name (car currElement)) (sceneId (cadr currElement)))
+			(if (and (equal? name parentName) (equal? sceneId parentSceneId))
+				#t
+				(parentInList parentName parentSceneId (cdr children))
+			)
+			
+		)
+	)
+)
+
+(define (make-set elementList) 
+	(define uniqueList (list))
+	(for-each (lambda(element) 
+		(if (not (member element uniqueList))
+			(set! uniqueList (cons element uniqueList))
+		)
+	) elementList)
+	uniqueList
+)
+
+(define (allRootParents)
+	(define allChildren (make-set (map fullChildName depgraph)))
+	(define allParents (make-set (map fullParentName depgraph)))
+	(define filteredParents (filter (lambda(parent) (not (parentInList (car parent) (cadr parent) allChildren))) allParents))
+	;(format #t "all parents: ~a\n" allParents)
+	;(format #t "all children: ~a\n" allChildren)
+	;(format #t "filteredParents: ~a\n" filteredParents)
+	filteredParents
+)
+
 (define (addPermaData)
 	(define index -1)
 	(define getIndex (lambda()
@@ -133,7 +179,9 @@
 ;	(draw-line (list -1 0.9 0) (list 1 0.9 0)  #f textureId)
 ;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
 
-	(drawHierarchy "root" 0 0 getIndex)
+	(for-each (lambda(target)
+		(drawHierarchy (car target) (cadr target) 0 getIndex)
+	) (allRootParents))
 	(set! maxIndex index)
 )
 
