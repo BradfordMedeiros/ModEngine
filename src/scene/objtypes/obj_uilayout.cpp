@@ -161,4 +161,5 @@ glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3
 
 void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   maybeSetVec4FromAttr(&layoutObj.tint, "tint", attributes);
+  setTextureAttributes(layoutObj.texture, attributes, util);
 }
