@@ -91,6 +91,8 @@ Texture loadCubemapTexture(std::string textureFilePathRoot){
   for (auto filepath : filepaths){
     int textureWidth, textureHeight, numChannels;
     std::cout << "loading file: " << filepath << std::endl;
+  
+    stbi_set_flip_vertically_on_load(false);
     unsigned char* data = stbi_load(filepath.c_str(), &textureWidth, &textureHeight, &numChannels, 0); 
     if (!data){
       throw std::runtime_error("failed loading texture " + textureFilePathRoot + ", reason: " + stbi_failure_reason());
