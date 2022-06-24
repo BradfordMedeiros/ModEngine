@@ -1,3 +1,4 @@
+; TODO -> no reason to draw this every frame 
 
 (define textureId #f)
 (define texturename "editor-console")
@@ -100,13 +101,13 @@
   )
 )
 
-(define paddingLeft 15 )
-(define offsetY 15)
+(define paddingLeft 40)
+(define offsetY 40)
 (define (drawFrame numLines fontSize )
   (define currentHeight 0)
   (draw-text "ModTerminal" paddingLeft (+ offsetY currentHeight) fontSize #f textureId)
   (set! currentHeight (+ currentHeight 10))
-  (draw-text "--------------------------------------" 10 (+ offsetY currentHeight) 1 #f textureId)
+  (draw-text "--------------------------------------" paddingLeft (+ offsetY currentHeight) 1 #f textureId)
   (do ((row (- numLines 1) (- row 1))) ((< row 0))
     (let* ((historyLength (vector-length lineHistory)) (lineIndex (- historyLength row 1)))
       (if (and (< lineIndex historyLength) (>= lineIndex 0))
@@ -126,16 +127,45 @@
 )
 
 
-(define buffer-size 20)
+(define buffer-size 85)
 (define (onFrame)
-	(clear-texture textureId (list 0.25 0.5 0.7 0.2))
+	(clear-texture textureId (list 0 0 0 0.95))
   (if showConsole
     (drawFrame buffer-size 4)
   )
   (format #t "texture id: ~a\n" textureId)
+  (maybe-move-panel)
 )
 
-(define showConsole #t)
+(define expandedPosition (list 0 0 0))
+(define foldedPosition (list 0 2 0))
+(define maxMoveRatePerSecond 8)
+
+(define (calcNextPosition currPos targetPos rate)
+  (define currXPos (car currPos))
+  (define currYPos (cadr currPos))
+  (define currZPos (caddr currPos))
+  (define targetXPos (car targetPos))
+  (define targetYPos (cadr targetPos))
+  (define targetZPos (caddr targetPos))
+  (define xDiff (- currXPos targetXPos))
+  (define yDiff (- currYPos targetYPos))
+  (define zDiff (- currZPos targetZPos))
+  (define distance (sqrt (+ (* xDiff xDiff) (* yDiff yDiff) (* zDiff zDiff))))
+  (if (< distance 0.1)
+    targetPos
+    (move-relative currPos (orientation-from-pos currPos targetPos) (* maxMoveRatePerSecond (time-elapsed)))
+  )
+)
+(define (maybe-move-panel)
+  (define currentPosition (gameobj-pos mainobj))
+  (if showConsole
+    (gameobj-setpos! mainobj (calcNextPosition currentPosition expandedPosition maxMoveRatePerSecond))
+    (gameobj-setpos! mainobj (calcNextPosition currentPosition foldedPosition maxMoveRatePerSecond))
+  )
+)
+  
+(define showConsole #f)
 (define (onKey key scancode action mods)
   (if (and (= key 96) (= action 1))
     (begin
