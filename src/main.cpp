@@ -153,7 +153,7 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearColor){
+void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
   glViewport(0, 0, texSize.width, texSize.height);
   updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
@@ -168,10 +168,24 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
   }
+
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  if (shouldClear && clearTextureId.has_value()){
+    glDisable(GL_DEPTH_TEST);
+    glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
+      glm::mat4(1.0f), 
+      glm::vec3(2.f, 2.f, 2.f)
+    )));
+    drawMesh(*defaultMeshes.unitXYRect, uiShaderProgram, clearTextureId.value());
+    glEnable(GL_DEPTH_TEST);
+  }
+
+
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
 
   //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
@@ -1568,7 +1582,7 @@ int main(int argc, char* argv[]){
       Texture tex {
         .textureId = userTexture.id,
       };
-      renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor);
+      renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
     }
     markUserTexturesCleared();
 

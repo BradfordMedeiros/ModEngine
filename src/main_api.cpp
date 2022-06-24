@@ -691,6 +691,7 @@ unsigned int createTexture(std::string name, unsigned int width, unsigned int he
     .id = textureID,
     .autoclear = false,
     .shouldClear = true,
+    .clearTextureId = std::nullopt, //world.textures.at("./res/textures/wood.jpg").texture.textureId,//,
     .clearColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
   });
   return textureID;

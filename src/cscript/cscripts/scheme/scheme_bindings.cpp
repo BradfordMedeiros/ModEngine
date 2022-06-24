@@ -631,7 +631,6 @@ SCM scmClearTexture(SCM textureId, SCM optValue1, SCM optValue2){
   if (value1Defined){
     if (isList(optValue1)){
       color = listToVec4(optValue1);
-      std::cout << "clear texture: " << print(color.value()) << std::endl;
     }else{
       autoclear = scm_to_bool(optValue1);
       foundClear = true;

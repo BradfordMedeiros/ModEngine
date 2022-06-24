@@ -163,6 +163,7 @@ struct UserTexture {
   unsigned int id;
   bool autoclear;
   bool shouldClear;
+  std::optional<unsigned int> clearTextureId;
   glm::vec4 clearColor;
 };
 std::vector<UserTexture> textureIdsToRender();
