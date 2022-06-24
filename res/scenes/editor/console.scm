@@ -11,9 +11,9 @@
   )
 )
 
-
 (set! textureId (create-texture texturename 2000 1000))
-
+(updateTexture)
+(enforce-layout (gameobj-id mainobj))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -129,11 +129,10 @@
 
 (define buffer-size 85)
 (define (onFrame)
-	(clear-texture textureId (list 0 0 0 0.95))
+	(clear-texture textureId (list 0 0 0 0.4))
   (if showConsole
     (drawFrame buffer-size 4)
   )
-  (format #t "texture id: ~a\n" textureId)
   (maybe-move-panel)
 )
 
@@ -195,9 +194,6 @@
   (if (and showConsole (not (= key 96)))
     (appendToBuffer (string (integer->char key)))
   )
- 	(if (equal? key 47) 
-		(updateTexture)
-	)   
 )
 
 
