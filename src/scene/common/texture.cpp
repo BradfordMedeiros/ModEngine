@@ -38,6 +38,7 @@ Texture loadTexture(std::string textureFilePath){
 
   int textureWidth, textureHeight, numChannels;
   int forcedChannels = 4;
+  stbi_set_flip_vertically_on_load(true);
   unsigned char* data = stbi_load(textureFilePath.c_str(), &textureWidth, &textureHeight, &numChannels, forcedChannels); 
   if (!data){
     throw std::runtime_error("failed loading texture " + textureFilePath + ", reason: " + stbi_failure_reason());
