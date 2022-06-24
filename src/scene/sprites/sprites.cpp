@@ -7,7 +7,7 @@ std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad){
     for ( const auto &[ascii, font]: fontToLoad.chars ) {
       assert(fontmeshes.find(ascii) == fontmeshes.end());
       std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
-      fontmeshes[ascii] = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture);
+      fontmeshes[ascii] = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture, true);
     }
     return fontmeshes;
 }

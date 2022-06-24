@@ -11,7 +11,7 @@ void main(){
     FragColor = tint;
     return;
   }
-  vec4 texColor = texture(textureData, vec2(TexCoord.x, -1 * TexCoord.y));
+  vec4 texColor = texture(textureData, vec2(TexCoord.x, TexCoord.y));
   if(texColor.w < 0.1){
   	discard;
   }
