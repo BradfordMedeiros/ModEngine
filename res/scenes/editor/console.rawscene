@@ -1,11 +1,6 @@
 (console:layer:basicui
-(console:type:vertical
 (console:backpanel:true
-(console:border-size:0.01
-(console:border-color:1 1 1 1
-(console:position:0 0 0
-
-(console:minwidth:1
+(console:minwidth:2
 (console:minheight:2
 (console:script:./res/scenes/editor/console.scm
-(console:texture:./res/textures/grid.png
+(console:position:0 0 0

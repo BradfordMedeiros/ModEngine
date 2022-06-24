@@ -1,6 +1,3 @@
-;(define (onFrame)
-;	(format #t "on frame console.scm!\n")
-;)
 
 (define textureId #f)
 (define texturename "editor-console")
@@ -14,7 +11,7 @@
 )
 
 
-(set! textureId (create-texture texturename 1000 1000))
+(set! textureId (create-texture texturename 2000 1000))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -102,9 +99,12 @@
     (string-append (car newString) "|" (cadr newString))
   )
 )
-(define (drawFrame numLines fontSize offsetY)
+
+(define paddingLeft 15 )
+(define offsetY 15)
+(define (drawFrame numLines fontSize )
   (define currentHeight 0)
-  (draw-text "ModTerminal" 10 (+ offsetY currentHeight) fontSize #f textureId)
+  (draw-text "ModTerminal" paddingLeft (+ offsetY currentHeight) fontSize #f textureId)
   (set! currentHeight (+ currentHeight 10))
   (draw-text "--------------------------------------" 10 (+ offsetY currentHeight) 1 #f textureId)
   (do ((row (- numLines 1) (- row 1))) ((< row 0))
@@ -112,29 +112,30 @@
       (if (and (< lineIndex historyLength) (>= lineIndex 0))
         (begin 
           (set! currentHeight (+ currentHeight 10))
-          (draw-text (vector-ref lineHistory lineIndex) 10 (+ offsetY currentHeight) fontSize #f textureId)
+          (draw-text (vector-ref lineHistory lineIndex) paddingLeft (+ offsetY currentHeight) fontSize #f textureId)
         )
       )
     )
   )
   (set! currentHeight (+ currentHeight 10))
-  (draw-text "//////////////////////////////" 10 (+ offsetY currentHeight) 2 #f textureId)
+  (draw-text "//////////////////////////////" paddingLeft (+ offsetY currentHeight) 2 #f textureId)
   (set! currentHeight (+ currentHeight 10))
-  (draw-text (currentLineWithCursor currentLineBuffer cursorFromEnd) 10 (+ offsetY currentHeight) fontSize #f textureId)
+  (draw-text (currentLineWithCursor currentLineBuffer cursorFromEnd) paddingLeft (+ offsetY currentHeight) fontSize #f textureId)
   (set! currentHeight (+ currentHeight 10))
-  (draw-text "//////////////////////////////" 10 (+ offsetY currentHeight) 2 #f textureId) 
+  (draw-text "//////////////////////////////" paddingLeft (+ offsetY currentHeight) 2 #f textureId) 
 )
 
 
 (define buffer-size 20)
 (define (onFrame)
-	(clear-texture textureId (list 0.1 0.1 0.1 0.8))
+	(clear-texture textureId (list 0.25 0.5 0.7 0.2))
   (if showConsole
-    (drawFrame buffer-size 4 100)
+    (drawFrame buffer-size 4)
   )
+  (format #t "texture id: ~a\n" textureId)
 )
 
-(define showConsole #f)
+(define showConsole #t)
 (define (onKey key scancode action mods)
   (if (and (= key 96) (= action 1))
     (begin
