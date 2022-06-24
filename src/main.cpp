@@ -172,8 +172,8 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   if (shouldClear && clearTextureId.has_value()){
+    glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(clearColor));
     glDisable(GL_DEPTH_TEST);
     glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(
       glm::mat4(1.0f), 
@@ -182,10 +182,9 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
     drawMesh(*defaultMeshes.unitXYRect, uiShaderProgram, clearTextureId.value());
     glEnable(GL_DEPTH_TEST);
   }
-
-
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
 
   //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);

@@ -711,8 +711,15 @@ void freeTexture(std::string name, objid ownerId){
   freeTextureRefsIdByOwner(world, ownerId, textureId);
 }
 
-void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color){
+void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture){
   UserTexture& userTex = *userTextureById(textureId);
+  std::optional<unsigned int> clearTextureId = std::nullopt;
+  if (texture.has_value()){
+    std::cout << "texture: " << texture.value() << std::endl;
+    clearTextureId = world.textures.at(texture.value()).texture.textureId;
+  }
+  userTex.clearTextureId = clearTextureId;
+  
   if (color.has_value()){
     userTex.clearColor = color.value();
   }

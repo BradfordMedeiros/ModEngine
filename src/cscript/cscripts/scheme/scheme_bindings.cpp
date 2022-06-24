@@ -619,15 +619,19 @@ SCM scmFreeTexture(SCM name){
   return SCM_UNSPECIFIED;
 }
 
-void (*_clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color);
-SCM scmClearTexture(SCM textureId, SCM optValue1, SCM optValue2){
+void (*_clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
+SCM scmClearTexture(SCM textureId, SCM optValue1, SCM optValue2, SCM optValue3){
   auto value1Defined = !scm_is_eq(optValue1, SCM_UNDEFINED);
   auto value2Defined = !scm_is_eq(optValue2, SCM_UNDEFINED);
+  auto value3Defined = !scm_is_eq(optValue3, SCM_UNDEFINED);
 
   std::optional<bool> autoclear = std::nullopt;
   std::optional<glm::vec4> color = std::nullopt;
 
   bool foundClear = false;
+  bool foundTexture = false;
+
+  std::optional<std::string> texture = std::nullopt;
   if (value1Defined){
     if (isList(optValue1)){
       color = listToVec4(optValue1);
@@ -638,10 +642,21 @@ SCM scmClearTexture(SCM textureId, SCM optValue1, SCM optValue2){
   }
 
   if (value2Defined){
-    assert(!foundClear);
-    autoclear = scm_to_bool(optValue2);
+    if (scm_is_bool(optValue2)){
+      assert(!foundClear);
+      autoclear = scm_to_bool(optValue2);
+    }else{
+      texture = scm_to_locale_string(optValue2);
+      foundTexture = true;
+    }
   }
-  _clearTexture(toUnsignedInt(textureId), autoclear, color);
+  if (value3Defined){
+    assert(!foundTexture);
+    texture = scm_to_locale_string(optValue3);
+  }
+
+  std::cout << "texture scheme: " << (texture.has_value() ? texture.value() : "no texture in clear") << std::endl;
+  _clearTexture(toUnsignedInt(textureId), autoclear, color, texture);
   return SCM_UNSPECIFIED;
 }
 
@@ -1049,7 +1064,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("create-texture", 3, 0, 0, (void*)scmCreateTexture);
   scm_c_define_gsubr("free-texture", 1, 0, 0, (void*)scmFreeTexture);
-  scm_c_define_gsubr("clear-texture", 1, 2, 0, (void*)scmClearTexture);
+  scm_c_define_gsubr("clear-texture", 1, 3, 0, (void*)scmClearTexture);
 
   scm_c_define_gsubr("navpos", 2, 0, 0, (void*)scmNavPosition);
 
@@ -1160,7 +1175,7 @@ void createStaticSchemeBindings(
   void (*enforceLayout)(objid layoutId),
   unsigned int (*createTexture)(std::string name, unsigned int width, unsigned int height, objid ownerId),
   void (*freeTexture)(std::string name, objid ownerId),
-  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color),
+  void (*clearTexture)(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture),
   AttributeValue (*runStats)(std::string field),
   unsigned int (*scmStat)(std::string),
   void (*logStat)(unsigned int, AttributeValue amount),
