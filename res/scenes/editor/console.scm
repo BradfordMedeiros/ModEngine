@@ -102,7 +102,7 @@
 )
 
 (define paddingLeft 40)
-(define offsetY 40)
+(define offsetY 80)
 (define (drawFrame numLines fontSize )
   (define currentHeight 0)
   (draw-text "ModTerminal" paddingLeft (+ offsetY currentHeight) fontSize #f textureId)
@@ -129,9 +129,11 @@
 
 (define buffer-size 85)
 (define (onFrame)
-	(clear-texture textureId (list 0 0 0 0.4))
   (if showConsole
-    (drawFrame buffer-size 4)
+    (begin
+      (clear-texture textureId (list 0 0 0 0.8) )
+      (drawFrame buffer-size 4)
+    )
   )
   (maybe-move-panel)
 )
@@ -143,7 +145,8 @@
 (define (calcNextPosition currPos targetPos rate)
   (define currXPos (car currPos))
   (define currYPos (cadr currPos))
-  (define currZPos (caddr currPos))
+  (define currZPos 0)
+  (define oldZPos (caddr currPos))
   (define targetXPos (car targetPos))
   (define targetYPos (cadr targetPos))
   (define targetZPos (caddr targetPos))
@@ -151,9 +154,12 @@
   (define yDiff (- currYPos targetYPos))
   (define zDiff (- currZPos targetZPos))
   (define distance (sqrt (+ (* xDiff xDiff) (* yDiff yDiff) (* zDiff zDiff))))
+  (define projCurrPos (list (car currPos) (cadr currPos) 0))
   (if (< distance 0.1)
-    targetPos
-    (move-relative currPos (orientation-from-pos currPos targetPos) (* maxMoveRatePerSecond (time-elapsed)))
+    (list (car targetPos) (cadr targetPos) oldZPos)
+    (let ((newPosition (move-relative projCurrPos (orientation-from-pos projCurrPos targetPos) (* maxMoveRatePerSecond (time-elapsed)))))
+      (list (car newPosition) (cadr newPosition) oldZPos) ; preserve z pos 
+    )
   )
 )
 (define (maybe-move-panel)
