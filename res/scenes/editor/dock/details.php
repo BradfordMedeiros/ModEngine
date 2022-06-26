@@ -3,6 +3,8 @@
     print("Must define which detail to build\n");
     exit(1);
   }
+
+  $zpos = -1;  # + or +- 0.2 for certain order of elements within
 ?>
 (test_panel:layer:basicui
 (test_panel:type:vertical
@@ -17,7 +19,7 @@
 (test_panel:align-items-vertical:up     # up/center/down
 (test_panel:border-size:0.004
 (test_panel:border-color:0.3 0.3 0.3 1
-(test_panel:position:-0.8 -0.1 0   # hackey to hardcode this position, but whatever!
+(test_panel:position:-0.8 -0.1 <?php echo($zpos . "\n"); ?>
 (test_panel:minwidth:0.44
 
 )window_x:layer:basicui
@@ -32,7 +34,8 @@
 )banner_title_right:tint:2 2 2 1
 )banner_title_right:value:Object Details
 )banner_title_right:rotation:0 0 -1 -90
-(banner_title_background_right:position:0.23 0 0
+)banner_title_right:position:0 0 0.01
+(banner_title_background_right:position:0.23 0 <?php echo($zpos . "\n"); ?>
 (banner_title_background_right:layer:basicui
 (banner_title_background_right:backpanel:true
 (banner_title_background_right:tint:0 0 0.8 1
@@ -47,7 +50,8 @@
 )banner_title_left:tint:2 2 2 1
 )banner_title_left:value:Object Details
 )banner_title_left:rotation:0 0 -1 -90
-(banner_title_background_left:position:-0.23 0 0
+)banner_title_left:position:0 0 0.01
+(banner_title_background_left:position:-0.23 0 <?php echo($zpos . "\n"); ?>
 (banner_title_background_left:layer:basicui
 (banner_title_background_left:backpanel:true
 (banner_title_background_left:tint:0 0 0.8 1
@@ -60,6 +64,7 @@
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
 )title:tint:1 1 2 1
+)title:position:0 0 -1
 
 
 <?php 
@@ -70,14 +75,14 @@
     }
   }
 
-  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id){
+  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos){
     $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
       "layer" => "basicui", 
       "scale" => "0.004 0.01 0.004",
+      "position" => "0 0 " . $zpos,
     ];
-    $extra_key_attrs = [];
-    $default_key = array_merge($default_text_style, $extra_key_attrs);
+    $default_key = $default_text_style;
     $default_value = array_merge($default_text_style, []);
     $default_keyvalueLayout = [
       "layer" => "basicui",
@@ -87,6 +92,16 @@
       "margin" => "0.04",
       "spacing" => "0.02",
       "minwidth" => "0.36",
+    ];
+    $default_rootLayout = [
+      "layer" => "basicui",
+      "type" => "horizontal",
+      "backpanel" => "true",
+      "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
+      "margin" => "0.04",
+      "spacing" => "0.02",
+      "minwidth" => "0.36",
+      "position" => "0 0 " . $zpos,
     ];
 
     include $file;
@@ -426,7 +441,7 @@
 
     $rootElementName = "(" . $unique_control_id;
     $templateFile = $typeToTemplate[$type];
-    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id);
+    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos);
     array_push($test_panel_elements, $rootElementName);
 
     echo ("\n");

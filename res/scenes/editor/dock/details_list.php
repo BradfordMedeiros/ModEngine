@@ -38,6 +38,7 @@
       "offtexture" => $value["image"],
       "ontint" => "5 5 5 1",
       "details-action" => $value["action"],
+      "position" => "0 0 " . ($zpos + 0.2),
     ]);
     array_push($listElementNames, $listItemName);
   }
@@ -46,6 +47,7 @@
     "tint" => "1 0 0 1",
     "elements" => implode(",", $listElementNames),
     "backpanel" => "true",
+    "position" => "0 0 " . ($zpos + 0.1),
   ]);
 
 
@@ -55,11 +57,12 @@
     "tint" => "0 0 1 1", 
     "elements" => implode(",", $topLevelElements),
     "type" => "vertical",
+    "position" => "0 0 " . ($zpos + 0.05),
     #"spacing" => "0.04",
   ];
 
   if (array_key_exists("mode", $data)){
     $topLevelAttr["details-list-mode"] = $data["mode"];
   }
-  createElement($rootElementName, $default_keyvalueLayout, $topLevelAttr);
+  createElement($rootElementName, $default_rootLayout, $topLevelAttr);
 ?>

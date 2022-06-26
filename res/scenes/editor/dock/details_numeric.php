@@ -57,6 +57,6 @@
   }
 
   $numericElements = array_reverse($numericElements);
-  createElement($rootElementName, $default_keyvalueLayout, [ "elements" => implode(",", $numericElements), "type" => "vertical" ]);
+  createElement($rootElementName, $default_rootLayout, [ "elements" => implode(",", $numericElements), "type" => "vertical" ]);
 ?>
 

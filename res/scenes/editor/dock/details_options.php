@@ -35,7 +35,7 @@
 
   $optionsLayout = "(" . $unique_control_id . "_options";
   createElement($optionsLayout, $default_keyvalueLayout, [ "elements" => implode(",", $optionElements) ]);
-  createElement($rootElementName, $default_keyvalueLayout, [ 
+  createElement($rootElementName, $default_rootLayout, [ 
     "tint" => "0 0 1 0.8", 
     "type" => "vertical", 
     "elements" => $optionsLayout . "," . $titleName  

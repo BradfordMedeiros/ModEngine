@@ -145,8 +145,8 @@
 
 
 (define (applySnapping gameobj indexToSnappingPair)
-  (let* ((snappingPair (cadr indexToSnappingPair)) (snappingPos (cadr snappingPair)))
-    (gameobj-setpos! gameobj snappingPos)
+  (let* ((snappingPair (cadr indexToSnappingPair)) (snappingPos (cadr snappingPair)) (oldpos (gameobj-pos gameobj)))
+    (gameobj-setpos! gameobj (list (car snappingPos) (cadr snappingPos) (caddr oldpos)))
     (enforce-layout (gameobj-id gameobj))
     (car indexToSnappingPair)
   )  

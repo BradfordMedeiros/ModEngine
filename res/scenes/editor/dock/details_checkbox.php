@@ -44,5 +44,5 @@
   }
  
   createElement($checkboxName, $default_text_style, $buttonFields);
-  createElement($rootElementName, $default_keyvalueLayout, [ "spacing" => "0.25", "tint" => "0 0 0 0.1", "elements" =>  $labelName . "," . $checkboxName ]);
+  createElement($rootElementName, $default_rootLayout, [ "spacing" => "0.25", "tint" => "0 0 0 0.1", "elements" =>  $labelName . "," . $checkboxName ]);
 ?>

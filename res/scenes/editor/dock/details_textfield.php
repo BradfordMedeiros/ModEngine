@@ -26,5 +26,5 @@
   }else{
     createElement($valuename, $default_value, [ "value" =>  "", "details-binding" => $data["value"]["binding"], "details-editabletext" => "true"  ] );
   }
-  createElement($rootElementName, $default_keyvalueLayout, [ "elements" => $keyname . "," . $valuename ]);
+  createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $valuename ]);
 ?>
