@@ -338,7 +338,7 @@ void saveRecording(objid recordingId, std::string filepath){
 std::map<objid, Recording> playingRecordings;
 void playRecording(objid id, std::string recordingPath){
   assert(playingRecordings.find(id) == playingRecordings.end());
-  playingRecordings[id] = loadRecording(recordingPath, parsePropertySuffix);
+  playingRecordings[id] = loadRecording(recordingPath, parsePropertySuffix, interface.readFile);
 }
 void stopRecording(objid id, std::string recordingPath){
   assert(playingRecordings.find(id) != playingRecordings.end());

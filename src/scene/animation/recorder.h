@@ -20,7 +20,7 @@ struct Recording {
 Recording createRecording();
 void saveRecordingIndex(Recording& recording, std::string name, AttributeValue value, float time);
 
-Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix);
+Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix, std::function<std::string(std::string)> readFile);
 void saveRecording(std::string name, Recording& recording, std::function<std::string(std::string, AttributeValue)> serializePropertySuffix);
 
 std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate);

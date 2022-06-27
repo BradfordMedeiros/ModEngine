@@ -35,7 +35,7 @@ struct DynamicLoading {
   std::map<objid, int> idsLoadAround;
 };
 
-DynamicLoading createDynamicLoading(std::string chunkfile);
+DynamicLoading createDynamicLoading(std::string chunkfile, std::function<std::string(std::string)> readFile);
 ChunkLoadingInfo getChunkLoadingInfo(DynamicLoading& world);
 std::string serializeChunkMappingInfo(ChunkMappingInfo& mappingInfo);
 void saveChunkMappingInfo(DynamicLoading& world, std::string filepath);

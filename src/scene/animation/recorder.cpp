@@ -29,8 +29,8 @@ void saveRecordingIndex(Recording& recording, std::string name, AttributeValue v
   );
 }
 
-Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix){
-  std::string serializedData = loadFile(name);
+Recording loadRecording(std::string name, std::function<AttributeValue(std::string, std::string)> parsePropertySuffix, std::function<std::string(std::string)> readFile){
+  std::string serializedData = readFile(name);
   auto properties = filterWhitespace(split(serializedData, '\n'));
 
   std::map<int, std::vector<Property>> values;

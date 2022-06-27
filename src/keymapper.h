@@ -42,7 +42,7 @@ struct KeyRemapper {
   std::map<int, bool> lastFrameDown;
 };
 
-KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inputFns);
+KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inputFns, std::function<std::string(std::string)> readFile);
 int getKeyRemapping(KeyRemapper& keymapper, int key);
 
 #endif

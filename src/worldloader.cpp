@@ -64,11 +64,11 @@ ChunkMappingCommand parseMappingToken(std::string token){
   return command;
 }
 
-ChunkMappingInfo parseChunkMapping(std::string filepath){
+ChunkMappingInfo parseChunkMapping(std::string filepath, std::function<std::string(std::string)> readFile){
   if (filepath == ""){
     return ChunkMappingInfo {};
   }
-  auto fileContent = loadFile(filepath);
+  auto fileContent = readFile(filepath);
   std::map<std::string, std::string> chunkHashToSceneFile;
 
   std::vector<std::string> lines = filterWhitespace(split(fileContent, '\n'));
@@ -133,8 +133,8 @@ void saveChunkMappingInfo(DynamicLoading& world, std::string filepath){
 
 // @TODO currently dynamic chunkloading assumes it has exclusive access to scene management (or at least that loadscene/unload scene gives it that).
 // This causes the use case of, for example, a user loading a scene in code manually to have this unload the scene if the scene file happens to match that, which is questionable behavior
-DynamicLoading createDynamicLoading(std::string chunkfile){
-  auto mappingInfo = parseChunkMapping(chunkfile);
+DynamicLoading createDynamicLoading(std::string chunkfile, std::function<std::string(std::string)> readFile){
+  auto mappingInfo = parseChunkMapping(chunkfile, readFile);
   DynamicLoading loading = {
     .mappingInfo = mappingInfo,
     .chunkRadius = 0, 

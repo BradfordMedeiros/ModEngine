@@ -739,7 +739,7 @@ void addSerialObjectsToWorld(
 }
 
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface, std::optional<std::string> name){
-  auto styles = loadStyles("./res/default.style");
+  auto styles = loadStyles("./res/default.style", interface.readFile);
   auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name);
   std::vector<GameObjectObj> addedGameobjObjs = {};
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields, false, addedGameobjObjs, data.subelementAttributes);
@@ -747,7 +747,7 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
 }
 
 objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens, std::optional<std::string> name){
-  auto sceneData = loadFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
+  auto sceneData = interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
   return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), sceneData, interface, name);
 }
 

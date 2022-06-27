@@ -44,8 +44,8 @@ std::vector<StyleSelectorQuery> parseStyleSelectorQuery(std::string tokentarget)
   return selectors;
 }
 
-std::vector<Style> loadStyles(std::string filepath){
-  auto tokens = parseFormat(loadFile(filepath));
+std::vector<Style> loadStyles(std::string filepath, std::function<std::string(std::string)> readFile){
+  auto tokens = parseFormat(readFile(filepath));
   std::vector<Style> styles;
   for (auto &token : tokens){
     styles.push_back(Style{

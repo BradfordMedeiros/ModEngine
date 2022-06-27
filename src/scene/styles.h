@@ -26,7 +26,7 @@ struct Style {
   std::string payload;
 };
 
-std::vector<Style> loadStyles(std::string filepath);
+std::vector<Style> loadStyles(std::string filepath, std::function<std::string(std::string)> readFile);
 void applyStyles(std::vector<Token>& tokens, std::vector<Style>& styles);
 
 #endif

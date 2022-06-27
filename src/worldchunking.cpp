@@ -1,8 +1,8 @@
 #include "./worldchunking.h"
 
-std::vector<std::string> voxelsInScene(std::string sceneFile){
+std::vector<std::string> voxelsInScene(std::string sceneFile, std::function<std::string(std::string)> readFile){
   std::vector<std::string> voxelsInScene;
-  auto elementsInScene = offlineGetElements(sceneFile);
+  auto elementsInScene = offlineGetElements(sceneFile, readFile);
   for (auto &element : elementsInScene){
     auto objType = getType(element);
     if (objType == "voxel"){
@@ -12,11 +12,11 @@ std::vector<std::string> voxelsInScene(std::string sceneFile){
   return voxelsInScene;
 }
 
-std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std::string& chunkHash){
+std::vector<std::string> getVoxelsForChunkhash(DynamicLoading& loadingInfo, std::string& chunkHash, std::function<std::string(std::string)> readFile){
   auto hasSceneFile = loadingInfo.mappingInfo.chunkHashToSceneFile.find(chunkHash) != loadingInfo.mappingInfo.chunkHashToSceneFile.end();
   if (hasSceneFile){
     auto sceneFile = loadingInfo.mappingInfo.chunkHashToSceneFile.at(chunkHash);
-    return voxelsInScene(sceneFile);
+    return voxelsInScene(sceneFile, readFile);
   }
   return {};
 }
@@ -95,29 +95,29 @@ std::string serializeVoxelDefault(World& world, Voxels& voxelData){
   return serializedObj;
 }
 
-void writeVoxelToSceneFile(World& world, std::string scenefile, std::string name, Voxels& voxel){
+void writeVoxelToSceneFile(World& world, std::string scenefile, std::string name, Voxels& voxel, std::function<std::string(std::string)> readFile){
   auto serializedObj = serializeVoxelDefault(world, voxel);
   auto tokens = parseFormat(serializedObj);
   std::vector<std::pair<std::string, std::string>> attrs;
   for (auto &token : tokens){
     attrs.push_back({ token.attribute, token.payload });
   }
-  offlineSetElementAttributes(scenefile, name, attrs);
+  offlineSetElementAttributes(scenefile, name, attrs, readFile);
 }
-void addFragmentToScene(World& world, fragmentSceneFile& fragmentSceneFile, VoxelChunkFragment& voxelFragment, std::string& voxelname, std::string& chunkValue){
+void addFragmentToScene(World& world, fragmentSceneFile& fragmentSceneFile, VoxelChunkFragment& voxelFragment, std::string& voxelname, std::string& chunkValue, std::function<std::string(std::string)> readFile){
   auto elementName = std::string("]voxelfragment_") + voxelname + "_from_" + chunkValue;
-  auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName).size() > 0;
+  auto elementAlreadyExists = offlineGetElement(fragmentSceneFile.name, elementName, readFile).size() > 0;
   auto name = elementAlreadyExists ? (elementName + "_" + std::to_string(getUniqueObjId())) : elementName;
   if (elementAlreadyExists){
     std::cout << "warning: " <<  elementName << " already exists in " << fragmentSceneFile.name << std::endl;
     //std::cout << "source: (hash, file, fragment address): (" <<  chunkHash << ", " << scenefile << ", " << fragmentSceneFile.fragmenthash << ")" << std::endl; 
-    assert(offlineGetElement(fragmentSceneFile.name, name).size() == 0);
+    assert(offlineGetElement(fragmentSceneFile.name, name, readFile).size() == 0);
   }
-  writeVoxelToSceneFile(world, fragmentSceneFile.name, name, voxelFragment.voxel);
+  writeVoxelToSceneFile(world, fragmentSceneFile.name, name, voxelFragment.voxel, readFile);
 }
 
 GameObjPair getVoxelFromFile(World& world, SysInterface& interface, std::string& scenefile, std::string& voxelname){
-  auto elementTokens = offlineGetElement(scenefile, voxelname);
+  auto elementTokens = offlineGetElement(scenefile, voxelname, interface.readFile);
   auto sceneTokensSerialized = serializeSceneTokens(elementTokens);
   auto gameobjPair = createObjectForScene(world, -1, voxelname, sceneTokensSerialized, interface);
   return gameobjPair;
@@ -136,7 +136,7 @@ std::vector<VoxelChunkFragment> fragmentsForVoxelname(World& world, SysInterface
 }
 
 void joinFragmentsInScenefile(World& world, SysInterface& interface, std::string& scenefile){
-  auto voxels = voxelsInScene(scenefile);
+  auto voxels = voxelsInScene(scenefile, interface.readFile);
   std::cout << "joining frags in: " << scenefile << std::endl;
 
   std::vector<std::string> fragmentNames;
@@ -157,10 +157,10 @@ void joinFragmentsInScenefile(World& world, SysInterface& interface, std::string
   }
 
   auto voxelData = joinVoxels(voxelBodies, transforms);
-  writeVoxelToSceneFile(world, scenefile, "]voxel_joined", voxelData);
+  writeVoxelToSceneFile(world, scenefile, "]voxel_joined", voxelData, interface.readFile);
 
   for (auto &fragmentname : fragmentNames){
-    offlineRemoveElement(scenefile, fragmentname);
+    offlineRemoveElement(scenefile, fragmentname, interface.readFile);
   }
 }
 
@@ -170,14 +170,14 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
   std::vector<ChunkAddress> chunks;
 
   for (auto &[chunkhash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
-    offlineCopyScene(scenefile, newOutputFileForScene(originalSceneFileName(loadingInfo, chunkhash)));
+    offlineCopyScene(scenefile, newOutputFileForScene(originalSceneFileName(loadingInfo, chunkhash)), interface.readFile);
   } 
 
   std::set<std::string> filesWithFragments;  // includes elements that were split from the mapping only, maybe it should check bigger set of files
   for (auto &[chunkHash, scenefile] : loadingInfo.mappingInfo.chunkHashToSceneFile){
     std::string chunkValue = chunkHash;
     std::cout << "processing chunk hash: " << chunkHash << std::endl;
-    auto voxelnamesInChunk = getVoxelsForChunkhash(loadingInfo, chunkValue);
+    auto voxelnamesInChunk = getVoxelsForChunkhash(loadingInfo, chunkValue, interface.readFile);
     for (auto &voxelname : voxelnamesInChunk){
       auto voxelFragments = fragmentsForVoxelname(world, interface, scenefile, voxelname);
       auto sceneFilesForFragments = getSceneFilesForFragments(loadingInfo, chunkValue, voxelFragments);
@@ -185,9 +185,9 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
       std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
       for (int i = 0; i < voxelFragments.size(); i++){
         filesWithFragments.insert(sceneFilesForFragments.at(i).name);
-        addFragmentToScene(world, sceneFilesForFragments.at(i), voxelFragments.at(i), voxelname, chunkValue);
+        addFragmentToScene(world, sceneFilesForFragments.at(i), voxelFragments.at(i), voxelname, chunkValue, interface.readFile);
       }
-      offlineRemoveElement(newOutputFileForScene(originalSceneFileName(loadingInfo, chunkHash)), voxelname);
+      offlineRemoveElement(newOutputFileForScene(originalSceneFileName(loadingInfo, chunkHash)), voxelname, interface.readFile);
     }
   }
 
@@ -196,12 +196,12 @@ void rechunkAllVoxels(World& world, DynamicLoading& loadingInfo, int newchunksiz
   }
 }
 
-std::vector<glm::vec3> getPositionForElements(std::string scenefile, std::vector<std::string>& elements, ChunkAddress& fromChunk, int oldchunksize){
+std::vector<glm::vec3> getPositionForElements(std::string scenefile, std::vector<std::string>& elements, ChunkAddress& fromChunk, int oldchunksize, std::function<std::string(std::string)> readFile){
   std::vector<glm::vec3> positions;
   glm::vec3 chunkOffset(fromChunk.x * oldchunksize, fromChunk.y * oldchunksize, fromChunk.z * oldchunksize);
   //std::cout << "Chunk offset: " << print(chunkOffset) << std::endl;
   for (auto element : elements){
-    auto position = offlineGetElementAttr(scenefile, element, "position");
+    auto position = offlineGetElementAttr(scenefile, element, "position", readFile);
     glm::vec3 pos(0.f, 0.f, 0.f);
     bool isPosition = maybeParseVec(position, pos);
     assert(isPosition);
@@ -235,10 +235,10 @@ std::vector<ChunkPositionAddress> chunkAddressForPosition(std::vector<glm::vec3>
 }
 
 
-void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping){
+void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
   std::vector<std::string> chunkHashToDelete;
   for (auto &[chunkHash, scenefile] : chunkMapping){
-    auto hasNoElements = offlineGetElements(scenefile).size() == 0;
+    auto hasNoElements = offlineGetElements(scenefile, readFile).size() == 0;
     if (hasNoElements){
       chunkHashToDelete.push_back(chunkHash);
     }
@@ -250,10 +250,10 @@ void removeEmptyScenes(std::map<std::string, std::string>& chunkMapping){
   }
 }
 
-std::map<std::string, std::string> getHashesToConsolidateScenefiles(std::map<std::string, std::string>& chunkMapping){
+std::map<std::string, std::string> getHashesToConsolidateScenefiles(std::map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
   std::map<size_t, std::vector<std::string>> hashedSceneToChunkHashs;
   for (auto &[chunkHash, scenefile] : chunkMapping){
-    auto hashedScene = offlineHashSceneContent(scenefile);
+    auto hashedScene = offlineHashSceneContent(scenefile, readFile);
     if (hashedSceneToChunkHashs.find(hashedScene) == hashedSceneToChunkHashs.end()){
       hashedSceneToChunkHashs[hashedScene] = {};
     }
@@ -269,9 +269,9 @@ std::map<std::string, std::string> getHashesToConsolidateScenefiles(std::map<std
   return chunkHashToNewSceneFiles;
 }
 
-void consolidateSameScenes(std::map<std::string, std::string>& chunkMapping){
+void consolidateSameScenes(std::map<std::string, std::string>& chunkMapping, std::function<std::string(std::string)> readFile){
   std::cout << "consolidating same scenes" << std::endl;
-  auto chunkHashToNewSceneFiles = getHashesToConsolidateScenefiles(chunkMapping);
+  auto chunkHashToNewSceneFiles = getHashesToConsolidateScenefiles(chunkMapping, readFile);
   for (auto &[chunkhash, newSceneFile] : chunkHashToNewSceneFiles){
     auto oldSceneFile = chunkMapping.at(chunkhash);
     offlineDeleteScene(oldSceneFile);  
@@ -293,7 +293,7 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
     assert(valid);
     auto copiedSceneName = newChunkFile(fileChunkAddress);
     newChunksMapping[chunkHash] = copiedSceneName;
-    offlineCopyScene(scenefile, copiedSceneName);
+    offlineCopyScene(scenefile, copiedSceneName, interface.readFile);
   }
 
   auto oldchunksize = loadingInfo.mappingInfo.chunkSize;
@@ -302,8 +302,8 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
     auto fileChunkAddress = decodeChunkHash(chunkHash, &valid);
     auto outputSceneFile = newChunksMapping.at(chunkHash);
     assert(valid);
-    auto elements = offlineGetElementsNoChildren(scenefile);
-    auto positions = getPositionForElements(scenefile, elements, fileChunkAddress, oldchunksize);
+    auto elements = offlineGetElementsNoChildren(scenefile, interface.readFile);
+    auto positions = getPositionForElements(scenefile, elements, fileChunkAddress, oldchunksize, interface.readFile);
     auto chunkPositionAddresses = chunkAddressForPosition(positions, newchunksize);
     for (int i = 0; i < chunkPositionAddresses.size(); i++){
       ChunkPositionAddress& chunkPositionAddress = chunkPositionAddresses.at(i);
@@ -317,8 +317,8 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
           offlineNewScene(sceneFileToWrite);
         }
         newChunksMapping[encodedTargetChunkHash] = sceneFileToWrite;        
-        offlineMoveElementAndChildren(outputSceneFile, sceneFileToWrite, elementName, true);
-        offlineUpdateElementAttributes(sceneFileToWrite, elementName, {{ "position", serializeVec(chunkPositionAddress.position) }});
+        offlineMoveElementAndChildren(outputSceneFile, sceneFileToWrite, elementName, true, interface.readFile);
+        offlineUpdateElementAttributes(sceneFileToWrite, elementName, {{ "position", serializeVec(chunkPositionAddress.position) }}, interface.readFile);
       }else{
         std::cout << "RECHUNKING: " << scenefile << " not moving element: " << elementName << std::endl;
       }
@@ -330,8 +330,8 @@ void rechunkAllObjects(World& world, DynamicLoading& loadingInfo, int newchunksi
   DynamicLoading newLoading = loadingInfo;
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;
   newLoading.mappingInfo.chunkSize = newchunksize;
-  removeEmptyScenes(newChunksMapping);
-  consolidateSameScenes(newChunksMapping);
+  removeEmptyScenes(newChunksMapping, interface.readFile);
+  consolidateSameScenes(newChunksMapping, interface.readFile);
   newLoading.mappingInfo.chunkHashToSceneFile = newChunksMapping;
   saveChunkMappingInfo(newLoading, "./res/scenes/chunk_copy.mapping");
   std::cout << "chunk size: " << newLoading.mappingInfo.chunkSize << std::endl;

@@ -14,9 +14,9 @@ std::map<std::string, std::string> parseConfigData(std::string serverConfig){
   return serverNameToIp;
 }
 
-ServerBrowser loadServerInfo(){
+ServerBrowser loadServerInfo(std::function<std::string(std::string)> readFile){
   ServerBrowser browser {
-    .serverNameToIp = parseConfigData(loadFile("./res/data/servers")),
+    .serverNameToIp = parseConfigData(readFile("./res/data/servers")),
   };
   return browser;
 }
@@ -29,8 +29,8 @@ std::string handleListServer(ServerBrowser& browser){
   return servers;
 }
 
-tcpServer initTcpServer(){
-  auto browser = loadServerInfo();
+tcpServer initTcpServer(std::function<std::string(std::string)> readFile){
+  auto browser = loadServerInfo(readFile);
   
   std::cout << "INFO: create server start" << std::endl;
   auto server = createServer();
@@ -121,11 +121,11 @@ void sendNetworkPacketUpdateToAllExcept(int socket, NetworkPacket packet, std::m
   }
 }
 
-NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected){
+NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected, std::function<std::string(std::string)> readFile){
   std::cout << "INFO: running in server bootstrapper mode" << std::endl;
   std::map<std::string, sockaddr_in> udpConnections;
   NetCode netcode {
-    .tServer = initTcpServer(),
+    .tServer = initTcpServer(readFile),
     .udpModsocket = createUdpServer(),
     .udpConnections = udpConnections,
     .onPlayerConnected = onPlayerConnected,

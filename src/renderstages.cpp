@@ -41,8 +41,8 @@ void ensureUniformExists(
     };
   }
 }
-std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile, unsigned int fb0, unsigned int fb1){
-  auto tokens = parseFormat(loadFile(postprocessingFile));
+std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile, unsigned int fb0, unsigned int fb1, std::function<std::string(std::string)> readFile){
+  auto tokens = parseFormat(readFile(postprocessingFile));
   std::vector<DeserializedRenderStage> additionalShaders;
   std::map<int, std::map<std::string, RenderStageUniformTypeValue>> stagenameToUniformToValue;
 
@@ -188,14 +188,15 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   std::string postprocessingFile,
   unsigned int fbo,
   unsigned int framebufferTexture, 
-  unsigned int framebufferTexture2
+  unsigned int framebufferTexture2,
+  std::function<std::string(std::string)> readFile
 ){
-  auto additionalShaders = parseRenderStages(postprocessingFile, framebufferTexture, framebufferTexture2);
+  auto additionalShaders = parseRenderStages(postprocessingFile, framebufferTexture, framebufferTexture2, readFile);
   std::vector<RenderStep> additionalRenderSteps;
   for (int i  = 0; i < additionalShaders.size(); i++){
     auto additionalShader = additionalShaders.at(i);
     auto shaderPath = additionalShader.shader;
-    unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl");
+    unsigned int shaderProgram = loadShader(shaderPath + "/vertex.glsl", shaderPath + "/fragment.glsl", readFile);
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
       .name = additionalShader.name,
@@ -233,7 +234,8 @@ RenderStages loadRenderStages(
   unsigned int framebufferTexture, unsigned int framebufferTexture2, unsigned int framebufferTexture3,
   unsigned int* depthTextures, int numDepthTextures,
   unsigned int* portalTextures, int numPortalTextures,
-  RenderShaders shaders
+  RenderShaders shaders,
+  std::function<std::string(std::string)> readFile
 ){
   assert(numDepthTextures > 1);
   assert(numPortalTextures > 1);
@@ -441,7 +443,7 @@ RenderStages loadRenderStages(
   dof2.intUniforms.at(0).value = false;
   dof2.textures.at(0).framebufferTextureId = framebufferTexture3;
 
-  auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2);
+  auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2, readFile);
 
   RenderStages stages {
     .selection = selectionRender,

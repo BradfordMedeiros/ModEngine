@@ -11,14 +11,14 @@ void offlineDeleteScene(std::string scenepath){
 bool offlineSceneExists(std::string scenepath){
   return fileExists(scenepath);
 }
-void offlineCopyScene(std::string scenepath, std::string newScenepath){
+void offlineCopyScene(std::string scenepath, std::string newScenepath, std::function<std::string(std::string)> readFile){
   std::cout << "offline: copy scene: " << scenepath << " in file: " << newScenepath << std::endl;
-  saveFile(newScenepath, loadFile(scenepath));
+  saveFile(newScenepath, readFile(scenepath));
 }
 
-void offlineRemoveElement(std::string scenepath, std::string elementName){
+void offlineRemoveElement(std::string scenepath, std::string elementName, std::function<std::string(std::string)> readFile){
   std::cout << "offline: remove element: " << elementName << " in file: " << scenepath << std::endl;
-  auto tokens = parseFormat(loadFile(scenepath));
+  auto tokens = parseFormat(readFile(scenepath));
   std::vector<Token> newTokens;
   for (auto token : tokens){
     if (token.target == elementName){
@@ -29,9 +29,9 @@ void offlineRemoveElement(std::string scenepath, std::string elementName){
   saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
-void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
+void offlineSetElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs, std::function<std::string(std::string)> readFile){
   std::cout << "offline: set element attributes: " << elementName << " in file: " << scenepath << " - ";
-  auto tokens = parseFormat(loadFile(scenepath));
+  auto tokens = parseFormat(readFile(scenepath));
   std::vector<Token> newTokens;
   for (auto token : tokens){
     if (token.target == elementName){
@@ -51,9 +51,9 @@ void offlineSetElementAttributes(std::string scenepath, std::string elementName,
 }
 
 // like set element but preserves the old attributes
-void offlineUpdateElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs){
+void offlineUpdateElementAttributes(std::string scenepath, std::string elementName, std::vector<std::pair<std::string, std::string>> attrs, std::function<std::string(std::string)> readFile){
   std::cout << "offline: update element attributes: " << elementName << " in file: " << scenepath << " - ";
-  auto tokens = parseFormat(loadFile(scenepath));
+  auto tokens = parseFormat(readFile(scenepath));
   std::vector<Token> newTokens;
 
   std::map<std::string, std::string> elementTokens;
@@ -78,8 +78,8 @@ void offlineUpdateElementAttributes(std::string scenepath, std::string elementNa
   saveFile(scenepath, serializeSceneTokens(newTokens));
 }
 
-std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName){
-  auto tokens = parseFormat(loadFile(scenepath));
+std::vector<Token> offlineGetElement(std::string scenepath, std::string elementName, std::function<std::string(std::string)> readFile){
+  auto tokens = parseFormat(readFile(scenepath));
   std::vector<Token> element;
   for (auto token : tokens){
     if (token.target == elementName){
@@ -89,8 +89,8 @@ std::vector<Token> offlineGetElement(std::string scenepath, std::string elementN
   return element;
 }
 
-std::string offlineGetElementAttr(std::string scenepath, std::string elementName, std::string attr){
-  auto tokens = offlineGetElement(scenepath, elementName);
+std::string offlineGetElementAttr(std::string scenepath, std::string elementName, std::string attr, std::function<std::string(std::string)> readFile){
+  auto tokens = offlineGetElement(scenepath, elementName, readFile);
   for (auto token : tokens){
     if (token.attribute == attr){
       return token.payload;
@@ -100,9 +100,9 @@ std::string offlineGetElementAttr(std::string scenepath, std::string elementName
   return "";
 }
 
-std::vector<std::string> offlineGetElements(std::string scenepath){
+std::vector<std::string> offlineGetElements(std::string scenepath, std::function<std::string(std::string)> readFile){
   std::vector<std::string> elements;
-  auto tokens = parseFormat(loadFile(scenepath));
+  auto tokens = parseFormat(readFile(scenepath));
   for (auto &token : tokens){
     if (std::find(elements.begin(), elements.end(), token.target) == elements.end()){
       elements.push_back(token.target);
@@ -111,13 +111,13 @@ std::vector<std::string> offlineGetElements(std::string scenepath){
   return elements;
 }
 
-bool offlineElementExists(std::string scenepath, std::string elementName){
-  auto elements = offlineGetElement(scenepath, elementName);
+bool offlineElementExists(std::string scenepath, std::string elementName, std::function<std::string(std::string)> readFile){
+  auto elements = offlineGetElement(scenepath, elementName, readFile);
   return elements.size() > 0;
 }
 
-std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
-  auto tokens = parseFormat(loadFile(scenepath));
+std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath, std::function<std::string(std::string)> readFile){
+  auto tokens = parseFormat(readFile(scenepath));
   auto elementsToAttrs = deserializeSceneTokens(tokens);
   std::set<std::string> allChildren;
   for (auto &[_, elementToAttr] : elementsToAttrs){
@@ -134,9 +134,9 @@ std::vector<std::string> offlineGetElementsNoChildren(std::string scenepath){
   return elements;
 }
 
-void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision){
+void offlineMoveElement(std::string fromScene, std::string toScene, std::string elementName, std::function<std::string(std::string)> readFile, bool renameOnCollision){
   std::string targetElementName = elementName;
-  if (offlineElementExists(toScene, elementName)){
+  if (offlineElementExists(toScene, elementName, readFile)){
     std::cout << "scene offline: " << elementName << " already exists in " << toScene << std::endl;
     if (!renameOnCollision){
       assert(false);
@@ -146,7 +146,7 @@ void offlineMoveElement(std::string fromScene, std::string toScene, std::string 
     for(int indexNumber = 0; indexNumber < 100; indexNumber++){  // 100 arbitrary limit
       indexNumber++;
       std::string newElementName = elementName + "_" + std::to_string(indexNumber);
-      if (!offlineElementExists(toScene, newElementName)){
+      if (!offlineElementExists(toScene, newElementName, readFile)){
         targetElementName = newElementName;
         renamed = true;
         std::cout << "renamed to elementName: " << targetElementName << std::endl;
@@ -155,8 +155,8 @@ void offlineMoveElement(std::string fromScene, std::string toScene, std::string 
     }
     assert(renamed);
   }
-  auto elements = offlineGetElement(fromScene, elementName);
-  offlineRemoveElement(fromScene, elementName);
+  auto elements = offlineGetElement(fromScene, elementName, readFile);
+  offlineRemoveElement(fromScene, elementName, readFile);
   std::vector<std::pair<std::string, std::string>> attrs;
   for (auto element : elements){
     attrs.push_back({element.attribute, element.payload});
@@ -165,11 +165,11 @@ void offlineMoveElement(std::string fromScene, std::string toScene, std::string 
     std::cout << "element " << elementName << " not found in " << fromScene << std::endl;
    // assert(false);
   }
-  offlineSetElementAttributes(toScene, targetElementName, attrs);
+  offlineSetElementAttributes(toScene, targetElementName, attrs, readFile);
 }
 
-std::vector<std::string> offlineNodeAndChildren(std::string fromScene, std::string elementName){
-  auto tokens = parseFormat(loadFile(fromScene));
+std::vector<std::string> offlineNodeAndChildren(std::string fromScene, std::string elementName, std::function<std::string(std::string)> readFile){
+  auto tokens = parseFormat(readFile(fromScene));
   auto elementsToAttrs = deserializeSceneTokens(tokens);
 
   std::vector<std::string> allChildren;
@@ -191,15 +191,15 @@ std::vector<std::string> offlineNodeAndChildren(std::string fromScene, std::stri
   }
   return allChildren;
 }
-void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision){
-  auto children = offlineNodeAndChildren(fromScene, elementName);
+void offlineMoveElementAndChildren(std::string fromScene, std::string toScene, std::string elementName, bool renameOnCollision, std::function<std::string(std::string)> readFile){
+  auto children = offlineNodeAndChildren(fromScene, elementName, readFile);
   for (auto child : children){
-    offlineMoveElement(fromScene, toScene, child, renameOnCollision);
+    offlineMoveElement(fromScene, toScene, child, readFile, renameOnCollision);
   }
 }
 
-size_t offlineHashSceneContent(std::string scenepath1){
-  auto sceneOne = loadFile(scenepath1);
+size_t offlineHashSceneContent(std::string scenepath1, std::function<std::string(std::string)> readFile){
+  auto sceneOne = readFile(scenepath1);
   std::hash<std::string> hashStr;
   return hashStr(sceneOne);
 }

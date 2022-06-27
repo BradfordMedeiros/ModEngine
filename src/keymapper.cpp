@@ -61,7 +61,7 @@ KeyValueType getKeyValueType(std::string trimmedValue){
   return KEY_VALUE_CHAR;
 }
 
-KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inputFns){
+KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inputFns, std::function<std::string(std::string)> readFile){
   if (filemapping == ""){
     return KeyRemapper{
       .inputFns = inputFns,
@@ -70,7 +70,7 @@ KeyRemapper readMapping(std::string filemapping, std::vector<InputDispatch> inpu
 
   std::vector<KeyMapping> mapping;
   std::map<int, KeyAxisConfiguration> axisConfigurations; 
-  std::string keyMapperContent = loadFile(filemapping);
+  std::string keyMapperContent = readFile(filemapping);
 
   auto mappedLines = filterWhitespace(filterComments(split(keyMapperContent, '\n')));
   for (auto line : mappedLines){

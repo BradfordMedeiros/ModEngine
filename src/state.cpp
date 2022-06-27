@@ -409,8 +409,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 	return state;
 }
 
-void setInitialState(engineState& state, std::string file, float now){
-  auto tokens = parseFormat(loadFile(file));
+void setInitialState(engineState& state, std::string file, float now, std::function<std::string(std::string)> readFile){
+  auto tokens = parseFormat(readFile(file));
   for (auto &token : tokens){
     ObjectValue objValue {
       .object = token.target,

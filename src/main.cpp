@@ -329,7 +329,7 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram, bool allo
     return shaderProgram;
   }
   if (shaderNameToId.find(fragShaderName) == shaderNameToId.end()){
-    auto shaderId = loadShader(shaderFolderPath + "/vertex.glsl", fragShaderName);
+    auto shaderId = loadShader(shaderFolderPath + "/vertex.glsl", fragShaderName, interface.readFile);
     shaderNameToId[fragShaderName] = shaderId;   
   }
   return shaderNameToId.at(fragShaderName);
@@ -927,16 +927,44 @@ int main(int argc, char* argv[]){
     }
   }
 
-  auto layers = parseLayerInfo(result["layers"].as<std::string>());
+  interface = SysInterface {
+    .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
+      //    .onCreateCustomElement = createCustomObj,
+      /*  if (script == "native/basic_test"){
+     return;
+       }
+      auto name = getGameObject(world, id).name;
+      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
+     loadScript(script, id, sceneId, bootStrapperMode, false /*freescript*/ ;
+      loadCScript(id, script.c_str(), sceneId, bootStrapperMode, false);
+      /*  /*if (script == "native/basic_test"){
+        return;
+      }
+       auto name = getGameObject(world, id).name;
+      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
+      loadScript(script, id, sceneId, bootStrapperMode, false);*/
+    },
+    .unloadCScript = [](std::string scriptpath, objid id) -> void {
+      unloadCScript(id);
+      removeLocks(id);
+      removeLinesByOwner(lineData, id);
+    },
+    .stopAnimation = stopAnimation,
+    .getCurrentTime = getTotalTime,
+    .readFile = loadFile,
+  };
+
   auto mods = result["mods"].as<std::vector<std::string>>();
   for (auto mod : mods){
     installMod(mod);
   }
 
+  auto layers = parseLayerInfo(result["layers"].as<std::string>(), interface.readFile);
+
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
-  keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns);
+  keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns, loadFile);
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
@@ -962,7 +990,7 @@ int main(int argc, char* argv[]){
   disableInput = result["noinput"].as<bool>();
 
   state.fullscreen = result["fullscreen"].as<bool>(); // merge flags and world.state concept
-  setInitialState(state, "./res/world.state", now); 
+  setInitialState(state, "./res/world.state", now, interface.readFile); 
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -1050,31 +1078,31 @@ int main(int argc, char* argv[]){
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
   glPointSize(10.f);
-  
+
   std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
-  unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl");
+  unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
   
   std::cout << "INFO: framebuffer file path is " << framebufferShaderPath << std::endl;
-  framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl");
+  framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string depthShaderPath = "./res/shaders/depth";
   std::cout << "INFO: depth file path is " << depthShaderPath << std::endl;
-  unsigned int depthProgram = loadShader(depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl");
+  unsigned int depthProgram = loadShader(depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
 
   std::cout << "INFO: ui shader file path is " << uiShaderPath << std::endl;
-  uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl");
+  uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string selectionShaderPath = "./res/shaders/selection";
   std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
-  unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl");
+  unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string drawingShaderPath = "./res/shaders/drawing";
   std::cout << "INFO: drawing shader path is: " << drawingShaderPath << std::endl;
-  drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl");
+  drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string blurShaderPath = "./res/shaders/blur";
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
-  blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl");
+  blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(fbo, 
     framebufferTexture, framebufferTexture2, framebufferTexture3, 
@@ -1084,7 +1112,8 @@ int main(int argc, char* argv[]){
       .blurProgram = blurProgram,
       .selectionProgram = selectionProgram,
       .shaderProgram = shaderProgram,
-    }
+    },
+    interface.readFile
   );
 
   fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
@@ -1178,39 +1207,15 @@ int main(int argc, char* argv[]){
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 
   cBindings = getCScriptBindingCallbacks();
-  if(bootStrapperMode){
-    netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave);
-  }
-
 
   BulletDebugDrawer drawer(addLineNextCycle);
   btIDebugDraw* debuggerDrawer = result["debugphysics"].as<bool>() ?  &drawer : NULL;
 
-  interface = SysInterface {
-    .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
-      //    .onCreateCustomElement = createCustomObj,
-      /*  if (script == "native/basic_test"){
-     return;
-       }
-      auto name = getGameObject(world, id).name;
-      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-     loadScript(script, id, sceneId, bootStrapperMode, false /*freescript*/ ;
-      loadCScript(id, script.c_str(), sceneId, bootStrapperMode, false);
-      /*  /*if (script == "native/basic_test"){
-        return;
-      }
-       auto name = getGameObject(world, id).name;
-      std::cout << "gameobj: " << name << " wants to load script: (" << script << ")" << std::endl;
-      loadScript(script, id, sceneId, bootStrapperMode, false);*/
-    },
-    .unloadCScript = [](std::string scriptpath, objid id) -> void {
-      unloadCScript(id);
-      removeLocks(id);
-      removeLinesByOwner(lineData, id);
-    },
-    .stopAnimation = stopAnimation,
-    .getCurrentTime = getTotalTime,
-  };
+
+  if(bootStrapperMode){
+    netcode = initNetCode(cBindings.onPlayerJoined, cBindings.onPlayerLeave, interface.readFile);
+  }
+
 
   std::vector<std::string> defaultMeshesToLoad {
     "./res/models/ui/node.obj",
@@ -1272,7 +1277,7 @@ int main(int argc, char* argv[]){
 
   //loadAllTextures();
 
-  dynamicLoading = createDynamicLoading(worldfile);
+  dynamicLoading = createDynamicLoading(worldfile, interface.readFile);
   if (result["rechunk"].as<int>()){
     rechunkAllObjects(world, dynamicLoading, result["rechunk"].as<int>(), interface);
     return 0;

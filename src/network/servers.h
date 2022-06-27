@@ -25,7 +25,7 @@ struct NetCode {
   std::function<void(std::string&)> onPlayerConnected;
   std::function<void(std::string&)> onPlayerDisconnected;
 };
-NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected);
+NetCode initNetCode(std::function<void(std::string&)> onPlayerConnected, std::function<void(std::string&)> onPlayerDisconnected, std::function<std::string(std::string)> readFile);
 bool tickNetCode(NetCode& netcode, NetworkPacket& packet, std::function<std::string()> maybeGetSetupConnectionHash);
 void sendUdpPacketToAllUdpClients(NetCode& netcode, NetworkPacket data);
 

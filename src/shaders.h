@@ -4,8 +4,8 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <stdexcept>
-#include "./common/util.h"
+#include <functional>
 
-unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
+unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentShaderFilepath, std::function<std::string(std::string)> readFile);
 
 #endif 

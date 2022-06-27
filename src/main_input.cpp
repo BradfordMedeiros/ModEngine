@@ -1237,7 +1237,7 @@ std::vector<InputDispatch> inputFns = {
         {{ "anewfield", "regular_field" }}
       );*/
 
-      auto elements = offlineGetElementsNoChildren("./res/scenes/world/elementwithparent.rawscene");
+      auto elements = offlineGetElementsNoChildren("./res/scenes/world/elementwithparent.rawscene", interface.readFile);
       std::cout << "elements in scene that are not children" << std::endl;
       for (auto element : elements){
         std::cout << element << " ";
@@ -1269,7 +1269,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineCopyScene("./build/testscene.rawscene", "./build/testscene2.rawscene");
+      offlineCopyScene("./build/testscene.rawscene", "./build/testscene2.rawscene", interface.readFile);
     }
   },
   InputDispatch{
@@ -1278,7 +1278,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineRemoveElement("./build/testscene.rawscene", "someitem");
+      offlineRemoveElement("./build/testscene.rawscene", "someitem", interface.readFile);
     }
   },
   InputDispatch{
@@ -1287,7 +1287,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 'L', 
     .hasPreq = true,
     .fn = []() -> void {
-      offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}});
+      offlineSetElementAttributes("./build/testscene.rawscene", "someitem", { {"one", "1" }, {"two", "2" }, {"3", "three"}}, interface.readFile);
     }
   },
   InputDispatch{
@@ -1325,8 +1325,8 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = GLFW_KEY_LEFT_ALT,
     .hasPreq = true,
     .fn = []() -> void {
-      auto styles = loadStyles("./res/test.style");
-      auto tokens = parseFormat(loadFile("./res/scenes/example.p.rawscene"));
+      auto styles = loadStyles("./res/test.style", interface.readFile);
+      auto tokens = parseFormat(interface.readFile("./res/scenes/example.p.rawscene"));
       applyStyles(tokens, styles);
       auto serializedContent = serializeSceneTokens(tokens);
       std::cout << serializedContent << std::endl;
