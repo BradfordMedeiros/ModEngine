@@ -499,7 +499,7 @@ int renderObject(
         auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f), position);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(outerScale));
         glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> border.borderColor));
-        drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);      
+        drawMesh(*defaultMeshes.unitXYRect, shaderProgram, -1, -1, drawPoints);      
       }
  
       layoutVertexCount += defaultMeshes.unitXYRect -> numTriangles;  // todo get vertex count from the drawmesh calls
