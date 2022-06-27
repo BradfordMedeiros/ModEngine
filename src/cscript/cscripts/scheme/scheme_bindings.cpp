@@ -787,6 +787,23 @@ SCM scmLogStat(SCM statId, SCM amount){
   return SCM_UNSPECIFIED;
 }
 
+
+void (*_installMod)(std::string layer);
+SCM scmInstallMod(SCM name){
+  _installMod(scm_to_locale_string(name));
+  return SCM_UNSPECIFIED;
+}
+void (*_uninstallMod)(std::string layer);
+SCM scmUninstallMod(SCM name){
+  _uninstallMod(scm_to_locale_string(name));
+}
+std::vector<std::string> (*_listMods)();
+SCM scmListMods(){
+  return listToSCM(_listMods());
+}
+
+
+
 // Callbacks
 void onFrame(){
   maybeCallFunc("onFrame");
@@ -1092,6 +1109,10 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("stat", 1, 0, 0, (void*)scmStat);
   scm_c_define_gsubr("logstat", 2, 0, 0, (void*)scmLogStat);
 
+  scm_c_define_gsubr("install-mod", 1, 0, 0, (void*)scmInstallMod);
+  scm_c_define_gsubr("uninstall-mod", 1, 0, 0, (void*)scmUninstallMod);
+  scm_c_define_gsubr("list-mods", 0, 0, 0, (void*)scmListMods);
+
   for (auto registerFn : _registerGuileFns){
     registerFn();
   }
@@ -1179,6 +1200,9 @@ void createStaticSchemeBindings(
   AttributeValue (*runStats)(std::string field),
   unsigned int (*scmStat)(std::string),
   void (*logStat)(unsigned int, AttributeValue amount),
+  void (*installMod)(std::string layer),
+  void (*uninstallMod)(std::string layer),
+  std::vector<std::string> (*listMods)(),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1272,6 +1296,10 @@ void createStaticSchemeBindings(
   _runStats = runStats;
   _scmStat = scmStat;
   _logStat = logStat;
+
+  _installMod = installMod;
+  _uninstallMod = uninstallMod;
+  _listMods = listMods;
 
   _setFloatState = setFloatState;
   _setIntState = setIntState;

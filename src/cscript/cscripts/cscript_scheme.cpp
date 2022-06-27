@@ -117,6 +117,9 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
     api.runStats,
     api.stat,
     api.logStat,
+    api.installMod,
+    api.uninstallMod,
+    api.listMods,
     {}
   );
 

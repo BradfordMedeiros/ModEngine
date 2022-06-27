@@ -90,6 +90,9 @@ void createStaticSchemeBindings(
   AttributeValue (*runStats)(std::string field),
   unsigned int (*scmStat)(std::string),
   void (*logStat)(unsigned int, AttributeValue amount),
+  void (*installMod)(std::string layer),
+  void (*uninstallMod)(std::string layer),
+  std::vector<std::string> (*listMods)(),
   std::vector<func_t> registerGuileFns
 );
 

@@ -32,6 +32,7 @@
 #include "./cscript/cscripts/cscript_scheme.h"
 #include "./lines.h"
 #include "./scene/common/textures_gen.h"
+#include "./modlayer.h"
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
@@ -897,6 +898,7 @@ int main(int argc, char* argv[]){
    ("z,layers", "Layers file to specify render layers", cxxopts::value<std::string>() -> default_value("./res/layers.layerinfo"))
    ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
+   ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("h,help", "Print help")
   ;        
 
@@ -926,6 +928,10 @@ int main(int argc, char* argv[]){
   }
 
   auto layers = parseLayerInfo(result["layers"].as<std::string>());
+  auto mods = result["mods"].as<std::vector<std::string>>();
+  for (auto mod : mods){
+    installMod(mod);
+  }
 
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
@@ -1165,6 +1171,9 @@ int main(int argc, char* argv[]){
     .runStats = statValue,
     .stat = statName,
     .logStat = registerStat,
+    .installMod = installMod,
+    .uninstallMod = uninstallMod,
+    .listMods = listMods,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
 

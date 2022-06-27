@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <assert.h>
 
 void installMod(std::string layer);
 void uninstallMod(std::string layer);

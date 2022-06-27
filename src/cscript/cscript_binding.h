@@ -91,6 +91,9 @@ struct CustomApiBindings {
   AttributeValue (*runStats)(std::string field);
   unsigned int (*stat)(std::string);
   void (*logStat)(unsigned int, AttributeValue amount);
+  void (*installMod)(std::string layer);
+  void (*uninstallMod)(std::string layer);
+  std::vector<std::string> (*listMods)();
   //std::vector<func_t> registerGuileFns
 };
 
