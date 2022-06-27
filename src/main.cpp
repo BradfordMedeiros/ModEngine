@@ -951,7 +951,7 @@ int main(int argc, char* argv[]){
     },
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime,
-    .readFile = loadFile,
+    .readFile = modlayerReadFile,
   };
 
   auto mods = result["mods"].as<std::vector<std::string>>();
