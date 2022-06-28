@@ -965,7 +965,7 @@ int main(int argc, char* argv[]){
   auto rawScenes = result["rawscene"].as<std::vector<std::string>>();
   rawSceneFile =  rawScenes.size() > 0 ? rawScenes.at(0) : "./res/scenes/example.rawscene";
 
-  keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns, loadFile);
+  keyMapper = readMapping(result["mapping"].as<std::string>(), inputFns, interface.readFile);
 
   if (result["help"].as<bool>()){
     std::cout << cxxoption.help() << std::endl;
