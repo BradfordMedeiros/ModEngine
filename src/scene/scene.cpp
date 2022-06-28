@@ -678,6 +678,7 @@ void addObjectToWorld(
         .addEmitter =  [](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
         .ensureMeshLoaded = [](std::string meshName) -> std::vector<std::string> { return {}; },
         .onCollisionChange = []() -> void {},
+        .pathForModLayer = world.interface.modlayerPath,
       }; 
       auto gameobjObj = createObjectType(getType(name), attr, util);
       returnobjs.push_back(gameobjObj);
@@ -692,6 +693,7 @@ void addObjectToWorld(
       .addEmitter = addEmitterObject,
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange,
+      .pathForModLayer = world.interface.modlayerPath,
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
     addObjectType(world.objectMapping, gameobjObj, id);

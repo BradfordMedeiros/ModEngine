@@ -29,6 +29,7 @@ struct ObjectTypeUtil {
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
   std::function<std::vector<std::string>(std::string)> ensureMeshLoaded;
   std::function<void()> onCollisionChange;
+  std::function<std::string(std::string)> pathForModLayer;
 };
 
 struct ObjectSerializeUtil {
