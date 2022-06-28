@@ -10,6 +10,7 @@ struct SysInterface {
   std::function<void(objid)> stopAnimation;
   std::function<float()> getCurrentTime;
   std::function<std::string(std::string)> readFile;
+  std::function<std::string(std::string)> modlayerPath;
 };
 
 #endif

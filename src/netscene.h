@@ -43,7 +43,7 @@ void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool boots
 void netObjectUpdate(World& world, GameObject& obj, NetCode& netcode, bool bootstrapperMode);
 void netObjectDelete(objid id, bool isNet, NetCode& netcode, bool bootstrapperMode);
 
-void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
+void onNetCode(World& world, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode);
 
 void sendDataUdp(std::string data);
 std::string connectServer(std::string data);

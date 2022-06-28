@@ -512,13 +512,14 @@ World createWorld(
     .onObjectDelete = onObjectDelete,
     .entitiesToUpdate = {},
     .sandbox = createSceneSandbox(layers),
+    .interface = interface,
   };
 
   // hackey, but createSceneSandbox adds root object with id 0 so this is needed
   std::vector<objid> idsAdded = { 0 };
   std::vector<GameObjectObj> addedGameobjObjs = {};
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, interface, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, false, addedGameobjObjs, submodelAttributes);
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, false, addedGameobjObjs, submodelAttributes);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -602,7 +603,6 @@ void addObjectToWorld(
   std::string name,
   std::string topName,
   std::function<objid()> getId,
-  SysInterface interface,
   GameobjAttributes attr,
   std::map<objid, std::vector<glm::vec3>>& idToModelVertexs,
   std::map<std::string, GameobjAttributes>& submodelAttributes,
@@ -617,8 +617,8 @@ void addObjectToWorld(
         return loadTextureWorld(world, texture, id);
       });    
     };
-    auto addEmitterObject = [&world, &interface, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
-      addEmitter(world.emitters, name, id, interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
+    auto addEmitterObject = [&world, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
+      addEmitter(world.emitters, name, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
     };
     auto onCollisionChange = [&world, id]() -> void {
       //assert(false); // think about what this should do better!
@@ -628,7 +628,7 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &interface, &idToModelVertexs, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &idToModelVertexs, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
       if (meshName == ""){
         return {};
       }
@@ -656,7 +656,7 @@ void addObjectToWorld(
         );
 
         for (auto &[name, objAttr] : newSerialObjs){
-          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, interface, objAttr.attr, idToModelVertexs, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
+          addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, idToModelVertexs, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
         }
         return meshNamesForNode(data, meshName, name);
       }
@@ -698,7 +698,6 @@ void addSerialObjectsToWorld(
   objid sceneId, 
   std::vector<objid>& idsAdded,
   std::function<objid()> getNewObjectId,
-  SysInterface interface,
   std::map<std::string, GameobjAttributesWithId> nameToAttr,
   bool returnObjectOnly,
   std::vector<GameObjectObj>& gameobjObjs,
@@ -707,7 +706,7 @@ void addSerialObjectsToWorld(
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
-    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, interface, objAttr.attr, idToModelVertexs, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
+    addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, idToModelVertexs, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
     return;
@@ -728,7 +727,7 @@ void addSerialObjectsToWorld(
   for (auto id : idsAdded){
     auto obj = getGameObject(world, id);
     if (obj.script != ""){
-      interface.loadCScript(obj.script, id, sceneId);
+      world.interface.loadCScript(obj.script, id, sceneId);
     }
   }
 
@@ -738,21 +737,21 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface, std::optional<std::string> name){
-  auto styles = loadStyles("./res/default.style", interface.readFile);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name){
+  auto styles = loadStyles("./res/default.style", world.interface.readFile);
   auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name);
   std::vector<GameObjectObj> addedGameobjObjs = {};
-  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, interface, data.additionalFields, false, addedGameobjObjs, data.subelementAttributes);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, data.additionalFields, false, addedGameobjObjs, data.subelementAttributes);
   return sceneId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens, std::optional<std::string> name){
-  auto sceneData = interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
-  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), sceneData, interface, name);
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name){
+  auto sceneData = world.interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
+  return addSceneToWorldFromData(world, sceneFile, getUniqueObjId(), sceneData, name);
 }
 
 // todo finish removing data like eg clearing meshes, animations,etc
-void removeObjectById(World& world, objid objectId, std::string name, SysInterface interface, std::string scriptName, bool netsynchronized){
+void removeObjectById(World& world, objid objectId, std::string name, std::string scriptName, bool netsynchronized){
   if (world.rigidbodys.find(objectId) != world.rigidbodys.end()){
     auto rigidBody = world.rigidbodys.at(objectId).body;
     assert(rigidBody != NULL);
@@ -760,7 +759,7 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
     world.rigidbodys.erase(objectId);
   }
 
-  interface.stopAnimation(objectId);
+  world.interface.stopAnimation(objectId);
   removeObject(
     world.objectMapping, 
     objectId, 
@@ -776,11 +775,11 @@ void removeObjectById(World& world, objid objectId, std::string name, SysInterfa
   freeTextureRefsByOwner(world, objectId);
   freeAnimationsForOwner(world, objectId);
   if (scriptName != ""){
-    interface.unloadCScript(scriptName, objectId);
+    world.interface.unloadCScript(scriptName, objectId);
   }
 }
 
-void removeObjectFromScene(World& world, objid objectId, SysInterface interface){  
+void removeObjectFromScene(World& world, objid objectId){  
   if (!idExists(world.sandbox, objectId)){
     return;
   }
@@ -797,23 +796,23 @@ void removeObjectFromScene(World& world, objid objectId, SysInterface interface)
       auto name = gameobj.name;
       auto scriptName = gameobj.script;
       auto netsynchronized = gameobj.netsynchronize;
-      removeObjectById(world, id, name, interface, scriptName, netsynchronized);
+      removeObjectById(world, id, name, scriptName, netsynchronized);
     }
     removeObjectsFromScenegraph(world.sandbox, idsToRemove);  
   }
   maybePruneScenes(world.sandbox);
 }
 
-void copyObjectToScene(World& world, objid id, SysInterface interface){
+void copyObjectToScene(World& world, objid id){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
   auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
   std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
-  addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false, interface);
+  addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
 }
 
 
-void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
+void removeSceneFromWorld(World& world, objid sceneId){
   if (!sceneExists(world.sandbox, sceneId)) {
     std::cout << "INFO: SCENE MANAGEMENT: tried to remove (" << sceneId << ") but it does not exist" << std::endl;
     return;   // @todo maybe better to throw error instead
@@ -824,17 +823,17 @@ void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface){
     auto name = gameobj.name;
     auto scriptName = gameobj.script;
     auto netsynchronized = gameobj.netsynchronize;
-    removeObjectById(world, objectId, name, interface, scriptName, netsynchronized);
+    removeObjectById(world, objectId, name, scriptName, netsynchronized);
   }
   removeScene(world.sandbox, sceneId);
 }
-void removeAllScenesFromWorld(World& world, SysInterface interface){
+void removeAllScenesFromWorld(World& world){
   for (auto sceneId : allSceneIds(world.sandbox)){
-    removeSceneFromWorld(world, sceneId, interface);
+    removeSceneFromWorld(world, sceneId);
   }
 }
 
-GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, SysInterface interface, bool returnOnly){
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, bool returnOnly){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
   auto idToAdd = useObjId ? id : getUniqueObjId();
@@ -853,7 +852,7 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   std::vector<GameObjectObj> addedGameobjObjs = {};
 
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, interface, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, returnOnly, addedGameobjObjs, submodelAttributes);
+  addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, returnOnly, addedGameobjObjs, submodelAttributes);
   if (returnOnly){
     assert(addedGameobjObjs.size() == 1);
     gameobjPair.gameobjObj = addedGameobjObjs.at(0);
@@ -881,19 +880,19 @@ SingleObjDeserialization deserializeSingleObj(std::string& serializedObj, objid 
   };
 }
 
-GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj, SysInterface interface){
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj){
   auto singleObj = deserializeSingleObj(serializedObj, -1, false);
   assert(singleObj.name == name);
-  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attr, interface, true);
+  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attr, true);
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface){
-  createObjectForScene(world, sceneId, name, attributes, interface, false).gameobj;
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes){
+  createObjectForScene(world, sceneId, name, attributes, false).gameobj;
   return getIdForName(world.sandbox, name, sceneId);
 }
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface){
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
   auto singleObj = deserializeSingleObj(serializedObj, id, useObjId);
-  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attr, interface);
+  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attr);
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
@@ -1193,11 +1192,11 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
   setAttributes(world, id, attrValue);
 }
 
-void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, SysInterface interface){
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics){
   updateEmitters(
     world.emitters, 
     timeElapsed,
-    [&world, &interface](std::string name, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
+    [&world](std::string name, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
       std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
       attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
       if (particleOpts.velocity.has_value()){
@@ -1206,18 +1205,16 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       if (particleOpts.angularVelocity.has_value()){
         attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
       }
-      objid objectAdded = addObjectToScene(
-        world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, interface
-      );
+      objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes);
       if (particleOpts.orientation.has_value()){
         physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
       }
       return objectAdded;
     }, 
-    [&world, &interface](objid id) -> void { 
+    [&world](objid id) -> void { 
       std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
       if (idExists(world.sandbox, id)){
-        removeObjectFromScene(world, id, interface);
+        removeObjectFromScene(world, id);
       }
     },
     [&world](objid id, std::string attribute, AttributeValue delta)  -> void {

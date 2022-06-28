@@ -952,6 +952,7 @@ int main(int argc, char* argv[]){
     .stopAnimation = stopAnimation,
     .getCurrentTime = getTotalTime,
     .readFile = modlayerReadFile,
+    .modlayerPath = modlayerPath,
   };
 
   auto mods = result["mods"].as<std::vector<std::string>>();
@@ -1279,7 +1280,7 @@ int main(int argc, char* argv[]){
 
   dynamicLoading = createDynamicLoading(worldfile, interface.readFile);
   if (result["rechunk"].as<int>()){
-    rechunkAllObjects(world, dynamicLoading, result["rechunk"].as<int>(), interface);
+    rechunkAllObjects(world, dynamicLoading, result["rechunk"].as<int>());
     return 0;
   }
 
@@ -1385,12 +1386,12 @@ int main(int argc, char* argv[]){
       registerStat(fpsStat, floor((60.f/(timedelta) + 0.5f)));
     }
 
-    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, interface);
+    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics);
 
     auto time = getTotalTime();
     tickRecordings(time);
 
-    onNetCode(world, interface, netcode, onClientMessage, bootStrapperMode);
+    onNetCode(world, netcode, onClientMessage, bootStrapperMode);
 
     auto viewTransform = getCameraTransform();
 

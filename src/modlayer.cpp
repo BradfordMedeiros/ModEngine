@@ -24,20 +24,24 @@ std::vector<std::string> listMods(){
 }
 
 // eg file = ./res/scenes/example.p.rawscene, mod = ./res/modlayers
-std::string pathForMod(std::string mod, std::string file){
+std::string joinModPath(std::string mod, std::string file){
 	auto relativePath = std::filesystem::path(file).lexically_relative("./res").string(); // file relative to the res folder
   std::filesystem::path modpath = std::filesystem::canonical(mod);                      
 
   return std::filesystem::weakly_canonical(modpath / relativePath).string(); 						// then join to modpath
 }
 
-std::string modlayerReadFile(std::string file){
+std::string modlayerPath(std::string file){
 	for (int i = installedMods.size() - 1; i >= 0; i--){
 		auto modpathRoot = installedMods.at(i);
-		auto fullModpath = pathForMod(modpathRoot, file);
+		auto fullModpath = joinModPath(modpathRoot, file);
 		if (fileExists(fullModpath)){
-			return loadFile(fullModpath);
+			return fullModpath;
 		}
-	}
-	return loadFile(file);
+	}	
+	return file;
+}
+
+std::string modlayerReadFile(std::string file){
+	return loadFile(modlayerPath(file));
 }

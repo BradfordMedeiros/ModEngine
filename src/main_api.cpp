@@ -76,7 +76,7 @@ int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> a
       .payload = tokens.at(2),
     });
   }
-  return addSceneToWorld(world, sceneFile, interface, addedTokens, name);
+  return addSceneToWorld(world, sceneFile, addedTokens, name);
 }
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
@@ -99,10 +99,10 @@ objid rootIdForScene(objid sceneId){
 
 void unloadScene(int32_t sceneId){  
   std::cout << "INFO: SCENE LOADING: unloading " << sceneId << std::endl;
-  removeSceneFromWorld(world, sceneId, interface);
+  removeSceneFromWorld(world, sceneId);
 }
 void unloadAllScenes(){
-  removeAllScenesFromWorld(world, interface);
+  removeAllScenesFromWorld(world);
 }
 
 // @TODO - save all the scenes in the world
@@ -241,11 +241,11 @@ objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std:
     .numAttributes = numAttributes,
     .vecAttr = vecAttr,
   };
-  return addObjectToScene(world, sceneId, name, attributes, interface);
+  return addObjectToScene(world, sceneId, name, attributes);
 }
 
 void copyObject(int32_t id){
-  copyObjectToScene(world, id, interface);
+  copyObjectToScene(world, id);
 }
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId){
@@ -290,7 +290,7 @@ void stopAnimation(int32_t id){
 }
 
 void removeObjectById(objid id){
-  removeObjectFromScene(world, id, interface);
+  removeObjectFromScene(world, id);
 }
 
 std::vector<std::string> listModels(){

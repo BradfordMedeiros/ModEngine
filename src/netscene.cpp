@@ -71,13 +71,13 @@ void netObjectDelete(objid id, bool isNet, NetCode& netcode, bool bootstrapperMo
   }
 }
 
-int32_t makeObject(World& world, SysInterface& interface, std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
+int32_t makeObject(World& world, std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
   auto firstSceneId = allSceneIds(world.sandbox).at(0);
-  return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId, interface);
+  return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId);
 }
 
  // @TODO --  this needs to makeObject in the right scene
-void handleCreate(World& world, SysInterface& interface, UdpPacket& packet){
+void handleCreate(World& world, UdpPacket& packet){
   auto create = packet.payload.createpacket;
   if (!sceneExists(world.sandbox, packet.payload.createpacket.sceneId)){
     return;
@@ -90,7 +90,7 @@ void handleCreate(World& world, SysInterface& interface, UdpPacket& packet){
   }
   std::string serialobj = create.serialobj;
   assert(serialobj.size() > 0);
-  auto newObjId = makeObject(world, interface, serialobj, create.id, true, packet.payload.createpacket.sceneId, true);                        
+  auto newObjId = makeObject(world, serialobj, create.id, true, packet.payload.createpacket.sceneId, true);                        
   assert(newObjId == id);
 }
 
@@ -104,17 +104,17 @@ void handleUpdate(World& world, UdpPacket& packet){
   }
 }
 
-void handleDelete(World& world, SysInterface& interface, UdpPacket& packet){
+void handleDelete(World& world, UdpPacket& packet){
   auto deletep = packet.payload.deletepacket;
   if (idExists(world.sandbox, deletep.id)){
     std::cout << "UDP CLIENT MESSAGE: DELETING: " << deletep.id << std::endl;
-    removeObjectFromScene(world, deletep.id, interface);
+    removeObjectFromScene(world, deletep.id);
   }else{
     std::cout << "UDP CLIENT MESSAGE: ID NOT EXIST: " << deletep.id << std::endl;
   }
 }
 
-void onUdpServerMessage(World& world, SysInterface& interface, UdpPacket& packet){
+void onUdpServerMessage(World& world, UdpPacket& packet){
   if (packet.type == SETUP){
     std::cout << "INFO: SETUP PACKET HANDLED IN SERVER CODE" << packet.payload.setuppacket.connectionHash << std::endl;
   }else if (packet.type == LOAD){
@@ -122,36 +122,36 @@ void onUdpServerMessage(World& world, SysInterface& interface, UdpPacket& packet
   }else if (packet.type == UPDATE){
     handleUpdate(world, packet);
   }else if (packet.type == CREATE){
-    handleCreate(world, interface, packet);
+    handleCreate(world, packet);
   }else if (packet.type == DELETE){
-    handleDelete(world, interface, packet);
+    handleDelete(world, packet);
   }else {
     std::cout << "ERROR: unknown packet type" << std::endl;
   }
 }
 
-void onUdpClientMessage(World& world, SysInterface& interface, UdpPacket& packet){
+void onUdpClientMessage(World& world, UdpPacket& packet){
   std::cout << "INFO: GOT UDP CLIENT MESSAGE" << std::endl;
   if (packet.type == SETUP){
     std::cout << "WARNING: should not get setup packet type" << std::endl;
   }else if (packet.type == LOAD){
-    addSceneToWorldFromData(world, "", packet.payload.loadpacket.sceneId, packet.payload.loadpacket.sceneData, interface, std::nullopt);
+    addSceneToWorldFromData(world, "", packet.payload.loadpacket.sceneId, packet.payload.loadpacket.sceneData, std::nullopt);
   }else if (packet.type == UPDATE){
     handleUpdate(world, packet);
   }else if (packet.type == CREATE){
-    handleCreate(world, interface, packet);
+    handleCreate(world, packet);
   }else if (packet.type == DELETE){
-    handleDelete(world, interface, packet);
+    handleDelete(world, packet);
   }
   //schemeBindings.onUdpMessage(message);
 }
 
-void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
+void onNetCode(World& world, NetCode& netcode, std::function<void(std::string)> onClientMessage, bool bootstrapperMode){
   maybeGetClientMessage(onClientMessage);
   UdpPacket udpPacket { };
   auto hasClientMessage = maybeGetUdpClientMessage(&udpPacket, sizeof(udpPacket));
   if (hasClientMessage){
-    onUdpClientMessage(world, interface, udpPacket);
+    onUdpClientMessage(world, udpPacket);
   }
   if (bootstrapperMode){
     UdpPacket packet { };
@@ -163,7 +163,7 @@ void onNetCode(World& world, SysInterface& interface, NetCode& netcode, std::fun
       return "";
     });
     if (udpPacketHasData){
-      onUdpServerMessage(world, interface, packet);
+      onUdpServerMessage(world, packet);
     }
   }
 }

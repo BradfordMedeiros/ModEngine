@@ -29,6 +29,8 @@ struct World {
   std::function<void(objid, bool)> onObjectDelete;
   std::set<objid> entitiesToUpdate;
   SceneSandbox sandbox;
+
+  SysInterface interface;
 };
 
 World createWorld(
@@ -44,25 +46,25 @@ World createWorld(
   std::vector<std::string> spriteMeshes
 );
 
-void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, SysInterface interface, std::map<std::string, GameobjAttributesWithId> additionalFields, bool returnObjectOnly, std::vector<GameObjectObj>& gameobjObjs, std::map<std::string, GameobjAttributes>& submodelAttributes);
+void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, bool returnObjectOnly, std::vector<GameObjectObj>& gameobjObjs, std::map<std::string, GameobjAttributes>& submodelAttributes);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight);
 
-objid addSceneToWorld(World& world, std::string sceneFile, SysInterface interface, std::vector<Token>& addedTokens, std::optional<std::string> name);
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, SysInterface interface, std::optional<std::string> name);
-void removeSceneFromWorld(World& world, objid sceneId, SysInterface interface);
-void removeAllScenesFromWorld(World& world, SysInterface interface);
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name);
+void removeSceneFromWorld(World& world, objid sceneId);
+void removeAllScenesFromWorld(World& world);
 
 struct GameObjPair {
   GameObject gameobj;
   GameObjectObj gameobjObj;
 };
-GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj, SysInterface interface);
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, SysInterface interface);
-objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId, SysInterface interface);
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj);
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes);
+objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId);
 
-void removeObjectFromScene(World& world, objid id, SysInterface interface);
-void copyObjectToScene(World& world, objid id, SysInterface interface);
+void removeObjectFromScene(World& world, objid id);
+void copyObjectToScene(World& world, objid id);
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj);
 GameobjAttributes objectAttributes(World& world, objid id);
@@ -89,7 +91,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
 bool hasPhysicsBody(World& world, objid id);
 void updatePhysicsBody(World& world, objid id);
 
-void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, SysInterface interface);
+void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics);
 
 NameAndMeshObjName getMeshesForGroupId(World& world, objid id);
 
