@@ -62,7 +62,11 @@ std::vector<TestCase> tests = {
   TestCase {
     .name = "directionToQuatConversionTest",
     .test = directionToQuatConversionTest,
-  }
+  },
+  TestCase {
+    .name = "modlayerPathTest",
+    .test = modlayerPathTest,
+  },
 };
 
 

@@ -11,6 +11,7 @@
 void installMod(std::string layer);
 void uninstallMod(std::string layer);
 std::vector<std::string> listMods();
+std::string joinModPath(std::string mod, std::string file);
 std::string modlayerPath(std::string file);
 std::string modlayerReadFile(std::string file);
 
