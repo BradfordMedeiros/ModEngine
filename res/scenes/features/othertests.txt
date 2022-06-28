@@ -1,0 +1,6 @@
+Modlayers:
+- Load a different file than one that exists
+./build/modengine --mods ./res/modlayers  -r ./res/scenes/example.p.rawscene 
+
+- Load a scene file that doesn't exist
+ ./build/modengine --mods ./res/modlayers  -r ./res/scenes/modonlyfile.p.rawscene 
