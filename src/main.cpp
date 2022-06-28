@@ -1205,7 +1205,7 @@ int main(int argc, char* argv[]){
     .uninstallMod = uninstallMod,
     .listMods = listMods,
   };
-  registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi) });
+  registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) });
 
   cBindings = getCScriptBindingCallbacks();
 

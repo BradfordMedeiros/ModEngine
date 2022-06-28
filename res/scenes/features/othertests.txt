@@ -4,3 +4,9 @@ Modlayers:
 
 - Load a scene file that doesn't exist
  ./build/modengine --mods ./res/modlayers  -r ./res/scenes/modonlyfile.p.rawscene 
+
+- specify a texture override (see new wood.jpg file which is actually the grid in modlayer)
+- specify a model override 
+
+- specify a script override
+./build/modengine -x ./res/scripts/vector.scm --mods ./res/modlayers/ -i   

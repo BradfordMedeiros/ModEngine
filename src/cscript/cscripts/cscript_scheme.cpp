@@ -2,8 +2,10 @@
 
 auto schemeCallbacks = getSchemeCallbacks();
 
+std::function<std::string(std::string)> pathForModLayer;
+
 void* createSchemeScript(std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript){
-  loadScript(scriptname, id, sceneId, isServer, isFreeScript);
+  loadScript(scriptname, id, sceneId, isServer, isFreeScript, pathForModLayer);
   return NULL;
 }
 
@@ -11,8 +13,9 @@ void unloadSchemeScript(std::string scriptname, objid id, void* data) {
   unloadScript(scriptname, id);
 }
 
-CScriptBinding cscriptSchemeBinding(CustomApiBindings& api){
+CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::string(std::string)> modlayerPath){
   auto binding = createCScriptBinding(".*\\.scm", api);
+  pathForModLayer =  modlayerPath;
 
   binding.onFrame = schemeCallbacks.onFrame;
 

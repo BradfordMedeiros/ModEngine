@@ -6,6 +6,6 @@
 #include "../cscript_binding.h"
 #include "./scheme/scheme_bindings.h"
 
-CScriptBinding cscriptSchemeBinding(CustomApiBindings& api);
+CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::string(std::string)> modlayerPath);
 
 #endif

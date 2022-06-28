@@ -32,7 +32,7 @@ struct SchemeBindingCallbacks {
 objid currentModuleId();
 objid currentSceneId();
 SchemeBindingCallbacks getSchemeCallbacks();
-void loadScript(std::string script, objid id, objid sceneId, bool isServer, bool isFreeScript);
+void loadScript(std::string script, objid id, objid sceneId, bool isServer, bool isFreeScript, std::function<std::string(std::string)> pathForModLayer);
 void unloadScript(std::string script, objid id);
 void unloadScriptsCleanup();
 

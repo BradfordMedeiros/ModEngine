@@ -50,7 +50,7 @@ objid currentSceneId(){
   assert(false); 
 }
 
-void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, bool isFreeScript){ 
+void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, bool isFreeScript, std::function<std::string(std::string)> pathForModLayer){ 
   auto script = getScriptName(scriptpath, id);
 
   std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
@@ -64,7 +64,7 @@ void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, 
   };                    
   scm_set_current_module(module);
   defineFunctions(id, isServer, isFreeScript);
-  scm_c_primitive_load(scriptpath.c_str());
+  scm_c_primitive_load(pathForModLayer(scriptpath).c_str());
   onFrame();
 }
 
