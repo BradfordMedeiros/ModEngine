@@ -413,8 +413,12 @@ void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ow
   }
 }
 
+ModelData loadModelPath(World& world, std::string rootname, std::string modelPath){
+  return loadModel(rootname, world.interface.modlayerPath(modelPath));
+}
+
 void addMesh(World& world, std::string meshpath){
-  ModelData data = loadModel("", meshpath);
+  ModelData data = loadModelPath(world, "", meshpath);
   if (data.meshIdToMeshData.size() !=  1){
     std::cout << "ERROR: " << meshpath << " actual size: " << data.meshIdToMeshData.size() << std::endl;
     assert(false);
@@ -633,7 +637,7 @@ void addObjectToWorld(
         return {};
       }
       if (data == NULL){
-        ModelData data = loadModel(name, meshName); 
+        ModelData data = loadModelPath(world, name, meshName); 
         idToModelVertexs[id] = getVertexsFromModelData(data);
         world.animations[id] = data.animations;
 
