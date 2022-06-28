@@ -23,13 +23,19 @@ void modlayerPathTest(){
 			.modpath = "./res/modlayers/",
 			.expectedpath = "/home/brad/gamedev/mosttrusted/ModEngine/res/modlayers/textures/wood.jpg",
 		},
+		ModLayerPathTest {
+			.file = "./res/textures/skyboxs/desert",
+			.modpath = "./res/modlayers/",
+			.expectedpath = "/home/brad/gamedev/mosttrusted/ModEngine/res/modlayers/textures/skyboxs/desert",
+		},
 	};
 
 	for (int i = 0; i < tests.size(); i++){
 		auto test = tests.at(i);
 		auto newPath = joinModPath(test.modpath, test.file);
 		if (newPath != test.expectedpath){
-      throw std::logic_error("wrong path: got: " + newPath + " but wanted: " + test.expectedpath + " - " + std::to_string(i));
+      throw std::logic_error("wrong path: got: (" + newPath + ") but wanted: (" + test.expectedpath + ") - " + std::to_string(i));
 		}
 	}
 }
+

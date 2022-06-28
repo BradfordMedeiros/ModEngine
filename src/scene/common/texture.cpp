@@ -72,14 +72,13 @@ Texture loadCubemapTextureData(std::vector<unsigned char*> data, std::vector<int
 
 Texture loadCubemapTexture(std::string textureFilePathRoot){
   std::cout << "Event: loading texture: " << textureFilePathRoot << std::endl;
-
   std::vector<std::string> filepaths = {
-    textureFilePathRoot + "right.jpg",
-    textureFilePathRoot + "left.jpg",
-    textureFilePathRoot + "top.jpg",
-    textureFilePathRoot + "bottom.jpg",
-    textureFilePathRoot + "front.jpg",
-    textureFilePathRoot + "back.jpg",
+    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("right.jpg")).string(),
+    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("left.jpg")).string(),
+    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("top.jpg")).string(),
+    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("bottom.jpg")).string(),
+    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("front.jpg")).string(),
+    std::filesystem::weakly_canonical(std::filesystem::path(textureFilePathRoot) / std::filesystem::path("back.jpg")).string(),
   };
 
   std::vector<unsigned char*> datas;

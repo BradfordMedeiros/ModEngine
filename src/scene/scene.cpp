@@ -319,7 +319,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
   }
-  Texture texture = loadTexture(texturepath);
+  Texture texture = loadTexture(world.interface.modlayerPath(texturepath));
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
@@ -345,7 +345,7 @@ Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
   }
-  Texture texture = loadCubemapTexture(texturepath);
+  Texture texture = loadCubemapTexture(world.interface.modlayerPath(texturepath));
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
