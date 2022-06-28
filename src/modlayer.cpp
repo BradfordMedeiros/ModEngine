@@ -23,25 +23,21 @@ std::vector<std::string> listMods(){
 	return installedMods;
 }
 
-
+// eg file = ./res/scenes/example.p.rawscene, mod = ./res/modlayers
 std::string pathForMod(std::string mod, std::string file){
-	std::filesystem::path relativePath = std::filesystem::weakly_canonical(file); 
-	return relativePath.string();
+	auto relativePath = std::filesystem::path(file).lexically_relative("./res").string(); // file relative to the res folder
+  std::filesystem::path modpath = std::filesystem::canonical(mod);                      
+
+  return std::filesystem::weakly_canonical(modpath / relativePath).string(); 						// then join to modpath
 }
+
 std::string modlayerReadFile(std::string file){
 	for (int i = installedMods.size() - 1; i >= 0; i--){
 		auto modpathRoot = installedMods.at(i);
 		auto fullModpath = pathForMod(modpathRoot, file);
-		std::cout << "modpath root: " << fullModpath << std::endl;
+		if (fileExists(fullModpath)){
+			return loadFile(fullModpath);
+		}
 	}
-	//(install-mod "./res/modlayers")
-	// loop over each install modpath in least recent order (since newer ones overwrite older ones)
-	// if file exists load from there, else load the prev and then base
-
-	/*
-	std::string loadFile(std::string filepath);
-void saveFile(std::string filepath, std::string content);
-bool fileExists(std::string path);
-*/
 	return loadFile(file);
 }
