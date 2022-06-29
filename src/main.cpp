@@ -560,6 +560,8 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
+int uiYOffset = 70;
+int uiXOffset = 20;
 void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
@@ -575,7 +577,7 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   }
 
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
-  drawText(std::to_string(currentFramerate) + state.additionalText, 10, 20, 4);
+  drawText(std::to_string(currentFramerate) + state.additionalText, uiXOffset, uiYOffset, 4);
 
   std::string manipulatorAxisString;
   if (state.manipulatorAxis == XAXIS){
@@ -587,34 +589,34 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   }else{
     manipulatorAxisString = "noaxis";
   }
-  drawText("manipulator axis: " + manipulatorAxisString, 10, 50, 3);
-  drawText("position: " + print(defaultCamera.transformation.position), 10, 60, 3);
-  drawText("rotation: " + print(defaultCamera.transformation.rotation), 10, 70, 3);
+  drawText("manipulator axis: " + manipulatorAxisString, uiXOffset, uiYOffset + 30, 3);
+  drawText("position: " + print(defaultCamera.transformation.position), uiXOffset, uiYOffset + 40, 3);
+  drawText("rotation: " + print(defaultCamera.transformation.rotation), uiXOffset, uiYOffset + 50, 3);
 
   float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
   float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
 
-  drawText("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", 10, 90, 3);
+  drawText("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + 70, 3);
   
   if (selected(state.editor) != -1){
     auto selectedIndex = selected(state.editor);
     auto obj = getGameObject(world, selectedIndex);
-    drawText("position: " + print(obj.transformation.position), 10, 100, 3);
-    drawText("scale: " + print(obj.transformation.scale), 10, 110, 3);
-    drawText("rotation: " + print(obj.transformation.rotation), 10, 120, 3);
+    drawText("position: " + print(obj.transformation.position), uiXOffset, uiYOffset + 80, 3);
+    drawText("scale: " + print(obj.transformation.scale), uiXOffset, uiYOffset + 90, 3);
+    drawText("rotation: " + print(obj.transformation.rotation), uiXOffset, uiYOffset + 100, 3);
   }
     
-  drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), 10, 140, 3);
-  drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , 10, 150, 3);
+  drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + 120, 3);
+  drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + 130, 3);
 
-  drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), 10, 170, 3);
-  drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , 40, 180, 3);
-  drawText("using object id: -1" , 40, 190, 3);
+  drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), uiXOffset, uiYOffset + 150, 3);
+  drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset + 30, uiYOffset + 160, 3);
+  drawText("using object id: -1" , uiXOffset + 30, uiYOffset + 170, 3);
 
-  drawText(std::string("triangles: ") + std::to_string(numTriangles), 10, 200, 3);
-  drawText(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), 10, 210, 3);
-  drawText(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), 10, 220, 3);
-  drawText(std::string("render mode: ") + renderModeAsStr(state.renderMode), 10, 230, 3);
+  drawText(std::string("triangles: ") + std::to_string(numTriangles), uiXOffset, uiYOffset + 180, 3);
+  drawText(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + 190, 3);
+  drawText(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + 200, 3);
+  drawText(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + 210, 3);
 }
 
 void onClientMessage(std::string message){
