@@ -569,6 +569,7 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
 
   if (showCursor){
     if(!state.isRotateSelection){
+       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
        drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
     }
   }
