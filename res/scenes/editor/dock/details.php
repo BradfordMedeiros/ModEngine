@@ -76,11 +76,18 @@
   }
 
   function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos){
+    $depth = [
+      0 => $zpos,
+      1 => ($zpos + 0.05),
+      2 => ($zpos + 0.1),
+      2.5 => ($zpos + 0.15),
+      3 => ($zpos + 0.2),
+    ];
     $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
       "layer" => "basicui", 
       "scale" => "0.004 0.01 0.004",
-      "position" => "0 0 " . $zpos,
+      "position" => "0 0 " . $depth[3],
     ];
     $default_key = $default_text_style;
     $default_value = array_merge($default_text_style, []);
@@ -92,16 +99,17 @@
       "margin" => "0.04",
       "spacing" => "0.02",
       "minwidth" => "0.36",
+      "position" => "0 0 " . $depth[2],
     ];
     $default_rootLayout = [
       "layer" => "basicui",
       "type" => "horizontal",
       "backpanel" => "true",
-      "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
+      "tint" => "0.25 0.25 0.25 1",  # doesn't show up since z ordering
       "margin" => "0.04",
       "spacing" => "0.02",
       "minwidth" => "0.36",
-      "position" => "0 0 " . $zpos,
+      "position" => "0 0 " . $depth[2],
     ];
 
     include $file;
