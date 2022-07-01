@@ -38,9 +38,9 @@ float getMargin(GameobjAttributes& attr, const char* attrname, float defaultMarg
   return attr.numAttributes.at(attrname);
 }
 
-LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos){
+LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos, LayoutContentAlignmentType defaultType){
   bool hasAlign = attr.stringAttributes.find(attrname) != attr.stringAttributes.end();
-  auto alignType = LayoutContentAlignment_Negative;
+  auto alignType = defaultType;
   if (hasAlign){
     if (attr.stringAttributes.at(attrname) == neg){
       alignType = LayoutContentAlignment_Negative;
@@ -122,11 +122,11 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   };
 
   LayoutContentAlignment alignment {
-    .vertical = layoutContentAlignment(attr, "align-items-vertical", "down", "up"),
-    .horizontal = layoutContentAlignment(attr, "align-items-horizontal", "left", "right"),
+    .vertical = layoutContentAlignment(attr, "align-items-vertical", "down", "up", LayoutContentAlignment_Negative),
+    .horizontal = layoutContentAlignment(attr, "align-items-horizontal", "left", "right", LayoutContentAlignment_Negative),
   };
 
-  auto contentAlign = layoutContentAlignment(attr, "align-content", "pos", "neg");
+  auto contentAlign = layoutContentAlignment(attr, "align-content", "pos", "neg", LayoutContentAlignment_Neutral);
 
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,

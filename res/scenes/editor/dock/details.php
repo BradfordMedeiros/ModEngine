@@ -21,6 +21,8 @@
 (test_panel:border-color:0.3 0.3 0.3 1
 (test_panel:position:-0.8 -0.1 <?php echo($zpos . "\n"); ?>
 (test_panel:minwidth:0.44
+(test_panel:align-content:neg
+
 
 )window_x:layer:basicui
 )window_x:scale:0.008 0.016 0.008
@@ -224,7 +226,7 @@
           "data" => [
             "key" => "Tint", 
             "value" => [
-              [ 
+              /*[ 
                 "type" => "float", 
                 "name" => "Red", 
                 "value" => [ 
@@ -232,10 +234,10 @@
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
-              ],
+              ],*/
               [ 
                 "type" => "slider", 
-                "name" => "", 
+                "name" => "Red", 
                 "value" => [ 
                   "binding" => "tint", 
                   "binding-index" =>  0,
