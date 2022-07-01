@@ -63,6 +63,7 @@ struct GameObjectUILayout {
   UILayoutFlowType vertical;
   LayoutBorder border;
   LayoutContentAlignment alignment;
+  LayoutContentAlignmentType contentAlign;
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);

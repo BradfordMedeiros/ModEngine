@@ -308,6 +308,20 @@ BoundInfo createBoundingAround(World& world, std::vector<objid> ids){
 }
 
 
+float getScaledBoundingWidth(World& world, objid id){
+  auto physicsInfo = getPhysicsInfoForGameObject(world, id);  
+  auto boundingWidth = physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin;
+  auto objectWidth =  glm::abs(boundingWidth * fixScaleIfLayoutType(world, id, physicsInfo.transformation.scale.x));  
+  return objectWidth;
+}
+float getScaledBoundingHeight(World& world, objid id){
+  auto physicsInfo = getPhysicsInfoForGameObject(world, id);  
+  auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
+  auto objectHeight = glm::abs(boundingHeight * fixScaleIfLayoutType(world, id, physicsInfo.transformation.scale.y));
+  return objectHeight;
+}
+
+
 std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
   //std::cout << "root position: " << print(rootPosition) << std::endl;
   auto horizontal = rootPosition.x;
@@ -320,12 +334,9 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
   if (layoutType == LAYOUT_HORIZONTAL){
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
-      auto boundingWidth = physicsInfo.boundInfo.xMax - physicsInfo.boundInfo.xMin;
-      auto objectWidth =  glm::abs(boundingWidth * fixScaleIfLayoutType(world, obj.id, physicsInfo.transformation.scale.x));
+      auto objectWidth =  getScaledBoundingWidth(world, obj.id);
       auto left = horizontal + objectWidth / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
-
       //std::cout << "(boundingWidth = " << boundingWidth << ", objectWidth = " << objectWidth << ")" << std::endl;
 
       glm::vec3 newPos = obj.transformation.position;
@@ -337,9 +348,7 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
   }else if (layoutType == LAYOUT_VERTICAL){
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      auto physicsInfo = getPhysicsInfoForGameObject(world, obj.id);  
-      auto boundingHeight = (physicsInfo.boundInfo.yMax - physicsInfo.boundInfo.yMin);
-      auto objectHeight = glm::abs(boundingHeight * fixScaleIfLayoutType(world, obj.id, physicsInfo.transformation.scale.y));
+      auto objectHeight = getScaledBoundingHeight(world, obj.id);
       auto top = vertical + objectHeight / 2.f;
       auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
 
@@ -353,6 +362,60 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
     std::cout << "layout type not supported" << std::endl;
     assert(false);
   }
+  return newPositions;
+}
+
+/*
+  float xMin, xMax;
+  float yMin, yMax;
+  float zMin, zMax;
+
+*/
+std::map<objid, glm::vec3> contentAlignPosition(World& world, std::map<objid, glm::vec3>& positions, BoundInfo& boundInfo,  UILayoutType layoutType, LayoutContentAlignmentType contentAlign){
+  float overallWidth = boundInfo.xMax - boundInfo.xMin;
+  float overallHeight = boundInfo.yMax - boundInfo.yMin;
+  std::cout << "width = " << overallWidth << ", height = " << overallHeight << std::endl;
+
+  std::map<objid, glm::vec3> newPositions;
+  for (auto &[id, pos] : positions){
+    auto boundingWidth = getScaledBoundingWidth(world, id);
+    auto boundingHeight = getScaledBoundingHeight(world, id);
+    std::cout << "name = " << getGameObject(world, id).name << ", pos = " << print(pos) << " height = " << boundingHeight << ", width = " << boundingWidth << std::endl;
+
+    float diffX = overallWidth - boundingWidth;
+    float diffY = overallHeight - boundingHeight;
+    glm::vec2 alignOffset(0.f, 0.f);
+
+    if (layoutType == LAYOUT_HORIZONTAL){
+      //    newPositions[id] = glm::vec3(pos.x + (0.5f * diffX), pos.y, pos.z);
+      if (contentAlign == LayoutContentAlignment_Negative){
+        alignOffset.y += 0.5f * diffY;
+      }else if (contentAlign == LayoutContentAlignment_Neutral){
+        // do nothing
+      }else if (contentAlign == LayoutContentAlignment_Positive){
+        alignOffset.y -= 0.5f * diffY;
+      }else{
+        modassert(false, "content align not supported");
+      }
+    }else if (layoutType == LAYOUT_VERTICAL){
+      if (contentAlign == LayoutContentAlignment_Negative){
+        alignOffset.x += 0.5f * diffX;
+      }else if (contentAlign == LayoutContentAlignment_Neutral){
+        // do nothing
+      }else if (contentAlign == LayoutContentAlignment_Positive){
+        alignOffset.x -= 0.5f * diffX;
+      }else{
+        modassert(false, "content align not supported");
+      }
+    }else{
+      modassert(false, "layout type - content align - not supported");
+    }
+    std::cout << "diff is: " << diffX << std::endl << std::endl;
+
+    newPositions[id] = glm::vec3(pos.x + alignOffset.x, pos.y + alignOffset.y, pos.z);
+
+  }
+
   return newPositions;
 }
 
@@ -411,6 +474,12 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   }
 
   layoutObject -> boundInfo = createBoundingAround(world, mapKeys<objid, glm::vec3>(newPositions));
+
+  std::cout << "enforcing layout: " << getGameObject(world, id).name << std::endl;
+  newPositions = contentAlignPosition(world, newPositions, layoutObject -> boundInfo, layoutType, layoutObject -> contentAlign);
+  for (auto [id, newPos] : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
+    physicsTranslateSet(world, id, newPos, false);
+  }
   /*std::cout << "set bounding to: " << std::endl;
   printBoundInfo(layoutObject -> boundInfo);
   std::cout << std::endl;*/
@@ -457,7 +526,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   
 
 
-  // This moves all elements and the bounding box to adjust for the align
+  // This moves all elements and the bounding box to adjust for the a
   auto mainAlignmentOffset = glm::vec3(0.f, 0.f, 0.f);
   if (layoutObject -> horizontal == UILayoutFlowNegative){
     mainAlignmentOffset.x = -1 * halfBoundingWidth;
@@ -479,14 +548,17 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   glm::vec3 alignItemsAdjustment(0.f, 0.f, 0.f);
   if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Negative){
     marginOffset += glm::vec3(layoutObject -> marginValues.marginLeft, 0.f, 0.f);
+    std::cout << "layout : left margin = " << print(marginOffset) << " align = " << print(alignItemsAdjustment) << std::endl;
     // do nothing this is the default
   }else if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Neutral){
     auto distanceToCenterFromLeft = boundingWidth - elementsWidth;
     alignItemsAdjustment += glm::vec3(distanceToCenterFromLeft * 0.5f, 0.f, 0.f);
+    std::cout << "layout : neutral margin = " << print(marginOffset) << " align = " << print(alignItemsAdjustment) << std::endl;
   }else if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Positive){
     auto remainderRight = boundingWidth - elementsWidth;
     alignItemsAdjustment += glm::vec3(remainderRight, 0.f, 0.f);
     marginOffset += glm::vec3(-1.f * layoutObject -> marginValues.marginRight, 0.f, 0.f);
+    std::cout << "layout : right margin = " << print(marginOffset) << " align = " << print(alignItemsAdjustment) << std::endl;
   }else{
     std::cout << "enforce layout: invalid horizontal align items" << std::endl;
     assert(false);

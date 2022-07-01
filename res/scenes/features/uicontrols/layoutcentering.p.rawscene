@@ -4,26 +4,32 @@
 )key_0:scale:0.01 0.01 0.01
 )key_0:tint:2 2 2 0.6
 )key_0:value:Current Object
+)key_0:position:1 1 0
+
+
 )value_0:layer:basicui
-)value_0:scale:0.01 0.01 0.01
+)value_0:scale:0.01 0.05 0.01
 )value_0:tint:1 1 1 0.6
 )value_0:value:platform
+)value_0:position:-1 -1 0
 
 (keyval_0:layer:basicui
-(keyval_0:type:vertical
 (keyval_0:backpanel:true
 (keyval_0:tint:0 0 0 0.6
 
-(keyval_0:margin:0.05
-(keyval_0:margin-right:0
-(keyval_0:minwidth:1
-(keyval_0:minheight:1
+#(keyval_0:margin:0.05
+#(keyval_0:margin-right:0
+#(keyval_0:minwidth:1
+#(keyval_0:minheight:1
 
 #(keyval_0:spacing:0.1
 (keyval_0:elements:)key_0,)value_0
 (keyval_0:align-items-horizontal:center   # left/center/right
 (keyval_0:align-items-vertical:center     # up/center/down
+(keyval_0:align-content:neg  # pos center neg   .  For vertical, aligns left/right, for horizontal aligns up down
 
 (keyval_0:border-size:0.004
 #(keyval_0:border-color:2 0.3 0.3 1
-(keyval_0:spacing:0.2
+
+(keyval_0:type:horizontal
+

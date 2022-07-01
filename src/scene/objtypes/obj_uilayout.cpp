@@ -126,6 +126,8 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .horizontal = layoutContentAlignment(attr, "align-items-horizontal", "left", "right"),
   };
 
+  auto contentAlign = layoutContentAlignment(attr, "align-content", "pos", "neg");
+
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
     .yMin = 0, .yMax = 0,
@@ -148,6 +150,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .vertical = vertical,
     .border = border,
     .alignment = alignment,
+    .contentAlign = contentAlign,
   };
   return obj;
 }
