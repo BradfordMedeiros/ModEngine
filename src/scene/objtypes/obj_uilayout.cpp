@@ -56,6 +56,22 @@ LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const
   return alignType;
 }
 
+LayoutContentSpacing layoutContentSpacing(GameobjAttributes& attr, const char* attrname){
+  if (attr.stringAttributes.find(attrname) != attr.stringAttributes.end()){
+    auto value = attr.stringAttributes.at(attrname);
+    if (value == "pack"){
+      return LayoutContentSpacing_Pack;
+    }else if (value == "space-for-first"){
+      return LayoutContentSpacing_SpaceForFirst;
+    }else if (value == "space-for-last"){
+      return LayoutContentSpacing_SpaceForLast;
+    }
+    modassert(false, "uilayout - content spacing - invalid payload: " + value);
+    return LayoutContentSpacing_Pack;
+  }
+  return LayoutContentSpacing_Pack;
+}
+
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
   auto minSpacing = attr.numAttributes.find("min-spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("min-spacing");
@@ -128,6 +144,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   };
 
   auto contentAlign = layoutContentAlignment(attr, "align-content", "pos", "neg", LayoutContentAlignment_Neutral);
+  auto contentSpacing = layoutContentSpacing(attr, "content-spacing");
 
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
@@ -153,6 +170,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .border = border,
     .alignment = alignment,
     .contentAlign = contentAlign,
+    .contentSpacing = contentSpacing,
   };
   return obj;
 }

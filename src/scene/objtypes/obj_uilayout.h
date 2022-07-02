@@ -46,6 +46,8 @@ struct LayoutContentAlignment {
   LayoutContentAlignmentType horizontal;
 };
 
+enum LayoutContentSpacing  { LayoutContentSpacing_Pack, LayoutContentSpacing_SpaceForFirst, LayoutContentSpacing_SpaceForLast };
+
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
@@ -65,6 +67,7 @@ struct GameObjectUILayout {
   LayoutBorder border;
   LayoutContentAlignment alignment;
   LayoutContentAlignmentType contentAlign;
+  LayoutContentSpacing contentSpacing;
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);
