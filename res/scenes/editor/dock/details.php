@@ -78,12 +78,13 @@
   }
 
   function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos){
+    $multiplier = 1;
     $depth = [
       0 => $zpos,
-      1 => ($zpos + 0.05),
-      2 => ($zpos + 0.1),
-      2.5 => ($zpos + 0.15),
-      3 => ($zpos + 0.2),
+      1 => ($zpos + $multiplier * 0.05),
+      2 => ($zpos + $multiplier * 0.1),
+      28 => ($zpos + $multiplier * 0.18),
+      3 => ($zpos + $multiplier * 0.2),
     ];
     $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
@@ -109,6 +110,7 @@
       "backpanel" => "true",
       "tint" => "0.25 0.25 0.25 1",  # doesn't show up since z ordering
       "margin" => "0.04",
+      "margin-left" => "0.02",
       "spacing" => "0.02",
       "minwidth" => "0.36",
       "position" => "0 0 " . $depth[2],
