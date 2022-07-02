@@ -10,9 +10,9 @@
 (test_panel:type:vertical
 (test_panel:backpanel:true
 (test_panel:tint:0.1 0.1 0.1 1
-(test_panel:margin:0.02
+#(test_panel:margin:0.02
 (test_panel:margin-top:0.1
-(test_panel:spacing:0.02
+#(test_panel:spacing:0.02
 (test_panel:minheight:2
 
 (test_panel:align-items-horizontal:left   # left/center/right
@@ -112,7 +112,9 @@
       "margin" => "0.04",
       "margin-left" => "0.02",
       "spacing" => "0.02",
-      "minwidth" => "0.36",
+      "minwidth" => "0.44",
+      "border-size" => "0.002",
+      "border-color" => "0.6 0.6 0.6 1",
       "position" => "0 0 " . $depth[2],
     ];
 
