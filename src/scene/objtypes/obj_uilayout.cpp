@@ -58,6 +58,7 @@ LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
+  auto minSpacing = attr.numAttributes.find("min-spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("min-spacing");
   auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
   
   std::vector<std::string> elements = {};
@@ -136,6 +137,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   GameObjectUILayout obj{
     .type = type,
     .spacing = spacing,
+    .minSpacing = minSpacing,
     .elements = elements,
     .boundInfo = boundInfo,
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),

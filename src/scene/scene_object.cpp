@@ -322,7 +322,7 @@ float getScaledBoundingHeight(World& world, objid id){
 }
 
 
-std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, UILayoutType layoutType){
+std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, float minSpacing, UILayoutType layoutType){
   //std::cout << "root position: " << print(rootPosition) << std::endl;
   auto horizontal = rootPosition.x;
   auto fixedY = rootPosition.y;
@@ -336,7 +336,10 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto objectWidth =  getScaledBoundingWidth(world, obj.id);
       auto left = horizontal + objectWidth / 2.f;
-      auto effectiveSpacing = spacing == 0.f ? objectWidth : (objectWidth + spacing);
+      auto effectiveSpacing = objectWidth + spacing;
+      if (effectiveSpacing < minSpacing){
+        effectiveSpacing = minSpacing;
+      }
       //std::cout << "(boundingWidth = " << boundingWidth << ", objectWidth = " << objectWidth << ")" << std::endl;
 
       glm::vec3 newPos = obj.transformation.position;
@@ -350,7 +353,10 @@ std::map<objid, glm::vec3> calcPositions(World& world, glm::vec3 rootPosition, s
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
       auto objectHeight = getScaledBoundingHeight(world, obj.id);
       auto top = vertical + objectHeight / 2.f;
-      auto effectiveSpacing = spacing == 0.f ? objectHeight : (objectHeight + spacing);
+      auto effectiveSpacing = objectHeight + spacing;
+      if (effectiveSpacing < minSpacing){
+        effectiveSpacing = minSpacing;
+      }
 
       glm::vec3 newPos = obj.transformation.position;
       newPos.x = fixedX;
@@ -468,7 +474,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   auto layoutPos = fullTransformation(world.sandbox, id).position;
   // Figure out positions, starting from rootPosition (layout should center elements so not quite right yet)
-  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutType);
+  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutObject -> minSpacing, layoutType);
   for (auto [id, newPos] : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
     physicsTranslateSet(world, id, newPos, false);
   }

@@ -49,6 +49,7 @@ struct LayoutContentAlignment {
 struct GameObjectUILayout {
   UILayoutType type;
   float spacing;
+  float minSpacing;
   std::vector<std::string> elements;
   BoundInfo boundInfo;
   glm::vec3 panelDisplayOffset;

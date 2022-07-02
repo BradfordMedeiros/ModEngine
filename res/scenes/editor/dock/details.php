@@ -39,11 +39,11 @@
 (banner_title_background_right:position:0.23 0 <?php echo($zpos . "\n"); ?>
 (banner_title_background_right:layer:basicui
 (banner_title_background_right:backpanel:true
-(banner_title_background_right:tint:0 0 0 1
+(banner_title_background_right:tint:1 1 1 0.3
 (banner_title_background_right:minheight:2
 (banner_title_background_right:minwidth:0.02
 (banner_title_background_right:border-size:0.002
-(banner_title_background_right:border-color:0 0 0
+(banner_title_background_right:border-color:0 0 0 1
 (banner_title_background_right:child:)banner_title_right
 
 )banner_title_left:layer:basicui
@@ -55,11 +55,11 @@
 (banner_title_background_left:position:-0.23 0 <?php echo($zpos . "\n"); ?>
 (banner_title_background_left:layer:basicui
 (banner_title_background_left:backpanel:true
-(banner_title_background_left:tint:0 0 0.8 1
+(banner_title_background_left:tint:1 1 1 0.3
 (banner_title_background_left:minheight:2
 (banner_title_background_left:minwidth:0.02
 (banner_title_background_left:border-size:0.002
-(banner_title_background_left:border-color:0 0 0
+(banner_title_background_left:border-color:0 0 0 1
 (banner_title_background_left:child:)banner_title_left
 
 )title:layer:basicui

@@ -1,6 +1,6 @@
 <?php
   $keyname = ")" . $unique_control_id . "_" . "numeric_mainlabel";
-  createElement($keyname, $default_key, [ "value" => $data["key"] ]);
+  createElement($keyname, $default_key, [  "value" => $data["key"] ]);
   $value = $data["value"];
   $numericElements = [ $keyname ];
 
@@ -43,7 +43,7 @@
       array_push($managedElements, $floatValueElementName);
     }else if ($controlType == "slider"){
       $sliderElementName =  "_" . $unique_control_id . "_" . "numeric"  . $i . "_value";
-      $attrValues["scale"] = "0.1 0.02 0.02";
+      $attrValues["scale"] = "0.3 0.02 0.02";
       $attrValues["onslide"] = "details-editable-slide";
       createElement($sliderElementName, $default_value, $attrValues);
       array_push($managedElements, $sliderElementName);
@@ -52,11 +52,11 @@
       exit(1);
     }
     $floatElementName = "(" . $unique_control_id . "_" . "numeric_" . $i;
-    createElement($floatElementName, $default_key, [ "elements" => implode(",", $managedElements) ]);
+    createElement($floatElementName, $default_key, [ "min-spacing" => "0.08", "margin" => "0.02", "minwidth" => "0.44", "tint" => "0.2 0.2 0.2 1", "backpanel" => "true", "elements" => implode(",", $managedElements) ]);
     array_push($numericElements, $floatElementName);
   }
 
   $numericElements = array_reverse($numericElements);
-  createElement($rootElementName, $default_rootLayout, [ "elements" => implode(",", $numericElements), "type" => "vertical" ]);
+  createElement($rootElementName, $default_rootLayout, [ "tint" => "0.5 0.5 0.5 1", "margin-top" => "0.02", "margin-left" => "0", "margin-right" => "0", "spacing" => "0.01", "elements" => implode(",", $numericElements), "type" => "vertical" ]);
 ?>
 
