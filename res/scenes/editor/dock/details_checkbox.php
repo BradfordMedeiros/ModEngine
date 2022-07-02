@@ -22,7 +22,7 @@
   $labelName = ")" . $unique_control_id . "_" . "checkbox_label";
   createElement($labelName, $default_key, [ 
     "value" => $data["key"],
-    "tint" => "5 5 5 1",
+    #"tint" => "5 5 5 1",
   ]);
 
   $checkboxName = "*" . $unique_control_id . "_" . "checkbox_check";
@@ -44,5 +44,5 @@
   }
  
   createElement($checkboxName, $default_text_style, $buttonFields);
-  createElement($rootElementName, $default_rootLayout, [ "spacing" => "0.25", "tint" => "0 0 1 1", "elements" =>  $labelName . "," . $checkboxName ]);
+  createElement($rootElementName, $default_rootLayout, [ "spacing" => "0.25", /*"tint" => "0 0 1 1",*/ "elements" =>  $labelName . "," . $checkboxName ]);
 ?>

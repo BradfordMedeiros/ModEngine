@@ -44,7 +44,7 @@
   }
 
   createElement($listHolder, $default_style, [
-    "tint" => "0 1 0 1",
+    #"tint" => "0 1 0 1",
     "elements" => implode(",", $listElementNames),
     "backpanel" => "true",
     "position" => "0 0 " . $depth[2],
@@ -54,7 +54,7 @@
   $topLevelElements = [$listHolder, $labelName];
 
   $topLevelAttr = [ 
-    "tint" => "0 0 1 1", 
+    #"tint" => "0 0 1 1", 
     "elements" => implode(",", $topLevelElements),
     "type" => "vertical",
     "position" => "0 0 " . $depth[1],

@@ -17,8 +17,7 @@
 
 (test_panel:align-items-horizontal:left   # left/center/right
 (test_panel:align-items-vertical:up     # up/center/down
-(test_panel:border-size:0.004
-(test_panel:border-color:0.3 0.3 0.3 1
+
 (test_panel:position:-0.8 -0.1 <?php echo($zpos . "\n"); ?>
 (test_panel:minwidth:0.44
 (test_panel:align-content:neg
@@ -40,7 +39,7 @@
 (banner_title_background_right:position:0.23 0 <?php echo($zpos . "\n"); ?>
 (banner_title_background_right:layer:basicui
 (banner_title_background_right:backpanel:true
-(banner_title_background_right:tint:0 0 0.8 1
+(banner_title_background_right:tint:0 0 0 1
 (banner_title_background_right:minheight:2
 (banner_title_background_right:minwidth:0.02
 (banner_title_background_right:border-size:0.002
@@ -65,7 +64,7 @@
 
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
-)title:tint:1 1 2 1
+)title:tint:2 2 2 1
 )title:position:0 0 -1
 
 
@@ -109,12 +108,12 @@
       "type" => "horizontal",
       "backpanel" => "true",
       "tint" => "0.25 0.25 0.25 1",  # doesn't show up since z ordering
-      "margin" => "0.04",
-      "margin-left" => "0.02",
+      "margin" => "0.02",
+      "margin-left" => "0.01",
       "spacing" => "0.02",
       "minwidth" => "0.44",
       "border-size" => "0.002",
-      "border-color" => "0.6 0.6 0.6 1",
+      "border-color" => "0 0 0 1",
       "position" => "0 0 " . $depth[2],
     ];
 
