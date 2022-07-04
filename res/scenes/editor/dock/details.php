@@ -110,6 +110,7 @@
       "tint" => "0.25 0.25 0.25 1",  # doesn't show up since z ordering
       "margin" => "0.02",
       "margin-left" => "0.01",
+      "margin-right" => "0.01",
       "spacing" => "0.02",
       "minwidth" => "0.44",
       "border-size" => "0.002",
