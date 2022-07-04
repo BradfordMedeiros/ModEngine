@@ -452,7 +452,7 @@ glm::vec3 calcMarginOffset(GameObjectUILayout* layoutObject){
   }else if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Neutral){
     // do nothing
   }else if (layoutObject -> alignment.horizontal == LayoutContentAlignment_Positive){
-    //marginOffset += glm::vec3(-1.f * layoutObject -> marginValues.marginRight, 0.f, 0.f);
+    marginOffset += glm::vec3(-1.f * layoutObject -> marginValues.marginRight, 0.f, 0.f);
   }else{
     std::cout << "enforce layout: invalid horizontal align items" << std::endl;
     assert(false);
@@ -463,7 +463,7 @@ glm::vec3 calcMarginOffset(GameObjectUILayout* layoutObject){
   }else if (layoutObject -> alignment.vertical == LayoutContentAlignment_Neutral){
     // do nothing
   }else if (layoutObject -> alignment.vertical == LayoutContentAlignment_Positive){
-    //marginOffset += glm::vec3(0.f, -1.f * layoutObject -> marginValues.marginTop, 0.f);
+    marginOffset += glm::vec3(0.f, -1.f * layoutObject -> marginValues.marginTop, 0.f);
   }else{
     std::cout << "enforce layout: invalid vertical align items" << std::endl;
     assert(false);
@@ -511,6 +511,7 @@ std::vector<glm::vec3> calcAlignItemsAdjustments(GameObjectUILayout* layoutObjec
   std::vector<glm::vec3> alignItemsAdjustments;
 
   auto alignItemsAdjustment = layoutAlignItemsAdjustment(layoutObject, boundingWidth, boundingHeight, elementsWidth, elementsHeight);
+  auto marginOffset = calcMarginOffset(layoutObject);
 
   float spaceableWidth = boundingWidth - (layoutObject -> marginValues.marginLeft + layoutObject -> marginValues.marginRight);
   float spaceableHeight = boundingHeight - (layoutObject -> marginValues.marginTop + layoutObject -> marginValues.marginBottom);
@@ -524,7 +525,7 @@ std::vector<glm::vec3> calcAlignItemsAdjustments(GameObjectUILayout* layoutObjec
 
   if (layoutObject -> contentSpacing == LayoutContentSpacing_Pack){
     for (int i = 0; i < newPositions.size(); i++){
-      alignItemsAdjustments.push_back(alignItemsAdjustment);
+      alignItemsAdjustments.push_back(alignItemsAdjustment + marginOffset);
     }
   }else if (layoutObject -> type == LAYOUT_HORIZONTAL){
       int spaceBetweenIndex =  INT_MAX;
@@ -542,7 +543,7 @@ std::vector<glm::vec3> calcAlignItemsAdjustments(GameObjectUILayout* layoutObjec
           additionalOffset = glm::vec3(rightSideRemaining, 0.f, 0.f);
         }
   
-      alignItemsAdjustments.push_back(additionalOffset + glm::vec3(0.f, alignItemsAdjustment.y, 0.f));
+      alignItemsAdjustments.push_back(additionalOffset + glm::vec3(0.f, alignItemsAdjustment.y, 0.f) + glm::vec3(layoutObject -> marginValues.marginLeft, marginOffset.y, 0));
     //  alignItemsAdjustments.push_back(glm::vec3(0.f, 0.f, 0.f));
     }
   }else if (layoutObject -> type == LAYOUT_VERTICAL){
@@ -561,7 +562,7 @@ std::vector<glm::vec3> calcAlignItemsAdjustments(GameObjectUILayout* layoutObjec
         additionalOffset = glm::vec3(0.f, heightRemaining, 0.f);
       }
 
-      alignItemsAdjustments.push_back(additionalOffset + glm::vec3(alignItemsAdjustment.x, 0.f, 0.f));
+      alignItemsAdjustments.push_back(additionalOffset + glm::vec3(alignItemsAdjustment.x, 0.f, 0.f) + glm::vec3(marginOffset.x, layoutObject -> marginValues.marginBottom, 0));
     //  alignItemsAdjustments.push_back(glm::vec3(0.f, 0.f, 0.f));
     }
   }else{
@@ -703,11 +704,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   //std::cout << std::endl;
 
   // Applies the margin.
-  //glm::vec3 marginOffset = calcMarginOffset(layoutObject); 
-
   std::vector<glm::vec3> alignItemsAdjustments = calcAlignItemsAdjustments(layoutObject, boundingWidth, boundingHeight, elementsWidth, elementsHeight, newPositions);
-
-
 
   //std::cout << "( elements(width, height) = " << print(glm::vec2(elementsWidth, elementsHeight)) << ", bounding(width, height) = " << print(glm::vec2(boundingWidth, boundingHeight)) << std::endl;
   //std::cout << "( totalAdjustment = " << print(totalAdjustment) << ", elementsLeftSideOffset = " << print(elementsLeftSideOffset) << ", marginOffset = " << print(marginOffset) << ", mainAlignmentOffset = " << print(mainAlignmentOffset) << ", alignItemsAdjustment = " << print(alignItemsAdjustment) << " ) " << std::endl;
