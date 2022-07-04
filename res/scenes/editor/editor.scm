@@ -63,8 +63,8 @@
 (define xLocationToSnappingPosition
   (list 
     (list 0.99 (list 1.2 -0.1 0))
-    (list 0 (list 0.8 -0.1 0))
-    (list -1.1 (list -0.8 -0.1 0))
+    (list 0 (list 0.78 -0.1 0))
+    (list -1.1 (list -0.78 -0.1 0))
     (list most-negative-fixnum (list -1.2 -0.1 0))
   )
 )

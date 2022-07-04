@@ -18,7 +18,7 @@
 (test_panel:align-items-horizontal:left   # left/center/right
 (test_panel:align-items-vertical:up     # up/center/down
 
-(test_panel:position:-0.8 -0.1 <?php echo($zpos . "\n"); ?>
+(test_panel:position:-0.78 -0.1 <?php echo($zpos . "\n"); ?>
 (test_panel:minwidth:0.44
 (test_panel:align-content:neg
 
@@ -27,7 +27,7 @@
 )window_x:scale:0.008 0.016 0.008
 )window_x:tint:0.8 0.8 0.8 1
 )window_x:value:x
-)window_x:position:0.18 0.95 0
+)window_x:position:0.2 0.95 0
 
 (test_panel:child:(banner_title_background_right,(banner_title_background_left,)window_x
 )banner_title_right:layer:basicui
@@ -36,7 +36,7 @@
 )banner_title_right:value:Object Details
 )banner_title_right:rotation:0 0 -1 -90
 )banner_title_right:position:0 0 0.01
-(banner_title_background_right:position:0.23 0 <?php echo($zpos . "\n"); ?>
+(banner_title_background_right:position:0.23 0 <?php echo($zpos . "\n"); /* minwidth = 0.22 + 0.01 since this panel is 0.02 width to align */ ?>
 (banner_title_background_right:layer:basicui
 (banner_title_background_right:backpanel:true
 (banner_title_background_right:tint:1 1 1 0.3
