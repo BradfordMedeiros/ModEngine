@@ -21,18 +21,26 @@
 (keyval_0:backpanel:true
 (keyval_0:tint:0 0 0 0.6
 (keyval_0:elements:)key_0,)value_0,)key_1
-(keyval_0:align-items-horizontal:center   # left/center/right
-(keyval_0:align-items-vertical:center     # up/center/down
-(keyval_0:align-content:center  # pos center neg   .  For vertical, aligns left/right, for horizontal aligns up down
 (keyval_0:border-size:0.004
-(keyval_0:margin-left:0.1
-(keyval_0:margin-top:0.1
-(keyval_0:margin:0.3
-(keyval_0:minwidth:1
+(keyval_0:margin:0
+(keyval_0:margin-left:0.4
+(keyval_0:margin-right:0.4
+#(keyval_0:margin-top:0
+(keyval_0:margin-bottom:0
+#(keyval_0:margin:0.3
+(keyval_0:minwidth:2
 (keyval_0:minheight:2
+(keyval_0:align-content:neg # pos center neg   .  For vertical, aligns left/right, for horizontal aligns up down
 
 
 
 #(keyval_0:content-spacing:pack
-(keyval_0:content-spacing:space-for-first
-#(keyval_0:content-spacing:space-for-last
+
+(keyval_0:align-items-horizontal:right   # left/center/right
+(keyval_0:align-items-vertical:center    # up/center/down
+
+#(keyval_0:content-spacing:space-for-first
+(keyval_0:content-spacing:space-for-last
+
+#(keyval_0:align-horizontal:right
+#(keyval_0:type:vertical
