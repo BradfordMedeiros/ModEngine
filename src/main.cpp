@@ -1481,6 +1481,14 @@ int main(int argc, char* argv[]){
 
           return glm::vec2(uv.x, uv.y);
         },
+        [](glm::vec2 coord) -> objid {
+          auto pixelCoord = ndiToPixelCoord(coord, state.resolution);
+          auto id = getIdFromPixelCoord(pixelCoord.x, pixelCoord.y);
+          if (id < 0){
+            return -1;
+          }
+          return id;
+        },
         [](std::string topic, std::string value) -> void { 
           StringString message {
             .strTopic = topic,
@@ -1489,7 +1497,7 @@ int main(int argc, char* argv[]){
           channelMessages.push(message);
         }, 
         state.editor.activeObj,
-        hoveredId,
+        hoveredId < 0 ? -1 : hoveredId,
         selectItemCalledThisFrame,
         uvCoord.x, 
         uvCoord.y,

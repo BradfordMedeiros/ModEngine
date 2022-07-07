@@ -16,6 +16,12 @@ objid getIdFromColor(Color color){
   return objectId;
 }
 
+objid getIdFromPixelCoord(GLint x, GLint y){
+  Color hoveredItemColor = getPixelColor(x, y);
+  auto hoveredId = getIdFromColor(hoveredItemColor);
+  return hoveredId;
+}
+
 glm::vec4 getColorFromGameobject(objid id){
   int redChannel =   (id & 0x000000FF);
   int greenChannel = (id & 0x0000FF00) >> 8;
