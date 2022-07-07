@@ -695,6 +695,7 @@ void applyFocusUI(std::map<objid, GameObjectObj>& mapping, objid id, std::functi
     }
   }
 }
+
 void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<void(std::string)> applyText){
   /*for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUI>(&obj);
@@ -706,10 +707,18 @@ void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<v
   }*/
 }
 
-void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(std::string, std::string)> onSliderPercentage, objid id, float uvx, float uvy){
+// probably need to figure out which one is being held down 
+// then build vec1 when select down
+// then get vec2 and vec3 diff 
+// compare to bounding width, and convert to percentage
+
+void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::vec2(glm::vec2)> getUVCoord, std::function<void(std::string, std::string)> onSliderPercentage, objid id, objid hoveredId, bool selectItemCalled, float uvx, float uvy, float ndiX, float ndiY){
+  std::cout << "apply uv coord: (" << id << ", " << hoveredId << ") " << selectItemCalled << " " << uvx << " " << uvy << ", " << ndiX << ", " << ndiY << std::endl;
+
   for (auto &[uiId, obj] : mapping){
     auto uiControl = std::get_if<GameObjectUISlider>(&obj);
     if (uiControl != NULL && uiId == id){
+      // check if had initial press
       uiControl -> percentage = uvx;
       if (uiControl -> onSlide != ""){
         onSliderPercentage(uiControl -> onSlide, std::to_string(id));
@@ -717,6 +726,7 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<void(st
     }
   }
 }
+
 
 void updatePosition(std::map<objid, GameObjectObj>& mapping, objid id, glm::vec3 position){
   auto object = mapping.at(id); 

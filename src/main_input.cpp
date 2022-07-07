@@ -95,11 +95,16 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
       state.cursorTop = ypos;
     }
 }
-void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
+
+glm::vec2 ndiCoord(){
   float xNdc = 2 * (state.cursorLeft / (float)state.resolution.x) - 1;
   float yNdc = -1 * (2 * (state.cursorTop  / (float)state.resolution.y) - 1);
-  cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, xNdc, yNdc);
+  return glm::vec2(xNdc, yNdc);
+}
+void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
+  onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
+  auto coords = ndiCoord();
+  cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
   processManipulator();
 }
 

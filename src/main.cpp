@@ -1454,21 +1454,7 @@ int main(int argc, char* argv[]){
     state.lastHoverIndex = state.currentHoverIndex;
     state.currentHoverIndex = hoveredId;
 
-    if (state.editor.activeObj != 0 && hoveredId == state.editor.activeObj){
-      applyUICoord(
-        world.objectMapping, 
-        [](std::string topic, std::string value) -> void { 
-          StringString message {
-            .strTopic = topic,
-            .strValue = value,
-          };
-          channelMessages.push(message);
-        }, 
-        state.editor.activeObj, 
-        uvCoord.x, 
-        uvCoord.y
-      );
-    }
+    bool selectItemCalledThisFrame = selectItemCalled;
 
     if ((hoveredId != getManipulatorId()) && selectItemCalled){
       std::cout << "INFO: select item called" << std::endl;
@@ -1481,6 +1467,31 @@ int main(int argc, char* argv[]){
       }
       selectItemCalled = false;
     }
+    auto ndiCoords = ndiCoord();
+    if (state.editor.activeObj != 0){
+      applyUICoord(
+        world.objectMapping,
+        [](glm::vec2 coord) -> glm::vec2 {
+          auto uv = getUVCoord(coord.x, coord.y);
+          return glm::vec2(uv.x, uv.y);
+        },
+        [](std::string topic, std::string value) -> void { 
+          StringString message {
+            .strTopic = topic,
+            .strValue = value,
+          };
+          channelMessages.push(message);
+        }, 
+        state.editor.activeObj,
+        hoveredId,
+        selectItemCalledThisFrame,
+        uvCoord.x, 
+        uvCoord.y,
+        ndiCoords.x, 
+        ndiCoords.y
+      );
+    }
+
 
     onManipulatorUpdate(
       [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
