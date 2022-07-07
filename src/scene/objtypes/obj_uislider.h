@@ -12,6 +12,8 @@ struct GameObjectUISlider {
   int texture;
   int opacityTexture;
   std::string onSlide;
+
+  std::optional<glm::vec2> uvCoord;
 };
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util);

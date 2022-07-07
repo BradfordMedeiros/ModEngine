@@ -719,7 +719,13 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::ve
     auto uiControl = std::get_if<GameObjectUISlider>(&obj);
     if (uiControl != NULL && uiId == id){
       // check if had initial press
-      uiControl -> percentage = uvx;
+      if (selectItemCalled){
+        uiControl -> uvCoord = glm::vec2(ndiX, ndiY);
+        return;
+      }
+
+      auto uvCoord = getUVCoord(glm::vec2(ndiX, uiControl -> uvCoord.value().y));
+      uiControl -> percentage = uvCoord.x;
       if (uiControl -> onSlide != ""){
         onSliderPercentage(uiControl -> onSlide, std::to_string(id));
       }

@@ -660,9 +660,10 @@ float getViewspaceDepth(glm::mat4& transView, objid elementId){
   return getTransformationFromMatrix(viewPosition).position.z;
 }
 
-glm::ivec2 pixelCoordsRelativeToViewport(){
-  int adjustedCursorX = (((float)(state.cursorLeft - state.viewportoffset.x)) / (float)state.viewportSize.x) * state.resolution.x;
-  int cursorBottom = (state.currentScreenHeight - state.cursorTop);
+// current pixel address to pixel number in viewport adjusted to the viewport resolution
+glm::ivec2 pixelCoordsRelativeToViewport(float x, float y){
+  int adjustedCursorX = (((float)(x - state.viewportoffset.x)) / (float)state.viewportSize.x) * state.resolution.x;
+  int cursorBottom = (state.currentScreenHeight - y);
   int adjustedCursorY = (((float)(cursorBottom - state.viewportoffset.y)) / (float)state.viewportSize.y) * state.resolution.y;
   return glm::ivec2(adjustedCursorX, adjustedCursorY);
 }
@@ -1444,7 +1445,9 @@ int main(int argc, char* argv[]){
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_BLEND);
 
-    auto adjustedCoords = pixelCoordsRelativeToViewport();
+    //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
+    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop);
+    //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
@@ -1471,8 +1474,11 @@ int main(int argc, char* argv[]){
     if (state.editor.activeObj != 0){
       applyUICoord(
         world.objectMapping,
-        [](glm::vec2 coord) -> glm::vec2 {
-          auto uv = getUVCoord(coord.x, coord.y);
+        [&adjustedCoords](glm::vec2 coord) -> glm::vec2 {
+          auto pixelCoord = ndiToPixelCoord(coord, state.resolution);
+          auto uv = getUVCoord(pixelCoord.x, pixelCoord.y);
+          std::cout << "get uv coord: " << print(coord) << " - " << print(pixelCoord) << " adjusted: " << print(adjustedCoords) <<  std::endl;
+
           return glm::vec2(uv.x, uv.y);
         },
         [](std::string topic, std::string value) -> void { 

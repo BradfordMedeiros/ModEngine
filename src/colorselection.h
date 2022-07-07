@@ -24,6 +24,7 @@ struct UVCoord {
 };
 
 UVCoord getUVCoord(GLint x, GLint y);
+glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution);
 glm::vec3 uvToNDC(UVCoord coord);
 
 void saveScreenshot(std::string& filepath);
