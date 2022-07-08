@@ -1477,8 +1477,7 @@ int main(int argc, char* argv[]){
         [&adjustedCoords](glm::vec2 coord) -> glm::vec2 {
           auto pixelCoord = ndiToPixelCoord(coord, state.resolution);
           auto uv = getUVCoord(pixelCoord.x, pixelCoord.y);
-          std::cout << "get uv coord: " << print(coord) << " - " << print(pixelCoord) << " adjusted: " << print(adjustedCoords) <<  std::endl;
-
+          //std::cout << "get uv coord: " << print(coord) << " - " << print(pixelCoord) << " adjusted: " << print(adjustedCoords) <<  std::endl;
           return glm::vec2(uv.x, uv.y);
         },
         [](glm::vec2 coord) -> objid {
@@ -1488,6 +1487,9 @@ int main(int argc, char* argv[]){
             return -1;
           }
           return id;
+        },
+        [](objid id) -> glm::quat {
+          return getGameObjectRotation(id, true);
         },
         [](std::string topic, std::string value) -> void { 
           StringString message {

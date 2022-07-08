@@ -712,7 +712,7 @@ void applyKey(std::map<objid, GameObjectObj>& mapping, char key, std::function<v
 // then get vec2 and vec3 diff 
 // compare to bounding width, and convert to percentage
 
-void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::vec2(glm::vec2)> getUVCoord, std::function<objid(glm::vec2)> getIdByNdi, std::function<void(std::string, std::string)> onSliderPercentage, objid id, objid hoveredId, bool selectItemCalled, float uvx, float uvy, float ndiX, float ndiY){
+void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::vec2(glm::vec2)> getUVCoord, std::function<objid(glm::vec2)> getIdByNdi, std::function<glm::quat(objid)> getRotation, std::function<void(std::string, std::string)> onSliderPercentage, objid id, objid hoveredId, bool selectItemCalled, float uvx, float uvy, float ndiX, float ndiY){
   //std::cout << "apply uv coord: " << id << ", " << hoveredId << ", " << selectItemCalled << std::endl;
   //std::cout << "apply uv coord: uvx << " " << uvy << ", " << ndiX << ", " << ndiY << std::endl;
 
