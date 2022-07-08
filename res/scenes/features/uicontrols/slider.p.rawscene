@@ -1,4 +1,9 @@
 
 _basicslider:position:0 0 0
 _basicslider:onslide:slideamount
-_basicslider:script:./res/scenes/features/uicontrols/slider.scm
+#_basicslider:script:./res/scenes/features/uicontrols/slider.scm
+_basicslider:layer:basicui
+
+_basicslider:backpaneltint:1 1 1 0.2
+_basicslider:rotation:0 0 -1 -10
+

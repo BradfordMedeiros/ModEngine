@@ -731,22 +731,27 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::ve
       }
 
       if (/*ndiId != id*/ hoveredId != id){ 
-        auto newNdi = glm::vec2(ndiX, uiControl -> uvCoord.value().y); // should have better projection fn
+        auto rotation = getRotation(id);
+        auto diffNdi = glm::vec2(ndiX, ndiY) - uiControl -> uvCoord.value();
+        auto diffNdiRotated = glm::inverse(rotation) * glm::vec3(diffNdi.x, diffNdi.y, 0.f);;
+        auto newNdi3 = rotation * glm::vec3(diffNdiRotated.x, 0.f, 0.f); // should have better projection fn
+        auto newNdi = glm::vec2(uiControl -> uvCoord.value().x + newNdi3.x, uiControl -> uvCoord.value().y + newNdi3.y);
         auto ndiId = getIdByNdi(newNdi);
         if (ndiId == id){
-          std::cout << "should project uv coord now" << std::endl;
+          //std::cout << "should project uv coord now" << std::endl;
           auto uvCoord = getUVCoord(newNdi);
           uiControl -> percentage = uvCoord.x;
         }else{
-          std::cout << "no project uv available" << std::endl;
-          if (newNdi.x > uiControl -> uvCoord.value().x){
+          //std::cout << "no project uv available" << std::endl;
+          auto right = rotation * glm::vec3(1.f, 0.f, 0.f);
+          if (glm::dot(newNdi3, right) > 0){ // this is wrong, should take into account rotation
             uiControl -> percentage = 1;
           }else{
             uiControl -> percentage = 0;
           }          
         }  
       }else {
-        std::cout << "uv coord default" << std::endl;   // if projection fn is better this can go away
+        //std::cout << "uv coord default" << std::endl;   // if projection fn is better this can go away
         auto uvCoord = getUVCoord(glm::vec2(ndiX, ndiY));
         uiControl -> percentage = uvCoord.x;
       }
