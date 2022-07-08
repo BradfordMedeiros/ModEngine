@@ -272,9 +272,14 @@
   (maybe-set-binding objattr)
 )
 
-;; todo remove - no items in this layout, should require this 
-(enforce-layout (gameobj-id (lsobj-name "(banner_title_background_right" )))
-(enforce-layout (gameobj-id (lsobj-name "(banner_title_background_left" )))
+
+(define (enforceLayouts)
+  ;; todo remove - no items in this layout, should require this 
+  (enforce-layout (gameobj-id (lsobj-name "(banner_title_background_right" )))
+  (enforce-layout (gameobj-id (lsobj-name "(banner_title_background_left" )))
+  (enforce-layout (gameobj-id (lsobj-name "(test_panel")))
+)
+(enforceLayouts)
 
 (define (onKey key scancode action mods)
   (if (and (equal? action 1) (not (isControlKey key)))
@@ -388,6 +393,7 @@
     ) 
     (all-obj-to-bindings "details-binding-toggle")  ;
   )
+  (enforceLayouts)
 )
 
 
