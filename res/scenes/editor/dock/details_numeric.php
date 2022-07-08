@@ -45,6 +45,7 @@
       $sliderElementName =  "_" . $unique_control_id . "_" . "numeric"  . $i . "_value";
       $attrValues["scale"] = "0.3 0.02 0.02";
       $attrValues["onslide"] = "details-editable-slide";
+      $attrValues["backpaneltint"] = "0.4 0.4 0.4 1";
       createElement($sliderElementName, $default_value, $attrValues);
       array_push($managedElements, $sliderElementName);
     }else{

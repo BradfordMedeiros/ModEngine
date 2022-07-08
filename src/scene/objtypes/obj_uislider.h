@@ -12,7 +12,9 @@ struct GameObjectUISlider {
   int texture;
   int opacityTexture;
   std::string onSlide;
-
+  bool showBackpanel;
+  glm::vec4 backpanelTint;
+  
   std::optional<glm::vec2> uvCoord;
 };
 

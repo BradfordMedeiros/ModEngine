@@ -4,6 +4,9 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto onSlide = attr.stringAttributes.find("onslide") != attr.stringAttributes.end() ? attr.stringAttributes.at("onslide") : "";
   auto percentage = attr.numAttributes.find("slideamount") != attr.numAttributes.end() ? attr.numAttributes.at("slideamount") : 100.f;
 
+  auto backpanelTint = attr.vecAttr.vec4.find("backpaneltint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("backpaneltint");
+  auto showBackpanel = attr.vecAttr.vec4.find("backpaneltint") != attr.vecAttr.vec4.end();
+
   GameObjectUISlider obj {
     .common = parseCommon(attr, util.meshes),
     .min = 0.f,
@@ -12,6 +15,8 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
     .texture = util.ensureTextureLoaded("./res/models/controls/slider.png").textureId,
     .opacityTexture = util.ensureTextureLoaded("./res/models/controls/slider_opacity.png").textureId,
     .onSlide = onSlide,
+    .showBackpanel = showBackpanel,
+    .backpanelTint = backpanelTint,
   };
   return obj;
 }
@@ -22,11 +27,17 @@ std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISli
   if (obj.onSlide != ""){
     pairs.push_back(std::pair<std::string, std::string>("onslide", obj.onSlide));
   }
+  if (obj.showBackpanel){
+    pairs.push_back(std::pair<std::string, std::string>("backpaneltint", serializeVec(obj.backpanelTint)));
+  }
   return pairs;
 }
 
 void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _attributes){
   MODTODO("ui slider - get rest of attributes");
   _attributes.numAttributes["slideamount"] = sliderObj.percentage;
+  if (sliderObj.showBackpanel){
+    _attributes.vecAttr.vec4["backpaneltint"] = sliderObj.backpanelTint;
+  }
 }
 
