@@ -724,19 +724,26 @@ void applyUICoord(std::map<objid, GameObjectObj>& mapping, std::function<glm::ve
         uiControl -> uvCoord = glm::vec2(ndiX, ndiY);  // should be dotproduct between the forward vector and ndiVector thing
         return;
       }
-      auto newNdi = glm::vec2(ndiX, uiControl -> uvCoord.value().y);
-      auto ndiId = getIdByNdi(newNdi);
-      //std::cout << "id by ndi: " << id << std::endl;
 
-      if (ndiId != id){ // should reallly be comparing against the id that was down when selected
-        if (newNdi.x > uiControl -> uvCoord.value().x){
-          uiControl -> percentage = 1;
+      if (/*ndiId != id*/ hoveredId != id){ 
+        auto newNdi = glm::vec2(ndiX, uiControl -> uvCoord.value().y); // should have better projection fn
+        auto ndiId = getIdByNdi(newNdi);
+        if (ndiId == id){
+          std::cout << "should project uv coord now" << std::endl;
+          auto uvCoord = getUVCoord(newNdi);
+          uiControl -> percentage = uvCoord.x;
         }else{
-          uiControl -> percentage = 0;
-        }
+          std::cout << "no project uv available" << std::endl;
+          if (newNdi.x > uiControl -> uvCoord.value().x){
+            uiControl -> percentage = 1;
+          }else{
+            uiControl -> percentage = 0;
+          }          
+        }  
       }else {
-        auto uvCoord = getUVCoord(newNdi); // this should be improved, since only works on horizontal bars effectively
-        uiControl -> percentage = uvCoord.x; 
+        std::cout << "uv coord default" << std::endl;   // if projection fn is better this can go away
+        auto uvCoord = getUVCoord(glm::vec2(ndiX, ndiY));
+        uiControl -> percentage = uvCoord.x;
       }
       if (uiControl -> onSlide != ""){
         onSliderPercentage(uiControl -> onSlide, std::to_string(id));
