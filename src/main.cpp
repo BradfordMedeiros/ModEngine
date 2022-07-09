@@ -335,10 +335,36 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram, bool allo
   return shaderNameToId.at(fragShaderName);
 }
 
-void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition){
+void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
+  for (auto &uniform : uniforms.intUniforms){
+    glUniform1i(glGetUniformLocation(shader, uniform.uniformName.c_str()), uniform.value);
+  }
+  for (auto &uniform : uniforms.floatUniforms){
+    glUniform1f(glGetUniformLocation(shader, uniform.uniformName.c_str()), uniform.value);
+  }
+  for (auto &uniform : uniforms.vec3Uniforms){
+    glUniform3fv(glGetUniformLocation(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
+  }
+  for (auto &uniform : uniforms.floatArrUniforms){
+    for (int i = 0; i < uniform.value.size(); i++){
+      glUniform1f(glGetUniformLocation(shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
+    }
+  }
+  for (auto &uniform : uniforms.builtInUniforms){  // todo -> avoid string comparisons
+    if (uniform.builtin == "resolution"){
+      glUniform2iv(glGetUniformLocation(shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
+    }else{
+      std::cout << "uniform not supported: " << uniform.builtin << std::endl;
+      assert(false);
+    }
+  }
+}
+
+void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<LightInfo>& lights, bool orthographic, glm::vec3 color, objid id, std::vector<glm::mat4> lightProjview, glm::vec3 cameraPosition, RenderUniforms& uniforms){
   auto projview = (orthographic ? glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 100.0f) : proj) * view;
 
   glUseProgram(shader);
+
   glUniform1i(glGetUniformLocation(shader, "maintexture"), 0);        
   glUniform1i(glGetUniformLocation(shader, "emissionTexture"), 1);
   glUniform1i(glGetUniformLocation(shader, "opacityTexture"), 2);
@@ -354,7 +380,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
   glUniform1i(glGetUniformLocation(shader, "enablePBR"), state.enablePBR);
-  glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
+  glUniform1i(glGetUniformLocation(shader, "enableLighting"), false);
 
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
@@ -376,6 +402,8 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   /////////////////////////////
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+
+  setRenderUniformData(shader, uniforms);
 }
 
 glm::vec3 getTintIfSelected(bool isSelected){
@@ -411,7 +439,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
     MODTODO("improve shader state switches by looking into some sort of caching");
 
-    setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition);
+    setShaderData(newShader, proj, layer.disableViewTransform ? glm::mat4(1.f) : view, lights, orthographic, getTintIfSelected(objectSelected), id, lightProjview, cameraPosition, layer.uniforms);
 
     if (state.visualizeNormals){
       glUniformMatrix4fv(glGetUniformLocation(newShader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -555,7 +583,14 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   std::vector<glm::mat4> lightProjView = {};
 
   auto value = glm::mat3(view);  // Removes last column aka translational component --> thats why when you move skybox no move!
-  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition);
+  RenderUniforms noUniforms = { 
+    .intUniforms = {},
+    .floatUniforms = {},
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .builtInUniforms = {},
+  };
+  setShaderData(shaderProgram, projection, value, lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjView, cameraPosition, noUniforms);
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(state.skyboxcolor.x, state.skyboxcolor.y, state.skyboxcolor.z, 1.f)));
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
@@ -680,33 +715,13 @@ struct RenderContext {
   std::optional<glm::mat4> projection;
 };
 
+
 int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
   PROFILE(
   renderStep.name.c_str(),
     glUseProgram(renderStep.shader);
-    for (auto &uniform : renderStep.uniforms.intUniforms){
-      glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
-    }
-    for (auto &uniform : renderStep.uniforms.floatUniforms){
-      glUniform1f(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
-    }
-    for (auto &uniform : renderStep.uniforms.vec3Uniforms){
-      glUniform3fv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
-    }
-    for (auto &uniform : renderStep.uniforms.floatArrUniforms){
-      for (int i = 0; i < uniform.value.size(); i++){
-        glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
-      }
-    }
-    for (auto &uniform : renderStep.uniforms.builtInUniforms){  // todo -> avoid string comparisons
-      if (uniform.builtin == "resolution"){
-        glUniform2iv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
-      }else{
-        std::cout << "uniform not supported: " << uniform.builtin << std::endl;
-        assert(false);
-      }
-    }
+    setRenderUniformData(renderStep.shader, renderStep.uniforms);
     for (int i = 0; i < renderStep.textures.size(); i++){
       auto &textureData = renderStep.textures.at(i);
       int activeTextureOffset = 7 + i; // this is funny, but basically other textures before this use up to 5, probably should centralize these values

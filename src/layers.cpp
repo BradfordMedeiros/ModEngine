@@ -75,6 +75,13 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
         .nearplane = 0.1f,
         .farplane = 1000.f,
         .selectIndex = 0,
+        .uniforms = {
+          .intUniforms = {},
+          .floatUniforms = {},
+          .floatArrUniforms = {},
+          .vec3Uniforms = {},
+          .builtInUniforms = {},
+        },
       };
     }
     setLayerOption(layers2.at(token.target), token.attribute, token.payload);
@@ -93,6 +100,18 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
       .nearplane = 0.1f,
       .farplane = 1000.f,
       .selectIndex = 0,
+      .uniforms = {
+        .intUniforms = {
+          RenderDataInt{
+            .uniformName = "enableLighting",
+            .value = false,
+          },
+        },
+        .floatUniforms = {},
+        .floatArrUniforms = {},
+        .vec3Uniforms = {},
+        .builtInUniforms = {},
+      },
     });
   }else{
     layers2.at("default").name = "";    
