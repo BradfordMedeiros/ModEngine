@@ -41,7 +41,10 @@
 ;))
 
 (define depgraph (getscenegraph))
-(define (refreshDepGraph) (set! depgraph (getscenegraph)))
+(define (refreshDepGraph) 
+	(set! depgraph (getscenegraph))
+
+)
 
 (define expandState (list))
 (define (expandPath name sceneId) (string-append name ":" (number->string sceneId)))
@@ -55,8 +58,19 @@
 )
 
 (define offset 0)
+(define offsetPerY 20)
+(define maxOffset 0)
+(define (setMinOffset depth) 
+	(define newMinOffset (* -1 (+ (* offsetPerY depth) 80)))
+	(if (< newMinOffset minOffset)
+		(set! minOffset newMinOffset)
+	)
+)
+(define (resetMinOffset) (set! minOffset 0))
+(define minOffset (* -1 (* offsetPerY 10)))
+
 (define (calcX depth) (+ (* 20 depth) 20))
-(define (calcY depth) (+ (* 20 depth) 80 offset))
+(define (calcY depth) (+ (* offsetPerY depth) 80 offset))
 (define (selected index name) (if (equal? index 2) (string-append ">" name) name))
 
 (define selectedIndex 1)
@@ -170,6 +184,7 @@
 	(define index -1)
 	(define getIndex (lambda()
 		(set! index (+ index 1))
+		(setMinOffset index)
 		index
 	))
 	(if drawtitle (begin
@@ -182,6 +197,7 @@
 ;	(draw-line (list -1 0.9 0) (list 1 0.9 0)  #f textureId)
 ;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
 
+	(resetMinOffset)
 	(for-each (lambda(target)
 		(drawHierarchy (car target) (cadr target) 0 getIndex)
 	) (allRootParents))
@@ -212,6 +228,7 @@
 )
 
 (define (onScroll amount)
-  (set! offset (+ offset (* 10 amount)))
+  (set! offset (min maxOffset (max minOffset (+ offset (* 10 amount)))))
+  (format #t "offset: ~a\n" offset)
 	(onGraphChange)
 )
