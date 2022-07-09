@@ -129,6 +129,34 @@ struct StrValues {
   std::string payload;
 };
 
+struct RenderDataInt {
+  std::string uniformName;
+  int value;
+};
+struct RenderDataFloat {
+  std::string uniformName;
+  float value;
+};
+struct RenderDataFloatArr {
+  std::string uniformName;
+  std::vector<float> value;
+};
+struct RenderDataVec3 {
+  std::string uniformName;
+  glm::vec3 value;
+};
+struct RenderDataBuiltIn {
+  std::string uniformName;
+  std::string builtin;
+};
+struct RenderUniforms {
+  std::vector<RenderDataInt> intUniforms;
+  std::vector<RenderDataFloat> floatUniforms;
+  std::vector<RenderDataFloatArr> floatArrUniforms;
+  std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderDataBuiltIn> builtInUniforms;
+};
+
 struct LayerInfo {
   std::string name;
   int zIndex;
