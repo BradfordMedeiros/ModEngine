@@ -1,5 +1,5 @@
 
-(define texturename (string-append "texture-" (number->string (gameobj-id mainobj))))
+(define texturename (string-append "gentexture-scenegraph" ))
 
 (define (create-obj)
 	(format #t "create obj placeholder\n")
@@ -7,7 +7,6 @@
   		(list
   			(list "position" (list 1 1 0))
   			(list "mesh" "./res/models/box/spriteplane.dae")
-  			(list "rotation" (list 0 0 1 180))
   		)
 	)
   (gameobj-setattr! (lsobj-name "someobj/Plane") 
@@ -166,16 +165,20 @@
 	filteredParents
 )
 
+(define drawtitle #f)
 (define (addPermaData)
 	(define index -1)
 	(define getIndex (lambda()
 		(set! index (+ index 1))
 		index
 	))
-	(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
-	(draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
-	(draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
-	(draw-line (list -1 1 0)   (list 1 1 0)   (list 0 1 1 1) #f textureId)
+	(if drawtitle (begin
+		(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
+	  (draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
+	  (draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
+	  (draw-line (list -1 1 0)   (list 1 1 0)   (list 0 1 1 1) #f textureId)	
+	))
+
 ;	(draw-line (list -1 0.9 0) (list 1 0.9 0)  #f textureId)
 ;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
 
@@ -187,7 +190,7 @@
 
 (define (onGraphChange)
 	(refreshDepGraph)         ; should this really be done at this point?  Perhaps?!
-	(clear-texture textureId (list 0.1 0.1 0.1 0.8))
+	(clear-texture textureId (list 0.05 0.05 0.05 1))
 	(addPermaData)
 )
 
