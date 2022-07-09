@@ -45,6 +45,7 @@
     ["value" => "SCENE INFO", "dialogoption" => "./res/scenes/editor/dock/world_state.rawscene"],
     ["value" => "OBJECT TOOLS", "dialogoption" => "./res/scenes/editor/dock/object_tools.rawscene"],
     ["value" => "SCENEGRAPH", "dialogoption" => "./res/scenes/editor/dock/scenegraph.rawscene"],
+    ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/performance.rawscene"],
     ////["value" => "WORLD STATE"],
     //["value" => "MESHES"],
     //["value" => "LIGHTS"],
