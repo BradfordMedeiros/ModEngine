@@ -20,6 +20,7 @@ uniform sampler2D normalTexture;
 uniform vec4 tint;
 uniform vec3 cameraPosition;
 
+uniform bool enableLighting;
 uniform bool enableDiffuse;
 uniform bool enableSpecular;
 uniform bool enablePBR;
@@ -29,6 +30,8 @@ uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
 uniform bool hasRoughnessTexture;
 uniform bool hasNormalTexture;
+
+
 
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
@@ -210,13 +213,19 @@ void main(){
       normal = normalize(vec3(normalTexColor.r * 2 - 1, normalTexColor.g * 2 - 1, normalTexColor.b * 2 - 1));
     }*/
 //    texColor = texture(normalTexture, adjustedTexCoord).rgba;
-  
+    
+ 
+    vec4 color  = enablePBR ? calcCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal), 1.0) * texColor;
+    
 
-    vec4 color = enablePBR ? calcCookTorrence(normal, texColor.rgb, 0.2, 0.5) : vec4(calculatePhongLight(normal), 1.0) * texColor;
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
-    float shadowDelta = (false && inShadow) ? 0.2 : 1.0;
+    float shadowDelta = (inShadow) ? 0.7 : 1.0;
 
-    FragColor = /*(hasNormalTexture ? vec4(1, 0, 0, 1) : vec4(0, 0, 1, 1)) **/ tint *  vec4(color.xyz * shadowDelta, color.w);
+    if (enableLighting){
+      FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);
+    }else{
+      FragColor = tint * texColor;
+    }
 
     // TODO -> what would be a better thesholding function? 
     float brightness = FragColor.r + FragColor.g + FragColor.b;

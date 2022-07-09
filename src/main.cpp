@@ -354,6 +354,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
   glUniform1i(glGetUniformLocation(shader, "enablePBR"), state.enablePBR);
+  glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
 
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
