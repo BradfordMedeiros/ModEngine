@@ -230,7 +230,7 @@
           "data" => [
             "key" => "Tint", 
             "value" => [
-              /*[ 
+              [ 
                 "type" => "float", 
                 "name" => "Red", 
                 "value" => [ 
@@ -238,8 +238,8 @@
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
-              ],*/
-              [ 
+              ],
+              /*[ 
                 "type" => "slider", 
                 "name" => "Red", 
                 "value" => [ 
@@ -247,7 +247,7 @@
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
-              ],
+              ],*/
               [ 
                 "type" => "slider", 
                 "name" => "Green", 
@@ -388,10 +388,12 @@
             "key" => "Transform Mode",
             "mode" => "oneof",
             "values" => [
-              ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
-              ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
+              //["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
+              //["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
               ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "set-rotate-mode" ],
+              ["image" => "gentexture-scenegraph", "action" => "set-rotate-mode", "size" => "0.42 -1 0.16" ],
             ],
+            "type" => "vertical",
           ],
         ],
         [

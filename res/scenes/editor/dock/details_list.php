@@ -32,33 +32,49 @@
   for ($i = 0; $i < count($values); $i++){
     $value = $values[$i];
     $listItemName = "*" . $unique_control_id . "_" . "list_item_" . $i;
+
+    $scale = "0.04 -0.1 0.04";
+    if (array_key_exists("size", $value)){
+      $scale = $value["size"];
+    }
+
     createElement($listItemName, $default_text_style, [
-      "scale" => "0.04 -0.1 0.04",  # negative since some bug with button textures, should fix
+      "scale" => $scale,  # negative since some bug with button textures, should fix
       "ontexture" => $value["image"],
       "offtexture" => $value["image"],
       "ontint" => "5 5 5 1",
+      "tint" => "2 2 2 1",
       "details-action" => $value["action"],
       "position" => "0 0 " . $depth[3],
     ]);
     array_push($listElementNames, $listItemName);
   }
 
-  createElement($listHolder, $default_style, [
-    #"tint" => "0 1 0 1",
+  $listHolderVals = [
+    "tint" => "1 0.5 0.5 1",
     "elements" => implode(",", $listElementNames),
     "backpanel" => "true",
     "position" => "0 0 " . $depth[2],
-  ]);
+    "align-content" => "center",
+    "align-items-horizontal" => "left",
+    "minwidth" => "0.42",
+  ];
+  if (array_key_exists("type", $data) && $data["type"] == "vertical"){
+    $listHolderVals["type"] = "vertical";
+  }
+
+  createElement($listHolder, $default_style, $listHolderVals);
 
 
   $topLevelElements = [$listHolder, $labelName];
 
   $topLevelAttr = [ 
-    #"tint" => "0 0 1 1", 
+    "tint" => "0.1 0.1 0.1 1", 
     "elements" => implode(",", $topLevelElements),
     "type" => "vertical",
     "position" => "0 0 " . $depth[1],
     #"spacing" => "0.04",
+    "align-content" => "neg"   
   ];
 
   if (array_key_exists("mode", $data)){
