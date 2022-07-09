@@ -685,21 +685,21 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   PROFILE(
   renderStep.name.c_str(),
     glUseProgram(renderStep.shader);
-    for (auto &uniform : renderStep.intUniforms){
+    for (auto &uniform : renderStep.uniforms.intUniforms){
       glUniform1i(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
     }
-    for (auto &uniform : renderStep.floatUniforms){
+    for (auto &uniform : renderStep.uniforms.floatUniforms){
       glUniform1f(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), uniform.value);
     }
-    for (auto &uniform : renderStep.vec3Uniforms){
+    for (auto &uniform : renderStep.uniforms.vec3Uniforms){
       glUniform3fv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(uniform.value));
     }
-    for (auto &uniform : renderStep.floatArrUniforms){
+    for (auto &uniform : renderStep.uniforms.floatArrUniforms){
       for (int i = 0; i < uniform.value.size(); i++){
         glUniform1f(glGetUniformLocation(renderStep.shader,  (uniform.uniformName + "[" + std::to_string(i) + "]").c_str()), uniform.value.at(i));
       }
     }
-    for (auto &uniform : renderStep.builtInUniforms){  // todo -> avoid string comparisons
+    for (auto &uniform : renderStep.uniforms.builtInUniforms){  // todo -> avoid string comparisons
       if (uniform.builtin == "resolution"){
         glUniform2iv(glGetUniformLocation(renderStep.shader, uniform.uniformName.c_str()), 1, glm::value_ptr(state.resolution));
       }else{

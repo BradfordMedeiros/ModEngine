@@ -40,6 +40,14 @@ struct RenderTexture {
   int framebufferTextureId;
 };
 
+struct RenderUniforms {
+  std::vector<RenderDataInt> intUniforms;
+  std::vector<RenderDataFloat> floatUniforms;
+  std::vector<RenderDataFloatArr> floatArrUniforms;
+  std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderDataBuiltIn> builtInUniforms;
+};
+
 struct RenderStep {
   std::string name;
   unsigned int fbo;
@@ -55,11 +63,7 @@ struct RenderStep {
   bool blend;
   bool enableStencil;
   bool allowShaderOverride;
-  std::vector<RenderDataInt> intUniforms;
-  std::vector<RenderDataFloat> floatUniforms;
-  std::vector<RenderDataFloatArr> floatArrUniforms;
-  std::vector<RenderDataVec3> vec3Uniforms;
-  std::vector<RenderDataBuiltIn> builtInUniforms;
+  RenderUniforms uniforms;
   std::vector<RenderTexture> textures;
 };
 

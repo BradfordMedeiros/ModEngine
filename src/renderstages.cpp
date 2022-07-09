@@ -213,11 +213,13 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
-      .intUniforms = additionalShader.intUniforms,
-      .floatUniforms = additionalShader.floatUniforms,
-      .floatArrUniforms = additionalShader.floatArrUniforms,
-      .vec3Uniforms = additionalShader.vec3Uniforms,
-      .builtInUniforms = additionalShader.builtInUniforms,
+      .uniforms {
+        .intUniforms = additionalShader.intUniforms,
+        .floatUniforms = additionalShader.floatUniforms,
+        .floatArrUniforms = additionalShader.floatArrUniforms,
+        .vec3Uniforms = additionalShader.vec3Uniforms,
+        .builtInUniforms = additionalShader.builtInUniforms,
+      },
       .textures = additionalShader.textures,
     };
     additionalRenderSteps.push_back(renderStep);
@@ -254,11 +256,13 @@ RenderStages loadRenderStages(
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
-    .intUniforms = {},
-    .floatUniforms = {},
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
+    .uniforms {
+      .intUniforms = {},
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .builtInUniforms = {},
+    },
     .textures = {},
   };
   RenderStep shadowMapRender {
@@ -276,11 +280,13 @@ RenderStages loadRenderStages(
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
-      .intUniforms = {},
-      .floatUniforms = {},
-      .floatArrUniforms = {},
-      .vec3Uniforms = {},
-      .builtInUniforms = {},
+      .uniforms {
+        .intUniforms = {},
+        .floatUniforms = {},
+        .floatArrUniforms = {},
+        .vec3Uniforms = {},
+        .builtInUniforms = {},
+      },
       .textures = {},
   };
 
@@ -299,11 +305,13 @@ RenderStages loadRenderStages(
     .blend = true,
     .enableStencil = true,
     .allowShaderOverride = true,
-    .intUniforms = {},
-    .floatUniforms = {},
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
+    .uniforms = {
+      .intUniforms = {},
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .builtInUniforms = {},
+    },
     .textures = {},
   };
   RenderStep portalRender {
@@ -321,11 +329,13 @@ RenderStages loadRenderStages(
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
-      .intUniforms = {},
-      .floatUniforms = {},
-      .floatArrUniforms = {},
-      .vec3Uniforms = {},
-      .builtInUniforms = {},
+      .uniforms {
+        .intUniforms = {},
+        .floatUniforms = {},
+        .floatArrUniforms = {},
+        .vec3Uniforms = {},
+        .builtInUniforms = {},
+      },
       .textures = {},
   };    
     // depends on framebuffer texture, outputs to framebuffer texture 2
@@ -350,16 +360,18 @@ RenderStages loadRenderStages(
     .blend = true,
     .enableStencil = false,
     .allowShaderOverride = false,
-    .intUniforms = {
-      RenderDataInt { .uniformName = "useDepthTexture", .value = false },
-      RenderDataInt { .uniformName = "firstpass",       .value = true },
-      //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-      RenderDataInt { .uniformName = "amount",          .value = 5 }
+    .uniforms = {
+      .intUniforms = {
+        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
+        RenderDataInt { .uniformName = "firstpass",       .value = true },
+        //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
+        RenderDataInt { .uniformName = "amount",          .value = 5 }
+      },
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .builtInUniforms = {},
     },
-    .floatUniforms = {},
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
     .textures = {},
   };
 
@@ -378,16 +390,18 @@ RenderStages loadRenderStages(
     .blend = true,
     .enableStencil = false,
     .allowShaderOverride = false,
-    .intUniforms = {
-      RenderDataInt { .uniformName = "useDepthTexture", .value = false },
-      RenderDataInt { .uniformName = "firstpass",       .value = false },
-      //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
-      RenderDataInt { .uniformName = "amount",          .value = 5 }
+    .uniforms = {
+      .intUniforms = {
+        RenderDataInt { .uniformName = "useDepthTexture", .value = false },
+        RenderDataInt { .uniformName = "firstpass",       .value = false },
+        //RenderDataInt { .uniformName = "amount",          .value = static_cast<int>(state.bloomBlurAmount) }
+        RenderDataInt { .uniformName = "amount",          .value = 5 }
+      },
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .builtInUniforms = {},
     },
-    .floatUniforms = {},
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
     .textures = {},
   };
 
@@ -406,20 +420,22 @@ RenderStages loadRenderStages(
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
-    .intUniforms = {
-      RenderDataInt { .uniformName = "firstpass", .value = true },
-      RenderDataInt{ .uniformName = "amount", .value = 0 },             // updates during updateRenderStages 
-      RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
+    .uniforms = {
+      .intUniforms = {
+        RenderDataInt { .uniformName = "firstpass", .value = true },
+        RenderDataInt{ .uniformName = "amount", .value = 0 },             // updates during updateRenderStages 
+        RenderDataInt{ .uniformName = "useDepthTexture", .value = true },
+      },
+      .floatUniforms = {
+        RenderDataFloat{ .uniformName = "minBlurDistance", .value = 0 },  // updates during updateRenderStages
+        RenderDataFloat{ .uniformName = "maxBlurDistance", .value = 0 },  // updates during updateRenderStages
+        RenderDataFloat{ .uniformName = "near", .value = 0 },             // updates during updateRenderStages
+        RenderDataFloat{ .uniformName = "far", .value = 0 },              // updates during updateRenderStages
+      },
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .builtInUniforms = {},
     },
-    .floatUniforms = {
-      RenderDataFloat{ .uniformName = "minBlurDistance", .value = 0 },  // updates during updateRenderStages
-      RenderDataFloat{ .uniformName = "maxBlurDistance", .value = 0 },  // updates during updateRenderStages
-      RenderDataFloat{ .uniformName = "near", .value = 0 },             // updates during updateRenderStages
-      RenderDataFloat{ .uniformName = "far", .value = 0 },              // updates during updateRenderStages
-    },
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
     .textures = {
       RenderTexture {
         .nameInShader = "framebufferTexture",
@@ -440,7 +456,7 @@ RenderStages loadRenderStages(
   dof2.name = "DOF-RENDERING-2";
   dof2.colorAttachment0 = framebufferTexture;
   dof2.quadTexture = framebufferTexture3;
-  dof2.intUniforms.at(0).value = false;
+  dof2.uniforms.intUniforms.at(0).value = false;
   dof2.textures.at(0).framebufferTextureId = framebufferTexture3;
 
   auto additionalRenderSteps = parseAdditionalRenderSteps("./res/postprocessing", fbo, framebufferTexture, framebufferTexture2, readFile);
@@ -463,16 +479,16 @@ RenderStages loadRenderStages(
 }
 
 void updateRenderStages(RenderStages& stages, RenderStagesDofInfo& dofInfo){ 
-  stages.dof1.intUniforms.at(1).value = dofInfo.blurAmount;
-  stages.dof1.floatUniforms.at(0).value = dofInfo.minBlurDistance;
-  stages.dof1.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
-  stages.dof1.floatUniforms.at(2).value = dofInfo.nearplane;
-  stages.dof1.floatUniforms.at(3).value = dofInfo.farplane;
-  stages.dof2.intUniforms.at(1).value = dofInfo.blurAmount;
-  stages.dof2.floatUniforms.at(0).value = dofInfo.minBlurDistance;
-  stages.dof2.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
-  stages.dof2.floatUniforms.at(2).value = dofInfo.nearplane;
-  stages.dof2.floatUniforms.at(3).value = dofInfo.farplane;
+  stages.dof1.uniforms.intUniforms.at(1).value = dofInfo.blurAmount;
+  stages.dof1.uniforms.floatUniforms.at(0).value = dofInfo.minBlurDistance;
+  stages.dof1.uniforms.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
+  stages.dof1.uniforms.floatUniforms.at(2).value = dofInfo.nearplane;
+  stages.dof1.uniforms.floatUniforms.at(3).value = dofInfo.farplane;
+  stages.dof2.uniforms.intUniforms.at(1).value = dofInfo.blurAmount;
+  stages.dof2.uniforms.floatUniforms.at(0).value = dofInfo.minBlurDistance;
+  stages.dof2.uniforms.floatUniforms.at(1).value = dofInfo.maxBlurDistance;
+  stages.dof2.uniforms.floatUniforms.at(2).value = dofInfo.nearplane;
+  stages.dof2.uniforms.floatUniforms.at(3).value = dofInfo.farplane;
 }
 
 void renderStagesSetPortal(RenderStages& stages, unsigned int portalNumber){
@@ -493,7 +509,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
     }
   } 
   if (step != NULL){
-    for (auto &uniform : step -> floatUniforms){
+    for (auto &uniform : step -> uniforms.floatUniforms){
       if (value.attribute == uniform.uniformName){
         auto floatValue = std::get_if<float>(&value.value);
         assert(floatValue != NULL);
@@ -501,7 +517,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         return;
       }
     }
-    for (auto &uniform : step -> intUniforms){
+    for (auto &uniform : step -> uniforms.intUniforms){
       if (value.attribute == uniform.uniformName){
         auto floatValue = std::get_if<float>(&value.value);
         assert(floatValue != NULL);
@@ -510,7 +526,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         return;
       }      
     }
-    for (auto &uniform : step -> floatArrUniforms){
+    for (auto &uniform : step -> uniforms.floatArrUniforms){
       if (value.attribute == uniform.uniformName){
         auto strValue = std::get_if<std::string>(&value.value);
         assert(strValue != NULL);
@@ -518,7 +534,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         return;
       }      
     }
-    for (auto &uniform : step -> vec3Uniforms){
+    for (auto &uniform : step -> uniforms.vec3Uniforms){
       if (value.attribute == uniform.uniformName){
         auto vec3Value = std::get_if<glm::vec3>(&value.value);
         assert(vec3Value != NULL);
@@ -526,7 +542,7 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value){
         return;
       }     
     }
-    for (auto &uniform : step -> builtInUniforms){
+    for (auto &uniform : step -> uniforms.builtInUniforms){
       if (value.attribute == uniform.uniformName){
         std::cout << "uniform type not supported" << std::endl;
         assert(false);
