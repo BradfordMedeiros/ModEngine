@@ -99,6 +99,13 @@ void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& paylo
   std::cout << "set layer: " << attribute << " - " << payload  << " visible? " << layer.visible <<  std::endl;
 }
 
+std::set<std::string> allLayerNames(std::vector<Token>& tokens){
+  std::set<std::string> names;
+  for (auto &token : tokens){
+    names.insert(token.target);
+  }
+  return names;
+}
 
 std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::string(std::string)> readFile){
   std::cout << "parse layer info: " << file << std::endl;
@@ -107,12 +114,12 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
   auto splitTokens = splitLayerTokens(unsplitTokens);
   auto allUniforms = allUniformsInfos(splitTokens.uniformTokens);
   // create map[token.target] => uniform 
+  auto layerNames = allLayerNames(unsplitTokens);
 
-  for (auto token : splitTokens.normalTokens){
-    std::cout << "(" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
-    if (layers2.find(token.target) == layers2.end()){
-      layers2[token.target] = LayerInfo {
-        .name = token.target, 
+  for (auto layerName : layerNames){
+    if (layers2.find(layerName) == layers2.end()){
+      layers2[layerName] = LayerInfo {
+        .name = layerName, 
         .zIndex = 0,
         .orthographic = false,
         .scale = false,
@@ -132,8 +139,15 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
         },
       };
     }
+  }
+  for (auto &token : splitTokens.normalTokens){
+    std::cout << "(" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
     setLayerOption(layers2.at(token.target), token.attribute, token.payload);
   }
+  for (auto &[target, uniforms] : allUniforms){
+    layers2.at(target).uniforms = uniforms;
+  }
+
   std::vector<LayerInfo> layers;
   if (layers2.find("default") == layers2.end()){
     layers.push_back(LayerInfo{
