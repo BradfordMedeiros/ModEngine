@@ -1,5 +1,47 @@
 #include "./layers.h"
 
+RenderUniforms uniformInfoFromTokens(){
+  RenderUniforms uniforms {
+    .intUniforms = {
+      RenderDataInt {
+        .uniformName = "enableLighting",
+        .value = true,
+      }
+    },
+    .floatUniforms = {},
+    .floatArrUniforms = {},
+    .vec3Uniforms = {},
+    .builtInUniforms = {},
+  };
+  return uniforms;
+}
+
+std::map<std::string, RenderUniforms> allUniformsInfos(std::vector<Token>& uniformTokens){
+  std::map<std::string, RenderUniforms> uniforms;
+  uniforms["default"] = uniformInfoFromTokens();
+  return uniforms;
+}
+
+struct LayerTokensSplit {
+  std::vector<Token> normalTokens;
+  std::vector<Token> uniformTokens;
+};
+
+// TODO actually implemement
+LayerTokensSplit splitLayerTokens(std::vector<Token>& tokens){
+  std::vector<Token> normalTokens;
+  for (auto &token : tokens){
+    if (!(token.attribute == "?enableLighting")){  // obviously this is placeholder
+      normalTokens.push_back(token);
+    }
+  }
+  return LayerTokensSplit {
+    .normalTokens = normalTokens,
+    .uniformTokens = {},
+  };
+}
+
+
 void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& payload){
   if (attribute == "zindex"){
     layer.zIndex = std::atoi(payload.c_str());
@@ -51,16 +93,22 @@ void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& paylo
     layer.selectIndex = std::atoi(payload.c_str());
   }else{
     std::cout << "WARNING: layers: " << attribute << " is not a valid option" << std::endl;
+    assert(false);
   }
 
   std::cout << "set layer: " << attribute << " - " << payload  << " visible? " << layer.visible <<  std::endl;
 }
 
+
 std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::string(std::string)> readFile){
   std::cout << "parse layer info: " << file << std::endl;
   std::map<std::string, LayerInfo> layers2; 
-  auto tokens = parseFormat(readFile(file));
-  for (auto token : tokens){
+  auto unsplitTokens = parseFormat(readFile(file));
+  auto splitTokens = splitLayerTokens(unsplitTokens);
+  auto allUniforms = allUniformsInfos(splitTokens.uniformTokens);
+  // create map[token.target] => uniform 
+
+  for (auto token : splitTokens.normalTokens){
     std::cout << "(" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
     if (layers2.find(token.target) == layers2.end()){
       layers2[token.target] = LayerInfo {
@@ -101,12 +149,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
       .farplane = 1000.f,
       .selectIndex = 0,
       .uniforms = {
-        .intUniforms = {
-          RenderDataInt{
-            .uniformName = "enableLighting",
-            .value = false,
-          },
-        },
+        .intUniforms = {},
         .floatUniforms = {},
         .floatArrUniforms = {},
         .vec3Uniforms = {},
