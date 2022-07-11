@@ -1,16 +1,5 @@
 #include "./renderstages.h"
 
-struct DeserializedRenderStage {
-  std::string name;
-  std::string shader;
-  std::vector<RenderDataInt> intUniforms;
-  std::vector<RenderDataFloat> floatUniforms;
-  std::vector<RenderDataFloatArr> floatArrUniforms;
-  std::vector<RenderDataVec3> vec3Uniforms;
-  std::vector<RenderDataBuiltIn> builtInUniforms;
-  std::vector<RenderTexture> textures;
-};
-
 enum RenderStageUniformType { RENDER_UNSPECIFIED, RENDER_BOOL, RENDER_FLOAT, RENDER_ARR_FLOAT, RENDER_INT, RENDER_VEC3 };
 struct RenderStageUniformTypeValue {
   RenderStageUniformType type;
@@ -41,13 +30,18 @@ void ensureUniformExists(
     };
   }
 }
-std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessingFile, unsigned int fb0, unsigned int fb1, std::function<std::string(std::string)> readFile){
-  auto tokens = parseFormat(readFile(postprocessingFile));
+
+bool isRenderStageToken(Token& token){
+  return token.attribute == "shader" || token.attribute.at(0) == '!' || token.attribute.at(0) == '?' || token.attribute.at(0) == '@' || token.attribute.at(0) == '&';
+}
+
+std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& tokens, unsigned int fb0, unsigned int fb1){
   std::vector<DeserializedRenderStage> additionalShaders;
   std::map<int, std::map<std::string, RenderStageUniformTypeValue>> stagenameToUniformToValue;
 
   for (auto token : tokens){
     std::cout << "render stages: (" << token.target << ", " << token.attribute << ", " << token.payload << ")" << std::endl; 
+    modassert(isRenderStageToken(token), "not a valid render token");
     auto indexForStage = indexForRenderStage(additionalShaders, token.target);
     if (indexForStage == -1){
       additionalShaders.push_back(DeserializedRenderStage{
@@ -128,14 +122,6 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
     }
   }
 
-  // ensure every render step has a shader
-  for (auto &additionalShader : additionalShaders){
-    if (additionalShader.shader == ""){
-      std::cout << "render stages: must specify a shader for: " << additionalShader.name << std::endl;
-      assert(false);
-    }
-  }
-
   for (auto &[stageIndex, uniformNameToValue] : stagenameToUniformToValue){
     for (auto &[uniformname, uniformValue] : uniformNameToValue){ 
       if (uniformValue.rawValue == ""){
@@ -180,7 +166,6 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::string& postprocessi
     }
   }
 
-
   return additionalShaders; 
 }
 
@@ -191,7 +176,15 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
   unsigned int framebufferTexture2,
   std::function<std::string(std::string)> readFile
 ){
-  auto additionalShaders = parseRenderStages(postprocessingFile, framebufferTexture, framebufferTexture2, readFile);
+  auto tokens = parseFormat(readFile(postprocessingFile));
+  auto additionalShaders = parseRenderStages(tokens, framebufferTexture, framebufferTexture2);
+  for (auto &additionalShader : additionalShaders){
+    if (additionalShader.shader == ""){
+      std::cout << "render stages: must specify a shader for: " << additionalShader.name << std::endl;
+      assert(false);
+    }
+  }
+
   std::vector<RenderStep> additionalRenderSteps;
   for (int i  = 0; i < additionalShaders.size(); i++){
     auto additionalShader = additionalShaders.at(i);

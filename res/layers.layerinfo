@@ -7,10 +7,14 @@
 # view: true / false (true)
 # visible: true / false (true)
 
+# pass in additional uniforms to shader (same as postprocessing for uniforms)
+# layer:!<uniform name>:<uniformvalue>
+# layer:?<uniform type>:<type>
+
 ### default name override the default view layer.
 
 transparency:zindex:1
-transparency:depth:1
+transparency:depth:0
 
 no_depth:zindex:2
 no_depth:depth:1
@@ -22,8 +26,14 @@ scale:zindex:2
 scale:depth:2
 scale:scale:true
 
-basicui:zindex:4
+basicui:zindex:3
 basicui:view:false
 basicui:ortho:true
+
+
+basicui:!enableLighting:false
+basicui:?enableLighting:bool
+
 #basicui:selection:-1
+
 

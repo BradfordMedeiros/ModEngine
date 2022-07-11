@@ -1,24 +1,22 @@
 #include "./layers.h"
 
-RenderUniforms uniformInfoFromTokens(){
-  RenderUniforms uniforms {
-    .intUniforms = {
-      RenderDataInt {
-        .uniformName = "enableLighting",
-        .value = true,
-      }
-    },
-    .floatUniforms = {},
-    .floatArrUniforms = {},
-    .vec3Uniforms = {},
-    .builtInUniforms = {},
-  };
-  return uniforms;
-}
-
 std::map<std::string, RenderUniforms> allUniformsInfos(std::vector<Token>& uniformTokens){
   std::map<std::string, RenderUniforms> uniforms;
-  uniforms["default"] = uniformInfoFromTokens();
+  auto renderStageValues = parseRenderStages(uniformTokens, 0, 0);  // kind of hackey, should make this common code less coupled to render stages
+  
+  std::cout << "num render stage values: " << renderStageValues.size() << " num tokens: " << uniformTokens.size() << std::endl;
+  for (auto &renderStageValue : renderStageValues){
+    modassert(renderStageValue.textures.size() == 0, "layers does not support target textures");
+    modassert(renderStageValue.shader == "", "layers shader must be empty");
+    modassert(uniforms.find(renderStageValue.name) == uniforms.end(), "layers -> found duplicate render stage");
+    uniforms[renderStageValue.name] = RenderUniforms {
+      .intUniforms = renderStageValue.intUniforms,
+      .floatUniforms = renderStageValue.floatUniforms,
+      .floatArrUniforms = renderStageValue.floatArrUniforms,
+      .vec3Uniforms = renderStageValue.vec3Uniforms,
+      .builtInUniforms = renderStageValue.builtInUniforms,
+    };
+  }
   return uniforms;
 }
 
@@ -27,17 +25,24 @@ struct LayerTokensSplit {
   std::vector<Token> uniformTokens;
 };
 
+
+bool isUniformStyleToken(Token& token){
+  return (token.attribute == "?enableLighting" || token.attribute == "!enableLighting");
+}
 // TODO actually implemement
 LayerTokensSplit splitLayerTokens(std::vector<Token>& tokens){
   std::vector<Token> normalTokens;
+  std::vector<Token> uniformTokens;
   for (auto &token : tokens){
-    if (!(token.attribute == "?enableLighting")){  // obviously this is placeholder
+    if (!isRenderStageToken(token)){  // obviously this is placeholder
       normalTokens.push_back(token);
+    }else{
+      uniformTokens.push_back(token);
     }
   }
   return LayerTokensSplit {
     .normalTokens = normalTokens,
-    .uniformTokens = {},
+    .uniformTokens = uniformTokens,
   };
 }
 

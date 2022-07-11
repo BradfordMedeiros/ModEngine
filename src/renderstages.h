@@ -11,8 +11,6 @@ struct RenderShaders {
   unsigned int shaderProgram;
 };
 
-
-
 enum RenderTextureType { RENDER_TEXTURE_REGULAR, RENDER_TEXTURE_FRAMEBUFFER };
 struct RenderTexture {
   std::string nameInShader;
@@ -83,5 +81,19 @@ void setRenderStageState(RenderStages& stages, ObjectValue& value);
 
 unsigned int finalRenderingTexture(RenderStages& stages);
 std::string renderStagesToString(RenderStages& stages);
+
+struct DeserializedRenderStage {
+  std::string name;
+  std::string shader;
+  std::vector<RenderDataInt> intUniforms;
+  std::vector<RenderDataFloat> floatUniforms;
+  std::vector<RenderDataFloatArr> floatArrUniforms;
+  std::vector<RenderDataVec3> vec3Uniforms;
+  std::vector<RenderDataBuiltIn> builtInUniforms;
+  std::vector<RenderTexture> textures;
+};
+
+bool isRenderStageToken(Token& token);
+std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& tokens, unsigned int fb0, unsigned int fb1);
 
 #endif

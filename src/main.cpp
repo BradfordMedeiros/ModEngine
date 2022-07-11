@@ -335,6 +335,7 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram, bool allo
   return shaderNameToId.at(fragShaderName);
 }
 
+// Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
 void setRenderUniformData(unsigned int shader, RenderUniforms& uniforms){
   for (auto &uniform : uniforms.intUniforms){
     glUniform1i(glGetUniformLocation(shader, uniform.uniformName.c_str()), uniform.value);
@@ -380,7 +381,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "enableDiffuse"), state.enableDiffuse);
   glUniform1i(glGetUniformLocation(shader, "enableSpecular"), state.enableSpecular);
   glUniform1i(glGetUniformLocation(shader, "enablePBR"), state.enablePBR);
-  glUniform1i(glGetUniformLocation(shader, "enableLighting"), false);
+  glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
 
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
   for (int i = 0; i < lights.size(); i++){
