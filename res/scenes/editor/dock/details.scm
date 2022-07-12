@@ -85,7 +85,8 @@
 
 (define (isManagedText gameobj)
   (and 
-    (equal? (list-sceneid (gameobj-id gameobj)))
+    (shouldUpdateText (gameobj-attr gameobj))
+    (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj)))
     (equal? ")" (substring (gameobj-name gameobj) 0 1))
   )
 )
@@ -246,6 +247,15 @@
 
 )
 
+(define (unsetFocused)
+  (if focusedElement
+    (gameobj-setattr! focusedElement 
+      (list (list "tint" (list 1 1 1 1)))
+    )
+    (set! focusedElement #f)    
+  )
+)
+
 (define managedObj #f)
 (define (onObjSelected gameobj color)
   (define objattr (gameobj-attr gameobj))
@@ -256,9 +266,13 @@
   (if (isManagedText gameobj)
     (begin
       (format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
+      (unsetFocused)
       (set! focusedElement gameobj)
+      (gameobj-setattr! gameobj 
+        (list (list "tint" (list 0 0 1 1)))
+      )
     )
-    (set! focusedElement #f)
+    (unsetFocused)
   )
 
   (if (isSelectableItem (assoc "layer" objattr))
@@ -271,7 +285,6 @@
   (maybe-perform-action objattr)
   (maybe-set-binding objattr)
 )
-
 
 (define (enforceLayouts)
   ;; todo remove - no items in this layout, should require this 
