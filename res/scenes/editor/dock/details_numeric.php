@@ -45,7 +45,7 @@
       $sliderElementName =  "_" . $unique_control_id . "_" . "numeric"  . $i . "_value";
       $attrValues["scale"] = "0.3 0.02 0.02";
       $attrValues["onslide"] = "details-editable-slide";
-      $attrValues["backpaneltint"] = "0.4 0.4 0.4 1";
+      $attrValues["backpaneltint"] = "0.3 0.3 0.3 1";
       createElement($sliderElementName, $default_value, $attrValues);
       array_push($managedElements, $sliderElementName);
     }else{
@@ -58,6 +58,6 @@
   }
 
   $numericElements = array_reverse($numericElements);
-  createElement($rootElementName, $default_rootLayout, [ "tint" => "0.5 0.5 0.5 1", "margin-top" => "0.02", "margin-left" => "0", "margin-right" => "0", "spacing" => "0.01", "elements" => implode(",", $numericElements), "type" => "vertical" ]);
+  createElement($rootElementName, $default_rootLayout, [ "tint" => "0.3 0.3 0.3 1", "margin-top" => "0.02", "margin-left" => "0", "margin-right" => "0", "spacing" => "0.01", "elements" => implode(",", $numericElements), "type" => "vertical" ]);
 ?>
 

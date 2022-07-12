@@ -31,7 +31,7 @@
     "scale" => "0.02 -0.05 0.02",  # negative since some bug with button textures, should fix
     "ontexture" => "./res/scenes/editor/dock/images/checked.png",
     "offtexture" => "./res/scenes/editor/dock/images/unchecked.png",
-    "ontint" => "5 5 5 1",
+    "ontint" => "0 0 1 1",
     "on" => "editor-button-on",
     "off" => "editor-button-off",
   ];
@@ -45,7 +45,7 @@
  
   createElement($checkboxName, $default_text_style, $buttonFields);
   createElement($rootElementName, $default_rootLayout, [ 
-    "content-spacing" => "space-for-first",  "tint" => "0.5 0.5 0.5 1", "margin-top" => "0.01", "margin-bottom" => "0.01", "spacing" => "0", "elements" =>  $labelName . "," . $checkboxName 
+    "content-spacing" => "space-for-first",  "tint" => "0.2 0.2 0.2 1", "margin-top" => "0.01", "margin-bottom" => "0.01", "spacing" => "0", "elements" =>  $labelName . "," . $checkboxName 
   ]);
 ?>
 

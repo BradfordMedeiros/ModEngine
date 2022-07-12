@@ -32,7 +32,6 @@
 (test_panel:child:(banner_title_background_right,(banner_title_background_left,)window_x
 )banner_title_right:layer:basicui
 )banner_title_right:scale:0.008 0.01 0.004
-)banner_title_right:tint:2 2 2 1
 )banner_title_right:value:Object Details
 )banner_title_right:rotation:0 0 -1 -90
 )banner_title_right:position:0 0 0.01
@@ -48,7 +47,6 @@
 
 )banner_title_left:layer:basicui
 )banner_title_left:scale:0.008 0.01 0.004
-)banner_title_left:tint:2 2 2 1
 )banner_title_left:value:Object Details
 )banner_title_left:rotation:0 0 -1 -90
 )banner_title_left:position:0 0 0.01
@@ -64,7 +62,6 @@
 
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
-)title:tint:2 2 2 1
 )title:position:0 0 -1
 
 
@@ -97,7 +94,7 @@
       "layer" => "basicui",
       "type" => "horizontal",
       "backpanel" => "true",
-      "tint" => "0.05 0.05 0.05 1",  # doesn't show up since z ordering
+      "tint" => "0.2 0.2 0.2 1",  
       "margin" => "0.04",
       "spacing" => "0.02",
       "minwidth" => "0.36",
@@ -107,7 +104,7 @@
       "layer" => "basicui",
       "type" => "horizontal",
       "backpanel" => "true",
-      "tint" => "0.25 0.25 0.25 1",  # doesn't show up since z ordering
+      "tint" => "0.2 0.2 0.2 1",  
       "margin" => "0.02",
       "margin-left" => "0.01",
       "margin-right" => "0.01",

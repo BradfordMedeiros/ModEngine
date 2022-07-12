@@ -42,8 +42,8 @@
       "scale" => $scale,  # negative since some bug with button textures, should fix
       "ontexture" => $value["image"],
       "offtexture" => $value["image"],
-      "ontint" => "5 5 5 1",
-      "tint" => "2 2 2 1",
+      "ontint" => "1 1 5 1",
+      "tint" => "1 1 1 1",
       "details-action" => $value["action"],
       "position" => "0 0 " . $depth[3],
     ]);

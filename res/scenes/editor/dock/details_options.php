@@ -21,7 +21,6 @@
       "value" => $optionName,  
       "details-binding-toggle" => $binding,
       "details-binding-set" => "true",
-      #"tint" => "1 0 0 1",
     ];
     if ($hasBindingIndex){
       $attrs["details-binding-index"] = $options[$optionIndex]["binding-index"];
@@ -37,7 +36,7 @@
   $optionsLayout = "(" . $unique_control_id . "_options";
 
   $optionsHolder = $default_keyvalueLayout;
-  #$optionsHolder["tint"] = "1 1 1 1";
+  $optionsHolder["tint"] = "0.1 0.1 0.1 1";
   $optionsHolder["position"] = "0 0 " . $depth[28];
   $optionsHolder["align-items-horizontal"] = "center";
 

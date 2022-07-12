@@ -356,7 +356,7 @@
   (gameobj-setattr! gameobj
     (list 
       (list "state" (if enableValue "on" "off"))
-      (list "tint"  (if enableValue (list 1 1 5 1) (list 1 1 1 1)))
+      (list "tint"  (if enableValue (list 0 0 1 1) (list 1 1 1 1)))
     )
   )
 )
