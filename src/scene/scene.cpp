@@ -319,7 +319,11 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
     world.textures.at(texturepath).owners.insert(ownerId);
     return world.textures.at(texturepath).texture;
   }
-  Texture texture = loadTexture(world.interface.modlayerPath(texturepath));
+  auto texturePath = world.interface.modlayerPath(texturepath);
+  if (!fileExists(texturePath) && ownerId != -1){ // root owner for default models etc, should never use default texs
+    return loadTextureWorld(world, "./res/models/box/grid.png", ownerId);
+  }
+  Texture texture = loadTexture(texturePath);
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
