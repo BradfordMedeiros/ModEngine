@@ -252,8 +252,8 @@
     (gameobj-setattr! focusedElement 
       (list (list "tint" (list 1 1 1 1)))
     )
-    (set! focusedElement #f)    
   )
+  (set! focusedElement #f)    
 )
 
 (define managedObj #f)
