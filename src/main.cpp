@@ -1298,6 +1298,7 @@ int main(int argc, char* argv[]){
   };
 
   //loadAllTextures();
+  loadTextureWorld(world, "./res/models/box/grid.png", -1);
 
   dynamicLoading = createDynamicLoading(worldfile, interface.readFile);
   if (result["rechunk"].as<int>()){
