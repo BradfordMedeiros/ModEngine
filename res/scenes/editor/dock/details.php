@@ -350,7 +350,8 @@
         [
           "type" => "label",
           "data" => [
-            "key" => "Number of Scenes", 
+            "key" => "Number of Scenes",
+            "readonly" => true,
             "value" => [
               "binding" => "meta-numscenes",
             ]
