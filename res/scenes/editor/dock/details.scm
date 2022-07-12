@@ -86,7 +86,6 @@
 (define (isManagedText gameobj)
   (and 
     (shouldUpdateText (gameobj-attr gameobj))
-    (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj)))
     (equal? ")" (substring (gameobj-name gameobj) 0 1))
   )
 )
@@ -257,33 +256,39 @@
 )
 
 (define managedObj #f)
-(define (onObjSelected gameobj color)
+(define (onObjSelected gameobj _)
   (define objattr (gameobj-attr gameobj))
-  (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
-    (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
-  )
-
-  (if (isManagedText gameobj)
+  (define reselectAttr (assoc "details-reselect" objattr))
+  (define objInScene (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj))))
+  (if (and objInScene reselectAttr)
+    (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
     (begin
-      (format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
-      (unsetFocused)
-      (set! focusedElement gameobj)
-      (gameobj-setattr! gameobj 
-        (list (list "tint" (list 0 0 1 1)))
+      (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
+        (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
       )
+      
+      (if (and objInScene (isManagedText gameobj))
+        (begin
+          (format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
+          (unsetFocused)
+          (set! focusedElement gameobj)
+          (gameobj-setattr! gameobj 
+            (list (list "tint" (list 0 0 1 1)))
+          )
+        )
+        (unsetFocused)
+      )
+      (if (isSelectableItem (assoc "layer" objattr))
+        (begin
+          (refillStore gameobj)
+          (set! managedObj gameobj)
+          (populateData)
+        )
+      )
+      (maybe-perform-action objattr)
+      (maybe-set-binding objattr)
     )
-    (unsetFocused)
   )
-
-  (if (isSelectableItem (assoc "layer" objattr))
-    (begin
-      (refillStore gameobj)
-      (set! managedObj gameobj)
-      (populateData)
-    )
-  )
-  (maybe-perform-action objattr)
-  (maybe-set-binding objattr)
 )
 
 (define (enforceLayouts)

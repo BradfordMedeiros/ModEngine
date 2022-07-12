@@ -49,13 +49,14 @@
     createElement($valuename, $default_value, $style);
   }
 
-  $holdername = "(" . $unique_control_id . "_" . "textfield" . $i;
+  $holdername = "(" . $unique_control_id . "_textfield_holder_" . $i;
 
   $editableStyle = [
     "backpanel" => "true", 
     "tint" => "0 0 0 1", 
     "minwidth" => "0.2",
     "align-items-horizontal" => "center",
+    "details-reselect" => $valuename,
 
     #"border-size" => "0.004", // should be the border size when selected
 
