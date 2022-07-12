@@ -27,17 +27,26 @@
   }
 
   $valuename = ")value_" . $i;
+
+
+
   if (is_string($data["value"])){
-    createElement($valuename, $default_value, [ 
+    $style = [ 
       "value" =>  $data["value"], 
-      "details-editabletext" => "true",  
-    ]);
+    ];
+    if (!$readonly){
+      $style["details-editabletext"] = "true";
+    }
+    createElement($valuename, $default_value, $style);
   }else{
-    createElement($valuename, $default_value, [ 
+    $style = [ 
       "value" =>  "", 
       "details-binding" => $data["value"]["binding"], 
-      "details-editabletext" => "true", 
-    ]);
+    ];
+    if (!$readonly){
+      $style["details-editabletext"] = "true";
+    } 
+    createElement($valuename, $default_value, $style);
   }
 
   $holdername = "(" . $unique_control_id . "_" . "textfield" . $i;
@@ -48,7 +57,7 @@
     "minwidth" => "0.2",
     "align-items-horizontal" => "center",
 
-    "border-size" => "0.004",
+    #"border-size" => "0.004", // should be the border size when selected
 
   ];
 
