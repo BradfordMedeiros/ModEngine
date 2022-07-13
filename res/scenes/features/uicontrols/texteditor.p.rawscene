@@ -25,7 +25,6 @@ somelement:position:0 0 0
 )sometext:align:left
 
 )sometext:maxheight:5
-)sometext:maxwidth:10
 )sometext:offsety:2
 
 

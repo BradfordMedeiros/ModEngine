@@ -11,7 +11,7 @@ struct GameObjectUIText {
   AlignType align;
   TextWrap wrap;
   TextVirtualization virtualization;
-  int maxwidth;
+  int charlimit;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);

@@ -74,7 +74,6 @@ struct TextWrap {
   float wrapamount;
 };
 struct TextVirtualization {
-  float maxwidth;
   float maxheight;
   float offsetx;
   float offsety;

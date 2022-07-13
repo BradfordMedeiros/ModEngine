@@ -77,12 +77,11 @@ float valueFromAttr(GameobjAttributes& attr, const char* key, float defaultValue
   return attr.numAttributes.at(key);
 }
 TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
-  float maxwidth = valueFromAttr(attr, "maxwidth", -1);
+  float charlimit = valueFromAttr(attr, "charlimit", -1);
   float maxheight = valueFromAttr(attr, "maxheight", -1);
   float offsetx = valueFromAttr(attr, "offsetx", 0);
   float offsety = valueFromAttr(attr, "offsety", 0);
   return TextVirtualization{
-    .maxwidth = maxwidth,
     .maxheight = maxheight,
     .offsetx = offsetx,
     .offsety = offsety,
@@ -91,8 +90,8 @@ TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
 
 void restrictWidth(GameObjectUIText& text){
   std::cout << "value: " << text.value << " - " << text.value.size() << std::endl;
-  if (text.value.size() > text.maxwidth){
-    text.value = text.value.substr(0, text.maxwidth);
+  if (text.value.size() > text.charlimit){
+    text.value = text.value.substr(0, text.charlimit);
   }
 }
 
@@ -103,7 +102,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto align = alignTypeFromAttr(attr);
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
-  auto maxwidth = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
+  auto charlimit = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -111,7 +110,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
     .align = align,
     .wrap = wrap,
     .virtualization = virtualizationFromAttr(attr),
-    .maxwidth = maxwidth,
+    .charlimit = charlimit,
   };
   restrictWidth(obj);
   return obj;
@@ -124,11 +123,10 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
   attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
   attributes.stringAttributes["wrapamount"] = std::to_string(textObj.wrap.wrapamount);
-  attributes.numAttributes["maxwidth"] = textObj.virtualization.maxwidth;
   attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
   attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
-  attributes.numAttributes["charlimit"] = textObj.maxwidth;
+  attributes.numAttributes["charlimit"] = textObj.charlimit;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -153,9 +151,6 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
     textObj.wrap.wrapamount = wrap.wrapamount;
   }
 
-  if (attributes.numAttributes.find("maxwidth") != attributes.numAttributes.end()){
-    textObj.virtualization.maxwidth = attributes.numAttributes.at("maxwidth");
-  }
   if (attributes.numAttributes.find("maxheight") != attributes.numAttributes.end()){
     textObj.virtualization.maxheight = attributes.numAttributes.at("maxheight");
   }
@@ -166,7 +161,7 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
     textObj.virtualization.offsety = attributes.numAttributes.at("offsety");
   }
   if (attributes.numAttributes.find("charlimit") != attributes.numAttributes.end()){
-    textObj.maxwidth = attributes.numAttributes.at("charlimit");
+    textObj.charlimit = attributes.numAttributes.at("charlimit");
   }
   restrictWidth(textObj);
 }
