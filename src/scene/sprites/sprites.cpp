@@ -70,7 +70,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
     }
 
     numCharactersOnLine++;
-    if (numCharactersOnLine < virtualization.offsetx){
+    if (numCharactersOnLine <= virtualization.offsetx){
       continue;
     }
     if (lineNumber < virtualization.offsety){
