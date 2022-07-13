@@ -27,10 +27,10 @@ float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignTyp
   return leftAlign;
 }
 
-int findLineBreakSize(std::string& word, TextWrap wrap){
+int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtualization){
   int biggestSize = 0;
   int currentSize = 0;
-  for (int i = 0; i < word.size(); i++){
+  for (int i = glm::max(0, virtualization.offset); i < word.size(); i++){
     if (word.at(i) == '\n' && wrap.type != WRAP_NONE){
       if (currentSize > biggestSize){
         biggestSize = currentSize;
@@ -51,7 +51,7 @@ int findLineBreakSize(std::string& word, TextWrap wrap){
   return biggestSize;
 }
 int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){
-  auto largestLineBreakSize = findLineBreakSize(word, wrap);
+  auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;
   int numTriangles = 0;
@@ -59,7 +59,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   int numCharactersOnLine = 0;
   int lineNumber = 0;
 
-  for (char& character : word){
+  for (int i = glm::max(0, virtualization.offset); i < word.size(); i++){
+    char& character = word.at(i);
     if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
@@ -97,7 +98,7 @@ void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, st
 
 BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
   //assert(type == CENTER_ALIGN);
-  auto largestLineBreakSize = findLineBreakSize(word, wrap);
+  auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float leftAlign = calculateLeftAlign(0, largestLineBreakSize, offsetDelta, align);
   float right = leftAlign + (offsetDelta * largestLineBreakSize);
 

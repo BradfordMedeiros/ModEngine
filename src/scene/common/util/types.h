@@ -77,6 +77,7 @@ struct TextVirtualization {
   float maxheight;
   float offsetx;
   float offsety;
+  int offset;
 };
 
 Transformation getTransformationFromMatrix(glm::mat4 matrix);

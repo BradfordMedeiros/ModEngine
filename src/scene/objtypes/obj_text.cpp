@@ -81,10 +81,12 @@ TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
   float maxheight = valueFromAttr(attr, "maxheight", -1);
   float offsetx = valueFromAttr(attr, "offsetx", 0);
   float offsety = valueFromAttr(attr, "offsety", 0);
+  int offset = valueFromAttr(attr, "offset", 0);
   return TextVirtualization{
     .maxheight = maxheight,
     .offsetx = offsetx,
     .offsety = offsety,
+    .offset = offset,
   };
 }
 
@@ -126,6 +128,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
   attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
+  attributes.numAttributes["offset"] = textObj.virtualization.offset;
   attributes.numAttributes["charlimit"] = textObj.charlimit;
 }
 
@@ -159,6 +162,9 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   }
   if (attributes.numAttributes.find("offsety") != attributes.numAttributes.end()){
     textObj.virtualization.offsety = attributes.numAttributes.at("offsety");
+  }
+  if (attributes.numAttributes.find("offset") != attributes.numAttributes.end()){
+    textObj.virtualization.offset = attributes.numAttributes.at("offset");
   }
   if (attributes.numAttributes.find("charlimit") != attributes.numAttributes.end()){
     textObj.charlimit = attributes.numAttributes.at("charlimit");
