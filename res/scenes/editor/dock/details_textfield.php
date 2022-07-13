@@ -42,9 +42,13 @@
     $style = [ 
       "value" =>  "", 
       "details-binding" => $data["value"]["binding"], 
+
     ];
     if (!$readonly){
       $style["details-editabletext"] = "true";
+      $style["wrapamount"] = "10"; # size limit
+      $style["wraptype"] = "char";
+      $style["maxheight"] = "1";
     } 
     createElement($valuename, $default_value, $style);
   }
@@ -59,7 +63,6 @@
     "details-reselect" => $valuename,
 
     #"border-size" => "0.004", // should be the border size when selected
-
   ];
 
   $defaultStyle = [ 

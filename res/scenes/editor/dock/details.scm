@@ -131,9 +131,13 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
+  (define wrapAmount (assoc "wrapamount" objattr)) ;wrapamount
+  (define lineLength (if wrapAmount (cadr wrapAmount) 100))
+  (define offset (max 0 (- (string-length text) lineLength)))
   (gameobj-setattr! obj 
     (list
       (list "value" text)
+      (list "offset" offset)
     )
   )
   (if detailBinding 

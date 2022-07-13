@@ -124,7 +124,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.vecAttr.vec4["tint"] = textObj.tint;
   attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
   attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
-  attributes.stringAttributes["wrapamount"] = std::to_string(textObj.wrap.wrapamount);
+  attributes.numAttributes["wrapamount"] = textObj.wrap.wrapamount;
   attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
   attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
@@ -150,7 +150,7 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   if (attributes.stringAttributes.find("wraptype") != attributes.stringAttributes.end()){
     textObj.wrap.type = wrap.type;
   }
-  if (attributes.stringAttributes.find("wrapamount") != attributes.stringAttributes.end()){
+  if (attributes.numAttributes.find("wrapamount") != attributes.numAttributes.end()){
     textObj.wrap.wrapamount = wrap.wrapamount;
   }
 

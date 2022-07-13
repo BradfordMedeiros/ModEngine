@@ -391,7 +391,7 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
 std::vector<calcPositionNewPosition> contentAlignPosition(World& world, std::vector<calcPositionNewPosition> positions, BoundInfo& boundInfo,  UILayoutType layoutType, LayoutContentAlignmentType contentAlign, LayoutContentSpacing contentSpacing){
   float overallWidth = boundInfo.xMax - boundInfo.xMin;
   float overallHeight = boundInfo.yMax - boundInfo.yMin;
-  std::cout << "width = " << overallWidth << ", height = " << overallHeight << std::endl;
+  //std::cout << "width = " << overallWidth << ", height = " << overallHeight << std::endl;
 
   std::vector<calcPositionNewPosition> newPositions;
   for (auto &newPosition : positions){
@@ -404,7 +404,7 @@ std::vector<calcPositionNewPosition> contentAlignPosition(World& world, std::vec
 
     auto boundingWidth = getScaledBoundingWidth(world, id);
     auto boundingHeight = getScaledBoundingHeight(world, id);
-    std::cout << "name = " << getGameObject(world, id).name << ", pos = " << print(pos) << " height = " << boundingHeight << ", width = " << boundingWidth << std::endl;
+    //std::cout << "name = " << getGameObject(world, id).name << ", pos = " << print(pos) << " height = " << boundingHeight << ", width = " << boundingWidth << std::endl;
 
     float diffX = overallWidth - boundingWidth;
     float diffY = overallHeight - boundingHeight;
@@ -434,7 +434,7 @@ std::vector<calcPositionNewPosition> contentAlignPosition(World& world, std::vec
     }else{
       modassert(false, "layout type - content align - not supported");
     }
-    std::cout << "diff is: " << diffX << std::endl << std::endl;
+    //std::cout << "diff is: " << diffX << std::endl << std::endl;
 
     newPositions.push_back(calcPositionNewPosition{
       .id = id,
@@ -516,12 +516,12 @@ std::vector<glm::vec3> calcAlignItemsAdjustments(GameObjectUILayout* layoutObjec
   float spaceableWidth = boundingWidth - (layoutObject -> marginValues.marginLeft + layoutObject -> marginValues.marginRight);
   float spaceableHeight = boundingHeight - (layoutObject -> marginValues.marginTop + layoutObject -> marginValues.marginBottom);
 
-  std::cout << "boundingsize = " << boundingWidth << ", " << boundingHeight << ", spaceable = " << spaceableWidth << ", " << spaceableHeight << std::endl;
-  std::cout << "elements = " << elementsWidth << ", " << elementsHeight << std::endl;
+  //std::cout << "boundingsize = " << boundingWidth << ", " << boundingHeight << ", spaceable = " << spaceableWidth << ", " << spaceableHeight << std::endl;
+  //std::cout << "elements = " << elementsWidth << ", " << elementsHeight << std::endl;
 
   auto rightSideRemaining = spaceableWidth - elementsWidth;
   auto heightRemaining = spaceableHeight - elementsHeight;
-  std::cout << "right = " << rightSideRemaining << " height = " << heightRemaining << std::endl << std::endl;
+  //std::cout << "right = " << rightSideRemaining << " height = " << heightRemaining << std::endl << std::endl;
 
   if (layoutObject -> contentSpacing == LayoutContentSpacing_Pack){
     for (int i = 0; i < newPositions.size(); i++){
@@ -632,7 +632,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   }
   layoutObject -> boundInfo = createBoundingAround(world, ids);
 
-  std::cout << "enforcing layout: " << getGameObject(world, id).name << std::endl;
+  //std::cout << "enforcing layout: " << getGameObject(world, id).name << std::endl;
 
   /*std::cout << "set bounding to: " << std::endl;
   printBoundInfo(layoutObject -> boundInfo);
