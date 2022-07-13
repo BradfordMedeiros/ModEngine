@@ -6,7 +6,14 @@
 
 
 (define (isSubmitKey key) (equal? key 47))   ; /
-(define (isControlKey key) (or (isSubmitKey key) (equal? key 44)))
+(define (isControlKey key) 
+  (format #t "key is: ~a\n" key)
+  (or 
+    (isSubmitKey key) 
+    (equal? key 44) 
+    (equal? key 257) ; enter key
+  ) 
+)
 (define (submitData)
   (if managedObj
     (begin
