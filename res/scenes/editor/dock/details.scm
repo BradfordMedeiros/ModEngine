@@ -149,8 +149,8 @@
   (define wrapAmount (assoc "wrapamount" objattr)) ;wrapamount
   (define lineLength (if wrapAmount (cadr wrapAmount) 100))
   (define offset (textOffset text lineLength key (assoc "offset" objattr))) 
-  (define cursor (assoc "cursor" objattr))
-  (define cursorIndex (if cursor (cadr cursor) (string-length text)))
+  (define oldCursorIndex (cadr (assoc "cursor" objattr)))
+  (define cursorIndex (if (< oldCursorIndex 0) 2 2))
   (format #t "cursor index: ~a\n" cursorIndex)
   (format #t "offset is: ~a\n" offset)
 

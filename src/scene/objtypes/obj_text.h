@@ -12,6 +12,7 @@ struct GameObjectUIText {
   TextWrap wrap;
   TextVirtualization virtualization;
   int charlimit;
+  int cursorIndex;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);

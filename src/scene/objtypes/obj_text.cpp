@@ -105,6 +105,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
   auto charlimit = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
+  auto cursorIndex = attr.numAttributes.find("cursor") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("cursor");
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -113,6 +114,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
     .wrap = wrap,
     .virtualization = virtualizationFromAttr(attr),
     .charlimit = charlimit,
+    .cursorIndex = cursorIndex,
   };
   restrictWidth(obj);
   return obj;
@@ -130,6 +132,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
   attributes.numAttributes["offset"] = textObj.virtualization.offset;
   attributes.numAttributes["charlimit"] = textObj.charlimit;
+  attributes.numAttributes["cursor"] = textObj.cursorIndex;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -168,6 +171,9 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   }
   if (attributes.numAttributes.find("charlimit") != attributes.numAttributes.end()){
     textObj.charlimit = attributes.numAttributes.at("charlimit");
+  }
+  if (attributes.numAttributes.find("cursor") != attributes.numAttributes.end()){
+    textObj.cursorIndex = attributes.numAttributes.at("cursor");
   }
   restrictWidth(textObj);
 }
