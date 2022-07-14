@@ -50,7 +50,7 @@ int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtu
   }
   return biggestSize;
 }
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization){
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex){
   auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;
@@ -58,6 +58,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 
   int numCharactersOnLine = 0;
   int lineNumber = 0;
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
 
   for (int i = glm::max(0, virtualization.offset); i < word.size(); i++){
     char& character = word.at(i);
@@ -87,13 +88,20 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSize, fontSize, model);
       numTriangles += fontMesh.numTriangles;
     }
+    if (cursorIndex == i){
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
+      Mesh& fontMesh = fontMeshes.at('|');
+      drawSprite(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f, top + topAlign, fontSize, fontSize, model);
+      numTriangles += fontMesh.numTriangles;      
+      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+    }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
   return numTriangles;
 }
 
 void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 });
+  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
 }
 
 BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
