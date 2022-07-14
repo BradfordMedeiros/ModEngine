@@ -58,7 +58,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 
   int numCharactersOnLine = 0;
   int lineNumber = 0;
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  
+  //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
 
   for (int i = glm::max(0, virtualization.offset); i < word.size(); i++){
     char& character = word.at(i);
@@ -89,11 +90,11 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       numTriangles += fontMesh.numTriangles;
     }
     if (cursorIndex == i){
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
+      //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
       Mesh& fontMesh = fontMeshes.at('|');
       drawSprite(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f, top + topAlign, fontSize, fontSize, model);
       numTriangles += fontMesh.numTriangles;      
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+      //glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
