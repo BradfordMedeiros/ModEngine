@@ -129,18 +129,17 @@
   ; 263 - left
   ; 264 - right
 (define (isArrowKey key) (or (equal? key 263) (equal? key 262)))
-(define (textOffset text wrapAmount key oldoffsetAttr) 
-  (define offset (if oldoffsetAttr (cadr oldoffsetAttr) 0))
-  (define maxoffset (max 0 (- (string-length text) wrapAmount)))
-  (if (not (isArrowKey key))
-    maxoffset
+(define (cursorOffset text wrapAmount key offset) 
+  (define maxoffset wrapAmount)
+  (if (not (noTextUpdateKey key))
+    (+ offset 1)
     (if (equal? key 263)
       (max 0 (- offset 1))
       (min maxoffset (+ offset 1))
     )
   )
 )
-(define (updateText obj text key)
+(define (updateText obj text key cursor)
   (define objattr (gameobj-attr obj))
   (define detailBindingPair (assoc "details-binding" objattr))
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
@@ -148,16 +147,16 @@
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (define wrapAmount (assoc "wrapamount" objattr)) ;wrapamount
   (define lineLength (if wrapAmount (cadr wrapAmount) 100))
-  (define offset (textOffset text lineLength key (assoc "offset" objattr))) 
-  (define oldCursorIndex (cadr (assoc "cursor" objattr)))
-  (define cursorIndex (if (< oldCursorIndex 0) 2 2))
+  (define cursorIndex (cursorOffset text lineLength key cursor)) 
+  ;(define oldCursorIndex (cadr (assoc "cursor" objattr)))
+  ;(define cursorIndex (if (< oldCursorIndex 0) 2 2))
   (format #t "cursor index: ~a\n" cursorIndex)
-  (format #t "offset is: ~a\n" offset)
+  ;(format #t "offset is: ~a\n" offset)
 
   (if (isArrowKey key)
     (gameobj-setattr! obj 
       (list
-        (list "offset" offset)
+        ;(list "offset" offset)
         (list "cursor" cursorIndex)
       )
     )
@@ -166,7 +165,7 @@
       (gameobj-setattr! obj 
         (list
           (list "value" text)
-          (list "offset" offset)
+          ;(list "offset" offset)
           (list "cursor" cursorIndex)
         )
       )
@@ -178,15 +177,38 @@
 )
 
 (define (lessIndex currentText) (max 0 (- (string-length currentText) 1)))
-(define (getUpdatedText attr obj key)
+
+(define (appendString currentText key cursorIndex)
+  (define length (string-length currentText))
+  (define splitIndex (min length cursorIndex))
+  (define start (substring currentText 0 splitIndex))
+  (define end   (substring currentText splitIndex length))
+  (string-append start (string (integer->char key)) end)
+)
+(define (deleteChar currentText cursorIndex)
+  (define length (string-length currentText))
+  (if (and (> cursorIndex 0) (< cursorIndex length))
+    (let* (
+      (splitIndex (min length (- cursorIndex 1)))
+      (start (substring currentText 0 splitIndex))
+      (end (substring currentText (+ 1 splitIndex) length))
+    )
+      (string-append start end)
+    )
+    currentText
+  )
+)
+
+(define (noTextUpdateKey key) (or (equal? key 259) (isArrowKey key)))
+(define (getUpdatedText attr obj key cursorIndex)
   (define currentText (cadr (assoc "value" attr)))
   (cond 
-    ((equal? key 259) (set! currentText (substring currentText 0 (lessIndex currentText))))
+    ((equal? key 259) (set! currentText (deleteChar currentText cursorIndex)))
     ((isArrowKey key) (format #t "updated text arrow!\n"))
     (#t 
       (begin
         (format #t "key is ~a ~a\n" key (string (integer->char key)))
-        (set! currentText (string-append currentText (string (integer->char key))))
+        (set! currentText (appendString currentText key cursorIndex))
       )
     )
   )
@@ -211,7 +233,7 @@
     (begin
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr) 
-          (let ((newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key)))
+          (let* ((cursorIndex (inexact->exact (cadr (assoc "cursor" attr)))) (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex)))
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
               (if (or number positiveNumber)
                 (if (or 
@@ -219,9 +241,9 @@
                     (equal? 0 (string-length newText)) 
                     (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
                   ) 
-                  (updateText focusedElement newText key)
+                  (updateText focusedElement newText key cursorIndex)
                 )
-                (updateText focusedElement newText key)
+                (updateText focusedElement newText key cursorIndex)
               )
             )
           )
