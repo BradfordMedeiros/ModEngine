@@ -125,7 +125,22 @@
     (list detailBindingName newvalue)
   )
 )
-(define (updateText obj text)
+
+  ; 263 - left
+  ; 264 - right
+(define (isArrowKey key) (or (equal? key 263) (equal? key 262)))
+(define (textOffset text wrapAmount key oldoffsetAttr) 
+  (define offset (if oldoffsetAttr (cadr oldoffsetAttr) 0))
+  (define maxoffset (max 0 (- (string-length text) wrapAmount)))
+  (if (not (isArrowKey key))
+    maxoffset
+    (if (equal? key 263)
+      (max 0 (- offset 1))
+      (min maxoffset (+ offset 1))
+    )
+  )
+)
+(define (updateText obj text key)
   (define objattr (gameobj-attr obj))
   (define detailBindingPair (assoc "details-binding" objattr))
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
@@ -133,25 +148,42 @@
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (define wrapAmount (assoc "wrapamount" objattr)) ;wrapamount
   (define lineLength (if wrapAmount (cadr wrapAmount) 100))
-  (define offset (max 0 (- (string-length text) lineLength)))
-  (gameobj-setattr! obj 
-    (list
-      (list "value" text)
-      (list "offset" offset)
+  (define offset (textOffset text lineLength key (assoc "offset" objattr))) 
+  (define cursor (assoc "cursor" objattr))
+  (define cursorIndex (if cursor (cadr cursor) (string-length text)))
+  (format #t "cursor index: ~a\n" cursorIndex)
+  (format #t "offset is: ~a\n" offset)
+
+  (if (isArrowKey key)
+    (gameobj-setattr! obj 
+      (list
+        (list "offset" offset)
+        (list "cursor" cursorIndex)
+      )
     )
-  )
-  (if detailBinding 
-    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
+    (begin
+      (format #t "it is NOT an arrow key!\n")
+      (gameobj-setattr! obj 
+        (list
+          (list "value" text)
+          (list "offset" offset)
+          (list "cursor" cursorIndex)
+        )
+      )
+      (if detailBinding 
+        (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
+      )
+    )
   )
 )
 
 (define (lessIndex currentText) (max 0 (- (string-length currentText) 1)))
 (define (getUpdatedText attr obj key)
-  (define currentText (cadr (assoc "value" attr)))   
-  (if (= key 259)  ; backspace
-    (set! currentText (substring currentText 0 (lessIndex currentText)))
-    (if (= key 257)
-      (set! currentText (string-append currentText "\n"))
+  (define currentText (cadr (assoc "value" attr)))
+  (cond 
+    ((equal? key 259) (set! currentText (substring currentText 0 (lessIndex currentText))))
+    ((isArrowKey key) (format #t "updated text arrow!\n"))
+    (#t 
       (begin
         (format #t "key is ~a ~a\n" key (string (integer->char key)))
         (set! currentText (string-append currentText (string (integer->char key))))
@@ -187,9 +219,9 @@
                     (equal? 0 (string-length newText)) 
                     (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
                   ) 
-                  (updateText focusedElement newText)
+                  (updateText focusedElement newText key)
                 )
-                (updateText focusedElement newText)
+                (updateText focusedElement newText key)
               )
             )
           )
