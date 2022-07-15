@@ -129,16 +129,16 @@
   ; 263 - left
   ; 264 - right
 (define (isArrowKey key) (or (equal? key 263) (equal? key 262)))
-(define (cursorOffset text wrapAmount key offset) 
-  (define maxoffset wrapAmount)
-  (if (not (noTextUpdateKey key))
-    (+ offset 1)
-    (if (equal? key 263)
-      (max 0 (- offset 1))
-      (min maxoffset (+ offset 1))
-    )
+(define (newCursorIndex oldIndex eventType) ;text wrapAmount key offset) 
+  ;(define maxoffset wrapAmount)
+  (define maxIndex 15)
+  (cond 
+    ((or (equal? eventType 'left)   (equal? eventType 'backspace)) (max 0 (- oldIndex 1)))
+    ((or (equal? eventType 'insert) (equal? eventType 'right)) (min maxIndex (+ oldIndex 1)))
+    (#t oldIndex)
   )
 )
+
 (define (updateText obj text key cursor)
   (define objattr (gameobj-attr obj))
   (define detailBindingPair (assoc "details-binding" objattr))
@@ -147,7 +147,8 @@
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (define wrapAmount (assoc "wrapamount" objattr)) ;wrapamount
   (define lineLength (if wrapAmount (cadr wrapAmount) 100))
-  (define cursorIndex (cursorOffset text lineLength key cursor)) 
+  ;(define cursorIndex (cursorOffset text lineLength key cursor)) 
+  (define cursorIndex cursor)
   ;(define oldCursorIndex (cadr (assoc "cursor" objattr)))
   ;(define cursorIndex (if (< oldCursorIndex 0) 2 2))
   (format #t "cursor index: ~a\n" cursorIndex)
@@ -200,11 +201,12 @@
 )
 
 (define (noTextUpdateKey key) (or (equal? key 259) (isArrowKey key)))
-(define (getUpdatedText attr obj key cursorIndex)
+(define (getUpdatedText attr obj key cursorIndex eventType)
   (define currentText (cadr (assoc "value" attr)))
   (cond 
-    ((equal? key 259) (set! currentText (deleteChar currentText cursorIndex)))
-    ((isArrowKey key) (format #t "updated text arrow!\n"))
+    ((equal? eventType 'backspace) (set! currentText (deleteChar currentText cursorIndex)))
+    ((equal? eventType 'delete) (set! currentText (deleteChar currentText (+ cursorIndex 1))))
+    ((or (equal? eventType 'left) (equal? eventType 'right)) (format #t "updated text arrow!\n"))
     (#t 
       (begin
         (format #t "key is ~a ~a\n" key (string (integer->char key)))
@@ -227,13 +229,28 @@
   isEditableType
 )
 
+(define (getUpdateType key)
+  (cond
+    ((equal? key 259) 'backspace)
+    ((equal? key 45)  'delete) ; - sign, should change to delete but will delete the item
+    ((equal? key 263) 'left)
+    ((equal? key 262) 'right)
+    (#t 'insert)
+  )
+)
+
 (define focusedElement #f)
 (define (processFocusedElement key)
   (if focusedElement
     (begin
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr) 
-          (let* ((cursorIndex (inexact->exact (cadr (assoc "cursor" attr)))) (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex)))
+          (let* (
+            (cursorIndex (inexact->exact (cadr (assoc "cursor" attr)))) 
+            (updateType (getUpdateType key))
+            (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex updateType))
+            (cursor (newCursorIndex cursorIndex updateType))
+          )
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
               (if (or number positiveNumber)
                 (if (or 
@@ -241,9 +258,9 @@
                     (equal? 0 (string-length newText)) 
                     (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
                   ) 
-                  (updateText focusedElement newText key cursorIndex)
+                  (updateText focusedElement newText key cursor)
                 )
-                (updateText focusedElement newText key cursorIndex)
+                (updateText focusedElement newText key cursor)
               )
             )
           )
