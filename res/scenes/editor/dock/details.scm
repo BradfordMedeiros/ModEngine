@@ -126,16 +126,15 @@
   )
 )
 
-(define (newCursorIndex oldIndex eventType) ;text wrapAmount key offset) 
-  ;(define maxoffset wrapAmount)
-  (define maxIndex 100)
+(define (newCursorIndex eventType oldIndex newTextLength) ;text wrapAmount key offset) 
   (cond 
     ((or (equal? eventType 'left)   (equal? eventType 'backspace)) (max 0 (- oldIndex 1)))
-    ((or (equal? eventType 'insert) (equal? eventType 'right)) (min maxIndex (+ oldIndex 1)))
+    ((or (equal? eventType 'insert) (equal? eventType 'right)) (min newTextLength (+ oldIndex 1)))
     (#t oldIndex)
   )
 )
 
+; todo -> take into account when the text is deleted 
 (define (newOffsetIndex type oldoffset newCursorIndex wrapAmount)
   (define cursorFromOffset (- newCursorIndex oldoffset))
   (define wrapRemaining (- wrapAmount cursorFromOffset))
@@ -239,7 +238,7 @@
             (updateType (getUpdateType key))
             (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
             (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex updateType))
-            (cursor (newCursorIndex cursorIndex updateType))
+            (cursor (newCursorIndex updateType cursorIndex (string-length newText)))
             (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount))
           )
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
