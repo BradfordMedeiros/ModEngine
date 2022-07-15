@@ -126,12 +126,9 @@
   )
 )
 
-  ; 263 - left
-  ; 264 - right
-(define (isArrowKey key) (or (equal? key 263) (equal? key 262)))
 (define (newCursorIndex oldIndex eventType) ;text wrapAmount key offset) 
   ;(define maxoffset wrapAmount)
-  (define maxIndex 15)
+  (define maxIndex 100)
   (cond 
     ((or (equal? eventType 'left)   (equal? eventType 'backspace)) (max 0 (- oldIndex 1)))
     ((or (equal? eventType 'insert) (equal? eventType 'right)) (min maxIndex (+ oldIndex 1)))
@@ -139,45 +136,37 @@
   )
 )
 
-(define (updateText obj text key cursor)
+(define (newOffsetIndex type oldoffset newCursorIndex wrapAmount)
+  (define cursorFromOffset (- newCursorIndex oldoffset))
+  (define wrapRemaining (- wrapAmount cursorFromOffset))
+  (define cursorOverLeftSide (> wrapRemaining wrapAmount))
+  (define cursorOverRightSide (< wrapRemaining 0))
+  (define amountOverLeftSide (- wrapRemaining wrapAmount))
+  (define amountOverRightSide (* -1 wrapRemaining))
+  (cond 
+    (cursorOverRightSide (+ oldoffset amountOverRightSide))
+    (cursorOverLeftSide  (- oldoffset amountOverLeftSide))
+    (#t oldoffset)
+  )
+)
+
+(define (updateText obj text cursorIndex offset)
   (define objattr (gameobj-attr obj))
   (define detailBindingPair (assoc "details-binding" objattr))
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
-  (define wrapAmount (assoc "wrapamount" objattr)) ;wrapamount
-  (define lineLength (if wrapAmount (cadr wrapAmount) 100))
-  ;(define cursorIndex (cursorOffset text lineLength key cursor)) 
-  (define cursorIndex cursor)
-  ;(define oldCursorIndex (cadr (assoc "cursor" objattr)))
-  ;(define cursorIndex (if (< oldCursorIndex 0) 2 2))
-  (format #t "cursor index: ~a\n" cursorIndex)
-  ;(format #t "offset is: ~a\n" offset)
-
-  (if (isArrowKey key)
-    (gameobj-setattr! obj 
-      (list
-        ;(list "offset" offset)
-        (list "cursor" cursorIndex)
-      )
-    )
-    (begin
-      (format #t "it is NOT an arrow key!\n")
-      (gameobj-setattr! obj 
-        (list
-          (list "value" text)
-          ;(list "offset" offset)
-          (list "cursor" cursorIndex)
-        )
-      )
-      (if detailBinding 
-        (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
-      )
+  (gameobj-setattr! obj 
+    (list
+      (list "value" text)
+      (list "offset" offset)
+      (list "cursor" cursorIndex)
     )
   )
+  (if detailBinding 
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
+  )
 )
-
-(define (lessIndex currentText) (max 0 (- (string-length currentText) 1)))
 
 (define (appendString currentText key cursorIndex)
   (define length (string-length currentText))
@@ -188,7 +177,7 @@
 )
 (define (deleteChar currentText cursorIndex)
   (define length (string-length currentText))
-  (if (and (> cursorIndex 0) (< cursorIndex length))
+  (if (and (> cursorIndex 0) (< cursorIndex (+ 1 length)))
     (let* (
       (splitIndex (min length (- cursorIndex 1)))
       (start (substring currentText 0 splitIndex))
@@ -200,7 +189,6 @@
   )
 )
 
-(define (noTextUpdateKey key) (or (equal? key 259) (isArrowKey key)))
 (define (getUpdatedText attr obj key cursorIndex eventType)
   (define currentText (cadr (assoc "value" attr)))
   (cond 
@@ -246,10 +234,13 @@
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr) 
           (let* (
-            (cursorIndex (inexact->exact (cadr (assoc "cursor" attr)))) 
+            (cursorIndex (inexact->exact (cadr (assoc "cursor" attr))))
+            (offsetIndex (inexact->exact (cadr (assoc "offset" attr)))) 
             (updateType (getUpdateType key))
+            (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
             (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex updateType))
             (cursor (newCursorIndex cursorIndex updateType))
+            (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount))
           )
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
               (if (or number positiveNumber)
@@ -258,9 +249,9 @@
                     (equal? 0 (string-length newText)) 
                     (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
                   ) 
-                  (updateText focusedElement newText key cursor)
+                  (updateText focusedElement newText cursor offset)
                 )
-                (updateText focusedElement newText key cursor)
+                (updateText focusedElement newText cursor offset)
               )
             )
           )
