@@ -126,12 +126,18 @@
   )
 )
 
-(define (newCursorIndex eventType oldIndex newTextLength) ;text wrapAmount key offset) 
-  (cond 
-    ((or (equal? eventType 'left)   (equal? eventType 'backspace)) (max 0 (- oldIndex 1)))
-    ((or (equal? eventType 'insert) (equal? eventType 'right)) (min newTextLength (+ oldIndex 1)))
-    (#t oldIndex)
+(define (newCursorIndex eventType oldIndex newTextLength oldoffset wrapAmount oldCursorDir) ;text wrapAmount key offset) 
+  (define distanceOnLine (- oldIndex oldoffset))
+  (define lastEnding (equal? distanceOnLine (- wrapAmount 1)))
+  (define index 
+    (cond 
+      ((or (equal? eventType 'left)   (equal? eventType 'backspace)) (max 0 (- oldIndex 1)))
+      ((or (equal? eventType 'insert) (equal? eventType 'right)) (min newTextLength (+ oldIndex 1)))
+      (#t oldIndex)
+    )
   )
+
+  (list index "left")
 )
 
 ; todo -> take into account when the text is deleted 
@@ -149,7 +155,9 @@
   )
 )
 
-(define (updateText obj text cursorIndex offset)
+(define (updateText obj text cursor offset)
+  (define cursorIndex (car cursor))
+  (define cursorDir (cadr cursor))
   (define objattr (gameobj-attr obj))
   (define detailBindingPair (assoc "details-binding" objattr))
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
@@ -160,11 +168,13 @@
       (list "value" text)
       (list "offset" offset)
       (list "cursor" cursorIndex)
+      (list "cursor-dir" cursorDir)
     )
   )
   (if detailBinding 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
   )
+  (format #t "cursor is: ~a\n" cursor)
 )
 
 (define (appendString currentText key cursorIndex)
@@ -188,16 +198,17 @@
   )
 )
 
-(define (getUpdatedText attr obj key cursorIndex eventType)
+(define (getUpdatedText attr obj key cursorIndex cursorDir eventType)
+  (define effectiveIndex (if (equal? cursorDir "left") cursorIndex (+ cursorIndex 1)))
   (define currentText (cadr (assoc "value" attr)))
   (cond 
-    ((equal? eventType 'backspace) (set! currentText (deleteChar currentText cursorIndex)))
-    ((equal? eventType 'delete) (set! currentText (deleteChar currentText (+ cursorIndex 1))))
+    ((equal? eventType 'backspace) (set! currentText (deleteChar currentText effectiveIndex)))
+    ((equal? eventType 'delete) (set! currentText (deleteChar currentText (+ effectiveIndex 1))))
     ((or (equal? eventType 'left) (equal? eventType 'right)) (format #t "updated text arrow!\n"))
     (#t 
       (begin
         (format #t "key is ~a ~a\n" key (string (integer->char key)))
-        (set! currentText (appendString currentText key cursorIndex))
+        (set! currentText (appendString currentText key effectiveIndex))
       )
     )
   )
@@ -234,12 +245,13 @@
         (if (shouldUpdateText attr) 
           (let* (
             (cursorIndex (inexact->exact (cadr (assoc "cursor" attr))))
+            (oldCursorDir (cadr (assoc "cursor-dir" attr)))
             (offsetIndex (inexact->exact (cadr (assoc "offset" attr)))) 
             (updateType (getUpdateType key))
             (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
-            (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex updateType))
-            (cursor (newCursorIndex updateType cursorIndex (string-length newText)))
-            (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount))
+            (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex oldCursorDir updateType))
+            (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir))
+            (offset (newOffsetIndex updateType offsetIndex (car cursor) wrapAmount))
           )
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
               (if (or number positiveNumber)
