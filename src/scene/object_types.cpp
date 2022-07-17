@@ -275,7 +275,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization, int)> drawWord,
+  std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization, UiTextCursor)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
   std::function<void(int)> onRender,
@@ -474,7 +474,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
-    return drawWord(shaderProgram, id, textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursorIndex);
+    return drawWord(shaderProgram, id, textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor);
   }
 
   auto layoutObj = std::get_if<GameObjectUILayout>(&toRender);

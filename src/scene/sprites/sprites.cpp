@@ -56,7 +56,7 @@ int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtu
   return biggestSize;
 }
 
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex){
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft){
   auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;
@@ -67,7 +67,13 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   
   glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
 
-  for (int i = glm::max(0, virtualization.offset); i < word.size(); i++){
+  if (!cursorIndexLeft){
+    std::cout << "only cursor index left supported" << std::endl;
+    assert(false);
+  }
+
+  int i = glm::max(0, virtualization.offset);
+  for (; i < word.size(); i++){
     char& character = word.at(i);
     if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
@@ -98,18 +104,18 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
     if (cursorIndex == i){
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
       Mesh& fontMesh = fontMeshes.at('|');
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f, top + topAlign, fontSize * 0.1f, fontSize * 2.f, model, 5.f);
+      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, 5.f);
       numTriangles += fontMesh.numTriangles;      
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
 
-  if (cursorIndex == word.size()){
+  if (cursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
       Mesh& fontMesh = fontMeshes.at('|');
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f, top + topAlign, fontSize * 0.1f, fontSize * 2.f, model, 5.f);
+      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, 5.f);
       numTriangles += fontMesh.numTriangles;      
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   }

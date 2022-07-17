@@ -106,6 +106,9 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto wrap = wrapTypeFromAttr(attr);
   auto charlimit = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
   auto cursorIndex = attr.numAttributes.find("cursor") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("cursor");
+  auto cursorIndexLeftStr = attr.stringAttributes.find("cursor-dir") != attr.stringAttributes.end() ? attr.stringAttributes.at("cursor-dir") : "left";
+  modassert(cursorIndexLeftStr == "left" || cursorIndexLeftStr == "right", "invalid value for cursorIndexLeftStr");
+  auto cursorIndexLeft = cursorIndexLeftStr == "left" ? true : false;
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -114,7 +117,10 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
     .wrap = wrap,
     .virtualization = virtualizationFromAttr(attr),
     .charlimit = charlimit,
-    .cursorIndex = cursorIndex,
+    .cursor = UiTextCursor {
+      .cursorIndex = cursorIndex,
+      .cursorIndexLeft = cursorIndexLeft,
+    },
   };
   restrictWidth(obj);
   return obj;
@@ -132,7 +138,8 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
   attributes.numAttributes["offset"] = textObj.virtualization.offset;
   attributes.numAttributes["charlimit"] = textObj.charlimit;
-  attributes.numAttributes["cursor"] = textObj.cursorIndex;
+  attributes.numAttributes["cursor"] = textObj.cursor.cursorIndex;
+  attributes.stringAttributes["cursor-dir"] = textObj.cursor.cursorIndexLeft ? "left" : "right";
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -173,7 +180,12 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
     textObj.charlimit = attributes.numAttributes.at("charlimit");
   }
   if (attributes.numAttributes.find("cursor") != attributes.numAttributes.end()){
-    textObj.cursorIndex = attributes.numAttributes.at("cursor");
+    textObj.cursor.cursorIndex = attributes.numAttributes.at("cursor");
+  }
+  if (attributes.stringAttributes.find("cursor-dir") != attributes.stringAttributes.end()){
+    auto value = attributes.stringAttributes.at("cursor-dir");
+    modassert(value == "left" || value == "right", "cursor-dir : invalid dir " + value);
+    textObj.cursor.cursorIndexLeft = value == "left";
   }
   restrictWidth(textObj);
 }

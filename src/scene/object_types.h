@@ -215,7 +215,7 @@ int renderObject(
   unsigned int portalTexture,
   glm::mat4 model,
   bool drawPoints,
-  std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization, int)> drawWord,
+  std::function<int(GLint, objid, std::string, unsigned int, float, AlignType, TextWrap, TextVirtualization, UiTextCursor)> drawWord,
   std::function<int(glm::vec3)> drawSphere,
   DefaultMeshes& defaultMeshes,
   std::function<void(int)> onRender,

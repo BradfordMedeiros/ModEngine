@@ -4,6 +4,11 @@
 #include "../../common/util.h"
 #include "./obj_util.h"
 
+struct UiTextCursor {
+  int cursorIndex;
+  bool cursorIndexLeft;
+};
+
 struct GameObjectUIText {
   std::string value;
   float deltaOffset;
@@ -12,7 +17,7 @@ struct GameObjectUIText {
   TextWrap wrap;
   TextVirtualization virtualization;
   int charlimit;
-  int cursorIndex;
+  UiTextCursor cursor;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);
