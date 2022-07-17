@@ -141,18 +141,27 @@
 )
 
 ; todo -> take into account when the text is deleted 
-(define (newOffsetIndex type oldoffset newCursorIndex wrapAmount)
+(define (newOffsetIndex type oldoffset newCursorIndex wrapAmount strlen)
   (define cursorFromOffset (- newCursorIndex oldoffset))
   (define wrapRemaining (- wrapAmount cursorFromOffset))
   (define cursorOverLeftSide (> wrapRemaining wrapAmount))
   (define cursorOverRightSide (< wrapRemaining 0))
   (define amountOverLeftSide (- wrapRemaining wrapAmount))
   (define amountOverRightSide (* -1 wrapRemaining))
-  (cond 
-    (cursorOverRightSide (+ oldoffset amountOverRightSide))
-    (cursorOverLeftSide  (- oldoffset amountOverLeftSide))
-    (#t oldoffset)
+  (define newOffset   
+    (cond 
+      (cursorOverRightSide (+ oldoffset amountOverRightSide))
+      (cursorOverLeftSide  (- oldoffset amountOverLeftSide))
+      (#t oldoffset)
+    )
   )
+  (define numCharsLeft (- strlen newOffset))
+  (define diffFromWrap (- numCharsLeft wrapAmount))
+  (define finalOffset (if (< diffFromWrap 0)
+    (+ newOffset diffFromWrap)
+    newOffset
+  ))
+  finalOffset
 )
 
 (define (updateText obj text cursor offset)
@@ -251,7 +260,7 @@
             (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
             (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex oldCursorDir updateType))
             (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir))
-            (offset (newOffsetIndex updateType offsetIndex (car cursor) wrapAmount))
+            (offset (newOffsetIndex updateType offsetIndex (car cursor) wrapAmount (string-length newText)))
           )
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
               (if (or number positiveNumber)
