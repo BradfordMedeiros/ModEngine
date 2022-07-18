@@ -364,6 +364,26 @@
 
 )
 
+(define (maybe-set-text-cursor gameobj)
+  (define objattr (gameobj-attr gameobj))
+  (define value (assoc "value" objattr))
+  (define wrap (assoc "wrapamount" objattr))
+  (define offset (assoc "offset" objattr))
+
+  (define wrapAmount (if wrap (cadr wrap) #f))
+  (define textlength (if value (cadr value) #f))
+  (define offsetValue (if offset (cadr offset) #f))
+  (format #t "wrap amount: ~a\n" wrapAmount)
+  (if (and textlength wrapAmount offsetValue)
+    (gameobj-setattr! gameobj 
+      (list
+        (list "cursor" (min (- (string-length textlength) 1) (+ (- wrapAmount 1) offsetValue) ))
+        (list "cursor-dir" "right")
+      )
+    )
+  )
+)
+
 (define (unsetFocused)
   (if focusedElement
     (gameobj-setattr! focusedElement 
@@ -405,6 +425,7 @@
       )
       (maybe-perform-action objattr)
       (maybe-set-binding objattr)
+      (maybe-set-text-cursor gameobj)
     )
   )
 )
