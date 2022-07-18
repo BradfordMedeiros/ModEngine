@@ -105,10 +105,13 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
   auto charlimit = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
+ 
   auto cursorIndex = attr.numAttributes.find("cursor") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("cursor");
   auto cursorIndexLeftStr = attr.stringAttributes.find("cursor-dir") != attr.stringAttributes.end() ? attr.stringAttributes.at("cursor-dir") : "left";
   modassert(cursorIndexLeftStr == "left" || cursorIndexLeftStr == "right", "invalid value for cursorIndexLeftStr");
   auto cursorIndexLeft = cursorIndexLeftStr == "left" ? true : false;
+
+
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,
@@ -120,6 +123,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
     .cursor = UiTextCursor {
       .cursorIndex = cursorIndex,
       .cursorIndexLeft = cursorIndexLeft,
+      .highlightLength = valueFromAttr(attr, "cursor-highlight", 0),
     },
   };
   restrictWidth(obj);
@@ -140,6 +144,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["charlimit"] = textObj.charlimit;
   attributes.numAttributes["cursor"] = textObj.cursor.cursorIndex;
   attributes.stringAttributes["cursor-dir"] = textObj.cursor.cursorIndexLeft ? "left" : "right";
+  attributes.numAttributes["cursor-highlight"] = textObj.cursor.highlightLength;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -186,6 +191,9 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
     auto value = attributes.stringAttributes.at("cursor-dir");
     modassert(value == "left" || value == "right", "cursor-dir : invalid dir " + value);
     textObj.cursor.cursorIndexLeft = value == "left";
+  }
+  if (attributes.numAttributes.find("cursor-highlight") != attributes.numAttributes.end()){
+    textObj.cursor.highlightLength = attributes.numAttributes.at("cursor-highlight");
   }
   restrictWidth(textObj);
 }

@@ -56,7 +56,7 @@ int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtu
   return biggestSize;
 }
 
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft){
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float leftAlign = originalleftAlign;

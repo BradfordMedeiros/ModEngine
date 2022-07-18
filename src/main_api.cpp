@@ -265,7 +265,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize){
 }
 
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor){
-  return drawWordsRelative(shaderProgram, fontMeshes, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft);
+  return drawWordsRelative(shaderProgram, fontMeshes, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength);
 }
 
 std::vector<std::string> listAnimations(int32_t id){

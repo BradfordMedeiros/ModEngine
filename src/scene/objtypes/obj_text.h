@@ -7,6 +7,7 @@
 struct UiTextCursor {
   int cursorIndex;
   bool cursorIndexLeft;
+  int highlightLength;
 };
 
 struct GameObjectUIText {
