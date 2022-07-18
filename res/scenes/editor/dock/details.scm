@@ -128,20 +128,45 @@
 
 (define (newCursorIndex eventType oldIndex newTextLength oldoffset wrapAmount oldCursorDir) ;text wrapAmount key offset) 
   (define distanceOnLine (- oldIndex oldoffset))
-  (define lastEnding (equal? distanceOnLine (- wrapAmount 1)))
+  (define lastEndingOnRight (= distanceOnLine (- wrapAmount 1)))
+  (define lastEndingOnLeft (= distanceOnLine 0))
+  (define oldCursorDirLeft (equal? oldCursorDir "left"))
+  (define newCursorDir oldCursorDir)
+
   (define index 
     (cond 
-      ((or (equal? eventType 'left)   (equal? eventType 'backspace)) (max 0 (- oldIndex 1)))
-      ((or (equal? eventType 'insert) (equal? eventType 'right)) (min newTextLength (+ oldIndex 1)))
+      ((or (equal? eventType 'left)   (equal? eventType 'backspace)) 
+        (if (not oldCursorDirLeft)
+          (begin
+            (set! newCursorDir "left")
+            oldIndex
+          )
+          (max 0 (- oldIndex 1))
+        )
+        
+      )
+      ((or (equal? eventType 'insert) (equal? eventType 'right)) 
+        (if (and lastEndingOnRight oldCursorDirLeft)  ; make sure this doesn't exceed the length
+          (begin
+            (set! newCursorDir "right")
+            (min newTextLength oldIndex)
+          )
+          (min (if (equal? newCursorDir "right") (- newTextLength 1) newTextLength) (+ oldIndex 1))
+        )
+      )
       (#t oldIndex)
     )
   )
-
-  (list index "left")
+  (format #t "last ending: (~a, ~a)\n" lastEndingOnLeft lastEndingOnRight)
+  (format #t "distance on line: ~a\n" distanceOnLine)
+  (list index newCursorDir)
 )
 
+
 ; todo -> take into account when the text is deleted 
-(define (newOffsetIndex type oldoffset newCursorIndex wrapAmount strlen)
+(define (newOffsetIndex type oldoffset cursor wrapAmount strlen)
+  (define rawCursorIndex (car cursor))
+  (define newCursorIndex (if (equal? (cadr cursor) "left") rawCursorIndex (+ rawCursorIndex 1)))
   (define cursorFromOffset (- newCursorIndex oldoffset))
   (define wrapRemaining (- wrapAmount cursorFromOffset))
   (define cursorOverLeftSide (> wrapRemaining wrapAmount))
@@ -157,7 +182,7 @@
   )
   (define numCharsLeft (- strlen newOffset))
   (define diffFromWrap (- numCharsLeft wrapAmount))
-  (define finalOffset (if (< diffFromWrap 0)
+  (define finalOffset (if (<= diffFromWrap 0)
     (+ newOffset diffFromWrap)
     newOffset
   ))
@@ -260,7 +285,7 @@
             (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
             (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex oldCursorDir updateType))
             (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir))
-            (offset (newOffsetIndex updateType offsetIndex (car cursor) wrapAmount (string-length newText)))
+            (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount (string-length newText)))
           )
             (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
               (if (or number positiveNumber)
