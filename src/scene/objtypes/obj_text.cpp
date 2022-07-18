@@ -111,7 +111,6 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   modassert(cursorIndexLeftStr == "left" || cursorIndexLeftStr == "right", "invalid value for cursorIndexLeftStr");
   auto cursorIndexLeft = cursorIndexLeftStr == "left" ? true : false;
 
-
   GameObjectUIText obj {
     .value = value,
     .deltaOffset = deltaOffset,

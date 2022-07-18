@@ -67,6 +67,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   
   int i = glm::max(0, virtualization.offset);
   float additionalCursorOffset = cursorIndexLeft ? 0 : offsetDelta;
+
+  int additionaCursorIndex = highlightLength + cursorIndex;
   for (; i < word.size(); i++){
     char& character = word.at(i);
     if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
@@ -89,24 +91,24 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       break;
     }
     float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
-
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       Mesh& fontMesh = fontMeshes.at((int)character);
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSize, fontSize, model);
       numTriangles += fontMesh.numTriangles;
     }
-    if (cursorIndex == i){
+
+    if (cursorIndex == i || additionaCursorIndex == i){
       Mesh& fontMesh = fontMeshes.at('|');
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, 5.f);
+      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
 
-  if (cursorIndex == i){
+  if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
       Mesh& fontMesh = fontMeshes.at('|');
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, 5.f);
+      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
   }
 
