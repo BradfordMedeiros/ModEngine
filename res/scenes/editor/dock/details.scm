@@ -138,7 +138,7 @@
     (cond 
       ((equal? eventType 'up) (set! highlightLength (+ highlightLength 1)) oldIndex)
       ((equal? eventType 'down) (set! highlightLength (max 0 (- highlightLength 1))) oldIndex)
-      ((or (equal? eventType 'left)   (equal? eventType 'backspace)) 
+      ((or (equal? eventType 'left)   (and (equal? eventType 'backspace) (<= oldHighlightLength 0))) 
         (if (not oldCursorDirLeft)
           (begin
             (set! newCursorDir "left")
@@ -160,7 +160,7 @@
     )
   )
 
-  (if (or (equal? eventType 'right) (equal? eventType 'left) (equal? eventType 'insert) (equal? eventType 'backspace))
+  (if (or (equal? eventType 'right) (equal? eventType 'left) (equal? eventType 'insert) (equal? eventType 'backspace) (equal? eventType 'delete))
     (set! highlightLength 0)
   )
 
