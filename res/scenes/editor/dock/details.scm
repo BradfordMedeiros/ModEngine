@@ -439,7 +439,8 @@
 (enforceLayouts)
 
 (define (onKey key scancode action mods)
-  (if (and (equal? action 1) (not (isControlKey key)))
+  (format #t "action is: ~a\n" action)
+  (if (and (or (equal? action 1) (equal? action 2)) (not (isControlKey key)))
     (processFocusedElement key)
   )
 )
