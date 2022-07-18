@@ -65,8 +65,6 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   int numCharactersOnLine = 0;
   int lineNumber = 0;
   
-  glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-
   int i = glm::max(0, virtualization.offset);
   float additionalCursorOffset = cursorIndexLeft ? 0 : offsetDelta;
   for (; i < word.size(); i++){
@@ -98,22 +96,18 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       numTriangles += fontMesh.numTriangles;
     }
     if (cursorIndex == i){
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
       Mesh& fontMesh = fontMeshes.at('|');
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, 5.f);
       numTriangles += fontMesh.numTriangles;      
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
 
   if (cursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 0.f, 0.f, 1.f)));
       Mesh& fontMesh = fontMeshes.at('|');
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, 5.f);
       numTriangles += fontMesh.numTriangles;      
-      glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   }
 
   return numTriangles;
