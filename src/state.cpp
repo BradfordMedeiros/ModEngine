@@ -305,6 +305,18 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "window",
     .attribute = "name",
   },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto iconpath = std::get_if<std::string>(&value);
+      if (iconpath != NULL){
+        state.iconpath = *iconpath;
+        return;
+      }
+      assert(false);
+    },
+    .object = "window",
+    .attribute = "icon",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -405,6 +417,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .antialiasingMode = ANTIALIASING_NONE,
     .crosshair = "",
     .windowname = "ModEngine",
+    .iconpath = "./misc/modengine.png",
 	};
 	return state;
 }
