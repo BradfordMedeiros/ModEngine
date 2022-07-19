@@ -1,17 +1,17 @@
 <?php
 
-  function createTextbox($holdername, $valuename, $data, $styles){
+  // binding 
+  // 1. [ "value" => "literal value to display"] or 
+  // or 
+  // 2. [ "value" => [ "binding"= > "binding to create" ]]
+
+  function createTextbox($holdername, $valuename, $readonly, $binding, $styles){
     $default_key = $styles["default_key"];
     $default_value = $styles["default_value"];
 
-    $readonly = false;
-    if (array_key_exists("readonly", $data)){
-      $readonly = $data["readonly"];
-    }
- 
-    if (is_string($data["value"])){
+    if (is_string($binding["value"])){
       $style = [ 
-        "value" =>  $data["value"], 
+        "value" =>  $binding["value"], 
       ];
       if (!$readonly){
         $style["details-editabletext"] = "true";
@@ -20,8 +20,7 @@
     }else{
       $style = [ 
         "value" =>  "", 
-        "details-binding" => $data["value"]["binding"], 
- 
+        "details-binding" => $binding["value"]["binding"], 
       ];
       if (!$readonly){
         $style["details-editabletext"] = "true";
