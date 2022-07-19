@@ -133,11 +133,14 @@
   (define oldCursorDirLeft (equal? oldCursorDir "left"))
   (define newCursorDir oldCursorDir)
   (define highlightLength oldHighlightLength)
-
   (define index 
     (cond 
       ((equal? eventType 'up) (set! highlightLength (+ highlightLength 1)) oldIndex)
       ((equal? eventType 'down) (set! highlightLength (max 0 (- highlightLength 1))) oldIndex)
+      ((equal? eventType 'selectAll) (begin
+        (set! highlightLength newTextLength)
+        0
+      ))
       ((or (equal? eventType 'left)   (and (equal? eventType 'backspace) (<= oldHighlightLength 0))) 
         (if (not oldCursorDirLeft)
           (begin
@@ -160,6 +163,18 @@
     )
   )
 
+  (if (> highlightLength 0)
+    (cond
+      ((equal? eventType 'left)
+        (set! index oldIndex)
+      )
+      ((equal? eventType 'right)
+        (set! index (+ oldIndex oldHighlightLength))
+      )
+    )
+  )
+  
+
   (if (or (equal? eventType 'right) (equal? eventType 'left) (equal? eventType 'insert) (equal? eventType 'backspace) (equal? eventType 'delete))
     (set! highlightLength 0)
   )
@@ -174,7 +189,8 @@
 (define (newOffsetIndex type oldoffset cursor wrapAmount strlen)
   (define rawCursorIndex (car cursor))
   (define newCursorIndex (if (equal? (cadr cursor) "left") rawCursorIndex (+ rawCursorIndex 1)))
-  (define cursorFromOffset (- newCursorIndex oldoffset))
+  (define cursorHighlight (caddr cursor))
+  (define cursorFromOffset (- (+ newCursorIndex cursorHighlight) oldoffset))
   (define wrapRemaining (- wrapAmount cursorFromOffset))
   (define cursorOverLeftSide (> wrapRemaining wrapAmount))
   (define cursorOverRightSide (< wrapRemaining 0))
@@ -193,6 +209,8 @@
     (+ newOffset diffFromWrap)
     newOffset
   ))
+
+  (format #t "offset index, highlight: ~a\n" cursorHighlight)
   finalOffset
 )
 
@@ -250,7 +268,7 @@
   (cond 
     ((equal? eventType 'backspace) (set! currentText (deleteChar currentText (if (<= highlightLength 0) effectiveIndex (+ effectiveIndex 1)) highlightLength)))
     ((equal? eventType 'delete) (set! currentText (deleteChar currentText (+ effectiveIndex 1) highlightLength)))
-    ((or (equal? eventType 'left) (equal? eventType 'right) (equal? eventType 'up) (equal? eventType 'down)) #t)
+    ((or (equal? eventType 'selectAll) (equal? eventType 'left) (equal? eventType 'right) (equal? eventType 'up) (equal? eventType 'down)) #t)
     (#t 
       (begin
         (format #t "key is ~a ~a\n" key (string (integer->char key)))
@@ -281,6 +299,7 @@
     ((equal? key 262) 'right)
     ((equal? key 265) 'up)
     ((equal? key 264) 'down)
+    ((equal? key 344) 'selectAll) ;shift
     (#t 'insert)
   )
 )
