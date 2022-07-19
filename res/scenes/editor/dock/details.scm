@@ -135,10 +135,11 @@
   (define highlightLength oldHighlightLength)
   (define index 
     (cond 
-      ((equal? eventType 'up) (set! highlightLength (+ highlightLength 1)) oldIndex)
+      ((equal? eventType 'up) (set! highlightLength (min (- newTextLength oldIndex) (+ highlightLength 1))) oldIndex)
       ((equal? eventType 'down) (set! highlightLength (max 0 (- highlightLength 1))) oldIndex)
       ((equal? eventType 'selectAll) (begin
         (set! highlightLength newTextLength)
+        (set! newCursorDir "left")
         0
       ))
       ((or (equal? eventType 'left)   (and (equal? eventType 'backspace) (<= oldHighlightLength 0))) 
