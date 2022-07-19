@@ -268,6 +268,9 @@ void keyCharCallback(GLFWwindow* window, unsigned int codepoint){
 }
 
 void handleSnapEasy(objid id, bool left){
+  if (getLayerForId(id).selectIndex == -2){
+    return;
+  }
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
     auto objPos = getGameObjectPosition(id, true);
     auto snapAmount = left ? snapTranslateDown(state.snappingMode, objPos, state.manipulatorAxis) : snapTranslateUp(state.snappingMode, objPos, state.manipulatorAxis);

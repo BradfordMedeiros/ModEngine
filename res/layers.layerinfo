@@ -6,6 +6,7 @@
 # scale: true/false  (false)
 # view: true / false (true)
 # visible: true / false (true)
+# selection: -1 = cannot be selected, -2 = can be selected, but built in operations will not apply
 
 # pass in additional uniforms to shader (same as postprocessing for uniforms)
 # layer:!<uniform name>:<uniformvalue>
@@ -34,6 +35,6 @@ basicui:ortho:true
 basicui:!enableLighting:false
 basicui:?enableLighting:bool
 
-#basicui:selection:-1
+basicui:selection:-2
 
 
