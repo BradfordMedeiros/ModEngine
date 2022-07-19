@@ -427,8 +427,9 @@
   (if focusedElement
     (gameobj-setattr! focusedElement 
       (list 
+        (list "value" "")
         (list "tint" (list 1 1 1 1))
-        (list "cursor" 0)
+        (list "cursor" -1)             ; probably shouldn't be setting this for every element
         (list "cursor-dir" "left")
         (list "cursor-highlight" 0)
       )
