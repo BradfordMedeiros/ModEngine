@@ -5,6 +5,7 @@
   }
 
   $zpos = -1;  # + or +- 0.2 for certain order of elements within
+
 ?>
 (test_panel:layer:basicui
 (test_panel:type:vertical
@@ -90,6 +91,12 @@
     ];
     $default_key = $default_text_style;
     $default_value = array_merge($default_text_style, []);
+
+    $styles = [
+      "default_key" => $default_key,
+      "default_value" => $default_value,
+    ];
+    
     $default_keyvalueLayout = [
       "layer" => "basicui",
       "type" => "horizontal",
