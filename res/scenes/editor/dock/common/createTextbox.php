@@ -5,7 +5,16 @@
   // or 
   // 2. [ "value" => [ "binding"= > "binding to create" ]]
 
-  function createTextbox($holdername, $valuename, $readonly, $binding, $styles){
+  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $styles){
+    // details-editable-type to sponsor the type behavior
+    if ($type != NULL){
+      if ($type!= "number" && $type != "positive-number"){  // should actually sponsor
+        print("invalid numeric type");
+        exit(1);
+      }
+    }
+
+
     $default_key = $styles["default_key"];
     $default_value = $styles["default_value"];
 
