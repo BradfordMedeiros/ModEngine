@@ -18,28 +18,21 @@
     $default_key = $styles["default_key"];
     $default_value = $styles["default_value"];
 
+    $style = [];
     if (is_string($binding["value"])){
-      $style = [ 
-        "value" =>  $binding["value"], 
-      ];
-      if (!$readonly){
-        $style["details-editabletext"] = "true";
-      }
-      createElement($valuename, $default_value, $style);
+      $style["value"] = $binding["value"];
     }else{
-      $style = [ 
-        "value" =>  "", 
-        "details-binding" => $binding["value"]["binding"], 
-      ];
-      if (!$readonly){
-        $style["details-editabletext"] = "true";
-        $style["wrapamount"] = "10"; # size limit
-        $style["wraptype"] = "char";
-        $style["maxheight"] = "1";
-      } 
-      createElement($valuename, $default_value, $style);
+      $style["value"] = "";
+      $style["details-binding"] = $binding["value"]["binding"];
     }
- 
+    if (!$readonly){
+      $style["details-editabletext"] = "true";
+      $style["wrapamount"] = "10"; # size limit
+      $style["wraptype"] = "char";
+      $style["maxheight"] = "1"; 
+    }
+    createElement($valuename, $default_value, $style);
+
     $editableStyle = [
       "backpanel" => "true", 
       "tint" => "0 0 0 1", 

@@ -4,6 +4,14 @@
 ; 3. if dialog-button-action message is sent, will perform the action in value of attribute button-action for the corresponding object id in the message
 ; 4. manages value field (as text editor style functionality) for focused elements with details-editabletext:true
 
+(define (assert trueOrFalse message)
+  (if (not trueOrFalse) 
+    (begin
+      (format #t "assertion error: ~a\n" message)
+      (exit 1)
+    )
+  )
+)
 
 (define (isSubmitKey key) (equal? key 47))   ; /
 (define (isControlKey key) 
@@ -247,10 +255,12 @@
 )
 
 (define (appendString currentText key cursorIndex highlightLength)
+  (define _ (format #t "currentText: ~a, key: ~a, cursorIndex: ~a, highlightLength = ~a\n" currentText key cursorIndex highlightLength))
   (define length (string-length currentText))
   (define splitIndex (min length cursorIndex))
   (define start (substring currentText 0 splitIndex))
   (define end   (substring currentText (+ splitIndex highlightLength) length))
+  (define __ (format #t "length: ~a, splitIndex = ~a, hihglightLength = ~a\n" length splitIndex highlightLength))
   (string-append start (string (integer->char key)) end)
 )
 (define (deleteChar currentText cursorIndex highlightLength)
@@ -270,6 +280,7 @@
 (define (getUpdatedText attr obj key cursorIndex cursorDir highlightLength eventType)
   (define effectiveIndex (if (equal? cursorDir "left") cursorIndex (+ cursorIndex 1)))
   (define currentText (cadr (assoc "value" attr)))
+  (format #t "highlight length: ~a\n" highlightLength)
   (cond 
     ((equal? eventType 'backspace) (set! currentText (deleteChar currentText (if (<= highlightLength 0) effectiveIndex (+ effectiveIndex 1)) highlightLength)))
     ((equal? eventType 'delete) (set! currentText (deleteChar currentText (+ effectiveIndex 1) highlightLength)))
@@ -311,34 +322,43 @@
 
 (define focusedElement #f)
 (define (processFocusedElement key)
+  (format #t "focused element: top\n")
   (if focusedElement
     (begin
       (let ((attr (gameobj-attr focusedElement)))
-        (if (shouldUpdateText attr) 
-          (let* (
-            (cursorIndex (inexact->exact (cadr (assoc "cursor" attr))))
-            (oldCursorDir (cadr (assoc "cursor-dir" attr)))
-            (oldHighlight (inexact->exact (cadr (assoc "cursor-highlight" attr))))
-            (offsetIndex (inexact->exact (cadr (assoc "offset" attr)))) 
-            (updateType (getUpdateType key))
-            (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
-            (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex oldCursorDir oldHighlight updateType))
-            (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir oldHighlight))
-            (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount (string-length newText)))
-          )
-            (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
-              (if (or number positiveNumber)
-                (if (or 
-                    (string->number newText) 
-                    (equal? 0 (string-length newText)) 
-                    (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
-                  ) 
-                  (updateText focusedElement newText cursor offset)
+        (if (shouldUpdateText attr)
+          (begin
+            (format #t "focused element: should update\n")
+            (let* (
+              (cursorIndex (inexact->exact (cadr (assoc "cursor" attr))))
+              (oldCursorDir (cadr (assoc "cursor-dir" attr)))
+              (oldHighlight (inexact->exact (cadr (assoc "cursor-highlight" attr))))
+              (offsetIndex (inexact->exact (cadr (assoc "offset" attr)))) 
+              (updateType (getUpdateType key))
+              (wrapAmount (inexact->exact (cadr (assoc "wrapamount" attr))))
+              (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex oldCursorDir oldHighlight updateType))
+              (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir oldHighlight))
+              (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount (string-length newText)))
+            )
+              ;#t
+              (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
+                (begin
+                  (format #t "focused element - number?: ~a, positiveNumber?: ~a\n" number positiveNumber)
+                  (if (or number positiveNumber)
+                    (if (or 
+                        (string->number newText) 
+                        (equal? 0 (string-length newText)) 
+                        (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
+                      ) 
+                      (updateText focusedElement newText cursor offset)
+                    )
+                    (updateText focusedElement newText cursor offset)
+                  )
                 )
-                (updateText focusedElement newText cursor offset)
               )
             )
           )
+          (format #t "focused element: should not update\n")
         )
       )
     )
@@ -410,14 +430,17 @@
   (define offset (assoc "offset" objattr))
 
   (define wrapAmount (if wrap (cadr wrap) #f))
-  (define textlength (if value (cadr value) #f))
+  (define text (if value (cadr value) #f))
   (define offsetValue (if offset (cadr offset) #f))
-  (format #t "wrap amount: ~a\n" wrapAmount)
-  (if (and textlength wrapAmount offsetValue)
-    (gameobj-setattr! gameobj 
-      (list
-        (list "cursor" (min (- (string-length textlength) 1) (+ (- wrapAmount 1) offsetValue) ))
-        (list "cursor-dir" "right")
+  (if (and text wrapAmount offsetValue)
+    (let ((cursorValue (min (- (string-length text) 1) (+ (- wrapAmount 1) offsetValue))))
+      (assert (>= cursorValue 0) (format #f "name: ~a => cursor value is expected to be >= 0 (got = ~a), wrapAmount = ~a, text = ~a, offset = ~a\n" (gameobj-name gameobj) cursorValue wrapAmount text offsetValue))
+      (gameobj-setattr! gameobj 
+        (list
+          (list "cursor" cursorValue)
+          (list "cursor-dir" "right")
+          (list "cursor-highlight" 0)
+        )
       )
     )
   )
@@ -443,14 +466,14 @@
   (define objattr (gameobj-attr gameobj))
   (define reselectAttr (assoc "details-reselect" objattr))
   (define objInScene (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj))))
+  (define managedText (and objInScene (isManagedText gameobj)))
   (if (and objInScene reselectAttr)
     (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
     (begin
       (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
         (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
       )
-      
-      (if (and objInScene (isManagedText gameobj))
+      (if managedText
         (begin
           (format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
           (unsetFocused)
@@ -470,7 +493,7 @@
       )
       (maybe-perform-action objattr)
       (maybe-set-binding objattr)
-      (maybe-set-text-cursor gameobj)
+      (if managedText (maybe-set-text-cursor gameobj))
     )
   )
 )
