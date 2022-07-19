@@ -24,7 +24,12 @@
 
   $holdername = "(" . $unique_control_id . "_textfield_holder_" . $i;
   $valuename = ")value_" . $i;
-  createTextbox($holdername, $valuename, $data, $styles);
+
+  $readonly = false;
+  if (array_key_exists("readonly", $data)){
+    $readonly = $data["readonly"];
+  }
+  createTextbox($holdername, $valuename, $readonly, $data, $styles);
 
   createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $holdername ]);
 ?>
