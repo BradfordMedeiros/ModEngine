@@ -81,7 +81,8 @@
       1 => ($zpos + $multiplier * 0.05),
       2 => ($zpos + $multiplier * 0.1),
       28 => ($zpos + $multiplier * 0.18),
-      3 => ($zpos + $multiplier * 0.2),
+      29 => ($zpos + $multiplier * 0.24),
+      3 => ($zpos + $multiplier * 0.3),
     ];
     $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
@@ -144,6 +145,14 @@
     "object_details" => [
       "title" => "Object Details",
       "items" => [
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Another Label", 
+            "value" => [
+              "binding" => "name",
+            ],
+          ]
+        ],
         [ "type" => "label", 
           "data" => [
             "key" => "Current Object", 
