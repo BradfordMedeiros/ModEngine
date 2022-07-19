@@ -426,7 +426,12 @@
 (define (unsetFocused)
   (if focusedElement
     (gameobj-setattr! focusedElement 
-      (list (list "tint" (list 1 1 1 1)))
+      (list 
+        (list "tint" (list 1 1 1 1))
+        (list "cursor" 0)
+        (list "cursor-dir" "left")
+        (list "cursor-highlight" 0)
+      )
     )
   )
   (set! focusedElement #f)    
@@ -467,6 +472,11 @@
       (maybe-set-text-cursor gameobj)
     )
   )
+)
+
+(define (onObjUnselected)
+  (unsetFocused)
+  (format #t "on object unselected\n")
 )
 
 (define (enforceLayouts)
