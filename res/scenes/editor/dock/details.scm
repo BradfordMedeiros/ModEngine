@@ -55,7 +55,10 @@
 
 (define dataValues (list))
 
-(define (isUpdatedObjectValue dataValue) (equal? #t (caddr dataValue)))
+(define (isUpdatedObjectValue dataValue) 
+  (format #t "is updated object value: ~a\n" dataValue)
+  (equal? #t (caddr dataValue))
+)
 (define (getAttr dataValue) (list (car dataValue) (cadr dataValue)))
 (define (filterUpdatedObjectValues) (map getAttr (filter isUpdatedObjectValue dataValues)))
 
@@ -111,6 +114,7 @@
 )
 
 (define (makeTypeCorrect oldvalue newvalue)
+  (format #t "make type correct: ~a ~a\n" oldvalue newvalue)
   (if (number? oldvalue)
     (if (string? newvalue) 
       (if (or (equal? (string-length newvalue) 0) (equal? "-" (substring newvalue 0 (string-length newvalue)))) 0 (string->number newvalue)) 
@@ -227,7 +231,7 @@
   finalOffset
 )
 
-(define (updateText obj text cursor offset)
+(define (updateText obj text cursor offset submitNewText)
   (define cursorIndex (car cursor))
   (define cursorDir (cadr cursor))
   (define cursorHighlightLength (caddr cursor))
@@ -236,19 +240,23 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
-
-  (format #t "cursor highlight: ~a\n" cursorHighlightLength)
-
-  (gameobj-setattr! obj 
+  (define newValues 
     (list
-      (list "value" text)
       (list "offset" offset)
       (list "cursor" cursorIndex)
       (list "cursor-dir" cursorDir)
       (list "cursor-highlight" cursorHighlightLength)
     )
   )
-  (if detailBinding 
+  (if submitNewText
+    (set! newValues (cons (list "value" text) newValues))
+  )
+
+  (format #t "cursor highlight: ~a\n" cursorHighlightLength)
+  (format #t "updating text: ~a\n" text)
+
+  (gameobj-setattr! obj newValues)
+  (if (and submitNewText detailBinding) 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
   )
   (format #t "cursor is: ~a\n" cursor)
@@ -320,6 +328,44 @@
   )
 )
 
+(define (isZeroLength text) (equal? 0 (string-length text)))
+(define (isNumber text) (if (string->number text) #t #f))
+(define (isNegativePrefix text)
+  (define isNegative 
+    (and 
+      (equal? 1 (string-length text))
+      (equal? "-" (substring text 0 1))
+    )
+  )
+  (format #t "is negative: ~a ~a\n" text isNegative)
+  isNegative
+)
+(define (isPositiveNumber text) 
+  (define number (string->number text))
+  (if number
+    (>= number 0)
+    #f
+  )
+)
+
+(define (isTypeNumber text) (or (isZeroLength text) (isNumber text) (isNegativePrefix text)))
+(define (isTypePositiveNumber text) (or (isZeroLength text) (isPositiveNumber text)))
+(define (shouldUpdateType newText attr)
+  (define update (cond
+    ((isEditableType "number" attr) 
+      (format #t "evaluating number type!\n")
+      (isTypeNumber newText)
+    )
+    ((isEditableType "positive-number" attr) 
+      (format #t "evaluating positive number type!\n")
+      (isTypePositiveNumber newText)
+    )
+    (#t #t)
+  ))
+  (format #t "should update: (~a) (~a)\n" newText update)
+  update
+)
+
 (define focusedElement #f)
 (define (processFocusedElement key)
   (format #t "focused element: top\n")
@@ -339,25 +385,10 @@
               (newText (getUpdatedText (gameobj-attr focusedElement) focusedElement key cursorIndex oldCursorDir oldHighlight updateType))
               (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir oldHighlight))
               (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount (string-length newText)))
+            )              
+              (updateText focusedElement newText cursor offset (shouldUpdateType newText attr))
             )
-              ;#t
-              (let ((number (isEditableType "number" attr)) (positiveNumber (isEditableType "positive-number" attr)))
-                (begin
-                  (format #t "focused element - number?: ~a, positiveNumber?: ~a\n" number positiveNumber)
-                  (if (or number positiveNumber)
-                    (if 
-                      (or 
-                        (and (string->number newText) (if (not positiveNumber) #t (>= (string->number newText) 0)))
-                        (equal? 0 (string-length newText)) 
-                        (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
-                      ) 
-                      (updateText focusedElement newText cursor offset)
-                    )
-                    (updateText focusedElement newText cursor offset)
-                  )
-                )
-              )
-            )
+            
           )
           (format #t "focused element: should not update\n")
         )
