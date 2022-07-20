@@ -19,11 +19,14 @@
     $default_value = $styles["default_value"];
 
     $style = [];
-    if (is_string($binding["value"])){
-      $style["value"] = $binding["value"];
+    if (is_string($binding)){
+      $style["value"] = $binding;
     }else{
       $style["value"] = "";
-      $style["details-binding"] = $binding["value"]["binding"];
+      $style["details-binding"] = $binding["binding"];
+      if (array_key_exists("binding-index", $binding)){
+        $style["details-binding-index"] = $binding["binding-index"];
+      }
     }
     if (!$readonly){
       $style["details-editabletext"] = "true";

@@ -17,7 +17,7 @@
       }
       $holdername = "(" . $unique_control_id . "_numeric_textfield_holder_" . $x;
       $valuename = ")numeric_text_" . $unique_control_id . "_" . $x;
-      createTextbox($holdername, $valuename, false, $editableType, [ "value" => "0" ], $styles);
+      createTextbox($holdername, $valuename, false, $editableType, $value[$x]["value"], $styles);
       array_push($managedElements, $holdername);
     }else if ($controlType == "slider"){
       $hasBinding = !is_string($value[$x]);

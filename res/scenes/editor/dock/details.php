@@ -378,7 +378,9 @@
           "data" => [
             "key" => "Object Id", 
             "value" => [
-              "binding" => "runtime-id",
+              "binding" => "tint", 
+              "binding-index" =>  0,
+              "type" => "positive-number",
             ]
           ],
         ],
