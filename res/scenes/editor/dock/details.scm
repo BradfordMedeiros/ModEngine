@@ -310,7 +310,7 @@
 (define (getUpdateType key)
   (cond
     ((equal? key 259) 'backspace)
-    ((equal? key 45)  'delete) ; - sign, should change to delete but will delete the item
+    ((equal? key 96)  'delete) ; ~ sign, should change to delete but will delete the item
     ((equal? key 263) 'left)
     ((equal? key 262) 'right)
     ((equal? key 265) 'up)
@@ -345,8 +345,9 @@
                 (begin
                   (format #t "focused element - number?: ~a, positiveNumber?: ~a\n" number positiveNumber)
                   (if (or number positiveNumber)
-                    (if (or 
-                        (string->number newText) 
+                    (if 
+                      (or 
+                        (and (string->number newText) (if (not positiveNumber) #t (>= (string->number newText) 0)))
                         (equal? 0 (string-length newText)) 
                         (and (not positiveNumber) (and (equal? 1 (string-length newText)) (equal? "-" (substring newText 0 1))))
                       ) 
@@ -433,7 +434,7 @@
   (define text (if value (cadr value) #f))
   (define offsetValue (if offset (cadr offset) #f))
   (if (and text wrapAmount offsetValue)
-    (let ((cursorValue (min (- (string-length text) 1) (+ (- wrapAmount 1) offsetValue))))
+    (let ((cursorValue (min (- (max 1 (string-length text)) 1) (+ (- wrapAmount 1) offsetValue))))
       (assert (>= cursorValue 0) (format #f "name: ~a => cursor value is expected to be >= 0 (got = ~a), wrapAmount = ~a, text = ~a, offset = ~a\n" (gameobj-name gameobj) cursorValue wrapAmount text offsetValue))
       (gameobj-setattr! gameobj 
         (list

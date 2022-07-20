@@ -27,6 +27,7 @@
     }
     if (!$readonly){
       $style["details-editabletext"] = "true";
+      $style["details-editable-type"] = $type;
       $style["wrapamount"] = "10"; # size limit
       $style["wraptype"] = "char";
       $style["maxheight"] = "1"; 

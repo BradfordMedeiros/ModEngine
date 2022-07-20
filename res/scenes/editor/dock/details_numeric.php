@@ -11,13 +11,13 @@
 
     $controlType = $value[$x]["type"];
     if ($controlType == "float"){
-      $editableType = "number";
+      $editableType = NULL;
       if (array_key_exists("type", $value[$x]["value"])){
         $editableType = $value[$x]["value"]["type"];
       }
       $holdername = "(" . $unique_control_id . "_numeric_textfield_holder_" . $x;
       $valuename = ")numeric_text_" . $unique_control_id . "_" . $x;
-      createTextbox($holdername, $valuename, false, $editableType, [ "value" => "placeholder" ], $styles);
+      createTextbox($holdername, $valuename, false, $editableType, [ "value" => "0" ], $styles);
       array_push($managedElements, $holdername);
     }else if ($controlType == "slider"){
       $hasBinding = !is_string($value[$x]);
