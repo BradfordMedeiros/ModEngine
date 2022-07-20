@@ -29,7 +29,11 @@
   if (array_key_exists("readonly", $data)){
     $readonly = $data["readonly"];
   }
-  createTextbox($holdername, $valuename, $readonly, NULL, $data["value"], $styles);
+  $type = NULL;
+  if (array_key_exists("type", $data["value"])){
+    $type = $data["value"]["type"];
+  }
+  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $styles);
 
   createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $holdername ]);
 ?>
