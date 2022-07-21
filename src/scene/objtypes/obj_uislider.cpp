@@ -46,10 +46,10 @@ std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISli
 void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _attributes){
   MODTODO("ui slider - get rest of attributes");
   _attributes.numAttributes["slideamount"] = sliderObj.percentage;
+  _attributes.stringAttributes["onslide"] = sliderObj.onSlide;
   if (sliderObj.showBackpanel){
     _attributes.vecAttr.vec4["backpaneltint"] = sliderObj.backpanelTint;
   }
-  _attributes.numAttributes["percentage"] = sliderObj.percentage;
   _attributes.numAttributes["min"] = sliderObj.min;
   _attributes.numAttributes["max"] = sliderObj.max;
 }
