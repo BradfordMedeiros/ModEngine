@@ -139,7 +139,7 @@
   (if detailBindingIndex
     (begin
       (if (equal? oldvalue #f)
-        (set! oldvalue (list 0 0 0))  ; should come from some type hint
+        (set! oldvalue (list 0 0 0 0))  ; should come from some type hint
       )
       (list-set! oldvalue detailBindingIndex (makeTypeCorrect (list-ref oldvalue detailBindingIndex) newvalue))
       (format #t "old value: ~a ~a\n"  oldvalue (map number? oldvalue))
@@ -587,7 +587,7 @@
   (set! type (if type (cadr type) type))
   (if (or (equal? type "number") (equal? type "positive-number"))
     (list 0 0 0 0)
-    "< no data source >"
+    #f
   )
 )
 
@@ -610,10 +610,34 @@
     )
   )
 )
+
+(define (getType x)
+  (cond 
+    ((number? x) "number")
+    ((pair? x) "pair")
+    ((string? x) "string")
+    ((list? x) "list")
+  )
+)
+
+(define (getGameobjType gameobj)
+  (define objname (gameobj-name gameobj))
+  (define prefix (substring objname 0 1))
+  (cond
+    ((equal? prefix "_") "slider")
+    ((equal? prefix ")") "text")
+  )
+)
+
 (define (update-binding attrpair getDataForAttr) 
   (define dataValue (getDataForAttr (cadr attrpair)))
   (define bindingIndex (caddr attrpair))
+  (define obj (car attrpair))
+  (define objType (getGameobjType obj))
   ;(format #t "binding index: ~a ~a\n" bindingIndex (number? bindingIndex))
+
+  (format #t "type for update dataValue is: ~a, value: ~a\n" (getType dataValue) dataValue)
+
   (if (and bindingIndex (list? dataValue) (< bindingIndex (length dataValue)))
     (set! dataValue (list-ref dataValue bindingIndex))
   )
@@ -621,14 +645,29 @@
     (set! dataValue (number->string dataValue))
   )
   ;(format #t "data value: ~a\n" dataValue)
-  (if (string? dataValue)
+  (format #t "update binding for: ~a\n" (gameobj-name obj))
+  (format #t "datavalues: ~a\n" dataValues)
+  (format #t "data = ~a, index = ~a\n" dataValue bindingIndex)
+
+  (if dataValue
     (begin
-      (gameobj-setattr! (car attrpair) 
-        (list (list "value" dataValue))
-      )
+        (cond
+          ((equal? objType "text") 
+            (gameobj-setattr! obj
+              (list (list "value" (if (number? dataValue) (number->string dataValue) dataValue)))
+            )
+          )
+          ((equal? objType "slider")
+            (format #t "its a slider!\n")
+            ;(assert (number? dataValue) (format #f "slider must use a number as data value, got: ~a ~a\n" (getType dataValue) dataValue))
+            (gameobj-setattr! obj
+              (list (list "slideamount" (if (string? dataValue) (string->number dataValue) dataValue)))
+            )
+          )
+        )
     )
-    (format #t "warning not a string: ~a ~a ~a\n" attrpair dataValue bindingIndex)
   )
+  
   attrpair
 )
 
