@@ -238,7 +238,7 @@ void handleTerrainPainting(UVCoord uvCoord){
 
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
-void selectItem(objid selectedId, Color pixelColor){
+void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   if (!showCursor){
     return;
@@ -246,27 +246,30 @@ void selectItem(objid selectedId, Color pixelColor){
   auto idToUse = state.groupSelection ? getGroupId(world.sandbox, selectedId) : selectedId;
   auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, idToUse);
-  onManipulatorSelectItem(
-    idToUse, 
-    selectedSubObj.name,
-    []() -> objid {
-      return makeObjectAttr(
-        0,
-        "manipulator", 
-        { 
-          {"mesh", "./res/models/ui/manipulator.gltf" }, 
-          {"layer", "scale" },
-        }, 
-        {}, 
-        {
-          //{"scale", glm::vec3(7.f, 7.f, 7.f)}
-        }
-      );
-    },
-    removeObjectById,
-    getGameObjectPos,
-    setGameObjectPosition
-  );
+
+  if (layerSelectIndex >= 0){
+    onManipulatorSelectItem(
+      idToUse, 
+      selectedSubObj.name,
+      []() -> objid {
+        return makeObjectAttr(
+          0,
+          "manipulator", 
+          { 
+            {"mesh", "./res/models/ui/manipulator.gltf" }, 
+            {"layer", "scale" },
+          }, 
+          {}, 
+          {
+            //{"scale", glm::vec3(7.f, 7.f, 7.f)}
+          }
+        );
+      },
+      removeObjectById,
+      getGameObjectPos,
+      setGameObjectPosition
+    );
+  }
   if (idToUse == getManipulatorId()){
     return;
   }
@@ -1484,9 +1487,10 @@ int main(int argc, char* argv[]){
 
     if ((hoveredId != getManipulatorId()) && selectItemCalled){
       std::cout << "INFO: select item called" << std::endl;
-      if (state.hoveredIdInScene && getLayerForId(hoveredId).selectIndex != -1){
+      auto layerSelectIndex = getLayerForId(hoveredId).selectIndex;
+      if (state.hoveredIdInScene && layerSelectIndex != -1 ){
         std::cout << "INFO: select item called -> id in scene!" << std::endl;
-        selectItem(hoveredId, hoveredItemColor);
+        selectItem(hoveredId, hoveredItemColor, layerSelectIndex);
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
         cBindings.onObjectUnselected();
