@@ -22,6 +22,11 @@
     (equal? key 257) ; enter key
   ) 
 )
+
+(define (submitAndPopulateData)
+  (submitData)
+  (populateData)
+)
 (define (submitData)
   (if managedObj
     (begin
@@ -40,7 +45,6 @@
           )
         ) updatedValues)
       )
-      (populateData)
     )
   )
 )
@@ -49,7 +53,7 @@
   (if (equal? key 44) ; comma
     (format #t "~a\n" dataValues) 
   )
-  (if (isSubmitKey key) (submitData))
+  (if (isSubmitKey key) (submitAndPopulateData))
 )
 
 
@@ -410,7 +414,7 @@
   (if detailBinding 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex slideAmount) #t)
   )
-  (submitData)
+  (submitAndPopulateData)
 )
 
 (define eoeMode #f)
@@ -451,8 +455,7 @@
   (if (and shouldSet enableValue detailBinding) 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex enableValue) #t)
   )
-  (submitData)
-
+  (submitAndPopulateData)
 )
 
 (define (maybe-set-text-cursor gameobj)
@@ -673,14 +676,14 @@
   (if (equal? key "editor-button-on")
     (begin
       (toggleButtonBinding (string->number value) #t)
-      (submitData) ; remove
+      (submitAndPopulateData) ; remove
     )
 
   )
   (if (equal? key "editor-button-off")
     (begin
       (toggleButtonBinding (string->number value) #f)
-      (submitData) ; remove
+      (submitAndPopulateData) ; remove
     )
   )
   (if (equal? key "details-editable-slide")
