@@ -1487,10 +1487,14 @@ int main(int argc, char* argv[]){
 
     if ((hoveredId != getManipulatorId()) && selectItemCalled){
       std::cout << "INFO: select item called" << std::endl;
-      auto layerSelectIndex = getLayerForId(hoveredId).selectIndex;
-      if (state.hoveredIdInScene && layerSelectIndex != -1 ){
+      
+      if (state.hoveredIdInScene){
         std::cout << "INFO: select item called -> id in scene!" << std::endl;
-        selectItem(hoveredId, hoveredItemColor, layerSelectIndex);
+        auto layerSelectIndex = getLayerForId(hoveredId).selectIndex;
+        if (layerSelectIndex != -1){
+          selectItem(hoveredId, hoveredItemColor, layerSelectIndex);
+        }
+        
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
         cBindings.onObjectUnselected();
