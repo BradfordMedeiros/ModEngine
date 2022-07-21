@@ -158,6 +158,7 @@
             "key" => "Current Object", 
             "value" => [
               "binding" => "object_name",
+              "type" => "number",
             ],
           ]
         ],
@@ -380,7 +381,7 @@
             "value" => [
               "binding" => "tint", 
               "binding-index" =>  0,
-              "type" => "positive-number",
+              "type" => "positive-integer",
             ]
           ],
         ],

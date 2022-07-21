@@ -351,9 +351,19 @@
     #f
   )
 )
+(define (isInteger text) (exact-integer? (string->number text)))
+(define (isPositiveInteger text) 
+  (define num (string->number text))
+  (and
+    (if num (>= num 0) #f )
+    (exact-integer? num)
+  )
+)
 
 (define (isTypeNumber text) (or (isZeroLength text) (isNumber text) (isNegativePrefix text)))
 (define (isTypePositiveNumber text) (or (isZeroLength text) (isPositiveNumber text)))
+(define (isTypeInteger text) (or (isZeroLength text) (isInteger text) (isNegativePrefix text)))
+(define (isTypePositiveInteger text) (or (isZeroLength text) (isPositiveInteger text)))
 (define (shouldUpdateType newText attr)
   (define update (cond
     ((isEditableType "number" attr) 
@@ -363,6 +373,12 @@
     ((isEditableType "positive-number" attr) 
       (format #t "evaluating positive number type!\n")
       (isTypePositiveNumber newText)
+    )
+    ((isEditableType "integer" attr)
+      (isTypeInteger newText)
+    )
+    ((isEditableType "positive-integer" attr)
+      (isTypePositiveInteger newText)
     )
     (#t #t)
   ))
