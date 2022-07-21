@@ -157,7 +157,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectUISlider{}),
     .createObj = createUISlider,
     .objectAttributes = convertElementValue<GameObjectUISlider>(getUISliderAttributes), 
-    .setAttributes = nothingSetObjAttr,
+    .setAttributes = convertElementSetValue<GameObjectUISlider>(setUISliderAttributes),
     .serialize = convertSerialize<GameObjectUISlider>(serializeSlider),
     .removeObject = removeDoNothing,
   },

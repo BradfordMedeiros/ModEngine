@@ -21,5 +21,6 @@ struct GameObjectUISlider {
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider& obj, ObjectSerializeUtil& util);
 void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _attributes);
+void setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif

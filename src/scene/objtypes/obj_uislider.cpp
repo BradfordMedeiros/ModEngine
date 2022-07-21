@@ -2,7 +2,7 @@
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto onSlide = attr.stringAttributes.find("onslide") != attr.stringAttributes.end() ? attr.stringAttributes.at("onslide") : "";
-  auto percentage = attr.numAttributes.find("slideamount") != attr.numAttributes.end() ? attr.numAttributes.at("slideamount") : 100.f;
+  auto percentage = attr.numAttributes.find("slideamount") != attr.numAttributes.end() ? attr.numAttributes.at("slideamount") : 1.f;
 
   auto backpanelTint = attr.vecAttr.vec4.find("backpaneltint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("backpaneltint");
   auto showBackpanel = attr.vecAttr.vec4.find("backpaneltint") != attr.vecAttr.vec4.end();
@@ -41,3 +41,9 @@ void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _at
   }
 }
 
+void setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  MODTODO("ui slider - set rest of attributes");
+  if (attributes.numAttributes.find("slideamount") != attributes.numAttributes.end()){
+    sliderObj.percentage = attributes.numAttributes.at("slideamount");
+  }
+}
