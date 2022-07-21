@@ -60,7 +60,7 @@
 (define dataValues (list))
 
 (define (isUpdatedObjectValue dataValue) 
-  (format #t "is updated object value: ~a\n" dataValue)
+  ;(format #t "is updated object value: ~a\n" dataValue)
   (equal? #t (caddr dataValue))
 )
 (define (getAttr dataValue) (list (car dataValue) (cadr dataValue)))
@@ -121,7 +121,14 @@
   (format #t "make type correct: ~a ~a\n" oldvalue newvalue)
   (if (number? oldvalue)
     (if (string? newvalue) 
-      (if (or (equal? (string-length newvalue) 0) (equal? "-" (substring newvalue 0 (string-length newvalue)))) 0 (string->number newvalue)) 
+      (if 
+        (or 
+          (equal? (string-length newvalue) 0) 
+          (equal? "-" (substring newvalue 0 (string-length newvalue)))
+          (equal? "." (substring newvalue 0 (string-length newvalue)))
+        ) 
+        0 (string->number newvalue)
+      ) 
       newvalue
     )
     newvalue
@@ -235,7 +242,7 @@
   finalOffset
 )
 
-(define (updateText obj text cursor offset submitNewText)
+(define (updateText obj text cursor offset)
   (define cursorIndex (car cursor))
   (define cursorDir (cadr cursor))
   (define cursorHighlightLength (caddr cursor))
@@ -250,17 +257,15 @@
       (list "cursor" cursorIndex)
       (list "cursor-dir" cursorDir)
       (list "cursor-highlight" cursorHighlightLength)
+      (list "value" text)
     )
-  )
-  (if submitNewText
-    (set! newValues (cons (list "value" text) newValues))
   )
 
   (format #t "cursor highlight: ~a\n" cursorHighlightLength)
   (format #t "updating text: ~a\n" text)
 
   (gameobj-setattr! obj newValues)
-  (if (and submitNewText detailBinding) 
+  (if detailBinding
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
   )
   (format #t "cursor is: ~a\n" cursor)
@@ -344,6 +349,7 @@
   (format #t "is negative: ~a ~a\n" text isNegative)
   isNegative
 )
+(define (isDecimal text) (and (equal? 1 (string-length text)) (equal? (substring text 0 1) ".")))
 (define (isPositiveNumber text) 
   (define number (string->number text))
   (if number
@@ -360,8 +366,8 @@
   )
 )
 
-(define (isTypeNumber text) (or (isZeroLength text) (isNumber text) (isNegativePrefix text)))
-(define (isTypePositiveNumber text) (or (isZeroLength text) (isPositiveNumber text)))
+(define (isTypeNumber text) (or (isZeroLength text) (isNumber text) (isDecimal text) (isNegativePrefix text)))
+(define (isTypePositiveNumber text) (or (isZeroLength text) (isDecimal text) (isPositiveNumber text)))
 (define (isTypeInteger text) (or (isZeroLength text) (isInteger text) (isNegativePrefix text)))
 (define (isTypePositiveInteger text) (or (isZeroLength text) (isPositiveInteger text)))
 (define (shouldUpdateType newText attr)
@@ -388,13 +394,13 @@
 
 (define focusedElement #f)
 (define (processFocusedElement key)
-  (format #t "focused element: top\n")
+  ;(format #t "focused element: top\n")
   (if focusedElement
     (begin
       (let ((attr (gameobj-attr focusedElement)))
         (if (shouldUpdateText attr)
           (begin
-            (format #t "focused element: should update\n")
+            ;(format #t "focused element: should update\n")
             (let* (
               (cursorIndex (inexact->exact (cadr (assoc "cursor" attr))))
               (oldCursorDir (cadr (assoc "cursor-dir" attr)))
@@ -406,11 +412,13 @@
               (cursor (newCursorIndex updateType cursorIndex (string-length newText) offsetIndex wrapAmount oldCursorDir oldHighlight))
               (offset (newOffsetIndex updateType offsetIndex cursor wrapAmount (string-length newText)))
             )              
-              (updateText focusedElement newText cursor offset (shouldUpdateType newText attr))
+              (if (shouldUpdateType newText attr)
+                (updateText focusedElement newText cursor offset)
+              )
             )
             
           )
-          (format #t "focused element: should not update\n")
+          ;(format #t "focused element: should not update\n")
         )
       )
     )
@@ -426,7 +434,7 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
-  (format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
+  ;(format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
   (if detailBinding 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex slideAmount) #t)
   )
@@ -447,7 +455,7 @@
 
 (define (maybe-perform-action objattr)
   (define attrActions (assoc "details-action" objattr))
-  (format #t "attr actions: ~a\n " attrActions)
+  ;(format #t "attr actions: ~a\n " attrActions)
   (if attrActions
     (let ((action (assoc (cadr attrActions) buttonToAction)))
       (if action
@@ -466,8 +474,7 @@
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (define bindingOn (assoc "details-binding-on" objattr))
   (define enableValue (if bindingOn (cadr bindingOn) #f))
-
-  (format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
+  ;(format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
   (if (and shouldSet enableValue detailBinding) 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex enableValue) #t)
   )
@@ -526,7 +533,7 @@
       )
       (if managedText
         (begin
-          (format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
+          ;(format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
           (unsetFocused)
           (set! focusedElement gameobj)
           (gameobj-setattr! gameobj 
@@ -551,7 +558,7 @@
 
 (define (onObjUnselected)
   (unsetFocused)
-  (format #t "on object unselected\n")
+  ;(format #t "on object unselected\n")
 )
 
 (define (enforceLayouts)
@@ -563,7 +570,7 @@
 (enforceLayouts)
 
 (define (onKey key scancode action mods)
-  (format #t "action is: ~a\n" action)
+  ;(format #t "action is: ~a\n" action)
   (if (and (or (equal? action 1) (equal? action 2)) (not (isControlKey key)))
     (processFocusedElement key)
   )
@@ -606,15 +613,14 @@
 (define (update-binding attrpair getDataForAttr) 
   (define dataValue (getDataForAttr (cadr attrpair)))
   (define bindingIndex (caddr attrpair))
-
-  (format #t "binding index: ~a ~a\n" bindingIndex (number? bindingIndex))
+  ;(format #t "binding index: ~a ~a\n" bindingIndex (number? bindingIndex))
   (if (and bindingIndex (list? dataValue) (< bindingIndex (length dataValue)))
     (set! dataValue (list-ref dataValue bindingIndex))
   )
   (if (number? dataValue)
     (set! dataValue (number->string dataValue))
   )
-  (format #t "data value: ~a\n" dataValue)
+  ;(format #t "data value: ~a\n" dataValue)
   (if (string? dataValue)
     (begin
       (gameobj-setattr! (car attrpair) 
@@ -632,8 +638,8 @@
   (define bindingOn (assoc "details-binding-on" (gameobj-attr gameobj)))
   (define enableValueStr (if bindingOn (cadr bindingOn) "enabled"))
   (define enableValue (equal? enableValueStr toggleEnableText))
-  (format #t "enable value str is: ~a for name ~a\n" enableValueStr (gameobj-name gameobj))
-  (format #t "toggle enable text: ~a\n" toggleEnableText)
+  ;(format #t "enable value str is: ~a for name ~a\n" enableValueStr (gameobj-name gameobj))
+  ;(format #t "toggle enable text: ~a\n" toggleEnableText)
   ;(format #t "update toggle binding: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
   (gameobj-setattr! gameobj
     (list 
@@ -647,7 +653,7 @@
   (define detailsBinding (assoc "details-binding-toggle" objattr))
   (define onValue (assoc "details-binding-on" objattr))
   (define offValue (assoc "details-binding-off" objattr))
-  (format #t "on value, off value: ~a\n ~a\n" onValue offValue)
+  ;(format #t "on value, off value: ~a\n ~a\n" onValue offValue)
   (if (and detailsBinding on onValue)
     (updateStoreValueModified (list (cadr detailsBinding) (cadr onValue)) #t)
   )
