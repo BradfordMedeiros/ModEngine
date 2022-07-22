@@ -426,6 +426,10 @@
   (submitData)
 )
 
+(define (calcSlideValue min max percentage)
+  (define range (- max min))
+  (+ min (* range percentage))
+)
 (define (onSlide objvalues)
   (define obj (car objvalues))
   (define slideAmount (cadr objvalues))
@@ -434,9 +438,15 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
+
+  (define slideMin (cadr (assoc "min" objattr)))
+  (define slideMax (cadr (assoc "max" objattr)))
+  (define value (calcSlideValue slideMin slideMax slideAmount))
+  (format #t "amount = ~a, min = ~a, max = ~a, value = ~a\n" slideAmount slideMin slideMax value)
+
   ;(format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
   (if detailBinding 
-    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex slideAmount) #t)
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex value) #t)
   )
   (submitAndPopulateData)
 )

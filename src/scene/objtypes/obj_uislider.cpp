@@ -16,7 +16,7 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
   GameObjectUISlider obj {
     .common = parseCommon(attr, util.meshes),
     .min = 0.f,
-    .max = 100.f,
+    .max = 1.f,
     .percentage = percentage,
     .texture = util.ensureTextureLoaded("./res/models/controls/slider.png").textureId,
     .opacityTexture = util.ensureTextureLoaded("./res/models/controls/slider_opacity.png").textureId,
