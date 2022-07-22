@@ -317,6 +317,18 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "window",
     .attribute = "icon",
   },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto fontsize = std::get_if<float>(&value);
+      if (fontsize != NULL){
+        state.fontsize = *fontsize;
+        return;
+      }
+      assert(false);
+    },
+    .object = "rendering",
+    .attribute = "fontsize",
+  },
 };
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -418,6 +430,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .crosshair = "",
     .windowname = "ModEngine",
     .iconpath = "./misc/modengine.png",
+    .fontsize = 3,
 	};
 	return state;
 }

@@ -117,6 +117,8 @@ struct engineState {
   std::string crosshair;
   std::string windowname;
   std::string iconpath;
+
+  int fontsize;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

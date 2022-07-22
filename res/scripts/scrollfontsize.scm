@@ -1,0 +1,25 @@
+
+(define fontsize 3)
+(define (setFontSize)
+	(set-wstate
+		(list
+			(list "rendering" "fontsize" fontsize)
+		)
+	)
+)
+(define (increaseFontSize)
+	(set! fontsize (+ fontsize 1))
+	(setFontSize)
+)
+(define (decreaseFontSize)
+	(set! fontsize (max 1 (- fontsize 1)))
+	(setFontSize)
+)
+
+(define (onScroll amount)
+	(format #t "on scroll: ~a\n" amount)
+	(if (> amount 0)
+		(increaseFontSize)
+		(decreaseFontSize)
+	)
+)
