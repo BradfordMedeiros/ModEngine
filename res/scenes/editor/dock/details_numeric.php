@@ -17,7 +17,12 @@
       }
       $holdername = "(" . $unique_control_id . "_numeric_textfield_holder_" . $x;
       $valuename = ")numeric_text_" . $unique_control_id . "_" . $x;
-      createTextbox($holdername, $valuename, false, $editableType, $value[$x]["value"], $styles);
+
+      $readonly = false;
+      if (array_key_exists("readonly", $value[$x]["value"])){
+        $readonly = $value[$x]["value"]["readonly"];
+      }
+      createTextbox($holdername, $valuename, $readonly, $editableType, $value[$x]["value"], $styles);
       array_push($managedElements, $holdername);
     }else if ($controlType == "slider"){
       $hasBinding = !is_string($value[$x]);
@@ -39,6 +44,13 @@
       $attrValues["scale"] = "0.3 0.02 0.02";
       $attrValues["onslide"] = "details-editable-slide";
       $attrValues["backpaneltint"] = "0.3 0.3 0.3 1";
+
+      if (array_key_exists("min", $value[$x]["value"])){
+        $attrValues["min"] = $value[$x]["value"]["min"];
+      }
+      if (array_key_exists("max", $value[$x]["value"])){
+        $attrValues["max"] = $value[$x]["value"]["max"];
+      }
 
       createElement($sliderElementName, $default_value, $attrValues);
       array_push($managedElements, $sliderElementName);

@@ -426,9 +426,19 @@
   (submitData)
 )
 
-(define (calcSlideValue min max percentage)
+(define (calcSlideValue objattr percentage)
+  (define min (cadr (assoc "min" objattr)))
+  (define max (cadr (assoc "max" objattr)))
   (define range (- max min))
   (+ min (* range percentage))
+)
+(define (uncalcSlideValue obj value)
+  (define objattr (gameobj-attr obj))
+  (define min (cadr (assoc "min" objattr)))
+  (define max (cadr (assoc "max" objattr)))
+  (define ratio (/ (- value min) (- max min)))
+  ;(format #t "min = ~a, max = ~a, range = ~a, ratio = ~a\n" min max range ratio)
+  ratio
 )
 (define (onSlide objvalues)
   (define obj (car objvalues))
@@ -438,11 +448,7 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
-
-  (define slideMin (cadr (assoc "min" objattr)))
-  (define slideMax (cadr (assoc "max" objattr)))
-  (define value (calcSlideValue slideMin slideMax slideAmount))
-  (format #t "amount = ~a, min = ~a, max = ~a, value = ~a\n" slideAmount slideMin slideMax value)
+  (define value (calcSlideValue objattr slideAmount))
 
   ;(format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
   (if detailBinding 
@@ -671,7 +677,7 @@
             (format #t "its a slider!\n")
             ;(assert (number? dataValue) (format #f "slider must use a number as data value, got: ~a ~a\n" (getType dataValue) dataValue))
             (gameobj-setattr! obj
-              (list (list "slideamount" (if (string? dataValue) (string->number dataValue) dataValue)))
+              (list (list "slideamount" (uncalcSlideValue obj (if (string? dataValue) (string->number dataValue) dataValue))))
             )
           )
         )
