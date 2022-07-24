@@ -700,15 +700,6 @@ float getViewspaceDepth(glm::mat4& transView, objid elementId){
   return getTransformationFromMatrix(viewPosition).position.z;
 }
 
-// current pixel address to pixel number in viewport adjusted to the viewport resolution
-glm::ivec2 pixelCoordsRelativeToViewport(float x, float y){
-  int adjustedCursorX = (((float)(x - state.viewportoffset.x)) / (float)state.viewportSize.x) * state.resolution.x;
-  int cursorBottom = (state.currentScreenHeight - y);
-  int adjustedCursorY = (((float)(cursorBottom - state.viewportoffset.y)) / (float)state.viewportSize.y) * state.resolution.y;
-  return glm::ivec2(adjustedCursorX, adjustedCursorY);
-}
-
-
 struct RenderContext {
   World& world;
   glm::mat4 view;
@@ -1472,7 +1463,7 @@ int main(int argc, char* argv[]){
     glEnable(GL_BLEND);
 
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
-    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop);
+    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);

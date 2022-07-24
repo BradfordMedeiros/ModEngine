@@ -27,6 +27,7 @@ struct UVCoord {
 UVCoord getUVCoord(GLint x, GLint y);
 glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution);
 glm::vec3 uvToNDC(UVCoord coord);
+glm::ivec2 pixelCoordsRelativeToViewport(int x, int y, unsigned int currentScreenHeight, glm::ivec2 viewportSize, glm::ivec2 viewportoffset, glm::ivec2 resolution);
 
 void saveScreenshot(std::string& filepath);
 

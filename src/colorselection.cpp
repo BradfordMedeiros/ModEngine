@@ -60,6 +60,14 @@ glm::vec3 uvToNDC(UVCoord coord){
   return glm::vec3(xCoord, yCoord, 0.f);
 }
 
+// current pixel address to pixel number in viewport adjusted to the viewport resolution
+glm::ivec2 pixelCoordsRelativeToViewport(int x, int y, unsigned int currentScreenHeight, glm::ivec2 viewportSize, glm::ivec2 viewportoffset, glm::ivec2 resolution){
+  int adjustedCursorX = (((float)(x - viewportoffset.x)) / (float)viewportSize.x) * resolution.x;
+  int cursorBottom = (currentScreenHeight - y);
+  int adjustedCursorY = (((float)(cursorBottom - viewportoffset.y)) / (float)viewportSize.y) * resolution.y;
+  return glm::ivec2(adjustedCursorX, adjustedCursorY);
+}
+
 void saveScreenshot(std::string& filepath){
   int w, h;
   int miplevel = 0;
