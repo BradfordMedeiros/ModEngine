@@ -1,7 +1,5 @@
 #include "./sprites.h"
 
-extern World world;
-
 std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad){
     std::map<unsigned int, Mesh> fontmeshes;
     for ( const auto &[ascii, font]: fontToLoad.chars ) {

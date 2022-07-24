@@ -5,7 +5,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "./readfont.h"
 #include "../common/mesh.h"
-#include "../scene.h"
 
 std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad);
 void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height);
