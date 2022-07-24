@@ -167,7 +167,7 @@ SCM removeObject(SCM value){
   return SCM_UNSPECIFIED;
 }
 
-void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId);
+void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi);
 SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3){
   auto opts = optionalOpts(opt1, opt2, opt3);   // color, perma, texture id
   _drawText(
@@ -177,10 +177,26 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, S
     toUnsignedInt(fontSize),
     opts.perma,
     opts.tint,
-    opts.textureId
+    opts.textureId,
+    false
   );
   return SCM_UNSPECIFIED;
 }
+SCM scmDrawTextNdi(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3){
+  auto opts = optionalOpts(opt1, opt2, opt3);   // color, perma, texture id
+  _drawText(
+    scm_to_locale_string(word), 
+    scm_to_double(left), 
+    scm_to_double(top), 
+    toUnsignedInt(fontSize),
+    opts.perma,
+    opts.tint,
+    opts.textureId,
+    true
+  );
+  return SCM_UNSPECIFIED;
+}
+
 
 int32_t (*_drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth);
 SCM scmDrawLine(SCM posFrom, SCM posTo, SCM opt1, SCM opt2, SCM opt3){
@@ -1003,6 +1019,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
   scm_c_define_gsubr("draw-text", 4, 3, 0, (void*)scmDrawText);
+  scm_c_define_gsubr("draw-text-ndi", 4, 3, 0, (void*)scmDrawTextNdi);
   scm_c_define_gsubr("draw-line", 2, 3, 0, (void*)scmDrawLine);
   scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
@@ -1138,7 +1155,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByType)(std::string),
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),

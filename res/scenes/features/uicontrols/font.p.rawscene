@@ -1,0 +1,4 @@
+#)sometext:value:this is some data
+#)sometext:physics:enabled
+
+drawtest:script:./res/scenes/features/uicontrols/font.scm
