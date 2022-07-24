@@ -21,6 +21,7 @@
 #include "./layers.h"
 #include "./benchstats.h"
 #include "./lines.h"
+#include "./colorselection.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 

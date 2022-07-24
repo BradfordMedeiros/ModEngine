@@ -248,12 +248,18 @@ void copyObject(int32_t id){
   copyObjectToScene(world, id);
 }
 
+
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
+  auto coords = glm::vec2(left, top);
+  if (ndi){
+    coords = ndiToPixelCoord(glm::vec2(coords.x, -1 * coords.y), state.resolution);
+  }
+
   addTextData(lineData, TextDrawingOptions{
     .word = word,
-    .left = left,
-    .top = top,
+    .left = coords.x,
+    .top = coords.y,
     .fontSize = fontSize,
     .textureId = textureId,
     .permaText = permatext,
