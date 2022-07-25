@@ -83,15 +83,18 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 
   int additionaCursorIndex = highlightLength + cursorIndex;
 
+  //std::cout << "rendering word: (" << word << " - " << word.size() << ") " << std::endl;
   //std::cout << "letters: " << std::endl;
   for (; i < word.size(); i++){
     char& character = word.at(i);
+    std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
     if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
       lineNumber++;
+      //std::cout << "not drawing this, resetting left align to: " << leftAlign << std::endl;
     }
-    if (wrap.type != WRAP_NONE && character == '\n'){
+    if (character == '\n'){
       continue;
     }
 
@@ -109,6 +112,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       Mesh& fontMesh = fontMeshes.at((int)character);
+      //std::cout << "drawing: " << character << " at: " << leftAlign << std::endl;
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
       numTriangles += fontMesh.numTriangles;
     }
