@@ -650,13 +650,19 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
 
   drawTextNdi("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + + offsetPerLine * 5, state.fontsize);
   
+  std::string position = "n/a";
+  std::string scale = "n/a";
+  std::string rotation = "n/a";
   if (selected(state.editor) != -1){
     auto selectedIndex = selected(state.editor);
     auto obj = getGameObject(world, selectedIndex);
-    drawTextNdi("position: " + print(obj.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
-    drawTextNdi("scale: " + print(obj.transformation.scale), uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
-    drawTextNdi("rotation: " + print(obj.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
+    position = print(obj.transformation.position);
+    scale = print(obj.transformation.scale);
+    rotation = print(obj.transformation.rotation);
   }
+  drawTextNdi("position: " + position, uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
+  drawTextNdi("scale: " + scale, uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
+  drawTextNdi("rotation: " + rotation, uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
     
   drawTextNdi("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + offsetPerLine * 9, state.fontsize);
   drawTextNdi("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + offsetPerLine * 10, state.fontsize);
