@@ -600,8 +600,12 @@ void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition)
   drawMesh(world.meshes.at("skybox").mesh, shaderProgram); 
 }
 
-int uiYOffset = 70;
-int uiXOffset = 20;
+float offsetPerLineMargin = 0.02f;
+float fontOffsetPerLine(float fontsize){
+  // 1000.f => 2.f height, width
+  return -1 * (fontsize / 500.f + offsetPerLineMargin);
+}
+
 void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
@@ -618,8 +622,15 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
     return;
   }
 
+
+  float offsetPerLine = fontOffsetPerLine(state.fontsize);
+  float uiYOffset = 1.f + offsetPerLine;
+  float uiXOffset = -1.f - offsetPerLine;
+  
+
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
-  drawText(std::to_string(currentFramerate) + state.additionalText, uiXOffset, uiYOffset, state.fontsize + 1);
+  std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
+  drawTextNdi(std::to_string(currentFramerate) + state.additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
 
   std::string manipulatorAxisString;
   if (state.manipulatorAxis == XAXIS){
@@ -631,34 +642,34 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   }else{
     manipulatorAxisString = "noaxis";
   }
-  drawText("manipulator axis: " + manipulatorAxisString, uiXOffset, uiYOffset + 30, state.fontsize);
-  drawText("position: " + print(defaultCamera.transformation.position), uiXOffset, uiYOffset + 40, state.fontsize);
-  drawText("rotation: " + print(defaultCamera.transformation.rotation), uiXOffset, uiYOffset + 50, state.fontsize);
+  drawTextNdi("manipulator axis: " + manipulatorAxisString, uiXOffset, uiYOffset + offsetPerLine * 2, state.fontsize);
+  drawTextNdi("position: " + print(defaultCamera.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 3, state.fontsize);
+  drawTextNdi("rotation: " + print(defaultCamera.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 4, state.fontsize);
 
   float ndiX = 2 * (state.cursorLeft / (float)state.resolution.x) - 1.f;
   float ndiY = -2 * (state.cursorTop / (float)state.resolution.y) + 1.f;
 
-  drawText("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + 70, state.fontsize);
+  drawTextNdi("cursor: (" + std::to_string(ndiX) + " | " + std::to_string(ndiY) + ") - " + std::to_string(state.cursorLeft) + " / " + std::to_string(state.cursorTop)  + "(" + std::to_string(state.resolution.x) + "||" + std::to_string(state.resolution.y) + ")", uiXOffset, uiYOffset + + offsetPerLine * 5, state.fontsize);
   
   if (selected(state.editor) != -1){
     auto selectedIndex = selected(state.editor);
     auto obj = getGameObject(world, selectedIndex);
-    drawText("position: " + print(obj.transformation.position), uiXOffset, uiYOffset + 80, state.fontsize);
-    drawText("scale: " + print(obj.transformation.scale), uiXOffset, uiYOffset + 90, state.fontsize);
-    drawText("rotation: " + print(obj.transformation.rotation), uiXOffset, uiYOffset + 100, state.fontsize);
+    drawTextNdi("position: " + print(obj.transformation.position), uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
+    drawTextNdi("scale: " + print(obj.transformation.scale), uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
+    drawTextNdi("rotation: " + print(obj.transformation.rotation), uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
   }
     
-  drawText("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + 120, state.fontsize);
-  drawText("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + 130, state.fontsize);
+  drawTextNdi("pixel color: " + std::to_string(pixelColor.r) + " " + std::to_string(pixelColor.g) + " " + std::to_string(pixelColor.b), uiXOffset, uiYOffset + offsetPerLine * 9, state.fontsize);
+  drawTextNdi("showing color: " + std::string(state.showBoneWeight ? "bone weight" : "bone indicies") , uiXOffset, uiYOffset + offsetPerLine * 10, state.fontsize);
 
-  drawText(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), uiXOffset, uiYOffset + 150, state.fontsize);
-  drawText("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset + 30, uiYOffset + 160, state.fontsize);
-  drawText("using object id: -1" , uiXOffset + 30, uiYOffset + 170, state.fontsize);
+  drawTextNdi(std::string("animation info: ") + (timePlayback.isPaused() ? "paused" : "playing"), uiXOffset, uiYOffset + offsetPerLine * 11, state.fontsize);
+  drawTextNdi("using animation: " + std::to_string(-1) + " / " + std::to_string(-1) , uiXOffset, uiYOffset + offsetPerLine * 12, state.fontsize);
+  drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
 
-  drawText(std::string("triangles: ") + std::to_string(numTriangles), uiXOffset, uiYOffset + 180, state.fontsize);
-  drawText(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + 190, state.fontsize);
-  drawText(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + 200, state.fontsize);
-  drawText(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + 210, state.fontsize);
+  drawTextNdi(std::string("triangles: ") + std::to_string(numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
+  drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
+  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
+  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
 }
 
 void onClientMessage(std::string message){

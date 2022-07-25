@@ -91,6 +91,8 @@ void copyObject(int32_t id);
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi);
 void drawText(std::string word, float left, float top, unsigned int fontSize);
+void drawTextNdi(std::string word, float left, float top, unsigned int fontSize);
+
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor);
 
 std::vector<std::string> listAnimations(int32_t id);
