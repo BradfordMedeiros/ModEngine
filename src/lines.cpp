@@ -156,13 +156,29 @@ void addTextData(LineData& lineData, TextDrawingOptions text){
   lineData.text.push_back(text);
 }
 
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height){
+
+glm::vec2 convertTextNDICoords(float left, float top, float height, float width, bool isndi){
+  if (isndi){
+    return glm::vec2(left, top);
+  }
+  float heightFromTop = height - top;
+  return pixelCoordToNdi(glm::ivec2(left, heightFromTop), glm::vec2(width, height));
+}
+
+float convertTextNdiFontsize(float height, float width, float fontsize, bool isndi){
+  return fontsize;
+}
+
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height, unsigned int width){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &text : lineData.text){
     if (textureIdSame(text.textureId, textureId)){
       //std::cout << "drawing words: " << text.word << std::endl;
       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(text.tint));
-      drawWords(uiShaderProgram, fontMeshes, text.word, text.left, height - text.top, text.fontSize);  
+
+      auto coords = convertTextNDICoords(text.left, text.top, height, width, text.ndi);
+      auto adjustedFontSize = convertTextNdiFontsize(height, width, text.fontSize, text.ndi);
+      drawWords(uiShaderProgram, fontMeshes, text.word, coords.x, coords.y, adjustedFontSize);  
     }
   }
 }

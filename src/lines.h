@@ -5,6 +5,7 @@
 #include "./scene/common/util/types.h"
 #include "./scene/common/mesh.h"
 #include "./scene/sprites/sprites.h"
+#include "./colorselection.h"
 #include <glad/glad.h>
 #include "glm/ext.hpp"
 
@@ -23,6 +24,7 @@ struct TextDrawingOptions  {
   unsigned int fontSize;
   std::optional<unsigned int> textureId;
   bool permaText;
+  bool ndi;
   glm::vec4 tint;
 };
 
@@ -46,7 +48,7 @@ void removeLinesByOwner(LineData& lineData, objid owner);
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
 
 void addTextData(LineData& lineData, TextDrawingOptions text);
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height);
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height, unsigned int width);
 
 void disposeTempBufferedData(LineData& lineData);
 

@@ -194,9 +194,9 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
 
-  auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ortho)); 
-  drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId,  texSize.height);
+  //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId,  texSize.height, texSize.width);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -604,13 +604,14 @@ int uiYOffset = 70;
 int uiXOffset = 20;
 void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(orthoProj)); 
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
   if (showCursor){
     if(!state.isRotateSelection){
-       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-       drawSpriteAround(uiShaderProgram, crosshairSprite, state.cursorLeft, state.currentScreenHeight - state.cursorTop, 20, 20);
+      glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+      auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
+      drawSpriteAround(uiShaderProgram, crosshairSprite, location.x, location.y, 0.05, 0.05);
     }
   }
   if (!showDebugInfo){
@@ -1718,7 +1719,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
     renderUI(*crosshairSprite, pixelColor, showCursor);
-    drawTextData(lineData, uiShaderProgram, fontMeshes, std::nullopt,  state.currentScreenHeight);
+    drawTextData(lineData, uiShaderProgram, fontMeshes, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 

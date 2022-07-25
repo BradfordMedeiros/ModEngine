@@ -54,6 +54,12 @@ glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
   return glm::ivec2(xCoord, yCoord);
 }
 
+glm::vec2 pixelCoordToNdi(glm::ivec2 pixelCoord, glm::vec2 resolution){
+  auto xCoord = convertBase(pixelCoord.x, 0, resolution.x, -1, 1);
+  auto yCoord = convertBase(pixelCoord.y, 0, resolution.y, -1, 1);
+  return glm::vec2(xCoord, yCoord);
+}
+
 glm::vec3 uvToNDC(UVCoord coord){
   float xCoord = convertBase(coord.x, 0, 1, -1, 1);
   float yCoord = convertBase(coord.y, 0, 1, -1, 1);

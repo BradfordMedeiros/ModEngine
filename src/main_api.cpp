@@ -249,28 +249,16 @@ void copyObject(int32_t id){
 }
 
 
-#define CONVERT_NDI_TO_RES
-
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
-  auto coords = glm::vec2(left, top);
-
-  #ifdef CONVERT_NDI_TO_RES
-    if (ndi){
-      coords = ndiToPixelCoord(glm::vec2(coords.x, -1 * coords.y), glm::ivec2(state.currentScreenWidth, state.currentScreenHeight));
-      MODTODO("invalid offset, works for fullscreen height adn resolution, but not w/ resolution, viewport sizing");
-    }
-  #else 
-
-  #endif
-
   addTextData(lineData, TextDrawingOptions{
     .word = word,
-    .left = coords.x,
-    .top = coords.y,
+    .left = left,
+    .top = top,
     .fontSize = fontSize,
     .textureId = textureId,
     .permaText = permatext,
+    .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
   });
 }

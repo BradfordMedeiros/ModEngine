@@ -474,7 +474,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(textObj -> tint));
-    return drawWord(shaderProgram, id, textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor);
+    return drawWord(shaderProgram, id, textObj -> value, 1000.f /* 1000.f => -1,1 range for each quad */, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, textObj -> cursor);
   }
 
   auto layoutObj = std::get_if<GameObjectUILayout>(&toRender);
