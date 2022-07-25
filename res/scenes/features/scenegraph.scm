@@ -1,7 +1,7 @@
 ;(define fontsize 5)
 ;(define smallFontSize 4)
 
-(define fontsize 10)
+(define fontsize 20)
 (define smallFontSize (- fontsize 1))
 
 (define (increaseFontSize)
@@ -87,7 +87,8 @@
 (define (calcY depth) (- (rawCalcY depth) offset))
 
 (define (setMinOffset depth) 
-	(define newMinOffset (* -1 (rawCalcY depth)))
+	(define newMinOffset (rawCalcY depth))
+	;(format #t "min: (~a, ~a)\n" newMinOffset depth)
 	(if (< newMinOffset minOffset)
 		(set! minOffset newMinOffset)
 	)
@@ -157,7 +158,7 @@
 	    (if isExpanded
 	      (for-each 
 	      	(lambda(target)
-	      		(format #t "draw target: ~a\n" target)
+	      		;(format #t "draw target: ~a\n" target)
 	      		(drawHierarchy (cadr target) (cadr (caddr target)) (+ depth 1) getIndex)
 	      	) 
 	      	childElements
@@ -259,7 +260,7 @@
 )
 
 (define (onScroll amount)
-  (set! offset (min maxOffset (max minOffset (+ offset (* 0.01 amount)))))
-  (format #t "offset: ~a\n" offset)
+  (set! offset (min maxOffset (max minOffset (+ offset (* 0.04 amount)))))
+  ;(format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
 	(onGraphChange)
 )
