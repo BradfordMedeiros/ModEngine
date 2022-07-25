@@ -109,21 +109,14 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       Mesh& fontMesh = fontMeshes.at((int)character);
-      //Mesh& fontMesh = fontMeshes.at('5');
-      //drawSprite(shaderProgram, fontMesh, 0, 0, fontSize, fontSize, model);
-      //std::cout << character << " fontsize_ndi = " << fontSizeNdi << " left = " << left << " left_align = " << leftAlign << " top = " << top <<  " top_align = " << topAlign << std::endl;
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
-      //drawSprite(shaderProgram, fontMesh, 0.75, 0, fontSizeNdi, fontSizeNdi, model);
-      //drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
-      //drawSprite(shaderProgram, fontMesh, 0, 0, fontSize, fontSize, model);
-      //drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, 1.f, 1.f, model);
       numTriangles += fontMesh.numTriangles;
     }
     
 
     if (cursorIndex == i || additionaCursorIndex == i){
       Mesh& fontMesh = fontMeshes.at('|');
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, -0.1f);
+      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
     }
     leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
@@ -133,7 +126,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
       Mesh& fontMesh = fontMeshes.at('|');
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSize * 0.3f, fontSize * 2.f, model, -0.1f);
+      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
   }
 
