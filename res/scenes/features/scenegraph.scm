@@ -1,3 +1,19 @@
+;(define fontsize 5)
+;(define smallFontSize 4)
+
+(define fontsize 10)
+(define smallFontSize (- fontsize 1))
+
+(define (increaseFontSize)
+	(set! fontsize (+ fontsize 1))
+	(set! smallFontSize (+ smallFontSize 1))
+	(onGraphChange)
+)
+(define (decreaseFontSize)
+	(set! fontsize (- fontsize 1))
+	(set! smallFontSize (- smallFontSize 1))
+	(onGraphChange)
+)
 
 (define texturename (string-append "gentexture-scenegraph" ))
 
@@ -43,7 +59,6 @@
 (define depgraph (getscenegraph))
 (define (refreshDepGraph) 
 	(set! depgraph (getscenegraph))
-
 )
 
 (define expandState (list))
@@ -58,19 +73,29 @@
 )
 
 (define offset 0)
-(define offsetPerY 20)
 (define maxOffset 0)
+
+(define (calcSpacing) (* (/ fontsize 1000) 2))
+(define (calcX depth) 
+	(define spacingPerLetter (calcSpacing))
+	(+ -1 (* -0.5 spacingPerLetter) (* depth spacingPerLetter))
+)
+(define (rawCalcY depth)
+	(define spacingPerLetter (calcSpacing))
+	(- 1 (* 0.5 spacingPerLetter) (* depth spacingPerLetter))
+)
+(define (calcY depth) (- (rawCalcY depth) offset))
+
 (define (setMinOffset depth) 
-	(define newMinOffset (* -1 (+ (* offsetPerY depth) 80)))
+	(define newMinOffset (* -1 (rawCalcY depth)))
 	(if (< newMinOffset minOffset)
 		(set! minOffset newMinOffset)
 	)
 )
 (define (resetMinOffset) (set! minOffset 0))
-(define minOffset (* -1 (* offsetPerY 10)))
+(define minOffset (* -1 (rawCalcY 1)))
 
-(define (calcX depth) (+ (* 20 depth) 20))
-(define (calcY depth) (+ (* offsetPerY depth) 80 offset))
+
 (define (selected index name) (if (equal? index 2) (string-append ">" name) name))
 
 (define selectedIndex 1)
@@ -94,11 +119,11 @@
 (define (draw elementName sceneId depth height expanded)
 	(define isSelected (equal? selectedIndex height))
 	(if isSelected (set! selectedName (expandPath elementName sceneId)))
-	(draw-text 
+	(draw-text-ndi
 		(selected (string-append elementName "(" (number->string sceneId) ")") expanded height) 
 		(calcX depth) 
 		(calcY height) 
-		(if isSelected 5 4) 
+		(if isSelected fontsize smallFontSize) 
 		(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
 		textureId
 	)
@@ -206,7 +231,7 @@
 
 (define (onGraphChange)
 	(refreshDepGraph)         ; should this really be done at this point?  Perhaps?!
-	(clear-texture textureId (list 0.05 0.05 0.05 1))
+	(clear-texture textureId (list 0.1 0.1 0.1 1))
 	(addPermaData)
 )
 
@@ -225,10 +250,16 @@
      	(if (equal? key 257) (toggleExpanded))
 		)
 	)
+	(if (equal? key 61)
+		(increaseFontSize)
+	)
+	(if (equal? key 45)
+		(decreaseFontSize)
+	)
 )
 
 (define (onScroll amount)
-  (set! offset (min maxOffset (max minOffset (+ offset (* 10 amount)))))
+  (set! offset (min maxOffset (max minOffset (+ offset (* 0.01 amount)))))
   (format #t "offset: ~a\n" offset)
 	(onGraphChange)
 )
