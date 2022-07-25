@@ -627,7 +627,6 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   float uiYOffset = 1.f + offsetPerLine;
   float uiXOffset = -1.f - offsetPerLine;
   
-
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
   std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
   drawTextNdi(std::to_string(currentFramerate) + state.additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
@@ -667,9 +666,9 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   drawTextNdi("using object id: -1" , uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
 
   drawTextNdi(std::string("triangles: ") + std::to_string(numTriangles), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
-  drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 13, state.fontsize);
-  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 14, state.fontsize);
-  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
+  drawTextNdi(std::string("num gameobjects: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(numObjectsStat)))), uiXOffset, uiYOffset + offsetPerLine * 15, state.fontsize);
+  drawTextNdi(std::string("num scenes loaded: ") + std::to_string(static_cast<int>(unwrapAttr<float>(statValue(scenesLoadedStat)))), uiXOffset, uiYOffset + offsetPerLine * 16, state.fontsize);
+  drawTextNdi(std::string("render mode: ") + renderModeAsStr(state.renderMode), uiXOffset, uiYOffset + offsetPerLine * 17, state.fontsize);
 }
 
 void onClientMessage(std::string message){
