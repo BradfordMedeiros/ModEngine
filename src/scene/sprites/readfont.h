@@ -25,4 +25,16 @@ struct font {
 
 font readFont(std::string filepath);
 
+struct ttfFont {
+	//std::string fontname;
+	//unsigned int rows;
+ 	//unsigned int width;
+ 	//unsigned char* buffer;
+};
+
+ttfFont readTTFFont(std::string filepath);
+
+typedef std::variant<font, ttfFont> fontType;
+fontType readFontFile(std::string filepath);
+
 #endif

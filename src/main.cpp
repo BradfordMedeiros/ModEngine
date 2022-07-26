@@ -931,6 +931,7 @@ int main(int argc, char* argv[]){
    ("test-unit", "Run unit tests", cxxopts::value<bool>()->default_value("false"))
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
    ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("font", "Default font to use", cxxopts::value<std::string>()->default_value("./res/textures/fonts/gamefont"))
    ("h,help", "Print help")
   ;        
 
@@ -1149,7 +1150,8 @@ int main(int argc, char* argv[]){
     interface.readFile
   );
 
-  fontMeshes = loadFontMeshes(readFont("./res/textures/fonts/gamefont"));
+  auto fontLoadInfo = readFontFile(result["font"].as<std::string>());
+  fontMeshes = loadFontMeshes(fontLoadInfo);
 
   CustomApiBindings pluginApi{
     .listSceneId = listSceneId,

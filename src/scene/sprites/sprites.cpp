@@ -1,14 +1,31 @@
 #include "./sprites.h"
 
-std::map<unsigned int, Mesh> loadFontMeshes(font fontToLoad){
-    std::map<unsigned int, Mesh> fontmeshes;
-    for ( const auto &[ascii, font]: fontToLoad.chars ) {
-      assert(fontmeshes.find(ascii) == fontmeshes.end());
-      std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
-      // this is (-1 to 1, -1 to 1)
-      fontmeshes[ascii] = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture, true);
-    }
-    return fontmeshes;
+std::map<unsigned int, Mesh> loadFontMeshes(font& fontToLoad){
+  std::map<unsigned int, Mesh> fontmeshes;
+  for ( const auto &[ascii, font]: fontToLoad.chars ) {
+    assert(fontmeshes.find(ascii) == fontmeshes.end());
+    std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
+    // this is (-1 to 1, -1 to 1)
+    fontmeshes[ascii] = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture, true);
+  }
+  return fontmeshes;
+}
+std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
+  modassert(false, "ttf loading not yet supported");
+  return {};
+}
+
+std::map<unsigned int, Mesh> loadFontMeshes(fontType fontInfo){
+  auto fontToLoadPtr = std::get_if<font>(&fontInfo);
+  if (fontToLoadPtr != NULL){
+    return loadFontMeshes(*fontToLoadPtr);
+  }
+  auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
+  if (ttfFontToLoadPtr != NULL){
+    return loadTtfFontMeshes(*ttfFontToLoadPtr);
+  }
+  modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
+  return {};
 }
 
 void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, float zbias){

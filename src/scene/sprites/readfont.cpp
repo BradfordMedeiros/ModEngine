@@ -67,3 +67,16 @@ font readFont(std::string fontFolderpath){
     file.close();	
     return info;
 }
+
+ttfFont readTTFFont(std::string filepath){
+    return ttfFont{};
+}
+
+fontType readFontFile(std::string filepath){
+    auto fontExtension = getExtension(filepath);
+    std::cout << "FONT: font extension is: " << (fontExtension.has_value() ? fontExtension.value() : "no extension") << std::endl;
+    if (fontExtension == "ttf"){
+        return readTTFFont(filepath);
+    }
+    return readFont(filepath);
+}
