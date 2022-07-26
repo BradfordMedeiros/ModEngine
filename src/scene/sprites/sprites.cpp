@@ -35,13 +35,15 @@ void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, floa
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   drawMesh(mesh, shaderProgram, -1, -1, false);
 }
+
+/// these two functions are now equivalent since drawing things non-centered has not been useful
 void drawSprite(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model){
   drawSpriteZBias(shaderProgram, mesh, left, top, width, height, model, 0.f);
 }
-
 void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height){
-  drawSprite(shaderProgram, mesh, centerX - width/2, centerY - height/2, width, height, glm::mat4(1.f));
+  drawSprite(shaderProgram, mesh, centerX, centerY, width, height, glm::mat4(1.f));
 }
+///////////////////////////////////////////////////////////////////////////////////////
 
 float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
   bool center = align == CENTER_ALIGN;

@@ -172,14 +172,7 @@ Mesh loadSpriteMeshSubimage(std::string imagePath, float offsetxndi, float offse
 }
 
 Mesh loadSpriteMesh(std::string imagePath, std::function<Texture(std::string)> ensureLoadTexture){
-  float verts[] = {
-    0.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-    0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-    1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
-  };
-  unsigned int indices[] = {2, 1, 0, 3, 2, 0};
-  return load2DMesh(imagePath, verts, indices, 20, 6, 3, 2, ensureLoadTexture, false);  
+  return loadSpriteMeshSubimage(imagePath, 0, 0, 1, 1, ensureLoadTexture, false);
 }
 
 void drawMesh(Mesh mesh, GLint shaderProgram, unsigned int customTextureId, unsigned int customOpacityTextureId,  bool drawPoints){
