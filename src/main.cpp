@@ -624,7 +624,7 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
 
 
   float offsetPerLine = fontOffsetPerLine(state.fontsize);
-  float uiYOffset = 1.f + offsetPerLine;
+  float uiYOffset = 1.f + 3 * offsetPerLine;
   float uiXOffset = -1.f - offsetPerLine;
   
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));

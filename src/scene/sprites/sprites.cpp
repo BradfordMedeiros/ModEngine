@@ -87,7 +87,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   //std::cout << "letters: " << std::endl;
   for (; i < word.size(); i++){
     char& character = word.at(i);
-    std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
+    //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
     if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
