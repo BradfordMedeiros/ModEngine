@@ -16,6 +16,9 @@ https://github.com/g-truc/glm
 stb from:
 https://github.com/nothings/stb/blob/master/stb_image.h 
 
+freetype from:
+https://download.savannah.gnu.org/releases/freetype/
+
 guile:
 sudo apt-get install guile-2.2-dev
 
