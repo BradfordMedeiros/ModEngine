@@ -204,7 +204,10 @@ endif()
 ## FreeType - font rendering
 if (NOT NO_INCLUDE_FREETYPE)
   message("MODBUILD - Including FreeType")
-
+  set(FREETYPE_DIR "${LIB_DIR}/freetype-2.12.1")
+  add_subdirectory("${FREETYPE_DIR}")
+  target_link_libraries(${PROJECT_NAME} "freetype" "${FREETYPE_DIR}")
+  target_include_directories(${PROJECT_NAME} PRIVATE "${FREETYPE_DIR}/include")
   ####################################################
   #add_subdirectory(${LIB_DIR}/bullet3 bullet)
   #target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/bullet3/src/")
