@@ -147,6 +147,13 @@ void testpass(std::string target){
   }
 #endif
 
+#ifdef INCLUDE_FREETYPE
+  void freetypeTest(){
+    assert(false);
+    testpass("FreeType");
+  }
+#endif
+
 int main(int argc, char* argv[]){
 	#ifdef INCLUDE_GLFW
 		glfwTest();
@@ -184,6 +191,9 @@ int main(int argc, char* argv[]){
 		bulletTest();
 	#endif
 
+  #ifdef INCLUDE_FREETYPE
+    freetypeTest();
+  #endif
 
 	std::cout << "Build test runs (" << numDepsTested << " dependencies tested)" << std::endl;
 }

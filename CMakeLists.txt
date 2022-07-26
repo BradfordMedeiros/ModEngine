@@ -69,6 +69,11 @@ else()
     add_definitions(-DINCLUDE_BULLET)
   endif()
 
+  #set(NO_INCLUDE_FREETYPE TRUE)
+  if (NOT NO_INCLUDE_FREETYPE)
+    add_definitions(-DINCLUDE_FREETYPE)
+  endif()
+
   add_executable(${PROJECT_NAME} ${source_list})
 endif()
 
@@ -195,3 +200,15 @@ else()
   message("MODBUILD - Not Including Bullet")
 endif()
 
+
+## FreeType - font rendering
+if (NOT NO_INCLUDE_FREETYPE)
+  message("MODBUILD - Including FreeType")
+
+  ####################################################
+  #add_subdirectory(${LIB_DIR}/bullet3 bullet)
+  #target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/bullet3/src/")
+  #target_link_libraries(${PROJECT_NAME} "Bullet3Common;BulletDynamics;BulletInverseDynamics;BulletCollision;LinearMath;BulletSoftBody")
+else()
+  message("MODBUILD - Not Including FreeType")
+endif()
