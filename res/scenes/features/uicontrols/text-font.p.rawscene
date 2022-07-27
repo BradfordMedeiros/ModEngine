@@ -1,0 +1,10 @@
+)default_font:value:hello world
+)default_font:position:0 5 -40
+
+)custom_font1:value:hello world
+)custom_font1:position:0 0 -40
+)custom_font1:font:./res/fonts/Walby-Regular.ttf
+
+)custom_font2:value:hello world
+)custom_font2:position:0 -5 -40
+)custom_font2:font:./res/fonts/dpquake.ttf
