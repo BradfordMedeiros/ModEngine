@@ -52,23 +52,36 @@ std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
   return fontmeshes;
 }
 
-std::map<unsigned int, FontParams> convertMeshToParam(std::map<unsigned int, Mesh> fontMeshes){
+std::map<unsigned int, FontParams> convertMeshToParam(std::map<unsigned int, Mesh> fontMeshes, bool sizeChars){
   std::map<unsigned int, FontParams> fontParams;
   for (auto &[ascii, mesh] : fontMeshes){
     fontParams[ascii] = FontParams {
       .mesh = mesh,
+      .advance = 1.f,
+      .size = glm::vec2(1.f, 1.f),
+      .bearing = glm::vec2(0.f, 0.f),
     };
+    if (sizeChars){
+      if (ascii == 'a' || ascii == 'A'){
+        fontParams.at(ascii).bearing.y = 0.1f;
+        fontParams.at(ascii).size.x = 4.f;
+      }
+      if (ascii == 'r' || ascii == 'R'){
+        fontParams.at(ascii).bearing.y = -0.1f;
+        fontParams.at(ascii).size.y = 0.6f;
+      }      
+    }
   }
   return fontParams;
 }
 std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
-    return convertMeshToParam(loadFontMeshes(*fontToLoadPtr));
+    return convertMeshToParam(loadFontMeshes(*fontToLoadPtr), false);
   }
   auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
   if (ttfFontToLoadPtr != NULL){
-    return convertMeshToParam(loadTtfFontMeshes(*ttfFontToLoadPtr));
+    return convertMeshToParam(loadTtfFontMeshes(*ttfFontToLoadPtr), true);
   }
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
   return {};
@@ -90,13 +103,6 @@ void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float cente
   drawSprite(shaderProgram, mesh, centerX, centerY, width, height, glm::mat4(1.f));
 }
 ///////////////////////////////////////////////////////////////////////////////////////
-
-float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
-  bool center = align == CENTER_ALIGN;
-  // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
-  float leftAlign = !center ? left : ((left  - ((numLetters / 2) * offsetDelta) + ((numLetters % 2) ? 0.f : (0.5f * offsetDelta))));
-  return leftAlign;
-}
 
 int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtualization){
   int biggestSize = 0;
@@ -120,6 +126,13 @@ int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtu
     biggestSize = currentSize;
   }
   return biggestSize;
+}
+
+float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
+  bool center = align == CENTER_ALIGN;
+  // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
+  float leftAlign = !center ? left : ((left  - ((numLetters / 2) * offsetDelta) + ((numLetters % 2) ? 0.f : (0.5f * offsetDelta))));
+  return leftAlign;
 }
 
 
@@ -175,23 +188,28 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
     }
     float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
 
+    float characterAdvance = 1.f;
+    glm::vec2 characterSizing(1.f, 1.f);
+    glm::vec2 characterBearing(0.f, 0.f);
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
+      characterAdvance = fontMeshes.at((int)(character)).advance;
+      characterSizing = fontMeshes.at((int)(character)).size;
+      characterBearing = fontMeshes.at((int)(character)).bearing;
       Mesh& fontMesh = fontMeshes.at((int)character).mesh;
       //std::cout << "drawing: " << character << " at: " << leftAlign << std::endl;
-      drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
+      drawSprite(shaderProgram, fontMesh, leftAlign + characterBearing.x, top + topAlign + characterBearing.y, fontSizeNdi * characterSizing.x, fontSizeNdi * characterSizing.y, model);
       numTriangles += fontMesh.numTriangles;
     }else{
       std::cout << "Character: " << character << std::endl;
       modassert(false, "draw sprite font mesh not found");
     }
     
-
     if (cursorIndex == i || additionaCursorIndex == i){
       Mesh& fontMesh = fontMeshes.at('|').mesh;
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
     }
-    leftAlign += offsetDelta;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
+    leftAlign += offsetDelta * characterAdvance;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
   //std::cout << std::endl;
 

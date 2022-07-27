@@ -11,6 +11,9 @@
 
 struct FontParams {
 	Mesh mesh;
+	float advance;
+	glm::vec2 size;
+	glm::vec2 bearing;
 };
 
 std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo);
