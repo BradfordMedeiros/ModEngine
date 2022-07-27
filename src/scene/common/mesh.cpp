@@ -112,8 +112,8 @@ Mesh loadMesh(std::string defaultTexture, MeshData meshData, std::function<Textu
 Mesh load2DMesh(std::string imagePath, float vertices[], unsigned int indices[], 
   unsigned int dataSize, unsigned int numIndices, unsigned int vertexWidth, unsigned int textureWidth, std::function<Texture(std::string)> ensureLoadTexture, bool flipVerticalTexCoords){
 
-  unsigned int bufferWidth = vertexWidth + textureWidth;
   Texture texture = ensureLoadTexture(imagePath);
+  unsigned int bufferWidth = vertexWidth + textureWidth;
 
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);

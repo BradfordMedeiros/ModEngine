@@ -30,31 +30,23 @@ std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
 
   FT_Library* freeType = initFreeType();
   FT_Face face;
-  if (FT_New_Face(*freeType, "res/fonts/Walby-Regular.ttf", 0, &face)){
+  if (FT_New_Face(*freeType, "./res/fonts/Walby-Regular.ttf", 0, &face)){
     modassert(false, "Error - FreeType - failed loading font");
   }
+  FT_Set_Pixel_Sizes(face, 64, 64);
 
   for (int i = 0; i < 128; i++){
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_RED,
-      face->glyph->bitmap.width,
-      face->glyph->bitmap.rows,
-      0,
-      GL_RED,
-      GL_UNSIGNED_BYTE,
-      face->glyph->bitmap.buffer
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    fontmeshes[i] = loadSpriteMesh("./res/textures/wood.jpg", loadTexture);  
+    auto error = FT_Load_Char(face, i, FT_LOAD_RENDER);
+    modassert(!error, "ERROR - loadTtfFontMeshes - could not load char: " + std::to_string(i));
+    if (face -> glyph -> bitmap.width == 0){
+      std::cout << "0 size, skipping character: " << i << std::endl;
+      continue;
+    }
+    fontmeshes[i] = loadSpriteMesh("./res/textures/wood.jpg", [&face, i](std::string _) -> Texture {
+      char value = (char)i;
+      std::cout << "Loading character: " << value << std::endl;
+      return loadTextureDataRed(face -> glyph -> bitmap.buffer, face -> glyph -> bitmap.width, face -> glyph -> bitmap.rows);
+    });  
   }
   //modassert(false, "ttf loading not yet supported");
   return fontmeshes;
@@ -180,7 +172,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
       numTriangles += fontMesh.numTriangles;
     }else{
-      modassert(false, "draw sprite -> font mesh not found: " + character);
+      std::cout << "Character: " << character << std::endl;
+      modassert(false, "draw sprite font mesh not found");
     }
     
 
