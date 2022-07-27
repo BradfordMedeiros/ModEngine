@@ -6,6 +6,9 @@
 #include "./readfont.h"
 #include "../common/mesh.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H  
+
 std::map<unsigned int, Mesh> loadFontMeshes(fontType fontInfo);
 void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height);
 int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex = -1, bool cursorIndexLeft = true, int highlightLength = 0);

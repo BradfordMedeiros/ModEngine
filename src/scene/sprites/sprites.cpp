@@ -2,7 +2,7 @@
 
 std::map<unsigned int, Mesh> loadFontMeshes(font& fontToLoad){
   std::map<unsigned int, Mesh> fontmeshes;
-  for ( const auto &[ascii, font]: fontToLoad.chars ) {
+  for (const auto &[ascii, font]: fontToLoad.chars) {
     assert(fontmeshes.find(ascii) == fontmeshes.end());
     std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
     // this is (-1 to 1, -1 to 1)
@@ -10,9 +10,54 @@ std::map<unsigned int, Mesh> loadFontMeshes(font& fontToLoad){
   }
   return fontmeshes;
 }
+
+
+FT_Library freeTypeInstance;
+FT_Library* initFreeType(){
+  static bool freeTypeInited = false;
+  if (!freeTypeInited){
+    if (FT_Init_FreeType(&freeTypeInstance)){
+        std::cout << "Error - Could not init freeType" << std::endl;
+        assert(false);
+    }
+    freeTypeInited = true;
+  }
+  return &freeTypeInstance;
+}
+
 std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
-  modassert(false, "ttf loading not yet supported");
-  return {};
+  std::map<unsigned int, Mesh> fontmeshes;
+
+  FT_Library* freeType = initFreeType();
+  FT_Face face;
+  if (FT_New_Face(*freeType, "res/fonts/Walby-Regular.ttf", 0, &face)){
+    modassert(false, "Error - FreeType - failed loading font");
+  }
+
+  for (int i = 0; i < 128; i++){
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(
+      GL_TEXTURE_2D,
+      0,
+      GL_RED,
+      face->glyph->bitmap.width,
+      face->glyph->bitmap.rows,
+      0,
+      GL_RED,
+      GL_UNSIGNED_BYTE,
+      face->glyph->bitmap.buffer
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    fontmeshes[i] = loadSpriteMesh("./res/textures/wood.jpg", loadTexture);  
+  }
+  //modassert(false, "ttf loading not yet supported");
+  return fontmeshes;
 }
 
 std::map<unsigned int, Mesh> loadFontMeshes(fontType fontInfo){
@@ -134,6 +179,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
       //std::cout << "drawing: " << character << " at: " << leftAlign << std::endl;
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
       numTriangles += fontMesh.numTriangles;
+    }else{
+      modassert(false, "draw sprite -> font mesh not found: " + character);
     }
     
 
