@@ -30,10 +30,10 @@ std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
 
   FT_Library* freeType = initFreeType();
   FT_Face face;
-  if (FT_New_Face(*freeType, "./res/fonts/Walby-Regular.ttf", 0, &face)){
+  if (FT_New_Face(*freeType, "./res/fonts/dpquake.ttf", 0, &face)){
     modassert(false, "Error - FreeType - failed loading font");
   }
-  FT_Set_Pixel_Sizes(face, 64, 64);
+  FT_Set_Pixel_Sizes(face, 128, 128); // what size to set this?
 
   for (int i = 0; i < 128; i++){
     auto error = FT_Load_Char(face, i, FT_LOAD_RENDER);

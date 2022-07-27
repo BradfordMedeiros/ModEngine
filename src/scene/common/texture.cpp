@@ -27,9 +27,9 @@ Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels){
   return tex;
 }
 Texture loadTextureData(unsigned char* data, int textureWidth, int textureHeight, int numChannels){
-  modassert(textureWidth > 0, "ERROR - loadTextureDataRed - texture width must be > 0");
-  modassert(textureHeight > 0, "ERROR - loadTextureDataRed - height width must be > 0");
-
+  modassert(textureWidth > 0, "ERROR - loadTextureData - texture width must be > 0");
+  modassert(textureHeight > 0, "ERROR - loadTextureData - height width must be > 0");
+  
   auto tex = loadTextureEmpty(textureWidth, textureHeight, numChannels);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
@@ -44,10 +44,17 @@ Texture loadTextureDataRed(unsigned char* data, int textureWidth, int textureHei
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   // set texture options
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);   
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  // https://www.khronos.org/opengl/wiki/Texture#Swizzle_mask
+  GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_RED};
+  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+
   glTexImage2D(
       GL_TEXTURE_2D,
       0,
