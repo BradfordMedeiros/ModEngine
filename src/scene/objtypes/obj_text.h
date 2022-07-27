@@ -19,6 +19,7 @@ struct GameObjectUIText {
   TextVirtualization virtualization;
   int charlimit;
   UiTextCursor cursor;
+  std::string fontFamily;
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);

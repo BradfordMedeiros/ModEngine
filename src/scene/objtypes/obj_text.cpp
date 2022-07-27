@@ -110,6 +110,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto cursorIndexLeftStr = attr.stringAttributes.find("cursor-dir") != attr.stringAttributes.end() ? attr.stringAttributes.at("cursor-dir") : "left";
   modassert(cursorIndexLeftStr == "left" || cursorIndexLeftStr == "right", "invalid value for cursorIndexLeftStr");
   auto cursorIndexLeft = cursorIndexLeftStr == "left" ? true : false;
+  auto fontFamily = attr.stringAttributes.find("font") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("font");
 
   GameObjectUIText obj {
     .value = value,
@@ -124,6 +125,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
       .cursorIndexLeft = cursorIndexLeft,
       .highlightLength = valueFromAttr(attr, "cursor-highlight", 0),
     },
+    .fontFamily = fontFamily,
   };
   restrictWidth(obj);
   return obj;
@@ -144,6 +146,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
   attributes.numAttributes["cursor"] = textObj.cursor.cursorIndex;
   attributes.stringAttributes["cursor-dir"] = textObj.cursor.cursorIndexLeft ? "left" : "right";
   attributes.numAttributes["cursor-highlight"] = textObj.cursor.highlightLength;
+  attributes.stringAttributes["font"] = textObj.fontFamily;
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -193,6 +196,9 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   }
   if (attributes.numAttributes.find("cursor-highlight") != attributes.numAttributes.end()){
     textObj.cursor.highlightLength = attributes.numAttributes.at("cursor-highlight");
+  }
+  if (attributes.stringAttributes.find("font") != attributes.stringAttributes.end()){
+    textObj.fontFamily = attributes.stringAttributes.at("font");
   }
   restrictWidth(textObj);
 }
