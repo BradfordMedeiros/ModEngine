@@ -169,7 +169,7 @@ float convertTextNdiFontsize(float height, float width, float fontsize, bool isn
   return fontsize;
 }
 
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height, unsigned int width){
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, FontParams>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height, unsigned int width){
   //std::cout << "text number: " << lineData.text.size() << std::endl;
   for (auto &text : lineData.text){
     if (textureIdSame(text.textureId, textureId)){

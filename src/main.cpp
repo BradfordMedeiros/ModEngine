@@ -76,7 +76,7 @@ int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing cert
 
 DynamicLoading dynamicLoading;
 
-std::map<unsigned int, Mesh> fontMeshes;
+std::map<unsigned int, FontParams> fontMeshes;
 
 glm::mat4 view;
 unsigned int framebufferTexture;

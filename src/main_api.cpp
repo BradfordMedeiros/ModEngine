@@ -6,7 +6,7 @@ extern SysInterface interface;
 extern WorldTiming timings;
 extern engineState state;
 extern GameObject defaultCamera;
-extern std::map<unsigned int, Mesh> fontMeshes;
+extern std::map<unsigned int, FontParams> fontMeshes;
 extern Mesh* crosshairSprite;
 extern Mesh defaultCrosshairSprite;
 extern unsigned int uiShaderProgram;

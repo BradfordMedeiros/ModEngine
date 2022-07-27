@@ -9,10 +9,16 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
-std::map<unsigned int, Mesh> loadFontMeshes(fontType fontInfo);
+struct FontParams {
+	Mesh mesh;
+};
+
+std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo);
+
+
 void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float centerY, float width, float height);
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex = -1, bool cursorIndexLeft = true, int highlightLength = 0);
-void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize);
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex = -1, bool cursorIndexLeft = true, int highlightLength = 0);
+void drawWords(GLint shaderProgram, std::map<unsigned int, FontParams>& fontMeshes, std::string word, float left, float top, unsigned int fontSize);
 BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float offsetDelta, AlignType type, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset);
 
 #endif

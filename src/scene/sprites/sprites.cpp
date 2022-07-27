@@ -52,14 +52,23 @@ std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
   return fontmeshes;
 }
 
-std::map<unsigned int, Mesh> loadFontMeshes(fontType fontInfo){
+std::map<unsigned int, FontParams> convertMeshToParam(std::map<unsigned int, Mesh> fontMeshes){
+  std::map<unsigned int, FontParams> fontParams;
+  for (auto &[ascii, mesh] : fontMeshes){
+    fontParams[ascii] = FontParams {
+      .mesh = mesh,
+    };
+  }
+  return fontParams;
+}
+std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
-    return loadFontMeshes(*fontToLoadPtr);
+    return convertMeshToParam(loadFontMeshes(*fontToLoadPtr));
   }
   auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
   if (ttfFontToLoadPtr != NULL){
-    return loadTtfFontMeshes(*ttfFontToLoadPtr);
+    return convertMeshToParam(loadTtfFontMeshes(*ttfFontToLoadPtr));
   }
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
   return {};
@@ -121,7 +130,7 @@ float convertFontSizeToNdi(float fontsize){
   return fontsize / 1000.f;
 }
 
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
   //std::cout << "Fontsizendi: " << fontSizeNdi << std::endl;
@@ -167,7 +176,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
     float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
 
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
-      Mesh& fontMesh = fontMeshes.at((int)character);
+      Mesh& fontMesh = fontMeshes.at((int)character).mesh;
       //std::cout << "drawing: " << character << " at: " << leftAlign << std::endl;
       drawSprite(shaderProgram, fontMesh, leftAlign, top + topAlign, fontSizeNdi, fontSizeNdi, model);
       numTriangles += fontMesh.numTriangles;
@@ -178,7 +187,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
     
 
     if (cursorIndex == i || additionaCursorIndex == i){
-      Mesh& fontMesh = fontMeshes.at('|');
+      Mesh& fontMesh = fontMeshes.at('|').mesh;
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
     }
@@ -188,7 +197,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
 
   if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
-      Mesh& fontMesh = fontMeshes.at('|');
+      Mesh& fontMesh = fontMeshes.at('|').mesh;
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
   }
@@ -196,7 +205,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMes
   return numTriangles;
 }
 
-void drawWords(GLint shaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
+void drawWords(GLint shaderProgram, std::map<unsigned int, FontParams>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
   drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
 }
 

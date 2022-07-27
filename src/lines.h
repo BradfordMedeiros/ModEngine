@@ -48,7 +48,7 @@ void removeLinesByOwner(LineData& lineData, objid owner);
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
 
 void addTextData(LineData& lineData, TextDrawingOptions text);
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, Mesh>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height, unsigned int width);
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::map<unsigned int, FontParams>& fontMeshes, std::optional<unsigned int> textureId, unsigned int height, unsigned int width);
 
 void disposeTempBufferedData(LineData& lineData);
 
