@@ -1,12 +1,17 @@
 #include "./sprites.h"
 
-std::map<unsigned int, Mesh> loadFontMeshes(font& fontToLoad){
-  std::map<unsigned int, Mesh> fontmeshes;
+std::map<unsigned int, FontParams> loadFontMeshes(font& fontToLoad){
+  std::map<unsigned int, FontParams> fontmeshes;
   for (const auto &[ascii, font]: fontToLoad.chars) {
     assert(fontmeshes.find(ascii) == fontmeshes.end());
     std::cout << "loaded font mesh: " << ascii << " (" << ((char)ascii) << ")" << std::endl;
     // this is (-1 to 1, -1 to 1)
-    fontmeshes[ascii] = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture, true);
+    fontmeshes[ascii] = FontParams {
+      .mesh = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture, true),
+      .advance = 1.f,
+      .size = glm::vec2(1.f, 1.f),
+      .bearing = glm::vec2(0.f, 0.f),
+    };
   }
   return fontmeshes;
 }
@@ -25,9 +30,8 @@ FT_Library* initFreeType(){
   return &freeTypeInstance;
 }
 
-std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
-  std::map<unsigned int, Mesh> fontmeshes;
-
+std::map<unsigned int, FontParams> loadTtfFontMeshes(ttfFont& fontToLoad){
+  std::map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
   if (FT_New_Face(*freeType, "./res/fonts/dpquake.ttf", 0, &face)){
@@ -42,46 +46,39 @@ std::map<unsigned int, Mesh> loadTtfFontMeshes(ttfFont& fontToLoad){
       std::cout << "0 size, skipping character: " << i << std::endl;
       continue;
     }
-    fontmeshes[i] = loadSpriteMesh("./res/textures/wood.jpg", [&face, i](std::string _) -> Texture {
-      char value = (char)i;
-      std::cout << "Loading character: " << value << std::endl;
-      return loadTextureDataRed(face -> glyph -> bitmap.buffer, face -> glyph -> bitmap.width, face -> glyph -> bitmap.rows);
-    });  
+
+    float glyphAdvance = face -> glyph -> advance.x / 64;
+    glm::vec2 glyphSize(face -> glyph -> bitmap.width, face -> glyph -> bitmap.rows); 
+    glm::vec2 glyphBearing(face -> glyph -> bitmap_left, face -> glyph -> bitmap_top);
+    //glm::vec2 glyphBearing(0.f, 0.f);
+    std::cout << "FONT: loading: " << (char) i << " size = " << print(glyphSize) << ", bearing = " << print(glyphBearing) << ", advance = " << glyphAdvance <<  std::endl;
+
+    // this should be smarter.  1 NDI text covers -1 to 1
+    // since I'm doing all ndi, maybe I should normalize the values or something?
+    float pixelToNDIScaling = 100.f; 
+
+    fontmeshes[i] = FontParams {
+      .mesh = loadSpriteMesh("./res/textures/wood.jpg", [&face, i](std::string _) -> Texture {
+        char value = (char)i;
+        std::cout << "Loading character: " << value << std::endl;
+        return loadTextureDataRed(face -> glyph -> bitmap.buffer, face -> glyph -> bitmap.width, face -> glyph -> bitmap.rows);
+      }),
+      .advance = glyphAdvance / pixelToNDIScaling,
+      .size = glyphSize / pixelToNDIScaling,
+      .bearing = glyphBearing / pixelToNDIScaling,
+    };
   }
-  //modassert(false, "ttf loading not yet supported");
   return fontmeshes;
 }
 
-std::map<unsigned int, FontParams> convertMeshToParam(std::map<unsigned int, Mesh> fontMeshes, bool sizeChars){
-  std::map<unsigned int, FontParams> fontParams;
-  for (auto &[ascii, mesh] : fontMeshes){
-    fontParams[ascii] = FontParams {
-      .mesh = mesh,
-      .advance = 1.f,
-      .size = glm::vec2(1.f, 1.f),
-      .bearing = glm::vec2(0.f, 0.f),
-    };
-    if (sizeChars){
-      if (ascii == 'a' || ascii == 'A'){
-        fontParams.at(ascii).bearing.y = 0.1f;
-        fontParams.at(ascii).size.x = 4.f;
-      }
-      if (ascii == 'r' || ascii == 'R'){
-        fontParams.at(ascii).bearing.y = -0.1f;
-        fontParams.at(ascii).size.y = 0.6f;
-      }      
-    }
-  }
-  return fontParams;
-}
 std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
-    return convertMeshToParam(loadFontMeshes(*fontToLoadPtr), false);
+    return loadFontMeshes(*fontToLoadPtr);
   }
   auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
   if (ttfFontToLoadPtr != NULL){
-    return convertMeshToParam(loadTtfFontMeshes(*ttfFontToLoadPtr), true);
+    return loadTtfFontMeshes(*ttfFontToLoadPtr);
   }
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
   return {};
@@ -200,8 +197,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
       drawSprite(shaderProgram, fontMesh, leftAlign + characterBearing.x, top + topAlign + characterBearing.y, fontSizeNdi * characterSizing.x, fontSizeNdi * characterSizing.y, model);
       numTriangles += fontMesh.numTriangles;
     }else{
-      std::cout << "Character: " << character << std::endl;
-      modassert(false, "draw sprite font mesh not found");
+      //std::cout << "Character: " << character << std::endl;
+      //modassert(false, "draw sprite font mesh not found");
     }
     
     if (cursorIndex == i || additionaCursorIndex == i){
