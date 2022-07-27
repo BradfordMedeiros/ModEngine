@@ -147,6 +147,8 @@ void testpass(std::string target){
   }
 #endif
 
+//https://freetype.org/freetype2/docs/tutorial/step1.html
+// https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_render_glyph char encoding
 #ifdef INCLUDE_FREETYPE
   #include <ft2build.h>
   #include FT_FREETYPE_H  
@@ -158,10 +160,27 @@ void testpass(std::string target){
         assert(false);
     }
     FT_Face face;
-    if (FT_New_Face(ft, "res/fonts/testfont.ttf", 0, &face)){
+    if (FT_New_Face(ft, "res/fonts/Walby-Regular.ttf", 0, &face)){
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;  
         assert(false);
     }
+
+    //FT_Set_Char_Size(face, 0, 16*64, 300, 300);   
+    FT_Set_Pixel_Sizes(face, 64, 64);
+    
+    std::cout << "num glyphs: " << face -> num_glyphs << std::endl;
+    std::cout << "height: " << face -> height << std::endl;
+
+    if (FT_Load_Char(face, 'B', FT_LOAD_RENDER)){
+      std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;  
+      assert(false);
+    }
+
+    std::cout << "glyph bitmap width: " << face -> glyph -> bitmap.width << std::endl;
+    std::cout << "glyph bitmap rows: " << face -> glyph -> bitmap.rows << std::endl;
+    std::cout << "glyph advance: " << face -> glyph -> advance.x << std::endl;
+    std::cout << "glypm bitmap: " << (face->glyph->bitmap.buffer ) << std::endl;
+
     testpass("FreeType");
   }
 #endif
