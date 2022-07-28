@@ -30,6 +30,12 @@ struct ttfFont {
 ttfFont readTTFFont(std::string filepath);
 
 typedef std::variant<font, ttfFont> fontType;
-std::vector<fontType> readFontFile(std::vector<std::string> filepaths);
+
+struct FontToLoad {
+	std::string name;
+	fontType type;
+};
+
+std::vector<FontToLoad> readFontFile(std::vector<std::string> filepaths);
 
 #endif

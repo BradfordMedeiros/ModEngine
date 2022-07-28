@@ -81,10 +81,13 @@ fontType readFontFile(std::string filepath){
     return readFont(filepath);
 }
 
-std::vector<fontType> readFontFile(std::vector<std::string> filepaths){
-    std::vector<fontType> fonts;
+std::vector<FontToLoad> readFontFile(std::vector<std::string> filepaths){
+    std::vector<FontToLoad> fonts;
     for (auto filepath : filepaths){
-        fonts.push_back(readFontFile(filepath));
+        fonts.push_back(FontToLoad{
+           .name = filepath,
+           .type = readFontFile(filepath),
+        });
     }
     return fonts;
 }

@@ -30,11 +30,11 @@ FT_Library* initFreeType(){
   return &freeTypeInstance;
 }
 
-std::map<unsigned int, FontParams> loadTtfFontMeshes(ttfFont& fontToLoad){
+std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad){
   std::map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
-  if (FT_New_Face(*freeType, "./res/fonts/dpquake.ttf", 0, &face)){
+  if (FT_New_Face(*freeType, filepath.c_str(), 0, &face)){
     modassert(false, "Error - FreeType - failed loading font");
   }
   FT_Set_Pixel_Sizes(face, 128, 128); // what size to set this?
@@ -71,26 +71,26 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(ttfFont& fontToLoad){
   return fontmeshes;
 }
 
-std::map<unsigned int, FontParams> loadFontMesh(fontType fontInfo){
+std::map<unsigned int, FontParams> loadFontMesh(std::string filepath, fontType fontInfo){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
     return loadModFontMeshes(*fontToLoadPtr);
   }
   auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
   if (ttfFontToLoadPtr != NULL){
-    return loadTtfFontMeshes(*ttfFontToLoadPtr);
+    return loadTtfFontMeshes(filepath, *ttfFontToLoadPtr);
   }
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
   return {};
 }
 
-std::vector<FontFamily> loadFontMeshes(std::vector<fontType> fontInfos){
+std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos){
   std::vector<FontFamily> fontParams;
   for (auto &fontInfo : fontInfos){
     fontParams.push_back(
       FontFamily {
-        .name = "",
-        .asciToMesh = loadFontMesh(fontInfo),
+        .name = fontInfo.name,
+        .asciToMesh = loadFontMesh(fontInfo.name, fontInfo.type),
       }
     );
   }

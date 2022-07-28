@@ -269,8 +269,18 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
   drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true);  
 }
 
+FontFamily& fontFamilyByName(std::string name){
+  for (auto &family : fontFamily){
+    std::cout << "Comparing " << name << " to " << family.name << std::endl;
+    if (family.name == name){
+      return family;
+    }
+  }
+  modassert(false, "ERROR invalid font family name");
+  return fontFamily.at(0);
+}
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName){
-  return drawWordsRelative(shaderProgram, fontFamily.at(0).asciToMesh, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength);
+  return drawWordsRelative(shaderProgram, fontFamilyByName(fontFamilyName).asciToMesh, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength);
 }
 
 std::vector<std::string> listAnimations(int32_t id){
