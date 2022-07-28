@@ -1,6 +1,6 @@
 #include "./sprites.h"
 
-std::map<unsigned int, FontParams> loadFontMeshes(font& fontToLoad){
+std::map<unsigned int, FontParams> loadModFontMeshes(font& fontToLoad){
   std::map<unsigned int, FontParams> fontmeshes;
   for (const auto &[ascii, font]: fontToLoad.chars) {
     assert(fontmeshes.find(ascii) == fontmeshes.end());
@@ -71,10 +71,10 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(ttfFont& fontToLoad){
   return fontmeshes;
 }
 
-std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo){
+std::map<unsigned int, FontParams> loadFontMesh(fontType fontInfo){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
-    return loadFontMeshes(*fontToLoadPtr);
+    return loadModFontMeshes(*fontToLoadPtr);
   }
   auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
   if (ttfFontToLoadPtr != NULL){
@@ -83,6 +83,20 @@ std::map<unsigned int, FontParams> loadFontMeshes(fontType fontInfo){
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
   return {};
 }
+
+std::vector<FontFamily> loadFontMeshes(std::vector<fontType> fontInfos){
+  std::vector<FontFamily> fontParams;
+  for (auto &fontInfo : fontInfos){
+    fontParams.push_back(
+      FontFamily {
+        .name = "",
+        .asciToMesh = loadFontMesh(fontInfo),
+      }
+    );
+  }
+  return fontParams;
+}
+
 
 void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, float zbias){
   auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));

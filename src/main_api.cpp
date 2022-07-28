@@ -6,7 +6,7 @@ extern SysInterface interface;
 extern WorldTiming timings;
 extern engineState state;
 extern GameObject defaultCamera;
-extern std::map<unsigned int, FontParams> fontMeshes;
+extern std::vector<FontFamily> fontFamily;
 extern Mesh* crosshairSprite;
 extern Mesh defaultCrosshairSprite;
 extern unsigned int uiShaderProgram;
@@ -269,9 +269,8 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
   drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true);  
 }
 
-int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamily){
-  std::cout << "draw word -- font family support not yet implemneted: " << fontFamily << std::endl;
-  return drawWordsRelative(shaderProgram, fontMeshes, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength);
+int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName){
+  return drawWordsRelative(shaderProgram, fontFamily.at(0).asciToMesh, fullModelTransform(world.sandbox, id), word, 0, 0, fontSize, offsetDelta, align, wrap, virtualization, cursor.cursorIndex, cursor.cursorIndexLeft, cursor.highlightLength);
 }
 
 std::vector<std::string> listAnimations(int32_t id){

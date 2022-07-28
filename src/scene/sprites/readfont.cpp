@@ -23,7 +23,7 @@ font readFont(std::string fontFolderpath){
     
     std::string line;
     getline(file, line);		// first line is font name
-    info.fontname = line;
+    //info.fontname = line;
 
     getline(file, line);		// skip second line, dont care
     getline(file, line);		// third line is image name, if not image.png throw exception for now
@@ -79,4 +79,12 @@ fontType readFontFile(std::string filepath){
         return readTTFFont(filepath);
     }
     return readFont(filepath);
+}
+
+std::vector<fontType> readFontFile(std::vector<std::string> filepaths){
+    std::vector<fontType> fonts;
+    for (auto filepath : filepaths){
+        fonts.push_back(readFontFile(filepath));
+    }
+    return fonts;
 }

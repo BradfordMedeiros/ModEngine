@@ -18,7 +18,6 @@ struct fontInfo {
 };
 
 struct font {
-	std::string fontname;
 	std::string image;
 	std::map<unsigned int, fontInfo> chars;
 };
@@ -26,15 +25,11 @@ struct font {
 font readFont(std::string filepath);
 
 struct ttfFont {
-	//std::string fontname;
-	//unsigned int rows;
- 	//unsigned int width;
- 	//unsigned char* buffer;
 };
 
 ttfFont readTTFFont(std::string filepath);
 
 typedef std::variant<font, ttfFont> fontType;
-fontType readFontFile(std::string filepath);
+std::vector<fontType> readFontFile(std::vector<std::string> filepaths);
 
 #endif

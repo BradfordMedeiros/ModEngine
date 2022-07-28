@@ -76,7 +76,7 @@ int numTriangles = 0;   // # drawn triangles (eg drawelements(x) -> missing cert
 
 DynamicLoading dynamicLoading;
 
-std::map<unsigned int, FontParams> fontMeshes;
+std::vector<FontFamily> fontFamily;
 
 glm::mat4 view;
 unsigned int framebufferTexture;
@@ -196,7 +196,7 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
 
   //auto ortho = glm::ortho(0.0f, (float)texSize.width, 0.0f, (float)texSize.height, -1.0f, 1.0f);  
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  drawTextData(lineData, uiShaderProgram, fontMeshes, texture.textureId,  texSize.height, texSize.width);
+  drawTextData(lineData, uiShaderProgram, fontFamily.at(0).asciToMesh, texture.textureId,  texSize.height, texSize.width);
 }
 
 void handlePaintingModifiesViewport(UVCoord uvsToPaint){
@@ -1150,8 +1150,7 @@ int main(int argc, char* argv[]){
     interface.readFile
   );
 
-  auto fontLoadInfo = readFontFile(result["font"].as<std::string>());
-  fontMeshes = loadFontMeshes(fontLoadInfo);
+  fontFamily = loadFontMeshes(readFontFile({result["font"].as<std::string>()}));
 
   CustomApiBindings pluginApi{
     .listSceneId = listSceneId,
@@ -1737,7 +1736,7 @@ int main(int argc, char* argv[]){
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
     renderUI(*crosshairSprite, pixelColor, showCursor);
-    drawTextData(lineData, uiShaderProgram, fontMeshes, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth);
+    drawTextData(lineData, uiShaderProgram, fontFamily.at(0).asciToMesh, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);
 

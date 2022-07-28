@@ -93,7 +93,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize);
 
-int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamily);
+int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName);
 
 std::vector<std::string> listAnimations(int32_t id);
 void playAnimation(int32_t id, std::string animationToPlay);
