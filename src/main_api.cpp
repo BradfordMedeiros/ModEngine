@@ -271,7 +271,7 @@ void drawTextNdi(std::string word, float left, float top, unsigned int fontSize)
 
 FontFamily& fontFamilyByName(std::string name){
   for (auto &family : fontFamily){
-    std::cout << "Comparing " << name << " to " << family.name << std::endl;
+    //std::cout << "Comparing " << name << " to " << family.name << std::endl;
     if (family.name == name){
       return family;
     }

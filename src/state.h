@@ -119,6 +119,7 @@ struct engineState {
   std::string iconpath;
 
   int fontsize;
+  bool showGrid;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

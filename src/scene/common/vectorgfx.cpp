@@ -57,35 +57,61 @@ int drawSphere(){                  // lots of repeat code here, should generaliz
   return drawLines(allLines);
 }
 
-void drawGridVertical(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){   
+void drawGridXY(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){   
+  float centeringOffsetX = -1.f * (cellSize * numCellsWidth) / 2.f;
+  float centeringOffsetY = -1.f * (cellSize * numCellsHeight) / 2.f;
+
   std::vector<Line> allLines;
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
-      .fromPos = glm::vec3(0 + offsetX, (i * cellSize) + offsetY, 0 + offsetZ), 
-      .toPos = glm::vec3((numCellsWidth * cellSize) + offsetX, (i * cellSize) + offsetY, 0 + offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX + offsetX, centeringOffsetY + (i * cellSize) + offsetY, 0 + offsetZ), 
+      .toPos = glm::vec3(centeringOffsetX + (numCellsWidth * cellSize) + offsetX, centeringOffsetY + (i * cellSize) + offsetY, 0 + offsetZ),
     });
   }
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3((i * cellSize) + offsetX, 0 + offsetY, 0 + offsetZ), 
-      .toPos = glm::vec3((i * cellSize) + offsetX, (numCellsHeight * cellSize) + offsetY, 0 + offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, centeringOffsetY + offsetY, 0 + offsetZ), 
+      .toPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, centeringOffsetY + (numCellsHeight * cellSize) + offsetY, 0 + offsetZ),
     });
   }
   drawLines(allLines);
 }
 
-void drawGridHorizontal(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){
+void drawGridXZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){
+  float centeringOffsetX = -1.f * (cellSize * numCellsWidth) / 2.f;
+  float centeringOffsetZ = -1.f * (cellSize * numCellsHeight) / 2.f;
+
   std::vector<Line> allLines;
   for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
     allLines.push_back(Line {                                                   
-      .fromPos = glm::vec3(0 + offsetX, offsetY, (i * cellSize) + offsetZ), 
-      .toPos = glm::vec3((numCellsWidth * cellSize) + offsetX, offsetY, (i * cellSize) + offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX + offsetX, offsetY, centeringOffsetZ + (i * cellSize) + offsetZ), 
+      .toPos = glm::vec3(centeringOffsetX + (numCellsWidth * cellSize) + offsetX, offsetY, centeringOffsetZ + (i * cellSize) + offsetZ),
     });
   }
   for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
     allLines.push_back(Line { 
-      .fromPos = glm::vec3((i * cellSize) + offsetX, 0 + offsetY, 0 + offsetZ), 
-      .toPos = glm::vec3((i * cellSize) + offsetX, offsetY, (numCellsHeight * cellSize) +  offsetZ),
+      .fromPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, 0 + offsetY, centeringOffsetZ + offsetZ), 
+      .toPos = glm::vec3(centeringOffsetX + (i * cellSize) + offsetX, offsetY, centeringOffsetZ + (numCellsHeight * cellSize) +  offsetZ),
+    });
+  }
+  drawLines(allLines);
+}
+
+void drawGridYZ(int numCellsWidth, int numCellsHeight, float cellSize, float offsetX, float offsetY, float offsetZ){
+  float centeringOffsetY = -1.f * (cellSize * numCellsWidth) / 2.f;
+  float centeringOffsetZ = -1.f * (cellSize * numCellsHeight) / 2.f;
+
+  std::vector<Line> allLines;
+  for (unsigned int i = 0 ; i < (numCellsHeight + 1); i++){
+    allLines.push_back(Line {                                                   
+      .fromPos = glm::vec3(offsetX, centeringOffsetY + offsetY, centeringOffsetZ + (i * cellSize) + offsetZ), 
+      .toPos = glm::vec3(offsetX, (numCellsWidth * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + (i * cellSize) + offsetZ),
+    });
+  }
+  for (unsigned int i = 0 ; i < (numCellsWidth + 1); i++){
+    allLines.push_back(Line { 
+      .fromPos = glm::vec3(offsetX, (i * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + offsetZ), 
+      .toPos = glm::vec3(offsetX, (i * cellSize) + centeringOffsetY + offsetY, centeringOffsetZ + (numCellsHeight * cellSize) +  offsetZ),
     });
   }
   drawLines(allLines);
@@ -93,10 +119,12 @@ void drawGridHorizontal(int numCellsWidth, int numCellsHeight, float cellSize, f
 
 void drawGrid3D(int numCellsWidth, float cellSize, float offsetX, float offsetY, float offsetZ){
   for (int i = 0; i <= numCellsWidth; i++){
-    drawGridHorizontal(numCellsWidth, numCellsWidth, cellSize, offsetX, i * cellSize + offsetY, offsetZ);
+    float centeredOffsetY = -1.f * (numCellsWidth * cellSize) / 2.f;
+    drawGridXZ(numCellsWidth, numCellsWidth, cellSize, offsetX, centeredOffsetY + i * cellSize + offsetY, offsetZ);
   }
   for (int i = 0; i <= numCellsWidth; i++){
-    drawGridVertical(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, i * cellSize + offsetZ);
+    float centeredOffsetZ = -1.f * (numCellsWidth * cellSize) / 2.f;
+    drawGridXY(numCellsWidth, numCellsWidth, cellSize, offsetX, offsetY, centeredOffsetZ + i * cellSize + offsetZ);
   }
 }
 

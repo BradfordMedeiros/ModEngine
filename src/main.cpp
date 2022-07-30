@@ -558,21 +558,37 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
   if (numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
-    drawGrid3DCentered(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
+    drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
-  }else{
+  }
+
+  //////////////////
+  if (state.manipulatorMode == TRANSLATE && state.showGrid){
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
-      if (state.manipulatorMode == TRANSLATE && selectedObj != -1){
+      if (selectedObj != -1){
         float snapGridSize = getSnapTranslateSize();
         if (snapGridSize > 0){
           auto position = getGameObjectPosition(selectedObj, false);
-          drawGrid3DCentered(10, snapGridSize, position.x, position.y, position.z);  
+
+          if (state.manipulatorAxis == XAXIS){
+            drawGridXY(10, 10, snapGridSize, position.x, position.y, position.z);  
+          }else if (state.manipulatorAxis == YAXIS){
+            drawGridXY(10, 10, snapGridSize, position.x, position.y, position.z);  
+          }else if (state.manipulatorAxis == ZAXIS){
+            drawGridYZ(10, 10, snapGridSize, position.x, position.y, position.z);  
+          }else{
+            drawGrid3D(10, snapGridSize, position.x, position.y, position.z);  
+          }
+
           glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 1.f, 1.f)));     
         }
       }
-    }
+    }    
   }
+
+  ////////////////
+
   drawCoordinateSystem(100.f);
   drawAllLines(lineData, shaderProgram, std::nullopt);
 
@@ -628,7 +644,7 @@ void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   float uiXOffset = -1.f - offsetPerLine;
   
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
-  std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
+  //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
   drawTextNdi(std::to_string(currentFramerate) + state.additionalText, uiXOffset, uiYOffset + offsetPerLine, state.fontsize + 1);
 
   std::string manipulatorAxisString;

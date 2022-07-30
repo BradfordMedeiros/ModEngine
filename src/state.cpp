@@ -431,6 +431,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .windowname = "ModEngine",
     .iconpath = "./misc/modengine.png",
     .fontsize = 3,
+    .showGrid = true,
 	};
 	return state;
 }
