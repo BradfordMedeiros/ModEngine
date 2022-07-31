@@ -207,7 +207,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
       characterSizing = fontMeshes.at((int)(character)).size;
       characterBearing = fontMeshes.at((int)(character)).bearing;
       Mesh& fontMesh = fontMeshes.at((int)character).mesh;
-      //std::cout << "drawing: " << character << " at: " << leftAlign << std::endl;
+      //std::cout << "char = " << character << ", " << "advance = " << characterAdvance << ", size = " << print(characterSizing) << ", bearing = " << print(characterBearing) << std::endl;
       drawSprite(shaderProgram, fontMesh, leftAlign + characterBearing.x, top + topAlign + characterBearing.y, fontSizeNdi * characterSizing.x, fontSizeNdi * characterSizing.y, model);
       numTriangles += fontMesh.numTriangles;
     }else{
