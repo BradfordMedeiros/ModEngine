@@ -251,6 +251,17 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto cullEnabled = std::get_if<std::string>(&value);
+      if (cullEnabled != NULL){
+        state.cullEnabled = *cullEnabled != "disabled";
+      }
+      modassert(*cullEnabled == "disabled" || *cullEnabled == "enabled", "invalid cullEnable string");
+    },
+    .object = "rendering",
+    .attribute = "cull",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto captureCursor = std::get_if<std::string>(&value);
       if (captureCursor != NULL){
         auto valid = maybeParseBool(*captureCursor, &state.captureCursor);
@@ -492,7 +503,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .cameraFast = true,
     .depthBufferLayer = -1,
     .printKeyStrokes = false,
-    .cullEnabled = false,
+    .cullEnabled = true,
     .groupSelection = true,
     .pauseWorldTiming = false,
     .activeCameraObj = NULL,

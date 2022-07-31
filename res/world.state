@@ -30,6 +30,8 @@ skybox:texture:./res/textures/skyboxs/desert/
 rendering:antialiasing:msaa
 rendering:fontsize:6
 
+rendering:cull:disabled
+
 ### input stuff ###
 #mouse:capturecursor:true
 
@@ -39,11 +41,10 @@ rendering:fontsize:6
 #skybox:color:0.1 0.1 0.1
 
 #editor:showgrid:true
-#editor:gridsize:20
-##
-###editor:snapangle-index:10
-##editor:snaptranslate-index:3
-###editor:snapscale-index:0
-##tools:manipulator-mode:translate
-##tools:manipulator-axis:x
-
+#editor:gridsize:40
+#editor:snaptranslate-index:3
+#tools:manipulator-mode:translate
+#tools:manipulator-axis:x
+#
+##editor:snapscale-index:0
+##editor:snapangle-index:10

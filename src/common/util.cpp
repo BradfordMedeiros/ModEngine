@@ -581,7 +581,7 @@ bool isIdentityVec(glm::vec4 vec){
 }
 
 const int maxCallstack = 128;
-bool warnOnly = true;
+bool warnOnly = false;
 void assertWithBacktrace(bool isTrue, std::string message){
   if (!isTrue){
     std::cout << message << std::endl;
