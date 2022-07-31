@@ -5,6 +5,7 @@
 #include <functional>
 #include "./common/util.h"
 #include "./easyuse/editor.h"
+#include "./easyuse/easy_use.h"
 #include "./scene/scene.h"
 
 enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS };
@@ -120,6 +121,8 @@ struct engineState {
 
   int fontsize;
   bool showGrid;
+
+  EasyUseInfo easyUse;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

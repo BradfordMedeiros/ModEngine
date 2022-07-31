@@ -7,22 +7,30 @@
 #include "../common/util.h"
 #include "../translations.h"
 
-glm::quat snapAngleUp(SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis); 
-glm::quat snapAngleDown(SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis);
-glm::quat snapRotate(glm::quat newRotation, Axis snapAxis);
+struct EasyUseInfo {
+	int currentAngleIndex;
+	int currentTranslateIndex;
+	int currentScaleIndex;
+};
 
-glm::vec3 snapTranslateUp(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
-glm::vec3 snapTranslateDown(SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
-glm::vec3 snapTranslate(glm::vec3 position);
+EasyUseInfo createEasyUse();
 
-glm::vec3 snapScaleUp(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis);
-glm::vec3 snapScaleDown(SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis);
-glm::vec3 snapScale(glm::vec3 scale);
+glm::quat snapAngleUp(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis); 
+glm::quat snapAngleDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis);
+glm::quat snapRotate(EasyUseInfo& easyUse, glm::quat newRotation, Axis snapAxis);
 
-float getSnapTranslateSize();
+glm::vec3 snapTranslateUp(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
+glm::vec3 snapTranslateDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
+glm::vec3 snapTranslate(EasyUseInfo& easyUse, glm::vec3 position);
 
-void setSnapEasyUseUp(ManipulatorMode manipulatorMode);
-void setSnapEasyUseDown(ManipulatorMode manipulatorMode);
+glm::vec3 snapScaleUp(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis);
+glm::vec3 snapScaleDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentScale, Axis translationAxis);
+glm::vec3 snapScale(EasyUseInfo& easyUse, glm::vec3 scale);
+
+float getSnapTranslateSize(EasyUseInfo& easyUse);
+
+void setSnapEasyUseUp(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode);
+void setSnapEasyUseDown(EasyUseInfo& easyUse, ManipulatorMode manipulatorMode);
 
 void snapCameraForward(std::function<void(glm::quat)> orientation);
 void snapCameraBackward(std::function<void(glm::quat)> orientation);

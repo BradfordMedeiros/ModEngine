@@ -273,15 +273,15 @@ void handleSnapEasy(objid id, bool left){
   }
   if (state.manipulatorMode == NONE || state.manipulatorMode == TRANSLATE){
     auto objPos = getGameObjectPosition(id, true);
-    auto snapAmount = left ? snapTranslateDown(state.snappingMode, objPos, state.manipulatorAxis) : snapTranslateUp(state.snappingMode, objPos, state.manipulatorAxis);
+    auto snapAmount = left ? snapTranslateDown(state.easyUse, state.snappingMode, objPos, state.manipulatorAxis) : snapTranslateUp(state.easyUse, state.snappingMode, objPos, state.manipulatorAxis);
     setGameObjectPosition(id, snapAmount);
   }else if (state.manipulatorMode == ROTATE){
     auto objRot = getGameObjectRotation(id, true);
-    auto snapAmount = left ? snapAngleDown(state.snappingMode, objRot, state.manipulatorAxis) : snapAngleUp(state.snappingMode, objRot, state.manipulatorAxis);
+    auto snapAmount = left ? snapAngleDown(state.easyUse, state.snappingMode, objRot, state.manipulatorAxis) : snapAngleUp(state.easyUse, state.snappingMode, objRot, state.manipulatorAxis);
     setGameObjectRotation(id, snapAmount);
   }else if (state.manipulatorMode == SCALE){
     auto objScale = getGameObjectScale(id);
-    auto snapAmount = left ? snapScaleDown(state.snappingMode, objScale, state.manipulatorAxis) : snapScaleUp(state.snappingMode, objScale, state.manipulatorAxis);
+    auto snapAmount = left ? snapScaleDown(state.easyUse, state.snappingMode, objScale, state.manipulatorAxis) : snapScaleUp(state.easyUse, state.snappingMode, objScale, state.manipulatorAxis);
     setGameObjectScale(id, snapAmount);  // THis might be wrong
     std::cout << "WARNING: SNAP TRANSLATE SET INPUT HANDLING MIGHT BE WRONG (world vs local)" << std::endl;
   }
@@ -302,10 +302,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   } 
 
   if (key == GLFW_KEY_UP && action == 1 && selected(state.editor) != -1){
-    setSnapEasyUseUp(state.manipulatorMode);
+    setSnapEasyUseUp(state.easyUse, state.manipulatorMode);
   }
   if (key == GLFW_KEY_DOWN && action == 1 && selected(state.editor) != -1){
-    setSnapEasyUseDown(state.manipulatorMode);
+    setSnapEasyUseDown(state.easyUse, state.manipulatorMode);
   }
 
   if (key == GLFW_KEY_K && action == 1){

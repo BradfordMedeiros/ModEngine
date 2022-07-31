@@ -567,7 +567,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
     for (auto id : selectedIds(state.editor)){
       auto selectedObj = id;
       if (selectedObj != -1){
-        float snapGridSize = getSnapTranslateSize();
+        float snapGridSize = getSnapTranslateSize(state.easyUse);
         if (snapGridSize > 0){
           auto position = getGameObjectPosition(selectedObj, false);
 
@@ -1594,9 +1594,15 @@ int main(int argc, char* argv[]){
       state.offsetY,
       glm::vec2(adjustedCoords.x, adjustedCoords.y),
       glm::vec2(state.resolution.x, state.resolution.y),
-      snapTranslate,
-      snapScale,
-      snapRotate,
+      [&state](glm::vec3 pos) -> glm::vec3 {
+        return snapTranslate(state.easyUse, pos);
+      },
+      [&state](glm::vec3 scale) -> glm::vec3 {
+        return snapScale(state.easyUse, scale);
+      },
+      [&state](glm::quat rot, Axis snapAxis) -> glm::quat {
+        return snapRotate(state.easyUse, rot, snapAxis);
+      },
       ManipulatorOptions {
          .snapManipulatorPositions = true,
          .snapManipulatorScales = true,
