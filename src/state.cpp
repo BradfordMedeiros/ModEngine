@@ -295,6 +295,28 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto axis = std::get_if<std::string>(&value);
+      if (axis == NULL){
+        modassert(false, "invalid manipulator axis type");
+        return;
+      }
+      if (*axis == "x"){
+        state.manipulatorAxis = XAXIS;
+      }else if (*axis == "y"){
+        state.manipulatorAxis = YAXIS;
+      }else if (*axis == "z"){
+        state.manipulatorAxis = ZAXIS;
+      }else if (*axis == "none"){
+        state.manipulatorAxis = NOAXIS;
+      }else{
+        modassert(false, "invalid manipulator axis option: " + *axis);
+      }
+    },
+    .object = "tools",
+    .attribute = "manipulator-axis",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto windowname = std::get_if<std::string>(&value);
       if (windowname != NULL){
         state.windowname = *windowname;
@@ -329,7 +351,55 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "fontsize",
   },
-};
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto showGrid = std::get_if<std::string>(&value);
+      if (showGrid != NULL){
+        state.showGrid = *showGrid == "true";
+        return;
+      }
+      assert(false);
+    },
+    .object = "editor",
+    .attribute = "showgrid",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto index = std::get_if<float>(&value);
+      if (index != NULL){
+        state.easyUse.currentAngleIndex = *index;
+        return;
+      }
+      assert(false);
+    },
+    .object = "editor",
+    .attribute = "snapangle-index",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto index = std::get_if<float>(&value);
+      if (index != NULL){
+        state.easyUse.currentTranslateIndex = *index;
+        return;
+      }
+      assert(false);
+    },
+    .object = "editor",
+    .attribute = "snaptranslate-index",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto index = std::get_if<float>(&value);
+      if (index != NULL){
+        state.easyUse.currentScaleIndex = *index;
+        return;
+      }
+      assert(false);
+    },
+    .object = "editor",
+    .attribute = "snapscale-index",
+  },
+};  
 
 void setState(engineState& state, ObjectValue& value, float now){
   for (auto &stateMap : mapping){
@@ -431,7 +501,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .windowname = "ModEngine",
     .iconpath = "./misc/modengine.png",
     .fontsize = 3,
-    .showGrid = true,
+    .showGrid = false,
     .easyUse = createEasyUse(),
 	};
 	return state;

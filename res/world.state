@@ -25,9 +25,10 @@ skybox:texture:./res/textures/skyboxs/desert/
 #rendering:viewport:1000 500
 #rendering:viewportoffset:320 300
 #rendering:border:./res/textures/wood.jpg
-#rendering:resolution:5000 4000
+#rendering:resolution:100 100
 #rendering:fullscreen:true
 rendering:antialiasing:msaa
+rendering:fontsize:6
 
 ### input stuff ###
 #mouse:capturecursor:true
@@ -36,3 +37,11 @@ rendering:antialiasing:msaa
 #window:icon:./res/textures/wood.jpg
 
 #skybox:color:0.1 0.1 0.1
+
+#editor:showgrid:true
+##editor:snapangle-index:10
+#editor:snaptranslate-index:3
+##editor:snapscale-index:0
+#tools:manipulator-mode:translate
+#tools:manipulator-axis:x
+

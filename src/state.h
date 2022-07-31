@@ -120,8 +120,8 @@ struct engineState {
   std::string iconpath;
 
   int fontsize;
+  
   bool showGrid;
-
   EasyUseInfo easyUse;
 };
 
