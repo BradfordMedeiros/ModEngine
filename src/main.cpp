@@ -572,15 +572,14 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
           auto position = getGameObjectPosition(selectedObj, false);
 
           if (state.manipulatorAxis == XAXIS){
-            drawGridXY(10, 10, snapGridSize, position.x, position.y, position.z);  
+            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }else if (state.manipulatorAxis == YAXIS){
-            drawGridXY(10, 10, snapGridSize, position.x, position.y, position.z);  
+            drawGridXY(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }else if (state.manipulatorAxis == ZAXIS){
-            drawGridYZ(10, 10, snapGridSize, position.x, position.y, position.z);  
+            drawGridYZ(state.gridSize, state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }else{
-            drawGrid3D(10, snapGridSize, position.x, position.y, position.z);  
+            drawGrid3D(state.gridSize, snapGridSize, position.x, position.y, position.z);  
           }
-
           glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 1.f, 1.f)));     
         }
       }

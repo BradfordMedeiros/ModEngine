@@ -39,9 +39,11 @@ rendering:fontsize:6
 #skybox:color:0.1 0.1 0.1
 
 #editor:showgrid:true
-##editor:snapangle-index:10
-#editor:snaptranslate-index:3
-##editor:snapscale-index:0
-#tools:manipulator-mode:translate
-#tools:manipulator-axis:x
+#editor:gridsize:20
+##
+###editor:snapangle-index:10
+##editor:snaptranslate-index:3
+###editor:snapscale-index:0
+##tools:manipulator-mode:translate
+##tools:manipulator-axis:x
 

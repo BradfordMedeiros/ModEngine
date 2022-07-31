@@ -365,6 +365,18 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto gridsize = std::get_if<float>(&value);
+      if (gridsize != NULL){
+        state.gridSize = *gridsize;
+        return;
+      }
+      assert(false);
+    },
+    .object = "editor",
+    .attribute = "gridsize",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto index = std::get_if<float>(&value);
       if (index != NULL){
         state.easyUse.currentAngleIndex = *index;
@@ -502,6 +514,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .iconpath = "./misc/modengine.png",
     .fontsize = 3,
     .showGrid = false,
+    .gridSize = 10,
     .easyUse = createEasyUse(),
 	};
 	return state;
