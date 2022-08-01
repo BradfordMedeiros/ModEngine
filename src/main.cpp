@@ -556,7 +556,7 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
 
 
   // Draw grid for the chunking logic if that is specified, else lots draw the snapping translations
-  if (numChunkingGridCells > 0){
+  if (showDebugInfo && numChunkingGridCells > 0){
     float offset = ((numChunkingGridCells % 2) == 0) ? (dynamicLoading.mappingInfo.chunkSize / 2) : 0;
     drawGrid3D(numChunkingGridCells, dynamicLoading.mappingInfo.chunkSize, offset, offset, offset);
     glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(0.05, 1.f, 0.f, 1.f)));
@@ -588,11 +588,13 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
 
   ////////////////
 
-  drawCoordinateSystem(100.f);
-  drawAllLines(lineData, shaderProgram, std::nullopt);
-
-  if (state.showCameras){
-    drawTraversalPositions();   
+  if (showDebugInfo){
+    drawCoordinateSystem(100.f);
+      drawAllLines(lineData, shaderProgram, std::nullopt);
+  
+    if (state.showCameras){
+      drawTraversalPositions();   
+    }    
   }
 }
 
@@ -1665,11 +1667,8 @@ int main(int argc, char* argv[]){
       channelMessages.pop();
       cBindings.onMessage(message.strTopic, message.strValue);
     }
-    if (showDebugInfo){
-      renderVector(shaderProgram, view, glm::mat4(1.0f));
-    }
 
-
+    renderVector(shaderProgram, view, glm::mat4(1.0f));
         
     portalIdCache.clear();
  
