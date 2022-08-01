@@ -30,7 +30,7 @@ FT_Library* initFreeType(){
   return &freeTypeInstance;
 }
 
-std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad){
+std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Texture& nullTexture){
   std::map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
@@ -44,9 +44,13 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
   for (int i = 0; i < 128; i++){
     auto error = FT_Load_Char(face, i, FT_LOAD_RENDER);
     modassert(!error, "ERROR - loadTtfFontMeshes - could not load char: " + std::to_string(i));
+
+
+    unsigned int width = face -> glyph -> bitmap.width;
+    unsigned int height = face -> glyph -> bitmap.rows;
+
     if (face -> glyph -> bitmap.width == 0){
-      std::cout << "0 size, skipping character: " << i << std::endl;
-     // continue;
+      std::cout << "warning 0 size, character: " << i << std::endl;
     }
 
     float glyphAdvance = face -> glyph -> advance.x / 64;
@@ -59,11 +63,16 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
     // since I'm doing all ndi, maybe I should normalize the values or something?
     float pixelToNDIScaling = 100.f; 
 
+
     fontmeshes[i] = FontParams {
-      .mesh = loadSpriteMesh("./res/textures/wood.jpg", [&face, i](std::string _) -> Texture {
+      .mesh = loadSpriteMesh("./res/textures/wood.jpg", [&face, i, width, height, &nullTexture](std::string _) -> Texture {
         char value = (char)i;
-        std::cout << "Loading character: " << value << std::endl;
-        return loadTextureDataRed(face -> glyph -> bitmap.buffer, face -> glyph -> bitmap.width, face -> glyph -> bitmap.rows);
+        std::cout << "Loading character: (" << i << ") - " << value << std::endl;
+        auto hasBuffer = face -> glyph -> bitmap.buffer != NULL;
+        if (hasBuffer){
+          return loadTextureDataRed(face -> glyph -> bitmap.buffer, width, height);
+        }
+        return nullTexture;
       }),
       .advance = glyphAdvance / pixelToNDIScaling,
       .size = glyphSize / pixelToNDIScaling,
@@ -73,27 +82,27 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
   return fontmeshes;
 }
 
-std::map<unsigned int, FontParams> loadFontMesh(std::string filepath, fontType fontInfo){
+std::map<unsigned int, FontParams> loadFontMesh(std::string filepath, fontType fontInfo, Texture& nullTexture){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
     return loadModFontMeshes(*fontToLoadPtr);
   }
   auto ttfFontToLoadPtr = std::get_if<ttfFont>(&fontInfo);
   if (ttfFontToLoadPtr != NULL){
-    return loadTtfFontMeshes(filepath, *ttfFontToLoadPtr);
+    return loadTtfFontMeshes(filepath, *ttfFontToLoadPtr, nullTexture);
   }
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
   return {};
 }
 
-std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos){
+std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Texture& nullTexture){
   std::vector<FontFamily> fontParams;
   for (auto &fontInfo : fontInfos){
     fontParams.push_back(
       FontFamily {
         .name = fontInfo.name,
         .lineSpacing = 2,
-        .asciToMesh = loadFontMesh(fontInfo.name, fontInfo.type),
+        .asciToMesh = loadFontMesh(fontInfo.name, fontInfo.type, nullTexture),
       }
     );
   }
@@ -227,7 +236,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
       numTriangles += fontMesh.numTriangles;
     }else{
       std::cout << "missed character: " << (int)character << std::endl;
-      //modassert(false, "draw sprite font mesh not found");
+      modassert(false, "draw sprite font mesh not found");
     }
     
     if (cursorIndex == i || additionaCursorIndex == i){

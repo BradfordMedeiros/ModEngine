@@ -1167,14 +1167,6 @@ int main(int argc, char* argv[]){
     interface.readFile
   );
 
-  auto fontPaths = result["font"].as<std::vector<std::string>>();
-  std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - ";
-  for (auto &fontPath : fontPaths){
-    std::cout << fontPath << " ";
-  }
-  std::cout << std::endl;
-  fontFamily = loadFontMeshes(readFontFile(fontPaths));
-
   CustomApiBindings pluginApi{
     .listSceneId = listSceneId,
     .loadScene = loadScene,
@@ -1306,6 +1298,16 @@ int main(int argc, char* argv[]){
     defaultMeshesToLoad,
     {   "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" }
   );
+
+  auto fontPaths = result["font"].as<std::vector<std::string>>();
+  std::cout << "INFO: FONT: loading font paths (" << fontPaths.size() <<") - ";
+  for (auto &fontPath : fontPaths){
+    std::cout << fontPath << " ";
+  }
+  std::cout << std::endl;
+   // this texture used for default textures, could make font mesh texture optional or something
+  fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
+
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   if (state.skybox != ""){
