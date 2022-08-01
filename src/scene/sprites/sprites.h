@@ -19,6 +19,7 @@ struct FontParams {
 
 struct FontFamily {
 	std::string name;
+	float lineSpacing;
 	std::map<unsigned int, FontParams> asciToMesh;
 };
 

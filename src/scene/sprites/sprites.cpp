@@ -39,12 +39,14 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
   }
   FT_Set_Pixel_Sizes(face, 128, 128); // what size to set this?
 
+  modassert(!FT_HAS_VERTICAL(face), "font rendering does not support vertical");
+
   for (int i = 0; i < 128; i++){
     auto error = FT_Load_Char(face, i, FT_LOAD_RENDER);
     modassert(!error, "ERROR - loadTtfFontMeshes - could not load char: " + std::to_string(i));
     if (face -> glyph -> bitmap.width == 0){
       std::cout << "0 size, skipping character: " << i << std::endl;
-      continue;
+     // continue;
     }
 
     float glyphAdvance = face -> glyph -> advance.x / 64;
@@ -90,6 +92,7 @@ std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos){
     fontParams.push_back(
       FontFamily {
         .name = fontInfo.name,
+        .lineSpacing = 2,
         .asciToMesh = loadFontMesh(fontInfo.name, fontInfo.type),
       }
     );
@@ -99,8 +102,8 @@ std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos){
 
 
 void drawSpriteZBias(GLint shaderProgram, Mesh mesh, float left, float top, float width, float height, glm::mat4 model, float zbias){
-  auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));
   auto scaleMatrix = glm::scale(glm::mat4(1.f), glm::vec3(width * 1.0f, height * 1.0f, 1.0f));
+  auto translateMatrix = glm::translate(glm::mat4(1.f), glm::vec3(left, top, zbias));
   glm::mat4 modelMatrix = model * translateMatrix * scaleMatrix; 
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
   drawMesh(mesh, shaderProgram, -1, -1, false);
@@ -205,13 +208,25 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
     if (fontMeshes.find((int)(character)) != fontMeshes.end()){
       characterAdvance = fontMeshes.at((int)(character)).advance;
       characterSizing = fontMeshes.at((int)(character)).size;
-      characterBearing = fontMeshes.at((int)(character)).bearing;
+      characterBearing = fontMeshes.at((int)(character)).bearing * offsetDelta;
       Mesh& fontMesh = fontMeshes.at((int)character).mesh;
-      //std::cout << "char = " << character << ", " << "advance = " << characterAdvance << ", size = " << print(characterSizing) << ", bearing = " << print(characterBearing) << std::endl;
-      drawSprite(shaderProgram, fontMesh, leftAlign + characterBearing.x, top + topAlign + characterBearing.y, fontSizeNdi * characterSizing.x, fontSizeNdi * characterSizing.y, model);
+      std::cout << "char = " << character << ", " << "advance = " << characterAdvance << ", size = " << print(characterSizing) << ", bearing = " << print(characterBearing) << std::endl;
+      //std::cout << "draw sprite: " << left << std::endl;
+      /* add 1 not 0.5 since size 1 => 2 ndi */
+
+      glm::vec2 centeringOffset(characterSizing.x, -1.f * characterSizing.y);
+      drawSprite(
+        shaderProgram, 
+        fontMesh, 
+        leftAlign + characterBearing.x + centeringOffset.x, 
+        top + topAlign + characterBearing.y + centeringOffset.y, 
+        fontSizeNdi * characterSizing.x, 
+        fontSizeNdi * characterSizing.y, 
+        model
+      );
       numTriangles += fontMesh.numTriangles;
     }else{
-      //std::cout << "Character: " << character << std::endl;
+      std::cout << "missed character: " << (int)character << std::endl;
       //modassert(false, "draw sprite font mesh not found");
     }
     
@@ -220,9 +235,10 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
     }
+    //std::cout << "offset delta: " << offsetDelta << std::endl;
     leftAlign += offsetDelta * characterAdvance;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
-  //std::cout << std::endl;
+  std::cout << std::endl;
 
   if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
