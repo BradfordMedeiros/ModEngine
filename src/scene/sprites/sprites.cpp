@@ -1,6 +1,11 @@
 #include "./sprites.h"
 
-std::map<unsigned int, FontParams> loadModFontMeshes(font& fontToLoad){
+struct FontParamInfo {
+  std::map<unsigned int, FontParams> fontmeshes;
+  float lineSpacing;
+};
+
+FontParamInfo loadModFontMeshes(font& fontToLoad){
   std::map<unsigned int, FontParams> fontmeshes;
   for (const auto &[ascii, font]: fontToLoad.chars) {
     assert(fontmeshes.find(ascii) == fontmeshes.end());
@@ -13,7 +18,10 @@ std::map<unsigned int, FontParams> loadModFontMeshes(font& fontToLoad){
       .bearing = glm::vec2(0.f, 0.f),
     };
   }
-  return fontmeshes;
+  return FontParamInfo{
+    .fontmeshes = fontmeshes,
+    .lineSpacing = 1.f,
+  };
 }
 
 
@@ -30,7 +38,7 @@ FT_Library* initFreeType(){
   return &freeTypeInstance;
 }
 
-std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Texture& nullTexture){
+FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Texture& nullTexture){
   std::map<unsigned int, FontParams> fontmeshes;
   FT_Library* freeType = initFreeType();
   FT_Face face;
@@ -41,6 +49,7 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
 
   modassert(!FT_HAS_VERTICAL(face), "font rendering does not support vertical");
 
+  float pixelToNDIScaling = 100.f; 
   for (int i = 0; i < 128; i++){
     auto error = FT_Load_Char(face, i, FT_LOAD_RENDER);
     modassert(!error, "ERROR - loadTtfFontMeshes - could not load char: " + std::to_string(i));
@@ -61,8 +70,6 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
 
     // this should be smarter.  1 NDI text covers -1 to 1
     // since I'm doing all ndi, maybe I should normalize the values or something?
-    float pixelToNDIScaling = 100.f; 
-
 
     fontmeshes[i] = FontParams {
       .mesh = loadSpriteMesh("./res/textures/wood.jpg", [&face, i, width, height, &nullTexture](std::string _) -> Texture {
@@ -79,10 +86,13 @@ std::map<unsigned int, FontParams> loadTtfFontMeshes(std::string filepath, ttfFo
       .bearing = glyphBearing / pixelToNDIScaling,
     };
   }
-  return fontmeshes;
+  return FontParamInfo{
+    .fontmeshes = fontmeshes,
+    .lineSpacing = face -> height / (64 * pixelToNDIScaling),
+  };;
 }
 
-std::map<unsigned int, FontParams> loadFontMesh(std::string filepath, fontType fontInfo, Texture& nullTexture){
+FontParamInfo loadFontMesh(std::string filepath, fontType fontInfo, Texture& nullTexture){
   auto fontToLoadPtr = std::get_if<font>(&fontInfo);
   if (fontToLoadPtr != NULL){
     return loadModFontMeshes(*fontToLoadPtr);
@@ -92,17 +102,18 @@ std::map<unsigned int, FontParams> loadFontMesh(std::string filepath, fontType f
     return loadTtfFontMeshes(filepath, *ttfFontToLoadPtr, nullTexture);
   }
   modassert(fontToLoadPtr != NULL, "invalid font type - NULL");
-  return {};
+  return FontParamInfo { .fontmeshes = {}, .lineSpacing = 1.f };
 }
 
 std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Texture& nullTexture){
   std::vector<FontFamily> fontParams;
   for (auto &fontInfo : fontInfos){
+    auto loadedFont = loadFontMesh(fontInfo.name, fontInfo.type, nullTexture);
     fontParams.push_back(
       FontFamily {
         .name = fontInfo.name,
-        .lineSpacing = 2,
-        .asciToMesh = loadFontMesh(fontInfo.name, fontInfo.type, nullTexture),
+        .lineSpacing = loadedFont.lineSpacing,
+        .asciToMesh = loadedFont.fontmeshes,
       }
     );
   }
@@ -166,7 +177,8 @@ float convertFontSizeToNdi(float fontsize){
   return fontsize / 1000.f;
 }
 
-int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& fontMeshes, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+  std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
   //std::cout << "Fontsizendi: " << fontSizeNdi << std::endl;
@@ -219,7 +231,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
       characterSizing = fontMeshes.at((int)(character)).size;
       characterBearing = fontMeshes.at((int)(character)).bearing * offsetDelta;
       Mesh& fontMesh = fontMeshes.at((int)character).mesh;
-      std::cout << "char = " << character << ", " << "advance = " << characterAdvance << ", size = " << print(characterSizing) << ", bearing = " << print(characterBearing) << std::endl;
+      //std::cout << "char = " << character << ", " << "advance = " << characterAdvance << ", size = " << print(characterSizing) << ", bearing = " << print(characterBearing) << std::endl;
       //std::cout << "draw sprite: " << left << std::endl;
       /* add 1 not 0.5 since size 1 => 2 ndi */
 
@@ -247,7 +259,7 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
     //std::cout << "offset delta: " << offsetDelta << std::endl;
     leftAlign += offsetDelta * characterAdvance;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
-  std::cout << std::endl;
+  //std::cout << std::endl;
 
   if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
@@ -259,8 +271,8 @@ int drawWordsRelative(GLint shaderProgram, std::map<unsigned int, FontParams>& f
   return numTriangles;
 }
 
-void drawWords(GLint shaderProgram, std::map<unsigned int, FontParams>& fontMeshes, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontMeshes, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
+void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize){
+  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
 }
 
 BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
