@@ -247,17 +247,18 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   int lineNumber = 0;
   
   int i = glm::max(0, virtualization.offset);
-//  float additionalCursorOffset = cursorIndexLeft ? 0 : offsetDelta;
-  float additionalCursorOffset = 0.f;
-
+  
   int additionaCursorIndex = highlightLength + cursorIndex;
 
   //std::cout << "rendering word: (" << word << " - " << word.size() << ") " << std::endl;
   //std::cout << "letters: " << std::endl;
 
   std::vector<ImmediateDrawingInfo> cursors;
-
   std::vector<ImmediateDrawingInfo> drawingInfo;
+
+  float lastCharacterAdvance = 0.f;
+  glm::vec2 cursorSizing(0.3f, 1.2f);
+  glm::vec2 cursorCenteringOffset(cursorSizing.x, cursorSizing.y);
   for (; i < word.size(); i++){
     char& character = word.at(i);
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
@@ -309,14 +310,15 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       std::cout << "missed character: " << (int)character << std::endl;
       modassert(false, "draw sprite font mesh not found");
     }
+
+    lastCharacterAdvance = offsetDelta * characterAdvance;
     
     if (cursorIndex == i || additionaCursorIndex == i){
-      glm::vec2 cursorSizing(0.3f, 1.2f);
-      glm::vec2 cursorCenteringOffset(cursorSizing.x, cursorSizing.y);
+      float additionalCursorOffset = cursorIndexLeft ? 0 : lastCharacterAdvance;
       ImmediateDrawingInfo cursor {
         .mesh = &fontMeshes.at('|').mesh,
         .pos = glm::vec2(
-          leftAlign , //+ cursorCenteringOffset.x + additionalCursorOffset, 
+          leftAlign + additionalCursorOffset, 
           top + topAlign + cursorSizing.y  //+ cursorCenteringOffset.y + 2.f
         ),
         .size = glm::vec2(fontSizeNdi * cursorSizing.x, fontSizeNdi * cursorSizing.y), 
@@ -324,15 +326,16 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       cursors.push_back(cursor);
     }
     //std::cout << "offset delta: " << offsetDelta << std::endl;
-    leftAlign += offsetDelta * characterAdvance;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
+    leftAlign += lastCharacterAdvance;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
   //std::cout << std::endl;
   if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
+      float additionalCursorOffset = cursorIndexLeft ? 0 : lastCharacterAdvance;
       ImmediateDrawingInfo cursor {
         .mesh = &fontMeshes.at('|').mesh,
-        .pos = glm::vec2(leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign),
-        .size = glm::vec2(fontSizeNdi * 0.3f, fontSizeNdi * 2.f), 
+        .pos = glm::vec2(leftAlign  + additionalCursorOffset, top + topAlign + cursorSizing.y),
+        .size = glm::vec2(fontSizeNdi * cursorSizing.x, fontSizeNdi * cursorSizing.y), 
       };
       cursors.push_back(cursor);
   }
