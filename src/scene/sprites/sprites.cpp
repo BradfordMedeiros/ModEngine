@@ -177,6 +177,57 @@ float convertFontSizeToNdi(float fontsize){
   return fontsize / 1000.f;
 }
 
+struct ImmediateDrawingInfo {
+  Mesh* mesh;
+  glm::vec2 pos;
+  glm::vec2 size;
+};
+
+float calcLeftOffset(ImmediateDrawingInfo& info){
+  return info.pos.x - info.size.x;
+}
+float calcRightOffset(ImmediateDrawingInfo& info){
+  return info.pos.x + info.size.x;
+}
+float calcBottomOffset(ImmediateDrawingInfo& info){
+  return info.pos.y - info.size.y;
+}
+float calcTopOffset(ImmediateDrawingInfo& info){
+  return info.pos.y + info.size.y;
+}
+glm::vec2 calcCenterOffset(std::vector<ImmediateDrawingInfo>& drawingInfo){
+  if (drawingInfo.size() == 0){
+    return glm::vec2(0.f, 0.f);
+  }
+  float maxLeft = calcLeftOffset(drawingInfo.at(0));
+  float maxRight = calcRightOffset(drawingInfo.at(0));
+  float maxBottom = calcBottomOffset(drawingInfo.at(0));
+  float maxTop = calcTopOffset(drawingInfo.at(0));
+  for (int i = 1; i < drawingInfo.size(); i++){
+    ImmediateDrawingInfo& info = drawingInfo.at(i);
+    float left = calcLeftOffset(info);
+    float right = calcRightOffset(info);
+    float top = calcTopOffset(info);
+    float bottom = calcBottomOffset(info);
+    if (left < maxLeft){
+      maxLeft = left;
+    }
+    if (right > maxRight){
+      maxRight = right;
+    }
+    if (bottom < maxBottom){
+      maxBottom = bottom;
+    }
+    if (top > maxTop){
+      maxTop = top;
+    }
+  }
+
+  float halfWidth = 0.5f * (maxRight - maxLeft);
+  float halfHeight = 0.5f * (maxTop - maxBottom);
+  return glm::vec2(-1 * maxLeft - halfWidth, -1 * maxBottom - halfHeight);
+}
+
 int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
@@ -198,6 +249,8 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
 
   //std::cout << "rendering word: (" << word << " - " << word.size() << ") " << std::endl;
   //std::cout << "letters: " << std::endl;
+
+  std::vector<ImmediateDrawingInfo> drawingInfo;
   for (; i < word.size(); i++){
     char& character = word.at(i);
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
@@ -236,16 +289,15 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       /* add 1 not 0.5 since size 1 => 2 ndi */
 
       glm::vec2 centeringOffset(characterSizing.x, -1.f * characterSizing.y);
-      drawSprite(
-        shaderProgram, 
-        fontMesh, 
-        leftAlign + characterBearing.x + centeringOffset.x, 
-        top + topAlign + characterBearing.y + centeringOffset.y, 
-        fontSizeNdi * characterSizing.x, 
-        fontSizeNdi * characterSizing.y, 
-        model
-      );
-      numTriangles += fontMesh.numTriangles;
+      ImmediateDrawingInfo info {
+        .mesh = &fontMesh,
+        .pos = glm::vec2(
+          leftAlign + characterBearing.x + centeringOffset.x,
+          top + topAlign + characterBearing.y + centeringOffset.y
+        ),
+        .size = glm::vec2(fontSizeNdi * characterSizing.x, fontSizeNdi * characterSizing.y),
+      };
+      drawingInfo.push_back(info);
     }else{
       std::cout << "missed character: " << (int)character << std::endl;
       modassert(false, "draw sprite font mesh not found");
@@ -267,6 +319,17 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
       numTriangles += fontMesh.numTriangles;      
   }
+
+  auto offsetToCenter = calcCenterOffset(drawingInfo);
+  //auto offsetToCenter = glm::vec2(0.f, 0.f);
+  for (auto &info : drawingInfo){
+      //std::cout << "offset center: " << print(offsetToCenter) << std::endl;
+      //std::cout << "info.pos.x = " << info.pos.x << ", info.size.x = " << info.size.x << std::endl;
+      drawSprite(shaderProgram, *info.mesh, info.pos.x + offsetToCenter.x, info.pos.y + offsetToCenter.y, info.size.x, info.size.y, model);
+      numTriangles += info.mesh -> numTriangles;
+  }
+
+
 
   return numTriangles;
 }
