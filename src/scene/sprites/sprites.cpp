@@ -15,7 +15,7 @@ FontParamInfo loadModFontMeshes(font& fontToLoad){
       .mesh = loadSpriteMeshSubimage(fontToLoad.image, font.x, font.y, font.width, font.height, loadTexture, true),
       .advance = 1.f,
       .size = glm::vec2(1.f, 1.f),
-      .bearing = glm::vec2(0.f, 0.f),
+      .bearing = glm::vec2(0.f, 1.f),
     };
   }
   return FontParamInfo{
@@ -86,6 +86,7 @@ FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Textu
       .bearing = glyphBearing / pixelToNDIScaling,
     };
   }
+  FT_Done_Face(face);
   return FontParamInfo{
     .fontmeshes = fontmeshes,
     .lineSpacing = face -> height / (64 * pixelToNDIScaling),
@@ -117,6 +118,7 @@ std::vector<FontFamily> loadFontMeshes(std::vector<FontToLoad> fontInfos, Textur
       }
     );
   }
+  FT_Done_FreeType(*initFreeType());
   return fontParams;
 }
 
@@ -235,7 +237,9 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   //std::cout << "Fontsizendi: " << fontSizeNdi << std::endl;
 
   auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
-  float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
+//  float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
+  float originalleftAlign = 0.f;
+
   float leftAlign = originalleftAlign;
   int numTriangles = 0;
 
@@ -243,7 +247,8 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   int lineNumber = 0;
   
   int i = glm::max(0, virtualization.offset);
-  float additionalCursorOffset = cursorIndexLeft ? 0 : offsetDelta;
+//  float additionalCursorOffset = cursorIndexLeft ? 0 : offsetDelta;
+  float additionalCursorOffset = 0.f;
 
   int additionaCursorIndex = highlightLength + cursorIndex;
 
@@ -306,10 +311,15 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     }
     
     if (cursorIndex == i || additionaCursorIndex == i){
+      glm::vec2 cursorSizing(0.3f, 1.2f);
+      glm::vec2 cursorCenteringOffset(cursorSizing.x, cursorSizing.y);
       ImmediateDrawingInfo cursor {
         .mesh = &fontMeshes.at('|').mesh,
-        .pos = glm::vec2(leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign),
-        .size = glm::vec2(fontSizeNdi * 0.3f, fontSizeNdi * 2.f), 
+        .pos = glm::vec2(
+          leftAlign , //+ cursorCenteringOffset.x + additionalCursorOffset, 
+          top + topAlign + cursorSizing.y  //+ cursorCenteringOffset.y + 2.f
+        ),
+        .size = glm::vec2(fontSizeNdi * cursorSizing.x, fontSizeNdi * cursorSizing.y), 
       };
       cursors.push_back(cursor);
     }
@@ -327,9 +337,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       cursors.push_back(cursor);
   }
 
-
   auto offsetToCenter = calcCenterOffset(drawingInfo);
-  //auto offsetToCenter = glm::vec2(0.f, 0.f);
   for (auto &info : drawingInfo){
       //std::cout << "offset center: " << print(offsetToCenter) << std::endl;
       //std::cout << "info.pos.x = " << info.pos.x << ", info.size.x = " << info.size.x << std::endl;
@@ -340,8 +348,6 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     drawSpriteZBias(shaderProgram, *cursor.mesh, cursor.pos.x + offsetToCenter.x, cursor.pos.y + offsetToCenter.y, cursor.size.x, cursor.size.y, model, -0.1f);
     numTriangles += cursor.mesh -> numTriangles; 
   }
-
-
   return numTriangles;
 }
 
