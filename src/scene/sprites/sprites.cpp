@@ -250,6 +250,8 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   //std::cout << "rendering word: (" << word << " - " << word.size() << ") " << std::endl;
   //std::cout << "letters: " << std::endl;
 
+  std::vector<ImmediateDrawingInfo> cursors;
+
   std::vector<ImmediateDrawingInfo> drawingInfo;
   for (; i < word.size(); i++){
     char& character = word.at(i);
@@ -304,21 +306,27 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     }
     
     if (cursorIndex == i || additionaCursorIndex == i){
-      Mesh& fontMesh = fontMeshes.at('|').mesh;
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
-      numTriangles += fontMesh.numTriangles;      
+      ImmediateDrawingInfo cursor {
+        .mesh = &fontMeshes.at('|').mesh,
+        .pos = glm::vec2(leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign),
+        .size = glm::vec2(fontSizeNdi * 0.3f, fontSizeNdi * 2.f), 
+      };
+      cursors.push_back(cursor);
     }
     //std::cout << "offset delta: " << offsetDelta << std::endl;
     leftAlign += offsetDelta * characterAdvance;  // @todo this spacing is hardcoded for a fix set of font size.  This needs to be proportional to fontsize.
   }
   //std::cout << std::endl;
-
   if (cursorIndex == i || additionaCursorIndex == i){
       float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
-      Mesh& fontMesh = fontMeshes.at('|').mesh;
-      drawSpriteZBias(shaderProgram, fontMesh, leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign, fontSizeNdi * 0.3f, fontSizeNdi * 2.f, model, -0.1f);
-      numTriangles += fontMesh.numTriangles;      
+      ImmediateDrawingInfo cursor {
+        .mesh = &fontMeshes.at('|').mesh,
+        .pos = glm::vec2(leftAlign - offsetDelta * 0.5f + additionalCursorOffset, top + topAlign),
+        .size = glm::vec2(fontSizeNdi * 0.3f, fontSizeNdi * 2.f), 
+      };
+      cursors.push_back(cursor);
   }
+
 
   auto offsetToCenter = calcCenterOffset(drawingInfo);
   //auto offsetToCenter = glm::vec2(0.f, 0.f);
@@ -328,7 +336,10 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       drawSprite(shaderProgram, *info.mesh, info.pos.x + offsetToCenter.x, info.pos.y + offsetToCenter.y, info.size.x, info.size.y, model);
       numTriangles += info.mesh -> numTriangles;
   }
-
+  for (auto &cursor : cursors){
+    drawSpriteZBias(shaderProgram, *cursor.mesh, cursor.pos.x + offsetToCenter.x, cursor.pos.y + offsetToCenter.y, cursor.size.x, cursor.size.y, model, -0.1f);
+    numTriangles += cursor.mesh -> numTriangles; 
+  }
 
 
   return numTriangles;
