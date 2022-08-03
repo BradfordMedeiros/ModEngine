@@ -95,7 +95,7 @@ FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Textu
   FT_Done_Face(face);
   return FontParamInfo{
     .fontmeshes = fontmeshes,
-    .lineSpacing = faceHeight * 0.8, // 1.f is "correct" but seems too big on avg
+    .lineSpacing = faceHeight * 0.8f, // 1.f is "correct" but seems too big on avg
   };;
 }
 
@@ -170,13 +170,6 @@ int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtu
   return biggestSize;
 }
 
-float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
-  bool center = align == CENTER_ALIGN;
-  // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
-  float leftAlign = !center ? left : ((left  - ((numLetters / 2) * offsetDelta) + ((numLetters % 2) ? 0.f : (0.5f * offsetDelta))));
-  return leftAlign;
-}
-
 
 // So -1 to 1 covers the whole range for both x, y
 // Apparently 1pt font is 1.333 pixels
@@ -247,6 +240,23 @@ TextDrawingInfo calcDrawInfo(std::vector<ImmediateDrawingInfo>& drawingInfo){
   };
 }
 
+glm::vec2 calcAlignOffset(std::vector<ImmediateDrawingInfo>& drawingInfo, AlignType align, float left, float top){
+  auto drawingDimensions = calcDrawInfo(drawingInfo);
+  auto offsetToCenter = drawingDimensions.centerOffset + glm::vec2(left, top);
+  if (align == CENTER_ALIGN){
+    std::cout << "center align" << std::endl;
+    return offsetToCenter;
+  }else if (align == POSITIVE_ALIGN){
+    std::cout << "pos align" << std::endl;
+    return offsetToCenter + glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
+  }else if (align == NEGATIVE_ALIGN){
+    std::cout << "negative align" << std::endl;
+    return offsetToCenter - glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
+  }
+  modassert(false, "calc align offset invalid align type");
+  return glm::vec2(0.f, 0.f);
+}
+
 int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
@@ -254,9 +264,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   //std::cout << "Fontsizendi: " << fontSizeNdi << std::endl;
 
   auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
-//  float originalleftAlign = calculateLeftAlign(left, largestLineBreakSize, offsetDelta, align);
   float originalleftAlign = 0.f;
-
   float leftAlign = originalleftAlign;
   int numTriangles = 0;
 
@@ -279,13 +287,13 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   for (; i < word.size(); i++){
     char& character = word.at(i);
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
-    if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
+    if (character == 'q' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
       lineNumber++;
       //std::cout << "not drawing this, resetting left align to: " << leftAlign << std::endl;
     }
-    if (character == '\n'){
+    if (character == 'q'){
       continue;
     }
 
@@ -328,9 +336,9 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       modassert(false, "draw sprite font mesh not found");
     }
 
-    std::cout << "linespacing: " << fontFamily.lineSpacing << std::endl;
-    std::cout << "char sizing: " << print(characterSizing) << std::endl;
-    std::cout << std::endl;
+    //std::cout << "linespacing: " << fontFamily.lineSpacing << std::endl;
+    //std::cout << "char sizing: " << print(characterSizing) << std::endl;
+    //std::cout << std::endl;
 
     lastCharacterAdvance = offsetDelta * characterAdvance;
     
@@ -361,9 +369,9 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       cursors.push_back(cursor);
   }
 
-  auto drawingDimensions = calcDrawInfo(drawingInfo);
-  //auto offsetToCenter = drawingDimensions.centerOffset + glm::vec2(left, top) + glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
-  auto offsetToCenter = drawingDimensions.centerOffset;
+  auto offsetToCenter = calcAlignOffset(drawingInfo, align, left, top);
+
+  //auto offsetToCenter = drawingDimensions.centerOffset;
   for (auto &info : drawingInfo){
       //std::cout << "offset center: " << print(offsetToCenter) << std::endl;
       //std::cout << "info.pos.x = " << info.pos.x << ", info.size.x = " << info.size.x << std::endl;
@@ -378,7 +386,14 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
 }
 
 void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize){
-  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, 14, NEGATIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
+  drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, 14, POSITIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
+}
+
+float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
+  bool center = align == CENTER_ALIGN;
+  // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
+  float leftAlign = !center ? left : ((left  - ((numLetters / 2) * offsetDelta) + ((numLetters % 2) ? 0.f : (0.5f * offsetDelta))));
+  return leftAlign;
 }
 
 BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
