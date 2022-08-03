@@ -102,7 +102,6 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
   auto tint = attr.vecAttr.vec4.find("tint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("tint");
   auto align = alignTypeFromAttr(attr);
-  assert(align != POSITIVE_ALIGN);
   auto wrap = wrapTypeFromAttr(attr);
   auto charlimit = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
  

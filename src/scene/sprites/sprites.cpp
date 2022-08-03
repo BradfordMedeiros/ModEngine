@@ -246,24 +246,28 @@ glm::vec2 calcAlignOffset(std::vector<ImmediateDrawingInfo>& drawingInfo, AlignT
   if (align == CENTER_ALIGN){
     return offsetToCenter;
   }else if (align == POSITIVE_ALIGN){
-    return offsetToCenter + glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
+    return offsetToCenter + glm::vec2(drawingDimensions.size.x * 0.5f, 0.f);
   }else if (align == NEGATIVE_ALIGN){
-    return offsetToCenter - glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
+    return offsetToCenter - glm::vec2(drawingDimensions.size.x * 0.5f, 0.f);
   }
   modassert(false, "calc align offset invalid align type");
   return glm::vec2(0.f, 0.f);
 }
 
-int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+struct DrawingInfoValues {
+  std::vector<ImmediateDrawingInfo> drawingInfo;
+  std::vector<ImmediateDrawingInfo> cursors;
+};
+
+
+DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
   std::map<unsigned int, FontParams>& fontMeshes = fontFamily.asciToMesh;
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
-  //std::cout << "Fontsizendi: " << fontSizeNdi << std::endl;
 
   auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float originalleftAlign = 0.f;
   float leftAlign = originalleftAlign;
-  int numTriangles = 0;
 
   int numCharactersOnLine = 0;
   int lineNumber = 0;
@@ -271,9 +275,6 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   int i = glm::max(0, virtualization.offset);
   
   int additionaCursorIndex = highlightLength + cursorIndex;
-
-  //std::cout << "rendering word: (" << word << " - " << word.size() << ") " << std::endl;
-  //std::cout << "letters: " << std::endl;
 
   std::vector<ImmediateDrawingInfo> cursors;
   std::vector<ImmediateDrawingInfo> drawingInfo;
@@ -284,13 +285,13 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   for (; i < word.size(); i++){
     char& character = word.at(i);
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
-    if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
+    if (character == 'q' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
       lineNumber++;
       //std::cout << "not drawing this, resetting left align to: " << leftAlign << std::endl;
     }
-    if (character == '\n'){
+    if (character == 'q'){
       continue;
     }
 
@@ -365,17 +366,49 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       };
       cursors.push_back(cursor);
   }
+      
+  return DrawingInfoValues {
+    .drawingInfo = drawingInfo,
+    .cursors = cursors,
+  };
+}
 
-  auto offsetToCenter = calcAlignOffset(drawingInfo, align, left, top);
+BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
+  //assert(type == CENTER_ALIGN);
+  float offsetDelta = 2.f;
+  auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
+  float right = offsetDelta * largestLineBreakSize;
+
+  /*std::cout << "calculate bound info text" << std::endl;
+  std::cout << "font size: " << fontSize << std::endl;
+  std::cout << "offset delta: " << offsetDelta << std::endl;
+  std::cout << "left align: " << leftAlign << std::endl;
+  std::cout << "right: " << right << std::endl;*/
+
+  auto halfWidth = (right - 0.f) / 2.f;
+  *_offset = glm::vec3(halfWidth, 0.f, 0.f);
+
+  BoundInfo info {
+    .xMin = -1 * halfWidth, .xMax = halfWidth,
+    .yMin = -1, .yMax = 1,
+    .zMin = 0, .zMax = 0.1,
+  };
+  return info;
+}
+
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+  auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
+  auto offsetToCenter = calcAlignOffset(drawingData.drawingInfo, align, left, top);
+  int numTriangles = 0;
 
   //auto offsetToCenter = drawingDimensions.centerOffset;
-  for (auto &info : drawingInfo){
+  for (auto &info : drawingData.drawingInfo){
       //std::cout << "offset center: " << print(offsetToCenter) << std::endl;
       //std::cout << "info.pos.x = " << info.pos.x << ", info.size.x = " << info.size.x << std::endl;
       drawSprite(shaderProgram, *info.mesh, info.pos.x + offsetToCenter.x, info.pos.y + offsetToCenter.y, info.size.x, info.size.y, model);
       numTriangles += info.mesh -> numTriangles;
   }
-  for (auto &cursor : cursors){
+  for (auto &cursor : drawingData.cursors){
     drawSpriteZBias(shaderProgram, *cursor.mesh, cursor.pos.x + offsetToCenter.x, cursor.pos.y + offsetToCenter.y, cursor.size.x, cursor.size.y, model, -0.1f);
     numTriangles += cursor.mesh -> numTriangles; 
   }
@@ -384,36 +417,4 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
 
 void drawWords(GLint shaderProgram, FontFamily& fontFamily, std::string word, float left, float top, unsigned int fontSize){
   drawWordsRelative(shaderProgram, fontFamily, glm::mat4(1.f), word, left, top, fontSize, 14, POSITIVE_ALIGN, TextWrap { .type = WRAP_NONE, .wrapamount = 0.f }, TextVirtualization { .maxheight = -1, .offsetx = 0, .offsety = 0 }, -1);
-}
-
-float calculateLeftAlign(float left, int numLetters, float offsetDelta, AlignType align){
-  bool center = align == CENTER_ALIGN;
-  // To center, move it back by half of the totals offsets.  If it's even, add an additional half an offset delta
-  float leftAlign = !center ? left : ((left  - ((numLetters / 2) * offsetDelta) + ((numLetters % 2) ? 0.f : (0.5f * offsetDelta))));
-  return leftAlign;
-}
-
-BoundInfo boundInfoForCenteredText(std::string word, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, glm::vec3 *_offset){
-  //assert(type == CENTER_ALIGN);
-  float offsetDelta = 2.f;
-  auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
-  float leftAlign = calculateLeftAlign(0, largestLineBreakSize, offsetDelta, align);
-  float right = leftAlign + (offsetDelta * largestLineBreakSize);
-
-  /*std::cout << "calculate bound info text" << std::endl;
-  std::cout << "font size: " << fontSize << std::endl;
-  std::cout << "offset delta: " << offsetDelta << std::endl;
-  std::cout << "left align: " << leftAlign << std::endl;
-  std::cout << "right: " << right << std::endl;*/
-
-  auto halfWidth = (right - leftAlign) / 2.f;
-
-  *_offset = glm::vec3(halfWidth - 0.5f * offsetDelta, 0.f, 0.f);
-
-  BoundInfo info {
-    .xMin = -1 * halfWidth, .xMax = halfWidth,
-    .yMin = -1, .yMax = 1,
-    .zMin = 0, .zMax = 0.1,
-  };
-  return info;
 }
