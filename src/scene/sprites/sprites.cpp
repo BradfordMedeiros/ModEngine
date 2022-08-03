@@ -86,10 +86,16 @@ FontParamInfo loadTtfFontMeshes(std::string filepath, ttfFont& fontToLoad, Textu
       .bearing = glyphBearing / pixelToNDIScaling,
     };
   }
+
+  int ymax = FT_MulFix(face -> bbox.yMax, face -> size -> metrics.y_scale) / 64;
+  int ymin = FT_MulFix(face -> bbox.yMin, face -> size -> metrics.y_scale) / 64;
+  int height = ymax - ymin;
+  auto faceHeight = height / pixelToNDIScaling;
+
   FT_Done_Face(face);
   return FontParamInfo{
     .fontmeshes = fontmeshes,
-    .lineSpacing = face -> height / (64 * pixelToNDIScaling),
+    .lineSpacing = faceHeight * 0.8, // 1.f is "correct" but seems too big on avg
   };;
 }
 
@@ -197,9 +203,15 @@ float calcBottomOffset(ImmediateDrawingInfo& info){
 float calcTopOffset(ImmediateDrawingInfo& info){
   return info.pos.y + info.size.y;
 }
-glm::vec2 calcCenterOffset(std::vector<ImmediateDrawingInfo>& drawingInfo){
+
+struct TextDrawingInfo {
+  glm::vec2 size;
+  glm::vec2 centerOffset;
+};
+
+TextDrawingInfo calcDrawInfo(std::vector<ImmediateDrawingInfo>& drawingInfo){
   if (drawingInfo.size() == 0){
-    return glm::vec2(0.f, 0.f);
+    return TextDrawingInfo{ .size = glm::vec2(0.f, 0.f), .centerOffset = glm::vec2(0.f, 0.f) };
   }
   float maxLeft = calcLeftOffset(drawingInfo.at(0));
   float maxRight = calcRightOffset(drawingInfo.at(0));
@@ -225,9 +237,14 @@ glm::vec2 calcCenterOffset(std::vector<ImmediateDrawingInfo>& drawingInfo){
     }
   }
 
-  float halfWidth = 0.5f * (maxRight - maxLeft);
-  float halfHeight = 0.5f * (maxTop - maxBottom);
-  return glm::vec2(-1 * maxLeft - halfWidth, -1 * maxBottom - halfHeight);
+  float width = maxRight - maxLeft;
+  float height = maxTop - maxBottom;
+  float halfWidth = 0.5f * width;
+  float halfHeight = 0.5f * height;
+  return TextDrawingInfo {
+    .size = glm::vec2(width, height),
+    .centerOffset = glm::vec2(-1 * maxLeft - halfWidth, -1 * maxBottom - halfHeight),
+  };
 }
 
 int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
@@ -282,7 +299,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
     if (virtualization.maxheight >= 0 && (lineNumber - virtualization.offsety >= virtualization.maxheight)){
       break;
     }
-    float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
+    float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta * fontFamily.lineSpacing;
 
     float characterAdvance = 1.f;
     glm::vec2 characterSizing(1.f, 1.f);
@@ -311,6 +328,10 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       modassert(false, "draw sprite font mesh not found");
     }
 
+    std::cout << "linespacing: " << fontFamily.lineSpacing << std::endl;
+    std::cout << "char sizing: " << print(characterSizing) << std::endl;
+    std::cout << std::endl;
+
     lastCharacterAdvance = offsetDelta * characterAdvance;
     
     if (cursorIndex == i || additionaCursorIndex == i){
@@ -330,7 +351,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   }
   //std::cout << std::endl;
   if (cursorIndex == i || additionaCursorIndex == i){
-      float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta;
+      float topAlign = (lineNumber - virtualization.offsety) * -1 * offsetDelta * fontFamily.lineSpacing;
       float additionalCursorOffset = cursorIndexLeft ? 0 : lastCharacterAdvance;
       ImmediateDrawingInfo cursor {
         .mesh = &fontMeshes.at('|').mesh,
@@ -340,7 +361,9 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       cursors.push_back(cursor);
   }
 
-  auto offsetToCenter = calcCenterOffset(drawingInfo);
+  auto drawingDimensions = calcDrawInfo(drawingInfo);
+  //auto offsetToCenter = drawingDimensions.centerOffset + glm::vec2(left, top) + glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
+  auto offsetToCenter = drawingDimensions.centerOffset;
   for (auto &info : drawingInfo){
       //std::cout << "offset center: " << print(offsetToCenter) << std::endl;
       //std::cout << "info.pos.x = " << info.pos.x << ", info.size.x = " << info.size.x << std::endl;
