@@ -1003,6 +1003,7 @@ int main(int argc, char* argv[]){
     .getCurrentTime = getTotalTime,
     .readFile = modlayerReadFile,
     .modlayerPath = modlayerPath,
+    .fontFamilyByName = fontFamilyByName,
   };
 
   auto mods = result["mods"].as<std::vector<std::string>>();

@@ -11,7 +11,7 @@
 #include "./scene/types/sound.h"
 #include "./network/servers.h"
 #include "./network/activemanager.h"
-#include "./common/sysinterface.h"
+#include "./scene/sysinterface.h"
 #include "./drawing.h"
 #include "./worldloader.h"
 #include "./netscene.h"
@@ -93,6 +93,7 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize);
 
+FontFamily& fontFamilyByName(std::string name);
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName);
 
 std::vector<std::string> listAnimations(int32_t id);

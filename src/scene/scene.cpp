@@ -100,7 +100,22 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
 
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
   if (textObj != NULL){
-    boundInfo = boundInfoForCenteredText(textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, &offset); 
+    // textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, &offset
+    boundInfo = boundInfoForCenteredText(
+      world.interface.fontFamilyByName(textObj -> fontFamily),
+      textObj -> value,
+      0,
+      0,
+      1000,
+      0, 
+      textObj -> align, 
+      textObj -> wrap, 
+      textObj -> virtualization, 
+      textObj -> cursor.cursorIndex, 
+      textObj -> cursor.cursorIndexLeft, 
+      textObj -> cursor.highlightLength,
+      &offset
+    ); 
   }
 
   PhysicsInfo info = {

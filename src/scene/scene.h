@@ -11,7 +11,7 @@
 #include "./common/mesh.h"
 #include "../translations.h"
 #include "../common/util.h"
-#include "../common/sysinterface.h"
+#include "./sysinterface.h"
 #include "./types/ainav.h"
 #include "./sprites/sprites.h"
 #include "./common/util/meshgen.h"

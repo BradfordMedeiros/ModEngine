@@ -2,7 +2,8 @@
 #define MOD_SYSINTERFACE
 
 #include <functional>
-#include "./util.h"
+#include "../common/util.h"
+#include "./sprites/sprites.h"
 
 struct SysInterface {
   std::function<void(std::string, objid, objid)> loadCScript;
@@ -11,6 +12,7 @@ struct SysInterface {
   std::function<float()> getCurrentTime;
   std::function<std::string(std::string)> readFile;
   std::function<std::string(std::string)> modlayerPath;
+  std::function<FontFamily&(std::string)> fontFamilyByName;
 };
 
 #endif
