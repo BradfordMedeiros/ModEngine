@@ -146,30 +146,6 @@ void drawSpriteAround(GLint shaderProgram, Mesh mesh, float centerX, float cente
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 
-int findLineBreakSize(std::string& word, TextWrap wrap, TextVirtualization virtualization){
-  int biggestSize = 0;
-  int currentSize = 0;
-  for (int i = glm::max(0, virtualization.offset); i < word.size(); i++){
-    if (word.at(i) == '\n' && wrap.type != WRAP_NONE){
-      if (currentSize > biggestSize){
-        biggestSize = currentSize;
-      }
-      currentSize = 0;
-    }
-    currentSize++;
-    if (wrap.type == WRAP_CHARACTERS && currentSize >= wrap.wrapamount){
-      if (currentSize > biggestSize){
-        biggestSize = currentSize;
-      }
-      currentSize = 0;
-    }
-  }
-  if (currentSize > biggestSize){
-    biggestSize = currentSize;
-  }
-  return biggestSize;
-}
-
 
 // So -1 to 1 covers the whole range for both x, y
 // Apparently 1pt font is 1.333 pixels
@@ -264,7 +240,6 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
   float fontSizeNdi = convertFontSizeToNdi(fontSize);
   float offsetDelta = 2.f * fontSizeNdi;
 
-  auto largestLineBreakSize = findLineBreakSize(word, wrap, virtualization);
   float originalleftAlign = 0.f;
   float leftAlign = originalleftAlign;
 
