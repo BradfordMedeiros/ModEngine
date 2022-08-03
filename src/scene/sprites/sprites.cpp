@@ -244,13 +244,10 @@ glm::vec2 calcAlignOffset(std::vector<ImmediateDrawingInfo>& drawingInfo, AlignT
   auto drawingDimensions = calcDrawInfo(drawingInfo);
   auto offsetToCenter = drawingDimensions.centerOffset + glm::vec2(left, top);
   if (align == CENTER_ALIGN){
-    std::cout << "center align" << std::endl;
     return offsetToCenter;
   }else if (align == POSITIVE_ALIGN){
-    std::cout << "pos align" << std::endl;
     return offsetToCenter + glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
   }else if (align == NEGATIVE_ALIGN){
-    std::cout << "negative align" << std::endl;
     return offsetToCenter - glm::vec2(drawingDimensions.size.x * 0.5f, drawingDimensions.size.y * 0.5f);
   }
   modassert(false, "calc align offset invalid align type");
@@ -287,13 +284,13 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
   for (; i < word.size(); i++){
     char& character = word.at(i);
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
-    if (character == 'q' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
+    if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
       lineNumber++;
       //std::cout << "not drawing this, resetting left align to: " << leftAlign << std::endl;
     }
-    if (character == 'q'){
+    if (character == '\n'){
       continue;
     }
 
@@ -321,7 +318,7 @@ int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 mod
       //std::cout << "draw sprite: " << left << std::endl;
       /* add 1 not 0.5 since size 1 => 2 ndi */
 
-      glm::vec2 centeringOffset(characterSizing.x, -1.f * characterSizing.y);
+      glm::vec2 centeringOffset(characterSizing.x * fontSizeNdi, -1.f * characterSizing.y * fontSizeNdi);
       ImmediateDrawingInfo info {
         .mesh = &fontMesh,
         .pos = glm::vec2(
