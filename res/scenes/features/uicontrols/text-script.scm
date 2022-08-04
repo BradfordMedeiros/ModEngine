@@ -15,13 +15,11 @@
 	(draw-text-ndi "small text" -0.5 (fontspace 3) (inexact->exact (floor (* 0.5 fontsize))) (list 1 1 1 1))
 	(draw-text-ndi "transparent" -0.5 (fontspace 4) fontsize (list 1 1 1 0.3))
 
-	;(draw-text "tes" 300 500 10)
-	;(draw-text "test" 300 600 10)
-	;(draw-text "t" 2400 980 10)
-
+	(draw-text "non-ndi text" 100 100 fontsize (list 1 1 1 1))
 )
 
 (draw-text-ndi "perma text" -0.5 (fontspace 5) fontsize (list 1 1 1 1) #t)
+(draw-text "non-ndi perma" 100 200 fontsize (list 1 1 1 1) #t)
 
 
 (define textureId #f)
@@ -46,3 +44,5 @@
 (clear-texture textureId (list 0 0 1 0.8))
 
 (draw-text-ndi "Text on Texture" 0 0 20 (list 1 1 1 1) #f textureId)
+(draw-text "Non-ndi text on Texture" 100 100 20 (list 1 1 1 1) #f textureId)
+
