@@ -909,6 +909,10 @@ void freeLine(objid lineId){
   freeLine(lineData, lineId);
 }
 
+void onGLFWEerror(int error, const char* description){
+  std::cerr << "Error: " << description << std::endl;
+}
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1049,6 +1053,7 @@ int main(int argc, char* argv[]){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   //glfwWindowHint(GLFW_DECORATED, false);
+  glfwSetErrorCallback(onGLFWEerror);
 
   monitor = glfwGetPrimaryMonitor();
   mode = glfwGetVideoMode(monitor);

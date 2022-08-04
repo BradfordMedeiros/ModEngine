@@ -55,15 +55,16 @@ T getOptValue(std::optional<optionalValueData>& value, T defaultValue){
 }
 
 template <typename T>
-std::optional<T> getOptValue2(std::optional<optionalValueData>& value){
-  return std::nullopt;
+std::optional<T> optionalTypeFromVariant (std::optional<optionalValueData>& value){
+  if (!value.has_value()){
+    return std::nullopt;
+  }
+  auto unwrappedValue = value.value();
+  auto valuePtr = std::get_if<T>(&unwrappedValue);
+  modassert(valuePtr != NULL, "optvalue2 optional value is null invalid type");
+  return *valuePtr;
 }
 
-/*  auto args = optionalOpts(
-    { OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC3, OPTIONAL_VALUE_INT}, 
-    { false, glm::vec3(1.f, 1.f, 1.f, 1.f), 100 }, 
-    { opt1, opt2, opt3 } 
-  );*/
 
 
 #endif

@@ -290,7 +290,56 @@ OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3){
   return opts;
 }
 
-
+//enum OptionalValueType { OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_INT, OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4 };
 std::vector<std::optional<optionalValueData>> optionalValues(std::vector<OptionalValueType> optValues, std::vector<SCM> scmValues){
-  return {};
+  std::vector<std::optional<optionalValueData>> values;
+  for (int scmValueIndex = 0; scmValueIndex < optValues.size(); scmValueIndex++){
+    
+    bool foundType = false;
+    for (int optValueIndex = scmValueIndex; optValueIndex < optValues.size(); optValueIndex++){
+      if (scmValueIndex >= scmValues.size()){
+        break;
+      }
+      SCM& scmValue = scmValues.at(scmValueIndex);
+      auto optType = optValues.at(optValueIndex);
+      //enum OptionalValueType { OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_INT, OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4 };
+      if (optType == OPTIONAL_VALUE_UNSIGNED_INT){
+        auto isType = scm_is_number(scmValue);
+        if (isType){
+          values.push_back(toUnsignedInt(scmValue));
+          foundType = true;
+        }
+      }else if (optType == OPTIONAL_VALUE_INT){
+        auto isType = scm_is_number(scmValue);
+        if (isType){
+          values.push_back(scm_to_int32(scmValue));
+          foundType = true;
+        }
+      }else if (optType == OPTIONAL_VALUE_STRING){
+        auto isType = scm_is_string(scmValue);
+        if (isType){
+          values.push_back(scm_to_locale_string(scmValue));
+          foundType = true;
+        }
+      }else if (optType == OPTIONAL_VALUE_BOOL){
+        auto isType = scm_is_bool(scmValue);
+        if (isType){
+          values.push_back(scm_to_bool(scmValue));
+          foundType = true;
+        }
+      }else if (optType == OPTIONAL_VALUE_VEC4){
+        auto isType = isList(scmValue);
+        if (isType){
+          values.push_back(listToVec4(scmValue));
+          foundType = true;
+        }
+      }else{
+        modassert(false, "optional values - invalid type");
+      }
+    }
+    if (!foundType){
+      values.push_back(std::nullopt); 
+    }
+  }
+  return values;
 }
