@@ -47,23 +47,23 @@ bool optValuesEqual(optionalValueData value1, optionalValueData value2){
 std::string optValueToStr(optionalValueData value1){
   auto value1UIntPtr = std::get_if<unsigned int>(&value1);
   if (value1UIntPtr != NULL){
-    return std::to_string(*value1UIntPtr);
+    return std::to_string(*value1UIntPtr) + "(uint)";
   }
   auto value1IntPtr = std::get_if<int>(&value1);
   if (value1IntPtr != NULL){
-    return std::to_string(*value1IntPtr);
+    return std::to_string(*value1IntPtr) + "(int)";
   }
   auto value1StrPtr = std::get_if<std::string>(&value1);
   if (value1StrPtr != NULL){
-    return *value1StrPtr;
+    return *value1StrPtr + "(std::string)";
   }
   auto value1BoolPtr = std::get_if<bool>(&value1);
   if (value1BoolPtr != NULL){
-    return *value1BoolPtr ? "true" : "false";
+    return std::string(*value1BoolPtr ? "true" : "false") + "(bool)";
   }
   auto value1Vec4Ptr = std::get_if<glm::vec4>(&value1);
   if (value1Vec4Ptr != NULL){
-    return print(*value1Vec4Ptr);
+    return print(*value1Vec4Ptr) + "(vec4)";
   }  
   modassert(false, "optValueToStr invalid value");
   return "";
