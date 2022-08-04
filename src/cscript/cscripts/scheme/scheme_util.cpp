@@ -289,3 +289,8 @@ OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3){
   };
   return opts;
 }
+
+
+std::vector<std::optional<optionalValueData>> optionalValues(std::vector<OptionalValueType> optValues, std::vector<SCM> scmValues){
+  return {};
+}

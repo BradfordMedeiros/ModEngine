@@ -38,4 +38,32 @@ struct OptionalValues{
 };
 OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3);
 
+enum OptionalValueType { OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_INT, OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4 };
+typedef std::variant<unsigned int, int, std::string, bool, glm::vec4> optionalValueData;
+std::vector<std::optional<optionalValueData>> optionalValues(
+  std::vector<OptionalValueType> optValues, 
+  std::vector<SCM> scmValues
+);
+template <typename T>
+T getOptValue(std::optional<optionalValueData>& value, T defaultValue){
+  if (!value.has_value()){
+    return defaultValue;
+  }
+  auto ptrValue = std::get_if<T>(&value.value());
+  modassert(ptrValue != NULL, "ptr value is null");
+  return *ptrValue;
+}
+
+template <typename T>
+std::optional<T> getOptValue2(std::optional<optionalValueData>& value){
+  return std::nullopt;
+}
+
+/*  auto args = optionalOpts(
+    { OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC3, OPTIONAL_VALUE_INT}, 
+    { false, glm::vec3(1.f, 1.f, 1.f, 1.f), 100 }, 
+    { opt1, opt2, opt3 } 
+  );*/
+
+
 #endif
