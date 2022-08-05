@@ -31,19 +31,14 @@ GameobjAttributes scmToAttributes(SCM scmAttributes);
 ObjectValue scmListToObjectValue(SCM list);
 std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues);
 
-struct OptionalValues{
-  std::optional<glm::vec4> tint;
-  std::optional<unsigned int> textureId;
-  bool perma;
-};
-OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3);
-
 enum OptionalValueType { OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_INT, OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4 };
 typedef std::variant<unsigned int, int, std::string, bool, glm::vec4> optionalValueData;
 std::vector<std::optional<optionalValueData>> optionalValues(
   std::vector<OptionalValueType> optValues, 
   std::vector<SCM> scmValues
 );
+std::string optValueToStr(optionalValueData value1);
+
 template <typename T>
 T getOptValue(std::optional<optionalValueData>& value, T defaultValue){
   if (!value.has_value()){
@@ -59,12 +54,13 @@ std::optional<T> optionalTypeFromVariant (std::optional<optionalValueData>& valu
   if (!value.has_value()){
     return std::nullopt;
   }
+
+  std::cout << "variant: " << optValueToStr(value.value()) << std::endl;
   auto unwrappedValue = value.value();
   auto valuePtr = std::get_if<T>(&unwrappedValue);
-  modassert(valuePtr != NULL, "optvalue2 optional value is null invalid type");
+  modassert(valuePtr != NULL, "optionalTypeFromVariant optional value is null invalid type");
   return *valuePtr;
 }
-
 
 
 #endif

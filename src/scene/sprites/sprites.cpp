@@ -259,13 +259,13 @@ DrawingInfoValues computeDrawingInfo(FontFamily& fontFamily, std::string word, f
   for (; i < word.size(); i++){
     char& character = word.at(i);
     //std::cout << "[" << (character == '\n' ? '@' : character) << "] ";
-    if (character == 'q' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
+    if (character == '\n' || (wrap.type == WRAP_CHARACTERS && numCharactersOnLine >= wrap.wrapamount)) {
       leftAlign = originalleftAlign;
       numCharactersOnLine = 0;
       lineNumber++;
       //std::cout << "not drawing this, resetting left align to: " << leftAlign << std::endl;
     }
-    if (character == 'q'){
+    if (character == '\n'){
       continue;
     }
 

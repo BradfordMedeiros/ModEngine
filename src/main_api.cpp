@@ -249,7 +249,7 @@ void copyObject(int32_t id){
 }
 
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi){
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addTextData(lineData, TextDrawingOptions{
     .word = word,
@@ -260,13 +260,14 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
     .permaText = permatext,
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
+    .fontFamily = fontFamily,
   });
 }
 void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false);  
+  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false, std::nullopt);  
 }
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true);  
+  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt);  
 }
 
 FontFamily& fontFamilyByName(std::string name){

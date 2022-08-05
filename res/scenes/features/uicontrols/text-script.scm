@@ -9,17 +9,17 @@
 (define fontsize 18)
 (define (fontspace index) (+ 1 (* -1 (+ 1 index) fontsize 0.01)))
 (define (onFrame)
-	(draw-text-ndi "red text" -0.5 (fontspace 0) fontsize (list 1 0 0 1))
-	(draw-text-ndi "green text" -0.5 (fontspace 1) fontsize (list 0 1 0 1))
-	(draw-text-ndi "varying text" -0.5 (fontspace 2) fontsize (list (varyingValue) (varyingValue) 1 1))
-	(draw-text-ndi "small text" -0.5 (fontspace 3) (inexact->exact (floor (* 0.5 fontsize))) (list 1 1 1 1))
+	(draw-text-ndi "red" -0.5 (fontspace 0) fontsize (list 1 0 0 1))
+	(draw-text-ndi "green" -0.5 (fontspace 1) fontsize (list 0 1 0 1))
+	(draw-text-ndi "varying color" -0.5 (fontspace 2) fontsize (list (varyingValue) (varyingValue) 1 1))
+	(draw-text-ndi "small" -0.5 (fontspace 3) (inexact->exact (floor (* 0.5 fontsize))) (list 1 1 1 1))
 	(draw-text-ndi "transparent" -0.5 (fontspace 4) fontsize (list 1 1 1 0.3))
-
-	(draw-text "non-ndi text" 100 100 fontsize (list 1 1 1 1))
+;
+	(draw-text "non-ndi" 100 100 fontsize (list 1 1 1 1))
 )
 
-(draw-text-ndi "perma text" -0.5 (fontspace 5) fontsize (list 1 1 1 1) #t)
-(draw-text "non-ndi perma" 100 200 fontsize (list 1 1 1 1) #t)
+(draw-text-ndi "perma\n(wallaby)" -0.5 (fontspace 5) fontsize "./res/fonts/Walby-Regular.ttf"  (list 1 1 1 1) #t)
+(draw-text "non-ndi perma\n(dpquake)" 100 200 fontsize "./res/fonts/dpquake.ttf" (list 5 1 1 1) #t)
 
 
 (define textureId #f)

@@ -26,6 +26,7 @@ struct TextDrawingOptions  {
   bool permaText;
   bool ndi;
   glm::vec4 tint;
+  std::optional<std::string> fontFamily;
 };
 
 struct LineByColor {
@@ -48,7 +49,7 @@ void removeLinesByOwner(LineData& lineData, objid owner);
 void drawAllLines(LineData& lineData, GLint shaderProgram, std::optional<unsigned int> textureId);
 
 void addTextData(LineData& lineData, TextDrawingOptions text);
-void drawTextData(LineData& lineData, unsigned int uiShaderProgram, FontFamily& fontfamily, std::optional<unsigned int> textureId, unsigned int height, unsigned int width);
+void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::function<FontFamily&(std::string)> fontFamilyByName, std::optional<unsigned int> textureId, unsigned int height, unsigned int width);
 
 void disposeTempBufferedData(LineData& lineData);
 

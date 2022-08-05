@@ -44,32 +44,8 @@ bool optValuesEqual(optionalValueData value1, optionalValueData value2){
 	return false;
 }
 
-std::string optValueToStr(optionalValueData value1){
-  auto value1BoolPtr = std::get_if<bool>(&value1);
-  if (value1BoolPtr != NULL){
-    return std::string(*value1BoolPtr ? "true" : "false") + "(bool)";
-  }
-  auto value1UIntPtr = std::get_if<unsigned int>(&value1);
-  if (value1UIntPtr != NULL){
-    return std::to_string(*value1UIntPtr) + "(uint)";
-  }
-  auto value1IntPtr = std::get_if<int>(&value1);
-  if (value1IntPtr != NULL){
-    return std::to_string(*value1IntPtr) + "(int)";
-  }
-  auto value1StrPtr = std::get_if<std::string>(&value1);
-  if (value1StrPtr != NULL){
-    return *value1StrPtr + "(std::string)";
-  }
-  auto value1Vec4Ptr = std::get_if<glm::vec4>(&value1);
-  if (value1Vec4Ptr != NULL){
-    return print(*value1Vec4Ptr) + "(vec4)";
-  }  
-  modassert(false, "optValueToStr invalid value");
-  return "";
-}
-
 void optionalValueDataTest(){
+  scm_init_guile();  // should be organized better to work w/ other unit tests...
 	std::vector<optsTestData> optsTests = {
     optsTestData {    
      	.types =  {},
@@ -100,6 +76,16 @@ void optionalValueDataTest(){
       .types =  { OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4  },
       .passedArgs = { SCM_UNSPECIFIED, SCM_UNDEFINED },
       .expectedValues = { std::nullopt, std::nullopt },
+    },
+    optsTestData {    
+      .types =  { OPTIONAL_VALUE_STRING },
+      .passedArgs = { scm_from_locale_string("hello") },
+      .expectedValues = { "hello" },
+    },
+    optsTestData {    
+      .types =  {OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_UNSIGNED_INT},
+      .passedArgs = { scm_from_utf8_string("hello"), vec4ToScmList(glm::vec4(1.f, 1.f, 1.f, 1.f)), scm_from_bool(false), scm_from_int32(10) },
+      .expectedValues = { "hello", glm::vec4(1.f, 1.f, 1.f, 1.f), false, (unsigned int)10 },
     },
   };
 
