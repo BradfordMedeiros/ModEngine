@@ -96,6 +96,11 @@ void optionalValueDataTest(){
      	.passedArgs = { SCM_BOOL_T },
      	.expectedValues = { true },
     },
+    optsTestData {    
+      .types =  { OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4  },
+      .passedArgs = { SCM_UNSPECIFIED, SCM_UNDEFINED },
+      .expectedValues = { std::nullopt, std::nullopt },
+    },
   };
 
   for (int i = 0; i < optsTests.size(); i++){

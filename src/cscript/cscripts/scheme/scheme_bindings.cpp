@@ -169,15 +169,35 @@ SCM removeObject(SCM value){
 
 void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi);
 SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3){
+  auto newOpts = optionalValues({ OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_UNSIGNED_INT }, { opt1, opt2, opt3 });
+
+  //auto tint2 = optionalTypeFromVariant<glm::vec4>(newOpts.at(0));
+  //auto perma2 = getOptValue<bool>(newOpts.at(1), false);
+  //auto textureId2 = optionalTypeFromVariant<unsigned int>(newOpts.at(2));
+//
   auto opts = optionalOpts(opt1, opt2, opt3);   // color, perma, texture id
+  bool perma = opts.perma;
+  auto tint = opts.tint;
+  auto textureId = opts.textureId;
+
+ // _drawText(
+ //   scm_to_locale_string(word), 
+ //   scm_to_double(left), 
+ //   scm_to_double(top), 
+ //   toUnsignedInt(fontSize),
+ //   perma2,
+ //   tint2,
+ //   textureId2,
+ //   false
+ // );
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
     scm_to_double(top), 
     toUnsignedInt(fontSize),
-    opts.perma,
-    opts.tint,
-    opts.textureId,
+    perma,
+    tint,
+    textureId,
     false
   );
   return SCM_UNSPECIFIED;
@@ -812,6 +832,7 @@ SCM scmInstallMod(SCM name){
 void (*_uninstallMod)(std::string layer);
 SCM scmUninstallMod(SCM name){
   _uninstallMod(scm_to_locale_string(name));
+  return SCM_UNSPECIFIED;
 }
 std::vector<std::string> (*_listMods)();
 SCM scmListMods(){
