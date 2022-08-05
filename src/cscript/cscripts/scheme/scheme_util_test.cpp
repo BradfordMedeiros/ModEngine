@@ -11,6 +11,12 @@ struct optsTestData {
 //typedef std::variant<unsigned int, int, std::string, bool, glm::vec4> optionalValueData;
 
 bool optValuesEqual(optionalValueData value1, optionalValueData value2){
+  auto value1BoolPtr = std::get_if<bool>(&value1);
+  auto value2BoolPtr = std::get_if<bool>(&value2);
+  if (value1BoolPtr != NULL && value2BoolPtr != NULL){
+    return *value1BoolPtr == *value2BoolPtr;
+  }
+
   auto value1UIntPtr = std::get_if<unsigned int>(&value1);
   auto value2UIntPtr = std::get_if<unsigned int>(&value2);
   if (value1UIntPtr != NULL && value2UIntPtr != NULL){
@@ -29,12 +35,6 @@ bool optValuesEqual(optionalValueData value1, optionalValueData value2){
     return *value1StrPtr == *value2StrPtr;
   }
 
-  auto value1BoolPtr = std::get_if<bool>(&value1);
-  auto value2BoolPtr = std::get_if<bool>(&value2);
-  if (value1BoolPtr != NULL && value2BoolPtr != NULL){
-    return *value1BoolPtr == *value2BoolPtr;
-  }
-
   auto value1Vec4Ptr = std::get_if<glm::vec4>(&value1);
   auto value2Vec4Ptr = std::get_if<glm::vec4>(&value2);
   if (value1Vec4Ptr != NULL && value2Vec4Ptr != NULL){
@@ -45,6 +45,10 @@ bool optValuesEqual(optionalValueData value1, optionalValueData value2){
 }
 
 std::string optValueToStr(optionalValueData value1){
+  auto value1BoolPtr = std::get_if<bool>(&value1);
+  if (value1BoolPtr != NULL){
+    return std::string(*value1BoolPtr ? "true" : "false") + "(bool)";
+  }
   auto value1UIntPtr = std::get_if<unsigned int>(&value1);
   if (value1UIntPtr != NULL){
     return std::to_string(*value1UIntPtr) + "(uint)";
@@ -56,10 +60,6 @@ std::string optValueToStr(optionalValueData value1){
   auto value1StrPtr = std::get_if<std::string>(&value1);
   if (value1StrPtr != NULL){
     return *value1StrPtr + "(std::string)";
-  }
-  auto value1BoolPtr = std::get_if<bool>(&value1);
-  if (value1BoolPtr != NULL){
-    return std::string(*value1BoolPtr ? "true" : "false") + "(bool)";
   }
   auto value1Vec4Ptr = std::get_if<glm::vec4>(&value1);
   if (value1Vec4Ptr != NULL){
@@ -82,14 +82,19 @@ void optionalValueDataTest(){
      	.expectedValues = { std::nullopt, std::nullopt, std::nullopt },
     },
     optsTestData {    
+      .types =  { OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_INT },
+      .passedArgs = { vec4ToScmList(glm::vec4(2.f, 3.f, 4.f, 1.f)), scm_from_int32(45) },
+      .expectedValues = { std::nullopt, glm::vec4(2.f, 3.f, 4.f, 1.f), 45 },
+    },
+    optsTestData {    
      	.types =  { OPTIONAL_VALUE_BOOL  },
      	.passedArgs = {  },
      	.expectedValues = { std::nullopt },
     },
     optsTestData {    
      	.types =  { OPTIONAL_VALUE_BOOL  },
-     	.passedArgs = { scm_from_bool(false) },
-     	.expectedValues = { false },
+     	.passedArgs = { SCM_BOOL_T },
+     	.expectedValues = { true },
     },
   };
 
@@ -99,6 +104,17 @@ void optionalValueDataTest(){
     if (args.size() != optTest.expectedValues.size()){
    	 	throw std::logic_error(std::string("actual size: ") + std::to_string(args.size()) + ", expected: " + std::to_string(optTest.expectedValues.size()));
   	}
+
+    //std::cout << "args: i: " << i << " - ";
+    //for (auto &arg : args){
+    //  std::cout << "[" << (!arg.has_value() ? "nullopt" : optValueToStr(arg.value())) << "] ";
+    //}
+    //std::cout << std::endl;
+    //std::cout << "expected: i: " << i << " - ";
+    //for (auto &arg : optTest.expectedValues){
+    //  std::cout << "[" << (!arg.has_value() ? "nullopt" : optValueToStr(arg.value())) << "] ";
+    //}
+    //std::cout << std::endl << std::endl;
 
   	for (int valueIndex = 0; valueIndex < optTest.expectedValues.size(); valueIndex++){
   		auto expectedValue = optTest.expectedValues.at(valueIndex);
