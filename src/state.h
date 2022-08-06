@@ -101,6 +101,7 @@ struct engineState {
 
   std::string skybox;
   glm::vec3 skyboxcolor;
+  bool showSkybox;
 
   bool enableDof;
 

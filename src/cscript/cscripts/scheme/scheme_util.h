@@ -54,8 +54,7 @@ std::optional<T> optionalTypeFromVariant (std::optional<optionalValueData>& valu
   if (!value.has_value()){
     return std::nullopt;
   }
-
-  std::cout << "variant: " << optValueToStr(value.value()) << std::endl;
+  //std::cout << "variant: " << optValueToStr(value.value()) << std::endl;
   auto unwrappedValue = value.value();
   auto valuePtr = std::get_if<T>(&unwrappedValue);
   modassert(valuePtr != NULL, "optionalTypeFromVariant optional value is null invalid type");

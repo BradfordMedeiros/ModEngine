@@ -242,7 +242,7 @@ std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues){
 
 std::optional<optionalValueData> getScmValueIfType(OptionalValueType optType, SCM& scmValue){
   if (optType == OPTIONAL_VALUE_STRING){
-    std::cout << "opt type: string" << std::endl;
+    //std::cout << "opt type: string" << std::endl;
     auto isType = scm_is_string(scmValue);
     if (isType){
       auto value = scm_to_locale_string(scmValue);
@@ -251,7 +251,7 @@ std::optional<optionalValueData> getScmValueIfType(OptionalValueType optType, SC
     }
   }
   else if (optType == OPTIONAL_VALUE_BOOL){
-    std::cout << "opt type: bool" << std::endl;
+    //std::cout << "opt type: bool" << std::endl;
     auto isType = scm_is_bool(scmValue);
     if (isType){
       bool value = scm_to_bool(scmValue);
@@ -261,19 +261,19 @@ std::optional<optionalValueData> getScmValueIfType(OptionalValueType optType, SC
       return false;
     }
   }else if (optType == OPTIONAL_VALUE_UNSIGNED_INT){
-    std::cout << "opt type: unsigned int" << std::endl;
+    //std::cout << "opt type: unsigned int" << std::endl;
     auto isType = scm_is_number(scmValue);
     if (isType){
       return toUnsignedInt(scmValue);
     }
   }else if (optType == OPTIONAL_VALUE_INT){
-    std::cout << "opt type: int" << std::endl;
+    //std::cout << "opt type: int" << std::endl;
     auto isType = scm_is_number(scmValue);
     if (isType){
       return scm_to_int32(scmValue);
     }
   }else if (optType == OPTIONAL_VALUE_VEC4){
-    std::cout << "opt type: vec4" << std::endl;
+    //std::cout << "opt type: vec4" << std::endl;
     auto isType = isList(scmValue);
     if (isType){
       return listToVec4(scmValue);
@@ -298,13 +298,13 @@ std::vector<std::optional<optionalValueData>> optionalValues(std::vector<Optiona
     auto value = getScmValueIfType(optValues.at(optTypeIndex), scmValue);
     if (value.has_value()){
       values.push_back(value);
-      std::cout << "pushing back: " << optValueToStr(value.value()) << std::endl;
+      //std::cout << "pushing back: " << optValueToStr(value.value()) << std::endl;
       scmValueIndex++;
     }else{
-      std::cout << "push_back nullopt " << std::endl;
+      //std::cout << "push_back nullopt " << std::endl;
       values.push_back(std::nullopt);
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
   }
   return values;
 }

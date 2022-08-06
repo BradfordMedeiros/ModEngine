@@ -773,7 +773,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
-    if (renderStep.renderSkybox){
+    if (state.showSkybox && renderStep.renderSkybox){
       glDepthMask(GL_FALSE);
       renderSkybox(renderStep.shader, context.view, context.cameraTransform.position);  // Probably better to render this at the end 
       glDepthMask(GL_TRUE);    

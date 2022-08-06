@@ -150,6 +150,17 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto showSkybox = std::get_if<std::string>(&value);
+      if (showSkybox != NULL){
+        std::cout << "state: update showSkybox: " << state.showSkybox << std::endl;
+        state.showSkybox = *showSkybox == "true"; 
+      }
+    },
+    .object = "skybox",
+    .attribute = "enable",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto dovEnabled = std::get_if<std::string>(&value);
       if (dovEnabled != NULL){
         std::cout << "state: update dof: " << *dovEnabled << std::endl;
@@ -510,6 +521,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .activeCameraData = NULL,
     .skybox = "",
     .skyboxcolor = glm::vec3(1.f, 1.f, 1.f),
+    .showSkybox = true,
     .enableDof = false,
     .swapInterval = 0,
     .fullscreen = false,
