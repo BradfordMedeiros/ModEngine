@@ -1,21 +1,11 @@
 #include "./obj_light.h"
 
-LightType getLightType(std::string type){
-  if (type == "spotlight"){
-    return LIGHT_SPOTLIGHT;
-  }
-  if (type == "directional"){
-    return LIGHT_DIRECTIONAL;
-  }
-  return LIGHT_POINT;
-}
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto lightType = attr.stringAttributes.find("type") == attr.stringAttributes.end() ? LIGHT_POINT : getLightType(attr.stringAttributes.at("type"));
-  auto maxangle = (lightType != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
-  GameObjectLight obj {
-    .type = lightType,
-    .maxangle = maxangle, 
-  };
+  GameObjectLight obj {};
+  attrSet(attr, (int*)&obj.type, { LIGHT_POINT, LIGHT_SPOTLIGHT, LIGHT_DIRECTIONAL }, { "point", "spotlight", "directional" }, LIGHT_POINT, "type", true);
+
+  auto maxangle = (obj.type != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
+  obj.maxangle = maxangle;
 
   attrSet(attr, &obj.color, glm::vec3(1.f, 1.f, 1.f), "color");
   // constant, linear, quadratic
