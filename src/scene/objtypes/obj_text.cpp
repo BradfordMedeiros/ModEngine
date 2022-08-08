@@ -1,23 +1,25 @@
 #include "./obj_text.h"
 
-AlignType alignTypeFromAttr(GameobjAttributes& attr){
-  auto hasAlign = attr.stringAttributes.find("align") != attr.stringAttributes.end();
-  auto align = CENTER_ALIGN;
-  if (hasAlign){
-    auto alignValue = attr.stringAttributes.at("align");
-    if (alignValue == "left"){
-      align = NEGATIVE_ALIGN;
-    }else if (alignValue == "center"){
-      align = CENTER_ALIGN;
-    }else if (alignValue == "right"){
-      align = POSITIVE_ALIGN;
-    }else{
-      std::cout << "text: invalid align value: " << alignValue << std::endl;
-      assert(false);
+void attrSet(GameobjAttributes& attr, int* _align, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    auto value = attr.stringAttributes.at(field);
+    bool foundEnum = false;
+    for (int i = 0; i < enumStrings.size(); i++){
+      if (enumStrings.at(i) == value){
+        *_align = enums.at(i);
+        foundEnum = true;
+        break;
+      }
     }
+    modassert(foundEnum || !strict, std::string("invalid enum type for ") + field + " - " + value);
+    if (!foundEnum){
+      *_align = defaultValue;
+    }
+  }else{
+    *_align = defaultValue;
   }
-  return align;  
 }
+
 
 std::string alignTypeToStr(AlignType type){
   if (type == NEGATIVE_ALIGN){
@@ -34,30 +36,10 @@ std::string alignTypeToStr(AlignType type){
 }
 
 TextWrap wrapTypeFromAttr(GameobjAttributes& attr){
-  auto hasWrapType = attr.stringAttributes.find("wraptype") != attr.stringAttributes.end();
-  auto wrapType = WRAP_NONE;
-  int wrapamount = -1;
-  if (hasWrapType){
-    auto wrapContent = attr.stringAttributes.at("wraptype");
-    if (wrapContent == "char"){
-      wrapType = WRAP_CHARACTERS;
-    }else if (wrapContent == "none"){
-      // do nothing
-    }else{
-      std::cout << "invalid wrap type: " << wrapContent << std::endl;
-      assert(false);
-    }
-  }
-
-  auto hasWrapAmount = attr.numAttributes.find("wrapamount") != attr.numAttributes.end();
-  if (hasWrapAmount){
-    wrapamount = attr.numAttributes.at("wrapamount");
-  }
- 
-  return TextWrap {
-    .type = wrapType,
-    .wrapamount = wrapamount,
-  };
+  auto wrap = TextWrap {};
+  attrSet(attr, (int*)&wrap.type, { WRAP_NONE, WRAP_CHARACTERS }, { "none", "char" }, WRAP_NONE, "wraptype", true);
+  attrSet(attr, &wrap.wrapamount, -1, "wrapamount");
+  return wrap;
 }
 std::string wrapTypeToStr(TextWrap wrap){
   if (wrap.type  == WRAP_NONE){
@@ -78,14 +60,13 @@ void restrictWidth(GameObjectUIText& text){
 }
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto align = alignTypeFromAttr(attr);
   auto wrap = wrapTypeFromAttr(attr);
-
   GameObjectUIText obj {
-    .align = align,
     .wrap = wrap,
   };
   
+  attrSet(attr, (int*)&obj.align, { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN }, { "left", "center", "right" }, CENTER_ALIGN, "align", true);
+
   attrSet(attr, &obj.cursor.cursorIndexLeft, "left", "right", true, "cursor-dir", true);
   attrSet(attr, &obj.virtualization.maxheight, -1, "maxheight");
   attrSet(attr, &obj.virtualization.offsetx, 0, "offsetx");
@@ -128,7 +109,7 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   attrSet(attributes, &textObj.tint, "tint");
 
   if (attributes.stringAttributes.find("align") != attributes.stringAttributes.end()){
-    textObj.align = alignTypeFromAttr(attributes);
+    attrSet(attributes, (int*)&textObj.align, { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN }, { "left", "center", "right" }, CENTER_ALIGN, "align", true);
   }
   
   auto wrap = wrapTypeFromAttr(attributes);
