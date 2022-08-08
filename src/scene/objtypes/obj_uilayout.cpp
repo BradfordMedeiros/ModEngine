@@ -29,14 +29,6 @@ UILayoutFlowType layoutAlignFromAttr(GameobjAttributes& attr, const char* attrna
   return alignType;
 }
 
-float getMargin(GameobjAttributes& attr, const char* attrname, float defaultMargin, bool* valueSpecified){
-  bool marginTypeSpecified = attr.numAttributes.find(attrname) != attr.numAttributes.end();
-  *valueSpecified = marginTypeSpecified;
-  if (!marginTypeSpecified){
-    return defaultMargin;
-  }
-  return attr.numAttributes.at(attrname);
-}
 
 LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos, LayoutContentAlignmentType defaultType){
   bool hasAlign = attr.stringAttributes.find(attrname) != attr.stringAttributes.end();
@@ -72,6 +64,15 @@ LayoutContentSpacing layoutContentSpacing(GameobjAttributes& attr, const char* a
   return LayoutContentSpacing_Pack;
 }
 
+float getMargin(GameobjAttributes& attr, const char* attrname, float defaultMargin, bool* valueSpecified){
+  bool marginTypeSpecified = attr.numAttributes.find(attrname) != attr.numAttributes.end();
+  *valueSpecified = marginTypeSpecified;
+  if (!marginTypeSpecified){
+    return defaultMargin;
+  }
+  return attr.numAttributes.at(attrname);
+}
+
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
   auto minSpacing = attr.numAttributes.find("min-spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("min-spacing");
@@ -82,7 +83,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     elements = split(attr.stringAttributes.at("elements"), ',');
   }
   auto showBackpanel = (attr.stringAttributes.find("backpanel") != attr.stringAttributes.end() && attr.stringAttributes.at("backpanel") == "true");
-  auto tint = attr.vecAttr.vec4.find("tint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("tint");
   
   bool marginSpecified = attr.numAttributes.find("margin") != attr.numAttributes.end();
   auto margin = !marginSpecified ? 0.f : attr.numAttributes.at("margin");
@@ -151,6 +151,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .yMin = 0, .yMax = 0,
     .zMin = 0, .zMax = 0,
   };
+
   GameObjectUILayout obj{
     .type = type,
     .spacing = spacing,
@@ -159,7 +160,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .boundInfo = boundInfo,
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
     .showBackpanel = showBackpanel,
-    .tint = tint,
     .marginValues = marginValues,
     .anchor = anchor,
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
@@ -172,6 +172,8 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .contentAlign = contentAlign,
     .contentSpacing = contentSpacing,
   };
+
+  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
   return obj;
 }
 

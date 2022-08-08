@@ -70,26 +70,6 @@ std::string wrapTypeToStr(TextWrap wrap){
   return "";
 }
 
-float valueFromAttr(GameobjAttributes& attr, const char* key, float defaultValue){
-  if (attr.numAttributes.find(key) == attr.numAttributes.end()){
-    return defaultValue;
-  }
-  return attr.numAttributes.at(key);
-}
-TextVirtualization virtualizationFromAttr(GameobjAttributes& attr){
-  float charlimit = valueFromAttr(attr, "charlimit", -1);
-  float maxheight = valueFromAttr(attr, "maxheight", -1);
-  float offsetx = valueFromAttr(attr, "offsetx", 0);
-  float offsety = valueFromAttr(attr, "offsety", 0);
-  int offset = valueFromAttr(attr, "offset", 0);
-  return TextVirtualization{
-    .maxheight = maxheight,
-    .offsetx = offsetx,
-    .offsety = offsety,
-    .offset = offset,
-  };
-}
-
 void restrictWidth(GameObjectUIText& text){
   std::cout << "value: " << text.value << " - " << text.value.size() << std::endl;
   if (text.value.size() > text.charlimit){
@@ -107,11 +87,15 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIText obj {
     .align = align,
     .wrap = wrap,
-    .virtualization = virtualizationFromAttr(attr),
     .cursor = UiTextCursor {
       .cursorIndexLeft = cursorIndexLeft,
     },
   };
+  
+  attrSet(attr, &obj.virtualization.maxheight, -1, "maxheight");
+  attrSet(attr, &obj.virtualization.offsetx, 0, "offsetx");
+  attrSet(attr, &obj.virtualization.offsety, 0, "offsety");
+  attrSet(attr, &obj.virtualization.offset, 0, "offset");
   
   attrSet(attr, &obj.cursor.cursorIndex, -1, "cursor");
   attrSet(attr, &obj.cursor.highlightLength, 0, "cursor-highlight");
