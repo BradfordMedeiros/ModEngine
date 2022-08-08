@@ -1,14 +1,12 @@
 #include "./obj_util.h"
 
 GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes){
-  auto onFocus = attr.stringAttributes.find("focus") != attr.stringAttributes.end() ? attr.stringAttributes.at("focus") : "";
-  auto onBlur = attr.stringAttributes.find("blur") != attr.stringAttributes.end() ? attr.stringAttributes.at("blur") : "";
   GameObjectUICommon common {
     .mesh = meshes.at("./res/models/controls/input.obj").mesh,
     .isFocused = false,
-    .onFocus = onFocus,
-    .onBlur = onBlur,
   };
+  attrSet(attr, &common.onFocus, "", "focus");
+  attrSet(attr, &common.onBlur, "", "blur");
   return common;
 }
 
@@ -22,19 +20,14 @@ void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs,
 }
 
 TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded){
-  glm::vec2 textureoffset = attr.stringAttributes.find("textureoffset") == attr.stringAttributes.end() ? glm::vec2(0.f, 0.f) : parseVec2(attr.stringAttributes.at("textureoffset"));
-  glm::vec2 texturetiling = attr.stringAttributes.find("texturetiling") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturetiling"));
-  glm::vec2 texturesize = attr.stringAttributes.find("texturesize") == attr.stringAttributes.end() ? glm::vec2(1.f, 1.f) : parseVec2(attr.stringAttributes.at("texturesize"));
-  std::string textureOverloadName = attr.stringAttributes.find("texture") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("texture");
-  int textureOverloadId = textureOverloadName == "" ? -1 : ensureTextureLoaded(textureOverloadName).textureId;
+  TextureInformation info {};
+  attrSet(attr, &info.textureoffset, glm::vec2(0.f, 0.f), "textureoffset");
+  attrSet(attr, &info.texturetiling, glm::vec2(1.f, 1.f), "texturetiling");
+  attrSet(attr, &info.texturesize, glm::vec2(1.f, 1.f), "texturesize");
+  attrSet(attr, &info.textureOverloadName, "", "texture");
+  int textureOverloadId = info.textureOverloadName == "" ? -1 : ensureTextureLoaded(info.textureOverloadName).textureId;
+  info.textureOverloadId = textureOverloadId;
 
-  TextureInformation info {
-    .textureoffset = textureoffset,
-    .texturetiling = texturetiling,
-    .texturesize = texturesize,
-    .textureOverloadName = textureOverloadName,
-    .textureOverloadId = textureOverloadId,
-  };
   return info;
 }
 
@@ -132,6 +125,15 @@ void attrSet(GameobjAttributes& attr, glm::vec4* _value, const char* field){
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field){
   if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
     *_value = attr.vecAttr.vec4.at(field);
+  }else{
+    *_value = defaultValue;
+  }
+}
+
+void attrSet(GameobjAttributes& attr, glm::vec2* _value, glm::vec2 defaultValue, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *_value = parseVec2(attr.stringAttributes.at(field));
+
   }else{
     *_value = defaultValue;
   }

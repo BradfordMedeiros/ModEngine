@@ -64,5 +64,6 @@ void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char*
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, const char* field);
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field);
+void attrSet(GameobjAttributes& attr, glm::vec2* _value, glm::vec2 defaultValue, const char* field);
 
 #endif
