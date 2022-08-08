@@ -1,26 +1,5 @@
 #include "./obj_text.h"
 
-void attrSet(GameobjAttributes& attr, int* _align, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    auto value = attr.stringAttributes.at(field);
-    bool foundEnum = false;
-    for (int i = 0; i < enumStrings.size(); i++){
-      if (enumStrings.at(i) == value){
-        *_align = enums.at(i);
-        foundEnum = true;
-        break;
-      }
-    }
-    modassert(foundEnum || !strict, std::string("invalid enum type for ") + field + " - " + value);
-    if (!foundEnum){
-      *_align = defaultValue;
-    }
-  }else{
-    *_align = defaultValue;
-  }
-}
-
-
 std::string alignTypeToStr(AlignType type){
   if (type == NEGATIVE_ALIGN){
     return "left";
@@ -35,12 +14,6 @@ std::string alignTypeToStr(AlignType type){
   return "";
 }
 
-TextWrap wrapTypeFromAttr(GameobjAttributes& attr){
-  auto wrap = TextWrap {};
-  attrSet(attr, (int*)&wrap.type, { WRAP_NONE, WRAP_CHARACTERS }, { "none", "char" }, WRAP_NONE, "wraptype", true);
-  attrSet(attr, &wrap.wrapamount, -1, "wrapamount");
-  return wrap;
-}
 std::string wrapTypeToStr(TextWrap wrap){
   if (wrap.type  == WRAP_NONE){
     return "none";
@@ -60,11 +33,11 @@ void restrictWidth(GameObjectUIText& text){
 }
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto wrap = wrapTypeFromAttr(attr);
-  GameObjectUIText obj {
-    .wrap = wrap,
-  };
+  GameObjectUIText obj {};
   
+  attrSet(attr, (int*)&obj.wrap.type, { WRAP_NONE, WRAP_CHARACTERS }, { "none", "char" }, WRAP_NONE, "wraptype", true);
+  attrSet(attr, &obj.wrap.wrapamount, -1, "wrapamount");
+
   attrSet(attr, (int*)&obj.align, { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN }, { "left", "center", "right" }, CENTER_ALIGN, "align", true);
 
   attrSet(attr, &obj.cursor.cursorIndexLeft, "left", "right", true, "cursor-dir", true);
@@ -112,14 +85,12 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
     attrSet(attributes, (int*)&textObj.align, { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN }, { "left", "center", "right" }, CENTER_ALIGN, "align", true);
   }
   
-  auto wrap = wrapTypeFromAttr(attributes);
   if (attributes.stringAttributes.find("wraptype") != attributes.stringAttributes.end()){
-    textObj.wrap.type = wrap.type;
+    attrSet(attributes, (int*)&textObj.wrap.type, { WRAP_NONE, WRAP_CHARACTERS }, { "none", "char" }, WRAP_NONE, "wraptype", true);
   }
   if (attributes.numAttributes.find("wrapamount") != attributes.numAttributes.end()){
-    textObj.wrap.wrapamount = wrap.wrapamount;
+    attrSet(attributes, &textObj.wrap.wrapamount, -1, "wrapamount");
   }
-
 
   attrSet(attributes, &textObj.virtualization.maxheight, "maxheight");
   attrSet(attributes, &textObj.virtualization.offsetx, "offsetx");

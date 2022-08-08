@@ -193,3 +193,23 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
   *_textureId = ensureTextureLoaded(textureToLoad).textureId;
   *_textureName = textureToLoad;
 }
+
+void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    auto value = attr.stringAttributes.at(field);
+    bool foundEnum = false;
+    for (int i = 0; i < enumStrings.size(); i++){
+      if (enumStrings.at(i) == value){
+        *_value = enums.at(i);
+        foundEnum = true;
+        break;
+      }
+    }
+    modassert(foundEnum || !strict, std::string("invalid enum type for ") + field + " - " + value);
+    if (!foundEnum){
+      *_value = defaultValue;
+    }
+  }else{
+    *_value = defaultValue;
+  }
+}
