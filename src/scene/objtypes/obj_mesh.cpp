@@ -20,10 +20,11 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
-    .discardAmount = attr.numAttributes.find("discard") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("discard"),
-    .emissionAmount = attr.numAttributes.find("emission") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("emission"),
-    .tint = attr.vecAttr.vec4.find("tint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("tint"),
   };
+
+  attrSet(attr, &obj.discardAmount, 0.f, "discard");
+  attrSet(attr, &obj.emissionAmount, 0.f, "emission");
+  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
   return obj;
 }
 

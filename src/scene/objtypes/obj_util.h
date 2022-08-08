@@ -53,4 +53,13 @@ TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Text
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture);
 void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util);
 
+void attrSet(GameobjAttributes& attr, bool* value, const char* field);
+void attrSet(GameobjAttributes& attr, std::string* value, const char* field);
+void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field);
+void attrSet(GameobjAttributes& attr, float* value, const char* field);
+void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field);
+void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field);
+void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field);
+void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field);
+
 #endif

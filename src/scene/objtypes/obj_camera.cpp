@@ -1,21 +1,11 @@
 #include "./obj_camera.h"
 
 void setCameraAttr(GameObjectCamera& cameraObj, GameobjAttributes& attr){
-  if (attr.stringAttributes.find("dof") != attr.stringAttributes.end()){
-    cameraObj.enableDof = attr.stringAttributes.at("dof") == "enabled";
-  }
-  if (attr.numAttributes.find("minblur") != attr.numAttributes.end()){
-    cameraObj.minBlurDistance = attr.numAttributes.at("minblur");
-  }
-  if (attr.numAttributes.find("maxblur") != attr.numAttributes.end()){
-    cameraObj.maxBlurDistance = attr.numAttributes.at("maxblur");
-  }
-  if (attr.numAttributes.find("bluramount") != attr.numAttributes.end()){
-    cameraObj.blurAmount = static_cast<unsigned int>(attr.numAttributes.at("bluramount"));
-  }
-  if (attr.stringAttributes.find("target") != attr.stringAttributes.end()){
-    cameraObj.target = attr.stringAttributes.at("target");
-  }
+  attrSet(attr, &cameraObj.enableDof, "dof");
+  attrSet(attr, &cameraObj.minBlurDistance, "minblur");
+  attrSet(attr, &cameraObj.maxBlurDistance, "maxblur");
+  attrSet(attr, &cameraObj.blurAmount, "bluramount");
+  attrSet(attr, &cameraObj.target, "target");
 }
 
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){

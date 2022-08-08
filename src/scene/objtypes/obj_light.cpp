@@ -10,21 +10,18 @@ LightType getLightType(std::string type){
   return LIGHT_POINT;
 }
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto color = attr.vecAttr.vec3.find("color") == attr.vecAttr.vec3.end() ? glm::vec3(1.f, 1.f, 1.f) : attr.vecAttr.vec3.at("color");
   auto lightType = attr.stringAttributes.find("type") == attr.stringAttributes.end() ? LIGHT_POINT : getLightType(attr.stringAttributes.at("type"));
   auto maxangle = (lightType != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
+  GameObjectLight obj {
+    .type = lightType,
+    .maxangle = maxangle, 
+  };
 
+  attrSet(attr, &obj.color, glm::vec3(1.f, 1.f, 1.f), "color");
   // constant, linear, quadratic
   // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
   // physically accurate ish would be to attenuate based on 1 / r^2  hence the 0 0 1 default
-  auto attenuation = attr.vecAttr.vec3.find("attenuation") == attr.vecAttr.vec3.end() ? glm::vec3(0, 0, 1) : attr.vecAttr.vec3.at("attenuation");
-
-  GameObjectLight obj {
-    .color = color,
-    .type = lightType,
-    .maxangle = maxangle, 
-    .attenuation = attenuation,
-  };
+  attrSet(attr, &obj.attenuation, glm::vec3(0, 0, 1), "attenuation");
   return obj;
 }
 

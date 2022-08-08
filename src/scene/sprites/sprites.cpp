@@ -352,10 +352,8 @@ BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, flo
   auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
   auto drawingDimensions = calcDrawSizing(drawingData.drawingInfo);
   auto offsetToCenter = calcAlignOffset(drawingDimensions, align, left, top);
-
-
-  std::cout << "offset to center: " << print(offsetToCenter) << std::endl;
-  std::cout << "size: " << print(drawingDimensions.size) << std::endl;
+  //std::cout << "offset to center: " << print(offsetToCenter) << std::endl;
+  //std::cout << "size: " << print(drawingDimensions.size) << std::endl;
 
   float halfWidth = drawingDimensions.size.x / 2.f;
   float halfHeight = drawingDimensions.size.y / 2.f;

@@ -63,3 +63,54 @@ void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, Obj
     info.textureOverloadId = textureOverloadId;
   }
 }
+
+void attrSet(GameobjAttributes& attr, bool* value, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *value = attr.stringAttributes.at(field) == "enabled";
+  }
+}
+void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *value = attr.stringAttributes.at(field);
+  }
+}
+void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *value = attr.stringAttributes.at(field);
+  }else{
+    *value = defaultValue;
+  } 
+}
+void attrSet(GameobjAttributes& attr, float* value, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *value = attr.numAttributes.at(field);
+  }
+}
+void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *_value = attr.numAttributes.at(field);
+  }else{
+    *_value = defaultValue;
+  }
+}
+void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *value = static_cast<unsigned int>(attr.numAttributes.at(field));
+  }
+}
+
+void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field){
+  auto value = defaultValue;
+  if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
+    value = attr.vecAttr.vec3.at(field);
+  }
+  *_value = value;
+}
+
+void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field){
+  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *_value = attr.vecAttr.vec4.at(field);
+  }else{
+    *_value = defaultValue;
+  }
+}
