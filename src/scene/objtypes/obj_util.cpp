@@ -159,3 +159,20 @@ void attrSet(GameobjAttributes& attr, glm::vec2* _value, glm::vec2 defaultValue,
     *_value = defaultValue;
   }
 }
+
+void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    auto stringValue = attr.stringAttributes.at(field);
+    if (stringValue == onString){
+      *_value = true;
+    }else if (stringValue == offString){
+      *_value = false;
+    }else{
+      modassert(!strict, "Invalid string value in attrSet - " + stringValue);
+      *_value = defaultValue;
+    }
+
+  }else{
+    *_value = defaultValue;
+  }
+}
