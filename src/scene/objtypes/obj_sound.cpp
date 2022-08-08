@@ -1,14 +1,10 @@
 #include "./obj_sound.h"
 
 GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto clip = attr.stringAttributes.at("clip");
-  auto loop = (attr.stringAttributes.find("loop") != attr.stringAttributes.end()) && (attr.stringAttributes.at("loop") == "true");
-  auto source = loadSoundState(util.pathForModLayer(clip), loop);
-  GameObjectSound obj {
-    .clip = clip,
-    .source = source,
-    .loop = loop,
-  };
+  GameObjectSound obj {};
+  attrSetRequired(attr, &obj.clip, "clip");
+  attrSet(attr, &obj.loop, "true", "false", false, "loop", false);
+  obj.source = loadSoundState(util.pathForModLayer(obj.clip), obj.loop);
   return obj;
 }
 

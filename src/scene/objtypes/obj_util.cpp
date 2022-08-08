@@ -1,13 +1,10 @@
 #include "./obj_util.h"
 
-GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes){
-  GameObjectUICommon common {
-    .mesh = meshes.at("./res/models/controls/input.obj").mesh,
-    .isFocused = false,
-  };
+void attrSetCommon(GameobjAttributes& attr, GameObjectUICommon& common, std::map<std::string, MeshRef>& meshes){
+  common.mesh = meshes.at("./res/models/controls/input.obj").mesh;
+  common.isFocused = false;
   attrSet(attr, &common.onFocus, "", "focus");
   attrSet(attr, &common.onBlur, "", "blur");
-  return common;
 }
 
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
@@ -73,6 +70,9 @@ void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultVal
   }else{
     *value = defaultValue;
   } 
+}
+void attrSetRequired(GameobjAttributes& attr, std::string* _value, const char* field){
+  *_value = attr.stringAttributes.at(field);
 }
 void attrSet(GameobjAttributes& attr, float* value, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){

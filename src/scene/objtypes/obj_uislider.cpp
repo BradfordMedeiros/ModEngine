@@ -1,10 +1,8 @@
 #include "./obj_uislider.h"
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
-  GameObjectUISlider obj {
-    .common = parseCommon(attr, util.meshes),
-  };
-
+  GameObjectUISlider obj {};
+  attrSetCommon(attr, obj.common, util.meshes);
   attrSet(attr, &obj.onSlide, "", "onslide");
   attrSet(attr, &obj.backpanelTint, &obj.showBackpanel, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
   attrSet(attr, &obj.percentage, 1.f, "slideamount");

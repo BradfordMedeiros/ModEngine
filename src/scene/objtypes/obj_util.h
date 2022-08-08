@@ -47,7 +47,7 @@ struct ObjectSetAttribUtil {
   std::function<void(int)> releaseTexture;
 };
 
-GameObjectUICommon parseCommon(GameobjAttributes& attr, std::map<std::string, MeshRef>& meshes);
+void attrSetCommon(GameobjAttributes& attr, GameObjectUICommon& common, std::map<std::string, MeshRef>& meshes);
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common);
 TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded);
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture);
@@ -56,6 +56,7 @@ void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, Obj
 void attrSet(GameobjAttributes& attr, bool* value, const char* field);
 void attrSet(GameobjAttributes& attr, std::string* value, const char* field);
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field);
+void attrSetRequired(GameobjAttributes& attr, std::string* _value, const char* field);
 void attrSet(GameobjAttributes& attr, float* value, const char* field);
 void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field);

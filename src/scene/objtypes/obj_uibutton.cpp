@@ -5,13 +5,13 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto offTexture = attr.stringAttributes.find("offtexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("offtexture") : "";
 
   GameObjectUIButton obj { 
-    .common = parseCommon(attr, util.meshes),
     .onTextureString = onTexture,
     .onTexture = util.ensureTextureLoaded(onTexture == "" ? "./res/models/controls/on.png" : onTexture).textureId,
     .offTextureString = offTexture,
     .offTexture = util.ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture).textureId,
   };
 
+  attrSetCommon(attr, obj.common, util.meshes);
   attrSet(attr, &obj.canToggle, "true", "false", true, "cantoggle", false);
   attrSet(attr, &obj.initialState, "on", "off", false, "state", false);
   attrSet(attr, &obj.toggleOn, "on", "off", false, "state", false);
