@@ -141,6 +141,16 @@ void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue,
   }
 }
 
+void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, glm::vec4 defaultValue, const char* field){
+  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *_value = attr.vecAttr.vec4.at(field);
+    *_hasValue = true;
+  }else{
+    *_value = defaultValue;
+    *_hasValue = false;
+  }  
+}
+
 void attrSet(GameobjAttributes& attr, glm::vec2* _value, glm::vec2 defaultValue, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *_value = parseVec2(attr.stringAttributes.at(field));
