@@ -80,18 +80,13 @@ void restrictWidth(GameObjectUIText& text){
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto align = alignTypeFromAttr(attr);
   auto wrap = wrapTypeFromAttr(attr);
-  auto cursorIndexLeftStr = attr.stringAttributes.find("cursor-dir") != attr.stringAttributes.end() ? attr.stringAttributes.at("cursor-dir") : "left";
-  modassert(cursorIndexLeftStr == "left" || cursorIndexLeftStr == "right", "invalid value for cursorIndexLeftStr");
-  auto cursorIndexLeft = cursorIndexLeftStr == "left" ? true : false;
 
   GameObjectUIText obj {
     .align = align,
     .wrap = wrap,
-    .cursor = UiTextCursor {
-      .cursorIndexLeft = cursorIndexLeft,
-    },
   };
   
+  attrSet(attr, &obj.cursor.cursorIndexLeft, "left", "right", true, "cursor-dir", true);
   attrSet(attr, &obj.virtualization.maxheight, -1, "maxheight");
   attrSet(attr, &obj.virtualization.offsetx, 0, "offsetx");
   attrSet(attr, &obj.virtualization.offsety, 0, "offsety");

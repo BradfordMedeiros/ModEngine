@@ -1,11 +1,8 @@
 #include "./obj_portal.h"
 
 GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto perspective = attr.stringAttributes.find("perspective") != attr.stringAttributes.end() ? attr.stringAttributes.at("perspective") == "true" : false;
-
-  GameObjectPortal obj {
-    .perspective = perspective,
-  };
+  GameObjectPortal obj {};
+  attrSet(attr, &obj.perspective, "true", "false", false, "perspective", false);
   attrSet(attr, &obj.camera, "", "camera");
   return obj;
 }

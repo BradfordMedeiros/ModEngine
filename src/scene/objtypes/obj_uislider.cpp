@@ -1,19 +1,18 @@
 #include "./obj_uislider.h"
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto showBackpanel = attr.vecAttr.vec4.find("backpaneltint") != attr.vecAttr.vec4.end();
   GameObjectUISlider obj {
     .common = parseCommon(attr, util.meshes),
-    .texture = util.ensureTextureLoaded("./res/models/controls/slider.png").textureId,
-    .opacityTexture = util.ensureTextureLoaded("./res/models/controls/slider_opacity.png").textureId,
-    .showBackpanel = showBackpanel,
   };
 
   attrSet(attr, &obj.onSlide, "", "onslide");
-  attrSet(attr, &obj.backpanelTint, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
+  attrSet(attr, &obj.backpanelTint, &obj.showBackpanel, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
   attrSet(attr, &obj.percentage, 1.f, "slideamount");
   attrSet(attr, &obj.min, 0.f, "min");
   attrSet(attr, &obj.max, 1.f, "max");
+  attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.texture, "./res/models/controls/slider.png", "texture");
+  attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.opacityTexture, "./res/models/controls/slider_opacity.png", "opacity-texture");
+
   return obj;
 }
 

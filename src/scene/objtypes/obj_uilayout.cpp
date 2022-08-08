@@ -71,7 +71,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
     elements = split(attr.stringAttributes.at("elements"), ',');
   }
-  auto showBackpanel = (attr.stringAttributes.find("backpanel") != attr.stringAttributes.end() && attr.stringAttributes.at("backpanel") == "true");
   
   LayoutMargin marginValues {};
   attrSet(attr, &marginValues.margin, &marginValues.marginSpecified, 0.f, "margin");
@@ -118,7 +117,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .elements = elements,
     .boundInfo = boundInfo,
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
-    .showBackpanel = showBackpanel,
     .marginValues = marginValues,
     .anchor = anchor,
     .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
@@ -132,6 +130,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .contentSpacing = contentSpacing,
   };
 
+  attrSet(attr, &obj.showBackpanel, "true", "false", false, "backpanel", false);
   attrSet(attr, &obj.spacing, 0.f, "spacing");
   attrSet(attr, &obj.minSpacing, 0.f, "min-spacing");
   attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");

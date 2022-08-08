@@ -176,3 +176,12 @@ void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const 
     *_value = defaultValue;
   }
 }
+
+void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string defaultTexture, const char* field){
+  std::string textureToLoad = defaultTexture;
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    textureToLoad = attr.stringAttributes.at(field);
+  }
+  *_textureId = ensureTextureLoaded(textureToLoad).textureId;
+}
+
