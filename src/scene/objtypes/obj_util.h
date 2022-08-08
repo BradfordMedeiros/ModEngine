@@ -59,6 +59,7 @@ void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultVal
 void attrSet(GameobjAttributes& attr, float* value, const char* field);
 void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field);
+void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field);
 

@@ -99,6 +99,14 @@ void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
   }
 }
 
+void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *_value = static_cast<int>(attr.numAttributes.at(field));
+  }else{
+    *_value = defaultValue;
+  }
+}
+
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field){
   auto value = defaultValue;
   if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){

@@ -5,11 +5,7 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
   auto offTexture = attr.stringAttributes.find("offtexture") != attr.stringAttributes.end() ? attr.stringAttributes.at("offtexture") : "";
   auto toggleOn = attr.stringAttributes.find("state") != attr.stringAttributes.end() && attr.stringAttributes.at("state") == "on";
   auto canToggle = attr.stringAttributes.find("cantoggle") == attr.stringAttributes.end() || !(attr.stringAttributes.at("cantoggle") == "false");
-  auto onToggleOn = attr.stringAttributes.find("on") != attr.stringAttributes.end() ? attr.stringAttributes.at("on") : "";
-  auto onToggleOff = attr.stringAttributes.find("off") != attr.stringAttributes.end() ? attr.stringAttributes.at("off") : "";
   auto hasOnTint  = attr.vecAttr.vec4.find("ontint") != attr.vecAttr.vec4.end();
-  auto onTint = hasOnTint ? attr.vecAttr.vec4.at("ontint") : glm::vec4(1.f, 1.f, 1.f, 1.f);
-  auto tint = attr.vecAttr.vec4.find("tint") != attr.vecAttr.vec4.end() ? attr.vecAttr.vec4.at("tint") : glm::vec4(1.f, 1.f, 1.f, 1.f);
 
   GameObjectUIButton obj { 
     .common = parseCommon(attr, util.meshes),
@@ -20,12 +16,14 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
     .onTexture = util.ensureTextureLoaded(onTexture == "" ? "./res/models/controls/on.png" : onTexture).textureId,
     .offTextureString = offTexture,
     .offTexture = util.ensureTextureLoaded(offTexture == "" ? "./res/models/controls/off.png" : offTexture).textureId,
-    .onToggleOn = onToggleOn,
-    .onToggleOff = onToggleOff,
     .hasOnTint = hasOnTint,
-    .onTint = onTint,
-    .tint = tint,
   };
+
+  attrSet(attr, &obj.onToggleOn, "", "on");
+  attrSet(attr, &obj.onToggleOff, "", "off");
+  attrSet(attr, &obj.onTint, glm::vec4(1.f, 1.f, 1.f, 1.f), "ontint");
+  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
+
   return obj;
 }
 

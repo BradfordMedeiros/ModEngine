@@ -98,34 +98,29 @@ void restrictWidth(GameObjectUIText& text){
 }
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto value = attr.stringAttributes.find("value") != attr.stringAttributes.end() ? attr.stringAttributes.at("value") : "";
-  auto deltaOffset = attr.numAttributes.find("spacing") != attr.numAttributes.end() ? attr.numAttributes.at("spacing") : 2;
-  auto tint = attr.vecAttr.vec4.find("tint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("tint");
   auto align = alignTypeFromAttr(attr);
   auto wrap = wrapTypeFromAttr(attr);
-  auto charlimit = attr.numAttributes.find("charlimit") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("charlimit");
- 
-  auto cursorIndex = attr.numAttributes.find("cursor") == attr.numAttributes.end() ? -1 : attr.numAttributes.at("cursor");
   auto cursorIndexLeftStr = attr.stringAttributes.find("cursor-dir") != attr.stringAttributes.end() ? attr.stringAttributes.at("cursor-dir") : "left";
   modassert(cursorIndexLeftStr == "left" || cursorIndexLeftStr == "right", "invalid value for cursorIndexLeftStr");
   auto cursorIndexLeft = cursorIndexLeftStr == "left" ? true : false;
-  auto fontFamily = attr.stringAttributes.find("font") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("font");
 
   GameObjectUIText obj {
-    .value = value,
-    .deltaOffset = deltaOffset,
-    .tint = tint,
     .align = align,
     .wrap = wrap,
     .virtualization = virtualizationFromAttr(attr),
-    .charlimit = charlimit,
     .cursor = UiTextCursor {
-      .cursorIndex = cursorIndex,
       .cursorIndexLeft = cursorIndexLeft,
-      .highlightLength = valueFromAttr(attr, "cursor-highlight", 0),
     },
-    .fontFamily = fontFamily,
   };
+  
+  attrSet(attr, &obj.cursor.cursorIndex, -1, "cursor");
+  attrSet(attr, &obj.cursor.highlightLength, 0, "cursor-highlight");
+  attrSet(attr, &obj.value, "", "value");
+  attrSet(attr, &obj.deltaOffset, 2, "spacing");
+  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
+  attrSet(attr, &obj.charlimit, -1, "charlimit");
+  attrSet(attr, &obj.fontFamily, "", "font");
+
   restrictWidth(obj);
   return obj;
 }

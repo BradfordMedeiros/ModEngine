@@ -1,32 +1,19 @@
 #include "./obj_uislider.h"
 
-void setValueFromAttrField(GameobjAttributes& attributes, const char* field, float* value){
-  if (attributes.numAttributes.find(field) != attributes.numAttributes.end()){
-    *value = attributes.numAttributes.at(field);
-  }
-}
-
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto onSlide = attr.stringAttributes.find("onslide") != attr.stringAttributes.end() ? attr.stringAttributes.at("onslide") : "";
-  auto percentage = attr.numAttributes.find("slideamount") != attr.numAttributes.end() ? attr.numAttributes.at("slideamount") : 1.f;
-
-  auto backpanelTint = attr.vecAttr.vec4.find("backpaneltint") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("backpaneltint");
   auto showBackpanel = attr.vecAttr.vec4.find("backpaneltint") != attr.vecAttr.vec4.end();
-
   GameObjectUISlider obj {
     .common = parseCommon(attr, util.meshes),
-    .min = 0.f,
-    .max = 1.f,
-    .percentage = percentage,
     .texture = util.ensureTextureLoaded("./res/models/controls/slider.png").textureId,
     .opacityTexture = util.ensureTextureLoaded("./res/models/controls/slider_opacity.png").textureId,
-    .onSlide = onSlide,
     .showBackpanel = showBackpanel,
-    .backpanelTint = backpanelTint,
   };
-  setValueFromAttrField(attr, "slideamount", &obj.percentage);
-  setValueFromAttrField(attr, "min", &obj.min);
-  setValueFromAttrField(attr, "max", &obj.max);
+
+  attrSet(attr, &obj.onSlide, "", "onslide");
+  attrSet(attr, &obj.backpanelTint, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
+  attrSet(attr, &obj.percentage, 1.f, "slideamount");
+  attrSet(attr, &obj.min, 0.f, "min");
+  attrSet(attr, &obj.max, 1.f, "max");
   return obj;
 }
 
@@ -57,7 +44,7 @@ void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _at
 
 void setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   MODTODO("ui slider - set rest of attributes");
-  setValueFromAttrField(attributes, "slideamount", &sliderObj.percentage);
-  setValueFromAttrField(attributes, "min", &sliderObj.min);
-  setValueFromAttrField(attributes, "max", &sliderObj.max);
+  attrSet(attributes, &sliderObj.percentage, "slideamount");
+  attrSet(attributes, &sliderObj.min, "min");
+  attrSet(attributes, &sliderObj.max, "max");
 }
