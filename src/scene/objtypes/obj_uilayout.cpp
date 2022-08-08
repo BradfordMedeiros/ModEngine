@@ -119,7 +119,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
     .marginValues = marginValues,
     .anchor = anchor,
-    .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
     .minwidth = minwidth,
     .minheight = minheight,
     .horizontal = horizontal,
@@ -130,6 +129,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .contentSpacing = contentSpacing,
   };
 
+  setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   attrSet(attr, &obj.showBackpanel, "true", "false", false, "backpanel", false);
   attrSet(attr, &obj.spacing, 0.f, "spacing");
   attrSet(attr, &obj.minSpacing, 0.f, "min-spacing");

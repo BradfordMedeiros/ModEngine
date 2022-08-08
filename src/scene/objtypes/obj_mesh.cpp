@@ -16,12 +16,12 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectMesh obj {
     .meshNames = meshNames,
     .meshesToRender = meshesToRender,
-    .isDisabled = attr.stringAttributes.find("disabled") != attr.stringAttributes.end(),
     .nodeOnly = meshNames.size() == 0,
     .rootMesh = rootMeshName,
-    .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
   };
 
+  attrSet(attr, &obj.isDisabled, "true", "false", false, "disabled", true);
+  setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   attrSet(attr, &obj.discardAmount, 0.f, "discard");
   attrSet(attr, &obj.emissionAmount, 0.f, "emission");
   attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");

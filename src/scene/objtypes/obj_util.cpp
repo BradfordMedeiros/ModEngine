@@ -16,16 +16,13 @@ void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs,
   }
 }
 
-TextureInformation texinfoFromFields(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded){
-  TextureInformation info {};
+void setTextureInfo(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, TextureInformation& info){
   attrSet(attr, &info.textureoffset, glm::vec2(0.f, 0.f), "textureoffset");
   attrSet(attr, &info.texturetiling, glm::vec2(1.f, 1.f), "texturetiling");
   attrSet(attr, &info.texturesize, glm::vec2(1.f, 1.f), "texturesize");
   attrSet(attr, &info.textureOverloadName, "", "texture");
   int textureOverloadId = info.textureOverloadName == "" ? -1 : ensureTextureLoaded(info.textureOverloadName).textureId;
   info.textureOverloadId = textureOverloadId;
-
-  return info;
 }
 
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){

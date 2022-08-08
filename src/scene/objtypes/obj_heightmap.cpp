@@ -8,8 +8,8 @@ GameObjectHeightmap createHeightmap(GameobjAttributes& attr, ObjectTypeUtil& uti
   GameObjectHeightmap obj{
     .heightmap = heightmap,
     .mesh = util.loadMesh(meshData),
-    .texture = texinfoFromFields(attr, util.ensureTextureLoaded),
   };
+  setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   return obj;
 }
 

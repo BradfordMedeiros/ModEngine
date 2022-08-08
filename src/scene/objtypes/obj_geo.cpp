@@ -7,14 +7,11 @@ GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
     ""
   );
 
-  auto type = attr.stringAttributes.find("shape") != attr.stringAttributes.end() ? 
-  (attr.stringAttributes.at("shape") == "sphere" ? GEOSPHERE : GEODEFAULT) : 
-  GEODEFAULT;
-
   GameObjectGeo geo{
     .points = points,
-    .type = type,
   };
+
+  attrSet(attr, (int*)&geo.type, { GEODEFAULT, GEOSPHERE }, { "default", "sphere" }, GEODEFAULT, "shape", true);
   return geo;
 }
 
