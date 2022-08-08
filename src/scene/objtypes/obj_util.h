@@ -58,6 +58,7 @@ void attrSet(GameobjAttributes& attr, std::string* value, const char* field);
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, float* value, const char* field);
 void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field);
+void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field);
 void attrSet(GameobjAttributes& attr, int* _value, const char* field);
 void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char* field);

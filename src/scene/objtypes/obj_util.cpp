@@ -86,6 +86,17 @@ void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const c
     *_value = defaultValue;
   }
 }
+
+void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *_value = attr.numAttributes.at(field);
+    *_hasValue = true;
+  }else{
+    *_value = defaultValue;
+    *_hasValue = false;
+  }
+}
+
 void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
     *value = static_cast<unsigned int>(attr.numAttributes.at(field));

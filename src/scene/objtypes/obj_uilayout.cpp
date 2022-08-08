@@ -64,18 +64,7 @@ LayoutContentSpacing layoutContentSpacing(GameobjAttributes& attr, const char* a
   return LayoutContentSpacing_Pack;
 }
 
-float getMargin(GameobjAttributes& attr, const char* attrname, float defaultMargin, bool* valueSpecified){
-  bool marginTypeSpecified = attr.numAttributes.find(attrname) != attr.numAttributes.end();
-  *valueSpecified = marginTypeSpecified;
-  if (!marginTypeSpecified){
-    return defaultMargin;
-  }
-  return attr.numAttributes.at(attrname);
-}
-
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto spacing = attr.numAttributes.find("spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("spacing");
-  auto minSpacing = attr.numAttributes.find("min-spacing") == attr.numAttributes.end() ? 0.f : attr.numAttributes.at("min-spacing");
   auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
   
   std::vector<std::string> elements = {};
@@ -84,59 +73,31 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   }
   auto showBackpanel = (attr.stringAttributes.find("backpanel") != attr.stringAttributes.end() && attr.stringAttributes.at("backpanel") == "true");
   
-  bool marginSpecified = attr.numAttributes.find("margin") != attr.numAttributes.end();
-  auto margin = !marginSpecified ? 0.f : attr.numAttributes.at("margin");
-
-  bool marginLeftSpecified = false;
-  float marginLeft = getMargin(attr, "margin-left", margin, &marginLeftSpecified);
-  
-  bool marginRightSpecified = false;
-  float marginRight = getMargin(attr, "margin-right", margin, &marginRightSpecified);
-
-  bool marginTopSpecified = false;
-  float marginTop = getMargin(attr, "margin-top", margin, &marginTopSpecified);
-
-  bool marginBottomSpecified = false;
-  float marginBottom = getMargin(attr, "margin-bottom", margin, &marginBottomSpecified);
-
-  LayoutMargin marginValues {
-    .margin = margin,
-    .marginLeft = marginLeft,
-    .marginRight = marginRight,
-    .marginBottom = marginBottom,
-    .marginTop = marginTop,
-    .marginSpecified = marginSpecified,
-    .marginLeftSpecified = marginLeftSpecified,
-    .marginRightSpecified = marginRightSpecified,
-    .marginBottomSpecified = marginBottomSpecified,
-    .marginTopSpecified = marginTopSpecified,
-  };
+  LayoutMargin marginValues {};
+  attrSet(attr, &marginValues.margin, &marginValues.marginSpecified, 0.f, "margin");
+  attrSet(attr, &marginValues.marginLeft, &marginValues.marginLeftSpecified, marginValues.margin, "margin-left");
+  attrSet(attr, &marginValues.marginRight, &marginValues.marginRightSpecified, marginValues.margin, "margin-right");
+  attrSet(attr, &marginValues.marginTop, &marginValues.marginTopSpecified, marginValues.margin, "margin-top");
+  attrSet(attr, &marginValues.marginBottom, &marginValues.marginBottomSpecified, marginValues.margin, "margin-bottom");
 
   auto minwidth = layoutMinSizeFromAttr(attr, "minwidth");
   auto minheight = layoutMinSizeFromAttr(attr, "minheight");
   auto horizontal = layoutAlignFromAttr(attr, "align-horizontal", "left", "right");
   auto vertical = layoutAlignFromAttr(attr, "align-vertical", "down", "up");
 
-  auto anchorTarget = attr.stringAttributes.find("anchor") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("anchor");
-  auto anchorOffset = attr.vecAttr.vec3.find("anchor-offset") == attr.vecAttr.vec3.end() ? glm::vec3(0.f, 0.f, 0.f) : attr.vecAttr.vec3.at("anchor-offset");
   auto anchorHorizontal = layoutAlignFromAttr(attr, "anchor-dir-horizontal", "left", "right");
   auto anchorVertical = layoutAlignFromAttr(attr, "anchor-dir-vertical", "down", "up");
   LayoutAnchor anchor = {
-    .target = anchorTarget,
-    .offset = anchorOffset,
     .horizontal = anchorHorizontal,
     .vertical = anchorVertical,
   };
+  attrSet(attr, &anchor.target, "", "anchor");
+  attrSet(attr, &anchor.offset, glm::vec3(0.f, 0.f, 0.f), "anchor-offset");
 
-  bool hasBorder = attr.numAttributes.find("border-size") != attr.numAttributes.end();
-  auto borderSize = hasBorder ? attr.numAttributes.at("border-size") : 0.f;
-  assert(borderSize <= 1.f);
-  auto borderColor = attr.vecAttr.vec4.find("border-color") == attr.vecAttr.vec4.end() ? glm::vec4(1.f, 1.f, 1.f, 1.f) : attr.vecAttr.vec4.at("border-color");
-  LayoutBorder border {
-    .borderSize = borderSize,
-    .borderColor = borderColor,
-    .hasBorder = hasBorder,
-  };
+  LayoutBorder border {};
+  attrSet(attr, &border.borderSize, &border.hasBorder, 0.f, "border-size");
+  attrSet(attr, &border.borderColor, glm::vec4(1.f, 1.f, 1.f, 1.f), "border-color");
+  assert(border.borderSize <= 1.f);
 
   LayoutContentAlignment alignment {
     .vertical = layoutContentAlignment(attr, "align-items-vertical", "down", "up", LayoutContentAlignment_Negative),
@@ -154,8 +115,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
 
   GameObjectUILayout obj{
     .type = type,
-    .spacing = spacing,
-    .minSpacing = minSpacing,
     .elements = elements,
     .boundInfo = boundInfo,
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
@@ -173,6 +132,8 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .contentSpacing = contentSpacing,
   };
 
+  attrSet(attr, &obj.spacing, 0.f, "spacing");
+  attrSet(attr, &obj.minSpacing, 0.f, "min-spacing");
   attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
   return obj;
 }
