@@ -99,6 +99,13 @@ void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
   }
 }
 
+
+void attrSet(GameobjAttributes& attr, int* _value, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *_value = static_cast<int>(attr.numAttributes.at(field));
+  }
+}
+
 void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
     *_value = static_cast<int>(attr.numAttributes.at(field));
@@ -108,11 +115,18 @@ void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char*
 }
 
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field){
-  auto value = defaultValue;
   if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
-    value = attr.vecAttr.vec3.at(field);
+    *_value = attr.vecAttr.vec3.at(field);
+  }else{
+    *_value = defaultValue;
   }
-  *_value = value;
+  
+}
+
+void attrSet(GameobjAttributes& attr, glm::vec4* _value, const char* field){
+  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *_value = attr.vecAttr.vec4.at(field);
+  }
 }
 
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field){

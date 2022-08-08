@@ -96,7 +96,7 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   attrSet(attr, &obj.virtualization.offsetx, 0, "offsetx");
   attrSet(attr, &obj.virtualization.offsety, 0, "offsety");
   attrSet(attr, &obj.virtualization.offset, 0, "offset");
-  
+
   attrSet(attr, &obj.cursor.cursorIndex, -1, "cursor");
   attrSet(attr, &obj.cursor.highlightLength, 0, "cursor-highlight");
   attrSet(attr, &obj.value, "", "value");
@@ -128,15 +128,10 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  if (attributes.stringAttributes.find("value") != attributes.stringAttributes.end()){
-    textObj.value = attributes.stringAttributes.at("value");
-  }
-  if (attributes.numAttributes.find("spacing") != attributes.numAttributes.end()){
-    textObj.deltaOffset = attributes.numAttributes.at("spacing");
-  }
-  if (attributes.vecAttr.vec4.find("tint") != attributes.vecAttr.vec4.end()){
-    textObj.tint = attributes.vecAttr.vec4.at("tint");
-  }
+  attrSet(attributes, &textObj.value, "value");
+  attrSet(attributes, &textObj.deltaOffset, "spacing");
+  attrSet(attributes, &textObj.tint, "tint");
+
   if (attributes.stringAttributes.find("align") != attributes.stringAttributes.end()){
     textObj.align = alignTypeFromAttr(attributes);
   }
@@ -149,34 +144,24 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
     textObj.wrap.wrapamount = wrap.wrapamount;
   }
 
-  if (attributes.numAttributes.find("maxheight") != attributes.numAttributes.end()){
-    textObj.virtualization.maxheight = attributes.numAttributes.at("maxheight");
-  }
-  if (attributes.numAttributes.find("offsetx") != attributes.numAttributes.end()){
-    textObj.virtualization.offsetx = attributes.numAttributes.at("offsetx");
-  }
-  if (attributes.numAttributes.find("offsety") != attributes.numAttributes.end()){
-    textObj.virtualization.offsety = attributes.numAttributes.at("offsety");
-  }
-  if (attributes.numAttributes.find("offset") != attributes.numAttributes.end()){
-    textObj.virtualization.offset = attributes.numAttributes.at("offset");
-  }
-  if (attributes.numAttributes.find("charlimit") != attributes.numAttributes.end()){
-    textObj.charlimit = attributes.numAttributes.at("charlimit");
-  }
-  if (attributes.numAttributes.find("cursor") != attributes.numAttributes.end()){
-    textObj.cursor.cursorIndex = attributes.numAttributes.at("cursor");
-  }
+
+  attrSet(attributes, &textObj.virtualization.maxheight, "maxheight");
+  attrSet(attributes, &textObj.virtualization.offsetx, "offsetx");
+  attrSet(attributes, &textObj.virtualization.offsety, "offsety");
+  attrSet(attributes, &textObj.virtualization.offset, "offset");
+  attrSet(attributes, &textObj.charlimit, "charlimit");
+  attrSet(attributes, &textObj.cursor.cursorIndex ,"cursor");
+
+
   if (attributes.stringAttributes.find("cursor-dir") != attributes.stringAttributes.end()){
     auto value = attributes.stringAttributes.at("cursor-dir");
     modassert(value == "left" || value == "right", "cursor-dir : invalid dir " + value);
     textObj.cursor.cursorIndexLeft = value == "left";
   }
-  if (attributes.numAttributes.find("cursor-highlight") != attributes.numAttributes.end()){
-    textObj.cursor.highlightLength = attributes.numAttributes.at("cursor-highlight");
-  }
-  if (attributes.stringAttributes.find("font") != attributes.stringAttributes.end()){
-    textObj.fontFamily = attributes.stringAttributes.at("font");
-  }
+
+  attrSet(attributes, &textObj.cursor.highlightLength, "cursor-highlight");
+  attrSet(attributes, &textObj.fontFamily, "font");
+
+
   restrictWidth(textObj);
 }
