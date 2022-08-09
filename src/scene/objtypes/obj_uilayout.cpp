@@ -33,40 +33,25 @@ UILayoutFlowType layoutAlignFromAttr(GameobjAttributes& attr, const char* attrna
 LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos, LayoutContentAlignmentType defaultType){
   bool hasAlign = attr.stringAttributes.find(attrname) != attr.stringAttributes.end();
   auto alignType = defaultType;
-  if (hasAlign){
-    if (attr.stringAttributes.at(attrname) == neg){
-      alignType = LayoutContentAlignment_Negative;
-    }else if (attr.stringAttributes.at(attrname) == pos){
-      alignType = LayoutContentAlignment_Positive;
-    }else if (attr.stringAttributes.at(attrname) == "center"){
-      alignType = LayoutContentAlignment_Neutral;
-    }else{
-      std::cout << "invalid align items type: " << attr.stringAttributes.at(attrname) << std::endl;
-      assert(false);
-    }
-  }
+  
+
+//
+  attrSet(
+    attr, 
+    (int*)&alignType, 
+    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, 
+    { neg, "center", pos }, 
+    defaultType, 
+    attrname, 
+    true
+  );
+
+//
+
   return alignType;
 }
 
-LayoutContentSpacing layoutContentSpacing(GameobjAttributes& attr, const char* attrname){
-  if (attr.stringAttributes.find(attrname) != attr.stringAttributes.end()){
-    auto value = attr.stringAttributes.at(attrname);
-    if (value == "pack"){
-      return LayoutContentSpacing_Pack;
-    }else if (value == "space-for-first"){
-      return LayoutContentSpacing_SpaceForFirst;
-    }else if (value == "space-for-last"){
-      return LayoutContentSpacing_SpaceForLast;
-    }
-    modassert(false, "uilayout - content spacing - invalid payload: " + value);
-    return LayoutContentSpacing_Pack;
-  }
-  return LayoutContentSpacing_Pack;
-}
-
-GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){
-  auto type = attr.stringAttributes.find("type") != attr.stringAttributes.end() && (attr.stringAttributes.at("type") == "vertical") ? LAYOUT_VERTICAL : LAYOUT_HORIZONTAL;
-  
+GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
   std::vector<std::string> elements = {};
   if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
     elements = split(attr.stringAttributes.at("elements"), ',');
@@ -104,7 +89,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   };
 
   auto contentAlign = layoutContentAlignment(attr, "align-content", "pos", "neg", LayoutContentAlignment_Neutral);
-  auto contentSpacing = layoutContentSpacing(attr, "content-spacing");
 
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
@@ -113,7 +97,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   };
 
   GameObjectUILayout obj{
-    .type = type,
     .elements = elements,
     .boundInfo = boundInfo,
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
@@ -126,9 +109,14 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .border = border,
     .alignment = alignment,
     .contentAlign = contentAlign,
-    .contentSpacing = contentSpacing,
   };
 
+  attrSet(
+    attr, (int*)&obj.contentSpacing, 
+    { LayoutContentSpacing_Pack, LayoutContentSpacing_SpaceForFirst, LayoutContentSpacing_SpaceForLast },  { "pack", "space-for-first", "space-for-last" }, 
+    LayoutContentSpacing_Pack, "content-spacing", true
+  );
+  attrSet(attr, (int*)&obj.type, { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL }, { "horizontal", "vertical" }, LAYOUT_HORIZONTAL, "type", false);
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   attrSet(attr, &obj.showBackpanel, "true", "false", false, "backpanel", false);
   attrSet(attr, &obj.spacing, 0.f, "spacing");
