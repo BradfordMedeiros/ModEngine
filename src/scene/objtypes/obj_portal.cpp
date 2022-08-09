@@ -1,6 +1,6 @@
 #include "./obj_portal.h"
 
-std::vector<AutoSerialize> autoserializerData {
+std::vector<AutoSerialize> portalAutoserializer {
   AutoSerializeBool {
     .structOffset = offsetof(GameObjectPortal, perspective),
     .field = "perspective", 
@@ -18,6 +18,6 @@ std::vector<AutoSerialize> autoserializerData {
 
 GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectPortal obj {};
-  createAutoSerialize((char*)&obj, autoserializerData, attr);
+  createAutoSerialize((char*)&obj, portalAutoserializer, attr);
   return obj;
 }

@@ -87,6 +87,12 @@ struct AutoSerializeString {
   std::string defaultValue;
 };
 
+struct AutoSerializeFloat {
+  size_t structOffset;
+  const char* field;
+  float defaultValue;
+};
+
 typedef std::variant<AutoSerializeBool, AutoSerializeString> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 
