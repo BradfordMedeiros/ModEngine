@@ -31,7 +31,6 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
     .field = "opacity-texture",
     .defaultValue = "./res/models/controls/slider_opacity.png",
   },
-
 };
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){

@@ -105,11 +105,17 @@ struct AutoSerializeUInt {
   size_t structOffset;
   const char* field;
   uint defaultValue;
-}; 
+};
+
+struct AutoSerializeVec4 {
+  size_t structOffset;
+  std::optional<size_t> structOffsetFiller;
+  const char* field;
+  glm::vec4 defaultValue;
+};
 
 
-
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeUInt> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeUInt, AutoSerializeVec4> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 
 #endif

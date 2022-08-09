@@ -94,10 +94,14 @@ void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const c
 void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
     *_value = attr.numAttributes.at(field);
-    *_hasValue = true;
+    if (_hasValue != NULL){
+      *_hasValue = true;  
+    }
   }else{
     *_value = defaultValue;
-    *_hasValue = false;
+    if (_hasValue != NULL){
+      *_hasValue = false;
+    }
   }
 }
 
@@ -156,10 +160,14 @@ void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue,
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, glm::vec4 defaultValue, const char* field){
   if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
     *_value = attr.vecAttr.vec4.at(field);
-    *_hasValue = true;
+    if (_hasValue != NULL){
+      *_hasValue = true;
+    }
   }else{
     *_value = defaultValue;
-    *_hasValue = false;
+    if (_hasValue != NULL){
+      *_hasValue = false;
+    }
   }  
 }
 
@@ -263,6 +271,13 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
+  if (vec4Value != NULL){
+    glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
+    bool* hasValueAddress = (!vec4Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec4Value -> structOffsetFiller.value());
+    attrSet(attr, address, hasValueAddress, vec4Value -> defaultValue, vec4Value -> field);
+    return;
+  }
   modassert(false, "autoserialize type not found");
 }
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){

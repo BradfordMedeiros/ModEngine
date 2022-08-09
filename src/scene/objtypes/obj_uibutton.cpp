@@ -1,17 +1,60 @@
 #include "./obj_uibutton.h"
 
+std::vector<AutoSerialize> uiButtonAutoserializer {
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectUIButton, tint),
+    .structOffsetFiller = std::nullopt,
+    .field = "tint",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectUIButton, onTint),
+    .structOffsetFiller = offsetof(GameObjectUIButton, hasOnTint),
+    .field = "ontint",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectUIButton, onToggleOn),
+    .field = "on",
+    .defaultValue = "",
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectUIButton, onToggleOff),
+    .field = "off",
+    .defaultValue = "",
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectUIButton, toggleOn),
+    .field = "state",
+    .onString = "on",
+    .offString = "off",
+    .defaultValue = false,
+  },
+  AutoSerializeBool { 
+    .structOffset = offsetof(GameObjectUIButton, initialState),
+    .field = "state",
+    .onString = "on",
+    .offString = "off",
+    .defaultValue = false,
+  },
+  AutoSerializeBool { 
+    .structOffset = offsetof(GameObjectUIButton, canToggle),
+    .field = "cantoggle",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = true,
+  },
+};
+
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIButton obj {};
+
   attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.onTexture, &obj.onTextureString, "./res/models/controls/on.png", "ontexture");
   attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.offTexture, &obj.offTextureString, "./res/models/controls/off.png", "offtexture");
   attrSetCommon(attr, obj.common, util.meshes);
-  attrSet(attr, &obj.canToggle, "true", "false", true, "cantoggle", false);
-  attrSet(attr, &obj.initialState, "on", "off", false, "state", false);
-  attrSet(attr, &obj.toggleOn, "on", "off", false, "state", false);
-  attrSet(attr, &obj.onToggleOn, "", "on");
-  attrSet(attr, &obj.onToggleOff, "", "off");
-  attrSet(attr, &obj.onTint, &obj.hasOnTint, glm::vec4(1.f, 1.f, 1.f, 1.f), "ontint");
-  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
+
+  createAutoSerialize((char*)&obj, uiButtonAutoserializer, attr, util);
+
   return obj;
 }
 
