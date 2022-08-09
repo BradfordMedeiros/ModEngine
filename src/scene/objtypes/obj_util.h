@@ -54,6 +54,7 @@ void addSerializedTextureInformation(std::vector<std::pair<std::string, std::str
 void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util);
 
 void attrSet(GameobjAttributes& attr, bool* value, const char* field);
+void attrSet(GameobjAttributes& attr, bool* value, bool defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, std::string* value, const char* field);
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field);
 void attrSetRequired(GameobjAttributes& attr, std::string* _value, const char* field);
@@ -61,6 +62,7 @@ void attrSet(GameobjAttributes& attr, float* value, const char* field);
 void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field);
+void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, int* _value, const char* field);
 void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field);
@@ -93,7 +95,21 @@ struct AutoSerializeFloat {
   float defaultValue;
 };
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat> AutoSerialize;
-void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
+struct AutoSerializeTextureLoader {
+  size_t structOffset;
+  const char* field;
+  std::string defaultValue;
+}; 
+
+struct AutoSerializeUInt {
+  size_t structOffset;
+  const char* field;
+  uint defaultValue;
+}; 
+
+
+
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeUInt> AutoSerialize;
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 
 #endif

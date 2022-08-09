@@ -56,6 +56,13 @@ void attrSet(GameobjAttributes& attr, bool* value, const char* field){
     *value = attr.stringAttributes.at(field) == "enabled";
   }
 }
+void attrSet(GameobjAttributes& attr, bool* value, bool defaultValue, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *value = attr.stringAttributes.at(field) == "enabled";
+  }else{
+    *value = defaultValue;
+  }
+}
 void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *value = attr.stringAttributes.at(field);
@@ -99,6 +106,14 @@ void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field){
     *value = static_cast<unsigned int>(attr.numAttributes.at(field));
   }
 }
+void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultValue, const char* field){
+  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *value = static_cast<unsigned int>(attr.numAttributes.at(field));
+  }else{
+    *value = defaultValue;
+  }
+}
+
 
 
 void attrSet(GameobjAttributes& attr, int* _value, const char* field){
@@ -212,7 +227,7 @@ void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::
 }
 
 
-void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttributes& attr){
+void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttributes& attr, ObjectTypeUtil& util){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
@@ -234,10 +249,24 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
+  if (textureLoader != NULL){
+    int* address = (int*)(((char*)structAddress) + textureLoader -> structOffset);
+    attrSetLoadTexture(attr, util.ensureTextureLoaded, address, textureLoader -> defaultValue, textureLoader -> field);
+    return;
+  }
+
+  AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
+  if (uintValue != NULL){
+    uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
+    attrSet(attr, address, uintValue -> defaultValue, uintValue -> field);
+    return;
+  }
+
   modassert(false, "autoserialize type not found");
 }
-void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr){
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){
   for (auto &value : values){
-    createAutoSerialize(structAddress, value, attr);
+    createAutoSerialize(structAddress, value, attr, util);
   }
 }

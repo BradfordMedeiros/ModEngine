@@ -18,6 +18,6 @@ std::vector<AutoSerialize> portalAutoserializer {
 
 GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectPortal obj {};
-  createAutoSerialize((char*)&obj, portalAutoserializer, attr);
+  createAutoSerialize((char*)&obj, portalAutoserializer, attr, util);
   return obj;
 }

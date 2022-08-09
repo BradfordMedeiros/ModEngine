@@ -1,22 +1,38 @@
 #include "./obj_camera.h"
 
-void setCameraAttr(GameObjectCamera& cameraObj, GameobjAttributes& attr){
-  attrSet(attr, &cameraObj.enableDof, "dof");
-  attrSet(attr, &cameraObj.minBlurDistance, "minblur");
-  attrSet(attr, &cameraObj.maxBlurDistance, "maxblur");
-  attrSet(attr, &cameraObj.blurAmount, "bluramount");
-  attrSet(attr, &cameraObj.target, "target");
-}
+std::vector<AutoSerialize> cameraAutoserializer {
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectCamera, enableDof),
+    .field = "dof",
+    .onString = "enabled",
+    .offString = "disabled",
+    .defaultValue = false,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectCamera, minBlurDistance),
+    .field = "minblur",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectCamera, maxBlurDistance),
+    .field = "maxblur",
+    .defaultValue = 10.f,
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectCamera, target),
+    .field = "target",
+    .defaultValue = "",
+  },
+  AutoSerializeUInt {
+    .structOffset = offsetof(GameObjectCamera, blurAmount),
+    .field = "bluramount",
+    .defaultValue = 1,
+  }, 
+};
 
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){
-  GameObjectCamera obj {
-    .enableDof = false,
-    .minBlurDistance = 0.f,
-    .maxBlurDistance = 10.f,
-    .blurAmount = 1,
-    .target = "",
-  };
-  setCameraAttr(obj, attr);
+  GameObjectCamera obj {};
+  createAutoSerialize((char*)&obj, cameraAutoserializer, attr, util);
   std::cout << "camera: " << obj.enableDof << std::endl;
   return obj;
 }
@@ -50,5 +66,9 @@ void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
 }
 
 void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  setCameraAttr(cameraObj, attributes);
+  attrSet(attributes, &cameraObj.enableDof, "dof");
+  attrSet(attributes, &cameraObj.minBlurDistance, "minblur");
+  attrSet(attributes, &cameraObj.maxBlurDistance, "maxblur");
+  attrSet(attributes, &cameraObj.blurAmount, "bluramount");
+  attrSet(attributes, &cameraObj.target, "target");
 }

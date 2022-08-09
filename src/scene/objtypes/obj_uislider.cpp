@@ -21,17 +21,26 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
     .field = "slideamount",
     .defaultValue = 1.f,
   },
-  
+  AutoSerializeTextureLoader {
+    .structOffset = offsetof(GameObjectUISlider, texture),
+    .field = "texture",
+    .defaultValue = "./res/models/controls/slider.png",
+  },
+  AutoSerializeTextureLoader {
+    .structOffset = offsetof(GameObjectUISlider, opacityTexture),
+    .field = "opacity-texture",
+    .defaultValue = "./res/models/controls/slider_opacity.png",
+  },
+
 };
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUISlider obj {};
-  createAutoSerialize((char*)&obj, uiSliderAutoserializer, attr);
+  createAutoSerialize((char*)&obj, uiSliderAutoserializer, attr, util);
 
   attrSetCommon(attr, obj.common, util.meshes);
   attrSet(attr, &obj.backpanelTint, &obj.showBackpanel, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
-  attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.texture, "./res/models/controls/slider.png", "texture");
-  attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.opacityTexture, "./res/models/controls/slider_opacity.png", "opacity-texture");
+  //attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.opacityTexture, , );
 
   return obj;
 }
