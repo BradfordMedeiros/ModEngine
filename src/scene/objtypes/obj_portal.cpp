@@ -7,6 +7,11 @@ std::vector<AutoSerialize> autoserializerData {
     .onString = "true",
     .offString = "false",
     .defaultValue = false,
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectPortal, camera),
+    .field = "camera",
+    .defaultValue = "",
   }
 };
 
@@ -14,6 +19,5 @@ std::vector<AutoSerialize> autoserializerData {
 GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectPortal obj {};
   createAutoSerialize((char*)&obj, autoserializerData, attr);
-  attrSet(attr, &obj.camera, "", "camera");
   return obj;
 }

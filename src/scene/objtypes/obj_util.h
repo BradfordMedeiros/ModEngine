@@ -81,7 +81,13 @@ struct AutoSerializeBool {
   bool defaultValue;
 };
 
-typedef std::variant<AutoSerializeBool> AutoSerialize;
+struct AutoSerializeString {
+  size_t structOffset;
+  const char* field;
+  std::string defaultValue;
+};
+
+typedef std::variant<AutoSerializeBool, AutoSerializeString> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 
 #endif

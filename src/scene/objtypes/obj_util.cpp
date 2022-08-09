@@ -211,13 +211,23 @@ void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::
   }
 }
 
+
 void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttributes& attr){
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
-  //  //void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
     attrSet(attr, address, boolValue -> onString, boolValue -> offString, boolValue -> defaultValue, boolValue -> field, true);
+    return;
   }
+
+  AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
+  if (strValue != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
+    attrSet(attr, address, strValue -> defaultValue, strValue -> field);
+    return;
+  }
+
+  modassert(false, "autoserialize type not found");
 }
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr){
   for (auto &value : values){
