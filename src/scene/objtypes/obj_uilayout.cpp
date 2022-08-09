@@ -30,40 +30,12 @@ UILayoutFlowType layoutAlignFromAttr(GameobjAttributes& attr, const char* attrna
 }
 
 
-LayoutContentAlignmentType layoutContentAlignment(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos, LayoutContentAlignmentType defaultType){
-  bool hasAlign = attr.stringAttributes.find(attrname) != attr.stringAttributes.end();
-  auto alignType = defaultType;
-  
-
-//
-  attrSet(
-    attr, 
-    (int*)&alignType, 
-    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, 
-    { neg, "center", pos }, 
-    defaultType, 
-    attrname, 
-    true
-  );
-
-//
-
-  return alignType;
-}
-
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
   std::vector<std::string> elements = {};
   if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
     elements = split(attr.stringAttributes.at("elements"), ',');
   }
   
-  LayoutMargin marginValues {};
-  attrSet(attr, &marginValues.margin, &marginValues.marginSpecified, 0.f, "margin");
-  attrSet(attr, &marginValues.marginLeft, &marginValues.marginLeftSpecified, marginValues.margin, "margin-left");
-  attrSet(attr, &marginValues.marginRight, &marginValues.marginRightSpecified, marginValues.margin, "margin-right");
-  attrSet(attr, &marginValues.marginTop, &marginValues.marginTopSpecified, marginValues.margin, "margin-top");
-  attrSet(attr, &marginValues.marginBottom, &marginValues.marginBottomSpecified, marginValues.margin, "margin-bottom");
-
   auto minwidth = layoutMinSizeFromAttr(attr, "minwidth");
   auto minheight = layoutMinSizeFromAttr(attr, "minheight");
   auto horizontal = layoutAlignFromAttr(attr, "align-horizontal", "left", "right");
@@ -78,18 +50,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   attrSet(attr, &anchor.target, "", "anchor");
   attrSet(attr, &anchor.offset, glm::vec3(0.f, 0.f, 0.f), "anchor-offset");
 
-  LayoutBorder border {};
-  attrSet(attr, &border.borderSize, &border.hasBorder, 0.f, "border-size");
-  attrSet(attr, &border.borderColor, glm::vec4(1.f, 1.f, 1.f, 1.f), "border-color");
-  assert(border.borderSize <= 1.f);
-
-  LayoutContentAlignment alignment {
-    .vertical = layoutContentAlignment(attr, "align-items-vertical", "down", "up", LayoutContentAlignment_Negative),
-    .horizontal = layoutContentAlignment(attr, "align-items-horizontal", "left", "right", LayoutContentAlignment_Negative),
-  };
-
-  auto contentAlign = layoutContentAlignment(attr, "align-content", "pos", "neg", LayoutContentAlignment_Neutral);
-
   BoundInfo boundInfo {
     .xMin = 0, .xMax = 0,
     .yMin = 0, .yMax = 0,
@@ -100,16 +60,37 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .elements = elements,
     .boundInfo = boundInfo,
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
-    .marginValues = marginValues,
     .anchor = anchor,
     .minwidth = minwidth,
     .minheight = minheight,
     .horizontal = horizontal,
     .vertical = vertical,
-    .border = border,
-    .alignment = alignment,
-    .contentAlign = contentAlign,
   };
+  attrSet(attr, &obj.marginValues.margin, &obj.marginValues.marginSpecified, 0.f, "margin");
+  attrSet(attr, &obj.marginValues.marginLeft, &obj.marginValues.marginLeftSpecified, obj.marginValues.margin, "margin-left");
+  attrSet(attr, &obj.marginValues.marginRight, &obj.marginValues.marginRightSpecified, obj.marginValues.margin, "margin-right");
+  attrSet(attr, &obj.marginValues.marginTop, &obj.marginValues.marginTopSpecified, obj.marginValues.margin, "margin-top");
+  attrSet(attr, &obj.marginValues.marginBottom, &obj.marginValues.marginBottomSpecified, obj.marginValues.margin, "margin-bottom");
+
+  attrSet(attr, &obj.border.borderSize, &obj.border.hasBorder, 0.f, "border-size");
+  attrSet(attr, &obj.border.borderColor, glm::vec4(1.f, 1.f, 1.f, 1.f), "border-color");
+  assert(obj.border.borderSize <= 1.f);
+  
+  attrSet(
+    attr, (int*)&obj.alignment.vertical, 
+    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "down", "center", "up" }, 
+    LayoutContentAlignment_Negative, "align-items-vertical", true
+  );
+  attrSet(
+    attr, (int*)&obj.alignment.horizontal, 
+    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "left", "center", "right" }, 
+    LayoutContentAlignment_Negative, "align-items-horizontal", true
+  );
+  attrSet(
+    attr, (int*)&obj.contentAlign, 
+    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "neg", "center", "pos" }, 
+    LayoutContentAlignment_Neutral, "align-content", true
+  );
 
   attrSet(
     attr, (int*)&obj.contentSpacing, 
