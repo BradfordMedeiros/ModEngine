@@ -227,6 +227,13 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
+  if (floatValue != NULL){
+    float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
+    attrSet(attr, address, floatValue -> defaultValue, floatValue -> field);
+    return;
+  }
+
   modassert(false, "autoserialize type not found");
 }
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr){

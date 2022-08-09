@@ -5,7 +5,23 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
     .structOffset = offsetof(GameObjectUISlider, onSlide),
     .field = "onslide",
     .defaultValue = "",
-  }
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUISlider, min),
+    .field = "min",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUISlider, max),
+    .field = "max",
+    .defaultValue = 1.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUISlider, percentage),
+    .field = "slideamount",
+    .defaultValue = 1.f,
+  },
+  
 };
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
@@ -14,12 +30,8 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
 
   attrSetCommon(attr, obj.common, util.meshes);
   attrSet(attr, &obj.backpanelTint, &obj.showBackpanel, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
-  attrSet(attr, &obj.percentage, 1.f, "slideamount");
-  attrSet(attr, &obj.min, 0.f, "min");
-  attrSet(attr, &obj.max, 1.f, "max");
   attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.texture, "./res/models/controls/slider.png", "texture");
   attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.opacityTexture, "./res/models/controls/slider_opacity.png", "opacity-texture");
-
 
   return obj;
 }

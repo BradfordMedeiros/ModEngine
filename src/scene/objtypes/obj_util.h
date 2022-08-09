@@ -93,7 +93,7 @@ struct AutoSerializeFloat {
   float defaultValue;
 };
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 
 #endif
