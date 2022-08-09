@@ -73,4 +73,15 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
 void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string* _textureName, std::string defaultTexture, const char* field);
 void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict);
 
+struct AutoSerializeBool {
+  size_t structOffset;
+  const char* field;
+  const char* onString;
+  const char* offString;
+  bool defaultValue;
+};
+
+typedef std::variant<AutoSerializeBool> AutoSerialize;
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
+
 #endif

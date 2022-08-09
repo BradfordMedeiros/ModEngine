@@ -210,3 +210,17 @@ void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::
     *_value = defaultValue;
   }
 }
+
+void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttributes& attr){
+  AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
+  if (boolValue != NULL){
+  //  //void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict){
+    bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
+    attrSet(attr, address, boolValue -> onString, boolValue -> offString, boolValue -> defaultValue, boolValue -> field, true);
+  }
+}
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr){
+  for (auto &value : values){
+    createAutoSerialize(structAddress, value, attr);
+  }
+}
