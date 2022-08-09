@@ -97,6 +97,7 @@ struct AutoSerializeFloat {
 
 struct AutoSerializeTextureLoader {
   size_t structOffset;
+  std::optional<size_t> structOffsetName;
   const char* field;
   std::string defaultValue;
 }; 

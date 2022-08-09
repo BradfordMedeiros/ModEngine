@@ -23,11 +23,13 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
   },
   AutoSerializeTextureLoader {
     .structOffset = offsetof(GameObjectUISlider, texture),
+    .structOffsetName = std::nullopt,
     .field = "texture",
     .defaultValue = "./res/models/controls/slider.png",
   },
   AutoSerializeTextureLoader {
     .structOffset = offsetof(GameObjectUISlider, opacityTexture),
+    .structOffsetName = std::nullopt,
     .field = "opacity-texture",
     .defaultValue = "./res/models/controls/slider_opacity.png",
   },

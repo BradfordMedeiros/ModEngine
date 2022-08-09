@@ -211,7 +211,9 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
     textureToLoad = attr.stringAttributes.at(field);
   }
   *_textureId = ensureTextureLoaded(textureToLoad).textureId;
-  *_textureName = textureToLoad;
+  if (_textureName != NULL){
+    *_textureName = textureToLoad;  
+  }
 }
 
 void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict){
@@ -260,7 +262,8 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
   AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
     int* address = (int*)(((char*)structAddress) + textureLoader -> structOffset);
-    attrSetLoadTexture(attr, util.ensureTextureLoaded, address, textureLoader -> defaultValue, textureLoader -> field);
+    std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
+    attrSetLoadTexture(attr, util.ensureTextureLoaded, address, textureName, textureLoader -> defaultValue, textureLoader -> field);
     return;
   }
 
