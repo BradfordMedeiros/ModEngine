@@ -11,61 +11,50 @@ UILayoutMinSize layoutMinSizeFromAttr(GameobjAttributes& attr, const char* attrn
   return minsize; 
 }
 
-UILayoutFlowType layoutAlignFromAttr(GameobjAttributes& attr, const char* attrname, const char* neg, const char* pos){
-  bool hasAlign = attr.stringAttributes.find(attrname) != attr.stringAttributes.end();
-  auto alignType = UILayoutFlowNone;
-  if (hasAlign){
-    if (attr.stringAttributes.at(attrname) == neg){
-      alignType = UILayoutFlowNegative;
-    }else if (attr.stringAttributes.at(attrname) == pos){
-      alignType = UILayoutFlowPositive;
-    }else if (attr.stringAttributes.at(attrname) == "center"){
-      alignType = UILayoutFlowNone;
-    }else{
-      std::cout << "invalid align type" << std::endl;
-      assert(false);
-    }
-  }
-  return alignType;
-}
-
-
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
   std::vector<std::string> elements = {};
   if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
     elements = split(attr.stringAttributes.at("elements"), ',');
   }
-  
   auto minwidth = layoutMinSizeFromAttr(attr, "minwidth");
   auto minheight = layoutMinSizeFromAttr(attr, "minheight");
-  auto horizontal = layoutAlignFromAttr(attr, "align-horizontal", "left", "right");
-  auto vertical = layoutAlignFromAttr(attr, "align-vertical", "down", "up");
-
-  auto anchorHorizontal = layoutAlignFromAttr(attr, "anchor-dir-horizontal", "left", "right");
-  auto anchorVertical = layoutAlignFromAttr(attr, "anchor-dir-vertical", "down", "up");
-  LayoutAnchor anchor = {
-    .horizontal = anchorHorizontal,
-    .vertical = anchorVertical,
-  };
-  attrSet(attr, &anchor.target, "", "anchor");
-  attrSet(attr, &anchor.offset, glm::vec3(0.f, 0.f, 0.f), "anchor-offset");
-
-  BoundInfo boundInfo {
-    .xMin = 0, .xMax = 0,
-    .yMin = 0, .yMax = 0,
-    .zMin = 0, .zMax = 0,
-  };
 
   GameObjectUILayout obj{
     .elements = elements,
-    .boundInfo = boundInfo,
+    .boundInfo = BoundInfo  {
+      .xMin = 0, .xMax = 0,
+      .yMin = 0, .yMax = 0,
+      .zMin = 0, .zMax = 0,
+    },
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
-    .anchor = anchor,
     .minwidth = minwidth,
     .minheight = minheight,
-    .horizontal = horizontal,
-    .vertical = vertical,
   };
+
+  attrSet(
+    attr, (int*)&obj.anchor.horizontal,
+    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "left", "right"},
+    UILayoutFlowNone, "anchor-dir-horizontal", true
+  );
+  attrSet(
+    attr, (int*)&obj.anchor.vertical,
+    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "down", "up"},
+    UILayoutFlowNone, "anchor-dir-vertical", true
+  );
+  attrSet(attr, &obj.anchor.target, "", "anchor");
+  attrSet(attr, &obj.anchor.offset, glm::vec3(0.f, 0.f, 0.f), "anchor-offset");
+
+  attrSet(
+    attr, (int*)&obj.horizontal,
+    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "left", "right"},
+    UILayoutFlowNone, "align-horizontal", true
+  );
+  attrSet(
+    attr, (int*)&obj.vertical,
+    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "down", "up"},
+    UILayoutFlowNone, "align-vertical", true
+  );
+
   attrSet(attr, &obj.marginValues.margin, &obj.marginValues.marginSpecified, 0.f, "margin");
   attrSet(attr, &obj.marginValues.marginLeft, &obj.marginValues.marginLeftSpecified, obj.marginValues.margin, "margin-left");
   attrSet(attr, &obj.marginValues.marginRight, &obj.marginValues.marginRightSpecified, obj.marginValues.margin, "margin-right");
@@ -75,7 +64,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   attrSet(attr, &obj.border.borderSize, &obj.border.hasBorder, 0.f, "border-size");
   attrSet(attr, &obj.border.borderColor, glm::vec4(1.f, 1.f, 1.f, 1.f), "border-color");
   assert(obj.border.borderSize <= 1.f);
-  
+
   attrSet(
     attr, (int*)&obj.alignment.vertical, 
     { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "down", "center", "up" }, 
