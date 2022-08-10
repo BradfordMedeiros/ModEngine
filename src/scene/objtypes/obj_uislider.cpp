@@ -38,10 +38,8 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUISlider obj {};
   createAutoSerialize((char*)&obj, uiSliderAutoserializer, attr, util);
-
   attrSetCommon(attr, obj.common, util.meshes);
   attrSet(attr, &obj.backpanelTint, &obj.showBackpanel, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
-  //attrSetLoadTexture(attr, util.ensureTextureLoaded, &obj.opacityTexture, , );
 
   return obj;
 }

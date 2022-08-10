@@ -281,6 +281,14 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     attrSet(attr, address, hasValueAddress, vec4Value -> defaultValue, vec4Value -> field);
     return;
   }
+
+  AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
+  if (enumsValue != NULL){
+    int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
+    attrSet(attr, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field, true);
+    return;
+  }
+
   modassert(false, "autoserialize type not found");
 }
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){

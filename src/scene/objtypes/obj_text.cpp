@@ -32,13 +32,32 @@ void restrictWidth(GameObjectUIText& text){
   }
 }
 
+std::vector<AutoSerialize> textAutoserializer {
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUIText, wrap.wrapamount),
+    .field = "wrapamount",
+    .defaultValue = -1,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUIText, wrap.type),
+    .enums = { WRAP_NONE, WRAP_CHARACTERS },
+    .enumStrings = { "none", "char" },
+    .field = "wraptype",
+    .defaultValue = WRAP_NONE,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUIText, align),
+    .enums = { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN },
+    .enumStrings = { "left", "center", "right" },
+    .field = "align",
+    .defaultValue = CENTER_ALIGN,
+  }
+};
+
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIText obj {};
-  
-  attrSet(attr, (int*)&obj.wrap.type, { WRAP_NONE, WRAP_CHARACTERS }, { "none", "char" }, WRAP_NONE, "wraptype", true);
-  attrSet(attr, &obj.wrap.wrapamount, -1, "wrapamount");
 
-  attrSet(attr, (int*)&obj.align, { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN }, { "left", "center", "right" }, CENTER_ALIGN, "align", true);
+  createAutoSerialize((char*)&obj, textAutoserializer, attr, util);
 
   attrSet(attr, &obj.cursor.cursorIndexLeft, "left", "right", true, "cursor-dir", true);
   attrSet(attr, &obj.virtualization.maxheight, -1, "maxheight");

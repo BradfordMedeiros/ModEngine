@@ -115,8 +115,18 @@ struct AutoSerializeVec4 {
   glm::vec4 defaultValue;
 };
 
+struct AutoSerializeEnums {
+  size_t structOffset;
+  std::vector<int> enums;
+  std::vector<std::string> enumStrings;
+  const char* field;
+  int defaultValue;
+};
+//void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict);
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeUInt, AutoSerializeVec4> AutoSerialize;
+
+
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeUInt, AutoSerializeVec4, AutoSerializeEnums> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 
 #endif
