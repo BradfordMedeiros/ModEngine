@@ -29,7 +29,50 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "min-spacing",
     .defaultValue = 0.f,
   },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectUILayout, showBackpanel),
+    .field = "backpanel",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = false,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, type),
+    .enums = { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL },
+    .enumStrings = { "horizontal", "vertical" },
+    .field = "type",
+    .defaultValue = LAYOUT_HORIZONTAL,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, contentSpacing),
+    .enums = { LayoutContentSpacing_Pack, LayoutContentSpacing_SpaceForFirst, LayoutContentSpacing_SpaceForLast },
+    .enumStrings = { "pack", "space-for-first", "space-for-last" },
+    .field = "content-spacing",
+    .defaultValue = LayoutContentSpacing_Pack,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, contentAlign),
+    .enums = { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive },
+    .enumStrings = { "neg", "center", "pos" },
+    .field = "align-content",
+    .defaultValue = LayoutContentAlignment_Neutral,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, alignment.horizontal),
+    .enums = { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive },
+    .enumStrings = { "left", "center", "right" },
+    .field = "align-items-horizontal",
+    .defaultValue = LayoutContentAlignment_Negative,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, alignment.vertical),
+    .enums = { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive },
+    .enumStrings = { "down", "center", "up" },
+    .field = "align-items-vertical",
+    .defaultValue = LayoutContentAlignment_Negative,
+  },
 
+  
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
@@ -84,34 +127,12 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
 
   attrSet(attr, &obj.border.borderSize, &obj.border.hasBorder, 0.f, "border-size");
   attrSet(attr, &obj.border.borderColor, glm::vec4(1.f, 1.f, 1.f, 1.f), "border-color");
-  assert(obj.border.borderSize <= 1.f);
 
-  attrSet(
-    attr, (int*)&obj.alignment.vertical, 
-    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "down", "center", "up" }, 
-    LayoutContentAlignment_Negative, "align-items-vertical", true
-  );
-  attrSet(
-    attr, (int*)&obj.alignment.horizontal, 
-    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "left", "center", "right" }, 
-    LayoutContentAlignment_Negative, "align-items-horizontal", true
-  );
-  attrSet(
-    attr, (int*)&obj.contentAlign, 
-    { LayoutContentAlignment_Negative, LayoutContentAlignment_Neutral, LayoutContentAlignment_Positive }, { "neg", "center", "pos" }, 
-    LayoutContentAlignment_Neutral, "align-content", true
-  );
-
-  attrSet(
-    attr, (int*)&obj.contentSpacing, 
-    { LayoutContentSpacing_Pack, LayoutContentSpacing_SpaceForFirst, LayoutContentSpacing_SpaceForLast },  { "pack", "space-for-first", "space-for-last" }, 
-    LayoutContentSpacing_Pack, "content-spacing", true
-  );
-  attrSet(attr, (int*)&obj.type, { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL }, { "horizontal", "vertical" }, LAYOUT_HORIZONTAL, "type", false);
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
-  attrSet(attr, &obj.showBackpanel, "true", "false", false, "backpanel", false);
 
   createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
+  assert(obj.border.borderSize <= 1.f);
+
   return obj;
 }
 
