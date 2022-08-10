@@ -33,14 +33,18 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
     .field = "opacity-texture",
     .defaultValue = "./res/models/controls/slider_opacity.png",
   },
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectUISlider, backpanelTint),
+    .structOffsetFiller = offsetof(GameObjectUISlider, showBackpanel),
+    .field = "backpaneltint",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
 };
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUISlider obj {};
   createAutoSerialize((char*)&obj, uiSliderAutoserializer, attr, util);
   attrSetCommon(attr, obj.common, util.meshes);
-  attrSet(attr, &obj.backpanelTint, &obj.showBackpanel, glm::vec4(1.f, 1.f, 1.f, 1.f), "backpaneltint");
-
   return obj;
 }
 

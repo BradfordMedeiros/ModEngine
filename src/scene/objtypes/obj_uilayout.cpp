@@ -11,6 +11,27 @@ UILayoutMinSize layoutMinSizeFromAttr(GameobjAttributes& attr, const char* attrn
   return minsize; 
 }
 
+std::vector<AutoSerialize> uiLayoutAutoserializer {
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectUILayout, tint),
+    .structOffsetFiller = std::nullopt,
+    .field = "tint",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
+
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, spacing),
+    .field = "spacing",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, minSpacing),
+    .field = "min-spacing",
+    .defaultValue = 0.f,
+  },
+
+};
+
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
   std::vector<std::string> elements = {};
   if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
@@ -89,9 +110,8 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   attrSet(attr, (int*)&obj.type, { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL }, { "horizontal", "vertical" }, LAYOUT_HORIZONTAL, "type", false);
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   attrSet(attr, &obj.showBackpanel, "true", "false", false, "backpanel", false);
-  attrSet(attr, &obj.spacing, 0.f, "spacing");
-  attrSet(attr, &obj.minSpacing, 0.f, "min-spacing");
-  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
+
+  createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
   return obj;
 }
 
