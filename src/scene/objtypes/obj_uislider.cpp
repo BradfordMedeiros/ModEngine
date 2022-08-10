@@ -8,16 +8,19 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUISlider, min),
+    .structOffsetFiller = std::nullopt,
     .field = "min",
     .defaultValue = 0.f,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUISlider, max),
+    .structOffsetFiller = std::nullopt,
     .field = "max",
     .defaultValue = 1.f,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUISlider, percentage),
+    .structOffsetFiller = std::nullopt,
     .field = "slideamount",
     .defaultValue = 1.f,
   },

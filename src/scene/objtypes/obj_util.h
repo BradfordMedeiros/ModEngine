@@ -89,8 +89,14 @@ struct AutoSerializeString {
   std::string defaultValue;
 };
 
+struct AutoSerializeRequiredString {
+  size_t structOffset;
+  const char* field;
+};
+
 struct AutoSerializeFloat {
   size_t structOffset;
+  std::optional<size_t> structOffsetFiller;
   const char* field;
   float defaultValue;
 };
@@ -139,7 +145,7 @@ struct AutoSerializeEnums {
 
 
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 
 #endif

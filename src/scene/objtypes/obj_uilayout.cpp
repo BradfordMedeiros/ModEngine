@@ -21,11 +21,13 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
 
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUILayout, spacing),
+    .structOffsetFiller = std::nullopt,
     .field = "spacing",
     .defaultValue = 0.f,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUILayout, minSpacing),
+    .structOffsetFiller = std::nullopt,
     .field = "min-spacing",
     .defaultValue = 0.f,
   },
@@ -116,17 +118,6 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "anchor-offset",
     .defaultValue = glm::vec3(0.f, 0.f, 0.f),
   },
-
-  ///
-
-  //AutoSerializeFloat {
-  //  size_t structOffset;
-  //  const char* field;
-  //  float defaultValue;
-  //},
-
-
-  ///
  
 };
 

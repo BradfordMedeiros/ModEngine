@@ -258,6 +258,14 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeRequiredString* strValueRequired = std::get_if<AutoSerializeRequiredString>(&value);
+  if (strValueRequired != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strValueRequired -> structOffset);
+    modassert(attr.stringAttributes.find(strValueRequired -> field) != attr.stringAttributes.end(), std::string("auto serialize - required string field not present ") + strValueRequired -> field);
+    attrSet(attr, address, strValueRequired -> field);
+    return;
+  }
+
   AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
   if (strValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
@@ -265,10 +273,13 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+
+
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
-    attrSet(attr, address, floatValue -> defaultValue, floatValue -> field);
+    bool* hasValueAddress = (!floatValue -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + floatValue -> structOffsetFiller.value());
+    attrSet(attr, address, hasValueAddress, floatValue -> defaultValue, floatValue -> field);
     return;
   }
 

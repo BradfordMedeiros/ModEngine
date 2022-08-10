@@ -10,11 +10,13 @@ std::vector<AutoSerialize> cameraAutoserializer {
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectCamera, minBlurDistance),
+    .structOffsetFiller = std::nullopt,
     .field = "minblur",
     .defaultValue = 0.f,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectCamera, maxBlurDistance),
+    .structOffsetFiller = std::nullopt,
     .field = "maxblur",
     .defaultValue = 10.f,
   },

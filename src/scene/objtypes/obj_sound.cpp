@@ -1,15 +1,23 @@
 #include "./obj_sound.h"
 
 std::vector<AutoSerialize> soundAutoserializer {
- 
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectSound, loop),
+    .field = "loop",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = false,
+  },
+  AutoSerializeRequiredString {
+    .structOffset = offsetof(GameObjectSound, clip),
+    .field = "clip",
+  },  
 };
 
 GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectSound obj {};
   createAutoSerialize((char*)&obj, soundAutoserializer, attr, util);
 
-  attrSetRequired(attr, &obj.clip, "clip");
-  attrSet(attr, &obj.loop, "true", "false", false, "loop", false);
   obj.source = loadSoundState(util.pathForModLayer(obj.clip), obj.loop);
   return obj;
 }

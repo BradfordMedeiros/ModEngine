@@ -35,6 +35,7 @@ void restrictWidth(GameObjectUIText& text){
 std::vector<AutoSerialize> textAutoserializer {
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUIText, wrap.wrapamount),
+    .structOffsetFiller = std::nullopt,
     .field = "wrapamount",
     .defaultValue = -1,
   },
@@ -61,16 +62,19 @@ std::vector<AutoSerialize> textAutoserializer {
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUIText, virtualization.maxheight),
+    .structOffsetFiller = std::nullopt,
     .field = "maxheight",
     .defaultValue = -1,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUIText, virtualization.offsetx),
+    .structOffsetFiller = std::nullopt,
     .field = "offsetx",
     .defaultValue = 0,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUIText, virtualization.offsety),
+    .structOffsetFiller = std::nullopt,
     .field = "offsety",
     .defaultValue = 0,
   },
@@ -96,6 +100,7 @@ std::vector<AutoSerialize> textAutoserializer {
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUIText, deltaOffset),
+    .structOffsetFiller = std::nullopt,
     .field = "spacing",
     .defaultValue = 2,
   },

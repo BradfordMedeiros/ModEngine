@@ -9,11 +9,13 @@ std::vector<AutoSerialize> meshAutoserializer {
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectMesh, emissionAmount),
+    .structOffsetFiller = std::nullopt,
     .field = "emission",
     .defaultValue = 0.f,
   },
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectMesh, discardAmount),
+    .structOffsetFiller = std::nullopt,
     .field = "discard",
     .defaultValue = 0.f,
   },
