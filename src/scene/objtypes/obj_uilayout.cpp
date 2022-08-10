@@ -71,8 +71,46 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "align-items-vertical",
     .defaultValue = LayoutContentAlignment_Negative,
   },
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectUILayout, border.borderColor),
+    .structOffsetFiller = std::nullopt,
+    .field = "border-color",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, anchor.horizontal),
+    .enums = { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive },
+    .enumStrings = { "center", "left", "right"},
+    .field = "anchor-dir-horizontal",
+    .defaultValue = UILayoutFlowNone,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, anchor.vertical),
+    .enums = { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive },
+    .enumStrings = { "center", "down", "up"},
+    .field = "anchor-dir-vertical",
+    .defaultValue = UILayoutFlowNone,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, horizontal),
+    .enums = { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive },
+    .enumStrings = { "center", "left", "right"},
+    .field = "align-horizontal",
+    .defaultValue = UILayoutFlowNone,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectUILayout, vertical),
+    .enums = { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive },
+    .enumStrings = { "center", "down", "up"},
+    .field = "align-vertical",
+    .defaultValue = UILayoutFlowNone,
+  },
 
+
+  ///
   
+  ///
+ 
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
@@ -95,29 +133,9 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .minheight = minheight,
   };
 
-  attrSet(
-    attr, (int*)&obj.anchor.horizontal,
-    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "left", "right"},
-    UILayoutFlowNone, "anchor-dir-horizontal", true
-  );
-  attrSet(
-    attr, (int*)&obj.anchor.vertical,
-    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "down", "up"},
-    UILayoutFlowNone, "anchor-dir-vertical", true
-  );
+
   attrSet(attr, &obj.anchor.target, "", "anchor");
   attrSet(attr, &obj.anchor.offset, glm::vec3(0.f, 0.f, 0.f), "anchor-offset");
-
-  attrSet(
-    attr, (int*)&obj.horizontal,
-    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "left", "right"},
-    UILayoutFlowNone, "align-horizontal", true
-  );
-  attrSet(
-    attr, (int*)&obj.vertical,
-    { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive }, { "center", "down", "up"},
-    UILayoutFlowNone, "align-vertical", true
-  );
 
   attrSet(attr, &obj.marginValues.margin, &obj.marginValues.marginSpecified, 0.f, "margin");
   attrSet(attr, &obj.marginValues.marginLeft, &obj.marginValues.marginLeftSpecified, obj.marginValues.margin, "margin-left");
@@ -126,7 +144,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   attrSet(attr, &obj.marginValues.marginBottom, &obj.marginValues.marginBottomSpecified, obj.marginValues.margin, "margin-bottom");
 
   attrSet(attr, &obj.border.borderSize, &obj.border.hasBorder, 0.f, "border-size");
-  attrSet(attr, &obj.border.borderColor, glm::vec4(1.f, 1.f, 1.f, 1.f), "border-color");
 
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
 
