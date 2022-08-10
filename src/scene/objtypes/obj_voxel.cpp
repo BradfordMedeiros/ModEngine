@@ -1,5 +1,9 @@
 #include "./obj_voxel.h"
 
+std::vector<AutoSerialize> voxelAutoserializer {
+ 
+};
+
 GameObjectVoxel createVoxel(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto defaultVoxelTexture = util.ensureTextureLoaded("./res/textures/wood.jpg").textureId;
   auto textureString = attr.stringAttributes.find("fromtextures") == attr.stringAttributes.end() ? "" : attr.stringAttributes.at("fromtextures");
@@ -7,6 +11,7 @@ GameObjectVoxel createVoxel(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectVoxel obj {
     .voxel = voxel,
   };
+  createAutoSerialize((char*)&obj, voxelAutoserializer, attr, util);
   return obj;
 }
 

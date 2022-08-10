@@ -140,8 +140,21 @@ void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue,
   }else{
     *_value = defaultValue;
   }
-  
 }
+void attrSet(GameobjAttributes& attr, glm::vec3* _value, bool* _hasValue, glm::vec3 defaultValue, const char* field){
+  if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
+    *_value = attr.vecAttr.vec3.at(field);
+    if (_hasValue != NULL){
+      *_hasValue = true;
+    }
+  }else{
+    *_value = defaultValue;
+    if (_hasValue != NULL){
+      *_hasValue = false;
+    }
+  }  
+}
+
 
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, const char* field){
   if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
@@ -278,6 +291,14 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
     attrSet(attr, address, uintValue -> defaultValue, uintValue -> field);
+    return;
+  }
+
+  AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
+  if (vec3Value != NULL){
+    glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
+    bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
+    attrSet(attr, address, hasValueAddress, vec3Value -> defaultValue, vec3Value -> field);
     return;
   }
 

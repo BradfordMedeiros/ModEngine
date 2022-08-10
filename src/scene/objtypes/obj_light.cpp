@@ -1,7 +1,13 @@
 #include "./obj_light.h"
 
+std::vector<AutoSerialize> lightAutoserializer {
+ 
+};
+
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
+  createAutoSerialize((char*)&obj, lightAutoserializer, attr, util);
+
   attrSet(attr, (int*)&obj.type, { LIGHT_POINT, LIGHT_SPOTLIGHT, LIGHT_DIRECTIONAL }, { "point", "spotlight", "directional" }, LIGHT_POINT, "type", true);
 
   auto maxangle = (obj.type != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
@@ -12,6 +18,7 @@ GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
   // physically accurate ish would be to attenuate based on 1 / r^2  hence the 0 0 1 default
   attrSet(attr, &obj.attenuation, glm::vec3(0, 0, 1), "attenuation");
+  createAutoSerialize((char*)&obj, lightAutoserializer, attr, util);
   return obj;
 }
 

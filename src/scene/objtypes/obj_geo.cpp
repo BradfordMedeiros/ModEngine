@@ -1,5 +1,9 @@
 #include "./obj_geo.h"
 
+std::vector<AutoSerialize> geoAutoserializer {
+ 
+};
+
 GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
   auto points = parsePoints(
     attr.stringAttributes.find("points") != attr.stringAttributes.end() ? 
@@ -10,6 +14,8 @@ GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectGeo geo{
     .points = points,
   };
+
+  createAutoSerialize((char*)&geo, geoAutoserializer, attr, util);
 
   attrSet(attr, (int*)&geo.type, { GEODEFAULT, GEOSPHERE }, { "default", "sphere" }, GEODEFAULT, "shape", true);
   return geo;

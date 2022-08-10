@@ -105,10 +105,27 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "align-vertical",
     .defaultValue = UILayoutFlowNone,
   },
-
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectUILayout, anchor.target),
+    .field = "anchor",
+    .defaultValue = "",
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObjectUILayout, anchor.offset),
+    .structOffsetFiller = std::nullopt,
+    .field = "anchor-offset",
+    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
+  },
 
   ///
-  
+
+  //AutoSerializeFloat {
+  //  size_t structOffset;
+  //  const char* field;
+  //  float defaultValue;
+  //},
+
+
   ///
  
 };
@@ -133,9 +150,8 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .minheight = minheight,
   };
 
+  createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
 
-  attrSet(attr, &obj.anchor.target, "", "anchor");
-  attrSet(attr, &obj.anchor.offset, glm::vec3(0.f, 0.f, 0.f), "anchor-offset");
 
   attrSet(attr, &obj.marginValues.margin, &obj.marginValues.marginSpecified, 0.f, "margin");
   attrSet(attr, &obj.marginValues.marginLeft, &obj.marginValues.marginLeftSpecified, obj.marginValues.margin, "margin-left");
@@ -147,7 +163,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
 
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
 
-  createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
   assert(obj.border.borderSize <= 1.f);
 
   return obj;
