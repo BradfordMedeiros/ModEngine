@@ -1,7 +1,13 @@
 #include "./obj_geo.h"
 
 std::vector<AutoSerialize> geoAutoserializer {
- 
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectGeo, type),
+    .enums = { GEODEFAULT, GEOSPHERE },
+    .enumStrings = { "default", "sphere" },
+    .field = "shape",
+    .defaultValue = GEODEFAULT,
+  },
 };
 
 GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
@@ -16,8 +22,6 @@ GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
   };
 
   createAutoSerialize((char*)&geo, geoAutoserializer, attr, util);
-
-  attrSet(attr, (int*)&geo.type, { GEODEFAULT, GEOSPHERE }, { "default", "sphere" }, GEODEFAULT, "shape", true);
   return geo;
 }
 

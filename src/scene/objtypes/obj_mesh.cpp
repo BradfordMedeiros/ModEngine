@@ -1,5 +1,34 @@
 #include "./obj_mesh.h"
 
+std::vector<AutoSerialize> meshAutoserializer {
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectMesh, tint),
+    .structOffsetFiller = std::nullopt,
+    .field = "tint",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectMesh, emissionAmount),
+    .field = "emission",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectMesh, discardAmount),
+    .field = "discard",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectMesh, isDisabled),
+    .field = "disabled",
+    .onString = "true",
+    .offString = "false",
+    .defaultValue = false,
+  },
+  //////////////
+
+  /////////////////
+};
+
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
   // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 
@@ -20,11 +49,8 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .rootMesh = rootMeshName,
   };
 
-  attrSet(attr, &obj.isDisabled, "true", "false", false, "disabled", true);
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
-  attrSet(attr, &obj.discardAmount, 0.f, "discard");
-  attrSet(attr, &obj.emissionAmount, 0.f, "emission");
-  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
+  createAutoSerialize((char*)&obj, meshAutoserializer, attr, util);
   return obj;
 }
 
