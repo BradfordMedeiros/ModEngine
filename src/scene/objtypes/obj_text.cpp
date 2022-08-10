@@ -51,28 +51,75 @@ std::vector<AutoSerialize> textAutoserializer {
     .enumStrings = { "left", "center", "right" },
     .field = "align",
     .defaultValue = CENTER_ALIGN,
-  }
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectUIText, cursor.cursorIndexLeft),
+    .field = "cursor-dir",
+    .onString = "left",
+    .offString = "right",
+    .defaultValue = true,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUIText, virtualization.maxheight),
+    .field = "maxheight",
+    .defaultValue = -1,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUIText, virtualization.offsetx),
+    .field = "offsetx",
+    .defaultValue = 0,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUIText, virtualization.offsety),
+    .field = "offsety",
+    .defaultValue = 0,
+  },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectUIText, virtualization.offset),
+    .field = "offset",
+    .defaultValue = 0,
+  },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectUIText, cursor.cursorIndex),
+    .field = "cursor",
+    .defaultValue = -1,
+  },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectUIText, cursor.highlightLength),
+    .field = "cursor-highlight",
+    .defaultValue = 0,
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectUIText, value),
+    .field = "value",
+    .defaultValue = "",
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUIText, deltaOffset),
+    .field = "spacing",
+    .defaultValue = 2,
+  },
+  AutoSerializeVec4 {
+    .structOffset = offsetof(GameObjectUIText, tint),
+    .structOffsetFiller = std::nullopt,
+    .field = "tint",
+    .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
+  },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectUIText, charlimit),
+    .field = "charlimit",
+    .defaultValue = -1,
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectUIText, fontFamily),
+    .field = "font",
+    .defaultValue = "",
+  },
 };
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIText obj {};
-
   createAutoSerialize((char*)&obj, textAutoserializer, attr, util);
-
-  attrSet(attr, &obj.cursor.cursorIndexLeft, "left", "right", true, "cursor-dir", true);
-  attrSet(attr, &obj.virtualization.maxheight, -1, "maxheight");
-  attrSet(attr, &obj.virtualization.offsetx, 0, "offsetx");
-  attrSet(attr, &obj.virtualization.offsety, 0, "offsety");
-  attrSet(attr, &obj.virtualization.offset, 0, "offset");
-
-  attrSet(attr, &obj.cursor.cursorIndex, -1, "cursor");
-  attrSet(attr, &obj.cursor.highlightLength, 0, "cursor-highlight");
-  attrSet(attr, &obj.value, "", "value");
-  attrSet(attr, &obj.deltaOffset, 2, "spacing");
-  attrSet(attr, &obj.tint, glm::vec4(1.f, 1.f, 1.f, 1.f), "tint");
-  attrSet(attr, &obj.charlimit, -1, "charlimit");
-  attrSet(attr, &obj.fontFamily, "", "font");
-
   restrictWidth(obj);
   return obj;
 }

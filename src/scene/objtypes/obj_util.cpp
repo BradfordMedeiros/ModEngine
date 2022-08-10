@@ -267,6 +267,13 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
+  if (intValue != NULL){
+    int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
+    attrSet(attr, address, intValue -> defaultValue, intValue -> field);    
+    return;
+  }
+
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
