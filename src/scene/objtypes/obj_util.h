@@ -55,6 +55,7 @@ void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, Obj
 
 void attrSet(GameobjAttributes& attr, bool* value, const char* field);
 void attrSet(GameobjAttributes& attr, bool* value, bool defaultValue, const char* field);
+void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, const char* field, bool strict);
 void attrSet(GameobjAttributes& attr, std::string* value, const char* field);
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field);
 void attrSetRequired(GameobjAttributes& attr, std::string* _value, const char* field);
