@@ -56,15 +56,12 @@ std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamer
   if (obj.target != ""){
     pairs.push_back(std::pair<std::string, std::string>("target", obj.target));
   }
+  autoserializerSerialize((char*)&obj, cameraAutoserializer, pairs);
+
   return pairs;
 }
 void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
-  assert(false); 
-  _attributes.stringAttributes["dof"] = cameraObj.enableDof ? "enabled" : "disabled";
-  _attributes.numAttributes["minblur"] = cameraObj.minBlurDistance;
-  _attributes.numAttributes["maxblur"] = cameraObj.maxBlurDistance;
-  _attributes.stringAttributes["target"] = cameraObj.target;
-  _attributes.numAttributes["bluramount"] = cameraObj.blurAmount;
+  autoserializerGetAttr((char*)&cameraObj, cameraAutoserializer, _attributes);
 }
 
 void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
@@ -73,4 +70,6 @@ void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attribu
   attrSet(attributes, &cameraObj.maxBlurDistance, "maxblur");
   attrSet(attributes, &cameraObj.blurAmount, "bluramount");
   attrSet(attributes, &cameraObj.target, "target");
+
+  autoserializerSetAttr((char*)&cameraObj, cameraAutoserializer, attributes);
 }

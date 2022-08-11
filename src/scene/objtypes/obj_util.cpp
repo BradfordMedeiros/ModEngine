@@ -273,8 +273,6 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
-
-
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
@@ -334,4 +332,108 @@ void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values
   for (auto &value : values){
     createAutoSerialize(structAddress, value, attr, util);
   }
+}
+
+void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs){
+  modassert(false, "not yet implemented");
+}
+
+void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& _attributes){
+  //modassert(false, "not yet implemented");
+  //  attrSet(attributes, &cameraObj.enableDof, "dof");
+  //  _attributes.stringAttributes["dof"] = cameraObj.enableDof ? "enabled" : "disabled";
+
+  AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
+  if (boolValue != NULL){
+    bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);
+    bool value = *address;
+    _attributes.stringAttributes[boolValue -> field] = value ? boolValue -> onString : boolValue -> offString;
+    return;
+  }
+
+
+  /*AutoSerializeRequiredString* strValueRequired = std::get_if<AutoSerializeRequiredString>(&value);
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectCamera, target),
+    .field = "target",
+    .defaultValue = "",
+  },  _attributes.stringAttributes["target"] = cameraObj.target;
+  if (strValueRequired != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strValueRequired -> structOffset);
+    modassert(attr.stringAttributes.find(strValueRequired -> field) != attr.stringAttributes.end(), std::string("auto serialize - required string field not present ") + strValueRequired -> field);
+    attrSet(attr, address, strValueRequired -> field);
+    return;
+  }
+  */
+  AutoSerializeString* strValue = std::get_if<AutoSerializeString>(&value);
+  if (strValue != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strValue -> structOffset);
+    _attributes.stringAttributes[strValue -> field] = *address;
+    return;
+  }
+  
+  AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
+  if (floatValue != NULL){
+    float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
+    _attributes.numAttributes[floatValue -> field] = *address;
+    return;
+  }
+
+  
+  /*
+  AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
+  if (textureLoader != NULL){
+    int* address = (int*)(((char*)structAddress) + textureLoader -> structOffset);
+    std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
+    attrSetLoadTexture(attr, util.ensureTextureLoaded, address, textureName, textureLoader -> defaultValue, textureLoader -> field);
+    return;
+  }
+
+  AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
+  if (intValue != NULL){
+    int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
+    attrSet(attr, address, intValue -> defaultValue, intValue -> field);    
+    return;
+  }
+  */
+  AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
+  if (uintValue != NULL){
+    uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
+    _attributes.numAttributes[uintValue -> field] = *address;
+    return;
+  }
+  /*
+  AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
+  if (vec3Value != NULL){
+    glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
+    bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
+    attrSet(attr, address, hasValueAddress, vec3Value -> defaultValue, vec3Value -> field);
+    return;
+  }
+
+  AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
+  if (vec4Value != NULL){
+    glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
+    bool* hasValueAddress = (!vec4Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec4Value -> structOffsetFiller.value());
+    attrSet(attr, address, hasValueAddress, vec4Value -> defaultValue, vec4Value -> field);
+    return;
+  }
+
+  AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
+  if (enumsValue != NULL){
+    int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
+    attrSet(attr, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field, true);
+    return;
+  }*/
+
+  //modassert(false, "autoserialize type not found");
+}
+
+void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes){
+  for (auto &value : values){
+    autoserializerGetAttr(structAddress, value, _attributes);
+  }
+}
+void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes){
+  modassert(false, "not yet implemented");
 }
