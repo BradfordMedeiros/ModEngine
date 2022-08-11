@@ -65,8 +65,5 @@ void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
 }
 
 void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  attrSet(attributes, &cameraObj.minBlurDistance, "minblur");
-  attrSet(attributes, &cameraObj.maxBlurDistance, "maxblur");
-  attrSet(attributes, &cameraObj.blurAmount, "bluramount");
   autoserializerSetAttr((char*)&cameraObj, cameraAutoserializer, attributes);
 }

@@ -462,14 +462,14 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     attrSet(attributes, address, strValue -> field);
     return;
   }
-// // //
-// // //AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
-// // //if (floatValue != NULL){
-// // //  float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
-// // //  _attributes.numAttributes[floatValue -> field] = *address;
-// // //  return;
-// // //}
-//
+
+  AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
+  if (floatValue != NULL){
+    float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
+    attrSet(attributes, address, floatValue -> field);
+    return;
+  }
+
 //  //
 //  //AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
 //  //if (textureLoader != NULL){
@@ -485,12 +485,12 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
 //  //  return;
 //  //}
 //  //*/
-//  //AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
-//  //if (uintValue != NULL){
-//  //  uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
-//  //  _attributes.numAttributes[uintValue -> field] = *address;
-//  //  return;
-//  //}
+  AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
+  if (uintValue != NULL){
+    uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
+    attrSet(attributes, address, uintValue -> field);
+    return;
+  }
 //  ///*
 //  //AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
 //  //if (vec3Value != NULL){
