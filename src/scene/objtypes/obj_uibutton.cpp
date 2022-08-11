@@ -95,9 +95,8 @@ std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIBut
   return pairs;
 }
 
-void getUIButtonAttributes(GameObjectUIButton& textObj, GameobjAttributes& _attributes){
-  MODTODO("ui button - get rest of attributes");
-  _attributes.vecAttr.vec4["tint"] = textObj.tint;
+void getUIButtonAttributes(GameObjectUIButton& uiButton, GameobjAttributes& _attributes){
+  autoserializerGetAttr((char*)&uiButton, uiButtonAutoserializer, _attributes);
 }
 
 
