@@ -148,6 +148,15 @@ void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char*
   }
 }
 
+void attrSet(GameobjAttributes& attr, glm::vec3* _value, bool* _hasValue, const char* field){
+  if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
+    *_value = attr.vecAttr.vec3.at(field);
+    if (_hasValue != NULL){
+      *_hasValue = true;
+    }
+  }
+}
+
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field){
   if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
     *_value = attr.vecAttr.vec3.at(field);
@@ -243,6 +252,21 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
   }
 }
 
+void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, const char* field, bool strict){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    auto value = attr.stringAttributes.at(field);
+    bool foundEnum = false;
+    for (int i = 0; i < enumStrings.size(); i++){
+      if (enumStrings.at(i) == value){
+        *_value = enums.at(i);
+        foundEnum = true;
+        break;
+      }
+    }
+    modassert(foundEnum || !strict, std::string("invalid enum type for ") + field + " - " + value);
+  }
+}
+
 void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     auto value = attr.stringAttributes.at(field);
@@ -261,6 +285,16 @@ void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::
   }else{
     *_value = defaultValue;
   }
+}
+
+std::string enumStringFromEnumValue(int value, std::vector<int>& enums, std::vector<std::string>& enumStrings){
+  for (int i = 0; i < enums.size(); i++){
+    if (value == enums.at(i)){
+      return enumStrings.at(i);
+    }
+  }
+  modassert(false, "invalid enum value: " + std::to_string(value));
+  return "";
 }
 
 
@@ -404,15 +438,14 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     _attributes.numAttributes[uintValue -> field] = *address;
     return;
   }
-  /*
+  
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
-    bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
-    attrSet(attr, address, hasValueAddress, vec3Value -> defaultValue, vec3Value -> field);
+    _attributes.vecAttr.vec3[vec3Value -> field] = *address;
     return;
   }
-  */
+  
   AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
   if (vec4Value != NULL){
     glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
@@ -420,13 +453,15 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     _attributes.vecAttr.vec4[vec4Value -> field] = *address;
     return;
   }
-  /*
+  
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-    attrSet(attr, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field, true);
+    auto enumValue = *address;
+    //attrSet(attr, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field, true);
+    _attributes.stringAttributes[enumsValue -> field] = enumStringFromEnumValue(enumValue, enumsValue -> enums, enumsValue -> enumStrings);
     return;
-  }*/
+  }
 
   modassert(false, "autoserialize type not found");
 }
@@ -492,13 +527,13 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 //  ///*
-//  //AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
-//  //if (vec3Value != NULL){
-//  //  glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
-//  //  bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
-//  //  attrSet(attr, address, hasValueAddress, vec3Value -> defaultValue, vec3Value -> field);
-//  //  return;
-//  //}
+  AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
+  if (vec3Value != NULL){
+    glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
+    bool* hasValueAddress = (!vec3Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec3Value -> structOffsetFiller.value());
+    attrSet(attributes, address, hasValueAddress, vec3Value -> field);
+    return;
+  }
 //  //*/
 //  //AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
 //  //if (vec4Value != NULL){
@@ -508,12 +543,12 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
 //  //  return;
 //  //}
 //  ///*
-//  //AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
-//  //if (enumsValue != NULL){
-//  //  int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
-//  //  attrSet(attr, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field, true);
-//  //  return;
-  //}*/
+  AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
+  if (enumsValue != NULL){
+    int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
+    attrSet(attributes, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> field, true);
+    return;
+  }
 
   //modassert(false, "autoserialize type not found");
 }

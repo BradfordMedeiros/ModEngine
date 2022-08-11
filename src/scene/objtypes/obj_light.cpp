@@ -14,7 +14,6 @@ std::vector<AutoSerialize> lightAutoserializer {
     .field = "color",
     .defaultValue = glm::vec3(1.f, 1.f, 1.f),
   },
-
   // constant, linear, quadratic
   // in shader =>  float attenuation = 1.0 / (constant + (linear * distanceToLight) + (quadratic * (distanceToLight * distanceToLight)));  
   // physically accurate ish would be to attenuate based on 1 / r^2  hence the 0 0 1 default
@@ -35,7 +34,7 @@ GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
 }
 
 void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes){
-  _attributes.vecAttr.vec3["color"] = lightObj.color;
+  autoserializerGetAttr((char*)&lightObj, lightAutoserializer, _attributes);
 }
 
 std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight& obj, ObjectSerializeUtil& util){
@@ -45,5 +44,5 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight&
 }
 
 void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  maybeSetVec3FromAttr(&lightObj.color, "color", attributes);
+  autoserializerSetAttr((char*)&lightObj, lightAutoserializer, attributes);
 }
