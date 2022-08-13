@@ -76,16 +76,11 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
   if (meshObj.meshNames.size() > 0){
     _attributes.stringAttributes["mesh"] = meshObj.meshNames.at(0);
   }
-  _attributes.stringAttributes["isDisabled"] = meshObj.isDisabled ? "true" : "false";
-  _attributes.vecAttr.vec4["tint"] = meshObj.tint;
+  autoserializerGetAttr((char*)&meshObj, meshAutoserializer, _attributes);
 }
 
 void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  if (attributes.stringAttributes.find("isDisabled") != attributes.stringAttributes.end()){
-    meshObj.isDisabled = attributes.stringAttributes.at("isDisabled") == "true";;
-  }
   setTextureAttributes(meshObj.texture, attributes, util);
-  if (attributes.vecAttr.vec4.find("tint") != attributes.vecAttr.vec4.end()){
-    meshObj.tint = attributes.vecAttr.vec4.at("tint");
-  }
+
+  autoserializerSetAttr((char*)&meshObj, meshAutoserializer, attributes, util);
 }
