@@ -59,5 +59,6 @@ void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes){
 void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   if (attributes.stringAttributes.find("points") != attributes.stringAttributes.end()){
     geoObj.points = parsePoints(attributes.stringAttributes.at("points"));
-  } 
+  }
+  autoserializerSetAttr((char*)&geoObj, geoAutoserializer, attributes, util);
 }

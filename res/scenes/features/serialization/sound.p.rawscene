@@ -1,12 +1,8 @@
 
 &sample:clip:./res/sounds/sample.wav
-&sample:script:./res/scenes/features/objtypes/sounds.scm
+&sample:script:./res/scenes/features/serialization/get-attr.scm
 &sample:loop:true
 &sample:position:1 0 1
-
-
-*button:position:0 0 0
-*button:script:./res/scenes/features/serialization/get-attr.scm
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:&sample

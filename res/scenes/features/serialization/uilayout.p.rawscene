@@ -1,0 +1,29 @@
+
+(layout:script:./res/scenes/features/serialization/get-attr.scm
+(layout:position:0 1 0
+(layout:type:vertical
+(layout:elements:*basicbutton1,*basicbutton2
+(layout:backpanel:true
+(layout:tint:1.0 0.1 0.1
+(layout:margin:0.1
+(layout:width:100
+(layout:wrap:flex
+(layout:height:50
+(layout:mode:flex
+
+
+test:script:./res/scenes/features/serialization/set-attr.scm
+test:target:(layout
+
+*basicbutton1:ontexture:./res/textures/wood.jpg
+*basicbutton1:offtexture:./res/textures/window.png
+*basicbutton1:position:0.1 0 0
+*basicbutton1:state:on
+*basicbutton1:ontint:0 0 1
+
+*basicbutton2:ontexture:./res/textures/wood.jpg
+*basicbutton2:offtexture:./res/textures/window.png
+*basicbutton2:position:1 0 0
+*basicbutton2:state:on
+*basicbutton2:ontint:0 0 1
+

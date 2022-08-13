@@ -434,13 +434,13 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
-  /*AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
+  AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
     int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-    attrSet(attr, address, intValue -> defaultValue, intValue -> field);    
+    _attributes.numAttributes[intValue -> field] = *address;
     return;
   }
-  */
+  
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);
@@ -482,9 +482,6 @@ void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& valu
 }
 
 void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-
-  //  attrSet(attributes, &cameraObj.enableDof, "dof");
-
   AutoSerializeBool* boolValue = std::get_if<AutoSerializeBool>(&value);
   if (boolValue != NULL){
     bool* address = (bool*)(((char*)structAddress) + boolValue -> structOffset);

@@ -30,7 +30,36 @@
 	)
 	(list "&sample"
 		(list
-
+			(list "loop" "false")
+			(list "clip" "./res/sounds/silenced-gunshot.wav")
+		)
+	)
+	(list "_slider"
+		(list
+  		(list "min" 20)
+  		(list "max" 100)
+  		(list "slideamount" 0.3)
+		)
+	)
+	(list "(layout"
+		(list
+  		(list "tint" (list 1 0 0 0.5))
+  		(list "border-size" 0.5)
+		)
+	)
+	(list ")text"
+		(list
+			(list "value" "goodbye world")
+			(list "tint" (list 0 1 0 1))
+			(list "align" "right")
+			(list "wraptype" "char")
+			(list "wrapamount" 3)
+			(list "charlimit" 9)
+			(list "cursor" 2)
+			(list "cursor-dir" "right")
+			(list "cursor-highlight" 3)
+			(list "font" "./res/fonts/dpquake.ttf")
+			(list "maxheight" 2)
 		)
 	)
 ))

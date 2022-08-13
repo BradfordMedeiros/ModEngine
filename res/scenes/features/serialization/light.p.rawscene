@@ -1,7 +1,4 @@
 
 !light:script:./res/scenes/features/serialization/get-attr.scm
-#!light:color:0 0 1
-
-
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:!light

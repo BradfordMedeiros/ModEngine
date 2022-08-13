@@ -118,7 +118,18 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "anchor-offset",
     .defaultValue = glm::vec3(0.f, 0.f, 0.f),
   },
- 
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, border.borderSize),
+    .structOffsetFiller = offsetof(GameObjectUILayout, border.hasBorder),
+    .field = "border-size",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, marginValues.margin),
+    .structOffsetFiller = offsetof(GameObjectUILayout, marginValues.marginSpecified),
+    .field = "margin",
+    .defaultValue = 0.f,
+  },
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
@@ -142,19 +153,14 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   };
 
   createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
+  assert(obj.border.borderSize <= 1.f);
 
-
-  attrSet(attr, &obj.marginValues.margin, &obj.marginValues.marginSpecified, 0.f, "margin");
   attrSet(attr, &obj.marginValues.marginLeft, &obj.marginValues.marginLeftSpecified, obj.marginValues.margin, "margin-left");
   attrSet(attr, &obj.marginValues.marginRight, &obj.marginValues.marginRightSpecified, obj.marginValues.margin, "margin-right");
   attrSet(attr, &obj.marginValues.marginTop, &obj.marginValues.marginTopSpecified, obj.marginValues.margin, "margin-top");
   attrSet(attr, &obj.marginValues.marginBottom, &obj.marginValues.marginBottomSpecified, obj.marginValues.margin, "margin-bottom");
 
-  attrSet(attr, &obj.border.borderSize, &obj.border.hasBorder, 0.f, "border-size");
-
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
-
-  assert(obj.border.borderSize <= 1.f);
 
   return obj;
 }
@@ -166,7 +172,12 @@ glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3
   return glm::scale(glm::translate(glm::mat4(1.0f), layoutObj.panelDisplayOffset + layoutPos + zFightingBias), glm::vec3(boundWidth, boundheight, 1.f) - minusScale);
 }
 
+
+void getUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& _attributes){
+  autoserializerGetAttr((char*)&layoutObj, uiLayoutAutoserializer, _attributes);
+}
+
 void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  maybeSetVec4FromAttr(&layoutObj.tint, "tint", attributes);
   setTextureAttributes(layoutObj.texture, attributes, util);
+  autoserializerSetAttr((char*)&layoutObj, uiLayoutAutoserializer, attributes, util);
 }

@@ -1,0 +1,5 @@
+_slider:position:0 0 0
+_slider:script:./res/scenes/features/serialization/get-attr.scm
+
+test:script:./res/scenes/features/serialization/set-attr.scm
+test:target:_slider

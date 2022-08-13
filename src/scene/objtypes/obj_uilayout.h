@@ -73,6 +73,7 @@ struct GameObjectUILayout {
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);
 glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale, glm::vec3 layoutPos);
 
+void getUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& _attributes);
 void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif

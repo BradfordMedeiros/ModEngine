@@ -130,56 +130,10 @@ GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
 }
 
 void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes){
-  attributes.stringAttributes["value"] = textObj.value; 
-  attributes.stringAttributes["spacing"] = std::to_string(textObj.deltaOffset);
-  attributes.vecAttr.vec4["tint"] = textObj.tint;
-  attributes.stringAttributes["align"] = alignTypeToStr(textObj.align);
-  attributes.stringAttributes["wraptype"] = wrapTypeToStr(textObj.wrap);
-  attributes.numAttributes["wrapamount"] = textObj.wrap.wrapamount;
-  attributes.numAttributes["maxheight"] = textObj.virtualization.maxheight;
-  attributes.numAttributes["offsetx"] = textObj.virtualization.offsetx;
-  attributes.numAttributes["offsety"] = textObj.virtualization.offsety;
-  attributes.numAttributes["offset"] = textObj.virtualization.offset;
-  attributes.numAttributes["charlimit"] = textObj.charlimit;
-  attributes.numAttributes["cursor"] = textObj.cursor.cursorIndex;
-  attributes.stringAttributes["cursor-dir"] = textObj.cursor.cursorIndexLeft ? "left" : "right";
-  attributes.numAttributes["cursor-highlight"] = textObj.cursor.highlightLength;
-  attributes.stringAttributes["font"] = textObj.fontFamily;
+  autoserializerGetAttr((char*)&textObj, textAutoserializer, attributes);
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  attrSet(attributes, &textObj.value, "value");
-  attrSet(attributes, &textObj.deltaOffset, "spacing");
-  attrSet(attributes, &textObj.tint, "tint");
-
-  if (attributes.stringAttributes.find("align") != attributes.stringAttributes.end()){
-    attrSet(attributes, (int*)&textObj.align, { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN }, { "left", "center", "right" }, CENTER_ALIGN, "align", true);
-  }
-  
-  if (attributes.stringAttributes.find("wraptype") != attributes.stringAttributes.end()){
-    attrSet(attributes, (int*)&textObj.wrap.type, { WRAP_NONE, WRAP_CHARACTERS }, { "none", "char" }, WRAP_NONE, "wraptype", true);
-  }
-  if (attributes.numAttributes.find("wrapamount") != attributes.numAttributes.end()){
-    attrSet(attributes, &textObj.wrap.wrapamount, -1, "wrapamount");
-  }
-
-  attrSet(attributes, &textObj.virtualization.maxheight, "maxheight");
-  attrSet(attributes, &textObj.virtualization.offsetx, "offsetx");
-  attrSet(attributes, &textObj.virtualization.offsety, "offsety");
-  attrSet(attributes, &textObj.virtualization.offset, "offset");
-  attrSet(attributes, &textObj.charlimit, "charlimit");
-  attrSet(attributes, &textObj.cursor.cursorIndex ,"cursor");
-
-
-  if (attributes.stringAttributes.find("cursor-dir") != attributes.stringAttributes.end()){
-    auto value = attributes.stringAttributes.at("cursor-dir");
-    modassert(value == "left" || value == "right", "cursor-dir : invalid dir " + value);
-    textObj.cursor.cursorIndexLeft = value == "left";
-  }
-
-  attrSet(attributes, &textObj.cursor.highlightLength, "cursor-highlight");
-  attrSet(attributes, &textObj.fontFamily, "font");
-
-
+  autoserializerSetAttr((char*)&textObj, textAutoserializer, attributes, util);
   restrictWidth(textObj);
 }
