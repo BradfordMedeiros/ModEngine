@@ -41,3 +41,7 @@ std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound&
 void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util){
   unloadSoundState(soundObj.source, soundObj.clip); 
 }
+
+void setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  autoserializerSetAttr((char*)&soundObj, soundAutoserializer, attributes, util);
+}

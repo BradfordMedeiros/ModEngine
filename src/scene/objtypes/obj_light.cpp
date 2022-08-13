@@ -44,5 +44,5 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight&
 }
 
 void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&lightObj, lightAutoserializer, attributes);
+  autoserializerSetAttr((char*)&lightObj, lightAutoserializer, attributes, util);
 }

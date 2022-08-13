@@ -65,5 +65,5 @@ void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
 }
 
 void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&cameraObj, cameraAutoserializer, attributes);
+  autoserializerSetAttr((char*)&cameraObj, cameraAutoserializer, attributes, util);
 }

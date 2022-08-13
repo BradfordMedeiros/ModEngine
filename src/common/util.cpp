@@ -617,13 +617,6 @@ bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjA
   }
   return false;
 }
-bool maybeSetBoolFromStrAttr(bool* _valueToUpdate, const char* field, const char* trueValue, const char* falseValue, GameobjAttributes& attributes){
-  if (attributes.stringAttributes.find(field) != attributes.stringAttributes.end()){
-    *_valueToUpdate = attributes.stringAttributes.at(field) == trueValue ? true : false; 
-    return true;
-  }
-  return false;
-}
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.stringAttributes){

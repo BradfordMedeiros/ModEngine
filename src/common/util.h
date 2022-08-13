@@ -187,7 +187,6 @@ struct GameobjAttributes {
 
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
-bool maybeSetBoolFromStrAttr(bool* _valueToUpdate, const char* field, const char* trueValue, const char* falseValue, GameobjAttributes& attributes);
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes);
 

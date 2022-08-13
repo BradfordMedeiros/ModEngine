@@ -112,7 +112,7 @@ std::vector<ObjectType> objTypes = {
     .variantType = getVariantIndex(GameObjectSound{}),
     .createObj = createSound,
     .objectAttributes = convertElementValue<GameObjectSound>(soundObjAttr),
-    .setAttributes = nothingSetObjAttr,
+    .setAttributes = convertElementSetValue<GameObjectSound>(setSoundAttributes),
     .serialize = convertSerialize<GameObjectSound>(serializeSound),
     .removeObject = convertRemove<GameObjectSound>(removeSound),
   },

@@ -1,0 +1,10 @@
+
+>camera:script:./res/scenes/features/serialization/get-attr.scm
+>camera:position:0 0 0
+>camera:dof:enabled
+>camera:target:somevalue
+>camera:minblur:5
+>camera:bluramount:3
+
+test:script:./res/scenes/features/serialization/set-attr.scm
+test:target:>camera

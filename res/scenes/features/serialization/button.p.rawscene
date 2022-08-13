@@ -1,0 +1,7 @@
+
+*button:position:0 0 0
+*button:script:./res/scenes/features/serialization/get-attr.scm
+
+
+test:script:./res/scenes/features/serialization/set-attr.scm
+test:target:*button

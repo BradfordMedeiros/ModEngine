@@ -65,20 +65,9 @@ std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISli
 
 
 void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _attributes){
-  MODTODO("ui slider - get rest of attributes");
-  _attributes.numAttributes["slideamount"] = sliderObj.percentage;
-  _attributes.stringAttributes["onslide"] = sliderObj.onSlide;
-  if (sliderObj.showBackpanel){
-    _attributes.vecAttr.vec4["backpaneltint"] = sliderObj.backpanelTint;
-  }
-  _attributes.numAttributes["min"] = sliderObj.min;
-  _attributes.numAttributes["max"] = sliderObj.max;
+  autoserializerGetAttr((char*)&sliderObj, uiSliderAutoserializer, _attributes);
 }
 
-
 void setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  MODTODO("ui slider - set rest of attributes");
-  attrSet(attributes, &sliderObj.percentage, "slideamount");
-  attrSet(attributes, &sliderObj.min, "min");
-  attrSet(attributes, &sliderObj.max, "max");
+  autoserializerSetAttr((char*)&sliderObj, uiSliderAutoserializer, attributes, util);
 }

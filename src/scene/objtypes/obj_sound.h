@@ -15,5 +15,6 @@ GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util);
 void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj, ObjectSerializeUtil& util);
 void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util);
+void setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif

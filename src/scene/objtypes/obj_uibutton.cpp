@@ -99,11 +99,6 @@ void getUIButtonAttributes(GameObjectUIButton& uiButton, GameobjAttributes& _att
   autoserializerGetAttr((char*)&uiButton, uiButtonAutoserializer, _attributes);
 }
 
-
 void setUIButtonAttributes(GameObjectUIButton& buttonObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  bool setState = maybeSetBoolFromStrAttr(&buttonObj.toggleOn, "state", "on", "off", attributes);
-  if (setState){
-    MODTODO("set button state should call toggle on / off");
-  }
-  maybeSetVec4FromAttr(&buttonObj.tint, "tint", attributes);
+  autoserializerSetAttr((char*)&buttonObj, uiButtonAutoserializer, attributes, util);
 }
