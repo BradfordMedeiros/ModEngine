@@ -51,9 +51,7 @@ std::string pointsToString(std::vector<glm::vec3>& points){
 
 void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes){
   _attributes.stringAttributes["points"] = pointsToString(geoObj.points);
-  if (geoObj.type == GEOSPHERE){   // should show for any shape
-   _attributes.stringAttributes["shape"] = "sphere";
-  }
+  autoserializerGetAttr((char*)&geoObj, geoAutoserializer, _attributes);
 }
 
 void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){

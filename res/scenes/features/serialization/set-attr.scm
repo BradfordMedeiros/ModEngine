@@ -62,6 +62,15 @@
 			(list "maxheight" 2)
 		)
 	)
+	(list "mesh/Plane_Plane.001" 
+		(list
+			(list "texture" "./res/textures/wood.jpg")
+			(list "tint" (list 1 0 1 0.8))
+			;(list "disabled" "true")
+		)
+	)
+		
+	
 ))
 
 (define (attrForName)

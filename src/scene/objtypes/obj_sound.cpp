@@ -17,14 +17,12 @@ std::vector<AutoSerialize> soundAutoserializer {
 GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectSound obj {};
   createAutoSerialize((char*)&obj, soundAutoserializer, attr, util);
-
   obj.source = loadSoundState(util.pathForModLayer(obj.clip), obj.loop);
   return obj;
 }
 
 void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes){
-  _attributes.stringAttributes["clip"] = soundObj.clip;
-  _attributes.stringAttributes["loop"] = soundObj.loop ? "true" : "false";
+   autoserializerGetAttr((char*)&soundObj, soundAutoserializer, _attributes);
 }
 
 std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj, ObjectSerializeUtil& util){

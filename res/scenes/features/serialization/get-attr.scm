@@ -18,9 +18,19 @@
 (define (printPretty value)
 	(format #t "(~a,~a[~a])\n" (car value) (cadr value) (getType (cadr value)))
 )
+
+(define (gettarget)
+	(define scriptTarget (assoc "script-target" (gameobj-attr mainobj)))
+	(if scriptTarget
+		(lsobj-name (cadr scriptTarget))
+		mainobj
+	)
+)
+
+
 (define (onKey key scancode action mods)
 	(if (and (equal? action 1) (equal? key 257))
-		(map printPretty (gameobj-attr mainobj))
+		(map printPretty (gameobj-attr (gettarget)))
 	)
 	(format #t "\n")
 )

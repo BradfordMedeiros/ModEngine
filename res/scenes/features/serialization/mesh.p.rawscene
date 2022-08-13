@@ -1,0 +1,9 @@
+mesh:mesh:./res/models/controls/unitxy.obj
+
+
+mesh/Plane_Plane.001:texture:./res/textures/blacktop.jpg
+mesh:script:./res/scenes/features/serialization/get-attr.scm
+mesh:script-target:mesh/Plane_Plane.001
+
+test:script:./res/scenes/features/serialization/set-attr.scm
+test:target:mesh/Plane_Plane.001
