@@ -1,14 +1,5 @@
 #include "./obj_util.h"
 
-void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
-  if (common.onFocus != ""){
-    pairs.push_back(std::pair<std::string, std::string>("focus", common.onFocus));
-  }
-  if (common.onBlur != ""){
-    pairs.push_back(std::pair<std::string, std::string>("blur", common.onBlur));
-  }
-}
-
 void setTextureInfo(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, TextureInformation& info){
   attrSet(attr, &info.textureoffset, glm::vec2(0.f, 0.f), "textureoffset");
   attrSet(attr, &info.texturetiling, glm::vec2(1.f, 1.f), "texturetiling");
@@ -424,9 +415,10 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   
   AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
-    //std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
-    //_attributes.stringAttributes[textureLoader -> field] = textureName == NULL ? "" : *textureName;
-    modassert(false, "textureLoader not yet implemneted");
+    std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
+    if (textureName != NULL && *textureName != textureLoader -> defaultValue){
+      _pairs.push_back({ textureLoader -> field, *textureName });
+    }
     return;
   }
   
@@ -452,7 +444,7 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
     if (!aboutEqual(*address, vec3Value -> defaultValue)){
-      _pairs.push_back({ vec3Value -> field, print(*address) });
+      _pairs.push_back({ vec3Value -> field, serializeVec(*address) });
     }
     return;
   }
@@ -461,7 +453,7 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   if (vec4Value != NULL){
     glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
     if (!aboutEqual(*address, vec4Value -> defaultValue)){
-      _pairs.push_back({ vec4Value -> field, print(*address) });
+      _pairs.push_back({ vec4Value -> field, serializeVec(*address) });
     }
     return;
   }
@@ -578,7 +570,6 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     attrSet(attributes, address, boolValue -> onString, boolValue -> offString, boolValue -> field, true);
     return;
   }
-
 
   AutoSerializeRequiredString* strValueRequired = std::get_if<AutoSerializeRequiredString>(&value);
   if (strValueRequired != NULL){

@@ -56,14 +56,6 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
 
 std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISlider& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  addSerializeCommon(pairs, obj.common);
-  if (obj.onSlide != ""){
-    pairs.push_back(std::pair<std::string, std::string>("onslide", obj.onSlide));
-  }
-  if (obj.showBackpanel){
-    pairs.push_back(std::pair<std::string, std::string>("backpaneltint", serializeVec(obj.backpanelTint)));
-  }
-
   autoserializerSerialize((char*)&obj, uiSliderAutoserializer, pairs);
   return pairs;
 }

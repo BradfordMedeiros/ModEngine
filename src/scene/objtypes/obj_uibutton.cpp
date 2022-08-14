@@ -95,6 +95,7 @@ std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIBut
   if (!isIdentityVec(obj.tint)){
     pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
   }
+  modassert(false, "serialize button not implemented");
   autoserializerSerialize((char*)&obj, uiButtonAutoserializer, pairs);
   return pairs;
 }
