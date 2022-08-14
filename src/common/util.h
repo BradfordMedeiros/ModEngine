@@ -78,7 +78,9 @@ typedef int32_t objid;
 objid getUniqueObjId();
 std::string getUniqueObjectName();
 
+enum AttributeValueType { ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_FLOAT };
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;
+
 template<typename T>
 T unwrapAttr(AttributeValue value) {   
   T* unwrappedValue = std::get_if<T>(&value);

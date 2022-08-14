@@ -140,11 +140,23 @@ struct AutoSerializeEnums {
   const char* field;
   int defaultValue;
 };
-//void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict);
 
+struct AutoSerializeCustom {
+  size_t structOffset;
+  const char* field;
+  AttributeValueType fieldType;
+  std::function<void(void* offset, void* value)> deserialize;
+};
+//AutoSerializeCustom {
+//    .deserialize = [](void* offset, std::optional<void*>) -> {
+//
+//    },
+//    .serialize = [](void* offset, GameobjAttributes& _attributes) -> {
+//
+//    },
+//  },
 
-
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);

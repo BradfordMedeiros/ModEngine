@@ -367,6 +367,39 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
+  if (customValue != NULL){
+    int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
+    if (customValue -> fieldType == ATTRIBUTE_VEC3){
+      if (attr.vecAttr.vec3.find(customValue -> field) == attr.vecAttr.vec3.end()){
+        customValue -> deserialize(address, NULL);
+      }else{
+        customValue -> deserialize(address, &(attr.vecAttr.vec3.at(customValue -> field)));
+      }
+    }else if (customValue -> fieldType == ATTRIBUTE_VEC4){
+      if (attr.vecAttr.vec4.find(customValue -> field) == attr.vecAttr.vec4.end()){
+        customValue -> deserialize(address, NULL);
+      }else{
+        customValue -> deserialize(address, &(attr.vecAttr.vec4.at(customValue -> field)));
+      }
+    }else if (customValue -> fieldType == ATTRIBUTE_STRING){
+      if (attr.stringAttributes.find(customValue -> field) == attr.stringAttributes.end()){
+        customValue -> deserialize(address, NULL);
+      }else{
+        customValue -> deserialize(address, &(attr.stringAttributes.at(customValue -> field)));
+      }
+    }else if (customValue -> fieldType == ATTRIBUTE_FLOAT){
+      if (attr.numAttributes.find(customValue -> field) == attr.numAttributes.end()){
+        customValue -> deserialize(address, NULL);
+      }else{
+        customValue -> deserialize(address, &(attr.numAttributes.at(customValue -> field)));
+      }
+    }else{
+      modassert(false, "custom value -> invalid field type");
+    }
+    return;
+  }
+
   modassert(false, "autoserialize type not found");
 }
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util){
