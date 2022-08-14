@@ -93,9 +93,9 @@ std::vector<ObjectType> objTypes = {
     .name = "portal",
     .variantType = getVariantIndex(GameObjectPortal{}),
     .createObj = createPortal,
-    .objectAttributes = nothingObjAttr,
-    .setAttributes = nothingSetObjAttr,
-    .serialize = serializeNotImplemented,
+    .objectAttributes = convertElementValue<GameObjectPortal>(portalObjAttr),
+    .setAttributes = convertElementSetValue<GameObjectPortal>(setPortalAttributes),
+    .serialize = convertSerialize<GameObjectPortal>(serializePortal),
     .removeObject = removeDoNothing,
   },
   ObjectType {

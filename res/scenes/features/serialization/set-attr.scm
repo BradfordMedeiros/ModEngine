@@ -69,6 +69,11 @@
 			;(list "disabled" "true")
 		)
 	)
+	(list "@portal"
+		(list
+			(list "perspective" "false")
+		)
+	)
 		
 	
 ))

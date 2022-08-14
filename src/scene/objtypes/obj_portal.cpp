@@ -21,3 +21,13 @@ GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
   createAutoSerialize((char*)&obj, portalAutoserializer, attr, util);
   return obj;
 }
+
+void portalObjAttr(GameObjectPortal& portalObj, GameobjAttributes& _attributes){
+  autoserializerGetAttr((char*)&portalObj, portalAutoserializer, _attributes);
+}
+std::vector<std::pair<std::string, std::string>> serializePortal(GameObjectPortal& obj, ObjectSerializeUtil& util){
+  return {};
+}
+void setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  autoserializerSetAttr((char*)&portalObj, portalAutoserializer, attributes, util);
+}
