@@ -41,21 +41,6 @@ GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){
 
 std::vector<std::pair<std::string, std::string>> serializeCamera(GameObjectCamera obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.enableDof){
-    pairs.push_back(std::pair<std::string, std::string>("dof", "enabled"));
-  }
-  if (!aboutEqual(obj.minBlurDistance, 0.05f)){
-    pairs.push_back(std::pair<std::string, std::string>("minblur", std::to_string(obj.minBlurDistance)));
-  }
-  if (!aboutEqual(obj.maxBlurDistance, 0.1f)){
-    pairs.push_back(std::pair<std::string, std::string>("maxblur", std::to_string(obj.maxBlurDistance)));
-  }
-  if (obj.blurAmount != 1){
-    pairs.push_back(std::pair<std::string, std::string>("bluramount", std::to_string(obj.blurAmount)));
-  }
-  if (obj.target != ""){
-    pairs.push_back(std::pair<std::string, std::string>("target", obj.target));
-  }
   autoserializerSerialize((char*)&obj, cameraAutoserializer, pairs);
   return pairs;
 }

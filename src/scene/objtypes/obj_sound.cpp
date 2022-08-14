@@ -27,12 +27,6 @@ void soundObjAttr(GameObjectSound& soundObj, GameobjAttributes& _attributes){
 
 std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.clip != ""){
-    pairs.push_back(std::pair<std::string, std::string>("clip", obj.clip));
-  }
-  if (obj.loop){
-    pairs.push_back(std::pair<std::string, std::string>("loop", "true"));
-  }
   autoserializerSerialize((char*)&obj, soundAutoserializer, pairs);
   return pairs;
 }  
