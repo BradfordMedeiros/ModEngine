@@ -106,8 +106,9 @@ void unloadAllScenes(){
 }
 
 // @TODO - save all the scenes in the world
-void saveScene(bool includeIds, objid sceneId){
+void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
   auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
+  fileToSave = filename.has_value() ? filename.value() : fileToSave;
   std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
   auto fileExtension = getPreExtension(fileToSave);
 
@@ -122,7 +123,6 @@ void saveScene(bool includeIds, objid sceneId){
   }else{
     std::cout << "WARNING: CANNOT SAVE: " << fileToSave << " because is a protected file" << std::endl;
   }
-
 }
 
 std::vector<int32_t> listScenes(){

@@ -512,11 +512,12 @@ SCM scmTimeElapsed(){
   return scm_from_double(_timeElapsed());
 }
 
-void (*_saveScene)(bool includeIds, objid sceneId); 
-SCM scmSaveScene(SCM scmIncludeIds, SCM scmSceneId){
+void (*_saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename); 
+SCM scmSaveScene(SCM scmIncludeIds, SCM scmSceneId, SCM filepath){
   auto includeIds = scmIncludeIds == SCM_UNDEFINED ? false : scm_to_bool(scmIncludeIds);
   auto sceneId = scmSceneId == SCM_UNDEFINED ? currentSceneId() : scm_to_int32(scmSceneId);
-  _saveScene(includeIds, sceneId);
+  auto sceneName = filepath == SCM_UNDEFINED ? std::nullopt : std::optional<std::string>(scm_to_locale_string(filepath));
+  _saveScene(includeIds, sceneId, sceneName);
   return SCM_UNSPECIFIED;
 }
 
@@ -1090,7 +1091,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
   scm_c_define_gsubr("time-elapsed", 0, 0, 0, (void*)scmTimeElapsed);
 
-  scm_c_define_gsubr("save-scene", 0, 2, 0, (void*)scmSaveScene);
+  scm_c_define_gsubr("save-scene", 0, 3, 0, (void*)scmSaveScene);
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
   scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
@@ -1206,7 +1207,7 @@ void createStaticSchemeBindings(
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(),
   double (*timeElapsed)(),
-  void (*saveScene)(bool includeIds, objid sceneId), 
+  void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename), 
   std::map<std::string, std::string> (*listServers)(),
   std::string (*connectServer)(std::string server),
   void (*disconnectServer)(),

@@ -2,3 +2,5 @@
 !light:script:./res/scenes/features/serialization/get-attr.scm
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:!light
+
+serialize:script:./res/scenes/features/serialization/serialize.scm

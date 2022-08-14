@@ -1,0 +1,5 @@
+(define (onKey key scancode action mods)
+	(if (and (equal? action 1) (equal? key 345))
+		(save-scene #f (list-sceneid (gameobj-id mainobj)) "./res/scenes/features/serialization/_output.rawscene")
+	)
+)

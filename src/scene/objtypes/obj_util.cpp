@@ -385,7 +385,7 @@ void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values
 }
 
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs){
-  modassert(false, "not yet implemented");
+  modassert(false, "autoserialize type not yet implemented");
 }
 
 void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAttributes& _attributes){
@@ -550,7 +550,7 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
-  //modassert(false, "autoserialize type not found");
+  modassert(false, "autoserialize type not found");
 }
 
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util){

@@ -7,3 +7,5 @@ mesh:script-target:mesh/Plane_Plane.001
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:mesh/Plane_Plane.001
+
+serialize:script:./res/scenes/features/serialization/serialize.scm

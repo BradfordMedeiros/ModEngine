@@ -19,3 +19,5 @@ platform2:mesh:./res/models/box/box.obj
 platform2:scale:100 1 100
 platform2:position:0 8 0
 platform2:rotation:0.2 0 0
+
+serialize:script:./res/scenes/features/serialization/serialize.scm

@@ -55,7 +55,8 @@ objid rootIdForScene(objid sceneId);
 
 void unloadScene(int32_t sceneId);
 void unloadAllScenes();
-void saveScene(bool includeIds, objid sceneId);
+void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename);
+
 std::vector<int32_t> listScenes();
 std::vector<StringPairVec2> scenegraph();
 

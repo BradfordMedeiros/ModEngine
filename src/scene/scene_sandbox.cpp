@@ -369,6 +369,8 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
     }
 
     auto gameobj = getGameObject(sandbox, id);
+    std::cout << "serializing: " << gameobj.name << ", root? = " << ((id == sandbox.mainScene.rootId) ? "true" : "false") << std::endl;
+
     auto gameobjecth = getGameObjectH(sandbox, id);
     auto additionalFields = getAdditionalFields(id); 
     auto children = childnames(sandbox, gameobjecth);

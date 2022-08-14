@@ -4,3 +4,4 @@ test:script:./res/scenes/features/serialization/set-attr.scm
 
 
 test:target:*basicbutton2
+serialize:script:./res/scenes/features/serialization/serialize.scm

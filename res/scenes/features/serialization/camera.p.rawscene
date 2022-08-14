@@ -8,3 +8,5 @@
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:>camera
+
+serialize:script:./res/scenes/features/serialization/serialize.scm

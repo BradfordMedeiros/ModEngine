@@ -34,9 +34,11 @@ std::function<void(GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribU
 
 //  std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj&)> serialize;
 template<typename T>
-std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj, ObjectSerializeUtil& util)> convertSerialize(std::function<void(T&, ObjectSerializeUtil&)> serialize) {   
-  return [](GameObjectObj& obj, ObjectSerializeUtil& util) -> std::vector<std::pair<std::string, std::string>> {
-    return {};
+std::function<std::vector<std::pair<std::string, std::string>>(GameObjectObj& obj, ObjectSerializeUtil& util)> convertSerialize(std::function<std::vector<std::pair<std::string, std::string>>(T&, ObjectSerializeUtil&)> serialize) {   
+  return [serialize](GameObjectObj& obj, ObjectSerializeUtil& util) -> std::vector<std::pair<std::string, std::string>> {
+    auto objInstance = std::get_if<T>(&obj);
+    assert(objInstance != NULL);
+    return serialize(*objInstance, util);
   };
 }
 
@@ -51,8 +53,8 @@ std::function<void(GameObjectObj& obj, ObjectRemoveUtil&)> convertRemove(std::fu
 
 std::vector<std::pair<std::string, std::string>> serializeNotImplemented(GameObjectObj& obj, ObjectSerializeUtil& util){
   std::cout << "ERROR: SERIALIZATION NOT YET IMPLEMENTED" << std::endl;
-  assert(false);
-  return {};    
+  //assert(false);
+  return { {"not", "implemented"}};    
 }
 
 void removeDoNothing(GameObjectObj& obj, ObjectRemoveUtil& util){}

@@ -1,0 +1,15 @@
+# Generated scene 
+serialize:rotation:0.000000 0.000000 -1.000000 0.000000
+serialize:physics_shape:shape_box
+serialize:script:./res/scenes/features/serialization/serialize.scm
+&sample:position:1.000000 0.000000 1.000000
+&sample:rotation:0.000000 0.000000 -1.000000 0.000000
+&sample:physics_shape:shape_box
+&sample:script:./res/scenes/features/serialization/get-attr.scm
+test:rotation:0.000000 0.000000 -1.000000 0.000000
+test:physics_shape:shape_box
+test:script:./res/scenes/features/serialization/set-attr.scm
+~root:1880460781:child:serialize,&sample,test
+~root:1880460781:rotation:0.000000 0.000000 -1.000000 0.000000
+~root:1880460781:physics_shape:shape_box
+~root:1880460781:not:implemented

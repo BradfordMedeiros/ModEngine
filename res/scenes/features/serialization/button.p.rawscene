@@ -5,3 +5,5 @@
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:*button
+
+serialize:script:./res/scenes/features/serialization/serialize.scm
