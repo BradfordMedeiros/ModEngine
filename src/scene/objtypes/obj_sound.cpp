@@ -33,6 +33,7 @@ std::vector<std::pair<std::string, std::string>> serializeSound(GameObjectSound&
   if (obj.loop){
     pairs.push_back(std::pair<std::string, std::string>("loop", "true"));
   }
+  autoserializerSerialize((char*)&obj, soundAutoserializer, pairs);
   return pairs;
 }  
 

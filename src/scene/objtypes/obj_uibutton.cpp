@@ -58,16 +58,19 @@ std::vector<AutoSerialize> uiButtonAutoserializer {
   },
 };
 
+static int _ = addCommonAutoserializer<GameObjectUIButton>(uiButtonAutoserializer);
+
+
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIButton obj {};
-  attrSetCommon(attr, obj.common, util.meshes);
   createAutoSerialize((char*)&obj, uiButtonAutoserializer, attr, util);
+  obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
+  obj.common.isFocused = false;
   return obj;
 }
 
 std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  addSerializeCommon(pairs, obj.common);
   if (obj.canToggle != true){
     pairs.push_back(std::pair<std::string, std::string>("cantoggle", "false"));
   }
@@ -92,6 +95,7 @@ std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIBut
   if (!isIdentityVec(obj.tint)){
     pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
   }
+  autoserializerSerialize((char*)&obj, uiButtonAutoserializer, pairs);
   return pairs;
 }
 

@@ -40,6 +40,7 @@ void lightObjAttr(GameObjectLight& lightObj, GameobjAttributes& _attributes){
 std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
   pairs.push_back(std::pair<std::string, std::string>("color", serializeVec(obj.color)));
+  autoserializerSerialize((char*)&obj, lightAutoserializer, pairs);
   return pairs;
 }
 

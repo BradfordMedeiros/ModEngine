@@ -44,10 +44,13 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
   },
 };
 
+static int _ = addCommonAutoserializer<GameObjectUISlider>(uiSliderAutoserializer);
+
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUISlider obj {};
   createAutoSerialize((char*)&obj, uiSliderAutoserializer, attr, util);
-  attrSetCommon(attr, obj.common, util.meshes);
+  obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
+  obj.common.isFocused = false;
   return obj;
 }
 
@@ -60,6 +63,8 @@ std::vector<std::pair<std::string, std::string>> serializeSlider(GameObjectUISli
   if (obj.showBackpanel){
     pairs.push_back(std::pair<std::string, std::string>("backpaneltint", serializeVec(obj.backpanelTint)));
   }
+
+  autoserializerSerialize((char*)&obj, uiSliderAutoserializer, pairs);
   return pairs;
 }
 

@@ -47,7 +47,6 @@ struct ObjectSetAttribUtil {
   std::function<void(int)> releaseTexture;
 };
 
-void attrSetCommon(GameobjAttributes& attr, GameObjectUICommon& common, std::map<std::string, MeshRef>& meshes);
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common);
 void setTextureInfo(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, TextureInformation& info);
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture);
@@ -151,5 +150,24 @@ void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+
+template <typename T>
+int addCommonAutoserializer(std::vector<AutoSerialize>& autoserializer){
+  autoserializer.push_back(
+    AutoSerializeString {
+      .structOffset = offsetof(T, common.onFocus),
+      .field = "focus",
+      .defaultValue = "",
+    }
+  );
+  autoserializer.push_back(
+    AutoSerializeString {
+      .structOffset = offsetof(T, common.onBlur),
+      .field = "blur",
+      .defaultValue = "",
+    }
+  );
+  return 0;
+}
 
 #endif

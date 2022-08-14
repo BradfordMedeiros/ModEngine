@@ -1,12 +1,5 @@
 #include "./obj_util.h"
 
-void attrSetCommon(GameobjAttributes& attr, GameObjectUICommon& common, std::map<std::string, MeshRef>& meshes){
-  common.mesh = meshes.at("./res/models/controls/input.obj").mesh;
-  common.isFocused = false;
-  attrSet(attr, &common.onFocus, "", "focus");
-  attrSet(attr, &common.onBlur, "", "blur");
-}
-
 void addSerializeCommon(std::vector<std::pair<std::string, std::string>>& pairs, GameObjectUICommon& common){
   if (common.onFocus != ""){
     pairs.push_back(std::pair<std::string, std::string>("focus", common.onFocus));
