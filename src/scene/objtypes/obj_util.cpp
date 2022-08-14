@@ -422,19 +422,22 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   }
 
   
-  /*AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
+  AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
-    std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
-    _attributes.stringAttributes[textureLoader -> field] = textureName == NULL ? "" : *textureName;
+    //std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
+    //_attributes.stringAttributes[textureLoader -> field] = textureName == NULL ? "" : *textureName;
+    modassert(false, "textureLoader not yet implemneted");
     return;
   }
-
+  
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
     int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-    _attributes.numAttributes[intValue -> field] = *address;
+    if (*address != intValue -> defaultValue){
+      _pairs.push_back({ intValue -> field, std::to_string(*address) });
+    }
     return;
-  }*/
+  }
   
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
@@ -445,18 +448,21 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     return;
   }
   
-  /*AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
+  AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
-    _attributes.vecAttr.vec3[vec3Value -> field] = *address;
+    if (!aboutEqual(*address, vec3Value -> defaultValue)){
+      _pairs.push_back({ vec3Value -> field, print(*address) });
+    }
     return;
   }
   
   AutoSerializeVec4* vec4Value = std::get_if<AutoSerializeVec4>(&value);
   if (vec4Value != NULL){
     glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
-    bool* hasValueAddress = (!vec4Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec4Value -> structOffsetFiller.value());
-    _attributes.vecAttr.vec4[vec4Value -> field] = *address;
+    if (!aboutEqual(*address, vec4Value -> defaultValue)){
+      _pairs.push_back({ vec4Value -> field, print(*address) });
+    }
     return;
   }
   
@@ -464,10 +470,12 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
     auto enumValue = *address;
-    //attrSet(attr, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> defaultValue, enumsValue -> field, true);
-    _attributes.stringAttributes[enumsValue -> field] = enumStringFromEnumValue(enumValue, enumsValue -> enums, enumsValue -> enumStrings);
+    if (enumsValue -> defaultValue != enumValue){
+      auto enumsString = enumStringFromEnumValue(enumValue, enumsValue -> enums, enumsValue -> enumStrings);
+      _pairs.push_back({ enumsValue -> field, enumsString });
+    }
     return;
-  }*/
+  }
 
   modassert(false, "autoserialize type not yet implemented");
 }
@@ -602,13 +610,13 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
-//  ///*AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
-//  //if (intValue != NULL){
-//  //  int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
-//  //  attrSet(attr, address, intValue -> defaultValue, intValue -> field);    
-//  //  return;
-//  //}
-//  //*/
+  AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
+  if (intValue != NULL){
+    int* address = (int*)(((char*)structAddress) + intValue -> structOffset);
+    attrSet(attributes, address, intValue -> field);    
+    return;
+  }
+  
   AutoSerializeUInt* uintValue = std::get_if<AutoSerializeUInt>(&value);
   if (uintValue != NULL){
     uint* address = (uint*)(((char*)structAddress) + uintValue -> structOffset);

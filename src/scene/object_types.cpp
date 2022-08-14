@@ -124,7 +124,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUIText,
     .objectAttributes = convertElementValue<GameObjectUIText>(textObjAttributes),
     .setAttributes = convertElementSetValue<GameObjectUIText>(setUITextAttributes),
-    .serialize = serializeNotImplemented,
+    .serialize = convertSerialize<GameObjectUIText>(serializeText),
     .removeObject = removeDoNothing,
   },
   ObjectType {

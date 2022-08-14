@@ -137,3 +137,9 @@ void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attribute
   autoserializerSetAttr((char*)&textObj, textAutoserializer, attributes, util);
   restrictWidth(textObj);
 }
+
+std::vector<std::pair<std::string, std::string>> serializeText(GameObjectUIText& obj, ObjectSerializeUtil& util){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  autoserializerSerialize((char*)&obj, textAutoserializer, pairs);
+  return pairs;
+}
