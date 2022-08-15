@@ -48,9 +48,7 @@ std::vector<AutoSerialize> geoAutoserializer {
     .setAttributes = [](void* offset, void* fieldValue) -> void {
       std::vector<glm::vec3>* points = static_cast<std::vector<glm::vec3>*>(offset);
       std::string* pointStr = static_cast<std::string*>(fieldValue);
-      if (pointStr == NULL){
-        *points = {};
-      }else{
+      if (pointStr != NULL){
         *points = parsePoints(*pointStr);
       }
     },

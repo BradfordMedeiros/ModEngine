@@ -133,7 +133,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createUILayout,
     .objectAttributes = convertElementValue<GameObjectUILayout>(getUILayoutAttributes),
     .setAttributes = convertElementSetValue<GameObjectUILayout>(setUILayoutAttributes),
-    .serialize = serializeNotImplemented,
+    .serialize = convertSerialize<GameObjectUILayout>(serializeLayout),
     .removeObject = removeDoNothing,
   },
   ObjectType {

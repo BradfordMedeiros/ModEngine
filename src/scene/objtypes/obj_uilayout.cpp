@@ -144,8 +144,10 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     },
     .setAttributes = [](void* offset, void* fieldValue) -> void {
       std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
-      std::string* attrValue = static_cast<std::string*>(fieldValue);
-      *elements = split(*attrValue, ',');
+      if (fieldValue != NULL){
+        std::string* attrValue = static_cast<std::string*>(fieldValue);
+        *elements = split(*attrValue, ',');
+      }
     },
     .getAttribute = [](void* offset) -> AttributeValue {
       std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
@@ -180,6 +182,12 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
 
   return obj;
+}
+
+std::vector<std::pair<std::string, std::string>> serializeLayout(GameObjectUILayout& obj, ObjectSerializeUtil& util){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  autoserializerSerialize((char*)&obj, uiLayoutAutoserializer, pairs);
+  return pairs;
 }
 
 glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale, glm::vec3 layoutPos){

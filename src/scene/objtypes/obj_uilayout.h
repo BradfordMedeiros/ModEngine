@@ -71,6 +71,7 @@ struct GameObjectUILayout {
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util);
+std::vector<std::pair<std::string, std::string>> serializeLayout(GameObjectUILayout& obj, ObjectSerializeUtil& util);
 glm::mat4 layoutBackpanelModelTransform(GameObjectUILayout& layoutObj, glm::vec3 minusScale, glm::vec3 layoutPos);
 
 void getUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& _attributes);
