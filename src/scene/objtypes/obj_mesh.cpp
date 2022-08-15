@@ -31,6 +31,9 @@ std::vector<AutoSerialize> meshAutoserializer {
   /////////////////
 };
 
+static auto _ = addTextureAutoserializer<GameObjectMesh>(meshAutoserializer);
+
+
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
   // get rid of meshes attribute completely, make ensuremeshloaded return the meshes you're actually responsible for
   // basically top level ensureMesh(attr("mesh") => your nodes, then the child ones can be logic'd in via being smart about ensureMeshLoaded :) 

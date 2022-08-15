@@ -644,14 +644,14 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   float boundingWidth = elementsWidth + layoutObject -> marginValues.marginLeft + layoutObject -> marginValues.marginRight;
   float boundingHeight = elementsHeight + layoutObject -> marginValues.marginBottom + layoutObject -> marginValues.marginTop;
 
-  if (layoutObject -> minwidth.hasMinSize && layoutObject -> minwidth.type == UILayoutPercent){
-    if (boundingWidth < layoutObject -> minwidth.amount){
-      boundingWidth = layoutObject -> minwidth.amount;
+  if (layoutObject -> minwidth > 0){
+    if (boundingWidth < layoutObject -> minwidth){
+      boundingWidth = layoutObject -> minwidth;
     }
   }
-  if (layoutObject -> minheight.hasMinSize && layoutObject -> minheight.type == UILayoutPercent){
-    if (boundingHeight < layoutObject -> minheight.amount){
-      boundingHeight = layoutObject -> minheight.amount;
+  if (layoutObject -> minheight > 0){
+    if (boundingHeight < layoutObject -> minheight){
+      boundingHeight = layoutObject -> minheight;
     }
   }
 

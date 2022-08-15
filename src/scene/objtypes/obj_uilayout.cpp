@@ -1,16 +1,5 @@
 #include "./obj_uilayout.h"
 
-UILayoutMinSize layoutMinSizeFromAttr(GameobjAttributes& attr, const char* attrname){
-  bool hasMinSize = attr.numAttributes.find(attrname) != attr.numAttributes.end();
-  float minSizeAmount = hasMinSize ? attr.numAttributes.at(attrname) : 0.f;
-  UILayoutMinSize minsize {
-    .hasMinSize = hasMinSize,
-    .type = hasMinSize ? UILayoutPercent : UILayoutNone,
-    .amount = minSizeAmount,
-  };
-  return minsize; 
-}
-
 std::vector<AutoSerialize> uiLayoutAutoserializer {
   AutoSerializeVec4 {
     .structOffset = offsetof(GameObjectUILayout, tint),
@@ -150,7 +139,6 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
       return join(*elements, ',');
     },
   },
-  /////
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUILayout, marginValues.margin),
     .structOffsetFiller = offsetof(GameObjectUILayout, marginValues.marginSpecified),
@@ -277,12 +265,27 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
       return margin -> marginBottom;
     },
   },
+
+  ////
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, minwidth),
+    .structOffsetFiller = std::nullopt,
+    .field = "minwidth",
+    .defaultValue = -1.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, minheight),
+    .structOffsetFiller = std::nullopt,
+    .field = "minheight",
+    .defaultValue = -1.f,
+  },
+
+  ///
 };
 
-GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
-  auto minwidth = layoutMinSizeFromAttr(attr, "minwidth");
-  auto minheight = layoutMinSizeFromAttr(attr, "minheight");
+static auto _ = addTextureAutoserializer<GameObjectUILayout>(uiLayoutAutoserializer);
 
+GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
   GameObjectUILayout obj{
     .boundInfo = BoundInfo  {
       .xMin = 0, .xMax = 0,
@@ -290,8 +293,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
       .zMin = 0, .zMax = 0,
     },
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
-    .minwidth = minwidth,
-    .minheight = minheight,
   };
   createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
   assert(obj.border.borderSize <= 1.f);

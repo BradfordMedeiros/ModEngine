@@ -6,13 +6,6 @@
 #include "./obj_util.h"
 
 enum UILayoutType { LAYOUT_HORIZONTAL, LAYOUT_VERTICAL };
-
-enum UILayoutMinSizeType { UILayoutNone, UILayoutPercent };
-struct UILayoutMinSize {
-  bool hasMinSize;
-  UILayoutMinSizeType type;
-  float amount;
-};
 enum UILayoutFlowType { UILayoutFlowNone, UILayoutFlowNegative, UILayoutFlowPositive };
 
 struct LayoutMargin {
@@ -60,8 +53,8 @@ struct GameObjectUILayout {
   LayoutMargin marginValues;
   LayoutAnchor anchor;
   TextureInformation texture;
-  UILayoutMinSize minwidth;
-  UILayoutMinSize minheight;
+  float minwidth;
+  float minheight;
   UILayoutFlowType horizontal;
   UILayoutFlowType vertical;
   LayoutBorder border;

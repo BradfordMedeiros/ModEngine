@@ -1,23 +1,15 @@
 #include "./obj_util.h"
 
+
 void setTextureInfo(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, TextureInformation& info){
-  attrSet(attr, &info.textureoffset, glm::vec2(0.f, 0.f), "textureoffset");
-  attrSet(attr, &info.texturetiling, glm::vec2(1.f, 1.f), "texturetiling");
-  attrSet(attr, &info.texturesize, glm::vec2(1.f, 1.f), "texturesize");
   attrSet(attr, &info.textureOverloadName, "", "texture");
   int textureOverloadId = info.textureOverloadName == "" ? -1 : ensureTextureLoaded(info.textureOverloadName).textureId;
   info.textureOverloadId = textureOverloadId;
 }
 
 void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
-  if (texture.textureoffset.x != 0.f && texture.textureoffset.y != 0.f){
-    pairs.push_back(std::pair<std::string, std::string>("textureoffset", serializeVec(texture.textureoffset)));
-  }
   if (texture.textureOverloadName != ""){
     pairs.push_back(std::pair<std::string, std::string>("texture", texture.textureOverloadName));
-  }
-  if (texture.texturesize.x != 1.f && texture.texturesize.y != 1.f){
-    pairs.push_back(std::pair<std::string, std::string>("texturesize", serializeVec(texture.texturesize)));
   }
 }
 
@@ -151,6 +143,20 @@ void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue,
 void attrSet(GameobjAttributes& attr, glm::vec3* _value, bool* _hasValue, glm::vec3 defaultValue, const char* field){
   if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
     *_value = attr.vecAttr.vec3.at(field);
+    if (_hasValue != NULL){
+      *_hasValue = true;
+    }
+  }else{
+    *_value = defaultValue;
+    if (_hasValue != NULL){
+      *_hasValue = false;
+    }
+  }  
+}
+void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, glm::vec2 defaultValue, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    auto value = attr.stringAttributes.at(field);
+    *_value = parseVec2(value);
     if (_hasValue != NULL){
       *_hasValue = true;
     }
@@ -344,6 +350,14 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
+  if (vec2Value != NULL){
+    glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
+    bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
+    attrSet(attr, address, hasValueAddress, vec2Value -> defaultValue, vec2Value -> field);
+    return;
+  }
+
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
@@ -475,6 +489,15 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     return;
   }
   
+  AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
+  if (vec2Value != NULL){
+    glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
+    if (!aboutEqual(*address, vec2Value -> defaultValue)){
+      _pairs.push_back({ uintValue -> field, serializeVec(*address) });
+    }
+    return;
+  }
+
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
@@ -598,6 +621,13 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
   
+  AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
+  if (vec2Value != NULL){
+    glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
+    _attributes.stringAttributes[vec2Value -> field] = serializeVec(*address);
+    return;
+  }
+
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
@@ -714,6 +744,16 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     attrSet(attributes, address, uintValue -> field);
     return;
   }
+
+  AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
+  if (vec2Value != NULL){
+    //glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
+    //bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
+    //attrSet(attr, address, hasValueAddress, vec2Value -> defaultValue, vec2Value -> field);
+    modassert(false, "autoserialize vec2 setAttr not implemented");
+    return;
+  }
+
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);

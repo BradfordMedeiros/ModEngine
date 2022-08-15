@@ -563,6 +563,9 @@ bool aboutEqual(float one, float two){
   float delta = 0.0001f;
   return one > (two - delta) && one < (two + delta);
 }
+bool aboutEqual(glm::vec2 one, glm::vec2 two){
+  return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y);
+}
 bool aboutEqual(glm::vec3 one, glm::vec3 two){
   return aboutEqual(one.x, two.x) && aboutEqual(one.y, two.y) && aboutEqual(one.z, two.z);
 }

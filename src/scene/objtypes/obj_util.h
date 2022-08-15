@@ -119,6 +119,13 @@ struct AutoSerializeUInt {
   uint defaultValue;
 };
 
+struct AutoSerializeVec2 {
+  size_t structOffset;
+  std::optional<size_t> structOffsetFiller;
+  const char* field;
+  glm::vec2 defaultValue;
+};
+
 struct AutoSerializeVec3 {
   size_t structOffset;
   std::optional<size_t> structOffsetFiller;
@@ -158,7 +165,7 @@ struct AutoSerializeCustom {
 //    },
 //  },
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
@@ -180,6 +187,41 @@ int addCommonAutoserializer(std::vector<AutoSerialize>& autoserializer){
       .defaultValue = "",
     }
   );
+  return 0;
+}
+
+template <typename T>
+int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
+  // attrSet(attr, &info.textureoffset, glm::vec2(0.f, 0.f), "textureoffset");
+  autoserializer.push_back(
+    AutoSerializeVec2 {
+      .structOffset = offsetof(T, texture.textureoffset),
+      .structOffsetFiller = std::nullopt,
+      .field = "textureoffset",
+      .defaultValue = glm::vec2(0.f, 0.f),
+    }
+  );
+
+  // attrSet(attr, &info.texturetiling, glm::vec2(1.f, 1.f), "texturetiling");
+  autoserializer.push_back(
+    AutoSerializeVec2 {
+      .structOffset = offsetof(T, texture.texturetiling),
+      .structOffsetFiller = std::nullopt,
+      .field = "texturetiling",
+      .defaultValue = glm::vec2(1.f, 1.f),
+    }
+  );
+
+  //attrSet(attr, &info.texturesize, glm::vec2(1.f, 1.f), "texturesize");
+  autoserializer.push_back(
+    AutoSerializeVec2 {
+      .structOffset = offsetof(T, texture.texturesize),
+      .structOffsetFiller = std::nullopt,
+      .field = "texturesize",
+      .defaultValue = glm::vec2(1.f, 1.f),
+    }
+  );
+
   return 0;
 }
 

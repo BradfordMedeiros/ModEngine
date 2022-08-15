@@ -197,6 +197,7 @@ std::string print(GameobjAttributes& attr);
 typedef void (*func_t)();
 
 bool aboutEqual(float one, float two);
+bool aboutEqual(glm::vec2 one, glm::vec2 two);
 bool aboutEqual(glm::vec3 one, glm::vec3 two);
 bool aboutEqualNormalized(glm::vec3 one, glm::vec3 two);
 bool aboutEqual(glm::vec4 one, glm::vec4 two);
