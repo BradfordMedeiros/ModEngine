@@ -493,7 +493,7 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   if (vec2Value != NULL){
     glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
     if (!aboutEqual(*address, vec2Value -> defaultValue)){
-      _pairs.push_back({ uintValue -> field, serializeVec(*address) });
+      _pairs.push_back({ vec2Value -> field, serializeVec(*address) });
     }
     return;
   }
