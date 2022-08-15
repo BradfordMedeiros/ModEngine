@@ -71,31 +71,6 @@ GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util)
 
 std::vector<std::pair<std::string, std::string>> serializeButton(GameObjectUIButton& obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  if (obj.canToggle != true){
-    pairs.push_back(std::pair<std::string, std::string>("cantoggle", "false"));
-  }
-  if (obj.onTextureString != ""){
-    pairs.push_back(std::pair<std::string, std::string>("ontexture", obj.onTextureString));
-  }
-  if (obj.offTextureString != ""){
-    pairs.push_back(std::pair<std::string, std::string>("offtexture", obj.offTextureString));
-  }
-  if (obj.onToggleOn != ""){
-    pairs.push_back(std::pair<std::string, std::string>("on", obj.onToggleOn));
-  }
-  if (obj.onToggleOff != ""){
-    pairs.push_back(std::pair<std::string, std::string>("off", obj.onToggleOff));
-  }
-  if (obj.initialState == true){
-    pairs.push_back(std::pair<std::string, std::string>("state", "on"));
-  }
-  if (obj.hasOnTint && !isIdentityVec(obj.onTint)){
-    pairs.push_back(std::pair<std::string, std::string>("ontint", serializeVec(obj.onTint)));
-  }
-  if (!isIdentityVec(obj.tint)){
-    pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
-  }
-  modassert(false, "serialize button not implemented");
   autoserializerSerialize((char*)&obj, uiButtonAutoserializer, pairs);
   return pairs;
 }

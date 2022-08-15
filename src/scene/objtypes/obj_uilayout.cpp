@@ -18,7 +18,6 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "tint",
     .defaultValue = glm::vec4(1.f, 1.f, 1.f, 1.f),
   },
-
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUILayout, spacing),
     .structOffsetFiller = std::nullopt,
@@ -130,18 +129,36 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "margin",
     .defaultValue = 0.f,
   },
+  AutoSerializeCustom {
+    .structOffset = offsetof(GameObjectUILayout, elements),
+    .field = "elements",
+    .fieldType = ATTRIBUTE_STRING,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
+      if (fieldValue == NULL){
+        *elements = {}; 
+      }else{
+        std::string* attrValue = static_cast<std::string*>(fieldValue);
+        *elements = split(*attrValue, ',');
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
+      std::string* attrValue = static_cast<std::string*>(fieldValue);
+      *elements = split(*attrValue, ',');
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
+      return join(*elements, ',');
+    },
+  },
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
-  std::vector<std::string> elements = {};
-  if (attr.stringAttributes.find("elements") != attr.stringAttributes.end()){
-    elements = split(attr.stringAttributes.at("elements"), ',');
-  }
   auto minwidth = layoutMinSizeFromAttr(attr, "minwidth");
   auto minheight = layoutMinSizeFromAttr(attr, "minheight");
 
   GameObjectUILayout obj{
-    .elements = elements,
     .boundInfo = BoundInfo  {
       .xMin = 0, .xMax = 0,
       .yMin = 0, .yMax = 0,
