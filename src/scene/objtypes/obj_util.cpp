@@ -502,6 +502,38 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     return;
   }
 
+  AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
+  if (customValue != NULL){
+    int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
+    auto attribute = customValue -> getAttribute(address);
+
+    auto vec3Attr = std::get_if<glm::vec3>(&attribute);
+    if (vec3Attr != NULL){
+      _pairs.push_back({ customValue -> field, serializeVec(*vec3Attr) });
+      return;
+    }
+    auto vec4Attr = std::get_if<glm::vec4>(&attribute);
+    if (vec4Attr != NULL){
+      _pairs.push_back({ customValue -> field, serializeVec(*vec4Attr) });
+      return;
+    }
+
+    auto strAttr = std::get_if<std::string>(&attribute);
+    if (strAttr != NULL){
+      _pairs.push_back({ customValue -> field, *strAttr });
+      return;
+    }
+
+    auto floatAttr = std::get_if<float>(&attribute);
+    if (floatAttr != NULL){
+      _pairs.push_back({ customValue -> field, std::to_string(*floatAttr) });
+      return;
+    }
+
+    modassert(false, "invalid get attribute custom type");
+    return;
+  }
+
   modassert(false, "autoserialize type not yet implemented");
 }
 
@@ -680,7 +712,6 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     attrSet(attributes, address, uintValue -> field);
     return;
   }
-//  ///*
   AutoSerializeVec3* vec3Value = std::get_if<AutoSerializeVec3>(&value);
   if (vec3Value != NULL){
     glm::vec3* address = (glm::vec3*)(((char*)structAddress) + vec3Value -> structOffset);
