@@ -58,17 +58,11 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
+  addSerializedTextureInformation(pairs, obj.texture);
   if (obj.rootMesh != ""){
     pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh));
   }
-  if (obj.isDisabled){
-    pairs.push_back(std::pair<std::string, std::string>("disabled", "true"));
-  }
-  addSerializedTextureInformation(pairs, obj.texture);
-  if (!isIdentityVec(obj.tint)){
-    pairs.push_back(std::pair<std::string, std::string>("tint", serializeVec(obj.tint)));
-  }
-
+  autoserializerSerialize((char*)&obj, meshAutoserializer, pairs);
   return pairs;  
 }
 
@@ -81,6 +75,5 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
 
 void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   setTextureAttributes(meshObj.texture, attributes, util);
-
   autoserializerSetAttr((char*)&meshObj, meshAutoserializer, attributes, util);
 }

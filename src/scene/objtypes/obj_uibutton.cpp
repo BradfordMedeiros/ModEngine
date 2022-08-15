@@ -30,7 +30,7 @@ std::vector<AutoSerialize> uiButtonAutoserializer {
     .offString = "off",
     .defaultValue = false,
   },
-  AutoSerializeBool { 
+  AutoSerializeBool {  // mark as not serializable
     .structOffset = offsetof(GameObjectUIButton, initialState),
     .field = "state",
     .onString = "on",

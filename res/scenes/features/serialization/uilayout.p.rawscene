@@ -5,12 +5,12 @@
 (layout:elements:*basicbutton1,*basicbutton2
 (layout:backpanel:true
 (layout:tint:1.0 0.1 0.1
-(layout:margin:0.1
 (layout:width:100
 (layout:wrap:flex
 (layout:height:50
 (layout:mode:flex
-
+(layout:margin-left:0.2
+(layout:margin:0.5
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:(layout

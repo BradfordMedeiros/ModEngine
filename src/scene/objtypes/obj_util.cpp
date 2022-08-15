@@ -392,7 +392,9 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
       if (attr.numAttributes.find(customValue -> field) == attr.numAttributes.end()){
         customValue -> deserialize(address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.numAttributes.at(customValue -> field)));
+        std::cout << "Custom value: " << customValue -> field << ", " << attr.numAttributes.at(customValue -> field) << std::endl;
+        float value = attr.numAttributes.at(customValue -> field);
+        customValue -> deserialize(address, &value);
       }
     }else{
       modassert(false, "custom value -> invalid field type");

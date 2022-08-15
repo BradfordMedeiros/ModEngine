@@ -123,12 +123,8 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "border-size",
     .defaultValue = 0.f,
   },
-  AutoSerializeFloat {
-    .structOffset = offsetof(GameObjectUILayout, marginValues.margin),
-    .structOffsetFiller = offsetof(GameObjectUILayout, marginValues.marginSpecified),
-    .field = "margin",
-    .defaultValue = 0.f,
-  },
+
+  ///
   AutoSerializeCustom {
     .structOffset = offsetof(GameObjectUILayout, elements),
     .field = "elements",
@@ -154,6 +150,133 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
       return join(*elements, ',');
     },
   },
+  /////
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, marginValues.margin),
+    .structOffsetFiller = offsetof(GameObjectUILayout, marginValues.marginSpecified),
+    .field = "margin",
+    .defaultValue = 0.f,
+  },
+  AutoSerializeCustom {
+    .structOffset = offsetof(GameObjectUILayout, marginValues),
+    .field = "margin-left",
+    .fieldType = ATTRIBUTE_FLOAT,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        std::cout << "margin-left value: " << *floatValue << std::endl; 
+        margin -> marginLeft = *floatValue;
+        margin -> marginLeftSpecified = true;
+      }else{
+        std::cout << "margin-left value: " << margin -> margin << std::endl; 
+        margin -> marginLeft = margin -> margin;
+        margin -> marginLeftSpecified = false;
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        margin -> marginLeft = *floatValue;
+        margin -> marginLeftSpecified = true;
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      return margin -> marginLeft;
+    },
+  },
+  AutoSerializeCustom {
+    .structOffset = offsetof(GameObjectUILayout, marginValues),
+    .field = "margin-right",
+    .fieldType = ATTRIBUTE_FLOAT,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        std::cout << "margin-right value: " << *floatValue << std::endl; 
+        margin -> marginRight = *floatValue;
+        margin -> marginRightSpecified = true;
+      }else{
+        std::cout << "margin-right value: " << margin -> margin << std::endl; 
+        margin -> marginRight = margin -> margin;
+        margin -> marginRightSpecified = false;
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        margin -> marginRight = *floatValue;
+        margin -> marginRightSpecified = true;
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      return margin -> marginRight;
+    },
+  },
+  AutoSerializeCustom {
+    .structOffset = offsetof(GameObjectUILayout, marginValues),
+    .field = "margin-top",
+    .fieldType = ATTRIBUTE_FLOAT,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        std::cout << "margin-top value: " << *floatValue << std::endl; 
+        margin -> marginTop = *floatValue;
+        margin -> marginTopSpecified = true;
+      }else{
+        std::cout << "margin-top value: " << margin -> margin << std::endl; 
+        margin -> marginTop = margin -> margin;
+        margin -> marginTopSpecified = false;
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        margin -> marginTop = *floatValue;
+        margin -> marginTopSpecified = true;
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      return margin -> marginTop;
+    },
+  },
+  AutoSerializeCustom {
+    .structOffset = offsetof(GameObjectUILayout, marginValues),
+    .field = "margin-bottom",
+    .fieldType = ATTRIBUTE_FLOAT,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        std::cout << "margin-bottom value: " << *floatValue << std::endl; 
+        margin -> marginBottom = *floatValue;
+        margin -> marginBottomSpecified = true;
+      }else{
+        std::cout << "margin-bottom value: " << margin -> margin << std::endl; 
+        margin -> marginBottom = margin -> margin;
+        margin -> marginBottomSpecified = false;
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      float* floatValue = static_cast<float*>(fieldValue);
+      if (floatValue != NULL){
+        margin -> marginBottom = *floatValue;
+        margin -> marginBottomSpecified = true;
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
+      return margin -> marginBottom;
+    },
+  },
 };
 
 GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util){  
@@ -170,17 +293,9 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     .minwidth = minwidth,
     .minheight = minheight,
   };
-
   createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
   assert(obj.border.borderSize <= 1.f);
-
-  attrSet(attr, &obj.marginValues.marginLeft, &obj.marginValues.marginLeftSpecified, obj.marginValues.margin, "margin-left");
-  attrSet(attr, &obj.marginValues.marginRight, &obj.marginValues.marginRightSpecified, obj.marginValues.margin, "margin-right");
-  attrSet(attr, &obj.marginValues.marginTop, &obj.marginValues.marginTopSpecified, obj.marginValues.margin, "margin-top");
-  attrSet(attr, &obj.marginValues.marginBottom, &obj.marginValues.marginBottomSpecified, obj.marginValues.margin, "margin-bottom");
-
   setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
-
   return obj;
 }
 
