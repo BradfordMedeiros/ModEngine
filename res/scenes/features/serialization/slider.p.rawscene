@@ -1,5 +1,8 @@
 _slider:position:0 0 0
 _slider:script:./res/scenes/features/serialization/get-attr.scm
+_slider:texture:./res/textures/blacktop.jpg
+_slider:focus:focusone
+_slider:blur:blurone
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:_slider

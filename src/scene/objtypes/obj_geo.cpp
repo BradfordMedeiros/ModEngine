@@ -12,6 +12,18 @@ std::vector<glm::vec3> parsePoints(std::string value){
   return points;
 }
 
+std::string pointsToString(std::vector<glm::vec3>& points){
+  std::string value = "";
+  for (int i = 0; i < points.size(); i++){
+    auto point = points.at(i);
+    value = value + print(point);
+    if (i != (points.size() - 1)){
+      value = value + "|";
+    }
+  }
+  return value;
+}
+
 std::vector<AutoSerialize> geoAutoserializer {
   AutoSerializeEnums {
     .structOffset = offsetof(GameObjectGeo, type),
@@ -33,8 +45,19 @@ std::vector<AutoSerialize> geoAutoserializer {
         *points = parsePoints(*pointStr);
       }
     },
-      //.serialize = [](void* offset, GameobjAttributes& _attributes) -> {
-  
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      std::vector<glm::vec3>* points = static_cast<std::vector<glm::vec3>*>(offset);
+      std::string* pointStr = static_cast<std::string*>(fieldValue);
+      if (pointStr == NULL){
+        *points = {};
+      }else{
+        *points = parsePoints(*pointStr);
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      std::vector<glm::vec3>* points = static_cast<std::vector<glm::vec3>*>(offset);
+      return pointsToString(*points);
+    },
   },
 };
 
@@ -44,27 +67,15 @@ GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
   return geo;
 }
 
-
-std::string pointsToString(std::vector<glm::vec3>& points){
-  std::string value = "";
-  for (int i = 0; i < points.size(); i++){
-    auto point = points.at(i);
-    value = value + print(point);
-    if (i != (points.size() - 1)){
-      value = value + "|";
-    }
-  }
-  return value;
-}
-
 void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes){
-  _attributes.stringAttributes["points"] = pointsToString(geoObj.points);
   autoserializerGetAttr((char*)&geoObj, geoAutoserializer, _attributes);
 }
 
 void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  if (attributes.stringAttributes.find("points") != attributes.stringAttributes.end()){
-    geoObj.points = parsePoints(attributes.stringAttributes.at("points"));
-  }
   autoserializerSetAttr((char*)&geoObj, geoAutoserializer, attributes, util);
+}
+std::vector<std::pair<std::string, std::string>> serializeGeo(GameObjectGeo obj, ObjectSerializeUtil& util){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  autoserializerSerialize((char*)&obj, geoAutoserializer, pairs);
+  return pairs;
 }

@@ -146,6 +146,8 @@ struct AutoSerializeCustom {
   const char* field;
   AttributeValueType fieldType;
   std::function<void(void* offset, void* value)> deserialize;
+  std::function<void(void* offset, void* fieldValue)> setAttributes;
+  std::function<AttributeValue(void* offset)> getAttribute;
 };
 //AutoSerializeCustom {
 //    .deserialize = [](void* offset, std::optional<void*>) -> {

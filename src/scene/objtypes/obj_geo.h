@@ -16,5 +16,6 @@ std::vector<glm::vec3> parsePoints(std::string value);
 
 void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes);
 void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::vector<std::pair<std::string, std::string>> serializeGeo(GameObjectGeo obj, ObjectSerializeUtil& util);
 
 #endif

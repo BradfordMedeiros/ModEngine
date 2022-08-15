@@ -587,6 +587,39 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
+  AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
+  if (customValue != NULL){
+    int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
+    auto attribute = customValue -> getAttribute(address);
+
+    auto vec3Attr = std::get_if<glm::vec3>(&attribute);
+    if (vec3Attr != NULL){
+      _attributes.vecAttr.vec3[customValue -> field] = *vec3Attr;
+      return;
+    }
+    auto vec4Attr = std::get_if<glm::vec4>(&attribute);
+    if (vec4Attr != NULL){
+      _attributes.vecAttr.vec4[customValue -> field] = *vec4Attr;
+      return;
+    }
+
+    auto strAttr = std::get_if<std::string>(&attribute);
+    if (strAttr != NULL){
+      _attributes.stringAttributes[customValue -> field] = *strAttr;
+      return;
+    }
+
+    auto floatAttr = std::get_if<float>(&attribute);
+    if (floatAttr != NULL){
+      _attributes.numAttributes[customValue -> field] = *floatAttr;
+      return;
+    }
+
+    modassert(false, "invalid get attribute custom type");
+    return;
+  }
+
+
   modassert(false, "autoserialize type not found");
 }
 
@@ -668,6 +701,39 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
     attrSet(attributes, address, enumsValue -> enums, enumsValue -> enumStrings, enumsValue -> field, true);
+    return;
+  }
+
+  AutoSerializeCustom* customValue = std::get_if<AutoSerializeCustom>(&value);
+  if (customValue != NULL){
+    int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
+    if (customValue -> fieldType == ATTRIBUTE_VEC3){
+      if (attributes.vecAttr.vec3.find(customValue -> field) == attributes.vecAttr.vec3.end()){
+        customValue -> setAttributes(address, NULL);
+      }else{
+        customValue -> setAttributes(address, &(attributes.vecAttr.vec3.at(customValue -> field)));
+      }
+    }else if (customValue -> fieldType == ATTRIBUTE_VEC4){
+      if (attributes.vecAttr.vec4.find(customValue -> field) == attributes.vecAttr.vec4.end()){
+        customValue -> setAttributes(address, NULL);
+      }else{
+        customValue -> setAttributes(address, &(attributes.vecAttr.vec4.at(customValue -> field)));
+      }
+    }else if (customValue -> fieldType == ATTRIBUTE_STRING){
+      if (attributes.stringAttributes.find(customValue -> field) == attributes.stringAttributes.end()){
+        customValue -> setAttributes(address, NULL);
+      }else{
+        customValue -> setAttributes(address, &(attributes.stringAttributes.at(customValue -> field)));
+      }
+    }else if (customValue -> fieldType == ATTRIBUTE_FLOAT){
+      if (attributes.numAttributes.find(customValue -> field) == attributes.numAttributes.end()){
+        customValue -> setAttributes(address, NULL);
+      }else{
+        customValue -> setAttributes(address, &(attributes.numAttributes.at(customValue -> field)));
+      }
+    }else{
+      modassert(false, "custom value -> invalid field type");
+    }
     return;
   }
 

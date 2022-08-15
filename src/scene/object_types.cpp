@@ -79,7 +79,7 @@ std::vector<ObjectType> objTypes = {
     .createObj = createGeo,
     .objectAttributes = convertElementValue<GameObjectGeo>(geoObjAttr),
     .setAttributes = convertElementSetValue<GameObjectGeo>(setGeoObjAttributes),
-    .serialize = serializeNotImplemented,
+    .serialize = convertSerialize<GameObjectGeo>(serializeGeo),
     .removeObject = removeDoNothing,
   },
   ObjectType {

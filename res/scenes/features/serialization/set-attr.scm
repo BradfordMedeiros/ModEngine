@@ -74,7 +74,11 @@
 			(list "perspective" "false")
 		)
 	)
-		
+	(list "<line"
+		(list
+			(list "points" "0 0 0|5 0 0|5 0 -5")
+		)
+	)	
 	
 ))
 
