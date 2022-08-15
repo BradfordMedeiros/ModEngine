@@ -167,9 +167,9 @@ std::vector<ObjectType> objTypes = {
     .name = "heightmap",
     .variantType = getVariantIndex(GameObjectHeightmap{}),
     .createObj = createHeightmap,
-    .objectAttributes = nothingObjAttr, 
-    .setAttributes = nothingSetObjAttr,
-    .serialize = serializeNotImplemented,
+    .objectAttributes = convertElementValue<GameObjectHeightmap>(heightmapObjAttr),
+    .setAttributes = convertElementSetValue<GameObjectHeightmap>(setHeightmapAttributes),
+    .serialize = convertSerialize<GameObjectHeightmap>(serializeHeightmap),
     .removeObject = convertRemove<GameObjectHeightmap>(removeHeightmap),
   },
   ObjectType {

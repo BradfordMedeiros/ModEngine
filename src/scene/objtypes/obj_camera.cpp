@@ -35,7 +35,6 @@ std::vector<AutoSerialize> cameraAutoserializer {
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectCamera obj {};
   createAutoSerialize((char*)&obj, cameraAutoserializer, attr, util);
-  std::cout << "camera: " << obj.enableDof << std::endl;
   return obj;
 }
 

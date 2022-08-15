@@ -6,6 +6,9 @@
 #include "./obj_util.h"
 
 struct GameObjectHeightmap{
+  std::string mapName;
+  int dim;
+  
   HeightMapData heightmap;
   Mesh mesh;
   TextureInformation texture;
@@ -13,5 +16,10 @@ struct GameObjectHeightmap{
 
 GameObjectHeightmap createHeightmap(GameobjAttributes& attr, ObjectTypeUtil& util);
 void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util);
+
+void heightmapObjAttr(GameObjectHeightmap& geoObj, GameobjAttributes& _attributes);
+void setHeightmapAttributes(GameObjectHeightmap& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::vector<std::pair<std::string, std::string>> serializeHeightmap(GameObjectHeightmap& obj, ObjectSerializeUtil& util);
+
 
 #endif
