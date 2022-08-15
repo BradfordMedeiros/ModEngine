@@ -1,18 +1,5 @@
 #include "./obj_util.h"
 
-
-void setTextureInfo(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, TextureInformation& info){
-  attrSet(attr, &info.textureOverloadName, "", "texture");
-  int textureOverloadId = info.textureOverloadName == "" ? -1 : ensureTextureLoaded(info.textureOverloadName).textureId;
-  info.textureOverloadId = textureOverloadId;
-}
-
-void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture){
-  if (texture.textureOverloadName != ""){
-    pairs.push_back(std::pair<std::string, std::string>("texture", texture.textureOverloadName));
-  }
-}
-
 void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   if (attr.stringAttributes.find("textureoffset") != attr.stringAttributes.end()){
     //std::cout << "setting texture offset" << std::endl;
@@ -237,7 +224,11 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     textureToLoad = attr.stringAttributes.at(field);
   }
-  *_textureId = ensureTextureLoaded(textureToLoad).textureId;
+  if (textureToLoad == ""){
+    *_textureId = -1;
+  }else{
+    *_textureId = ensureTextureLoaded(textureToLoad).textureId;
+  }
 }
 
 void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string* _textureName, std::string defaultTexture, const char* field){

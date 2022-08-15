@@ -47,8 +47,6 @@ struct ObjectSetAttribUtil {
   std::function<void(int)> releaseTexture;
 };
 
-void setTextureInfo(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, TextureInformation& info);
-void addSerializedTextureInformation(std::vector<std::pair<std::string, std::string>>& pairs, TextureInformation& texture);
 void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util);
 
 void attrSet(GameobjAttributes& attr, bool* value, const char* field);
@@ -221,6 +219,16 @@ int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
       .defaultValue = glm::vec2(1.f, 1.f),
     }
   );
+
+  autoserializer.push_back(
+    AutoSerializeTextureLoader {
+      .structOffset = offsetof(T, texture.textureOverloadId),
+      .structOffsetName = offsetof(T, texture.textureOverloadName),
+      .field = "texture",
+      .defaultValue = "",
+    }
+  );
+  
 
   return 0;
 }

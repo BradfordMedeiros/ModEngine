@@ -296,7 +296,6 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
   };
   createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
   assert(obj.border.borderSize <= 1.f);
-  setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   return obj;
 }
 

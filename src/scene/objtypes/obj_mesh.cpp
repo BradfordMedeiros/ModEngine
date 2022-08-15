@@ -54,14 +54,12 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .rootMesh = rootMeshName,
   };
 
-  setTextureInfo(attr, util.ensureTextureLoaded, obj.texture);
   createAutoSerialize((char*)&obj, meshAutoserializer, attr, util);
   return obj;
 }
 
 std::vector<std::pair<std::string, std::string>> serializeMesh(GameObjectMesh obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;
-  addSerializedTextureInformation(pairs, obj.texture);
   if (obj.rootMesh != ""){
     pairs.push_back(std::pair<std::string, std::string>("mesh", obj.rootMesh));
   }
