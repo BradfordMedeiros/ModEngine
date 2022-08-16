@@ -48,8 +48,6 @@ struct ObjectSetAttribUtil {
   std::function<std::string(std::string)> pathForModLayer;
 };
 
-void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util);
-
 void attrSet(GameobjAttributes& attr, bool* value, const char* field);
 void attrSet(GameobjAttributes& attr, bool* value, bool defaultValue, const char* field);
 void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, const char* field, bool strict);

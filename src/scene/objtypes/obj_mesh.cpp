@@ -75,6 +75,5 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
 }
 
 void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  setTextureAttributes(meshObj.texture, attributes, util);
   autoserializerSetAttr((char*)&meshObj, meshAutoserializer, attributes, util);
 }

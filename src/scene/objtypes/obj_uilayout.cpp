@@ -314,6 +314,5 @@ void getUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& _at
 }
 
 void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  setTextureAttributes(layoutObj.texture, attributes, util);
   autoserializerSetAttr((char*)&layoutObj, uiLayoutAutoserializer, attributes, util);
 }

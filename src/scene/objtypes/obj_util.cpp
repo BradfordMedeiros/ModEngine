@@ -1,19 +1,5 @@
 #include "./obj_util.h"
 
-void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util){
-  if (attr.stringAttributes.find("textureoffset") != attr.stringAttributes.end()){
-    //std::cout << "setting texture offset" << std::endl;
-    info.textureoffset = parseVec2(attr.stringAttributes.at("textureoffset"));
-  }
-  if (attr.stringAttributes.find("texture") != attr.stringAttributes.end()){
-    util.releaseTexture(info.textureOverloadId);
-    auto textureOverloadName = attr.stringAttributes.at("texture");
-    int textureOverloadId = util.ensureTextureLoaded(textureOverloadName).textureId;
-    info.textureOverloadName = textureOverloadName;
-    info.textureOverloadId = textureOverloadId;
-  }
-}
-
 void attrSet(GameobjAttributes& attr, bool* value, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *value = attr.stringAttributes.at(field) == "enabled";
@@ -149,6 +135,20 @@ void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, glm::v
     }
   }else{
     *_value = defaultValue;
+    if (_hasValue != NULL){
+      *_hasValue = false;
+    }
+  }  
+}
+
+void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    auto value = attr.stringAttributes.at(field);
+    *_value = parseVec2(value);
+    if (_hasValue != NULL){
+      *_hasValue = true;
+    }
+  }else{
     if (_hasValue != NULL){
       *_hasValue = false;
     }
@@ -718,6 +718,11 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
   if (textureLoader != NULL){
     int* address = (int*)(((char*)structAddress) + textureLoader -> structOffset);
     std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
+
+    util.releaseTexture(*address);
+    if (textureName != NULL){
+      *textureName = "";
+    }
     attrSetLoadTexture(attributes, util.ensureTextureLoaded, address, textureName, textureLoader -> defaultValue, textureLoader -> field);
     return;
   }
@@ -738,10 +743,9 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
 
   AutoSerializeVec2* vec2Value = std::get_if<AutoSerializeVec2>(&value);
   if (vec2Value != NULL){
-    //glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
-    //bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
-    //attrSet(attr, address, hasValueAddress, vec2Value -> defaultValue, vec2Value -> field);
-    modassert(false, "autoserialize vec2 setAttr not implemented");
+    glm::vec2* address = (glm::vec2*)(((char*)structAddress) + vec2Value -> structOffset);
+    bool* hasValueAddress = (!vec2Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec2Value -> structOffsetFiller.value());
+    attrSet(attributes, address, hasValueAddress, vec2Value -> field);
     return;
   }
 
