@@ -1,37 +1,22 @@
 # Generated scene 
-*basicbutton1:position:0.100000 0.000000 0.000000
-*basicbutton1:rotation:0.000000 0.000000 -1.000000 0.000000
-*basicbutton1:physics_shape:shape_box
-*basicbutton1:state:on
-*basicbutton1:state:on
-*basicbutton1:ontexture:./res/textures/wood.jpg
-*basicbutton1:offtexture:./res/textures/window.png
-(layout:position:0.000000 1.000000 0.000000
-(layout:rotation:0.000000 0.000000 -1.000000 0.000000
-(layout:physics_shape:shape_box
-(layout:script:./res/scenes/features/serialization/get-attr.scm
-(layout:backpanel:true
-(layout:type:vertical
-(layout:elements:*basicbutton1,*basicbutton2
-(layout:margin:0.500000
-(layout:margin-left:0.200000
-(layout:margin-right:0.500000
-(layout:margin-top:0.500000
-(layout:margin-bottom:0.500000
-~root:597609208:child:*basicbutton1,(layout,test,serialize,*basicbutton2
-~root:597609208:rotation:0.000000 0.000000 -1.000000 0.000000
-~root:597609208:physics_shape:shape_box
-~root:597609208:not:implemented
+~root:518357239:child:box,!light,test,serialize
+~root:518357239:rotation:0.000000 0.000000 -1.000000 0.000000
+~root:518357239:physics_shape:shape_box
+~root:518357239:not:implemented
+box:position:0.000000 -5.000000 0.000000
+box:scale:100.000000 1.000000 100.000000
+box:rotation:0.000000 0.000000 -1.000000 0.000000
+box:physics_shape:shape_box
+box:mesh:./res/models/box/box.obj
+!light:rotation:0.000000 0.000000 -1.000000 0.000000
+!light:physics_shape:shape_box
+!light:script:./res/scenes/features/serialization/get-attr.scm
+!light:type:spotlight
+!light:color:1.000000 1.000000 5.000000
+!light:angle:180.000000
 test:rotation:0.000000 0.000000 -1.000000 0.000000
 test:physics_shape:shape_box
 test:script:./res/scenes/features/serialization/set-attr.scm
 serialize:rotation:0.000000 0.000000 -1.000000 0.000000
 serialize:physics_shape:shape_box
 serialize:script:./res/scenes/features/serialization/serialize.scm
-*basicbutton2:position:1.000000 0.000000 0.000000
-*basicbutton2:rotation:0.000000 0.000000 -1.000000 0.000000
-*basicbutton2:physics_shape:shape_box
-*basicbutton2:state:on
-*basicbutton2:state:on
-*basicbutton2:ontexture:./res/textures/wood.jpg
-*basicbutton2:offtexture:./res/textures/window.png

@@ -1015,7 +1015,8 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
     },
     [&world, id](int textureId){
       freeTextureRefsIdByOwner(world, id, textureId);
-    }
+    },
+    world.interface.modlayerPath
   );
 
   GameObject& obj = getGameObject(world, id);

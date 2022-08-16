@@ -45,6 +45,7 @@ struct ObjectSetAttribUtil {
   std::function<void(bool)> setEmitterEnabled;
   std::function<Texture(std::string)> ensureTextureLoaded;
   std::function<void(int)> releaseTexture;
+  std::function<std::string(std::string)> pathForModLayer;
 };
 
 void setTextureAttributes(TextureInformation& info, GameobjAttributes& attr, ObjectSetAttribUtil& util);
@@ -150,8 +151,8 @@ struct AutoSerializeCustom {
   size_t structOffset;
   const char* field;
   AttributeValueType fieldType;
-  std::function<void(void* offset, void* value)> deserialize;
-  std::function<void(void* offset, void* fieldValue)> setAttributes;
+  std::function<void(ObjectTypeUtil& util, void* offset, void* value)> deserialize;
+  std::function<void(ObjectSetAttribUtil& util, void* offset, void* fieldValue)> setAttributes;
   std::function<AttributeValue(void* offset)> getAttribute;
 };
 

@@ -36,7 +36,7 @@ std::vector<AutoSerialize> geoAutoserializer {
     .structOffset = offsetof(GameObjectGeo, points),
     .field = "points",
     .fieldType = ATTRIBUTE_STRING,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       std::vector<glm::vec3>* points = static_cast<std::vector<glm::vec3>*>(offset);
       std::string* pointStr = static_cast<std::string*>(fieldValue);
       if (pointStr == NULL){
@@ -45,7 +45,7 @@ std::vector<AutoSerialize> geoAutoserializer {
         *points = parsePoints(*pointStr);
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       std::vector<glm::vec3>* points = static_cast<std::vector<glm::vec3>*>(offset);
       std::string* pointStr = static_cast<std::string*>(fieldValue);
       if (pointStr != NULL){
@@ -56,7 +56,7 @@ std::vector<AutoSerialize> geoAutoserializer {
       std::vector<glm::vec3>* points = static_cast<std::vector<glm::vec3>*>(offset);
       return pointsToString(*points);
     },
-  },
+  }
 };
 
 GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){

@@ -224,7 +224,7 @@ int renderObject(
 
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName);
 void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes);
-void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled,  std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture);
+void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled,  std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture, std::function<std::string(std::string)> pathForModLayer);
 
 template<typename T>
 std::vector<objid> getGameObjectsIndex(std::map<objid, GameObjectObj>& mapping){   // putting templates have to be in header?

@@ -27,7 +27,7 @@ std::vector<AutoSerialize> lightAutoserializer {
     .structOffset = 0,
     .field = "angle",
     .fieldType = ATTRIBUTE_FLOAT,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       GameObjectLight* light = static_cast<GameObjectLight*>(offset);
       float* field = static_cast<float*>(fieldValue);
       if (light != NULL && light -> type == LIGHT_SPOTLIGHT && field != NULL){
@@ -36,7 +36,7 @@ std::vector<AutoSerialize> lightAutoserializer {
         light -> maxangle = -10.f;
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       GameObjectLight* light = static_cast<GameObjectLight*>(offset);
       float* field = static_cast<float*>(fieldValue);
       if (light != NULL && light -> type == LIGHT_SPOTLIGHT && field != NULL){

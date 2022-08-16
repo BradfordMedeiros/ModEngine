@@ -554,7 +554,7 @@ void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes){
 }
 
 // TODO -> this needs updating hard.  
-void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled,  std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture){
+void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, std::function<void(bool)> setEmitterEnabled,  std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture, std::function<std::string(std::string)> pathForModLayer){
   GameObjectObj& toRender = mapping.at(id);
   auto variantIndex = toRender.index();
   for (auto &objType : objTypes){
@@ -563,6 +563,7 @@ void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, Game
         .setEmitterEnabled = setEmitterEnabled,
         .ensureTextureLoaded = ensureTextureLoaded,
         .releaseTexture = releaseTexture,
+        .pathForModLayer = pathForModLayer,
       };
       objType.setAttributes(toRender, attributes, util);
       return;

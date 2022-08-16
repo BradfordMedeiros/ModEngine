@@ -118,7 +118,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .structOffset = offsetof(GameObjectUILayout, elements),
     .field = "elements",
     .fieldType = ATTRIBUTE_STRING,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
       if (fieldValue == NULL){
         *elements = {}; 
@@ -127,7 +127,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
         *elements = split(*attrValue, ',');
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       std::vector<std::string>* elements = static_cast<std::vector<std::string>*>(offset);
       if (fieldValue != NULL){
         std::string* attrValue = static_cast<std::string*>(fieldValue);
@@ -149,7 +149,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .structOffset = offsetof(GameObjectUILayout, marginValues),
     .field = "margin-left",
     .fieldType = ATTRIBUTE_FLOAT,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -162,7 +162,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
         margin -> marginLeftSpecified = false;
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -179,7 +179,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .structOffset = offsetof(GameObjectUILayout, marginValues),
     .field = "margin-right",
     .fieldType = ATTRIBUTE_FLOAT,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -192,7 +192,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
         margin -> marginRightSpecified = false;
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -209,7 +209,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .structOffset = offsetof(GameObjectUILayout, marginValues),
     .field = "margin-top",
     .fieldType = ATTRIBUTE_FLOAT,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -222,7 +222,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
         margin -> marginTopSpecified = false;
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -239,7 +239,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .structOffset = offsetof(GameObjectUILayout, marginValues),
     .field = "margin-bottom",
     .fieldType = ATTRIBUTE_FLOAT,
-    .deserialize = [](void* offset, void* fieldValue) -> void {
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){
@@ -252,7 +252,7 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
         margin -> marginBottomSpecified = false;
       }
     },
-    .setAttributes = [](void* offset, void* fieldValue) -> void {
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
       LayoutMargin* margin = static_cast<LayoutMargin*>(offset);
       float* floatValue = static_cast<float*>(fieldValue);
       if (floatValue != NULL){

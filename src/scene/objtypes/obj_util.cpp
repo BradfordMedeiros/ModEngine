@@ -377,29 +377,29 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
     if (customValue -> fieldType == ATTRIBUTE_VEC3){
       if (attr.vecAttr.vec3.find(customValue -> field) == attr.vecAttr.vec3.end()){
-        customValue -> deserialize(address, NULL);
+        customValue -> deserialize(util, address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.vecAttr.vec3.at(customValue -> field)));
+        customValue -> deserialize(util, address, &(attr.vecAttr.vec3.at(customValue -> field)));
       }
     }else if (customValue -> fieldType == ATTRIBUTE_VEC4){
       if (attr.vecAttr.vec4.find(customValue -> field) == attr.vecAttr.vec4.end()){
-        customValue -> deserialize(address, NULL);
+        customValue -> deserialize(util, address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.vecAttr.vec4.at(customValue -> field)));
+        customValue -> deserialize(util, address, &(attr.vecAttr.vec4.at(customValue -> field)));
       }
     }else if (customValue -> fieldType == ATTRIBUTE_STRING){
       if (attr.stringAttributes.find(customValue -> field) == attr.stringAttributes.end()){
-        customValue -> deserialize(address, NULL);
+        customValue -> deserialize(util, address, NULL);
       }else{
-        customValue -> deserialize(address, &(attr.stringAttributes.at(customValue -> field)));
+        customValue -> deserialize(util, address, &(attr.stringAttributes.at(customValue -> field)));
       }
     }else if (customValue -> fieldType == ATTRIBUTE_FLOAT){
       if (attr.numAttributes.find(customValue -> field) == attr.numAttributes.end()){
-        customValue -> deserialize(address, NULL);
+        customValue -> deserialize(util, address, NULL);
       }else{
         std::cout << "Custom value: " << customValue -> field << ", " << attr.numAttributes.at(customValue -> field) << std::endl;
         float value = attr.numAttributes.at(customValue -> field);
-        customValue -> deserialize(address, &value);
+        customValue -> deserialize(util, address, &value);
       }
     }else{
       modassert(false, "custom value -> invalid field type");
@@ -773,27 +773,27 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     int* address = (int*)(((char*)structAddress) + customValue -> structOffset);
     if (customValue -> fieldType == ATTRIBUTE_VEC3){
       if (attributes.vecAttr.vec3.find(customValue -> field) == attributes.vecAttr.vec3.end()){
-        customValue -> setAttributes(address, NULL);
+        customValue -> setAttributes(util, address, NULL);
       }else{
-        customValue -> setAttributes(address, &(attributes.vecAttr.vec3.at(customValue -> field)));
+        customValue -> setAttributes(util, address, &(attributes.vecAttr.vec3.at(customValue -> field)));
       }
     }else if (customValue -> fieldType == ATTRIBUTE_VEC4){
       if (attributes.vecAttr.vec4.find(customValue -> field) == attributes.vecAttr.vec4.end()){
-        customValue -> setAttributes(address, NULL);
+        customValue -> setAttributes(util, address, NULL);
       }else{
-        customValue -> setAttributes(address, &(attributes.vecAttr.vec4.at(customValue -> field)));
+        customValue -> setAttributes(util, address, &(attributes.vecAttr.vec4.at(customValue -> field)));
       }
     }else if (customValue -> fieldType == ATTRIBUTE_STRING){
       if (attributes.stringAttributes.find(customValue -> field) == attributes.stringAttributes.end()){
-        customValue -> setAttributes(address, NULL);
+        customValue -> setAttributes(util, address, NULL);
       }else{
-        customValue -> setAttributes(address, &(attributes.stringAttributes.at(customValue -> field)));
+        customValue -> setAttributes(util, address, &(attributes.stringAttributes.at(customValue -> field)));
       }
     }else if (customValue -> fieldType == ATTRIBUTE_FLOAT){
       if (attributes.numAttributes.find(customValue -> field) == attributes.numAttributes.end()){
-        customValue -> setAttributes(address, NULL);
+        customValue -> setAttributes(util, address, NULL);
       }else{
-        customValue -> setAttributes(address, &(attributes.numAttributes.at(customValue -> field)));
+        customValue -> setAttributes(util, address, &(attributes.numAttributes.at(customValue -> field)));
       }
     }else{
       modassert(false, "custom value -> invalid field type");

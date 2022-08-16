@@ -1,0 +1,15 @@
+
+-heightmap:scale:10 1 10
+-heightmap:physics:enabled
+-heightmap:position:0 -100 0
+-heightmap:dim:10
+-heightmap:map:./res/heightmaps/dunes.jpg
+-heightmap:texturetiling:10 10
+-heightmap:texture:./res/textures/grass.jpg
+
+
+
+test:script:./res/scenes/features/serialization/set-attr.scm
+test:target:-heightmap
+
+serialize:script:./res/scenes/features/serialization/serialize.scm

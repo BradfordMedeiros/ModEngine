@@ -94,4 +94,12 @@
 			(gameobj-setattr! targetObj (attrForName))
 		)
 	)
+
+	(if (and (equal? action 1) (equal? key 259)) ; shift
+		(if (equal? target "&sample")
+			(playclip "&sample")
+		)
+	)
+
+	(format #t "key is: ~a\n" key)
 )

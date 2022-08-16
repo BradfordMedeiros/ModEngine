@@ -8,16 +8,39 @@ std::vector<AutoSerialize> soundAutoserializer {
     .offString = "false",
     .defaultValue = false,
   },
-  AutoSerializeRequiredString {
-    .structOffset = offsetof(GameObjectSound, clip),
+  AutoSerializeCustom {
+    .structOffset = 0,
     .field = "clip",
-  },  
+    .fieldType = ATTRIBUTE_STRING,
+    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
+      GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
+      std::string* clip = static_cast<std::string*>(fieldValue);
+      if (fieldValue == NULL){
+        modassert(false, "clip must not be unspecified");
+      }else{
+        obj -> clip = *clip;
+        obj -> source = loadSoundState(util.pathForModLayer(obj -> clip), obj -> loop);     
+      }
+    },
+    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
+      GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
+      std::string* clip = static_cast<std::string*>(fieldValue);
+      if (fieldValue != NULL){
+        unloadSoundState(obj -> source, obj -> clip); 
+        obj -> clip = *clip;
+        obj -> source = loadSoundState(util.pathForModLayer(obj -> clip), obj -> loop);     
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
+      return obj -> clip;
+    },
+  },
 };
 
 GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectSound obj {};
   createAutoSerialize((char*)&obj, soundAutoserializer, attr, util);
-  obj.source = loadSoundState(util.pathForModLayer(obj.clip), obj.loop);
   return obj;
 }
 
