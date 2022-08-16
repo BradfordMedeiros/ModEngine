@@ -1,20 +1,7 @@
 #include "./obj_util.h"
 
-void attrSet(GameobjAttributes& attr, bool* value, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    *value = attr.stringAttributes.at(field) == "enabled";
-  }
-}
-void attrSet(GameobjAttributes& attr, bool* value, bool defaultValue, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    *value = attr.stringAttributes.at(field) == "enabled";
-  }else{
-    *value = defaultValue;
-  }
-}
-
 void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, const char* field, bool strict){
-if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
      auto value = attr.stringAttributes.at(field);
      if (value == onString){
         *_value = true;
@@ -31,6 +18,7 @@ void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
     *value = attr.stringAttributes.at(field);
   }
 }
+
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *value = attr.stringAttributes.at(field);
@@ -38,19 +26,10 @@ void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultVal
     *value = defaultValue;
   } 
 }
-void attrSetRequired(GameobjAttributes& attr, std::string* _value, const char* field){
-  *_value = attr.stringAttributes.at(field);
-}
+
 void attrSet(GameobjAttributes& attr, float* value, const char* field){
   if (attr.numAttributes.find(field) != attr.numAttributes.end()){
     *value = attr.numAttributes.at(field);
-  }
-}
-void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field){
-  if (attr.numAttributes.find(field) != attr.numAttributes.end()){
-    *_value = attr.numAttributes.at(field);
-  }else{
-    *_value = defaultValue;
   }
 }
 
@@ -126,6 +105,7 @@ void attrSet(GameobjAttributes& attr, glm::vec3* _value, bool* _hasValue, glm::v
     }
   }  
 }
+
 void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, glm::vec2 defaultValue, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     auto value = attr.stringAttributes.at(field);
@@ -153,13 +133,6 @@ void attrSet(GameobjAttributes& attr, glm::vec2* _value, bool* _hasValue, const 
       *_hasValue = false;
     }
   }  
-}
-
-
-void attrSet(GameobjAttributes& attr, glm::vec4* _value, const char* field){
-  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
-    *_value = attr.vecAttr.vec4.at(field);
-  }
 }
 
 void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, const char* field){
@@ -191,15 +164,6 @@ void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, glm::v
       *_hasValue = false;
     }
   }  
-}
-
-void attrSet(GameobjAttributes& attr, glm::vec2* _value, glm::vec2 defaultValue, const char* field){
-  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
-    *_value = parseVec2(attr.stringAttributes.at(field));
-
-  }else{
-    *_value = defaultValue;
-  }
 }
 
 void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict){
