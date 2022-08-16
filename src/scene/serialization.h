@@ -40,4 +40,7 @@ std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::v
 
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
 
+void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr);
+void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util);
+
 #endif

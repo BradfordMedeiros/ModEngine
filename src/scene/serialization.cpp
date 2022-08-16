@@ -350,5 +350,91 @@ std::string serializeObj(
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   _attr.vecAttr.vec4["rotation"] = serializeQuatToVec4(gameobj.transformation.rotation); // these representation transformations could happen offline 
   autoserializerGetAttr((char*)&gameobj, gameobjSerializer, _attr);
+}
 
+void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
+  auto value = std::get_if<glm::vec3>(&attr);
+  if (field == "physics_angle" && value != NULL){
+     gameobj.physicsOptions.angularFactor = *value;
+     return;
+  } 
+  if (field == "physics_linear" && value != NULL){
+     gameobj.physicsOptions.linearFactor = *value;
+     return;
+  } 
+  if (field == "physics_gravity" && value != NULL){
+     gameobj.physicsOptions.gravity = *value;
+     return;
+  }   
+  if (field == "physics_velocity" && value != NULL){
+    gameobj.physicsOptions.velocity = *value;
+    return;
+  }
+  if (field == "physics_avelocity" && value != NULL){
+    gameobj.physicsOptions.angularVelocity = *value;
+    return;
+  }
+
+  auto vec4Value = std::get_if<glm::vec4>(&attr);
+  if (field == "rotation" && vec4Value != NULL){
+    MODTODO("probably use basic quaternion representation internally and just make the type outer layer for ease of use");
+    gameobj.transformation.rotation = parseQuat(*vec4Value);
+    return;
+  }
+
+  auto fValue = std::get_if<float>(&attr);
+  if (field == "physics_friction" && fValue != NULL){
+    gameobj.physicsOptions.friction = *fValue;
+    return;
+  }
+  if (field == "physics_restitution" && fValue != NULL){
+    gameobj.physicsOptions.restitution = *fValue;
+    return;
+  }
+  if (field == "physics_mass" && fValue != NULL){
+    gameobj.physicsOptions.mass = *fValue;
+    return;
+  }
+  if (field == "physics_maxspeed" && fValue != NULL){
+    gameobj.physicsOptions.maxspeed = *fValue;
+    return;
+  }
+  if (field == "physics_layer" && fValue != NULL){
+    gameobj.physicsOptions.layer = *fValue;
+    return;
+  }
+
+  auto strValue = std::get_if<std::string>(&attr);
+
+  if (field == "script" && strValue != NULL){
+    assert(false); // cannot set script this way yet (would need to support load/unload)
+    gameobj.script = *strValue;
+    return;
+  }
+
+  if (field == "layer" && strValue != NULL){
+    assert(false);  // should work already, but should verify 
+    gameobj.layer = *strValue;
+    return;
+  }
+} 
+void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
+  autoserializerSetAttr((char*)&gameobj, gameobjSerializer, attr, util);
+
+  for (auto [field, fieldValue] : attr.stringAttributes){
+    setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.stringAttributes[field] = fieldValue;
+  }
+  for (auto [field, fieldValue] : attr.numAttributes){
+    setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.numAttributes[field] = fieldValue;
+  }
+  for (auto [field, fieldValue] : attr.vecAttr.vec3){
+    setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.vecAttr.vec3[field] = fieldValue;
+  }
+  for (auto [field, fieldValue] : attr.vecAttr.vec4){
+    setAttribute(gameobj, field, fieldValue);
+    gameobj.attr.vecAttr.vec4[field] = fieldValue;
+  }
 }

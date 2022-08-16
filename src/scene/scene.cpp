@@ -1003,25 +1003,23 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){
-  setObjectAttributes(
-    world.objectMapping, 
-    id, 
-    attr,
-    [&world, id](bool enabled) -> void {
+  ObjectSetAttribUtil util {
+    .setEmitterEnabled = [&world, id](bool enabled) -> void {
       setEmitterEnabled(world.emitters, id, enabled);
     },
-    [&world, id](std::string texturepath) -> Texture {
+    .ensureTextureLoaded = [&world, id](std::string texturepath) -> Texture {
       return loadTextureWorld(world, texturepath, id);
     },
-    [&world, id](int textureId){
+    .releaseTexture = [&world, id](int textureId){
       freeTextureRefsIdByOwner(world, id, textureId);
     },
-    world.interface.modlayerPath
-  );
+    .pathForModLayer = world.interface.modlayerPath,
+  };
+  setObjectAttributes(world.objectMapping, id, attr, util);
 
   GameObject& obj = getGameObject(world, id);
   bool oldPhysicsEnabled = obj.physicsOptions.enabled;
-  setAllAttributes(obj, attr);
+  setAllAttributes(obj, attr, util);
   bool newPhysicsEnabled = obj.physicsOptions.enabled;
   afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled);
 }
