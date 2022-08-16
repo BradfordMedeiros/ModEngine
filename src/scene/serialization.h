@@ -11,6 +11,7 @@
 #include "./common/util/types.h"
 #include "../common/util.h"
 #include "./serialobject.h"
+#include "./objtypes/obj_util.h"
 
 struct Token {
   std::string target;

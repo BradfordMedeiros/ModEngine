@@ -210,6 +210,59 @@ bool isDefaultGravity(glm::vec3 gravity){
   return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
 }
 
+// conditionally supported, but should be fine in practice, and for c++20
+// either way compile time so should be fine
+std::vector<AutoSerialize> gameobjSerializer {
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, transformation.position), 
+    .structOffsetFiller = std::nullopt,
+    .field = "position",
+    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, transformation.scale),
+    .structOffsetFiller = std::nullopt,
+    .field = "scale",
+    .defaultValue = glm::vec3(1.f, 1.f, 1.f),
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObject, physicsOptions.enabled),
+    .field = "physics", 
+    .onString = "enabled",
+    .offString = "disabled",
+    .defaultValue = false,
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObject, physicsOptions.isStatic),
+    .field = "physics_type", 
+    .onString = "static",
+    .offString = "dynamic",
+    .defaultValue = true,
+  },
+
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObject, physicsOptions.hasCollisions),
+    .field = "physics_collision", 
+    .onString = "collide",
+    .offString = "nocollide",
+    .defaultValue = true,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObject, physicsOptions.shape),
+    .enums = { BOX, SPHERE, CAPSULE, CYLINDER, CONVEXHULL, SHAPE_EXACT, AUTOSHAPE },
+    .enumStrings = { "shape_box", "shape_sphere", "shape_capsule", "shape_cylinder", "shape_hull", "shape_exact", "shape_auto" },
+    .field = "physics_shape",
+    .defaultValue = AUTOSHAPE,
+  },
+};
+
+std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobject){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  pairs.push_back({ "rotation", serializeQuat(gameobject.transformation.rotation) });
+  autoserializerSerialize((char*)&gameobject, gameobjSerializer, pairs);
+  return pairs;
+}
+
 std::string serializeObj(
   objid id, 
   objid groupId, 
@@ -232,26 +285,6 @@ std::string serializeObj(
   if (includeIds){
     sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
   }
-
-  if (!isDefaultPosition(gameobject.transformation.position)){
-    sceneData = sceneData + gameobjectName + ":position:" + serializeVec(gameobject.transformation.position) + "\n";
-  }
-  if (!isIdentityVec(gameobject.transformation.scale)){
-    sceneData = sceneData + gameobjectName + ":scale:" + serializeVec(gameobject.transformation.scale) + "\n";
-  }
-  sceneData = sceneData + gameobjectName + ":rotation:" + serializeQuat(gameobject.transformation.rotation) + "\n";
-
-  if (gameobject.physicsOptions.enabled){
-    sceneData = sceneData + gameobjectName + ":physics:enabled" + "\n"; 
-  }
-  if (!gameobject.physicsOptions.isStatic){
-    sceneData = sceneData + gameobjectName + ":physics_type:dynamic" + "\n"; 
-  }
-  if (!gameobject.physicsOptions.hasCollisions){
-    sceneData = sceneData + gameobjectName + ":physics_collision:nocollide" + "\n"; 
-  }
-
-  sceneData = sceneData + gameobjectName + ":physics_shape:" + physicsShapeValue(gameobject) + "\n";
  
   if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
     sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
@@ -277,6 +310,10 @@ std::string serializeObj(
 
   if (gameobject.layer != ""){
     sceneData = sceneData + gameobjectName + ":layer:" + gameobject.layer + "\n";
+  }
+
+  for (auto additionalField : coreFields(gameobject)){
+    sceneData = sceneData + gameobjectName + ":" + additionalField.first + ":" + additionalField.second + "\n";
   }
 
   for (auto additionalField : additionalFields){
