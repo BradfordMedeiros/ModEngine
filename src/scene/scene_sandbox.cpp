@@ -369,9 +369,11 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
     }
 
     auto gameobj = getGameObject(sandbox, id);
-    std::cout << "serializing: " << gameobj.name << ", root? = " << ((id == sandbox.mainScene.rootId) ? "true" : "false") << std::endl;
-
     auto gameobjecth = getGameObjectH(sandbox, id);
+    if (rootIdForScene(sandbox, gameobjecth.sceneId) == gameobj.id){
+      continue;
+    }
+
     auto additionalFields = getAdditionalFields(id); 
     auto children = childnames(sandbox, gameobjecth);
     sceneData = sceneData + serializeObjectSandbox(gameobj, id, gameobjecth.groupId, additionalFields, children, includeIds, "");
@@ -814,7 +816,6 @@ objid rootIdForScene(SceneSandbox& sandbox, objid sceneId){
 objid sceneId(SceneSandbox& sandbox, objid id){
   return sandbox.mainScene.idToGameObjectsH.at(id).sceneId;
 }
-
 
 bool parentSceneId(SceneSandbox& sandbox, objid sceneId, objid* _parentSceneId){
   auto currObjId = rootIdForScene(sandbox, sceneId);
