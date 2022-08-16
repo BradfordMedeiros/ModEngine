@@ -64,6 +64,7 @@ glm::quat parseQuat(glm::vec4 vecXYZRotation);
 glm::vec3 quatToVec(glm::quat quat);
 glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition);
 
+std::string serializeFloat(float value);
 std::string serializeVec(glm::vec4 vec);
 std::string serializeVec(glm::vec3 vec);
 std::string serializeVec(glm::vec2 vec);

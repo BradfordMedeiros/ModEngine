@@ -411,7 +411,7 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
     if (!aboutEqual(*address, floatValue -> defaultValue)){
       std::cout << floatValue -> field << " values: " << std::to_string(*address) << ", " << floatValue -> defaultValue << std::endl;
-      _pairs.push_back({ floatValue -> field, std::to_string(*address) });
+      _pairs.push_back({ floatValue -> field, serializeFloat(*address) });
     }
     return;
   }
@@ -506,7 +506,7 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
 
     auto floatAttr = std::get_if<float>(&attribute);
     if (floatAttr != NULL){
-      _pairs.push_back({ customValue -> field, std::to_string(*floatAttr) });
+      _pairs.push_back({ customValue -> field, serializeFloat(*floatAttr) });
       return;
     }
 

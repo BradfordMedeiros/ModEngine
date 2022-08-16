@@ -352,14 +352,19 @@ glm::quat orientationFromPos(glm::vec3 fromPos, glm::vec3 targetPosition){
   return glm::normalize(glm::conjugate(glm::quat_cast(glm::lookAt(fromPos, targetPosition, glm::vec3(0, 1, 0)))));
 }
 
+std::string serializeFloat(float value){
+  char buff[100];
+  snprintf(buff, sizeof(buff), "%g", value);
+  return buff;
+}
 std::string serializeVec(glm::vec4 vec){
-  return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z) + " " + std::to_string(vec.w);
+  return serializeFloat(vec.x) + " " + serializeFloat(vec.y) + " " + serializeFloat(vec.z) + " " + serializeFloat(vec.w);
 }
 std::string serializeVec(glm::vec3 vec){
-  return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
+  return serializeFloat(vec.x) + " " + serializeFloat(vec.y) + " " + serializeFloat(vec.z);
 }
 std::string serializeVec(glm::vec2 vec){
-  return std::to_string(vec.x) + " " + std::to_string(vec.y);
+  return serializeFloat(vec.x) + " " + serializeFloat(vec.y);
 }
 
 float maxvalue(float x, float y, float z){
