@@ -154,14 +154,6 @@ struct AutoSerializeCustom {
   std::function<void(void* offset, void* fieldValue)> setAttributes;
   std::function<AttributeValue(void* offset)> getAttribute;
 };
-//AutoSerializeCustom {
-//    .deserialize = [](void* offset, std::optional<void*>) -> {
-//
-//    },
-//    .serialize = [](void* offset, GameobjAttributes& _attributes) -> {
-//
-//    },
-//  },
 
 typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);

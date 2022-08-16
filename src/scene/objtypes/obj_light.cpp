@@ -23,13 +23,39 @@ std::vector<AutoSerialize> lightAutoserializer {
     .field = "attenuation",
     .defaultValue = glm::vec3(0, 0, 1),
   },
+  AutoSerializeCustom {
+    .structOffset = 0,
+    .field = "angle",
+    .fieldType = ATTRIBUTE_FLOAT,
+    .deserialize = [](void* offset, void* fieldValue) -> void {
+      GameObjectLight* light = static_cast<GameObjectLight*>(offset);
+      float* field = static_cast<float*>(fieldValue);
+      if (light != NULL && light -> type == LIGHT_SPOTLIGHT && field != NULL){
+        light -> maxangle = *field;
+      }else{
+        light -> maxangle = -10.f;
+      }
+    },
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
+      GameObjectLight* light = static_cast<GameObjectLight*>(offset);
+      float* field = static_cast<float*>(fieldValue);
+      if (light != NULL && light -> type == LIGHT_SPOTLIGHT && field != NULL){
+        light -> maxangle = *field;
+      }else {
+        light -> maxangle = -10.f;
+      }
+    },
+    .getAttribute = [](void* offset) -> AttributeValue {
+      GameObjectLight* light = static_cast<GameObjectLight*>(offset);
+      return light -> maxangle;
+    },
+  }
+
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
   createAutoSerialize((char*)&obj, lightAutoserializer, attr, util);
-  auto maxangle = (obj.type != LIGHT_SPOTLIGHT || attr.numAttributes.find("angle") == attr.numAttributes.end()) ? -10.f : attr.numAttributes.at("angle");
-  obj.maxangle = maxangle;
   return obj;
 }
 

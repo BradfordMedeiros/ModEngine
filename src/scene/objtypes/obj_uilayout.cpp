@@ -265,8 +265,6 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
       return margin -> marginBottom;
     },
   },
-
-  ////
   AutoSerializeFloat {
     .structOffset = offsetof(GameObjectUILayout, minwidth),
     .structOffsetFiller = std::nullopt,
@@ -279,8 +277,6 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "minheight",
     .defaultValue = -1.f,
   },
-
-  ///
 };
 
 static auto _ = addTextureAutoserializer<GameObjectUILayout>(uiLayoutAutoserializer);
