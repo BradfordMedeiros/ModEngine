@@ -95,6 +95,8 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
   if (attributes.stringAttributes.find("physics_shape") != attributes.stringAttributes.end()){
     auto value = attributes.stringAttributes.at("physics_shape");
     object.physicsOptions.shape = parseShape(value);
+  }else{
+    object.physicsOptions.shape = AUTOSHAPE;
   }
 
   if (attributes.stringAttributes.find("net") != attributes.stringAttributes.end()){

@@ -203,13 +203,6 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
   return objectAttributes;
 }
 
-bool isDefaultPosition(glm::vec3 pos){
-  return pos.x == 0 && pos.y == 0 && pos.z == 0;
-}
-bool isDefaultGravity(glm::vec3 gravity){
-  return gravity.x == 0 && (gravity.y < -9.80 && gravity.y > -9.82) && gravity.z == 0;
-}
-
 // conditionally supported, but should be fine in practice, and for c++20
 // either way compile time so should be fine
 std::vector<AutoSerialize> gameobjSerializer {
@@ -239,7 +232,6 @@ std::vector<AutoSerialize> gameobjSerializer {
     .offString = "dynamic",
     .defaultValue = true,
   },
-
   AutoSerializeBool {
     .structOffset = offsetof(GameObject, physicsOptions.hasCollisions),
     .field = "physics_collision", 
@@ -254,6 +246,64 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_shape",
     .defaultValue = AUTOSHAPE,
   },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, physicsOptions.linearFactor),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_linear",
+    .defaultValue = glm::vec3(1.f, 1.f, 1.f),
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, physicsOptions.angularFactor),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_angle",
+    .defaultValue = glm::vec3(1.f, 1.f, 1.f),
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, physicsOptions.gravity),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_gravity",
+    .defaultValue = glm::vec3(0.f, -9.81f, 0.f),
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, physicsOptions.velocity),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_velocity",
+    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
+  },
+  AutoSerializeVec3 {
+    .structOffset = offsetof(GameObject, physicsOptions.angularVelocity),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_avelocity",
+    .defaultValue = glm::vec3(0.f, 0.f, 0.f),
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObject, lookat),
+    .field = "lookat",
+    .defaultValue = "",
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObject, script),
+    .field = "script",
+    .defaultValue = "",
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObject, fragshader),
+    .field = "fragshader",
+    .defaultValue = "",
+  },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObject, layer),
+    .field = "layer",
+    .defaultValue = "",
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObject, netsynchronize),
+    .field = "net", 
+    .onString = "sync",
+    .offString = "nosync",
+    .defaultValue = false,
+  },
+
 };
 
 std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobject){
@@ -284,32 +334,6 @@ std::string serializeObj(
 
   if (includeIds){
     sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
-  }
- 
-  if (!isIdentityVec(gameobject.physicsOptions.linearFactor)){
-    sceneData = sceneData + gameobjectName + ":physics_linear:" + serializeVec(gameobject.physicsOptions.linearFactor) + "\n"; 
-  }
-  if (!isIdentityVec(gameobject.physicsOptions.angularFactor)){
-    sceneData = sceneData + gameobjectName + ":physics_angle:" + serializeVec(gameobject.physicsOptions.angularFactor) + "\n"; 
-  }
-  if (!isDefaultGravity(gameobject.physicsOptions.gravity)){
-    sceneData = sceneData + gameobjectName + ":physics_gravity:" + serializeVec(gameobject.physicsOptions.gravity) + "\n"; 
-  }
-  if (gameobject.lookat != ""){
-    sceneData = sceneData + gameobjectName + ":lookat:" + gameobject.lookat + "\n"; 
-  }
-  if (gameobject.script != ""){
-    sceneData = sceneData + gameobjectName + ":script:" + gameobject.script + "\n"; 
-  }
-  if (gameobject.fragshader != ""){
-    sceneData = sceneData + gameobjectName + ":fragshader:" + gameobject.fragshader + "\n";
-  }
-  if (gameobject.netsynchronize){
-    sceneData = sceneData + gameobjectName + ":net:sync" + "\n";
-  }
-
-  if (gameobject.layer != ""){
-    sceneData = sceneData + gameobjectName + ":layer:" + gameobject.layer + "\n";
   }
 
   for (auto additionalField : coreFields(gameobject)){
