@@ -328,6 +328,7 @@ std::string serializeObj(
   }
   std::string gameobjectName = name == "" ? gameobject.name : name;
 
+  // custom autoserializer
   if (children.size() > 0){
     sceneData = sceneData + gameobjectName + ":child:" + join(children, ',') + "\n";  
   }
@@ -344,4 +345,10 @@ std::string serializeObj(
     sceneData = sceneData + gameobjectName + ":" + additionalField.first + ":" + additionalField.second + "\n";
   }
   return sceneData;  
+}
+
+void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
+  _attr.vecAttr.vec4["rotation"] = serializeQuatToVec4(gameobj.transformation.rotation); // these representation transformations could happen offline 
+  autoserializerGetAttr((char*)&gameobj, gameobjSerializer, _attr);
+
 }
