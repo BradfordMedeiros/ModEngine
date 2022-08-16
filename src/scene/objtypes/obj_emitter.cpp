@@ -108,33 +108,65 @@ std::vector<EmitterDelta> emitterDeltas(GameobjAttributes& attributes){
   return deltas;
 }
 
+std::vector<AutoSerialize> emitterAutoserializer {
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectEmitter, rate),
+    .structOffsetFiller = std::nullopt,
+    .field = "rate",
+    .defaultValue = 1.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectEmitter, duration),
+    .structOffsetFiller = std::nullopt,
+    .field = "duration",
+    .defaultValue = 10.f,
+  },
+  AutoSerializeUInt {
+    .structOffset = offsetof(GameObjectEmitter, limit),
+    .field = "limit",
+    .defaultValue = 10,
+  },
+  AutoSerializeBool {
+    .structOffset = offsetof(GameObjectEmitter, state),
+    .field = "state", 
+    .onString = "enabled",
+    .offString = "disabled",
+    .defaultValue = true,
+  },
+  AutoSerializeEnums {
+    .structOffset = offsetof(GameObjectEmitter, deleteBehavior),
+    .enums = { EMITTER_NOTYPE, EMITTER_DELETE, EMITTER_ORPHAN, EMITTER_FINISH },
+    .enumStrings = { "notype", "delete", "orphan", "finish" },
+    .field = "onremove",
+    .defaultValue = EMITTER_DELETE,
+  },
+};
+
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util){
   GameObjectEmitter obj {};
-  float spawnrate = attributes.numAttributes.find("rate") != attributes.numAttributes.end() ? attributes.numAttributes.at("rate") : 1.f;
-  float lifetime = attributes.numAttributes.find("duration") != attributes.numAttributes.end() ? attributes.numAttributes.at("duration") : 10.f;
-  int limit = attributes.numAttributes.find("limit") != attributes.numAttributes.end() ? attributes.numAttributes.at("limit") : 10;
-  auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
-  assert(limit >= 0);
+  createAutoSerialize((char*)&obj, emitterAutoserializer, attributes, util);
+  assert(obj.limit >= 0);
   
-  auto deleteValueStr = attributes.stringAttributes.find("onremove") != attributes.stringAttributes.end() ? attributes.stringAttributes.at("onremove") : "delete";
-  auto deleteType = EMITTER_DELETE;
-  if (deleteValueStr == "orphan"){
-    deleteType = EMITTER_ORPHAN;
-  }
-  if (deleteValueStr == "finish"){
-    deleteType = EMITTER_FINISH;
-  }
-
   auto emitterAttr = particleFields(attributes);
-  util.addEmitter(spawnrate, lifetime, limit, emitterAttr, emitterDeltas(attributes), enabled, deleteType);
+  util.addEmitter(obj.rate, obj.duration, obj.limit, emitterAttr, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
   return obj;
 }
 
-void removeEmitter(GameObjectEmitter& heightmapObj, ObjectRemoveUtil& util){
+void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
   util.rmEmitter();
 }
 
 void setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  auto enabled = attributes.stringAttributes.find("state") != attributes.stringAttributes.end() ? !(attributes.stringAttributes.at("state") == "disabled") : true;
-  util.setEmitterEnabled(enabled);
+  autoserializerSetAttr((char*)&emitterObj, emitterAutoserializer, attributes, util);
+  util.setEmitterEnabled(emitterObj.state);
+}
+
+void emitterObjAttr(GameObjectEmitter& emitterObj, GameobjAttributes& _attributes){
+  autoserializerGetAttr((char*)&emitterObj, emitterAutoserializer, _attributes);
+}
+
+std::vector<std::pair<std::string, std::string>> serializeEmitter(GameObjectEmitter& emitterObj, ObjectSerializeUtil& util){
+  std::vector<std::pair<std::string, std::string>> pairs;
+  autoserializerSerialize((char*)&emitterObj, emitterAutoserializer, pairs);
+  return pairs;
 }

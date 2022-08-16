@@ -185,10 +185,10 @@ std::vector<ObjectType> objTypes = {
     .name = "emitter",
     .variantType = getVariantIndex(GameObjectEmitter{}),
     .createObj = createEmitter,
-    .objectAttributes = nothingObjAttr, 
+    .objectAttributes = convertElementValue<GameObjectEmitter>(emitterObjAttr),
     .setAttributes = convertElementSetValue<GameObjectEmitter>(setEmitterAttributes),
-    .serialize = serializeNotImplemented,
-    .removeObject = removeDoNothing,
+    .serialize = convertSerialize<GameObjectEmitter>(serializeEmitter),
+    .removeObject = convertRemove<GameObjectEmitter>(removeEmitterObj),
   },
   ObjectType {
     .name = "default",
