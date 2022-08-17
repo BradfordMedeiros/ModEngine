@@ -303,6 +303,30 @@ std::vector<AutoSerialize> gameobjSerializer {
     .offString = "nosync",
     .defaultValue = false,
   },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObject, physicsOptions.mass),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_mass",
+    .defaultValue = 1.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObject, physicsOptions.maxspeed),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_maxspeed",
+    .defaultValue = -1.f,
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObject, physicsOptions.friction),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_friction",
+    .defaultValue = 1.f,
+  }, 
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObject, physicsOptions.restitution),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_restitution",
+    .defaultValue = 0.f,
+  }, 
 
 };
 
@@ -353,28 +377,6 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
 }
 
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
-  auto value = std::get_if<glm::vec3>(&attr);
-  if (field == "physics_angle" && value != NULL){
-     gameobj.physicsOptions.angularFactor = *value;
-     return;
-  } 
-  if (field == "physics_linear" && value != NULL){
-     gameobj.physicsOptions.linearFactor = *value;
-     return;
-  } 
-  if (field == "physics_gravity" && value != NULL){
-     gameobj.physicsOptions.gravity = *value;
-     return;
-  }   
-  if (field == "physics_velocity" && value != NULL){
-    gameobj.physicsOptions.velocity = *value;
-    return;
-  }
-  if (field == "physics_avelocity" && value != NULL){
-    gameobj.physicsOptions.angularVelocity = *value;
-    return;
-  }
-
   auto vec4Value = std::get_if<glm::vec4>(&attr);
   if (field == "rotation" && vec4Value != NULL){
     MODTODO("probably use basic quaternion representation internally and just make the type outer layer for ease of use");
@@ -383,40 +385,18 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
   }
 
   auto fValue = std::get_if<float>(&attr);
-  if (field == "physics_friction" && fValue != NULL){
-    gameobj.physicsOptions.friction = *fValue;
-    return;
-  }
-  if (field == "physics_restitution" && fValue != NULL){
-    gameobj.physicsOptions.restitution = *fValue;
-    return;
-  }
-  if (field == "physics_mass" && fValue != NULL){
-    gameobj.physicsOptions.mass = *fValue;
-    return;
-  }
-  if (field == "physics_maxspeed" && fValue != NULL){
-    gameobj.physicsOptions.maxspeed = *fValue;
-    return;
-  }
   if (field == "physics_layer" && fValue != NULL){
     gameobj.physicsOptions.layer = *fValue;
     return;
   }
 
   auto strValue = std::get_if<std::string>(&attr);
-
   if (field == "script" && strValue != NULL){
     assert(false); // cannot set script this way yet (would need to support load/unload)
     gameobj.script = *strValue;
     return;
   }
-
-  if (field == "layer" && strValue != NULL){
-    assert(false);  // should work already, but should verify 
-    gameobj.layer = *strValue;
-    return;
-  }
+  
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   autoserializerSetAttr((char*)&gameobj, gameobjSerializer, attr, util);
