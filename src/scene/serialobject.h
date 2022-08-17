@@ -40,7 +40,5 @@ struct GameObject {
   GameobjAttributes attr;
 };
 
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes);
-AttributeValue parsePropertySuffix(std::string key, std::string value);
 
 #endif

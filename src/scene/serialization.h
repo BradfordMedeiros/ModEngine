@@ -43,4 +43,8 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr);
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util);
 
+AttributeValue parsePropertySuffix(std::string key, std::string value);
+
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes);
+
 #endif
