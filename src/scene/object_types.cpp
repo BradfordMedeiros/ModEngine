@@ -446,7 +446,7 @@ int renderObject(
     }else{
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiObj -> tint));
     }
-    auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture : uiObj -> offTexture;
+    auto textureOverloadId = uiObj -> toggleOn ? uiObj -> onTexture.textureId : uiObj -> offTexture.textureId;
     drawMesh(uiObj -> common.mesh, shaderProgram, textureOverloadId); 
     return uiObj -> common.mesh.numTriangles;   
   }

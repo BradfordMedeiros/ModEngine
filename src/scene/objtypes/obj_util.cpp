@@ -183,6 +183,17 @@ void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const 
   }
 }
 
+void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _textureLoading, std::string defaultTexture, const char* field){
+  std::string textureToLoad = defaultTexture;
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    textureToLoad = attr.stringAttributes.at(field);
+  }
+  if (textureToLoad != _textureLoading -> textureString){
+    _textureLoading -> isLoaded = false;
+  }
+  std::cout << "texture to load: " << textureToLoad << " isloaded: " << _textureLoading -> isLoaded << std::endl;
+}
+
 void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string defaultTexture, const char* field){
   std::string textureToLoad = defaultTexture;
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
@@ -194,6 +205,7 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
     *_textureId = ensureTextureLoaded(textureToLoad).textureId;
   }
 }
+
 
 void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string* _textureName, std::string defaultTexture, const char* field){
   std::string textureToLoad = defaultTexture;
@@ -283,6 +295,12 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
+  if (textureLoaderManual != NULL){
+    TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+    attrSetLoadTextureManual(attr, address, textureLoaderManual -> defaultValue, textureLoaderManual -> field);
+    return;
+  }
   AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
     int* address = (int*)(((char*)structAddress) + textureLoader -> structOffset);
@@ -417,6 +435,15 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
   }
 
   
+  //AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
+  //if (textureLoaderManual != NULL){
+  //  TextureLoadingData* textureLoadingInfo = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+  //    _pairs.push_back({ textureLoaderManual -> field, textureLoadingInfo -> textureString });
+  //  }
+  //  return;
+  //}
+
+
   AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
     std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
@@ -554,13 +581,20 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
-  
+  //AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
+  //if (textureLoaderManual != NULL){
+  //  TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+  //  _attributes.stringAttributes[textureLoaderManual -> field] = textureName == NULL ? "" : address -> textureString;
+  //  return;
+  //}
+
   AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
     std::string* textureName = (!textureLoader -> structOffsetName.has_value()) ? NULL : (std::string*)(((char*)structAddress) + textureLoader -> structOffsetName.value());
     _attributes.stringAttributes[textureLoader -> field] = textureName == NULL ? "" : *textureName;
     return;
   }
+
 
   AutoSerializeInt* intValue = std::get_if<AutoSerializeInt>(&value);
   if (intValue != NULL){
@@ -677,6 +711,13 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
+  //AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
+  //if (textureLoaderManual != NULL){
+  //  int* address = (int*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+  //  TextureLoadingData* address = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+  //  attrSetLoadTextureManual(attributes, address, textureLoaderManual -> defaultValue, textureLoaderManual -> field);
+  //  return;
+  //}
 
   AutoSerializeTextureLoader* textureLoader = std::get_if<AutoSerializeTextureLoader>(&value);
   if (textureLoader != NULL){
@@ -775,5 +816,20 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   for (auto &value : values){
     autoserializerSetAttr(structAddress, value, attributes, util);
+  }
+}
+
+void autoserializeHandleTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture){
+  for (auto &value : values){
+    AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
+    if (textureLoaderManual != NULL){
+      TextureLoadingData* _textureLoading = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
+      if (!_textureLoading -> isLoaded){
+        auto texture = ensureTextureLoaded(_textureLoading -> textureString);
+        _textureLoading -> textureId = texture.textureId;
+        _textureLoading -> isLoaded = true;
+      }
+      std::cout << "texture to load: " << _textureLoading -> textureString << " isloaded: " << _textureLoading -> isLoaded << std::endl;
+    }
   }
 }

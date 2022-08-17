@@ -9,10 +9,8 @@ struct GameObjectUIButton {
   bool initialState;
   bool toggleOn;
   bool canToggle;
-  std::string onTextureString;
-  int onTexture;
-  std::string offTextureString;
-  int offTexture;
+  TextureLoadingData onTexture;
+  TextureLoadingData offTexture;
   std::string onToggleOn;
   std::string onToggleOff;
   bool hasOnTint;

@@ -25,6 +25,7 @@ struct ObjectTypeUtil {
   std::function<Mesh(std::string)> createMeshCopy;
   std::map<std::string, MeshRef>& meshes;
   std::function<Texture(std::string)> ensureTextureLoaded;
+  std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
   std::function<std::vector<std::string>(std::string)> ensureMeshLoaded;
@@ -104,6 +105,18 @@ struct AutoSerializeTextureLoader {
   std::string defaultValue;
 }; 
 
+struct TextureLoadingData {
+  int textureId;
+  std::string textureString;
+  bool isLoaded;
+};
+struct AutoSerializeTextureLoaderManual {
+  size_t structOffset;
+  const char* field;
+  std::string defaultValue;
+
+};
+
 struct AutoSerializeInt {
   size_t structOffset;
   const char* field;
@@ -154,11 +167,13 @@ struct AutoSerializeCustom {
   std::function<AttributeValue(void* offset)> getAttribute;
 };
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+
+void autoserializeHandleTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, std::function<Texture(std::string)> ensureTextureLoaded, std::function<void(int)> releaseTexture);
 
 template <typename T>
 int addCommonAutoserializer(std::vector<AutoSerialize>& autoserializer){

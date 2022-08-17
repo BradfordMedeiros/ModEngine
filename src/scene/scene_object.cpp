@@ -781,10 +781,10 @@ void setTexture(World& world, objid index, std::string textureName){
 
     GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));
     if (buttonObj != NULL){
-      buttonObj -> onTextureString = textureName;
-      buttonObj -> onTexture = textureId;
-      buttonObj -> offTextureString = textureName;
-      buttonObj -> offTexture = textureId;
+      buttonObj -> onTexture.textureString = textureName;
+      buttonObj -> onTexture.textureId = textureId;
+      buttonObj -> offTexture.textureString = textureName;
+      buttonObj -> offTexture.textureId = textureId;
     }
   }
 }
