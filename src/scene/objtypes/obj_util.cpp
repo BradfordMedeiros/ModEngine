@@ -212,7 +212,12 @@ void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::stri
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     textureToLoad = attr.stringAttributes.at(field);
   }
-  *_textureId = ensureTextureLoaded(textureToLoad).textureId;
+  if (textureToLoad != ""){
+    *_textureId = ensureTextureLoaded(textureToLoad).textureId;  
+  }else {
+    *_textureId = -1;
+  }
+  
   if (_textureName != NULL){
     *_textureName = textureToLoad;  
   }
