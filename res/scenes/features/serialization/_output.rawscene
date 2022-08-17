@@ -1,22 +1,14 @@
 # Generated scene 
-~root:518357239:child:box,!light,test,serialize
-~root:518357239:rotation:0.000000 0.000000 -1.000000 0.000000
-~root:518357239:physics_shape:shape_box
-~root:518357239:not:implemented
-box:position:0.000000 -5.000000 0.000000
-box:scale:100.000000 1.000000 100.000000
-box:rotation:0.000000 0.000000 -1.000000 0.000000
-box:physics_shape:shape_box
+serialize:rotation:0 0 -1 0
+serialize:script:./res/scenes/features/serialization/serialize.scm
+box:rotation:0 0 -1 0
+box:position:0 -5 0
+box:scale:100 1 100
 box:mesh:./res/models/box/box.obj
-!light:rotation:0.000000 0.000000 -1.000000 0.000000
-!light:physics_shape:shape_box
+test:rotation:0 0 -1 0
+test:script:./res/scenes/features/serialization/set-attr.scm
+!light:rotation:0 0 -1 0
 !light:script:./res/scenes/features/serialization/get-attr.scm
 !light:type:spotlight
-!light:color:1.000000 1.000000 5.000000
-!light:angle:180.000000
-test:rotation:0.000000 0.000000 -1.000000 0.000000
-test:physics_shape:shape_box
-test:script:./res/scenes/features/serialization/set-attr.scm
-serialize:rotation:0.000000 0.000000 -1.000000 0.000000
-serialize:physics_shape:shape_box
-serialize:script:./res/scenes/features/serialization/serialize.scm
+!light:color:0 0 1
+!light:angle:0.1

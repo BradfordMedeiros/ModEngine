@@ -15,8 +15,15 @@
 	(list "!light" 
 		(list
 			(list "color" (list 1 0 0))
-			(list "type" "directional")
-			(list "attenuation" (list 4 3 1))
+			;(list "type" "directional")
+			;(list "attenuation" (list 4 3 1))
+			(list "position" (list 0 2 0))
+			(list "scale" (list 2 1 1))
+			;(list "lookat" "box")
+			(list "physics" "enabled")
+			(list "physics_shape" "shape_sphere")
+			(list "physics_mass" 100)
+			(list "physics_maxspeed" -0.001)
 		)
 	)
 	(list "*button" 
@@ -45,6 +52,7 @@
 		(list
   		(list "tint" (list 1 0 0 0.5))
   		(list "border-size" 0.5)
+  		(list "texture" "./res/textures/blacktop.jpg")
 		)
 	)
 	(list ")text"
@@ -78,7 +86,14 @@
 		(list
 			(list "points" "0 0 0|5 0 0|5 0 -5")
 		)
-	)	
+	)
+	(list "-heightmap"
+		(list
+			(list "texture" "./res/textures/grass.jpg")
+			(list "texturetiling" "100 10")
+			(list "fragshader" "./res/shaders/discard_lowintensity/fragment.glsl")
+		)
+	)
 	
 ))
 

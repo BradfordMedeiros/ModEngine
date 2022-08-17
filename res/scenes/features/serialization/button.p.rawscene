@@ -5,7 +5,6 @@
 *button:on:hello
 *button:off:goodbye
 *button:state:on
-*button:texturetiling:5 5
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:*button

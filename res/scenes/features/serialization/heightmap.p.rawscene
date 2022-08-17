@@ -1,13 +1,20 @@
 
--heightmap:scale:10 1 10
+-heightmap:scale:30 1 60
 -heightmap:physics:enabled
 -heightmap:position:0 -100 0
 -heightmap:dim:10
 -heightmap:map:./res/heightmaps/dunes.jpg
 -heightmap:texturetiling:10 10
 -heightmap:texture:./res/textures/grass.jpg
+-heightmap:script:./res/scenes/features/serialization/get-attr.scm
 
 
+box:position:0.000000 -5.000000 0.000000
+box:scale:100.000000 1.000000 100.000000
+box:rotation:0.000000 -0.000000 -3.141593
+box:mesh:./res/models/box/box.obj
+box/Cube:texture:./res/textures/blacktop.jpg
+box:physics:enabled
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:-heightmap

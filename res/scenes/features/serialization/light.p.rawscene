@@ -3,6 +3,7 @@
 !light:color:0 0 1
 !light:type:spotlight
 !light:angle:0.1
+!light:physics_type:dynamic
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:!light
@@ -12,6 +13,6 @@ serialize:script:./res/scenes/features/serialization/serialize.scm
 box:position:0.000000 -5.000000 0.000000
 box:scale:100.000000 1.000000 100.000000
 box:rotation:0.000000 -0.000000 -3.141593
-box:physics_shape:shape_box
 box:mesh:./res/models/box/box.obj
 box/Cube:texture:./res/textures/blacktop.jpg
+box:physics:enabled

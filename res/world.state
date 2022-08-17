@@ -18,6 +18,7 @@ bloomblur:amount:1
 #dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
 #skybox:color:5 0.2 0.2 1
+skybox:enable:false
 ###############################
 
 ### Window/Rendering ###
@@ -30,7 +31,6 @@ skybox:texture:./res/textures/skyboxs/desert/
 rendering:antialiasing:msaa
 rendering:fontsize:6
 
-rendering:cull:disabled
 
 ### input stuff ###
 #mouse:capturecursor:true
@@ -40,11 +40,13 @@ rendering:cull:disabled
 
 #skybox:color:0.1 0.1 0.1
 
-#editor:showgrid:true
-#editor:gridsize:40
-#editor:snaptranslate-index:3
-#tools:manipulator-mode:translate
-#tools:manipulator-axis:x
-#
-##editor:snapscale-index:0
-##editor:snapangle-index:10
+#rendering:cull:disabled
+
+editor:showgrid:true
+editor:gridsize:40
+editor:snaptranslate-index:3
+tools:manipulator-mode:translate
+tools:manipulator-axis:x
+
+#editor:snapscale-index:0
+#editor:snapangle-index:10
