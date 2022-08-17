@@ -327,6 +327,12 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_restitution",
     .defaultValue = 0.f,
   }, 
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObject, physicsOptions.layer),
+    .structOffsetFiller = std::nullopt,
+    .field = "physics_layer",
+    .defaultValue = 0.f,
+  }, 
 
 };
 
@@ -377,44 +383,16 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
 }
 
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
-  auto vec4Value = std::get_if<glm::vec4>(&attr);
-  if (field == "rotation" && vec4Value != NULL){
-    MODTODO("probably use basic quaternion representation internally and just make the type outer layer for ease of use");
-    gameobj.transformation.rotation = parseQuat(*vec4Value);
-    return;
-  }
-
-  auto fValue = std::get_if<float>(&attr);
-  if (field == "physics_layer" && fValue != NULL){
-    gameobj.physicsOptions.layer = *fValue;
-    return;
-  }
-
-  auto strValue = std::get_if<std::string>(&attr);
-  if (field == "script" && strValue != NULL){
-    assert(false); // cannot set script this way yet (would need to support load/unload)
-    gameobj.script = *strValue;
-    return;
-  }
-  
+  modassert(false, "set attribute not yet implemented");
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   autoserializerSetAttr((char*)&gameobj, gameobjSerializer, attr, util);
-
-  for (auto [field, fieldValue] : attr.stringAttributes){
-    setAttribute(gameobj, field, fieldValue);
-    gameobj.attr.stringAttributes[field] = fieldValue;
-  }
-  for (auto [field, fieldValue] : attr.numAttributes){
-    setAttribute(gameobj, field, fieldValue);
-    gameobj.attr.numAttributes[field] = fieldValue;
-  }
-  for (auto [field, fieldValue] : attr.vecAttr.vec3){
-    setAttribute(gameobj, field, fieldValue);
-    gameobj.attr.vecAttr.vec3[field] = fieldValue;
-  }
-  for (auto [field, fieldValue] : attr.vecAttr.vec4){
-    setAttribute(gameobj, field, fieldValue);
-    gameobj.attr.vecAttr.vec4[field] = fieldValue;
+  modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
+  for (auto [field, vec4Value] : attr.vecAttr.vec4){
+    if (field == "rotation"){
+      MODTODO("probably use basic quaternion representation internally and just make the type outer layer for ease of use");
+      gameobj.transformation.rotation = parseQuat(vec4Value);
+      return;
+    }
   }
 }
