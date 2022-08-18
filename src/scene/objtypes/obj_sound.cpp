@@ -40,7 +40,7 @@ std::vector<AutoSerialize> soundAutoserializer {
 
 GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectSound obj {};
-  createAutoSerialize((char*)&obj, soundAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, soundAutoserializer, attr, util);
   return obj;
 }
 
@@ -59,5 +59,5 @@ void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util){
 }
 
 void setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&soundObj, soundAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, attributes, util);
 }

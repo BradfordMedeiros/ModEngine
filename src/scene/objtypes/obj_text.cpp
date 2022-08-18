@@ -1,30 +1,5 @@
 #include "./obj_text.h"
 
-std::string alignTypeToStr(AlignType type){
-  if (type == NEGATIVE_ALIGN){
-    return "left";
-  }
-  if (type == CENTER_ALIGN){
-    return "center";
-  }
-  if (type == POSITIVE_ALIGN){
-    return "right";
-  }
-  assert(false);
-  return "";
-}
-
-std::string wrapTypeToStr(TextWrap wrap){
-  if (wrap.type  == WRAP_NONE){
-    return "none";
-  }
-  if (wrap.type == WRAP_CHARACTERS){
-    return "char";
-  }
-  assert(false);
-  return "";
-}
-
 void restrictWidth(GameObjectUIText& text){
   std::cout << "value: " << text.value << " - " << text.value.size() << std::endl;
   if (text.value.size() > text.charlimit){
@@ -124,7 +99,7 @@ std::vector<AutoSerialize> textAutoserializer {
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIText obj {};
-  createAutoSerialize((char*)&obj, textAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, textAutoserializer, attr, util);
   restrictWidth(obj);
   return obj;
 }
@@ -134,7 +109,7 @@ void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes)
 }
 
 void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&textObj, textAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&textObj, textAutoserializer, attributes, util);
   restrictWidth(textObj);
 }
 

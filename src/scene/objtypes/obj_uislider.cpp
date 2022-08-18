@@ -48,7 +48,7 @@ static int _ = addCommonAutoserializer<GameObjectUISlider>(uiSliderAutoserialize
 
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUISlider obj {};
-  createAutoSerialize((char*)&obj, uiSliderAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, uiSliderAutoserializer, attr, util);
   obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
   obj.common.isFocused = false;
   return obj;
@@ -66,5 +66,5 @@ void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _at
 }
 
 void setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&sliderObj, uiSliderAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&sliderObj, uiSliderAutoserializer, attributes, util);
 }

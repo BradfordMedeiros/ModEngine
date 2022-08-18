@@ -18,7 +18,7 @@ std::vector<AutoSerialize> portalAutoserializer {
 
 GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectPortal obj {};
-  createAutoSerialize((char*)&obj, portalAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, portalAutoserializer, attr, util);
   return obj;
 }
 
@@ -31,5 +31,5 @@ std::vector<std::pair<std::string, std::string>> serializePortal(GameObjectPorta
   return pairs;
 }
 void setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&portalObj, portalAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&portalObj, portalAutoserializer, attributes, util);
 }

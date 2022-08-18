@@ -11,7 +11,7 @@ GameObjectVoxel createVoxel(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectVoxel obj {
     .voxel = voxel,
   };
-  createAutoSerialize((char*)&obj, voxelAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, voxelAutoserializer, attr, util);
   return obj;
 }
 

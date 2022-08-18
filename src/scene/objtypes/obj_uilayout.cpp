@@ -290,7 +290,7 @@ GameObjectUILayout createUILayout(GameobjAttributes& attr, ObjectTypeUtil& util)
     },
     .panelDisplayOffset = glm::vec3(0.f, 0.f, 0.f),
   };
-  createAutoSerialize((char*)&obj, uiLayoutAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, uiLayoutAutoserializer, attr, util);
   assert(obj.border.borderSize <= 1.f);
   return obj;
 }
@@ -314,5 +314,5 @@ void getUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& _at
 }
 
 void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&layoutObj, uiLayoutAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&layoutObj, uiLayoutAutoserializer, attributes, util);
 }

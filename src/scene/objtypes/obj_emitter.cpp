@@ -144,7 +144,7 @@ std::vector<AutoSerialize> emitterAutoserializer {
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util){
   GameObjectEmitter obj {};
-  createAutoSerialize((char*)&obj, emitterAutoserializer, attributes, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, emitterAutoserializer, attributes, util);
   assert(obj.limit >= 0);
   
   auto emitterAttr = particleFields(attributes);
@@ -157,7 +157,7 @@ void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
 }
 
 void setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&emitterObj, emitterAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, attributes, util);
   util.setEmitterEnabled(emitterObj.state);
 }
 

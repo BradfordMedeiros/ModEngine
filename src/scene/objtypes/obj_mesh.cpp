@@ -54,7 +54,7 @@ GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util){
     .rootMesh = rootMeshName,
   };
 
-  createAutoSerialize((char*)&obj, meshAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, meshAutoserializer, attr, util);
   return obj;
 }
 
@@ -75,5 +75,5 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
 }
 
 void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&meshObj, meshAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&meshObj, meshAutoserializer, attributes, util);
 }

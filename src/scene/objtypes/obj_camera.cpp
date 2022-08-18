@@ -34,7 +34,7 @@ std::vector<AutoSerialize> cameraAutoserializer {
 
 GameObjectCamera createCamera(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectCamera obj {};
-  createAutoSerialize((char*)&obj, cameraAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, cameraAutoserializer, attr, util);
   return obj;
 }
 
@@ -48,5 +48,5 @@ void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
 }
 
 void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&cameraObj, cameraAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&cameraObj, cameraAutoserializer, attributes, util);
 }

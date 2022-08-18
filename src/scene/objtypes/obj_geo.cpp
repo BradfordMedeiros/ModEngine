@@ -61,7 +61,7 @@ std::vector<AutoSerialize> geoAutoserializer {
 
 GameObjectGeo createGeo(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectGeo geo{};
-  createAutoSerialize((char*)&geo, geoAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&geo, geoAutoserializer, attr, util);
   return geo;
 }
 
@@ -70,7 +70,7 @@ void geoObjAttr(GameObjectGeo& geoObj, GameobjAttributes& _attributes){
 }
 
 void setGeoObjAttributes(GameObjectGeo& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&geoObj, geoAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&geoObj, geoAutoserializer, attributes, util);
 }
 std::vector<std::pair<std::string, std::string>> serializeGeo(GameObjectGeo obj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;

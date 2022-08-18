@@ -55,7 +55,7 @@ std::vector<AutoSerialize> lightAutoserializer {
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectLight obj {};
-  createAutoSerialize((char*)&obj, lightAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, lightAutoserializer, attr, util);
   return obj;
 }
 
@@ -70,5 +70,5 @@ std::vector<std::pair<std::string, std::string>> serializeLight(GameObjectLight&
 }
 
 void setLightAttributes(GameObjectLight& lightObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&lightObj, lightAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&lightObj, lightAutoserializer, attributes, util);
 }

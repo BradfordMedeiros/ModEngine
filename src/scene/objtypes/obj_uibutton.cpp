@@ -44,11 +44,6 @@ std::vector<AutoSerialize> uiButtonAutoserializer {
     .offString = "false",
     .defaultValue = true,
   },
-
-  /* std::string onTextureString;
-  int onTexture;
-  std::string offTextureString;
-  int offTexture;*/
   AutoSerializeTextureLoaderManual{
     .structOffset = offsetof(GameObjectUIButton, onTexture),
     .field = "ontexture",
@@ -63,15 +58,11 @@ std::vector<AutoSerialize> uiButtonAutoserializer {
 
 static int _ = addCommonAutoserializer<GameObjectUIButton>(uiButtonAutoserializer);
 
-
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIButton obj {};
-  createAutoSerialize((char*)&obj, uiButtonAutoserializer, attr, util);
+  createAutoSerializeWithTextureLoading((char*)&obj, uiButtonAutoserializer, attr, util);
   obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
   obj.common.isFocused = false;
-
-  autoserializeHandleTextureLoading((char*)&obj, uiButtonAutoserializer, util.ensureTextureLoaded, util.releaseTexture);
-
   return obj;
 }
 
@@ -86,5 +77,5 @@ void getUIButtonAttributes(GameObjectUIButton& uiButton, GameobjAttributes& _att
 }
 
 void setUIButtonAttributes(GameObjectUIButton& buttonObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&buttonObj, uiButtonAutoserializer, attributes, util);
+  autoserializerSetAttrWithTextureLoading((char*)&buttonObj, uiButtonAutoserializer, attributes, util);
 }
