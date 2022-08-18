@@ -12,23 +12,23 @@ std::vector<AutoSerialize> soundAutoserializer {
     .structOffset = 0,
     .field = "clip",
     .fieldType = ATTRIBUTE_STRING,
-    .deserialize = [](ObjectTypeUtil& util, void* offset, void* fieldValue) -> void {
+    .deserialize = [](void* offset, void* fieldValue) -> void {
       GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
       std::string* clip = static_cast<std::string*>(fieldValue);
       if (fieldValue == NULL){
         modassert(false, "clip must not be unspecified");
       }else{
         obj -> clip = *clip;
-        obj -> source = loadSoundState(util.pathForModLayer(obj -> clip), obj -> loop);     
+        obj -> source = loadSoundState(obj -> clip, obj -> loop);     
       }
     },
-    .setAttributes = [](ObjectSetAttribUtil& util, void* offset, void* fieldValue) -> void {
+    .setAttributes = [](void* offset, void* fieldValue) -> void {
       GameObjectSound* obj = static_cast<GameObjectSound*>(offset);
       std::string* clip = static_cast<std::string*>(fieldValue);
       if (fieldValue != NULL){
         unloadSoundState(obj -> source, obj -> clip); 
         obj -> clip = *clip;
-        obj -> source = loadSoundState(util.pathForModLayer(obj -> clip), obj -> loop);     
+        obj -> source = loadSoundState(obj -> clip, obj -> loop);     
       }
     },
     .getAttribute = [](void* offset) -> AttributeValue {

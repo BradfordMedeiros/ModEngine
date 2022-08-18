@@ -9,8 +9,8 @@ struct GameObjectUISlider {
   float min;
   float max;
   float percentage;
-  int texture;
-  int opacityTexture;
+  TextureLoadingData texture;
+  TextureLoadingData opacityTexture;
   std::string onSlide;
   bool showBackpanel;
   glm::vec4 backpanelTint;

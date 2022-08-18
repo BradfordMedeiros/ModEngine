@@ -458,7 +458,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(glm::vec2(1.f, 1.f)));
     glUniform1f(glGetUniformLocation(shaderProgram, "discardTexAmount"), 1 - uiSliderObj -> percentage);  
-    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture, uiSliderObj -> opacityTexture);
+    drawMesh(uiSliderObj -> common.mesh, shaderProgram, uiSliderObj -> texture.textureId, uiSliderObj -> opacityTexture.textureId);
     if (uiSliderObj -> showBackpanel){
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, glm::vec3(0.f, 0.f, -0.001f)))); // nudge so always renders behind
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(uiSliderObj -> backpanelTint));

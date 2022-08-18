@@ -386,7 +386,7 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
   modassert(false, "set attribute not yet implemented");
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
-  autoserializerSetAttr((char*)&gameobj, gameobjSerializer, attr, util);
+  autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
   modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
   for (auto [field, vec4Value] : attr.vecAttr.vec4){
     if (field == "rotation"){

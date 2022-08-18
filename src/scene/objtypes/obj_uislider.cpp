@@ -24,15 +24,13 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
     .field = "slideamount",
     .defaultValue = 1.f,
   },
-  AutoSerializeTextureLoader {
+  AutoSerializeTextureLoaderManual {
     .structOffset = offsetof(GameObjectUISlider, texture),
-    .structOffsetName = std::nullopt,
     .field = "texture",
     .defaultValue = "./res/models/controls/slider.png",
   },
-  AutoSerializeTextureLoaderm {
+  AutoSerializeTextureLoaderManual {
     .structOffset = offsetof(GameObjectUISlider, opacityTexture),
-    .structOffsetName = std::nullopt,
     .field = "opacity-texture",
     .defaultValue = "./res/models/controls/slider_opacity.png",
   },
@@ -51,6 +49,8 @@ GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util)
   createAutoSerializeWithTextureLoading((char*)&obj, uiSliderAutoserializer, attr, util);
   obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
   obj.common.isFocused = false;
+
+  std::cout << "slider: textureId = " << obj.texture.textureId << ", opacityTexture = " << obj.opacityTexture.textureId << std::endl;
   return obj;
 }
 

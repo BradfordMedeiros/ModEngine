@@ -53,29 +53,6 @@ struct ObjectSetAttribUtil {
   std::function<std::string(std::string)> pathForModLayer;
 };
 
-void attrSet(GameobjAttributes& attr, bool* value, const char* field);
-void attrSet(GameobjAttributes& attr, bool* value, bool defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, const char* field, bool strict);
-void attrSet(GameobjAttributes& attr, std::string* value, const char* field);
-void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field);
-void attrSetRequired(GameobjAttributes& attr, std::string* _value, const char* field);
-void attrSet(GameobjAttributes& attr, float* value, const char* field);
-void attrSet(GameobjAttributes& attr, float* _value, float defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, float* _value, bool* _hasValue, float defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, unsigned int* value, const char* field);
-void attrSet(GameobjAttributes& attr, unsigned int* value, unsigned int defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, int* _value, const char* field);
-void attrSet(GameobjAttributes& attr, int* _value, int defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, glm::vec3* _value, glm::vec3 defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, glm::vec4* _value, const char* field);
-void attrSet(GameobjAttributes& attr, glm::vec4* _value, glm::vec4 defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, glm::vec4 defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, glm::vec2* _value, glm::vec2 defaultValue, const char* field);
-void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict);
-void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string defaultTexture, const char* field);
-void attrSetLoadTexture(GameobjAttributes& attr, std::function<Texture(std::string)> ensureTextureLoaded, int* _textureId, std::string* _textureName, std::string defaultTexture, const char* field);
-void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, int defaultValue, const char* field, bool strict);
-
 struct AutoSerializeBool {
   size_t structOffset;
   const char* field;
@@ -101,14 +78,6 @@ struct AutoSerializeFloat {
   const char* field;
   float defaultValue;
 };
-
-struct AutoSerializeTextureLoader {
-  size_t structOffset;
-  std::optional<size_t> structOffsetName;
-  const char* field;
-  std::string defaultValue;
-}; 
-
 
 struct AutoSerializeTextureLoaderManual {
   size_t structOffset;
@@ -162,17 +131,17 @@ struct AutoSerializeCustom {
   size_t structOffset;
   const char* field;
   AttributeValueType fieldType;
-  std::function<void(ObjectTypeUtil& util, void* offset, void* value)> deserialize;
-  std::function<void(ObjectSetAttribUtil& util, void* offset, void* fieldValue)> setAttributes;
+  std::function<void(void* offset, void* value)> deserialize;
+  std::function<void(void* offset, void* fieldValue)> setAttributes;
   std::function<AttributeValue(void* offset)> getAttribute;
 };
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoader, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
-void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
+void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
-void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes);
 void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 template <typename T>
@@ -216,7 +185,6 @@ int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
     }
   );
 
-  //attrSet(attr, &info.texturesize, glm::vec2(1.f, 1.f), "texturesize");
   autoserializer.push_back(
     AutoSerializeVec2 {
       .structOffset = offsetof(T, texture.texturesize),
@@ -227,15 +195,13 @@ int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
   );
 
   autoserializer.push_back(
-    AutoSerializeTextureLoader {
-      .structOffset = offsetof(T, texture.loadingInfo.textureId),
-      .structOffsetName = offsetof(T, texture.loadingInfo.textureString),
+    AutoSerializeTextureLoaderManual {
+      .structOffset = offsetof(T, texture.loadingInfo),
       .field = "texture",
       .defaultValue = "",
     }
   );
   
-
   return 0;
 }
 
