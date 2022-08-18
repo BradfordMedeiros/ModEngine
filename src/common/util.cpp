@@ -441,6 +441,20 @@ AttributeValue parseAttributeValue(std::string payload){
   return payload;
 }
 
+std::string attributeTypeStr(AttributeValueType type){
+  if (type == ATTRIBUTE_VEC3){
+    return "vec3";
+  }else if (type == ATTRIBUTE_VEC4){
+    return "vec4";
+  }else if (type == ATTRIBUTE_FLOAT){
+    return "float";
+  }else if (type == ATTRIBUTE_STRING){
+    return "string";
+  }
+  modassert(false, "attribute type str invalid type");
+  return "";
+}
+
 AttributeValue addAttributes(AttributeValue one, AttributeValue two){
   auto valueOne = std::get_if<glm::vec3>(&one);
   auto valueTwo = std::get_if<glm::vec3>(&two);

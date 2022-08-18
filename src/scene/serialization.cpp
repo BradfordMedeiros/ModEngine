@@ -61,146 +61,12 @@ std::vector<std::string> parseChildren(std::string payload){
   return split(payload, ',');
 }
 
-bool addVec3Fields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "position", "scale", "physics_angle", "physics_linear", "physics_gravity", "physics_velocity", "physics_avelocity" };
-  for (auto field : fields){
-    if (attribute == field){
-      attributes.vecAttr.vec3[attribute] = parseVec(payload);
-      return true;
-    }
-  }
-  return false;
-}
-bool addVec4Fields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "rotation" };
-  for (auto field : fields){
-    if (attribute == field){
-      attributes.vecAttr.vec4[attribute] = parseVec4(payload);
-      return true;
-    }
-  }
-  return false;
-}
-bool addFloatFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "physics_friction", "physics_restitution", "physics_mass", "physics_maxspeed", "physics_layer" };
-  for (auto field : fields){
-    if (attribute == field){
-      attributes.numAttributes[attribute] = std::atof(payload.c_str());
-      return true;
-    }
-  }
-  return false;
-}
-bool addStringFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  auto fields = { "layer", "lookat", "script", "fragshader", "physics", "physics_collision", "physics_type", "physics_shape", "net", "id" };
-  for (auto field : fields){
-    if (attribute == field){
-      attributes.stringAttributes[attribute] = payload;
-      return true;
-    }
-  }
-  return false;
-}
-bool addFields(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  bool addedVecField = addVec3Fields(attributes, attribute, payload);
-  if (addedVecField){
-    return true;
-  }
-  bool addedVec4Field = addVec4Fields(attributes, attribute, payload);
-  if (addedVec4Field){
-    return true;
-  }
-  bool addedFloatField = addFloatFields(attributes, attribute, payload);
-  if (addedFloatField){
-    return true;
-  }
-  bool addedStringField = addStringFields(attributes, attribute, payload);
-  if (addedStringField){
-    return true;
-  }
-  return false;
-}
-
-void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
-  glm::vec3 vec(0.f, 0.f, 0.f);
-  bool isVec = maybeParseVec(payload, vec);
-  if (isVec){
-    attributes.vecAttr.vec3[attribute] = vec;
-    return;
-  }
-
-  glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
-  bool isVec4 = maybeParseVec4(payload, vec4);
-  if (isVec4){
-    attributes.vecAttr.vec4[attribute] = vec4;
-    return;
-  }
-
-  float number = 0.f;
-  bool isFloat = maybeParseFloat(payload, number);
-  if (isFloat){
-    attributes.numAttributes[attribute] = number;
-    return;
-  }
-  attributes.stringAttributes[attribute] = payload;
-}
-
 std::string mainTargetElement(std::string target){
   return split(target, '/').at(0);
 }
 bool isSubelementToken(Token& token){
   auto numTokens = split(token.target, '/');
   return numTokens.size() > 1;
-}
-
-DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
-  std::vector<Token> mainTokens;
-  std::vector<Token> subelementTokens;
-  for (auto &token : tokens){
-    bool isSubelement = isSubelementToken(token);
-    if (isSubelement){
-      subelementTokens.push_back(token);
-    }else{
-      mainTokens.push_back(token);
-    }
-  }
-  std::cout << std::endl;
-  DividedTokens dividedTokens {
-    .mainTokens = mainTokens,
-    .subelementTokens = subelementTokens,
-  };
-  return dividedTokens;
-}
-std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
-  std::map<std::string, GameobjAttributes> objectAttributes;
-
-  for (Token token : tokens){
-    assert(token.target != "" && token.attribute != "" && token.payload != "");
-
-    if (objectAttributes.find(token.target) == objectAttributes.end()) {
-      assert(token.target.find(',') == std::string::npos);
-      objectAttributes[token.target] = GameobjAttributes {};
-    }
-
-    if (token.attribute == "child"){
-      auto children = parseChildren(token.payload);
-      for (auto child : children){
-        if (objectAttributes.find(child) == objectAttributes.end()){
-          objectAttributes[child] = GameobjAttributes { };
-        }
-      }
-      objectAttributes.at(token.target).children = children;
-      continue;
-    }
-
-    bool addedField = addFields(objectAttributes.at(token.target), token.attribute, token.payload);
-    if (addedField){
-      continue;
-    }  
-    addFieldDynamic(objectAttributes.at(token.target), token.attribute, token.payload);
-  }
-
-  return objectAttributes;
 }
 
 // conditionally supported, but should be fine in practice, and for c++20
@@ -333,8 +199,94 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "physics_layer",
     .defaultValue = 0.f,
   }, 
-
 };
+
+
+void assertCoreType(AttributeValueType type, std::string& fieldname, std::string& payload){
+  AttributeValueType serializerType;
+  auto autoserializer = serializerByName(gameobjSerializer, fieldname);
+  if (autoserializer.has_value()){
+    auto serializerType = typeForSerializer(autoserializer.value());
+    modassert(serializerType == type, std::string("mismatch type for: ") + fieldname + " should be: " + attributeTypeStr(serializerType) + " payload = " + payload);
+  }
+}
+
+void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload){
+  glm::vec3 vec(0.f, 0.f, 0.f);
+  bool isVec = maybeParseVec(payload, vec);
+  if (isVec){
+    attributes.vecAttr.vec3[attribute] = vec;
+    assertCoreType(ATTRIBUTE_VEC3, attribute, payload);
+    return;
+  }
+
+  glm::vec4 vec4(0.f, 0.f, 0.f, 0.f);
+  bool isVec4 = maybeParseVec4(payload, vec4);
+  if (isVec4){
+    attributes.vecAttr.vec4[attribute] = vec4;
+    assertCoreType(ATTRIBUTE_VEC4, attribute, payload);
+    return;
+  }
+
+  float number = 0.f;
+  bool isFloat = maybeParseFloat(payload, number);
+  if (isFloat){
+    attributes.numAttributes[attribute] = number;
+    assertCoreType(ATTRIBUTE_FLOAT, attribute, payload);
+    return;
+  }
+  assertCoreType(ATTRIBUTE_STRING, attribute, payload);
+  attributes.stringAttributes[attribute] = payload;
+}
+
+
+DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
+  std::vector<Token> mainTokens;
+  std::vector<Token> subelementTokens;
+  for (auto &token : tokens){
+    bool isSubelement = isSubelementToken(token);
+    if (isSubelement){
+      subelementTokens.push_back(token);
+    }else{
+      mainTokens.push_back(token);
+    }
+  }
+  std::cout << std::endl;
+  DividedTokens dividedTokens {
+    .mainTokens = mainTokens,
+    .subelementTokens = subelementTokens,
+  };
+  return dividedTokens;
+}
+std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
+  std::map<std::string, GameobjAttributes> objectAttributes;
+
+  for (Token token : tokens){
+    assert(token.target != "" && token.attribute != "" && token.payload != "");
+
+    if (objectAttributes.find(token.target) == objectAttributes.end()) {
+      assert(token.target.find(',') == std::string::npos);
+      objectAttributes[token.target] = GameobjAttributes {};
+    }
+
+    if (token.attribute == "child"){
+      auto children = parseChildren(token.payload);
+      for (auto child : children){
+        if (objectAttributes.find(child) == objectAttributes.end()){
+          objectAttributes[child] = GameobjAttributes { };
+        }
+      }
+      objectAttributes.at(token.target).children = children;
+      continue;
+    }
+
+   
+    addFieldDynamic(objectAttributes.at(token.target), token.attribute, token.payload);
+  }
+
+  return objectAttributes;
+}
+
 
 std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobject){
   std::vector<std::pair<std::string, std::string>> pairs;
@@ -409,7 +361,8 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
   return value;
 }
 
-void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
+  GameObject object = { .id = id, .name = name };
   createAutoSerialize((char*)&object, gameobjSerializer, attributes);
   if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
     object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
@@ -421,12 +374,7 @@ void setSerialObjFromAttr(GameObject& object, GameobjAttributes& attributes){
     object.transformation.rotation = glm::identity<glm::quat>();
   }
   object.attr = attributes; // lots of redundant information here, should only set attrs that aren't consumed elsewhere
-}
-
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
-  GameObject gameObject = { .id = id, .name = name };
-  setSerialObjFromAttr(gameObject, attributes);
-  return gameObject;
+  return object;
 }
 
 

@@ -83,7 +83,6 @@ struct AutoSerializeTextureLoaderManual {
   size_t structOffset;
   const char* field;
   std::string defaultValue;
-
 };
 
 struct AutoSerializeInt {
@@ -143,6 +142,8 @@ void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& va
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes);
 void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name);
+AttributeValueType typeForSerializer(AutoSerialize& serializer);
 
 template <typename T>
 int addCommonAutoserializer(std::vector<AutoSerialize>& autoserializer){
