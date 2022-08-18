@@ -166,6 +166,19 @@ void attrSet(GameobjAttributes& attr, glm::vec4* _value, bool* _hasValue, glm::v
   }  
 }
 
+void attrSet(GameobjAttributes& attr, glm::quat* _value, glm::quat defaultValue, const char* field){
+  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *_value = parseQuat(attr.vecAttr.vec4.at(field));
+  }else{
+    *_value = defaultValue;
+  }  
+}
+void attrSet(GameobjAttributes& attr, glm::quat* _value, const char* field){
+  if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *_value = parseQuat(attr.vecAttr.vec4.at(field));
+  } 
+}
+
 void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const char* offString, bool defaultValue, const char* field, bool strict){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     auto stringValue = attr.stringAttributes.at(field);
@@ -345,6 +358,13 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     glm::vec4* address = (glm::vec4*)(((char*)structAddress) + vec4Value -> structOffset);
     bool* hasValueAddress = (!vec4Value -> structOffsetFiller.has_value()) ? NULL : (bool*)(((char*)structAddress) + vec4Value -> structOffsetFiller.value());
     attrSet(attr, address, hasValueAddress, vec4Value -> defaultValue, vec4Value -> field);
+    return;
+  }
+
+  AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
+  if (rotValue != NULL){
+    glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
+    attrSet(attr, address, rotValue -> defaultValue, rotValue -> field);
     return;
   }
 
@@ -619,6 +639,13 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     _attributes.vecAttr.vec4[vec4Value -> field] = *address;
     return;
   }
+
+  AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
+  if (rotValue != NULL){
+    glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
+    _attributes.vecAttr.vec4[rotValue -> field] = serializeQuatToVec4(*address);
+    return;
+  }
   
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
@@ -744,6 +771,13 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
+  AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
+  if (rotValue != NULL){
+    glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
+    attrSet(attributes, address, rotValue -> field);
+    return;
+  }
+
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){
     int* address = (int*)(((char*)structAddress) + enumsValue -> structOffset);
@@ -843,6 +877,12 @@ bool serializerIsName(AutoSerialize& serializer, std::string& name){
   if (vec4Serializer != NULL && vec4Serializer -> field == name){
     return true;
   }
+
+  AutoSerializeRotation* rotSerializer = std::get_if<AutoSerializeRotation>(&serializer);
+  if (rotSerializer != NULL && rotSerializer -> field == name){
+    return true;
+  }
+
   AutoSerializeCustom* customSerializer = std::get_if<AutoSerializeCustom>(&serializer);
   if (customSerializer != NULL && customSerializer -> field == name){
     return true;
@@ -880,6 +920,10 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
   }
   AutoSerializeVec4* vec4Serializer = std::get_if<AutoSerializeVec4>(&serializer);
   if (vec3Serializer != NULL){
+    return ATTRIBUTE_VEC4;
+  }
+  AutoSerializeRotation* rotSerializer = std::get_if<AutoSerializeRotation>(&serializer);
+  if (rotSerializer != NULL){
     return ATTRIBUTE_VEC4;
   }
   AutoSerializeCustom* customSerializer = std::get_if<AutoSerializeCustom>(&serializer);

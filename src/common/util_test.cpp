@@ -1,5 +1,9 @@
 #include "./util_test.h"
 
+std::string testSerializeQuat(glm::quat rotation){
+  return serializeVec(serializeQuatToVec4(rotation)); 
+}
+
 void utilParseAndSerializeQuatTest() {
   std::vector<std::string> rawQuatsTests = {
     "0 0 -1 45",  // 0 
@@ -25,7 +29,7 @@ void utilParseAndSerializeQuatTest() {
     auto rawParsed = parseVec4(rawquat);
     auto normalizedRaw = glm::normalize(glm::vec3(rawParsed.x, rawParsed.y, rawParsed.z));
     auto normalizedRaw4 = glm::vec4(normalizedRaw.x, normalizedRaw.y, normalizedRaw.z, rawParsed.w);
-    auto serializedParsed = parseVec4(serializeQuat(parseQuat(parseVec4(rawQuatsTests.at(i)))));
+    auto serializedParsed = parseVec4(testSerializeQuat(parseQuat(parseVec4(rawQuatsTests.at(i)))));
     if (!aboutEqual(normalizedRaw4, serializedParsed)){
       numFailingTests++;
       errorStr = errorStr + "test: " + std::to_string(i) + " - " + "got : " + print(serializedParsed) + " but wanted: " + print(normalizedRaw4) + " - original: " + print(rawParsed) + "\n";

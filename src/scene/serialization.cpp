@@ -84,6 +84,11 @@ std::vector<AutoSerialize> gameobjSerializer {
     .field = "scale",
     .defaultValue = glm::vec3(1.f, 1.f, 1.f),
   },
+  AutoSerializeRotation {
+    .structOffset = offsetof(GameObject, transformation.rotation),
+    .field = "rotation",
+    .defaultValue = glm::identity<glm::quat>(),
+  },
   AutoSerializeBool {
     .structOffset = offsetof(GameObject, physicsOptions.enabled),
     .field = "physics", 
@@ -290,7 +295,6 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
 
 std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobject){
   std::vector<std::pair<std::string, std::string>> pairs;
-  pairs.push_back({ "rotation", serializeQuat(gameobject.transformation.rotation) });
   autoserializerSerialize((char*)&gameobject, gameobjSerializer, pairs);
   return pairs;
 }
@@ -330,7 +334,6 @@ std::string serializeObj(
 }
 
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
-  _attr.vecAttr.vec4["rotation"] = serializeQuatToVec4(gameobj.transformation.rotation); // these representation transformations could happen offline 
   autoserializerGetAttr((char*)&gameobj, gameobjSerializer, _attr);
 }
 
@@ -340,13 +343,6 @@ void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
   modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");
-  for (auto [field, vec4Value] : attr.vecAttr.vec4){
-    if (field == "rotation"){
-      MODTODO("probably use basic quaternion representation internally and just make the type outer layer for ease of use");
-      gameobj.transformation.rotation = parseQuat(vec4Value);
-      return;
-    }
-  }
 }
 
 
@@ -368,11 +364,6 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
     object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
   }
 
-  if (attributes.vecAttr.vec4.find("rotation") != attributes.vecAttr.vec4.end()){
-    object.transformation.rotation = parseQuat(attributes.vecAttr.vec4.at("rotation"));
-  }else{
-    object.transformation.rotation = glm::identity<glm::quat>();
-  }
   object.attr = attributes; // lots of redundant information here, should only set attrs that aren't consumed elsewhere
   return object;
 }
