@@ -1,0 +1,3 @@
+
+test:script:./res/scenes/features/serialization/serialize.scm
+test:target:box/Cube
