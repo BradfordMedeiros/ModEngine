@@ -190,6 +190,8 @@ void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _text
   }
   if (textureToLoad != _textureLoading -> textureString){
     _textureLoading -> isLoaded = false;
+    _textureLoading -> textureId = -1;
+    _textureLoading -> textureString = textureToLoad;
   }
   std::cout << "texture to load: " << textureToLoad << " isloaded: " << _textureLoading -> isLoaded << std::endl;
 }
@@ -829,11 +831,16 @@ void autoserializeHandleTextureLoading(char* structAddress, std::vector<AutoSeri
     AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
     if (textureLoaderManual != NULL){
       TextureLoadingData* _textureLoading = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-      if (!_textureLoading -> isLoaded){
+      if (!_textureLoading -> isLoaded && _textureLoading -> textureString != ""){
+        std::cout << "about to load: " << _textureLoading -> textureString << std::endl;
         auto texture = ensureTextureLoaded(_textureLoading -> textureString);
         _textureLoading -> textureId = texture.textureId;
         _textureLoading -> isLoaded = true;
+      }else{
+        _textureLoading -> textureId = -1;
+        _textureLoading -> isLoaded = true;
       }
+      
       std::cout << "texture to load: " << _textureLoading -> textureString << " isloaded: " << _textureLoading -> isLoaded << std::endl;
     }
   }
