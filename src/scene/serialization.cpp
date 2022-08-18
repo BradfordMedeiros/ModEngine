@@ -87,7 +87,7 @@ std::vector<AutoSerialize> gameobjSerializer {
   AutoSerializeRotation {
     .structOffset = offsetof(GameObject, transformation.rotation),
     .field = "rotation",
-    .defaultValue = glm::identity<glm::quat>(),
+    .defaultValue = glm::identity<glm::quat>(), // consider what the forward vector should be
   },
   AutoSerializeBool {
     .structOffset = offsetof(GameObject, physicsOptions.enabled),

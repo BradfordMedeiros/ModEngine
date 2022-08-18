@@ -17,7 +17,6 @@
 #include "./common/mesh.h"
 #include "../common/util.h"
 #include "./serialization.h"
-#include "./serialobject.h"
 #include "./styles.h"
 
 struct GameObjectH {

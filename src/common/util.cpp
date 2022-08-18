@@ -331,6 +331,10 @@ glm::vec4 serializeQuatToVec4(glm::quat rotation){
   float degreesAngle = glm::degrees(w);
   return glm::vec4(axis.x, axis.y, axis.z, degreesAngle);  
 }
+ 
+std::string serializeQuat(glm::quat rotation){
+  return serializeVec(serializeQuatToVec4(rotation)); 
+}
 
 glm::vec3 quatToVec(glm::quat quat){
   return quat * glm::vec3(0.f, 0.f, -1.f);    // rotate the forward direction by the quat. 

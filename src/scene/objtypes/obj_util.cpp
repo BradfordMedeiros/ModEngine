@@ -513,6 +513,16 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     }
     return;
   }
+
+  AutoSerializeRotation* rotValue = std::get_if<AutoSerializeRotation>(&value);
+  if (rotValue != NULL){
+    glm::quat* address = (glm::quat*)(((char*)structAddress) + rotValue -> structOffset);
+    glm::vec4 quat4Rot = serializeQuatToVec4(*address);
+    if (!aboutEqual(quat4Rot, serializeQuatToVec4(rotValue -> defaultValue))){
+      _pairs.push_back({ rotValue -> field, serializeVec(quat4Rot) });
+    }
+    return;
+  }
   
   AutoSerializeEnums* enumsValue = std::get_if<AutoSerializeEnums>(&value);
   if (enumsValue != NULL){

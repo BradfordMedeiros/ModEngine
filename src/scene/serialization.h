@@ -10,8 +10,40 @@
 #include <glm/gtx/quaternion.hpp>
 #include "./common/util/types.h"
 #include "../common/util.h"
-#include "./serialobject.h"
 #include "./objtypes/obj_util.h"
+
+enum ColliderShape { BOX, SPHERE, CAPSULE, CYLINDER, CONVEXHULL, SHAPE_EXACT, AUTOSHAPE };
+
+struct physicsOpts {
+  bool enabled;
+  bool isStatic;
+  bool hasCollisions;
+  ColliderShape shape;
+  glm::vec3 linearFactor;
+  glm::vec3 angularFactor;
+  glm::vec3 gravity;
+  glm::vec3 velocity;
+  glm::vec3 angularVelocity;
+  float friction;
+  float restitution;
+  float mass;
+  float maxspeed;
+  float layer;
+};
+
+struct GameObject {
+  objid id;
+  std::string name;
+  Transformation transformation;
+  physicsOpts physicsOptions;  // Should remove this and just get it from the physics system (probably)
+  std::string lookat;
+  std::string layer;
+  std::string script;
+  std::string fragshader;
+  bool netsynchronize;
+  GameobjAttributes attr;
+};
+
 
 struct Token {
   std::string target;
