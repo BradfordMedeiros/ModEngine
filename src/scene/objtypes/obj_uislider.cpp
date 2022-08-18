@@ -30,7 +30,7 @@ std::vector<AutoSerialize> uiSliderAutoserializer {
     .field = "texture",
     .defaultValue = "./res/models/controls/slider.png",
   },
-  AutoSerializeTextureLoader {
+  AutoSerializeTextureLoaderm {
     .structOffset = offsetof(GameObjectUISlider, opacityTexture),
     .structOffsetName = std::nullopt,
     .field = "opacity-texture",

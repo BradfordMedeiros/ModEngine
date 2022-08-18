@@ -310,7 +310,7 @@ int renderObject(
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
       glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
-      drawMesh(meshToRender, shaderProgram, meshObj -> texture.textureOverloadId, -1, drawPoints);   
+      drawMesh(meshToRender, shaderProgram, meshObj -> texture.loadingInfo.textureId, -1, drawPoints);   
       numTriangles = numTriangles + meshToRender.numTriangles; 
     }
     return numTriangles;
@@ -323,7 +323,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(meshObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(meshObj -> texture.texturetiling));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(meshObj -> texture.texturesize));
-    drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.textureOverloadId);    
+    drawMesh(*defaultMeshes.nodeMesh, shaderProgram, meshObj -> texture.loadingInfo.textureId);    
     return defaultMeshes.nodeMesh -> numTriangles;
   }
 
@@ -389,7 +389,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureOffset"), 1, glm::value_ptr(heightmapObj -> texture.textureoffset));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureTiling"), 1, glm::value_ptr(heightmapObj -> texture.texturetiling));
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(heightmapObj -> texture.texturesize));
-    drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.textureOverloadId);   
+    drawMesh(heightmapObj -> mesh, shaderProgram, heightmapObj -> texture.loadingInfo.textureId);   
     return heightmapObj -> mesh.numTriangles;
   }
 
@@ -501,7 +501,7 @@ int renderObject(
       auto innerScale = layoutBackpanelModelTransform(*layoutObj, minusScale, position);
       glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(innerScale));
       glUniform4fv(glGetUniformLocation(shaderProgram, "tint"), 1, glm::value_ptr(layoutObj -> tint));
-      drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.textureOverloadId, -1, drawPoints);   
+      drawMesh(*defaultMeshes.unitXYRect, shaderProgram, layoutObj -> texture.loadingInfo.textureId, -1, drawPoints);   
       if (hasBorder){
         auto outerScale = layoutBackpanelModelTransform(*layoutObj, glm::vec3(0.f, 0.f, 0.f), position);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(outerScale));

@@ -775,8 +775,8 @@ void setTexture(World& world, objid index, std::string textureName){
   for (auto id : getIdsInGroup(world.sandbox, index)){
     GameObjectMesh* meshObj = std::get_if<GameObjectMesh>(&world.objectMapping.at(id));
     if (meshObj != NULL){
-      meshObj -> texture.textureOverloadName = textureName;
-      meshObj -> texture.textureOverloadId = textureId;       
+      meshObj -> texture.loadingInfo.textureString = textureName;
+      meshObj -> texture.loadingInfo.textureId = textureId;       
     }
 
     GameObjectUIButton* buttonObj = std::get_if<GameObjectUIButton>(&world.objectMapping.at(id));

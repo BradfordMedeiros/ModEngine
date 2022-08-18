@@ -12,12 +12,16 @@ struct GameObjectUICommon {
   std::string onBlur;
 };
 
+struct TextureLoadingData {
+  int textureId;
+  std::string textureString;
+  bool isLoaded;
+};
 struct TextureInformation {
   glm::vec2 textureoffset;
   glm::vec2 texturetiling;
   glm::vec2 texturesize;
-  std::string textureOverloadName;
-  int textureOverloadId;
+  TextureLoadingData loadingInfo;
 };
 
 struct ObjectTypeUtil {
@@ -105,11 +109,7 @@ struct AutoSerializeTextureLoader {
   std::string defaultValue;
 }; 
 
-struct TextureLoadingData {
-  int textureId;
-  std::string textureString;
-  bool isLoaded;
-};
+
 struct AutoSerializeTextureLoaderManual {
   size_t structOffset;
   const char* field;
@@ -228,8 +228,8 @@ int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
 
   autoserializer.push_back(
     AutoSerializeTextureLoader {
-      .structOffset = offsetof(T, texture.textureOverloadId),
-      .structOffsetName = offsetof(T, texture.textureOverloadName),
+      .structOffset = offsetof(T, texture.loadingInfo.textureId),
+      .structOffsetName = offsetof(T, texture.loadingInfo.textureString),
       .field = "texture",
       .defaultValue = "",
     }
