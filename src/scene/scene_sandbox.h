@@ -61,7 +61,6 @@ struct SceneSandbox {
 };
 
 std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobjecth);
-std::string serializeObjectSandbox(GameObject& gameobj, objid id, objid groupId, std::vector<std::pair<std::string, std::string>> getAdditionalFields, std::vector<std::string>& children, bool includeIds, std::string overrideName);
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children);
 
 std::vector<objid> idsToRemoveFromScenegraph(SceneSandbox& sandbox, objid);

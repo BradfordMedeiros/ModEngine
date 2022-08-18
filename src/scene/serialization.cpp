@@ -309,8 +309,10 @@ std::string serializeObj(
   std::string name
 ){
   std::string sceneData = "";
+  std::cout << "serializing object: " << gameobject.name << std::endl;
   if (groupId != id){
-    return sceneData;
+    std::cout << "not serializing: " << gameobject.name << std::endl;
+    //return sceneData;
   }
   std::string gameobjectName = name == "" ? gameobject.name : name;
 
@@ -328,6 +330,7 @@ std::string serializeObj(
   }
 
   for (auto additionalField : additionalFields){
+    std::cout << "additional field: " << additionalField.first << std::endl;
     sceneData = sceneData + gameobjectName + ":" + additionalField.first + ":" + additionalField.second + "\n";
   }
   return sceneData;  

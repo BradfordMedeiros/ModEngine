@@ -616,7 +616,7 @@ std::string serializeObject(World& world, objid id, std::string overridename){
   auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
     return getTextureById(world, textureId);
   });
-  return serializeObjectSandbox(gameobj, id, gameobjecth.groupId, additionalFields, children, false, overridename);
+  return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
 }
 
 void addObjectToWorld(

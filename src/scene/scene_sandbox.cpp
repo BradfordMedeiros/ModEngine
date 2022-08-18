@@ -181,19 +181,6 @@ std::vector<std::string> childnames(SceneSandbox& sandbox, GameObjectH& gameobje
   return childnames;
 }
 
-std::string serializeObjectSandbox(GameObject& gameobj, objid id, objid groupId, std::vector<std::pair<std::string, std::string>> additionalFields, std::vector<std::string>& children, bool includeIds, std::string overridename){
-  auto objectSerialization = serializeObj(
-    id, 
-    groupId, 
-    gameobj, 
-    children, 
-    includeIds, 
-    additionalFields, 
-    overridename
-  );
-  return objectSerialization;
-}
-
 void addGameObjectToScene(SceneSandbox& sandbox, objid sceneId, std::string name, GameObject& gameobjectObj, std::vector<std::string> children){
   auto addedId = sandboxAddToScene(sandbox.mainScene, sceneId, -1, name, gameobjectObj);      
   for (auto child : children){
@@ -376,7 +363,7 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 
     auto additionalFields = getAdditionalFields(id); 
     auto children = childnames(sandbox, gameobjecth);
-    sceneData = sceneData + serializeObjectSandbox(gameobj, id, gameobjecth.groupId, additionalFields, children, includeIds, "");
+    sceneData = sceneData + serializeObj(id, gameobjecth.groupId, gameobj, children, includeIds, additionalFields,  "");
   }
   return sceneData;
 }

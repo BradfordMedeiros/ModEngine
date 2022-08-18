@@ -91,7 +91,7 @@ std::string serializeVoxelDefault(World& world, Voxels& voxelData){
     }
   };
   auto additionalFields = serializeVoxel(vox, util);
-  auto serializedObj = serializeObjectSandbox(gameobj, -1, -1, additionalFields, children, false, "");
+  auto serializedObj = serializeObj(-1, -1, gameobj, children, false, additionalFields, "");
   return serializedObj;
 }
 
