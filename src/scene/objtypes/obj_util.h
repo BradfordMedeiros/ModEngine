@@ -149,6 +149,7 @@ void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& va
 void autoserializerGetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& _attributes);
 void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes);
 void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+std::vector<std::string> serializerNames(std::vector<AutoSerialize>& serializers);
 std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name);
 AttributeValueType typeForSerializer(AutoSerialize& serializer);
 

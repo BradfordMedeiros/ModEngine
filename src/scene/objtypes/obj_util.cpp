@@ -842,66 +842,68 @@ void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<Au
   autoserializeHandleTextureLoading(structAddress, values, util.ensureTextureLoaded, util.releaseTexture);
 }
 
-bool serializerIsName(AutoSerialize& serializer, std::string& name){
+std::string serializerName(AutoSerialize& serializer){
   AutoSerializeBool* boolSerializer = std::get_if<AutoSerializeBool>(&serializer);
-  if (boolSerializer != NULL && boolSerializer -> field == name){
-    return true;
+  if (boolSerializer != NULL){
+    return boolSerializer -> field;
   }
   AutoSerializeString* stringSerializer = std::get_if<AutoSerializeString>(&serializer);
-  if (stringSerializer != NULL && stringSerializer -> field == name){
-    return true;
+  if (stringSerializer != NULL){
+    return stringSerializer -> field;
   }
   AutoSerializeRequiredString* requiredStringSerializer = std::get_if<AutoSerializeRequiredString>(&serializer);
-  if (requiredStringSerializer != NULL && requiredStringSerializer -> field == name){
-    return true;
+  if (requiredStringSerializer != NULL){
+    return requiredStringSerializer -> field;
   }
   AutoSerializeTextureLoaderManual* textureSerializer = std::get_if<AutoSerializeTextureLoaderManual>(&serializer);
-  if (textureSerializer != NULL && textureSerializer -> field == name){
-    return true;
+  if (textureSerializer != NULL){
+    return textureSerializer -> field;
   }
   AutoSerializeEnums* enumsSerializer = std::get_if<AutoSerializeEnums>(&serializer);
-  if (enumsSerializer != NULL && enumsSerializer -> field == name){
-    return true;
+  if (enumsSerializer != NULL){
+    return enumsSerializer -> field;
   }
   AutoSerializeVec2* vec2Serializer = std::get_if<AutoSerializeVec2>(&serializer);
-  if (vec2Serializer != NULL && vec2Serializer -> field == name){
-    return true;
+  if (vec2Serializer != NULL){
+    return vec2Serializer -> field;
   }
   AutoSerializeFloat* floatSerializer = std::get_if<AutoSerializeFloat>(&serializer);
-  if (floatSerializer != NULL && floatSerializer -> field == name){
-    return true;
+  if (floatSerializer != NULL){
+    return floatSerializer -> field;
   }
   AutoSerializeInt* intSerializer = std::get_if<AutoSerializeInt>(&serializer);
-  if (intSerializer != NULL && intSerializer -> field == name){
-    return true;
+  if (intSerializer != NULL){
+    return intSerializer -> field;
   }
   AutoSerializeUInt* uintSerializer = std::get_if<AutoSerializeUInt>(&serializer);
-  if (uintSerializer != NULL && uintSerializer -> field == name){
-    return true;
+  if (uintSerializer != NULL){
+    return uintSerializer -> field;
   }
   AutoSerializeVec3* vec3Serializer = std::get_if<AutoSerializeVec3>(&serializer);
-  if (vec3Serializer != NULL && vec3Serializer -> field == name){
-    return true;
+  if (vec3Serializer != NULL){
+    return vec3Serializer -> field;
   }
   AutoSerializeVec4* vec4Serializer = std::get_if<AutoSerializeVec4>(&serializer);
-  if (vec4Serializer != NULL && vec4Serializer -> field == name){
-    return true;
+  if (vec4Serializer != NULL){
+    return vec4Serializer -> field;
   }
 
   AutoSerializeRotation* rotSerializer = std::get_if<AutoSerializeRotation>(&serializer);
-  if (rotSerializer != NULL && rotSerializer -> field == name){
-    return true;
+  if (rotSerializer != NULL){
+    return rotSerializer -> field;
   }
 
   AutoSerializeCustom* customSerializer = std::get_if<AutoSerializeCustom>(&serializer);
-  if (customSerializer != NULL && customSerializer -> field == name){
-    return true;
+  if (customSerializer != NULL){
+    return customSerializer -> field;
   }
-  return false;
+  modassert(false, "could not find serializer");
+  return "";
 }
+
 std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name){
   for (auto &value : serializer){
-    if (serializerIsName(value, name)){
+    if (serializerName(value) == name){
       return value;
     }
   }

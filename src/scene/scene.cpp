@@ -737,6 +737,9 @@ void addSerialObjectsToWorld(
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
+    //std::cout << "add serial: " << name << std::endl;
+    //std::cout << print(objAttr.attr) << std::endl;
+    //std::cout << std::endl;
     addObjectToWorld(world, sceneId, objAttr.id, name, name, getNewObjectId, objAttr.attr, idToModelVertexs, submodelAttributes, NULL, "", returnObjectOnly, gameobjObjs);
   }
   if (returnObjectOnly){
@@ -927,7 +930,15 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
-  auto attr = gameobj.attr;
+  GameobjAttributes attr {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = vectorAttributes{
+      .vec3 = {},
+      .vec4 = {},
+    },
+    .children = {},
+  };  
   objectAttributes(gameobjObj, attr);
   getAllAttributes(gameobj, attr);
   return attr;
