@@ -121,9 +121,8 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
   return attributes;
 }
 
-std::map<std::string, GameobjAttributesWithId> addSubsceneToRoot(
-  Scene& scene, 
-  std::vector<LayerInfo>& layers,
+std::map<std::string, GameobjAttributesWithId> multiObjAdd(
+  SceneSandbox& sandbox,
   objid sceneId,
   objid rootId, 
   objid rootIdNode, 
@@ -133,6 +132,9 @@ std::map<std::string, GameobjAttributesWithId> addSubsceneToRoot(
   std::map<objid, GameobjAttributes> additionalFields,
   std::function<objid()> getNewObjectId
 ){
+  Scene& scene = sandbox.mainScene; 
+  std::vector<LayerInfo>& layers = sandbox.layers;
+
   std::map<std::string,  GameobjAttributesWithId> nameToAdditionalFields;
   std::map<objid, objid> nodeIdToRealId;
   auto rootObj = scene.idToGameObjects.at(rootId);
@@ -749,20 +751,6 @@ void removeScene(SceneSandbox& sandbox, objid sceneId){
 bool sceneExists(SceneSandbox& sandbox, objid sceneId){
   return !(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
 }    
-
-std::map<std::string, GameobjAttributesWithId> multiObjAdd(
-  SceneSandbox& sandbox,
-  objid sceneId,
-  objid rootId,
-  objid rootIdNode, 
-  std::map<objid, objid> childToParent, 
-  std::map<objid, Transformation> gameobjTransforms, 
-  std::map<objid, std::string> names, 
-  std::map<objid, GameobjAttributes> additionalFields,
-  std::function<objid()> getNewObjectId){
-  auto nameToAdditionalFields = addSubsceneToRoot(sandbox.mainScene, sandbox.layers, sceneId, rootId, rootIdNode, childToParent, gameobjTransforms, names, additionalFields, getNewObjectId);
-  return nameToAdditionalFields;
-}
 
 void makeParent(SceneSandbox& sandbox, objid child, objid parent){
   assert(child != parent);

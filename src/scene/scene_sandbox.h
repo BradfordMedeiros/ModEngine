@@ -1,13 +1,6 @@
 #ifndef MOD_SCENESANDBOX
 #define MOD_SCENESANDBOX
 
-#include <map>
-#include <vector>
-#include <functional>
-
-////////////
-#include <vector>
-#include <map>
 #include <set>
 #include <sstream>
 #include <functional>
