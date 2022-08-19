@@ -299,6 +299,31 @@ std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobje
   return pairs;
 }
 
+std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::map<std::string, std::string>& serializedPairs){
+  std::vector<std::pair<std::string, std::string>> fields;
+  for (auto &[field, value] : gameobject.attr.stringAttributes){
+    if (serializedPairs.find(field) == serializedPairs.end()){
+      fields.push_back({ field, value });
+    }
+  }
+  for (auto &[field, value] : gameobject.attr.numAttributes){
+    if (serializedPairs.find(field) == serializedPairs.end()){
+      fields.push_back({ field, serializeFloat(value) });
+    }
+  }
+  for (auto &[field, value] : gameobject.attr.vecAttr.vec3){
+    if (serializedPairs.find(field) == serializedPairs.end()){
+      fields.push_back({ field, serializeVec(value) });
+    }
+  }
+  for (auto &[field, value] : gameobject.attr.vecAttr.vec4){
+    if (serializedPairs.find(field) == serializedPairs.end()){
+      fields.push_back({ field, serializeVec(value) });
+    }
+  }
+  return fields;
+}
+
 std::string serializeObj(
   objid id, 
   objid groupId, 
@@ -312,7 +337,7 @@ std::string serializeObj(
   std::cout << "serializing object: " << gameobject.name << std::endl;
   if (groupId != id){
     std::cout << "not serializing: " << gameobject.name << std::endl;
-    //return sceneData;
+    return sceneData;
   }
   std::string gameobjectName = name == "" ? gameobject.name : name;
 
@@ -325,14 +350,21 @@ std::string serializeObj(
     sceneData = sceneData + gameobjectName + ":id:" + std::to_string(gameobject.id) + "\n";
   }
 
-  for (auto additionalField : coreFields(gameobject)){
-    sceneData = sceneData + gameobjectName + ":" + additionalField.first + ":" + additionalField.second + "\n";
+  std::map<std::string, std::string> serializedPairs;
+  for (auto &additionalField : coreFields(gameobject)){
+    serializedPairs[additionalField.first] = additionalField.second;
+  }
+  for (auto &additionalField : additionalFields){
+    serializedPairs[additionalField.first] = additionalField.second;
+  }
+  for (auto &additionalField : uniqueAdditionalFields(gameobject, serializedPairs)){
+    serializedPairs[additionalField.first] = additionalField.second;
   }
 
-  for (auto additionalField : additionalFields){
-    std::cout << "additional field: " << additionalField.first << std::endl;
-    sceneData = sceneData + gameobjectName + ":" + additionalField.first + ":" + additionalField.second + "\n";
+  for (auto &[attribute, payload] : serializedPairs){
+    sceneData = sceneData + gameobjectName + ":" + attribute + ":" + payload + "\n";
   }
+
   return sceneData;  
 }
 
