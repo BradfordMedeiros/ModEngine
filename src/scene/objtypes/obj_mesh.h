@@ -15,6 +15,7 @@ struct GameObjectMesh {
   float discardAmount;
   float emissionAmount;
   glm::vec4 tint;
+  bool isRoot;
 };
 
 GameObjectMesh createMesh(GameobjAttributes& attr, ObjectTypeUtil& util);

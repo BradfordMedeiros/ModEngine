@@ -333,7 +333,7 @@ std::string serializeObj(
   std::cout << "serializing object: " << gameobject.name << std::endl;
   if (groupId != id){
     std::cout << "not serializing: " << gameobject.name << std::endl;
-    return sceneData;
+    //return sceneData;
   }
   std::string gameobjectName = name == "" ? gameobject.name : name;
 

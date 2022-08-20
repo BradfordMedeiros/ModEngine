@@ -409,6 +409,11 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     }
     return;
   }
+  AutoserializeReservedField* reservedField = std::get_if<AutoserializeReservedField>(&value);
+  if (reservedField != NULL){
+    // do nothing
+    return;
+  }
 
   modassert(false, "autoserialize type not found");
 }
@@ -567,6 +572,12 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     return;
   }
 
+  AutoserializeReservedField* reservedField = std::get_if<AutoserializeReservedField>(&value);
+  if (reservedField != NULL){
+    // do nothing
+    return;
+  }
+
   modassert(false, "autoserialize type not yet implemented");
 }
 
@@ -694,6 +705,12 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     }
 
     modassert(false, "invalid get attribute custom type");
+    return;
+  }
+
+  AutoserializeReservedField* reservedField = std::get_if<AutoserializeReservedField>(&value);
+  if (reservedField != NULL){
+    // do nothing
     return;
   }
 
@@ -828,6 +845,12 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
+  AutoserializeReservedField* reservedField = std::get_if<AutoserializeReservedField>(&value);
+  if (reservedField != NULL){
+    // do nothing
+    return;
+  }
+
   modassert(false, "autoserialize type not found");
 }
 
@@ -897,6 +920,11 @@ std::string serializerName(AutoSerialize& serializer){
   if (customSerializer != NULL){
     return customSerializer -> field;
   }
+  AutoserializeReservedField* reservedField = std::get_if<AutoserializeReservedField>(&serializer);
+  if (reservedField != NULL){
+    // do nothing
+    return reservedField -> field;
+  }
   modassert(false, "could not find serializer");
   return "";
 }
@@ -949,6 +977,11 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
   AutoSerializeCustom* customSerializer = std::get_if<AutoSerializeCustom>(&serializer);
   if (customSerializer != NULL){
     return customSerializer -> fieldType;
+  }
+  AutoserializeReservedField* reservedField = std::get_if<AutoserializeReservedField>(&serializer);
+  if (reservedField != NULL){
+    // do nothing
+    return reservedField -> fieldType;
   }
   modassert(false, "type for serializer invalid type");
   return ATTRIBUTE_STRING;

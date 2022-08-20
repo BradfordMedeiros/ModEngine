@@ -709,7 +709,8 @@ void addObjectToWorld(
       std::cout << "Custom texture loading: " << texturepath << std::endl;
       return loadTextureWorld(world, texturepath, id);
     };
-    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &idToModelVertexs, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName) -> std::vector<std::string> {
+    auto ensureMeshLoaded = [&world, sceneId, id, name, topName, getId, &attr, &idToModelVertexs, &submodelAttributes, data, &rootMeshName, returnObjectOnly, &returnobjs](std::string meshName, bool* _isRoot) -> std::vector<std::string> {
+      *_isRoot = data == NULL;
       if (meshName == ""){
         return {};
       }
@@ -737,9 +738,11 @@ void addObjectToWorld(
           getObjautoserializerFields
         );
 
+        std::cout << "id is: " << id << std::endl;
         for (auto &[name, objAttr] : newSerialObjs){
           addObjectToWorld(world, sceneId, objAttr.id, name, topName, getId, objAttr.attr, idToModelVertexs, submodelAttributes, &data, meshName, returnObjectOnly, returnobjs);
         }
+        std::cout << std::endl;
         return meshNamesForNode(data, meshName, name);
       }
       return meshNamesForNode(*data, rootMeshName, name);  
@@ -757,7 +760,7 @@ void addObjectToWorld(
         },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
         .addEmitter =  [](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
-        .ensureMeshLoaded = [](std::string meshName) -> std::vector<std::string> { return {}; },
+        .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
         .onCollisionChange = []() -> void {},
         .pathForModLayer = world.interface.modlayerPath,
       }; 

@@ -33,7 +33,7 @@ struct ObjectTypeUtil {
   std::function<void(int)> releaseTexture;
   std::function<Mesh(MeshData&)> loadMesh;
   std::function<void(float, float, int, GameobjAttributes&, std::vector<EmitterDelta>, bool, EmitterDeleteBehavior)> addEmitter;
-  std::function<std::vector<std::string>(std::string)> ensureMeshLoaded;
+  std::function<std::vector<std::string>(std::string, bool*)> ensureMeshLoaded;
   std::function<void()> onCollisionChange;
   std::function<std::string(std::string)> pathForModLayer;
 };
@@ -143,7 +143,12 @@ struct AutoSerializeCustom {
   std::function<AttributeValue(void* offset)> getAttribute;
 };
 
-typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeRotation, AutoSerializeEnums, AutoSerializeCustom> AutoSerialize;
+struct AutoserializeReservedField {
+  const char* field;
+  AttributeValueType fieldType;
+};
+
+typedef std::variant<AutoSerializeBool, AutoSerializeString, AutoSerializeRequiredString, AutoSerializeFloat, AutoSerializeTextureLoaderManual, AutoSerializeInt, AutoSerializeUInt, AutoSerializeVec2, AutoSerializeVec3, AutoSerializeVec4, AutoSerializeRotation, AutoSerializeEnums, AutoSerializeCustom, AutoserializeReservedField> AutoSerialize;
 void createAutoSerialize(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr);
 void createAutoSerializeWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attr, ObjectTypeUtil& util);
 void autoserializerSerialize(char* structAddress, std::vector<AutoSerialize>& values, std::vector<std::pair<std::string, std::string>>& _pairs);
