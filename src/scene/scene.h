@@ -33,6 +33,8 @@ struct World {
   SysInterface interface;
 };
 
+std::set<std::string> getObjautoserializerFields(std::string& name);
+
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 

@@ -423,7 +423,7 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std:
   return extraLabels;
 }
 
-GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
+GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes, std::set<std::string> objautoserializerFields){
   GameObject object = { .id = id, .name = name };
   createAutoSerialize((char*)&object, gameobjSerializer, attributes);
   if (attributes.stringAttributes.find("id") != attributes.stringAttributes.end()){
@@ -431,7 +431,7 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
   }
 
   std::set<std::string> autoserializerFields = serializerFieldNames(gameobjSerializer);
-  for (auto &field : serializerFieldNames(gameobjSerializer)){
+  for (auto &field : objautoserializerFields){
     autoserializerFields.insert(field);
   }
 

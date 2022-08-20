@@ -513,6 +513,63 @@ void loadSkybox(World& world, std::string skyboxpath){
   };
 }
 
+extern std::vector<AutoSerialize> meshAutoserializer;
+extern std::vector<AutoSerialize> cameraAutoserializer;
+extern std::vector<AutoSerialize> portalAutoserializer;
+extern std::vector<AutoSerialize> soundAutoserializer;
+extern std::vector<AutoSerialize> lightAutoserializer;
+extern std::vector<AutoSerialize> voxelAutoserializer;
+extern std::vector<AutoSerialize> emitterAutoserializer;
+extern std::vector<AutoSerialize> heightmapAutoserializer;
+extern std::vector<AutoSerialize> navmeshAutoserializer;
+extern std::vector<AutoSerialize> navconnAutoserializer;
+extern std::vector<AutoSerialize> uiLayoutAutoserializer;
+extern std::vector<AutoSerialize> uiSliderAutoserializer;
+extern std::vector<AutoSerialize> textAutoserializer;
+extern std::vector<AutoSerialize> geoAutoserializer;
+extern std::vector<AutoSerialize> uiButtonAutoserializer;
+std::set<std::string> getObjautoserializerFields(std::string& name){
+  auto type = getType(name);
+  if (type == "default"){
+    return serializerFieldNames(meshAutoserializer);
+  }else if (type == "camera"){
+    return serializerFieldNames(cameraAutoserializer);
+  }else if (type == "portal"){
+    return serializerFieldNames(portalAutoserializer);
+  }else if (type == "sound"){
+    return serializerFieldNames(soundAutoserializer);
+  }else if (type == "light"){
+    return serializerFieldNames(lightAutoserializer);
+  }else if (type == "voxel"){
+    return serializerFieldNames(voxelAutoserializer);
+  }else if (type == "root"){
+    return {};
+  }else if (type == "emitter"){
+    return serializerFieldNames(emitterAutoserializer);
+  }else if (type == "heightmap"){
+    return serializerFieldNames(heightmapAutoserializer);
+  }else if (type == "navmesh"){
+    return serializerFieldNames(navmeshAutoserializer);
+  }else if (type == "navconnection"){
+    return serializerFieldNames(navconnAutoserializer);
+  }else if (type == "slider"){
+    return serializerFieldNames(uiSliderAutoserializer);
+  }else if (type == "text"){
+    return serializerFieldNames(textAutoserializer);
+  }else if (type == "layout"){
+    return serializerFieldNames(uiLayoutAutoserializer);
+  }else if (type == "ui"){
+    return serializerFieldNames(uiButtonAutoserializer);
+  }else if (type == "geo"){
+    return serializerFieldNames(geoAutoserializer);
+  }else if (type == "custom"){
+    return {};
+  }
+  modassert(false, "autoserializer not found");
+  return {};
+}
+
+
 World createWorld(
   collisionPairPosFn onObjectEnter, 
   collisionPairFn onObjectLeave, 
@@ -534,7 +591,7 @@ World createWorld(
     .onObjectCreate = onObjectCreate,
     .onObjectDelete = onObjectDelete,
     .entitiesToUpdate = {},
-    .sandbox = createSceneSandbox(layers),
+    .sandbox = createSceneSandbox(layers, getObjautoserializerFields),
     .interface = interface,
   };
 
@@ -619,6 +676,7 @@ std::string serializeObject(World& world, objid id, std::string overridename){
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
 }
 
+
 void addObjectToWorld(
   World& world, 
   objid sceneId, 
@@ -675,7 +733,8 @@ void addObjectToWorld(
           data.nodeTransform, 
           data.names, 
           additionalFields,
-          getId
+          getId,
+          getObjautoserializerFields
         );
 
         for (auto &[name, objAttr] : newSerialObjs){
@@ -773,7 +832,7 @@ void addSerialObjectsToWorld(
 
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name){
   auto styles = loadStyles("./res/default.style", world.interface.readFile);
-  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name, getObjautoserializerFields);
   std::vector<GameObjectObj> addedGameobjObjs = {};
   addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, data.additionalFields, false, addedGameobjObjs, data.subelementAttributes);
   return sceneId;
@@ -872,8 +931,9 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
   auto idToAdd = useObjId ? id : getUniqueObjId();
+
   GameObjPair gameobjPair{
-    .gameobj = gameObjectFromFields(name, idToAdd, attributes),
+    .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),
   };
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
   auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.

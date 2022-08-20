@@ -83,7 +83,10 @@ std::string serializeVoxelDefault(World& world, Voxels& voxelData){
  GameObjectVoxel vox {
     .voxel = voxelData,
   };
-  auto gameobj = gameObjectFromFields("]default_voxel", -1, {});
+
+  std::set<std::string> voxelFields = {};
+  std::string name = "]default_voxel";
+  auto gameobj = gameObjectFromFields(name, -1, {}, getObjautoserializerFields(name));
   std::vector<std::string> children;
   ObjectSerializeUtil util {
     .textureName = [&world](int id) -> std::string {

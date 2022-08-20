@@ -46,7 +46,8 @@ GameobjAttributes rootGameObject(){
 SceneDeserialization createSceneFromParsedContent(
   objid sceneId,
   std::vector<Token> tokens,  
-  std::function<objid()> getNewObjectId
+  std::function<objid()> getNewObjectId,
+  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields
 ){
   Scene scene;
 
@@ -65,13 +66,15 @@ SceneDeserialization createSceneFromParsedContent(
   std::map<std::string, GameObject> gameobjs;
 
   for (auto [name, gameAttr] : serialGameAttrs){
+    auto objName = name;
     if (name != rootName){
       objid id = (gameAttr.stringAttributes.find("id") != gameAttr.stringAttributes.end()) ? 
         std::atoi(gameAttr.stringAttributes.at("id").c_str()) : 
         getNewObjectId();
-      gameobjs[name] = gameObjectFromFields(name, id, gameAttr);
+
+      gameobjs[name] = gameObjectFromFields(name, id, gameAttr, getObjautoserializerFields(objName));
     }else{
-      gameobjs[name] = gameObjectFromFields(name, scene.rootId, gameAttr); 
+      gameobjs[name] = gameObjectFromFields(name, scene.rootId, gameAttr, getObjautoserializerFields(objName)); 
     }
   }
 
@@ -130,7 +133,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   std::map<objid, Transformation> gameobjTransforms, 
   std::map<objid, std::string> names,
   std::map<objid, GameobjAttributes> additionalFields,
-  std::function<objid()> getNewObjectId
+  std::function<objid()> getNewObjectId,
+  std::function<std::set<std::string>(std::string&)> getObjautoserializerFields
 ){
   Scene& scene = sandbox.mainScene; 
   std::vector<LayerInfo>& layers = sandbox.layers;
@@ -152,7 +156,8 @@ std::map<std::string, GameobjAttributesWithId> multiObjAdd(
       .attr = additionalFields.at(nodeId),
     };
 
-    auto gameobj = gameObjectFromFields(names.at(nodeId), id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)));
+    auto name = names.at(nodeId);
+    auto gameobj = gameObjectFromFields(name, id, defaultAttributesForMultiObj(transform, rootObj, additionalFields.at(nodeId)), getObjautoserializerFields(name));
     gameobj.transformation.rotation = transform.rotation; // todo make this work w/ attributes better
 
     auto addedId = sandboxAddToScene(scene, sceneId, -1, names.at(nodeId), gameobj);
@@ -370,14 +375,16 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
   return sceneData;
 }
 
-SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers){
+
+SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   Scene mainScene {
     .rootId = 0,
     .sceneToNameToId = {{ 0, {}}}
   };
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
-  auto rootObj = gameObjectFromFields("root", mainScene.rootId, rootGameObject()); 
+  std::string name = "root";
+  auto rootObj = gameObjectFromFields(name, mainScene.rootId, rootGameObject(), getObjautoserializerFields(name)); 
   auto rootObjId = sandboxAddToScene(mainScene, 0, -1, rootObj.name, rootObj);
   addObjectToCache(mainScene, layers, rootObjId);
 
@@ -678,12 +685,12 @@ glm::mat4 armatureTransform(SceneSandbox& sandbox, objid id, std::string skeleto
 }
 
 
-SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<Style>& styles){
+SceneDeserialization deserializeScene(objid sceneId, std::string content, std::function<objid()> getNewObjectId, std::vector<Style>& styles, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   auto tokens = parseFormat(content);
   applyStyles(tokens, styles);
-  return createSceneFromParsedContent(sceneId, tokens, getNewObjectId);
+  return createSceneFromParsedContent(sceneId, tokens, getNewObjectId, getObjautoserializerFields);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
@@ -692,7 +699,7 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
     }
   }
 
-  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, styles);
+  SceneDeserialization deserializedScene = deserializeScene(sceneId, sceneData, getUniqueObjId, styles, getObjautoserializerFields);
 
   for (auto &[id, obj] : deserializedScene.scene.idToGameObjects){
     sandbox.mainScene.idToGameObjects[id] = obj;

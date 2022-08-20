@@ -5,13 +5,17 @@
 
 // but maybe this should check if a read for a child is dirty and then it could recalculate?
 
+static std::set<std::string> testObjautoserializerFields(std::string& name){
+  return {};
+};
+
 void sandboxBasicDeserialization(){
-  auto sandbox = createSceneSandbox({});
+  auto sandbox = createSceneSandbox({}, testObjautoserializerFields);
   std::string twoItemScene = std::string("") + 
   "object_one:position:1 0 0\n" + 
   "object_two:position:5 0 0\n";
   std::vector<Style> styles;
-  addSceneDataToScenebox(sandbox, "somefilename", 1, twoItemScene, styles, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, twoItemScene, styles, std::nullopt, testObjautoserializerFields);
 
   auto numObjects = getNumberOfObjects(sandbox);
   if (numObjects != 4){  // global root, scene root, two objects in scene
@@ -20,13 +24,13 @@ void sandboxBasicDeserialization(){
 }
 
 void sandboxParentPosition(){
-  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
   std::string sceneWithChild = std::string("") + 
   "object_one:position:1 0 0\n" + 
   "object_one:child:object_two\n" + 
   "object_two:position:5 0 0\n";
   std::vector<Style> styles;
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt, testObjautoserializerFields);
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
   auto posObjectTwo = fullTransformation(sandbox, objectTwoId);
   auto equal = aboutEqual(posObjectTwo.position, glm::vec3(6.f, 0.f, 0.f));
@@ -36,12 +40,12 @@ void sandboxParentPosition(){
 }
 
 void sandboxMakeParentPosition(){
-  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
   std::string sceneWithChild = std::string("") + 
   "object_one:position:1 0 0\n" + 
   "object_two:position:5 0 0\n";
   std::vector<Style> styles;
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt, testObjautoserializerFields);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
   auto posObjectTwo = fullTransformation(sandbox, objectTwoId);
@@ -68,13 +72,13 @@ void sandboxMakeParentPosition(){
 }
 
 void sandboxUpdateParentRelative(){
-  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
   std::string sceneWithChild = std::string("") + 
   "object_one:position:-1 0 0\n" + 
   "object_one:child:object_two\n" + 
   "object_two:position:5 0 0\n";
   std::vector<Style> styles;
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt, testObjautoserializerFields);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
@@ -89,13 +93,13 @@ void sandboxUpdateParentRelative(){
 }
 
 void sandboxUpdateParentAbsolute(){
-  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
   std::string sceneWithChild = std::string("") + 
   "object_two:position:5 0 0\n" + 
     "object_one:position:-1 0 0\n" + 
   "object_one:child:object_two\n";
   std::vector<Style> styles;
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt, testObjautoserializerFields);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
@@ -111,13 +115,13 @@ void sandboxUpdateParentAbsolute(){
 
 
 void sandboxUpdateParentAndChildRelative(){
-  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } });
+  SceneSandbox sandbox = createSceneSandbox({ LayerInfo{ .name = "", } }, testObjautoserializerFields);
   std::string sceneWithChild = std::string("") + 
   "object_one:position:-1 0 0\n" + 
   "object_one:child:object_two\n" + 
   "object_two:position:5 0 0\n";
   std::vector<Style> styles;
-  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt);
+  addSceneDataToScenebox(sandbox, "somefilename", 1, sceneWithChild, styles, std::nullopt, testObjautoserializerFields);
   auto objectOneId = getGameObjectH(sandbox, "object_one", 1).id;
   auto objectTwoId = getGameObjectH(sandbox, "object_two", 1).id;
 
