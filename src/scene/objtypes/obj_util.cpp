@@ -910,6 +910,14 @@ std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serial
   return std::nullopt;
 }
 
+std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers){
+  std::set<std::string> fields;
+  for (auto &autoserializer : serializers){
+    fields.insert(serializerName(autoserializer));
+  }
+  return fields;
+}
+
 AttributeValueType typeForSerializer(AutoSerialize& serializer){
   AutoSerializeBool* boolSerializer = std::get_if<AutoSerializeBool>(&serializer);
   AutoSerializeString* stringSerializer = std::get_if<AutoSerializeString>(&serializer);

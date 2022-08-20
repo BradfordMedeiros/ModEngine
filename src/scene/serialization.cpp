@@ -302,19 +302,19 @@ std::vector<std::pair<std::string, std::string>> coreFields(GameObject& gameobje
 std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObject& gameobject, std::map<std::string, std::string>& serializedPairs){
   std::vector<std::pair<std::string, std::string>> fields;
   for (auto &[field, value] : gameobject.additionalAttr.stringAttributes){
-    modassert(serializedPairs.find(field) == serializedPairs.end(), "serialization invalid obj state");
+    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     fields.push_back({ field, value });
   }
   for (auto &[field, value] : gameobject.additionalAttr.numAttributes){
-    modassert(serializedPairs.find(field) == serializedPairs.end(), "serialization invalid obj state");
+    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     fields.push_back({ field, serializeFloat(value) });
   }
   for (auto &[field, value] : gameobject.additionalAttr.vecAttr.vec3){
-    modassert(serializedPairs.find(field) == serializedPairs.end(), "serialization invalid obj state");
+    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     fields.push_back({ field, serializeVec(value) });
   }
   for (auto &[field, value] : gameobject.additionalAttr.vecAttr.vec4){
-    modassert(serializedPairs.find(field) == serializedPairs.end(), "serialization invalid obj state");
+    modassert(serializedPairs.find(field) == serializedPairs.end(), std::string("serialization invalid obj state: ") + field);
     fields.push_back({ field, serializeVec(value) });
   }
   return fields;
@@ -388,7 +388,10 @@ AttributeValue parsePropertySuffix(std::string key, std::string value){
   return value;
 }
 
-GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes){
+bool isReservedAttribute(std::string field, std::set<std::string>& autoserializerFields){
+  return autoserializerFields.count(field) > 0;
+}
+GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes, std::set<std::string>& autoserializerFields){
   GameobjAttributes extraLabels {
     .stringAttributes = {},
     .numAttributes = {},
@@ -397,9 +400,28 @@ GameobjAttributes getAdditionalAttr(GameobjAttributes& attributes){
       .vec4 = {},
     },
   };
+  for (auto &[key, value] : attributes.stringAttributes){
+    if (!isReservedAttribute(key, autoserializerFields)){
+      extraLabels.stringAttributes[key] = value;
+    }
+  }
+  for (auto &[key, value] : attributes.numAttributes){
+    if (!isReservedAttribute(key, autoserializerFields)){
+      extraLabels.numAttributes[key] = value;
+    }
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec3){
+    if (!isReservedAttribute(key, autoserializerFields)){
+      extraLabels.vecAttr.vec3[key] = value;
+    }
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec4){
+    if (!isReservedAttribute(key, autoserializerFields)){
+      extraLabels.vecAttr.vec4[key] = value;
+    }
+  }
   return extraLabels;
 }
-
 
 GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes attributes){
   GameObject object = { .id = id, .name = name };
@@ -408,7 +430,12 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
     object.id = std::atoi(attributes.stringAttributes.at("id").c_str());
   }
 
-  object.additionalAttr = getAdditionalAttr(attributes);
+  std::set<std::string> autoserializerFields = serializerFieldNames(gameobjSerializer);
+  for (auto &field : serializerFieldNames(gameobjSerializer)){
+    autoserializerFields.insert(field);
+  }
+
+  object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
 
   std::cout << "additional attr: " << name << std::endl;
   std::cout << print(object.additionalAttr) << std::endl << std::endl;

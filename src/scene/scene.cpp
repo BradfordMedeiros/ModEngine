@@ -867,6 +867,7 @@ void removeAllScenesFromWorld(World& world){
   }
 }
 
+
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, bool returnOnly){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
@@ -930,15 +931,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
-  GameobjAttributes attr {
-    .stringAttributes = {},
-    .numAttributes = {},
-    .vecAttr = vectorAttributes{
-      .vec3 = {},
-      .vec4 = {},
-    },
-    .children = {},
-  };  
+  GameobjAttributes attr = gameobj.additionalAttr;
   objectAttributes(gameobjObj, attr);
   getAllAttributes(gameobj, attr);
   return attr;

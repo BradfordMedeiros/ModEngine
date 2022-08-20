@@ -2,6 +2,7 @@
 #define MOD_OBJ_UTIL
 
 #include <map>
+#include <set>
 #include "../common/mesh.h"
 #include "../types/emitter.h"
 
@@ -151,6 +152,7 @@ void autoserializerSetAttr(char* structAddress, std::vector<AutoSerialize>& valu
 void autoserializerSetAttrWithTextureLoading(char* structAddress, std::vector<AutoSerialize>& values, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 std::vector<std::string> serializerNames(std::vector<AutoSerialize>& serializers);
 std::optional<AutoSerialize> serializerByName(std::vector<AutoSerialize>& serializer, std::string& name);
+std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serializers);
 AttributeValueType typeForSerializer(AutoSerialize& serializer);
 
 template <typename T>
