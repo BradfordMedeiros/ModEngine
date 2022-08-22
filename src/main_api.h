@@ -62,6 +62,7 @@ std::vector<StringPairVec2> scenegraph();
 
 void sendLoadScene(int32_t sceneId);
 void createScene(std::string scenename);
+void deleteScene(std::string scenename);
 
 void onObjectEnter(const btCollisionObject* obj1, const btCollisionObject* obj2, glm::vec3 contactPos);
 void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2);

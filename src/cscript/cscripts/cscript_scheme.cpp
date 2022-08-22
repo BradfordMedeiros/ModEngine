@@ -52,6 +52,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.scenegraph,
     api.sendLoadScene,
     api.createScene,
+    api.deleteScene,
     api.moveCamera,  
     api.rotateCamera,
     api.removeObjectById,

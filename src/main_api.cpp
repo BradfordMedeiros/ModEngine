@@ -105,20 +105,23 @@ void unloadAllScenes(){
   removeAllScenesFromWorld(world);
 }
 
-// @TODO - save all the scenes in the world
-void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
-  auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
-  fileToSave = filename.has_value() ? filename.value() : fileToSave;
-  std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
+bool isNotWriteProtectedFile(std::string& fileToSave){
   auto fileExtension = getPreExtension(fileToSave);
-
   auto allowedToSave = true;
   if (fileExtension.has_value()){
     auto extension = fileExtension.value();
     std::cout << "extension is: " << extension << std::endl;
     allowedToSave = extension != "p";
   }
-  if (allowedToSave){
+  return allowedToSave;
+}
+
+// @TODO - save all the scenes in the world
+void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename){
+  auto fileToSave = sceneFileForSceneId(world, sceneId);    // MAYBE SHOULD CREATE A CACHE OF WHAT FILE WAS WHAT SCENE?
+  fileToSave = filename.has_value() ? filename.value() : fileToSave;
+  std::cout << "saving scene id: " << sceneId << " to file: " << fileToSave << std::endl;
+  if (isNotWriteProtectedFile(fileToSave)){
     saveFile(fileToSave, serializeScene(world, sceneId, includeIds));
   }else{
     std::cout << "WARNING: CANNOT SAVE: " << fileToSave << " because is a protected file" << std::endl;
@@ -163,6 +166,12 @@ void createScene(std::string scenename){
   saveFile(scenename, "");
 }
 
+void deleteScene(std::string scenename){
+  auto extension = getExtension(scenename);
+  bool canSave = extension.has_value() && extension == "rawscene";
+  assert(canSave && isNotWriteProtectedFile(scenename));
+  rmFile(scenename);
+}
 
 std::vector<int32_t> getObjectsByType(std::string type){
   if (type == "mesh"){

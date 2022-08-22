@@ -16,6 +16,10 @@ void saveFile(std::string filepath, std::string content){
   file.close();
 }
 
+void rmFile(std::string filepath){
+  std::remove(filepath.c_str());
+}
+
 bool fileExists(std::string path){
   std::ifstream infile(path);
   return infile.good();

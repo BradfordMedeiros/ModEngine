@@ -22,6 +22,7 @@
 
 std::string loadFile(std::string filepath);
 void saveFile(std::string filepath, std::string content);
+void rmFile(std::string filepath);
 bool fileExists(std::string path);
 std::optional<std::string> getExtension(std::string file);
 std::optional<std::string> getPreExtension(std::string file);

@@ -66,6 +66,12 @@ SCM scm_createScene(SCM filepath){
   return SCM_UNSPECIFIED;
 }
 
+void (*_deleteScene)(std::string scenename);
+SCM scm_deleteScene(SCM filepath){
+  _deleteScene(scm_to_locale_string(filepath));
+  return SCM_UNSPECIFIED;
+}
+
 std::optional<objid> (*_sceneIdByName)(std::string name);
 SCM scm_sceneIdByName(SCM name){
   auto sceneId = _sceneIdByName(scm_to_locale_string(name));
@@ -1027,6 +1033,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("child-scenes", 1, 0, 0, (void *)scm_childScenes);
   scm_c_define_gsubr("list-scenefiles", 0, 0, 0, (void *)scm_listSceneFiles);
   scm_c_define_gsubr("create-scene", 1, 0, 0, (void *)scm_createScene);
+  scm_c_define_gsubr("rm-scene", 1, 0, 0, (void *) scm_deleteScene);
   scm_c_define_gsubr("lsscene-name", 1, 0, 0, (void *)scm_sceneIdByName);
   scm_c_define_gsubr("scene-rootid", 1, 0, 0, (void *)scm_rootIdForScene);
   scm_c_define_gsubr("scenegraph", 0, 1, 0, (void*)scmScenegraph);
@@ -1174,6 +1181,7 @@ void createStaticSchemeBindings(
   std::vector<StringPairVec2> (*scenegraph)(),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
+  void (*deleteScene)(std::string scenename),
   void (*moveCamera)(glm::vec3),  
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(int32_t id),
@@ -1264,6 +1272,7 @@ void createStaticSchemeBindings(
   _listSceneFiles = listSceneFiles;
   _sendLoadScene = sendLoadScene;
   _createScene = createScene;
+  _deleteScene = deleteScene;
   
   moveCam = moveCamera;
   rotateCam = rotateCamera;

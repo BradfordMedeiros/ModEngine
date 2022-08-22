@@ -1187,6 +1187,7 @@ int main(int argc, char* argv[]){
     .scenegraph = scenegraph,
     .sendLoadScene = sendLoadScene,
     .createScene = createScene,
+    .deleteScene = deleteScene,
     .moveCamera = moveCamera,
     .rotateCamera = rotateCamera,
     .removeObjectById = removeObjectById,

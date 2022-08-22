@@ -20,6 +20,7 @@ struct CustomApiBindings {
   std::vector<StringPairVec2> (*scenegraph)();
   void (*sendLoadScene)(int32_t id);
   void (*createScene)(std::string scenename);
+  void (*deleteScene)(std::string scenename);
   void (*moveCamera)(glm::vec3);
   void (*rotateCamera)(float xoffset, float yoffset);
   void (*removeObjectById)(int32_t id);
