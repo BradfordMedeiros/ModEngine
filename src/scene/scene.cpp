@@ -569,6 +569,14 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
   return {};
 }
 
+// kind of hackey, this could just be returned from add objects, but flow control is tricky.
+std::function<objid(void)> createGetUniqueObjId(std::vector<objid>& idsAdded){
+  return [&idsAdded]() -> objid {      
+    auto newId = getUniqueObjId();
+    idsAdded.push_back(newId);
+    return newId;
+  };
+}
 
 World createWorld(
   collisionPairPosFn onObjectEnter, 
@@ -599,7 +607,9 @@ World createWorld(
   std::vector<objid> idsAdded = { 0 };
   std::vector<GameObjectObj> addedGameobjObjs = {};
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getUniqueObjId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, false, addedGameobjObjs, submodelAttributes);
+
+  auto getId = createGetUniqueObjId(idsAdded);
+  addSerialObjectsToWorld(world, world.sandbox.mainScene.rootId, idsAdded, getId, {{ "root", GameobjAttributesWithId { .id = idsAdded.at(0), .attr = GameobjAttributes{}}}}, false, addedGameobjObjs, submodelAttributes);
 
   // Default meshes that are silently loaded in the background
   for (auto &meshname : defaultMeshes){
@@ -807,12 +817,12 @@ void addSerialObjectsToWorld(
   if (returnObjectOnly){
     return;
   }
-  for (auto id : idsAdded){
+
+  for (auto &id : idsAdded){
     std::vector<glm::vec3> modelVerts = {};
     if (idToModelVertexs.find(id) != idToModelVertexs.end()){
       modelVerts = idToModelVertexs.at(id);
     }
-    std::cout << "id is: " << id << std::endl;
     auto phys = addPhysicsBody(world, id, true, modelVerts); 
     if (phys.body != NULL){   // why do I need this?
       auto transform = fullTransformation(world.sandbox, id);
@@ -837,7 +847,9 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
   auto styles = loadStyles("./res/default.style", world.interface.readFile);
   auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name, getObjautoserializerFields);
   std::vector<GameObjectObj> addedGameobjObjs = {};
-  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getUniqueObjId, data.additionalFields, false, addedGameobjObjs, data.subelementAttributes);
+
+  auto getId = createGetUniqueObjId(data.idsAdded);
+  addSerialObjectsToWorld(world, sceneId, data.idsAdded, getId, data.additionalFields, false, addedGameobjObjs, data.subelementAttributes);
   return sceneId;
 }
 
@@ -929,7 +941,6 @@ void removeAllScenesFromWorld(World& world){
   }
 }
 
-
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, bool returnOnly){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
@@ -939,11 +950,7 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
     .gameobj = gameObjectFromFields(name, idToAdd, attributes, getObjautoserializerFields(name)),
   };
   std::vector<objid> idsAdded = { gameobjPair.gameobj.id }; 
-  auto getId = [&idsAdded]() -> objid {      // kind of hackey, this could just be returned from add objects, but flow control is tricky.
-    auto newId = getUniqueObjId();
-    idsAdded.push_back(newId);
-    return newId;
-  };
+  auto getId = createGetUniqueObjId(idsAdded);
   if (!returnOnly){
     addGameObjectToScene(world.sandbox, sceneId, name, gameobjPair.gameobj, attributes.children);
   }
