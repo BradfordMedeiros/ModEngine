@@ -320,6 +320,36 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
   return fields;
 }
 
+std::vector<std::string> reservedMultiObjFields = { "fragshader", "layer", "position", "scale" };
+bool isReservedSubobjectAttribute(const char* field){
+  for (int i = 0; i < reservedMultiObjFields.size(); i++){
+    if (reservedMultiObjFields.at(i) == field){
+      return true;
+    }
+  }
+  return false;
+}
+GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields){
+  MODTODO("default inheritance of attributes...should there really be any (aside from transform)");
+  GameobjAttributes attributes {
+    .stringAttributes = {
+      {"fragshader", gameobj.fragshader},
+      {"layer", gameobj.layer},
+    },
+    .vecAttr = {
+      .vec3 = {
+        {"position", transform.position },
+        {"scale",    transform.scale    },
+        // 
+      },
+      .vec4 = {},
+    },
+  };
+  //std::cout << "Default attributes: fragshader = " << gameobj.fragshader << ", layer = " << gameobj.layer << ", position = " << print(transform.position) << ", scale = " << print(transform.scale) << std::endl;
+  mergeAttributes(attributes, additionalFields);
+  return attributes;
+}
+
 std::string serializeObj(
   objid id, 
   objid groupId, 
@@ -331,10 +361,10 @@ std::string serializeObj(
 ){
   std::string sceneData = "";
   std::cout << "serializing object: " << gameobject.name << std::endl;
-  if (groupId != id){
-    std::cout << "not serializing: " << gameobject.name << std::endl;
-    //return sceneData;
-  }
+
+  bool isSubobject = groupId != id;
+
+
   std::string gameobjectName = name == "" ? gameobject.name : name;
 
   // custom autoserializer
@@ -358,6 +388,9 @@ std::string serializeObj(
   }
 
   for (auto &[attribute, payload] : serializedPairs){
+    if (isSubobject && isReservedSubobjectAttribute(attribute.c_str())){
+      continue;
+    }
     sceneData = sceneData + gameobjectName + ":" + attribute + ":" + payload + "\n";
   }
 

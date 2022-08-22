@@ -104,26 +104,6 @@ SceneDeserialization createSceneFromParsedContent(
   return deserializedScene;
 }
 
-GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields){
-  MODTODO("default inheritance of attributes...should there really be any (aside from transform");
-  GameobjAttributes attributes {
-    .stringAttributes = {
-      {"fragshader", gameobj.fragshader},
-      {"layer", gameobj.layer},
-    },
-    .vecAttr = {
-      .vec3 = {
-        {"position", transform.position },
-        {"scale",    transform.scale    },
-        // 
-      },
-      .vec4 = {},
-    },
-  };
-  mergeAttributes(attributes, additionalFields);
-  return attributes;
-}
-
 std::map<std::string, GameobjAttributesWithId> multiObjAdd(
   SceneSandbox& sandbox,
   objid sceneId,

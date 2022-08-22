@@ -69,6 +69,7 @@ struct DividedTokens {
 std::string mainTargetElement(std::string target);
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens);
 std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens);
+GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
 
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
