@@ -68,7 +68,7 @@ std::vector<AutoSerialize> textAutoserializer {
     .field = "cursor-highlight",
     .defaultValue = 0,
   },
-  AutoSerializeString {
+  AutoSerializeForceString {
     .structOffset = offsetof(GameObjectUIText, value),
     .field = "value",
     .defaultValue = "",

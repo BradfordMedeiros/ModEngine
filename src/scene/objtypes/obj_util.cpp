@@ -18,10 +18,35 @@ void attrSet(GameobjAttributes& attr, std::string* value, const char* field){
     *value = attr.stringAttributes.at(field);
   }
 }
+void attrForceSet(GameobjAttributes& attr, std::string* value, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *value = attr.stringAttributes.at(field);
+  }else if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *value = serializeFloat(attr.numAttributes.at(field));
+  }else if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
+    *value = serializeVec(attr.vecAttr.vec3.at(field));
+  }else if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *value = serializeVec(attr.vecAttr.vec4.at(field));
+  }
+}
 
 void attrSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     *value = attr.stringAttributes.at(field);
+  }else{
+    *value = defaultValue;
+  } 
+}
+
+void attrForceSet(GameobjAttributes& attr, std::string* value, std::string defaultValue, const char* field){
+  if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
+    *value = attr.stringAttributes.at(field);
+  }else if (attr.numAttributes.find(field) != attr.numAttributes.end()){
+    *value = serializeFloat(attr.numAttributes.at(field));
+  }else if (attr.vecAttr.vec3.find(field) != attr.vecAttr.vec3.end()){
+    *value = serializeVec(attr.vecAttr.vec3.at(field));
+  }else if (attr.vecAttr.vec4.find(field) != attr.vecAttr.vec4.end()){
+    *value = serializeVec(attr.vecAttr.vec4.at(field));
   }else{
     *value = defaultValue;
   } 
@@ -308,6 +333,13 @@ void createAutoSerialize(char* structAddress, AutoSerialize& value, GameobjAttri
     return;
   }
 
+  AutoSerializeForceString* strForcedValue = std::get_if<AutoSerializeForceString>(&value);
+  if (strForcedValue != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strForcedValue -> structOffset);
+    attrForceSet(attr, address, strForcedValue -> defaultValue, strForcedValue -> field);
+    return;
+  }
+
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
@@ -454,6 +486,15 @@ void autoserializerSerialize(char* structAddress, AutoSerialize& value, std::vec
     return;
   }
   
+  AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
+  if (strForceValue != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strForceValue -> structOffset);
+    if (*address != strForceValue -> defaultValue){
+      _pairs.push_back({ strForceValue -> field, *address });
+    }
+    return;
+  }  
+
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
@@ -610,6 +651,12 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     _attributes.stringAttributes[strValue -> field] = *address;
     return;
   }
+  AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
+  if (strValue != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strForceValue -> structOffset);
+    _attributes.stringAttributes[strForceValue -> field] = *address;
+    return;
+  }
   
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
@@ -746,6 +793,14 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
 
+  AutoSerializeForceString* strForcedValue = std::get_if<AutoSerializeForceString>(&value);
+  if (strForcedValue != NULL){
+    std::string* address = (std::string*)(((char*)structAddress) + strForcedValue -> structOffset);
+    attrForceSet(attributes, address, strForcedValue -> field);
+    return;
+  }
+  
+
   AutoSerializeFloat* floatValue = std::get_if<AutoSerializeFloat>(&value);
   if (floatValue != NULL){
     float* address = (float*)(((char*)structAddress) + floatValue -> structOffset);
@@ -874,6 +929,12 @@ std::string serializerName(AutoSerialize& serializer){
   if (stringSerializer != NULL){
     return stringSerializer -> field;
   }
+
+  AutoSerializeForceString* forcedStringSerializer = std::get_if<AutoSerializeForceString>(&serializer);
+  if (forcedStringSerializer != NULL){
+    return forcedStringSerializer -> field;
+  }
+
   AutoSerializeRequiredString* requiredStringSerializer = std::get_if<AutoSerializeRequiredString>(&serializer);
   if (requiredStringSerializer != NULL){
     return requiredStringSerializer -> field;
@@ -949,11 +1010,12 @@ std::set<std::string> serializerFieldNames(std::vector<AutoSerialize>& serialize
 AttributeValueType typeForSerializer(AutoSerialize& serializer){
   AutoSerializeBool* boolSerializer = std::get_if<AutoSerializeBool>(&serializer);
   AutoSerializeString* stringSerializer = std::get_if<AutoSerializeString>(&serializer);
+  AutoSerializeForceString* forcedStringSerializer = std::get_if<AutoSerializeForceString>(&serializer);
   AutoSerializeRequiredString* requiredStringSerializer = std::get_if<AutoSerializeRequiredString>(&serializer);
   AutoSerializeTextureLoaderManual* textureSerializer = std::get_if<AutoSerializeTextureLoaderManual>(&serializer);
   AutoSerializeEnums* enumsSerializer = std::get_if<AutoSerializeEnums>(&serializer);
   AutoSerializeVec2* vec2Serializer = std::get_if<AutoSerializeVec2>(&serializer);
-  if (boolSerializer != NULL || stringSerializer != NULL || requiredStringSerializer != NULL || textureSerializer != NULL || enumsSerializer != NULL || vec2Serializer != NULL){
+  if (boolSerializer != NULL || stringSerializer != NULL || requiredStringSerializer != NULL || forcedStringSerializer != NULL || textureSerializer != NULL || enumsSerializer != NULL || vec2Serializer != NULL){
     return ATTRIBUTE_STRING;
   }
   AutoSerializeFloat* floatSerializer = std::get_if<AutoSerializeFloat>(&serializer);
