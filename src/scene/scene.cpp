@@ -98,9 +98,11 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
     boundInfo = layoutObj -> boundInfo;
   }
 
+  bool hasOffset = false;
   auto textObj = std::get_if<GameObjectUIText>(&gameObjV);
   if (textObj != NULL){
     // textObj -> value, 1, textObj -> deltaOffset, textObj -> align, textObj -> wrap, textObj -> virtualization, &offset
+    hasOffset = true;
     boundInfo = boundInfoForCenteredText(
       world.interface.fontFamilyByName(textObj -> fontFamily),
       textObj -> value,
@@ -121,7 +123,7 @@ PhysicsInfo getPhysicsInfoForGameObject(World& world, objid index){
   PhysicsInfo info = {
     .boundInfo = boundInfo,
     .transformation = obj.transformation,
-    .offset = offset,
+    .offset = hasOffset ? std::optional<glm::vec3>(offset) : std::nullopt,
   };
 
   return info;
@@ -144,19 +146,25 @@ GroupPhysicsInfo getPhysicsInfoForGroup(World& world, objid id){
   return groupInfo;
 }
 
-glm::vec3 calcOffsetFromRotation(glm::vec3 position, glm::vec3 offset, glm::quat rotation){
-  return position + rotation * offset;
+glm::vec3 calcOffsetFromRotation(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation){
+  if (!offset.has_value()){
+    return position;
+  }
+  return position + rotation * offset.value();
 }
 
-glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, glm::vec3 offset, glm::quat rotation){
-  return position - rotation * offset;
+glm::vec3 calcOffsetFromRotationReverse(glm::vec3 position, std::optional<glm::vec3> offset, glm::quat rotation){
+  if (!offset.has_value()){
+    return position;
+  }
+  return position - rotation * offset.value();
 }
 
 // TODO - physics bug - physicsOptions location/rotation/scale is not relative to parent 
 PhysicsValue addPhysicsBody(World& world, objid id, bool initialLoad, std::vector<glm::vec3> verts){
   auto groupPhysicsInfo = getPhysicsInfoForGroup(world, id);
   if (!groupPhysicsInfo.physicsOptions.enabled){
-    return PhysicsValue { .body = NULL, .offset = glm::vec3(0.f, 0.f, 0.f) };
+    return PhysicsValue { .body = NULL, .offset = std::nullopt };
   }
 
   btRigidBody* rigidBody = NULL;
