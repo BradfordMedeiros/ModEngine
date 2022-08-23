@@ -30,6 +30,7 @@ std::vector<std::pair<std::string, std::string>> serializePortal(GameObjectPorta
   autoserializerSerialize((char*)&obj, portalAutoserializer, pairs);
   return pairs;
 }
-void setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setPortalAttributes(GameObjectPortal& portalObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&portalObj, portalAutoserializer, attributes, util);
+  return false;
 }

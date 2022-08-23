@@ -1,7 +1,7 @@
 
 *button:position:0 0 0
 *button:script:./res/scenes/features/serialization/get-attr.scm
-*button:ontexture:./res/textures/blacktop.jpg
+*button:offtexture:./res/textures/blacktop.jpg
 *button:on:hello
 *button:off:goodbye
 *button:state:on

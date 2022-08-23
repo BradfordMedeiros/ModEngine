@@ -47,6 +47,7 @@ void cameraObjAttr(GameObjectCamera& cameraObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&cameraObj, cameraAutoserializer, _attributes);
 }
 
-void setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setCameraAttributes(GameObjectCamera& cameraObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&cameraObj, cameraAutoserializer, attributes, util);
+  return false;
 }

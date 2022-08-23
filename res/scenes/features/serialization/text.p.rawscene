@@ -1,7 +1,8 @@
 
-)text:value:hello world
+)text:value:3 4
 )text:script:./res/scenes/features/serialization/get-attr.scm
-
+)text:position:0 0 -20
+)text:physics:enabled
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:)text

@@ -32,8 +32,9 @@ void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util){
 void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
 }
-void setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&heightmapObj, heightmapAutoserializer, attributes, util);
+  return false;
 }
 std::vector<std::pair<std::string, std::string>> serializeHeightmap(GameObjectHeightmap& heightmapObj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;

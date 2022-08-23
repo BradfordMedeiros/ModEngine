@@ -156,9 +156,10 @@ void removeEmitterObj(GameObjectEmitter& obj, ObjectRemoveUtil& util){
   util.rmEmitter();
 }
 
-void setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setEmitterAttributes(GameObjectEmitter& emitterObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&emitterObj, emitterAutoserializer, attributes, util);
   util.setEmitterEnabled(emitterObj.state);
+  return false;
 }
 
 void emitterObjAttr(GameObjectEmitter& emitterObj, GameobjAttributes& _attributes){

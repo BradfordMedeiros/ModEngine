@@ -1,3 +1,6 @@
 
 test:script:./res/scenes/features/serialization/serialize.scm
 test:target:box/Cube
+test:fieldone:one
+test:fieldtwo:two
+test:number:3

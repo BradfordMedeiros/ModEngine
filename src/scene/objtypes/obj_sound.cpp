@@ -58,6 +58,7 @@ void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util){
   unloadSoundState(soundObj.source, soundObj.clip); 
 }
 
-void setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, attributes, util);
+  return false;
 }

@@ -22,8 +22,7 @@
 			;(list "lookat" "box")
 			(list "physics" "enabled")
 			(list "physics_shape" "shape_sphere")
-			(list "physics_mass" 100)
-			(list "physics_maxspeed" -0.001)
+			(list "customattr" "overrideenvalue")
 		)
 	)
 	(list "*button" 
@@ -37,7 +36,7 @@
 	)
 	(list "&sample"
 		(list
-			(list "loop" "false")
+			(list "loop" "true")
 			(list "clip" "./res/sounds/silenced-gunshot.wav")
 		)
 	)

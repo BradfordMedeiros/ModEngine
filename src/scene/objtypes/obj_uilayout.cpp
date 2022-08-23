@@ -313,6 +313,7 @@ void getUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& _at
   autoserializerGetAttr((char*)&layoutObj, uiLayoutAutoserializer, _attributes);
 }
 
-void setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setUILayoutAttributes(GameObjectUILayout& layoutObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&layoutObj, uiLayoutAutoserializer, attributes, util);
+  return false;
 }

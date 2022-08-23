@@ -12,6 +12,6 @@ struct GameObjectPortal {
 GameObjectPortal createPortal(GameobjAttributes& attr, ObjectTypeUtil& util);
 void portalObjAttr(GameObjectPortal& soundObj, GameobjAttributes& _attributes);
 std::vector<std::pair<std::string, std::string>> serializePortal(GameObjectPortal& obj, ObjectSerializeUtil& util);
-void setPortalAttributes(GameObjectPortal& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+bool setPortalAttributes(GameObjectPortal& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 
 #endif

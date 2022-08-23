@@ -10,7 +10,7 @@ std::size_t getVariantIndex(GameObjectObj gameobj){
 }
 
 void nothingObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes){ }// do nothing 
-void nothingSetObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes, ObjectSetAttribUtil& util){ }// do nothing 
+bool nothingSetObjAttr(GameObjectObj& obj, GameobjAttributes& _attributes, ObjectSetAttribUtil& util){ return false; }// do nothing 
 
 
 template<typename T>
@@ -23,11 +23,11 @@ std::function<void(GameObjectObj& obj, GameobjAttributes& attr)> convertElementV
 }
 
 template<typename T>
-std::function<void(GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil&)> convertElementSetValue(std::function<void(T&, GameobjAttributes&, ObjectSetAttribUtil&)> setAttr) {   
-  return [setAttr](GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil& util) -> void {
+std::function<bool(GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil&)> convertElementSetValue(std::function<bool(T&, GameobjAttributes&, ObjectSetAttribUtil&)> setAttr) {   
+  return [setAttr](GameObjectObj& obj, GameobjAttributes& attr, ObjectSetAttribUtil& util) -> bool {
     auto objInstance = std::get_if<T>(&obj);
     assert(objInstance != NULL);
-    setAttr(*objInstance, attr, util);
+    return setAttr(*objInstance, attr, util);
   };
 }
 
@@ -554,17 +554,17 @@ void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes){
 }
 
 // TODO -> this needs updating hard.  
-void setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   GameObjectObj& toRender = mapping.at(id);
   auto variantIndex = toRender.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
-      objType.setAttributes(toRender, attributes, util);
-      return;
+      return objType.setAttributes(toRender, attributes, util);
     }
   }
   std::cout << "obj type not supported" << std::endl;
   assert(false);
+  return false;
 }
   
 std::vector<std::pair<std::string, std::string>> getAdditionalFields(objid id, std::map<objid, GameObjectObj>& mapping, std::function<std::string(int)> getTextureName){

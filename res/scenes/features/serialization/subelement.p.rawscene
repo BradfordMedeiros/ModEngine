@@ -3,7 +3,6 @@ box:scale:100.000000 1.000000 100.000000
 box:mesh:./res/models/box/box.obj
 
 box/Cube:texture:./res/textures/blacktop.jpg
-box/Cube:script:./res/scenes/features/serialization/get-attr.scm
 #box:script:./res/scenes/features/serialization/get-attr.scm
 
 test:script:./res/scenes/features/serialization/serialize.scm

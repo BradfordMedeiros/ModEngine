@@ -76,6 +76,7 @@ void getUIButtonAttributes(GameObjectUIButton& uiButton, GameobjAttributes& _att
   autoserializerGetAttr((char*)&uiButton, uiButtonAutoserializer, _attributes);
 }
 
-void setUIButtonAttributes(GameObjectUIButton& buttonObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setUIButtonAttributes(GameObjectUIButton& buttonObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&buttonObj, uiButtonAutoserializer, attributes, util);
+  return false;
 }

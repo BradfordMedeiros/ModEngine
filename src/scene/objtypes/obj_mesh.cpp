@@ -75,6 +75,7 @@ void meshObjAttr(GameObjectMesh& meshObj, GameobjAttributes& _attributes){
   autoserializerGetAttr((char*)&meshObj, meshAutoserializer, _attributes);
 }
 
-void setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setMeshAttributes(GameObjectMesh& meshObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&meshObj, meshAutoserializer, attributes, util);
+  return false;
 }

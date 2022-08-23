@@ -65,6 +65,7 @@ void getUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& _at
   autoserializerGetAttr((char*)&sliderObj, uiSliderAutoserializer, _attributes);
 }
 
-void setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setUISliderAttributes(GameObjectUISlider& sliderObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&sliderObj, uiSliderAutoserializer, attributes, util);
+  return false;
 }

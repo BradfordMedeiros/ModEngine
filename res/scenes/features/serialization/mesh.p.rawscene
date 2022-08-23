@@ -5,9 +5,11 @@ mesh:texture:./res/textures/blacktop.jpg
 mesh:texturetiling:10 10
 
 mesh:script:./res/scenes/features/serialization/get-attr.scm
-mesh:script-target:mesh/Plane_Plane.001
+#mesh:script-target:mesh/Plane_Plane.001
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:mesh/Plane_Plane.001
 
 serialize:script:./res/scenes/features/serialization/serialize.scm
+
+mesh/Plane_Plane.001:texture:./res/textures/blacktop.jpg

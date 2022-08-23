@@ -1,7 +1,6 @@
 
 &sample:clip:./res/sounds/sample.wav
 &sample:script:./res/scenes/features/serialization/get-attr.scm
-&sample:position:1 0 1
 
 test:script:./res/scenes/features/serialization/set-attr.scm
 test:target:&sample

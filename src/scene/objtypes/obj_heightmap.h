@@ -18,7 +18,7 @@ GameObjectHeightmap createHeightmap(GameobjAttributes& attr, ObjectTypeUtil& uti
 void removeHeightmap(GameObjectHeightmap& heightmapObj, ObjectRemoveUtil& util);
 
 void heightmapObjAttr(GameObjectHeightmap& geoObj, GameobjAttributes& _attributes);
-void setHeightmapAttributes(GameObjectHeightmap& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+bool setHeightmapAttributes(GameObjectHeightmap& geoObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeHeightmap(GameObjectHeightmap& obj, ObjectSerializeUtil& util);
 
 

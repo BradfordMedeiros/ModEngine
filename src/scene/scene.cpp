@@ -1095,13 +1095,13 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
     },
     .pathForModLayer = world.interface.modlayerPath,
   };
-  setObjectAttributes(world.objectMapping, id, attr, util);
+  auto shouldRebuildPhysics = setObjectAttributes(world.objectMapping, id, attr, util);
 
   GameObject& obj = getGameObject(world, id);
   bool oldPhysicsEnabled = obj.physicsOptions.enabled;
   setAllAttributes(obj, attr, util);
   bool newPhysicsEnabled = obj.physicsOptions.enabled;
-  afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled);
+  afterAttributesSet(world, id, obj, attr.vecAttr.vec3.find("physics_velocity") != attr.vecAttr.vec3.end(), oldPhysicsEnabled != newPhysicsEnabled || shouldRebuildPhysics);
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
   GameObject& gameobj = getGameObject(world, id);

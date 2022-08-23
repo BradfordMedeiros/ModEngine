@@ -24,7 +24,7 @@ struct GameObjectUIText {
 
 GameObjectUIText createUIText(GameobjAttributes& attr, ObjectTypeUtil& util);
 void textObjAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes);
-void setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
+bool setUITextAttributes(GameObjectUIText& textObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util);
 std::vector<std::pair<std::string, std::string>> serializeText(GameObjectUIText& obj, ObjectSerializeUtil& util);
 
 #endif
