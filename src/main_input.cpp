@@ -102,6 +102,7 @@ glm::vec2 ndiCoord(){
   return glm::vec2(xNdc, yNdc);
 }
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
+  std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
   onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
   auto coords = ndiCoord();
   cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
@@ -164,6 +165,9 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
     }
     state.cursorLeft = state.currentScreenWidth / 2;
     state.cursorTop = state.currentScreenHeight / 2;
+    state.lastY = state.cursorTop;
+    state.lastX = state.cursorLeft;
+    glfwSetCursorPos(window, state.currentScreenWidth / 2, state.currentScreenHeight / 2);
   }
 }
 
