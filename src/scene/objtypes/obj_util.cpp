@@ -652,7 +652,7 @@ void autoserializerGetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
     return;
   }
   AutoSerializeForceString* strForceValue = std::get_if<AutoSerializeForceString>(&value);
-  if (strValue != NULL){
+  if (strForceValue != NULL){
     std::string* address = (std::string*)(((char*)structAddress) + strForceValue -> structOffset);
     _attributes.stringAttributes[strForceValue -> field] = *address;
     return;
