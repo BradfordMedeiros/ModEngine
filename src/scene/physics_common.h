@@ -3,6 +3,7 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
+#include <optional>
 
 glm::vec3 btToGlm(btVector3 pos);
 btVector3 glmToBt(glm::vec3 pos);
@@ -11,7 +12,7 @@ btQuaternion glmToBt(glm::quat rotation);
 
 struct PhysicsValue {
   btRigidBody* body;
-  glm::vec3 offset;
+  std::optional<glm::vec3> offset;
 };
 
 #endif

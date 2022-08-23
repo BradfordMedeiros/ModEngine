@@ -64,7 +64,7 @@ struct Transformation {
 struct PhysicsInfo {
   BoundInfo boundInfo;
   Transformation transformation;
-  glm::vec3 offset;
+  std::optional<glm::vec3> offset;
 };
 
 enum AlignType { NEGATIVE_ALIGN, CENTER_ALIGN, POSITIVE_ALIGN };
