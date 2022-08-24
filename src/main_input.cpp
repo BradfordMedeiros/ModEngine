@@ -415,9 +415,21 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
     if (fileType == IMAGE_EXTENSION){
       setTexture(selected(state.editor), paths[i]);
     }else if (fileType == AUDIO_EXTENSION){
-      makeObjectAttr(sceneId, "&" + objectName, {{ "clip", paths[i] }}, {}, {});
+      GameobjAttributes attr {
+        .stringAttributes = {{ "clip", paths[i] }}, 
+        .numAttributes = {}, 
+        .vecAttr = vectorAttributes { .vec3 = {}, .vec4 = {}},
+        .children = {},
+      };
+      makeObjectAttr(sceneId, "&" + objectName, attr);
     }else if (fileType == MODEL_EXTENSION){
-      makeObjectAttr(sceneId, objectName, {{ "mesh", paths[i] }}, {}, {});
+      GameobjAttributes attr {
+        .stringAttributes = {{ "mesh", paths[i] }}, 
+        .numAttributes = {}, 
+        .vecAttr = vectorAttributes { .vec3 = {}, .vec4 = {}},
+        .children = {},
+      };
+      makeObjectAttr(sceneId, objectName, attr);
     }else if (fileType == UNKNOWN_EXTENSION){
       std::cout << "UNKNOWN file format, so doing nothing: " << paths[i] << std::endl;
     }

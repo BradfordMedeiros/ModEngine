@@ -248,22 +248,20 @@ void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
   auto selectedObject =  getGameObject(world, idToUse);
 
   if (layerSelectIndex >= 0){
+    GameobjAttributes manipulatorAttr {
+      .stringAttributes = {
+        {"mesh", "./res/models/ui/manipulator.gltf" }, 
+        {"layer", "scale" },
+      },
+      .numAttributes = {},
+      .vecAttr = { .vec3 = {}, .vec4 = {} },
+      .children = {},
+    };
     onManipulatorSelectItem(
       idToUse, 
       selectedSubObj.name,
-      []() -> objid {
-        return makeObjectAttr(
-          0,
-          "manipulator", 
-          { 
-            {"mesh", "./res/models/ui/manipulator.gltf" }, 
-            {"layer", "scale" },
-          }, 
-          {}, 
-          {
-            //{"scale", glm::vec3(7.f, 7.f, 7.f)}
-          }
-        );
+      [&manipulatorAttr]() -> objid {
+        return makeObjectAttr(0, "manipulator", manipulatorAttr);
       },
       removeObjectById,
       getGameObjectPos,

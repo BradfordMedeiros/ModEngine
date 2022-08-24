@@ -81,7 +81,13 @@ int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> a
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
 
-  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, {}, {}, vectorAttributes { .vec3 = {{"position", offset}}, .vec4 = {} } );
+  GameobjAttributes attr {
+    .stringAttributes = {}, 
+    .numAttributes = {}, 
+    .vecAttr = vectorAttributes { .vec3 = {{"position", offset}}, .vec4 = {} },
+    .children = {},
+  };
+  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr);
   std::cout << "load scene offset: " << print(offset) << std::endl;
   auto sceneId = loadScene(sceneFile, {}, std::nullopt);
   auto rootId = rootIdForScene(world.sandbox, sceneId);
@@ -244,13 +250,9 @@ glm::quat getGameObjectRotationRelative(int32_t index){
   return getGameObjectRotation(index, false);
 }
 
-objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, vectorAttributes vecAttr){
-  GameobjAttributes attributes {
-    .stringAttributes = stringAttributes,
-    .numAttributes = numAttributes,
-    .vecAttr = vecAttr,
-  };
-  return addObjectToScene(world, sceneId, name, attributes);
+objid makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes){
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  return addObjectToScene(world, sceneId, name, attributes, submodelAttributes);
 }
 
 void copyObject(int32_t id){

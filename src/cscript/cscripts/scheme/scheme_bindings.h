@@ -66,7 +66,7 @@ void createStaticSchemeBindings(
   void (*stopRecording)(objid id, std::string recordingPath),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
-  objid (*makeObjectAttr)(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, vectorAttributes vecAttr),
+  objid (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr),
   void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),

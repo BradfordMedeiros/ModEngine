@@ -87,7 +87,7 @@ glm::quat getGameObjectRotationRelative(int32_t index); // relative
 void setGameObjectRotation(int32_t index, glm::quat rotation);
 void setGameObjectRotationRelative(int32_t index, glm::quat rotation);
 
-objid makeObjectAttr(objid sceneId, std::string name, std::map<std::string, std::string> stringAttributes, std::map<std::string, double> numAttributes, vectorAttributes vecAttr);
+objid makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes);
 void removeObjectById(int32_t id);
 void copyObject(int32_t id);
 

@@ -956,7 +956,7 @@ void removeAllScenesFromWorld(World& world){
   }
 }
 
-GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, bool returnOnly){
+GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes, bool returnOnly){
   int id = attributes.numAttributes.find("id") != attributes.numAttributes.end() ? attributes.numAttributes.at("id") : -1;
   bool useObjId = attributes.numAttributes.find("id") != attributes.numAttributes.end();
   auto idToAdd = useObjId ? id : getUniqueObjId();
@@ -971,7 +971,7 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
   }
   std::vector<GameObjectObj> addedGameobjObjs = {};
 
-  std::map<std::string, GameobjAttributes> submodelAttributes;
+  
   addSerialObjectsToWorld(world, sceneId, idsAdded, getId, {{ name, GameobjAttributesWithId{ .id = idToAdd, .attr = attributes }}}, returnOnly, addedGameobjObjs, submodelAttributes);
   if (returnOnly){
     assert(addedGameobjObjs.size() == 1);
@@ -1003,16 +1003,19 @@ SingleObjDeserialization deserializeSingleObj(std::string& serializedObj, objid 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj){
   auto singleObj = deserializeSingleObj(serializedObj, -1, false);
   assert(singleObj.name == name);
-  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attr, true);
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  MODTODO("deserialized obj doesn't include submodel attr");
+  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attr, submodelAttributes, true);
 }
 
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes){
-  createObjectForScene(world, sceneId, name, attributes, false).gameobj;
+objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
+  createObjectForScene(world, sceneId, name, attributes, submodelAttributes, false).gameobj;
   return getIdForName(world.sandbox, name, sceneId);
 }
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
   auto singleObj = deserializeSingleObj(serializedObj, id, useObjId);
-  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attr);
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attr, submodelAttributes);
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
@@ -1335,7 +1338,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
       if (particleOpts.angularVelocity.has_value()){
         attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
       }
-      objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes);
+      std::map<std::string, GameobjAttributes> submodelAttributes = {};
+      objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attributes, submodelAttributes);
       if (particleOpts.orientation.has_value()){
         physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
       }
