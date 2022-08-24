@@ -37,9 +37,13 @@ void enforceRootObjects(Scene& scene){
   }
 }
 
-GameobjAttributes rootGameObject(){
-  return GameobjAttributes {
-    .stringAttributes = {{"physics", "disabled"}}
+
+AttrChildrenPair rootGameObject(){
+  return AttrChildrenPair{
+    .attr = GameobjAttributes {
+      .stringAttributes = {{"physics", "disabled"}}
+    },
+    .children = {},
   };
 }
 
@@ -61,20 +65,21 @@ SceneDeserialization createSceneFromParsedContent(
 
   assert(serialGameAttrs.find(rootName) == serialGameAttrs.end());
   assert(rootName.find(',') == std::string::npos);
+
   serialGameAttrs[rootName] = rootGameObject();
 
   std::map<std::string, GameObject> gameobjs;
 
-  for (auto [name, gameAttr] : serialGameAttrs){
+  for (auto [name, attrWithChildren] : serialGameAttrs){
     auto objName = name;
     if (name != rootName){
-      objid id = (gameAttr.stringAttributes.find("id") != gameAttr.stringAttributes.end()) ? 
-        std::atoi(gameAttr.stringAttributes.at("id").c_str()) : 
+      objid id = (attrWithChildren.attr.stringAttributes.find("id") != attrWithChildren.attr.stringAttributes.end()) ? 
+        std::atoi(attrWithChildren.attr.stringAttributes.at("id").c_str()) : 
         getNewObjectId();
 
-      gameobjs[name] = gameObjectFromFields(name, id, gameAttr, getObjautoserializerFields(objName));
+      gameobjs[name] = gameObjectFromFields(name, id, attrWithChildren.attr, getObjautoserializerFields(objName));
     }else{
-      gameobjs[name] = gameObjectFromFields(name, scene.rootId, gameAttr, getObjautoserializerFields(objName)); 
+      gameobjs[name] = gameObjectFromFields(name, scene.rootId, attrWithChildren.attr, getObjautoserializerFields(objName)); 
     }
   }
 
@@ -83,8 +88,8 @@ SceneDeserialization createSceneFromParsedContent(
     auto addedId = sandboxAddToScene(scene, sceneId, -1, name, gameobjectObj);
   }
 
-  for (auto [name, gameobj] : serialGameAttrs){
-    for (auto childName : gameobj.children){
+  for (auto [name, attrWithChildren] : serialGameAttrs){
+    for (auto childName : attrWithChildren.children){
       auto parentId = scene.sceneToNameToId.at(sceneId).at(name);
       enforceParentRelationship(scene, scene.sceneToNameToId.at(sceneId).at(childName), parentId);
     }
@@ -92,14 +97,19 @@ SceneDeserialization createSceneFromParsedContent(
   enforceRootObjects(scene);
 
   std::map<std::string, GameobjAttributes> additionalFields;
-  for (auto &[name, attr] : serialGameAttrs){
-    additionalFields[name] = attr;
+  for (auto &[name, attrWithChildren] : serialGameAttrs){
+    additionalFields[name] = attrWithChildren.attr;
+  }
+
+  std::map<std::string, GameobjAttributes> subelementAttributes;
+  for (auto &[name, attrWithChildren] : subelementAttrs){
+    subelementAttributes[name] = attrWithChildren.attr;
   }
 
   SceneDeserialization deserializedScene {
     .scene = scene,
     .additionalFields = additionalFields,
-    .subelementAttributes = subelementAttrs,
+    .subelementAttributes = subelementAttributes,
   };
   return deserializedScene;
 }
@@ -364,7 +374,7 @@ SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std
   std::sort(std::begin(layers), std::end(layers), [](LayerInfo layer1, LayerInfo layer2) { return layer1.zIndex < layer2.zIndex; });
 
   std::string name = "root";
-  auto rootObj = gameObjectFromFields(name, mainScene.rootId, rootGameObject(), getObjautoserializerFields(name)); 
+  auto rootObj = gameObjectFromFields(name, mainScene.rootId, rootGameObject().attr, getObjautoserializerFields(name)); 
   auto rootObjId = sandboxAddToScene(mainScene, 0, -1, rootObj.name, rootObj);
   addObjectToCache(mainScene, layers, rootObjId);
 

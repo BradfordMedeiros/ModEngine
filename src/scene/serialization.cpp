@@ -263,22 +263,28 @@ DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
   };
   return dividedTokens;
 }
-std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Token> tokens){
-  std::map<std::string, GameobjAttributes> objectAttributes;
+std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token> tokens){
+  std::map<std::string, AttrChildrenPair> objectAttributes;
 
   for (Token token : tokens){
     assert(token.target != "" && token.attribute != "" && token.payload != "");
 
     if (objectAttributes.find(token.target) == objectAttributes.end()) {
       assert(token.target.find(',') == std::string::npos);
-      objectAttributes[token.target] = GameobjAttributes {};
+      objectAttributes[token.target] = AttrChildrenPair {
+        .attr = GameobjAttributes { },
+        .children = {},
+      };
     }
 
     if (token.attribute == "child"){
       auto children = parseChildren(token.payload);
       for (auto child : children){
         if (objectAttributes.find(child) == objectAttributes.end()){
-          objectAttributes[child] = GameobjAttributes { };
+          objectAttributes[child] = AttrChildrenPair {
+            .attr = GameobjAttributes { },
+            .children = {},
+          };
         }
       }
       objectAttributes.at(token.target).children = children;
@@ -286,7 +292,7 @@ std::map<std::string, GameobjAttributes> deserializeSceneTokens(std::vector<Toke
     }
 
    
-    addFieldDynamic(objectAttributes.at(token.target), token.attribute, token.payload);
+    addFieldDynamic(objectAttributes.at(token.target).attr, token.attribute, token.payload);
   }
 
   return objectAttributes;

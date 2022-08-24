@@ -419,7 +419,6 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
         .stringAttributes = {{ "clip", paths[i] }}, 
         .numAttributes = {}, 
         .vecAttr = vectorAttributes { .vec3 = {}, .vec4 = {}},
-        .children = {},
       };
       makeObjectAttr(sceneId, "&" + objectName, attr);
     }else if (fileType == MODEL_EXTENSION){
@@ -427,7 +426,6 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
         .stringAttributes = {{ "mesh", paths[i] }}, 
         .numAttributes = {}, 
         .vecAttr = vectorAttributes { .vec3 = {}, .vec4 = {}},
-        .children = {},
       };
       makeObjectAttr(sceneId, objectName, attr);
     }else if (fileType == UNKNOWN_EXTENSION){

@@ -159,7 +159,6 @@ SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
     .stringAttributes = attrs.stringAttributes,
     .numAttributes = attrs.numAttributes,
     .vecAttr = attrs.vecAttr,
-    .children = {},
   };
   objid id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attr);
   return scm_from_int32(id);

@@ -255,7 +255,6 @@ void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
       },
       .numAttributes = {},
       .vecAttr = { .vec3 = {}, .vec4 = {} },
-      .children = {},
     };
     onManipulatorSelectItem(
       idToUse, 

@@ -186,8 +186,6 @@ struct GameobjAttributes {
   std::map<std::string, std::string> stringAttributes;
   std::map<std::string, double> numAttributes;
   vectorAttributes vecAttr;
-  // todo get rid of these fields
-  std::vector<std::string> children;
 };
 
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);

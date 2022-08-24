@@ -62,7 +62,7 @@ struct GameObjPair {
   GameObjectObj gameobjObj;
 };
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj);
-objid addObjectToScene(World& world, objid sceneId, std::string name, GameobjAttributes attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
+objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes);
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId);
 
 void removeObjectFromScene(World& world, objid id);
