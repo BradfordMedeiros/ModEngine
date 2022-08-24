@@ -108,64 +108,72 @@ void maybeCallFuncString(const char* function, const char* payload){
   }   
 }
 
-GameobjAttributes scmToAttributes(SCM scmAttributes){
-  std::map<std::string, double> numAttributes;
-  std::map<std::string, std::string> stringAttributes;
-  std::map<std::string, glm::vec3> vec3Attributes;
-  std::map<std::string, glm::vec4> vec4Attributes;
+void scmHandleAttrListItem(GameobjAttributes& _attr, SCM propertyPair){
+  auto pairLength = toUnsignedInt(scm_length(propertyPair));
+  assert(pairLength == 2);
+  auto attrName = scm_to_locale_string(scm_list_ref(propertyPair, scm_from_unsigned_integer(0)));
+  assert(
+    _attr.stringAttributes.find(attrName) == _attr.stringAttributes.end() &&
+    _attr.vecAttr.vec3.find(attrName) == _attr.vecAttr.vec3.end()
+  );
+
+  auto attrValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(1));
+
+  bool isNumber = scm_is_number(attrValue);
+  bool isString = scm_is_string(attrValue);
+  bool isList = scm_to_bool(scm_list_p(attrValue));
+  assert(isNumber || isString || isList);
+
+  if (isNumber){
+    _attr.numAttributes[attrName] = scm_to_double(attrValue);
+  }else if (isString){
+    _attr.stringAttributes[attrName] = scm_to_locale_string(attrValue);
+  }else{
+    auto vecListLength = toUnsignedInt(scm_length(attrValue));
+    assert(vecListLength == 3 || vecListLength == 4);
+
+    if (vecListLength == 3){
+      double values[] = {0, 0, 0};
+      for (int j = 0; j < vecListLength; j++){
+        auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
+        values[j] = scm_to_double(vecValue);
+      }
+      _attr.vecAttr.vec3[attrName] = glm::vec3(values[0], values[1], values[2]);
+    }else{
+      double values[] = {0, 0, 0, 0};
+      for (int j = 0; j < vecListLength; j++){
+        auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
+        values[j] = scm_to_double(vecValue);
+      }
+      _attr.vecAttr.vec4[attrName] = glm::vec4(values[0], values[1], values[2], values[3]);
+    }
+  }
+}
+
+ScmAttributeValue scmToAttributes(SCM scmAttributes){
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  submodelAttributes["someobj2/Cube.001"] = GameobjAttributes {
+    .stringAttributes = {{ "texture", "./res/textures/wood.jpg" }},
+  };
+
+  ScmAttributeValue attrs {
+    .attr = GameobjAttributes {
+      .stringAttributes = {},
+      .numAttributes = {},
+      .vecAttr = vectorAttributes {
+        .vec3 = {},
+        .vec4 = {}
+      },      
+    },
+    .submodelAttributes = submodelAttributes,
+  };
 
   auto numElements = toUnsignedInt(scm_length(scmAttributes));
   for (int i = 0; i < numElements; i++){
     auto propertyPair = scm_list_ref(scmAttributes, scm_from_unsigned_integer(i));
-    auto pairLength = toUnsignedInt(scm_length(propertyPair));
-    assert(pairLength == 2);
-    auto attrName = scm_to_locale_string(scm_list_ref(propertyPair, scm_from_unsigned_integer(0)));
-    assert(
-      stringAttributes.find(attrName) == stringAttributes.end() &&
-      vec3Attributes.find(attrName) == vec3Attributes.end()
-    );
-
-    auto attrValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(1));
-
-    bool isNumber = scm_is_number(attrValue);
-    bool isString = scm_is_string(attrValue);
-    bool isList = scm_to_bool(scm_list_p(attrValue));
-    assert(isNumber || isString || isList);
-
-    if (isNumber){
-      numAttributes[attrName] = scm_to_double(attrValue);
-    }else if (isString){
-      stringAttributes[attrName] = scm_to_locale_string(attrValue);
-    }else{
-      auto vecListLength = toUnsignedInt(scm_length(attrValue));
-      assert(vecListLength == 3 || vecListLength == 4);
-
-      if (vecListLength == 3){
-        double values[] = {0, 0, 0};
-        for (int j = 0; j < vecListLength; j++){
-          auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
-          values[j] = scm_to_double(vecValue);
-        }
-        vec3Attributes[attrName] = glm::vec3(values[0], values[1], values[2]);
-      }else{
-        double values[] = {0, 0, 0, 0};
-        for (int j = 0; j < vecListLength; j++){
-          auto vecValue = scm_list_ref(attrValue, scm_from_unsigned_integer(j));
-          values[j] = scm_to_double(vecValue);
-        }
-        vec4Attributes[attrName] = glm::vec4(values[0], values[1], values[2], values[3]);
-      }
-
-    }
+    scmHandleAttrListItem(attrs.attr, propertyPair);
   }
-  GameobjAttributes attrs { 
-    .stringAttributes = stringAttributes,
-    .numAttributes = numAttributes,
-    .vecAttr = vectorAttributes {
-      .vec3 = vec3Attributes,
-      .vec4 = vec4Attributes
-    },
-  };
+
   return attrs;
 }
 

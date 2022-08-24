@@ -150,17 +150,14 @@ SCM scmRotateCamera(SCM xoffset, SCM yoffset){
 objid (*_makeObjectAttr)(
   objid sceneId,
   std::string name, 
-  GameobjAttributes& attr
+  GameobjAttributes& attr,
+  std::map<std::string, GameobjAttributes>& submodelAttributes
 );
 SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
   auto sceneId = _listSceneId(currentModuleId());
   auto attrs = scmToAttributes(scmAttributes);
-  GameobjAttributes attr{
-    .stringAttributes = attrs.stringAttributes,
-    .numAttributes = attrs.numAttributes,
-    .vecAttr = attrs.vecAttr,
-  };
-  objid id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attr);
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  objid id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attrs.attr, attrs.submodelAttributes);
   return scm_from_int32(id);
 }
 
@@ -348,7 +345,7 @@ SCM scmGetGameObjectAttr(SCM gameobj){
 void (*_setGameObjectAttr)(int32_t id, GameobjAttributes& attr);
 SCM scmSetGameObjectAttr(SCM gameobj, SCM attr){
   auto id = getGameobjId(gameobj);
-  auto attrs = scmToAttributes(attr);
+  auto attrs = scmToAttributes(attr).attr;
   _setGameObjectAttr(id, attrs);
   return SCM_UNSPECIFIED;
 }
@@ -1228,7 +1225,7 @@ void createStaticSchemeBindings(
   void (*stopRecording)(objid id, std::string recordingPath),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
-  objid (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr),
+  objid (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& submodelAttributes),
   void (*makeParent)(objid child, objid parent),
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance),
   void (*saveScreenshot)(std::string),

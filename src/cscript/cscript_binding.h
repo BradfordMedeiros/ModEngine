@@ -66,7 +66,7 @@ struct CustomApiBindings {
   void (*stopRecording)(objid id, std::string recordingPath);
   objid (*createRecording)(objid id);
   void (*saveRecording)(objid recordingId, std::string filepath);
-  objid (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr);
+  objid (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& submodelAttributes);
   void (*makeParent)(objid child, objid parent);
   std::vector<HitObject> (*raycast)(glm::vec3 pos, glm::quat direction, float maxDistance);
   void (*saveScreenshot)(std::string);

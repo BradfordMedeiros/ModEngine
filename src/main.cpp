@@ -260,7 +260,8 @@ void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
       idToUse, 
       selectedSubObj.name,
       [&manipulatorAttr]() -> objid {
-        return makeObjectAttr(0, "manipulator", manipulatorAttr);
+        std::map<std::string, GameobjAttributes> submodelAttributes = {};
+        return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes);
       },
       removeObjectById,
       getGameObjectPos,

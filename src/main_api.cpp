@@ -86,7 +86,8 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
     .numAttributes = {}, 
     .vecAttr = vectorAttributes { .vec3 = {{"position", offset}}, .vec4 = {} },
   };
-  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr);
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes);
   std::cout << "load scene offset: " << print(offset) << std::endl;
   auto sceneId = loadScene(sceneFile, {}, std::nullopt);
   auto rootId = rootIdForScene(world.sandbox, sceneId);
@@ -249,8 +250,7 @@ glm::quat getGameObjectRotationRelative(int32_t index){
   return getGameObjectRotation(index, false);
 }
 
-objid makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes){
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+objid makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
     .attr = attributes,
     .children = {},
