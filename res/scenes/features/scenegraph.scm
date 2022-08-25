@@ -1,17 +1,33 @@
-;(define fontsize 5)
-;(define smallFontSize 4)
+;;
+;; Logic for different types of depth 
 
-(define fontsize 20)
-(define smallFontSize (- fontsize 1))
+(define (getMockMeshList)
+	(list
+		(list "AllMeshes" "mesh1" (list 0 0))
+		(list "AllMeshes" "mesh2" (list 0 0))
+	)
+)
 
+;(define (getMockScenegraph) (list
+;	(list "root" "mainfolder" (list 0 0))
+;	(list "root2" "mainfolder2" (list 0 1))
+;	(list "mainfolder" "folder1" (list 0 0))
+;	(list "mainfolder" "folder2" (list 0 0))
+;	(list "mainfolder" "folder3" (list 0 0))
+;	(list "folder3" "folder3-1" (list 0 0))
+;	(list "folder3" "folder3-2" (list 0 0))
+;))
+(define (getDepGraph) (scenegraph))
+;(define (getDepGraph) (getMockMeshList))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define fontsize 30)
 (define (increaseFontSize)
 	(set! fontsize (+ fontsize 1))
-	(set! smallFontSize (+ smallFontSize 1))
 	(onGraphChange)
 )
 (define (decreaseFontSize)
 	(set! fontsize (- fontsize 1))
-	(set! smallFontSize (- smallFontSize 1))
 	(onGraphChange)
 )
 
@@ -33,32 +49,9 @@
 )
 
 
-;(define (getscenegraph) (list
-;	(list "root" "mainfolder" (list 0 0))
-;	(list "root2" "mainfolder2" (list 0 1))
-;	(list "mainfolder" "folder1" (list 0 0))
-;	(list "mainfolder" "folder2" (list 0 0))
-;	(list "mainfolder" "folder3" (list 0 0))
-;	(list "folder3" "folder3-1" (list 0 0))
-;	(list "folder3" "folder3-2" (list 0 0))
-;))
-(define (getscenegraph) (scenegraph))
-
-; parent, child, parent scene, child scene
-;(define (getscenegraph) (list
-;	(list "root"  "human"      (list 0 0))
-;	(list "human" "head"       (list 0 0))
-;	(list "human" "legs"       (list 0 0))
-;	(list "human" "right-leg"  (list 0 1))
-;	(list "legs"  "left-left"  (list 0 0))
-;	(list "legs"  "right-leg"  (list 0 0))
-;	(list "right-leg"  "right-toe"  (list 1 1))
-;	(list "human" "arms"       (list 0 0))
-;))
-
-(define depgraph (getscenegraph))
+(define depgraph (getDepGraph))
 (define (refreshDepGraph) 
-	(set! depgraph (getscenegraph))
+	(set! depgraph (getDepGraph))
 )
 
 (define expandState (list))
@@ -78,7 +71,7 @@
 (define (calcSpacing) (* (/ fontsize 1000) 2))
 (define (calcX depth) 
 	(define spacingPerLetter (calcSpacing))
-	(+ -1 (* -0.5 spacingPerLetter) (* depth spacingPerLetter))
+	(+ -1 (* 0.5 spacingPerLetter) (* depth spacingPerLetter))
 )
 (define (rawCalcY depth)
 	(define spacingPerLetter (calcSpacing))
@@ -97,7 +90,6 @@
 (define minOffset (* -1 (rawCalcY 1)))
 
 
-(define (selected index name) (if (equal? index 2) (string-append ">" name) name))
 
 (define selectedIndex 1)
 (define maxIndex #f)
@@ -105,11 +97,6 @@
 	(define adjustedIndex (max 0 index))
 	(set! selectedIndex (if maxIndex (min maxIndex adjustedIndex) adjustedIndex))
 	(onGraphChange)
-)
-(define (selected name expanded index) 
-	(define isSelected (equal? selectedIndex index))
-	(define selectedPrefix (if isSelected "-" " "))
-	(if expanded (string-append selectedPrefix ">" name) (string-append selectedPrefix "^" name))
 )
 
 (define (checkExpanded elementName sceneId)
@@ -121,10 +108,10 @@
 	(define isSelected (equal? selectedIndex height))
 	(if isSelected (set! selectedName (expandPath elementName sceneId)))
 	(draw-text-ndi
-		(selected (string-append elementName "(" (number->string sceneId) ")") expanded height) 
+		(string-append elementName "(" (number->string sceneId) ")")
 		(calcX depth) 
 		(calcY height) 
-		(if isSelected fontsize smallFontSize) 
+		fontsize
 		(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
 		textureId
 	)
@@ -245,17 +232,17 @@
 	(format #t "key is: ~a\n" key)
 	(if (equal? action 1)
 		(begin
-     	(if (equal? key 47) (create-obj))
+     	(if (equal? key 47) (create-obj))  ; /
      	(if (equal? key 264) (setSelectedIndex (+ selectedIndex 1)))                    
-     	(if (equal? key 265) (setSelectedIndex (- selectedIndex 1)))
-     	(if (equal? key 257) (toggleExpanded))
+     	(if (equal? key 265) (setSelectedIndex (- selectedIndex 1))) 
+     	(if (equal? key 257) (toggleExpanded))  ; enter
 		)
 	)
 	(if (equal? key 61)
-		(increaseFontSize)
+		(increaseFontSize)	; = 
 	)
 	(if (equal? key 45)
-		(decreaseFontSize)
+		(decreaseFontSize)  ; -
 	)
 )
 
