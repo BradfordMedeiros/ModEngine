@@ -12,6 +12,8 @@
   					  (list "texture" "./res/textures/grid.png")
   					  (list "mesh" "../gameresources/build/debug/twospike.gltf")
   					  (list "someobj2/Cube.001" "tint" (list 0 1 0 1))
+   					  (list "someobj2/Cube.001" "texture" "./res/textures/blacktop.jpg")
+   					  (list "someobj2/Cube.001" "position" (list 0 -1 -1))
   					)
 					)	
 					(set! madeobj #t)

@@ -108,16 +108,15 @@ void maybeCallFuncString(const char* function, const char* payload){
   }   
 }
 
-void scmHandleAttrListItem(GameobjAttributes& _attr, SCM propertyPair){
-  auto pairLength = toUnsignedInt(scm_length(propertyPair));
-  assert(pairLength == 2);
-  auto attrName = scm_to_locale_string(scm_list_ref(propertyPair, scm_from_unsigned_integer(0)));
+void scmHandleAttrListItem(GameobjAttributes& _attr, SCM firstValue, SCM secondValue){
+  auto attrName = scm_to_locale_string(firstValue);
+  auto attrValue = secondValue;
+
   assert(
     _attr.stringAttributes.find(attrName) == _attr.stringAttributes.end() &&
     _attr.vecAttr.vec3.find(attrName) == _attr.vecAttr.vec3.end()
   );
 
-  auto attrValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(1));
 
   bool isNumber = scm_is_number(attrValue);
   bool isString = scm_is_string(attrValue);
@@ -152,10 +151,6 @@ void scmHandleAttrListItem(GameobjAttributes& _attr, SCM propertyPair){
 
 ScmAttributeValue scmToAttributes(SCM scmAttributes){
   std::map<std::string, GameobjAttributes> submodelAttributes;
-  submodelAttributes["someobj2/Cube.001"] = GameobjAttributes {
-    .stringAttributes = {{ "texture", "./res/textures/wood.jpg" }},
-  };
-
   ScmAttributeValue attrs {
     .attr = GameobjAttributes {
       .stringAttributes = {},
@@ -171,7 +166,30 @@ ScmAttributeValue scmToAttributes(SCM scmAttributes){
   auto numElements = toUnsignedInt(scm_length(scmAttributes));
   for (int i = 0; i < numElements; i++){
     auto propertyPair = scm_list_ref(scmAttributes, scm_from_unsigned_integer(i));
-    scmHandleAttrListItem(attrs.attr, propertyPair);
+    auto pairLength = toUnsignedInt(scm_length(propertyPair));
+    assert(pairLength == 2 || pairLength == 3);
+    bool isSubmodelAttr = pairLength == 3;
+
+    auto firstValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(0));
+    auto secondValue = scm_list_ref(propertyPair, scm_from_unsigned_integer(1));
+    auto thirdValue = isSubmodelAttr ? scm_list_ref(propertyPair, scm_from_unsigned_integer(2)) : SCM_UNSPECIFIED;
+
+    if (isSubmodelAttr){
+      auto submodelName = scm_to_locale_string(firstValue);
+      if (attrs.submodelAttributes.find(submodelName) == attrs.submodelAttributes.end()){
+        attrs.submodelAttributes[submodelName] = GameobjAttributes {
+          .stringAttributes = {},
+          .numAttributes = {},
+          .vecAttr = {
+            .vec3 = {},
+            .vec4 = {},
+          },
+        };
+      }
+      scmHandleAttrListItem(attrs.submodelAttributes.at(submodelName), secondValue, thirdValue);
+    }else{
+      scmHandleAttrListItem(attrs.attr, firstValue, secondValue);
+    }
   }
 
   return attrs;
