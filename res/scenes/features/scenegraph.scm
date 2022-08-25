@@ -1,24 +1,54 @@
 ;;
 ;; Logic for different types of depth 
 
-(define (getMockMeshList)
+(define (getMockModelList)
 	(list
 		(list "AllMeshes" "mesh1" (list 0 0))
 		(list "AllMeshes" "mesh2" (list 0 0))
 	)
 )
 
-;(define (getMockScenegraph) (list
-;	(list "root" "mainfolder" (list 0 0))
-;	(list "root2" "mainfolder2" (list 0 1))
-;	(list "mainfolder" "folder1" (list 0 0))
-;	(list "mainfolder" "folder2" (list 0 0))
-;	(list "mainfolder" "folder3" (list 0 0))
-;	(list "folder3" "folder3-1" (list 0 0))
-;	(list "folder3" "folder3-2" (list 0 0))
-;))
-(define (getDepGraph) (scenegraph))
-;(define (getDepGraph) (getMockMeshList))
+(format #t "list models: ~a\n" (ls-models))
+
+(define (getMockScenegraph) (list
+	(list "root" "mainfolder" (list 0 0))
+	(list "root2" "mainfolder2" (list 0 1))
+	(list "mainfolder" "folder1" (list 0 0))
+	(list "mainfolder" "folder2" (list 0 0))
+	(list "mainfolder" "folder3" (list 0 0))
+	(list "folder3" "folder3-1" (list 0 0))
+	(list "folder3" "folder3-2" (list 0 0))
+))
+
+(define (makeIntoModelGraph modelpath) (list "models" modelpath (list 0 0)))
+(define (getModelList) (map makeIntoModelGraph (ls-models)))
+(define (getNoData) (list (list "data" "none available" (list 0 0))))
+
+(define modeToGetDepGraph
+	(list
+		(list "nodata" getNoData)
+		(list "mock-scenegraph" getMockScenegraph)
+		(list "scenegraph" scenegraph)
+		(list "mock-models" getMockModelList)
+		(list "models" getModelList)
+	)
+)
+(define (getDepGraph) #f)
+(define (setDepGraphType type)
+	(define depGraphPair (assoc type modeToGetDepGraph))
+	(if depGraphPair
+		(set! getDepGraph (cadr depGraphPair))
+	)
+)
+
+(define (setTypeFromAttr)
+	(define depgraphAttr (assoc "depgraph" (gameobj-attr mainobj)))
+	(if depgraphAttr 
+		(setDepGraphType (cadr depgraphAttr))
+		(setDepGraphType "nodata")
+	)
+)
+(setTypeFromAttr)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define fontsize 30)
