@@ -177,22 +177,24 @@ struct OptionalValues{
   std::optional<std::string> fontFamily;
   std::optional<glm::vec4> tint;
   std::optional<unsigned int> textureId;
+  std::optional<unsigned int> selectionId;
   bool perma;
 };
-OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3, SCM opt4){
-  auto optVals = optionalValues({OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_UNSIGNED_INT}, { opt1, opt2, opt3, opt4 });
+OptionalValues optionalOpts(SCM opt1, SCM opt2, SCM opt3, SCM opt4, SCM opt5){
+  auto optVals = optionalValues({OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_VEC4, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_UNSIGNED_INT}, { opt1, opt2, opt3, opt4, opt5 });
   OptionalValues opts {
     .fontFamily = optionalTypeFromVariant<std::string>(optVals.at(0)),
     .tint = optionalTypeFromVariant<glm::vec4>(optVals.at(1)),
     .textureId = optionalTypeFromVariant<unsigned int>(optVals.at(3)),
+    .selectionId = optionalTypeFromVariant<unsigned int>(optVals.at(4)),
     .perma = getOptValue<bool>(optVals.at(2), false),
   };
   return opts;
 }
 
-void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily);
-SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3, SCM opt4){
-  auto opts = optionalOpts(opt1, opt2, opt3, opt4);   // fontname, color, perma, texture id
+void (*_drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId);
+SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3, SCM opt4, SCM opt5){
+  auto opts = optionalOpts(opt1, opt2, opt3, opt4, opt5);   // fontname, color, perma, texture id, selection id
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
@@ -202,12 +204,13 @@ SCM scmDrawText(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, S
     opts.tint,
     opts.textureId,
     false,
-    opts.fontFamily
+    opts.fontFamily, 
+    opts.selectionId
   );
   return SCM_UNSPECIFIED;
 }
-SCM scmDrawTextNdi(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3, SCM opt4){
-  auto opts = optionalOpts(opt1, opt2, opt3, opt4);   // fontname, color, perma, texture id
+SCM scmDrawTextNdi(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2, SCM opt3, SCM opt4, SCM opt5){
+  auto opts = optionalOpts(opt1, opt2, opt3, opt4, opt5);   // fontname, color, perma, texture id, selection id
   _drawText(
     scm_to_locale_string(word), 
     scm_to_double(left), 
@@ -217,7 +220,8 @@ SCM scmDrawTextNdi(SCM word, SCM left, SCM top, SCM fontSize, SCM opt1, SCM opt2
     opts.tint,
     opts.textureId,
     true,
-    opts.fontFamily
+    opts.fontFamily,
+    opts.selectionId
   );
   return SCM_UNSPECIFIED;
 }
@@ -1050,8 +1054,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("lsobj-attr", 1, 1, 0, (void *)scm_getObjectsByAttr);
   scm_c_define_gsubr("lsobj-name", 1, 1, 0, (void *)getGameObjByName);
  
-  scm_c_define_gsubr("draw-text", 4, 4, 0, (void*)scmDrawText);
-  scm_c_define_gsubr("draw-text-ndi", 4, 4, 0, (void*)scmDrawTextNdi);
+  scm_c_define_gsubr("draw-text", 4, 5, 0, (void*)scmDrawText);
+  scm_c_define_gsubr("draw-text-ndi", 4, 5, 0, (void*)scmDrawTextNdi);
   scm_c_define_gsubr("draw-line", 2, 3, 0, (void*)scmDrawLine);
   scm_c_define_gsubr("free-line", 1, 0, 0, (void*)scmFreeLine);
 
@@ -1188,7 +1192,7 @@ void createStaticSchemeBindings(
   std::vector<int32_t> (*getObjectsByType)(std::string),
   std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
-  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily),
+  void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamil, std::optional<objid> selectionId),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth),
   void (*freeLine)(int32_t lineid),
   std::string (*getGameObjectNameForId)(int32_t id),

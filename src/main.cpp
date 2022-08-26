@@ -154,7 +154,7 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
+void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
   glViewport(0, 0, texSize.width, texSize.height);
   updateDepthTexturesSize(textureDepthTextures, 1, texSize.width, texSize.height); // wonder if this would be better off preallocated per gend texture?
@@ -162,7 +162,8 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
 
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture.textureId, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
+  
   glUseProgram(uiShaderProgram);
 
   if (shouldClear){ 
@@ -186,6 +187,7 @@ void renderScreenspaceLines(Texture& texture, bool shouldClear, glm::vec4 clearC
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
   //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
@@ -1525,8 +1527,9 @@ int main(int argc, char* argv[]){
 
     auto hoveredId = getIdFromColor(hoveredItemColor);
     auto secondaryId = getIdFromColor(secondColor);
-    std::cout << "hoveredId = " << hoveredId << ", secondaryId = " << secondaryId << std::endl;
-    std::cout << "color = " << printColor(hoveredItemColor) << ", secondColor = " << printColor(secondColor) << std::endl;
+    std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
+    //std::cout << "hoveredId = " << hoveredId << ", secondaryId = " << secondaryId << std::endl;
+    //std::cout << "color = " << printColor(hoveredItemColor) << ", secondColor = " << printColor(secondColor) << std::endl;
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
@@ -1710,7 +1713,10 @@ int main(int argc, char* argv[]){
       Texture tex {
         .textureId = userTexture.id,
       };
-      renderScreenspaceLines(tex, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
+      Texture tex2 {
+        .textureId = userTexture.selectionTextureId,
+      };
+      renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
     }
     markUserTexturesCleared();
 

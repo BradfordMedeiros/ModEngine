@@ -178,6 +178,12 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::functio
       auto coords = convertTextNDICoords(text.left, text.top, height, width, text.ndi);
       auto adjustedFontSize = convertTextNdiFontsize(height, width, text.fontSize, text.ndi);
       FontFamily& fontFamily = fontFamilyByName(text.fontFamily.has_value() ? text.fontFamily.value() : "");
+      if (text.selectionId.has_value()){
+        std::cout << "selection id value: " << text.selectionId.value() << std::endl;
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(text.selectionId.value())));
+      }else{
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
+      }
       drawWords(uiShaderProgram, fontFamily, text.word, coords.x, coords.y, adjustedFontSize);  
     }
   }

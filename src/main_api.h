@@ -91,7 +91,7 @@ objid makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attribu
 void removeObjectById(int32_t id);
 void copyObject(int32_t id);
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily);
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId);
 void drawText(std::string word, float left, float top, unsigned int fontSize);
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize);
 
@@ -167,6 +167,7 @@ void takeScreenshot(std::string filepath);
 
 struct UserTexture {
   unsigned int id;
+  unsigned int selectionTextureId;
   bool autoclear;
   bool shouldClear;
   std::optional<unsigned int> clearTextureId;

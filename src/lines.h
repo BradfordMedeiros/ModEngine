@@ -27,6 +27,7 @@ struct TextDrawingOptions  {
   bool ndi;
   glm::vec4 tint;
   std::optional<std::string> fontFamily;
+  std::optional<objid> selectionId;
 };
 
 struct LineByColor {

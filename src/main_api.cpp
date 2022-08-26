@@ -263,7 +263,7 @@ void copyObject(int32_t id){
 }
 
 
-void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily){
+void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;
   addTextData(lineData, TextDrawingOptions{
     .word = word,
@@ -275,13 +275,14 @@ void drawText(std::string word, float left, float top, unsigned int fontSize, bo
     .ndi = ndi,
     .tint = tint.has_value() ? tint.value() : glm::vec4(1.f, 1.f, 1.f, 1.f),
     .fontFamily = fontFamily,
+    .selectionId = selectionId,
   });
 }
 void drawText(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false, std::nullopt);  
+  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, false, std::nullopt, std::nullopt);  
 }
 void drawTextNdi(std::string word, float left, float top, unsigned int fontSize){
-  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt);  
+  drawText(word, left, top, fontSize, false, glm::vec4(1.f, 1.f, 1.f, 1.f), std::nullopt, true, std::nullopt, std::nullopt);  
 }
 
 FontFamily& fontFamilyByName(std::string name){
@@ -716,9 +717,12 @@ UserTexture* userTextureById(unsigned int id){
 }
 unsigned int createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
+  std::cout << "create texture" << std::endl;
   auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height).textureId;
+  auto selectionTextureId = loadTextureWorldEmpty(world, name +"_seletion_texture", ownerId, width, height).textureId;
   userTextures.push_back(UserTexture{
     .id = textureID,
+    .selectionTextureId = selectionTextureId,
     .autoclear = false,
     .shouldClear = true,
     .clearTextureId = std::nullopt, //world.textures.at("./res/textures/wood.jpg").texture.textureId,//,
@@ -730,15 +734,21 @@ unsigned int createTexture(std::string name, unsigned int width, unsigned int he
 void freeTexture(std::string name, objid ownerId){
   MODTODO("delete texture -> use ownership id of the script being used");
   auto textureId = world.textures.at(name).texture.textureId;
+  int selectionTextureId = -1;
 
   std::vector<UserTexture> remainingTextures;
   for (auto userTexture : userTextures){
     if (userTexture.id != textureId){
       remainingTextures.push_back(userTexture);
+    }else{
+      selectionTextureId = userTexture.selectionTextureId;
     }
   }
   userTextures = remainingTextures;
   freeTextureRefsIdByOwner(world, ownerId, textureId);
+  modassert(selectionTextureId > 0, "selectionTextureId not found");
+  freeTextureRefsIdByOwner(world, ownerId, selectionTextureId);
+
 }
 
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture){
