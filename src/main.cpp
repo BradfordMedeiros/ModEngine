@@ -404,6 +404,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   /////////////////////////////
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
+  glUniform4fv(glGetUniformLocation(shader, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0))); // update 
 
   setRenderUniformData(shader, uniforms);
 }
@@ -768,6 +769,10 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.hasColorAttachment1){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
     }
+    if (renderStep.hasColorAttachment2){
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, renderStep.colorAttachment2, 0);
+    }
+
     glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
@@ -1088,6 +1093,7 @@ int main(int argc, char* argv[]){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
   genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebufferTexture3, 0);
 
   generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
   generateDepthTextures(textureDepthTextures, 1, state.resolution.x, state.resolution.y);
@@ -1383,8 +1389,8 @@ int main(int argc, char* argv[]){
 
   std::cout << "INFO: render loop starting" << std::endl;
 
-  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2,buffers_to_render);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+  glDrawBuffers(3,buffers_to_render);
 
   int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
@@ -1515,8 +1521,13 @@ int main(int argc, char* argv[]){
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    Color secondColor = getPixelColor2(adjustedCoords.x, adjustedCoords.y);
+
     auto hoveredId = getIdFromColor(hoveredItemColor);
-    
+    auto secondaryId = getIdFromColor(secondColor);
+    std::cout << "hoveredId = " << hoveredId << ", secondaryId = " << secondaryId << std::endl;
+    std::cout << "color = " << printColor(hoveredItemColor) << ", secondColor = " << printColor(secondColor) << std::endl;
+
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
     state.lastHoverIndex = state.currentHoverIndex;
