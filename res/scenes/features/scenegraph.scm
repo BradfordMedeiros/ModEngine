@@ -24,20 +24,40 @@
 (define (getModelList) (map makeIntoModelGraph (ls-models)))
 (define (getNoData) (list (list "data" "none available" (list 0 0))))
 
+
+(define (donothing x) #f)
+(define (echoprint x) (format #t "x = ~a\n" x))
+(define (selectScenegraphItem x) (format #t "placeholder select scenegraph item\n"))
+(define (selectModelItem element) 
+	(define modelpath (car element))
+	(mk-obj-attr
+		(string-append (number->string (random 10000000)) "-generated")
+		(list
+			(list "mesh" modelpath)
+		)
+	)
+)
+
 (define modeToGetDepGraph
 	(list
-		(list "nodata" getNoData)
-		(list "mock-scenegraph" getMockScenegraph)
-		(list "scenegraph" scenegraph)
-		(list "mock-models" getMockModelList)
-		(list "models" getModelList)
+		(list "nodata" getNoData donothing #f)
+		(list "mock-scenegraph" getMockScenegraph donothing #f)
+		(list "scenegraph" scenegraph selectScenegraphItem #t)
+		(list "mock-models" getMockModelList donothing #f)
+		(list "models" getModelList selectModelItem #f)
 	)
 )
 (define (getDepGraph) #f)
+(define showSceneIds #f)
+(define handleItemSelected donothing)
 (define (setDepGraphType type)
 	(define depGraphPair (assoc type modeToGetDepGraph))
 	(if depGraphPair
-		(set! getDepGraph (cadr depGraphPair))
+		(begin
+			(set! getDepGraph (cadr depGraphPair))
+			(set! handleItemSelected (caddr depGraphPair))
+			(set! showSceneIds (cadddr depGraphPair))
+		)
 	)
 )
 
@@ -64,12 +84,11 @@
 (define texturename (string-append "gentexture-scenegraph" ))
 
 (define (create-obj)
-	(format #t "create obj placeholder\n")
-   	(mk-obj-attr "someobj"     
-  		(list
-  			(list "position" (list 1 1 0))
-  			(list "mesh" "./res/models/box/spriteplane.dae")
-  		)
+  (mk-obj-attr "someobj"     
+  	(list
+  		(list "position" (list 1 1 0))
+  		(list "mesh" "./res/models/box/spriteplane.dae")
+  	)
 	)
   (gameobj-setattr! (lsobj-name "someobj/Plane") 
   	(list
@@ -95,6 +114,7 @@
 	(onGraphChange)
 )
 
+
 (define offset 0)
 (define maxOffset 0)
 
@@ -111,7 +131,6 @@
 
 (define (setMinOffset depth) 
 	(define newMinOffset (rawCalcY depth))
-	;(format #t "min: (~a, ~a)\n" newMinOffset depth)
 	(if (< newMinOffset minOffset)
 		(set! minOffset newMinOffset)
 	)
@@ -119,10 +138,9 @@
 (define (resetMinOffset) (set! minOffset 0))
 (define minOffset (* -1 (rawCalcY 1)))
 
-
-
 (define selectedIndex 1)
 (define maxIndex #f)
+(define selectedElement #f)
 (define (setSelectedIndex index)
 	(define adjustedIndex (max 0 index))
 	(set! selectedIndex (if maxIndex (min maxIndex adjustedIndex) adjustedIndex))
@@ -137,8 +155,9 @@
 (define (draw elementName sceneId depth height expanded)
 	(define isSelected (equal? selectedIndex height))
 	(if isSelected (set! selectedName (expandPath elementName sceneId)))
+	(if isSelected (set! selectedElement (list elementName sceneId)))
 	(draw-text-ndi
-		(string-append elementName "(" (number->string sceneId) ")")
+		(if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName)
 		(calcX depth) 
 		(calcY height) 
 		fontsize
@@ -165,7 +184,7 @@
 		)
 	
 )
-(define (drawHierarchy target sceneId depth getIndex)
+(define (drawHierarchy target sceneId depth getIndex fullTarget)
 	(define childElements (children target sceneId))
 	(define isExpanded (checkExpanded target sceneId))
 	(define exists (elementExists target))
@@ -175,8 +194,7 @@
 	    (if isExpanded
 	      (for-each 
 	      	(lambda(target)
-	      		;(format #t "draw target: ~a\n" target)
-	      		(drawHierarchy (cadr target) (cadr (caddr target)) (+ depth 1) getIndex)
+	      		(drawHierarchy (cadr target) (cadr (caddr target)) (+ depth 1) getIndex target)
 	      	) 
 	      	childElements
 	      )
@@ -242,7 +260,7 @@
 
 	(resetMinOffset)
 	(for-each (lambda(target)
-		(drawHierarchy (car target) (cadr target) 0 getIndex)
+		(drawHierarchy (car target) (cadr target) 0 getIndex target)
 	) (allRootParents))
 	(set! maxIndex index)
 )
@@ -266,6 +284,7 @@
      	(if (equal? key 264) (setSelectedIndex (+ selectedIndex 1)))                    
      	(if (equal? key 265) (setSelectedIndex (- selectedIndex 1))) 
      	(if (equal? key 257) (toggleExpanded))  ; enter
+     	(if (equal? key 344) (handleItemSelected selectedElement))  ; shift
 		)
 	)
 	(if (equal? key 61)
