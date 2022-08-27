@@ -38,6 +38,7 @@ unsigned int framebufferProgram;
 unsigned int drawingProgram;
 unsigned int blurProgram;
 unsigned int quadVAO;
+unsigned int quadVAO3D;
 
 GameObject defaultCamera = GameObject {
   .id = -1,
@@ -514,7 +515,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
       );
       numTriangles = numTriangles + trianglesDrawn;
     }
-
+  
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     if (isPortal && portalTextureInCache && isPerspectivePortal){
       glUseProgram(framebufferProgram); 
@@ -1109,7 +1110,7 @@ int main(int argc, char* argv[]){
   }
 
   quadVAO = loadFullscreenQuadVAO();
- 
+  quadVAO3D = loadFullscreenQuadVAO3D();
   //////////////////////////////
 
   auto onFramebufferSizeChange = [](GLFWwindow* window, int width, int height) -> void {
