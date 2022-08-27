@@ -1,0 +1,9 @@
+
+(panel:layer:basicui
+(panel:backpanel:true
+(panel:tint:0 0 1 1
+(panel:minheight:2
+(panel:minwidth:2
+
+(panel:border-size:0.08
+(panel:border-color:2 0.3 0.3 1
