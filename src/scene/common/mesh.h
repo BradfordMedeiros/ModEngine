@@ -71,5 +71,6 @@ void freeMesh(Mesh& mesh);
 
 // 6 vertices, eg drawarray(6)
 unsigned int loadFullscreenQuadVAO();  // TODO - maybe make an unload...but in practice we just load it and keep it so whatever
+unsigned int loadFullscreenQuadVAO3D();
 
 #endif 
