@@ -163,7 +163,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
 
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
+  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,  texture2.textureId, 0);
   
   glUseProgram(uiShaderProgram);
 
@@ -407,7 +407,6 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   /////////////////////////////
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
-  glUniform4fv(glGetUniformLocation(shader, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0))); // update 
 
   setRenderUniformData(shader, uniforms);
 }
@@ -772,9 +771,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     if (renderStep.hasColorAttachment1){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
     }
-    if (renderStep.hasColorAttachment2){
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, renderStep.colorAttachment2, 0);
-    }
 
     glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
@@ -813,6 +809,22 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
   )
   return triangles;
+}
+
+void drawFullTexture(Texture& texture){
+  glUseProgram(uiShaderProgram);
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
+  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
+  glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture.textureId);
+  glBindVertexArray(quadVAO3D);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 std::map<objid, unsigned int> renderPortals(RenderContext& context){
@@ -1096,7 +1108,7 @@ int main(int argc, char* argv[]){
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, framebufferTexture2, 0);
 
   genFramebufferTexture(&framebufferTexture3, state.resolution.x, state.resolution.y);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebufferTexture3, 0);
+  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, framebufferTexture3, 0);
 
   generateDepthTextures(depthTextures, numDepthTextures, state.resolution.x, state.resolution.y);
   generateDepthTextures(textureDepthTextures, 1, state.resolution.x, state.resolution.y);
@@ -1392,8 +1404,8 @@ int main(int argc, char* argv[]){
 
   std::cout << "INFO: render loop starting" << std::endl;
 
-  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-  glDrawBuffers(3,buffers_to_render);
+  GLenum buffers_to_render[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+  glDrawBuffers(2, buffers_to_render);
 
   int frameratelimit = result["fps"].as<int>();
   bool hasFramelimit = frameratelimit != 0;
@@ -1524,13 +1536,16 @@ int main(int argc, char* argv[]){
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    Color secondColor = getPixelColor2(adjustedCoords.x, adjustedCoords.y);
 
     auto hoveredId = getIdFromColor(hoveredItemColor);
+
+    drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture);
+    Color secondColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+
     auto secondaryId = getIdFromColor(secondColor);
+    std::cout << "second color: " << secondColor.r << ", " << secondColor.g << ", " << secondColor.b << ", " << secondColor.a << std::endl;
     std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
-    //std::cout << "hoveredId = " << hoveredId << ", secondaryId = " << secondaryId << std::endl;
-    //std::cout << "color = " << printColor(hoveredItemColor) << ", secondColor = " << printColor(secondColor) << std::endl;
+    std::cout << "hoveredId = " << hoveredId << ", secondaryId = " << secondaryId << std::endl;
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
@@ -1781,7 +1796,6 @@ int main(int argc, char* argv[]){
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
     glBindVertexArray(quadVAO);
-
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDisable(GL_DEPTH_TEST);

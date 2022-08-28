@@ -24,12 +24,10 @@ struct RenderStep {
   unsigned int fbo;
   unsigned int colorAttachment0;
   unsigned int colorAttachment1;
-  unsigned int colorAttachment2;
   unsigned int depthTextureIndex;
   unsigned int shader;
   unsigned int quadTexture;
   bool hasColorAttachment1;
-  bool hasColorAttachment2;
   bool renderWorld;
   bool renderSkybox;
   bool renderQuad;
