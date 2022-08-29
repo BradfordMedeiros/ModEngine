@@ -157,7 +157,7 @@ void applyPainting(objid id){
 
 void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
   auto texSize = getTextureSizeInfo(texture);
-  auto texSize2 = getTextureSizeInfo(texture);
+  auto texSize2 = getTextureSizeInfo(texture2);
   modassert(texSize.width == texSize2.width && texSize.height == texSize2.height, "screenspace - invalid tex sizes");
 
   glViewport(0, 0, texSize.width, texSize.height);
@@ -818,16 +818,17 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   return triangles;
 }
 
-void drawFullTexture(Texture& texture){
+void drawFullTexture(Texture& texture, unsigned int fb){
   glUseProgram(uiShaderProgram);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture2, 0);
-  glClearColor(0.f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb, 0);
+
+  //glClearColor(0.f, 1.0f, 0.0f, 1.0f);
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture.textureId);
   glBindVertexArray(quadVAO3D);
@@ -1546,7 +1547,7 @@ int main(int argc, char* argv[]){
 
     auto hoveredId = getIdFromColor(hoveredItemColor);
 
-    drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture);
+    //drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture, framebufferTexture2);
     Color secondColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
 
     auto secondaryId = getIdFromColor(secondColor);
@@ -1681,6 +1682,7 @@ int main(int argc, char* argv[]){
     )
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
+    //drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture, renderStages.main.colorAttachment0);
 
       /////////////////
 
@@ -1743,6 +1745,8 @@ int main(int argc, char* argv[]){
     }
     markUserTexturesCleared();
 
+
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto finalProgram = (state.renderMode == RENDER_DEPTH) ? depthProgram : framebufferProgram;
     glUseProgram(finalProgram); 
@@ -1788,7 +1792,8 @@ int main(int argc, char* argv[]){
       assert(state.textureIndex <= numPortalTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
     }else if (state.renderMode == RENDER_PAINT){
-      glBindTexture(GL_TEXTURE_2D, textureToPaint);
+      //glBindTexture(GL_TEXTURE_2D, textureToPaint);
+      glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_seletion_texture").texture.textureId);
     }else if (state.renderMode == RENDER_DEPTH){
       assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
