@@ -21,6 +21,7 @@ struct RenderTexture {
 
 struct RenderStep {
   std::string name;
+  bool enable;
   unsigned int fbo;
   unsigned int colorAttachment0;
   unsigned int colorAttachment1;
@@ -84,6 +85,7 @@ std::string renderStagesToString(RenderStages& stages);
 
 struct DeserializedRenderStage {
   std::string name;
+  bool enable;
   std::string shader;
   std::vector<RenderDataInt> intUniforms;
   std::vector<RenderDataFloat> floatUniforms;

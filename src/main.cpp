@@ -753,6 +753,10 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
   int triangles = 0;
   PROFILE(
   renderStep.name.c_str(),
+    if (!renderStep.enable){
+      std::cout << "Warning: render step not enabled: " << renderStep.name << std::endl;
+      return triangles;
+    }
     glUseProgram(renderStep.shader);
     setRenderUniformData(renderStep.shader, renderStep.uniforms);
     for (int i = 0; i < renderStep.textures.size(); i++){

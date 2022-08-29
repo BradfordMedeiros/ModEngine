@@ -32,7 +32,7 @@ void ensureUniformExists(
 }
 
 bool isRenderStageToken(Token& token){
-  return token.attribute == "shader" || token.attribute.at(0) == '!' || token.attribute.at(0) == '?' || token.attribute.at(0) == '@' || token.attribute.at(0) == '&';
+  return token.attribute == "shader" || token.attribute == "enable" ||  token.attribute.at(0) == '!' || token.attribute.at(0) == '?' || token.attribute.at(0) == '@' || token.attribute.at(0) == '&';
 }
 
 std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& tokens, unsigned int fb0, unsigned int fb1){
@@ -46,6 +46,7 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& token
     if (indexForStage == -1){
       additionalShaders.push_back(DeserializedRenderStage{
         .name = token.target,
+        .enable = true,
       });
       indexForStage = additionalShaders.size() - 1;
     }
@@ -57,6 +58,8 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& token
 
     if (token.attribute == "shader"){
       additionalShaders.at(indexForStage).shader = token.payload;
+    }else if (token.attribute == "enable"){
+      additionalShaders.at(indexForStage).enable = !(token.payload == "false");
     }else if (isTexture){
       auto textureNameInShader = token.attribute.substr(1, token.attribute.size());
       auto isFramebufferType = token.payload.at(0) == '$';
@@ -169,6 +172,16 @@ std::vector<DeserializedRenderStage> parseRenderStages(std::vector<Token>& token
   return additionalShaders; 
 }
 
+std::vector<DeserializedRenderStage> filterEnabledShaders(std::vector<DeserializedRenderStage> & unfilteredShaders){
+  std::vector<DeserializedRenderStage> shaders;
+  for (auto &shader : unfilteredShaders){
+    if (shader.enable){
+      shaders.push_back(shader);
+    }
+  }
+  return shaders;
+}
+
 std::vector<RenderStep> parseAdditionalRenderSteps(
   std::string postprocessingFile,
   unsigned int fbo,
@@ -185,6 +198,8 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
     }
   }
 
+  additionalShaders = filterEnabledShaders(additionalShaders);
+
   std::vector<RenderStep> additionalRenderSteps;
   for (int i  = 0; i < additionalShaders.size(); i++){
     auto additionalShader = additionalShaders.at(i);
@@ -193,6 +208,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
     bool isEvenIndex = (i % 2) == 0;
     RenderStep renderStep {
       .name = additionalShader.name,
+      .enable = additionalShader.enable,
       .fbo = fbo,
       .colorAttachment0 = isEvenIndex ? framebufferTexture2 : framebufferTexture,
       .colorAttachment1 = 0,
@@ -236,6 +252,7 @@ RenderStages loadRenderStages(
   assert(numPortalTextures > 1);
   RenderStep selectionRender {
     .name = "RENDERING-SELECTION",
+    .enable = true,
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture,
     .colorAttachment1 = framebufferTexture2,  // this stores UV coord
@@ -260,6 +277,7 @@ RenderStages loadRenderStages(
   };
   RenderStep shadowMapRender {
       .name = "SHADOWMAP-RENDERING",
+      .enable = true,
       .fbo = fbo,
       .colorAttachment0 = framebufferTexture, 
       .colorAttachment1 = framebufferTexture2,
@@ -285,6 +303,7 @@ RenderStages loadRenderStages(
 
   RenderStep mainRender {
     .name = "MAIN_RENDERING",
+    .enable = true,
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture,
     .colorAttachment1 = framebufferTexture2,
@@ -309,6 +328,7 @@ RenderStages loadRenderStages(
   };
   RenderStep portalRender {
       .name = "PORTAL-RENDERING",
+      .enable = true,
       .fbo = fbo,
       .colorAttachment0 = portalTextures[0], // this gets updated
       .colorAttachment1 = 0,
@@ -340,6 +360,7 @@ RenderStages loadRenderStages(
     // Big bug:  doesn't sponsor depth value, also just kind of looks bad
   RenderStep bloomStep1 {
     .name = "BLOOM-RENDERING-FIRST",
+    .enable = true,
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture3,
     .colorAttachment1 = 0,
@@ -370,6 +391,7 @@ RenderStages loadRenderStages(
 
   RenderStep bloomStep2 {
     .name = "BLOOM-RENDERING-SECOND",
+    .enable = true,
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture2,
     .colorAttachment1 = 0,
@@ -400,6 +422,7 @@ RenderStages loadRenderStages(
 
   RenderStep dof1{
     .name = "DOF-RENDERING",
+    .enable = true,
     .fbo = fbo,
     .colorAttachment0 = framebufferTexture3,
     .colorAttachment1 = 0,
@@ -447,6 +470,7 @@ RenderStages loadRenderStages(
 
   RenderStep dof2 = dof1;
   dof2.name = "DOF-RENDERING-2";
+  dof2.enable = true;
   dof2.colorAttachment0 = framebufferTexture;
   dof2.quadTexture = framebufferTexture3;
   dof2.uniforms.intUniforms.at(0).value = false;
@@ -559,6 +583,7 @@ unsigned int finalRenderingTexture(RenderStages& stages){   // additional render
 std::string renderStageToString(RenderStep& step){
   std::string text = step.name + "\n---------\n";
   text = text + "shader: " + std::to_string(step.shader) + "\n";
+  text = text + "enable: " + (step.enable ?  "true" : "false") + "\n";
   text = text + "colorAttachment0: " + std::to_string(step.colorAttachment0) + "\n";
   text = text + "colorAttachment1: " + std::to_string(step.colorAttachment1) + " (has attachment = " + (step.hasColorAttachment1 ? "true" : "false") + ")\n";
   text = text + "renderWorld: " + (step.renderWorld ? "true" : "false") + "\n";
