@@ -192,6 +192,7 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), true);
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
   glUniform4fv(glGetUniformLocation(uiShaderProgram, "selectionId"), 1, glm::value_ptr(getColorFromGameobject(0)));
+  glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
 
   //std::cout << "screenspace: lines" << std::endl;
   drawAllLines(lineData, uiShaderProgram, texture.textureId);
@@ -828,23 +829,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
     }
   )
   return triangles;
-}
-
-void drawFullTexture(Texture& texture, unsigned int fb){
-  glUseProgram(uiShaderProgram);
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
-  glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
-  glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
-  glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb, 0);
-
-  //glClearColor(0.f, 1.0f, 0.0f, 1.0f);
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture.textureId);
-  glBindVertexArray(quadVAO3D);
-  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 std::map<objid, unsigned int> renderPortals(RenderContext& context){
@@ -1559,8 +1543,6 @@ int main(int argc, char* argv[]){
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
 
     auto hoveredId = getIdFromColor(hoveredItemColor);
-
-    //drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture, framebufferTexture2);
     Color secondColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
 
     auto secondaryId = getIdFromColor(secondColor);
@@ -1696,17 +1678,22 @@ int main(int argc, char* argv[]){
 
 
     renderStages.basicTexture.quadTexture = world.textures.at("gentexture-scenegraph_seletion_texture").texture.textureId;
-    //renderStages.basicTexture.quadTexture = world.textures.at("./res/textures/wood.jpg").texture.textureId;
     renderWithProgram(renderContext, renderStages.basicTexture);
-    //drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture, renderStages.main.colorAttachment0);
-    Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    std::cout << "colorFromSelection: " << print(glm::vec4(colorFromSelection.r, colorFromSelection.g, colorFromSelection.b, colorFromSelection.a)) << std::endl;
 
+    //auto pixelCoords = uvToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
+    auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
+    Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
+    std::cout << "colorFromSelection2: " << print(glm::vec4(colorFromSelection2.r, colorFromSelection2.g, colorFromSelection2.b, colorFromSelection2.a)) << std::endl;
+    std::cout << "uv coord: " << uvCoord.x << ", " << uvCoord.y << std::endl;
+    std::cout << "pixel coord: " << pixelCoord.x << ", " << pixelCoord.y << std::endl;
+    auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
+    std::cout << "hovered item id:  " << print(hoveredColorItemId) << std::endl;
+    ////////////////////////////
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
-    Color colorFromSelection2 = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    std::cout << "colorFromSelection2: " << print(glm::vec4(colorFromSelection2.r, colorFromSelection2.g, colorFromSelection2.b, colorFromSelection2.a)) << std::endl;
-
+    //Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    //std::cout << "colorFromSelection: " << print(glm::vec4(colorFromSelection.r, colorFromSelection.g, colorFromSelection.b, colorFromSelection.a)) << std::endl
+    //    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
 
       /////////////////
 

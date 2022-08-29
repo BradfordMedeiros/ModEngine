@@ -30,6 +30,7 @@ glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution);
 glm::vec2 pixelCoordToNdi(glm::ivec2 pixelCoord, glm::vec2 resolution);
 
 glm::vec3 uvToNDC(UVCoord coord);
+glm::ivec2 uvToPixelCoord(UVCoord coord, glm::vec2 resolution);
 glm::ivec2 pixelCoordsRelativeToViewport(int x, int y, unsigned int currentScreenHeight, glm::ivec2 viewportSize, glm::ivec2 viewportoffset, glm::ivec2 resolution);
 
 void saveScreenshot(std::string& filepath);

@@ -70,6 +70,12 @@ glm::vec3 uvToNDC(UVCoord coord){
   return glm::vec3(xCoord, yCoord, 0.f);
 }
 
+glm::ivec2 uvToPixelCoord(UVCoord coord, glm::vec2 resolution){
+  auto xCoord = convertBase(coord.x, 0, 1, 0, resolution.x);
+  auto yCoord = convertBase(coord.y, 0, 1, 0, resolution.y);
+  return glm::ivec2(xCoord, yCoord);
+}
+
 // current pixel address to pixel number in viewport adjusted to the viewport resolution
 glm::ivec2 pixelCoordsRelativeToViewport(int x, int y, unsigned int currentScreenHeight, glm::ivec2 viewportSize, glm::ivec2 viewportoffset, glm::ivec2 resolution){
   int adjustedCursorX = (((float)(x - viewportoffset.x)) / (float)viewportSize.x) * resolution.x;
