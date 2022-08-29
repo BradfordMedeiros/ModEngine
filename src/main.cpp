@@ -794,6 +794,18 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       glDisable(GL_BLEND);
     }
 
+    if (renderStep.renderQuad3D){
+      std::vector<LightInfo> lights = {};
+      std::vector<glm::mat4> lightProjview = {};
+      RenderUniforms uniforms { };
+      setShaderData(renderStep.shader, ndiOrtho, glm::mat4(1.f), lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, glm::vec3(0.f, 0.f, 0.f), uniforms);
+      glUniform1i(glGetUniformLocation(renderStep.shader, "hasDiffuseTexture"), true);
+      glActiveTexture(GL_TEXTURE0); 
+      glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
+      glBindVertexArray(quadVAO3D);
+      glDrawArrays(GL_TRIANGLES, 0, 6);      
+    }
+
     if (renderStep.enableStencil){
       glEnable(GL_STENCIL_TEST);
       glStencilMask(0xFF);
@@ -1195,6 +1207,7 @@ int main(int argc, char* argv[]){
     RenderShaders {
       .blurProgram = blurProgram,
       .selectionProgram = selectionProgram,
+      .uiShaderProgram = uiShaderProgram,
       .shaderProgram = shaderProgram,
     },
     interface.readFile
@@ -1681,8 +1694,19 @@ int main(int argc, char* argv[]){
       portalIdCache = renderPortals(renderContext);
     )
 
-    numTriangles = renderWithProgram(renderContext, renderStages.main);
+
+    renderStages.basicTexture.quadTexture = world.textures.at("gentexture-scenegraph_seletion_texture").texture.textureId;
+    //renderStages.basicTexture.quadTexture = world.textures.at("./res/textures/wood.jpg").texture.textureId;
+    renderWithProgram(renderContext, renderStages.basicTexture);
     //drawFullTexture(world.textures.at("gentexture-scenegraph_seletion_texture").texture, renderStages.main.colorAttachment0);
+    Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    std::cout << "colorFromSelection: " << print(glm::vec4(colorFromSelection.r, colorFromSelection.g, colorFromSelection.b, colorFromSelection.a)) << std::endl;
+
+
+    numTriangles = renderWithProgram(renderContext, renderStages.main);
+    Color colorFromSelection2 = getPixelColor(adjustedCoords.x, adjustedCoords.y);
+    std::cout << "colorFromSelection2: " << print(glm::vec4(colorFromSelection2.r, colorFromSelection2.g, colorFromSelection2.b, colorFromSelection2.a)) << std::endl;
+
 
       /////////////////
 

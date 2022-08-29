@@ -219,6 +219,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .renderWorld = false,
       .renderSkybox = false,
       .renderQuad = true,
+      .renderQuad3D = false,
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
@@ -263,6 +264,7 @@ RenderStages loadRenderStages(
     .renderWorld = true,
     .renderSkybox = false,
     .renderQuad = false,
+    .renderQuad3D = false,
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
@@ -288,6 +290,7 @@ RenderStages loadRenderStages(
       .renderWorld = true,
       .renderSkybox = false,
       .renderQuad = false,
+      .renderQuad3D = false,
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
@@ -314,6 +317,7 @@ RenderStages loadRenderStages(
     .renderWorld = true,
     .renderSkybox = true,
     .renderQuad = false,
+    .renderQuad3D = false,
     .blend = true,
     .enableStencil = true,
     .allowShaderOverride = true,
@@ -339,6 +343,7 @@ RenderStages loadRenderStages(
       .renderWorld = true,
       .renderSkybox = true,
       .renderQuad = false,
+      .renderQuad3D = false,
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
@@ -351,6 +356,34 @@ RenderStages loadRenderStages(
       },
       .textures = {},
   };    
+
+  RenderStep basicTexture{
+    .name = "BASICTEXTURE-RENDERING",
+    .enable = true,
+    .fbo = fbo,
+    .colorAttachment0 = framebufferTexture,
+    .colorAttachment1 = framebufferTexture2,
+    .depthTextureIndex = 0,
+    .shader = shaders.shaderProgram,
+    .quadTexture = 0,
+    .hasColorAttachment1 = true,
+    .renderWorld = true,
+    .renderSkybox = true,
+    .renderQuad = false,
+    .renderQuad3D = true,
+    .blend = true,
+    .enableStencil = true,
+    .allowShaderOverride = true,
+    .uniforms = {
+      .intUniforms = {},
+      .floatUniforms = {},
+      .floatArrUniforms = {},
+      .vec3Uniforms = {},
+      .builtInUniforms = {},
+    },
+    .textures = {},
+  };
+
     // depends on framebuffer texture, outputs to framebuffer texture 2
     // Blurring draws the framebuffer texture 
     // The blur program blurs it one in one direction and saves in framebuffer texture 3 
@@ -371,6 +404,7 @@ RenderStages loadRenderStages(
     .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = true,
+    .renderQuad3D = false,
     .blend = true,
     .enableStencil = false,
     .allowShaderOverride = false,
@@ -402,6 +436,7 @@ RenderStages loadRenderStages(
     .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = true,
+    .renderQuad3D = false,
     .blend = true,
     .enableStencil = false,
     .allowShaderOverride = false,
@@ -433,6 +468,7 @@ RenderStages loadRenderStages(
     .renderWorld = false,
     .renderSkybox = false,
     .renderQuad = true,
+    .renderQuad3D = false,
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
@@ -487,6 +523,7 @@ RenderStages loadRenderStages(
     .bloom2 = bloomStep2,
     .dof1 = dof1,
     .dof2 = dof2,
+    .basicTexture = basicTexture,
     .additionalRenderSteps = additionalRenderSteps,
     .portalTextures = portalTextures,
     .numPortalTextures = numPortalTextures,
@@ -589,6 +626,7 @@ std::string renderStageToString(RenderStep& step){
   text = text + "renderWorld: " + (step.renderWorld ? "true" : "false") + "\n";
   text = text + "renderSkybox: " + (step.renderSkybox ? "true" : "false") + "\n";
   text = text + "renderQuad: " + (step.renderQuad ? "true" : "false") + "\n";
+  text = text + "renderQuad3D: " + (step.renderQuad3D ? "true" : "false") + "\n";
 
 
   return text;

@@ -8,6 +8,7 @@
 struct RenderShaders {
   unsigned int blurProgram;
   unsigned int selectionProgram;
+  unsigned int uiShaderProgram;
   unsigned int shaderProgram;
 };
 
@@ -32,6 +33,7 @@ struct RenderStep {
   bool renderWorld;
   bool renderSkybox;
   bool renderQuad;
+  bool renderQuad3D;
   bool blend;
   bool enableStencil;
   bool allowShaderOverride;
@@ -48,6 +50,7 @@ struct RenderStages {
   RenderStep bloom2;
   RenderStep dof1;
   RenderStep dof2;
+  RenderStep basicTexture;
   std::vector<RenderStep> additionalRenderSteps;
 
   // dependent data
