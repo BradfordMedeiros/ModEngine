@@ -371,7 +371,7 @@ RenderStages loadRenderStages(
     .renderSkybox = true,
     .renderQuad = false,
     .renderQuad3D = true,
-    .blend = true,
+    .blend = false,
     .enableStencil = true,
     .allowShaderOverride = true,
     .uniforms = {

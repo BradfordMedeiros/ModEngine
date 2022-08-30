@@ -780,7 +780,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
     }
 
-    glClearColor(0.0, 0.0, 0.0, 1.0f);
+    glClearColor(0.0, 0.0, 0.0, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     if (state.showSkybox && renderStep.renderSkybox){
@@ -1541,14 +1541,9 @@ int main(int argc, char* argv[]){
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-
     auto hoveredId = getIdFromColor(hoveredItemColor);
-    Color secondColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
 
-    auto secondaryId = getIdFromColor(secondColor);
-    std::cout << "second color: " << secondColor.r << ", " << secondColor.g << ", " << secondColor.b << ", " << secondColor.a << std::endl;
-    std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
-    std::cout << "hoveredId = " << hoveredId << ", secondaryId = " << secondaryId << std::endl;
+    //std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
@@ -1683,11 +1678,11 @@ int main(int argc, char* argv[]){
     //auto pixelCoords = uvToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
     auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
     Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
-    std::cout << "colorFromSelection2: " << print(glm::vec4(colorFromSelection2.r, colorFromSelection2.g, colorFromSelection2.b, colorFromSelection2.a)) << std::endl;
-    std::cout << "uv coord: " << uvCoord.x << ", " << uvCoord.y << std::endl;
-    std::cout << "pixel coord: " << pixelCoord.x << ", " << pixelCoord.y << std::endl;
+    //std::cout << "colorFromSelection2: " << print(glm::vec4(colorFromSelection2.r, colorFromSelection2.g, colorFromSelection2.b, colorFromSelection2.a)) << std::endl;
+    //std::cout << "uv coord: " << uvCoord.x << ", " << uvCoord.y << std::endl;
+    //std::cout << "pixel coord: " << pixelCoord.x << ", " << pixelCoord.y << std::endl;
     auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
-    std::cout << "hovered item id:  " << print(hoveredColorItemId) << std::endl;
+    std::cout << "hovered color = " << print(colorFromSelection2) << " " << hoveredColorItemId << std::endl;
     ////////////////////////////
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
