@@ -10,6 +10,7 @@ struct RenderShaders {
   unsigned int selectionProgram;
   unsigned int uiShaderProgram;
   unsigned int shaderProgram;
+  unsigned int basicProgram;
 };
 
 enum RenderTextureType { RENDER_TEXTURE_REGULAR, RENDER_TEXTURE_FRAMEBUFFER };

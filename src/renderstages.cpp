@@ -372,8 +372,8 @@ RenderStages loadRenderStages(
     .renderQuad = false,
     .renderQuad3D = true,
     .blend = false,
-    .enableStencil = true,
-    .allowShaderOverride = true,
+    .enableStencil = false,
+    .allowShaderOverride = false,
     .uniforms = {
       .intUniforms = {},
       .floatUniforms = {},

@@ -36,7 +36,6 @@
 
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
-unsigned int blurProgram;
 unsigned int quadVAO;
 unsigned int quadVAO3D;
 
@@ -155,7 +154,7 @@ void applyPainting(objid id){
   //std::cout << "texture id is: " << texture.textureId << std::endl;
 }
 
-void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId){
+void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear, glm::vec4 clearColor, std::optional<unsigned int> clearTextureId, bool blend){
   auto texSize = getTextureSizeInfo(texture);
   auto texSize2 = getTextureSizeInfo(texture2);
   modassert(texSize.width == texSize2.width && texSize.height == texSize2.height, "screenspace - invalid tex sizes");
@@ -173,6 +172,11 @@ void renderScreenspaceLines(Texture& texture, Texture texture2, bool shouldClear
   if (shouldClear){ 
     glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
+  }
+  if (blend){
+    glEnable(GL_BLEND);
+  }else{
+    glDisable(GL_BLEND);
   }
 
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
@@ -780,7 +784,7 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, renderStep.colorAttachment1, 0);
     }
 
-    glClearColor(0.0, 0.0, 0.0, 0.f);
+    glClearColor(0.0, 0.0, 0.0, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT);
 
     if (state.showSkybox && renderStep.renderSkybox){
@@ -1182,7 +1186,11 @@ int main(int argc, char* argv[]){
 
   std::string blurShaderPath = "./res/shaders/blur";
   std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
-  blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
+  unsigned int blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
+
+  std::string basicShaderPath = "./res/shaders/basic";
+  std::cout << "INFO: basic shader path is: " << basicShaderPath << std::endl;
+  unsigned int basicProgram = loadShader(shaderFolderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(fbo, 
     framebufferTexture, framebufferTexture2, framebufferTexture3, 
@@ -1193,6 +1201,7 @@ int main(int argc, char* argv[]){
       .selectionProgram = selectionProgram,
       .uiShaderProgram = uiShaderProgram,
       .shaderProgram = shaderProgram,
+      .basicProgram = basicProgram,
     },
     interface.readFile
   );
@@ -1534,7 +1543,6 @@ int main(int argc, char* argv[]){
 
     // Each portal requires a render pass
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glEnable(GL_BLEND);
 
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
@@ -1542,6 +1550,8 @@ int main(int argc, char* argv[]){
     auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
+
+    glEnable(GL_BLEND);
 
     //std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
 
@@ -1747,7 +1757,7 @@ int main(int argc, char* argv[]){
       Texture tex2 {
         .textureId = userTexture.selectionTextureId,
       };
-      renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId);
+      renderScreenspaceLines(tex, tex2, userTexture.shouldClear || userTexture.autoclear, userTexture.clearColor, userTexture.clearTextureId, false);
     }
     markUserTexturesCleared();
 

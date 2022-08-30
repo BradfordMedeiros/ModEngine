@@ -193,7 +193,7 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::functio
         };
         auto restoredId = getIdFromColor(colorTypeColor);
         std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
-        glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(color));
+        glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(id)));
 
       }else{
         glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(0)));
