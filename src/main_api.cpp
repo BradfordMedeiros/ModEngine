@@ -715,11 +715,12 @@ UserTexture* userTextureById(unsigned int id){
   assert(false);
   return NULL;
 }
+
 unsigned int createTexture(std::string name, unsigned int width, unsigned int height, objid ownerId){
   MODTODO("create texture -> use ownership id of the script being used");
   std::cout << "create texture" << std::endl;
-  auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height).textureId;
-  auto selectionTextureId = loadTextureWorldEmpty(world, name +"_seletion_texture", ownerId, width, height).textureId;
+  auto selectionTextureId = loadTextureWorldEmpty(world, name +"_seletion_texture", ownerId, width, height, std::nullopt).textureId;
+  auto textureID = loadTextureWorldEmpty(world, name, ownerId, width, height, selectionTextureId).textureId;
   userTextures.push_back(UserTexture{
     .id = textureID,
     .selectionTextureId = selectionTextureId,

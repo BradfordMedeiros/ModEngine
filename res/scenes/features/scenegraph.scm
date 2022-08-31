@@ -152,6 +152,9 @@
 	(define value (assoc elementPath expandState))
 	(if value (equal? #t (cadr value)) #t)
 )
+
+
+(define baseNumber 90000)  ; arbitrary number, only uses for mapping selection for now, which numbering is basically a manually process
 (define (draw elementName sceneId depth height expanded)
 	(define isSelected (equal? selectedIndex height))
 	(if isSelected (set! selectedName (expandPath elementName sceneId)))
@@ -163,6 +166,7 @@
 		fontsize
 		(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
 		textureId
+		(+ baseNumber height)
 	)
 )
 

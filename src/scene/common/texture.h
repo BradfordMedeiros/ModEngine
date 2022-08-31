@@ -19,6 +19,7 @@ struct Texture {
 struct TextureRef {
   std::set<objid> owners;
   Texture texture;
+  objid mappingTexture;
 };
 
 Texture loadTextureEmpty(int textureWidth, int textureHeight, int numChannels);

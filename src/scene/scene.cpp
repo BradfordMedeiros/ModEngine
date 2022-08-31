@@ -357,11 +357,12 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
+    .mappingTexture = 0,
   };
   return texture;
 }
 
-Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight){
+Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture){
   std::cout << "load texture world empty: " << texturepath << std::endl;
   if (world.textures.find(texturepath) != world.textures.end()){
     assert(false);
@@ -371,6 +372,7 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
+    .mappingTexture = mappingTexture.has_value() ? mappingTexture.value() : 0,
   };
   return texture;  
 }
@@ -383,6 +385,7 @@ Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
+    .mappingTexture = 0,
   };
   return texture;
 }
@@ -396,6 +399,7 @@ Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned cha
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
+    .mappingTexture = 0,
   };
   return texture;  
 }
@@ -429,10 +433,21 @@ void freeTextureRefsByOwner(World& world, int ownerId){
   freeTextureRefsIdByOwner(world, ownerId, std::nullopt);
 }
 
+std::optional<objid> getMappingTexture(World& world, std::string& texture){
+  for (auto &[name, textureRef] : world.textures){
+    if (name == texture){
+      return textureRef.mappingTexture;
+    }
+  }
+  return std::nullopt;
+}
+
 void freeAnimationsForOwner(World& world, objid id){
   std::cout << "INFO: removing animations for: " << id << std::endl;
   world.animations.erase(id);
 }
+
+
 
 void loadMeshData(World& world, std::string meshPath, MeshData& meshData, int ownerId){
   if (world.meshes.find(meshPath) != world.meshes.end()){

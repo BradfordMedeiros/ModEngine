@@ -50,7 +50,7 @@ World createWorld(
 
 void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& idsAdded, std::function<objid()> getNewObjectId, std::map<std::string, GameobjAttributesWithId> additionalFields, bool returnObjectOnly, std::vector<GameObjectObj>& gameobjObjs, std::map<std::string, GameobjAttributes>& submodelAttributes);
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
-Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight);
+Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 
 objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name);
 objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name);
@@ -123,6 +123,7 @@ void loadSkybox(World& world, std::string skyboxpath);
 
 std::string getType(std::string name);
 
+std::optional<objid> getMappingTexture(World& world, std::string& texture);
 void freeTextureRefsIdByOwner(World& world, int ownerId, std::optional<int> id);
 
 #endif

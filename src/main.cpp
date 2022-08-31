@@ -944,10 +944,6 @@ void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
 
-std::optional<std::string> getMappingTexture(std::string& texture){
-  return "gentexture-scenegraph_seletion_texture";
-}
-
 
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
@@ -1696,9 +1692,11 @@ int main(int argc, char* argv[]){
 
     if (textureName != ""){
       std::cout << "texturename: " << textureName << std::endl;
-      auto mappingTexture = getMappingTexture(textureName);
+      auto mappingTexture = getMappingTexture(world, textureName);
       if (mappingTexture.has_value()){
-        renderStages.basicTexture.quadTexture = world.textures.at(mappingTexture.value()).texture.textureId;
+        auto mappingTextureName = getTextureById(world, mappingTexture.value());
+        std::cout << "mapping texture name: " << mappingTextureName << std::endl;
+        renderStages.basicTexture.quadTexture = mappingTexture.value();
         renderWithProgram(renderContext, renderStages.basicTexture);
         auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
         Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
