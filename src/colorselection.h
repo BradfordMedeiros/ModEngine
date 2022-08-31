@@ -31,6 +31,9 @@ struct UVCoord {
 };
 
 UVCoord getUVCoord(GLint x, GLint y);
+UVCoord toUvCoord(UVCoordAndTextureId uvCoordWithTex);
+UVCoordAndTextureId getUVCoordAndTextureId(GLint x, GLint y);
+
 glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution);
 glm::vec2 pixelCoordToNdi(glm::ivec2 pixelCoord, glm::vec2 resolution);
 

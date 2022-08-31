@@ -701,7 +701,6 @@ std::string serializeObject(World& world, objid id, std::string overridename){
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
 }
 
-
 void addObjectToWorld(
   World& world, 
   objid sceneId, 

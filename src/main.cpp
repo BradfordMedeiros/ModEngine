@@ -944,6 +944,11 @@ void onGLFWEerror(int error, const char* description){
   std::cerr << "Error: " << description << std::endl;
 }
 
+std::optional<std::string> getMappingTexture(std::string& texture){
+  return "gentexture-scenegraph_seletion_texture";
+}
+
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1552,13 +1557,12 @@ int main(int argc, char* argv[]){
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
-    auto uvCoord = getUVCoord(adjustedCoords.x, adjustedCoords.y);
+    auto uvCoordWithTex = getUVCoordAndTextureId(adjustedCoords.x, adjustedCoords.y);
+    auto uvCoord = toUvCoord(uvCoordWithTex);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
 
     glEnable(GL_BLEND);
-
-    std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
@@ -1687,18 +1691,22 @@ int main(int argc, char* argv[]){
     )
 
 
-    renderStages.basicTexture.quadTexture = world.textures.at("gentexture-scenegraph_seletion_texture").texture.textureId;
-    
-    renderWithProgram(renderContext, renderStages.basicTexture);
+    auto textureId = uvCoordWithTex.z;
+    auto textureName = textureId != 0 ? getTextureById(world, textureId) : "";
 
-    //auto pixelCoords = uvToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
-    auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
-    Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
-    //std::cout << "colorFromSelection2: " << print(glm::vec4(colorFromSelection2.r, colorFromSelection2.g, colorFromSelection2.b, colorFromSelection2.a)) << std::endl;
-    //std::cout << "uv coord: " << uvCoord.x << ", " << uvCoord.y << std::endl;
-    //std::cout << "pixel coord: " << pixelCoord.x << ", " << pixelCoord.y << std::endl;
-    auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
-    std::cout << "hovered color = " << print(colorFromSelection2) << " " << hoveredColorItemId << std::endl;
+    if (textureName != ""){
+      std::cout << "texturename: " << textureName << std::endl;
+      auto mappingTexture = getMappingTexture(textureName);
+      if (mappingTexture.has_value()){
+        renderStages.basicTexture.quadTexture = world.textures.at(mappingTexture.value()).texture.textureId;
+        renderWithProgram(renderContext, renderStages.basicTexture);
+        auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
+        Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
+        auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
+        std::cout << "hovered color = " << print(colorFromSelection2) << " " << hoveredColorItemId << std::endl;  
+      }    
+    }
+
     ////////////////////////////
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);

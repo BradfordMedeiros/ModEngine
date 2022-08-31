@@ -49,16 +49,19 @@ UVCoordAndTextureId getUVCoordAndTextureId(GLint x, GLint y){
   std::cout << "uv texture: " << uvTexturedata.x << ", " << uvTexturedata.y << ", " << uvTexturedata.z << std::endl;
   return uvTexturedata;
 }
-// Emphasis:  Color attachment 1 needs to save the uvCoordData 
-// eg: layout(location = 1) out vec2 UVCoords;
-// UVCoords = vec2(1, 2)
-UVCoord getUVCoord(GLint x, GLint y){
-  auto uvCoordWithTex = getUVCoordAndTextureId(x, y);
+
+UVCoord toUvCoord(UVCoordAndTextureId uvCoordWithTex){
   UVCoord coord {
     .x = uvCoordWithTex.x,
     .y = uvCoordWithTex.y,
   };
   return coord;
+}
+// Emphasis:  Color attachment 1 needs to save the uvCoordData 
+// eg: layout(location = 1) out vec2 UVCoords;
+// UVCoords = vec2(1, 2)
+UVCoord getUVCoord(GLint x, GLint y){
+  return toUvCoord(getUVCoordAndTextureId(x, y));
 }
 
 glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
