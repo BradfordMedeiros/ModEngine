@@ -805,7 +805,6 @@ int renderWithProgram(RenderContext& context, RenderStep& renderStep){
       std::vector<glm::mat4> lightProjview = {};
       RenderUniforms uniforms { };
       setShaderData(renderStep.shader, ndiOrtho, glm::mat4(1.f), lights, false, glm::vec3(1.f, 1.f, 1.f), 0, lightProjview, glm::vec3(0.f, 0.f, 0.f), uniforms);
-      glUniform1i(glGetUniformLocation(renderStep.shader, "hasDiffuseTexture"), true);
       glActiveTexture(GL_TEXTURE0); 
       glBindTexture(GL_TEXTURE_2D, renderStep.quadTexture);
       glBindVertexArray(quadVAO3D);
@@ -1191,7 +1190,7 @@ int main(int argc, char* argv[]){
 
   std::string basicShaderPath = "./res/shaders/basic";
   std::cout << "INFO: basic shader path is: " << basicShaderPath << std::endl;
-  unsigned int basicProgram = loadShader(shaderFolderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
+  unsigned int basicProgram = loadShader(basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(fbo, 
     framebufferTexture, framebufferTexture2, framebufferTexture3, 
@@ -1698,9 +1697,7 @@ int main(int argc, char* argv[]){
     ////////////////////////////
 
     numTriangles = renderWithProgram(renderContext, renderStages.main);
-    //Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
-    //std::cout << "colorFromSelection: " << print(glm::vec4(colorFromSelection.r, colorFromSelection.g, colorFromSelection.b, colorFromSelection.a)) << std::endl
-    //    auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
+    Color colorFromSelection = getPixelColor(adjustedCoords.x, adjustedCoords.y);
 
       /////////////////
 
