@@ -634,6 +634,7 @@ float fontOffsetPerLine(float fontsize){
 
 void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
+  glEnable(GL_BLEND);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
@@ -1683,6 +1684,7 @@ int main(int argc, char* argv[]){
 
 
     renderStages.basicTexture.quadTexture = world.textures.at("gentexture-scenegraph_seletion_texture").texture.textureId;
+    
     renderWithProgram(renderContext, renderStages.basicTexture);
 
     //auto pixelCoords = uvToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
