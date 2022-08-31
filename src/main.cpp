@@ -396,6 +396,10 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
 
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
+
+  glUniform1i(glGetUniformLocation(shader, "textureid"), 0);
+
+
   for (int i = 0; i < lights.size(); i++){
     glm::vec3 position = lights.at(i).transform.position;
     glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(position));
@@ -1554,7 +1558,7 @@ int main(int argc, char* argv[]){
 
     glEnable(GL_BLEND);
 
-    //std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
+    std::cout << "uv coord = " << uvCoord.x << " " << uvCoord.y << std::endl;
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);

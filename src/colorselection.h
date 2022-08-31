@@ -20,6 +20,11 @@ objid getIdFromPixelCoord(GLint x, GLint y);
 glm::vec4 getColorFromGameobject(objid id);
 std::string printColor(Color color);
 
+struct UVCoordAndTextureId {
+  GLfloat x;
+  GLfloat y;
+  GLfloat z;
+};
 struct UVCoord {
   GLfloat x;
   GLfloat y;

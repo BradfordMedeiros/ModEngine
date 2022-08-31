@@ -42,14 +42,23 @@ std::string printColor(Color color){
   return std::to_string(color.r) + ", " + std::to_string(color.g) + ", " + std::to_string(color.b) + ", " + std::to_string(color.a);
 }
 
+UVCoordAndTextureId getUVCoordAndTextureId(GLint x, GLint y){
+  glReadBuffer(GL_COLOR_ATTACHMENT1);
+  UVCoordAndTextureId uvTexturedata; 
+  glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &uvTexturedata); 
+  std::cout << "uv texture: " << uvTexturedata.x << ", " << uvTexturedata.y << ", " << uvTexturedata.z << std::endl;
+  return uvTexturedata;
+}
 // Emphasis:  Color attachment 1 needs to save the uvCoordData 
 // eg: layout(location = 1) out vec2 UVCoords;
 // UVCoords = vec2(1, 2)
 UVCoord getUVCoord(GLint x, GLint y){
-  glReadBuffer(GL_COLOR_ATTACHMENT1);
-  UVCoord uvdata; 
-  glReadPixels(x, y, 1, 1, GL_RG, GL_FLOAT, &uvdata); 
-  return uvdata;
+  auto uvCoordWithTex = getUVCoordAndTextureId(x, y);
+  UVCoord coord {
+    .x = uvCoordWithTex.x,
+    .y = uvCoordWithTex.y,
+  };
+  return coord;
 }
 
 glm::ivec2 ndiToPixelCoord(glm::vec2 ndi, glm::vec2 resolution){
