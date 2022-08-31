@@ -48,6 +48,7 @@ uniform bool lightsisdir[MAX_LIGHTS];
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
 
+uniform vec3 ambientAmount;
 uniform float emissionAmount;
 uniform float discardTexAmount;
 uniform float time;
@@ -70,7 +71,7 @@ float calcAttenutation(int lightNumber){
 }
 
 vec3 calculatePhongLight(vec3 normal){
-  vec3 ambient = vec3(0.4, 0.4, 0.4);     
+  vec3 ambient = ambientAmount;   
   vec3 totalDiffuse  = vec3(0, 0, 0);     
   vec3 totalSpecular = vec3(0, 0, 0);     
 

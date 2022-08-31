@@ -66,6 +66,16 @@ std::vector<ObjectStateMapping> mapping = {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
       if (color != NULL){
+        state.ambient = *color; 
+      }
+    },
+    .object = "light",
+    .attribute = "amount",
+  },
+  ObjectStateMapping{
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto color = std::get_if<glm::vec3>(&value);
+      if (color != NULL){
         auto fogColor = *color;
         state.fogColor = glm::vec4(fogColor.x, fogColor.y, fogColor.z, 1.0f); 
       }
@@ -496,6 +506,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .bloomBlurAmount = 5,
     .enableFog = true,  
     .fogColor = glm::vec4(0.f, 0.f, 0.f, 1.f),
+    .ambient = glm::vec3(0.4, 0.4, 0.4),
     .exposureStart = 0.f,
     .oldExposure = 1.f,
     .targetExposure = 1.f,

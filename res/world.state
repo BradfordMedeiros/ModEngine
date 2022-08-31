@@ -1,12 +1,14 @@
 
 ### Lighting ###
-diffuse:enabled:true
+diffuse:enabled:false
 specular:enabled:false
 bloom:enabled:false
 bloom:amount:1
 bloomblur:amount:1
 #exposure:amount:0.8
 #pbr:enabled:true
+
+light:amount:0.8 0.8 0.8
 ###############################
 
 ### Post Process ###
