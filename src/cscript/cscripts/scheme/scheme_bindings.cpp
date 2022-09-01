@@ -947,6 +947,14 @@ void onObjectUnhover(int32_t index){
   const char* function = "onObjUnhover";
   callObjIdFunc(function, index);
 }
+void onMapping(int32_t index){
+  const char* function = "onMapping";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, scm_from_unsigned_integer(index));
+  }
+}
+
 void onKeyCallback(int key, int scancode, int action, int mods){
   const char* function = "onKey";
   if (symbolDefined(function)){

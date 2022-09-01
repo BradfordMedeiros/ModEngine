@@ -28,6 +28,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
   binding.onObjectSelected = schemeCallbacks.onObjectSelected;
   binding.onObjectUnselected = schemeCallbacks.onObjectUnselected;
   binding.onObjectHover = schemeCallbacks.onObjectHover;
+  binding.onMapping = schemeCallbacks.onMapping;
   binding.onKeyCallback = schemeCallbacks.onKeyCallback;
   binding.onKeyCharCallback = schemeCallbacks.onKeyCharCallback;
   binding.onCameraSystemChange = schemeCallbacks.onCameraSystemChange;

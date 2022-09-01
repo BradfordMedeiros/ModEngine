@@ -46,7 +46,6 @@ UVCoordAndTextureId getUVCoordAndTextureId(GLint x, GLint y){
   glReadBuffer(GL_COLOR_ATTACHMENT1);
   UVCoordAndTextureId uvTexturedata; 
   glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &uvTexturedata); 
-  std::cout << "uv texture: " << uvTexturedata.x << ", " << uvTexturedata.y << ", " << uvTexturedata.z << std::endl;
   return uvTexturedata;
 }
 

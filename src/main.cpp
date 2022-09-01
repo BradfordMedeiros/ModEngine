@@ -1691,17 +1691,18 @@ int main(int argc, char* argv[]){
     auto textureName = textureId != 0 ? getTextureById(world, textureId) : "";
 
     if (textureName != ""){
-      std::cout << "texturename: " << textureName << std::endl;
+      //std::cout << "texturename: " << textureName << std::endl;
       auto mappingTexture = getMappingTexture(world, textureName);
       if (mappingTexture.has_value()){
         auto mappingTextureName = getTextureById(world, mappingTexture.value());
-        std::cout << "mapping texture name: " << mappingTextureName << std::endl;
         renderStages.basicTexture.quadTexture = mappingTexture.value();
         renderWithProgram(renderContext, renderStages.basicTexture);
         auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
         Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
         auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
-        std::cout << "hovered color = " << print(colorFromSelection2) << " " << hoveredColorItemId << std::endl;  
+        if (hoveredColorItemId > 0){
+          cBindings.onMapping(hoveredColorItemId);
+        }
       }    
     }
 

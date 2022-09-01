@@ -233,6 +233,8 @@ typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
 typedef void(*id_onobjectSelectedFunc)(int32_t id, int32_t index, glm::vec3 color);
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef void(*id_onobjectHoverFunc)(int32_t id, int32_t index, bool hoverOn);
+typedef void(*funcMappingFunc)(int32_t index);
+typedef void(*id_funcMappingFunc)(int32_t id, int32_t index);
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef void(*id_keycallback)(int32_t id, int key, int scancode, int action, int mods);
 typedef void(*keycharcallback)(unsigned int codepoint);

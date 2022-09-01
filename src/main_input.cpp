@@ -102,7 +102,7 @@ glm::vec2 ndiCoord(){
   return glm::vec2(xNdc, yNdc);
 }
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
+  //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
   onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
   auto coords = ndiCoord();
   cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
