@@ -106,11 +106,21 @@
 (define expandState (list))
 (define (expandPath name sceneId) (string-append name ":" (number->string sceneId)))
 
-(define selectedName #f)
+(define (rmFromList listVals keyToRemove) 
+	(filter 
+		(lambda(val) 
+			(format #t "key = ~a, val = ~a\n" keyToRemove val)
+			(not (equal? (car val) keyToRemove))
+		) 
+		listVals
+	)
+)
 (define (toggleExpanded)
 	(define element (assoc selectedName expandState))
 	(define isExpanded (if element (cadr element) #t))
-	(set! expandState (cons  (list selectedName (not isExpanded)) expandState))
+	(define filteredList (rmFromList expandState selectedName))
+	(define newExpandState (cons  (list selectedName (not isExpanded)) filteredList))
+	(set! expandState newExpandState)
 	(onGraphChange)
 )
 
@@ -141,10 +151,13 @@
 (define selectedIndex 1)
 (define maxIndex #f)
 (define selectedElement #f)
+(define selectedName #f)
+
+; should set selectedElement and selectedName here
 (define (setSelectedIndex index)
 	(define adjustedIndex (max 0 index))
+	(format #t "selected index: ~a\n" index)
 	(set! selectedIndex (if maxIndex (min maxIndex adjustedIndex) adjustedIndex))
-	(onGraphChange)
 )
 
 (define (checkExpanded elementName sceneId)
@@ -154,9 +167,29 @@
 )
 
 
+
 (define baseNumber 90000)  ; arbitrary number, only uses for mapping selection for now, which numbering is basically a manually process
+(define baseNumberMapping (list))
+(define (baseNumberToSelectedIndex index)
+	(define baseIndexPair (assoc index baseNumberMapping))
+	(format #t "base mapping: ~a\n" baseNumberMapping)
+	(format #t "base index pair: ~a\n" baseIndexPair)
+	(if baseIndexPair
+		(cadr baseIndexPair)
+		(begin
+			(format #t "warning: no basemapping for: ~a\n" index)
+			0
+		)
+	)
+)
+(define (clearBaseNumberMapping) (set! baseNumberMapping (list)))
+(define (setBaseNumberMapping basenumber index)
+	(set! baseNumberMapping (cons (list basenumber index) baseNumberMapping))
+)
+
 (define (draw elementName sceneId depth height expanded)
 	(define isSelected (equal? selectedIndex height))
+	(define mappingNumber (+ baseNumber height))
 	(if isSelected (set! selectedName (expandPath elementName sceneId)))
 	(if isSelected (set! selectedElement (list elementName sceneId)))
 	(draw-text-ndi
@@ -166,8 +199,9 @@
 		fontsize
 		(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
 		textureId
-		(+ baseNumber height)
+		mappingNumber
 	)
+	(setBaseNumberMapping mappingNumber height)
 )
 
 (define (elementExists element)
@@ -263,6 +297,7 @@
 ;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
 
 	(resetMinOffset)
+	(clearBaseNumberMapping)
 	(for-each (lambda(target)
 		(drawHierarchy (car target) (cadr target) 0 getIndex target)
 	) (allRootParents))
@@ -285,8 +320,18 @@
 	(if (equal? action 1)
 		(begin
      	(if (equal? key 47) (create-obj))  ; /
-     	(if (equal? key 264) (setSelectedIndex (+ selectedIndex 1)))                    
-     	(if (equal? key 265) (setSelectedIndex (- selectedIndex 1))) 
+     	(if (equal? key 264) 
+     		(begin
+     			(setSelectedIndex (+ selectedIndex 1))
+     			(onGraphChange)
+     		)
+     	)                  
+     	(if (equal? key 265) 
+     		(begin
+     			(setSelectedIndex (- selectedIndex 1))
+     			(onGraphChange)
+     		)	
+     	)
      	(if (equal? key 257) (toggleExpanded))  ; enter
      	(if (equal? key 344) (handleItemSelected selectedElement))  ; shift
 		)
@@ -297,6 +342,10 @@
 	(if (equal? key 45)
 		(decreaseFontSize)  ; -
 	)
+	(if (equal? key 262)
+		(format #t "base: ~a\n" baseNumberMapping)
+	)
+	(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
 )
 
 (define (onScroll amount)
@@ -306,5 +355,14 @@
 )
 
 (define (onMapping index)
-	(format #t "mapping: ~a\n" index)
+	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
+	(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
+	(if selectedIndexForMapping
+		(begin
+  		(setSelectedIndex selectedIndexForMapping)
+  		(toggleExpanded)
+			(format #t "exapnded: ~a\n" expandState)
+		)
+	)
+	(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
 )
