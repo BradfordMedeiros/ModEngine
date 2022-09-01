@@ -74,10 +74,12 @@
 (define fontsize 30)
 (define (increaseFontSize)
 	(set! fontsize (+ fontsize 1))
+	(refreshDepGraph)         
 	(onGraphChange)
 )
 (define (decreaseFontSize)
 	(set! fontsize (- fontsize 1))
+	(refreshDepGraph)   
 	(onGraphChange)
 )
 
@@ -328,26 +330,30 @@
 	)
 )
 
-(define drawtitle #f)
-(define (addPermaData)
-	(define drawListWithIndex (getDrawList))
-	(define drawList (car drawListWithIndex))
-	(define index (cadr drawListWithIndex))
-	(if drawtitle (begin
-		(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
-	  (draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
-	  (draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
-	  (draw-line (list -1 1 0)   (list 1 1 0)   (list 0 1 1 1) #f textureId)	
-	))
 
-	(updateDrawListData drawList index)
-	(doDrawList drawList)
+(define (refreshGraphData)
+	(let* (
+			(drawListWithIndex (getDrawList))
+			(drawList (car drawListWithIndex))
+			(index (cadr drawListWithIndex))
+		)
+		(updateDrawListData drawList index)
+  	drawList
+	)
 )
 
+(define drawtitle #f)
 (define (onGraphChange)
-	(refreshDepGraph)         ; should this really be done at this point?  Perhaps?!
 	(clear-texture textureId (list 0.1 0.1 0.1 1))
-	(addPermaData)
+	(if drawtitle 
+		(begin
+			(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
+	  	(draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
+	  	(draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
+	  	(draw-line (list -1 1 0)   (list 1 1 0)   (list 0 1 1 1) #f textureId)	
+		)
+	)
+	(doDrawList (refreshGraphData))
 )
 
 (define textureId #f)
@@ -363,18 +369,21 @@
      	(if (equal? key 264) 
      		(begin
      			(setSelectedIndex (+ selectedIndex 1))
+     			(refreshDepGraph)   
      			(onGraphChange)
      		)
      	)                  
      	(if (equal? key 265) 
      		(begin
      			(setSelectedIndex (- selectedIndex 1))
+     			(refreshDepGraph)   
      			(onGraphChange)
      		)	
      	)
      	(if (equal? key 257) 
      		(begin
      			(toggleExpanded selectedName)
+     			(refreshDepGraph)   
    				(onGraphChange)
      		)  ; enter
      	)
@@ -396,6 +405,7 @@
 (define (onScroll amount)
   (set! offset (min maxOffset (max minOffset (+ offset (* 0.04 amount)))))
   ;(format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
+  (refreshDepGraph)   
 	(onGraphChange)
 )
 
@@ -404,8 +414,10 @@
 	(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
 	(if selectedIndexForMapping
 		(begin
+			(refreshDepGraph)
   		(setSelectedIndex selectedIndexForMapping)
-  		(toggleExpanded selectedName)
+  		(refreshGraphData)   
+   		(toggleExpanded selectedName)
   		(onGraphChange)
 			(format #t "expanded: ~a\n" expandState)
 		)
