@@ -179,9 +179,7 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::functio
       auto adjustedFontSize = convertTextNdiFontsize(height, width, text.fontSize, text.ndi);
       FontFamily& fontFamily = fontFamilyByName(text.fontFamily.has_value() ? text.fontFamily.value() : "");
       if (text.selectionId.has_value()){
-        std::cout << "selection id value: " << text.selectionId.value() << std::endl;
-        //glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(glm::vec4(0.f, 1.f, 0.f, 1.f)));
-
+        //std::cout << "selection id value: " << text.selectionId.value() << std::endl;
         auto id = text.selectionId.value();
         auto color = getColorFromGameobject(id);
 
@@ -192,7 +190,7 @@ void drawTextData(LineData& lineData, unsigned int uiShaderProgram, std::functio
           .a = color.w,
         };
         auto restoredId = getIdFromColor(colorTypeColor);
-        std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
+        //std::cout << "color is: " << print(colorTypeColor) << " - " << id << " - " << restoredId << std::endl;
         glUniform4fv(glGetUniformLocation(uiShaderProgram, "encodedid2"), 1, glm::value_ptr(getColorFromGameobject(id)));
 
       }else{

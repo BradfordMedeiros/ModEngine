@@ -1701,7 +1701,9 @@ int main(int argc, char* argv[]){
         Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
         auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
         if (hoveredColorItemId > 0){
-          cBindings.onMapping(hoveredColorItemId);
+          if (selectItemCalledThisFrame){
+            cBindings.onMapping(hoveredColorItemId);
+          }
         }
       }    
     }
