@@ -115,13 +115,13 @@
 		listVals
 	)
 )
-(define (toggleExpanded)
-	(define element (assoc selectedName expandState))
+(define (toggleExpanded name)
+	(define element (assoc name expandState))
 	(define isExpanded (if element (cadr element) #t))
-	(define filteredList (rmFromList expandState selectedName))
-	(define newExpandState (cons  (list selectedName (not isExpanded)) filteredList))
+	(define filteredList (rmFromList expandState name))
+	(define newExpandState (cons  (list name (not isExpanded)) filteredList))
+	(format #t "toggle expanded, selectname = ~a, element = ~a\n" name element)
 	(set! expandState newExpandState)
-	(onGraphChange)
 )
 
 
@@ -187,29 +187,6 @@
 	(set! baseNumberMapping (cons (list basenumber index) baseNumberMapping))
 )
 
-(define (draw elementName sceneId depth height expanded)
-	(define isSelected (equal? selectedIndex height))
-	(define mappingNumber (+ baseNumber height))
-	(if isSelected (set! selectedName (expandPath elementName sceneId)))
-	(if isSelected (set! selectedElement (list elementName sceneId)))
-	(draw-text-ndi
-		(if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName)
-		(calcX depth) 
-		(calcY height) 
-		fontsize
-		(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
-		textureId
-		mappingNumber
-	)
-	(setBaseNumberMapping mappingNumber height)
-)
-
-(define (elementExists element)
-	(define value (assoc element depgraph))
-	(if value #t (if (member element depgraph) #t #f))  ; check if 
-
-)
-
 (define (children target sceneId)
 		(filter 
 			(lambda(val)
@@ -222,22 +199,22 @@
 		)
 	
 )
-(define (drawHierarchy target sceneId depth getIndex fullTarget)
+
+(define (calcDrawHierarchy target sceneId depth getIndex addDrawList)
 	(define childElements (children target sceneId))
 	(define isExpanded (checkExpanded target sceneId))
-	(define exists (elementExists target))
-	(if #t
-		(begin
-	    (draw target sceneId depth (getIndex) isExpanded)
-	    (if isExpanded
-	      (for-each 
-	      	(lambda(target)
-	      		(drawHierarchy (cadr target) (cadr (caddr target)) (+ depth 1) getIndex target)
-	      	) 
-	      	childElements
-	      )
-	    )
-		)
+	(define height (getIndex))
+	(define mappingNumber (+ baseNumber height))
+	(begin
+		 (addDrawList target sceneId depth height isExpanded mappingNumber)
+	   (if isExpanded
+	     (for-each 
+	     	(lambda(target)
+	     		(calcDrawHierarchy (cadr target) (cadr (caddr target)) (+ depth 1) getIndex addDrawList)
+	     	) 
+	     	childElements
+	     )
+	   )
 	)
 )
 
@@ -278,14 +255,84 @@
 	filteredParents
 )
 
-(define drawtitle #f)
-(define (addPermaData)
+(define (getDrawList)
 	(define index -1)
 	(define getIndex (lambda()
 		(set! index (+ index 1))
-		(setMinOffset index)
 		index
 	))
+
+	(define drawList (list))
+	(define addDrawList (
+		lambda(target sceneId depth height isExpanded mappingNumber)
+			(set! drawList (cons (list target sceneId depth height isExpanded (equal? selectedIndex height) mappingNumber) drawList))
+			(format #t "add draw list: ~a\n" drawList)
+		)
+	)
+	(for-each 
+		(lambda(target)
+			(begin
+				(calcDrawHierarchy (car target) (cadr target) 0 getIndex addDrawList)
+			)
+		) 
+		(allRootParents)
+	)
+	(list drawList index)
+)
+(define (updateDrawListData drawList index)
+	(resetMinOffset)
+	(clearBaseNumberMapping)
+	(set! maxIndex index)
+	(for-each
+		(lambda (drawElement)
+			(let (
+					(isSelected (list-ref drawElement 5))
+					(target (list-ref drawElement 0))
+					(sceneId (list-ref drawElement 1))
+					(mappingNumber (list-ref drawElement 6))
+					(height (list-ref drawElement 3))
+				)
+				(if isSelected (set! selectedName (expandPath target sceneId)))
+				(if isSelected (set! selectedElement (list target sceneId)))
+				(setBaseNumberMapping mappingNumber height)
+			)
+		)
+		drawList
+	)
+)
+(define (doDrawList drawList)
+	(for-each
+		(lambda (drawElement)
+			(let (
+					(elementName (list-ref drawElement 0))
+					(sceneId (list-ref drawElement 1))
+					(depth (list-ref drawElement 2))
+					(height (list-ref drawElement 3))
+					(expanded (list-ref drawElement 4))
+					(isSelected (list-ref drawElement 5))
+					(mappingNumber (list-ref drawElement 6))
+				)
+				(draw-text-ndi
+					(string-append (if expanded "E" "N") (if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName))
+					(calcX depth) 
+					(calcY height) 
+					fontsize
+					(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
+					textureId
+					mappingNumber
+				)
+			)
+			
+		)
+		drawList
+	)
+)
+
+(define drawtitle #f)
+(define (addPermaData)
+	(define drawListWithIndex (getDrawList))
+	(define drawList (car drawListWithIndex))
+	(define index (cadr drawListWithIndex))
 	(if drawtitle (begin
 		(draw-text "Scenegraph" 20 30 4 (list 1 1 1 0.8) textureId)
 	  (draw-line (list -1 0.9 0) (list 1 0.9 0) (list 0 0 1 1) #t textureId)
@@ -293,15 +340,8 @@
 	  (draw-line (list -1 1 0)   (list 1 1 0)   (list 0 1 1 1) #f textureId)	
 	))
 
-;	(draw-line (list -1 0.9 0) (list 1 0.9 0)  #f textureId)
-;	(draw-line (list -1 1 0)   (list 1 1 0)   #f textureId)
-
-	(resetMinOffset)
-	(clearBaseNumberMapping)
-	(for-each (lambda(target)
-		(drawHierarchy (car target) (cadr target) 0 getIndex target)
-	) (allRootParents))
-	(set! maxIndex index)
+	(updateDrawListData drawList index)
+	(doDrawList drawList)
 )
 
 (define (onGraphChange)
@@ -332,7 +372,12 @@
      			(onGraphChange)
      		)	
      	)
-     	(if (equal? key 257) (toggleExpanded))  ; enter
+     	(if (equal? key 257) 
+     		(begin
+     			(toggleExpanded selectedName)
+   				(onGraphChange)
+     		)  ; enter
+     	)
      	(if (equal? key 344) (handleItemSelected selectedElement))  ; shift
 		)
 	)
@@ -360,8 +405,9 @@
 	(if selectedIndexForMapping
 		(begin
   		(setSelectedIndex selectedIndexForMapping)
-  		(toggleExpanded)
-			(format #t "exapnded: ~a\n" expandState)
+  		(toggleExpanded selectedName)
+  		(onGraphChange)
+			(format #t "expanded: ~a\n" expandState)
 		)
 	)
 	(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
