@@ -357,7 +357,7 @@ Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId){
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
-    .mappingTexture = 0,
+    .mappingTexture = std::nullopt,
   };
   return texture;
 }
@@ -372,7 +372,7 @@ Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid owner
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
-    .mappingTexture = mappingTexture.has_value() ? mappingTexture.value() : 0,
+    .mappingTexture = mappingTexture,
   };
   return texture;  
 }
@@ -385,7 +385,7 @@ Texture loadSkyboxWorld(World& world, std::string texturepath, objid ownerId){
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
-    .mappingTexture = 0,
+    .mappingTexture = std::nullopt,
   };
   return texture;
 }
@@ -399,7 +399,7 @@ Texture loadTextureDataWorld(World& world, std::string texturepath, unsigned cha
   world.textures[texturepath] = TextureRef {
     .owners = { ownerId },
     .texture = texture,
-    .mappingTexture = 0,
+    .mappingTexture = std::nullopt,
   };
   return texture;  
 }
