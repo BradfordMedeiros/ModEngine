@@ -304,3 +304,7 @@
   ;(format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
 	(onGraphChange)
 )
+
+(define (onMapping index)
+	(format #t "mapping: ~a\n" index)
+)

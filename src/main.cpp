@@ -1688,7 +1688,7 @@ int main(int argc, char* argv[]){
 
 
     auto textureId = uvCoordWithTex.z;
-    auto textureName = textureId != 0 ? getTextureById(world, textureId) : "";
+    auto textureName = textureId > 0 ? getTextureById(world, textureId) : "";
 
     if (textureName != ""){
       //std::cout << "texturename: " << textureName << std::endl;
