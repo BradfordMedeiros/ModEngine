@@ -88,10 +88,10 @@
 (define (create-obj)
   (mk-obj-attr "someobj"     
   	(list
-  		(list "layer" "noselect1")
   		(list "position" (list 1 1 0))
   		(list "mesh" "./res/models/box/spriteplane.dae")
   		(list "someobj/Plane" "texture" texturename)
+  		(list "layer" "noselect1")
   	)
 	)
 )
@@ -169,17 +169,21 @@
 
 (define baseNumber 90000)  ; arbitrary number, only uses for mapping selection for now, which numbering is basically a manually process
 (define baseNumberMapping (list))
-(define (baseNumberToSelectedIndex index)
+(define (baseNumberToSelectedIndex mappingIndex)
+	(define isPayloadMapping (>= mappingIndex 95000))
+	(define index (if isPayloadMapping (- mappingIndex 5000) mappingIndex))
 	(define baseIndexPair (assoc index baseNumberMapping))
 	(format #t "base mapping: ~a\n" baseNumberMapping)
 	(format #t "base index pair: ~a\n" baseIndexPair)
 	(if baseIndexPair
-		(cadr baseIndexPair)
+		(list (cadr baseIndexPair) isPayloadMapping)
 		(begin
 			(format #t "warning: no basemapping for: ~a\n" index)
-			0
+			#f
 		)
 	)
+)
+(define (payloadMappingNumber mappingNumber) (+ mappingNumber 5000)
 )
 (define (clearBaseNumberMapping) (set! baseNumberMapping (list)))
 (define (setBaseNumberMapping basenumber index)
@@ -312,13 +316,26 @@
 					(mappingNumber (list-ref drawElement 6))
 				)
 				(draw-text-ndi
-					(string-append (if expanded "E" "N") (if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName))
+					(if expanded "E" "N")
 					(calcX depth) 
 					(calcY height) 
 					fontsize
+					;"./res/fonts/Walby-Regular.ttf"
+					"./res/textures/fonts/gamefont"
 					(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
 					textureId
 					mappingNumber
+				)
+				(draw-text-ndi
+					(if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName)
+					(calcX (+ depth 1)) 
+					(calcY height) 
+					fontsize
+					;"./res/fonts/Walby-Regular.ttf"
+					"./res/textures/fonts/gamefont"
+					(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
+					textureId
+					(payloadMappingNumber mappingNumber)
 				)
 			)
 			
@@ -408,15 +425,33 @@
 
 (define (onMapping index)
 	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
-	;(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
+	(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
 	(if selectedIndexForMapping
-		(begin
-			(refreshDepGraph)
-  		(setSelectedIndex selectedIndexForMapping)
-  		(refreshGraphData)   
-   		(toggleExpanded selectedName)
-  		(onGraphChange)
-			;(format #t "expanded: ~a\n" expandState)
+		(let (
+				(isToggle (not (cadr selectedIndexForMapping)))
+				(mappedIndex (car selectedIndexForMapping))
+			)
+			(if isToggle
+				(begin
+					(refreshDepGraph)
+	  			(setSelectedIndex mappedIndex)
+	  			(refreshGraphData)   
+	   			(toggleExpanded selectedName)
+	  			(onGraphChange)
+				)
+				(if (equal? mappedIndex selectedIndex)
+					(begin
+						(handleItemSelected selectedElement)
+					)
+					(begin
+						(refreshDepGraph)
+	  				(setSelectedIndex mappedIndex)
+	  				(refreshGraphData)   
+	  				(onGraphChange)
+					)
+				)
+			
+			)
 		)
 	)
 	;(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)

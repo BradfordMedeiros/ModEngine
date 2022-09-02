@@ -39,4 +39,6 @@ basicui:!enableLighting:false
 basicui:?enableLighting:bool
 basicui:selection:-2
 
-noselect1:selection:-3
+noselect1:selection:-1
+
+#noselect1:cursor:./res/cursors/somecursor.somecursor
