@@ -12,6 +12,7 @@ struct EditorItem {
 };
 
 struct EditorContent {
+  objid forceSelectIndex;
   objid activeObj;
   std::vector<EditorItem> selectedObjs;
   std::vector<EditorItem> clipboardObjs;

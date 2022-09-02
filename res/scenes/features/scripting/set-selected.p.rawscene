@@ -1,0 +1,2 @@
+object:mesh:./res/models/electricbox/electricbox.obj
+object:script:./res/scenes/features/scripting/set-selected.scm

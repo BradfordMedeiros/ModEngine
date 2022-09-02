@@ -252,7 +252,7 @@ void handleTerrainPainting(UVCoord uvCoord){
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
-void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
+void selectItem(objid selectedId, int layerSelectIndex){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   if (!showCursor){
     return;
@@ -291,7 +291,6 @@ void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
 
   setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
-  state.additionalText = "     <" + std::to_string((int)(255 * pixelColor.r)) + ","  + std::to_string((int)(255 * pixelColor.g)) + " , " + std::to_string((int)(255 * pixelColor.b)) + ">  " + " --- " + state.selectedName;
 }
 
 
@@ -1582,25 +1581,30 @@ int main(int argc, char* argv[]){
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
     state.lastHoverIndex = state.currentHoverIndex;
     state.currentHoverIndex = hoveredId;
+    state.additionalText = "     <" + std::to_string((int)(255 * hoveredItemColor.r)) + ","  + std::to_string((int)(255 * hoveredItemColor.g)) + " , " + std::to_string((int)(255 * hoveredItemColor.b)) + ">  " + " --- " + state.selectedName;
 
     bool selectItemCalledThisFrame = selectItemCalled;
 
-    if ((hoveredId != getManipulatorId()) && selectItemCalled){
+    auto selectTargetId = state.editor.forceSelectIndex == 0 ? hoveredId : state.editor.forceSelectIndex;;
+    auto shouldSelectItem = selectItemCalled || (state.editor.forceSelectIndex != 0);
+    state.editor.forceSelectIndex = 0;
+
+    if ((selectTargetId != getManipulatorId()) && shouldSelectItem){
       std::cout << "INFO: select item called" << std::endl;
-      
-      if (state.hoveredIdInScene){
+
+      std::cout << "select target id: " << selectTargetId << std::endl;
+      if (idExists(world.sandbox, selectTargetId)){
         std::cout << "INFO: select item called -> id in scene!" << std::endl;
-        auto layerSelectIndex = getLayerForId(hoveredId).selectIndex;
+        auto layerSelectIndex = getLayerForId(selectTargetId).selectIndex;
 
         auto layerSelectNegOne = layerSelectIndex == -1;
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond)){
-          selectItem(hoveredId, hoveredItemColor, layerSelectIndex);
+          selectItem(selectTargetId, layerSelectIndex);
         }
-        
-    }else{
-        std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
+      }else{
+        std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
         cBindings.onObjectUnselected();
       }
       selectItemCalled = false;

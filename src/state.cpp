@@ -443,6 +443,19 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "editor",
     .attribute = "snapscale-index",
   },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto selectedIndexStr = std::get_if<std::string>(&value);
+      if (selectedIndexStr != NULL){
+        int index =  std::atoi(selectedIndexStr -> c_str());
+        std::cout << "selected index: " << index << std::endl;
+        state.editor.forceSelectIndex = index;
+      }
+
+    },
+    .object = "editor",
+    .attribute = "selected-index",
+  },
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -515,7 +528,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .screenshotPath = "",
     .highlight = true,
     .multiselect = false,
-    .editor = EditorContent{ .activeObj = 0 },
+    .editor = EditorContent{ .forceSelectIndex = 0, .activeObj = 0 },
     .isRecording = false,
     .recordingIndex = -1,
     .renderMode = RENDER_FINAL,
