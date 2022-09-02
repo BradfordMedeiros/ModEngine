@@ -439,7 +439,7 @@ void setState(std::string stateName){
 
 void  setCrosshairSprite(){
   if (state.crosshair == ""){
-    crosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh;
+    crosshairSprite = NULL;
     return;
   }
   crosshairSprite = &world.meshes.at(state.crosshair).mesh;

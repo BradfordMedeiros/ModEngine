@@ -66,7 +66,9 @@ World world;
 RenderStages renderStages;
 DefaultMeshes defaultMeshes;  
 
+Mesh* defaultCrosshairSprite;
 Mesh* crosshairSprite;
+
 
 SysInterface interface;
 std::string textureFolderPath;
@@ -638,17 +640,17 @@ float fontOffsetPerLine(float fontsize){
   return -1 * (fontsize / 500.f + offsetPerLineMargin);
 }
 
-void renderUI(Mesh& crosshairSprite, Color pixelColor, bool showCursor){
+void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
   glEnable(GL_BLEND);
   glUniformMatrix4fv(glGetUniformLocation(uiShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(ndiOrtho)); 
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
-  if (showCursor){
+  if (showCursor && crosshairSprite != NULL){
     if(!state.isRotateSelection){
       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
       auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
-      drawSpriteAround(uiShaderProgram, crosshairSprite, location.x, location.y, 0.05, 0.05);
+      drawSpriteAround(uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
     }
   }
   if (!showDebugInfo){
@@ -1326,6 +1328,24 @@ int main(int argc, char* argv[]){
     "../gameresources/build/objtypes/sound.gltf",
     "../gameresources/build/objtypes/light.gltf",
   };
+
+  std::vector<std::string> allTexturesToLoad = {  "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" };
+  for (auto &layer : layers){
+    if (layer.cursor == ""){
+      continue;
+    }
+    if (layer.cursor == "none"){
+      continue;
+    }
+    for (auto &texture : allTexturesToLoad){
+      if (layer.cursor == texture){
+        continue;
+      }
+    }
+    allTexturesToLoad.push_back(layer.cursor);
+  }
+
+
   world = createWorld(
     onObjectEnter, 
     onObjectLeave, 
@@ -1343,7 +1363,7 @@ int main(int argc, char* argv[]){
     layers,
     interface,
     defaultMeshesToLoad,
-    {   "./res/textures/crosshairs/crosshair029.png", "./res/textures/crosshairs/crosshair008.png" }
+    allTexturesToLoad
   );
 
   auto fontPaths = result["font"].as<std::vector<std::string>>();
@@ -1355,6 +1375,7 @@ int main(int argc, char* argv[]){
    // this texture used for default textures, could make font mesh texture optional or something
   fontFamily = loadFontMeshes(readFontFile(fontPaths), world.textures.at("./res/textures/wood.jpg").texture);
 
+  defaultCrosshairSprite = &world.meshes.at("./res/textures/crosshairs/crosshair008.png").mesh;
   setCrosshairSprite();  // needs to be after create world since depends on these meshes being loaded
 
   if (state.skybox != ""){
@@ -1622,6 +1643,20 @@ int main(int argc, char* argv[]){
       );
     }
 
+    std::string cursorForLayer("./res/textures/crosshairs/crosshair008.png");
+    if (state.hoveredIdInScene){
+      auto hoveredLayer = getLayerForId(hoveredId);
+      if (hoveredLayer.cursor != ""){
+        cursorForLayer = hoveredLayer.cursor;
+      }
+    }
+    if (cursorForLayer == "none"){
+      defaultCrosshairSprite = NULL;
+    }else{
+      defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
+    }
+    
+
 
     onManipulatorUpdate(
       [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
@@ -1853,7 +1888,12 @@ int main(int argc, char* argv[]){
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, state.currentScreenWidth, state.currentScreenHeight);
-    renderUI(*crosshairSprite, pixelColor, showCursor);
+
+    Mesh* effectiveCrosshair = defaultCrosshairSprite;
+    if (crosshairSprite != NULL){
+      effectiveCrosshair = crosshairSprite;
+    }
+    renderUI(effectiveCrosshair, pixelColor, showCursor);
     drawTextData(lineData, uiShaderProgram, fontFamilyByName, std::nullopt,  state.currentScreenHeight, state.currentScreenWidth);
     disposeTempBufferedData(lineData);
     glEnable(GL_DEPTH_TEST);

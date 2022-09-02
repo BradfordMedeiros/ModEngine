@@ -96,6 +96,8 @@ void setLayerOption(LayerInfo& layer, std::string& attribute, std::string& paylo
     layer.fov = std::atof(payload.c_str());
   }else if (attribute == "selection"){
     layer.selectIndex = std::atoi(payload.c_str());
+  }else if (attribute == "cursor"){
+    layer.cursor = payload;
   }else{
     std::cout << "WARNING: layers: " << attribute << " is not a valid option" << std::endl;
     assert(false);
@@ -135,6 +137,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
         .nearplane = 0.1f,
         .farplane = 1000.f,
         .selectIndex = 0,
+        .cursor = "",
         .uniforms = {
           .intUniforms = {},
           .floatUniforms = {},
@@ -167,6 +170,7 @@ std::vector<LayerInfo> parseLayerInfo(std::string file, std::function<std::strin
       .nearplane = 0.1f,
       .farplane = 1000.f,
       .selectIndex = 0,
+      .cursor = "",
       .uniforms = {
         .intUniforms = {},
         .floatUniforms = {},
