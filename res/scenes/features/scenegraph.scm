@@ -88,15 +88,12 @@
 (define (create-obj)
   (mk-obj-attr "someobj"     
   	(list
+  		(list "layer" "noselect1")
   		(list "position" (list 1 1 0))
   		(list "mesh" "./res/models/box/spriteplane.dae")
+  		(list "someobj/Plane" "texture" texturename)
   	)
 	)
-  (gameobj-setattr! (lsobj-name "someobj/Plane") 
-  	(list
-  		(list "texture" texturename)
-  	)
-  )
 )
 
 
@@ -268,7 +265,7 @@
 	(define addDrawList (
 		lambda(target sceneId depth height isExpanded mappingNumber)
 			(set! drawList (cons (list target sceneId depth height isExpanded (equal? selectedIndex height) mappingNumber) drawList))
-			(format #t "add draw list: ~a\n" drawList)
+			;(format #t "add draw list: ~a\n" drawList)
 		)
 	)
 	(for-each 
@@ -396,10 +393,10 @@
 	(if (equal? key 45)
 		(decreaseFontSize)  ; -
 	)
-	(if (equal? key 262)
-		(format #t "base: ~a\n" baseNumberMapping)
-	)
-	(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
+	;(if (equal? key 262)
+	;	(format #t "base: ~a\n" baseNumberMapping)
+	;)
+	;(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
 )
 
 (define (onScroll amount)
@@ -411,7 +408,7 @@
 
 (define (onMapping index)
 	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
-	(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
+	;(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
 	(if selectedIndexForMapping
 		(begin
 			(refreshDepGraph)
@@ -419,8 +416,8 @@
   		(refreshGraphData)   
    		(toggleExpanded selectedName)
   		(onGraphChange)
-			(format #t "expanded: ~a\n" expandState)
+			;(format #t "expanded: ~a\n" expandState)
 		)
 	)
-	(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
+	;(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
 )

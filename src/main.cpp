@@ -249,6 +249,7 @@ void handleTerrainPainting(UVCoord uvCoord){
 
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
+bool mappingClickCalled = false;
 void selectItem(objid selectedId, Color pixelColor, int layerSelectIndex){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   if (!showCursor){
@@ -1547,9 +1548,6 @@ int main(int argc, char* argv[]){
     // outputs to FBO unique colors based upon ids. This eventually passed in encodedid to all the shaders which is how color is determined
     renderWithProgram(renderContext, renderStages.selection);
 
-    // Each portal requires a render pass
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
     //std::cout << "cursor pos: " << state.cursorLeft << " " << state.cursorTop << std::endl;
     auto adjustedCoords = pixelCoordsRelativeToViewport(state.cursorLeft, state.cursorTop, state.currentScreenHeight, state.viewportSize, state.viewportoffset, state.resolution);
     //std::cout << "adjusted coords: " << print(adjustedCoords) << std::endl;
@@ -1558,7 +1556,6 @@ int main(int argc, char* argv[]){
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
 
-    glEnable(GL_BLEND);
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
@@ -1573,11 +1570,15 @@ int main(int argc, char* argv[]){
       if (state.hoveredIdInScene){
         std::cout << "INFO: select item called -> id in scene!" << std::endl;
         auto layerSelectIndex = getLayerForId(hoveredId).selectIndex;
-        if (layerSelectIndex != -1){
+
+        auto layerSelectNegOne = layerSelectIndex == -1;
+        auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
+        std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
+        if (!(layerSelectNegOne || layerSelectThreeCond)){
           selectItem(hoveredId, hoveredItemColor, layerSelectIndex);
         }
         
-      }else{
+    }else{
         std::cout << "INFO: select item called -> id not in scene! - " << hoveredId<< std::endl;
         cBindings.onObjectUnselected();
       }
@@ -1662,6 +1663,38 @@ int main(int argc, char* argv[]){
          .preserveRelativeScale = false,
       }
     );
+
+    ///////////////////
+    auto textureId = uvCoordWithTex.z;
+    auto textureName = textureId > 0 ? getTextureById(world, textureId) : "";
+
+    bool selectedMappingTexture = false;
+    if (textureName != ""){
+      //std::cout << "texturename: " << textureName << std::endl;
+      auto mappingTexture = getMappingTexture(world, textureName);
+      if (mappingTexture.has_value()){
+        auto mappingTextureName = getTextureById(world, mappingTexture.value());
+        renderStages.basicTexture.quadTexture = mappingTexture.value();
+        renderWithProgram(renderContext, renderStages.basicTexture);
+        auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
+        Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
+        auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
+        if (hoveredColorItemId > 0){
+          if (selectItemCalledThisFrame){
+            cBindings.onMapping(hoveredColorItemId);
+            selectedMappingTexture = true;
+          }
+        }
+      }    
+    }
+    mappingClickCalled = selectedMappingTexture;
+    ///////////////////////
+
+    // Each portal requires a render pass  -- // look misplaced and unneccessary 
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glEnable(GL_BLEND);
+    /////////////////////
+
     handlePaintingModifiesViewport(uvCoord);
 
 
@@ -1686,27 +1719,6 @@ int main(int argc, char* argv[]){
       portalIdCache = renderPortals(renderContext);
     )
 
-
-    auto textureId = uvCoordWithTex.z;
-    auto textureName = textureId > 0 ? getTextureById(world, textureId) : "";
-
-    if (textureName != ""){
-      //std::cout << "texturename: " << textureName << std::endl;
-      auto mappingTexture = getMappingTexture(world, textureName);
-      if (mappingTexture.has_value()){
-        auto mappingTextureName = getTextureById(world, mappingTexture.value());
-        renderStages.basicTexture.quadTexture = mappingTexture.value();
-        renderWithProgram(renderContext, renderStages.basicTexture);
-        auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);
-        Color colorFromSelection2 = getPixelColor(pixelCoord.x, pixelCoord.y);
-        auto hoveredColorItemId = getIdFromColor(colorFromSelection2);
-        if (hoveredColorItemId > 0){
-          if (selectItemCalledThisFrame){
-            cBindings.onMapping(hoveredColorItemId);
-          }
-        }
-      }    
-    }
 
     ////////////////////////////
 
