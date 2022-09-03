@@ -27,7 +27,23 @@
 
 (define (donothing x) #f)
 (define (echoprint x) (format #t "x = ~a\n" x))
-(define (selectScenegraphItem x) (format #t "placeholder select scenegraph item\n"))
+(define (selectScenegraphItem x) 
+	;(define objId (gameobj-id mainobj))
+  ;(format #t "object id: ~a\n" objId)
+  ;(if (equal? codepoint 112)  ; p
+  ;  (set-wstate (list 
+  ;    (list "editor" "selected-index" (number->string objId))  ; to float loses precision?
+  ;  ))
+  ;)
+  (define objname (car x))
+  (define sceneId (cadr x))
+  (define selectedObj (lsobj-name objname sceneId))
+  (define objIndex (gameobj-id selectedObj))
+  (set-wstate (list
+  	(list "editor" "selected-index" (number->string objIndex))
+  ))
+
+)
 (define (selectModelItem element) 
 	(define modelpath (car element))
 	(mk-obj-attr

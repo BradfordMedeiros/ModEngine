@@ -10,6 +10,7 @@
 # 	-1 = cannot be selected
 #		-2 = can be selected, but built in operations will not apply
 #   -3 = only allow selection if no mapping id applies
+# cursor: ./path/to/texture or none (disables cursor)
 
 # pass in additional uniforms to shader (same as postprocessing for uniforms)
 # layer:!<uniform name>:<uniformvalue>
@@ -40,5 +41,3 @@ basicui:?enableLighting:bool
 basicui:selection:-2
 
 noselect1:selection:-1
-
-#noselect1:cursor:./res/cursors/somecursor.somecursor
