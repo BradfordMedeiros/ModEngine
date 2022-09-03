@@ -1,5 +1,7 @@
 ;;
 ;; Logic for different types of depth 
+(use-modules (srfi srfi-1))  ; for list-index
+
 
 (define (getMockModelList)
 	(list
@@ -284,7 +286,7 @@
 	(define drawList (list))
 	(define addDrawList (
 		lambda(target sceneId depth height isExpanded mappingNumber)
-			(set! drawList (cons (list target sceneId depth height isExpanded (equal? selectedIndex height) mappingNumber) drawList))
+			(set! drawList (reverse (cons (list target sceneId depth height isExpanded (equal? selectedIndex height) mappingNumber) (reverse drawList))))
 			;(format #t "add draw list: ~a\n" drawList)
 		)
 	)
@@ -439,6 +441,42 @@
 	(onGraphChange)
 )
 
+
+(define (isMatchingDrawElement gameobj)
+	(define objname (gameobj-name gameobj))
+	(define sceneId (list-sceneid (gameobj-id gameobj)))
+	(format #t "objname = ~a, sceneid = ~a\n" objname sceneId)
+	(lambda(drawElement)
+		(let (
+				(drawElementName (car drawElement))
+				(drawElementSceneId (cadr drawElement))
+			)
+			(and (equal? drawElementName objname) (equal? sceneId drawElementSceneId))
+		)
+	)
+)
+(define (selectedIndexForGameobj gameobj)
+	(define drawElements (car  (getDrawList)))
+	(define matchGameObj (isMatchingDrawElement gameobj))
+	(define newSelectIndex (list-index matchGameObj drawElements))
+	;(define value (list-ref drawElements newSelectIndex))
+	;(format #t "draw list: ~a\n" drawElements)
+	;(format #t "newSelectIndex: ~a\n" newSelectIndex)
+	;(format #t "value: ~a\n" value)
+	newSelectIndex
+)
+(define (onObjSelected gameobj color)
+	(define index (selectedIndexForGameobj gameobj))
+	(format #t "on object selected: ~a, ~a\n" gameobj color)
+	(if index
+		(begin
+			(setSelectedIndex index)
+			(refreshGraphData)   
+			(onGraphChange)
+		)
+	)
+)
+
 (define (onMapping index)
 	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
 	(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
@@ -449,7 +487,7 @@
 			)
 			(if isToggle
 				(begin
-					(refreshDepGraph)
+					;(refreshDepGraph)
 	  			(setSelectedIndex mappedIndex)
 	  			(refreshGraphData)   
 	   			(toggleExpanded selectedName)
@@ -460,7 +498,7 @@
 						(handleItemSelected selectedElement)
 					)
 					(begin
-						(refreshDepGraph)
+						;(refreshDepGraph)
 	  				(setSelectedIndex mappedIndex)
 	  				(refreshGraphData)   
 	  				(onGraphChange)
