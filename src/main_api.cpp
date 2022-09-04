@@ -574,12 +574,24 @@ void nextCamera(){
   int32_t activeCameraId = cameraIndexs.at(state.activeCamera);
   setActiveCamera(activeCameraId, -1);
 }
-void moveCamera(glm::vec3 offset){
-  if (state.activeCameraObj == NULL){
-    defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
+void moveCamera(glm::vec3 offset, std::optional<bool> relative){
+  bool isRelative = !relative.has_value() || relative.value() == true;
+  if (isRelative){
+    if (state.activeCameraObj == NULL){
+      defaultCamera.transformation.position = moveRelative(defaultCamera.transformation.position, defaultCamera.transformation.rotation, glm::vec3(offset), false);
+    }else{
+      setGameObjectPosition(state.activeCameraObj ->id, moveRelative(state.activeCameraObj -> transformation.position, state.activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
+    }
   }else{
-    setGameObjectPosition(state.activeCameraObj ->id, moveRelative(state.activeCameraObj -> transformation.position, state.activeCameraObj -> transformation.rotation, glm::vec3(offset), false));
+    if (state.activeCameraObj == NULL){
+      defaultCamera.transformation.position = offset;
+    }else{
+      setGameObjectPosition(state.activeCameraObj ->id, offset);
+    }
   }
+}
+void moveCamera(glm::vec3 offset){
+  moveCamera(offset, std::nullopt);
 }
 void rotateCamera(float xoffset, float yoffset){
   if (state.activeCameraObj == NULL){

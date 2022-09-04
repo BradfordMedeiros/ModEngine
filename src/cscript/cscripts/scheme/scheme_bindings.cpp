@@ -135,9 +135,15 @@ SCM scmSetActiveCamera(SCM value, SCM interpolationTime){
   return SCM_UNSPECIFIED;
 }
 
-void (*moveCam)(glm::vec3);
-SCM scmMoveCamera(SCM arg1, SCM arg2, SCM arg3){
-  moveCam(glm::vec3(scm_to_double(arg1), scm_to_double(arg2), scm_to_double(arg3)));
+void (*moveCam)(glm::vec3, std::optional<bool> relative);
+SCM scmMoveCamera(SCM arg1, SCM arg2, SCM arg3, SCM scmRelative){
+  std::optional<bool> relative = std::nullopt;
+  auto relativeDefined = !scm_is_eq(scmRelative, SCM_UNDEFINED);
+  if (relativeDefined){
+    relative = scm_to_bool(scmRelative);
+  }
+
+  moveCam(glm::vec3(scm_to_double(arg1), scm_to_double(arg2), scm_to_double(arg3)), relative);
   return SCM_UNSPECIFIED;
 }
 
@@ -1055,7 +1061,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
 
   scm_c_define_gsubr("set-camera", 1, 1, 0, (void *)scmSetActiveCamera);    
-  scm_c_define_gsubr("mov-cam", 3, 0, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
+  scm_c_define_gsubr("mov-cam", 3, 1, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
   scm_c_define_gsubr("rot-cam", 2, 0, 0, (void *)scmRotateCamera);
   scm_c_define_gsubr("rm-obj", 1, 0, 0, (void *)removeObject);
   scm_c_define_gsubr("lsobj-type", 1, 0, 0, (void *)lsObjectsByType);
@@ -1194,7 +1200,7 @@ void createStaticSchemeBindings(
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*deleteScene)(std::string scenename),
-  void (*moveCamera)(glm::vec3),  
+  void (*moveCamera)(glm::vec3, std::optional<bool> relative),  
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(int32_t id),
   std::vector<int32_t> (*getObjectsByType)(std::string),

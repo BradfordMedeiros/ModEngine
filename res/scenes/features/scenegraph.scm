@@ -27,26 +27,23 @@
 (define (getNoData) (list (list "data" "none available" (list 0 0))))
 
 
-(define (donothing x) #f)
+(define (donothing x isAlt) #f)
 (define (echoprint x) (format #t "x = ~a\n" x))
-(define (selectScenegraphItem x) 
-	;(define objId (gameobj-id mainobj))
-  ;(format #t "object id: ~a\n" objId)
-  ;(if (equal? codepoint 112)  ; p
-  ;  (set-wstate (list 
-  ;    (list "editor" "selected-index" (number->string objId))  ; to float loses precision?
-  ;  ))
-  ;)
+(define (selectScenegraphItem x isAlt) 
   (define objname (car x))
   (define sceneId (cadr x))
   (define selectedObj (lsobj-name objname sceneId))
   (define objIndex (gameobj-id selectedObj))
-  (set-wstate (list
-  	(list "editor" "selected-index" (number->string objIndex))
-  ))
+  (define objpos (gameobj-pos-world selectedObj))
+  (if isAlt
+  	(mov-cam (car objpos) (cadr objpos) (caddr objpos) #f)
+  	(set-wstate (list
+  		(list "editor" "selected-index" (number->string objIndex))
+  	))
+  )
 
 )
-(define (selectModelItem element) 
+(define (selectModelItem element isAlt) 
 	(define modelpath (car element))
 	(mk-obj-attr
 		(string-append (number->string (random 10000000)) "-generated")
@@ -442,7 +439,8 @@
    				(onGraphChange)
      		)  ; enter
      	)
-     	(if (equal? key 344) (handleItemSelected selectedElement))  ; shift
+     	(if (equal? key 344) (handleItemSelected selectedElement #f))  ; shift
+     	(if (equal? key 345) (handleItemSelected selectedElement #t))  ; ctrl
 		)
 	)
 	(if (equal? key 61)
@@ -510,7 +508,7 @@
 				)
 				(if (equal? mappedIndex selectedIndex)
 					(begin
-						(handleItemSelected selectedElement)
+						(handleItemSelected selectedElement #f)
 					)
 					(begin
 						;(refreshDepGraph)

@@ -36,7 +36,8 @@ void maybeResetCamera(int32_t id);
 void setActiveCamera(int32_t cameraId, float interpolationTime);
 void setActiveCamera(std::string name, objid sceneId);
 void nextCamera();
-void moveCamera(glm::vec3 offset);  
+void moveCamera(glm::vec3 offset, std::optional<bool> relative);  
+void moveCamera(glm::vec3 offset);
 void rotateCamera(float xoffset, float yoffset);
 void setCameraRotation(glm::quat orientation);
 
