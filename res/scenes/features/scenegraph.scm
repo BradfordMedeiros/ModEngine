@@ -56,24 +56,47 @@
 	)
 )
 
+(define (onObjDoNothing gameobj color) 
+	(format #t "on obj do nothing\n")
+	#f
+)
+(define (onObjectSelectedSelectItem gameobj color)
+	(refreshDepGraph)
+	(let (
+			(index (selectedIndexForGameobj gameobj))
+		)
+		(if index
+			(begin
+		    (format #t "on object selected: ~a, ~a\n" gameobj color)
+		    (setSelectedIndex index)
+		    (refreshGraphData)   
+		    (onGraphChange)
+			)
+		)
+	)
+)
+
 (define modeToGetDepGraph
 	(list
-		(list "nodata" getNoData donothing #f)
-		(list "mock-scenegraph" getMockScenegraph donothing #f)
-		(list "scenegraph" scenegraph selectScenegraphItem #t)
-		(list "mock-models" getMockModelList donothing #f)
-		(list "models" getModelList selectModelItem #f)
+		(list "nodata" getNoData donothing #f onObjDoNothing)
+		(list "mock-scenegraph" getMockScenegraph donothing #f onObjDoNothing)
+		(list "scenegraph" scenegraph selectScenegraphItem #t onObjectSelectedSelectItem)
+		(list "mock-models" getMockModelList donothing #f onObjDoNothing)
+		(list "models" getModelList selectModelItem #f onObjDoNothing)
 	)
 )
 (define (getDepGraph) #f)
 (define showSceneIds #f)
 (define handleItemSelected donothing)
+(define onObjectSelected onObjDoNothing)
+
 (define (setDepGraphType type)
 	(define depGraphPair (assoc type modeToGetDepGraph))
 	(if depGraphPair
 		(begin
 			(set! getDepGraph (cadr depGraphPair))
 			(set! handleItemSelected (caddr depGraphPair))
+			(set! onObjectSelected (list-ref depGraphPair 4))
 			(set! showSceneIds (cadddr depGraphPair))
 		)
 	)
@@ -466,15 +489,7 @@
 	newSelectIndex
 )
 (define (onObjSelected gameobj color)
-	(define index (selectedIndexForGameobj gameobj))
-	(format #t "on object selected: ~a, ~a\n" gameobj color)
-	(if index
-		(begin
-			(setSelectedIndex index)
-			(refreshGraphData)   
-			(onGraphChange)
-		)
-	)
+	(onObjectSelected gameobj color)
 )
 
 (define (onMapping index)
