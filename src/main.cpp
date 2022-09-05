@@ -1705,14 +1705,14 @@ int main(int argc, char* argv[]){
 
     ///////////////////
     auto textureId = uvCoordWithTex.z;
-    auto textureName = textureId > 0 ? getTextureById(world, textureId) : "";
+    std::optional<std::string> textureName = textureId > 0 ? getTextureById(world, textureId) : std::nullopt;
 
     bool selectedMappingTexture = false;
-    if (textureName != ""){
+    if (textureName.has_value()){
       //std::cout << "texturename: " << textureName << std::endl;
-      auto mappingTexture = getMappingTexture(world, textureName);
+      auto mappingTexture = getMappingTexture(world, textureName.value());
       if (mappingTexture.has_value()){
-        auto mappingTextureName = getTextureById(world, mappingTexture.value());
+        auto mappingTextureName = getTextureById(world, mappingTexture.value()).value();
         renderStages.basicTexture.quadTexture = mappingTexture.value();
         renderWithProgram(renderContext, renderStages.basicTexture);
         auto pixelCoord = uvToPixelCoord(uvCoord, state.resolution);

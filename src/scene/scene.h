@@ -77,7 +77,7 @@ AttributeValue interpolateAttribute(AttributeValue key1, AttributeValue key2, fl
 AttributeValue parsePropertySuffix(std::string key, std::string value);
 std::string serializePropertySuffix(std::string key, AttributeValue value);
 
-std::string getTextureById(World& world, int id);
+std::optional<std::string> getTextureById(World& world, int id);
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
 std::string serializeObject(World& world, objid id, std::string overridename = "");
 

@@ -90,7 +90,7 @@ std::string serializeVoxelDefault(World& world, Voxels& voxelData){
   std::vector<std::string> children;
   ObjectSerializeUtil util {
     .textureName = [&world](int id) -> std::string {
-      return getTextureById(world, id); // can be not loaded...
+      return getTextureById(world, id).value(); // can be not loaded...
     }
   };
   auto additionalFields = serializeVoxel(vox, util);

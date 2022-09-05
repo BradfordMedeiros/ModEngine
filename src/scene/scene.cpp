@@ -687,21 +687,19 @@ std::map<objid, GameobjAttributes> applyFieldsToSubelements(std::string meshName
   return additionalFieldsMap;
 }
 
-std::string getTextureById(World& world, int id){
+std::optional<std::string> getTextureById(World& world, int id){
   for (auto &[textureName, texture] : world.textures){
     if (texture.texture.textureId == id){
       return textureName;
     }
   }
-  std::cout << "TEXTURE : lookup: could not find texture with id: " << id << std::endl;
-  assert(false);
-  return "";
+  return std::nullopt;
 }
 
 std::string serializeScene(World& world, objid sceneId, bool includeIds){
   return serializeScene(world.sandbox, sceneId, [&world](objid objectId)-> std::vector<std::pair<std::string, std::string>> {
     return getAdditionalFields(objectId, world.objectMapping, [&world](int textureId) -> std::string {
-      return getTextureById(world, textureId);
+      return getTextureById(world, textureId).value();
     });
   }, includeIds);
 } 
@@ -711,7 +709,7 @@ std::string serializeObject(World& world, objid id, std::string overridename){
   auto gameobjecth = getGameObjectH(world.sandbox, id);
   auto children = childnames(world.sandbox, gameobjecth);
   auto additionalFields = getAdditionalFields(id, world.objectMapping, [&world](int textureId) -> std::string {
-    return getTextureById(world, textureId);
+    return getTextureById(world, textureId).value();
   });
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
 }
