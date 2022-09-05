@@ -254,6 +254,7 @@ bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
 void selectItem(objid selectedId, int layerSelectIndex){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
+  modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
   if (!showCursor){
     return;
   }
@@ -987,10 +988,15 @@ int main(int argc, char* argv[]){
    ("rechunk", "Rechunk the world", cxxopts::value<int>()->default_value("0"))
    ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
+   ("log", "List of logs to display", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("h,help", "Print help")
   ;        
 
   const auto result = cxxoption.parse(argc, argv);
+
+  auto levels = result["log"].as<std::vector<std::string>>();
+  modlogSetEnabled(levels.size() > 0, levels);
+
   auto runUnitTests = result["test-unit"].as<bool>();
   if (runUnitTests){
     auto returnVal = runTests();
@@ -1171,33 +1177,33 @@ int main(int argc, char* argv[]){
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
   glPointSize(10.f);
 
-  std::cout << "INFO: shader file path is " << shaderFolderPath << std::endl;
+  modlog("shaders", std::string("shader file path is ") + shaderFolderPath);
   unsigned int shaderProgram = loadShader(shaderFolderPath + "/vertex.glsl", shaderFolderPath + "/fragment.glsl", interface.readFile);
   
-  std::cout << "INFO: framebuffer file path is " << framebufferShaderPath << std::endl;
+  modlog("shaders", std::string("framebuffer file path is ") + framebufferShaderPath);
   framebufferProgram = loadShader(framebufferShaderPath + "/vertex.glsl", framebufferShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string depthShaderPath = "./res/shaders/depth";
-  std::cout << "INFO: depth file path is " << depthShaderPath << std::endl;
+  modlog("shaders", std::string("depth file path is ") + depthShaderPath);
   unsigned int depthProgram = loadShader(depthShaderPath + "/vertex.glsl", depthShaderPath + "/fragment.glsl", interface.readFile);
 
-  std::cout << "INFO: ui shader file path is " << uiShaderPath << std::endl;
+  modlog("shaders", std::string("ui shader file path is ") + uiShaderPath);
   uiShaderProgram = loadShader(uiShaderPath + "/vertex.glsl",  uiShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string selectionShaderPath = "./res/shaders/selection";
-  std::cout << "INFO: selection shader path is " << selectionShaderPath << std::endl;
+  modlog("shaders", std::string("selection shader path is ") + selectionShaderPath);
   unsigned int selectionProgram = loadShader(selectionShaderPath + "/vertex.glsl", selectionShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string drawingShaderPath = "./res/shaders/drawing";
-  std::cout << "INFO: drawing shader path is: " << drawingShaderPath << std::endl;
+  modlog("shaders", std::string("drawing shader path is: ") + drawingShaderPath);
   drawingProgram = loadShader(drawingShaderPath + "/vertex.glsl", drawingShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string blurShaderPath = "./res/shaders/blur";
-  std::cout << "INFO: blur shader path is: " << blurShaderPath << std::endl;
+  modlog("shaders", std::string("blur shader path is: ") + blurShaderPath);
   unsigned int blurProgram = loadShader(blurShaderPath + "/vertex.glsl", blurShaderPath + "/fragment.glsl", interface.readFile);
 
   std::string basicShaderPath = "./res/shaders/basic";
-  std::cout << "INFO: basic shader path is: " << basicShaderPath << std::endl;
+  modlog("shaders", std::string("basic shader path is: ") + basicShaderPath);
   unsigned int basicProgram = loadShader(basicShaderPath + "/vertex.glsl", basicShaderPath+ "/fragment.glsl", interface.readFile);
 
   renderStages = loadRenderStages(fbo, 
@@ -1883,7 +1889,7 @@ int main(int argc, char* argv[]){
       if (screenspaceTextureIds.size() > state.textureIndex && state.textureIndex >= 0){
         glBindTexture(GL_TEXTURE_2D, screenspaceTextureIds.at(state.textureIndex).id);
       }else{
-        std::cout << "cannot display graph texture index: " << state.textureIndex << std::endl;
+        modlog("rendering", (std::string("cannot display graph texture index: ") + std::to_string(state.textureIndex)).c_str());
       }
     }
     glViewport(state.viewportoffset.x, state.viewportoffset.y, state.viewportSize.x, state.viewportSize.y);
@@ -1910,7 +1916,7 @@ int main(int argc, char* argv[]){
     glfwSwapBuffers(window);
   )})
 
-  std::cout << "LIFECYCLE: program exiting" << std::endl;
+  modlog("lifecycle", "program exiting");
 
   cleanup:   
     if (shouldBenchmark){

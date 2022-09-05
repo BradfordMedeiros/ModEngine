@@ -264,6 +264,9 @@ void assertTodo(std::string message);
   #define MODTODO(m) ;
 #endif
 
+
+void modlog(const char* identifier, const char* value);
+void modlog(const char* identifier, std::string value);
+void modlogSetEnabled(bool filterLogs, std::vector<std::string> levels);
+
 #endif
-
-

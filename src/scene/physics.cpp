@@ -307,7 +307,7 @@ void clampMaxVelocity(btRigidBody* body, float maxspeed){
 }
 
 void deinitPhysics(physicsEnv env){
-  std::cout << "INFO: DEINIT: physics system" << std::endl;
+  modlog("physics", "deinitializing physics system");
   MODTODO("maybe clean up rigid bodies too but maybe not");
   delete env.filterCallback;
   delete env.dynamicsWorld;

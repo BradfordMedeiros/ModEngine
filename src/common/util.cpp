@@ -659,3 +659,26 @@ void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAtt
     toAttributes.vecAttr.vec4[name] = value;
   }
 }
+
+
+static std::vector<std::string> modlogLevels;
+static bool shouldFilterLogs = false;
+void modlog(const char* identifier, const char* value){
+  if (!shouldFilterLogs){
+    std::cout << "modlog: " << identifier << " : " << value << std::endl;
+  }else{
+    for (auto &modlogLevel : modlogLevels){
+      if (identifier == modlogLevel){
+        std::cout << "modlog: " << identifier << " : " << value << std::endl;
+        return;
+      }
+    }
+  }
+}
+void modlog(const char* identifier, std::string value){
+ modlog(identifier, value.c_str());
+}
+void modlogSetEnabled(bool filterLogs, std::vector<std::string> levels){
+  modlogLevels = levels;
+  shouldFilterLogs = filterLogs;
+}
