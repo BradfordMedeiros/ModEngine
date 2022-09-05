@@ -989,13 +989,14 @@ int main(int argc, char* argv[]){
    ("mods", "List of mod folders", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
    ("log", "List of logs to display", cxxopts::value<std::vector<std::string>>() -> default_value(""))
+   ("loglevel", "Log level", cxxopts::value<int>()->default_value("0"))
    ("h,help", "Print help")
   ;        
 
   const auto result = cxxoption.parse(argc, argv);
 
   auto levels = result["log"].as<std::vector<std::string>>();
-  modlogSetEnabled(levels.size() > 0, levels);
+  modlogSetEnabled(levels.size() > 0, static_cast<MODLOG_LEVEL>(result["loglevel"].as<int>()), levels);
 
   auto runUnitTests = result["test-unit"].as<bool>();
   if (runUnitTests){

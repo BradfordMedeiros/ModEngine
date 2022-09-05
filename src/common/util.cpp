@@ -660,25 +660,41 @@ void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAtt
   }
 }
 
+const char* levelToString(MODLOG_LEVEL level){
+  if (level == MODLOG_INFO){
+    return "INFO";
+  }else if (level == MODLOG_WARNING){
+    return "WARNING";
+  }else if (level == MODLOG_ERROR){
+    return "ERROR";
+  }
+  modassert(false, "invalid modlog level");
+  return "";
+}
 
 static std::vector<std::string> modlogLevels;
 static bool shouldFilterLogs = false;
-void modlog(const char* identifier, const char* value){
+static MODLOG_LEVEL filterLevel;
+void modlog(const char* identifier, const char* value, MODLOG_LEVEL level){
+  if (level < filterLevel){
+    return;
+  }
   if (!shouldFilterLogs){
-    std::cout << "modlog: " << identifier << " : " << value << std::endl;
+    std::cout << "modlog: " << levelToString(level) << " : " << identifier << " : " << value << std::endl;
   }else{
     for (auto &modlogLevel : modlogLevels){
       if (identifier == modlogLevel){
-        std::cout << "modlog: " << identifier << " : " << value << std::endl;
+        std::cout << "modlog: " << levelToString(level) << " : " << identifier << " : " << value << std::endl;
         return;
       }
     }
   }
 }
-void modlog(const char* identifier, std::string value){
- modlog(identifier, value.c_str());
+void modlog(const char* identifier, std::string value, MODLOG_LEVEL level){
+ modlog(identifier, value.c_str(), level);
 }
-void modlogSetEnabled(bool filterLogs, std::vector<std::string> levels){
+void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels){
   modlogLevels = levels;
   shouldFilterLogs = filterLogs;
+  filterLevel = level;
 }
