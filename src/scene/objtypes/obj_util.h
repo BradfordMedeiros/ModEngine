@@ -227,4 +227,6 @@ int addTextureAutoserializer(std::vector<AutoSerialize>& autoserializer){
   return 0;
 }
 
+std::string printTextureDebug(TextureInformation& info);
+
 #endif

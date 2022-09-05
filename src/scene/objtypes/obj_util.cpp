@@ -224,6 +224,10 @@ void attrSet(GameobjAttributes& attr, bool* _value, const char* onString, const 
 void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _textureLoading, const char* field){
   if (attr.stringAttributes.find(field) != attr.stringAttributes.end()){
     std::string textureToLoad = attr.stringAttributes.at(field);
+    //std::cout << "attr set load texture manual: tex to load: " << textureToLoad << std::endl;
+    //std::cout << "texture string: " << _textureLoading -> textureString << std::endl;
+    //std::cout << "isloaded: " << _textureLoading -> isLoaded << std::endl;
+
     if (textureToLoad != _textureLoading -> textureString){
       _textureLoading -> isLoaded = false;
       _textureLoading -> textureId = -1;
@@ -295,8 +299,9 @@ void autoserializeHandleTextureLoading(char* structAddress, std::vector<AutoSeri
     AutoSerializeTextureLoaderManual* textureLoaderManual = std::get_if<AutoSerializeTextureLoaderManual>(&value);
     if (textureLoaderManual != NULL){
       TextureLoadingData* _textureLoading = (TextureLoadingData*)(((char*)structAddress) + textureLoaderManual -> structOffset);
-      if (!_textureLoading -> isLoaded && _textureLoading -> textureString != ""){
-        std::cout << "about to load: " << _textureLoading -> textureString << std::endl;
+      if (_textureLoading -> isLoaded){
+        // do nothing
+      }else if (_textureLoading -> textureString != ""){
         auto texture = ensureTextureLoaded(_textureLoading -> textureString);
         _textureLoading -> textureId = texture.textureId;
         _textureLoading -> isLoaded = true;
@@ -1047,4 +1052,14 @@ AttributeValueType typeForSerializer(AutoSerialize& serializer){
   }
   modassert(false, "type for serializer invalid type");
   return ATTRIBUTE_STRING;
+}
+
+std::string printTextureDebug(TextureInformation& info){
+  std::string debug = "";
+  debug += "offset = " + print(info.textureoffset);
+  debug += ", tiling = " + print(info.texturetiling);
+  debug += ", size = " + print(info.texturesize);
+  debug += ", id = " + std::to_string(info.loadingInfo.textureId);
+  debug += ", texstring = " + info.loadingInfo.textureString;
+  return debug;
 }
