@@ -87,7 +87,7 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
     .vecAttr = vectorAttributes { .vec3 = {{"position", offset}}, .vec4 = {} },
   };
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes);
+  auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes).value();
   std::cout << "load scene offset: " << print(offset) << std::endl;
   auto sceneId = loadScene(sceneFile, {}, std::nullopt);
   auto rootId = rootIdForScene(world.sandbox, sceneId);
@@ -250,11 +250,16 @@ glm::quat getGameObjectRotationRelative(int32_t index){
   return getGameObjectRotation(index, false);
 }
 
-objid makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
+std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes){
   AttrChildrenPair attrWithChildren {
     .attr = attributes,
     .children = {},
   };
+
+  if (idExists(world.sandbox, name, sceneId)){
+    modlog("gameobj creation", std::string("object with name: ") + name + " already exists in scene: " + std::to_string(sceneId), MODLOG_WARNING);
+    return std::nullopt;
+  }
   return addObjectToScene(world, sceneId, name, attrWithChildren, submodelAttributes);
 }
 

@@ -4,19 +4,18 @@ void addObjectToCache(Scene& mainScene, std::vector<LayerInfo>& layers, objid id
 void removeObjectFromCache(Scene& mainScene, objid id);
 
 objid sandboxAddToScene(Scene& scene, objid sceneId, objid parentId, std::string name, GameObject& gameobjectObj){
-  assert(name == gameobjectObj.name);
+  modassert(name == gameobjectObj.name, "name does not match gameobjectObj name");
   auto gameobjectH = GameObjectH { 
     .id = gameobjectObj.id,
     .parentId = parentId,
     .groupId = gameobjectObj.id,
     .sceneId = sceneId,
   };
-  assert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end());
+  modassert(scene.idToGameObjectsH.find(gameobjectObj.id) == scene.idToGameObjectsH.end(), "id already exists");
   scene.idToGameObjectsH[gameobjectObj.id] = gameobjectH;
   scene.idToGameObjects[gameobjectObj.id] = gameobjectObj;
   if (!(scene.sceneToNameToId.at(sceneId).find(name) == scene.sceneToNameToId.at(sceneId).end())){
-    std::cout << "name already exists: " << name << std::endl;
-    assert(false);
+    modassert(false, std::string("name already exists: " + name))
   }
   scene.sceneToNameToId.at(sceneId)[name]= gameobjectObj.id;
   return gameobjectObj.id;

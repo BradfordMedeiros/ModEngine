@@ -276,7 +276,7 @@ void selectItem(objid selectedId, int layerSelectIndex){
       selectedSubObj.name,
       [&manipulatorAttr]() -> objid {
         std::map<std::string, GameobjAttributes> submodelAttributes = {};
-        return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes);
+        return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
       },
       removeObjectById,
       getGameObjectPos,

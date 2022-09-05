@@ -1025,6 +1025,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildr
   createObjectForScene(world, sceneId, name, attrWithChildren, submodelAttributes, false).gameobj;
   return getIdForName(world.sandbox, name, sceneId);
 }
+
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
   auto singleObj = deserializeSingleObj(serializedObj, id, useObjId);
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
