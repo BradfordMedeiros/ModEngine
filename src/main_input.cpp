@@ -687,6 +687,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
+      modlog("clipboard", "set clipboard from selected");
       setClipboardFromSelected(state.editor);
     }
   }, 
@@ -696,6 +697,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
+      modlog("clipboard", "copying objects");
       copyAllObjects(state.editor, copyObject);
     }
   }, 

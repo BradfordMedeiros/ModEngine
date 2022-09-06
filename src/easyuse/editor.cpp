@@ -60,7 +60,7 @@ void clearSelectedIndexs(EditorContent& editor){
   editor.selectedObjs = {};
 }
 void copyAllObjects(EditorContent& editor, std::function<void(objid)> copyObject){
-  std::cout << "INFO: EDITOR: COPY ALL OBJECTS" << std::endl;
+  modlog("editor", std::string("copying objects from clipboard, size = ") + std::to_string(editor.clipboardObjs.size()));
   for (auto item : editor.clipboardObjs){
     copyObject(item.id);
   }
