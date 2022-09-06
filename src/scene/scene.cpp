@@ -704,7 +704,7 @@ std::string serializeScene(World& world, objid sceneId, bool includeIds){
   }, includeIds);
 } 
 
-std::string serializeObject(World& world, objid id, std::string overridename){
+std::string serializeObjectById(World& world, objid id, std::string overridename){
   auto gameobj = getGameObject(world.sandbox, id);
   auto gameobjecth = getGameObjectH(world.sandbox, id);
   auto children = childnames(world.sandbox, gameobjecth);
@@ -712,6 +712,26 @@ std::string serializeObject(World& world, objid id, std::string overridename){
     return getTextureById(world, textureId).value();
   });
   return serializeObj(id, gameobjecth.groupId, gameobj, children, false, additionalFields, overridename);
+}
+
+std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, std::string overridename){
+  // std::vector<objid> getIdsInGroup(SceneSandbox& sandbox, objid index){
+  std::vector<objid> singleId = { id };
+  auto idsToSerialize = includeSubmodelAttr ? getIdsInGroup(world.sandbox, getGroupId(world.sandbox, id)) : singleId;
+
+  std::string serializedData = "";
+  for (auto &gameobjid : idsToSerialize){
+    std::cout << "serialized = " << gameobjid << "(" << std::endl;
+    auto serialized = serializeObjectById(world, gameobjid, overridename);
+    std::cout << serialized;
+    std::cout << ")" << std::endl << std::endl;
+    serializedData += serialized;
+  }
+
+  std::cout << "all serialized data: " << std::endl;
+  std::cout << serializedData << std::endl << std::endl;
+  
+  return serializedData;
 }
 
 void addObjectToWorld(
@@ -940,8 +960,8 @@ void removeObjectFromScene(World& world, objid objectId){
 
 void copyObjectToScene(World& world, objid id){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
-  auto serializedObject = serializeObject(world, id, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
-  std::cout << "copy object: serialized object is: " << std::endl;
+  auto serializedObject = serializeObject(world, id, false, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
+  //std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
   addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
 }
@@ -1027,6 +1047,9 @@ objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildr
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, objid id, bool useObjId){
+  std::cout << "serialized obj: " << std::endl;
+  std::cout << serializedObj << std::endl << std::endl;
+
   auto singleObj = deserializeSingleObj(serializedObj, id, useObjId);
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   return addObjectToScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, submodelAttributes);

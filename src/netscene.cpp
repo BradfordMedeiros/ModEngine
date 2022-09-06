@@ -27,7 +27,7 @@ void netObjectCreate(World& world, GameObject& obj, NetCode& netcode, bool boots
     .id = obj.id,
     .sceneId = getGameObjectH(world.sandbox, obj.id).sceneId,
   };
-  auto serialobj = serializeObject(world, obj.id);
+  auto serialobj = serializeObject(world, obj.id, true);
   if (serialobj == ""){
     return; // "" is sentinal, that specifies that the group id != the id, which we do not send over a network.  This needs to be more explicit
   }

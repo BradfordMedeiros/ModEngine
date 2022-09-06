@@ -79,7 +79,7 @@ std::string serializePropertySuffix(std::string key, AttributeValue value);
 
 std::optional<std::string> getTextureById(World& world, int id);
 std::string serializeScene(World& world, objid sceneId, bool includeIds);
-std::string serializeObject(World& world, objid id, std::string overridename = "");
+std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, std::string overridename = "");
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative);
 void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relative);  
