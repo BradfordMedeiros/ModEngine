@@ -1,7 +1,6 @@
 #include "./manipulator.h"
 
 auto manipulatorId = 0;
-auto manipulatorTargetShouldDelete = 0;
 Axis manipulatorObject = NOAXIS;
 
 std::optional<glm::vec3> initialDragPosition = std::nullopt;
@@ -12,7 +11,6 @@ objid getManipulatorId(){
   return manipulatorId;
 }
 void unspawnManipulator(std::function<void(objid)> removeObjectById){
-  std::cout << "unspawn manipulator called" << std::endl;
   if (manipulatorId != 0){
     removeObjectById(manipulatorId);
   }
@@ -252,7 +250,6 @@ void onManipulatorUpdate(
 
   //////// delete manipulator
   if (!selectedObjs.mainObj.has_value()){
-    std::cout << "no manipulator selected" << std::endl;
     unspawnManipulator(removeObjectById);
     return;
   }
