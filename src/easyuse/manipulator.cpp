@@ -23,6 +23,7 @@ void unspawnManipulator(std::function<void(objid)> removeObjectById){
 void onManipulatorSelectItem(
   objid selectedItem, 
   std::string selectedItemName,
+  std::function<ManipulatorSelection()> getSelectedIds,
   std::function<objid(void)> makeManipulator,
   std::function<void(objid)> removeObjectById,
   std::function<glm::vec3(objid)> getPosition,

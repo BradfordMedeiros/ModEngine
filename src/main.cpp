@@ -249,6 +249,14 @@ void handleTerrainPainting(UVCoord uvCoord){
   }
 }
 
+
+ManipulatorSelection onManipulatorSelected(){
+  return ManipulatorSelection {
+    .mainObj = latestSelected(state.editor),
+    .selectedIds = selectedIds(state.editor),
+  }; 
+}
+   
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
@@ -274,6 +282,7 @@ void selectItem(objid selectedId, int layerSelectIndex){
     onManipulatorSelectItem(
       idToUse, 
       selectedSubObj.name,
+      onManipulatorSelected,
       [&manipulatorAttr]() -> objid {
         std::map<std::string, GameobjAttributes> submodelAttributes = {};
         return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
@@ -1671,12 +1680,7 @@ int main(int argc, char* argv[]){
     
 
     onManipulatorUpdate(
-      []() ->  ManipulatorSelection {
-        return ManipulatorSelection {
-          .mainObj = latestSelected(state.editor),
-          .selectedIds = selectedIds(state.editor),
-        }; 
-      }, 
+      onManipulatorSelected, 
       [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
         if (state.manipulatorLineId == 0){
           state.manipulatorLineId = getUniqueObjId();
