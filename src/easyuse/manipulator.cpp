@@ -235,7 +235,8 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
 }
 
 void onManipulatorUpdate(
-  std::function<ManipulatorSelection()> getSelectedIds, 
+  std::function<ManipulatorSelection()> getSelectedIds,
+  std::function<void(objid)> removeObjectById,
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
@@ -260,10 +261,11 @@ void onManipulatorUpdate(
   auto selectedObjs = getSelectedIds();
   if (!selectedObjs.mainObj.has_value()){
     std::cout << "no manipulator selected" << std::endl;
+    unspawnManipulator(&manipulatorTargetShouldDelete, removeObjectById);
     return;
   }
   auto selectedTarget = selectedObjs.mainObj.value();
-  auto manipulatorTarget = manipulatorTargetShouldDelete;
+  auto manipulatorTarget = selectedObjs.mainObj.value();
   ///////////////////////////
 
   if (mouseX < 10 && mouseX > -10.f){
@@ -372,14 +374,3 @@ void onManipulatorUpdate(
   }
 }
 
-void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
-  modlog("manipulator", "onManipulatorUnselect");
-  unspawnManipulator(&manipulatorTargetShouldDelete, removeObjectById);
-}
-
-void onManipulatorIdRemoved(objid id, std::function<void(objid)> removeObjectById){
-  modlog("manipulator", std::string("on manipulator id removed: ") + std::to_string(id));
-  if (id == manipulatorTargetShouldDelete){
-    onManipulatorUnselect(removeObjectById);
-  }
-}

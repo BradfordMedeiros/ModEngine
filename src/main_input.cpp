@@ -138,7 +138,6 @@ void onSelectNullItem(){
   auto manipulatorId = getManipulatorId();
   std::cout << "manipulatorId: " << manipulatorId << std::endl;
   if (manipulatorId != 0){
-    onManipulatorUnselect(removeObjectById);
     removeLinesByOwner(lineData, state.manipulatorLineId); 
   }
   clearSelectedIndexs(state.editor); 

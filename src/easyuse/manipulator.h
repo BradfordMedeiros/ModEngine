@@ -24,7 +24,8 @@ void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName, s
 void onManipulatorMouseRelease();
 
 void onManipulatorUpdate(
-  std::function<ManipulatorSelection()> getSelectedIds, 
+  std::function<ManipulatorSelection()> getSelectedIds,
+  std::function<void(objid)> removeObjectById,
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
@@ -45,7 +46,5 @@ void onManipulatorUpdate(
   std::function<glm::quat(glm::quat, Axis)> snapRotate,
   ManipulatorOptions options
 );
-void onManipulatorUnselect(std::function<void(objid)> removeObjectById);
-void onManipulatorIdRemoved(objid id, std::function<void(objid)> removeObjectById);
 
 #endif

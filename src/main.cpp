@@ -742,7 +742,6 @@ void onObjDelete(objid id){
  std::cout << "deleted obj id: " << id << std::endl;
   maybeResetCamera(id);
   unsetSelectedIndex(state.editor, id, true);
-  onManipulatorIdRemoved(id, removeObjectById);
 }
 
 std::map<std::string, std::string> args;
@@ -1680,7 +1679,8 @@ int main(int argc, char* argv[]){
     
 
     onManipulatorUpdate(
-      onManipulatorSelected, 
+      onManipulatorSelected,
+      removeObjectById,
       [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
         if (state.manipulatorLineId == 0){
           state.manipulatorLineId = getUniqueObjId();
