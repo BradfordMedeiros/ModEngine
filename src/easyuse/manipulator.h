@@ -20,11 +20,12 @@ struct ManipulatorSelection {
 };  
 
 objid getManipulatorId();
-void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName, std::function<ManipulatorSelection()> getSelectedIds, std::function<objid(void)> makeManipulator, std::function<void(objid)> removeObjectById,   std::function<glm::vec3(objid)> getPosition, std::function<void(objid, glm::vec3)> setPosition);
+void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName);
 void onManipulatorMouseRelease();
 
 void onManipulatorUpdate(
   std::function<ManipulatorSelection()> getSelectedIds,
+  std::function<objid(void)> makeManipulator,
   std::function<void(objid)> removeObjectById,
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,

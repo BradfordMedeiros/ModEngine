@@ -256,7 +256,20 @@ ManipulatorSelection onManipulatorSelected(){
     .selectedIds = selectedIds(state.editor),
   }; 
 }
-   
+
+objid createManipulator(){
+  GameobjAttributes manipulatorAttr {
+      .stringAttributes = {
+        {"mesh", "./res/models/ui/manipulator.gltf" }, 
+        {"layer", "scale" },
+      },
+      .numAttributes = {},
+      .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
+}
+
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
@@ -271,26 +284,7 @@ void selectItem(objid selectedId, int layerSelectIndex){
   auto selectedObject =  getGameObject(world, idToUse);
 
   if (layerSelectIndex >= 0){
-    GameobjAttributes manipulatorAttr {
-      .stringAttributes = {
-        {"mesh", "./res/models/ui/manipulator.gltf" }, 
-        {"layer", "scale" },
-      },
-      .numAttributes = {},
-      .vecAttr = { .vec3 = {}, .vec4 = {} },
-    };
-    onManipulatorSelectItem(
-      idToUse, 
-      selectedSubObj.name,
-      onManipulatorSelected,
-      [&manipulatorAttr]() -> objid {
-        std::map<std::string, GameobjAttributes> submodelAttributes = {};
-        return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
-      },
-      removeObjectById,
-      getGameObjectPos,
-      setGameObjectPosition
-    );
+    onManipulatorSelectItem(idToUse, selectedSubObj.name);
   }
   if (idToUse == getManipulatorId()){
     return;
@@ -1680,6 +1674,7 @@ int main(int argc, char* argv[]){
 
     onManipulatorUpdate(
       onManipulatorSelected,
+      createManipulator,
       removeObjectById,
       [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
         if (state.manipulatorLineId == 0){
