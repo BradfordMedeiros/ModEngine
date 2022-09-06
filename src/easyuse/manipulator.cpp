@@ -1,7 +1,7 @@
 #include "./manipulator.h"
 
 auto manipulatorId = 0;
-auto manipulatorTarget = 0;
+auto manipulatorTargetShouldDelete = 0;
 Axis manipulatorObject = NOAXIS;
 
 std::optional<glm::vec3> initialDragPosition = std::nullopt;
@@ -11,13 +11,13 @@ std::optional<glm::quat> initialDragRotation = std::nullopt;
 objid getManipulatorId(){
   return manipulatorId;
 }
-void unspawnManipulator(std::function<void(objid)> removeObjectById){
+void unspawnManipulator(objid* manipulatorTarget, std::function<void(objid)> removeObjectById){
   std::cout << "unspawn manipulator called" << std::endl;
   if (manipulatorId != 0){
     removeObjectById(manipulatorId);
   }
   manipulatorId = 0;
-  manipulatorTarget = 0;
+  *manipulatorTarget = 0;
 }
 
 void onManipulatorSelectItem(
@@ -36,11 +36,11 @@ void onManipulatorSelectItem(
     if (!manipulatorExists){
       manipulatorId = makeManipulator();
     }
-    if (manipulatorTarget == selectedItem){
-      unspawnManipulator(removeObjectById);
+    if (manipulatorTargetShouldDelete == selectedItem){
+      unspawnManipulator(&manipulatorTargetShouldDelete, removeObjectById);
     }else{
-      manipulatorTarget = selectedItem;
-      setPosition(manipulatorId, getPosition(manipulatorTarget));
+      manipulatorTargetShouldDelete = selectedItem;
+      setPosition(manipulatorId, getPosition(manipulatorTargetShouldDelete));
     }
   }else{
     std::cout << "item name is: " << selectedItemName << std::endl;
@@ -64,7 +64,7 @@ void onManipulatorMouseRelease(){
   initialDragRotation = std::nullopt;
 }
 
-struct ManipulatorTarget {
+struct ManipulatorUpdate {
   glm::vec3 manipulatorNew;
   glm::vec3 targetNew;
   bool shouldSet;
@@ -96,7 +96,7 @@ void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine
 
 bool manipulatorInstantClickMode = true;
 bool drawDebugLines = true;
-glm::vec3 projectCursor(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
+glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
   ProjectCursorDebugInfo projectCursorInfo{};
   auto newPosition = projectCursorPositionOntoAxis(
     projection,
@@ -125,7 +125,8 @@ glm::vec3 projectCursor(std::function<void(glm::vec3, glm::vec3, LineColor)> dra
 
   return newPosition;
 }
-ManipulatorTarget newManipulatorValues(
+ManipulatorUpdate newManipulatorValues(
+  objid manipulatorTarget,
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
@@ -149,21 +150,21 @@ ManipulatorTarget newManipulatorValues(
     auto manipulatorPosition = getPosition(manipulatorId);
     if (manipulatorObject == XAXIS){
       auto position = manipulatorPosition + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
-      return ManipulatorTarget {
+      return ManipulatorUpdate {
         .manipulatorNew = position,
         .targetNew = position,
         .shouldSet = true,
       };
     }else if (manipulatorObject == YAXIS){
       auto position = manipulatorPosition + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
-      return ManipulatorTarget {
+      return ManipulatorUpdate {
         .manipulatorNew = position,
         .targetNew = position,
         .shouldSet = true,
       };
     }else if (manipulatorObject == ZAXIS){
       auto position = manipulatorPosition + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
-      return ManipulatorTarget {
+      return ManipulatorUpdate {
         .manipulatorNew = position,
         .targetNew = position,
         .shouldSet = true,
@@ -173,28 +174,28 @@ ManipulatorTarget newManipulatorValues(
     auto targetScale = getScale(manipulatorTarget);
     if (manipulatorObject == XAXIS){
       auto scale = targetScale + glm::vec3(0.01f * moveVec.x, 0.f, 0.f);
-      return ManipulatorTarget {
+      return ManipulatorUpdate {
         .manipulatorNew = scale,
         .targetNew = scale,
         .shouldSet = true,
       };
     }else if (manipulatorObject == YAXIS){
       auto scale = targetScale + glm::vec3(0.f, 0.01f * moveVec.y, 0.f);
-      return ManipulatorTarget {
+      return ManipulatorUpdate {
         .manipulatorNew = scale,
         .targetNew = scale,
         .shouldSet = true,
       };
     }else if (manipulatorObject == ZAXIS){
       auto scale = targetScale + glm::vec3(0.f, 0.0f, 0.01f * moveVec.z);
-      return ManipulatorTarget {
+      return ManipulatorUpdate {
         .manipulatorNew = scale,
         .targetNew = scale,
         .shouldSet = true,
       };
     } 
   }
-  return ManipulatorTarget {
+  return ManipulatorUpdate {
     .manipulatorNew = glm::vec3(0.f, 0.f, 0.f),
     .targetNew = glm::vec3(0.f, 0.f, 0.f),
     .shouldSet = false,
@@ -262,6 +263,8 @@ void onManipulatorUpdate(
     return;
   }
   auto selectedTarget = selectedObjs.mainObj.value();
+  auto manipulatorTarget = manipulatorTargetShouldDelete;
+  ///////////////////////////
 
   if (mouseX < 10 && mouseX > -10.f){
     mouseX = 0.f;
@@ -276,7 +279,7 @@ void onManipulatorUpdate(
         setPosition(manipulatorId, getPosition(selectedTarget));
         return;
       }
-      auto projectedPosition = projectCursor(drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
+      auto projectedPosition = projectCursor(manipulatorTarget, drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
       if (!initialDragPosition.has_value()){
         initialDragPosition = projectedPosition;  
         initialDragScale = getScale(selectedTarget);
@@ -354,7 +357,7 @@ void onManipulatorUpdate(
         }
       }
     }else{
-      auto newValues = newManipulatorValues(drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
+      auto newValues = newManipulatorValues(manipulatorTarget, drawLine, clearLines, getPosition, getScale, projection, cameraViewMatrix, mode, mouseX, mouseY, cursorPos, screensize);
       if (!newValues.shouldSet){
         return;
       }
@@ -371,12 +374,12 @@ void onManipulatorUpdate(
 
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
   modlog("manipulator", "onManipulatorUnselect");
-  unspawnManipulator(removeObjectById);
+  unspawnManipulator(&manipulatorTargetShouldDelete, removeObjectById);
 }
 
 void onManipulatorIdRemoved(objid id, std::function<void(objid)> removeObjectById){
   modlog("manipulator", std::string("on manipulator id removed: ") + std::to_string(id));
-  if (id == manipulatorTarget){
+  if (id == manipulatorTargetShouldDelete){
     onManipulatorUnselect(removeObjectById);
   }
 }
