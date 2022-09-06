@@ -29,20 +29,13 @@ void onManipulatorSelectItem(
   std::function<glm::vec3(objid)> getPosition,
   std::function<void(objid, glm::vec3)> setPosition
 ){
-  auto isTargetManipulator =  selectedItem == manipulatorId;
-  auto manipulatorExists = manipulatorId != 0;
+  auto selectedObjs = getSelectedIds();
 
-  if (!isTargetManipulator){
-    if (!manipulatorExists){
-      manipulatorId = makeManipulator();
-    }
-    if (manipulatorTargetShouldDelete == selectedItem){
-      unspawnManipulator(&manipulatorTargetShouldDelete, removeObjectById);
-    }else{
-      manipulatorTargetShouldDelete = selectedItem;
-      setPosition(manipulatorId, getPosition(manipulatorTargetShouldDelete));
-    }
-  }else{
+  /////
+
+
+  auto isTargetManipulator =  selectedItem == manipulatorId;
+  if (isTargetManipulator){
     std::cout << "item name is: " << selectedItemName << std::endl;
     if (selectedItemName == "manipulator/xaxis"){
       std::cout << "settting manipulator to xaxis!" << std::endl;
@@ -54,7 +47,18 @@ void onManipulatorSelectItem(
       std::cout << "settting manipulator to zaxis!" << std::endl;
       manipulatorObject = ZAXIS;
     }
+    return;
   }
+
+  auto manipulatorExists = manipulatorId != 0;
+  if (!manipulatorExists){
+    manipulatorId = makeManipulator();
+  }
+  if (manipulatorTargetShouldDelete != selectedItem){
+    manipulatorTargetShouldDelete = selectedItem;
+    setPosition(manipulatorId, getPosition(manipulatorTargetShouldDelete));
+  }
+
 }
 void onManipulatorMouseRelease(){
   manipulatorObject = NOAXIS;
