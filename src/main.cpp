@@ -245,7 +245,7 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
 }
 void handleTerrainPainting(UVCoord uvCoord){
   if (state.shouldTerrainPaint && state.mouseIsDown){
-    applyHeightmapMasking(world, selected(state.editor), state.terrainPaintDown ? -10.f : 10.f, uvCoord.x, uvCoord.y, true);
+    applyHeightmapMasking(world, latestSelected(state.editor).value(), state.terrainPaintDown ? -10.f : 10.f, uvCoord.x, uvCoord.y, true);
   }
 }
 
@@ -688,8 +688,10 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   std::string position = "n/a";
   std::string scale = "n/a";
   std::string rotation = "n/a";
-  if (selected(state.editor) != -1){
-    auto selectedIndex = selected(state.editor);
+
+  auto selectedValue = latestSelected(state.editor);
+  if (selectedValue.has_value()){
+    auto selectedIndex = selectedValue.value();
     auto obj = getGameObject(world, selectedIndex);
     position = print(obj.transformation.position);
     scale = print(obj.transformation.scale);
@@ -1668,8 +1670,13 @@ int main(int argc, char* argv[]){
     }
     
 
-
     onManipulatorUpdate(
+      []() ->  ManipulatorSelection {
+        return ManipulatorSelection {
+          .mainObj = latestSelected(state.editor),
+          .selectedIds = selectedIds(state.editor),
+        }; 
+      }, 
       [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
         if (state.manipulatorLineId == 0){
           state.manipulatorLineId = getUniqueObjId();
@@ -1775,9 +1782,9 @@ int main(int argc, char* argv[]){
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     if (shouldCallItemSelected){
-      auto selectedId = selected(state.editor);
-      if (selectedId != -1){
-        cBindings.onObjectSelected(selectedId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      auto selectedId = latestSelected(state.editor);
+      if (selectedId.has_value()){
+        cBindings.onObjectSelected(selectedId.value(), glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       }
       shouldCallItemSelected = false;
     }

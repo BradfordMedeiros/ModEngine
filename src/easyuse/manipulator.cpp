@@ -233,6 +233,7 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
 }
 
 void onManipulatorUpdate(
+  std::function<ManipulatorSelection()> getSelectedIds, 
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
   std::function<void()> clearLines,
   std::function<glm::vec3(objid)> getPosition, 
@@ -253,6 +254,14 @@ void onManipulatorUpdate(
   std::function<glm::quat(glm::quat, Axis)> snapRotate,
   ManipulatorOptions options
 ){
+
+  auto selectedObjs = getSelectedIds();
+  if (!selectedObjs.mainObj.has_value()){
+    std::cout << "no manipulator selected" << std::endl;
+    return;
+  }
+  auto selectedTarget = selectedObjs.mainObj.value();
+
   if (mouseX < 10 && mouseX > -10.f){
     mouseX = 0.f;
   }
@@ -260,33 +269,33 @@ void onManipulatorUpdate(
     mouseY = 0.f;
   }
 
-  if (manipulatorId != 0 && manipulatorTarget != 0){
+  if (manipulatorId != 0 && selectedTarget != 0){
     if (manipulatorInstantClickMode){
       if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
-        setPosition(manipulatorId, getPosition(manipulatorTarget));
+        setPosition(manipulatorId, getPosition(selectedTarget));
         return;
       }
       auto projectedPosition = projectCursor(drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
       if (!initialDragPosition.has_value()){
         initialDragPosition = projectedPosition;  
-        initialDragScale = getScale(manipulatorTarget);
-        initialDragRotation = getRotation(manipulatorTarget);
+        initialDragScale = getScale(selectedTarget);
+        initialDragRotation = getRotation(selectedTarget);
       }
     
       if (mode == TRANSLATE){
         if (!options.snapManipulatorPositions){
-          setPosition(manipulatorTarget, projectedPosition);
+          setPosition(selectedTarget, projectedPosition);
           setPosition(manipulatorId, projectedPosition);
           return;
         }
         auto newPosition = snapPosition(projectedPosition);
-        setPosition(manipulatorTarget, newPosition);
+        setPosition(selectedTarget, newPosition);
         setPosition(manipulatorId, newPosition);
       }else if (mode == SCALE) {
         if (!options.snapManipulatorScales){
           auto scaleFactor = calcPositionDiff(projectedPosition, getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
           auto relativeScale = scaleFactor *  initialDragScale.value();  
-          setScale(manipulatorTarget, relativeScale);
+          setScale(selectedTarget, relativeScale);
           return;
         }
 
@@ -301,7 +310,7 @@ void onManipulatorUpdate(
           scaleFactor = glm::vec3(compLength * (negX ? -1.f : 1.f), compLength * (negY ? -1.f : 1.f), compLength * (negZ ? -1.f : 1.f));
         }
         auto relativeScale = scaleFactor *  initialDragScale.value() + initialDragScale.value();  
-        setScale(manipulatorTarget, relativeScale);
+        setScale(selectedTarget, relativeScale);
       }else if (mode == ROTATE){
         auto positionDiff = calcPositionDiff(projectedPosition, getPosition, false);
         auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right
@@ -309,7 +318,7 @@ void onManipulatorUpdate(
         auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
 
         if (!options.snapManipulatorAngles){
-          setRotation(manipulatorTarget,
+          setRotation(selectedTarget,
             setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
             initialDragRotation.value() 
           );
@@ -336,11 +345,11 @@ void onManipulatorUpdate(
 
         if (options.rotateSnapRelative){
           auto newRotation = snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorObject) ;
-          setRotation(manipulatorTarget, newRotation * initialDragRotation.value());          
+          setRotation(selectedTarget, newRotation * initialDragRotation.value());          
         }else{
           auto newRotation =  setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) ;
           auto snappedRotation = snapRotate( newRotation * initialDragRotation.value(), manipulatorObject);
-          setRotation(manipulatorTarget, snappedRotation);
+          setRotation(selectedTarget, snappedRotation);
         }
       }
     }else{
@@ -349,10 +358,10 @@ void onManipulatorUpdate(
         return;
       }
       if (mode == TRANSLATE){
-        setPosition(manipulatorTarget, newValues.manipulatorNew);
+        setPosition(selectedTarget, newValues.manipulatorNew);
         setPosition(manipulatorId, newValues.targetNew);
       }else if (mode == SCALE){
-        setScale(manipulatorTarget, newValues.targetNew);
+        setScale(selectedTarget, newValues.targetNew);
       }
     }
 
@@ -360,11 +369,12 @@ void onManipulatorUpdate(
 }
 
 void onManipulatorUnselect(std::function<void(objid)> removeObjectById){
-  std::cout << "on manipulator unselect" << std::endl;
+  modlog("manipulator", "onManipulatorUnselect");
   unspawnManipulator(removeObjectById);
 }
 
 void onManipulatorIdRemoved(objid id, std::function<void(objid)> removeObjectById){
+  modlog("manipulator", std::string("on manipulator id removed: ") + std::to_string(id));
   if (id == manipulatorTarget){
     onManipulatorUnselect(removeObjectById);
   }

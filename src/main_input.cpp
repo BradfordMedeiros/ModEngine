@@ -242,8 +242,9 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
   cBindings.onScrollCallback(yoffset);
 
-  if (selected(state.editor) != -1 && idExists(world.sandbox, selected(state.editor))){
-    maybeChangeTexture(selected(state.editor));
+  auto selectedIndex = latestSelected(state.editor);
+  if (selectedIndex.has_value() && idExists(world.sandbox, selectedIndex.value())){
+    maybeChangeTexture(selectedIndex.value());
   }
 
   for (auto voxelData : getSelectedVoxels()){ 
@@ -305,10 +306,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
   } 
 
-  if (key == GLFW_KEY_UP && action == 1 && selected(state.editor) != -1){
+  auto selectedIndex = latestSelected(state.editor);
+  if (key == GLFW_KEY_UP && action == 1 && selectedIndex.has_value()){
     setSnapEasyUseUp(state.easyUse, state.manipulatorMode);
   }
-  if (key == GLFW_KEY_DOWN && action == 1 && selected(state.editor) != -1){
+  if (key == GLFW_KEY_DOWN && action == 1 && selectedIndex.has_value()){
     setSnapEasyUseDown(state.easyUse, state.manipulatorMode);
   }
 
@@ -413,7 +415,10 @@ void drop_callback(GLFWwindow* window, int count, const char** paths){
     MODTODO("dropping element into scene assumes sceneId " + sceneId);
 
     if (fileType == IMAGE_EXTENSION){
-      setTexture(selected(state.editor), paths[i]);
+      auto selectedIndex = latestSelected(state.editor);
+      if (selectedIndex.has_value()){
+        setTexture(selectedIndex.value(), paths[i]);
+      }
     }else if (fileType == AUDIO_EXTENSION){
       GameobjAttributes attr {
         .stringAttributes = {{ "clip", paths[i] }}, 
@@ -759,9 +764,9 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = [&state]() -> void {
       std::cout << "saving heightmap" << std::endl;
-      auto selectedId = selected(state.editor);
-      if (selectedId != -1 && isHeightmap(world, selectedId)){
-        saveHeightmap(world, selectedId, "./res/heightmaps/testmap.png");
+      auto selectedId = latestSelected(state.editor);
+      if (selectedId.has_value() && isHeightmap(world, selectedId.value())){
+        saveHeightmap(world, selectedId.value(), "./res/heightmaps/testmap.png");
       }
     }
   }, 
@@ -821,27 +826,27 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = true,
     .fn = [&state]() -> void {
       std::cout << "splitting data!" << std::endl;
-      auto objectId = selected(state.editor);
-      if (objectId == -1){
+      auto objectId = latestSelected(state.editor);
+      if (!objectId.has_value()){
         std::cout << "no object to split" << std::endl;
         return;
       }
-      if (isHeightmap(world, objectId)){
+      if (isHeightmap(world, objectId.value())){
         std::string heightmapBaseName = ". /res/heightmaps/";
-        std::cout << "want to split heightmap: " << objectId << std::endl;
-        auto hm = getHeightmap(world, objectId);
+        std::cout << "want to split heightmap: " << objectId.value() << std::endl;
+        auto hm = getHeightmap(world, objectId.value());
         auto newHeightmaps = splitHeightmap(hm.heightmap);
         for (int i = 0; i < newHeightmaps.size(); i++){
           auto newHm = newHeightmaps.at(i);
           auto newMapPath = heightmapBaseName + "splitmap_" + std::to_string(i) + ".png";
           saveHeightmap(newHm, newMapPath);
         }
-      }else if (isVoxel(world, objectId)){
+      }else if (isVoxel(world, objectId.value())){
         std::cout << "Splitting voxel:" << std::endl;
-        auto voxel = getVoxel(world, objectId);
+        auto voxel = getVoxel(world, objectId.value());
         if (voxel.has_value()){
           auto voxels = voxel.value();
-          auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId).transformation, 2);
+          auto voxelFragments = splitVoxel(voxels -> voxel, getGameObject(world, objectId.value()).transformation, 2);
           auto newVoxels = groupVoxelChunks(voxelFragments);
           std::cout << "Voxel fragments size: " << voxelFragments.size() << std::endl;
           std::cout << "New Voxels size: " << newVoxels.size() << std::endl;

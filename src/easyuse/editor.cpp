@@ -32,6 +32,7 @@ void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool re
       });
     }
   }
+  std::cout << "setting active obj to: " << id << std::endl;
   editor.activeObj = id;
 }
 void setNoActiveObj(EditorContent& editor){
@@ -78,11 +79,8 @@ bool isSelected(EditorContent& editor, objid id){
   return false;
 }
 
-objid selected(EditorContent& editor){
-  if (editor.selectedObjs.size() > 0){
-    return editor.selectedObjs.at(editor.selectedObjs.size() - 1).id;
-  }
-  return -1;
+std::optional<objid> latestSelected(EditorContent& editor){
+  return editor.selectedObjs.size() == 0 ? std::nullopt : std::optional<objid>(editor.selectedObjs.at(editor.selectedObjs.size() - 1).id);
 }
 
 objid activeSelected(EditorContent& editor){
