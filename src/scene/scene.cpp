@@ -960,7 +960,7 @@ void removeObjectFromScene(World& world, objid objectId){
 
 void copyObjectToScene(World& world, objid id){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
-  auto serializedObject = serializeObject(world, id, false, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
+  auto serializedObject = serializeObject(world, id, true, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
   //std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
   addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
@@ -1016,9 +1016,18 @@ GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name,
 struct SingleObjDeserialization {
   std::string name;
   AttrChildrenPair attrWithChildren;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
 };
 SingleObjDeserialization deserializeSingleObj(std::string& serializedObj, objid id, bool useObjId){
-  auto serialAttrs = deserializeSceneTokens(parseFormat(serializedObj));
+  auto tokens = parseFormat(serializedObj);
+  auto dividedTokens = divideMainAndSubelementTokens(tokens);
+  auto serialAttrs = deserializeSceneTokens(dividedTokens.mainTokens);
+  auto subelementAttrs = deserializeSceneTokens(dividedTokens.subelementTokens);
+  std::map<std::string, GameobjAttributes> subelementAttributes;
+  for (auto &[name, attrWithChildren] : subelementAttrs){
+    subelementAttributes[name] = attrWithChildren.attr;
+  }
+
   if (serialAttrs.size() > 1){
     std::cout << "SERIALIZATION GOT MORE THAN 1 OBJECT.  Either bad data or has child element, got " << serialAttrs.size() << std::endl;
   }
@@ -1030,15 +1039,14 @@ SingleObjDeserialization deserializeSingleObj(std::string& serializedObj, objid 
   return SingleObjDeserialization{
     .name = serialAttrs.begin() -> first,
     .attrWithChildren = attrObj,
+    .submodelAttributes = subelementAttributes,
   };
 }
 
 GameObjPair createObjectForScene(World& world, objid sceneId, std::string& name, std::string& serializedObj){
   auto singleObj = deserializeSingleObj(serializedObj, -1, false);
   assert(singleObj.name == name);
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  MODTODO("deserialized obj doesn't include submodel attr");
-  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, submodelAttributes, true);
+  return createObjectForScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, singleObj.submodelAttributes, true);
 }
 
 objid addObjectToScene(World& world, objid sceneId, std::string name, AttrChildrenPair attrWithChildren, std::map<std::string, GameobjAttributes>& submodelAttributes){
@@ -1051,8 +1059,7 @@ objid addObjectToScene(World& world, objid sceneId, std::string serializedObj, o
   std::cout << serializedObj << std::endl << std::endl;
 
   auto singleObj = deserializeSingleObj(serializedObj, id, useObjId);
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
-  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, submodelAttributes);
+  return addObjectToScene(world, sceneId, singleObj.name, singleObj.attrWithChildren, singleObj.submodelAttributes);
 }
 
 GameobjAttributes objectAttributes(GameObjectObj& gameobjObj, GameObject& gameobj){
