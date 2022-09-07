@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include "./common/util.h"
 
 glm::quat setFrontDelta(glm::quat orientation, float deltaYaw, float deltaPitch, float deltaRoll, float delta);
@@ -38,6 +39,16 @@ glm::vec3 directionFromQuat(glm::quat direction);
 const glm::quat MOD_ORIENTATION_UP = quatFromDirection(glm::vec3(0.f, 1.f, 0.f));
 const glm::quat MOD_ORIENTATION_RIGHT = quatFromDirection(glm::vec3(1.f, 0.f, 0.f));
 const glm::quat MOD_ORIENTATION_FORWARD = quatFromDirection(glm::vec3(0.f, 0.f, -1.f));
+
+struct Transformation {
+  glm::vec3 position;
+  glm::vec3 scale;
+  glm::quat rotation;
+};
+
+glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation);
+glm::mat4 matrixFromComponents(Transformation transformation);
+Transformation getTransformationFromMatrix(glm::mat4 matrix);
 
 struct RotationPosition {
   glm::vec3 position;

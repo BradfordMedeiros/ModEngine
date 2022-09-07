@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
 #include "../../../common/util.h"
+#include "../../../translations.h"
 
 struct BoundInfo {
   float xMin, xMax;

@@ -254,9 +254,43 @@ glm::vec3 directionFromQuat(glm::quat direction){
   return direction * glm::vec3(0, 0, -1.f);
 }
 
+glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
+  glm::mat4 modelMatrix = glm::translate(initialModel, position);
+  modelMatrix = modelMatrix * glm::toMat4(rotation);
+  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
+  return scaledModelMatrix;
+}
+glm::mat4 matrixFromComponents(Transformation transformation){
+  return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
+}
 
+Transformation getTransformationFromMatrix(glm::mat4 matrix){
+  glm::vec3 scale;
+  glm::quat rotation;
+  glm::vec3 translation;
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+  Transformation transform = {
+    .position = translation,
+    .scale = scale,
+    .rotation = rotation,
+  };
+  return transform;  
+}
 
 RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, float rotationRadians){
-  return object; // todo implement
+  auto objectMatrix = matrixFromComponents(glm::mat4(1.f), object.position, glm::vec3(1.f, 1.f, 1.f), object.rotation);
+
+  auto fromAxis = object.position - axis.position;
+  auto objectTranslation = glm::translate(glm::mat4(1.f), fromAxis);
+  auto axisRotation = glm::rotate(glm::mat4(1.f), glm::radians(rotationRadians), directionFromQuat(axis.rotation));
+  auto axisTransform = glm::translate(glm::mat4(1.f), axis.position);
+  auto transform = getTransformationFromMatrix(axisTransform * axisRotation * objectTranslation * glm::toMat4(object.rotation));
+
+  return RotationPosition {
+    .position = transform.position,
+    .rotation = transform.rotation,
+  }; 
 }
 

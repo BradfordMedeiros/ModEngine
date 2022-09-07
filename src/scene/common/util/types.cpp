@@ -1,33 +1,8 @@
 #include "./types.h"
 
-Transformation getTransformationFromMatrix(glm::mat4 matrix){
-  glm::vec3 scale;
-  glm::quat rotation;
-  glm::vec3 translation;
-  glm::vec3 skew;
-  glm::vec4 perspective;
-  glm::decompose(matrix, scale, rotation, translation, skew, perspective);
-  Transformation transform = {
-    .position = translation,
-    .scale = scale,
-    .rotation = rotation,
-  };
-  return transform;  
-}
-
 glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x){
   auto toRelativeToFrom = y * x;
   return getTransformationFromMatrix(toRelativeToFrom).position;
-}
-
-glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation){
-  glm::mat4 modelMatrix = glm::translate(initialModel, position);
-  modelMatrix = modelMatrix * glm::toMat4(rotation);
-  glm::mat4 scaledModelMatrix = modelMatrix * glm::scale(glm::mat4(1.f), scale);
-  return scaledModelMatrix;
-}
-glm::mat4 matrixFromComponents(Transformation transformation){
-  return matrixFromComponents(glm::mat4(1.f), transformation.position, transformation.scale, transformation.rotation);
 }
 
 void printTransformInformation(Transformation transform){

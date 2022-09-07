@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/compatibility.hpp>
 #include <map>
 #include <vector>
@@ -55,12 +54,6 @@ struct VoxelBody {
   unsigned int textureId;
 };
 
-struct Transformation {
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::quat rotation;
-};
-
 struct PhysicsInfo {
   BoundInfo boundInfo;
   Transformation transformation;
@@ -80,13 +73,10 @@ struct TextVirtualization {
   int offset;
 };
 
-Transformation getTransformationFromMatrix(glm::mat4 matrix);
 glm::vec3 distanceToSecondFromFirst(glm::mat4 y, glm::mat4 x);
 void printTransformInformation(Transformation transform);
 void printMatrixInformation(glm::mat4 transform, std::string label);
 BoundInfo getBounds(std::vector<Vertex>& vertices);
-glm::mat4 matrixFromComponents(glm::mat4 initialModel, glm::vec3 position, glm::vec3 scale, glm::quat rotation);
-glm::mat4 matrixFromComponents(Transformation transformation);
 Transformation interpolate(Transformation transform1, Transformation transform2, float posamount, float scaleamount, float rotamount);
 
 #endif
