@@ -561,7 +561,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .manipulatorLineId = 0,
     .snapManipulatorPositions = true,
     .snapManipulatorScales = true,
-    .snapManipulatorAngles = true,
+    .snapManipulatorAngles = true, // rotate behavior should probably be some enum, these true/false have precedence rules
     .rotateSnapRelative = true,
     .preserveRelativeScale = false,
 		.firstMouse = true,

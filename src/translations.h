@@ -35,5 +35,15 @@ glm::vec3 projectCursorPositionOntoAxis(glm::mat4 projection, glm::mat4 view, gl
 glm::quat quatFromDirection(glm::vec3 direction);
 glm::vec3 directionFromQuat(glm::quat direction);
 
+const glm::quat MOD_ORIENTATION_UP = quatFromDirection(glm::vec3(0.f, 1.f, 0.f));
+const glm::quat MOD_ORIENTATION_RIGHT = quatFromDirection(glm::vec3(1.f, 0.f, 0.f));
+const glm::quat MOD_ORIENTATION_FORWARD = quatFromDirection(glm::vec3(0.f, 0.f, -1.f));
+
+struct RotationPosition {
+  glm::vec3 position;
+  glm::quat rotation;
+};
+
+RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, float rotationRadians);
 
 #endif 

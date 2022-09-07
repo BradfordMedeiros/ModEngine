@@ -149,10 +149,12 @@ struct ManipulatorTools {
   std::function<glm::vec3(objid)> getPosition;
   std::function<void(objid, glm::vec3)> setPosition;
   std::function<void(objid, glm::vec3)> setScale;
+  std::function<glm::quat(objid)> getRotation;
   std::function<void(objid, glm::quat)> setRotation;
   std::function<glm::vec3(glm::vec3)> snapPosition;
   std::function<glm::vec3(glm::vec3)> snapScale;
   std::function<glm::quat(glm::quat, Axis)> snapRotate;
+  std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine;
 };
 
 glm::vec3 findDragScale(objid id){
@@ -172,6 +174,17 @@ glm::quat findDragRotation(objid id){
   }
   modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
   return glm::identity<glm::quat>();
+}
+
+glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(objid)> getPosition){
+  glm::vec3 positionSum(0.f, 0.f, 0.f);
+  for (auto targetId : targets){
+    auto position = getPosition(targetId);
+    positionSum.x += position.x;
+    positionSum.y += position.y;
+    positionSum.z += position.z;
+  }
+  return glm::vec3(positionSum.x / targets.size(), positionSum.y / targets.size(), positionSum.z / targets.size());
 }
 
 void updateTransform(
@@ -235,6 +248,22 @@ void updateTransform(
     auto yRotation = (positionDiff.y / 3.1416) * 360;  // not quite right
     auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
 
+    // this is effectively a different rotation type and the ui probably ought tp be different
+    auto meanPosition = calcMeanPosition(targets, tools.getPosition);
+    modlog("manipulator", std::string("rotation mean position: ") + print(meanPosition));
+    tools.drawLine(meanPosition, meanPosition + glm::vec3(0.f, 5.f, 0.f), GREEN);
+    for (auto &targetId : targets){
+      auto newTargetRotPos = rotateOverAxis(
+        RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
+        RotationPosition { .position = meanPosition, .rotation = MOD_ORIENTATION_UP },
+        yRotation
+      );
+      tools.setPosition(targetId, newTargetRotPos.position);
+      tools.setRotation(targetId, newTargetRotPos.rotation);
+    }
+    return;
+    ////////////////////////////
+
    if (!options.snapManipulatorAngles){
       for (auto &targetId : targets){
         tools.setRotation(targetId,
@@ -242,27 +271,7 @@ void updateTransform(
           findDragRotation(targetId)
         );
       }
-      return;
-    }
-
-    int numXRotates = (int)(xRotation / 90.f);
-    int numYRotates = (int)(yRotation / 90.f);
-    int numZRotates = (int)(zRotation / 90.f);
-
-    std::cout << "rotations: (" << print(glm::vec3(xRotation, yRotation, zRotation)) << ")" << std::endl;
-    std::cout << "num rotates: (" << print(glm::vec3(numXRotates, numYRotates, numZRotates)) << ")" << std::endl;
-
-    int numRotates = 0;
-    if (manipulatorObject == XAXIS){
-      numRotates = numXRotates;
-    }else if (manipulatorObject == YAXIS){
-      numRotates = numYRotates;
-    }else if (manipulatorObject == ZAXIS){
-      numRotates = numZRotates;
-    }
-    std::cout << "num rotates: " << numRotates << std::endl;
-
-    if (options.rotateSnapRelative){
+    }else if (options.rotateSnapRelative){
       auto newRotation = tools.snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorObject) ;
       for (auto &targetId : targets){
         tools.setRotation(targetId, newRotation * findDragRotation(targetId));
@@ -364,10 +373,12 @@ void onManipulatorUpdate(
       .getPosition = getPosition,
       .setPosition = setPosition,
       .setScale = setScale,
+      .getRotation = getRotation,
       .setRotation = setRotation,
       .snapPosition = snapPosition,
       .snapScale = snapScale,
       .snapRotate = snapRotate,
+      .drawLine = drawLine,
     }
   );
 }

@@ -254,3 +254,9 @@ glm::vec3 directionFromQuat(glm::quat direction){
   return direction * glm::vec3(0, 0, -1.f);
 }
 
+
+
+RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, float rotationRadians){
+  return object; // todo implement
+}
+
