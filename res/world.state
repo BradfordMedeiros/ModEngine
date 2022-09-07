@@ -20,7 +20,7 @@ light:amount:0.8 0.8 0.8
 #dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
 #skybox:color:5 0.2 0.2 1
-skybox:enable:false
+skybox:enable:true
 ###############################
 
 ### Window/Rendering ###
@@ -44,11 +44,17 @@ rendering:fontsize:6
 
 #rendering:cull:disabled
 
-editor:showgrid:true
+#editor:showgrid:true
 editor:gridsize:40
 editor:snaptranslate-index:3
 tools:manipulator-mode:translate
 tools:manipulator-axis:x
+
+#tools:preserve-scale:true
+#tools:snap-position:false
+#tools:snap-scale:false
+#tools:snap-angles:false
+#tools:rotate-relative:false
 
 #editor:snapscale-index:0
 #editor:snapangle-index:10

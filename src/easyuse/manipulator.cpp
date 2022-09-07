@@ -181,7 +181,7 @@ void updateTransform(
   if (mode == TRANSLATE){
     auto oldPos = tools.getPosition(manipulatorTarget);
     auto positionDiff = glm::vec3(0.f, 0.f, 0.f);
-    std::cout << "position diff: " << print(positionDiff) << std::endl;
+    //std::cout << "position diff: " << print(positionDiff) << std::endl;
     if (!options.snapManipulatorPositions){
       tools.setPosition(manipulatorId, projectedPosition);
       positionDiff = projectedPosition - oldPos;
@@ -218,6 +218,7 @@ void updateTransform(
       }
       
       for (auto &targetId : targets){
+        std::cout << "scale factor: " << print(scaleFactor) << std::endl;
         auto initialDragScale = findDragScale(targetId);
         auto relativeScale = scaleFactor *  initialDragScale + initialDragScale;
         tools.setScale(targetId, relativeScale);

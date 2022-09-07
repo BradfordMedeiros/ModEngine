@@ -45,6 +45,11 @@ struct engineState {
   ManipulatorMode manipulatorMode;
   Axis manipulatorAxis;
   objid manipulatorLineId;
+  bool snapManipulatorPositions;
+  bool snapManipulatorScales;
+  bool snapManipulatorAngles;
+  bool rotateSnapRelative;
+  bool preserveRelativeScale;
 
   bool firstMouse;
   float lastX;

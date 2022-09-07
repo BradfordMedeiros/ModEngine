@@ -349,6 +349,66 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto preserveRelativeScale = std::get_if<std::string>(&value);
+      if (preserveRelativeScale != NULL){
+        state.preserveRelativeScale = *preserveRelativeScale == "true";
+        return;
+      }
+      modassert(false, "invalid tools preserve-scale option: " + *preserveRelativeScale);
+    },
+    .object = "tools",
+    .attribute = "preserve-scale",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto snapManipulatorPositions = std::get_if<std::string>(&value);
+      if (snapManipulatorPositions != NULL){
+        state.snapManipulatorPositions = *snapManipulatorPositions == "true";
+        return;
+      }
+      modassert(false, "invalid tools snap-position option: " + *snapManipulatorPositions);
+    },
+    .object = "tools",
+    .attribute = "snap-position",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto snapManipulatorScales = std::get_if<std::string>(&value);
+      if (snapManipulatorScales != NULL){
+        state.snapManipulatorScales = *snapManipulatorScales == "true";
+        return;
+      }
+      modassert(false, "invalid tools snap-scale option: " + *snapManipulatorScales);
+    },
+    .object = "tools",
+    .attribute = "snap-scale",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto snapManipulatorAngles = std::get_if<std::string>(&value);
+      if (snapManipulatorAngles != NULL){
+        state.snapManipulatorAngles = *snapManipulatorAngles == "true";
+        return;
+      }
+      modassert(false, "invalid tools snap-angles option: " + *snapManipulatorAngles);
+    },
+    .object = "tools",
+    .attribute = "snap-angles",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto rotateSnapRelative = std::get_if<std::string>(&value);
+      if (rotateSnapRelative != NULL){
+        state.rotateSnapRelative = *rotateSnapRelative == "true";
+        return;
+      }
+      modassert(false, "invalid tools rotate-relative option: " + *rotateSnapRelative);
+    },
+    .object = "tools",
+    .attribute = "rotate-relative",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto windowname = std::get_if<std::string>(&value);
       if (windowname != NULL){
         state.windowname = *windowname;
@@ -499,6 +559,11 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.manipulatorMode = NONE,
 		.manipulatorAxis = NOAXIS,
     .manipulatorLineId = 0,
+    .snapManipulatorPositions = true,
+    .snapManipulatorScales = true,
+    .snapManipulatorAngles = true,
+    .rotateSnapRelative = true,
+    .preserveRelativeScale = false,
 		.firstMouse = true,
 		.lastX = 0,
 		.lastY = 0,

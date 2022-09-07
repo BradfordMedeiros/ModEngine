@@ -1712,11 +1712,11 @@ int main(int argc, char* argv[]){
         return snapRotate(state.easyUse, rot, snapAxis);
       },
       ManipulatorOptions {
-         .snapManipulatorPositions = true,
-         .snapManipulatorScales = true,
-         .snapManipulatorAngles = true,
-         .rotateSnapRelative = true,
-         .preserveRelativeScale = false,
+         .snapManipulatorPositions = state.snapManipulatorPositions,
+         .snapManipulatorScales = state.snapManipulatorScales,
+         .snapManipulatorAngles = state.snapManipulatorAngles,
+         .rotateSnapRelative = state.rotateSnapRelative,
+         .preserveRelativeScale = state.preserveRelativeScale,
       }
     );
 
