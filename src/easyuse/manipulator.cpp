@@ -4,7 +4,12 @@ auto manipulatorId = 0;
 Axis manipulatorObject = NOAXIS;
 
 std::optional<glm::vec3> initialDragPosition = std::nullopt;
-std::optional<glm::vec3> initialDragScale = std::nullopt;
+
+struct InitialDragScale {
+  objid id;
+  glm::vec3 scale;
+};
+std::vector<InitialDragScale> initialDragScales = {};
 std::optional<glm::quat> initialDragRotation = std::nullopt;
 
 objid getManipulatorId(){
@@ -38,7 +43,7 @@ void onManipulatorMouseRelease(){
   manipulatorObject = NOAXIS;
   std::cout << "reset initial drag position" << std::endl;
   initialDragPosition = std::nullopt;
-  initialDragScale = std::nullopt;
+  initialDragScales = {};
   initialDragRotation = std::nullopt;
 }
 
@@ -145,6 +150,16 @@ struct ManipulatorTools {
   std::function<glm::quat(glm::quat, Axis)> snapRotate;
 };
 
+glm::vec3 findDragScale(objid id){
+  for (auto &dragScale : initialDragScales){
+    if (dragScale.id == id){
+      return dragScale.scale;
+    }
+  }
+  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+
 void updateTransform(
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
   ManipulatorMode mode, ManipulatorOptions options, glm::vec3 projectedPosition, ManipulatorTools tools
@@ -173,27 +188,33 @@ void updateTransform(
   if (mode == SCALE) {
     if (!options.snapManipulatorScales){
       auto scaleFactor = calcPositionDiff(projectedPosition, tools.getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
-      auto relativeScale = scaleFactor *  initialDragScale.value();  
-      tools.setScale(manipulatorTarget, relativeScale);
-      return;
+      for (auto &targetId : targets){
+        auto relativeScale = scaleFactor *  findDragScale(targetId);  
+        tools.setScale(targetId, relativeScale);
+      }
+    }else{
+      auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, true);
+      auto scaleFactor = tools.snapScale(positionDiff);
+      if (options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
+        auto vecLength = glm::length(scaleFactor);
+        bool negX = positionDiff.x < 0.f;
+        bool negY = positionDiff.y < 0.f;
+        bool negZ = positionDiff.z < 0.f;
+        auto compLength = glm::sqrt(vecLength * vecLength / 3.f);  // because sqrt(x^2 + y^2 + z^2) =  sqrt(3x^2) = veclength  
+        scaleFactor = glm::vec3(compLength * (negX ? -1.f : 1.f), compLength * (negY ? -1.f : 1.f), compLength * (negZ ? -1.f : 1.f));
+      }
+      
+      for (auto &targetId : targets){
+        auto initialDragScale = findDragScale(targetId);
+        auto relativeScale = scaleFactor *  initialDragScale + initialDragScale;
+        tools.setScale(targetId, relativeScale);
+      }
     }
 
-    auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, true);
-    auto scaleFactor = tools.snapScale(positionDiff);
-    if (options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
-      auto vecLength = glm::length(scaleFactor);
-      bool negX = positionDiff.x < 0.f;
-      bool negY = positionDiff.y < 0.f;
-      bool negZ = positionDiff.z < 0.f;
-      auto compLength = glm::sqrt(vecLength * vecLength / 3.f);  // because sqrt(x^2 + y^2 + z^2) =  sqrt(3x^2) = veclength  
-      scaleFactor = glm::vec3(compLength * (negX ? -1.f : 1.f), compLength * (negY ? -1.f : 1.f), compLength * (negZ ? -1.f : 1.f));
-    }
-    auto relativeScale = scaleFactor *  initialDragScale.value() + initialDragScale.value();  
-    tools.setScale(manipulatorTarget, relativeScale);
-    return;
   } 
 
 
+  ///////////////////////////////////
   if (mode == ROTATE){
     auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, false);
     auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right
@@ -303,7 +324,13 @@ void onManipulatorUpdate(
   auto projectedPosition = projectCursor(manipulatorTarget, drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
   if (!initialDragPosition.has_value()){
     initialDragPosition = projectedPosition;  
-    initialDragScale = getScale(manipulatorTarget);
+    initialDragScales = {};
+    for (auto &selectedId : selectedObjs.selectedIds){
+      initialDragScales.push_back(InitialDragScale {
+        .id = selectedId,
+        .scale = getScale(selectedId)
+      });
+    }
     initialDragRotation = getRotation(manipulatorTarget);
   }
     
