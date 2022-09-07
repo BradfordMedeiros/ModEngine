@@ -266,7 +266,11 @@ objid createManipulator(){
       .numAttributes = {},
       .vecAttr = { .vec3 = {}, .vec4 = {} },
   };
-  std::map<std::string, GameobjAttributes> submodelAttributes = {};
+  std::map<std::string, GameobjAttributes> submodelAttributes = {
+    {"manipulator/xaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(1.f, 1.f, 0.f, 0.8f) }} }}}},
+    {"manipulator/yaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(1.f, 0.f, 1.f, 0.8f) }} }}}},
+    {"manipulator/zaxis", { GameobjAttributes { .vecAttr = { .vec4 = {{ "tint", glm::vec4(0.f, 0.f, 1.f, 0.8f) }} }}}},
+  };
   return makeObjectAttr(0, "manipulator", manipulatorAttr, submodelAttributes).value();
 }
 
