@@ -10,7 +10,12 @@ struct InitialDragScale {
   glm::vec3 scale;
 };
 std::vector<InitialDragScale> initialDragScales = {};
-std::optional<glm::quat> initialDragRotation = std::nullopt;
+
+struct InitialDragRotation {
+  objid id;
+  glm::quat rotation;
+};
+std::vector<InitialDragRotation> initialDragRotations = {};
 
 objid getManipulatorId(){
   return manipulatorId;
@@ -44,7 +49,7 @@ void onManipulatorMouseRelease(){
   std::cout << "reset initial drag position" << std::endl;
   initialDragPosition = std::nullopt;
   initialDragScales = {};
-  initialDragRotation = std::nullopt;
+  initialDragRotations = {};
 }
 
 struct ManipulatorUpdate {
@@ -159,6 +164,15 @@ glm::vec3 findDragScale(objid id){
   modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
   return glm::vec3(0.f, 0.f, 0.f);
 }
+glm::quat findDragRotation(objid id){
+  for (auto &dragRotation : initialDragRotations){
+    if (dragRotation.id == id){
+      return dragRotation.rotation;
+    }
+  }
+  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
+  return glm::identity<glm::quat>();
+}
 
 void updateTransform(
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
@@ -184,7 +198,6 @@ void updateTransform(
     return;
   }
 
-  //////////////////////////
   if (mode == SCALE) {
     if (!options.snapManipulatorScales){
       auto scaleFactor = calcPositionDiff(projectedPosition, tools.getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
@@ -210,7 +223,7 @@ void updateTransform(
         tools.setScale(targetId, relativeScale);
       }
     }
-
+    return;
   } 
 
 
@@ -222,10 +235,12 @@ void updateTransform(
     auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
 
    if (!options.snapManipulatorAngles){
-      tools.setRotation(manipulatorTarget,
-        setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
-        initialDragRotation.value() 
-      );
+      for (auto &targetId : targets){
+        tools.setRotation(targetId,
+          setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
+          findDragRotation(targetId)
+        );
+      }
       return;
     }
 
@@ -248,11 +263,15 @@ void updateTransform(
 
     if (options.rotateSnapRelative){
       auto newRotation = tools.snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorObject) ;
-      tools.setRotation(manipulatorTarget, newRotation * initialDragRotation.value());          
+      for (auto &targetId : targets){
+        tools.setRotation(targetId, newRotation * findDragRotation(targetId));
+      }
     }else{
       auto newRotation = setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) ;
-      auto snappedRotation = tools.snapRotate( newRotation * initialDragRotation.value(), manipulatorObject);
-      tools.setRotation(manipulatorTarget, snappedRotation);
+      for (auto &targetId : targets){
+        auto snappedRotation = tools.snapRotate( newRotation * findDragRotation(targetId), manipulatorObject);
+        tools.setRotation(targetId, snappedRotation);
+      }
     }
   }
 
@@ -325,13 +344,17 @@ void onManipulatorUpdate(
   if (!initialDragPosition.has_value()){
     initialDragPosition = projectedPosition;  
     initialDragScales = {};
+    initialDragRotations = {};
     for (auto &selectedId : selectedObjs.selectedIds){
       initialDragScales.push_back(InitialDragScale {
         .id = selectedId,
         .scale = getScale(selectedId)
       });
+      initialDragRotations.push_back(InitialDragRotation {
+        .id = selectedId,
+        .rotation = getRotation(selectedId)
+      });
     }
-    initialDragRotation = getRotation(manipulatorTarget);
   }
     
   /// actual do the transformation
