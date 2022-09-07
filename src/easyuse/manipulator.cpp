@@ -187,6 +187,41 @@ glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(
   return glm::vec3(positionSum.x / targets.size(), positionSum.y / targets.size(), positionSum.z / targets.size());
 }
 
+int sphereNumPoints = 30;
+void drawRotationVisualization(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 position, glm::quat orientation, float radius){
+  float radianPerPoint = 2 * MODPI / sphereNumPoints;
+
+  glm::vec3 lastPos(0.f, 0.f, 0.f);
+  glm::vec3 firstPos(0.f, 0.f, 0.f);
+  for (int i = 0; i < sphereNumPoints; i++){
+    auto xPos = glm::cos(radianPerPoint * i) * radius;
+    auto yPos = glm::sin(radianPerPoint * i) * radius;
+    auto deltaCirclePos = orientation * glm::vec3(xPos, yPos, 0.f);
+    auto newPos = position + glm::vec3(deltaCirclePos.x, deltaCirclePos.y, deltaCirclePos.z);
+    if (i > 0){
+      drawLine(lastPos, newPos, RED);
+    }else{
+      firstPos = newPos;
+    }
+    lastPos = newPos;
+  }
+  drawLine(lastPos, firstPos, RED);
+}
+
+glm::quat axisToOrientation(Axis& manipulatorObject){
+  if (manipulatorObject == XAXIS){
+    return MOD_ORIENTATION_RIGHT;
+  }
+  if (manipulatorObject == YAXIS){
+    return MOD_ORIENTATION_UP;
+  }
+  if (manipulatorObject == ZAXIS){
+    return MOD_ORIENTATION_FORWARD;
+  }
+  modassert(false, "axis to orientation invalid orientation");
+  return glm::identity<glm::quat>();
+}
+
 void updateTransform(
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
   ManipulatorMode mode, ManipulatorOptions options, glm::vec3 projectedPosition, ManipulatorTools tools
@@ -244,20 +279,35 @@ void updateTransform(
   ///////////////////////////////////
   if (mode == ROTATE){
     auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, false);
-    auto xRotation = (positionDiff.x / 3.1416) * 360;  // not quite right
-    auto yRotation = (positionDiff.y / 3.1416) * 360;  // not quite right
-    auto zRotation = (positionDiff.z / 3.1416) * 360;  // not quite right
+    auto xRotation = (positionDiff.x / MODPI) * 360;  // not quite right
+    auto yRotation = (positionDiff.y / MODPI) * 360;  // not quite right
+    auto zRotation = (positionDiff.z / MODPI) * 360;  // not quite right
 
     // this is effectively a different rotation type and the ui probably ought tp be different
     auto meanPosition = calcMeanPosition(targets, tools.getPosition);
     modlog("manipulator", std::string("rotation mean position: ") + print(meanPosition));
     tools.drawLine(meanPosition, meanPosition + glm::vec3(0.f, 5.f, 0.f), GREEN);
+
+    float rotationAmount = 0.f;
+    if (manipulatorObject == XAXIS){
+      rotationAmount = xRotation;
+    }else if (manipulatorObject == YAXIS){
+      rotationAmount = yRotation;
+    }else if (manipulatorObject == ZAXIS){
+      rotationAmount = zRotation;
+    }
     for (auto &targetId : targets){
+      auto targetPosition = tools.getPosition(targetId);
+      auto rotationOrientation = axisToOrientation(manipulatorObject);
       auto newTargetRotPos = rotateOverAxis(
-        RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
-        RotationPosition { .position = meanPosition, .rotation = MOD_ORIENTATION_UP },
-        yRotation
+        RotationPosition { .position = targetPosition, .rotation = tools.getRotation(targetId) },
+        RotationPosition { .position = meanPosition, .rotation = rotationOrientation },
+        rotationAmount
       );
+
+      auto distanceToTarget = glm::distance(targetPosition, meanPosition);
+      drawRotationVisualization(tools.drawLine, meanPosition, rotationOrientation, distanceToTarget);
+
       tools.setPosition(targetId, newTargetRotPos.position);
       tools.setRotation(targetId, newTargetRotPos.rotation);
     }
