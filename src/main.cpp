@@ -352,7 +352,8 @@ GLint getShaderByName(std::string fragShaderName, GLint shaderProgram, bool allo
   }
   if (shaderNameToId.find(fragShaderName) == shaderNameToId.end()){
     auto shaderId = loadShader(shaderFolderPath + "/vertex.glsl", fragShaderName, interface.readFile);
-    shaderNameToId[fragShaderName] = shaderId;   
+    shaderNameToId[fragShaderName] = shaderId;
+    sendNotifyMessage("alert", std::string("loaded shader: ") + fragShaderName);
   }
   return shaderNameToId.at(fragShaderName);
 }

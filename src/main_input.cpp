@@ -598,6 +598,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "mode set to translate" << std::endl;
       state.manipulatorMode = TRANSLATE;
+      sendNotifyMessage("alert", "mode: translate");
     }
   },
   InputDispatch{
@@ -608,6 +609,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "mode set to rotate" << std::endl;
       state.manipulatorMode = ROTATE;
+      sendNotifyMessage("alert", "mode: rotate");
     }
   },
   InputDispatch{
@@ -618,6 +620,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = [&state]() -> void {
       std::cout << "mode set to scale" << std::endl;
       state.manipulatorMode = SCALE;
+      sendNotifyMessage("alert", "mode: scale");
     }
   },
   InputDispatch{
@@ -686,7 +689,16 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
-      modlog("clipboard", "set clipboard from selected");
+      auto numObject = state.editor.selectedObjs.size();
+      if (numObject == 0 && state.editor.clipboardObjs.size() > 0){
+        sendNotifyMessage("alert", "cleared clipboard");
+      }
+      else if (numObject == 1){
+        sendNotifyMessage("alert", "copied object to clipboard");
+      }else if (numObject > 1){
+        sendNotifyMessage("alert", "copied objects to clipboard");
+      }
+      modlog("clipboard", "copied objects to clipboard");
       setClipboardFromSelected(state.editor);
     }
   }, 
@@ -696,7 +708,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
-      modlog("clipboard", "copying objects");
+      modlog("clipboard", "pasting objects");
       copyAllObjects(state.editor, copyObject);
     }
   }, 
@@ -923,7 +935,7 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
-    .sourceKey = GLFW_KEY_LEFT_ALT,  // ctrl
+    .sourceKey = GLFW_KEY_LEFT_ALT,  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
@@ -931,6 +943,7 @@ std::vector<InputDispatch> inputFns = {
       state.cameraFast = !state.cameraFast;
       std::cout << "camera fast: " << state.cameraFast << std::endl;
       cameraSpeed = state.cameraFast ? 1.f : 0.1f;
+      sendNotifyMessage("alert", std::string("camera speed: ") + (state.cameraFast ? "fast" : "slow"));
     }
   },  
   InputDispatch{
@@ -995,6 +1008,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraDown(setCameraRotation);
+      sendNotifyMessage("alert", "snap camera: -y");
     }
   },
   InputDispatch{
@@ -1004,6 +1018,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraLeft(setCameraRotation);
+      sendNotifyMessage("alert", "snap camera: -x");
     }
   },
   InputDispatch{
@@ -1013,6 +1028,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraRight(setCameraRotation);
+      sendNotifyMessage("alert", "snap camera: +x");
     }
   },
   InputDispatch{
@@ -1022,6 +1038,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraForward(setCameraRotation);
+      sendNotifyMessage("alert", "snap camera: -z");
     }
   },
   InputDispatch{
@@ -1031,6 +1048,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraUp(setCameraRotation);
+      sendNotifyMessage("alert", "snap camera: +y");
     }
   },
   InputDispatch{
@@ -1040,6 +1058,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       snapCameraBackward(setCameraRotation);
+      sendNotifyMessage("alert", "snap camera: +z");
     }
   },
   InputDispatch{
@@ -1049,6 +1068,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       std::cout << dumpDebugInfo(false) << std::endl;
+      sendNotifyMessage("alert", "*dumped debug data to console*");
     }
   },
   InputDispatch{
@@ -1074,6 +1094,7 @@ std::vector<InputDispatch> inputFns = {
         glDisable(GL_CULL_FACE);  
       }
       std::cout << "culling enabled: " << state.cullEnabled << std::endl;
+      sendNotifyMessage("alert", std::string("culling toggled: ") + (state.cullEnabled ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1095,6 +1116,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.enableBloom = !state.enableBloom;
       std::cout << "bloom: " << state.enableBloom << std::endl;
+      sendNotifyMessage("alert", std::string("bloom: ") + (state.enableBloom ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1105,6 +1127,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.enableDiffuse = !state.enableDiffuse;
       std::cout << "diffuse: " << state.enableDiffuse << std::endl;
+      sendNotifyMessage("alert", std::string("diffuse: ") + (state.enableDiffuse ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1115,6 +1138,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.enableSpecular = !state.enableSpecular;
       std::cout << "specular: " << state.enableSpecular << std::endl;
+      sendNotifyMessage("alert", std::string("specular: ") + (state.enableSpecular ? "enabled" : "disabled"));
     }
   },
   InputDispatch{
@@ -1144,6 +1168,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.manipulatorAxis = XAXIS;
+      sendNotifyMessage("alert", "axis: XAXIS");
     }
   },
   InputDispatch{
@@ -1153,6 +1178,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.manipulatorAxis = YAXIS;
+      sendNotifyMessage("alert", "axis: YAXIS");
     }
   },
   InputDispatch{
@@ -1162,6 +1188,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.manipulatorAxis = ZAXIS;
+      sendNotifyMessage("alert", "axis: ZAXIS");
     }
   },
   InputDispatch{
@@ -1338,6 +1365,7 @@ std::vector<InputDispatch> inputFns = {
     .fn = []() -> void {
       state.captureCursor = !state.captureCursor;
       toggleCursor(state.captureCursor);
+      sendNotifyMessage("alert", std::string("capture cursor: ") + (state.captureCursor ? "true" : "false"));
     }
   },
   InputDispatch{
