@@ -95,8 +95,6 @@ glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, g
     &projectCursorInfo
   );
 
-  clearLines();
-
   // actual lengths
   drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
 
@@ -208,7 +206,7 @@ void drawRotationVisualization(std::function<void(glm::vec3, glm::vec3, LineColo
   drawLine(lastPos, firstPos, RED);
 }
 
-glm::quat axisToOrientation(Axis& manipulatorObject){
+glm::quat axisToOrientation(Axis manipulatorObject){
   if (manipulatorObject == XAXIS){
     return MOD_ORIENTATION_RIGHT;
   }
@@ -277,21 +275,27 @@ void handleScale(
   }
 }
 
-void visualizeRotation(){
+void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::quat rotationOrientation, ManipulatorTools& tools){
+  if (targets.size() > 1){
+    for (auto &targetId : targets){
+      auto targetPosition = tools.getPosition(targetId);
+      auto distanceToTarget = glm::distance(targetPosition, meanPosition);
+      drawRotationVisualization(tools.drawLine, meanPosition, rotationOrientation, distanceToTarget);
+    }
+    return;
+  }
 
+  auto lineAmount = rotationOrientation * glm::vec3(0, 0.f, -5.f);
+  tools.drawLine(meanPosition + lineAmount, meanPosition - lineAmount, GREEN);
 }
 
 void handleRotate(
+  glm::vec3 meanPosition, glm::quat rotationOrientation,
   glm::vec3 projectedPosition,
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
   ManipulatorOptions& options, ManipulatorTools& tools
 ){
 
-  auto meanPosition = calcMeanPosition(targets, tools.getPosition);
-  auto rotationOrientation = axisToOrientation(manipulatorObject);
-  auto lineAmount = rotationOrientation * glm::vec3(0, 0.f, -5.f);
-  tools.drawLine(meanPosition + lineAmount, meanPosition - lineAmount, GREEN);
-  visualizeRotation();
   ////
 
   auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, false);
@@ -312,16 +316,11 @@ void handleRotate(
       rotationAmount = zRotation;
     }
     for (auto &targetId : targets){
-      auto targetPosition = tools.getPosition(targetId);
       auto newTargetRotPos = rotateOverAxis(
-        RotationPosition { .position = targetPosition, .rotation = tools.getRotation(targetId) },
+        RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
         RotationPosition { .position = meanPosition, .rotation = rotationOrientation },
         rotationAmount
       );
-
-      auto distanceToTarget = glm::distance(targetPosition, meanPosition);
-      drawRotationVisualization(tools.drawLine, meanPosition, rotationOrientation, distanceToTarget);
-  
       tools.setPosition(targetId, newTargetRotPos.position);
       tools.setRotation(targetId, newTargetRotPos.rotation);
     }
@@ -350,6 +349,23 @@ void handleRotate(
   }
 }
 
+void handleShowManipulator(
+  ManipulatorSelection& selectedObjs, 
+  std::function<void(objid, glm::vec3)> setPosition, std::function<glm::vec3(objid)> getPosition, 
+  std::function<void(objid)> removeObjectById, std::function<objid(void)> makeManipulator,
+  ManipulatorMode mode
+){
+  if (!selectedObjs.mainObj.has_value() || (mode == ROTATE && selectedObjs.selectedIds.size() > 1)){
+    unspawnManipulator(removeObjectById);
+  }
+  else if (selectedObjs.mainObj.has_value()){
+    auto manipulatorExists = manipulatorId != 0;
+    if (!manipulatorExists){
+      manipulatorId = makeManipulator();
+    }
+    setPosition(manipulatorId, getPosition(selectedObjs.mainObj.value()));
+  }
+}
 
 void onManipulatorUpdate(
   std::function<ManipulatorSelection()> getSelectedIds,
@@ -366,6 +382,7 @@ void onManipulatorUpdate(
   glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
+  Axis defaultAxis,
   float mouseX, 
   float mouseY,
   glm::vec2 cursorPos,
@@ -376,23 +393,13 @@ void onManipulatorUpdate(
   ManipulatorOptions options
 ){
 
+  clearLines();
+
   auto selectedObjs = getSelectedIds();
-
-  //// create manipulator
-  if (selectedObjs.mainObj.has_value()){
-    auto manipulatorExists = manipulatorId != 0;
-    if (!manipulatorExists){
-      manipulatorId = makeManipulator();
-    }
-    setPosition(manipulatorId, getPosition(selectedObjs.mainObj.value()));
-  }
-
-  //////// delete manipulator
+  handleShowManipulator(selectedObjs, setPosition, getPosition, removeObjectById, makeManipulator, mode);
   if (!selectedObjs.mainObj.has_value()){
-    unspawnManipulator(removeObjectById);
     return;
   }
-
   //////////////////////////////
 
   auto manipulatorTarget = selectedObjs.mainObj.value();
@@ -405,11 +412,29 @@ void onManipulatorUpdate(
     mouseY = 0.f;
   }
 
+  ManipulatorTools manipulatorTools {
+    .getPosition = getPosition,
+    .setPosition = setPosition,
+    .setScale = setScale,
+    .getRotation = getRotation,
+    .setRotation = setRotation,
+    .snapPosition = snapPosition,
+    .snapScale = snapScale,
+    .snapRotate = snapRotate,
+    .drawLine = drawLine,
+  };
+  if (mode == ROTATE){
+    auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
+    auto rotationOrientation = axisToOrientation(defaultAxis);
+    visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools);
+  }
+
   if (manipulatorId == 0 || manipulatorTarget == 0){
     return;
   }
 
   std::cout << "on manipulate update" << std::endl;
+
 
   if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
     setPosition(manipulatorId, getPosition(manipulatorTarget));
@@ -434,17 +459,6 @@ void onManipulatorUpdate(
     }
   }
 
-  ManipulatorTools manipulatorTools {
-    .getPosition = getPosition,
-    .setPosition = setPosition,
-    .setScale = setScale,
-    .getRotation = getRotation,
-    .setRotation = setRotation,
-    .snapPosition = snapPosition,
-    .snapScale = snapScale,
-    .snapRotate = snapRotate,
-    .drawLine = drawLine,
-  };
   if (mode == TRANSLATE){
     handleTranslate(projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
     return;
@@ -454,7 +468,9 @@ void onManipulatorUpdate(
     return;
   }
   if (mode == ROTATE){
-    handleRotate(projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
+    auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
+    auto rotationOrientation = axisToOrientation(defaultAxis);
+    handleRotate(meanPosition, rotationOrientation, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
     return;
   }
 }

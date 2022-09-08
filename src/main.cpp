@@ -1699,6 +1699,7 @@ int main(int argc, char* argv[]){
       projectionFromLayer(layers.at(0)),
       view, 
       state.manipulatorMode, 
+      state.manipulatorAxis,
       state.offsetX, 
       state.offsetY,
       glm::vec2(adjustedCoords.x, adjustedCoords.y),

@@ -135,11 +135,6 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
 }
 
 void onSelectNullItem(){
-  auto manipulatorId = getManipulatorId();
-  std::cout << "manipulatorId: " << manipulatorId << std::endl;
-  if (manipulatorId != 0){
-    removeLinesByOwner(lineData, state.manipulatorLineId); 
-  }
   clearSelectedIndexs(state.editor); 
 }
 

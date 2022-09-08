@@ -38,6 +38,7 @@ void onManipulatorUpdate(
   glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
+  Axis defaultAxis,
   float mouseX, 
   float mouseY,
   glm::vec2 cursorPos,
