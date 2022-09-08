@@ -49,7 +49,6 @@
   (define currTime (time-seconds))
   (define createTime (createTimeForMessage message))
   (define diff (* 1000 (- currTime createTime)))
-  (format #t "message create time: ~a, diff: ~a\n" createTime diff)
   (< diff bufferExpirationTimeMs)
 )
 (define (filterExpiredMessages) 
