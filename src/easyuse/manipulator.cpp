@@ -302,6 +302,19 @@ void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::
   auto position = getTransformationFromMatrix(glm::inverse(cameraViewMatrix)).position;
   auto vecDirection = directionFromQuat(rotationOrientation);
 
+  ////////////////////////////////////
+  // visualization for the selection dir
+  glm::vec3 bias(-0.01f, -0.01f, 0.f);
+  tools.drawLine(position + bias, position + glm::vec3(selectDir.x, selectDir.y, selectDir.z), RED);
+  bias = glm::vec3(0.01f, 0.01f, 0.f);
+  tools.drawLine(position + bias, position + glm::vec3(selectDir.x , selectDir.y, selectDir.z ), RED);
+
+  bias = glm::vec3(0.01f, -0.01f, 0.f);
+  tools.drawLine(position + bias, position +  glm::vec3(selectDir.x, selectDir.y, selectDir.z ), RED);
+  bias = glm::vec3(-0.01f, 0.01f, 0.f);
+  tools.drawLine(position + bias, position + glm::vec3(selectDir.x , selectDir.y , selectDir.z), RED);
+  //////////////////////////////////////////////////
+
   auto optIntersection = findPlaneIntersection(meanPosition, vecDirection, position, selectDir);
   if (!optIntersection.has_value()){
     std::cout << "no intersection" << std::endl;

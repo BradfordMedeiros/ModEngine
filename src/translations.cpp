@@ -64,6 +64,8 @@ float convertBase(float value, float fromBaseLow, float fromBaseHigh, float toBa
   return ((value - fromBaseLow) * ((toBaseHigh - toBaseLow) / (fromBaseHigh - fromBaseLow))) + toBaseLow;
 }
 
+
+// I think this is wrong, test with manupulator rotation visualization
 glm::vec3 getCursorRayDirection(glm::mat4 projection, glm::mat4 view, float cursorLeft, float cursorBottom, float screenWidth, float screenHeight){
   glm::mat4 inversionMatrix = glm::inverse(projection * view);
   float screenXPosNdi = convertBase(cursorLeft, 0.f, screenWidth, -1.f, 1.f);
