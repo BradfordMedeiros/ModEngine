@@ -283,7 +283,7 @@ float atanRadians360(float x, float y){
   return angle;
 }
 
-void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::quat rotationOrientation, ManipulatorTools& tools, glm::mat4 cameraViewMatrix, glm::vec3 selectDir){
+float visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::quat rotationOrientation, ManipulatorTools& tools, glm::mat4 cameraViewMatrix, glm::vec3 selectDir){
   float maxDistance = 0.f;
   if (targets.size() > 1){
     for (auto &targetId : targets){
@@ -316,10 +316,8 @@ void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::
   //////////////////////////////////////////////////
 
   auto optIntersection = findPlaneIntersection(meanPosition, vecDirection, position, selectDir);
-  if (!optIntersection.has_value()){
-    std::cout << "no intersection" << std::endl;
-    return;
-  }
+  modassert(optIntersection.has_value(), "visualize rotation - could not find intersection");
+  
   auto intersection = optIntersection.value();
   auto pointRelativeToPlane = glm::inverse(rotationOrientation) * (intersection - meanPosition);
   auto angle = atanRadians360(pointRelativeToPlane.x, pointRelativeToPlane.y);
@@ -339,38 +337,26 @@ void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::
   auto angleIndicator = rotationOrientation * (glm::normalize(glm::vec3(glm::cos(angle), glm::sin(angle), 0.f)) * maxDistance);
   tools.drawLine(meanPosition, meanPosition + angleIndicator, GREEN);
 
-
+  return angle;
 }
 
 void handleRotate(
   glm::vec3 meanPosition, glm::quat rotationOrientation,
   glm::vec3 projectedPosition,
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
-  ManipulatorOptions& options, ManipulatorTools& tools
+  ManipulatorOptions& options, ManipulatorTools& tools,
+  float rotationAmount
 ){
 
-  ////
-
-  auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, false);
-  auto xRotation = (positionDiff.x / MODPI) * 360;  // not quite right
-  auto yRotation = (positionDiff.y / MODPI) * 360;  // not quite right
-  auto zRotation = (positionDiff.z / MODPI) * 360;  // not quite right
-
-  if (targets.size() > 1){
   // this is effectively a different rotation type and the ui probably ought tp be different
+  if (targets.size() > 1){
     modlog("manipulator", std::string("rotation mean position: ") + print(meanPosition));
+    std::cout << "rotating: " << rotationAmount << std::endl;
 
-    float rotationAmount = 0.f;
-    if (manipulatorObject == XAXIS){
-      rotationAmount = xRotation;
-    }else if (manipulatorObject == YAXIS){
-      rotationAmount = yRotation;
-    }else if (manipulatorObject == ZAXIS){
-      rotationAmount = zRotation;
-    }
     for (auto &targetId : targets){
       auto newTargetRotPos = rotateOverAxis(
-        RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
+        //RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
+        RotationPosition { .position = glm::vec3(0.f, 0.f, 0.f)/*findDragPosition(targetId)*/, .rotation = findDragRotation(targetId) },
         RotationPosition { .position = meanPosition, .rotation = rotationOrientation },
         rotationAmount
       );
@@ -380,6 +366,11 @@ void handleRotate(
     return;
   }
   ////////////////////////////
+
+  auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, false);
+  auto xRotation = (positionDiff.x / MODPI) * 360;  // not quite right
+  auto yRotation = (positionDiff.y / MODPI) * 360;  // not quite right
+  auto zRotation = (positionDiff.z / MODPI) * 360;  // not quite right
 
   if (!options.snapManipulatorAngles){
     for (auto &targetId : targets){
@@ -476,26 +467,26 @@ void onManipulatorUpdate(
     .snapRotate = snapRotate,
     .drawLine = drawLine,
   };
+
+  float rotationAmount = 0.f;
   if (mode == ROTATE){
     auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
     auto rotationOrientation = axisToOrientation(defaultAxis);
-
     auto selectDir = getCursorRayDirection(projection, cameraViewMatrix, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
-
-    visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools, cameraViewMatrix, selectDir);
+    rotationAmount = visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools, cameraViewMatrix, selectDir);
   }
 
-  if (manipulatorId == 0 || manipulatorTarget == 0){
-    return;
-  }
-
-  std::cout << "on manipulate update" << std::endl;
-
-
-  if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
-    setPosition(manipulatorId, getPosition(manipulatorTarget));
-    return;
-  }
+  //if (manipulatorId == 0 || manipulatorTarget == 0){
+  //  return;
+  //}
+//
+//  //std::cout << "on manipulate update" << std::endl;
+//
+//
+//  //if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
+//  //  setPosition(manipulatorId, getPosition(manipulatorTarget));
+//  //  //return;
+  //}
 
 
   auto projectedPosition = projectCursor(manipulatorTarget, drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
@@ -526,7 +517,7 @@ void onManipulatorUpdate(
   if (mode == ROTATE){
     auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
     auto rotationOrientation = axisToOrientation(defaultAxis);
-    handleRotate(meanPosition, rotationOrientation, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
+    handleRotate(meanPosition, rotationOrientation, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools, rotationAmount);
     return;
   }
 }
