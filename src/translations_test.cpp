@@ -144,3 +144,64 @@ void directionToQuatConversionTest(){
     }
   }
 }
+
+
+struct planeIntersectionTestValues {
+  glm::vec3 pointOnPlane;
+  glm::vec3 planeNormal;
+  glm::vec3 rayPosition;
+  glm::vec3 rayDirection;
+  std::optional<glm::vec3> intersection;
+};
+
+std::string interToStr(std::optional<glm::vec3> value){
+  return std::string("hasvalue = ") + (value.has_value() ? "true" : "false") + ", value = " + (!value.has_value() ? "[no value]" : print(value.value()));
+}
+void planeIntersectionTest(){
+  std::vector<planeIntersectionTestValues> intersectionTests = {
+    planeIntersectionTestValues {
+      .pointOnPlane = glm::vec3(0.f, 2.f, 0.f),
+      .planeNormal = glm::vec3(0.f, 1.f, 0.f),
+      .rayPosition = glm::vec3(1.f, 0.f, 0.f),
+      .rayDirection = glm::vec3(0.f, 1.f, 0.f),
+      .intersection = glm::vec3(1.f, 2.f, 0.f),
+    },
+    planeIntersectionTestValues {
+      .pointOnPlane = glm::vec3(2.f, 2.f, 0.f),
+      .planeNormal = glm::vec3(-1.f, 0.f, 0.f),
+      .rayPosition = glm::vec3(1.f, 0.f, 0.f),
+      .rayDirection = glm::vec3(2.f, 2.f, 0.f),
+      .intersection = glm::vec3(2.f, 1.f, 0.f),
+    },
+    planeIntersectionTestValues {
+      .pointOnPlane = glm::vec3(2.f, 2.f, 0.f),
+      .planeNormal = glm::vec3(-1.f, 0.f, 0.f),
+      .rayPosition = glm::vec3(1.f, 0.f, 0.f),
+      .rayDirection = glm::vec3(-2.f, 2.f, 0.f),
+      .intersection = glm::vec3(2.f, -1.f, 0.f),
+    },
+    planeIntersectionTestValues {
+      .pointOnPlane = glm::vec3(0.f, 2.f, 2.f),
+      .planeNormal = glm::vec3(0.f, 0.f, -1.f),
+      .rayPosition = glm::vec3(0.f, 0.f, 1.f),
+      .rayDirection = glm::vec3(0.f, 2.f, -2.f),
+      .intersection = glm::vec3(0.f, -1.f, 2.f),
+    },
+  };
+  for (auto &plane : intersectionTests){
+    auto intersectionPoint = findPlaneIntersection(plane.pointOnPlane, plane.planeNormal, plane.rayPosition, plane.rayDirection);
+    auto hasValueMatch = intersectionPoint.has_value() == plane.intersection.has_value();
+
+    if (!hasValueMatch){
+       throw std::logic_error(std::string("Invalid intersection test match wanted: ") + interToStr(plane.intersection) + " got: " + interToStr(intersectionPoint));
+    }
+    if (intersectionPoint.has_value()){
+      auto desiredIntersection = plane.intersection.value();
+      auto actualIntersection = intersectionPoint.value();
+      if (!aboutEqual(desiredIntersection, actualIntersection)){
+        throw std::logic_error(std::string("Invalid intersection test point wanted: ") + print(desiredIntersection) + " got: " + print(actualIntersection));
+      }
+    }
+    
+  } 
+}

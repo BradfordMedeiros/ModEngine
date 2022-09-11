@@ -71,6 +71,10 @@ std::vector<TestCase> tests = {
     .name = "optionalValueDataTest",
     .test = optionalValueDataTest,
   },
+  TestCase {
+    .name = "planeIntersectionTest",
+    .test = planeIntersectionTest,
+  },
 };
 
 

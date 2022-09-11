@@ -10,4 +10,6 @@ void calcLineIntersectionTest();
 
 void directionToQuatConversionTest();
 
+void planeIntersectionTest();
+
 #endif

@@ -294,3 +294,23 @@ RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, 
   }; 
 }
 
+std::optional<glm::vec3> findPlaneIntersection(glm::vec3 anypointOnPlane, glm::vec3 planeNormal, glm::vec3 rayPosition, glm::vec3 rayDirection){
+  auto normalConstant = planeNormal.x * anypointOnPlane.x + planeNormal.y * anypointOnPlane.y + planeNormal.z * anypointOnPlane.z;
+  auto tSum = planeNormal.x * rayDirection.x + planeNormal.y * rayDirection.y + planeNormal.z * rayDirection.z;
+  auto constantSum = (planeNormal.x * rayPosition.x)  + (planeNormal.y * rayPosition.y) + (planeNormal.z * rayPosition.z);
+
+
+
+  auto tValue = (normalConstant - constantSum) / tSum;
+
+  auto xFuncT = rayDirection.x  * tValue + rayPosition.x;
+  auto yFuncT = rayDirection.y * tValue + rayPosition.y;
+  auto zFuncT = rayDirection.z * tValue + rayPosition.z;
+
+  auto tValuesNormal = (planeNormal.x * xFuncT) + (planeNormal.y * yFuncT) + (planeNormal.z * zFuncT) - normalConstant;
+  if (!aboutEqual(tValuesNormal, 0.f)){
+    std::cout << "tvaluesnormal: " << tValuesNormal << std::endl;
+    return std::nullopt;
+  }
+  return glm::vec3(xFuncT, yFuncT, zFuncT);
+}
