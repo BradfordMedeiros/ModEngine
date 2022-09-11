@@ -1453,7 +1453,7 @@ int main(int argc, char* argv[]){
   glfwSetJoystickCallback(joystickCallback);
   glfwSwapInterval(state.swapInterval);
   toggleFullScreen(state.fullscreen);
-  toggleCursor(state.captureCursor); 
+  toggleCursor(state.cursorBehavior); 
 
   unsigned int frameCount = 0;
   float previous = now;

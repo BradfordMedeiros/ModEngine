@@ -374,7 +374,7 @@ LayerInfo layerByName(std::string layername){
       return layer;
     }
   }
-  assert(false);
+  modassert(false, std::string("layer does not exist: " + layername));
   return LayerInfo{};
 }
 LayerInfo getLayerForId(objid id){
@@ -551,9 +551,14 @@ void toggleFullScreen(bool fullscreen){
     glfwSetWindowMonitor(window, NULL, 0, 0, 400, 600, 0);
   }
 }
-void toggleCursor(bool focusCursor){
-  std::cout << "toggle cursor: " << focusCursor << std::endl;
-  glfwSetInputMode(window, GLFW_CURSOR, focusCursor ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN);  
+void toggleCursor(CURSOR_TYPE cursorBehavior){
+  if (cursorBehavior == CURSOR_NORMAL){
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  }else if (cursorBehavior == CURSOR_CAPTURE){
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  }else if (cursorBehavior == CURSOR_HIDDEN){
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+  }
 }
 
 float cameraSpeed = 1.f;
@@ -1358,9 +1363,22 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = GLFW_KEY_LEFT_ALT,
     .hasPreq = true,
     .fn = []() -> void {
-      state.captureCursor = !state.captureCursor;
-      toggleCursor(state.captureCursor);
-      sendNotifyMessage("alert", std::string("capture cursor: ") + (state.captureCursor ? "true" : "false"));
+      if (state.cursorBehavior == CURSOR_NORMAL){
+        state.cursorBehavior = CURSOR_CAPTURE;
+      }else if (state.cursorBehavior == CURSOR_CAPTURE){
+        state.cursorBehavior = CURSOR_HIDDEN;
+      }else if (state.cursorBehavior == CURSOR_HIDDEN){
+        state.cursorBehavior = CURSOR_NORMAL;
+      }
+      toggleCursor(state.cursorBehavior);
+      if (state.cursorBehavior == CURSOR_NORMAL){
+        sendNotifyMessage("alert", std::string("capture cursor: cursor normal"));
+      }else if (state.cursorBehavior == CURSOR_CAPTURE){
+        sendNotifyMessage("alert", std::string("capture cursor: cursor capture"));
+      }else if (state.cursorBehavior == CURSOR_HIDDEN){
+        sendNotifyMessage("alert", std::string("capture cursor: cursor hidden"));
+      }
+      
     }
   },
   InputDispatch{

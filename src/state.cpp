@@ -283,15 +283,23 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto captureCursor = std::get_if<std::string>(&value);
-      if (captureCursor != NULL){
-        auto valid = maybeParseBool(*captureCursor, &state.captureCursor);
-        assert(valid);
-        std::cout << "captureCursor: " << (state.captureCursor ? "true" : "false") << std::endl;
-      }     
+      auto cursorBehavior = std::get_if<std::string>(&value);
+      if (cursorBehavior != NULL){
+        if (*cursorBehavior == "normal"){
+          state.cursorBehavior = CURSOR_NORMAL;
+          return;
+        }else if (*cursorBehavior == "hidden"){
+          state.cursorBehavior = CURSOR_HIDDEN;
+          return;
+        }else if (*cursorBehavior == "capture"){
+          state.cursorBehavior = CURSOR_CAPTURE;
+          return;
+        }
+        modassert(false, "invalid cursor type");
+      }
     },
     .object = "mouse",
-    .attribute = "capturecursor",
+    .attribute = "cursor",
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
@@ -570,7 +578,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.offsetX = 0,
 		.offsetY = 0,
     .mouseIsDown = false,
-    .captureCursor = false,
+    .cursorBehavior = CURSOR_NORMAL,
 		.enableDiffuse = true,
 		.enableSpecular = true,
     .enablePBR = false,

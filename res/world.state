@@ -20,7 +20,7 @@ light:amount:0.8 0.8 0.8
 #dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
 #skybox:color:5 0.2 0.2 1
-skybox:enable:true
+skybox:enable:false
 ###############################
 
 ### Window/Rendering ###
@@ -35,7 +35,7 @@ rendering:fontsize:6
 
 
 ### input stuff ###
-#mouse:capturecursor:true
+mouse:cursor:capture   # normal, hidden, capture
 
 #window:name:ModEngine Editor
 #window:icon:./res/textures/wood.jpg

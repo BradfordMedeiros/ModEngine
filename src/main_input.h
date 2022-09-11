@@ -45,7 +45,7 @@ void drop_callback(GLFWwindow* window, int count, const char** paths);
 void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3), float deltaTime,  void (*onKeyChar)(unsigned int codepoint), void (*onJoystick)(std::vector<JoyStickInfo> infos));
 void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper);
 void toggleFullScreen(bool fullscreen);
-void toggleCursor(bool focusCursor);
+void toggleCursor(CURSOR_TYPE cursorBehavior);
 
 void handleInput(GLFWwindow* window);
 

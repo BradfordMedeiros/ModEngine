@@ -19,6 +19,7 @@ struct CamInterpolation {
 };
 
 enum ANTIALIASING_TYPE { ANTIALIASING_NONE, ANTIALIASING_MSAA };
+enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN };
 
 struct engineState {
   bool visualizeNormals;
@@ -57,7 +58,7 @@ struct engineState {
   float offsetX;
   float offsetY;
   bool mouseIsDown;
-  bool captureCursor;
+  CURSOR_TYPE cursorBehavior;
 
   bool enableDiffuse;
   bool enableSpecular;
