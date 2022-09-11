@@ -275,18 +275,58 @@ void handleScale(
   }
 }
 
-void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::quat rotationOrientation, ManipulatorTools& tools){
+float atanRadians360(float x, float y){
+  auto angle = glm::atan(y / x);
+  if (x < 0){
+    return angle + MODPI;
+  }
+  return angle;
+}
+
+void visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::quat rotationOrientation, ManipulatorTools& tools, glm::mat4 cameraViewMatrix, glm::vec3 selectDir){
+  float maxDistance = 0.f;
   if (targets.size() > 1){
     for (auto &targetId : targets){
       auto targetPosition = tools.getPosition(targetId);
       auto distanceToTarget = glm::distance(targetPosition, meanPosition);
+      if (distanceToTarget > maxDistance){
+        maxDistance = distanceToTarget;
+      }
       drawRotationVisualization(tools.drawLine, meanPosition, rotationOrientation, distanceToTarget);
     }
-    return;
   }
 
   auto lineAmount = rotationOrientation * glm::vec3(0, 0.f, -5.f);
   tools.drawLine(meanPosition + lineAmount, meanPosition - lineAmount, GREEN);
+
+  auto position = getTransformationFromMatrix(glm::inverse(cameraViewMatrix)).position;
+  auto vecDirection = directionFromQuat(rotationOrientation);
+
+  auto optIntersection = findPlaneIntersection(meanPosition, vecDirection, position, selectDir);
+  if (!optIntersection.has_value()){
+    std::cout << "no intersection" << std::endl;
+    return;
+  }
+  auto intersection = optIntersection.value();
+  auto pointRelativeToPlane = glm::inverse(rotationOrientation) * (intersection - meanPosition);
+  auto angle = atanRadians360(pointRelativeToPlane.x, pointRelativeToPlane.y);
+  auto angleDegrees = glm::degrees(angle);
+
+  std::cout << "position: " << print(position) << std::endl;
+  std::cout << "selecdir: " << print(selectDir) << std::endl;
+  std::cout << "intersection: " << print(intersection) << std::endl;
+  std::cout << "xyz to plane: " << print(pointRelativeToPlane) << std::endl;
+  std::cout << "angle: " << angleDegrees << std::endl;
+
+  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(0.1f, 0.1f, 0.f), RED);
+  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(-0.1f, -0.1f, 0.f), RED);
+  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(-0.1f, 0.1f, 0.f), RED);
+  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(0.1f, -0.1f, 0.f), RED);
+
+  auto angleIndicator = rotationOrientation * (glm::normalize(glm::vec3(glm::cos(angle), glm::sin(angle), 0.f)) * maxDistance);
+  tools.drawLine(meanPosition, meanPosition + angleIndicator, GREEN);
+
+
 }
 
 void handleRotate(
@@ -426,7 +466,10 @@ void onManipulatorUpdate(
   if (mode == ROTATE){
     auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
     auto rotationOrientation = axisToOrientation(defaultAxis);
-    visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools);
+
+    auto selectDir = getCursorRayDirection(projection, cameraViewMatrix, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
+
+    visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools, cameraViewMatrix, selectDir);
   }
 
   if (manipulatorId == 0 || manipulatorTarget == 0){

@@ -294,15 +294,12 @@ RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, 
   }; 
 }
 
+// todo add diagram/explanation of this math (parametric representation of line, plane equation w/ substitutions)
 std::optional<glm::vec3> findPlaneIntersection(glm::vec3 anypointOnPlane, glm::vec3 planeNormal, glm::vec3 rayPosition, glm::vec3 rayDirection){
   auto normalConstant = planeNormal.x * anypointOnPlane.x + planeNormal.y * anypointOnPlane.y + planeNormal.z * anypointOnPlane.z;
   auto tSum = planeNormal.x * rayDirection.x + planeNormal.y * rayDirection.y + planeNormal.z * rayDirection.z;
   auto constantSum = (planeNormal.x * rayPosition.x)  + (planeNormal.y * rayPosition.y) + (planeNormal.z * rayPosition.z);
-
-
-
   auto tValue = (normalConstant - constantSum) / tSum;
-
   auto xFuncT = rayDirection.x  * tValue + rayPosition.x;
   auto yFuncT = rayDirection.y * tValue + rayPosition.y;
   auto zFuncT = rayDirection.z * tValue + rayPosition.z;
