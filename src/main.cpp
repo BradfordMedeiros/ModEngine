@@ -655,7 +655,7 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   glUniform1i(glGetUniformLocation(uiShaderProgram, "forceTint"), false);
 
   if (showCursor && crosshairSprite != NULL){
-    if(!state.isRotateSelection){
+    if(!state.isRotateSelection && state.cursorBehavior != CURSOR_NORMAL){
       glUniform4fv(glGetUniformLocation(uiShaderProgram, "tint"), 1, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
       auto location = pixelCoordToNdi(glm::ivec2(state.cursorLeft, state.currentScreenHeight - state.cursorTop), glm::vec2(state.currentScreenWidth, state.currentScreenHeight));
       drawSpriteAround(uiShaderProgram, *crosshairSprite, location.x, location.y, 0.05, 0.05);
