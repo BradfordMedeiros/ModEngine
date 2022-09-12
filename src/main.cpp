@@ -448,7 +448,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
   int numTriangles = 0;
   int numDepthClears = 0;
 
-  traverseSandbox(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
+  traverseSandboxByLayer(world.sandbox, [&world, &numDepthClears, shaderProgram, allowShaderOverride, projection, view, &portals, &lights, &lightProjview, &numTriangles, &cameraPosition](int32_t id, glm::mat4 modelMatrix, glm::mat4 parentModelMatrix, LayerInfo& layer, std::string shader) -> void {
     assert(id >= 0);
     auto proj = projection == NULL ? projectionFromLayer(layer) : *projection;
 
