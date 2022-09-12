@@ -17,6 +17,12 @@ struct InitialDragRotation {
 };
 std::vector<InitialDragRotation> initialDragRotations = {};
 
+struct InitialDragPosition {
+  objid id;
+  glm::vec3 position;
+};
+std::vector<InitialDragPosition> initialDragPositions = {};
+
 objid getManipulatorId(){
   return manipulatorId;
 }
@@ -172,6 +178,15 @@ glm::quat findDragRotation(objid id){
   }
   modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
   return glm::identity<glm::quat>();
+}
+glm::vec3 findDragPosition(objid id){
+  for (auto &dragPosition : initialDragPositions){
+    if (dragPosition.id == id){
+      return dragPosition.position;
+    }
+  }
+  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
+  return glm::vec3(0.f, 0.f, 0.f);
 }
 
 glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(objid)> getPosition){
@@ -356,7 +371,7 @@ void handleRotate(
     for (auto &targetId : targets){
       auto newTargetRotPos = rotateOverAxis(
         //RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
-        RotationPosition { .position = glm::vec3(0.f, 0.f, 0.f)/*findDragPosition(targetId)*/, .rotation = findDragRotation(targetId) },
+        RotationPosition { .position = findDragPosition(targetId), .rotation = findDragRotation(targetId) },
         RotationPosition { .position = meanPosition, .rotation = rotationOrientation },
         rotationAmount
       );
@@ -491,10 +506,15 @@ void onManipulatorUpdate(
 
   auto projectedPosition = projectCursor(manipulatorTarget, drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
   if (!initialDragPosition.has_value()){
-    initialDragPosition = projectedPosition;  
+    initialDragPosition = projectedPosition;
+    initialDragPositions = {};
     initialDragScales = {};
     initialDragRotations = {};
     for (auto &selectedId : selectedObjs.selectedIds){
+      initialDragPositions.push_back(InitialDragPosition{
+        .id = selectedId,
+        .position = getPosition(selectedId),
+      });
       initialDragScales.push_back(InitialDragScale {
         .id = selectedId,
         .scale = getScale(selectedId)

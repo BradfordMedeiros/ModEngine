@@ -286,7 +286,7 @@ RotationPosition rotateOverAxis(RotationPosition object, RotationPosition axis, 
 
   auto fromAxis = object.position - axis.position;
   auto objectTranslation = glm::translate(glm::mat4(1.f), fromAxis);
-  auto axisRotation = glm::rotate(glm::mat4(1.f), glm::radians(rotationRadians), directionFromQuat(axis.rotation));
+  auto axisRotation = glm::rotate(glm::mat4(1.f), -1 * rotationRadians, directionFromQuat(axis.rotation));
   auto axisTransform = glm::translate(glm::mat4(1.f), axis.position);
   auto transform = getTransformationFromMatrix(axisTransform * axisRotation * objectTranslation * glm::toMat4(object.rotation));
 
