@@ -313,3 +313,25 @@ std::optional<glm::vec3> findPlaneIntersection(glm::vec3 anypointOnPlane, glm::v
   }
   return glm::vec3(xFuncT, yFuncT, zFuncT);
 }
+
+glm::quat axisToOrientation(Axis axis){
+  if (axis == XAXIS){
+    return MOD_ORIENTATION_RIGHT;
+  }
+  if (axis == YAXIS){
+    return MOD_ORIENTATION_UP;
+  }
+  if (axis == ZAXIS){
+    return MOD_ORIENTATION_FORWARD;
+  }
+  modassert(false, "axis to orientation invalid orientation");
+  return glm::identity<glm::quat>();
+}
+
+float atanRadians360(float x, float y){
+  auto angle = glm::atan(y / x);
+  if (x < 0){
+    return angle + MODPI;
+  }
+  return angle;
+}

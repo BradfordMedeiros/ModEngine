@@ -3,9 +3,8 @@
 
 #include <functional>
 #include <optional>
-#include "../common/util.h"
-#include "../scene/serialization.h"  
 #include "../translations.h"
+#include "./manipulator_drawing.h"
 
 struct ManipulatorOptions {
   bool snapManipulatorPositions;
@@ -18,19 +17,6 @@ struct ManipulatorSelection {
   std::optional<objid> mainObj;
   std::vector<objid> selectedIds;
 };  
-struct ManipulatorTools {
-  std::function<glm::vec3(objid)> getPosition;
-  std::function<void(objid, glm::vec3)> setPosition;
-  std::function<glm::vec3(objid)> getScale;
-  std::function<void(objid, glm::vec3)> setScale;
-  std::function<glm::quat(objid)> getRotation;
-  std::function<void(objid, glm::quat)> setRotation;
-  std::function<glm::vec3(glm::vec3)> snapPosition;
-  std::function<glm::vec3(glm::vec3)> snapScale;
-  std::function<glm::quat(glm::quat, Axis)> snapRotate;
-  std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine;
-  std::function<void()> clearLines;
-};
 
 objid getManipulatorId();
 void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName);

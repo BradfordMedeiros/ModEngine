@@ -39,7 +39,10 @@ glm::vec3 directionFromQuat(glm::quat direction);
 const glm::quat MOD_ORIENTATION_UP = quatFromDirection(glm::vec3(0.f, 1.f, 0.f));
 const glm::quat MOD_ORIENTATION_RIGHT = quatFromDirection(glm::vec3(1.f, 0.f, 0.f));
 const glm::quat MOD_ORIENTATION_FORWARD = quatFromDirection(glm::vec3(0.f, 0.f, -1.f));
+glm::quat axisToOrientation(Axis axis);
+
 const float MODPI = 3.1416f;
+float atanRadians360(float x, float y);
 
 struct Transformation {
   glm::vec3 position;

@@ -65,25 +65,6 @@ struct ManipulatorUpdate {
 };
 
 
-void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction, LineColor color){
-  glm::vec3 normalizedDirection = glm::normalize(direction);
-  auto rotation = quatFromDirection(normalizedDirection);
-  for (int i = 0; i < 10; i++){
-    auto newPos = fromPos + glm::vec3(normalizedDirection.x * i, normalizedDirection.y * i, normalizedDirection.z * i);
-    auto leftDash = newPos + rotation * glm::vec3(-0.1f, -0.01f, 0.5f);
-    auto rightDash = newPos + rotation * glm::vec3(0.1f, -0.01f, 0.5f);
-    //std::cout << "drawLine from: " << print(leftDash) << " to " << print(rightDash) << std::endl;
-    drawLine(leftDash, newPos, color);
-    drawLine(rightDash, newPos, color);
-  }
-}
-
-void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 position){
-  float length = 5.f;
-  drawLine(position + glm::vec3(0.f, length * 2.f, 0.f), position + glm::vec3(0.f, length * -2.f, 0.f), RED);
-  drawLine(position + glm::vec3(length * 2.f, 0.f, 0.f), position + glm::vec3(length *  -2.f, 0.f, 0.f), RED);
-  drawLine(position + glm::vec3(0.f, 0.f, length *  -2.f), position + glm::vec3(0.f, 0.f, length *  2.f), RED);
-}
 
 bool drawDebugLines = true;
 glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
@@ -185,41 +166,6 @@ glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(
   return glm::vec3(positionSum.x / targets.size(), positionSum.y / targets.size(), positionSum.z / targets.size());
 }
 
-int sphereNumPoints = 30;
-void drawRotationVisualization(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 position, glm::quat orientation, float radius){
-  float radianPerPoint = 2 * MODPI / sphereNumPoints;
-
-  glm::vec3 lastPos(0.f, 0.f, 0.f);
-  glm::vec3 firstPos(0.f, 0.f, 0.f);
-  for (int i = 0; i < sphereNumPoints; i++){
-    auto xPos = glm::cos(radianPerPoint * i) * radius;
-    auto yPos = glm::sin(radianPerPoint * i) * radius;
-    auto deltaCirclePos = orientation * glm::vec3(xPos, yPos, 0.f);
-    auto newPos = position + glm::vec3(deltaCirclePos.x, deltaCirclePos.y, deltaCirclePos.z);
-    if (i > 0){
-      drawLine(lastPos, newPos, RED);
-    }else{
-      firstPos = newPos;
-    }
-    lastPos = newPos;
-  }
-  drawLine(lastPos, firstPos, RED);
-}
-
-glm::quat axisToOrientation(Axis manipulatorObject){
-  if (manipulatorObject == XAXIS){
-    return MOD_ORIENTATION_RIGHT;
-  }
-  if (manipulatorObject == YAXIS){
-    return MOD_ORIENTATION_UP;
-  }
-  if (manipulatorObject == ZAXIS){
-    return MOD_ORIENTATION_FORWARD;
-  }
-  modassert(false, "axis to orientation invalid orientation");
-  return glm::identity<glm::quat>();
-}
-
 void handleTranslate(
   glm::vec3 projectedPosition,
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
@@ -273,71 +219,6 @@ void handleScale(
       tools.setScale(targetId, relativeScale);
     }
   }
-}
-
-float atanRadians360(float x, float y){
-  auto angle = glm::atan(y / x);
-  if (x < 0){
-    return angle + MODPI;
-  }
-  return angle;
-}
-
-float visualizeRotation(std::vector<objid> targets, glm::vec3 meanPosition, glm::quat rotationOrientation, ManipulatorTools& tools, glm::mat4 cameraViewMatrix, glm::vec3 selectDir){
-  float maxDistance = 0.f;
-  if (targets.size() > 1){
-    for (auto &targetId : targets){
-      auto targetPosition = tools.getPosition(targetId);
-      auto distanceToTarget = glm::distance(targetPosition, meanPosition);
-      if (distanceToTarget > maxDistance){
-        maxDistance = distanceToTarget;
-      }
-      drawRotationVisualization(tools.drawLine, meanPosition, rotationOrientation, distanceToTarget);
-    }
-  }
-
-  auto lineAmount = rotationOrientation * glm::vec3(0, 0.f, -5.f);
-  tools.drawLine(meanPosition + lineAmount, meanPosition - lineAmount, GREEN);
-
-  auto position = getTransformationFromMatrix(glm::inverse(cameraViewMatrix)).position;
-  auto vecDirection = directionFromQuat(rotationOrientation);
-
-  ////////////////////////////////////
-  // visualization for the selection dir
-  glm::vec3 bias(-0.01f, -0.01f, 0.f);
-  tools.drawLine(position + bias, position + glm::vec3(selectDir.x, selectDir.y, selectDir.z), RED);
-  bias = glm::vec3(0.01f, 0.01f, 0.f);
-  tools.drawLine(position + bias, position + glm::vec3(selectDir.x , selectDir.y, selectDir.z ), RED);
-
-  bias = glm::vec3(0.01f, -0.01f, 0.f);
-  tools.drawLine(position + bias, position +  glm::vec3(selectDir.x, selectDir.y, selectDir.z ), RED);
-  bias = glm::vec3(-0.01f, 0.01f, 0.f);
-  tools.drawLine(position + bias, position + glm::vec3(selectDir.x , selectDir.y , selectDir.z), RED);
-  //////////////////////////////////////////////////
-
-  auto optIntersection = findPlaneIntersection(meanPosition, vecDirection, position, selectDir);
-  modassert(optIntersection.has_value(), "visualize rotation - could not find intersection");
-  
-  auto intersection = optIntersection.value();
-  auto pointRelativeToPlane = glm::inverse(rotationOrientation) * (intersection - meanPosition);
-  auto angle = atanRadians360(pointRelativeToPlane.x, pointRelativeToPlane.y);
-  auto angleDegrees = glm::degrees(angle);
-
-  std::cout << "position: " << print(position) << std::endl;
-  std::cout << "selecdir: " << print(selectDir) << std::endl;
-  std::cout << "intersection: " << print(intersection) << std::endl;
-  std::cout << "xyz to plane: " << print(pointRelativeToPlane) << std::endl;
-  std::cout << "angle: " << angleDegrees << std::endl;
-
-  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(0.1f, 0.1f, 0.f), RED);
-  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(-0.1f, -0.1f, 0.f), RED);
-  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(-0.1f, 0.1f, 0.f), RED);
-  tools.drawLine(intersection, intersection + rotationOrientation * glm::vec3(0.1f, -0.1f, 0.f), RED);
-
-  auto angleIndicator = rotationOrientation * (glm::normalize(glm::vec3(glm::cos(angle), glm::sin(angle), 0.f)) * maxDistance);
-  tools.drawLine(meanPosition, meanPosition + angleIndicator, GREEN);
-
-  return angle;
 }
 
 void handleRotate(
@@ -482,7 +363,29 @@ void onManipulatorUpdate(
     auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
     auto rotationOrientation = axisToOrientation(defaultAxis);
     auto selectDir = getCursorRayDirection(projection, cameraViewMatrix, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
-    rotationAmount = visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools, cameraViewMatrix, selectDir);
+
+    std::vector<IdVec3Pair> positions;
+    for (auto &id : selectedObjs.selectedIds){
+      positions.push_back(IdVec3Pair{
+        .id = id,
+        .value = manipulatorTools.getPosition(id),
+      });
+    }
+
+    auto cameraPosition = getTransformationFromMatrix(glm::inverse(cameraViewMatrix)).position; 
+    auto vecDirection = directionFromQuat(rotationOrientation);
+    auto optIntersection = findPlaneIntersection(meanPosition, vecDirection, cameraPosition, selectDir);
+    modassert(optIntersection.has_value(), "visualize rotation - could not find intersection");
+    auto intersection = optIntersection.value();
+    auto pointRelativeToPlane = glm::inverse(rotationOrientation) * (intersection - meanPosition);
+    rotationAmount = atanRadians360(pointRelativeToPlane.x, pointRelativeToPlane.y);
+    std::cout << "position: " << print(cameraPosition) << std::endl;
+    std::cout << "selecdir: " << print(selectDir) << std::endl;
+    std::cout << "intersection: " << print(intersection) << std::endl;
+    std::cout << "xyz to plane: " << print(pointRelativeToPlane) << std::endl;
+    std::cout << "angle: " << glm::degrees(rotationAmount) << std::endl;
+
+    drawRotation(positions, meanPosition, rotationOrientation, cameraPosition, selectDir, intersection, rotationAmount, manipulatorTools.drawLine);
   }
 
 
@@ -502,3 +405,17 @@ void onManipulatorUpdate(
   }
 }
 
+
+/*
+
+glm::vec3 valueForIdVec3(std::vector<IdVec3Pair> values, objid id){
+  for (auto &value : values){
+    if (value.id == id){
+      return value.value;
+    }
+  }
+  modassert(false, std::string("no id found for: " + std::to_string(id)));
+  return glm::vec3(0.f, 0.f, 0.f);
+}
+
+*/
