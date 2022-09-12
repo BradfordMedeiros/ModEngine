@@ -1676,26 +1676,10 @@ int main(int argc, char* argv[]){
       defaultCrosshairSprite = &world.meshes.at(cursorForLayer).mesh;
     }
     
-
     onManipulatorUpdate(
       onManipulatorSelected,
       createManipulator,
       removeObjectById,
-      [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
-        if (state.manipulatorLineId == 0){
-          state.manipulatorLineId = getUniqueObjId();
-        }
-        addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
-      },
-      []() -> void {
-        removeLinesByOwner(lineData, state.manipulatorLineId);
-      },
-      getGameObjectPos, 
-      setGameObjectPosition, 
-      getGameObjectScale,
-      setGameObjectScale,
-      getGameObjectRotationRelative,
-      setGameObjectRotationRelative,
       projectionFromLayer(layers.at(0)),
       view, 
       state.manipulatorMode, 
@@ -1704,21 +1688,38 @@ int main(int argc, char* argv[]){
       state.offsetY,
       glm::vec2(adjustedCoords.x, adjustedCoords.y),
       glm::vec2(state.resolution.x, state.resolution.y),
-      [&state](glm::vec3 pos) -> glm::vec3 {
-        return snapTranslate(state.easyUse, pos);
-      },
-      [&state](glm::vec3 scale) -> glm::vec3 {
-        return snapScale(state.easyUse, scale);
-      },
-      [&state](glm::quat rot, Axis snapAxis) -> glm::quat {
-        return snapRotate(state.easyUse, rot, snapAxis);
-      },
       ManipulatorOptions {
          .snapManipulatorPositions = state.snapManipulatorPositions,
          .snapManipulatorScales = state.snapManipulatorScales,
          .snapManipulatorAngles = state.snapManipulatorAngles,
          .rotateSnapRelative = state.rotateSnapRelative,
          .preserveRelativeScale = state.preserveRelativeScale,
+      },
+      ManipulatorTools  {
+        .getPosition = getGameObjectPos,
+        .setPosition = setGameObjectPosition,
+        .getScale = getGameObjectScale,
+        .setScale = setGameObjectScale,
+        .getRotation = getGameObjectRotationRelative,
+        .setRotation = setGameObjectRotationRelative,
+        .snapPosition = [&state](glm::vec3 pos) -> glm::vec3 {
+          return snapTranslate(state.easyUse, pos);
+        },
+        .snapScale = [&state](glm::vec3 scale) -> glm::vec3 {
+          return snapScale(state.easyUse, scale);
+        },
+        .snapRotate = [&state](glm::quat rot, Axis snapAxis) -> glm::quat {
+          return snapRotate(state.easyUse, rot, snapAxis);
+        },
+        .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
+          if (state.manipulatorLineId == 0){
+            state.manipulatorLineId = getUniqueObjId();
+          }
+          addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
+        },
+        .clearLines = []() -> void {
+          removeLinesByOwner(lineData, state.manipulatorLineId);
+        },
       }
     );
 

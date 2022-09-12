@@ -85,9 +85,6 @@ void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine
   drawLine(position + glm::vec3(0.f, 0.f, length *  -2.f), position + glm::vec3(0.f, 0.f, length *  2.f), RED);
 }
 
-
-
-
 bool drawDebugLines = true;
 glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
   ProjectCursorDebugInfo projectCursorInfo{};
@@ -148,18 +145,6 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
   auto positionDiff = effectProjPos - effectInitialPos;  
   return positionDiff;
 }
-
-struct ManipulatorTools {
-  std::function<glm::vec3(objid)> getPosition;
-  std::function<void(objid, glm::vec3)> setPosition;
-  std::function<void(objid, glm::vec3)> setScale;
-  std::function<glm::quat(objid)> getRotation;
-  std::function<void(objid, glm::quat)> setRotation;
-  std::function<glm::vec3(glm::vec3)> snapPosition;
-  std::function<glm::vec3(glm::vec3)> snapScale;
-  std::function<glm::quat(glm::quat, Axis)> snapRotate;
-  std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine;
-};
 
 glm::vec3 findDragScale(objid id){
   for (auto &dragScale : initialDragScales){
@@ -430,14 +415,6 @@ void onManipulatorUpdate(
   std::function<ManipulatorSelection()> getSelectedIds,
   std::function<objid(void)> makeManipulator,
   std::function<void(objid)> removeObjectById,
-  std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine,
-  std::function<void()> clearLines,
-  std::function<glm::vec3(objid)> getPosition, 
-  std::function<void(objid, glm::vec3)> setPosition, 
-  std::function<glm::vec3(objid)> getScale,
-  std::function<void(objid, glm::vec3)> setScale,
-  std::function<glm::quat(objid)> getRotation,
-  std::function<void(objid, glm::quat)> setRotation,
   glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,
@@ -446,16 +423,14 @@ void onManipulatorUpdate(
   float mouseY,
   glm::vec2 cursorPos,
   glm::vec2 screensize,
-  std::function<glm::vec3(glm::vec3)> snapPosition,
-  std::function<glm::vec3(glm::vec3)> snapScale,
-  std::function<glm::quat(glm::quat, Axis)> snapRotate,
-  ManipulatorOptions options
+  ManipulatorOptions options,
+  ManipulatorTools manipulatorTools
 ){
 
-  clearLines();
+  manipulatorTools.clearLines();
 
   auto selectedObjs = getSelectedIds();
-  handleShowManipulator(selectedObjs, setPosition, getPosition, removeObjectById, makeManipulator, mode);
+  handleShowManipulator(selectedObjs, manipulatorTools.setPosition, manipulatorTools.getPosition, removeObjectById, makeManipulator, mode);
   if (!selectedObjs.mainObj.has_value()){
     return;
   }
@@ -471,17 +446,36 @@ void onManipulatorUpdate(
     mouseY = 0.f;
   }
 
-  ManipulatorTools manipulatorTools {
-    .getPosition = getPosition,
-    .setPosition = setPosition,
-    .setScale = setScale,
-    .getRotation = getRotation,
-    .setRotation = setRotation,
-    .snapPosition = snapPosition,
-    .snapScale = snapScale,
-    .snapRotate = snapRotate,
-    .drawLine = drawLine,
-  };
+  //if (manipulatorId == 0 || manipulatorTarget == 0){
+  //  return;
+  //}
+
+//  //if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
+//  //  setPosition(manipulatorId, getPosition(manipulatorTarget));
+//  //  //return;
+  //}
+
+  auto projectedPosition = projectCursor(manipulatorTarget, manipulatorTools.drawLine, manipulatorTools.clearLines, manipulatorTools.getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
+  if (!initialDragPosition.has_value()){
+    initialDragPosition = projectedPosition;
+    initialDragPositions = {};
+    initialDragScales = {};
+    initialDragRotations = {};
+    for (auto &selectedId : selectedObjs.selectedIds){
+      initialDragPositions.push_back(InitialDragPosition{
+        .id = selectedId,
+        .position = manipulatorTools.getPosition(selectedId),
+      });
+      initialDragScales.push_back(InitialDragScale {
+        .id = selectedId,
+        .scale = manipulatorTools.getScale(selectedId)
+      });
+      initialDragRotations.push_back(InitialDragRotation {
+        .id = selectedId,
+        .rotation = manipulatorTools.getRotation(selectedId)
+      });
+    }
+  }
 
   float rotationAmount = 0.f;
   if (mode == ROTATE){
@@ -491,40 +485,6 @@ void onManipulatorUpdate(
     rotationAmount = visualizeRotation(selectedObjs.selectedIds, meanPosition, rotationOrientation, manipulatorTools, cameraViewMatrix, selectDir);
   }
 
-  //if (manipulatorId == 0 || manipulatorTarget == 0){
-  //  return;
-  //}
-//
-//  //std::cout << "on manipulate update" << std::endl;
-//
-//
-//  //if (manipulatorObject != XAXIS && manipulatorObject != YAXIS && manipulatorObject != ZAXIS){
-//  //  setPosition(manipulatorId, getPosition(manipulatorTarget));
-//  //  //return;
-  //}
-
-
-  auto projectedPosition = projectCursor(manipulatorTarget, drawLine, clearLines, getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
-  if (!initialDragPosition.has_value()){
-    initialDragPosition = projectedPosition;
-    initialDragPositions = {};
-    initialDragScales = {};
-    initialDragRotations = {};
-    for (auto &selectedId : selectedObjs.selectedIds){
-      initialDragPositions.push_back(InitialDragPosition{
-        .id = selectedId,
-        .position = getPosition(selectedId),
-      });
-      initialDragScales.push_back(InitialDragScale {
-        .id = selectedId,
-        .scale = getScale(selectedId)
-      });
-      initialDragRotations.push_back(InitialDragRotation {
-        .id = selectedId,
-        .rotation = getRotation(selectedId)
-      });
-    }
-  }
 
   if (mode == TRANSLATE){
     handleTranslate(projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
