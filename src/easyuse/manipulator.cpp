@@ -58,35 +58,6 @@ void onManipulatorMouseRelease(ManipulatorState& manipulatorState){
   manipulatorState.initialDragRotations = {};
 }
 
-bool drawDebugLines = true;
-glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
-  ProjectCursorDebugInfo projectCursorInfo{};
-  auto newPosition = projectCursorPositionOntoAxis(
-    projection,
-    view,
-    cursorPos,  
-    screensize, 
-    axis,  
-    getPosition(manipulatorTarget),
-    &projectCursorInfo
-  );
-
-  // actual lengths
-  drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
-
-  if (drawDebugLines){
-    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
-    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
-    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
-  
-    // directions
-    drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
-    drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
-  }
-
-  return newPosition;
-}
-
 //  2 - 2 = 0 units, so 1x original scale
 //  3 - 2 = 1 units, so 2x original scale
 //  4 - 2 = 2 units, so 3x original scale 
@@ -309,7 +280,10 @@ void onManipulatorUpdate(
 //  //  //return;
   //}
 
-  auto projectedPosition = projectCursor(manipulatorTarget, manipulatorTools.drawLine, manipulatorTools.clearLines, manipulatorTools.getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorState.manipulatorObject);
+  ProjectCursorDebugInfo projectCursorInfo{};
+  auto projectedPosition =  projectCursorPositionOntoAxis(projection, cameraViewMatrix, cursorPos, screensize,  manipulatorState.manipulatorObject, manipulatorTools.getPosition(manipulatorTarget), &projectCursorInfo);
+  drawProjectionVisualization(manipulatorTools.drawLine, projectCursorInfo);
+
   if (!manipulatorState.initialDragPosition.has_value()){
     manipulatorState.initialDragPosition = projectedPosition;
     manipulatorState.initialDragPositions = {};

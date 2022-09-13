@@ -86,3 +86,17 @@ void drawRotation(
   auto angleIndicator = rotationOrientation * (glm::normalize(glm::vec3(glm::cos(angle), glm::sin(angle), 0.f)) * maxDistance);
   drawLine(meanPosition, meanPosition + angleIndicator, GREEN);
 }
+
+bool drawDebugLines = true;
+void drawProjectionVisualization(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, ProjectCursorDebugInfo& projectCursorInfo){
+  drawHitMarker(drawLine, projectCursorInfo.intersectionPoint);
+  if (drawDebugLines){
+    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.intersectionPoint, RED);
+    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.projectedTarget, GREEN);
+    drawLine(projectCursorInfo.positionFrom, projectCursorInfo.target, BLUE);
+  
+    // directions
+    drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.selectDir, BLUE);
+    drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
+  }
+}

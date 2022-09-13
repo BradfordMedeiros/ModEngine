@@ -25,5 +25,6 @@ struct IdVec3Pair {
 void drawDirectionalLine(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 fromPos, glm::vec3 direction, LineColor color);
 void drawHitMarker(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, glm::vec3 position);
 void drawRotation(std::vector<IdVec3Pair> positions, glm::vec3 meanPosition, glm::quat rotationOrientation, glm::vec3 cameraPosition, glm::vec3 selectDir, glm::vec3 intersection, float angle, std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine);
+void drawProjectionVisualization(std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, ProjectCursorDebugInfo& projectCursorInfo);
 
 #endif
