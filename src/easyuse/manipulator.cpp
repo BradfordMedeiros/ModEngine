@@ -11,17 +11,6 @@ ManipulatorState createManipulatorState(){
   };
 }
 
-template <typename T, typename V>
-T findDragValue(std::vector<V> values, objid id){
-  for (auto &value : values){
-    if (value.id == id){
-      return value.value;
-    }
-  }
-  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
-  return glm::vec3(0.f, 0.f, 0.f);
-}
-
 
 objid getManipulatorId(ManipulatorState& manipulatorState){
   return manipulatorState.manipulatorId;
@@ -58,49 +47,6 @@ void onManipulatorMouseRelease(ManipulatorState& manipulatorState){
   manipulatorState.initialDragRotations = {};
 }
 
-//  2 - 2 = 0 units, so 1x original scale
-//  3 - 2 = 1 units, so 2x original scale
-//  4 - 2 = 2 units, so 3x original scale 
-// for negative
-// (-2) - (-2) = 0 units, so 1x original scale
-// (-3) - (-2) = -1 units, so 2x original scale
-glm::vec3 calcPositionDiff(ManipulatorState& manipulatorState, glm::vec3 projectedPosition, std::function<glm::vec3(objid)> getPosition, bool reverseOnMiddle){
-  auto manipulatorPosition = getPosition(manipulatorState.manipulatorId);
-  auto effectProjPos = projectedPosition;
-  auto effectInitialPos = manipulatorState.initialDragPosition.value();
-  if (reverseOnMiddle){
-    bool draggingMoreNegX = projectedPosition.x < manipulatorPosition.x;
-    bool draggingMoreNegY = projectedPosition.y < manipulatorPosition.y;
-    bool draggingMoreNegZ = projectedPosition.z < manipulatorPosition.z;
-    if (draggingMoreNegX){
-      effectProjPos.x *= -1;
-      effectInitialPos.x *= -1;
-    }
-    if (draggingMoreNegY){
-      effectProjPos.y *= -1;
-      effectInitialPos.y *= -1;
-    }
-    if (draggingMoreNegZ){
-      effectProjPos.z *= -1;
-      effectInitialPos.z *= -1;         
-    }
-  }
-  //std::cout << "draggin more neg: " << draggingMoreNegX << " " << draggingMoreNegY << " " << draggingMoreNegZ << std::endl
-  auto positionDiff = effectProjPos - effectInitialPos;  
-  return positionDiff;
-}
-
-glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(objid)> getPosition){
-  glm::vec3 positionSum(0.f, 0.f, 0.f);
-  for (auto targetId : targets){
-    auto position = getPosition(targetId);
-    positionSum.x += position.x;
-    positionSum.y += position.y;
-    positionSum.z += position.z;
-  }
-  return glm::vec3(positionSum.x / targets.size(), positionSum.y / targets.size(), positionSum.z / targets.size());
-}
-
 void handleTranslate(
   ManipulatorState& manipulatorState, 
   glm::vec3 projectedPosition,
@@ -132,13 +78,13 @@ void handleScale(
   ManipulatorOptions& options, ManipulatorTools& tools
 ){
   if (!options.snapManipulatorScales){
-    auto scaleFactor = calcPositionDiff(manipulatorState, projectedPosition, tools.getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
+    auto scaleFactor = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, tools.getPosition(manipulatorState.manipulatorId), true) + glm::vec3(1.f, 1.f, 1.f);
     for (auto &targetId : targets){
       auto relativeScale = scaleFactor *  findDragValue<glm::vec3, IdVec3Pair>(manipulatorState.initialDragScales, targetId);  
       tools.setScale(targetId, relativeScale);
     }
   }else{
-    auto positionDiff = calcPositionDiff(manipulatorState, projectedPosition, tools.getPosition, true);
+    auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, tools.getPosition(manipulatorState.manipulatorId), true);
     auto scaleFactor = tools.snapScale(positionDiff);
     if (options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
       auto vecLength = glm::length(scaleFactor);
@@ -190,7 +136,7 @@ void handleRotate(
   }
   ////////////////////////////
 
-  auto positionDiff = calcPositionDiff(manipulatorState, projectedPosition, tools.getPosition, false);
+  auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, tools.getPosition(manipulatorState.manipulatorId), false);
   auto xRotation = (positionDiff.x / MODPI) * 360;  // not quite right
   auto yRotation = (positionDiff.y / MODPI) * 360;  // not quite right
   auto zRotation = (positionDiff.z / MODPI) * 360;  // not quite right
@@ -307,7 +253,7 @@ void onManipulatorUpdate(
 
   float rotationAmount = 0.f;
   if (mode == ROTATE){
-    auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
+    auto meanPosition = calcMeanPosition(idToPositions(selectedObjs.selectedIds, manipulatorTools.getPosition));
     auto rotationOrientation = axisToOrientation(defaultAxis);
     auto selectDir = getCursorRayDirection(projection, cameraViewMatrix, cursorPos.x, cursorPos.y, screensize.x, screensize.y);
 
@@ -345,7 +291,7 @@ void onManipulatorUpdate(
     return;
   }
   if (mode == ROTATE){
-    auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
+    auto meanPosition = calcMeanPosition(idToPositions(selectedObjs.selectedIds, manipulatorTools.getPosition));
     auto rotationOrientation = axisToOrientation(defaultAxis);
     handleRotate(manipulatorState, meanPosition, rotationOrientation, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorState.manipulatorId, options, manipulatorTools, rotationAmount);
     return;

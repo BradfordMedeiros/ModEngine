@@ -100,3 +100,55 @@ void drawProjectionVisualization(std::function<void(glm::vec3, glm::vec3, LineCo
     drawDirectionalLine(drawLine, projectCursorInfo.positionFrom, projectCursorInfo.targetAxis, RED);
   }
 }
+
+////////////////////////////////////////////
+glm::vec3 calcMeanPosition(std::vector<IdVec3Pair> positions){
+  glm::vec3 positionSum(0.f, 0.f, 0.f);
+  for (auto posWithId : positions){
+    positionSum.x += posWithId.value.x;
+    positionSum.y += posWithId.value.y;
+    positionSum.z += posWithId.value.z;
+  }
+  return glm::vec3(positionSum.x / positions.size(), positionSum.y / positions.size(), positionSum.z / positions.size());
+}
+
+std::vector<IdVec3Pair> idToPositions(std::vector<objid>& targets, std::function<glm::vec3(objid)> getValue){
+  std::vector<IdVec3Pair> values;
+  for (auto &id : targets){
+    values.push_back(IdVec3Pair {
+      .id = id,
+      .value = getValue(id),
+    });
+  }
+  return values;
+}
+
+//  2 - 2 = 0 units, so 1x original scale
+//  3 - 2 = 1 units, so 2x original scale
+//  4 - 2 = 2 units, so 3x original scale 
+// for negative
+// (-2) - (-2) = 0 units, so 1x original scale
+// (-3) - (-2) = -1 units, so 2x original scale
+glm::vec3 calcPositionDiff(glm::vec3 effectInitialPos, glm::vec3 projectedPosition, glm::vec3 manipulatorPosition, bool reverseOnMiddle){
+  auto effectProjPos = projectedPosition;
+  if (reverseOnMiddle){
+    bool draggingMoreNegX = projectedPosition.x < manipulatorPosition.x;
+    bool draggingMoreNegY = projectedPosition.y < manipulatorPosition.y;
+    bool draggingMoreNegZ = projectedPosition.z < manipulatorPosition.z;
+    if (draggingMoreNegX){
+      effectProjPos.x *= -1;
+      effectInitialPos.x *= -1;
+    }
+    if (draggingMoreNegY){
+      effectProjPos.y *= -1;
+      effectInitialPos.y *= -1;
+    }
+    if (draggingMoreNegZ){
+      effectProjPos.z *= -1;
+      effectInitialPos.z *= -1;         
+    }
+  }
+  //std::cout << "draggin more neg: " << draggingMoreNegX << " " << draggingMoreNegY << " " << draggingMoreNegZ << std::endl
+  auto positionDiff = effectProjPos - effectInitialPos;  
+  return positionDiff;
+}
