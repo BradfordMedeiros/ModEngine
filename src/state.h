@@ -43,7 +43,7 @@ struct engineState {
 
   std::string additionalText;
  
-  ManipulatorState manipulatorState;
+  ManipulatorData manipulatorState;
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
   Axis manipulatorAxis;

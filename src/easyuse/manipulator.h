@@ -13,10 +13,7 @@ struct ManipulatorOptions {
   bool rotateSnapRelative;
   bool preserveRelativeScale;
 };
-struct ManipulatorSelection {
-  std::optional<objid> mainObj;
-  std::vector<objid> selectedIds;
-};  
+
 struct InitialDragRotation {
   objid id;
   glm::quat value;
@@ -28,7 +25,9 @@ struct ManipulatorUpdate {
 };
 
 
-struct ManipulatorState {
+struct ManipulatorData {
+  std::string state;
+
   objid manipulatorId;
   Axis manipulatorObject;
   std::optional<glm::vec3> initialDragPosition;
@@ -36,17 +35,14 @@ struct ManipulatorState {
   std::vector<IdVec3Pair> initialDragScales;
   std::vector<InitialDragRotation> initialDragRotations;
 };
-ManipulatorState createManipulatorState();
+ManipulatorData createManipulatorData();
 
-objid getManipulatorId(ManipulatorState& manipulatorState);
-void onManipulatorSelectItem(ManipulatorState& manipulatorState, objid selectedItem, std::string selectedItemName);
-void onManipulatorMouseRelease(ManipulatorState& manipulatorState);
+objid getManipulatorId(ManipulatorData& manipulatorState);
+void onManipulatorSelectItem(ManipulatorData& manipulatorState, objid selectedItem, std::string selectedItemName);
+void onManipulatorMouseRelease(ManipulatorData& manipulatorState);
 
 void onManipulatorUpdate(
-  ManipulatorState& manipulatorState,
-  std::function<ManipulatorSelection()> getSelectedIds,
-  std::function<objid(void)> makeManipulator,
-  std::function<void(objid)> removeObjectById,
+  ManipulatorData& manipulatorState,
   glm::mat4 projection,
   glm::mat4 cameraViewMatrix, 
   ManipulatorMode mode,

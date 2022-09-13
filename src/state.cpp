@@ -563,7 +563,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.activeCamera = 0,
     .cameraInterp = CamInterpolation { .shouldInterpolate = false },
 		.additionalText = "",
-    .manipulatorState = createManipulatorState(),
+    .manipulatorState = createManipulatorData(),
 		.enableManipulator = false,
 		.manipulatorMode = NONE,
 		.manipulatorAxis = NOAXIS,

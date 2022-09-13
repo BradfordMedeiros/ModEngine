@@ -1678,9 +1678,6 @@ int main(int argc, char* argv[]){
     
     onManipulatorUpdate(
       state.manipulatorState, 
-      onManipulatorSelected,
-      createManipulator,
-      removeObjectById,
       projectionFromLayer(layers.at(0)),
       view, 
       state.manipulatorMode, 
@@ -1721,6 +1718,9 @@ int main(int argc, char* argv[]){
         .clearLines = []() -> void {
           removeLinesByOwner(lineData, state.manipulatorLineId);
         },
+        .removeObjectById = removeObjectById,
+        .makeManipulator = createManipulator,
+        .getSelectedIds = onManipulatorSelected,
       }
     );
 

@@ -4,6 +4,11 @@
 #include "../common/util.h"
 #include "../scene/serialization.h"  
 
+struct ManipulatorSelection {
+  std::optional<objid> mainObj;
+  std::vector<objid> selectedIds;
+};  
+
 struct ManipulatorTools {
   std::function<glm::vec3(objid)> getPosition;
   std::function<void(objid, glm::vec3)> setPosition;
@@ -16,7 +21,11 @@ struct ManipulatorTools {
   std::function<glm::quat(glm::quat, Axis)> snapRotate;
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine;
   std::function<void()> clearLines;
+  std::function<void(objid)> removeObjectById; 
+  std::function<objid(void)> makeManipulator;
+  std::function<ManipulatorSelection()> getSelectedIds;
 };
+
 struct IdVec3Pair {
   objid id;
   glm::vec3 value;
