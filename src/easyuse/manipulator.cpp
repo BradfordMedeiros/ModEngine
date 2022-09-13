@@ -1,70 +1,62 @@
 #include "./manipulator.h"
 
-auto manipulatorId = 0;
-Axis manipulatorObject = NOAXIS;
-
-std::optional<glm::vec3> initialDragPosition = std::nullopt;
-
-struct InitialDragScale {
-  objid id;
-  glm::vec3 scale;
-};
-std::vector<InitialDragScale> initialDragScales = {};
-
-struct InitialDragRotation {
-  objid id;
-  glm::quat rotation;
-};
-std::vector<InitialDragRotation> initialDragRotations = {};
-
-struct InitialDragPosition {
-  objid id;
-  glm::vec3 position;
-};
-std::vector<InitialDragPosition> initialDragPositions = {};
-
-objid getManipulatorId(){
-  return manipulatorId;
+ManipulatorState createManipulatorState(){
+  return ManipulatorState {
+    .manipulatorId = 0,
+    .manipulatorObject = NOAXIS,
+    .initialDragPosition = std::nullopt,
+    .initialDragPositions = {},
+    .initialDragScales = {},
+    .initialDragRotations = {},
+  };
 }
-void unspawnManipulator(std::function<void(objid)> removeObjectById){
-  if (manipulatorId != 0){
-    removeObjectById(manipulatorId);
+
+template <typename T, typename V>
+T findDragValue(std::vector<V> values, objid id){
+  for (auto &value : values){
+    if (value.id == id){
+      return value.value;
+    }
   }
-  manipulatorId = 0;
+  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
+  return glm::vec3(0.f, 0.f, 0.f);
 }
 
-void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName){
-  auto isTargetManipulator =  selectedItem == manipulatorId;
+
+objid getManipulatorId(ManipulatorState& manipulatorState){
+  return manipulatorState.manipulatorId;
+}
+void unspawnManipulator(ManipulatorState& manipulatorState, std::function<void(objid)> removeObjectById){
+  if (manipulatorState.manipulatorId != 0){
+    removeObjectById(manipulatorState.manipulatorId);
+  }
+  manipulatorState.manipulatorId = 0;
+}
+
+void onManipulatorSelectItem(ManipulatorState& manipulatorState, objid selectedItem, std::string selectedItemName){
+  auto isTargetManipulator =  selectedItem == manipulatorState.manipulatorId;
   if (isTargetManipulator){
     modlog("manipulator", std::string("item name is: ") + selectedItemName);
     if (selectedItemName == "manipulator/xaxis"){
       modlog("manipulator", "setting manipulator to xaxis");
-      manipulatorObject = XAXIS;
+      manipulatorState.manipulatorObject = XAXIS;
     }else if (selectedItemName == "manipulator/yaxis"){
       modlog("manipulator", "setting manipulator to yaxis");
-      manipulatorObject = YAXIS;
+      manipulatorState.manipulatorObject = YAXIS;
     }else if (selectedItemName == "manipulator/zaxis"){
       modlog("manipulator", "setting manipulator to zaxis");
-      manipulatorObject = ZAXIS;
+      manipulatorState.manipulatorObject = ZAXIS;
     }
     return;
   }
 }
-void onManipulatorMouseRelease(){
-  manipulatorObject = NOAXIS;
+void onManipulatorMouseRelease(ManipulatorState& manipulatorState){
+  manipulatorState.manipulatorObject = NOAXIS;
   std::cout << "reset initial drag position" << std::endl;
-  initialDragPosition = std::nullopt;
-  initialDragScales = {};
-  initialDragRotations = {};
+  manipulatorState.initialDragPosition = std::nullopt;
+  manipulatorState.initialDragScales = {};
+  manipulatorState.initialDragRotations = {};
 }
-
-struct ManipulatorUpdate {
-  glm::vec3 manipulatorNew;
-  glm::vec3 targetNew;
-  bool shouldSet;
-};
-
-
 
 bool drawDebugLines = true;
 glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine, std::function<void()> clearLines, std::function<glm::vec3(objid)> getPosition, glm::mat4 projection, glm::mat4 view, glm::vec2 cursorPos, glm::vec2 screensize, Axis axis){
@@ -101,10 +93,10 @@ glm::vec3 projectCursor(objid manipulatorTarget, std::function<void(glm::vec3, g
 // for negative
 // (-2) - (-2) = 0 units, so 1x original scale
 // (-3) - (-2) = -1 units, so 2x original scale
-glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(objid)> getPosition, bool reverseOnMiddle){
-  auto manipulatorPosition = getPosition(manipulatorId);
+glm::vec3 calcPositionDiff(ManipulatorState& manipulatorState, glm::vec3 projectedPosition, std::function<glm::vec3(objid)> getPosition, bool reverseOnMiddle){
+  auto manipulatorPosition = getPosition(manipulatorState.manipulatorId);
   auto effectProjPos = projectedPosition;
-  auto effectInitialPos = initialDragPosition.value();
+  auto effectInitialPos = manipulatorState.initialDragPosition.value();
   if (reverseOnMiddle){
     bool draggingMoreNegX = projectedPosition.x < manipulatorPosition.x;
     bool draggingMoreNegY = projectedPosition.y < manipulatorPosition.y;
@@ -127,34 +119,6 @@ glm::vec3 calcPositionDiff(glm::vec3 projectedPosition, std::function<glm::vec3(
   return positionDiff;
 }
 
-glm::vec3 findDragScale(objid id){
-  for (auto &dragScale : initialDragScales){
-    if (dragScale.id == id){
-      return dragScale.scale;
-    }
-  }
-  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
-  return glm::vec3(0.f, 0.f, 0.f);
-}
-glm::quat findDragRotation(objid id){
-  for (auto &dragRotation : initialDragRotations){
-    if (dragRotation.id == id){
-      return dragRotation.rotation;
-    }
-  }
-  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
-  return glm::identity<glm::quat>();
-}
-glm::vec3 findDragPosition(objid id){
-  for (auto &dragPosition : initialDragPositions){
-    if (dragPosition.id == id){
-      return dragPosition.position;
-    }
-  }
-  modassert(false, std::string("could not find manipulatorTarget = " + std::to_string(id)));
-  return glm::vec3(0.f, 0.f, 0.f);
-}
-
 glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(objid)> getPosition){
   glm::vec3 positionSum(0.f, 0.f, 0.f);
   for (auto targetId : targets){
@@ -167,6 +131,7 @@ glm::vec3 calcMeanPosition(std::vector<objid>& targets, std::function<glm::vec3(
 }
 
 void handleTranslate(
+  ManipulatorState& manipulatorState, 
   glm::vec3 projectedPosition,
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
   ManipulatorOptions& options, ManipulatorTools& tools
@@ -190,18 +155,19 @@ void handleTranslate(
 }
 
 void handleScale(
+  ManipulatorState& manipulatorState,
   glm::vec3 projectedPosition,
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
   ManipulatorOptions& options, ManipulatorTools& tools
 ){
   if (!options.snapManipulatorScales){
-    auto scaleFactor = calcPositionDiff(projectedPosition, tools.getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
+    auto scaleFactor = calcPositionDiff(manipulatorState, projectedPosition, tools.getPosition, true) + glm::vec3(1.f, 1.f, 1.f);
     for (auto &targetId : targets){
-      auto relativeScale = scaleFactor *  findDragScale(targetId);  
+      auto relativeScale = scaleFactor *  findDragValue<glm::vec3, IdVec3Pair>(manipulatorState.initialDragScales, targetId);  
       tools.setScale(targetId, relativeScale);
     }
   }else{
-    auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, true);
+    auto positionDiff = calcPositionDiff(manipulatorState, projectedPosition, tools.getPosition, true);
     auto scaleFactor = tools.snapScale(positionDiff);
     if (options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
       auto vecLength = glm::length(scaleFactor);
@@ -214,7 +180,7 @@ void handleScale(
     
     for (auto &targetId : targets){
       std::cout << "scale factor: " << print(scaleFactor) << std::endl;
-      auto initialDragScale = findDragScale(targetId);
+      auto initialDragScale = findDragValue<glm::vec3, IdVec3Pair>(manipulatorState.initialDragScales, targetId);
       auto relativeScale = scaleFactor *  initialDragScale + initialDragScale;
       tools.setScale(targetId, relativeScale);
     }
@@ -222,6 +188,7 @@ void handleScale(
 }
 
 void handleRotate(
+  ManipulatorState& manipulatorState,
   glm::vec3 meanPosition, glm::quat rotationOrientation,
   glm::vec3 projectedPosition,
   std::vector<objid> targets, objid manipulatorTarget, objid manipulatorId, 
@@ -237,8 +204,12 @@ void handleRotate(
     for (auto &targetId : targets){
       auto newTargetRotPos = rotateOverAxis(
         //RotationPosition { .position = tools.getPosition(targetId), .rotation = tools.getRotation(targetId) },
-        RotationPosition { .position = findDragPosition(targetId), .rotation = findDragRotation(targetId) },
-        RotationPosition { .position = meanPosition, .rotation = rotationOrientation },
+          RotationPosition { 
+            .position = findDragValue<glm::vec3, IdVec3Pair>(manipulatorState.initialDragPositions, targetId), 
+            .rotation = findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId),
+          },
+          RotationPosition { .position = meanPosition, .rotation = rotationOrientation 
+        },
         rotationAmount
       );
       tools.setPosition(targetId, newTargetRotPos.position);
@@ -248,7 +219,7 @@ void handleRotate(
   }
   ////////////////////////////
 
-  auto positionDiff = calcPositionDiff(projectedPosition, tools.getPosition, false);
+  auto positionDiff = calcPositionDiff(manipulatorState, projectedPosition, tools.getPosition, false);
   auto xRotation = (positionDiff.x / MODPI) * 360;  // not quite right
   auto yRotation = (positionDiff.y / MODPI) * 360;  // not quite right
   auto zRotation = (positionDiff.z / MODPI) * 360;  // not quite right
@@ -257,42 +228,44 @@ void handleRotate(
     for (auto &targetId : targets){
       tools.setRotation(targetId,
         setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
-        findDragRotation(targetId)
+        findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId) 
       );
     }
   }else if (options.rotateSnapRelative){
-    auto newRotation = tools.snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorObject) ;
+    auto newRotation = tools.snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorState.manipulatorObject) ;
     for (auto &targetId : targets){
-      tools.setRotation(targetId, newRotation * findDragRotation(targetId));
+      tools.setRotation(targetId, newRotation * findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId) );
     }
   }else{
     auto newRotation = setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) ;
     for (auto &targetId : targets){
-      auto snappedRotation = tools.snapRotate( newRotation * findDragRotation(targetId), manipulatorObject);
+      auto snappedRotation = tools.snapRotate(newRotation * findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId), manipulatorState.manipulatorObject);
       tools.setRotation(targetId, snappedRotation);
     }
   }
 }
 
 void handleShowManipulator(
+  ManipulatorState& manipulatorState,
   ManipulatorSelection& selectedObjs, 
   std::function<void(objid, glm::vec3)> setPosition, std::function<glm::vec3(objid)> getPosition, 
   std::function<void(objid)> removeObjectById, std::function<objid(void)> makeManipulator,
   ManipulatorMode mode
 ){
   if (!selectedObjs.mainObj.has_value() || (mode == ROTATE && selectedObjs.selectedIds.size() > 1)){
-    unspawnManipulator(removeObjectById);
+    unspawnManipulator(manipulatorState, removeObjectById);
   }
   else if (selectedObjs.mainObj.has_value()){
-    auto manipulatorExists = manipulatorId != 0;
+    auto manipulatorExists = manipulatorState.manipulatorId != 0;
     if (!manipulatorExists){
-      manipulatorId = makeManipulator();
+      manipulatorState.manipulatorId = makeManipulator();
     }
-    setPosition(manipulatorId, getPosition(selectedObjs.mainObj.value()));
+    setPosition(manipulatorState.manipulatorId, getPosition(selectedObjs.mainObj.value()));
   }
 }
 
 void onManipulatorUpdate(
+  ManipulatorState& manipulatorState,
   std::function<ManipulatorSelection()> getSelectedIds,
   std::function<objid(void)> makeManipulator,
   std::function<void(objid)> removeObjectById,
@@ -311,7 +284,7 @@ void onManipulatorUpdate(
   manipulatorTools.clearLines();
 
   auto selectedObjs = getSelectedIds();
-  handleShowManipulator(selectedObjs, manipulatorTools.setPosition, manipulatorTools.getPosition, removeObjectById, makeManipulator, mode);
+  handleShowManipulator(manipulatorState, selectedObjs, manipulatorTools.setPosition, manipulatorTools.getPosition, removeObjectById, makeManipulator, mode);
   if (!selectedObjs.mainObj.has_value()){
     return;
   }
@@ -336,24 +309,24 @@ void onManipulatorUpdate(
 //  //  //return;
   //}
 
-  auto projectedPosition = projectCursor(manipulatorTarget, manipulatorTools.drawLine, manipulatorTools.clearLines, manipulatorTools.getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorObject);
-  if (!initialDragPosition.has_value()){
-    initialDragPosition = projectedPosition;
-    initialDragPositions = {};
-    initialDragScales = {};
-    initialDragRotations = {};
+  auto projectedPosition = projectCursor(manipulatorTarget, manipulatorTools.drawLine, manipulatorTools.clearLines, manipulatorTools.getPosition, projection, cameraViewMatrix, cursorPos, screensize, manipulatorState.manipulatorObject);
+  if (!manipulatorState.initialDragPosition.has_value()){
+    manipulatorState.initialDragPosition = projectedPosition;
+    manipulatorState.initialDragPositions = {};
+    manipulatorState.initialDragScales = {};
+    manipulatorState.initialDragRotations = {};
     for (auto &selectedId : selectedObjs.selectedIds){
-      initialDragPositions.push_back(InitialDragPosition{
+      manipulatorState.initialDragPositions.push_back(IdVec3Pair{
         .id = selectedId,
-        .position = manipulatorTools.getPosition(selectedId),
+        .value = manipulatorTools.getPosition(selectedId),
       });
-      initialDragScales.push_back(InitialDragScale {
+      manipulatorState.initialDragScales.push_back(IdVec3Pair {
         .id = selectedId,
-        .scale = manipulatorTools.getScale(selectedId)
+        .value = manipulatorTools.getScale(selectedId)
       });
-      initialDragRotations.push_back(InitialDragRotation {
+      manipulatorState.initialDragRotations.push_back(InitialDragRotation {
         .id = selectedId,
-        .rotation = manipulatorTools.getRotation(selectedId)
+        .value = manipulatorTools.getRotation(selectedId)
       });
     }
   }
@@ -390,32 +363,17 @@ void onManipulatorUpdate(
 
 
   if (mode == TRANSLATE){
-    handleTranslate(projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
+    handleTranslate(manipulatorState, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorState.manipulatorId, options, manipulatorTools);
     return;
   }
   if (mode == SCALE){
-    handleScale(projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools);
+    handleScale(manipulatorState, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorState.manipulatorId, options, manipulatorTools);
     return;
   }
   if (mode == ROTATE){
     auto meanPosition = calcMeanPosition(selectedObjs.selectedIds, manipulatorTools.getPosition);
     auto rotationOrientation = axisToOrientation(defaultAxis);
-    handleRotate(meanPosition, rotationOrientation, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorId, options, manipulatorTools, rotationAmount);
+    handleRotate(manipulatorState, meanPosition, rotationOrientation, projectedPosition, selectedObjs.selectedIds, manipulatorTarget, manipulatorState.manipulatorId, options, manipulatorTools, rotationAmount);
     return;
   }
 }
-
-
-/*
-
-glm::vec3 valueForIdVec3(std::vector<IdVec3Pair> values, objid id){
-  for (auto &value : values){
-    if (value.id == id){
-      return value.value;
-    }
-  }
-  modassert(false, std::string("no id found for: " + std::to_string(id)));
-  return glm::vec3(0.f, 0.f, 0.f);
-}
-
-*/

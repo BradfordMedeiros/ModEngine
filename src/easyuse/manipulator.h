@@ -17,12 +17,33 @@ struct ManipulatorSelection {
   std::optional<objid> mainObj;
   std::vector<objid> selectedIds;
 };  
+struct InitialDragRotation {
+  objid id;
+  glm::quat value;
+};
+struct ManipulatorUpdate {
+  glm::vec3 manipulatorNew;
+  glm::vec3 targetNew;
+  bool shouldSet;
+};
 
-objid getManipulatorId();
-void onManipulatorSelectItem(objid selectedItem, std::string selectedItemName);
-void onManipulatorMouseRelease();
+
+struct ManipulatorState {
+  objid manipulatorId;
+  Axis manipulatorObject;
+  std::optional<glm::vec3> initialDragPosition;
+  std::vector<IdVec3Pair> initialDragPositions;
+  std::vector<IdVec3Pair> initialDragScales;
+  std::vector<InitialDragRotation> initialDragRotations;
+};
+ManipulatorState createManipulatorState();
+
+objid getManipulatorId(ManipulatorState& manipulatorState);
+void onManipulatorSelectItem(ManipulatorState& manipulatorState, objid selectedItem, std::string selectedItemName);
+void onManipulatorMouseRelease(ManipulatorState& manipulatorState);
 
 void onManipulatorUpdate(
+  ManipulatorState& manipulatorState,
   std::function<ManipulatorSelection()> getSelectedIds,
   std::function<objid(void)> makeManipulator,
   std::function<void(objid)> removeObjectById,

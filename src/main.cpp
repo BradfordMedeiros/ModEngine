@@ -288,9 +288,9 @@ void selectItem(objid selectedId, int layerSelectIndex){
   auto selectedObject =  getGameObject(world, idToUse);
 
   if (layerSelectIndex >= 0){
-    onManipulatorSelectItem(idToUse, selectedSubObj.name);
+    onManipulatorSelectItem(state.manipulatorState, idToUse, selectedSubObj.name);
   }
-  if (idToUse == getManipulatorId()){
+  if (idToUse == getManipulatorId(state.manipulatorState)){
     return;
   }
   applyPainting(selectedId);
@@ -1605,7 +1605,7 @@ int main(int argc, char* argv[]){
     auto shouldSelectItem = selectItemCalled || (state.editor.forceSelectIndex != 0);
     state.editor.forceSelectIndex = 0;
 
-    if ((selectTargetId != getManipulatorId()) && shouldSelectItem){
+    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem){
       std::cout << "INFO: select item called" << std::endl;
 
       std::cout << "select target id: " << selectTargetId << std::endl;
@@ -1677,6 +1677,7 @@ int main(int argc, char* argv[]){
     }
     
     onManipulatorUpdate(
+      state.manipulatorState, 
       onManipulatorSelected,
       createManipulator,
       removeObjectById,

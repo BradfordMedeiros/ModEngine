@@ -121,7 +121,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
     selectItemCalled = true;
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
-    onManipulatorMouseRelease();
+    onManipulatorMouseRelease(state.manipulatorState);
     setNoActiveObj(state.editor);
   }
 

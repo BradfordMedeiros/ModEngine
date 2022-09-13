@@ -6,6 +6,7 @@
 #include "./common/util.h"
 #include "./easyuse/editor.h"
 #include "./easyuse/easy_use.h"
+#include "./easyuse/manipulator.h"
 #include "./scene/scene.h"
 
 enum RENDER_MODE { RENDER_FINAL, RENDER_PORTAL, RENDER_PAINT, RENDER_DEPTH, RENDER_BLOOM, RENDER_GRAPHS };
@@ -42,6 +43,7 @@ struct engineState {
 
   std::string additionalText;
  
+  ManipulatorState manipulatorState;
   bool enableManipulator;
   ManipulatorMode manipulatorMode;
   Axis manipulatorAxis;
