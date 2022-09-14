@@ -703,8 +703,9 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
     auto obj = getGameObject(world, selectedIndex);
     position = print(obj.transformation.position);
     scale = print(obj.transformation.scale);
-    rotation = print(obj.transformation.rotation);
+    rotation = serializeQuat(obj.transformation.rotation);
   }
+
   drawTextNdi("position: " + position, uiXOffset, uiYOffset + offsetPerLine * 6, state.fontsize);
   drawTextNdi("scale: " + scale, uiXOffset, uiYOffset + offsetPerLine * 7, state.fontsize);
   drawTextNdi("rotation: " + rotation, uiXOffset, uiYOffset + offsetPerLine * 8, state.fontsize);
