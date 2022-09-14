@@ -6,13 +6,7 @@
 #include "../translations.h"
 #include "./manipulator_drawing.h"
 
-struct ManipulatorOptions {
-  bool snapManipulatorPositions;
-  bool snapManipulatorScales;
-  bool snapManipulatorAngles;
-  bool rotateSnapRelative;
-  bool preserveRelativeScale;
-};
+
 
 struct InitialDragRotation {
   objid id;
@@ -24,21 +18,48 @@ struct ManipulatorUpdate {
   bool shouldSet;
 };
 
+struct InitialTransformData {
+  objid id;
+  Transformation transform;
+};
 
 struct ManipulatorData {
   std::string state;
+  bool mouseClickedLastFrame;
+  bool mouseReleasedLastFrame;
 
   objid manipulatorId;
   Axis manipulatorObject;
+
   std::optional<glm::vec3> initialDragPosition;
-  std::vector<IdVec3Pair> initialDragPositions;
-  std::vector<IdVec3Pair> initialDragScales;
-  std::vector<InitialDragRotation> initialDragRotations;
+  std::vector<InitialTransformData> initialTransforms;
 };
+
+struct ManipulatorOptions {
+  bool snapManipulatorPositions;
+  bool snapManipulatorScales;
+  bool snapManipulatorAngles;
+  bool rotateSnapRelative;
+  bool preserveRelativeScale;
+};
+struct ManipulatorUpdateInfo {
+  glm::mat4 projection;
+  glm::mat4 cameraViewMatrix; 
+  ManipulatorMode mode;
+  Axis defaultAxis;
+  float mouseX; 
+  float mouseY;
+  glm::vec2 cursorPos;
+  glm::vec2 screensize;
+  ManipulatorOptions options;
+  ManipulatorSelection selectedObjs;
+};
+
 ManipulatorData createManipulatorData();
 
 objid getManipulatorId(ManipulatorData& manipulatorState);
 void onManipulatorSelectItem(ManipulatorData& manipulatorState, objid selectedItem, std::string selectedItemName);
+void onManipulatorMouseDown(ManipulatorData& manipulatorState);
 void onManipulatorMouseRelease(ManipulatorData& manipulatorState);
 
 void onManipulatorUpdate(

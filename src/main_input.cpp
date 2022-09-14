@@ -119,6 +119,7 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
+    onManipulatorMouseDown(state.manipulatorState);
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE){
     onManipulatorMouseRelease(state.manipulatorState);
