@@ -178,6 +178,13 @@ void visualizeSubrotations(ManipulatorTools& tools, ManipulatorUpdateInfo& updat
   drawRotation(positions, rotateInfo.meanPosition, rotateInfo.rotationOrientation, rotateInfo.cameraPosition, rotateInfo.selectDir, rotateInfo.intersection, rotateInfo.rotationAmount, tools.drawLine);
 }
 
+void updateManipulatorToCurrentObj(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
+  auto manipulatorId = manipulatorState.manipulatorId;
+  auto selectedObjs = tools.getSelectedIds();
+  modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
+}
+
 std::vector<ManipulatorState> manipulatorStates = {
   ManipulatorState {
     .state = "idle",
@@ -190,7 +197,7 @@ std::vector<ManipulatorState> manipulatorStates = {
   },
   ManipulatorState {
     .state = "translateIdle",
-    .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {},
+    .onState = updateManipulatorToCurrentObj,
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "translateMode", .transition = "axisSelected", .fn = manipulatorDoNothing },
@@ -226,7 +233,7 @@ std::vector<ManipulatorState> manipulatorStates = {
   },
   ManipulatorState {
     .state = "scaleIdle",
-    .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {},
+    .onState = updateManipulatorToCurrentObj,
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "scaleMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
