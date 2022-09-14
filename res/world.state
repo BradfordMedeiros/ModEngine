@@ -35,7 +35,7 @@ rendering:fontsize:6
 
 
 ### input stuff ###
-mouse:cursor:capture   # normal, hidden, capture
+mouse:cursor:normal   # normal, hidden, capture
 
 #window:name:ModEngine Editor
 #window:icon:./res/textures/wood.jpg
@@ -54,7 +54,7 @@ tools:manipulator-axis:x
 #tools:snap-position:false
 #tools:snap-scale:false
 #tools:snap-angles:false
-#tools:rotate-relative:false
+tools:rotate-relative:false
 
 #editor:snapscale-index:0
 #editor:snapangle-index:10

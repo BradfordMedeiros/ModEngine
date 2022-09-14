@@ -297,11 +297,15 @@ std::vector<ManipulatorState> manipulatorStates = {
     .state = "rotateMode",
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
         modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
-        auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
+        modassert(!update.options.rotateSnapRelative, "snap relative not yet supported");
 
+        auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
         float rotationDiff = rotateInfo.rotationAmount - manipulatorState.rotationAmount;
-        std::cout << "rotation diff: " << rotationDiff << std::endl;
         visualizeSubrotations(tools, update, rotateInfo);
+
+        std::optional<std::function<glm::quat(glm::quat)>> snapFn = !update.options.snapManipulatorAngles ? std::optional<std::function<glm::quat(glm::quat)>>(std::nullopt) : [&update, &tools](glm::quat rotation) -> glm::quat {
+          return tools.snapRotate(rotation, update.defaultAxis);
+        };
 
         for (auto &targetId : update.selectedObjs.selectedIds){
           auto newTargetRotPos = rotateOverAxis(
@@ -309,41 +313,13 @@ std::vector<ManipulatorState> manipulatorStates = {
                 .position = getInitialTransformation(manipulatorState, targetId).position, 
                 .rotation = getInitialTransformation(manipulatorState, targetId).rotation,
               },
-              RotationPosition { .position = rotateInfo.meanPosition, .rotation = rotateInfo.rotationOrientation 
-            },
-            rotationDiff
+              RotationPosition { .position = rotateInfo.meanPosition, .rotation = rotateInfo.rotationOrientation },
+            rotationDiff,
+            snapFn
           );
           tools.setPosition(targetId, newTargetRotPos.position);
           tools.setRotation(targetId, newTargetRotPos.rotation);
         }
-        return;
-      
-//  ////////////////////////////
-//
-//  auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, tools.getPosition(manipulatorState.manipulatorId), false);
-//  auto xRotation = (positionDiff.x / MODPI) * 360;  // not quite right
-//  auto yRotation = (positionDiff.y / MODPI) * 360;  // not quite right
-//  auto zRotation = (positionDiff.z / MODPI) * 360;  // not quite right
-//
-//  if (!options.snapManipulatorAngles){
-//    for (auto &targetId : targets){
-//      tools.setRotation(targetId,
-//        setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) *
-//        findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId) 
-//      );
-//    }
-//  }else if (options.rotateSnapRelative){
-//    auto newRotation = tools.snapRotate(setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f), manipulatorState.manipulatorObject) ;
-//    for (auto &targetId : targets){
-//      tools.setRotation(targetId, newRotation * findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId) );
-//    }
-//  }else{
-//    auto newRotation = setFrontDelta(glm::identity<glm::quat>(), yRotation, xRotation, zRotation, 0.01f) ;
-//    for (auto &targetId : targets){
-//      auto snappedRotation = tools.snapRotate(newRotation * findDragValue<glm::quat, InitialDragRotation>(manipulatorState.initialDragRotations, targetId), manipulatorState.manipulatorObject);
-//      tools.setRotation(targetId, snappedRotation);
-//    }
-//  }*/
     },
     .nextStates = {
       ManipulatorNextState { .nextState = "rotateIdle", .transition = "mouseUp", .fn = manipulatorDoNothing },
