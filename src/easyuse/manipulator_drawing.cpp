@@ -41,6 +41,7 @@ void drawRotationCircle(std::function<void(glm::vec3, glm::vec3, LineColor)> dra
   drawLine(lastPos, firstPos, RED);
 }
 
+float circleSizeFor1Element = 5.f;
 void drawRotation(
 	std::vector<IdVec3Pair> positions, 
 	glm::vec3 meanPosition, 
@@ -62,6 +63,9 @@ void drawRotation(
       }
       drawRotationCircle(drawLine, meanPosition, rotationOrientation, distanceToTarget);
     }
+  }else{
+    maxDistance = circleSizeFor1Element;
+    drawRotationCircle(drawLine, meanPosition, rotationOrientation, circleSizeFor1Element);
   }
 
   auto lineAmount = rotationOrientation * glm::vec3(0, 0.f, -5.f);

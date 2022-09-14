@@ -180,6 +180,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "translateMode", .transition = "axisSelected", .fn = manipulatorDoNothing },
       ManipulatorNextState { .nextState = "scaleIdle", .transition = "gotoScaleIdle", .fn = manipulatorDoNothing },
+      ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExist },
     },
   },
   ManipulatorState {
@@ -206,7 +207,6 @@ std::vector<ManipulatorState> manipulatorStates = {
     },
     .nextStates = {
        ManipulatorNextState { .nextState = "translateIdle", .transition = "axisReleased", .fn = manipulatorDoNothing },
-       ManipulatorNextState { .nextState = "scaleIdle", .transition = "axisReleased", .fn = manipulatorDoNothing },
     },
   },
   ManipulatorState {
@@ -216,6 +216,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "scaleMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
       ManipulatorNextState { .nextState = "translateIdle", .transition = "gotoTranslateIdle", .fn = manipulatorDoNothing },
+      ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExist },
     },
   },
   ManipulatorState {
@@ -276,6 +277,8 @@ std::vector<ManipulatorState> manipulatorStates = {
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorDoNothing },
       ManipulatorNextState { .nextState = "rotateMode", .transition = "mouseDown", .fn = manipulatorPopulateInitialPositions },
+      ManipulatorNextState { .nextState = "scaleIdle", .transition = "gotoScaleIdle", .fn = manipulatorEnsureExists },
+      ManipulatorNextState { .nextState = "translateIdle", .transition = "gotoTranslateIdle", .fn = manipulatorEnsureExists },
     },
   },
   ManipulatorState {
@@ -286,8 +289,6 @@ std::vector<ManipulatorState> manipulatorStates = {
         //std::cout << "rotating: " << rotationAmount << std::endl;
         //std::cout << "selected: " << print(update.selectedObjs) << std::endl;
         auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
-        glm::vec3 meanPosition(0.f, 0.f, 0.f);
-        auto rotationOrientation = axisToOrientation(update.defaultAxis);
 
         std::vector<IdVec3Pair> positions;
         for (auto &id : update.selectedObjs.selectedIds){
