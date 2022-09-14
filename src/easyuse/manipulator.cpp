@@ -3,13 +3,16 @@
 ManipulatorData createManipulatorData(){
   return ManipulatorData {
     .state = "idle",
+    .mouseClickedLastFrame = false,
     .mouseReleasedLastFrame = false,
+    .selectedItemLastFrame = false,
 
     .manipulatorId = 0,
     .manipulatorObject = NOAXIS,
 
     .initialDragPosition = std::nullopt,
     .initialTransforms = {},
+    .rotationAmount = 0.f,
 
   };
 }
@@ -34,6 +37,7 @@ void onManipulatorSelectItem(ManipulatorData& manipulatorState, objid selectedIt
       manipulatorState.manipulatorObject = ZAXIS;
     }
   }
+  manipulatorState.selectedItemLastFrame = true;
 }
 
 void onManipulatorMouseDown(ManipulatorData& manipulatorState){
@@ -163,6 +167,17 @@ RotateInfo calcRotateInfo(ManipulatorData& manipulatorState, ManipulatorTools& t
   };
 }
 
+void visualizeSubrotations(ManipulatorTools& tools, ManipulatorUpdateInfo& update, RotateInfo& rotateInfo){
+  std::vector<IdVec3Pair> positions;
+  for (auto &id : update.selectedObjs.selectedIds){
+    positions.push_back(IdVec3Pair{
+      .id = id,
+      .value = tools.getPosition(id),
+    });
+  }
+  drawRotation(positions, rotateInfo.meanPosition, rotateInfo.rotationOrientation, rotateInfo.cameraPosition, rotateInfo.selectDir, rotateInfo.intersection, rotateInfo.rotationAmount, tools.drawLine);
+}
+
 std::vector<ManipulatorState> manipulatorStates = {
   ManipulatorState {
     .state = "idle",
@@ -247,7 +262,6 @@ std::vector<ManipulatorState> manipulatorStates = {
           auto compLength = glm::sqrt(vecLength * vecLength / 3.f);  // because sqrt(x^2 + y^2 + z^2) =  sqrt(3x^2) = veclength  
           scaleFactor = glm::vec3(compLength * (negX ? -1.f : 1.f), compLength * (negY ? -1.f : 1.f), compLength * (negZ ? -1.f : 1.f));
         }
-        //
         for (auto &targetId : update.selectedObjs.selectedIds){
           std::cout << "scale factor: " << print(scaleFactor) << std::endl;
           auto initialDragScale = getInitialTransformation(manipulatorState, targetId).scale; 
@@ -265,14 +279,8 @@ std::vector<ManipulatorState> manipulatorStates = {
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
       modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
       auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
-      std::vector<IdVec3Pair> positions;
-      for (auto &id : update.selectedObjs.selectedIds){
-        positions.push_back(IdVec3Pair{
-          .id = id,
-          .value = tools.getPosition(id),
-        });
-      }
-      drawRotation(positions, rotateInfo.meanPosition, rotateInfo.rotationOrientation, rotateInfo.cameraPosition, rotateInfo.selectDir, rotateInfo.intersection, rotateInfo.rotationAmount, tools.drawLine);
+      manipulatorState.rotationAmount = rotateInfo.rotationAmount;
+      visualizeSubrotations(tools, update, rotateInfo);
     },
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorDoNothing },
@@ -285,19 +293,11 @@ std::vector<ManipulatorState> manipulatorStates = {
     .state = "rotateMode",
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
         modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
-        //modlog("manipulator", std::string("rotation mean position: ") + print(meanPosition));
-        //std::cout << "rotating: " << rotationAmount << std::endl;
-        //std::cout << "selected: " << print(update.selectedObjs) << std::endl;
         auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
 
-        std::vector<IdVec3Pair> positions;
-        for (auto &id : update.selectedObjs.selectedIds){
-          positions.push_back(IdVec3Pair{
-            .id = id,
-            .value = tools.getPosition(id),
-          });
-        }
-        drawRotation(positions, rotateInfo.meanPosition, rotateInfo.rotationOrientation, rotateInfo.cameraPosition, rotateInfo.selectDir, rotateInfo.intersection, rotateInfo.rotationAmount, tools.drawLine);
+        float rotationDiff = rotateInfo.rotationAmount - manipulatorState.rotationAmount;
+        std::cout << "rotation diff: " << rotationDiff << std::endl;
+        visualizeSubrotations(tools, update, rotateInfo);
 
         for (auto &targetId : update.selectedObjs.selectedIds){
           auto newTargetRotPos = rotateOverAxis(
@@ -307,7 +307,7 @@ std::vector<ManipulatorState> manipulatorStates = {
               },
               RotationPosition { .position = rotateInfo.meanPosition, .rotation = rotateInfo.rotationOrientation 
             },
-            rotateInfo.rotationAmount
+            rotationDiff
           );
           tools.setPosition(targetId, newTargetRotPos.position);
           tools.setRotation(targetId, newTargetRotPos.rotation);
@@ -343,6 +343,7 @@ std::vector<ManipulatorState> manipulatorStates = {
     },
     .nextStates = {
       ManipulatorNextState { .nextState = "rotateIdle", .transition = "mouseUp", .fn = manipulatorDoNothing },
+      ManipulatorNextState { .nextState = "rotateIdle", .transition = "itemSelected", .fn = manipulatorDoNothing },
     },
   },
 };
@@ -443,9 +444,10 @@ void onManipulatorUpdate(
     manipulatorHandleTransition(manipulatorState, manipulatorTools, updateInfo, "mouseDown");
   }
 
+  if (manipulatorState.selectedItemLastFrame){
+    manipulatorState.selectedItemLastFrame = false;
+    manipulatorHandleTransition(manipulatorState, manipulatorTools, updateInfo, "itemSelected");
+  }
 
   manipulatorStateByName(manipulatorState.state).onState(manipulatorState, manipulatorTools, updateInfo);
-
-
-  // for current state, do the on update thing
 }

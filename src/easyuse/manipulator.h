@@ -27,12 +27,14 @@ struct ManipulatorData {
   std::string state;
   bool mouseClickedLastFrame;
   bool mouseReleasedLastFrame;
+  bool selectedItemLastFrame;
 
   objid manipulatorId;
   Axis manipulatorObject;
 
   std::optional<glm::vec3> initialDragPosition;
   std::vector<InitialTransformData> initialTransforms;
+  float rotationAmount;
 };
 
 struct ManipulatorOptions {
