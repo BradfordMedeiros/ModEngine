@@ -1104,10 +1104,18 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      std::cout << "setting obj dimensions" << std::endl;
-      auto selected = selectedIds(state.editor);
-      setObjectDimensions(world, selected, 10, 5, 10);
-    }
+      if (state.manipulatorMode == TRANSLATE){
+        state.snapManipulatorPositions = !state.snapManipulatorPositions;
+        sendNotifyMessage("alert", std::string("snap positions: ") + (state.snapManipulatorPositions ? "enabled" : "disabled"));
+      }else if (state.manipulatorMode == SCALE){
+        state.snapManipulatorScales = !state.snapManipulatorScales;
+        sendNotifyMessage("alert", std::string("snap scales: ") + (state.snapManipulatorScales ? "enabled" : "disabled"));
+      }else if (state.manipulatorMode == ROTATE){
+        state.snapManipulatorAngles = !state.snapManipulatorAngles;
+        sendNotifyMessage("alert", std::string("snap rotate: ") + (state.snapManipulatorAngles ? "enabled" : "disabled"));
+      }
+        //bool rotateSnapRelative;
+        //bool preserveRelativeScale;
   },
   InputDispatch{
     .sourceKey = 'I', // i
