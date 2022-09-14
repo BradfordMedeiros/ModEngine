@@ -86,7 +86,9 @@ void manipulatorEnsureDoesNotExist(ManipulatorData& manipulatorState, Manipulato
 void manipulatorPopulateInitialPositions(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
   manipulatorState.initialDragPosition = std::nullopt;
   manipulatorState.initialTransforms = {};
-  for (auto &targetId : update.selectedObjs.selectedIds){
+  std::vector<objid> ids = update.selectedObjs.selectedIds;
+  ids.push_back(manipulatorState.manipulatorId);
+  for (auto &targetId : ids){
     manipulatorState.initialTransforms.push_back(InitialTransformData {
       .id = targetId,
       .transform = Transformation {
@@ -200,7 +202,7 @@ std::vector<ManipulatorState> manipulatorStates = {
     .onState = updateManipulatorToCurrentObj,
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
-      ManipulatorNextState { .nextState = "translateMode", .transition = "axisSelected", .fn = manipulatorDoNothing },
+      ManipulatorNextState { .nextState = "translateMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
       ManipulatorNextState { .nextState = "scaleIdle", .transition = "gotoScaleIdle", .fn = manipulatorDoNothing },
       ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExist },
     },
@@ -209,20 +211,15 @@ std::vector<ManipulatorState> manipulatorStates = {
     .state = "translateMode",
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
       modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
-      auto projectedPosition = projectAndVisualize(manipulatorState, tools, update);
-      auto oldMainTargetPosition = tools.getPosition(update.selectedObjs.mainObj.value());
-      auto positionDiff = glm::vec3(0.f, 0.f, 0.f);
-
-      if (!update.options.snapManipulatorPositions){
-        tools.setPosition(manipulatorState.manipulatorId, projectedPosition);
-        positionDiff = projectedPosition - oldMainTargetPosition;
-      }else{
-        auto newPosition = tools.snapPosition(projectedPosition);
-        tools.setPosition(manipulatorState.manipulatorId, newPosition);  
-        positionDiff = newPosition - oldMainTargetPosition;    
+      auto projectedPositionRaw = projectAndVisualize(manipulatorState, tools, update);
+      if (!manipulatorState.initialDragPosition.has_value()){
+         manipulatorState.initialDragPosition = projectedPositionRaw;
       }
+      auto positionDiff = projectedPositionRaw - manipulatorState.initialDragPosition.value();
+      positionDiff = update.options.snapManipulatorPositions ? tools.snapPosition(positionDiff) : positionDiff;
+      tools.setPosition(manipulatorState.manipulatorId, getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position + positionDiff);
       for (auto &targetId : update.selectedObjs.selectedIds){
-        auto oldPosition = tools.getPosition(targetId);
+        auto oldPosition = getInitialTransformation(manipulatorState, targetId).position;
         auto newPosition = oldPosition + positionDiff;
         tools.setPosition(targetId, newPosition);
       }
