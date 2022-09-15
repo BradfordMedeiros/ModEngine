@@ -1105,8 +1105,14 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       if (state.manipulatorMode == TRANSLATE){
-        state.snapManipulatorPositions = !state.snapManipulatorPositions;
-        sendNotifyMessage("alert", std::string("snap positions: ") + (state.snapManipulatorPositions ? "enabled" : "disabled"));
+        if (state.manipulatorPositionMode == SNAP_CONTINUOUS){
+          state.manipulatorPositionMode = SNAP_RELATIVE;
+          sendNotifyMessage("alert", std::string("snap positions: on - relative"));
+        }else if (state.manipulatorPositionMode == SNAP_RELATIVE){
+          state.manipulatorPositionMode = SNAP_CONTINUOUS;
+          sendNotifyMessage("alert", std::string("snap positions: off"));
+        }
+       
       }else if (state.manipulatorMode == SCALE){
         state.snapManipulatorScales = !state.snapManipulatorScales;
         sendNotifyMessage("alert", std::string("snap scales: ") + (state.snapManipulatorScales ? "enabled" : "disabled"));

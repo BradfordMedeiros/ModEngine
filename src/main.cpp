@@ -1688,7 +1688,7 @@ int main(int argc, char* argv[]){
       glm::vec2(adjustedCoords.x, adjustedCoords.y),
       glm::vec2(state.resolution.x, state.resolution.y),
       ManipulatorOptions {
-         .snapManipulatorPositions = state.snapManipulatorPositions,
+         .manipulatorPositionMode = state.manipulatorPositionMode,
          .snapManipulatorScales = state.snapManipulatorScales,
          .snapManipulatorAngles = state.snapManipulatorAngles,
          .rotateSnapRelative = state.rotateSnapRelative,

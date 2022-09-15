@@ -371,7 +371,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorPositions = std::get_if<std::string>(&value);
       if (snapManipulatorPositions != NULL){
-        state.snapManipulatorPositions = *snapManipulatorPositions == "true";
+        state.manipulatorPositionMode = (*snapManipulatorPositions == "true") ? SNAP_RELATIVE : SNAP_CONTINUOUS;
         return;
       }
       modassert(false, "invalid tools snap-position option: " + *snapManipulatorPositions);
@@ -568,7 +568,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.manipulatorMode = NONE,
 		.manipulatorAxis = NOAXIS,
     .manipulatorLineId = 0,
-    .snapManipulatorPositions = true,
+    .manipulatorPositionMode = SNAP_CONTINUOUS,
     .snapManipulatorScales = true,
     .snapManipulatorAngles = true, // rotate behavior should probably be some enum, these true/false have precedence rules
     .rotateSnapRelative = true,

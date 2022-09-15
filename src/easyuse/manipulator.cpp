@@ -218,7 +218,7 @@ std::vector<ManipulatorState> manipulatorStates = {
          manipulatorState.initialDragPosition = projectedPositionRaw;
       }
       auto positionDiff = projectedPositionRaw - manipulatorState.initialDragPosition.value();
-      positionDiff = update.options.snapManipulatorPositions ? tools.snapPosition(positionDiff) : positionDiff;
+      positionDiff = (update.options.manipulatorPositionMode == SNAP_RELATIVE) ? tools.snapPosition(positionDiff) : positionDiff;
       tools.setPosition(manipulatorState.manipulatorId, getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position + positionDiff);
       for (auto &targetId : update.selectedObjs.selectedIds){
         auto oldPosition = getInitialTransformation(manipulatorState, targetId).position;

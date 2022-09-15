@@ -6,8 +6,6 @@
 #include "../translations.h"
 #include "./manipulator_drawing.h"
 
-
-
 struct InitialDragRotation {
   objid id;
   glm::quat value;
@@ -39,7 +37,7 @@ struct ManipulatorData {
 };
 
 struct ManipulatorOptions {
-  bool snapManipulatorPositions;
+  SNAPPING_MODE manipulatorPositionMode;
   bool snapManipulatorScales;
   bool snapManipulatorAngles;
   bool rotateSnapRelative;
