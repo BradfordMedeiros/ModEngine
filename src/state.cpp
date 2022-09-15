@@ -369,6 +369,24 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto scaleGroup = std::get_if<std::string>(&value);
+      if (scaleGroup != NULL){
+        if (*scaleGroup == "individual"){
+          state.scalingGroup = INDIVIDUAL_SCALING;
+          return;
+        }else if (*scaleGroup == "group"){
+          state.scalingGroup = GROUP_SCALING;
+          return;
+        }
+        modassert(false, "invalid tools scale-group option: " + *scaleGroup);
+        return;
+      }
+    },
+    .object = "tools",
+    .attribute = "scale-group",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorPositions = std::get_if<std::string>(&value);
       if (snapManipulatorPositions != NULL){
         if (*snapManipulatorPositions == "none"){
@@ -568,6 +586,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .manipulatorLineId = 0,
     .manipulatorPositionMode = SNAP_CONTINUOUS,
     .rotateMode = SNAP_CONTINUOUS,
+    .scalingGroup = INDIVIDUAL_SCALING,
     .snapManipulatorScales = true,
     .preserveRelativeScale = false,
 		.firstMouse = true,

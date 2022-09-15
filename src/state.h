@@ -50,6 +50,7 @@ struct engineState {
   objid manipulatorLineId;
   SNAPPING_MODE manipulatorPositionMode;
   SNAPPING_MODE rotateMode;
+  SCALING_GROUP scalingGroup;
   bool snapManipulatorScales;
   bool preserveRelativeScale;
 

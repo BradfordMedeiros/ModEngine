@@ -1690,6 +1690,7 @@ int main(int argc, char* argv[]){
       ManipulatorOptions {
          .manipulatorPositionMode = state.manipulatorPositionMode,
          .rotateMode = state.rotateMode,
+         .scalingGroup = state.scalingGroup,
          .snapManipulatorScales = state.snapManipulatorScales,
          .preserveRelativeScale = state.preserveRelativeScale,
       },

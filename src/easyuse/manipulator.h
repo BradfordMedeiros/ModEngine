@@ -36,9 +36,12 @@ struct ManipulatorData {
   std::optional<glm::vec3> meanPosition;
 };
 
+
+enum SCALING_GROUP { INDIVIDUAL_SCALING, GROUP_SCALING };
 struct ManipulatorOptions {
   SNAPPING_MODE manipulatorPositionMode;
   SNAPPING_MODE rotateMode;
+  SCALING_GROUP scalingGroup;
   bool snapManipulatorScales;
   bool preserveRelativeScale;
 };
