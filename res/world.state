@@ -51,7 +51,7 @@ tools:manipulator-mode:translate
 tools:manipulator-axis:x
 
 #tools:preserve-scale:true
-#tools:snap-position:false
+tools:snap-position:relative    # none relative absolute
 #tools:snap-scale:false
 #tools:snap-angles:false
 tools:rotate-relative:false

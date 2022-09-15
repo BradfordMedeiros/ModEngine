@@ -371,7 +371,13 @@ std::vector<ObjectStateMapping> mapping = {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorPositions = std::get_if<std::string>(&value);
       if (snapManipulatorPositions != NULL){
-        state.manipulatorPositionMode = (*snapManipulatorPositions == "true") ? SNAP_RELATIVE : SNAP_CONTINUOUS;
+        if (*snapManipulatorPositions == "none"){
+          state.manipulatorPositionMode = SNAP_CONTINUOUS;
+        }else if (*snapManipulatorPositions == "relative"){
+          state.manipulatorPositionMode = SNAP_RELATIVE;
+        }else if (*snapManipulatorPositions == "absolute"){
+          state.manipulatorPositionMode = SNAP_ABSOLUTE;
+        }
         return;
       }
       modassert(false, "invalid tools snap-position option: " + *snapManipulatorPositions);

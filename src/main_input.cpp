@@ -1109,6 +1109,9 @@ std::vector<InputDispatch> inputFns = {
           state.manipulatorPositionMode = SNAP_RELATIVE;
           sendNotifyMessage("alert", std::string("snap positions: on - relative"));
         }else if (state.manipulatorPositionMode == SNAP_RELATIVE){
+          state.manipulatorPositionMode = SNAP_ABSOLUTE;
+          sendNotifyMessage("alert", std::string("snap positions: on - absolute"));
+        }else if (state.manipulatorPositionMode == SNAP_ABSOLUTE){
           state.manipulatorPositionMode = SNAP_CONTINUOUS;
           sendNotifyMessage("alert", std::string("snap positions: off"));
         }
