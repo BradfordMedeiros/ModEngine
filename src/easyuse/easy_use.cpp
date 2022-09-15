@@ -141,7 +141,7 @@ glm::quat snapRotate(EasyUseInfo& easyUse, glm::quat newRotation, Axis snapAxis)
   bool snapX = snapAxis == XAXIS || snapAxis == NOAXIS;
   bool snapY = snapAxis == YAXIS || snapAxis == NOAXIS;
   bool snapZ = snapAxis == ZAXIS || snapAxis == NOAXIS;
-  std::cout << "snap angle is: " << deltaAngle << std::endl;
+  //std::cout << "snap angle is: " << deltaAngle << std::endl;
   glm::vec3 eulerNew = glm::degrees(glm::eulerAngles(newRotation));
   auto snappedAngleX = snapX ? getClosestPosition(eulerNew.x, deltaAngle) : eulerNew.x;    
   auto snappedAngleY = snapY ? getClosestPosition(eulerNew.y, deltaAngle) : eulerNew.y;    

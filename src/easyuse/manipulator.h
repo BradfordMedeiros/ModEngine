@@ -35,6 +35,7 @@ struct ManipulatorData {
   std::optional<glm::vec3> initialDragPosition;
   std::vector<InitialTransformData> initialTransforms;
   float rotationAmount;
+  std::optional<glm::vec3> meanPosition;
 };
 
 struct ManipulatorOptions {

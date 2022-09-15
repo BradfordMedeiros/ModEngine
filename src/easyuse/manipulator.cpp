@@ -86,6 +86,7 @@ void manipulatorEnsureDoesNotExist(ManipulatorData& manipulatorState, Manipulato
 void manipulatorPopulateInitialPositions(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
   manipulatorState.initialDragPosition = std::nullopt;
   manipulatorState.initialTransforms = {};
+  manipulatorState.meanPosition = std::nullopt;
   std::vector<objid> ids = update.selectedObjs.selectedIds;
   ids.push_back(manipulatorState.manipulatorId);
   for (auto &targetId : ids){
@@ -104,7 +105,6 @@ Transformation getInitialTransformation(ManipulatorData& manipulatorState, objid
     if (idTransform.id == targetId){
       return idTransform.transform;
     }
-    std::cout << "checking id: " << idTransform.id << std::endl;
   }
   modassert(false, std::string("no id for: ") + std::to_string(targetId));
   return Transformation {};
@@ -143,7 +143,8 @@ struct RotateInfo {
 
 RotateInfo calcRotateInfo(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
   auto rotationOrientation = axisToOrientation(update.defaultAxis);
-  auto meanPosition = calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
+  auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
+  manipulatorState.meanPosition = meanPosition;
   float rotationAmount = 0.f;
   auto selectDir = getCursorRayDirection(update.projection, update.cameraViewMatrix, update.cursorPos.x, update.cursorPos.y, update.screensize.x, update.screensize.y);
 
@@ -155,10 +156,11 @@ RotateInfo calcRotateInfo(ManipulatorData& manipulatorState, ManipulatorTools& t
   auto pointRelativeToPlane = glm::inverse(rotationOrientation) * (intersection - meanPosition);
   rotationAmount = atanRadians360(pointRelativeToPlane.x, pointRelativeToPlane.y);
   //  std::cout << "position: " << print(cameraPosition) << std::endl;
-  //  std::cout << "selecdir: " << print(selectDir) << std::endl;
-  //  std::cout << "intersection: " << print(intersection) << std::endl;
-  //  std::cout << "xyz to plane: " << print(pointRelativeToPlane) << std::endl;
-  //  std::cout << "angle: " << glm::degrees(rotationAmount) << std::endl;
+  // std::cout << "meanposition: " << print(meanPosition) << std::endl;
+  // std::cout << "selectdir: " << print(selectDir) << std::endl;
+  // std::cout << "intersection: " << print(intersection) << std::endl;
+  // std::cout << "xyz to plane: " << print(pointRelativeToPlane) << std::endl;
+  // std::cout << "angle: " << glm::degrees(rotationAmount) << std::endl;
   return RotateInfo {
     .rotationAmount = rotationAmount,
     .cameraPosition = cameraPosition,
@@ -307,6 +309,8 @@ std::vector<ManipulatorState> manipulatorStates = {
           return tools.snapRotate(rotation, update.defaultAxis);
         };
 
+        //std::cout << "manipulator = " << manipulatorState.rotationAmount << ", rotationAmount = " << rotateInfo.rotationAmount << std::endl;
+
         for (auto &targetId : update.selectedObjs.selectedIds){
           auto newTargetRotPos = rotateOverAxis(
               RotationPosition { 
@@ -378,7 +382,7 @@ void onManipulatorUpdate(
   ManipulatorOptions options,
   ManipulatorTools manipulatorTools
 ){
-  modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
+  //modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
   manipulatorTools.clearLines();
 
   auto selectedObjs = manipulatorTools.getSelectedIds();
