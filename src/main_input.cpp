@@ -1114,8 +1114,22 @@ std::vector<InputDispatch> inputFns = {
         state.snapManipulatorAngles = !state.snapManipulatorAngles;
         sendNotifyMessage("alert", std::string("snap rotate: ") + (state.snapManipulatorAngles ? "enabled" : "disabled"));
       }
-        //bool rotateSnapRelative;
-        //bool preserveRelativeScale;
+    }
+  },
+  InputDispatch{
+    .sourceKey = '[',
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      if (state.manipulatorMode == ROTATE){
+        state.rotateSnapRelative = !state.rotateSnapRelative;;
+        sendNotifyMessage("alert", std::string("snap rotate relative: ") + (state.rotateSnapRelative ? "enabled" : "disabled"));
+      }else if (state.manipulatorMode == SCALE){
+        state.preserveRelativeScale = !state.preserveRelativeScale;
+        sendNotifyMessage("alert", std::string("snap scale preserve relative: ") + (state.preserveRelativeScale ? "enabled" : "disabled"));
+      }
+    }
   },
   InputDispatch{
     .sourceKey = 'I', // i
