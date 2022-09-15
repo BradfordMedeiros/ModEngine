@@ -49,9 +49,8 @@ struct engineState {
   Axis manipulatorAxis;
   objid manipulatorLineId;
   SNAPPING_MODE manipulatorPositionMode;
+  SNAPPING_MODE rotateMode;
   bool snapManipulatorScales;
-  bool snapManipulatorAngles;
-  bool rotateSnapRelative;
   bool preserveRelativeScale;
 
   bool firstMouse;

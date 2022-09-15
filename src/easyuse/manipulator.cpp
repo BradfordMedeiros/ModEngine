@@ -302,19 +302,18 @@ std::vector<ManipulatorState> manipulatorStates = {
   ManipulatorState {
     .state = "rotateMode",
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
+
         modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
-        modassert(!update.options.rotateSnapRelative, "snap relative not yet supported");
 
         auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
         float rotationDiff = rotateInfo.rotationAmount - manipulatorState.rotationAmount;
         visualizeSubrotations(tools, update, rotateInfo);
 
-        std::optional<std::function<glm::quat(glm::quat)>> snapFn = !update.options.snapManipulatorAngles ? std::optional<std::function<glm::quat(glm::quat)>>(std::nullopt) : [&update, &tools](glm::quat rotation) -> glm::quat {
+        std::optional<std::function<glm::quat(glm::quat)>> snapFn = (update.options.rotateMode == SNAP_CONTINUOUS) ? std::optional<std::function<glm::quat(glm::quat)>>(std::nullopt) : [&update, &tools](glm::quat rotation) -> glm::quat {
           return tools.snapRotate(rotation, update.defaultAxis);
         };
 
         //std::cout << "manipulator = " << manipulatorState.rotationAmount << ", rotationAmount = " << rotateInfo.rotationAmount << std::endl;
-
         for (auto &targetId : update.selectedObjs.selectedIds){
           auto newTargetRotPos = rotateOverAxis(
               RotationPosition { 

@@ -1115,28 +1115,20 @@ std::vector<InputDispatch> inputFns = {
           state.manipulatorPositionMode = SNAP_CONTINUOUS;
           sendNotifyMessage("alert", std::string("snap positions: off"));
         }
-       
       }else if (state.manipulatorMode == SCALE){
         state.snapManipulatorScales = !state.snapManipulatorScales;
         sendNotifyMessage("alert", std::string("snap scales: ") + (state.snapManipulatorScales ? "enabled" : "disabled"));
       }else if (state.manipulatorMode == ROTATE){
-        state.snapManipulatorAngles = !state.snapManipulatorAngles;
-        sendNotifyMessage("alert", std::string("snap rotate: ") + (state.snapManipulatorAngles ? "enabled" : "disabled"));
-      }
-    }
-  },
-  InputDispatch{
-    .sourceKey = '[',
-    .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
-    .fn = []() -> void {
-      if (state.manipulatorMode == ROTATE){
-        state.rotateSnapRelative = !state.rotateSnapRelative;;
-        sendNotifyMessage("alert", std::string("snap rotate relative: ") + (state.rotateSnapRelative ? "enabled" : "disabled"));
-      }else if (state.manipulatorMode == SCALE){
-        state.preserveRelativeScale = !state.preserveRelativeScale;
-        sendNotifyMessage("alert", std::string("snap scale preserve relative: ") + (state.preserveRelativeScale ? "enabled" : "disabled"));
+        if (state.rotateMode == SNAP_CONTINUOUS){
+          state.rotateMode = SNAP_RELATIVE;
+          sendNotifyMessage("alert", std::string("snap rotate: on - relative"));
+        }else if (state.rotateMode == SNAP_RELATIVE){
+          state.rotateMode = SNAP_ABSOLUTE;
+          sendNotifyMessage("alert", std::string("snap rotate: on - absolute"));
+        }else if (state.rotateMode == SNAP_ABSOLUTE){
+          state.rotateMode = SNAP_CONTINUOUS;
+          sendNotifyMessage("alert", std::string("snap rotate: off"));
+        }
       }
     }
   },

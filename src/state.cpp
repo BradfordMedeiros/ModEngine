@@ -400,26 +400,18 @@ std::vector<ObjectStateMapping> mapping = {
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorAngles = std::get_if<std::string>(&value);
-      if (snapManipulatorAngles != NULL){
-        state.snapManipulatorAngles = *snapManipulatorAngles == "true";
-        return;
+      if (*snapManipulatorAngles == "none"){
+        state.rotateMode = SNAP_CONTINUOUS;
+      }else if (*snapManipulatorAngles == "relative"){
+        state.rotateMode = SNAP_RELATIVE;
+      }else if (*snapManipulatorAngles == "absolute"){
+        state.rotateMode = SNAP_ABSOLUTE;
       }
+      return;
       modassert(false, "invalid tools snap-angles option: " + *snapManipulatorAngles);
     },
     .object = "tools",
-    .attribute = "snap-angles",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto rotateSnapRelative = std::get_if<std::string>(&value);
-      if (rotateSnapRelative != NULL){
-        state.rotateSnapRelative = *rotateSnapRelative == "true";
-        return;
-      }
-      modassert(false, "invalid tools rotate-relative option: " + *rotateSnapRelative);
-    },
-    .object = "tools",
-    .attribute = "rotate-relative",
+    .attribute = "snap-rotate",
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
@@ -575,9 +567,8 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.manipulatorAxis = NOAXIS,
     .manipulatorLineId = 0,
     .manipulatorPositionMode = SNAP_CONTINUOUS,
+    .rotateMode = SNAP_CONTINUOUS,
     .snapManipulatorScales = true,
-    .snapManipulatorAngles = true, // rotate behavior should probably be some enum, these true/false have precedence rules
-    .rotateSnapRelative = true,
     .preserveRelativeScale = false,
 		.firstMouse = true,
 		.lastX = 0,

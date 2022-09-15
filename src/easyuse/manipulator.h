@@ -38,9 +38,8 @@ struct ManipulatorData {
 
 struct ManipulatorOptions {
   SNAPPING_MODE manipulatorPositionMode;
+  SNAPPING_MODE rotateMode;
   bool snapManipulatorScales;
-  bool snapManipulatorAngles;
-  bool rotateSnapRelative;
   bool preserveRelativeScale;
 };
 struct ManipulatorUpdateInfo {
