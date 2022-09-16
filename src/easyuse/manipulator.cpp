@@ -254,38 +254,47 @@ std::vector<ManipulatorState> manipulatorStates = {
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPosition;
       }
+      
+      auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
+      manipulatorState.meanPosition = meanPosition;
 
-      auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, tools.getPosition(manipulatorState.manipulatorId), true);
-      auto scalingDiff = positionDiff;
-
-      std::cout << "positionDiff = " << print(positionDiff) << std::endl;
-      std::cout << "scalingDiff = " << print(scalingDiff) << std::endl;
-      auto scaleFactor = update.options.snapManipulatorScales ? tools.snapScale(scalingDiff) : scalingDiff;
+      auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position, true);
+      auto scaleFactor = update.options.snapManipulatorScales ? tools.snapScale(positionDiff) : positionDiff;
       if (update.options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
         auto oldScaleFactor = scaleFactor;
         auto vecLength = glm::length(scaleFactor);
         auto compLength = glm::sqrt(vecLength * vecLength / 3);
        
         auto positiveValue = glm::dot(scaleFactor, glm::vec3(1.f, 1.f, 1.f));
-        std::cout << "positive value: " << positiveValue << std::endl;
+        //std::cout << "positive value: " << positiveValue << std::endl;
 
         if (positiveValue < 0){
           compLength *= -1.f;
         }
         scaleFactor = glm::vec3(compLength, compLength, compLength);
-        std::cout << "old scale = " << print(oldScaleFactor) << ", new scale = " << print(scaleFactor) << std::endl;
+        //std::cout << "old scale = " << print(oldScaleFactor) << ", new scale = " << print(scaleFactor) << std::endl;
         modassert(aboutEqual(glm::length(scaleFactor), glm::length(oldScaleFactor)), "scale magnitude was not preserved");
       }
+
       for (auto &targetId : update.selectedObjs.selectedIds){
         std::cout << "scale factor: " << print(scaleFactor) << std::endl;
-        auto initialDragScale = getInitialTransformation(manipulatorState, targetId).scale; 
+        auto initialTransform = getInitialTransformation(manipulatorState, targetId);
+        auto initialDragScale = initialTransform.scale; 
         auto relativeScale = scaleFactor *  initialDragScale + initialDragScale;
+        if (update.options.scalingGroup == GROUP_SCALING){
+          auto scaleRatio = relativeScale / initialDragScale;
+          auto offsetFromMean = initialTransform.position - manipulatorState.meanPosition.value();
+          auto scaledOffsetFromMean = scaleRatio * offsetFromMean;
+          std::cout << "scale ratio: " << print(scaleRatio) << std::endl;
+          std::cout << "mean position: " << print(initialTransform.position - manipulatorState.meanPosition.value()) << std::endl;
+          tools.setPosition(targetId, manipulatorState.meanPosition.value() + scaledOffsetFromMean);
+        }
         tools.setScale(targetId, relativeScale);
       }
-      
     },
     .nextStates = {
       ManipulatorNextState { .nextState = "scaleIdle", .transition = "axisReleased", .fn = manipulatorDoNothing },
+      ManipulatorNextState { .nextState = "scaleIdle", .transition = "itemSelected", .fn = manipulatorDoNothing },
     },
   },
   ManipulatorState {
