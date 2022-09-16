@@ -53,8 +53,8 @@ tools:manipulator-axis:x
 #tools:preserve-scale:true
 tools:snap-position:relative    # none relative absolute
 #tools:snap-scale:false
-#tools:snap-angles:false
-tools:rotate-relative:false
+tools:snap-rotate:relative     # none relative absolute
+tools:scale-group:group
 
 #editor:snapscale-index:0
 #editor:snapangle-index:10
