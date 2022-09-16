@@ -322,11 +322,25 @@ std::vector<ManipulatorState> manipulatorStates = {
         float extraRadiansCorrection = 0.f;
         if (update.options.rotateMode == SNAP_ABSOLUTE){
           auto targetId = update.selectedObjs.mainObj.value();
-          auto mainobjDiff = getInitialTransformation(manipulatorState, update.selectedObjs.mainObj.value()).position - rotateInfo.meanPosition;
+          auto mainObjTransform = getInitialTransformation(manipulatorState, update.selectedObjs.mainObj.value());
+          auto mainobjDiff = mainObjTransform.position - rotateInfo.meanPosition;
           auto rotationOrientation = axisToOrientation(update.defaultAxis);
-          auto mainobjRelative = glm::inverse(rotationOrientation) * mainobjDiff;
-          float radiansValue = atanRadians360(mainobjRelative.x, mainobjRelative.y);
-          extraRadiansCorrection = -1.f * radiansValue;
+
+          if (aboutEqual(mainobjDiff, glm::vec3(0.f, 0.f, 0.f))){
+            if (update.selectedObjs.selectedIds.size() > 1){
+              modlog("manipulator", "rotation zero difference from mean", MODLOG_WARNING);
+              return;
+            }
+            auto relativeOrientation = glm::inverse(rotationOrientation) * mainObjTransform.rotation;
+            auto mainobjRelative = relativeOrientation * glm::vec3(1.0f, 0.f, 0.f);
+            float radiansValue = atanRadians360(mainobjRelative.x, mainobjRelative.y);
+            extraRadiansCorrection = -1.f * radiansValue;
+           
+          }else{
+            auto mainobjRelative = glm::inverse(rotationOrientation) * mainobjDiff;
+            float radiansValue = atanRadians360(mainobjRelative.x, mainobjRelative.y);
+            extraRadiansCorrection = -1.f * radiansValue;
+          }
         }
         
         std::optional<std::function<glm::quat(glm::quat)>> snapFn = (update.options.rotateMode == SNAP_CONTINUOUS) ? std::optional<std::function<glm::quat(glm::quat)>>(std::nullopt) : [&update, &tools, extraRadiansCorrection](glm::quat rotation) -> glm::quat {
