@@ -1133,6 +1133,20 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .sourceKey = '[',
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      if (state.manipulatorMode == TRANSLATE){
+      }else if (state.manipulatorMode == SCALE){
+        state.preserveRelativeScale = !state.preserveRelativeScale;
+        sendNotifyMessage("alert", std::string("scale preserve relative: ") + (state.preserveRelativeScale ? "enabled" : "disabled"));
+      }else if (state.manipulatorMode == ROTATE){
+      }
+    }
+  },
+  InputDispatch{
     .sourceKey = 'I', // i
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
