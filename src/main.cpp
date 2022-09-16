@@ -1707,8 +1707,8 @@ int main(int argc, char* argv[]){
         .snapScale = [&state](glm::vec3 scale) -> glm::vec3 {
           return snapScale(state.easyUse, scale);
         },
-        .snapRotate = [&state](glm::quat rot, Axis snapAxis) -> glm::quat {
-          return snapRotate(state.easyUse, rot, snapAxis);
+        .snapRotate = [&state](glm::quat rot, Axis snapAxis, float extraRadians) -> glm::quat {
+          return snapRotate(state.easyUse, rot, snapAxis, extraRadians);
         },
         .drawLine = [](glm::vec3 frompos, glm::vec3 topos, LineColor color) -> void {
           if (state.manipulatorLineId == 0){

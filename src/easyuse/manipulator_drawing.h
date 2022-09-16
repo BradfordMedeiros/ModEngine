@@ -18,7 +18,7 @@ struct ManipulatorTools {
   std::function<void(objid, glm::quat)> setRotation;
   std::function<glm::vec3(glm::vec3)> snapPosition;
   std::function<glm::vec3(glm::vec3)> snapScale;
-  std::function<glm::quat(glm::quat, Axis)> snapRotate;
+  std::function<glm::quat(glm::quat, Axis, float)> snapRotate;
   std::function<void(glm::vec3, glm::vec3, LineColor)> drawLine;
   std::function<void()> clearLines;
   std::function<void(objid)> removeObjectById; 

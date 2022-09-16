@@ -17,7 +17,7 @@ EasyUseInfo createEasyUse();
 
 glm::quat snapAngleUp(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis); 
 glm::quat snapAngleDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::quat currentAngle, Axis rotationAxis);
-glm::quat snapRotate(EasyUseInfo& easyUse, glm::quat newRotation, Axis snapAxis);
+glm::quat snapRotate(EasyUseInfo& easyUse, glm::quat newRotation, Axis snapAxis, float extraRadians);
 
 glm::vec3 snapTranslateUp(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);
 glm::vec3 snapTranslateDown(EasyUseInfo& easyUse, SNAPPING_MODE mode, glm::vec3 currentPos, Axis translationAxis);

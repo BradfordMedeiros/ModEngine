@@ -314,15 +314,23 @@ std::vector<ManipulatorState> manipulatorStates = {
   ManipulatorState {
     .state = "rotateMode",
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
-
         modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
-
         auto rotateInfo = calcRotateInfo(manipulatorState, tools, update);
         float rotationDiff = rotateInfo.rotationAmount - manipulatorState.rotationAmount;
         visualizeSubrotations(tools, update, rotateInfo);
 
-        std::optional<std::function<glm::quat(glm::quat)>> snapFn = (update.options.rotateMode == SNAP_CONTINUOUS) ? std::optional<std::function<glm::quat(glm::quat)>>(std::nullopt) : [&update, &tools](glm::quat rotation) -> glm::quat {
-          return tools.snapRotate(rotation, update.defaultAxis);
+        float extraRadiansCorrection = 0.f;
+        if (update.options.rotateMode == SNAP_ABSOLUTE){
+          auto targetId = update.selectedObjs.mainObj.value();
+          auto mainobjDiff = getInitialTransformation(manipulatorState, update.selectedObjs.mainObj.value()).position - rotateInfo.meanPosition;
+          auto rotationOrientation = axisToOrientation(update.defaultAxis);
+          auto mainobjRelative = glm::inverse(rotationOrientation) * mainobjDiff;
+          float radiansValue = atanRadians360(mainobjRelative.x, mainobjRelative.y);
+          extraRadiansCorrection = -1.f * radiansValue;
+        }
+        
+        std::optional<std::function<glm::quat(glm::quat)>> snapFn = (update.options.rotateMode == SNAP_CONTINUOUS) ? std::optional<std::function<glm::quat(glm::quat)>>(std::nullopt) : [&update, &tools, extraRadiansCorrection](glm::quat rotation) -> glm::quat {
+          return tools.snapRotate(rotation, update.defaultAxis, extraRadiansCorrection);
         };
 
         //std::cout << "manipulator = " << manipulatorState.rotationAmount << ", rotationAmount = " << rotateInfo.rotationAmount << std::endl;
