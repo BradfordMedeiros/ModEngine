@@ -114,7 +114,7 @@ glm::vec3 projectAndVisualize(ManipulatorData& manipulatorState, ManipulatorTool
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "should not be in translate state with the obj selected");
   ProjectCursorDebugInfo projectCursorInfo{};
-  auto projectedPosition =  projectCursorPositionOntoAxis(update.projection, update.cameraViewMatrix, update.cursorPos, update.screensize, manipulatorState.manipulatorObject, tools.getPosition(selectedObjs.mainObj.value()), &projectCursorInfo);
+  auto projectedPosition =  projectCursorPositionOntoAxis(update.projection, update.cameraViewMatrix, update.cursorPos, update.screensize, manipulatorState.manipulatorObject, getInitialTransformation(manipulatorState, selectedObjs.mainObj.value()).position, &projectCursorInfo);
   drawProjectionVisualization(tools.drawLine, projectCursorInfo);
   return projectedPosition;
 }
@@ -257,7 +257,6 @@ std::vector<ManipulatorState> manipulatorStates = {
       
       auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
       manipulatorState.meanPosition = meanPosition;
-
       auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position, true);
       auto scaleFactor = update.options.snapManipulatorScales ? tools.snapScale(positionDiff) : positionDiff;
       if (update.options.preserveRelativeScale){  // makes the increase in scale magnitude proportion to length of the vec
@@ -398,7 +397,7 @@ void onManipulatorUpdate(
   ManipulatorOptions options,
   ManipulatorTools manipulatorTools
 ){
-  //modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
+  modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
   manipulatorTools.clearLines();
 
   auto selectedObjs = manipulatorTools.getSelectedIds();
