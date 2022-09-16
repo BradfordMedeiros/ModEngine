@@ -1147,6 +1147,25 @@ std::vector<InputDispatch> inputFns = {
     }
   },
   InputDispatch{
+    .sourceKey = ']',
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0, 
+    .hasPreq = false,
+    .fn = []() -> void {
+      if (state.manipulatorMode == TRANSLATE){
+      }else if (state.manipulatorMode == SCALE){
+        if (state.scalingGroup == INDIVIDUAL_SCALING){
+          state.scalingGroup = GROUP_SCALING;
+          sendNotifyMessage("alert", "scaling grouping: group");
+        }else if (state.scalingGroup == GROUP_SCALING){
+          state.scalingGroup = INDIVIDUAL_SCALING;
+          sendNotifyMessage("alert", "scaling grouping: individual");
+        }
+      }else if (state.manipulatorMode == ROTATE){
+      }
+    }
+  },
+  InputDispatch{
     .sourceKey = 'I', // i
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
