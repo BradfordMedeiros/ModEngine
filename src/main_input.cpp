@@ -19,6 +19,7 @@ extern GLFWwindow* window;
 extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
 extern LineData lineData;
+extern ManipulatorTools tools;
 
 std::string dumpDebugInfo(bool fullInfo){
   auto sceneInfo = std::string("final scenegraph\n") + scenegraphAsDotFormat(world.sandbox, world.objectMapping) + "\n\n";
@@ -1005,61 +1006,121 @@ std::vector<InputDispatch> inputFns = {
   InputDispatch{
     .sourceKey = 322,  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
+    .prereqKey = 341,  // ctrl,, 
+    .hasPreq = true,
     .fn = []() -> void {
       snapCameraDown(setCameraRotation);
       sendNotifyMessage("alert", "snap camera: -y");
     }
   },
   InputDispatch{
+    .sourceKey = 322,  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT, 
+    .hasPreq = true,
+    .fn = []() -> void {
+      onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_DOWN);
+      sendNotifyMessage("alert", "set orientation: -y");
+    }
+  },
+  InputDispatch{
     .sourceKey = 324,  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
+    .prereqKey = 341,  // ctrl,, 
+    .hasPreq = true,
     .fn = []() -> void {
       snapCameraLeft(setCameraRotation);
       sendNotifyMessage("alert", "snap camera: -x");
     }
   },
   InputDispatch{
+    .sourceKey = 324,  
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT, 
+    .hasPreq = true,
+    .fn = []() -> void {
+      onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_LEFT);
+      sendNotifyMessage("alert", "set orientation: -x");
+    }
+  },
+  InputDispatch{
     .sourceKey = 326, 
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
+    .prereqKey = 341,  // ctrl,, 
+    .hasPreq = true,
     .fn = []() -> void {
       snapCameraRight(setCameraRotation);
       sendNotifyMessage("alert", "snap camera: +x");
     }
   },
   InputDispatch{
+    .sourceKey = 326, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
+    .hasPreq = true,
+    .fn = []() -> void {
+      onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_RIGHT);
+      sendNotifyMessage("alert", "set orientation: +x");
+    }
+  },
+  InputDispatch{
     .sourceKey = 327, 
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
+    .prereqKey = 341,  // ctrl,, 
+    .hasPreq = true,
     .fn = []() -> void {
       snapCameraForward(setCameraRotation);
       sendNotifyMessage("alert", "snap camera: -z");
     }
   },
   InputDispatch{
+    .sourceKey = 327, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
+    .hasPreq = true,
+    .fn = []() -> void {
+      onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_FORWARD);
+      sendNotifyMessage("alert", "set orientation: -z");
+    }
+  },
+  InputDispatch{
     .sourceKey = 328,  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
+    .prereqKey = 341,  // ctrl,, 
+    .hasPreq = true,
     .fn = []() -> void {
       snapCameraUp(setCameraRotation);
       sendNotifyMessage("alert", "snap camera: +y");
     }
   },
   InputDispatch{
+    .sourceKey = 328, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,  // ctrl,, 
+    .hasPreq = true,
+    .fn = []() -> void {
+      onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_UP);
+      sendNotifyMessage("alert", "set orientation: +y");
+    }
+  },
+  InputDispatch{
     .sourceKey = 329,  
     .sourceType = BUTTON_PRESS,
-    .prereqKey = 0, 
-    .hasPreq = false,
+    .prereqKey = 341,  // ctrl,, 
+    .hasPreq = true,
     .fn = []() -> void {
       snapCameraBackward(setCameraRotation);
       sendNotifyMessage("alert", "snap camera: +z");
+    }
+  },
+  InputDispatch{
+    .sourceKey = 329, 
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = GLFW_KEY_LEFT_ALT,
+    .hasPreq = true,
+    .fn = []() -> void {
+      onManipulatorEvent(state.manipulatorState, tools, OBJECT_ORIENT_BACK);
+      sendNotifyMessage("alert", "set orientation: +z");
     }
   },
   InputDispatch{

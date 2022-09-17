@@ -65,6 +65,9 @@ void onManipulatorSelectItem(ManipulatorData& manipulatorState, objid selectedIt
 void onManipulatorMouseDown(ManipulatorData& manipulatorState);
 void onManipulatorMouseRelease(ManipulatorData& manipulatorState);
 
+enum MANIPULATOR_EVENT { OBJECT_ORIENT_UP, OBJECT_ORIENT_DOWN, OBJECT_ORIENT_RIGHT, OBJECT_ORIENT_LEFT, OBJECT_ORIENT_FORWARD, OBJECT_ORIENT_BACK };
+void onManipulatorEvent(ManipulatorData& manipulatorState, ManipulatorTools& tools, MANIPULATOR_EVENT event);
+
 void onManipulatorUpdate(
   ManipulatorData& manipulatorState,
   glm::mat4 projection,

@@ -47,6 +47,41 @@ void onManipulatorMouseRelease(ManipulatorData& manipulatorState){
   manipulatorState.mouseReleasedLastFrame = true;
 }
 
+void onManipulatorEvent(ManipulatorData& manipulatorState, ManipulatorTools& tools, MANIPULATOR_EVENT event){
+  auto selectedObjs = tools.getSelectedIds();
+  if (event == OBJECT_ORIENT_UP){
+    modlog("manipulator", "event - object_orient_up");
+    for (auto id: selectedObjs.selectedIds){
+      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, 1.f, 0.f)));
+    }
+  }else if (event == OBJECT_ORIENT_DOWN){
+    modlog("manipulator", "event - object_orient_down");
+    for (auto id: selectedObjs.selectedIds){
+      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, -1.f, 0.f)));
+    }
+  }else if (event == OBJECT_ORIENT_RIGHT){
+    modlog("manipulator", "event - object_orient_right");
+    for (auto id: selectedObjs.selectedIds){
+      tools.setRotation(id, quatFromDirection(glm::vec3(1.f, 0.f, 0.f)));
+    }
+  }else if (event == OBJECT_ORIENT_LEFT){
+    modlog("manipulator", "event - object_orient_left");
+    for (auto id: selectedObjs.selectedIds){
+      tools.setRotation(id, quatFromDirection(glm::vec3(-1.f, 0.f, 0.f)));
+    }
+  }else if (event == OBJECT_ORIENT_FORWARD){
+    modlog("manipulator", "event - object_orient_forward");
+    for (auto id: selectedObjs.selectedIds){
+      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, 0.f, -1.f)));
+    }
+  }else if (event == OBJECT_ORIENT_BACK){
+    modlog("manipulator", "event - object_orient_back");
+    for (auto id: selectedObjs.selectedIds){
+      tools.setRotation(id, quatFromDirection(glm::vec3(0.f, 0.f, 1.f)));
+    }
+  }
+}
+
 struct ManipulatorStateTransition {
   std::string transition;
   std::function<void()> fn;
@@ -326,9 +361,9 @@ std::vector<ManipulatorState> manipulatorStates = {
           auto mainobjDiff = mainObjTransform.position - rotateInfo.meanPosition;
           auto rotationOrientation = axisToOrientation(update.defaultAxis);
 
-          if (aboutEqual(mainobjDiff, glm::vec3(0.f, 0.f, 0.f))){
+          if (aboutEqual(mainobjDiff, glm::vec3(0.f, 0.f, 0.f))){  // captured for single obj since mean is it's position, and stacked objected
             if (update.selectedObjs.selectedIds.size() > 1){
-              modlog("manipulator", "rotation zero difference from mean", MODLOG_WARNING);
+              modlog("manipulator", "rotation zero difference from mean", MODLOG_WARNING);  // not handled, theoretically should loop over objects and rotate them all?
               return;
             }
             auto relativeOrientation = glm::inverse(rotationOrientation) * mainObjTransform.rotation;
@@ -419,7 +454,7 @@ void onManipulatorUpdate(
   ManipulatorOptions options,
   ManipulatorTools manipulatorTools
 ){
-  modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
+  //modlog("manipulator", std::string("manipulator state: ") + manipulatorState.state);
   manipulatorTools.clearLines();
 
   auto selectedObjs = manipulatorTools.getSelectedIds();
@@ -472,3 +507,4 @@ void onManipulatorUpdate(
 
   manipulatorStateByName(manipulatorState.state).onState(manipulatorState, manipulatorTools, updateInfo);
 }
+
