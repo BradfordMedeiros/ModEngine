@@ -217,11 +217,19 @@ void visualizeSubrotations(ManipulatorTools& tools, ManipulatorUpdateInfo& updat
   drawRotation(positions, rotateInfo.meanPosition, rotateInfo.rotationOrientation, rotateInfo.cameraPosition, rotateInfo.selectDir, rotateInfo.intersection, rotateInfo.rotationAmount, tools.drawLine);
 }
 
-void updateManipulatorToCurrentObj(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
+void updateManipulatorToCurrentObjTranslate(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
   tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
+  tools.setRotation(manipulatorId, MOD_ORIENTATION_FORWARD);
+}
+void updateManipulatorToCurrentObjScale(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
+  auto manipulatorId = manipulatorState.manipulatorId;
+  auto selectedObjs = tools.getSelectedIds();
+  modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
+  tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
+  tools.setRotation(manipulatorState.manipulatorId, tools.getRotation(selectedObjs.mainObj.value()));
 }
 
 std::vector<ManipulatorState> manipulatorStates = {
@@ -236,7 +244,7 @@ std::vector<ManipulatorState> manipulatorStates = {
   },
   ManipulatorState {
     .state = "translateIdle",
-    .onState = updateManipulatorToCurrentObj,
+    .onState = updateManipulatorToCurrentObjTranslate,
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "translateMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
@@ -271,7 +279,7 @@ std::vector<ManipulatorState> manipulatorStates = {
   },
   ManipulatorState {
     .state = "scaleIdle",
-    .onState = updateManipulatorToCurrentObj,
+    .onState = updateManipulatorToCurrentObjScale,
     .nextStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "scaleMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
@@ -289,7 +297,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPosition;
       }
-      
+
       auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
       manipulatorState.meanPosition = meanPosition;
       auto positionDiff = calcPositionDiff(manipulatorState.initialDragPosition.value(), projectedPosition, getInitialTransformation(manipulatorState, manipulatorState.manipulatorId).position, true);
