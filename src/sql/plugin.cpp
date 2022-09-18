@@ -124,6 +124,9 @@ int main(int argc, char *argv[]){
     }else if (strcmp(argv[1], "dotviz") == 0){
       std::cout << drawDotGraph() << std::endl;
       return 0;
+    }else if (strcmp(argv[1], "help") == 0){
+      std::cout << "usage: " << argv[0] << " <command>, where command is shell, script, file, dotviz, or help" << std::endl;
+      return 0;
     }
   }
 
