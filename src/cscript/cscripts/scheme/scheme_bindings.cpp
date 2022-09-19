@@ -2,11 +2,9 @@
 
 namespace sql {
   typedef std::map<std::string, std::string> (*sql_func_map)();
-  void sqlRegisterGetArgs(sql_func_map getArgsFn);
   void sqlRegisterGuileFns();
   void sqlRegisterGuileTypes();
 
-  std::string dataDir = "./res/data/sql/";
   SCM sqlNestedVecToSCM(std::vector<std::vector<std::string>>& list){
     SCM scmList = scm_make_list(scm_from_unsigned_integer(list.size()), scm_from_unsigned_integer(0));
     for (int i = 0; i < list.size(); i++){
@@ -32,16 +30,18 @@ namespace sql {
     return query -> query;
   }
   
+  std::vector<std::vector<std::string>> (*_executeSqlQuery)(sql::SqlQuery& query);
   SCM scmSql(SCM sqlQuery){
     auto query = queryFromForeign(sqlQuery);
-    auto sqlResult = executeSqlQuery(*query, dataDir);
+    auto sqlResult = _executeSqlQuery(*query);
     return sqlNestedVecToSCM(sqlResult);
   } 
   
+  sql::SqlQuery (*_compileSqlQuery)(std::string queryString);
   SCM scmSqlCompile(SCM sqlQueryString){
     auto queryObj = (sqlQueryHolder*)scm_gc_malloc(sizeof(sqlQueryHolder), "sqlquery");
     SqlQuery* query = new SqlQuery;
-    *query = compileSqlQuery(scm_to_locale_string(sqlQueryString));
+    *query = _compileSqlQuery(scm_to_locale_string(sqlQueryString));
     queryObj -> query = query;
     return scm_make_foreign_object_1(sqlObjectType, queryObj);
   }
@@ -60,13 +60,6 @@ namespace sql {
     sqlObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("sqlquery"), scm_list_1(scm_from_utf8_symbol("data")), finalizeSqlObjectType);
   }
   
-  void sqlRegisterGetArgs(sql_func_map getArgsFn){
-    std::cout << "SQL_INFO: registered get args fn: " << std::endl;
-    auto args = getArgsFn();
-    if (args.find("sqldir") != args.end()){
-      dataDir = args.at("sqldir");
-    }
-  }
 };
   
   
@@ -1462,8 +1455,9 @@ void createStaticSchemeBindings(
   _debugInfo = debugInfo;
 
   // sql should be pulled out
-  sql::sqlRegisterGetArgs(_getArgs);
   sql::sqlRegisterGuileTypes();
+  sql::_compileSqlQuery = compileSqlQuery;
+  sql::_executeSqlQuery = executeSqlQuery;
 
   _registerGuileFns = registerGuileFns;
 }

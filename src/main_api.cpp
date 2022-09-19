@@ -794,6 +794,17 @@ void markUserTexturesCleared(){
   }
 }
 
-std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query){
-  return sql::executeSqlQuery(query, "./res/data/sql");
+extern std::map<std::string, std::string> args;
+std::map<std::string, std::string> getArgs(){
+  return args;
 }
+
+std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query){
+  auto args = getArgs();
+  std::string directory = "./res/data/sql";
+  if (args.find("sqldir") != args.end()){
+    directory = args.at("sqldir");
+  }
+  return sql::executeSqlQuery(query, directory);
+}
+

@@ -745,9 +745,7 @@ void onObjDelete(objid id){
 }
 
 std::map<std::string, std::string> args;
-std::map<std::string, std::string> getArgs(){
-  return args;
-}
+
 
 float exposureAmount(){
   float elapsed = now - state.exposureStart;

@@ -182,5 +182,6 @@ void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::op
 void markUserTexturesCleared();
 
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query);
+std::map<std::string, std::string> getArgs();
 
 #endif
