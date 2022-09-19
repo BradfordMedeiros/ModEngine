@@ -6,7 +6,7 @@ namespace sql {
   void sqlRegisterGuileFns();
   void sqlRegisterGuileTypes();
 
-  std::string dataDir = "./res/state/";
+  std::string dataDir = "./res/data/sql/";
   SCM sqlNestedVecToSCM(std::vector<std::vector<std::string>>& list){
     SCM scmList = scm_make_list(scm_from_unsigned_integer(list.size()), scm_from_unsigned_integer(0));
     for (int i = 0; i < list.size(); i++){
@@ -67,7 +67,6 @@ namespace sql {
       dataDir = args.at("sqldir");
     }
   }
-  
 };
   
   
@@ -1463,6 +1462,7 @@ void createStaticSchemeBindings(
   _debugInfo = debugInfo;
 
   // sql should be pulled out
+  sql::sqlRegisterGetArgs(_getArgs);
   sql::sqlRegisterGuileTypes();
 
   _registerGuileFns = registerGuileFns;
