@@ -74,7 +74,7 @@
     }
   }
 
-  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos){
+  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos, $sqlBinding){
     $multiplier = 1;
     $depth = [
       0 => $zpos,
@@ -123,6 +123,11 @@
       "position" => "0 0 " . $depth[2],
     ];
 
+    if ($sqlBinding){
+      $default_rootLayout["sql-binding"] = $sqlBinding["binding"];
+      $default_rootLayout["sql-query"] = $sqlBinding["query"];
+    }
+
     include $file;
   }
 
@@ -146,10 +151,14 @@
       "title" => "Object Details",
       "items" => [
         [ "type" => "label", 
+          "sql" => [
+            "binding" => "sql-person-name",
+            "query" => "select name from people limit 1 offset 1"
+          ],  
           "data" => [
             "key" => "Another Label", 
             "value" => [
-              "binding" => "name",
+              "binding" => "sql-person-name",
             ],
           ]
         ],
@@ -491,7 +500,13 @@
 
     $rootElementName = "(" . $unique_control_id;
     $templateFile = $typeToTemplate[$type];
-    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos);
+    $sqlBinding = [];
+
+    if (array_key_exists("sql", $keyvaluePairs[$i])){
+      $sqlBinding = $keyvaluePairs[$i]["sql"];
+    }
+
+    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos, $sqlBinding);
     array_push($test_panel_elements, $rootElementName);
 
     echo ("\n");
