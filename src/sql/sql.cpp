@@ -477,42 +477,54 @@ void deleteRows(std::string tableName, SqlFilter& filter, std::string basePath){
   saveFile(tablePath(tableName, basePath), content);
 }
 
-std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::string dataDir){
+std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::string dataDir, bool* valid, std::string* error){
   assert(query.validQuery);
-  if (query.type == SQL_SELECT){
-    auto selectData = std::get_if<SqlSelect>(&query.queryData);
-    assert(selectData != NULL);
-    return select(query.table, selectData -> columns, selectData -> join, selectData -> filter, selectData -> orderBy, selectData -> groupby, selectData -> limit, selectData -> offset, dataDir);
-  }else if (query.type == SQL_INSERT){
-    auto insertData = std::get_if<SqlInsert>(&query.queryData);
-    assert(insertData != NULL);
-    insert(query.table, insertData -> columns, insertData -> values, dataDir);
+  *valid = true;
+  try {
+    if (query.type == SQL_SELECT){
+      auto selectData = std::get_if<SqlSelect>(&query.queryData);
+      assert(selectData != NULL);
+      return select(query.table, selectData -> columns, selectData -> join, selectData -> filter, selectData -> orderBy, selectData -> groupby, selectData -> limit, selectData -> offset, dataDir);
+    }else if (query.type == SQL_INSERT){
+      auto insertData = std::get_if<SqlInsert>(&query.queryData);
+      assert(insertData != NULL);
+      insert(query.table, insertData -> columns, insertData -> values, dataDir);
+      return {};
+    }else if (query.type == SQL_UPDATE){
+      auto updateData = std::get_if<SqlUpdate>(&query.queryData);
+      assert(updateData != NULL);
+      update(query.table, updateData -> columns, updateData -> values, dataDir);
+      return {};
+    }else if (query.type == SQL_DELETE){
+      auto deleteData = std::get_if<SqlDelete>(&query.queryData);
+      assert(deleteData != NULL);
+      deleteRows(query.table, deleteData -> filter, dataDir);
+      return {};
+    }else if (query.type == SQL_CREATE_TABLE){
+      auto createData = std::get_if<SqlCreate>(&query.queryData);
+      assert(createData != NULL);
+      createTable(query.table, createData -> columns, dataDir);
+      return {};
+    }else if (query.type == SQL_DELETE_TABLE){
+      deleteTable(query.table, dataDir);
+      return {};
+    }else if (query.type == SQL_DESCRIBE){
+      return describeTable(query.table, dataDir);
+    }else if (query.type == SQL_SHOW_TABLES){
+      return showTables(dataDir);
+    }
+    assert(false);
     return {};
-  }else if (query.type == SQL_UPDATE){
-    auto updateData = std::get_if<SqlUpdate>(&query.queryData);
-    assert(updateData != NULL);
-    update(query.table, updateData -> columns, updateData -> values, dataDir);
+  }catch (const std::exception & ex){
+    *valid = false;
+    *error = ex.what();
     return {};
-  }else if (query.type == SQL_DELETE){
-    auto deleteData = std::get_if<SqlDelete>(&query.queryData);
-    assert(deleteData != NULL);
-    deleteRows(query.table, deleteData -> filter, dataDir);
+  }catch (...){
+    *valid = false;
+    *error = "unknown sql error";
     return {};
-  }else if (query.type == SQL_CREATE_TABLE){
-    auto createData = std::get_if<SqlCreate>(&query.queryData);
-    assert(createData != NULL);
-    createTable(query.table, createData -> columns, dataDir);
-    return {};
-  }else if (query.type == SQL_DELETE_TABLE){
-    deleteTable(query.table, dataDir);
-    return {};
-  }else if (query.type == SQL_DESCRIBE){
-    return describeTable(query.table, dataDir);
-  }else if (query.type == SQL_SHOW_TABLES){
-    return showTables(dataDir);
   }
-  assert(false);
-  return {};
+
 }
 
 }

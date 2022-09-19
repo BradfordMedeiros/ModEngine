@@ -7,7 +7,7 @@
 #include "./util.h"
 
 namespace sql {
-	std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::string dataDir);
+	std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::string dataDir, bool* valid, std::string* error);
 }
 
 #endif

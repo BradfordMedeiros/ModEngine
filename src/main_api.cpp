@@ -799,12 +799,18 @@ std::map<std::string, std::string> getArgs(){
   return args;
 }
 
-std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query){
+std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid){
   auto args = getArgs();
   std::string directory = "./res/data/sql";
   if (args.find("sqldir") != args.end()){
     directory = args.at("sqldir");
   }
-  return sql::executeSqlQuery(query, directory);
+
+  std::string error = "";
+  auto result = sql::executeSqlQuery(query, directory, valid, &error);
+  if (!*valid){
+    modlog("sql", std::string("invalid query execution: " + error), MODLOG_ERROR);
+  }
+  return result;
 }
 

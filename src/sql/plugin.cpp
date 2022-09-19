@@ -24,7 +24,9 @@ int main(int argc, char *argv[]){
     }else if (strcmp(argv[1], "script") == 0){
       assert(argc >= 3);
       auto sqlQuery = compileSqlQuery(argv[2]);
-      auto rows = executeSqlQuery(sqlQuery, dataDir);
+      bool valid = false;
+      std::string error;
+      auto rows = executeSqlQuery(sqlQuery, dataDir, &valid, &error);
       for (auto row : rows){
         std::cout << join(row, ' ') << std::endl;
       }
@@ -47,7 +49,9 @@ int main(int argc, char *argv[]){
         return -1;
       }
       for (auto query : queries){
-        auto rows = executeSqlQuery(query, dataDir);
+        bool valid = false;
+        std::string error;
+        auto rows = executeSqlQuery(query, dataDir, &valid, &error);
         for (auto row : rows){
           std::cout << join(row, ' ') << std::endl;
         }
@@ -90,7 +94,9 @@ int main(int argc, char *argv[]){
         auto sqlQuery = compileSqlQuery(value);
         if(sqlQuery.validQuery){
           if (executeQuery){
-            auto rows = executeSqlQuery(sqlQuery, dataDir);
+            bool valid = false;
+            std::string error;
+            auto rows = executeSqlQuery(sqlQuery, dataDir, &valid, &error);
             for (auto row : rows){
               std::cout << join(row, ' ') << std::endl;
             }

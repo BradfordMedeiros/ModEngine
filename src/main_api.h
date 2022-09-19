@@ -181,7 +181,7 @@ void freeTexture(std::string name, objid ownerId);
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
 void markUserTexturesCleared();
 
-std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query);
+std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid);
 std::map<std::string, std::string> getArgs();
 
 #endif
