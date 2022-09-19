@@ -8,8 +8,6 @@
 #include "./scheme_util.h"
 #include "../../../common/util.h"
 #include "../../../sql/sql.h"  // ideally move this away from being a direct dependency
-#include "../../../sql/plugin.h"  // ideally move this away from being a direct dependency
-
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),

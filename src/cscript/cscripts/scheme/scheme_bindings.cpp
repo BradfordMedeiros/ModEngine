@@ -1,5 +1,76 @@
 #include "./scheme_bindings.h"
 
+namespace sql {
+  typedef std::map<std::string, std::string> (*sql_func_map)();
+  void sqlRegisterGetArgs(sql_func_map getArgsFn);
+  void sqlRegisterGuileFns();
+  void sqlRegisterGuileTypes();
+
+  std::string dataDir = "./res/state/";
+  SCM sqlNestedVecToSCM(std::vector<std::vector<std::string>>& list){
+    SCM scmList = scm_make_list(scm_from_unsigned_integer(list.size()), scm_from_unsigned_integer(0));
+    for (int i = 0; i < list.size(); i++){
+      auto sublist = list.at(i);
+      SCM scmSubList = scm_make_list(scm_from_unsigned_integer(sublist.size()), scm_from_unsigned_integer(0));
+      for (int j = 0; j < sublist.size(); j++){
+        scm_list_set_x (scmSubList, scm_from_unsigned_integer(j), scm_from_locale_string(sublist.at(j).c_str()));
+      }
+      scm_list_set_x(scmList, scm_from_unsigned_integer(i), scmSubList);
+    }
+    return scmList;
+  }
+  
+  struct sqlQueryHolder {
+    SqlQuery* query;
+  };
+  
+  SCM sqlObjectType;  
+  SqlQuery* queryFromForeign(SCM sqlQuery){
+    sqlQueryHolder* query;
+    scm_assert_foreign_object_type(sqlObjectType, sqlQuery);
+    query = (sqlQueryHolder*)scm_foreign_object_ref(sqlQuery, 0); 
+    return query -> query;
+  }
+  
+  SCM scmSql(SCM sqlQuery){
+    auto query = queryFromForeign(sqlQuery);
+    auto sqlResult = executeSqlQuery(*query, dataDir);
+    return sqlNestedVecToSCM(sqlResult);
+  } 
+  
+  SCM scmSqlCompile(SCM sqlQueryString){
+    auto queryObj = (sqlQueryHolder*)scm_gc_malloc(sizeof(sqlQueryHolder), "sqlquery");
+    SqlQuery* query = new SqlQuery;
+    *query = compileSqlQuery(scm_to_locale_string(sqlQueryString));
+    queryObj -> query = query;
+    return scm_make_foreign_object_1(sqlObjectType, queryObj);
+  }
+  
+  void finalizeSqlObjectType(SCM sqlQuery){
+    auto query = queryFromForeign(sqlQuery);
+    delete query;
+  }
+  
+  void sqlRegisterGuileFns() { 
+   scm_c_define_gsubr("sql", 1, 0, 0, (void*)scmSql);
+   scm_c_define_gsubr("sql-compile", 1, 0, 0, (void*)scmSqlCompile);
+  }
+  
+  void sqlRegisterGuileTypes(){
+    sqlObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("sqlquery"), scm_list_1(scm_from_utf8_symbol("data")), finalizeSqlObjectType);
+  }
+  
+  void sqlRegisterGetArgs(sql_func_map getArgsFn){
+    std::cout << "SQL_INFO: registered get args fn: " << std::endl;
+    auto args = getArgsFn();
+    if (args.find("sqldir") != args.end()){
+      dataDir = args.at("sqldir");
+    }
+  }
+  
+};
+  
+  
 int32_t (*_listSceneId)(int32_t objid);
 SCM scm_listSceneId(SCM id){
   auto objId = scm_to_int32(id);
@@ -1183,7 +1254,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("uninstall-mod", 1, 0, 0, (void*)scmUninstallMod);
   scm_c_define_gsubr("list-mods", 0, 0, 0, (void*)scmListMods);
 
-  sql::registerGuileFns();
+  sql::sqlRegisterGuileFns();
 
   for (auto registerFn : _registerGuileFns){
     registerFn();
@@ -1392,7 +1463,7 @@ void createStaticSchemeBindings(
   _debugInfo = debugInfo;
 
   // sql should be pulled out
-  sql::registerGuileTypes();
+  sql::sqlRegisterGuileTypes();
 
   _registerGuileFns = registerGuileFns;
 }
