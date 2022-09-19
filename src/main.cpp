@@ -1346,6 +1346,8 @@ int main(int argc, char* argv[]){
     .installMod = installMod,
     .uninstallMod = uninstallMod,
     .listMods = listMods,
+    .compileSqlQuery = sql::compileSqlQuery,
+    .executeSqlQuery = executeSqlQuery,
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) });
 

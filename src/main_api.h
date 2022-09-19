@@ -22,6 +22,7 @@
 #include "./benchstats.h"
 #include "./lines.h"
 #include "./colorselection.h"
+#include "./sql/sql.h"
 
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
@@ -180,5 +181,6 @@ void freeTexture(std::string name, objid ownerId);
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture);
 void markUserTexturesCleared();
 
+std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query);
 
 #endif

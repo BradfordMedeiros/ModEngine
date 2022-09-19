@@ -2,8 +2,9 @@
 #include <libguile.h>
 #include "./sql.h"
 #include "./sqlparse.h"
+#include "./plugin.h"
 
-using namespace sql;
+namespace sql {
 
 std::string dataDir = "./res/state/";
 
@@ -52,19 +53,15 @@ void finalizeSqlObjectType(SCM sqlQuery){
   delete query;
 }
 
-void registerGuileFns() asm ("registerGuileFns");
 void registerGuileFns() { 
  scm_c_define_gsubr("sql", 1, 0, 0, (void*)scmSql);
  scm_c_define_gsubr("sql-compile", 1, 0, 0, (void*)scmSqlCompile);
 }
 
-void registerGuileTypes() asm("registerGuileTypes");
 void registerGuileTypes(){
   sqlObjectType = scm_make_foreign_object_type(scm_from_utf8_symbol("sqlquery"), scm_list_1(scm_from_utf8_symbol("data")), finalizeSqlObjectType);
 }
 
-typedef std::map<std::string, std::string> (*func_map)();
-void registerGetArgs(func_map getArgsFn) asm("registerGetArgs");
 void registerGetArgs(func_map getArgsFn){
   std::cout << "SQL_INFO: registered get args fn: " << std::endl;
   auto args = getArgsFn();
@@ -74,9 +71,12 @@ void registerGetArgs(func_map getArgsFn){
 }
 
 
+}
+
 #ifdef BINARY_MODE
 
 #include "./sqlparse_test.h"
+using namespace sql;
 
 typedef void (*func_t)();
 struct TestCase {

@@ -5,6 +5,7 @@
 #include <functional>
 #include <glm/gtx/compatibility.hpp>
 #include "../common/util.h"
+#include "../sql/sql.h"  // ideally move this away from being a direct dependency
 
 struct CustomApiBindings {
   int32_t (*listSceneId)(int32_t objid);
@@ -95,6 +96,10 @@ struct CustomApiBindings {
   void (*installMod)(std::string layer);
   void (*uninstallMod)(std::string layer);
   std::vector<std::string> (*listMods)();
+
+  sql::SqlQuery (*compileSqlQuery)(std::string queryString);
+  std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query);
+
   //std::vector<func_t> registerGuileFns
 };
 

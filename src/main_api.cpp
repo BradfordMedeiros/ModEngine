@@ -793,3 +793,7 @@ void markUserTexturesCleared(){
     userTexture.shouldClear = false;
   }
 }
+
+std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query){
+  return sql::executeSqlQuery(query, "./res/data/sql");
+}

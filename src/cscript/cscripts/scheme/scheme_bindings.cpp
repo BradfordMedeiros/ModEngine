@@ -1183,6 +1183,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("uninstall-mod", 1, 0, 0, (void*)scmUninstallMod);
   scm_c_define_gsubr("list-mods", 0, 0, 0, (void*)scmListMods);
 
+  sql::registerGuileFns();
+
   for (auto registerFn : _registerGuileFns){
     registerFn();
   }
@@ -1274,6 +1276,8 @@ void createStaticSchemeBindings(
   void (*installMod)(std::string layer),
   void (*uninstallMod)(std::string layer),
   std::vector<std::string> (*listMods)(),
+  sql::SqlQuery (*compileSqlQuery)(std::string queryString),
+  std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1386,6 +1390,9 @@ void createStaticSchemeBindings(
   _lock = lock;
   _unlock = unlock;
   _debugInfo = debugInfo;
+
+  // sql should be pulled out
+  sql::registerGuileTypes();
 
   _registerGuileFns = registerGuileFns;
 }

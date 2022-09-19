@@ -7,6 +7,9 @@
 #include "./scriptmanager.h"      // need to eliminate the circular relationship here
 #include "./scheme_util.h"
 #include "../../../common/util.h"
+#include "../../../sql/sql.h"  // ideally move this away from being a direct dependency
+#include "../../../sql/plugin.h"  // ideally move this away from being a direct dependency
+
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
@@ -94,6 +97,8 @@ void createStaticSchemeBindings(
   void (*installMod)(std::string layer),
   void (*uninstallMod)(std::string layer),
   std::vector<std::string> (*listMods)(),
+  sql::SqlQuery (*compileSqlQuery)(std::string queryString),
+  std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query),
   std::vector<func_t> registerGuileFns
 );
 
