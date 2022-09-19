@@ -217,6 +217,35 @@ void visualizeSubrotations(ManipulatorTools& tools, ManipulatorUpdateInfo& updat
   drawRotation(positions, rotateInfo.meanPosition, rotateInfo.rotationOrientation, rotateInfo.cameraPosition, rotateInfo.selectDir, rotateInfo.intersection, rotateInfo.rotationAmount, tools.drawLine);
 }
 
+bool isPositivePartition(glm::vec3 meanPosition, glm::vec3 position, Axis axis){
+  if (axis == XAXIS){
+    return position.x > meanPosition.x;
+  }else if (axis == YAXIS){
+    return position.y > meanPosition.y;
+  }else if (axis == ZAXIS){
+    return position.z > meanPosition.z;
+  }
+  modassert(axis != NOAXIS, "invalid axis, must not be noaxis");
+  return true;
+}
+
+void visualizePartitionPlane(ManipulatorData& manipulatorState, ManipulatorTools& tools, glm::vec3 meanPosition){
+  float size = 100.f;
+  auto orientation = axisToOrientation(manipulatorState.manipulatorObject);
+  auto cornerBottomLeft = size * (orientation * glm::vec3 (-1.f, -1.f, 0.f)) + meanPosition;
+  auto cornerTopLeft = size * (orientation * glm::vec3 (-1.f, 1.f, 0.f)) + meanPosition;
+  auto cornerTopRight = size * (orientation * glm::vec3 (1.f, 1.f, 0.f)) + meanPosition;
+  auto coronerBottomRight = size * (orientation * glm::vec3 (1.f, -1.f, 0.f)) + meanPosition;
+
+  tools.drawLine(cornerBottomLeft, cornerTopLeft, BLUE);
+  tools.drawLine(cornerTopLeft, cornerTopRight, BLUE);
+  tools.drawLine(cornerTopRight, coronerBottomRight, BLUE);
+  tools.drawLine(coronerBottomRight, cornerBottomLeft, BLUE);
+
+  tools.drawLine(cornerTopLeft, coronerBottomRight, BLUE);
+  tools.drawLine(cornerTopRight, cornerBottomLeft, BLUE);
+}
+
 void updateManipulatorToCurrentObjTranslate(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
   auto manipulatorId = manipulatorState.manipulatorId;
   auto selectedObjs = tools.getSelectedIds();
@@ -260,6 +289,9 @@ std::vector<ManipulatorState> manipulatorStates = {
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPositionRaw;
       }
+      auto meanPosition = manipulatorState.meanPosition.has_value() ? manipulatorState.meanPosition.value() : calcMeanPosition(idToPositions(update.selectedObjs.selectedIds, tools.getPosition));
+      manipulatorState.meanPosition = meanPosition;
+
       auto positionDiff = projectedPositionRaw - manipulatorState.initialDragPosition.value();
       positionDiff = (update.options.manipulatorPositionMode == SNAP_RELATIVE) ? tools.snapPosition(positionDiff) : positionDiff;
 
@@ -267,9 +299,23 @@ std::vector<ManipulatorState> manipulatorStates = {
       auto manipulatorPos =  (update.options.manipulatorPositionMode == SNAP_ABSOLUTE) ? tools.snapPosition(oldManipulatorPos + positionDiff) : (oldManipulatorPos + positionDiff);
       auto actualPositionDiff = manipulatorPos - oldManipulatorPos;
       tools.setPosition(manipulatorState.manipulatorId, manipulatorPos);
+
+      auto translateMirror = update.options.translateMirror && update.selectedObjs.selectedIds.size() > 1;
+      if (translateMirror){
+        visualizePartitionPlane(manipulatorState, tools, meanPosition);  
+      }
+
+      auto mainObjOnPositivePartition = isPositivePartition(meanPosition, getInitialTransformation(manipulatorState, update.selectedObjs.mainObj.value()).position, manipulatorState.manipulatorObject);
       for (auto &targetId : update.selectedObjs.selectedIds){
         auto oldPosition = getInitialTransformation(manipulatorState, targetId).position;
-        auto newPosition = oldPosition + actualPositionDiff;
+        auto deltaPosition = actualPositionDiff;
+        if (translateMirror){
+          auto currObjOnPositivePartition = isPositivePartition(meanPosition, oldPosition, manipulatorState.manipulatorObject);
+          if (currObjOnPositivePartition != mainObjOnPositivePartition){
+            deltaPosition *= -1.f;
+          }
+        }
+        auto newPosition = oldPosition + deltaPosition;
         tools.setPosition(targetId, newPosition);
       }
     },

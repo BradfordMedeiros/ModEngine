@@ -49,6 +49,7 @@ struct engineState {
   Axis manipulatorAxis;
   objid manipulatorLineId;
   SNAPPING_MODE manipulatorPositionMode;
+  bool translateMirror;
   SNAPPING_MODE rotateMode;
   SCALING_GROUP scalingGroup;
   bool snapManipulatorScales;

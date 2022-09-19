@@ -405,6 +405,19 @@ std::vector<ObjectStateMapping> mapping = {
   },
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto positionMirror = std::get_if<std::string>(&value);
+      if (*positionMirror == "true"){
+        state.translateMirror = true;
+      }else if (*positionMirror == "false"){
+        state.translateMirror = false;
+      }
+      modassert(*positionMirror == "true" || *positionMirror == "false", "invalid tools position-mirror: " + *positionMirror);
+    },
+    .object = "tools",
+    .attribute = "position-mirror",
+  },
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorScales = std::get_if<std::string>(&value);
       if (snapManipulatorScales != NULL){
         state.snapManipulatorScales = *snapManipulatorScales == "true";
@@ -585,6 +598,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
 		.manipulatorAxis = NOAXIS,
     .manipulatorLineId = 0,
     .manipulatorPositionMode = SNAP_CONTINUOUS,
+    .translateMirror = false,
     .rotateMode = SNAP_CONTINUOUS,
     .scalingGroup = INDIVIDUAL_SCALING,
     .snapManipulatorScales = true,
