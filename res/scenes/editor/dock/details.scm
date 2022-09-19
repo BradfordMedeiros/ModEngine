@@ -75,6 +75,44 @@
 )
 (define (updateStoreValue keyvalue) (updateStoreValueModified keyvalue #f))
 
+(define (executeQuery query) (list (car query) (sql (sql-compile (cadr query)))))
+(define (extractFirstElement bindingName data)
+  (define firstRow (car data))
+  (if (> (length firstRow) 0)
+    (updateStoreValue (list bindingName (car firstRow)))
+  )
+)
+(define (populateSqlResults result) 
+  (if result
+    (let* ((bindingName (car result)) (data (cadr result)))
+      (if data
+        (extractFirstElement bindingName data)
+        (format #t "warning no data for sql binding: ~a\n" bindingName)
+      )
+    )
+  )
+)
+
+(define (bindingAndQueryFromObj obj)
+  (define attr (gameobj-attr obj))
+  (define sqlBinding (assoc "sql-binding" attr))
+  (define sqlQuery (assoc "sql-query" attr))
+  (define binding (if sqlBinding (cadr sqlBinding) #f))
+  (define query (if sqlQuery (cadr sqlQuery) #f))
+  (if (and binding query)
+    (list binding query)
+    #f
+  )
+)
+
+(define (populateSqlData)
+  (define allQueriesObj (lsobj-attr "sql-query"))
+  (define bindingQueryPair (map bindingAndQueryFromObj allQueriesObj))
+  (define queries (filter (lambda(x) x) bindingQueryPair))
+  (define results (map executeQuery queries))
+  (for-each populateSqlResults results)
+  (format #t "querypair: ~a\n" bindingQueryPair)
+)
 (define (refillStore gameobj)
   (clearStore)
   (updateStoreValue (list "object_name" (gameobj-name gameobj)))
@@ -85,6 +123,8 @@
   (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
   (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
   (updateStoreValue (list "runtime-sceneid" (number->string (list-sceneid (gameobj-id gameobj)))))
+
+  (populateSqlData)
 )
 
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))

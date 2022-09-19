@@ -492,9 +492,9 @@ GameObject gameObjectFromFields(std::string name, objid id, GameobjAttributes at
 
   object.additionalAttr = getAdditionalAttr(attributes, autoserializerFields);
 
-  std::cout << "additional attr: " << name << std::endl;
-  std::cout << print(object.additionalAttr) << std::endl << std::endl;
-  //object.attr = attributes; // lots of redundant information here, should only set attrs that aren't consumed elsewhere
+  //std::cout << "additional attr: " << name << std::endl;
+  //std::cout << print(object.additionalAttr) << std::endl << std::endl;
+  ////object.attr = attributes; // lots of redundant information here, should only set attrs that aren't consumed elsewhere
 //
 //  //std::cout << "gameobj from fields: " << name << std::endl;
 //  //std::cout << print(object.attr) << std::endl;

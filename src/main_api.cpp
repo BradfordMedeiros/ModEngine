@@ -801,7 +801,7 @@ std::map<std::string, std::string> getArgs(){
 
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid){
   auto args = getArgs();
-  std::string directory = "./res/data/sql";
+  std::string directory = "./res/data/sql/";
   if (args.find("sqldir") != args.end()){
     directory = args.at("sqldir");
   }
