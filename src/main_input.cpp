@@ -102,12 +102,10 @@ glm::vec2 ndiCoord(){
   float yNdc = -1 * (2 * (state.cursorTop  / (float)state.resolution.y) - 1);
   return glm::vec2(xNdc, yNdc);
 }
+
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
   //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
   onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
-  auto coords = ndiCoord();
-  cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
-  processManipulator();
 }
 
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
@@ -445,6 +443,9 @@ void handleInput(GLFWwindow* window){
   if (!disableInput){    // we return after escape, so escape still quits
     processKeyBindings(window, keyMapper);
   }
+  auto coords = ndiCoord();
+  cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
+  processManipulator();
 }
 
 void printControllerDebug(const unsigned char* buttons, int buttonCount){
