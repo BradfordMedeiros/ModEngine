@@ -203,6 +203,10 @@ int main(int argc, char *argv[]){
       .test = testCompileSqlUpdate,
     },
     TestCase {
+      .name = "testCompileSqlUpdateWhere",
+      .test = testCompileSqlUpdateWhere,
+    },
+    TestCase {
       .name = "testCompileSqlOffset",
       .test = testCompileSqlOffset,
     },

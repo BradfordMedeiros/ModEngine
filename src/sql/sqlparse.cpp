@@ -558,36 +558,43 @@ std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineF
     query.type = SQL_DELETE;
     query.queryData = SqlDelete{};
   }},
-  {"EQUAL:delete_where_val", [](SqlQuery& query, LexTokens* token) -> void {
-      SqlDelete* deleteQuery = std::get_if<SqlDelete>(&query.queryData);
+};
+
+template <typename T>
+int addWhereStateFns(std::string suffix, std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& machineFns){
+  machineFns[std::string("EQUAL:") + suffix] =  [](SqlQuery& query, LexTokens* token) -> void {
+      T* deleteQuery = std::get_if<T>(&query.queryData);
       assert(deleteQuery != NULL);
       deleteQuery -> filter.hasFilter = true;
       deleteQuery -> filter.type = EQUAL;
-  }},
-  {"OPERATOR:delete_where_val", [](SqlQuery& query, LexTokens* token) -> void {
+  };
+  machineFns[std::string("OPERATOR:") + suffix] = [](SqlQuery& query, LexTokens* token) -> void {
       auto operatorToken = std::get_if<OperatorToken>(token);
       assert(operatorToken != NULL);
-      SqlDelete* deleteQuery = std::get_if<SqlDelete>(&query.queryData);
+      T* deleteQuery = std::get_if<T>(&query.queryData);
       assert(deleteQuery != NULL);
       deleteQuery -> filter.hasFilter = true;
       deleteQuery -> filter.type = operatorToken -> type;
-  }},
-  {"IDENTIFIER_TOKEN:delete_where_val", [](SqlQuery& query, LexTokens* token) -> void {
+  };
+  machineFns[std::string("IDENTIFIER_TOKEN:") + suffix] = [](SqlQuery& query, LexTokens* token) -> void {
       auto identifierToken = std::get_if<IdentifierToken>(token);
       assert(identifierToken != NULL);
-      SqlDelete* deleteQuery = std::get_if<SqlDelete>(&query.queryData);
+      T* deleteQuery = std::get_if<T>(&query.queryData);
       assert(deleteQuery != NULL);
       deleteQuery -> filter.column = identifierToken -> content;
-  }},
-  {"IDENTIFIER_TOKEN:delete_where_val2", [](SqlQuery& query, LexTokens* token) -> void {
+  };
+  machineFns[std::string("IDENTIFIER_TOKEN:") + suffix + "2"] = [](SqlQuery& query, LexTokens* token) -> void {
       auto identifierToken = std::get_if<IdentifierToken>(token);
       assert(identifierToken != NULL);
-      SqlDelete* deleteQuery = std::get_if<SqlDelete>(&query.queryData);
+      T* deleteQuery = std::get_if<T>(&query.queryData);
       assert(deleteQuery != NULL);
       deleteQuery -> filter.hasFilter = true;
       deleteQuery -> filter.value = identifierToken -> content;
-  }},
-};
+  };
+  return 0;
+}
+
+auto _ = addWhereStateFns<SqlDelete>("delete_where_val", machineFns);
 
 std::map<std::string, TokenState> createMachine(std::string transitionsStr, std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& fns){
   std::map<std::string, TokenState> machine;
@@ -614,6 +621,7 @@ std::map<std::string, TokenState> machine = createMachine(machineTransitions, ma
 
 
 SqlQuery parseTokens(std::vector<LexTokens> lexTokens){
+  //std::cout << "machine: " << std::endl << machineTransitions << std::endl;
   SqlQuery query {
     .validQuery = false,
     .type = SQL_SELECT,

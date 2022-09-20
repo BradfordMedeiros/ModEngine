@@ -8,6 +8,7 @@
 #include <functional>
 #include <variant>
 #include <stdio.h>
+#include <iostream>
 #include "./util.h"
 
 namespace sql {
