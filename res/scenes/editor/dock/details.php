@@ -126,6 +126,7 @@
     if ($sqlBinding){
       $default_rootLayout["sql-binding"] = $sqlBinding["binding"];
       $default_rootLayout["sql-query"] = $sqlBinding["query"];
+      $default_rootLayout["sql-update"] = $sqlBinding["update"];
     }
 
     include $file;
@@ -153,7 +154,8 @@
         [ "type" => "label", 
           "sql" => [
             "binding" => "sql-person-name",
-            "query" => "select name from people limit 1 offset 1"
+            "query" => "select name from people where class = warrior limit 1",
+            "update" => 'update people set people.name = $VALUE where people.class = warrior'
           ],  
           "data" => [
             "key" => "Another Label", 

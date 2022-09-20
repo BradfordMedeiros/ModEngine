@@ -27,6 +27,58 @@
   (submitData)
   (populateData)
 )
+
+(define (queryUpdateForBinding bindingQueryPair) 
+  (lambda(updatedValue)
+    (let (
+        (sqlForUpdate (assoc (car updatedValue) bindingQueryPair))
+      )
+      (if sqlForUpdate
+        (list (cadr updatedValue) (caddr sqlForUpdate))
+        #f
+      )
+    )
+  )
+)
+
+(define (template sourceString template templateValue)
+  (define index (string-contains sourceString template))
+  (if index
+    (string-replace sourceString templateValue index (+ index (string-length template)))
+    sourceString
+  )
+)
+
+(define (bind-query query value)  ; would be nice to have something like (sql-compile "select $0 from $1" (list value0 value1))
+  (template query "$VALUE" (if value value "no_data"))
+)
+(define (submitSqlUpdates updatedValues)
+  (define allQueriesObj (lsobj-attr "sql-query"))
+  (define bindingQueryPair (map bindingAndQueryFromObj allQueriesObj))
+  (define queryUpdateWithValue (map (queryUpdateForBinding bindingQueryPair) updatedValues))
+  (for-each 
+    (lambda(updatedValue)
+      (let* (
+        (templateValue (car updatedValue)) 
+        (validQuery 
+          (not (or 
+            (equal? 0 (string-length templateValue))
+            (> (length (string-split templateValue #\ )) 1)
+          ))
+        )
+      )
+        (if validQuery
+          (sql (sql-compile (bind-query (cadr updatedValue) templateValue)))
+          (format #t "invalid template value\n")
+        )
+      )
+      ;(format #t "updated value: ~a\n" updatedValue)
+      ;(format #t "update query: ~a\n" (cadr updatedValue))
+    )
+    queryUpdateWithValue
+  )
+)
+
 (define (submitData)
   (if managedObj
     (begin
@@ -44,6 +96,7 @@
             )
           )
         ) updatedValues)
+        (submitSqlUpdates updatedValues)
       )
     )
   )
@@ -97,10 +150,12 @@
   (define attr (gameobj-attr obj))
   (define sqlBinding (assoc "sql-binding" attr))
   (define sqlQuery (assoc "sql-query" attr))
+  (define sqlUpdate (assoc "sql-update" attr))
   (define binding (if sqlBinding (cadr sqlBinding) #f))
   (define query (if sqlQuery (cadr sqlQuery) #f))
+  (define update (if sqlUpdate (cadr sqlUpdate) #f))
   (if (and binding query)
-    (list binding query)
+    (list binding query update)
     #f
   )
 )
