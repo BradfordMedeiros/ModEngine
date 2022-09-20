@@ -170,39 +170,23 @@ void testCompileSqlUpdate(){
   auto queryData = std::get_if<SqlUpdate>(&(sqlQuery1.queryData));
   assert(queryData != NULL);
   assert(queryData -> columns.at(0) == "name");
+  assert(queryData -> filter.hasFilter == false);
 }
 
 void testCompileSqlUpdateWhere(){
-  auto sqlQuery1 = compileSqlQuery("update atable set name = nonamehere where age = 50");
- // assert(sqlQuery1.validQuery);
- 
-  /*
-  struct SqlUpdate {
-  std::vector<std::string> columns;
-  std::vector<std::string> values;
-  SqlFilter filter;
-};
-struct SqlQuery {
-  bool validQuery;
-  SQL_QUERY_TYPE type;
-  std::string table;
-  std::variant<SqlSelect, SqlInsert, SqlCreate, SqlDropTable, SqlUpdate, SqlDelete, SqlShowTables, SqlDescribe> queryData;
-};
+  auto sqlQuery1 = compileSqlQuery("update somepeople set age = nonamehere where age = 50");
+  assert(sqlQuery1.validQuery);
+  assert(sqlQuery1.type == SQL_UPDATE);
+  assert(sqlQuery1.table == "somepeople");
+  auto queryData = std::get_if<SqlUpdate>(&(sqlQuery1.queryData));
+  assert(queryData != NULL);
+  assert(queryData -> columns.at(0) == "age");
+  assert(queryData -> values.at(0) == "nonamehere");
 
-enum OperatorType { GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL, EQUAL, NOT_EQUAL };
-struct OperatorToken {
-  OperatorType type;
-};
-struct SqlFilter {
-  bool hasFilter;
-  std::string column;
-  std::string value;
-  OperatorType type;
-};
-
-
-*/
-  throw std::logic_error("where update not yet implemented");
+  assert(queryData -> filter.hasFilter);
+  assert(queryData -> filter.column == "age");
+  assert(queryData -> filter.value == "50");
+  assert(queryData -> filter.type == EQUAL);
 }
 
 void testCompileSqlOffset(){

@@ -329,7 +329,7 @@ generateWhere("whereselect") +
 "IDENTIFIER_TOKEN:tableupdate_val *END*\n"
 "IDENTIFIER_TOKEN:tableupdate_val SPLICE tableupdate_val\n"
 "SPLICE:tableupdate_val IDENTIFIER_TOKEN tableupdate_col\n"
-"IDENTIFIER_TOKEN:tableupdate_val WHERE tableupdate\n" + 
+"IDENTIFIER_TOKEN:tableupdate_val WHERE tableupdate_where\n" + 
 generateWhere("tableupdate_where") +
 
 "DELETE FROM delete_vals\n"
@@ -504,24 +504,6 @@ std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineF
     assert(identifierToken != NULL);
     updateQuery -> values.push_back(identifierToken -> content);   
   }},
-  {"IDENTIFIER_TOKEN:tableupdatef_col", [](SqlQuery& query, LexTokens* token) -> void {
-    auto updateQuery = std::get_if<SqlUpdate>(&query.queryData);
-    assert(updateQuery != NULL);
-    auto identifierToken = std::get_if<IdentifierToken>(token);
-    assert(identifierToken != NULL);
-    updateQuery -> values.push_back(identifierToken -> content);   
-    updateQuery -> filter.hasFilter = true;
-    updateQuery -> filter.column = identifierToken -> content;
-  }},
-  {"IDENTIFIER_TOKEN:tableupdatef_val", [](SqlQuery& query, LexTokens* token) -> void {
-    auto updateQuery = std::get_if<SqlUpdate>(&query.queryData);
-    assert(updateQuery != NULL);
-    auto identifierToken = std::get_if<IdentifierToken>(token);
-    assert(identifierToken != NULL);
-    updateQuery -> values.push_back(identifierToken -> content);   
-    updateQuery -> filter.hasFilter = true;
-    updateQuery -> filter.value = identifierToken -> content;
-  }},
   {"IDENTIFIER_TOKEN:delete_vals", [](SqlQuery& query, LexTokens* token) -> void {
     auto identifierToken = std::get_if<IdentifierToken>(token);
     assert(identifierToken != NULL);
@@ -567,6 +549,7 @@ int addWhereStateFns(std::string suffix, std::map<std::string, std::function<voi
 
 auto _1 = addWhereStateFns<SqlDelete>("delete_where_val", machineFns);
 auto _2 = addWhereStateFns<SqlSelect>("whereselect", machineFns);
+auto _3 = addWhereStateFns<SqlUpdate>("tableupdate_where", machineFns);
 
 std::map<std::string, TokenState> createMachine(std::string transitionsStr, std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>>& fns){
   std::map<std::string, TokenState> machine;
