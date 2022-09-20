@@ -444,17 +444,46 @@ void insert(std::string tableName, std::vector<std::string> columns, std::vector
   appendFile(tablePath(tableName, basePath), newContent);
 }
 
-void update(std::string tableName, std::vector<std::string>& columns, std::vector<std::string>& values, std::string basePath){
+std::string print(std::vector<std::string>& values){
+  std::string valueStr = "";
+  for (auto &value : values){
+    valueStr += value + " ";
+  }
+  return valueStr;
+}
+
+std::vector<std::string> updateRow(std::vector<std::string> values, std::vector<int> columns, std::vector<std::string> newValues){
+  for (int i = 0; i < columns.size(); i++){
+    values.at(columns.at(i)) = newValues.at(i);
+  }
+  return values;
+}
+
+void update(std::string tableName, std::vector<std::string>& columns, std::vector<std::string>& values, SqlFilter& filter, std::string basePath){
   auto header = readHeader(tableName, basePath);
   auto allRows = select(tableName, header, {}, SqlFilter{ .hasFilter = false }, SqlOrderBy{}, {}, -1, 0, basePath);
 
   std::string content = createHeader(header);
+
+  auto columnIndexesToUpdate = getColumnIndexs(header, columns);
+
   for (auto row : allRows){
-    if (false){ // this is wrong
-      content = content + "this one should be updated\n";
+    bool applyUpdate = true;
+    if (filter.hasFilter){
+      auto filterIndex = getColumnIndexs(header, { filter.column }).at(0);
+      auto column = row.at(filterIndex);
+      auto passFilter = passesFilter(column, filter);
+      if (!passFilter){
+        applyUpdate = false;
+      }
+    }
+
+    if (applyUpdate){
+      content = content + createRow(updateRow(row, columnIndexesToUpdate, values));
     }else{
       content = content + createRow(row);
     }
+    
   }
   saveFile(tablePath(tableName, basePath), content);
 }
@@ -493,7 +522,7 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::stri
     }else if (query.type == SQL_UPDATE){
       auto updateData = std::get_if<SqlUpdate>(&query.queryData);
       assert(updateData != NULL);
-      update(query.table, updateData -> columns, updateData -> values, dataDir);
+      update(query.table, updateData -> columns, updateData -> values, updateData -> filter, dataDir);
       return {};
     }else if (query.type == SQL_DELETE){
       auto deleteData = std::get_if<SqlDelete>(&query.queryData);
@@ -524,7 +553,6 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::stri
     *error = "unknown sql error";
     return {};
   }
-
 }
 
 }
