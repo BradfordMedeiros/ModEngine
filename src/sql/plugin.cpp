@@ -100,6 +100,9 @@ int main(int argc, char *argv[]){
             for (auto row : rows){
               std::cout << join(row, ' ') << std::endl;
             }
+            if (!valid){
+              std::cout << "error executing query: " << error << std::endl;
+            }
           }else{
             std::cout << "Valid query" << std::endl;
           }

@@ -488,7 +488,14 @@ std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineF
     assert(identifierToken != NULL);
     query.table = identifierToken -> content;
     query.type = SQL_UPDATE;
-    query.queryData = SqlUpdate{};
+    query.queryData = SqlUpdate{
+      .columns = {},
+      .values = {},
+      .filter =  SqlFilter {
+         .hasFilter = false,
+      },
+    };
+    
   }},
   {"IDENTIFIER_TOKEN:tableupdate_col", [](SqlQuery& query, LexTokens* token) -> void {
     auto updateQuery = std::get_if<SqlUpdate>(&query.queryData);

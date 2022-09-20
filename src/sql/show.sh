@@ -1,4 +1,4 @@
 #!/bin/sh
 
 dotconfig=$(./plugin dotviz)
-(cd ../../ModEngine/res/tools && ./showscene.sh "$dotconfig")
+(cd ../../res/tools && ./showscene.sh "$dotconfig")
