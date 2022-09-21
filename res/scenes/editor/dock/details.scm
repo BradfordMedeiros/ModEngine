@@ -55,7 +55,9 @@
 (define (submitSqlUpdates updatedValues)
   (define allQueriesObj (lsobj-attr "sql-query"))
   (define bindingQueryPair (map bindingAndQueryFromObj allQueriesObj))
-  (define queryUpdateWithValue (map (queryUpdateForBinding bindingQueryPair) updatedValues))
+  (define queryUpdateWithValue (filter (lambda(x) x) (map (queryUpdateForBinding bindingQueryPair) updatedValues)))
+  ;(format #t "updated values: ~a\n" updatedValues)
+  ;(format #t "queryUpdateWithValue : ~a\n" queryUpdateWithValue)
   (for-each 
     (lambda(updatedValue)
       (let* (
@@ -101,10 +103,19 @@
     )
   )
 )
+
+(define (prettyPrint attr)
+  (for-each 
+    (lambda(val) 
+      (format #t "~a\n" val)
+    )
+    attr
+  )
+)
 (define (onKeyChar key)
   (format #t "key is: ~a\n" key)
   (if (equal? key 44) ; comma
-    (format #t "~a\n" dataValues) 
+    (prettyPrint dataValues)
   )
   (if (isSubmitKey key) (submitAndPopulateData))
 )
@@ -585,7 +596,7 @@
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (define bindingOn (assoc "details-binding-on" objattr))
   (define enableValue (if bindingOn (cadr bindingOn) #f))
-  ;(format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
+  ;;(format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
   (if (and shouldSet enableValue detailBinding) 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex enableValue) #t)
   )
@@ -636,6 +647,7 @@
   (define reselectAttr (assoc "details-reselect" objattr))
   (define objInScene (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj))))
   (define managedText (and objInScene (isManagedText gameobj)))
+  (format #t "placeholder\n")
   (if (and objInScene reselectAttr)
     (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
     (begin

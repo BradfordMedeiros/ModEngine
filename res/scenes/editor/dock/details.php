@@ -211,18 +211,25 @@
             ],
           ],
         ],
-        [
+        
+         [
           "type" => "options",
+          "sql" => [
+            "binding" => "sql-tree-type",
+            "query" => "select tree_type from trees where growth_rate = medium limit 1",
+            "update" => 'update trees set trees.tree_type  = $VALUE where trees.growth_rate = medium',
+          ],  
           "data" => [
-            "key" => "physics-shape", 
+            "key" => "treetype", 
             "options" => [
-              [ "label" => "auto", "binding" => "physics_shape", "binding-on" => "shape_auto" ],
-              [ "label" => "box", "binding" => "physics_shape", "binding-on" => "shape_box" ],
-              [ "label" => "sphere", "binding" => "physics_shape", "binding-on" => "shape_sphere" ],
+              [ "label" => "big tree", "binding" => "sql-tree-type", "binding-on" => "big_tree" ],
+              [ "label" => "medium tree", "binding" => "sql-tree-type", "binding-on" => "medium_tree" ],
+              [ "label" => "small tree", "binding" => "sql-tree-type", "binding-on" => "small_tree" ],
    
             ],
           ],
         ],
+
         /*[
           "type" => "numeric",
           "data" => [
