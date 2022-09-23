@@ -56,21 +56,22 @@
   (define allQueriesObj (lsobj-attr "sql-query"))
   (define bindingQueryPair (map bindingAndQueryFromObj allQueriesObj))
   (define queryUpdateWithValue (filter (lambda(x) x) (map (queryUpdateForBinding bindingQueryPair) updatedValues)))
-  ;(format #t "updated values: ~a\n" updatedValues)
+  (format #t "updated values: ~a\n" updatedValues)
   ;(format #t "queryUpdateWithValue : ~a\n" queryUpdateWithValue)
   (for-each 
     (lambda(updatedValue)
       (let* (
         (templateValue (car updatedValue)) 
+        (typeCorrectValue (if (number? templateValue) (number->string templateValue) templateValue))
         (validQuery 
           (not (or 
-            (equal? 0 (string-length templateValue))
-            (> (length (string-split templateValue #\ )) 1)
+            (equal? 0 (string-length typeCorrectValue))
+            (> (length (string-split typeCorrectValue #\ )) 1)
           ))
         )
       )
         (if validQuery
-          (sql (sql-compile (bind-query (cadr updatedValue) templateValue)))
+          (sql (sql-compile (bind-query (cadr updatedValue) typeCorrectValue)))
           (format #t "invalid template value\n")
         )
       )
@@ -104,10 +105,18 @@
   )
 )
 
+(define (typeof val)
+  (cond
+    ((number? val) "number")
+    ((string? val) "string")
+    ((list? val)   "list")
+    (#t "unknown")
+  )
+)
 (define (prettyPrint attr)
   (for-each 
     (lambda(val) 
-      (format #t "~a\n" val)
+      (format #t "~a, type is = ~a\n" val (typeof (cadr val)))
     )
     attr
   )
@@ -139,18 +148,37 @@
 )
 (define (updateStoreValue keyvalue) (updateStoreValueModified keyvalue #f))
 
-(define (executeQuery query) (list (car query) (sql (sql-compile (cadr query)))))
-(define (extractFirstElement bindingName data)
+(define (executeQuery query) 
+  (define queryCast (list-ref query 3))
+  (list 
+    (car query) 
+    (sql 
+      (sql-compile 
+        (cadr query)
+      )
+    )
+    queryCast
+  )
+)
+(define (extractFirstElement bindingName data type)
   (define firstRow (car data))
   (if (> (length firstRow) 0)
-    (updateStoreValue (list bindingName (car firstRow)))
+    (updateStoreValue (list bindingName (castData (car firstRow) type)))
+  )
+)
+
+(define (castData val type)
+  (format #t "cast data: val = ~a, type = ~a\n" val type)
+  (cond 
+    ((equal? type "number") (string->number val))
+    (#t val)
   )
 )
 (define (populateSqlResults result) 
   (if result
     (let* ((bindingName (car result)) (data (cadr result)))
       (if data
-        (extractFirstElement bindingName data)
+        (extractFirstElement bindingName data (caddr result))
         (format #t "warning no data for sql binding: ~a\n" bindingName)
       )
     )
@@ -162,11 +190,13 @@
   (define sqlBinding (assoc "sql-binding" attr))
   (define sqlQuery (assoc "sql-query" attr))
   (define sqlUpdate (assoc "sql-update" attr))
+  (define sqlCast (assoc "sql-cast" attr))
   (define binding (if sqlBinding (cadr sqlBinding) #f))
   (define query (if sqlQuery (cadr sqlQuery) #f))
   (define update (if sqlUpdate (cadr sqlUpdate) #f))
+  (define cast (if sqlCast (cadr sqlCast) #f))
   (if (and binding query)
-    (list binding query update)
+    (list binding query update cast)
     #f
   )
 )
@@ -758,8 +788,7 @@
   (define obj (car attrpair))
   (define objType (getGameobjType obj))
   ;(format #t "binding index: ~a ~a\n" bindingIndex (number? bindingIndex))
-
-  (format #t "type for update dataValue is: ~a, value: ~a\n" (getType dataValue) dataValue)
+  ;(format #t "type for update dataValue is: ~a, value: ~a\n" (getType dataValue) dataValue)
 
   (if (and bindingIndex (list? dataValue) (< bindingIndex (length dataValue)))
     (set! dataValue (list-ref dataValue bindingIndex))
@@ -768,9 +797,9 @@
     (set! dataValue (number->string dataValue))
   )
   ;(format #t "data value: ~a\n" dataValue)
-  (format #t "update binding for: ~a\n" (gameobj-name obj))
-  (format #t "datavalues: ~a\n" dataValues)
-  (format #t "data = ~a, index = ~a\n" dataValue bindingIndex)
+  ;(format #t "update binding for: ~a\n" (gameobj-name obj))
+  ;(format #t "datavalues: ~a\n" dataValues)
+  ;(format #t "data = ~a, index = ~a\n" dataValue bindingIndex)
 
   (if dataValue
     (begin

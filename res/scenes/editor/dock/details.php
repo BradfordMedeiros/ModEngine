@@ -126,7 +126,12 @@
     if ($sqlBinding){
       $default_rootLayout["sql-binding"] = $sqlBinding["binding"];
       $default_rootLayout["sql-query"] = $sqlBinding["query"];
-      $default_rootLayout["sql-update"] = $sqlBinding["update"];
+      if (array_key_exists("update", $sqlBinding)){
+        $default_rootLayout["sql-update"] = $sqlBinding["update"];
+      }
+      if (array_key_exists("cast", $sqlBinding)){
+        $default_rootLayout["sql-cast"] = $sqlBinding["cast"];
+      }
     }
 
     include $file;
@@ -155,7 +160,8 @@
           "sql" => [
             "binding" => "sql-person-name",
             "query" => "select name from people where class = warrior limit 1",
-            "update" => 'update people set people.name = $VALUE where people.class = warrior'
+            "update" => 'update people set people.name = $VALUE where people.class = warrior',
+            "cast" => "string", # string, number (vec not yet implemented)
           ],  
           "data" => [
             "key" => "Another Label", 
@@ -200,7 +206,28 @@
             ],
           ],
         ],
-        */[
+        */
+
+        [
+          "type" => "checkbox",
+          "sql" => [
+            "binding" => "multiday-ticket",
+            "query" => "select tickets.multiday from tickets where tickets.name = single",
+            "update" => 'update tickets set tickets.multiday  = $VALUE where tickets.name = single',
+            "cast" => "string",
+          ],
+          "data" => [
+            "key" => "Is Multiday Ticket?", 
+            "value" => [
+              "binding" => "multiday-ticket",
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+
+
+        [
           "type" => "checkbox",
           "data" => [
             "key" => "enable physics", 
@@ -218,6 +245,7 @@
             "binding" => "sql-tree-type",
             "query" => "select tree_type from trees where growth_rate = medium limit 1",
             "update" => 'update trees set trees.tree_type  = $VALUE where trees.growth_rate = medium',
+            "cast" => "string",
           ],  
           "data" => [
             "key" => "treetype", 
@@ -257,6 +285,30 @@
             ]
           ],
         ],*/
+        [
+          "type" => "numeric",
+          "sql" => [
+            "binding" => "sql-trait-speed",
+            "query" => "select people.topspeed from people where people.name = john",
+            "update" => 'update people set people.topspeed = $VALUE where people.name = john',
+            "cast" => "number",
+          ], 
+          "data" => [
+            "key" => "Physics Tuning", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "physics max speed", 
+                "value" => [ 
+                  "binding" => "sql-trait-speed", 
+                  "type" => "number",
+                  "min" => 0,
+                  "max" => 100,
+                ],
+              ],
+            ]
+          ],
+        ],
         [
           "type" => "numeric",
           "data" => [
