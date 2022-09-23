@@ -298,6 +298,7 @@ void selectItem(objid selectedId, int layerSelectIndex){
   shouldCallItemSelected = true;
 
   setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
+  sendNotifyMessage("alert", std::string("selected: ") + selectedObject.name);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
 }
 

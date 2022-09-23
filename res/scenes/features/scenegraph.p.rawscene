@@ -1,2 +1,2 @@
 |loadscript:script:./res/scenes/features/scenegraph.scm
-|loadscript:depgraph:models
+|loadscript:depgraph:scenegraph

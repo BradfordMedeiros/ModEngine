@@ -514,7 +514,7 @@
             "key" => "Scenegraph",
             "mode" => "oneof",
             "values" => [
-              ["image" => "gentexture-scenegraph", "action" => "set-rotate-mode", "size" => "0.42 -1 0.16" ],
+              ["image" => "gentexture-scenegraph", "action" => "set-rotate-mode", "size" => "0.42 1 0.16" ],
             ],
             "type" => "vertical",
           ],
