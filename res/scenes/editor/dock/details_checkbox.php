@@ -28,7 +28,7 @@
   $checkboxName = "*" . $unique_control_id . "_" . "checkbox_check";
   $buttonFields = [
     "cantoggle" => "true",
-    "scale" => "0.02 -0.05 0.02",  # negative since some bug with button textures, should fix
+    "scale" => "0.02 0.05 0.02",  # negative since some bug with button textures, should fix
     "ontexture" => "./res/scenes/editor/dock/images/checked.png",
     "offtexture" => "./res/scenes/editor/dock/images/unchecked.png",
     "ontint" => "0 0 1 1",

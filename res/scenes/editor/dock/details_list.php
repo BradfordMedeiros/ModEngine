@@ -33,7 +33,7 @@
     $value = $values[$i];
     $listItemName = "*" . $unique_control_id . "_" . "list_item_" . $i;
 
-    $scale = "0.04 -0.1 0.04";
+    $scale = "0.04 0.1 0.04";
     if (array_key_exists("size", $value)){
       $scale = $value["size"];
     }
