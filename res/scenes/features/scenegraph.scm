@@ -456,6 +456,7 @@
 )
 
 (define (onScroll amount)
+	(format #t "onScroll called: ~a" amount)
   (set! offset (min maxOffset (max minOffset (+ offset (* 0.04 amount)))))
   ;(format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
   (refreshDepGraph)   
@@ -506,18 +507,13 @@
 	   			(toggleExpanded selectedName)
 	  			(onGraphChange)
 				)
-				(if (equal? mappedIndex selectedIndex)
-					(begin
-						(handleItemSelected selectedElement #f)
-					)
-					(begin
-						;(refreshDepGraph)
-	  				(setSelectedIndex mappedIndex)
-	  				(refreshGraphData)   
-	  				(onGraphChange)
-					)
+				(begin
+					;(refreshDepGraph)
+	  			(setSelectedIndex mappedIndex)
+	  			(refreshGraphData)   
+	  			(handleItemSelected selectedElement #f)
+	  			(onGraphChange)
 				)
-			
 			)
 		)
 	)

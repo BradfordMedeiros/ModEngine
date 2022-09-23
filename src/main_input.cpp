@@ -237,7 +237,7 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   cBindings.onScrollCallback(yoffset);
 
   auto selectedIndex = latestSelected(state.editor);
-  if (selectedIndex.has_value() && idExists(world.sandbox, selectedIndex.value())){
+  if (selectedIndex.has_value() && idExists(world.sandbox, selectedIndex.value()) && getLayerForId(selectedIndex.value()).selectIndex != -2){
     maybeChangeTexture(selectedIndex.value());
   }
 

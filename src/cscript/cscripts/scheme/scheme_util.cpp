@@ -272,7 +272,7 @@ std::optional<optionalValueData> getScmValueIfType(OptionalValueType optType, SC
     auto isType = scm_is_string(scmValue);
     if (isType){
       auto value = scm_to_locale_string(scmValue);
-      std::cout << "str value is: " << optValueToStr(value) << std::endl;
+      //std::cout << "str value is: " << optValueToStr(value) << std::endl;
       return std::string(value);
     }
   }
