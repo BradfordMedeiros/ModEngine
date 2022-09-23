@@ -61,7 +61,7 @@ static int _ = addCommonAutoserializer<GameObjectUIButton>(uiButtonAutoserialize
 GameObjectUIButton createUIButton(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUIButton obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, uiButtonAutoserializer, attr, util);
-  obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
+  obj.common.mesh = util.meshes.at("./res/models/controls/unitxy.obj").mesh;
   obj.common.isFocused = false;
   return obj;
 }

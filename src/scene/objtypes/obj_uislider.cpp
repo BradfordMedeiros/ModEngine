@@ -47,7 +47,7 @@ static int _ = addCommonAutoserializer<GameObjectUISlider>(uiSliderAutoserialize
 GameObjectUISlider createUISlider(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectUISlider obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, uiSliderAutoserializer, attr, util);
-  obj.common.mesh = util.meshes.at("./res/models/controls/input.obj").mesh;
+  obj.common.mesh = util.meshes.at("./res/models/controls/unitxy.obj").mesh;
   obj.common.isFocused = false;
 
   std::cout << "slider: textureId = " << obj.texture.textureId << ", opacityTexture = " << obj.opacityTexture.textureId << std::endl;

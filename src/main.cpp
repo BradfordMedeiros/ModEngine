@@ -1367,7 +1367,6 @@ int main(int argc, char* argv[]){
     "./res/models/cone/cone.obj",
     "../gameresources/build/objtypes/camera.gltf",
     "./res/models/box/plane.dae",
-    "./res/models/controls/input.obj",
     "./res/models/controls/unitxy.obj",  
     "../gameresources/build/objtypes/emitter.gltf",  
     "../gameresources/build/objtypes/sound.gltf",
