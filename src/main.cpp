@@ -251,9 +251,15 @@ void handleTerrainPainting(UVCoord uvCoord){
 
 
 ManipulatorSelection onManipulatorSelected(){
+  std::vector<objid> ids;
+  for (auto &id : selectedIds(state.editor)){
+    if (getLayerForId(id).selectIndex != -2){
+      ids.push_back(id);
+    }
+  }
   return ManipulatorSelection {
-    .mainObj = latestSelected(state.editor),
-    .selectedIds = selectedIds(state.editor),
+    .mainObj = ids.size() > 0 ? std::optional<objid>(ids.at(ids.size() - 1)) : std::optional<objid>(std::nullopt),
+    .selectedIds = ids,
   }; 
 }
 
@@ -298,7 +304,6 @@ void selectItem(objid selectedId, int layerSelectIndex){
   shouldCallItemSelected = true;
 
   setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
-  sendNotifyMessage("alert", std::string("selected: ") + selectedObject.name);
   state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
 }
 
