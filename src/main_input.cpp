@@ -236,10 +236,12 @@ void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
   scroll_callback(window, state, xoffset, yoffset);
   cBindings.onScrollCallback(yoffset);
 
-  auto selectedIndex = latestSelected(state.editor);
-  if (selectedIndex.has_value() && idExists(world.sandbox, selectedIndex.value()) && getLayerForId(selectedIndex.value()).selectIndex != -2){
-    maybeChangeTexture(selectedIndex.value());
+  for (auto &selectedIndex : selectedIds(state.editor)){
+    if (idExists(world.sandbox, selectedIndex) && getLayerForId(selectedIndex).selectIndex != -2){
+      maybeChangeTexture(selectedIndex);
+    }
   }
+ 
 
   for (auto voxelData : getSelectedVoxels()){ 
     auto activeTexture = activeTextureId();
