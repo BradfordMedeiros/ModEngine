@@ -324,6 +324,7 @@
 	(resetMinOffset)
 	(clearBaseNumberMapping)
 	(set! maxIndex index)
+	(setMinOffset index)
 	(for-each
 		(lambda (drawElement)
 			(let (
@@ -458,7 +459,7 @@
 (define (onScroll amount)
 	(format #t "onScroll called: ~a" amount)
   (set! offset (min maxOffset (max minOffset (+ offset (* 0.04 amount)))))
-  ;(format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
+  (format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
   (refreshDepGraph)   
 	(onGraphChange)
 )
