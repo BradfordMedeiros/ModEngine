@@ -246,8 +246,9 @@
 	(define isExpanded (checkExpanded target sceneId))
 	(define height (getIndex))
 	(define mappingNumber (+ baseNumber height))
+	(define hasChildren (> (length childElements) 0))
 	(begin
-		 (addDrawList target sceneId depth height isExpanded mappingNumber)
+		 (addDrawList target sceneId depth height isExpanded mappingNumber hasChildren)
 	   (if isExpanded
 	     (for-each 
 	     	(lambda(target)
@@ -305,8 +306,8 @@
 
 	(define drawList (list))
 	(define addDrawList (
-		lambda(target sceneId depth height isExpanded mappingNumber)
-			(set! drawList (reverse (cons (list target sceneId depth height isExpanded (equal? selectedIndex height) mappingNumber) (reverse drawList))))
+		lambda(target sceneId depth height isExpanded mappingNumber hasChildren)
+			(set! drawList (reverse (cons (list target sceneId depth height isExpanded (equal? selectedIndex height) mappingNumber hasChildren) (reverse drawList))))
 			;(format #t "add draw list: ~a\n" drawList)
 		)
 	)
@@ -353,17 +354,20 @@
 					(expanded (list-ref drawElement 4))
 					(isSelected (list-ref drawElement 5))
 					(mappingNumber (list-ref drawElement 6))
+					(hasChildren (list-ref drawElement 7))
 				)
-				(draw-text-ndi
-					(if expanded "E" "N")
-					(calcX depth) 
-					(calcY height) 
-					fontsize
-					;"./res/fonts/Walby-Regular.ttf"
-					"./res/textures/fonts/gamefont"
-					(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
-					textureId
-					mappingNumber
+				(if hasChildren
+					(draw-text-ndi
+						(if expanded "E" "N")
+						(calcX depth) 
+						(calcY height) 
+						fontsize
+						;"./res/fonts/Walby-Regular.ttf"
+						"./res/textures/fonts/gamefont"
+						(if isSelected  (list 0.7 0.7 1 1) (list 1 1 1 1)) 
+						textureId
+						mappingNumber
+					)
 				)
 				(draw-text-ndi
 					(if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName)
