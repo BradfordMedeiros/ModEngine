@@ -311,6 +311,32 @@
         ],
         [
           "type" => "numeric",
+          "sql" => [
+            "binding" => "sql-trait-color",
+            "query" => "select people.color from people where people.name = john",
+            "update" => 'update people set people.color = $VALUE where people.name = john',
+            #"update" => "select people.color from people where people.name = john",
+            "cast" => "vec",
+          ], 
+          "data" => [
+            "key" => "Vec4Demo", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "class-color", 
+                "value" => [ 
+                  "binding" => "sql-trait-color",
+                  "binding-index" => 3, 
+                  "type" => "number",
+                  "min" => 0,
+                  "max" => 100,
+                ],
+              ],
+            ]
+          ],
+        ],
+        [
+          "type" => "numeric",
           "data" => [
             "key" => "Tint", 
             "value" => [

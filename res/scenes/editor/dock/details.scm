@@ -52,6 +52,25 @@
 (define (bind-query query value)  ; would be nice to have something like (sql-compile "select $0 from $1" (list value0 value1))
   (template query "$VALUE" (if value value "no_data"))
 )
+
+(define (serializeVec vec) 
+  (format #t "serialize vec: ~a\n" vec)
+  (format #t "types: ~a" (string-join (map typeof vec) ", "))
+  (string-join (map number->string vec) "?")
+)
+(define (sqlMakeTypeCorrect templateValue)
+  (format #t "template value: ~a, ~a\n" templateValue (typeof templateValue))
+  (cond
+    ((number? templateValue) 
+      (begin
+        (format #t "~a is a number\n" templateValue)
+        (number->string templateValue)
+      )
+    )
+    ((list? templateValue) (serializeVec templateValue))
+    (#t templateValue)
+  )
+)
 (define (submitSqlUpdates updatedValues)
   (define allQueriesObj (lsobj-attr "sql-query"))
   (define bindingQueryPair (map bindingAndQueryFromObj allQueriesObj))
@@ -62,14 +81,15 @@
     (lambda(updatedValue)
       (let* (
         (templateValue (car updatedValue)) 
-        (typeCorrectValue (if (number? templateValue) (number->string templateValue) templateValue))
+        (typeCorrectValue (sqlMakeTypeCorrect templateValue))
         (validQuery 
           (not (or 
             (equal? 0 (string-length typeCorrectValue))
-            (> (length (string-split typeCorrectValue #\ )) 1)
+            (> (length (string-split typeCorrectValue #\ )) 1) ; cannot handle spaces yet!
           ))
         )
       )
+        (format #t "query: valid = ~a, query ~a\n" validQuery typeCorrectValue)
         (if validQuery
           (sql (sql-compile (bind-query (cadr updatedValue) typeCorrectValue)))
           (format #t "invalid template value\n")
@@ -109,7 +129,7 @@
   (cond
     ((number? val) "number")
     ((string? val) "string")
-    ((list? val)   "list")
+    ((list? val)  (format #f "list(~a)" (length val)))
     (#t "unknown")
   )
 )
@@ -167,10 +187,16 @@
   )
 )
 
+(define (parseVec val)
+  (define listParts (string-split val #\?))
+  (define numVals (map string->number listParts))
+  numVals
+)
 (define (castData val type)
   (format #t "cast data: val = ~a, type = ~a\n" val type)
   (cond 
     ((equal? type "number") (string->number val))
+    ((equal? type "vec")   (parseVec val))
     (#t val)
   )
 )
