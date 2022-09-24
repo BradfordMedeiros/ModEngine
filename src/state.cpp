@@ -658,6 +658,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .viewportSize = glm::ivec2(0, 0),
     .viewportoffset = glm::ivec2(0, 0),
     .resolution = glm::ivec2(0, 0),
+    .savedWindowsize = glm::ivec4(0, 0, 600, 400),
     .borderTexture = "",
     .antialiasingMode = ANTIALIASING_NONE,
     .crosshair = "",

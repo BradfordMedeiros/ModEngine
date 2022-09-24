@@ -1220,6 +1220,9 @@ int main(int argc, char* argv[]){
 
   onFramebufferSizeChange(window, state.currentScreenWidth, state.currentScreenHeight);
   glfwSetFramebufferSizeCallback(window, onFramebufferSizeChange); 
+  glfwSetWindowSizeCallback(window, windowSizeCallback);
+  glfwSetWindowPosCallback(window, windowPositionCallback);
+
   glPointSize(10.f);
 
   modlog("shaders", std::string("shader file path is ") + shaderFolderPath);

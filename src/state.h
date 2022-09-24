@@ -123,6 +123,7 @@ struct engineState {
   glm::ivec2 viewportSize;
   glm::ivec2 viewportoffset;
   glm::ivec2 resolution;
+  glm::ivec4 savedWindowsize;
   std::string borderTexture;
   ANTIALIASING_TYPE antialiasingMode;
 

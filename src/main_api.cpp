@@ -25,6 +25,10 @@ extern std::map<std::string, objid> activeLocks;
 extern CScriptBindingCallbacks cBindings;
 extern LineData lineData;
 
+extern GLFWwindow* window;
+extern GLFWmonitor* monitor;
+extern const GLFWvidmode* mode;
+
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
 }
@@ -450,6 +454,26 @@ void  setCrosshairSprite(){
   crosshairSprite = &world.meshes.at(state.crosshair).mesh;
 }
 
+void windowPositionCallback(GLFWwindow* window, int xpos, int ypos){
+  if (!state.fullscreen){
+    state.savedWindowsize.x = xpos;
+    state.savedWindowsize.y = ypos;
+  }
+}
+void windowSizeCallback(GLFWwindow* window, int width, int height){
+  if (!state.fullscreen){
+    state.savedWindowsize.z = width; 
+    state.savedWindowsize.w = height;
+  }
+}
+void toggleFullScreen(bool fullscreen){
+  if (fullscreen){
+    glfwSetWindowMonitor(window, monitor, 0, 0, mode -> width, mode->height, 0);
+  }else{
+    glfwSetWindowMonitor(window, NULL, state.savedWindowsize.x, state.savedWindowsize.y, state.savedWindowsize.z, state.savedWindowsize.w, 0);
+  }
+}
+
 void setWorldState(std::vector<ObjectValue> values){
   std::vector<ObjectValue> renderStagesValues;
   std::vector<ObjectValue> otherValues;
@@ -467,10 +491,16 @@ void setWorldState(std::vector<ObjectValue> values){
   for (auto &renderStagesValue : renderStagesValues){
     setRenderStageState(renderStages, renderStagesValue);
   }
+  
+  auto oldFullScreen = state.fullscreen;
   setState(state, otherValues, now);
-
+  if (oldFullScreen != state.fullscreen){
+    toggleFullScreen(state.fullscreen);
+  }
   //// todo add updates for each state ... should check if it was changed in state maybe?
   setCrosshairSprite();
+
+
 }
 
 void setLayerState(std::vector<StrValues> values){

@@ -40,13 +40,15 @@
   )
 )
 
+(define fullscreen #f) ; no way to query world state right now, so this will cause initial mismatch if starts in fullscreen
 (define nameAction (list
   (list "load" (get-change-dialog "load"))
   (list "quit" (get-change-dialog "quit"))
   (list "fullscreen" (lambda () 
       (format #t "toggling fullscreen\n")
+      (set! fullscreen (not fullscreen))
       (set-wstate (list
-        (list "rendering" "fullscreen" "true") ; doesn't actually toggle since fullscreen state never updates to match internal with set-wstate
+        (list "rendering" "fullscreen" (if fullscreen "true" "false")) ; doesn't actually toggle since fullscreen state never updates to match internal with set-wstate
       ))
       #f
     )

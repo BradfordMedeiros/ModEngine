@@ -134,6 +134,11 @@ void setTexture(objid index, std::string textureName);
 
 void setState(std::string stateName);
 void setCrosshairSprite();
+
+void windowPositionCallback(GLFWwindow* window, int xpos, int ypos);
+void windowSizeCallback(GLFWwindow* window, int width, int height);
+void toggleFullScreen(bool fullscreen);
+
 void setWorldState(std::vector<ObjectValue> values);
 void setLayerState(std::vector<StrValues> values);
 void setFloatState(std::string stateName, float value);

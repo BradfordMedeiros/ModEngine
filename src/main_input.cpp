@@ -16,8 +16,6 @@ extern bool selectItemCalled;
 extern DynamicLoading dynamicLoading;
 extern SysInterface interface;
 extern GLFWwindow* window;
-extern GLFWmonitor* monitor;
-extern const GLFWvidmode* mode;
 extern LineData lineData;
 extern ManipulatorTools tools;
 
@@ -549,13 +547,6 @@ void processKeyBindings(GLFWwindow *window, KeyRemapper& remapper){
   remapper.lastFrameDown = lastFrameDown;
 }
 
-void toggleFullScreen(bool fullscreen){
-  if (fullscreen){
-    glfwSetWindowMonitor(window, monitor, 0, 0, mode -> width, mode->height, 0);
-  }else{
-    glfwSetWindowMonitor(window, NULL, 0, 0, 400, 600, 0);
-  }
-}
 void toggleCursor(CURSOR_TYPE cursorBehavior){
   if (cursorBehavior == CURSOR_NORMAL){
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
