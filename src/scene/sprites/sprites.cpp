@@ -370,12 +370,22 @@ BoundInfo boundInfoForCenteredText(FontFamily& fontFamily, std::string word, flo
   return info;
 }
 
-int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength){
+int drawWordsRelative(GLint shaderProgram, FontFamily& fontFamily, glm::mat4 model, std::string word, float left, float top, unsigned int fontSize, float spacing, AlignType align, TextWrap wrap, TextVirtualization virtualization, int cursorIndex, bool cursorIndexLeft, int highlightLength, bool drawBoundingOnly){
+  int numTriangles = 0;
+  if (drawBoundingOnly){
+    glm::vec3 offset(0.f, 0.f, 0.f);
+    auto boundInfo = boundInfoForCenteredText(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization,  cursorIndex, cursorIndexLeft, highlightLength, &offset);
+    auto boundingMesh = fontFamily.asciToMesh.at('H').mesh; // should swap out for unitxy mesh, but this is OK since in practice used in selection program, which does not discard
+    numTriangles += boundingMesh.numTriangles;
+    auto width = boundInfo.xMax - boundInfo.xMin;
+    auto height = boundInfo.yMax - boundInfo.yMin;
+    drawSprite(shaderProgram, boundingMesh, offset.x, offset.y, width / 2.f, height / 2.f, model);
+    return numTriangles;
+  }
+
   auto drawingData = computeDrawingInfo(fontFamily, word, left, top, fontSize, spacing, align, wrap, virtualization, cursorIndex, cursorIndexLeft, highlightLength);
   auto drawingDimensions = calcDrawSizing(drawingData.drawingInfo);
   auto offsetToCenter = drawingDimensions.centerOffset + calcAlignOffset(drawingDimensions, align, left, top);
-  int numTriangles = 0;
-
   //auto offsetToCenter = drawingDimensions.centerOffset;
   for (auto &info : drawingData.drawingInfo){
       //std::cout << "offset center: " << print(offsetToCenter) << std::endl;

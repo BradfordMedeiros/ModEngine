@@ -223,6 +223,7 @@ std::vector<RenderStep> parseAdditionalRenderSteps(
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
+      .textBoundingOnly = false,
       .uniforms {
         .intUniforms = additionalShader.intUniforms,
         .floatUniforms = additionalShader.floatUniforms,
@@ -268,6 +269,7 @@ RenderStages loadRenderStages(
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
+    .textBoundingOnly = true,
     .uniforms {
       .intUniforms = {},
       .floatUniforms = {},
@@ -294,6 +296,7 @@ RenderStages loadRenderStages(
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
+      .textBoundingOnly = false,
       .uniforms {
         .intUniforms = {},
         .floatUniforms = {},
@@ -321,6 +324,7 @@ RenderStages loadRenderStages(
     .blend = true,
     .enableStencil = true,
     .allowShaderOverride = true,
+    .textBoundingOnly = false,
     .uniforms = {
       .intUniforms = {},
       .floatUniforms = {},
@@ -347,6 +351,7 @@ RenderStages loadRenderStages(
       .blend = true,
       .enableStencil = false,
       .allowShaderOverride = false,
+      .textBoundingOnly = false,
       .uniforms {
         .intUniforms = {},
         .floatUniforms = {},
@@ -374,6 +379,7 @@ RenderStages loadRenderStages(
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
+    .textBoundingOnly = false,
     .uniforms = {
       .intUniforms = {},
       .floatUniforms = {},
@@ -408,6 +414,7 @@ RenderStages loadRenderStages(
     .blend = true,
     .enableStencil = false,
     .allowShaderOverride = false,
+    .textBoundingOnly = false,
     .uniforms = {
       .intUniforms = {
         RenderDataInt { .uniformName = "useDepthTexture", .value = false },
@@ -440,6 +447,7 @@ RenderStages loadRenderStages(
     .blend = true,
     .enableStencil = false,
     .allowShaderOverride = false,
+    .textBoundingOnly = false,
     .uniforms = {
       .intUniforms = {
         RenderDataInt { .uniformName = "useDepthTexture", .value = false },
@@ -472,6 +480,7 @@ RenderStages loadRenderStages(
     .blend = false,
     .enableStencil = false,
     .allowShaderOverride = false,
+    .textBoundingOnly = false,
     .uniforms = {
       .intUniforms = {
         RenderDataInt { .uniformName = "firstpass", .value = true },
