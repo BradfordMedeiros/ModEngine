@@ -289,7 +289,7 @@
           "type" => "numeric",
           "sql" => [
             "binding" => "sql-trait-speed",
-            "query" => "select people.topspeed from people where people.name = john",
+            "query" => 'select people.topspeed from people where people.name = $object_name',
             "update" => 'update people set people.topspeed = $VALUE where people.name = john',
             "cast" => "number",
           ], 
