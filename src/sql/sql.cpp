@@ -77,8 +77,6 @@ TableData readTableData(std::string tableName, std::string basePath){
   for (int i = 1; i < rawRows.size(); i++){
     auto columnContent = split(rawRows.at(i), ',');
     rows.push_back(columnContent);
-    std::cout << "columns size: " << columnContent.size() << std::endl;
-    std::cout << "header size: " << header.size() << std::endl;
     assert(columnContent.size() == header.size());
   }
 
@@ -462,16 +460,15 @@ std::vector<std::string> updateRow(std::vector<std::string> values, std::vector<
 void update(std::string tableName, std::vector<std::string>& columns, std::vector<std::string>& values, SqlFilter& filter, std::string basePath){
   auto header = readHeader(tableName, basePath);
   auto allRows = select(tableName, header, {}, SqlFilter{ .hasFilter = false }, SqlOrderBy{}, {}, -1, 0, basePath);
-
   std::string content = createHeader(header);
-
-  auto columnIndexesToUpdate = getColumnIndexs(header, columns);
+  auto columnIndexesToUpdate = getColumnIndexs(header, fullQualifiedNames(tableName, columns));
 
   for (auto row : allRows){
     bool applyUpdate = true;
     if (filter.hasFilter){
-      auto filterIndex = getColumnIndexs(header, { filter.column }).at(0);
-      auto column = row.at(filterIndex);
+      std::vector<std::string> cols = { filter.column };
+      auto fullColnames = getColumnIndexs(header, fullQualifiedNames(tableName, cols));
+      auto column = row.at(fullColnames.at(0));
       auto passFilter = passesFilter(column, filter);
       if (!passFilter){
         applyUpdate = false;
@@ -494,7 +491,8 @@ void deleteRows(std::string tableName, SqlFilter& filter, std::string basePath){
   std::string content = createHeader(header);
   for (auto row : rowsToKeep){
     if (filter.hasFilter){
-      auto filterIndex = getColumnIndexs(header, { filter.column }).at(0);
+      std::vector<std::string> filterColumns = { filter.column };
+      auto filterIndex = getColumnIndexs(header, fullQualifiedNames(tableName, filterColumns)).at(0);
       auto column = row.at(filterIndex);
       auto passFilter = passesFilter(column, filter);
       if (passFilter){
