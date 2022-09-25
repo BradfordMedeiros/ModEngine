@@ -190,6 +190,10 @@ int main(int argc, char *argv[]){
       .test = testCompileSqlCreateTable,
     },
     TestCase {
+      .name = "testCompileSqlCreateTableWithTypes",
+      .test = testCompileSqlCreateTableWithTypes,
+    },
+    TestCase {
       .name = "testCompileSqlDropTable",
       .test = testCompileSqlDropTable,
     },

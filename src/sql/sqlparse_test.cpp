@@ -116,7 +116,19 @@ void testCompileSqlCreateTable(){
   assert(sqlQuery1.type == SQL_CREATE_TABLE);
   assert(sqlQuery1.table == "testtable");
 
-  auto sqlQuery2 = compileSqlQuery(" create    table another  ");
+  auto sqlQuery2 = compileSqlQuery(" create    table another (age, id) ");
+  assert(sqlQuery2.validQuery);
+  assert(sqlQuery2.type == SQL_CREATE_TABLE);
+  assert(sqlQuery2.table == "another");
+}
+
+void testCompileSqlCreateTableWithTypes(){
+  auto sqlQuery1 = compileSqlQuery("create table testtable (age int)");
+  assert(sqlQuery1.validQuery);
+  assert(sqlQuery1.type == SQL_CREATE_TABLE);
+  assert(sqlQuery1.table == "testtable");
+
+  auto sqlQuery2 = compileSqlQuery(" create    table another (pass STRING, thing INT) ");
   assert(sqlQuery2.validQuery);
   assert(sqlQuery2.type == SQL_CREATE_TABLE);
   assert(sqlQuery2.table == "another");

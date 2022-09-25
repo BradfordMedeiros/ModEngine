@@ -25,7 +25,12 @@ struct OperatorToken {
   OperatorType type;
 };
 
-typedef std::variant<SymbolToken, IdentifierToken, OperatorToken, InvalidToken> LexTokens;
+enum TypeTokenType { TYPE_INT, TYPE_STRING };
+struct TypeToken {
+  TypeTokenType type;
+};
+
+typedef std::variant<SymbolToken, IdentifierToken, OperatorToken, TypeToken, InvalidToken> LexTokens;
 
 std::string tokenTypeStr(std::vector<LexTokens> tokens, bool includeContent);
 std::vector<LexTokens> lex(std::string value);

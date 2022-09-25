@@ -34,6 +34,23 @@ std::string tokenTypeStr(LexTokens token, bool includeContent){
     return result; 
   }
 
+  auto typeToken = std::get_if<TypeToken>(&token);
+  if (typeToken != NULL){
+    std::string result = "TYPE_TOKEN";
+    if (typeToken -> type == TYPE_INT){
+      if (includeContent){
+        result += "(TYPE_INT)";
+      }
+      return result;
+    }else if (typeToken -> type == TYPE_STRING){
+      if (includeContent){
+        result += "(TYPE_STRING)";
+      }
+      return result;
+    }
+    assert(false);
+  }
+
   auto identifierToken = std::get_if<IdentifierToken>(&token);
   if (identifierToken != NULL){
     std::string result =  "IDENTIFIER_TOKEN";
@@ -178,6 +195,7 @@ std::vector<LexTokens> lex(std::string value){
       }
     }else{
       bool isSymbol = false;
+      bool isTypeToken = false;
       for (auto validSymbol : validSymbols){
         if (toUpper(token.token) == validSymbol){
           lexTokens.push_back(SymbolToken { .name = validSymbol });
@@ -185,7 +203,20 @@ std::vector<LexTokens> lex(std::string value){
           break;
         }
       }
-      if (!isSymbol){
+
+      if (toUpper(token.token) == "INT"){
+        isTypeToken = true;
+        lexTokens.push_back(TypeToken{
+          .type = TYPE_INT,
+        });
+      }else if (toUpper(token.token) == "STRING"){
+        isTypeToken = true;
+        lexTokens.push_back(TypeToken{
+          .type = TYPE_STRING,
+        });
+      }
+
+      if (!isSymbol && !isTypeToken){
         if (isIdentifier(token.token)){
           lexTokens.push_back(IdentifierToken{
             .content = token.token,
@@ -236,6 +267,9 @@ auto machineTransitions = ""
 "IDENTIFIER_TOKEN:table LEFTP table\n"
 "LEFTP:table IDENTIFIER_TOKEN create_tablecol\n"
 "IDENTIFIER_TOKEN:create_tablecol SPLICE create_tablecol\n"
+"IDENTIFIER_TOKEN:create_tablecol TYPE_TOKEN create_tablecol\n"
+"TYPE_TOKEN:create_tablecol RIGHTP create_tablecol\n"
+"TYPE_TOKEN:create_tablecol SPLICE create_tablecol\n"
 "SPLICE:create_tablecol IDENTIFIER_TOKEN create_tablecol\n"
 "IDENTIFIER_TOKEN:create_tablecol RIGHTP create_tablecol\n"
 "RIGHTP:create_tablecol *END*\n"
