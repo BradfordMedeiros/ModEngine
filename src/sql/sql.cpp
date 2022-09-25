@@ -39,8 +39,16 @@ std::string tablePath(std::string tableName, std::string basePath){
   return basePath + tableName + ".csv";  // TODO do paths better bro
 }
 
-std::string createHeader(std::vector<std::string> columns){
-  return join(columns, ',') + "\n";
+struct HeaderData {
+  std::vector<std::string> columns;
+  //std::vector<TypeTokenType> types;
+};
+struct TableData {
+  HeaderData header;
+  std::vector<std::vector<std::string>> rows;
+};
+std::string createHeader(HeaderData data){
+  return join(data.columns, ',') + "\n";
 }
 
 bool isValidColumnName(std::string columnname){
@@ -51,7 +59,7 @@ void createTable(std::string tableName, std::vector<std::string> columns, std::v
   for (auto column : columns){
     assert(isValidColumnName(column));
   }
-  saveFile(filepath, createHeader(columns));
+  saveFile(filepath, createHeader(HeaderData { .columns = columns /*, .types = types*/ }));
 }
 
 void deleteTable(std::string tableName, std::string basePath){
@@ -59,10 +67,6 @@ void deleteTable(std::string tableName, std::string basePath){
   std::remove(filepath.c_str());
 }
 
-struct TableData {
-  std::vector<std::string> header;
-  std::vector<std::vector<std::string>> rows;
-};
 
 TableData readTableData(std::string tableName, std::string basePath){
   auto tableContent = loadFile(tablePath(tableName, basePath));
@@ -81,17 +85,20 @@ TableData readTableData(std::string tableName, std::string basePath){
   }
 
   return TableData{
-    .header = qualifiedHeader,
+    .header = HeaderData {
+      .columns = qualifiedHeader,
+    },
     .rows = rows,
   };
 }
-std::vector<std::string> readHeader(std::string tableName, std::string basePath){
+
+HeaderData readHeader(std::string tableName, std::string basePath){
   return readTableData(tableName, basePath).header;
 }
 
 std::vector<std::vector<std::string>> describeTable(std::string tableName, std::string basePath){
   std::vector<std::vector<std::string>> rows;
-  for (auto header : readHeader(tableName, basePath)){
+  for (auto header : readHeader(tableName, basePath).columns){
     rows.push_back({ dequalifyColumnName(header) });
   }
   return rows;
@@ -236,7 +243,7 @@ std::string qualifyNameOrLeaveQualified(std::string table, std::string col1){
 
 bool assignQualifiedColIfBelongs(std::string table, TableData& data, std::string col, std::string* outValue){
   auto colTable = qualifyNameOrLeaveQualified(table, col);
-  for (auto col : data.header){
+  for (auto col : data.header.columns){
     if (col == colTable){
       *outValue = colTable;
       return true;
@@ -266,14 +273,14 @@ JoinColumns figureOutJoinCols(std::string table1, TableData& data1, std::string 
 
 TableData joinTableData(std::string table1, TableData& data1, std::string table2, TableData& data2, std::string col1, std::string col2, OperatorType op){
   auto joinCols = figureOutJoinCols(table1, data1, table2, data2, col1, col2);
-  auto columnIndex1 = getColumnIndexs(data1.header,  { joinCols.table1Col }).at(0);
-  auto columnIndex2 = getColumnIndexs(data2.header,  { joinCols.table2Col }).at(0);
+  auto columnIndex1 = getColumnIndexs(data1.header.columns,  { joinCols.table1Col }).at(0);
+  auto columnIndex2 = getColumnIndexs(data2.header.columns,  { joinCols.table2Col }).at(0);
 
   std::vector<std::string> header;
-  for (auto col : fullQualifiedNames(table1, data1.header)){
+  for (auto col : fullQualifiedNames(table1, data1.header.columns)){
     header.push_back(col);
   }
-  for (auto col : fullQualifiedNames(table2, data2.header)){
+  for (auto col : fullQualifiedNames(table2, data2.header.columns)){
     header.push_back(col);
   }
 
@@ -316,8 +323,13 @@ TableData joinTableData(std::string table1, TableData& data1, std::string table2
     }
   }
 
+  //assert(false); // should add type info here
+  HeaderData headerData {
+    .columns = header,
+  //std::vector<TypeTokenType> types;
+  };
   return TableData {
-    .header = header,
+    .header = headerData,
     .rows = rows,
   };
 }
@@ -349,7 +361,7 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
   }
 
 
-  auto orderIndexs = getColumnIndexs(tableData.header, qualifiedOrderBy);
+  auto orderIndexs = getColumnIndexs(tableData.header.columns, qualifiedOrderBy);
   std::sort (tableData.rows.begin(), tableData.rows.end(), [&orderIndexs, &orderBy](std::vector<std::string>& row1, std::vector<std::string>& row2) -> bool {
     for (int i = 0; i < orderIndexs.size(); i++){
       auto index = orderIndexs.at(i);
@@ -368,11 +380,11 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
   std::vector<std::vector<std::string>> finalRows;
   auto filterIndex = -1;
   if (filter.hasFilter){
-    filterIndex = getColumnIndexs(tableData.header, qualifiedFilter).at(0);
+    filterIndex = getColumnIndexs(tableData.header.columns, qualifiedFilter).at(0);
   }
 
-  auto indexs = getColumnsStarSelection(tableData.header, qualifiedColumns);
-  auto groupingIndexs = getColumnIndexs(tableData.header, qualifiedGroupBy);
+  auto indexs = getColumnsStarSelection(tableData.header.columns, qualifiedColumns);
+  auto groupingIndexs = getColumnIndexs(tableData.header.columns, qualifiedGroupBy);
   std::set<std::string> groupingKeysHash;
 
   for (int i = offset; i < tableData.rows.size(); i++){
@@ -427,7 +439,7 @@ std::string createRow(std::vector<std::string> values){
 }
 
 void insert(std::string tableName, std::vector<std::string> columns, std::vector<std::vector<std::string>> values, std::string basePath){
-  auto header = readHeader(tableName, basePath);
+  auto header = readHeader(tableName, basePath).columns;
   auto indexs = getColumnIndexs(header, columns);
 
   std::string newContent = "";
@@ -459,15 +471,15 @@ std::vector<std::string> updateRow(std::vector<std::string> values, std::vector<
 
 void update(std::string tableName, std::vector<std::string>& columns, std::vector<std::string>& values, SqlFilter& filter, std::string basePath){
   auto header = readHeader(tableName, basePath);
-  auto allRows = select(tableName, header, {}, SqlFilter{ .hasFilter = false }, SqlOrderBy{}, {}, -1, 0, basePath);
+  auto allRows = select(tableName, header.columns, {}, SqlFilter{ .hasFilter = false }, SqlOrderBy{}, {}, -1, 0, basePath);
   std::string content = createHeader(header);
-  auto columnIndexesToUpdate = getColumnIndexs(header, fullQualifiedNames(tableName, columns));
+  auto columnIndexesToUpdate = getColumnIndexs(header.columns, fullQualifiedNames(tableName, columns));
 
   for (auto row : allRows){
     bool applyUpdate = true;
     if (filter.hasFilter){
       std::vector<std::string> cols = { filter.column };
-      auto fullColnames = getColumnIndexs(header, fullQualifiedNames(tableName, cols));
+      auto fullColnames = getColumnIndexs(header.columns, fullQualifiedNames(tableName, cols));
       auto column = row.at(fullColnames.at(0));
       auto passFilter = passesFilter(column, filter);
       if (!passFilter){
@@ -487,12 +499,12 @@ void update(std::string tableName, std::vector<std::string>& columns, std::vecto
 
 void deleteRows(std::string tableName, SqlFilter& filter, std::string basePath){
   auto header = readHeader(tableName, basePath);
-  auto rowsToKeep = select(tableName, header, {}, SqlFilter{}, SqlOrderBy{}, {}, -1, 0, basePath);
+  auto rowsToKeep = select(tableName, header.columns, {}, SqlFilter{}, SqlOrderBy{}, {}, -1, 0, basePath);
   std::string content = createHeader(header);
   for (auto row : rowsToKeep){
     if (filter.hasFilter){
       std::vector<std::string> filterColumns = { filter.column };
-      auto filterIndex = getColumnIndexs(header, fullQualifiedNames(tableName, filterColumns)).at(0);
+      auto filterIndex = getColumnIndexs(header.columns, fullQualifiedNames(tableName, filterColumns)).at(0);
       auto column = row.at(filterIndex);
       auto passFilter = passesFilter(column, filter);
       if (passFilter){
