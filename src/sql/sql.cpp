@@ -46,7 +46,7 @@ std::string createHeader(std::vector<std::string> columns){
 bool isValidColumnName(std::string columnname){
   return (columnname.find('.') == std::string::npos) && (columnname.find(',') == std::string::npos) && (columnname.find('\n') == std::string::npos);
 }
-void createTable(std::string tableName, std::vector<std::string> columns, std::string basePath){
+void createTable(std::string tableName, std::vector<std::string> columns, std::vector<TypeTokenType> types, std::string basePath){
   auto filepath = tablePath(tableName, basePath);
   for (auto column : columns){
     assert(isValidColumnName(column));
@@ -530,7 +530,7 @@ std::vector<std::vector<std::string>> executeSqlQuery(SqlQuery& query, std::stri
     }else if (query.type == SQL_CREATE_TABLE){
       auto createData = std::get_if<SqlCreate>(&query.queryData);
       assert(createData != NULL);
-      createTable(query.table, createData -> columns, dataDir);
+      createTable(query.table, createData -> columns, createData -> types, dataDir);
       return {};
     }else if (query.type == SQL_DELETE_TABLE){
       deleteTable(query.table, dataDir);

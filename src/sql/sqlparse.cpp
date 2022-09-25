@@ -398,6 +398,14 @@ std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineF
       auto createQuery = std::get_if<SqlCreate>(&query.queryData);
       assert(createQuery != NULL);
       createQuery -> columns.push_back(identifier -> content);
+      createQuery -> types.push_back(TYPE_STRING);
+  }},
+  {"TYPE_TOKEN:create_tablecol", [](SqlQuery& query, LexTokens* token) -> void {
+      auto identifier = std::get_if<TypeToken>(token);
+      assert(identifier != NULL);
+      auto createQuery = std::get_if<SqlCreate>(&query.queryData);
+      assert(createQuery != NULL);
+      createQuery -> columns.at(createQuery -> columns.size() -1) = identifier -> type;
   }},
   {"IDENTIFIER_TOKEN:droptable", setTableName},
   {"SELECT", [](SqlQuery& query, LexTokens* token) -> void {
