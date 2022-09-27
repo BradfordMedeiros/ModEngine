@@ -16,7 +16,7 @@ std::string join(std::vector<std::string> values, char delimeter);
 void saveFile(std::string filepath, std::string content);
 std::string loadFile(std::string filepath);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
-std::vector<std::string> filterWhitespace(std::vector<std::string> values);
+std::vector<std::string> filterWhitespace(std::vector<std::string> values, int offset = 0);
 void appendFile(std::string filepath, std::string content);
 }
 #endif

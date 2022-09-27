@@ -405,7 +405,7 @@ std::map<std::string, std::function<void(SqlQuery&, LexTokens* token)>> machineF
       assert(identifier != NULL);
       auto createQuery = std::get_if<SqlCreate>(&query.queryData);
       assert(createQuery != NULL);
-      createQuery -> columns.at(createQuery -> columns.size() -1) = identifier -> type;
+      createQuery -> types.at(createQuery -> columns.size() -1) = identifier -> type;
   }},
   {"IDENTIFIER_TOKEN:droptable", setTableName},
   {"SELECT", [](SqlQuery& query, LexTokens* token) -> void {

@@ -41,25 +41,56 @@ std::string tablePath(std::string tableName, std::string basePath){
 
 struct HeaderData {
   std::vector<std::string> columns;
-  //std::vector<TypeTokenType> types;
+  std::vector<TypeTokenType> types;
 };
 struct TableData {
   HeaderData header;
   std::vector<std::vector<std::string>> rows;
 };
+
+std::string headerTypeStr(TypeTokenType type){
+  if (type == TYPE_STRING){
+    return "STRING";
+  }
+  if (type ==  TYPE_INT){
+    return "INT";
+  }
+  assert(false);
+  return "";
+}
+TypeTokenType strToHeaderType(std::string type){
+  if (type == "STRING"){
+    return TYPE_STRING;
+  }
+  if (type == "INT"){
+    return TYPE_INT;
+  }
+  assert(false);
+  return TYPE_STRING;
+}
+
 std::string createHeader(HeaderData data){
-  return join(data.columns, ',') + "\n";
+  assert(data.columns.size() == data.types.size());
+
+  std::vector<std::string> nameWithType;
+  for (int i = 0; i < data.columns.size(); i++){
+    std::cout << "pushing back: " << data.columns.at(i) << std::endl;
+    nameWithType.push_back(data.columns.at(i) + ":" + headerTypeStr(data.types.at(i)));
+  }
+  return join(nameWithType, ',') + "\n";
 }
 
 bool isValidColumnName(std::string columnname){
-  return (columnname.find('.') == std::string::npos) && (columnname.find(',') == std::string::npos) && (columnname.find('\n') == std::string::npos);
+  return (columnname.find('.') == std::string::npos) && (columnname.find(',') == std::string::npos) && (columnname.find('\n') == std::string::npos) && (columnname.find(':') == std::string::npos);
 }
 void createTable(std::string tableName, std::vector<std::string> columns, std::vector<TypeTokenType> types, std::string basePath){
   auto filepath = tablePath(tableName, basePath);
   for (auto column : columns){
     assert(isValidColumnName(column));
   }
-  saveFile(filepath, createHeader(HeaderData { .columns = columns /*, .types = types*/ }));
+  auto headerStr = createHeader(HeaderData { .columns = columns, .types = types });
+  std::cout << "header str: " << headerStr << ", size = " << headerStr.size() << std::endl;
+  saveFile(filepath, headerStr);
 }
 
 void deleteTable(std::string tableName, std::string basePath){
@@ -70,11 +101,18 @@ void deleteTable(std::string tableName, std::string basePath){
 
 TableData readTableData(std::string tableName, std::string basePath){
   auto tableContent = loadFile(tablePath(tableName, basePath));
-  auto rawRows = filterWhitespace(split(tableContent, '\n'));
+  auto rawRows = filterWhitespace(split(tableContent, '\n'), 1);
   auto header = split(rawRows.at(0), ',');
   std::vector<std::string> qualifiedHeader;
+  std::vector<TypeTokenType> types;
   for (auto col : header){
-    qualifiedHeader.push_back(qualifyColumnName(tableName, col));
+    //std::cout << "col " << col << std::endl;
+    auto values = split(col, ':');
+    assert(values.size() == 2);
+    auto colname = values.at(0);
+    auto columnType = strToHeaderType(values.at(1));
+    qualifiedHeader.push_back(qualifyColumnName(tableName, colname ));
+    types.push_back(columnType);
   }
 
   std::vector<std::vector<std::string>> rows;
@@ -87,6 +125,7 @@ TableData readTableData(std::string tableName, std::string basePath){
   return TableData{
     .header = HeaderData {
       .columns = qualifiedHeader,
+      .types = types,
     },
     .rows = rows,
   };
@@ -98,8 +137,10 @@ HeaderData readHeader(std::string tableName, std::string basePath){
 
 std::vector<std::vector<std::string>> describeTable(std::string tableName, std::string basePath){
   std::vector<std::vector<std::string>> rows;
-  for (auto header : readHeader(tableName, basePath).columns){
-    rows.push_back({ dequalifyColumnName(header) });
+  auto headerInfo = readHeader(tableName, basePath);
+  for (int i = 0; i < headerInfo.columns.size(); i++){
+    auto headerColumn = headerInfo.columns.at(i);
+    rows.push_back({ dequalifyColumnName(headerColumn), headerTypeStr(headerInfo.types.at(i)) });
   }
   return rows;
 }
@@ -323,7 +364,7 @@ TableData joinTableData(std::string table1, TableData& data1, std::string table2
     }
   }
 
-  //assert(false); // should add type info here
+  assert(false); // should add type info here
   HeaderData headerData {
     .columns = header,
   //std::vector<TypeTokenType> types;
@@ -333,8 +374,6 @@ TableData joinTableData(std::string table1, TableData& data1, std::string table2
     .rows = rows,
   };
 }
-
-
 
 std::vector<std::vector<std::string>> select(std::string tableName, std::vector<std::string> columns, SqlJoin join, SqlFilter filter, SqlOrderBy orderBy, std::vector<std::string> groupBy, int limit, int offset, std::string basePath){
   auto tableData = readTableData(tableName, basePath);
@@ -425,29 +464,65 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
 }
 
 
-std::string findValue(std::string columnToFind, std::vector<std::string>& columns, std::vector<std::string>& values){
+std::optional<std::string> findValue(std::string columnToFind, std::vector<std::string>& columns, std::vector<std::string>& values){
   for (int i = 0; i < columns.size(); i++){
     if (columnToFind == columns.at(i)){
       return values.at(i);
     }
   }
-  return "NULL";
+  return std::nullopt;
 }
 
 std::string createRow(std::vector<std::string> values){
   return join(values, ',') + "\n";
 }
 
+
+bool checkValidType(std::optional<std::string>& value, TypeTokenType type){
+  if (type == TYPE_STRING){
+    return true;
+  }
+  if (type == TYPE_INT){
+    if (!value.has_value()){
+      return true;
+    }
+    char* notValid;
+    long converted = strtol(value.value().c_str(), &notValid, 10);
+    if (*notValid) {
+      return false;
+    }
+    return true;
+  }
+
+  
+  return false;
+}
+
+std::string serializeValueType(std::optional<std::string> value, TypeTokenType type){
+  bool isValidType = checkValidType(value, type);
+  if (!isValidType){
+    throw std::logic_error(std::string("Invalid type for value: ") + (value.has_value() ? value.value() : "NULL") + ", expected type = " + headerTypeStr(type));
+  }
+  auto headerType = headerTypeStr(type);
+  std::cout << "serializing value: " << value.value() << ", type is = " << headerType << std::endl;
+
+  return value.has_value() ? value.value() : "NULL";
+}
+
 void insert(std::string tableName, std::vector<std::string> columns, std::vector<std::vector<std::string>> values, std::string basePath){
-  auto header = readHeader(tableName, basePath).columns;
-  auto indexs = getColumnIndexs(header, columns);
+  auto header = readHeader(tableName, basePath);
+  auto qualifiedColumns = fullQualifiedNames(tableName, columns);
+  auto indexs = getColumnIndexs(header.columns, qualifiedColumns);
 
   std::string newContent = "";
   for (auto value : values){
     std::vector<std::string> valuesToInsert;
-    for (int i = 0; i < header.size(); i++){
+    for (int i = 0; i < header.columns.size(); i++){
       assert(columns.size() == value.size());
-      valuesToInsert.push_back(findValue(header.at(i), columns, value));
+      auto columnName = header.columns.at(i);
+      auto columnType = header.types.at(i);
+      auto columnValue = findValue(header.columns.at(i), qualifiedColumns, value);
+      valuesToInsert.push_back(serializeValueType(columnValue, columnType));
     }
     newContent = newContent + createRow(valuesToInsert);
   }
@@ -462,12 +537,6 @@ std::string print(std::vector<std::string>& values){
   return valueStr;
 }
 
-std::vector<std::string> updateRow(std::vector<std::string> values, std::vector<int> columns, std::vector<std::string> newValues){
-  for (int i = 0; i < columns.size(); i++){
-    values.at(columns.at(i)) = newValues.at(i);
-  }
-  return values;
-}
 
 void update(std::string tableName, std::vector<std::string>& columns, std::vector<std::string>& values, SqlFilter& filter, std::string basePath){
   auto header = readHeader(tableName, basePath);
@@ -488,7 +557,13 @@ void update(std::string tableName, std::vector<std::string>& columns, std::vecto
     }
 
     if (applyUpdate){
-      content = content + createRow(updateRow(row, columnIndexesToUpdate, values));
+      for (int i = 0; i < columnIndexesToUpdate.size(); i++){
+        auto columnType = header.types.at(columnIndexesToUpdate.at(i));
+        auto columnValue = values.at(i);
+        row.at(columnIndexesToUpdate.at(i)) = serializeValueType(columnValue, columnType);
+      }
+  
+      content = content + createRow(row);
     }else{
       content = content + createRow(row);
     }

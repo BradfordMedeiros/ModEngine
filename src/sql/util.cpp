@@ -68,11 +68,12 @@ std::string trim(const std::string& str){
   return str.substr(first, (last - first + 1));
 }
 
-std::vector<std::string> filterWhitespace(std::vector<std::string> values){
+std::vector<std::string> filterWhitespace(std::vector<std::string> values, int offset){
   std::vector<std::string> newStrings;
-  for (auto value : values){
+  for (int i = 0; i < values.size(); i++){
+    auto value = values.at(i);
     auto newValue = trim(value);
-    if (newValue != ""){
+    if (newValue != "" || offset > i){
       newStrings.push_back(newValue);
     }
   }
