@@ -28,6 +28,7 @@ extern LineData lineData;
 extern GLFWwindow* window;
 extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
+extern TimePlayback timePlayback;
 
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
   return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
@@ -344,8 +345,11 @@ void sendNotifyMessage(std::string message, std::string value){
   });
 }
 
-double timeSeconds(){
-  return now;
+double timeSeconds(bool realtime){
+  if (realtime){
+    return now;
+  }
+  return timePlayback.currentTime;
 }
 
 double timeElapsed(){

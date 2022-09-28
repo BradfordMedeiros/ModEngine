@@ -589,9 +589,14 @@ SCM scmSendNotify(SCM topic, SCM value){
   return SCM_UNSPECIFIED;
 }
 
-double (*_timeSeconds)();
-SCM scmTimeSeconds(){
-  return scm_from_double(_timeSeconds());
+double (*_timeSeconds)(bool realtime);
+SCM scmTimeSeconds(SCM scmRealtime){
+  auto realtimeDefined = scmRealtime != SCM_UNDEFINED;
+  bool realtime = false;
+  if (realtimeDefined){
+    realtime = scm_to_bool(scmRealtime);
+  }
+  return scm_from_double(_timeSeconds(realtime));
 }
 double (*_timeElapsed)();
 SCM scmTimeElapsed(){
@@ -781,7 +786,7 @@ SCM scmClearTexture(SCM textureId, SCM optValue1, SCM optValue2, SCM optValue3){
     texture = scm_to_locale_string(optValue3);
   }
 
-  std::cout << "texture scheme: " << (texture.has_value() ? texture.value() : "no texture in clear") << std::endl;
+  //std::cout << "texture scheme: " << (texture.has_value() ? texture.value() : "no texture in clear") << std::endl;
   _clearTexture(toUnsignedInt(textureId), autoclear, color, texture);
   return SCM_UNSPECIFIED;
 }
@@ -1183,7 +1188,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   // event system
   scm_c_define_gsubr("sendnotify", 2, 0, 0, (void*)scmSendNotify);
 
-  scm_c_define_gsubr("time-seconds", 0, 0, 0, (void*)scmTimeSeconds);
+  scm_c_define_gsubr("time-seconds", 0, 1, 0, (void*)scmTimeSeconds);
   scm_c_define_gsubr("time-elapsed", 0, 0, 0, (void*)scmTimeElapsed);
 
   scm_c_define_gsubr("save-scene", 0, 3, 0, (void*)scmSaveScene);
@@ -1303,7 +1308,7 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string, objid),
   std::vector<std::string> (*listModels)(),
   void (*sendNotifyMessage)(std::string topic, std::string value),
-  double (*timeSeconds)(),
+  double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
   void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename), 
   std::map<std::string, std::string> (*listServers)(),

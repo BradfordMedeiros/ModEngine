@@ -55,7 +55,7 @@ struct CustomApiBindings {
   ///////////
   std::vector<std::string> (*listModels)();
   void (*sendNotifyMessage)(std::string message, std::string value);
-  double (*timeSeconds)();
+  double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
   void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);
   std::map<std::string, std::string> (*listServers)();

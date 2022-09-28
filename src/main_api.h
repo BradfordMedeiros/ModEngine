@@ -111,7 +111,7 @@ std::vector<std::string> listModels();
 
 void sendNotifyMessage(std::string message, std::string value);
 
-double timeSeconds();
+double timeSeconds(bool realtime);
 double timeElapsed();
 
 void playRecording(objid id, std::string recordingPath);
