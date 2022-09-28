@@ -14,7 +14,6 @@ enum EndBehavior {
 // future is + and past is -
 class TimePlayback {
   private:
-    float currentTime;
     float beginTime;
     float duration;
     bool paused;
@@ -25,6 +24,7 @@ class TimePlayback {
     bool hasRemainingTime();
     
   public:
+    float currentTime;
     TimePlayback(float currentTime, std::function<void(float, float)> onFrame,  std::function<void()> onFinish, float duration = INFINITY, EndBehavior behavior = RESTART); 
     TimePlayback(){ };  // Do not use, just to satisfy maps 
     void play();

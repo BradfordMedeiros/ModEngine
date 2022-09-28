@@ -1406,13 +1406,14 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     );  
   }
   
-  if (enablePhysics){
-    if (dumpPhysics){
-      dumpPhysicsInfo(world.rigidbodys);
-    }
-    stepPhysicsSimulation(world.physicsEnvironment, timestep, paused);
-    updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
+  if (enablePhysics && dumpPhysics){
+    dumpPhysicsInfo(world.rigidbodys);
   }
+  std::cout << "on world frame physics: " << enablePhysics << std::endl;
+
+  stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
+  updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
+  
   updateSoundPositions(world);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   

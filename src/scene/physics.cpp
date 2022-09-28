@@ -275,9 +275,9 @@ void checkCollisions(physicsEnv& env){
   env.collisionCache.onObjectsCollide(collisionPairs);
 }
 
-void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused){
+void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused, bool enablePhysics){
   MODTODO("step physics simulation substeps should have consideration");
-  if (!paused){
+  if (enablePhysics && !paused){
     env.dynamicsWorld -> stepSimulation(timestep, 0);  
     checkCollisions(env);
   }

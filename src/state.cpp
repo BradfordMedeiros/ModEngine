@@ -655,7 +655,6 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .printKeyStrokes = false,
     .cullEnabled = true,
     .groupSelection = true,
-    .pauseWorldTiming = false,
     .activeCameraObj = NULL,
     .activeCameraData = NULL,
     .skybox = "",

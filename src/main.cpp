@@ -1561,9 +1561,6 @@ int main(int argc, char* argv[]){
     registerStat(scenesLoadedStat, getNumberScenesLoaded(world.sandbox));
     logBenchmarkTick(benchmark, deltaTime, numObjects, numTriangles);
 
-    if (!state.pauseWorldTiming){
-      timePlayback.setElapsedTime(deltaTime);
-    }
 
     if (frameCount == 60){
       frameCount = 0;
@@ -1572,7 +1569,12 @@ int main(int argc, char* argv[]){
       registerStat(fpsStat, floor((60.f/(timedelta) + 0.5f)));
     }
 
-    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, state.worldpaused);
+    if (!state.worldpaused){
+      std::cout << "Current time: " << timePlayback.currentTime << std::endl;
+      timePlayback.setElapsedTime(deltaTime);
+    }
+
+    onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused);
     auto time = getTotalTime();
     tickRecordings(time);
 

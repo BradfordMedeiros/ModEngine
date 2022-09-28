@@ -105,7 +105,6 @@ struct engineState {
   bool cullEnabled;
 
   bool groupSelection;
-  bool pauseWorldTiming;
   GameObject* activeCameraObj;
   GameObjectCamera* activeCameraData;
 
