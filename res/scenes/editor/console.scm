@@ -187,7 +187,7 @@
 )
 
 (define (onKey key scancode action mods)
-  (if (and (= key 96) (= action 1))
+  (if (and (= key 96) (= action 1) (= mods 0))
     (begin
       (if (not showConsole)
         (tryUnlock)
