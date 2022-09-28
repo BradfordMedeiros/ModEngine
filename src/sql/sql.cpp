@@ -198,7 +198,7 @@ std::vector<int> getColumnsStarSelection(std::vector<std::string> header, std::v
   return getColumnIndexs(header, modifiedCols);
 }
 
-bool passesFilter(std::string& columnValue, SqlFilter& filter){
+bool passesStringFilter(std::string& columnValue, int filterIndex, SqlFilter& filter){
   if (filter.type == EQUAL){
     return columnValue == filter.value;
   }
@@ -216,6 +216,58 @@ bool passesFilter(std::string& columnValue, SqlFilter& filter){
   }
   if (filter.type == LESS_THAN_OR_EQUAL){
     return columnValue <= filter.value;
+  }
+  assert(false);
+  return false;
+}
+
+bool maybeParseInt(std::string& value, int* parsedValue){
+  char* notValid;
+  int converted = static_cast<int>(strtol(value.c_str(), &notValid, 10));
+  if (*notValid) {
+    *parsedValue = 0;
+    return false;
+  }
+  *parsedValue = converted;
+  return true;
+}
+
+bool passesIntFilter(std::string& columnValue, int filterIndex, SqlFilter& filter){
+  int value = 0;
+  bool isInt = maybeParseInt(columnValue, &value);
+  int filterValue = 0;
+  bool filterIsInt = maybeParseInt(filter.value, &filterValue);
+  if (!isInt || !filterIsInt){
+     throw std::logic_error("invalid type for filter should be int");
+  }
+  if (filter.type == EQUAL){
+    return value == filterValue;
+  }
+  if (filter.type == NOT_EQUAL){
+    return value != filterValue;
+  }
+  if (filter.type == GREATER_THAN){
+    return value > filterValue;
+  }
+  if (filter.type == GREATER_THAN_OR_EQUAL){
+    return value >= filterValue;
+  }
+  if (filter.type == LESS_THAN){
+    return value < filterValue;
+  }
+  if (filter.type == LESS_THAN_OR_EQUAL){
+    return value <= filterValue;
+  }
+  assert(false); 
+  return false;
+}
+bool passesFilter(HeaderData& header, std::string& columnValue, int filterIndex, SqlFilter& filter){
+  auto columnType = header.types.at(filterIndex);
+  if (columnType == TYPE_STRING){
+    return passesStringFilter(columnValue, filterIndex, filter);
+  }
+  if (columnType == TYPE_INT){
+    return passesIntFilter(columnValue, filterIndex, filter);
   }
   std::cout << "operator not supported" << std::endl;
   assert(false);
@@ -430,7 +482,7 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
     auto row = tableData.rows.at(i);
     if (filter.hasFilter){
       auto columnValue = row.at(filterIndex);
-      auto passFilter = passesFilter(columnValue, filter);
+      auto passFilter = passesFilter(tableData.header, columnValue, filterIndex, filter);
       if (!passFilter){
         continue;
       }
@@ -477,7 +529,6 @@ std::string createRow(std::vector<std::string> values){
   return join(values, ',') + "\n";
 }
 
-
 bool checkValidType(std::optional<std::string>& value, TypeTokenType type){
   if (type == TYPE_STRING){
     return true;
@@ -486,15 +537,11 @@ bool checkValidType(std::optional<std::string>& value, TypeTokenType type){
     if (!value.has_value()){
       return true;
     }
-    char* notValid;
-    long converted = strtol(value.value().c_str(), &notValid, 10);
-    if (*notValid) {
-      return false;
-    }
-    return true;
-  }
 
-  
+    int _;
+    bool validInt = maybeParseInt(value.value(), &_);
+    return validInt;
+  }
   return false;
 }
 
@@ -549,8 +596,8 @@ void update(std::string tableName, std::vector<std::string>& columns, std::vecto
     if (filter.hasFilter){
       std::vector<std::string> cols = { filter.column };
       auto fullColnames = getColumnIndexs(header.columns, fullQualifiedNames(tableName, cols));
-      auto column = row.at(fullColnames.at(0));
-      auto passFilter = passesFilter(column, filter);
+      auto column = row.at(fullColnames.at(0)); // only checking agianst the first element?
+      auto passFilter = passesFilter(header, column, fullColnames.at(0), filter);
       if (!passFilter){
         applyUpdate = false;
       }
@@ -581,7 +628,7 @@ void deleteRows(std::string tableName, SqlFilter& filter, std::string basePath){
       std::vector<std::string> filterColumns = { filter.column };
       auto filterIndex = getColumnIndexs(header.columns, fullQualifiedNames(tableName, filterColumns)).at(0);
       auto column = row.at(filterIndex);
-      auto passFilter = passesFilter(column, filter);
+      auto passFilter = passesFilter(header, column, filterIndex, filter);
       if (passFilter){
         continue;
       }
