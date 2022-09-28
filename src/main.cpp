@@ -1570,7 +1570,7 @@ int main(int argc, char* argv[]){
     }
 
     if (!state.worldpaused){
-      std::cout << "Current time: " << timePlayback.currentTime << std::endl;
+      //std::cout << "Current time: " << timePlayback.currentTime << std::endl;
       timePlayback.setElapsedTime(deltaTime);
     }
 

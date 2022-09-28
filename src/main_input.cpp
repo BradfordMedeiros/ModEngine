@@ -441,7 +441,11 @@ void handleInput(GLFWwindow* window){
   }
   processControllerInput(keyMapper, moveCamera, deltaTime, keyCharCallback, onJoystick);
   if (!disableInput){    // we return after escape, so escape still quits
-    processKeyBindings(window, keyMapper);
+    bool lockSuccess = lock("input", 0);
+    if (lockSuccess){
+      processKeyBindings(window, keyMapper);
+      unlock("input", 0);
+    }
   }
   auto coords = ndiCoord();
   cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);

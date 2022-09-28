@@ -1409,7 +1409,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   if (enablePhysics && dumpPhysics){
     dumpPhysicsInfo(world.rigidbodys);
   }
-  std::cout << "on world frame physics: " << enablePhysics << std::endl;
+  //std::cout << "on world frame physics: " << enablePhysics << std::endl;
 
   stepPhysicsSimulation(world.physicsEnvironment, timestep, paused, enablePhysics);
   updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
