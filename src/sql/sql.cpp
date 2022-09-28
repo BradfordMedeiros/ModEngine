@@ -368,13 +368,24 @@ TableData joinTableData(std::string table1, TableData& data1, std::string table2
   auto joinCols = figureOutJoinCols(table1, data1, table2, data2, col1, col2);
   auto columnIndex1 = getColumnIndexs(data1.header.columns,  { joinCols.table1Col }).at(0);
   auto columnIndex2 = getColumnIndexs(data2.header.columns,  { joinCols.table2Col }).at(0);
+  auto columnType1 = data1.header.types.at(columnIndex1);
+  auto columnType2 = data2.header.types.at(columnIndex2);
 
+  if (columnType1 != columnType2){
+    throw std::logic_error(std::string("type mismatch on join: ") + joinCols.table1Col  + "[" + headerTypeStr(columnType1) + "] cannot be joined with " + joinCols.table2Col  + "[" + headerTypeStr(columnType2) + "]");
+  }
+  //std::cout << "join types: " << headerTypeStr(columnType1) << ", " << headerTypeStr(columnType2) << std::endl;
   std::vector<std::string> header;
+  std::vector<TypeTokenType> types;
   for (auto col : fullQualifiedNames(table1, data1.header.columns)){
     header.push_back(col);
+    auto colIndex = getColumnIndexs(data1.header.columns, { col }).at(0);
+    types.push_back(data1.header.types.at(colIndex));
   }
   for (auto col : fullQualifiedNames(table2, data2.header.columns)){
     header.push_back(col);
+    auto colIndex = getColumnIndexs(data2.header.columns, { col }).at(0);
+    types.push_back(data2.header.types.at(colIndex));
   }
 
   std::vector<std::vector<std::string>> rows;
@@ -416,10 +427,9 @@ TableData joinTableData(std::string table1, TableData& data1, std::string table2
     }
   }
 
-  assert(false); // should add type info here
   HeaderData headerData {
     .columns = header,
-  //std::vector<TypeTokenType> types;
+    .types = types,
   };
   return TableData {
     .header = headerData,
@@ -436,7 +446,6 @@ std::vector<std::vector<std::string>> select(std::string tableName, std::vector<
       assert(false);
     }
     TableData additionalTableData = readTableData(join.table, basePath);
-    std::cout << "main table: " << tableName << " join table " << join.table << std::endl;
     tableData = joinTableData(tableName, tableData, join.table, additionalTableData, join.col1, join.col2, join.type);
   }
 
