@@ -1,5 +1,7 @@
 ; TODO -> no reason to draw this every frame 
 
+(define fontSize (if (args "fontsize") (string->number (args "fontsize")) 10)) 
+
 (define textureId #f)
 (define texturename "editor-console")
 
@@ -101,8 +103,8 @@
   )
 )
 
-(define fontSize 8) ; 1000 means letter covers whole screen
-(define letterSize (/ fontSize 1000))
+
+(define letterSize (/ fontSize 1000)) ; 1000 means letter covers whole screen
 (define margin (* 2 letterSize))
 (define marginLeft margin)
 (define marginTop margin)

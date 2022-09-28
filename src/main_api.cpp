@@ -701,17 +701,17 @@ std::vector<VoxelQueryData> getSelectedVoxels(){
 }
 
 bool lock(std::string key, objid owner){
-  std::cout << "lock: (" << key << ", " << owner << ")" << std::endl;
+  //std::cout << "lock: (" << key << ", " << owner << ")" << std::endl;
   auto canLock = activeLocks.find(key) == activeLocks.end();
   if (!canLock){
     return false;
   }
   activeLocks[key] = owner;
-  std::cout << "lock: " << key << std::endl;
+  //std::cout << "lock: " << key << std::endl;
   return true;
 }
 bool unlock(std::string key, objid owner){
-  std::cout << "unlock: (" << key << ", " << owner << ")" << std::endl;
+  //std::cout << "unlock: (" << key << ", " << owner << ")" << std::endl;
   auto lockExists = activeLocks.find(key) != activeLocks.end();
   auto ownerOwnsKey = lockExists && activeLocks.at(key) == owner;
   if (!lockExists){
@@ -719,7 +719,7 @@ bool unlock(std::string key, objid owner){
   }  
   if (ownerOwnsKey){
     activeLocks.erase(key);
-    std::cout << "unlock: " << key << std::endl;
+    //std::cout << "unlock: " << key << std::endl;
     return true;
   }
   std::cout << "ERROR: tried to unlock a key that did not own (" << key << "," << owner << ")" << std::endl;
