@@ -93,7 +93,7 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
 bool hasPhysicsBody(World& world, objid id);
 void updatePhysicsBody(World& world, objid id);
 
-void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics);
+void onWorldFrame(World& world, float timestep, float timeElapsed, bool enablePhysics, bool dumpPhysics, bool paused);
 
 NameAndMeshObjName getMeshesForGroupId(World& world, objid id);
 

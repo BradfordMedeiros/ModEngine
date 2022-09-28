@@ -1368,51 +1368,54 @@ void applyAttributeDelta(World& world, objid id, std::string field, AttributeVal
   setAttributes(world, id, attrValue);
 }
 
-void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics){
-  updateEmitters(
-    world.emitters, 
-    timeElapsed,
-    [&world](std::string name, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
-      std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
-      attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
-      if (particleOpts.velocity.has_value()){
-        attributes.vecAttr.vec3["physics_velocity"] = particleOpts.velocity.value();
+void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enablePhysics, bool dumpPhysics, bool paused){
+  if (!paused){
+    updateEmitters(
+      world.emitters, 
+      timeElapsed,
+      [&world](std::string name, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
+        std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
+        attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
+        if (particleOpts.velocity.has_value()){
+          attributes.vecAttr.vec3["physics_velocity"] = particleOpts.velocity.value();
+        }
+        if (particleOpts.angularVelocity.has_value()){
+          attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
+        }
+        std::map<std::string, GameobjAttributes> submodelAttributes = {};
+        AttrChildrenPair attrChildren {
+          .attr = attributes,
+          .children = {},
+        };
+        objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attrChildren, submodelAttributes);
+        if (particleOpts.orientation.has_value()){
+          physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
+        }
+        return objectAdded;
+      }, 
+      [&world](objid id) -> void { 
+        std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
+        if (idExists(world.sandbox, id)){
+          removeObjectFromScene(world, id);
+        }
+      },
+      [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
+        MODTODO("update particle attr -- WARNING ADD FPS INDEPNDENC HERE");
+        applyAttributeDelta(world, id, attribute, delta);
       }
-      if (particleOpts.angularVelocity.has_value()){
-        attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
-      }
-      std::map<std::string, GameobjAttributes> submodelAttributes = {};
-      AttrChildrenPair attrChildren {
-        .attr = attributes,
-        .children = {},
-      };
-      objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attrChildren, submodelAttributes);
-      if (particleOpts.orientation.has_value()){
-        physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
-      }
-      return objectAdded;
-    }, 
-    [&world](objid id) -> void { 
-      std::cout << "INFO: emitter: removing particle from emitter: " << id << std::endl;
-      if (idExists(world.sandbox, id)){
-        removeObjectFromScene(world, id);
-      }
-    },
-    [&world](objid id, std::string attribute, AttributeValue delta)  -> void {
-      MODTODO("update particle attr -- WARNING ADD FPS INDEPNDENC HERE");
-      applyAttributeDelta(world, id, attribute, delta);
-    }
-  );  
-
+    );  
+  }
+  
   if (enablePhysics){
     if (dumpPhysics){
       dumpPhysicsInfo(world.rigidbodys);
     }
-    stepPhysicsSimulation(world.physicsEnvironment, timestep);
+    stepPhysicsSimulation(world.physicsEnvironment, timestep, paused);
     updatePhysicsPositionsAndClampVelocity(world, world.rigidbodys);  
   }
   updateSoundPositions(world);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
+  
   updateSandbox(world.sandbox);
   callbackEntities(world);
 

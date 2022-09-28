@@ -275,10 +275,12 @@ void checkCollisions(physicsEnv& env){
   env.collisionCache.onObjectsCollide(collisionPairs);
 }
 
-void stepPhysicsSimulation(physicsEnv& env, float timestep){
+void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused){
   MODTODO("step physics simulation substeps should have consideration");
-  env.dynamicsWorld -> stepSimulation(timestep, 0);  
-  checkCollisions(env);
+  if (!paused){
+    env.dynamicsWorld -> stepSimulation(timestep, 0);  
+    checkCollisions(env);
+  }
   if (env.hasDebugDrawer){
     env.dynamicsWorld -> debugDrawWorld();
   }

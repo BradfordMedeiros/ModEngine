@@ -39,7 +39,7 @@ struct physicsEnv {
 
 physicsEnv initPhysics(collisionPairPosFn onObjectEnter,  collisionPairFn onObjectLeave, btIDebugDraw* debugDrawer);
 void deinitPhysics(physicsEnv env);
-void stepPhysicsSimulation(physicsEnv& env, float timestep);
+void stepPhysicsSimulation(physicsEnv& env, float timestep, bool paused);
 
 struct rigidBodyOpts {
   glm::vec3 linear;

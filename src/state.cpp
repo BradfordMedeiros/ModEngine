@@ -553,6 +553,17 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "editor",
     .attribute = "selected-index",
   },
+
+  ObjectStateMapping {
+    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
+      auto worldpaused = std::get_if<std::string>(&value);
+      if (worldpaused != NULL){
+        state.worldpaused = *worldpaused == "true";
+      }
+    },
+    .object = "world",
+    .attribute = "paused",
+  },
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -668,6 +679,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .showGrid = false,
     .gridSize = 10,
     .easyUse = createEasyUse(),
+    .worldpaused = false,
 	};
 	return state;
 }

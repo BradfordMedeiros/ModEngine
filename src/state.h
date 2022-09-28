@@ -136,6 +136,8 @@ struct engineState {
   bool showGrid;
   int gridSize;
   EasyUseInfo easyUse;
+
+  bool worldpaused;
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

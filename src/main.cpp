@@ -1572,13 +1572,11 @@ int main(int argc, char* argv[]){
       registerStat(fpsStat, floor((60.f/(timedelta) + 0.5f)));
     }
 
-    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics);
-
+    onWorldFrame(world, deltaTime, getTotalTime(), enablePhysics, dumpPhysics, state.worldpaused);
     auto time = getTotalTime();
     tickRecordings(time);
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
-
     auto viewTransform = getCameraTransform();
 
     auto forward = calculateRelativeOffset(viewTransform.rotation, {0, 0, -1 }, false);

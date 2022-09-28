@@ -1380,8 +1380,8 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      state.pauseWorldTiming = !state.pauseWorldTiming;
-      std::cout << "pause world timing: " << state.pauseWorldTiming << std::endl;
+      state.worldpaused = !state.worldpaused;
+      std::cout << "worldpaused: " << (state.worldpaused ? "true" : "false") << std::endl;
     }
   },
 
