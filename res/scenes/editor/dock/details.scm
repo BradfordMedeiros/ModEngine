@@ -49,8 +49,27 @@
   )
 )
 
+
+
+
+(define (bind-query-main query)  
+  (define templatedQuery query)
+  (for-each 
+    (lambda(dataValue)
+      (let ((key (car dataValue)) (value (cadr dataValue)))
+        (format #t "data value, key = ~a, value = ~a\n" key value)
+        (format #t "template: ~a\n" templatedQuery)
+        (set! templatedQuery (template templatedQuery (string-append "$" key) (sqlMakeTypeCorrect value)))
+      )
+    ) 
+    dataValues
+  )
+  (format #t "bind-query data valus: ~a" dataValues)
+  templatedQuery
+)
+
 (define (bind-query query value)  ; would be nice to have something like (sql-compile "select $0 from $1" (list value0 value1))
-  (template query "$VALUE" (if value value "no_data"))
+  (template (bind-query-main query) "$VALUE" (if value value "no_data"))
 )
 
 (define (serializeVec vec) 
@@ -172,11 +191,7 @@
   (define queryCast (list-ref query 3))
   (list 
     (car query) 
-    (sql 
-      (sql-compile 
-        (cadr query)
-      )
-    )
+    (sql (sql-compile (bind-query-main (cadr query))))
     queryCast
   )
 )
