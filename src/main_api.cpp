@@ -71,7 +71,8 @@ std::vector<objid> childScenes(objid sceneId){
   return childSceneIds(world.sandbox, sceneId);
 }
 
-int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name){
+
+int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<objid> id){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   std::vector<Token> addedTokens;
   for (auto &tokens : additionalTokens){
@@ -81,8 +82,14 @@ int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> a
       .payload = tokens.at(2),
     });
   }
-  return addSceneToWorld(world, sceneFile, addedTokens, name);
+  return addSceneToWorld(world, sceneFile, addedTokens, name, id);
 }
+
+int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name){
+  return loadSceneWithId(sceneFile, additionalTokens, name, std::nullopt);
+}
+
+
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
 
@@ -126,7 +133,7 @@ void resetScene(std::optional<objid> sceneId){
     auto sceneFile = sceneFileForSceneId(world, sceneId.value());
     auto sceneName = sceneNameForSceneId(world, sceneId.value());
     unloadScene(sceneId.value());
-    loadScene(sceneFile, {}, sceneName); // additional args get lost, maybe i should keep this data around? 
+    loadSceneWithId(sceneFile, {}, sceneName, sceneId.value()); // additional args get lost, maybe i should keep this data around? 
   }
 
 }
