@@ -1473,10 +1473,12 @@ int main(int argc, char* argv[]){
 
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto rawScene : rawScenes){
-    loadScene(rawScene, {}, std::nullopt);
+    auto parts = split(rawScene, ':');
+    auto hasName = parts.size() > 1;
+    auto sceneFileToLoad = !hasName ? join(parts, ':') : join(subvector(parts, 0, parts.size() - 1), ':');
+    std::optional<std::string> sceneFileName = hasName ? parts.at(parts.size() -1) : std::optional<std::string>(std::nullopt);
+    loadScene(sceneFileToLoad, {}, sceneFileName);
   }
-  
-
   auto defaultCameraName = result["camera"].as<std::string>();
   if (defaultCameraName != ""){
     auto ids =  getByName(world.sandbox, defaultCameraName);

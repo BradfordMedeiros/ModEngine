@@ -133,6 +133,13 @@ std::string join(std::vector<std::string> values, char delimeter){
   }
   return value;
 }
+std::vector<std::string> subvector(std::vector<std::string>& values, int indexLow, int indexHigh){
+  std::vector<std::string> subvec;
+  for (int i = indexLow; i < indexHigh; i++){
+    subvec.push_back(values.at(i));
+  }
+  return subvec;
+}
 std::vector<std::string> filterWhitespace(std::vector<std::string> values){
   std::vector<std::string> newStrings;
   for (auto value : values){

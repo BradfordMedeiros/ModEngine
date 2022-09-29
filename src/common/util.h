@@ -34,6 +34,7 @@ FILE_EXTENSION_TYPE getFileType(std::string filepath);
 std::string trim(const std::string& str);
 std::vector<std::string> split(std::string strToSplit, char delimeter);
 std::string join(std::vector<std::string> values, char delimeter);
+std::vector<std::string> subvector(std::vector<std::string>& values, int indexLow, int indexHigh);
 std::vector<std::string> filterWhitespace(std::vector<std::string> values);
 std::vector<std::string> splitNoWhitespace(std::string string, char character);
 std::vector<std::string> filterComments(std::vector<std::string> values);
