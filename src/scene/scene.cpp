@@ -1439,3 +1439,7 @@ void setProperties(World& world, objid id, Properties& properties){
 std::string sceneFileForSceneId(World& world, objid sceneId){
   return world.sandbox.sceneIdToSceneMetadata.at(sceneId).scenefile;
 }
+
+std::optional<std::string> sceneNameForSceneId(World& world, objid sceneId){
+  return world.sandbox.sceneIdToSceneMetadata.at(sceneId).name;
+}

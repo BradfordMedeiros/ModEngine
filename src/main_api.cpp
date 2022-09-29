@@ -116,8 +116,19 @@ void unloadAllScenes(){
   removeAllScenesFromWorld(world);
 }
 
+// This implementation could be a lot better.  
+// This ought to just update the old attributes to the new ones instead of unloaded/reloading
+// also should check if the scene is a child of another scene
+// also consider preserving the old sceneid 
 void resetScene(std::optional<objid> sceneId){
-  std::cout << "reset scene placeholder" << std::endl;
+  std::cout << "reset scene placeholder for: " << (sceneId.has_value() ? std::to_string(sceneId.value()) : "no sceneid") << std::endl;
+  if (sceneId.has_value()){
+    auto sceneFile = sceneFileForSceneId(world, sceneId.value());
+    auto sceneName = sceneNameForSceneId(world, sceneId.value());
+    unloadScene(sceneId.value());
+    loadScene(sceneFile, {}, sceneName); // additional args get lost, maybe i should keep this data around? 
+  }
+
 }
 
 bool isNotWriteProtectedFile(std::string& fileToSave){
