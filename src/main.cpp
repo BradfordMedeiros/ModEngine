@@ -985,7 +985,9 @@ ManipulatorTools tools {
     addLineToNextCycle(lineData, frompos, topos, true, state.manipulatorLineId, color, std::nullopt);
   },
   .clearLines = []() -> void {
-    removeLinesByOwner(lineData, state.manipulatorLineId);
+    if (state.manipulatorLineId != 0){
+      removeLinesByOwner(lineData, state.manipulatorLineId);
+    }
   },
   .removeObjectById = removeObjectById,
   .makeManipulator = createManipulator,
