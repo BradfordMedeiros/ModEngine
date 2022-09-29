@@ -125,15 +125,18 @@ void unloadAllScenes(){
 
 // This implementation could be a lot better.  
 // This ought to just update the old attributes to the new ones instead of unloaded/reloading
-// also should check if the scene is a child of another scene
-// also consider preserving the old sceneid 
 void resetScene(std::optional<objid> sceneId){
   std::cout << "reset scene placeholder for: " << (sceneId.has_value() ? std::to_string(sceneId.value()) : "no sceneid") << std::endl;
   if (sceneId.has_value()){
     auto sceneFile = sceneFileForSceneId(world, sceneId.value());
     auto sceneName = sceneNameForSceneId(world, sceneId.value());
+    auto parentObjId = listParentObjId(world.sandbox, sceneId.value());
     unloadScene(sceneId.value());
     loadSceneWithId(sceneFile, {}, sceneName, sceneId.value()); // additional args get lost, maybe i should keep this data around? 
+    if (parentObjId.has_value()){
+      auto rootObjIdNewScene = rootIdForScene(world.sandbox, sceneId.value());
+      makeParent(world.sandbox, rootObjIdNewScene, parentObjId.value());
+    }
   }
 
 }

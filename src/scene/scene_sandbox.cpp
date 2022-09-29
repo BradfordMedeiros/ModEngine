@@ -785,6 +785,15 @@ void makeParent(SceneSandbox& sandbox, objid child, objid parent){
   sandbox.mainScene.absoluteTransforms.at(parent).updateType = UPDATE_ABSOLUTE;
 }
 
+std::optional<objid> listParentObjId(SceneSandbox& sandbox, objid sceneId){
+  auto rootObj = rootIdForScene(sandbox, sceneId);
+  GameObjectH& gameobjecth = getGameObjectH(sandbox, rootObj);
+  if (gameobjecth.parentId == -1){
+    return std::nullopt;
+  }
+  return gameobjecth.parentId;
+}
+
 objid rootIdForScene(SceneSandbox& sandbox, objid sceneId){
   return sandbox.sceneIdToRootObj.at(sceneId);
 }
