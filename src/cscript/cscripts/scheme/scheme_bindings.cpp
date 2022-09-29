@@ -103,6 +103,14 @@ SCM scm_unloadAllScenes(){
   return SCM_UNSPECIFIED;
 }
 
+void (*_resetScene)(std::optional<objid> sceneId);
+SCM scm_resetScene(SCM scmSceneId){
+  auto sceneIdDefined = scmSceneId != SCM_UNDEFINED;
+  auto sceneId = sceneIdDefined ? scm_to_int32(scmSceneId) : std::optional<int32_t>(std::nullopt);
+  _resetScene(sceneId);
+  return SCM_UNSPECIFIED;
+}
+
 std::vector<int32_t> (*_listScenes)();
 SCM scm_listScenes(){
   auto scenes = _listScenes();
@@ -1121,6 +1129,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("load-scene", 1, 2, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
+  scm_c_define_gsubr("reset-scene", 0, 1, 0, (void*)scm_resetScene);
   scm_c_define_gsubr("list-scenes", 0, 0, 0, (void *)scm_listScenes);
   scm_c_define_gsubr("parent-scene", 1, 0, 0, (void *)scm_parentScene);
   scm_c_define_gsubr("child-scenes", 1, 0, 0, (void *)scm_childScenes);
@@ -1267,6 +1276,7 @@ void createStaticSchemeBindings(
   int32_t (*loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name),
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
+  void (*resetScene)(std::optional<objid> sceneId),
   std::vector<int32_t> (*listScenes)(),  
   std::vector<std::string> (*listSceneFiles)(),
   bool (*parentScene)(objid sceneId, objid* parentSceneId),
@@ -1360,6 +1370,7 @@ void createStaticSchemeBindings(
 
   _unloadScene = unloadScene;
   _unloadAllScenes = unloadAllScenes;
+  _resetScene = resetScene;
   _listScenes = listScenes;
   _parentScene = parentScene;
   _childScenes = childScenes;

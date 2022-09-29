@@ -14,6 +14,7 @@ void createStaticSchemeBindings(
   int32_t (*loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name),
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
+  void (*resetScene)(std::optional<objid> sceneId),
   std::vector<int32_t> (*listScenes)(),  
   std::vector<std::string> (*listSceneFiles)(),
   bool (*parentScene)(objid sceneId, objid* _parentSceneId),

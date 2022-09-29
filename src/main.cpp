@@ -1273,6 +1273,7 @@ int main(int argc, char* argv[]){
     .loadScene = loadScene,
     .unloadScene = unloadScene,
     .unloadAllScenes = unloadAllScenes,
+    .resetScene = resetScene,
     .listScenes = listScenes,
     .listSceneFiles = listSceneFiles,
     .parentScene = parentScene,

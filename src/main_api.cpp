@@ -116,6 +116,10 @@ void unloadAllScenes(){
   removeAllScenesFromWorld(world);
 }
 
+void resetScene(std::optional<objid> sceneId){
+  std::cout << "reset scene placeholder" << std::endl;
+}
+
 bool isNotWriteProtectedFile(std::string& fileToSave){
   auto fileExtension = getPreExtension(fileToSave);
   auto allowedToSave = true;

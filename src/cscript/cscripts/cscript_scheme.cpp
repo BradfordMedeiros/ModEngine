@@ -44,6 +44,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.loadScene,  
     api.unloadScene,  
     api.unloadAllScenes,
+    api.resetScene,
     api.listScenes,  
     api.listSceneFiles,
     api.parentScene,
