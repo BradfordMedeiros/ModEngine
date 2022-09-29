@@ -1236,10 +1236,14 @@ void applyPhysicsRotation(World& world, objid index, float offsetX, float offset
 void physicsScaleSet(World& world, objid index, glm::vec3 scale){
   updateAbsoluteScale(world.sandbox, index, scale);
 
+  std::cout << "physics scale set: " << index << " - " <<  print(scale) << std::endl;
   if (world.rigidbodys.find(index) != world.rigidbodys.end()){
-    auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
+    //auto collisionInfo = getPhysicsInfoForGameObject(world, index).transformation.scale;
+    //auto newScale = collisionInfo;
+    auto newScale = scale;             // this should be reconsidered how this relates to transformation.scale
     auto body =  world.rigidbodys.at(index).body;
-    setScale(body, collisionInfo.x, collisionInfo.y, collisionInfo.z);
+    setScale(body, newScale.x, newScale.y, newScale.z);
+    std::cout << "physics scale set physics: " << index << " - " << print(scale) << std::endl;
   }
   world.entitiesToUpdate.insert(index);
 }
