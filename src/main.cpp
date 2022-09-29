@@ -573,7 +573,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
 void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   auto projection = projectionFromLayer(world.sandbox.layers.at(0));
   glUseProgram(shaderProgram);
-
+  glEnable(GL_DEPTH_TEST);
   // this list is incomplete, it probably would be better to just use a separate shader maybe too
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projview"), 1, GL_FALSE, glm::value_ptr(projection * view));    
   glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -619,15 +619,17 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   }
 
   ////////////////
+  
 
   if (showDebugInfo){
     drawCoordinateSystem(100.f);
-      drawAllLines(lineData, shaderProgram, std::nullopt);
-  
+    glDisable(GL_DEPTH_TEST);
+    drawAllLines(lineData, shaderProgram, std::nullopt);
     if (state.showCameras){
       drawTraversalPositions();   
     }    
   }
+
 }
 
 void renderSkybox(GLint shaderProgram, glm::mat4 view, glm::vec3 cameraPosition){
