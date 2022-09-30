@@ -297,7 +297,8 @@
     )
   )
   (set! playModeEnabled (not playModeEnabled))
- ;(sendnotify "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
+  (format #t "play mode: ~a" (if playModeEnabled "true" "false"))
+  (sendnotify "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
 )
 
 (define buttonToAction
@@ -776,7 +777,6 @@
           (populateData)
         )
       )
-      (maybe-perform-action objattr)
       (maybe-set-binding objattr)
       (if managedText (maybe-set-text-cursor gameobj))
     )
@@ -785,7 +785,20 @@
 
 (define (onObjUnselected)
   (unsetFocused)
-  ;(format #t "on object unselected\n")
+)
+
+
+(define hoveredObj #f)
+(define (onObjHover obj)
+  (set! hoveredObj obj)
+)
+(define (onObjUnhover index)
+  (set! hoveredObj #f)
+)
+(define (onMouse button action mods)
+  (if (and (equal? button 0) (equal? action 0) (and hoveredObj))
+    (maybe-perform-action (gameobj-attr  hoveredObj))
+  )
 )
 
 (define (enforceLayouts)
@@ -800,10 +813,10 @@
   ;(format #t "action is: ~a\n" action)
   (if (equal? action 0)
     (begin
-      (if (equal? key 91)
+      (if (equal? key 59)  ; key = ; 
         (togglePauseMode)
       )
-      (if (equal? key 93)
+      (if (equal? key 39)  ; key = '
         (togglePlayMode)
       )
     )
@@ -988,3 +1001,4 @@
     (format #t "slide: ~a\n" (onSlide (getSlidePercentage (string->number value))))
   )
 )
+
