@@ -508,6 +508,16 @@
           ],
         ],
         [
+          "type" => "list",
+          "data" => [
+            "key" => "Scene Control",
+            "values" => [
+              [ "image" => "./res/scenes/editor/dock/images/play.png", "action" => "toggle-play-mode" ],
+              [ "image" => "./res/scenes/editor/dock/images/pause.png", "action" => "toggle-pause-mode" ],
+            ],
+          ],
+        ],
+        [
           "type" => "checkbox",
           "data" => [
             "key" => "Move Relative", 

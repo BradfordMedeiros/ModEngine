@@ -43,7 +43,7 @@
       "ontexture" => $value["image"],
       "offtexture" => $value["image"],
       "ontint" => "1 1 1 1",
-      "tint" => "1 1 1 1",
+      "tint" => "0.4 0.4 0.4 1",
       "details-action" => $value["action"],
       "position" => "0 0 " . $depth[3],
       "layer" => "basicui",

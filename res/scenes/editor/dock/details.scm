@@ -275,9 +275,10 @@
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
+    (list "toggle-play-mode" (lambda() (format #t "toggle play mode placeholder\n")))
+    (list "toggle-pause-mode" (lambda() (format #t "toggle pause mode placeholder\n")))
   )
 )
-
 
 (define mainSceneId (list-sceneid (gameobj-id mainobj)))
 (define mainpanelId (gameobj-id (lsobj-name "(test_panel")))
