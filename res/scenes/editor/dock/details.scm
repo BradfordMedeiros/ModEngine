@@ -268,6 +268,38 @@
 (define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
 
+(define pauseModeEnabled #t)
+
+(define (setPauseMode enabled)
+  (set! pauseModeEnabled enabled)
+  (set-wstate (list
+    (list "world" "paused" (if pauseModeEnabled "true" "false"))
+  ))
+)
+(define (togglePauseMode)
+ (set! pauseModeEnabled (not pauseModeEnabled))
+ (format #t "toggle pause mode: ~a\n" pauseModeEnabled)
+ (sendnotify "alert" (string-append "pause mode " (if pauseModeEnabled "enabled" "disabled"))) 
+ (set-wstate (list
+    (list "world" "paused" (if pauseModeEnabled "true" "false"))
+ ))
+)
+
+(define playModeEnabled #f)
+(define (togglePlayMode)
+  (if playModeEnabled
+    (begin
+      (setPauseMode #t)
+      (reset-scene (lsscene-name "reset"))
+    )
+    (begin
+      (setPauseMode #f)
+    )
+  )
+  (set! playModeEnabled (not playModeEnabled))
+ ;(sendnotify "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
+)
+
 (define buttonToAction
   (list
     (list "create-camera" createCameraPlaceholder)
@@ -275,8 +307,8 @@
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
-    (list "toggle-play-mode" (lambda() (format #t "toggle play mode placeholder\n")))
-    (list "toggle-pause-mode" (lambda() (format #t "toggle pause mode placeholder\n")))
+    (list "toggle-play-mode" togglePlayMode)
+    (list "toggle-pause-mode" togglePauseMode)
   )
 )
 
@@ -766,6 +798,17 @@
 
 (define (onKey key scancode action mods)
   ;(format #t "action is: ~a\n" action)
+  (if (equal? action 0)
+    (begin
+      (if (equal? key 91)
+        (togglePauseMode)
+      )
+      (if (equal? key 93)
+        (togglePlayMode)
+      )
+    )
+  )
+  (format #t "key: ~a\n" key)
   (if (and (or (equal? action 1) (equal? action 2)) (not (isControlKey key)))
     (processFocusedElement key)
   )
