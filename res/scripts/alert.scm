@@ -1,5 +1,5 @@
 (define (amount-to-draw text createTime rate)
-  (define currIndex (inexact->exact (floor (* rate (- (time-seconds) createTime)))))
+  (define currIndex (inexact->exact (floor (* rate (- (time-seconds #t) createTime)))))
   (substring text 0 (min (string-length text) currIndex))
 )
 
@@ -10,7 +10,7 @@
 (define (onMessage key value)
   (if (equal? key "alert")
     (begin
-      (set! messageBuffer (reverse (cons (list value (time-seconds)) (reverse messageBuffer)))) 
+      (set! messageBuffer (reverse (cons (list value (time-seconds #t)) (reverse messageBuffer)))) 
       (if (> (length messageBuffer) maxBufferSize)
         (set! messageBuffer (cdr messageBuffer))
       )
@@ -46,7 +46,7 @@
 
 (define bufferExpirationTimeMs 5000)
 (define (isNotExpiredMessage message) 
-  (define currTime (time-seconds))
+  (define currTime (time-seconds #t))
   (define createTime (createTimeForMessage message))
   (define diff (* 1000 (- currTime createTime)))
   (< diff bufferExpirationTimeMs)
