@@ -512,8 +512,23 @@
           "data" => [
             "key" => "Scene Control",
             "values" => [
-              [ "image" => "./res/scenes/editor/dock/images/play.png", "action" => "toggle-play-mode" ],
-              [ "image" => "./res/scenes/editor/dock/images/pause.png", "action" => "toggle-pause-mode" ],
+              [ 
+                "image" => "./res/scenes/editor/dock/images/play.png", 
+                "action" => "toggle-play-mode",
+                "binding" => "play-mode-on", 
+                "binding-on" => "on",
+                "binding-off" => "off",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/pause.png", 
+                "action" => "toggle-pause-mode",
+                "binding" => "pause-mode-on", 
+                "binding-on" => "on",
+                "binding-off" => "off",
+                //"disabled" => [
+                //  "binding" => "play-mode-on",
+                //  "binding-value" => "on",
+                //],
+              ],
             ],
           ],
         ],

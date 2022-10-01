@@ -261,6 +261,9 @@
   (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
   (updateStoreValue (list "runtime-sceneid" (number->string (list-sceneid (gameobj-id gameobj)))))
 
+  (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
+  (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
+
   (populateSqlData)
 )
 
@@ -275,14 +278,11 @@
   (set-wstate (list
     (list "world" "paused" (if pauseModeEnabled "true" "false"))
   ))
+  (sendnotify "alert" (string-append "pause mode " (if pauseModeEnabled "enabled" "disabled"))) 
+  (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
 )
 (define (togglePauseMode)
- (set! pauseModeEnabled (not pauseModeEnabled))
- (format #t "toggle pause mode: ~a\n" pauseModeEnabled)
- (sendnotify "alert" (string-append "pause mode " (if pauseModeEnabled "enabled" "disabled"))) 
- (set-wstate (list
-    (list "world" "paused" (if pauseModeEnabled "true" "false"))
- ))
+ (setPauseMode (not pauseModeEnabled))
 )
 
 (define playModeEnabled #f)
@@ -297,6 +297,7 @@
     )
   )
   (set! playModeEnabled (not playModeEnabled))
+  (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
   (format #t "play mode: ~a" (if playModeEnabled "true" "false"))
   (sendnotify "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
 )
@@ -765,7 +766,7 @@
           (unsetFocused)
           (set! focusedElement gameobj)
           (gameobj-setattr! gameobj 
-            (list (list "tint" (list 0 0 1 1)))
+            (list (list "tint" (list 0.3 0.3 0.6 1)))
           )
         )
         (unsetFocused)
@@ -799,6 +800,7 @@
   (if (and (equal? button 0) (equal? action 0) (and hoveredObj))
     (maybe-perform-action (gameobj-attr  hoveredObj))
   )
+  (populateData)
 )
 
 (define (enforceLayouts)
@@ -933,7 +935,7 @@
   (gameobj-setattr! gameobj
     (list 
       (list "state" (if enableValue "on" "off"))
-      (list "tint"  (if enableValue (list 0 0 1 1) (list 1 1 1 1)))
+      (list "tint"  (if enableValue (list 0.3 0.3 0.6 1) (list 1 1 1 1)))
     )
   )
 )

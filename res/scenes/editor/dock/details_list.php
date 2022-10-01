@@ -38,16 +38,27 @@
       $scale = $value["size"];
     }
 
-    createElement($listItemName, $default_text_style, [
+    $extraVals = [
       "scale" => $scale,  # negative since some bug with button textures, should fix
       "ontexture" => $value["image"],
       "offtexture" => $value["image"],
-      "ontint" => "0.3 0.3 0.6 1",
       "tint" => "1 1 1 1",
       "details-action" => $value["action"],
       "position" => "0 0 " . $depth[3],
       "layer" => "basicui",
-    ]);
+    ];
+    if (array_key_exists("binding", $value)){
+      $extraVals["details-binding-toggle"] = $value["binding"];
+    }
+    if (array_key_exists("binding-on", $value)){
+      $extraVals["details-binding-on"] = $value["binding-on"];
+    }
+    if (array_key_exists("binding-off", $value)){
+      $extraVals["details-binding-off"] = $value["binding-off"];
+    }
+
+    createElement($listItemName, $default_text_style, $extraVals);
+
     array_push($listElementNames, $listItemName);
   }
 
