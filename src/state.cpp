@@ -55,19 +55,22 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
   };
 }
 
-ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribute, size_t offset){
+ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribute, std::string enabledValue, std::string disabledValue, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr(
       StateBoolSerializer{
         .structOffset = offset,      
-        .enabledValue = "true",
-        .disabledValue = "false",
+        .enabledValue = enabledValue,
+        .disabledValue = disabledValue,
       }
     ),
     .object = object,
     .attribute = attribute,
   };
   return mapping;
+}
+ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribute, size_t offset){
+  return simpleBoolSerializer(object, attribute, "true", "false", offset);
 }
 
 std::vector<ObjectStateMapping> mapping = {
@@ -153,18 +156,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "color",
   },
   simpleBoolSerializer("skybox", "enable", offsetof(engineState, showSkybox)),
-
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto dovEnabled = std::get_if<std::string>(&value);
-      if (dovEnabled != NULL){
-        std::cout << "state: update dof: " << *dovEnabled << std::endl;
-        state.enableDof = *dovEnabled == "enabled";
-      }     
-    },
-    .object = "dof",
-    .attribute = "state",
-  },
+  simpleBoolSerializer("dof", "state", "enabled", "disabled", offsetof(engineState, enableDof)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto swapInterval = std::get_if<float>(&value);
@@ -223,18 +215,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "border",
   },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto fullscreen = std::get_if<std::string>(&value);
-      if (fullscreen != NULL){
-        auto valid = maybeParseBool(*fullscreen, &state.fullscreen);
-        assert(valid);
-        std::cout << "fullscreen: " << (state.fullscreen ? "true" : "false") << std::endl;
-      }     
-    },
-    .object = "rendering",
-    .attribute = "fullscreen",
-  },
+  simpleBoolSerializer("rendering", "fullscreen", offsetof(engineState, fullscreen)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto antialiasing = std::get_if<std::string>(&value);
@@ -255,17 +236,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "antialiasing",
   },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto cullEnabled = std::get_if<std::string>(&value);
-      if (cullEnabled != NULL){
-        state.cullEnabled = *cullEnabled != "disabled";
-      }
-      modassert(*cullEnabled == "disabled" || *cullEnabled == "enabled", "invalid cullEnable string");
-    },
-    .object = "rendering",
-    .attribute = "cull",
-  },
+  simpleBoolSerializer("rendering", "cull", "enabled", "disabled", offsetof(engineState, cullEnabled)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto cursorBehavior = std::get_if<std::string>(&value);
@@ -340,18 +311,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "tools",
     .attribute = "manipulator-axis",
   },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto preserveRelativeScale = std::get_if<std::string>(&value);
-      if (preserveRelativeScale != NULL){
-        state.preserveRelativeScale = *preserveRelativeScale == "true";
-        return;
-      }
-      modassert(false, "invalid tools preserve-scale option: " + *preserveRelativeScale);
-    },
-    .object = "tools",
-    .attribute = "preserve-scale",
-  },
+  simpleBoolSerializer("tools", "preserve-scale", offsetof(engineState, preserveRelativeScale)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto scaleGroup = std::get_if<std::string>(&value);
@@ -465,18 +425,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "fontsize",
   },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto showGrid = std::get_if<std::string>(&value);
-      if (showGrid != NULL){
-        state.showGrid = *showGrid == "true";
-        return;
-      }
-      assert(false);
-    },
-    .object = "editor",
-    .attribute = "showgrid",
-  },
+  simpleBoolSerializer("editor", "showgrid", offsetof(engineState, showGrid)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto gridsize = std::get_if<float>(&value);
@@ -538,17 +487,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "editor",
     .attribute = "selected-index",
   },
-
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto worldpaused = std::get_if<std::string>(&value);
-      if (worldpaused != NULL){
-        state.worldpaused = *worldpaused == "true";
-      }
-    },
-    .object = "world",
-    .attribute = "paused",
-  },
+  simpleBoolSerializer("world", "paused", offsetof(engineState, worldpaused)),
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
