@@ -31,37 +31,49 @@ struct ObjectStateMapping {
   std::string attribute;
 };
 
+struct StateBoolSerializer {
+  size_t structOffset;
+  std::string enabledValue;
+  std::string disabledValue;
+};
+
+std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateBoolSerializer serializer){
+  return [serializer](engineState& state, AttributeValue value, float now) -> void { 
+    bool* boolValue = (bool*)(((char*)&state) + serializer.structOffset);
+    auto enabledStr = std::get_if<std::string>(&value);
+    if (enabledStr != NULL){
+      if (*enabledStr == serializer.enabledValue){
+        *boolValue = true;
+      }else if (*enabledStr == serializer.disabledValue){
+        *boolValue = false;
+      }else{
+        modassert(false, std::string("invalid string: ") + *enabledStr);
+      }
+      return;
+    }
+    modassert(false, "invalid type");
+  };
+}
+
+ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribute, size_t offset){
+  ObjectStateMapping mapping {
+    .attr = getSetAttr(
+      StateBoolSerializer{
+        .structOffset = offset,      
+        .enabledValue = "true",
+        .disabledValue = "false",
+      }
+    ),
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
+
 std::vector<ObjectStateMapping> mapping = {
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto enabled = std::get_if<std::string>(&value);
-      if (enabled != NULL){
-        state.enableDiffuse = *enabled == "true";
-      }
-    },
-    .object = "diffuse",
-    .attribute = "enabled",
-  },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto enabled = std::get_if<std::string>(&value);
-      if (enabled != NULL){
-        state.enableSpecular = *enabled == "true";
-      }
-    },
-    .object = "specular",
-    .attribute = "enabled",
-  },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto enabled = std::get_if<std::string>(&value);
-      if (enabled != NULL){
-        state.enablePBR = *enabled == "true";
-      }
-    },
-    .object = "pbr",
-    .attribute = "enabled",
-  },
+  simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
+  simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
+  simpleBoolSerializer("pbr", "enabled", offsetof(engineState, enablePBR)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
@@ -83,26 +95,8 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "fog",
     .attribute = "color",
   },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto enabled = std::get_if<std::string>(&value);
-      if (enabled != NULL){
-        state.enableFog = *enabled == "true";
-      }
-    },
-    .object = "fog",
-    .attribute = "enabled",
-  },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto enabled = std::get_if<std::string>(&value);
-      if (enabled != NULL){
-        state.enableBloom = *enabled == "true";
-      }
-    },
-    .object = "bloom",
-    .attribute = "enabled",
-  },
+  simpleBoolSerializer("fog", "enabled", offsetof(engineState, enableFog)),
+  simpleBoolSerializer("bloom", "enabled", offsetof(engineState, enableBloom)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto amount = std::get_if<float>(&value);
@@ -158,17 +152,8 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "skybox",
     .attribute = "color",
   },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto showSkybox = std::get_if<std::string>(&value);
-      if (showSkybox != NULL){
-        std::cout << "state: update showSkybox: " << state.showSkybox << std::endl;
-        state.showSkybox = *showSkybox == "true"; 
-      }
-    },
-    .object = "skybox",
-    .attribute = "enable",
-  },
+  simpleBoolSerializer("skybox", "enable", offsetof(engineState, showSkybox)),
+
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto dovEnabled = std::get_if<std::string>(&value);
