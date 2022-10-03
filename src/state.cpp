@@ -248,69 +248,12 @@ std::vector<ObjectStateMapping> mapping = {
   },
   simpleBoolSerializer("rendering", "cull", "enabled", "disabled", offsetof(engineState, cullEnabled)),
   simpleEnumSerializer("mouse", "cursor", { CURSOR_NORMAL, CURSOR_HIDDEN, CURSOR_CAPTURE }, { "normal", "hidden", "capture" }, offsetof(engineState, cursorBehavior)),
-
   simpleStringSerializer("mouse", "crosshair", offsetof(engineState, crosshair)),
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto mode = std::get_if<std::string>(&value);
-      if (mode == NULL){
-        modassert(false, "invalid manipulator mode type");
-        return;
-      }
-      if (*mode == "translate"){
-        state.manipulatorMode = TRANSLATE;
-      }else if (*mode == "scale"){
-        state.manipulatorMode = SCALE;
-      }else if (*mode == "rotate"){
-        state.manipulatorMode = ROTATE;
-      }else{
-        modassert(false, "invalid manipulator mode option: " + *mode);
-      }
-    },
-    .object = "tools",
-    .attribute = "manipulator-mode",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto axis = std::get_if<std::string>(&value);
-      if (axis == NULL){
-        modassert(false, "invalid manipulator axis type");
-        return;
-      }
-      if (*axis == "x"){
-        state.manipulatorAxis = XAXIS;
-      }else if (*axis == "y"){
-        state.manipulatorAxis = YAXIS;
-      }else if (*axis == "z"){
-        state.manipulatorAxis = ZAXIS;
-      }else if (*axis == "none"){
-        state.manipulatorAxis = NOAXIS;
-      }else{
-        modassert(false, "invalid manipulator axis option: " + *axis);
-      }
-    },
-    .object = "tools",
-    .attribute = "manipulator-axis",
-  },
+  simpleEnumSerializer("tools", "manipulator-mode", { TRANSLATE, SCALE, ROTATE }, { "translate", "scale", "rotate" }, offsetof(engineState, manipulatorMode)),
+  simpleEnumSerializer("tools", "manipulator-axis", { XAXIS, YAXIS, ZAXIS, NOAXIS }, { "x", "y", "z", "none" }, offsetof(engineState, manipulatorAxis)),
   simpleBoolSerializer("tools", "preserve-scale", offsetof(engineState, preserveRelativeScale)),
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto scaleGroup = std::get_if<std::string>(&value);
-      if (scaleGroup != NULL){
-        if (*scaleGroup == "individual"){
-          state.scalingGroup = INDIVIDUAL_SCALING;
-          return;
-        }else if (*scaleGroup == "group"){
-          state.scalingGroup = GROUP_SCALING;
-          return;
-        }
-        modassert(false, "invalid tools scale-group option: " + *scaleGroup);
-        return;
-      }
-    },
-    .object = "tools",
-    .attribute = "scale-group",
-  },
+  simpleEnumSerializer("tools", "scale-group", { INDIVIDUAL_SCALING, GROUP_SCALING }, { "individual", "group" }, offsetof(engineState, scalingGroup)),
+
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorPositions = std::get_if<std::string>(&value);
