@@ -89,6 +89,14 @@ ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribut
   };
   return mapping;
 }
+ObjectStateMapping simpleFloatSerializer(std::string object, std::string attribute, size_t offset){
+  ObjectStateMapping mapping {
+    .attr = getSetAttr<float>(offset),
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
 ObjectStateMapping simpleStringSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<std::string>(offset),
@@ -116,16 +124,7 @@ std::vector<ObjectStateMapping> mapping = {
   },
   simpleBoolSerializer("fog", "enabled", offsetof(engineState, enableFog)),
   simpleBoolSerializer("bloom", "enabled", offsetof(engineState, enableBloom)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto amount = std::get_if<float>(&value);
-      if (amount != NULL){
-        state.bloomAmount = *amount;
-      }
-    },
-    .object = "bloom",
-    .attribute = "amount",
-  },
+  simpleFloatSerializer("bloom", "amount", offsetof(engineState, bloomAmount)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto amount = std::get_if<float>(&value);
@@ -323,31 +322,9 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "tools",
     .attribute = "snap-position",
   },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto positionMirror = std::get_if<std::string>(&value);
-      if (*positionMirror == "true"){
-        state.translateMirror = true;
-      }else if (*positionMirror == "false"){
-        state.translateMirror = false;
-      }
-      modassert(*positionMirror == "true" || *positionMirror == "false", "invalid tools position-mirror: " + *positionMirror);
-    },
-    .object = "tools",
-    .attribute = "position-mirror",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto snapManipulatorScales = std::get_if<std::string>(&value);
-      if (snapManipulatorScales != NULL){
-        state.snapManipulatorScales = *snapManipulatorScales == "true";
-        return;
-      }
-      modassert(false, "invalid tools snap-scale option: " + *snapManipulatorScales);
-    },
-    .object = "tools",
-    .attribute = "snap-scale",
-  },
+
+  simpleBoolSerializer("tools", "position-mirror", offsetof(engineState, translateMirror)),
+  simpleBoolSerializer("tools", "snap-scale", offsetof(engineState, snapManipulatorScales)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto snapManipulatorAngles = std::get_if<std::string>(&value);
