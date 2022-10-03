@@ -115,6 +115,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.unlock,
     api.debugInfo,
     api.setWorldState,
+    api.getWorldState,
     api.setLayerState,
     api.enforceLayout,
     api.createTexture,

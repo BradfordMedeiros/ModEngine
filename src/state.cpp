@@ -571,3 +571,14 @@ void setInitialState(engineState& state, std::string file, float now, std::funct
     setState(state, objValue, now); 
   }
 }
+
+
+std::vector<ObjectValue> getState(engineState& state){
+  return {
+    ObjectValue {
+      .object = "placeholder_object",
+      .attribute = "placeholder_attribute",
+      .value = "placeholder_value",
+    }
+  };
+}

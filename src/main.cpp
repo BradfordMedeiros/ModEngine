@@ -1348,6 +1348,7 @@ int main(int argc, char* argv[]){
     .unlock = unlock,
     .debugInfo = debugInfo,
     .setWorldState = setWorldState,
+    .getWorldState = getWorldState,
     .setLayerState = setLayerState,
     .enforceLayout = enforceLayout,
     .createTexture = createTexture,

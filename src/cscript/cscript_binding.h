@@ -85,6 +85,7 @@ struct CustomApiBindings {
   bool (*unlock)(std::string, objid);
   void (*debugInfo)(std::string infoType, std::string filepath);
   void (*setWorldState)(std::vector<ObjectValue> values);
+  std::vector<ObjectValue> (*getWorldState)();
   void (*setLayerState)(std::vector<StrValues> values);
   void (*enforceLayout)(objid layoutId);
 

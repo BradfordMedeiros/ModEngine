@@ -141,6 +141,7 @@ void windowSizeCallback(GLFWwindow* window, int width, int height);
 void toggleFullScreen(bool fullscreen);
 
 void setWorldState(std::vector<ObjectValue> values);
+std::vector<ObjectValue> getWorldState();
 void setLayerState(std::vector<StrValues> values);
 void setFloatState(std::string stateName, float value);
 void setIntState(std::string stateName, int value);

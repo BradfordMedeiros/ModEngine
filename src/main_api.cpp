@@ -528,8 +528,10 @@ void setWorldState(std::vector<ObjectValue> values){
   }
   //// todo add updates for each state ... should check if it was changed in state maybe?
   setCrosshairSprite();
+}
 
-
+std::vector<ObjectValue> getWorldState(){
+  return getState(state);
 }
 
 void setLayerState(std::vector<StrValues> values){

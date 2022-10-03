@@ -142,5 +142,6 @@ struct engineState {
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);
 void setState(engineState& state, std::vector<ObjectValue>& values, float now);
 void setInitialState(engineState& state, std::string file, float now, std::function<std::string(std::string)> readFile);
+std::vector<ObjectValue> getState(engineState& state);
 
 #endif
