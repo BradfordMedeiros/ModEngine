@@ -27,6 +27,7 @@ std::string renderModeAsStr(RENDER_MODE mode){
 
 struct ObjectStateMapping {
   std::function<void(engineState& state, AttributeValue, float)> attr;
+  std::function<std::optional<AttributeValue>(engineState& state)> getAttr;
   std::string object;
   std::string attribute;
 };
@@ -36,6 +37,11 @@ struct StateBoolSerializer {
   std::string enabledValue;
   std::string disabledValue;
 };
+
+std::optional<AttributeValue> getStateAttrNotImplemented(engineState& state){
+  return std::nullopt;
+}
+
 std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateBoolSerializer serializer){
   return [serializer](engineState& state, AttributeValue value, float now) -> void { 
     bool* boolValue = (bool*)(((char*)&state) + serializer.structOffset);
@@ -62,6 +68,7 @@ ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribut
         .disabledValue = disabledValue,
       }
     ),
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -106,6 +113,7 @@ ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribu
         }
       }     
     },
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -115,6 +123,7 @@ ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribu
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<glm::vec3>(offset),
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -123,6 +132,7 @@ ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribut
 ObjectStateMapping simpleFloatSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<float>(offset),
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -131,6 +141,7 @@ ObjectStateMapping simpleFloatSerializer(std::string object, std::string attribu
 ObjectStateMapping simpleStringSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<std::string>(offset),
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -140,6 +151,7 @@ ObjectStateMapping simpleStringSerializer(std::string object, std::string attrib
 ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<int, float>(offset),
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -164,6 +176,7 @@ ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribut
         modassert(false, std::string("invalid enum type: ") + *strValue);
       }
     },
+    .getAttr = getStateAttrNotImplemented,
     .object = object,
     .attribute = attribute,
   };
@@ -183,6 +196,7 @@ std::vector<ObjectStateMapping> mapping = {
         state.fogColor = glm::vec4(fogColor.x, fogColor.y, fogColor.z, 1.0f); 
       }
     },
+    .getAttr = getStateAttrNotImplemented,
     .object = "fog",
     .attribute = "color",
   },
@@ -200,6 +214,7 @@ std::vector<ObjectStateMapping> mapping = {
         std::cout << "target exposure: " << state.targetExposure << " but the old exposure: " << state.oldExposure << std::endl;
       }
     },
+    .getAttr = getStateAttrNotImplemented,
     .object = "exposure",
     .attribute = "amount",
   },
@@ -242,6 +257,7 @@ std::vector<ObjectStateMapping> mapping = {
         state.editor.forceSelectIndex = index;
       }
     },
+    .getAttr = getStateAttrNotImplemented,
     .object = "editor",
     .attribute = "selected-index",
   },
@@ -379,11 +395,19 @@ void setInitialState(engineState& state, std::string file, float now, std::funct
 
 
 std::vector<ObjectValue> getState(engineState& state){
-  return {
-    ObjectValue {
-      .object = "placeholder_object",
-      .attribute = "placeholder_attribute",
-      .value = "placeholder_value",
+  std::vector<ObjectValue> values;
+  for (auto &stateMap : mapping){
+    auto value = stateMap.getAttr(state);
+    //modassert(value.has_value(), std::string("not yet implemented: ") + stateMap.object + " - " + stateMap.attribute);
+    if (value.has_value()){
+      values.push_back(
+        ObjectValue {
+          .object = stateMap.object,
+          .attribute = stateMap.attribute,
+          .value = value.value(),
+        }
+      );
     }
-  };
+  }
+  return values;
 }
