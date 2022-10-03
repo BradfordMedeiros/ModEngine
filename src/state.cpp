@@ -127,6 +127,30 @@ ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute
   return mapping;
 }
 
+ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribute, std::vector<int> enums, std::vector<std::string> enumStrings, size_t offset){
+  modassert(enums.size() == enumStrings.size(), "enum serializer enums and strings invalid size");
+  ObjectStateMapping mapping {
+    .attr = [enums, enumStrings, offset](engineState& state, AttributeValue value, float now) -> void { 
+      auto strValue = std::get_if<std::string>(&value);
+      if (strValue != NULL){
+        for (int i = 0; i < enums.size(); i++){
+          auto enumString = enumStrings.at(i);
+          if (enumString == *strValue){
+            auto enumValue = enums.at(i);
+            int* value = (int*)(((char*)&state) + offset);
+            *value = enumValue;
+            return;
+          }
+        }
+        modassert(false, std::string("invalid enum type: ") + *strValue);
+      }
+    },
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
+
 std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
   simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
@@ -223,26 +247,8 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "antialiasing",
   },
   simpleBoolSerializer("rendering", "cull", "enabled", "disabled", offsetof(engineState, cullEnabled)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto cursorBehavior = std::get_if<std::string>(&value);
-      if (cursorBehavior != NULL){
-        if (*cursorBehavior == "normal"){
-          state.cursorBehavior = CURSOR_NORMAL;
-          return;
-        }else if (*cursorBehavior == "hidden"){
-          state.cursorBehavior = CURSOR_HIDDEN;
-          return;
-        }else if (*cursorBehavior == "capture"){
-          state.cursorBehavior = CURSOR_CAPTURE;
-          return;
-        }
-        modassert(false, "invalid cursor type");
-      }
-    },
-    .object = "mouse",
-    .attribute = "cursor",
-  },
+  simpleEnumSerializer("mouse", "cursor", { CURSOR_NORMAL, CURSOR_HIDDEN, CURSOR_CAPTURE }, { "normal", "hidden", "capture" }, offsetof(engineState, cursorBehavior)),
+
   simpleStringSerializer("mouse", "crosshair", offsetof(engineState, crosshair)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
@@ -349,8 +355,6 @@ std::vector<ObjectStateMapping> mapping = {
   simpleIntSerializer("editor", "snapangle-index", offsetof(engineState, easyUse.currentAngleIndex)),
   simpleIntSerializer("editor", "snaptranslate-index", offsetof(engineState, easyUse.currentTranslateIndex)),
   simpleIntSerializer("editor", "snapscale-index", offsetof(engineState, easyUse.currentScaleIndex)),
-
-
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto selectedIndexStr = std::get_if<std::string>(&value);
