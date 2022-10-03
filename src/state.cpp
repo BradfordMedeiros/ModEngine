@@ -226,26 +226,7 @@ std::vector<ObjectStateMapping> mapping = {
   },
   simpleStringSerializer("rendering", "border", offsetof(engineState, borderTexture)),
   simpleBoolSerializer("rendering", "fullscreen", offsetof(engineState, fullscreen)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto antialiasing = std::get_if<std::string>(&value);
-      if (antialiasing != NULL){
-        auto isNone = *antialiasing == "none";
-        auto isMsaa = *antialiasing == "msaa";
-        if (!isNone && !isMsaa){
-          std::cout << "invalid anti-aliasing mode: " << *antialiasing << std::endl;
-          assert(false);
-        }
-        if (isNone){
-          state.antialiasingMode = ANTIALIASING_NONE;
-        }else if (isMsaa){
-          state.antialiasingMode = ANTIALIASING_MSAA;
-        }
-      }     
-    },
-    .object = "rendering",
-    .attribute = "antialiasing",
-  },
+  simpleEnumSerializer("rendering", "antialiasing", { ANTIALIASING_NONE, ANTIALIASING_MSAA }, { "none", "msaa" }, offsetof(engineState, antialiasingMode)),
   simpleBoolSerializer("rendering", "cull", "enabled", "disabled", offsetof(engineState, cullEnabled)),
   simpleEnumSerializer("mouse", "cursor", { CURSOR_NORMAL, CURSOR_HIDDEN, CURSOR_CAPTURE }, { "normal", "hidden", "capture" }, offsetof(engineState, cursorBehavior)),
   simpleStringSerializer("mouse", "crosshair", offsetof(engineState, crosshair)),
