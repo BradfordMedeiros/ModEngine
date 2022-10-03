@@ -99,3 +99,15 @@
 (row2:anchor-direction:down
 (row2:minwidth:2
 
+(row3:layer:basicui
+(row3:position:0 0 0
+(row3:type:horizontal
+(row3:backpanel:true
+(row3:tint:1 1 1 0.8
+(row3:theme-play-tint:0 0 1 0.8
+(row3:theme-restore-tint:1 1 1 0.8
+(row3:margin:0.002
+(row3:anchor:(menubar
+(row3:anchor-offset:1 -0.099 0
+(row3:anchor-direction:down
+(row3:minwidth:0.5

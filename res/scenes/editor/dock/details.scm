@@ -300,6 +300,7 @@
   (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
   (format #t "play mode: ~a" (if playModeEnabled "true" "false"))
   (sendnotify "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
+  (sendnotify "play-mode" (if playModeEnabled "true" "false")) 
 )
 
 (define buttonToAction

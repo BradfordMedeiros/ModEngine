@@ -172,6 +172,24 @@
   )
 )
 
+
+(define (tintForAttr attr isPlay)
+  (define currTint (assoc "tint" attr))
+  (define themeTint (assoc "theme-play-tint" attr))
+  (define restoreTint (assoc "theme-restore-tint" attr))
+  (define value (if isPlay (cadr themeTint) (cadr restoreTint)))
+  value
+)
+(define (tintThemeColors value)
+  (define themeObjs (lsobj-attr "theme-play-tint"))
+  (define themeObjAndAttr (map (lambda(obj) (list obj (gameobj-attr obj))) themeObjs))
+  (for-each (lambda(objAndAttr) 
+    (gameobj-setattr! (car objAndAttr) (list
+      (list "tint" (tintForAttr (cadr objAndAttr) (equal? value "true")))
+    ))
+  ) themeObjAndAttr)
+  (format #t "should tint: ~a\n" themeObjs)
+)
 (define (onMessage key value)
   (if (equal? key "dialogmove-drag-stop") 
     (maybe-handle-side-panel-drop (string->number value))
@@ -182,8 +200,10 @@
       (format #t "should unload the dock because x was clicked\n")
     )
   )
+  (if (equal? key "play-mode")
+     (tintThemeColors value)
+  )
 )
-
 
 ;;;;;;;;;;;;;
 
