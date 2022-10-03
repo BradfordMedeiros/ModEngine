@@ -36,7 +36,6 @@ struct StateBoolSerializer {
   std::string enabledValue;
   std::string disabledValue;
 };
-
 std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateBoolSerializer serializer){
   return [serializer](engineState& state, AttributeValue value, float now) -> void { 
     bool* boolValue = (bool*)(((char*)&state) + serializer.structOffset);
@@ -54,7 +53,6 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
     modassert(false, "invalid type");
   };
 }
-
 ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribute, std::string enabledValue, std::string disabledValue, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr(
@@ -73,20 +71,61 @@ ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribut
   return simpleBoolSerializer(object, attribute, "true", "false", offset);
 }
 
+struct StateVec3Serializer {
+  size_t structOffset;
+};
+std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateVec3Serializer serializer){
+  return [serializer](engineState& state, AttributeValue value, float now) -> void { 
+    glm::vec3* vec3Value = (glm::vec3*)(((char*)&state) + serializer.structOffset);
+    auto vecValue = std::get_if<glm::vec3>(&value);
+    if (vecValue != NULL){
+      *vec3Value = *vecValue;
+    }
+  };
+}
+ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
+  ObjectStateMapping mapping {
+    .attr = getSetAttr(
+      StateVec3Serializer{
+        .structOffset = offset,      
+      }
+    ),
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
+
+struct StateStringSerializer {
+  size_t structOffset;
+};
+std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateStringSerializer serializer){
+  return [serializer](engineState& state, AttributeValue value, float now) -> void { 
+    std::string* strValue = (std::string*)(((char*)&state) + serializer.structOffset);
+    auto strAttrValue = std::get_if<std::string>(&value);
+    if (strAttrValue != NULL){
+      *strValue = *strAttrValue;
+    }
+  };
+}
+ObjectStateMapping simpleStringSerializer(std::string object, std::string attribute, size_t offset){
+  ObjectStateMapping mapping {
+    .attr = getSetAttr(
+      StateStringSerializer{
+        .structOffset = offset,      
+      }
+    ),
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
+
 std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
   simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
   simpleBoolSerializer("pbr", "enabled", offsetof(engineState, enablePBR)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto color = std::get_if<glm::vec3>(&value);
-      if (color != NULL){
-        state.ambient = *color; 
-      }
-    },
-    .object = "light",
-    .attribute = "amount",
-  },
+  simpleVec3Serializer("light", "amount", offsetof(engineState, ambient)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto color = std::get_if<glm::vec3>(&value);
@@ -133,28 +172,8 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "exposure",
     .attribute = "amount",
   },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto skyboxTexture = std::get_if<std::string>(&value);
-      if (skyboxTexture != NULL){
-        std::cout << "state: update skybox: " << *skyboxTexture << std::endl;
-        state.skybox = *skyboxTexture;
-      }     
-    },
-    .object = "skybox",
-    .attribute = "texture",
-  },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto skyboxColor = std::get_if<glm::vec3>(&value);
-      if (skyboxColor != NULL){
-        std::cout << "state: update skybox color: " << print(*skyboxColor) << std::endl;
-        state.skyboxcolor = *skyboxColor; 
-      }
-    },
-    .object = "skybox",
-    .attribute = "color",
-  },
+  simpleStringSerializer("skybox", "texture", offsetof(engineState, skybox)),
+  simpleVec3Serializer("skybox", "color", offsetof(engineState, skyboxcolor)),
   simpleBoolSerializer("skybox", "enable", offsetof(engineState, showSkybox)),
   simpleBoolSerializer("dof", "state", "enabled", "disabled", offsetof(engineState, enableDof)),
   ObjectStateMapping{
@@ -204,17 +223,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "rendering",
     .attribute = "resolution",
   },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto borderTexture = std::get_if<std::string>(&value);
-      if (borderTexture != NULL){
-        state.borderTexture = *borderTexture;
-        std::cout << "border texture: " << state.borderTexture << std::endl;
-      }     
-    },
-    .object = "rendering",
-    .attribute = "border",
-  },
+  simpleStringSerializer("rendering", "border", offsetof(engineState, borderTexture)),
   simpleBoolSerializer("rendering", "fullscreen", offsetof(engineState, fullscreen)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
@@ -257,18 +266,7 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "mouse",
     .attribute = "cursor",
   },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto crosshair = std::get_if<std::string>(&value);
-      if (crosshair != NULL){
-        state.crosshair = *crosshair;
-        return;
-      }
-      assert(false);
-    },
-    .object = "mouse",
-    .attribute = "crosshair",
-  },
+  simpleStringSerializer("mouse", "crosshair", offsetof(engineState, crosshair)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto mode = std::get_if<std::string>(&value);
@@ -389,30 +387,8 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "tools",
     .attribute = "snap-rotate",
   },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto windowname = std::get_if<std::string>(&value);
-      if (windowname != NULL){
-        state.windowname = *windowname;
-        return;
-      }
-      assert(false);
-    },
-    .object = "window",
-    .attribute = "name",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto iconpath = std::get_if<std::string>(&value);
-      if (iconpath != NULL){
-        state.iconpath = *iconpath;
-        return;
-      }
-      assert(false);
-    },
-    .object = "window",
-    .attribute = "icon",
-  },
+  simpleStringSerializer("window", "name", offsetof(engineState, windowname)),
+  simpleStringSerializer("window", "icon", offsetof(engineState, iconpath)),
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto fontsize = std::get_if<float>(&value);
