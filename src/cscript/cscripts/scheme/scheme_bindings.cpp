@@ -728,7 +728,17 @@ SCM scmSetWorldState(SCM value){
 
 std::vector<ObjectValue> (*_getWorldState)();
 SCM scmGetWorldState(){
-  return SCM_UNSPECIFIED;
+  auto state = _getWorldState();
+  SCM scmList = scm_make_list(scm_from_unsigned_integer(state.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < state.size(); i++){
+    auto worldStateVal = state.at(i);
+    SCM scmSubList = scm_make_list(scm_from_unsigned_integer(3), scm_from_unsigned_integer(0));
+    scm_list_set_x(scmSubList, scm_from_unsigned_integer(0), scm_from_locale_string(worldStateVal.object.c_str()));
+    scm_list_set_x(scmSubList, scm_from_unsigned_integer(1), scm_from_locale_string(worldStateVal.attribute.c_str()));
+    scm_list_set_x(scmSubList, scm_from_unsigned_integer(2), fromAttributeValue(worldStateVal.value));
+    scm_list_set_x(scmList, scm_from_unsigned_integer(i), scmSubList);
+  }
+  return scmList;
 }
 
 void (*_setLayerState)(std::vector<StrValues> values);
