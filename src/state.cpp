@@ -59,6 +59,7 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
     modassert(false, "invalid type");
   };
 }
+
 ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribute, std::string enabledValue, std::string disabledValue, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr(
@@ -68,7 +69,10 @@ ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribut
         .disabledValue = disabledValue,
       }
     ),
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [offset, enabledValue, disabledValue](engineState& state) -> AttributeValue {
+      bool* value = (bool*)(((char*)&state) + offset);
+      return *value ? enabledValue : disabledValue;
+    },
     .object = object,
     .attribute = attribute,
   };
