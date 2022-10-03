@@ -806,8 +806,6 @@
 
 (define (enforceLayouts)
   ;; todo remove - no items in this layout, should require this 
-  (enforce-layout (gameobj-id (lsobj-name "(banner_title_background_right" )))
-  (enforce-layout (gameobj-id (lsobj-name "(banner_title_background_left" )))
   (enforce-layout (gameobj-id (lsobj-name "(test_panel")))
 )
 (enforceLayouts)

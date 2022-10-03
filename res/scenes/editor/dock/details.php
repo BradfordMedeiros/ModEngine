@@ -19,7 +19,7 @@
 (test_panel:align-items-horizontal:left   # left/center/right
 (test_panel:align-items-vertical:up     # up/center/down
 
-(test_panel:position:-0.78 -0.1 <?php echo($zpos . "\n"); ?>
+(test_panel:position:-0.78 -0.097 <?php echo($zpos . "\n"); ?>
 (test_panel:minwidth:0.44
 (test_panel:align-content:neg
 
@@ -30,36 +30,8 @@
 )window_x:value:x
 )window_x:position:0.2 0.95 0
 
-(test_panel:child:(banner_title_background_right,(banner_title_background_left,)window_x
-)banner_title_right:layer:basicui
-)banner_title_right:scale:0.008 0.01 0.004
-)banner_title_right:value:Object Details
-)banner_title_right:rotation:0 0 -1 -90
-)banner_title_right:position:0 0 0.01
-(banner_title_background_right:position:0.23 0 <?php echo($zpos . "\n"); /* minwidth = 0.22 + 0.01 since this panel is 0.02 width to align */ ?>
-(banner_title_background_right:layer:basicui
-(banner_title_background_right:backpanel:true
-(banner_title_background_right:tint:1 1 1 0.3
-(banner_title_background_right:minheight:2
-(banner_title_background_right:minwidth:0.02
-(banner_title_background_right:border-size:0.002
-(banner_title_background_right:border-color:0 0 0 1
-(banner_title_background_right:child:)banner_title_right
+(test_panel:child:)window_x
 
-)banner_title_left:layer:basicui
-)banner_title_left:scale:0.008 0.01 0.004
-)banner_title_left:value:Object Details
-)banner_title_left:rotation:0 0 -1 -90
-)banner_title_left:position:0 0 0.01
-(banner_title_background_left:position:-0.23 0 <?php echo($zpos . "\n"); ?>
-(banner_title_background_left:layer:basicui
-(banner_title_background_left:backpanel:true
-(banner_title_background_left:tint:1 1 1 0.3
-(banner_title_background_left:minheight:2
-(banner_title_background_left:minwidth:0.02
-(banner_title_background_left:border-size:0.002
-(banner_title_background_left:border-color:0 0 0 1
-(banner_title_background_left:child:)banner_title_left
 
 )title:layer:basicui
 )title:scale:0.008 0.02 0.008
