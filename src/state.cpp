@@ -81,6 +81,18 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
     }
   };
 }
+
+template <typename T, typename F> 
+std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(size_t structOffset){
+  return [structOffset](engineState& state, AttributeValue value, float now) -> void { 
+    T* tValue = (T*)(((char*)&state) + structOffset);
+    auto attrValue = std::get_if<F>(&value);
+    if (attrValue != NULL){
+      *tValue = static_cast<T>(*attrValue);
+    }
+  };
+}
+
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<glm::vec3>(offset),
@@ -106,6 +118,15 @@ ObjectStateMapping simpleStringSerializer(std::string object, std::string attrib
   return mapping;
 }
 
+ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute, size_t offset){
+  ObjectStateMapping mapping {
+    .attr = getSetAttr<int, float>(offset),
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
+
 std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
   simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
@@ -125,16 +146,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("fog", "enabled", offsetof(engineState, enableFog)),
   simpleBoolSerializer("bloom", "enabled", offsetof(engineState, enableBloom)),
   simpleFloatSerializer("bloom", "amount", offsetof(engineState, bloomAmount)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto amount = std::get_if<float>(&value);
-      if (amount != NULL){
-        state.bloomBlurAmount = static_cast<int>(*amount);
-      }
-    },
-    .object = "bloomblur",
-    .attribute = "amount",
-  },
+  simpleIntSerializer("bloomblur", "amount", offsetof(engineState, bloomBlurAmount)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto amount = std::get_if<float>(&value);
@@ -152,18 +164,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleVec3Serializer("skybox", "color", offsetof(engineState, skyboxcolor)),
   simpleBoolSerializer("skybox", "enable", offsetof(engineState, showSkybox)),
   simpleBoolSerializer("dof", "state", "enabled", "disabled", offsetof(engineState, enableDof)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto swapInterval = std::get_if<float>(&value);
-      if (swapInterval != NULL){
-        int value = static_cast<int>(*swapInterval);
-        std::cout << "state: swap interval: " << value << std::endl;
-        state.swapInterval = value;
-      }     
-    },
-    .object = "rendering",
-    .attribute = "swapinterval",
-  },
+  simpleIntSerializer("rendering", "swapinterval", offsetof(engineState, swapInterval)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto viewportSizeStr = std::get_if<std::string>(&value);
@@ -322,7 +323,6 @@ std::vector<ObjectStateMapping> mapping = {
     .object = "tools",
     .attribute = "snap-position",
   },
-
   simpleBoolSerializer("tools", "position-mirror", offsetof(engineState, translateMirror)),
   simpleBoolSerializer("tools", "snap-scale", offsetof(engineState, snapManipulatorScales)),
   ObjectStateMapping {
@@ -343,67 +343,14 @@ std::vector<ObjectStateMapping> mapping = {
   },
   simpleStringSerializer("window", "name", offsetof(engineState, windowname)),
   simpleStringSerializer("window", "icon", offsetof(engineState, iconpath)),
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto fontsize = std::get_if<float>(&value);
-      if (fontsize != NULL){
-        state.fontsize = *fontsize;
-        return;
-      }
-      assert(false);
-    },
-    .object = "rendering",
-    .attribute = "fontsize",
-  },
+  simpleIntSerializer("rendering", "fontsize", offsetof(engineState, fontsize)),
   simpleBoolSerializer("editor", "showgrid", offsetof(engineState, showGrid)),
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto gridsize = std::get_if<float>(&value);
-      if (gridsize != NULL){
-        state.gridSize = *gridsize;
-        return;
-      }
-      assert(false);
-    },
-    .object = "editor",
-    .attribute = "gridsize",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto index = std::get_if<float>(&value);
-      if (index != NULL){
-        state.easyUse.currentAngleIndex = *index;
-        return;
-      }
-      assert(false);
-    },
-    .object = "editor",
-    .attribute = "snapangle-index",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto index = std::get_if<float>(&value);
-      if (index != NULL){
-        state.easyUse.currentTranslateIndex = *index;
-        return;
-      }
-      assert(false);
-    },
-    .object = "editor",
-    .attribute = "snaptranslate-index",
-  },
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto index = std::get_if<float>(&value);
-      if (index != NULL){
-        state.easyUse.currentScaleIndex = *index;
-        return;
-      }
-      assert(false);
-    },
-    .object = "editor",
-    .attribute = "snapscale-index",
-  },
+  simpleIntSerializer("editor", "gridsize", offsetof(engineState, gridSize)),
+  simpleIntSerializer("editor", "snapangle-index", offsetof(engineState, easyUse.currentAngleIndex)),
+  simpleIntSerializer("editor", "snaptranslate-index", offsetof(engineState, easyUse.currentTranslateIndex)),
+  simpleIntSerializer("editor", "snapscale-index", offsetof(engineState, easyUse.currentScaleIndex)),
+
+
   ObjectStateMapping {
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 
       auto selectedIndexStr = std::get_if<std::string>(&value);
