@@ -104,6 +104,14 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
   };
 }
 
+template <typename T>
+std::function<AttributeValue(engineState& state)> getGetAttr(size_t offset){
+  return [offset](engineState& state) -> AttributeValue {
+    T* value = (T*)(((char*)&state) + offset);
+    return *value; 
+  };
+}
+
 ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribute, size_t structOffset, std::optional<size_t> usingDefaultOffset){
   ObjectStateMapping mapping {
     .attr = [structOffset, usingDefaultOffset](engineState& state, AttributeValue value, float now) -> void { 
@@ -127,7 +135,7 @@ ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribu
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<glm::vec3>(offset),
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = getGetAttr<glm::vec3>(offset),
     .object = object,
     .attribute = attribute,
   };
@@ -136,7 +144,7 @@ ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribut
 ObjectStateMapping simpleFloatSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<float>(offset),
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = getGetAttr<float>(offset),
     .object = object,
     .attribute = attribute,
   };
@@ -145,7 +153,7 @@ ObjectStateMapping simpleFloatSerializer(std::string object, std::string attribu
 ObjectStateMapping simpleStringSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<std::string>(offset),
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = getGetAttr<std::string>(offset),
     .object = object,
     .attribute = attribute,
   };
@@ -155,7 +163,11 @@ ObjectStateMapping simpleStringSerializer(std::string object, std::string attrib
 ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<int, float>(offset),
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [offset](engineState& state) -> AttributeValue {
+      int* value = (int*)(((char*)&state) + offset);
+      float floatValue = static_cast<float>(*value);
+      return floatValue; 
+    },
     .object = object,
     .attribute = attribute,
   };
