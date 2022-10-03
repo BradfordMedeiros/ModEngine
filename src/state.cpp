@@ -192,7 +192,16 @@ ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribut
         modassert(false, std::string("invalid enum type: ") + *strValue);
       }
     },
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [enums, enumStrings, offset](engineState& state) -> AttributeValue {
+      int* enumValue = (int*)(((char*)&state) + offset);
+      for (int i = 0; i < enums.size(); i++){
+        if (enums.at(i) == *enumValue){
+          return enumStrings.at(i);
+        }
+      }
+      modassert(false, "invalid enum value in enum serializer");
+      return "";
+    },
     .object = object,
     .attribute = attribute,
   };
