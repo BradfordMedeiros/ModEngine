@@ -38,10 +38,6 @@ struct StateBoolSerializer {
   std::string disabledValue;
 };
 
-std::optional<AttributeValue> getStateAttrNotImplemented(engineState& state){
-  return std::nullopt;
-}
-
 std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateBoolSerializer serializer){
   return [serializer](engineState& state, AttributeValue value, float now) -> void { 
     bool* boolValue = (bool*)(((char*)&state) + serializer.structOffset);
@@ -125,13 +121,15 @@ ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribu
         }
       }     
     },
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [structOffset](engineState& state) -> AttributeValue {
+      glm::ivec2* vecValue = (glm::ivec2*)(((char*)&state) + structOffset);
+      return serializeVec(*vecValue);
+    },
     .object = object,
     .attribute = attribute,
   };
   return mapping;
 }
-
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<glm::vec3>(offset),
@@ -159,7 +157,6 @@ ObjectStateMapping simpleStringSerializer(std::string object, std::string attrib
   };
   return mapping;
 }
-
 ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<int, float>(offset),
@@ -173,7 +170,6 @@ ObjectStateMapping simpleIntSerializer(std::string object, std::string attribute
   };
   return mapping;
 }
-
 ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribute, std::vector<int> enums, std::vector<std::string> enumStrings, size_t offset){
   modassert(enums.size() == enumStrings.size(), "enum serializer enums and strings invalid size");
   ObjectStateMapping mapping {
@@ -221,7 +217,7 @@ std::vector<ObjectStateMapping> mapping = {
         state.fogColor = glm::vec4(fogColor.x, fogColor.y, fogColor.z, 1.0f); 
       }
     },
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [](engineState& state) -> AttributeValue { return glm::vec3(state.fogColor.x, state.fogColor.y, state.fogColor.z); },
     .object = "fog",
     .attribute = "color",
   },
@@ -239,7 +235,7 @@ std::vector<ObjectStateMapping> mapping = {
         std::cout << "target exposure: " << state.targetExposure << " but the old exposure: " << state.oldExposure << std::endl;
       }
     },
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [](engineState& state) -> AttributeValue { return state.targetExposure; },
     .object = "exposure",
     .attribute = "amount",
   },
@@ -282,7 +278,7 @@ std::vector<ObjectStateMapping> mapping = {
         state.editor.forceSelectIndex = index;
       }
     },
-    .getAttr = getStateAttrNotImplemented,
+    .getAttr = [](engineState& state) -> AttributeValue { return serializeFloat(state.editor.forceSelectIndex); },
     .object = "editor",
     .attribute = "selected-index",
   },
