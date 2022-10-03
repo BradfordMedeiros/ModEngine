@@ -253,43 +253,10 @@ std::vector<ObjectStateMapping> mapping = {
   simpleEnumSerializer("tools", "manipulator-axis", { XAXIS, YAXIS, ZAXIS, NOAXIS }, { "x", "y", "z", "none" }, offsetof(engineState, manipulatorAxis)),
   simpleBoolSerializer("tools", "preserve-scale", offsetof(engineState, preserveRelativeScale)),
   simpleEnumSerializer("tools", "scale-group", { INDIVIDUAL_SCALING, GROUP_SCALING }, { "individual", "group" }, offsetof(engineState, scalingGroup)),
-
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto snapManipulatorPositions = std::get_if<std::string>(&value);
-      if (snapManipulatorPositions != NULL){
-        if (*snapManipulatorPositions == "none"){
-          state.manipulatorPositionMode = SNAP_CONTINUOUS;
-        }else if (*snapManipulatorPositions == "relative"){
-          state.manipulatorPositionMode = SNAP_RELATIVE;
-        }else if (*snapManipulatorPositions == "absolute"){
-          state.manipulatorPositionMode = SNAP_ABSOLUTE;
-        }
-        return;
-      }
-      modassert(false, "invalid tools snap-position option: " + *snapManipulatorPositions);
-    },
-    .object = "tools",
-    .attribute = "snap-position",
-  },
+  simpleEnumSerializer("tools", "snap-position", { SNAP_CONTINUOUS, SNAP_RELATIVE, SNAP_ABSOLUTE }, { "none", "relative", "absolute" }, offsetof(engineState, manipulatorPositionMode)),
   simpleBoolSerializer("tools", "position-mirror", offsetof(engineState, translateMirror)),
   simpleBoolSerializer("tools", "snap-scale", offsetof(engineState, snapManipulatorScales)),
-  ObjectStateMapping {
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto snapManipulatorAngles = std::get_if<std::string>(&value);
-      if (*snapManipulatorAngles == "none"){
-        state.rotateMode = SNAP_CONTINUOUS;
-      }else if (*snapManipulatorAngles == "relative"){
-        state.rotateMode = SNAP_RELATIVE;
-      }else if (*snapManipulatorAngles == "absolute"){
-        state.rotateMode = SNAP_ABSOLUTE;
-      }
-      return;
-      modassert(false, "invalid tools snap-angles option: " + *snapManipulatorAngles);
-    },
-    .object = "tools",
-    .attribute = "snap-rotate",
-  },
+  simpleEnumSerializer("tools", "snap-rotate", { SNAP_CONTINUOUS, SNAP_RELATIVE, SNAP_ABSOLUTE }, { "none", "relative", "absolute" }, offsetof(engineState, rotateMode)),
   simpleStringSerializer("window", "name", offsetof(engineState, windowname)),
   simpleStringSerializer("window", "icon", offsetof(engineState, iconpath)),
   simpleIntSerializer("rendering", "fontsize", offsetof(engineState, fontsize)),
