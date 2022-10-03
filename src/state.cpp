@@ -93,6 +93,25 @@ std::function<void(engineState& state, AttributeValue value, float now)> getSetA
   };
 }
 
+ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribute, size_t structOffset, std::optional<size_t> usingDefaultOffset){
+  ObjectStateMapping mapping {
+    .attr = [structOffset, usingDefaultOffset](engineState& state, AttributeValue value, float now) -> void { 
+      auto viewportSizeStr = std::get_if<std::string>(&value);
+      if (viewportSizeStr != NULL){
+        glm::ivec2* vecValue = (glm::ivec2*)(((char*)&state) + structOffset);
+        *vecValue = parseVec2(*viewportSizeStr);
+        if (usingDefaultOffset.has_value()){
+          bool* usingDefault = (bool*)(((char*)&state) + usingDefaultOffset.value());
+          *usingDefault = false;
+        }
+      }     
+    },
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
+
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<glm::vec3>(offset),
@@ -189,41 +208,9 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("skybox", "enable", offsetof(engineState, showSkybox)),
   simpleBoolSerializer("dof", "state", "enabled", "disabled", offsetof(engineState, enableDof)),
   simpleIntSerializer("rendering", "swapinterval", offsetof(engineState, swapInterval)),
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto viewportSizeStr = std::get_if<std::string>(&value);
-      if (viewportSizeStr != NULL){
-        state.nativeViewport = false;
-        state.viewportSize = parseVec2(*viewportSizeStr);
-        std::cout << "viewport size: " << print(state.viewportSize) << std::endl;
-      }     
-    },
-    .object = "rendering",
-    .attribute = "viewport",
-  },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto viewportSizeStr = std::get_if<std::string>(&value);
-      if (viewportSizeStr != NULL){
-        state.viewportoffset = parseVec2(*viewportSizeStr);
-        std::cout << "viewport offsetset: " << print(state.viewportoffset) << std::endl;
-      }     
-    },
-    .object = "rendering",
-    .attribute = "viewportoffset",
-  },
-  ObjectStateMapping{
-    .attr = [](engineState& state, AttributeValue value, float now) -> void { 
-      auto resolutionStr = std::get_if<std::string>(&value);
-      if (resolutionStr != NULL){
-        state.nativeResolution = false;
-        state.resolution = parseVec2(*resolutionStr);
-        std::cout << "resolution: " << print(state.resolution) << std::endl;
-      }     
-    },
-    .object = "rendering",
-    .attribute = "resolution",
-  },
+  simpleIVec2Serializer("rendering", "viewport", offsetof(engineState, viewportSize), offsetof(engineState, nativeViewport)),
+  simpleIVec2Serializer("rendering", "viewportoffset", offsetof(engineState, viewportoffset), std::nullopt),
+  simpleIVec2Serializer("rendering", "resolution", offsetof(engineState, resolution), offsetof(engineState, nativeResolution)),
   simpleStringSerializer("rendering", "border", offsetof(engineState, borderTexture)),
   simpleBoolSerializer("rendering", "fullscreen", offsetof(engineState, fullscreen)),
   simpleEnumSerializer("rendering", "antialiasing", { ANTIALIASING_NONE, ANTIALIASING_MSAA }, { "none", "msaa" }, offsetof(engineState, antialiasingMode)),
@@ -254,7 +241,6 @@ std::vector<ObjectStateMapping> mapping = {
         std::cout << "selected index: " << index << std::endl;
         state.editor.forceSelectIndex = index;
       }
-
     },
     .object = "editor",
     .attribute = "selected-index",
