@@ -71,50 +71,27 @@ ObjectStateMapping simpleBoolSerializer(std::string object, std::string attribut
   return simpleBoolSerializer(object, attribute, "true", "false", offset);
 }
 
-struct StateVec3Serializer {
-  size_t structOffset;
-};
-std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateVec3Serializer serializer){
-  return [serializer](engineState& state, AttributeValue value, float now) -> void { 
-    glm::vec3* vec3Value = (glm::vec3*)(((char*)&state) + serializer.structOffset);
-    auto vecValue = std::get_if<glm::vec3>(&value);
-    if (vecValue != NULL){
-      *vec3Value = *vecValue;
+template <typename T> 
+std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(size_t structOffset){
+  return [structOffset](engineState& state, AttributeValue value, float now) -> void { 
+    T* tValue = (T*)(((char*)&state) + structOffset);
+    auto attrValue = std::get_if<T>(&value);
+    if (attrValue != NULL){
+      *tValue = *attrValue;
     }
   };
 }
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
-    .attr = getSetAttr(
-      StateVec3Serializer{
-        .structOffset = offset,      
-      }
-    ),
+    .attr = getSetAttr<glm::vec3>(offset),
     .object = object,
     .attribute = attribute,
   };
   return mapping;
 }
-
-struct StateStringSerializer {
-  size_t structOffset;
-};
-std::function<void(engineState& state, AttributeValue value, float now)> getSetAttr(StateStringSerializer serializer){
-  return [serializer](engineState& state, AttributeValue value, float now) -> void { 
-    std::string* strValue = (std::string*)(((char*)&state) + serializer.structOffset);
-    auto strAttrValue = std::get_if<std::string>(&value);
-    if (strAttrValue != NULL){
-      *strValue = *strAttrValue;
-    }
-  };
-}
 ObjectStateMapping simpleStringSerializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
-    .attr = getSetAttr(
-      StateStringSerializer{
-        .structOffset = offset,      
-      }
-    ),
+    .attr = getSetAttr<std::string>(offset),
     .object = object,
     .attribute = attribute,
   };
