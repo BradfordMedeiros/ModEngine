@@ -427,10 +427,5 @@
   (changeCursor #f)
 )
 
-
-
-(define (onKeyChar key)
-  (enforce-layout (gameobj-id (lsobj-name "(row2")))
-  (enforce-layout (gameobj-id (lsobj-name "(menubar")))
-)
-
+(enforce-layout (gameobj-id (lsobj-name "(row2")))
+(enforce-layout (gameobj-id (lsobj-name "(menubar")))

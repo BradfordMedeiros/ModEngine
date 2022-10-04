@@ -577,6 +577,8 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
 
+  modlog("layout", std::string("enforcing layout for: " + getGameObject(world, id).name));
+
    // Set position of the layout based on anchor target
   if (layoutObject -> anchor.target != ""){
     auto anchorElement = getGameObjectByNamePrefix(world, layoutObject -> anchor.target, currentSceneId, false);
@@ -601,7 +603,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
       //std::cout << "anchor boundoffset: " << print(boundDirectionOffset) << std::endl;
       auto anchorElementPos = fullTransformation(world.sandbox, anchorId).position + boundDirectionOffset;
       //std::cout << "anchor pos: " << print(anchorElementPos) << std::endl;
-      physicsTranslateSet(world, id, anchorElementPos, false);
+      physicsTranslateSet(world, id, anchorElementPos, true);
     
       }else{
       std::cout << "anchor target: " << layoutObject -> anchor.target << " does not exist" << std::endl;
@@ -623,7 +625,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   // Figure out positions, starting from rootPosition (layout should center elements so not quite right yet)
   auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutObject -> minSpacing, layoutType, layoutObject -> contentSpacing);
   for (auto newPosition : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
-    physicsTranslateSet(world, newPosition.id, newPosition.position, false);
+    physicsTranslateSet(world, newPosition.id, newPosition.position, true);
   }
 
   std::vector<objid> ids;
@@ -658,7 +660,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   newPositions = contentAlignPosition(world, newPositions, layoutObject -> boundInfo, layoutType, layoutObject -> contentAlign, layoutObject -> contentSpacing);
   for (auto [id, newPos] : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
-    physicsTranslateSet(world, id, newPos, false);
+    physicsTranslateSet(world, id, newPos, true);
   }
 
 
@@ -714,7 +716,10 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
     auto id = newPosition.id;
     auto newPos = newPosition.position;
     auto fullNewPos = newPos + elementsLeftSideOffset + mainAlignmentOffset + alignItemsAdjustments.at(i);
-    physicsTranslateSet(world, id, fullNewPos, false);
+    physicsTranslateSet(world, id, fullNewPos, true);
+    auto afterPosition = fullTransformation(world.sandbox, id).position;
+    //getGameObject(world,id).transformation.position = afterPosition;
+
     GameObjectUILayout* layoutObject = std::get_if<GameObjectUILayout>(&world.objectMapping.at(id));
     if (layoutObject != NULL){
       // Could just technically move the elements by the change from the holder position, but whatever for now
