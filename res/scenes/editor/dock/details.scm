@@ -922,10 +922,6 @@
   attrpair
 )
 
-(define (getDataValue key) 
-  (define value (assoc key dataValues))
-  (if value (cadr value) #f)
-)
 
 (define (controlEnabled gameobjAttr) 
   (define isEnabledBindingPair (assoc "details-enable-binding" gameobjAttr))
