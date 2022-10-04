@@ -137,6 +137,9 @@ struct engineState {
   EasyUseInfo easyUse;
 
   bool worldpaused;
+
+  glm::vec2 infoTextOffset;
+
 };
 
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight);

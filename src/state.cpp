@@ -130,6 +130,28 @@ ObjectStateMapping simpleIVec2Serializer(std::string object, std::string attribu
   };
   return mapping;
 }
+ObjectStateMapping simpleVec2Serializer(std::string object, std::string attribute, size_t structOffset, std::optional<size_t> usingDefaultOffset){
+  ObjectStateMapping mapping {
+    .attr = [structOffset, usingDefaultOffset](engineState& state, AttributeValue value, float now) -> void { 
+      auto viewportSizeStr = std::get_if<std::string>(&value);
+      if (viewportSizeStr != NULL){
+        glm::vec2* vecValue = (glm::vec2*)(((char*)&state) + structOffset);
+        *vecValue = parseVec2(*viewportSizeStr);
+        if (usingDefaultOffset.has_value()){
+          bool* usingDefault = (bool*)(((char*)&state) + usingDefaultOffset.value());
+          *usingDefault = false;
+        }
+      }     
+    },
+    .getAttr = [structOffset](engineState& state) -> AttributeValue {
+      glm::vec2* vecValue = (glm::vec2*)(((char*)&state) + structOffset);
+      return serializeVec(*vecValue);
+    },
+    .object = object,
+    .attribute = attribute,
+  };
+  return mapping;
+}
 ObjectStateMapping simpleVec3Serializer(std::string object, std::string attribute, size_t offset){
   ObjectStateMapping mapping {
     .attr = getSetAttr<glm::vec3>(offset),
@@ -283,6 +305,7 @@ std::vector<ObjectStateMapping> mapping = {
     .attribute = "selected-index",
   },
   simpleBoolSerializer("world", "paused", offsetof(engineState, worldpaused)),
+  simpleVec2Serializer("debug", "textoffset", offsetof(engineState, infoTextOffset), std::nullopt),
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){
@@ -398,6 +421,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .gridSize = 10,
     .easyUse = createEasyUse(),
     .worldpaused = false,
+    .infoTextOffset = glm::ivec2(0, 0),
 	};
 	return state;
 }
