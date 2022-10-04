@@ -685,7 +685,7 @@
 (define (maybe-perform-action objattr)
   (define attrActions (assoc "details-action" objattr))
   ;(format #t "attr actions: ~a\n " attrActions)
-  (if attrActions
+  (if (and attrActions (controlEnabled objattr))
     (let ((action (assoc (cadr attrActions) buttonToAction)))
       (if action
         ((cadr action))
@@ -922,19 +922,40 @@
   attrpair
 )
 
+(define (getDataValue key) 
+  (define value (assoc key dataValues))
+  (if value (cadr value) #f)
+)
+
+(define (controlEnabled gameobjAttr) 
+  (define isEnabledBindingPair (assoc "details-enable-binding" gameobjAttr))
+  (define isEnabledBinding (if isEnabledBindingPair (cadr isEnabledBindingPair) #f))
+  (define isEnabledBindingOffPair (assoc "details-enable-binding-off" gameobjAttr))
+  (define isEnabledBindingOff (if isEnabledBindingOffPair (cadr isEnabledBindingOffPair) #f))
+  (define bindingValue (getDataValue isEnabledBinding))
+  (if (and isEnabledBinding isEnabledBindingOff)
+    (not (equal? bindingValue isEnabledBindingOff))
+    #t
+  )
+)
+
 (define (update-toggle-binding attrpair getDataForAttr)
   (define toggleEnableText (getDataForAttr (cadr attrpair)))
   (define gameobj (car attrpair))
-  (define bindingOn (assoc "details-binding-on" (gameobj-attr gameobj)))
+  (define gameobjAttr (gameobj-attr gameobj))
+  (define bindingOn (assoc "details-binding-on" gameobjAttr))
   (define enableValueStr (if bindingOn (cadr bindingOn) "enabled"))
   (define enableValue (equal? enableValueStr toggleEnableText))
+  (define isEnabled (controlEnabled gameobjAttr))
+
+  (define onOffColor (if enableValue (list 0.3 0.3 0.6 1) (list 1 1 1 1)))
   ;(format #t "enable value str is: ~a for name ~a\n" enableValueStr (gameobj-name gameobj))
   ;(format #t "toggle enable text: ~a\n" toggleEnableText)
   ;(format #t "update toggle binding: ~a with value ~a (~a)\n" attrpair enableValue toggleEnableText)
   (gameobj-setattr! gameobj
     (list 
       (list "state" (if enableValue "on" "off"))
-      (list "tint"  (if enableValue (list 0.3 0.3 0.6 1) (list 1 1 1 1)))
+      (list "tint"  (if isEnabled onOffColor (list 0.4 0.4 0.4 1)))
     )
   )
 )
