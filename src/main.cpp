@@ -657,6 +657,9 @@ float fontOffsetPerLine(float fontsize){
   return -1 * (fontsize / 500.f + offsetPerLineMargin);
 }
 
+std::optional<float> fixedYOffset = std::nullopt;
+std::optional<float> fixedXOffset = std::nullopt;
+
 void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
   glUseProgram(uiShaderProgram);
   glEnable(GL_BLEND);
@@ -676,8 +679,8 @@ void renderUI(Mesh* crosshairSprite, Color pixelColor, bool showCursor){
 
 
   float offsetPerLine = fontOffsetPerLine(state.fontsize);
-  float uiYOffset = 1.f + 3 * offsetPerLine;
-  float uiXOffset = -1.f - offsetPerLine;
+  float uiYOffset = !fixedYOffset.has_value() ? (1.f + 3 * offsetPerLine) : fixedYOffset.value();
+  float uiXOffset = !fixedXOffset.has_value() ? (-1.f - offsetPerLine) : fixedXOffset.value();
   
   auto currentFramerate = static_cast<int>(unwrapAttr<float>(statValue(fpsStat)));
   //std::cout << "offsets: " << uiXOffset << " " << uiYOffset << std::endl;
@@ -1016,6 +1019,7 @@ int main(int argc, char* argv[]){
    ("fps-speed", "Fps speed multiplier", cxxopts::value<int>()->default_value("1000"))
    ("f,fullscreen", "Enable fullscreen mode", cxxopts::value<bool>()->default_value("false"))
    ("i,info", "Show debug info", cxxopts::value<bool>()->default_value("false"))
+   ("offset", "Offset of text", cxxopts::value<std::string>() -> default_value("0 0"))
    ("cursor", "Show cursor", cxxopts::value<bool>() -> default_value("true"))
    ("k,skiploop", "Skip main game loop", cxxopts::value<bool>()->default_value("false"))
    ("d,dumpphysics", "Dump physics info to file for external processing", cxxopts::value<bool>()->default_value("false"))
@@ -1123,6 +1127,14 @@ int main(int argc, char* argv[]){
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
+
+  auto offsetStr = result["offset"].as<std::string>();
+  if (offsetStr != ""){
+    auto offset = parseVec2(offsetStr);
+    fixedYOffset = offset.y;
+    fixedXOffset = offset.x;
+  }
+
   showCursor = result["cursor"].as<bool>() || showDebugInfo;
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
