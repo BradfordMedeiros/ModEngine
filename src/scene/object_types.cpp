@@ -554,7 +554,6 @@ void objectAttributes(GameObjectObj& toRender, GameobjAttributes& _attributes){
   assert(false);
 }
 
-// TODO -> this needs updating hard.  
 bool setObjectAttributes(std::map<objid, GameObjectObj>& mapping, objid id, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   GameObjectObj& toRender = mapping.at(id);
   auto variantIndex = toRender.index();

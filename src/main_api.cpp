@@ -239,6 +239,7 @@ GameobjAttributes getGameObjectAttr(int32_t id){
 }
 
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr){
+  modassert(idExists(world.sandbox, id), std::string("object does not exist: ") + std::to_string(id));
   setAttributes(world, id, attr);
 }
 
