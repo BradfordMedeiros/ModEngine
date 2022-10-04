@@ -125,8 +125,9 @@
   (if managedObj
     (begin
       (let ((updatedValues (filterUpdatedObjectValues)))
-        (format #t "submiit attrs: ~a\n" updatedValues)
-        (gameobj-setattr! managedObj updatedValues)
+        (if (gameobj-name managedObj)
+          (gameobj-setattr! managedObj updatedValues)
+        )
         ;; temporary, just to get the effect, should change
         (for-each (lambda(attrPair) 
           (if (equal? "editor-eoe-mode" (car attrPair))

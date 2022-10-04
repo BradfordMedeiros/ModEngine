@@ -1297,7 +1297,7 @@ int main(int argc, char* argv[]){
     .drawText = drawText,
     .drawLine = addLineNextCycle,
     .freeLine = freeLine,
-    .getGameObjectNameForId = getGameObjectName,
+    .getGameObjNameForId = getGameObjectName,
     .getGameObjectAttr = getGameObjectAttr,
     .setGameObjectAttr = setGameObjectAttr,
     .getGameObjectPos = getGameObjectPosition,

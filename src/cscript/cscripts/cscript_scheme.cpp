@@ -64,7 +64,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.drawText,
     api.drawLine,
     api.freeLine,
-    api.getGameObjectNameForId,
+    api.getGameObjNameForId,
     api.getGameObjectAttr,
     api.setGameObjectAttr,
     api.getGameObjectPos,

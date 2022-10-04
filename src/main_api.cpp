@@ -230,7 +230,10 @@ std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeV
   return idsWithAttrs;
 }
 
-std::string getGameObjectName(int32_t index){
+std::optional<std::string> getGameObjectName(int32_t index){
+  if (!idExists(world.sandbox, index)){
+    return std::nullopt;
+  }
   return getGameObject(world, index).name;
 }
 

@@ -380,15 +380,19 @@ int32_t getGameobjId(SCM value){
   return obj->id;  
 }
 
-std::string (*getGameObjNameForId)(int32_t id);
+std::optional<std::string> (*_getGameObjNameForId)(int32_t id);
 SCM getGameObjNameForIdFn(SCM value){
-  return scm_from_locale_string(getGameObjNameForId(getGameobjId(value)).c_str());
+  auto name = _getGameObjNameForId(getGameobjId(value));
+  if (!name.has_value()){
+    return scm_from_bool(false);
+  }
+  return scm_from_locale_string(name.value().c_str());
 }
 
 SCM scmGetGameObjectById(SCM scmId){
   auto id = scm_to_int32(scmId);
-  getGameObjNameForId(id);          // this assert the object exists
-  return createGameObject(id);
+  auto gameobjId = _getGameObjNameForId(id);          // this assert the object exists
+  return gameobjId.has_value() ? createGameObject(id) : scm_from_bool(false);
 }
 
 GameobjAttributes (*_getGameObjectAttr)(int32_t id);
@@ -1313,7 +1317,7 @@ void createStaticSchemeBindings(
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamil, std::optional<objid> selectionId),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth),
   void (*freeLine)(int32_t lineid),
-  std::string (*getGameObjectNameForId)(int32_t id),
+  std::optional<std::string> (*getGameObjNameForId)(int32_t id),
   GameobjAttributes getGameObjectAttr(int32_t id),
   void (*setGameObjectAttr)(int32_t id, GameobjAttributes& attr),
   glm::vec3 (*getGameObjectPos)(int32_t index, bool world),
@@ -1411,7 +1415,7 @@ void createStaticSchemeBindings(
   _drawLine = drawLine;
   _freeLine = freeLine;
 
-  getGameObjNameForId = getGameObjectNameForId;
+  _getGameObjNameForId = getGameObjNameForId;
   _getGameObjectAttr = getGameObjectAttr;
   _setGameObjectAttr = setGameObjectAttr;
 

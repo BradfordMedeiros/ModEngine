@@ -73,7 +73,7 @@ void onObjectLeave(const btCollisionObject* obj1, const btCollisionObject* obj2)
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit);
 std::vector<int32_t> getObjectsByType(std::string type);
 std::vector<int32_t> getObjectsByAttr(std::string type, std::optional<AttributeValue> value, int32_t sceneId);
-std::string getGameObjectName(int32_t index);
+std::optional<std::string> getGameObjectName(int32_t index);
 GameobjAttributes getGameObjectAttr(int32_t id);
 void setGameObjectAttr(int32_t id, GameobjAttributes& attr);
 
