@@ -305,7 +305,6 @@
     (let ((openedDialog ((cadr mappedAction))))
       (if (equal? openedDialog #t)
         (set! activeDialogName actionName)
-        (set! activeDialogName #f)
       )
     )
   )
