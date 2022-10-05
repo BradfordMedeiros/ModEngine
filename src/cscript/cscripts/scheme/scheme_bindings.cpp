@@ -77,19 +77,16 @@ SCM scm_listSceneId(SCM id){
 
 // Main Api
 int32_t (*_loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
-SCM scm_loadScene(SCM value, SCM additionalValues, SCM name){
+SCM scm_loadScene(SCM value, SCM additionalValues, SCM name, SCM tags){
   auto additionalValuesDefined = !scm_is_eq(additionalValues, SCM_UNDEFINED);
   std::vector<std::vector<std::string>> additionalValuesList;
   if (additionalValuesDefined){
     additionalValuesList = scmToStringList(additionalValues);
   }
-  auto scenenameDefined = !scm_is_eq(name, SCM_UNDEFINED);
-  std::optional<std::string> scenename = std::nullopt;
-  if (scenenameDefined){
-    scenename = scm_to_locale_string(name);
-  }
-  std::vector<std::string> tags = {};
-  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList, scenename, tags);
+  auto optVals = optionalValues({OPTIONAL_VALUE_STRING, OPTIONAL_STRING_LIST }, { name, tags });
+  auto sceneNameOpt = optionalTypeFromVariant<std::string>(optVals.at(0));
+  auto sceneTagsOpt = optionalTypeFromVariant<std::vector<std::string>>(optVals.at(1));
+  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList, sceneNameOpt, sceneTagsOpt);
   return scm_from_int32(sceneId);
 }
 
@@ -1147,7 +1144,7 @@ std::vector<func_t> _registerGuileFns;
 ////////////
 void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("list-sceneid", 1, 0, 0, (void *)scm_listSceneId);
-  scm_c_define_gsubr("load-scene", 1, 2, 0, (void *)scm_loadScene);
+  scm_c_define_gsubr("load-scene", 1, 3, 0, (void *)scm_loadScene);
   scm_c_define_gsubr("unload-scene", 1, 0, 0, (void *)scm_unloadScene);
   scm_c_define_gsubr("unload-all-scenes", 0, 0, 0, (void *)scm_unloadAllScenes);
   scm_c_define_gsubr("reset-scene", 0, 1, 0, (void*)scm_resetScene);

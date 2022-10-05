@@ -313,6 +313,11 @@ std::optional<optionalValueData> getScmValueIfType(OptionalValueType optType, SC
     if (isType){
       return listToVec4(scmValue);
     }
+  }else if (optType == OPTIONAL_STRING_LIST){
+    auto isType = isList(scmValue);
+    if (isType){
+      return scmToList(scmValue);
+    }
   }else{
     modassert(false, "optional values - invalid type");
   }
@@ -365,6 +370,10 @@ std::string optValueToStr(optionalValueData value1){
   if (value1Vec4Ptr != NULL){
     return print(*value1Vec4Ptr) + "(vec4)";
   }  
+  auto stringListPtr = std::get_if<std::vector<std::string>>(&value1);
+  if (stringListPtr != NULL){
+    return std::string("list of size = ") + std::to_string(stringListPtr -> size()) + "(strlist)";
+  }
   modassert(false, "optValueToStr invalid value");
   return "";
 }
