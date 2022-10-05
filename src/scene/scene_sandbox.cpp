@@ -395,7 +395,14 @@ void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObj
   }
 }
 
-std::vector<objid> allSceneIds(SceneSandbox& sandbox){
+std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<std::string>> tags){
+  if (tags.has_value()){
+    std::cout << "tags = [ ";
+    for (auto tag : tags.value()){
+      std::cout << tag << " ";
+    }
+    std::cout << " ]" << std::endl;
+  }
   std::vector<objid> sceneIds;
   for (auto [sceneId, _] : sandbox.sceneIdToRootObj){
     sceneIds.push_back(sceneId);

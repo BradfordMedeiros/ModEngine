@@ -72,7 +72,7 @@ void netObjectDelete(objid id, bool isNet, NetCode& netcode, bool bootstrapperMo
 }
 
 int32_t makeObject(World& world, std::string serializedobj, objid id, bool useObjId, objid sceneId, bool useSceneId){
-  auto firstSceneId = allSceneIds(world.sandbox).at(0);
+  auto firstSceneId = allSceneIds(world.sandbox, std::nullopt).at(0);
   return addObjectToScene(world, useSceneId ? sceneId : firstSceneId, serializedobj, id, useObjId);
 }
 

@@ -65,7 +65,7 @@ std::string serializeScene(SceneSandbox& sandbox, objid sceneId, std::function<s
 
 SceneSandbox createSceneSandbox(std::vector<LayerInfo> layers, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields);
 void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObject& gameobj)> onElement);
-std::vector<objid> allSceneIds(SceneSandbox& sandbox);
+std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<std::string>> tags);
 bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName);
 std::optional<GameObject*> maybeGetGameObjectByName(SceneSandbox& sandbox, std::string name, objid sceneId, bool enablePrefixMatch);
 objid getGroupId(SceneSandbox& sandbox, objid id);

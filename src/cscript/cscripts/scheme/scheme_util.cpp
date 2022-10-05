@@ -265,6 +265,15 @@ std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues){
   return tokens;
 }
 
+std::vector<std::string> scmToList(SCM stringList){
+  std::vector<std::string> values;
+  auto numElements = toUnsignedInt(scm_length(stringList));
+  for (int i = 0; i < numElements; i++){
+    auto strValue = scm_list_ref(stringList, scm_from_unsigned_integer(i));
+    values.push_back(scm_to_locale_string(strValue));
+  }
+  return values;
+}
 
 std::optional<optionalValueData> getScmValueIfType(OptionalValueType optType, SCM& scmValue){
   if (optType == OPTIONAL_VALUE_STRING){

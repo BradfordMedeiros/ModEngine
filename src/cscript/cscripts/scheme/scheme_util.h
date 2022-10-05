@@ -35,6 +35,7 @@ struct ScmAttributeValue {
 ScmAttributeValue scmToAttributes(SCM scmAttributes);
 ObjectValue scmListToObjectValue(SCM list);
 std::vector<std::vector<std::string>> scmToStringList(SCM additionalValues);
+std::vector<std::string> scmToList(SCM stringList);
 
 enum OptionalValueType { OPTIONAL_VALUE_UNSIGNED_INT, OPTIONAL_VALUE_INT, OPTIONAL_VALUE_STRING, OPTIONAL_VALUE_BOOL, OPTIONAL_VALUE_VEC4 };
 typedef std::variant<unsigned int, int, std::string, bool, glm::vec4> optionalValueData;

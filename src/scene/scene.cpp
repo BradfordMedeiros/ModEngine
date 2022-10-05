@@ -983,7 +983,7 @@ void removeSceneFromWorld(World& world, objid sceneId){
   removeScene(world.sandbox, sceneId);
 }
 void removeAllScenesFromWorld(World& world){
-  for (auto sceneId : allSceneIds(world.sandbox)){
+  for (auto sceneId : allSceneIds(world.sandbox, std::nullopt)){
     removeSceneFromWorld(world, sceneId);
   }
 }

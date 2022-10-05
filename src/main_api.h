@@ -60,7 +60,7 @@ void unloadAllScenes();
 void resetScene(std::optional<objid> sceneId);
 void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filename);
 
-std::vector<int32_t> listScenes();
+std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags);
 std::vector<StringPairVec2> scenegraph();
 
 void sendLoadScene(int32_t sceneId);
