@@ -72,7 +72,7 @@ std::vector<objid> childScenes(objid sceneId){
 }
 
 
-int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<objid> id){
+int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> id){
   std::cout << "INFO: SCENE LOADING: loading " << sceneFile << std::endl;
   std::vector<Token> addedTokens;
   for (auto &tokens : additionalTokens){
@@ -82,17 +82,16 @@ int32_t loadSceneWithId(std::string sceneFile, std::vector<std::vector<std::stri
       .payload = tokens.at(2),
     });
   }
-  return addSceneToWorld(world, sceneFile, addedTokens, name, id);
+  return addSceneToWorld(world, sceneFile, addedTokens, name, tags, id);
 }
 
-int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name){
-  return loadSceneWithId(sceneFile, additionalTokens, name, std::nullopt);
+int32_t loadScene(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
+  return loadSceneWithId(sceneFile, additionalTokens, name, tags, std::nullopt);
 }
 
 
 int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::string parentNodeName){
   auto name = std::to_string(getUniqueObjId()) + parentNodeName;
-
   GameobjAttributes attr {
     .stringAttributes = {}, 
     .numAttributes = {}, 
@@ -101,7 +100,7 @@ int32_t loadSceneParentOffset(std::string sceneFile, glm::vec3 offset, std::stri
   std::map<std::string, GameobjAttributes> submodelAttributes = {};
   auto nodeOffsetId = makeObjectAttr(world.sandbox.mainScene.rootId, name, attr, submodelAttributes).value();
   std::cout << "load scene offset: " << print(offset) << std::endl;
-  auto sceneId = loadScene(sceneFile, {}, std::nullopt);
+  auto sceneId = loadScene(sceneFile, {}, std::nullopt, std::nullopt);
   auto rootId = rootIdForScene(world.sandbox, sceneId);
   makeParent(world.sandbox, rootId, nodeOffsetId);
   return nodeOffsetId;
@@ -130,9 +129,11 @@ void resetScene(std::optional<objid> sceneId){
   if (sceneId.has_value()){
     auto sceneFile = sceneFileForSceneId(world, sceneId.value());
     auto sceneName = sceneNameForSceneId(world, sceneId.value());
+    auto sceneTags = sceneTagsForSceneId(world, sceneId.value());
+
     auto parentObjId = listParentObjId(world.sandbox, sceneId.value());
     unloadScene(sceneId.value());
-    loadSceneWithId(sceneFile, {}, sceneName, sceneId.value()); // additional args get lost, maybe i should keep this data around? 
+    loadSceneWithId(sceneFile, {}, sceneName, sceneTags, sceneId.value()); // additional args get lost, maybe i should keep this data around? 
     if (parentObjId.has_value()){
       auto rootObjIdNewScene = rootIdForScene(world.sandbox, sceneId.value());
       makeParent(world.sandbox, rootObjIdNewScene, parentObjId.value());

@@ -395,17 +395,24 @@ void forEveryGameobj(SceneSandbox& sandbox, std::function<void(objid id, GameObj
   }
 }
 
-std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<std::string>> tags){
-  if (tags.has_value()){
-    std::cout << "tags = [ ";
-    for (auto tag : tags.value()){
-      std::cout << tag << " ";
+
+bool sceneContainsTag(SceneSandbox& sandbox, objid sceneId, std::vector<std::string>& tags){
+  for (auto &tag : sandbox.sceneIdToSceneMetadata.at(sceneId).tags){
+    for (auto filterTag : tags){
+      if (tag == filterTag){
+        return true;
+      }
     }
-    std::cout << " ]" << std::endl;
-  }
+  } 
+  return false;
+}
+
+std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<std::string>> tags){
   std::vector<objid> sceneIds;
   for (auto [sceneId, _] : sandbox.sceneIdToRootObj){
-    sceneIds.push_back(sceneId);
+    if (!tags.has_value() || sceneContainsTag(sandbox, sceneId, tags.value())){
+      sceneIds.push_back(sceneId);
+    }
   }
   return sceneIds;
 } 
@@ -691,7 +698,7 @@ SceneDeserialization deserializeScene(objid sceneId, std::string content, std::f
   applyStyles(tokens, styles);
   return createSceneFromParsedContent(sceneId, tokens, getNewObjectId, getObjautoserializerFields);
 }
-AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
+AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sceneFileName, objid sceneId, std::string sceneData, std::vector<Style>& styles, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::function<std::set<std::string>(std::string&)> getObjautoserializerFields){
   assert(sandbox.sceneIdToRootObj.find(sceneId) == sandbox.sceneIdToRootObj.end());
   for (auto &[_, metadata] : sandbox.sceneIdToSceneMetadata){ // all scene names should be unique
     if (metadata.name == name && name != std::nullopt){
@@ -716,9 +723,11 @@ AddSceneDataValues addSceneDataToScenebox(SceneSandbox& sandbox, std::string sce
   }
   auto rootId = deserializedScene.scene.rootId;
   sandbox.sceneIdToRootObj[deserializedScene.scene.idToGameObjectsH.at(rootId).sceneId] = rootId;
+
   sandbox.sceneIdToSceneMetadata[sceneId] = SceneMetadata{
     .scenefile = sceneFileName,
     .name = name,
+    .tags = tags.has_value() ? tags.value() : std::vector<std::string>({}),
   }; 
 
   enforceParentRelationship(sandbox.mainScene, rootId, sandbox.mainScene.rootId);

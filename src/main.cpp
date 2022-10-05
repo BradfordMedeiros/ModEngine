@@ -1482,7 +1482,7 @@ int main(int argc, char* argv[]){
     auto hasName = parts.size() > 1;
     auto sceneFileToLoad = !hasName ? join(parts, ':') : join(subvector(parts, 0, parts.size() - 1), ':');
     std::optional<std::string> sceneFileName = hasName ? parts.at(parts.size() -1) : std::optional<std::string>(std::nullopt);
-    loadScene(sceneFileToLoad, {}, sceneFileName);
+    loadScene(sceneFileToLoad, {}, sceneFileName, {});
   }
   auto defaultCameraName = result["camera"].as<std::string>();
   if (defaultCameraName != ""){

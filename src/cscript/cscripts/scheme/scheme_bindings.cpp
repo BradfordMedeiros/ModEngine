@@ -76,7 +76,7 @@ SCM scm_listSceneId(SCM id){
 
 
 // Main Api
-int32_t (*_loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name);
+int32_t (*_loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
 SCM scm_loadScene(SCM value, SCM additionalValues, SCM name){
   auto additionalValuesDefined = !scm_is_eq(additionalValues, SCM_UNDEFINED);
   std::vector<std::vector<std::string>> additionalValuesList;
@@ -88,7 +88,8 @@ SCM scm_loadScene(SCM value, SCM additionalValues, SCM name){
   if (scenenameDefined){
     scenename = scm_to_locale_string(name);
   }
-  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList, scenename);
+  std::vector<std::string> tags = {};
+  auto sceneId = _loadScene(scm_to_locale_string(value), additionalValuesList, scenename, tags);
   return scm_from_int32(sceneId);
 }
 
@@ -1295,7 +1296,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
 void createStaticSchemeBindings(
   int32_t (*listSceneId)(int32_t objid),
-  int32_t (*loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name),
+  int32_t (*loadScene)(std::string sceneFile, std::vector<std::vector<std::string>> additionalTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags),
   void (*unloadScene)(int32_t id),  
   void (*unloadAllScenes)(),
   void (*resetScene)(std::optional<objid> sceneId),

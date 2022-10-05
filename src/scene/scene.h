@@ -52,8 +52,8 @@ void addSerialObjectsToWorld(World& world, objid sceneId, std::vector<objid>& id
 Texture loadTextureWorld(World& world, std::string texturepath, objid ownerId);
 Texture loadTextureWorldEmpty(World& world, std::string texturepath, objid ownerId, int textureWidth, int textureHeight, std::optional<objid> mappingTexture);
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<objid> sceneId = std::nullopt);
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name);
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId = std::nullopt);
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags);
 void removeSceneFromWorld(World& world, objid sceneId);
 void removeAllScenesFromWorld(World& world);
 
@@ -120,6 +120,8 @@ void setProperties(World& world, objid id, Properties& properties);
 
 std::string sceneFileForSceneId(World& world, objid sceneId);
 std::optional<std::string> sceneNameForSceneId(World& world, objid sceneId);
+std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId);
+
 void loadSkybox(World& world, std::string skyboxpath);
 
 std::string getType(std::string name);

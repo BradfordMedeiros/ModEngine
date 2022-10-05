@@ -890,9 +890,9 @@ void addSerialObjectsToWorld(
   }
 }
 
-objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name){
+objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sceneId, std::string sceneData, std::optional<std::string> name, std::optional<std::vector<std::string>> tags){
   auto styles = loadStyles("./res/default.style", world.interface.readFile);
-  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name, getObjautoserializerFields);
+  auto data = addSceneDataToScenebox(world.sandbox, sceneFileName, sceneId, sceneData, styles, name, tags, getObjautoserializerFields);
   std::vector<GameObjectObj> addedGameobjObjs = {};
 
   auto getId = createGetUniqueObjId(data.idsAdded);
@@ -900,9 +900,9 @@ objid addSceneToWorldFromData(World& world, std::string sceneFileName, objid sce
   return sceneId;
 }
 
-objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<objid> sceneId){
+objid addSceneToWorld(World& world, std::string sceneFile, std::vector<Token>& addedTokens, std::optional<std::string> name, std::optional<std::vector<std::string>> tags, std::optional<objid> sceneId){
   auto sceneData = world.interface.readFile(sceneFile) + "\n" + serializeSceneTokens(addedTokens);  // maybe should clean this up to prevent string hackeyness
-  return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name);
+  return addSceneToWorldFromData(world, sceneFile, sceneId.has_value() ? sceneId.value() : getUniqueObjId(), sceneData, name, tags);
 }
 
 // todo finish removing data like eg clearing meshes, animations,etc
@@ -1446,4 +1446,8 @@ std::string sceneFileForSceneId(World& world, objid sceneId){
 
 std::optional<std::string> sceneNameForSceneId(World& world, objid sceneId){
   return world.sandbox.sceneIdToSceneMetadata.at(sceneId).name;
+}
+
+std::vector<std::string> sceneTagsForSceneId(World& world, objid sceneId){
+  return world.sandbox.sceneIdToSceneMetadata.at(sceneId).tags;
 }
