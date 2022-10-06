@@ -996,6 +996,21 @@ ManipulatorTools tools {
   .getSelectedIds = onManipulatorSelected,
 };
 
+struct ExtractSuffix {
+  std::string suffix;
+  std::string rest;
+};
+
+ExtractSuffix extractSuffix(std::string& value, char delimeter){
+  auto tagSplit = split(value, delimeter);
+  auto tagRest = tagSplit.size() > 1 ? join(subvector(tagSplit, 0, tagSplit.size() - 1), delimeter) : value;
+  auto tagPart = tagSplit.size() > 1 ? tagSplit.at(tagSplit.size() -1) : "";
+  return ExtractSuffix {
+    .suffix = tagPart,
+    .rest = tagRest,
+  };
+}
+
 GLFWwindow* window = NULL;
 GLFWmonitor* monitor = NULL;
 const GLFWvidmode* mode = NULL;
@@ -1478,12 +1493,16 @@ int main(int argc, char* argv[]){
 
   std::cout << "INFO: # of intitial raw scenes: " << rawScenes.size() << std::endl;
   for (auto rawScene : rawScenes){
-    auto parts = split(rawScene, ':');
-    auto hasName = parts.size() > 1;
-    auto sceneFileToLoad = !hasName ? join(parts, ':') : join(subvector(parts, 0, parts.size() - 1), ':');
-    std::optional<std::string> sceneFileName = hasName ? parts.at(parts.size() -1) : std::optional<std::string>(std::nullopt);
-    loadScene(sceneFileToLoad, {}, sceneFileName, {});
+    // :scenename
+    // =tag1,tag2,tag3 
+    auto tagExtract = extractSuffix(rawScene, '=');
+    auto tags = split(tagExtract.suffix, '.');
+    auto scenenameExtract = extractSuffix(tagExtract.rest, ':');
+    std::optional<std::string> sceneFileName = scenenameExtract.suffix.size() > 0 ? std::optional<std::string>(scenenameExtract.suffix) : std::nullopt;
+    auto sceneToLoad = scenenameExtract.rest;
+    loadScene(sceneToLoad, {}, sceneFileName, tags);
   }
+
   auto defaultCameraName = result["camera"].as<std::string>();
   if (defaultCameraName != ""){
     auto ids =  getByName(world.sandbox, defaultCameraName);

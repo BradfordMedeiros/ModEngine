@@ -52,6 +52,7 @@ std::string rawprint(glm::quat quat);
 std::string print(glm::mat4 mat);
 std::string print(glm::mat3 mat);
 std::string print(glm::mat2 mat);
+std::string print(std::vector<std::string>& values);
 glm::vec3 parseVec(std::string positionRaw);
 glm::vec4 parseVec4(std::string positionRaw);
 bool maybeParseVec(std::string positionRaw, glm::vec3& _vec);
