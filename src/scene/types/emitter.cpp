@@ -2,7 +2,8 @@
 
 void addEmitter(
   EmitterSystem& system, 
-  std::string name, 
+  std::string name,
+  std::string templateName,
   objid emitterNodeId, 
   float currentTime, 
   unsigned int targetParticles,
@@ -18,6 +19,7 @@ void addEmitter(
 
   Emitter emitter {
     .name = name,
+    .templateName = templateName,
     .emitterNodeId = emitterNodeId,
     .lastSpawnTime = currentTime,
     .targetParticles = targetParticles,
@@ -109,7 +111,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
+  std::function<objid(std::string emitterName, std::string templateName, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -186,7 +188,8 @@ void updateEmitters(
         emitter.forceParticles.pop_front();
       }
       emitter.currentParticles+= 1; 
-      auto particleId = addParticle(emitter.name, emitter.particleAttributes, emitter.emitterNodeId, newParticleOpts);
+
+      auto particleId = addParticle(emitter.name, emitter.templateName, emitter.particleAttributes, emitter.emitterNodeId, newParticleOpts);
 
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,

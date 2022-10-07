@@ -80,7 +80,7 @@ int maxvalue(int x, int y, int z);
 
 typedef int32_t objid;
 objid getUniqueObjId();
-std::string getUniqueObjectName();
+std::string getUniqueObjectName(std::string& prefix);
 
 enum AttributeValueType { ATTRIBUTE_VEC3, ATTRIBUTE_VEC4, ATTRIBUTE_STRING, ATTRIBUTE_FLOAT };
 typedef std::variant<glm::vec3, glm::vec4, std::string, float> AttributeValue;

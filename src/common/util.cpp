@@ -445,8 +445,8 @@ objid getUniqueObjId(){
   return randId;
 }
 
-std::string getUniqueObjectName(){
-  return std::string("name(") + std::to_string(getUniqueObjId()) + ")";
+std::string getUniqueObjectName(std::string& prefix){
+  return prefix + std::to_string(getUniqueObjId()) + ")";
 }
 
 AttributeValue parseAttributeValue(std::string payload){

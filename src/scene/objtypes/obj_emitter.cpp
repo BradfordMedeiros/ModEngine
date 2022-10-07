@@ -140,6 +140,11 @@ std::vector<AutoSerialize> emitterAutoserializer {
     .field = "onremove",
     .defaultValue = EMITTER_DELETE,
   },
+  AutoSerializeString {
+    .structOffset = offsetof(GameObjectEmitter, templateName),
+    .field = "template",
+    .defaultValue = "obj",
+  }
 };
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util){
@@ -148,7 +153,7 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   assert(obj.limit >= 0);
   
   auto emitterAttr = particleFields(attributes);
-  util.addEmitter(obj.rate, obj.duration, obj.limit, emitterAttr, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
+  util.addEmitter(obj.templateName, obj.rate, obj.duration, obj.limit, emitterAttr, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
   return obj;
 }
 

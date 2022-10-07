@@ -756,8 +756,8 @@ void addObjectToWorld(
         return loadTextureWorld(world, texture, id);
       });    
     };
-    auto addEmitterObject = [&world, name, id](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
-      addEmitter(world.emitters, name, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
+    auto addEmitterObject = [&world, name, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
+      addEmitter(world.emitters, name, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
     };
     auto onCollisionChange = [&world, id]() -> void {
       //assert(false); // think about what this should do better!
@@ -817,7 +817,7 @@ void addObjectToWorld(
           freeTextureRefsIdByOwner(world, id, textureId);
         },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
-        .addEmitter =  [](float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
+        .addEmitter =  [](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
         .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
         .onCollisionChange = []() -> void {},
         .pathForModLayer = world.interface.modlayerPath,
@@ -1378,7 +1378,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateEmitters(
       world.emitters, 
       timeElapsed,
-      [&world](std::string name, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
+      [&world](std::string name, std::string templateName, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
         std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
         attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
         if (particleOpts.velocity.has_value()){
@@ -1392,7 +1392,8 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           .attr = attributes,
           .children = {},
         };
-        objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(), attrChildren, submodelAttributes);
+
+        objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(templateName), attrChildren, submodelAttributes);
         if (particleOpts.orientation.has_value()){
           physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
         }
