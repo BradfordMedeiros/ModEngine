@@ -854,6 +854,11 @@ void addSerialObjectsToWorld(
   std::vector<GameObjectObj>& gameobjObjs,
   std::map<std::string, GameobjAttributes>& submodelAttributes
 ){
+
+  for (auto &[name, _] : submodelAttributes){
+    std::cout << "submodel attr: " << name << std::endl;
+  }
+
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
     // Warning: getNewObjectId will mutate the idsAdded.  
@@ -1378,7 +1383,7 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
     updateEmitters(
       world.emitters, 
       timeElapsed,
-      [&world](std::string name, std::string templateName, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
+      [&world](std::string name, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions particleOpts) -> objid {      
         std::cout << "INFO: emitter: creating particle from emitter: " << name << std::endl;
         attributes.vecAttr.vec3["position"] = particleOpts.position.has_value() ?  particleOpts.position.value() : fullTransformation(world.sandbox, emitterNodeId).position;
         if (particleOpts.velocity.has_value()){
@@ -1387,7 +1392,6 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
         if (particleOpts.angularVelocity.has_value()){
           attributes.vecAttr.vec3["physics_avelocity"] = particleOpts.angularVelocity.value();
         }
-        std::map<std::string, GameobjAttributes> submodelAttributes = {};
         AttrChildrenPair attrChildren {
           .attr = attributes,
           .children = {},

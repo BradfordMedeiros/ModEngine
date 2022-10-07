@@ -27,6 +27,11 @@ void addEmitter(
     .spawnrate = spawnrate,
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
+    .submodelAttributes = {
+      { "Cube", GameobjAttributes {
+        .stringAttributes = {{ "texture", "./res/textures/blacktop.jpg" }}, 
+      }},
+    },
     .deltas =  deltas,
     .deleteBehavior = deleteBehavior,
     .enabled = enabled,
@@ -111,7 +116,7 @@ float calcLifetimeEffect(float timeElapsed, float totalDuration, std::vector<flo
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string emitterName, std::string templateName, GameobjAttributes attributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
+  std::function<objid(std::string emitterName, std::string templateName, GameobjAttributes attributes, std::map<std::string, GameobjAttributes> submodelAttributes, objid emitterNodeId, NewParticleOptions newParticleOpts)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 ){   
@@ -189,7 +194,7 @@ void updateEmitters(
       }
       emitter.currentParticles+= 1; 
 
-      auto particleId = addParticle(emitter.name, emitter.templateName, emitter.particleAttributes, emitter.emitterNodeId, newParticleOpts);
+      auto particleId = addParticle(emitter.name, emitter.templateName, emitter.particleAttributes, emitter.submodelAttributes, emitter.emitterNodeId, newParticleOpts);
 
       emitter.particles.push_back(ActiveParticle {
         .id = particleId,

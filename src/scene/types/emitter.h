@@ -41,6 +41,7 @@ struct Emitter {
   float spawnrate;
   float lifetime;
   GameobjAttributes particleAttributes;
+  std::map<std::string, GameobjAttributes> submodelAttributes;
   std::vector<EmitterDelta> deltas;
   EmitterDeleteBehavior deleteBehavior;
 
@@ -58,7 +59,7 @@ void removeEmitter(EmitterSystem& system, std::string name);
 void updateEmitters(
   EmitterSystem& system, 
   float currentTime, 
-  std::function<objid(std::string, std::string, GameobjAttributes, objid, NewParticleOptions)> addParticle, 
+  std::function<objid(std::string, std::string, GameobjAttributes, std::map<std::string, GameobjAttributes>, objid, NewParticleOptions)> addParticle, 
   std::function<void(objid)> rmParticle,
   std::function<void(objid, std::string, AttributeValue)> updateParticle
 );
