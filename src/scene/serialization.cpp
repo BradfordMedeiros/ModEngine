@@ -64,14 +64,6 @@ std::vector<std::string> parseChildren(std::string payload){
 std::string mainTargetElement(std::string target){
   return split(target, '/').at(0);
 }
-std::string suffixTargetElement(std::string target){
-  auto values = split(target, '/');
-  std::vector<std::string> rest;
-  for (int i = 1; i < values.size(); i++){
-    rest.push_back(values.at(i));
-  }
-  return join(rest, '/');
-}
 
 bool isSubelementName(std::string& name){
   auto numTokens = split(name, '/');
@@ -384,10 +376,6 @@ std::string serializeObj(
   bool isSubobject = groupId != id;
 
   std::string gameobjectName = name == "" ? gameobject.name : name;
-  if (isSubobject){
-    auto suffixName = suffixTargetElement(gameobject.name);
-    gameobjectName = gameobjectName + "/" + suffixName;
-  }
 
   // custom autoserializer
   if (children.size() > 0){
