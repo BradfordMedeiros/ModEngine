@@ -67,6 +67,8 @@ struct DividedTokens {
 };
 
 std::string mainTargetElement(std::string target);
+std::string suffixTargetElement(std::string target);
+std::string rewriteTargetName(std::string target, std::string newname);
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens);
 
 struct AttrChildrenPair {

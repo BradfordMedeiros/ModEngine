@@ -721,8 +721,9 @@ std::string serializeObject(World& world, objid id, bool includeSubmodelAttr, st
 
   std::string serializedData = "";
   for (auto &gameobjid : idsToSerialize){
-    std::cout << "serialized = " << gameobjid << "(" << std::endl;
-    auto serialized = serializeObjectById(world, gameobjid, overridename);
+    std::cout << "serialized = " << gameobjid <<  "(" << std::endl;
+    auto newName = rewriteTargetName(getGameObject(world, gameobjid).name, overridename);
+    auto serialized = serializeObjectById(world, gameobjid, newName);
     std::cout << serialized;
     std::cout << ")" << std::endl << std::endl;
     serializedData += serialized;
@@ -961,7 +962,7 @@ void removeObjectFromScene(World& world, objid objectId){
 void copyObjectToScene(World& world, objid id){
   std::cout << "INFO: SCENE: COPY OBJECT: " << id << std::endl;
   auto serializedObject = serializeObject(world, id, true, getGameObject(world, id).name + "-copy-" + std::to_string(getUniqueObjId()));
-  //std::cout << "copy object: serialized object is: " << std::endl;
+  std::cout << "copy object: serialized object is: " << std::endl;
   std::cout << serializedObject << std::endl << std::endl;
   addObjectToScene(world, getGameObjectH(world.sandbox, id).sceneId, serializedObject, -1, false);
 }
