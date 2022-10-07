@@ -855,9 +855,9 @@ void addSerialObjectsToWorld(
   std::map<std::string, GameobjAttributes>& submodelAttributes
 ){
 
-  for (auto &[name, _] : submodelAttributes){
-    std::cout << "submodel attr: " << name << std::endl;
-  }
+  //for (auto &[name, _] : submodelAttributes){
+  //  std::cout << "submodel attr: " << name << std::endl;
+  //}
 
   std::map<objid, std::vector<glm::vec3>> idToModelVertexs;
   for (auto &[name, objAttr] : nameToAttr){
@@ -1397,7 +1397,15 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
           .children = {},
         };
 
-        objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, getUniqueObjectName(templateName), attrChildren, submodelAttributes);
+        // should get rid of this copying stuff, should make subelements just refer to suffix path
+        auto newName =  getUniqueObjectName(templateName);
+        std::map<std::string, GameobjAttributes> submodelAttributesFixedPath;
+        for (auto &[name, attr] : submodelAttributes){
+          submodelAttributesFixedPath[newName + "/" + name] = attr;
+        }
+        ////////////////////////////////////////////////////////////////////////
+        
+        objid objectAdded = addObjectToScene(world, getGameObjectH(world.sandbox, emitterNodeId).sceneId, newName, attrChildren, submodelAttributesFixedPath);
         if (particleOpts.orientation.has_value()){
           physicsRotateSet(world, objectAdded, particleOpts.orientation.value(), true);
         }

@@ -28,9 +28,6 @@ void addEmitter(
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
     .submodelAttributes = {
-      { "Cube", GameobjAttributes {
-        .stringAttributes = {{ "texture", "./res/textures/blacktop.jpg" }}, 
-      }},
     },
     .deltas =  deltas,
     .deleteBehavior = deleteBehavior,
