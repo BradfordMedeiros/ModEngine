@@ -1,0 +1,22 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+platform:physics:enabled
+platform/Cube:texture:./res/textures/blacktop.jpg
+
++particles:position:0 2 0
++particles:limit:5
++particles:rate:1
++particles:duration:5
+
++particles:+mesh:./res/models/box/box.obj
++particles:+physics_type:dynamic
++particles:+physics:enabled
++particles:state:enabled
++particles:+Cube/texture:./res/textures/blacktop.jpg
+
++particles:template:something
+
+
+
+
