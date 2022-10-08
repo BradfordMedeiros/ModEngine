@@ -756,8 +756,8 @@ void addObjectToWorld(
         return loadTextureWorld(world, texture, id);
       });    
     };
-    auto addEmitterObject = [&world, name, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
-      addEmitter(world.emitters, name, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, deltas, enabled, behavior);
+    auto addEmitterObject = [&world, name, id](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes> submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {
+      addEmitter(world.emitters, name, templateName, id, world.interface.getCurrentTime(), limit, spawnrate, lifetime, particleFields, submodelAttributes, deltas, enabled, behavior);
     };
     auto onCollisionChange = [&world, id]() -> void {
       //assert(false); // think about what this should do better!
@@ -817,7 +817,7 @@ void addObjectToWorld(
           freeTextureRefsIdByOwner(world, id, textureId);
         },
         .loadMesh = [](MeshData&) -> Mesh { return Mesh{}; },
-        .addEmitter =  [](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
+        .addEmitter =  [](std::string templateName, float spawnrate, float lifetime, int limit, GameobjAttributes& particleFields, std::map<std::string, GameobjAttributes>& submodelAttributes, std::vector<EmitterDelta> deltas, bool enabled, EmitterDeleteBehavior behavior) -> void {},
         .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
         .onCollisionChange = []() -> void {},
         .pathForModLayer = world.interface.modlayerPath,

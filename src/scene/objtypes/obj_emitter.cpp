@@ -147,13 +147,77 @@ std::vector<AutoSerialize> emitterAutoserializer {
   }
 };
 
+struct EmitterSpecialAttribute {
+  char emitterType;
+  std::string attribute;
+  AttributeValue value;
+};
+
+std::vector<std::string> emitterSubmodelAttr(GameobjAttributes& attributes){
+  return {};
+}
+std::vector<EmitterSpecialAttribute> filterEmitterSpecialAttributes(GameobjAttributes& attributes) {
+  return {};
+}
+
+struct AttributeKeyAndValue {
+  std::string attribute;
+  AttributeValue payload;
+};
+
+std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes){
+  std::vector<AttributeKeyAndValue> values;
+  for (auto &[key, value] : attributes.stringAttributes){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  for (auto &[key, value] : attributes.numAttributes){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec3){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec4){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  return values;
+}
+
+
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util){
   GameObjectEmitter obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, emitterAutoserializer, attributes, util);
   assert(obj.limit >= 0);
   
   auto emitterAttr = particleFields(attributes);
-  util.addEmitter(obj.templateName, obj.rate, obj.duration, obj.limit, emitterAttr, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
+
+  auto allSubmodelPaths = emitterSubmodelAttr(attributes);
+  std::cout << "submodel paths: [ ";
+  for (auto &submodel : allSubmodelPaths){
+    std::cout << submodel << " ";
+  }
+  std::cout << " ]" << std::endl;
+  
+
+  std::map<std::string, GameobjAttributes> submodelAttributes = {
+    {"Cube", GameobjAttributes {
+      .stringAttributes = {
+        {"texture", "./res/textures/blacktop.jpg"},
+      }
+    }}
+  };
+  util.addEmitter(obj.templateName, obj.rate, obj.duration, obj.limit, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
   return obj;
 }
 

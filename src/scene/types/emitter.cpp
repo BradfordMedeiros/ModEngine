@@ -10,6 +10,7 @@ void addEmitter(
   float spawnrate, 
   float lifetime, 
   GameobjAttributes particleAttributes, 
+  std::map<std::string, GameobjAttributes> submodelAttributes,
   std::vector<EmitterDelta> deltas,
   bool enabled,
   EmitterDeleteBehavior deleteBehavior
@@ -27,8 +28,7 @@ void addEmitter(
     .spawnrate = spawnrate,
     .lifetime = lifetime,
     .particleAttributes = particleAttributes,
-    .submodelAttributes = {
-    },
+    .submodelAttributes = submodelAttributes,
     .deltas =  deltas,
     .deleteBehavior = deleteBehavior,
     .enabled = enabled,
