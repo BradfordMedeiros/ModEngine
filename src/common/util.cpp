@@ -715,3 +715,35 @@ void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::stri
   shouldFilterLogs = filterLogs;
   filterLevel = level;
 }
+
+std::string mainTargetElement(std::string target){
+  return split(target, '/').at(0);
+}
+std::string suffixTargetElement(std::string target){
+  auto values = split(target, '/');
+  std::vector<std::string> rest;
+  for (int i = 1; i < values.size(); i++){
+    rest.push_back(values.at(i));
+  }
+  return join(rest, '/');
+}
+
+std::string rewriteTargetName(std::string target, std::string newname){
+  auto suffixTarget = suffixTargetElement(target);
+  if (suffixTarget != ""){
+    return newname + "/" + suffixTarget;
+  }
+  return newname;
+}
+
+bool isSubelementName(std::string& name){
+  auto numTokens = split(name, '/');
+  return numTokens.size() > 1;
+}
+
+std::optional<std::string> subelementTargetName(std::string& name){
+  if (!isSubelementName(name)){
+    return std::nullopt;
+  }
+  return suffixTargetElement(name);
+}

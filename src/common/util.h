@@ -271,4 +271,9 @@ void modlog(const char* identifier, const char* value, MODLOG_LEVEL level = MODL
 void modlog(const char* identifier, std::string value, MODLOG_LEVEL level = MODLOG_INFO);
 void modlogSetEnabled(bool filterLogs, MODLOG_LEVEL level, std::vector<std::string> levels);
 
+std::string mainTargetElement(std::string target);
+std::string suffixTargetElement(std::string target);
+std::string rewriteTargetName(std::string target, std::string newname);
+bool isSubelementName(std::string& name);
+std::optional<std::string> subelementTargetName(std::string& name);
 #endif

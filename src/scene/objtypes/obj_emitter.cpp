@@ -147,23 +147,32 @@ std::vector<AutoSerialize> emitterAutoserializer {
   }
 };
 
-struct EmitterSpecialAttribute {
-  char emitterType;
-  std::string attribute;
-  AttributeValue value;
-};
-
-std::vector<std::string> emitterSubmodelAttr(GameobjAttributes& attributes){
-  return {};
-}
-std::vector<EmitterSpecialAttribute> filterEmitterSpecialAttributes(GameobjAttributes& attributes) {
-  return {};
-}
 
 struct AttributeKeyAndValue {
   std::string attribute;
   AttributeValue payload;
 };
+
+bool isEmitterPrefix(char character){
+  return character == '!' || character == '?' || character == '%' || character == '+';
+}
+std::set<std::string> emitterSubmodelAttr(std::vector<AttributeKeyAndValue>& attr){
+  std::set<std::string> submodelNames;
+  //std::cout << "submodel attr: [ ";
+  for (auto &val : attr){
+    if (isEmitterPrefix(val.attribute.at(0))){
+      auto strippedAttribute = val.attribute.substr(1, val.attribute.size());
+      auto subelementVal = subelementTargetName(strippedAttribute);
+      auto mainname = mainTargetElement(strippedAttribute);
+      //std::cout << val.attribute << "( " << subelementVal.has_value() << " ) [ " << (subelementVal.has_value() ? mainname : "- no name -") << " ], ";
+      if (subelementVal.has_value()){
+        submodelNames.insert(mainname);
+      }
+    }
+  }
+  //std::cout << "]" << std::endl;
+  return submodelNames;
+}
 
 std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes){
   std::vector<AttributeKeyAndValue> values;
@@ -194,6 +203,62 @@ std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attrib
   return values;
 }
 
+struct EmitterSpecialAttribute {
+  std::string subelement;
+  std::string attribute;
+};
+
+std::optional<EmitterSpecialAttribute> extractSpecialAttribute(std::string key){
+  if (key.at(0) == '+'){
+    auto strippedAttribute = key.substr(1, key.size());
+    auto subelementVal = subelementTargetName(strippedAttribute);
+    auto mainname = mainTargetElement(strippedAttribute);
+    if (subelementVal.has_value()){
+      return EmitterSpecialAttribute {
+        .subelement = mainname,
+        .attribute = subelementVal.value(),
+      };
+    }
+  }
+  return std::nullopt;
+}
+
+GameobjAttributes emitterExtractAttributes(GameobjAttributes& attributes, std::string name){
+  std::map<std::string, std::string> stringAttributes;
+  std::map<std::string, double> numAttributes;
+  std::map<std::string, glm::vec3> vec3;
+  std::map<std::string, glm::vec4> vec4;
+
+  for (auto &[key, value] : attributes.stringAttributes){
+    auto extractedAttribute = extractSpecialAttribute(key);
+    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
+      stringAttributes[extractedAttribute.value().attribute] = value;
+    }
+  }
+  for (auto &[key, value] : attributes.numAttributes){
+    auto extractedAttribute = extractSpecialAttribute(key);
+    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
+      numAttributes[extractedAttribute.value().attribute] = value;
+    }
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec3){
+    auto extractedAttribute = extractSpecialAttribute(key);
+    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
+      vec3[extractedAttribute.value().attribute] = value;
+    }  
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec4){
+    auto extractedAttribute = extractSpecialAttribute(key);
+    if (extractedAttribute.has_value() && extractedAttribute.value().subelement == name){
+      vec4[extractedAttribute.value().attribute] = value;
+    }   
+  }
+  return GameobjAttributes {
+    .stringAttributes = stringAttributes,
+    .numAttributes = numAttributes,
+    .vecAttr { .vec3 = vec3, .vec4 = vec4 },
+  };
+}
 
 GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& util){
   GameObjectEmitter obj {};
@@ -201,22 +266,12 @@ GameObjectEmitter createEmitter(GameobjAttributes& attributes, ObjectTypeUtil& u
   assert(obj.limit >= 0);
   
   auto emitterAttr = particleFields(attributes);
-
-  auto allSubmodelPaths = emitterSubmodelAttr(attributes);
-  std::cout << "submodel paths: [ ";
+  auto allAttributes = allKeysAndAttributes(attributes);
+  auto allSubmodelPaths = emitterSubmodelAttr(allAttributes);
+  std::map<std::string, GameobjAttributes> submodelAttributes = {};
   for (auto &submodel : allSubmodelPaths){
-    std::cout << submodel << " ";
+    submodelAttributes[submodel] = emitterExtractAttributes(attributes, submodel);
   }
-  std::cout << " ]" << std::endl;
-  
-
-  std::map<std::string, GameobjAttributes> submodelAttributes = {
-    {"Cube", GameobjAttributes {
-      .stringAttributes = {
-        {"texture", "./res/textures/blacktop.jpg"},
-      }
-    }}
-  };
   util.addEmitter(obj.templateName, obj.rate, obj.duration, obj.limit, emitterAttr, submodelAttributes, emitterDeltas(attributes), obj.state, obj.deleteBehavior);
   return obj;
 }
