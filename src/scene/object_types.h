@@ -25,6 +25,7 @@
 #include "./objtypes/obj_mesh.h"
 #include "./objtypes/obj_voxel.h"
 #include "./objtypes/obj_nil.h"
+#include "./objtypes/obj_prefab.h"
 #include "./objtypes/obj_util.h"
 
 #include <unistd.h>
@@ -55,7 +56,8 @@ typedef std::variant<
   GameObjectUIText,
   GameObjectUILayout,
   GameObjectGeo,
-  GameObjectNil
+  GameObjectNil,
+  GameObjectPrefab
 > GameObjectObj;
 
 // attributes: mesh, disabled, textureoffset, texture
@@ -149,6 +151,12 @@ static Field customField {
   .type = "custom",
 };
 
+static Field prefabField {
+  .prefix = '[',
+  .type = "prefab",
+};
+
+
 static std::vector fields = { 
   obj, 
   camera, 
@@ -167,6 +175,7 @@ static std::vector fields = {
   uiLayoutField,
   geoField,
   customField,
+  prefabField,
 };
 
 std::string getType(std::string name);

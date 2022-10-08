@@ -558,6 +558,7 @@ extern std::vector<AutoSerialize> uiSliderAutoserializer;
 extern std::vector<AutoSerialize> textAutoserializer;
 extern std::vector<AutoSerialize> geoAutoserializer;
 extern std::vector<AutoSerialize> uiButtonAutoserializer;
+extern std::vector<AutoSerialize> prefabAutoserializer;
 std::set<std::string> getObjautoserializerFields(std::string& name){
   auto type = getType(name);
   if (type == "default"){
@@ -594,6 +595,8 @@ std::set<std::string> getObjautoserializerFields(std::string& name){
     return serializerFieldNames(geoAutoserializer);
   }else if (type == "custom"){
     return {};
+  }else if (type == "prefab"){
+    return serializerFieldNames(prefabAutoserializer);
   }
   modassert(false, "autoserializer not found");
   return {};

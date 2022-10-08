@@ -217,6 +217,15 @@ std::vector<ObjectType> objTypes = {
     .serialize = serializeNotImplemented,
     .removeObject  = removeDoNothing,
   },
+  ObjectType {
+    .name = "prefab", 
+    .variantType = getVariantIndex(GameObjectPrefab{}),
+    .createObj = createPrefabObj, 
+    .objectAttributes = convertElementValue<GameObjectPrefab>(prefabObjAttr),
+    .setAttributes = convertElementSetValue<GameObjectPrefab>(setPrefabAttributes),
+    .serialize = convertSerialize<GameObjectPrefab>(serializePrefabObj),
+    .removeObject  = convertRemove<GameObjectPrefab>(removePrefabObj),
+  },
 };
 
 GameObjectObj createObjectType(std::string objectType, GameobjAttributes& attr, ObjectTypeUtil util){
@@ -539,6 +548,16 @@ int renderObject(
     onRender(id);
     return vertexCount;
   }
+
+  auto prefabObj = std::get_if<GameObjectPrefab>(&toRender);
+  if (prefabObj != NULL){
+    int vertexCount;
+    if (showDebug){
+      vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+    }
+    return vertexCount;
+  }
+
 
   return 0;
 }
