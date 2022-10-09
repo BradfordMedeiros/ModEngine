@@ -809,10 +809,12 @@ void addObjectToWorld(
       return meshNamesForNode(*data, rootMeshName, name);  
     }; 
 
-    auto loadScene = [&world](std::string sceneFile) -> objid {
+    auto loadScene = [&world, id](std::string sceneFile) -> objid {
       modlog("load scene", std::string("loading scene: " + sceneFile));
       std::vector<Token> addedTokens = {};
       auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt);  // should make original obj the parent
+      auto rootId = rootIdForScene(world.sandbox, sceneId);
+      makeParent(world.sandbox, rootId, id);
       return sceneId;
     };
 
