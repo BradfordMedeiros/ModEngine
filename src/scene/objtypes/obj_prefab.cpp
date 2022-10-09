@@ -4,17 +4,20 @@ std::vector<AutoSerialize> prefabAutoserializer {
 };
 
 GameObjectPrefab createPrefabObj(GameobjAttributes& attr, ObjectTypeUtil& util){
-	return GameObjectPrefab {};
+	auto sceneId = util.loadScene(attr.stringAttributes.at("scene"));
+	return GameObjectPrefab {
+		.sceneId = sceneId,
+	};
 }
-void prefabObjAttr(GameObjectPrefab& soundObj, GameobjAttributes& _attributes){
+void prefabObjAttr(GameObjectPrefab& prefabObj, GameobjAttributes& _attributes){
 
 }
 std::vector<std::pair<std::string, std::string>> serializePrefabObj(GameObjectPrefab& obj, ObjectSerializeUtil& util){
 	return {};
 }
-void removePrefabObj(GameObjectPrefab& soundObj, ObjectRemoveUtil& util){
-
+void removePrefabObj(GameObjectPrefab& prefabObj, ObjectRemoveUtil& util){
+	util.unloadScene(prefabObj.sceneId);
 }
-bool setPrefabAttributes(GameObjectPrefab& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+bool setPrefabAttributes(GameObjectPrefab& prefabObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
 	return false;
 }

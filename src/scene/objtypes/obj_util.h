@@ -36,6 +36,7 @@ struct ObjectTypeUtil {
   std::function<std::vector<std::string>(std::string, bool*)> ensureMeshLoaded;
   std::function<void()> onCollisionChange;
   std::function<std::string(std::string)> pathForModLayer;
+  std::function<objid(std::string)> loadScene;
 };
 
 struct ObjectSerializeUtil {
@@ -45,6 +46,7 @@ struct ObjectSerializeUtil {
 struct ObjectRemoveUtil {
   objid id;
   std::function<void()> rmEmitter;
+  std::function<void(objid)> unloadScene;
 };
 
 struct ObjectSetAttribUtil {

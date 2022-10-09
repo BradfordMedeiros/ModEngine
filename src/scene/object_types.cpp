@@ -248,14 +248,19 @@ void removeObject(
   std::map<objid, GameObjectObj>& mapping, 
   objid id, 
   std::function<void(std::string)> unbindCamera,
-  std::function<void()> rmEmitter
+  std::function<void()> rmEmitter,
+  std::function<void(objid)> unloadScene
 ){
   auto Object = mapping.at(id); 
   auto variantIndex = Object.index();
   for (auto &objType : objTypes){
     if (variantIndex == objType.variantType){
       std::cout << "type is: " << objType.name << std::endl;
-      ObjectRemoveUtil util { .id = id, .rmEmitter = rmEmitter };
+      ObjectRemoveUtil util { 
+        .id = id, 
+        .rmEmitter = rmEmitter,
+        .unloadScene = unloadScene
+      };
       objType.removeObject(Object, util);
       mapping.erase(id);
       return;

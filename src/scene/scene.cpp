@@ -809,6 +809,13 @@ void addObjectToWorld(
       return meshNamesForNode(*data, rootMeshName, name);  
     }; 
 
+    auto loadScene = [&world](std::string sceneFile) -> objid {
+      modlog("load scene", std::string("loading scene: " + sceneFile));
+      std::vector<Token> addedTokens = {};
+      auto sceneId = addSceneToWorld(world, sceneFile, addedTokens, std::nullopt, std::nullopt, std::nullopt);  // should make original obj the parent
+      return sceneId;
+    };
+
     std::cout << "rootname create mesh: " << name << std::endl;
     if (returnObjectOnly){
       ObjectTypeUtil util {
@@ -824,6 +831,7 @@ void addObjectToWorld(
         .ensureMeshLoaded = [](std::string meshName, bool* isRoot) -> std::vector<std::string> { *isRoot = true; return {  }; },
         .onCollisionChange = []() -> void {},
         .pathForModLayer = world.interface.modlayerPath,
+        .loadScene = loadScene,
       }; 
       auto gameobjObj = createObjectType(getType(name), attr, util);
       returnobjs.push_back(gameobjObj);
@@ -842,6 +850,7 @@ void addObjectToWorld(
       .ensureMeshLoaded = ensureMeshLoaded,
       .onCollisionChange = onCollisionChange,
       .pathForModLayer = world.interface.modlayerPath,
+      .loadScene = loadScene,
     };
     auto gameobjObj = createObjectType(getType(name), attr, util);
     addObjectType(world.objectMapping, gameobjObj, id);
@@ -931,7 +940,11 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
       std::cout << "remove camera not yet implemented" << std::endl;
       assert(false);
     },
-    [&world, name]() -> void { removeEmitter(world.emitters, name); }
+    [&world, name]() -> void { removeEmitter(world.emitters, name); },
+    [&world](objid sceneId) -> void {
+      modlog("load scene", std::string("unload scene: " + std::to_string(sceneId)));
+      removeSceneFromWorld(world, sceneId);
+    }
   );
   
   world.onObjectDelete(objectId, netsynchronized);

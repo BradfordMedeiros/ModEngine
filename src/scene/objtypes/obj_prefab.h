@@ -3,7 +3,9 @@
 
 #include "./obj_util.h"
 
-struct GameObjectPrefab{};
+struct GameObjectPrefab{
+	objid sceneId;
+};
 
 GameObjectPrefab createPrefabObj(GameobjAttributes& attr, ObjectTypeUtil& util);
 void prefabObjAttr(GameObjectPrefab& soundObj, GameobjAttributes& _attributes);
