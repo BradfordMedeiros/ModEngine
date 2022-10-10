@@ -389,6 +389,9 @@ int renderObject(
 
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
   if (rootObj != NULL){
+    if (showDebug){
+      return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
+    }
     return 0;
   }
 
@@ -562,7 +565,6 @@ int renderObject(
     }
     return vertexCount;
   }
-
 
   return 0;
 }

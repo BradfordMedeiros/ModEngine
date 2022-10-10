@@ -522,7 +522,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     bool portalTextureInCache = portalIdCache.find(id) != portalIdCache.end();
     glStencilMask(isPortal ? 0xFF : 0x00);
 
-    if (layer.visible){
+    if (layer.visible && id != 0){
       auto trianglesDrawn = renderObject(
         newShader, 
         id, 
@@ -1657,7 +1657,6 @@ int main(int argc, char* argv[]){
     auto uvCoord = toUvCoord(uvCoordWithTex);
     Color hoveredItemColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     auto hoveredId = getIdFromColor(hoveredItemColor);
-
 
     state.lastHoveredIdInScene = state.hoveredIdInScene;
     state.hoveredIdInScene = idExists(world.sandbox, hoveredId);
