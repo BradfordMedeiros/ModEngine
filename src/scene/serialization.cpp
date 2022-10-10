@@ -2,7 +2,15 @@
 
 // format: <token>:<attribute>:<payload>
 std::optional<Token> parseToken(std::string content) {
-  std::vector<std::string> validToken = split(content, ':');
+  std::vector<std::string> rawTokens = split(content, ':');
+
+  std::vector<std::string> validToken;
+  validToken.push_back(rawTokens.at(0));
+  validToken.push_back(rawTokens.at(1));
+  auto lastToken = join(subvector(rawTokens, 2, rawTokens.size()), ':');
+  validToken.push_back(lastToken);
+  //std::cout << "tokens: " << print(validToken) << std::endl;
+
   if (validToken.size() != 3){
     std::cout << "invalid token: " << content << " - size = " << validToken.size() << std::endl;
     assert(false);
