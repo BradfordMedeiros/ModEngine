@@ -36,7 +36,7 @@ struct ObjectTypeUtil {
   std::function<std::vector<std::string>(std::string, bool*)> ensureMeshLoaded;
   std::function<void()> onCollisionChange;
   std::function<std::string(std::string)> pathForModLayer;
-  std::function<objid(std::string)> loadScene;
+  std::function<objid(std::string, std::vector<Token>&)> loadScene;
 };
 
 struct ObjectSerializeUtil {

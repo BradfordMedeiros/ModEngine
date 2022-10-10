@@ -45,13 +45,6 @@ struct GameObject {
   GameobjAttributes additionalAttr;
 };
 
-
-struct Token {
-  std::string target;
-  std::string attribute;
-  std::string payload;
-};
-
 struct Field {
   char prefix;
   std::string type;

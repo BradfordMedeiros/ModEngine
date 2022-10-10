@@ -3,8 +3,35 @@
 std::vector<AutoSerialize> prefabAutoserializer {
 };
 
+std::vector<Token> prefabAdditionalTokens(GameobjAttributes& attributes){
+	// allKeysAndAttributes
+	std::vector<Token> addTokens;
+	auto allKeysAndAttr = allKeysAndAttributes(attributes);
+	// std::string attribute;
+  // AttributeValue payload;
+  for (auto &keyAndAttr : allKeysAndAttr){
+  	auto attribute = keyAndAttr.attribute;
+  	if (attribute.at(0) == '+'){
+  		auto tokenTarget = attribute.substr(1, attribute.size());
+  		auto tokenPayload = keyAndAttr.payload;
+  		auto payload = std::get_if<std::string>(&tokenPayload);
+  		modassert(payload != NULL, "prefab attribute not string value");
+  		auto values = split(*payload, ':');
+  		modassert(values.size() == 2, std::string("invalid additive prefab attribute: " + *payload));
+  		addTokens.push_back(Token {
+  			.target = tokenTarget,
+  			.attribute = values.at(0),
+  			.payload = values.at(1),
+  		});
+  	}
+
+  }
+	return addTokens;
+}
+
 GameObjectPrefab createPrefabObj(GameobjAttributes& attr, ObjectTypeUtil& util){
-	auto sceneId = util.loadScene(attr.stringAttributes.at("scene"));
+	auto additionalTokens = prefabAdditionalTokens(attr);
+	auto sceneId = util.loadScene(attr.stringAttributes.at("scene"), additionalTokens);
 	return GameObjectPrefab {
 		.sceneId = sceneId,
 	};

@@ -747,3 +747,32 @@ std::optional<std::string> subelementTargetName(std::string& name){
   }
   return suffixTargetElement(name);
 }
+
+std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes){
+  std::vector<AttributeKeyAndValue> values;
+  for (auto &[key, value] : attributes.stringAttributes){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  for (auto &[key, value] : attributes.numAttributes){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec3){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  for (auto &[key, value] : attributes.vecAttr.vec4){
+    values.push_back(AttributeKeyAndValue{
+      .attribute = key,
+      .payload = value,
+    });
+  }
+  return values;
+}

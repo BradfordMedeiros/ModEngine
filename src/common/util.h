@@ -276,4 +276,18 @@ std::string suffixTargetElement(std::string target);
 std::string rewriteTargetName(std::string target, std::string newname);
 bool isSubelementName(std::string& name);
 std::optional<std::string> subelementTargetName(std::string& name);
+
+struct AttributeKeyAndValue {
+  std::string attribute;
+  AttributeValue payload;
+};
+
+std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes);
+
+struct Token {
+  std::string target;
+  std::string attribute;
+  std::string payload;
+};
+
 #endif
