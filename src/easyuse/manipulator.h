@@ -40,6 +40,7 @@ struct ManipulatorData {
 enum SCALING_GROUP { INDIVIDUAL_SCALING, GROUP_SCALING };
 struct ManipulatorOptions {
   SNAPPING_MODE manipulatorPositionMode;
+  bool relativePositionMode;
   bool translateMirror;
   SNAPPING_MODE rotateMode;
   SCALING_GROUP scalingGroup;

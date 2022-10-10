@@ -1754,6 +1754,7 @@ int main(int argc, char* argv[]){
       glm::vec2(state.resolution.x, state.resolution.y),
       ManipulatorOptions {
          .manipulatorPositionMode = state.manipulatorPositionMode,
+         .relativePositionMode = state.relativePositionMode,
          .translateMirror = state.translateMirror,
          .rotateMode = state.rotateMode,
          .scalingGroup = state.scalingGroup,

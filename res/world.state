@@ -1,6 +1,9 @@
 
 ### Lighting ###
-diffuse:enabled:false
+
+world:paused:false  # true / false
+
+diffuse:enabled:true
 specular:enabled:false
 bloom:enabled:false
 bloom:amount:1
@@ -18,15 +21,15 @@ light:amount:0.8 0.8 0.8
 
 ### Effects ###
 #dof:state:enabled
-skybox:texture:./res/textures/skyboxs/desert/
+skybox:texture:./res/textures/skyboxs/sky/
 #skybox:color:5 0.2 0.2 1
-skybox:enable:false
+skybox:enable:true
 ###############################
 
 ### Window/Rendering ###
 #rendering:swapinterval:1  # 1 = vsync enabled, 0 disabled
 #rendering:viewport:1000 500
-#rendering:viewportoffset:320 300
+#rendering:viewportoffset:1220 300
 #rendering:border:./res/textures/wood.jpg
 #rendering:resolution:100 100
 #rendering:fullscreen:true
@@ -46,16 +49,20 @@ mouse:cursor:normal   # normal, hidden, capture
 
 #editor:showgrid:true
 editor:gridsize:40
-editor:snaptranslate-index:3
+editor:snaptranslate-index:0
 tools:manipulator-mode:translate
 tools:manipulator-axis:x
 
 #tools:preserve-scale:true
 tools:snap-position:relative    # none relative absolute
 #tools:position-mirror:true  # true/false     
-#tools:snap-scale:false
+#tools:snap-scale:true
 tools:snap-rotate:relative     # none relative absolute
 tools:scale-group:group
+#tools:position-relative:true
 
 #editor:snapscale-index:0
 #editor:snapangle-index:10
+
+
+debug:textoffset:1.5 -1.2

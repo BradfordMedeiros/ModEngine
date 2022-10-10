@@ -251,7 +251,11 @@ void updateManipulatorToCurrentObjTranslate(ManipulatorData& manipulatorState, M
   auto selectedObjs = tools.getSelectedIds();
   modassert(selectedObjs.mainObj.has_value(), "manipulator selected obj main value does not have a value");
   tools.setPosition(manipulatorId, tools.getPosition(selectedObjs.mainObj.value()));
-  tools.setRotation(manipulatorId, MOD_ORIENTATION_FORWARD);
+  if (!update.options.relativePositionMode){
+    tools.setRotation(manipulatorId, MOD_ORIENTATION_FORWARD);
+  }else{
+    tools.setRotation(manipulatorState.manipulatorId, tools.getRotation(selectedObjs.mainObj.value()));
+  }
 }
 void updateManipulatorToCurrentObjScale(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
   auto manipulatorId = manipulatorState.manipulatorId;
@@ -285,6 +289,7 @@ std::vector<ManipulatorState> manipulatorStates = {
     .state = "translateMode",
     .onState = [](ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update) -> void {
       modassert(update.selectedObjs.mainObj.has_value(), "cannot have no obj selected in this mode");
+      
       auto projectedPositionRaw = projectAndVisualize(manipulatorState, tools, update);
       if (!manipulatorState.initialDragPosition.has_value()){
          manipulatorState.initialDragPosition = projectedPositionRaw;
