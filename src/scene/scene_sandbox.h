@@ -133,6 +133,6 @@ void updateRelativeScale(SceneSandbox& sandbox, objid id, glm::vec3 scale);
 void updateAbsoluteRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
 void updateRelativeRotation(SceneSandbox& sandbox, objid id, glm::quat rotation);
 
-void updateSandbox(SceneSandbox& sandbox);
+std::set<objid> updateSandbox(SceneSandbox& sandbox);
 
 #endif 

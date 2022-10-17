@@ -1289,12 +1289,14 @@ void physicsLocalTransformSet(World& world, objid index, Transformation transfor
 void updatePhysicsPositionsAndClampVelocity(World& world, std::map<objid, PhysicsValue>& rigidbodys){
   for (auto [i, rigidBody]: rigidbodys){
     GameObject& gameobj = getGameObject(world, i);
-    auto rotation = getRotation(rigidBody.body);
-    updateAbsoluteTransform(world.sandbox, i, Transformation {
-      .position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation),
-      .scale = getScale(rigidBody.body),
-      .rotation = rotation,
-    });
+    if (!gameobj.physicsOptions.isStatic){
+      auto rotation = getRotation(rigidBody.body);
+      updateAbsoluteTransform(world.sandbox, i, Transformation {
+        .position = calcOffsetFromRotationReverse(getPosition(rigidBody.body), rigidBody.offset, rotation),
+        .scale = getScale(rigidBody.body),
+        .rotation = rotation,
+      });
+    }
     clampMaxVelocity(rigidBody.body, gameobj.physicsOptions.maxspeed);
   }
 }
@@ -1452,7 +1454,17 @@ void onWorldFrame(World& world, float timestep, float timeElapsed,  bool enableP
   updateSoundPositions(world);
   enforceLookAt(world);   // probably should have physicsTranslateSet, so might be broken
   
-  updateSandbox(world.sandbox);
+  auto updatedIds = updateSandbox(world.sandbox);  
+  for (auto index : updatedIds){
+    auto transform = fullTransformation(world.sandbox, index);
+    if (world.rigidbodys.find(index) != world.rigidbodys.end()){
+      PhysicsValue& phys = world.rigidbodys.at(index);
+      auto body =  phys.body;
+      auto fullTransform = fullTransformation(world.sandbox, index);
+      setTransform(body, calcOffsetFromRotation(fullTransform.position, phys.offset, fullTransform.rotation), fullTransform.scale, fullTransform.rotation);
+    }
+  }
+  
   callbackEntities(world);
 
   onObjectFrame(world.objectMapping, [&world](std::string texturepath, unsigned char* data, int textureWidth, int textureHeight) -> void {

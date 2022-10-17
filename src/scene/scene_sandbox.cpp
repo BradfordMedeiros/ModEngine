@@ -532,8 +532,11 @@ void updateTraverse(Scene& scene, objid id, std::function<bool(objid)> onAddObje
 }
 
 // Might be better conceptually thought of as "enforceParentConstraints"
-void updateSandbox(SceneSandbox& sandbox){
+// Returns elemenets are the ids that were not explicitly updated by calling code, and therefore may need to be updated by calling code 
+// In practice this means they need to update the actual physics trasform since this code recalculated it from the scenegraph
+std::set<objid> updateSandbox(SceneSandbox& sandbox){
   std::set<objid> dirtiedElements;
+  std::set<objid> newUpdatedElements;
   for (auto &[id, transform] : sandbox.mainScene.absoluteTransforms){
     if (id == 0){
       continue;
@@ -545,7 +548,10 @@ void updateSandbox(SceneSandbox& sandbox){
   std::set<objid> alreadyUpdated;
   for (auto element : dirtiedElements){
     //std::cout << "dirty element: " << element << std::endl;
-    updateTraverse(sandbox.mainScene, element, [&sandbox, &alreadyUpdated](objid id) -> bool {
+    updateTraverse(sandbox.mainScene, element, [&sandbox, &alreadyUpdated, &dirtiedElements, &newUpdatedElements](objid id) -> bool {
+      if (dirtiedElements.find(id) == dirtiedElements.end()){
+        newUpdatedElements.insert(id);
+      }
       if (alreadyUpdated.find(id) != alreadyUpdated.end()){
         //std::cout << "id: " << id << " was already updated" << std::endl;
         return false;
@@ -570,6 +576,8 @@ void updateSandbox(SceneSandbox& sandbox){
       return true;
     });
   }
+
+  return newUpdatedElements;
 }
 
 
