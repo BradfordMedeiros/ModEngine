@@ -4,7 +4,7 @@
   (list 
     (list ")text_main" "value" "hello world")
   )
-  "test"
-  (list "testtag")
+  "reset"
+  (list "reset")
 )
 

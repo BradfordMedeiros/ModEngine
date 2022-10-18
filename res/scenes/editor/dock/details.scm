@@ -291,7 +291,7 @@
   (if playModeEnabled
     (begin
       (setPauseMode #t)
-      (reset-scene (lsscene-name "reset"))
+      (for-each reset-scene (list-scenes (list "editable")))
     )
     (begin
       (setPauseMode #f)
