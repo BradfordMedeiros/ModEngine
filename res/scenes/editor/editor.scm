@@ -85,23 +85,45 @@
 )
 
 
+(define (loadSidePanel scene position moveable restrictX snapX)
+  (define attrs
+    (list 
+      (list ")window_x" "script" "./res/scenes/editor/dock/details.scm")
+      (list "(test_panel" "position" 
+        (if position 
+          (string-append (number->string (car position)) " " (number->string (cadr position)) " " (number->string (caddr position))) 
+          "-0.78 -0.097 -1"
+        )
+      )
+      ;(list "(test_panel" "anchor" anchorElementName)
+    )
+  )
+  (if moveable  (set! attrs (cons (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm") attrs)))
+  (if restrictX (set! attrs (cons (list "(test_panel" "dialogmove-restrictx" "true") attrs)))
+  (if snapX     (set! attrs (cons (list "(test_panel" "editor-shouldsnap" "true") attrs)))
+  (load-scene scene attrs)
+)
+
+(define (load-all-panels panelIdAndPos)
+  (format #t "load panels placeholder")
+  (for-each 
+    (lambda (panelIdAndPos)
+      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #f #f #f)
+    )
+    panelIdAndPos
+  )
+
+)
+
+
+
+
 (define (change-sidepanel snappingIndex scene anchorElementName)
   (format #t "change sidepanel: elementname: ~a\n" anchorElementName)
   (maybe-unload-sidepanel snappingIndex)
   (if (not (get-snap-id snappingIndex))
     (begin
-      (update-snap-pos snappingIndex
-        (load-scene 
-          scene
-          (list 
-            (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm")  ; doesn't work with anchored element since both rewrite position
-            (list "(test_panel" "dialogmove-restrictx" "true")
-            (list "(test_panel" "editor-shouldsnap" "true")
-            (list ")window_x" "script" "./res/scenes/editor/dock/details.scm")
-            ;(list "(test_panel" "anchor" anchorElementName)
-          )
-        )
-      )
+      (update-snap-pos snappingIndex (loadSidePanel scene #f #t #t #t))
       (format #t "editor: load scene: ~a\n" scene)
       (format #t "sidepanel id is: ~a\n" (get-snap-id snappingIndex))
       (enforce-layout (gameobj-id (lsobj-name "(test_panel" (get-snap-id snappingIndex))))
@@ -428,3 +450,9 @@
 
 (enforce-layout (gameobj-id (lsobj-name "(row2")))
 (enforce-layout (gameobj-id (lsobj-name "(menubar")))
+
+;(load-all-panels 
+;  (list 
+;    (list "./res/scenes/editor/dock/object_details.rawscene" (list 0 -0.097 -1))
+;  )
+;)
