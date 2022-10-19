@@ -14,28 +14,9 @@
 #(test_panel:margin:0.02
 (test_panel:margin-top:0.1
 #(test_panel:spacing:0.02
-(test_panel:minheight:2
-
-(test_panel:align-items-horizontal:left   # left/center/right
-(test_panel:align-items-vertical:up     # up/center/down
 
 (test_panel:position:-0.78 -0.097 <?php echo($zpos . "\n"); ?>
-(test_panel:minwidth:0.44
 (test_panel:align-content:neg
-
-
-)window_x:layer:basicui
-)window_x:scale:0.008 0.016 0.008
-)window_x:tint:0.8 0.8 0.8 1
-)window_x:value:x
-)window_x:position:0.2 0.95 0
-
-(test_panel:child:)window_x
-
-
-)title:layer:basicui
-)title:scale:0.008 0.02 0.008
-)title:position:0 0 -1
 
 
 <?php 
@@ -430,7 +411,6 @@
       ]
     ],
     "world_state" => [
-      "title" => "World State",
       "items" => [
         [
           "type" => "label",
@@ -465,20 +445,24 @@
       ],
     ],
     "object_tools" => [
-      "title" => "Object Tools",
+      "minheight" => false,
+      "minwidth" => 2,
+      "hidex" => true,
+      "vertical" => "center",
+      "horizontal" => "center",
       "items" => [
-        [
-          "type" => "list",
-          "data" => [
-            "key" => "Transform Mode",
-            "mode" => "oneof",
-            "values" => [
-              ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
-              ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
-              ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "set-rotate-mode" ],
-            ],
-          ],
-        ],
+       # [
+       #   "type" => "list",
+       #   "data" => [
+       #     "key" => "Transform Mode",
+       #     "mode" => "oneof",
+       #     "values" => [
+       #       ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
+       #       ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
+       #       ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "set-rotate-mode" ],
+       #     ],
+       #   ],
+       # ],
         [
           "type" => "list",
           "data" => [
@@ -504,28 +488,28 @@
             ],
           ],
         ],
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "Move Relative", 
-            "value" => [
-              "binding" => "tools-manipulator-coord", # relative/absolute
-              "binding-on" => "relative",
-              "binding-off" => "absolute",
-            ],
-          ],
-        ],
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "EoE Mode", 
-            "value" => [
-              "binding" => "editor-eoe-mode",
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
-            ],
-          ],
-        ],
+        //[
+        //  "type" => "checkbox",
+        //  "data" => [
+        //    "key" => "Move Relative", 
+        //    "value" => [
+        //      "binding" => "tools-manipulator-coord", # relative/absolute
+        //      "binding-on" => "relative",
+        //      "binding-off" => "absolute",
+        //    ],
+        //  ],
+        //],
+        //[
+        //  "type" => "checkbox",
+        //  "data" => [
+        //    "key" => "EoE Mode", 
+        //    "value" => [
+        //      "binding" => "editor-eoe-mode",
+        //      "binding-on" => "enabled",
+        //      "binding-off" => "disabled",
+        //    ],
+        //  ],
+        //],
       ],
     ],
     "scenegraph" => [
@@ -562,9 +546,56 @@
   ];
 
   $detailType = $mappingPerType[$target_type];
-  echo (")title:value:" . $detailType["title"] . "\n");
+
   
-  $test_panel_elements = [")title"];
+  if (array_key_exists("minheight", $detailType)){
+    if (!$detailType["minheight"] == false){
+      echo("(test_panel:minheight:" . $detailType["minheight"] . "\n");
+    }
+  }else{
+    echo("(test_panel:minheight:2\n");
+  }
+  if (array_key_exists("minwidth", $detailType)){
+    if (!$detailType["minwidth"] == false){
+      echo("(test_panel:minwidth:" . $detailType["minwidth"] . "\n");
+    }
+  }else{
+    echo("(test_panel:minwidth:0.44\n");
+  }
+
+  
+  if (array_key_exists("horizontal", $detailType)){
+    echo("(test_panel:align-items-horizontal:" . $detailType["horizontal"] . "\n");
+  }else{
+    echo("(test_panel:align-items-horizontal:left\n");
+  }
+  if (array_key_exists("vertical", $detailType)){
+    echo("(test_panel:align-items-vertical:" . $detailType["vertical"] . "\n");
+  }else{
+    echo("(test_panel:align-items-vertical:up\n");
+  }
+
+  $window_elements = [
+    ")window_x:layer:basicui",
+    ")window_x:scale:0.008 0.016 0.008",
+    ")window_x:tint:0.8 0.8 0.8 1",
+    ")window_x:value:x",
+    ")window_x:position:0.2 0.95 0",
+    "(test_panel:child:)window_x",
+  ];
+  
+  if (!(array_key_exists("hidex", $detailType) && $detailType["hidex"])){
+    echo (implode("\n", $window_elements) . "\n");
+  }
+
+  $test_panel_elements = [];
+  if (array_key_exists("title", $detailType)){
+    echo(")title:value:" . $detailType["title"] . "\n");
+    echo(")title:layer:basicui\n");
+    echo(")title:scale:0.008 0.02 0.008\n");
+    echo(")title:position:0 0 -1\n");
+    $test_panel_elements = [")title"];
+  }
 
   $keyvaluePairs = $detailType["items"];
 
