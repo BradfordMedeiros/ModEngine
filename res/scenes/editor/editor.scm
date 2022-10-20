@@ -104,23 +104,9 @@
   (load-scene scene attrs)
 )
 
-(define (load-all-panels panelIdAndPos)
-  (format #t "load panels placeholder")
-  (for-each 
-    (lambda (panelIdAndPos)
-      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #f #f #f)
-    )
-    panelIdAndPos
-  )
-
-)
-
-
-
-
 (define (change-sidepanel snappingIndex scene anchorElementName)
   (format #t "change sidepanel: elementname: ~a\n" anchorElementName)
-  (maybe-unload-sidepanel snappingIndex)
+  (maybe-unload-sidepanel-snap snappingIndex)
   (if (not (get-snap-id snappingIndex))
     (begin
       (update-snap-pos snappingIndex (loadSidePanel scene #f #t #t #t))
@@ -133,9 +119,13 @@
 
 (define (maybe-unload-sidepanel-by-scene sceneIndex)
   (define snapIndex (list-index snappingPositionToSceneId sceneIndex))
-  (if snapIndex (maybe-unload-sidepanel snapIndex))
+  (format #t "dock: remove: ~a ~a\n" snapIndex sceneIndex)
+  (if snapIndex 
+    (maybe-unload-sidepanel-snap snapIndex)
+    (unload-scene sceneIndex)
+  )
 )
-(define (maybe-unload-sidepanel panelIndex)
+(define (maybe-unload-sidepanel-snap panelIndex)
   (define sidePanelSceneId (get-snap-id panelIndex))
   (if sidePanelSceneId (unload-scene sidePanelSceneId))
   (update-snap-pos panelIndex #f) 
@@ -451,8 +441,39 @@
 (enforce-layout (gameobj-id (lsobj-name "(row2")))
 (enforce-layout (gameobj-id (lsobj-name "(menubar")))
 
-;(load-all-panels 
-;  (list 
-;    (list "./res/scenes/editor/dock/object_details.rawscene" (list 0 -0.097 -1))
-;  )
-;)
+;;;;;;;;;;;;;;;;;;;;;;;
+(define (hasLayoutTable) 
+  (define tables (map car (sql (sql-compile "show tables"))))
+  (define tableExists (> (length (filter (lambda(x) (equal? x "layout")) tables)) 0))
+  tableExists
+)
+
+(define (parseVec val)
+  (define listParts (string-split val #\?))
+  (define numVals (map string->number listParts))
+  numVals
+)
+(define (tableLayout layoutname)
+  (define elements (sql (sql-compile (string-append "select panel, position from layout where name = " layoutname ))))
+  (define elementsFixedType 
+    (map 
+      (lambda(element)
+        (list (car element) (parseVec (cadr element)))
+      ) 
+      elements
+    )
+  )
+    (format #t "layout for ~a, ~a\n" layoutname elements)
+
+  elementsFixedType
+)
+(define (load-all-panels panelIdAndPos)
+  (format #t "load panels placeholder")
+  (for-each 
+    (lambda (panelIdAndPos)
+      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #f #f #f)
+    )
+    panelIdAndPos
+  )
+)
+(if (hasLayoutTable) (load-all-panels (tableLayout "main")))
