@@ -439,6 +439,7 @@
 )
 
 (enforce-layout (gameobj-id (lsobj-name "(row2")))
+(enforce-layout (gameobj-id (lsobj-name "(row3")))
 (enforce-layout (gameobj-id (lsobj-name "(menubar")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -471,9 +472,11 @@
   (format #t "load panels placeholder")
   (for-each 
     (lambda (panelIdAndPos)
-      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #f #f #f)
+      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #t #f #f)
     )
     panelIdAndPos
   )
 )
-(if (hasLayoutTable) (load-all-panels (tableLayout "main")))
+
+(define layoutToUse (if (args "layout") (args "layout") "none"))
+(if (hasLayoutTable) (load-all-panels (tableLayout layoutToUse)))
