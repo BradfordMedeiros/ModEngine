@@ -482,6 +482,7 @@
 (define (onKeyChar key)
   (if (equal? key 46)
     (save-all-panels layoutToUse)
+    ;(loadPanelsFromDb "main")
   ) 
 )
 (define (save-all-panels layoutname)
@@ -519,8 +520,13 @@
 (define layoutToUse (if (args "layout") (args "layout") "none"))
 
 (define panels (list))
-(if (hasLayoutTable) 
-  (begin
-    (set! panels  (load-all-panels (tableLayout layoutToUse)))
+(define (loadPanelsFromDb layout)
+  (if (hasLayoutTable) 
+    (begin
+      (for-each maybe-unload-sidepanel-by-scene panels)
+      (set! panels  (load-all-panels (tableLayout layout)))
+    )
   )
 )
+
+(loadPanelsFromDb layoutToUse)
