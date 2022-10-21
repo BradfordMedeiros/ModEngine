@@ -46,18 +46,15 @@
     ["value" => "OBJECT TOOLS", "dialogoption" => "./res/scenes/editor/dock/object_tools.rawscene"],
     ["value" => "SCENEGRAPH", "dialogoption" => "./res/scenes/editor/dock/scenegraph.rawscene"],
     ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/performance.rawscene"],
-    ////["value" => "WORLD STATE"],
-    //["value" => "MESHES"],
-    //["value" => "LIGHTS"],
-    //["value" => "CAMERAS"],
-    //["value" => "HEIGHTMAPS"],
-    //["value" => "VOXEL"],
+    ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
+    ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
+    ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
+    ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
   ];
 
   $text_attr = [
     "layer" => "basicui",
     "scale" => "0.004 0.01 0.004",
-
   ];
 
   for ($i = 0; $i < count($text_buttons); $i++){

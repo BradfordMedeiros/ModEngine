@@ -106,6 +106,21 @@
   ];
 
   $mappingPerType = [
+    "not_implemented" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Panel is Not Yet Implenented",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding",
+            ]
+          ],
+        ],
+      ],
+    ],
+    /////
     "object_details" => [
       "title" => "Object Details",
       "items" => [
@@ -446,7 +461,7 @@
     ],
     "object_tools" => [
       "minheight" => false,
-      "minwidth" => 2,
+      "minwidth" => false,
       "hidex" => true,
       "vertical" => "center",
       "horizontal" => "center",

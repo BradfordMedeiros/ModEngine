@@ -7,6 +7,7 @@ all:
 	@php ./dock/details.php object_tools > ./dock/object_tools.rawscene
 	@php ./dock/details.php scenegraph > ./dock/scenegraph.rawscene
 	@php ./dock/details.php performance > ./dock/performance.rawscene
+	@php ./dock/details.php not_implemented > ./dock/not_implemented.rawscene
 
 clean:
 	@rm ./editor.rawscene
@@ -15,4 +16,5 @@ clean:
 	@rm ./dock/world_state.rawscene
 	@rm ./dock/object_tools.rawscene 
 	@rm ./dock/scenegraph.rawscene
-	@rm ./dock/performance.rawscene 
+	@rm ./dock/performance.rawscene
+	@rm ./dock/not_implemented.rawscene
