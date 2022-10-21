@@ -51,12 +51,25 @@
   )
 )
 
+(define (calculateSnapToGrid ndiOffset cellWidth gridOffset)
+  (define xCell (round (/ (car ndiOffset) cellWidth)))
+  (define yCell (round (/ (+ (cadr ndiOffset) gridOffset) cellWidth)))
+  (define xPos (* cellWidth xCell))
+  (define yPos (* cellWidth yCell))
+  (format #t "ndi offset: ~a\n" ndiOffset)
+  (format #t "cell (x = ~a, y = ~a)\n" xCell yCell )
+  (format #t "fcell (x = ~a, y = ~a)\n" xPos yPos )
+  (list xPos (- yPos gridOffset) (caddr ndiOffset))
+)
+
+(define gridSize (if (args "gridsize") (string->number (args "gridsize")) #f))
+(define gridOffset (if (args "gridoffset") (string->number (args "gridoffset")) 0))
 (define (onMouseMove xpos ypos ndcx ndcy)
   (set! currNdi (list ndcx ndcy))
   ;(format #t "ndcx: ~a, ndcy: ~a\n" ndcx ndcy)
   (if objSelected 
     (begin
-      (gameobj-setpos! mainobj (calcNdiOffset))
+      (gameobj-setpos! mainobj (if gridSize (calculateSnapToGrid (calcNdiOffset) gridSize gridOffset) (calcNdiOffset)))
       (enforce-layout (gameobj-id mainobj))
     )
   )
