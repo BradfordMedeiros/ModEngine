@@ -61,6 +61,9 @@ void clearImpulse(int32_t index){
 
 std::vector<std::string> listSceneFiles(std::optional<objid> sceneId){
   if (sceneId.has_value()){
+    if (!sceneExists(world.sandbox, sceneId.value())){
+      return {};
+    }
     return { sceneFileForSceneId(world, sceneId.value()) };
   }
   return listFilesWithExtensions("./res/scenes", { "rawscene" });

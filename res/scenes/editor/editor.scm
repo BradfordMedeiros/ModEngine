@@ -476,7 +476,7 @@
 
 (define (sceneFileForSceneId sceneId) 
   (define sceneIds (list-scenefiles sceneId))
-  (car sceneIds)
+  (if (> (length sceneIds) 0) (car sceneIds) #f)
 )
 (define (onKeyChar key)
   (if (equal? key 46)
@@ -487,9 +487,14 @@
   (define layoutInfo 
     (map 
       (lambda(sceneId) 
-        (list 
-          (sceneFileForSceneId sceneId)
-          (gameobj-pos (lsobj-name "(test_panel" sceneId))
+        (let ((scenefilename (sceneFileForSceneId sceneId)))
+          (if scenefilename
+            (list 
+              scenefilename
+              (gameobj-pos (lsobj-name "(test_panel" sceneId))
+            )
+            #f
+          )
         )
       ) 
       panels
@@ -500,12 +505,14 @@
   (remove-old-layout layoutname)
   (for-each 
     (lambda(layout)
-      (save-new-layout layoutname layout)
+      (if layout
+        (save-new-layout layoutname layout)
+      )
     )
     layoutInfo
   )
   
-  (format #t "load side save all panels placeholder: ~a\n" layoutInfo)
+  ;(format #t "load side save all panels placeholder: ~a\n" layoutInfo)
 )
 
 (define layoutToUse (if (args "layout") (args "layout") "none"))
