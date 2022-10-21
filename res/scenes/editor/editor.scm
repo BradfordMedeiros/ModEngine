@@ -455,14 +455,15 @@
       elements
     )
   )
-    (format #t "layout for ~a, ~a\n" layoutname elements)
-
+  (format #t "layout for ~a, ~a\n" layoutname elements)
   elementsFixedType
 )
+
+(define panelsMoveable (args "gridmove"))
 (define (load-all-panels panelIdAndPos)
   (map 
     (lambda (panelIdAndPos)
-      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #t #f #f)
+      (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) panelsMoveable #f #f)
     )
     panelIdAndPos
   )
