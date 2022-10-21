@@ -185,9 +185,11 @@ SCM scmScenegraph(SCM sceneId){
   return list;
 }
 
-std::vector<std::string> (*_listSceneFiles)();
-SCM scm_listSceneFiles(){
-  auto scenes = _listSceneFiles();
+std::vector<std::string> (*_listSceneFiles)(std::optional<objid> sceneId);
+SCM scm_listSceneFiles(SCM scmSceneId){
+  auto sceneIdDefined = scmSceneId != SCM_UNDEFINED;
+  auto sceneId = sceneIdDefined ? scm_to_int32(scmSceneId) : std::optional<objid>(std::nullopt);
+  auto scenes = _listSceneFiles(sceneId);
   SCM list = scm_make_list(scm_from_unsigned_integer(scenes.size()), scm_from_unsigned_integer(0));
   for (int i = 0; i < scenes.size(); i++){
     scm_list_set_x (list, scm_from_unsigned_integer(i), scm_from_locale_string(scenes.at(i).c_str())); 
@@ -1151,7 +1153,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("list-scenes", 0, 1, 0, (void *)scm_listScenes);
   scm_c_define_gsubr("parent-scene", 1, 0, 0, (void *)scm_parentScene);
   scm_c_define_gsubr("child-scenes", 1, 0, 0, (void *)scm_childScenes);
-  scm_c_define_gsubr("list-scenefiles", 0, 0, 0, (void *)scm_listSceneFiles);
+  scm_c_define_gsubr("list-scenefiles", 0, 1, 0, (void *)scm_listSceneFiles);
   scm_c_define_gsubr("create-scene", 1, 0, 0, (void *)scm_createScene);
   scm_c_define_gsubr("rm-scene", 1, 0, 0, (void *) scm_deleteScene);
   scm_c_define_gsubr("lsscene-name", 1, 0, 0, (void *)scm_sceneIdByName);
@@ -1298,7 +1300,7 @@ void createStaticSchemeBindings(
   void (*unloadAllScenes)(),
   void (*resetScene)(std::optional<objid> sceneId),
   std::vector<int32_t> (*listScenes)(std::optional<std::vector<std::string>> tags),  
-  std::vector<std::string> (*listSceneFiles)(),
+  std::vector<std::string> (*listSceneFiles)(std::optional<objid> sceneId),
   bool (*parentScene)(objid sceneId, objid* parentSceneId),
   std::vector<objid> (*childScenes)(objid sceneId),
   std::optional<objid> (*sceneIdByName)(std::string name),

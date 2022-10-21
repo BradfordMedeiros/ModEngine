@@ -408,15 +408,6 @@
 )
 
 
-;(define (onKeyChar key)
-;  (format #t "on key char: ~a\n" key)
-;  ; ".
-;  (if (equal? key 46)
-;    (format #t "snapping positions: ~a\n" snappingPositionToSceneId)
-;  ) 
-;)
-
-
 (define (changeCursor isHover)
   (if isHover
     (set-wstate (list
@@ -469,8 +460,7 @@
   elementsFixedType
 )
 (define (load-all-panels panelIdAndPos)
-  (format #t "load panels placeholder")
-  (for-each 
+  (map 
     (lambda (panelIdAndPos)
       (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) #t #f #f)
     )
@@ -478,5 +468,51 @@
   )
 )
 
+(define (serializeVec vec) (string-join (map number->string vec) "?"))
+(define (remove-old-layout layoutname) (sql (sql-compile (string-append "delete from layout where name = " layoutname))))
+(define (save-new-layout layoutname layoutInfo)
+  (sql (sql-compile (string-append "insert into layout (name, panel, position) values ("  layoutname ", "  (car layoutInfo) ", "  (serializeVec (cadr layoutInfo)) ")" )))
+)
+
+(define (sceneFileForSceneId sceneId) 
+  (define sceneIds (list-scenefiles sceneId))
+  (car sceneIds)
+)
+(define (onKeyChar key)
+  (if (equal? key 46)
+    (save-all-panels layoutToUse)
+  ) 
+)
+(define (save-all-panels layoutname)
+  (define layoutInfo 
+    (map 
+      (lambda(sceneId) 
+        (list 
+          (sceneFileForSceneId sceneId)
+          (gameobj-pos (lsobj-name "(test_panel" sceneId))
+        )
+      ) 
+      panels
+    )
+  )
+
+  ; Would be nice to write  have ability for this stuff to run transactionally, theoretically could fail here
+  (remove-old-layout layoutname)
+  (for-each 
+    (lambda(layout)
+      (save-new-layout layoutname layout)
+    )
+    layoutInfo
+  )
+  
+  (format #t "load side save all panels placeholder: ~a\n" layoutInfo)
+)
+
 (define layoutToUse (if (args "layout") (args "layout") "none"))
-(if (hasLayoutTable) (load-all-panels (tableLayout layoutToUse)))
+
+(define panels (list))
+(if (hasLayoutTable) 
+  (begin
+    (set! panels  (load-all-panels (tableLayout layoutToUse)))
+  )
+)

@@ -577,7 +577,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
 
-  modlog("layout", std::string("enforcing layout for: " + getGameObject(world, id).name));
+  //modlog("layout", std::string("enforcing layout for: " + getGameObject(world, id).name));
 
    // Set position of the layout based on anchor target
   if (layoutObject -> anchor.target != ""){
