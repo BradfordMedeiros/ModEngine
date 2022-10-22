@@ -48,7 +48,7 @@
     ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/performance.rawscene"],
     ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/dock/cameras.rawscene"],
     ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/dock/lights.rawscene"],
-    ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
+    ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/sound.rawscene"],
     ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
   ];
 

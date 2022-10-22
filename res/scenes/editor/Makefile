@@ -9,6 +9,7 @@ all:
 	@php ./dock/details.php performance > ./dock/performance.rawscene
 	@php ./dock/details.php cameras > ./dock/cameras.rawscene
 	@php ./dock/details.php lights > ./dock/lights.rawscene
+	@php ./dock/details.php sound > ./dock/sound.rawscene
 	@php ./dock/details.php not_implemented > ./dock/not_implemented.rawscene
 
 clean:
@@ -21,4 +22,5 @@ clean:
 	@rm ./dock/performance.rawscene
 	@rm ./dock/cameras.rawscene
 	@rm ./dock/lights.rawscene
+	@rm ./dock/sound.rawscene
 	@rm ./dock/not_implemented.rawscene

@@ -120,7 +120,6 @@
         ],
       ],
     ],
-
     "cameras" => [
       "items" => [
         [
@@ -297,8 +296,42 @@
         ],
       ],
     ],
+    "sound" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Sound Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "loop", 
+            "value" => [
+              "binding" => "state",  # update field
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Path to Clip",
+            "readonly" => false,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+      ],
+    ],
 
-    /////
     "object_details" => [
       "title" => "Object Details",
       "items" => [
