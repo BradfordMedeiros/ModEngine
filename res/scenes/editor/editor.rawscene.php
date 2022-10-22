@@ -49,7 +49,7 @@
     ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/dock/cameras.rawscene"],
     ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/dock/lights.rawscene"],
     ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/sound.rawscene"],
-    ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
+    ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/text.rawscene"],
   ];
 
   $text_attr = [

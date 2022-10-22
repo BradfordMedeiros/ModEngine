@@ -331,6 +331,28 @@
         ],
       ],
     ],
+    "text" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Text Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "text", 
+            "value" => [
+              "binding" => "object_name",
+            ],
+          ]
+        ],
+      ],
+    ],
 
     "object_details" => [
       "title" => "Object Details",
