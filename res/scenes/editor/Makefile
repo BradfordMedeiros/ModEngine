@@ -7,6 +7,8 @@ all:
 	@php ./dock/details.php object_tools > ./dock/object_tools.rawscene
 	@php ./dock/details.php scenegraph > ./dock/scenegraph.rawscene
 	@php ./dock/details.php performance > ./dock/performance.rawscene
+	@php ./dock/details.php cameras > ./dock/cameras.rawscene
+	@php ./dock/details.php lights > ./dock/lights.rawscene
 	@php ./dock/details.php not_implemented > ./dock/not_implemented.rawscene
 
 clean:
@@ -17,4 +19,6 @@ clean:
 	@rm ./dock/object_tools.rawscene 
 	@rm ./dock/scenegraph.rawscene
 	@rm ./dock/performance.rawscene
+	@rm ./dock/cameras.rawscene
+	@rm ./dock/lights.rawscene
 	@rm ./dock/not_implemented.rawscene

@@ -120,6 +120,184 @@
         ],
       ],
     ],
+
+    "cameras" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Camera Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "depth of field", 
+            "value" => [
+              "binding" => "state",  # update field
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "blur distances for depth of field effect", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "min blur", 
+                "value" => [ 
+                  "binding" => "physics_gravity1", 
+                  "binding-index" =>  0,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "max blur", 
+                "value" => [ 
+                  "binding" => "physics_gravity2", 
+                  "binding-index" =>  0,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "amount", 
+                "value" => [ 
+                  "binding" => "physics_gravity3", 
+                  "binding-index" =>  0,
+                  "min" => 0,
+                  "max" => 100,
+                ]
+              ]
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Depth of Field Target",
+            "value" => [
+              "binding" => "false-binding",
+            ]
+          ],
+        ],
+      ],
+    ],
+    "lights" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Light Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "type", 
+            "options" => [
+              [ "label" => "point", "binding" => "sql-tree-type", "binding-on" => "big_tree" ],
+              [ "label" => "spotlight", "binding" => "sql-tree-type", "binding-on" => "medium_tree" ],
+              [ "label" => "directional", "binding" => "sql-tree-type", "binding-on" => "small_tree" ],
+   
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "color", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "red", 
+                "value" => [ 
+                  "binding" => "physics_gravity1", 
+                  "binding-index" =>  0,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "green", 
+                "value" => [ 
+                  "binding" => "physics_gravity2", 
+                  "binding-index" =>  0,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "blue", 
+                "value" => [ 
+                  "binding" => "physics_gravity3", 
+                  "binding-index" =>  0,
+                  "min" => 0,
+                  "max" => 100,
+                ]
+              ]
+            ]
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "attenuation", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "constant", 
+                "value" => [ 
+                  "binding" => "physics_gravity1", 
+                  "binding-index" =>  0,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "linear", 
+                "value" => [ 
+                  "binding" => "physics_gravity1", 
+                  "binding-index" =>  0,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "quadratic", 
+                "value" => [ 
+                  "binding" => "physics_gravity1", 
+                  "binding-index" =>  0,
+                ]
+              ],
+            ]
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "angle", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "degrees", 
+                "value" => [ 
+                  "binding" => "physics_gravity1", 
+                  "binding-index" =>  0,
+                ]
+              ],
+            ]
+          ],
+        ],
+      ],
+    ],
+
     /////
     "object_details" => [
       "title" => "Object Details",

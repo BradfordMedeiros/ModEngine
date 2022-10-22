@@ -46,8 +46,8 @@
     ["value" => "OBJECT TOOLS", "dialogoption" => "./res/scenes/editor/dock/object_tools.rawscene"],
     ["value" => "SCENEGRAPH", "dialogoption" => "./res/scenes/editor/dock/scenegraph.rawscene"],
     ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/performance.rawscene"],
-    ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
-    ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
+    ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/dock/cameras.rawscene"],
+    ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/dock/lights.rawscene"],
     ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
     ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/not_implemented.rawscene"],
   ];
