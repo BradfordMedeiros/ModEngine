@@ -808,7 +808,7 @@
         )
       )
       (maybe-set-binding objattr)
-      (if (and managedText (not valueIsSelectionType)) (maybe-set-text-cursor gameobj))
+      (if managedText (maybe-set-text-cursor gameobj))
     )
   )
 )
