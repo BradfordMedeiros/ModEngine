@@ -33,7 +33,13 @@
   if (array_key_exists("type", $data["value"])){
     $type = $data["value"]["type"];
   }
-  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $styles);
+
+  $valueFromSelection = false;
+  if (array_key_exists("valueFromSelection", $data["value"]) && $data["value"]["valueFromSelection"]){
+    $valueFromSelection = true;
+  }
+
+  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $styles);
 
   createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $holdername ]);
 ?>

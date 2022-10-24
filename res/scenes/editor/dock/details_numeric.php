@@ -22,7 +22,7 @@
       if (array_key_exists("readonly", $value[$x]["value"])){
         $readonly = $value[$x]["value"]["readonly"];
       }
-      createTextbox($holdername, $valuename, $readonly, $editableType, $value[$x]["value"], $styles);
+      createTextbox($holdername, $valuename, $readonly, $editableType, $value[$x]["value"], false, $styles);
       array_push($managedElements, $holdername);
     }else if ($controlType == "slider"){
       $hasBinding = !is_string($value[$x]);

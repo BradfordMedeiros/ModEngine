@@ -5,7 +5,7 @@
   // or 
   // 2. [ "value" => [ "binding"= > "binding to create" ]]
 
-  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $styles){
+  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $valueFromSelection, $styles){
     // details-editable-type to sponsor the type behavior
     if ($type != NULL){
       if ($type!= "number" && $type != "positive-number" && $type != "integer" && $type != "positive-integer"){  // should actually sponsor
@@ -35,6 +35,11 @@
       $style["wraptype"] = "char";
       $style["maxheight"] = "1"; 
     }
+
+    if ($valueFromSelection){
+      $style["details-value-selection"] = "true";
+    }
+
     createElement($valuename, $default_value, $style);
 
     $editableStyle = [

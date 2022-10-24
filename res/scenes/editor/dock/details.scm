@@ -126,7 +126,11 @@
     (begin
       (let ((updatedValues (filterUpdatedObjectValues)))
         (if (gameobj-name managedObj)
-          (gameobj-setattr! managedObj updatedValues)
+          (begin
+            (gameobj-setattr! managedObj updatedValues)
+            (format #t "set attr: ~a ~a\n" (gameobj-name managedObj) updatedValues)
+          )
+          
         )
         ;; temporary, just to get the effect, should change
         (for-each (lambda(attrPair) 
@@ -749,18 +753,40 @@
   (set! focusedElement #f)    
 )
 
+(define managedTextSelectionMode #f)
+(define (setManagedSelectionMode textobj)
+  (format #t "set managed selection mode: ~a\n" textobj)
+  (set! managedTextSelectionMode textobj)
+)
+
+(define (finishManagedSelectionMode obj)
+  (format #t "finishManagedSelectionMode end: ~a ~a\n" (gameobj-name obj) managedTextSelectionMode)
+  (updateText managedTextSelectionMode (gameobj-name obj) (list 0 "left" 0) 0)
+  ;(set! managedTextSelectionMode #f)
+)
+
 (define managedObj #f)
 (define (onObjSelected gameobj _)
   (define objattr (gameobj-attr gameobj))
   (define reselectAttr (assoc "details-reselect" objattr))
   (define objInScene (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj))))
   (define managedText (and objInScene (isManagedText gameobj)))
+  (define valueIsSelectionType (assoc "details-value-selection" objattr))
+
   (format #t "placeholder\n")
+
   (if (and objInScene reselectAttr)
     (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
     (begin
       (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
         (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
+      )
+
+      (if valueIsSelectionType
+        (if managedText 
+          (setManagedSelectionMode gameobj)
+          (format #t "selection type but not text\n")
+        )
       )
       (if managedText
         (begin
@@ -773,6 +799,7 @@
         )
         (unsetFocused)
       )
+      
       (if (isSelectableItem (assoc "layer" objattr))
         (begin
           (refillStore gameobj)
@@ -781,7 +808,7 @@
         )
       )
       (maybe-set-binding objattr)
-      (if managedText (maybe-set-text-cursor gameobj))
+      (if (and managedText (not valueIsSelectionType)) (maybe-set-text-cursor gameobj))
     )
   )
 )
@@ -801,6 +828,16 @@
 (define (onMouse button action mods)
   (if (and (equal? button 0) (equal? action 0) (and hoveredObj))
     (maybe-perform-action (gameobj-attr  hoveredObj))
+  )
+  (if (and (equal? button 1) (equal? action 0) hoveredObj)
+    (begin
+      (if managedTextSelectionMode
+        (begin
+          (finishManagedSelectionMode hoveredObj)
+          (submitData)
+        )
+      )
+    )
   )
   (populateData)
 )

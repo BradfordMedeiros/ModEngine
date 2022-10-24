@@ -182,7 +182,8 @@
           "data" => [
             "key" => "Depth of Field Target",
             "value" => [
-              "binding" => "false-binding",
+              "valueFromSelection" => true,
+              "binding" => "lookat",
             ]
           ],
         ],
@@ -714,7 +715,7 @@
         [
           "type" => "list",
           "data" => [
-            "key" => "Scene Control",
+            "key" => "",
             "values" => [
               [ 
                 "image" => "./res/scenes/editor/dock/images/play.png", 
