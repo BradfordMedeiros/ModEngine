@@ -924,7 +924,7 @@ RenderStagesDofInfo getDofInfo(bool* _shouldRender){
 
     if (state.activeCameraData -> target != ""){
       auto elements = getByName(world.sandbox, state.activeCameraData -> target);
-      assert(elements.size() == 1);
+      modassert(elements.size() == 1, std::string("elements size = ") + std::to_string(elements.size()));
       auto elementId = elements.at(0);
       auto halfBlurDistance = (maxBlurDistance - minBlurDistance) * 0.5f;
       targetDepth = -1 * getViewspaceDepth(view, elementId);

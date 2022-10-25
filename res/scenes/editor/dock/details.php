@@ -137,7 +137,7 @@
           "data" => [
             "key" => "depth of field", 
             "value" => [
-              "binding" => "state",  # update field
+              "binding" => "dof",  
               "binding-on" => "enabled",
               "binding-off" => "disabled",
             ],
@@ -152,24 +152,25 @@
                 "type" => "slider", 
                 "name" => "min blur", 
                 "value" => [ 
-                  "binding" => "physics_gravity1", 
-                  "binding-index" =>  0,
+                  "binding" => "minblur", 
+                  "min" => -100,  // what should min and max really be?
+                  "max" => 100,
                 ]
               ],
               [ 
                 "type" => "slider", 
-                "name" => "max blur", 
+                "name" => "maxblur", 
                 "value" => [ 
-                  "binding" => "physics_gravity2", 
-                  "binding-index" =>  0,
+                  "binding" => "maxblur", 
+                  "min" => -100,
+                  "max" => 100,
                 ]
               ],
               [ 
                 "type" => "slider", 
                 "name" => "amount", 
                 "value" => [ 
-                  "binding" => "physics_gravity3", 
-                  "binding-index" =>  0,
+                  "binding" => "bluramount", 
                   "min" => 0,
                   "max" => 100,
                 ]
@@ -183,7 +184,7 @@
             "key" => "Depth of Field Target",
             "value" => [
               "valueFromSelection" => true,
-              "binding" => "lookat",
+              "binding" => "target",
             ]
           ],
         ],
