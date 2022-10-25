@@ -347,17 +347,99 @@
           "data" => [
             "key" => "text", 
             "value" => [
-              "binding" => "object_name",
+              "binding" => "value",
             ],
           ]
         ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "align", 
+            "options" => [
+                [ "label" => "left", "binding" => "align", "binding-on" => "left" ],
+                [ "label" => "center", "binding" => "align", "binding-on" => "center" ],
+                [ "label" => "right", "binding" => "align", "binding-on" => "right" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "wraptype", 
+            "options" => [
+                [ "label" => "none", "binding" => "wraptype", "binding-on" => "none" ],
+                [ "label" => "char", "binding" => "wraptype", "binding-on" => "char" ],
+            ],
+          ],
+        ],
+
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "wrapamount", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "wrapamount", 
+                "value" => [ 
+                  "binding" => "wrapamount", 
+                  "type" => "number",
+                ]
+              ],
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "font",
+            "value" => [
+              "binding" => "font",
+            ]
+          ],
+        ],
+
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "offset", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "offsetx", 
+                "value" => [ 
+                  "binding" => "offsetx", 
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "offsety", 
+                "value" => [ 
+                  "binding" => "offsety", 
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "offset", 
+                "value" => [ 
+                  "binding" => "offset", 
+                  "type" => "number",
+                ]
+              ],
+            ]
+          ],
+        ],
+
+
       ],
     ],
 
     "object_details" => [
       "title" => "Object Details",
       "items" => [
-        [ "type" => "label", 
+        /*[ "type" => "label", 
           "sql" => [
             "binding" => "sql-person-name",
             "query" => "select name from people where class = warrior limit 1",
@@ -370,7 +452,7 @@
               "binding" => "sql-person-name",
             ],
           ]
-        ],
+        ],*/
         [ "type" => "label", 
           "data" => [
             "key" => "Current Object", 
@@ -409,7 +491,7 @@
         ],
         */
 
-        [
+        /*[
           "type" => "checkbox",
           "sql" => [
             "binding" => "multiday-ticket",
@@ -426,8 +508,6 @@
             ],
           ],
         ],
-
-
         [
           "type" => "checkbox",
           "data" => [
@@ -457,7 +537,7 @@
    
             ],
           ],
-        ],
+        ],*/
 
         /*[
           "type" => "numeric",
@@ -486,7 +566,7 @@
             ]
           ],
         ],*/
-        [
+        /*[
           "type" => "numeric",
           "sql" => [
             "binding" => "sql-trait-speed",
@@ -535,7 +615,7 @@
               ],
             ]
           ],
-        ],
+        ],*/
         [
           "type" => "numeric",
           "data" => [

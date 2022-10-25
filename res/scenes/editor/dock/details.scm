@@ -363,7 +363,7 @@
       (format #t "old value: ~a ~a\n"  oldvalue (map number? oldvalue))
       (list detailBindingName oldvalue)
     )
-    (list detailBindingName newvalue)
+    (list detailBindingName (makeTypeCorrect oldvalue newvalue))
   )
 )
 
