@@ -153,7 +153,7 @@
                 "name" => "min blur", 
                 "value" => [ 
                   "binding" => "minblur", 
-                  "min" => -100,  // what should min and max really be?
+                  "min" => -100,  // what should min and max really be?d
                   "max" => 100,
                 ]
               ],
@@ -207,10 +207,9 @@
           "data" => [
             "key" => "type", 
             "options" => [
-              [ "label" => "point", "binding" => "sql-tree-type", "binding-on" => "big_tree" ],
-              [ "label" => "spotlight", "binding" => "sql-tree-type", "binding-on" => "medium_tree" ],
-              [ "label" => "directional", "binding" => "sql-tree-type", "binding-on" => "small_tree" ],
-   
+              [ "label" => "point", "binding" => "type", "binding-on" => "point" ],
+              [ "label" => "spotlight", "binding" => "type", "binding-on" => "spotlight" ],
+              [ "label" => "directional", "binding" => "type", "binding-on" => "directional" ],
             ],
           ],
         ],
@@ -223,7 +222,7 @@
                 "type" => "slider", 
                 "name" => "red", 
                 "value" => [ 
-                  "binding" => "physics_gravity1", 
+                  "binding" => "color", 
                   "binding-index" =>  0,
                 ]
               ],
@@ -231,18 +230,16 @@
                 "type" => "slider", 
                 "name" => "green", 
                 "value" => [ 
-                  "binding" => "physics_gravity2", 
-                  "binding-index" =>  0,
+                  "binding" => "color", 
+                  "binding-index" =>  1,
                 ]
               ],
               [ 
                 "type" => "slider", 
                 "name" => "blue", 
                 "value" => [ 
-                  "binding" => "physics_gravity3", 
-                  "binding-index" =>  0,
-                  "min" => 0,
-                  "max" => 100,
+                  "binding" => "color", 
+                  "binding-index" =>  2,
                 ]
               ]
             ]
@@ -257,7 +254,7 @@
                 "type" => "slider", 
                 "name" => "constant", 
                 "value" => [ 
-                  "binding" => "physics_gravity1", 
+                  "binding" => "attenuation", 
                   "binding-index" =>  0,
                 ]
               ],
@@ -265,16 +262,16 @@
                 "type" => "slider", 
                 "name" => "linear", 
                 "value" => [ 
-                  "binding" => "physics_gravity1", 
-                  "binding-index" =>  0,
+                  "binding" => "attenuation", 
+                  "binding-index" =>  1,
                 ]
               ],
               [ 
                 "type" => "slider", 
                 "name" => "quadratic", 
                 "value" => [ 
-                  "binding" => "physics_gravity1", 
-                  "binding-index" =>  0,
+                  "binding" => "attenuation", 
+                  "binding-index" =>  2,
                 ]
               ],
             ]
@@ -289,8 +286,9 @@
                 "type" => "slider", 
                 "name" => "degrees", 
                 "value" => [ 
-                  "binding" => "physics_gravity1", 
-                  "binding-index" =>  0,
+                  "binding" => "angle", 
+                  "min" => -1,
+                  "max" => 1,
                 ]
               ],
             ]

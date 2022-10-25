@@ -897,7 +897,9 @@ void autoserializerSetAttr(char* structAddress, AutoSerialize& value, GameobjAtt
       if (attributes.numAttributes.find(customValue -> field) == attributes.numAttributes.end()){
         customValue -> setAttributes(address, NULL);
       }else{
-        customValue -> setAttributes(address, &(attributes.numAttributes.at(customValue -> field)));
+        // why is num attributes a double?  Should unify
+        float value = static_cast<float>(attributes.numAttributes.at(customValue -> field));
+        customValue -> setAttributes(address, &value);
       }
     }else{
       modassert(false, "custom value -> invalid field type");

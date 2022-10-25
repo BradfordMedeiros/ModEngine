@@ -39,10 +39,9 @@ std::vector<AutoSerialize> lightAutoserializer {
     .setAttributes = [](void* offset, void* fieldValue) -> void {
       GameObjectLight* light = static_cast<GameObjectLight*>(offset);
       float* field = static_cast<float*>(fieldValue);
-      if (light != NULL && light -> type == LIGHT_SPOTLIGHT && field != NULL){
-        light -> maxangle = *field;
-      }else {
-        light -> maxangle = -10.f;
+      modassert(light != NULL, "light was null");
+      if (field != NULL){
+         light -> maxangle = *field;
       }
     },
     .getAttribute = [](void* offset) -> AttributeValue {
