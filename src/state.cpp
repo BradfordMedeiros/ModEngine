@@ -307,6 +307,7 @@ std::vector<ObjectStateMapping> mapping = {
   },
   simpleBoolSerializer("world", "paused", offsetof(engineState, worldpaused)),
   simpleVec2Serializer("debug", "textoffset", offsetof(engineState, infoTextOffset), std::nullopt),
+  simpleBoolSerializer("editor", "groupselection", offsetof(engineState, groupSelection)),
 };  
 
 void setState(engineState& state, ObjectValue& value, float now){

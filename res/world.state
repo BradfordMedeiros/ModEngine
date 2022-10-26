@@ -4,14 +4,14 @@
 world:paused:false  # true / false
 
 diffuse:enabled:true
-specular:enabled:false
-bloom:enabled:false
+specular:enabled:true
+bloom:enabled:true
 bloom:amount:1
 bloomblur:amount:1
 #exposure:amount:0.8
 pbr:enabled:false
 
-light:amount:0.8 0.8 0.8
+light:amount:0.2 0.2 0.2
 ###############################
 
 ### Post Process ###
@@ -66,3 +66,5 @@ tools:scale-group:group
 
 
 debug:textoffset:1.5 -1.2
+
+editor:groupselection:true
