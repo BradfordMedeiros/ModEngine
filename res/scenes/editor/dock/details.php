@@ -313,19 +313,35 @@
           "data" => [
             "key" => "loop", 
             "value" => [
-              "binding" => "state",  # update field
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "loop",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "volume", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "volume", 
+                "value" => [ 
+                  "binding" => "volume", 
+                  "type" => "number",
+                ]
+              ],
+            ]
           ],
         ],
         [
           "type" => "label",
           "data" => [
             "key" => "Path to Clip",
-            "readonly" => false,
+            "readonly" => true,
             "value" => [
-              "binding" => "false-binding-0",
+              "binding" => "clip",
             ]
           ],
         ],

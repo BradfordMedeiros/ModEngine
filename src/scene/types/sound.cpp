@@ -24,6 +24,13 @@ void setSoundPosition(ALuint source, float x, float y, float z){
   alSource3f(source, AL_POSITION, x, y, z);
 }
 
+void setSoundVolume(ALuint source, float newVolume){
+  alSourcef(source, AL_GAIN, newVolume);
+}
+void setSoundLooping(ALuint source, bool shouldLoop){
+  alSourcei(source, AL_LOOPING, shouldLoop ? AL_TRUE : AL_FALSE);
+}
+
 void setListenerPosition(float x, float y, float z, std::vector<float> forward, std::vector<float> up){
   assert(forward.size() == 3);
   assert(up.size() == 3);
@@ -61,21 +68,20 @@ ALuint findOrLoadBuffer(std::string filepath){
   return soundBuffer;  
 }
 
-ALuint createSource(ALuint soundBuffer, bool shouldLoop){
+ALuint createSource(ALuint soundBuffer){
   ALuint soundSource;
   alGenSources(1, &soundSource);
   alSourcei(soundSource, AL_BUFFER, soundBuffer);  
-  alSourcei(soundSource, AL_LOOPING, shouldLoop ? AL_TRUE : AL_FALSE);
   return soundSource;
 }
 
 // @todo support ogg file format.
 // This call should support: .wav, .snd, .au , but have only tested .wav
-ALuint loadSoundState(std::string filepath, bool shouldLoop){
+ALuint loadSoundState(std::string filepath){
   std::cout << "EVENT: loading sound:" << filepath <<  std::endl; 
 
   ALuint soundBuffer = findOrLoadBuffer(filepath);
-  ALuint soundSource = createSource(soundBuffer, shouldLoop);
+  ALuint soundSource = createSource(soundBuffer);
   
   if (soundUsages.find(filepath) == soundUsages.end()){
     soundUsages[filepath] = 0;

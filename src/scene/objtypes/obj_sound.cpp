@@ -19,7 +19,7 @@ std::vector<AutoSerialize> soundAutoserializer {
         modassert(false, "clip must not be unspecified");
       }else{
         obj -> clip = *clip;
-        obj -> source = loadSoundState(obj -> clip, obj -> loop);     
+        obj -> source = loadSoundState(obj -> clip);     
       }
     },
     .setAttributes = [](void* offset, void* fieldValue) -> void {
@@ -28,7 +28,7 @@ std::vector<AutoSerialize> soundAutoserializer {
       if (fieldValue != NULL){
         unloadSoundState(obj -> source, obj -> clip); 
         obj -> clip = *clip;
-        obj -> source = loadSoundState(obj -> clip, obj -> loop);     
+        obj -> source = loadSoundState(obj -> clip);     
       }
     },
     .getAttribute = [](void* offset) -> AttributeValue {
@@ -36,11 +36,19 @@ std::vector<AutoSerialize> soundAutoserializer {
       return obj -> clip;
     },
   },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectSound, volume),
+    .structOffsetFiller = std::nullopt,
+    .field = "volume",
+    .defaultValue = 1.f,
+  },
 };
 
 GameObjectSound createSound(GameobjAttributes& attr, ObjectTypeUtil& util){
   GameObjectSound obj {};
   createAutoSerializeWithTextureLoading((char*)&obj, soundAutoserializer, attr, util);
+  setSoundVolume(obj.source, obj.volume);
+  setSoundLooping(obj.source, obj.loop);
   return obj;
 }
 
@@ -60,5 +68,7 @@ void removeSound(GameObjectSound& soundObj, ObjectRemoveUtil& util){
 
 bool setSoundAttributes(GameObjectSound& soundObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&soundObj, soundAutoserializer, attributes, util);
+  setSoundVolume(soundObj.source, soundObj.volume);
+  setSoundLooping(soundObj.source, soundObj.loop);
   return false;
 }
