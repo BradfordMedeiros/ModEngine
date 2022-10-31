@@ -284,10 +284,19 @@
             "value" => [
               [ 
                 "type" => "slider", 
-                "name" => "degrees", 
+                "name" => "angle", 
                 "value" => [ 
                   "binding" => "angle", 
                   "min" => -1,
+                  "max" => 1,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "delta", 
+                "value" => [ 
+                  "binding" => "angledelta", 
+                  "min" => 0,
                   "max" => 1,
                 ]
               ],
