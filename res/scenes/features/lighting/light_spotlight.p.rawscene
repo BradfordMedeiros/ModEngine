@@ -4,12 +4,11 @@ platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
 
-!flashlight:position:0 -2 0 
-!flashlight:angle:0.3
+!flashlight:position:0 1 0 
+!flashlight:angle:0.5
+!flashlight:rotation:0 -1 0 0
 !flashlight:type:spotlight
+!flashlight:color:0 0 1
+!flashlight:attenuation:0.0 0.0 1
 
-flashbox:mesh:./res/models/box/box.obj
-flashbox:child:!flashlight
-flashbox:scale:0.5 2 0.5
-flashbox:position:0 5 0
-
+!flashlight:angledelta:0.2

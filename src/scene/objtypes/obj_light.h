@@ -9,6 +9,7 @@ struct GameObjectLight {
   glm::vec3 color;
   LightType type;
   float maxangle;
+  float angledelta;
   glm::vec3 attenuation;
 };
 

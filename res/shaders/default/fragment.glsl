@@ -44,6 +44,7 @@ uniform vec3 lightscolor[MAX_LIGHTS];
 uniform vec3 lightsdir[MAX_LIGHTS];
 uniform vec3 lightsatten[MAX_LIGHTS];
 uniform float lightsmaxangle[MAX_LIGHTS];
+uniform float lightsangledelta[MAX_LIGHTS];
 uniform bool lightsisdir[MAX_LIGHTS];
 
 //uniform mat4 lightsprojview[MAX_LIGHTS];
@@ -80,8 +81,16 @@ vec3 calculatePhongLight(vec3 normal){
     vec3 lightDir = lightsisdir[i] ?  lightsdir[i] : normalize(lightPos - FragPos);
 
     float angle = dot(lightDir, normalize(-lightsdir[i]));
-    if (angle < lightsmaxangle[i]){
+
+    float angleFactor = 1;
+    float minAngle = lightsmaxangle[i];
+    float maxAngle = minAngle + lightsangledelta[i];
+    float angleAmount = mix(minAngle, maxAngle, angle);
+    if (angle < maxAngle){
+      if (angle < minAngle){
         continue;
+      }
+      angleFactor = (angle - minAngle) / (maxAngle - minAngle);
     }
 
     vec3 diffuse = max(dot(normal, lightDir), 0.0) * lightscolor[i];
@@ -90,8 +99,8 @@ vec3 calculatePhongLight(vec3 normal){
     vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), 32) * vec3(1.0, 1.0, 1.0);  
     float attenuation = calcAttenutation(i);
 
-    totalDiffuse = totalDiffuse + (attenuation * diffuse * lightscolor[i]);
-    totalSpecular = totalSpecular + (attenuation * specular * lightscolor[i]);
+    totalDiffuse = totalDiffuse + angleFactor * (attenuation * diffuse * lightscolor[i]);
+    totalSpecular = totalSpecular + angleFactor * (attenuation * specular * lightscolor[i]);
   }
 
   vec3 diffuseValue = enableDiffuse ? totalDiffuse : vec3(0, 0, 0);
@@ -220,7 +229,7 @@ void main(){
     
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
-    float shadowDelta = (inShadow) ? 0.7 : 1.0;
+    float shadowDelta = (false && inShadow) ? 0.7 : 1.0;
 
     if (enableLighting){
       FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);

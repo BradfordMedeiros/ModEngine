@@ -48,8 +48,13 @@ std::vector<AutoSerialize> lightAutoserializer {
       GameObjectLight* light = static_cast<GameObjectLight*>(offset);
       return light -> maxangle;
     },
+  },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectLight, angledelta),
+    .structOffsetFiller = std::nullopt,
+    .field = "angledelta",
+    .defaultValue = 0.f,
   }
-
 };
 
 GameObjectLight createLight(GameobjAttributes& attr, ObjectTypeUtil& util){

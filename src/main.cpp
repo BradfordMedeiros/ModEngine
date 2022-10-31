@@ -423,6 +423,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
     glUniform3fv(glGetUniformLocation(shader, ("lightsdir[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(directionFromQuat(light.transform.rotation)));
     glUniform3fv(glGetUniformLocation(shader, ("lightsatten[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(light.light.attenuation));
     glUniform1f(glGetUniformLocation(shader,  ("lightsmaxangle[" + std::to_string(i) + "]").c_str()), light.light.type == LIGHT_SPOTLIGHT ? light.light.maxangle : -10.f);
+    glUniform1f(glGetUniformLocation(shader,  ("lightsangledelta[" + std::to_string(i) + "]").c_str()), light.light.angledelta);
     glUniform1i(glGetUniformLocation(shader,  ("lightsisdir[" + std::to_string(i) + "]").c_str()), light.light.type == LIGHT_DIRECTIONAL);
 
     if (lightProjview.size() > i){
