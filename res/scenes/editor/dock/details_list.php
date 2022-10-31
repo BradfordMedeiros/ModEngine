@@ -69,7 +69,6 @@
     "position" => "0 0 " . $depth[2],
     "align-content" => "center",
     "align-items-horizontal" => "left",
-    "minwidth" => "0.42",
   ];
   if (array_key_exists("type", $data) && $data["type"] == "vertical"){
     $listHolderVals["type"] = "vertical";

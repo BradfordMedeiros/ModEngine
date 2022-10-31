@@ -27,16 +27,7 @@
     }
   }
 
-  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos, $sqlBinding){
-    $multiplier = 1;
-    $depth = [
-      0 => $zpos,
-      1 => ($zpos + $multiplier * 0.05),
-      2 => ($zpos + $multiplier * 0.1),
-      28 => ($zpos + $multiplier * 0.18),
-      29 => ($zpos + $multiplier * 0.24),
-      3 => ($zpos + $multiplier * 0.3),
-    ];
+  function includeTemplate($file, $rootElementName, $i, $data,  $unique_control_id, $zpos, $sqlBinding, $depth, $default_rootLayout ){
     $default_style = [ "layer" => "basicui" ];
     $default_text_style = [
       "layer" => "basicui", 
@@ -61,20 +52,6 @@
       "minwidth" => "0.36",
       "position" => "0 0 " . $depth[2],
     ];
-    $default_rootLayout = [
-      "layer" => "basicui",
-      "type" => "horizontal",
-      "backpanel" => "true",
-      "tint" => "0.2 0.2 0.2 1",  
-      "margin" => "0.02",
-      "margin-left" => "0.01",
-      "margin-right" => "0.01",
-      "spacing" => "0.02",
-      "minwidth" => "0.44",
-      "border-size" => "0.002",
-      "border-color" => "0 0 0 1",
-      "position" => "0 0 " . $depth[2],
-    ];
 
     if ($sqlBinding){
       $default_rootLayout["sql-binding"] = $sqlBinding["binding"];
@@ -86,7 +63,6 @@
         $default_rootLayout["sql-cast"] = $sqlBinding["cast"];
       }
     }
-
     include $file;
   }
 
@@ -908,12 +884,38 @@
   }else{
     echo("(test_panel:minheight:2\n");
   }
+
+  $multiplier = 1;
+  $depth = [
+    0 => $zpos,
+    1 => ($zpos + $multiplier * 0.05),
+    2 => ($zpos + $multiplier * 0.1),
+    28 => ($zpos + $multiplier * 0.18),
+    29 => ($zpos + $multiplier * 0.24),
+    3 => ($zpos + $multiplier * 0.3),
+  ];
+  $default_rootLayout = [
+    "layer" => "basicui",
+    "type" => "horizontal",
+    "backpanel" => "true",
+    "tint" => "0.2 0.2 0.2 1",  
+    "margin" => "0.02",
+    "margin-left" => "0.01",
+    "margin-right" => "0.01",
+    "spacing" => "0.02",
+    "border-size" => "0.002",
+    "border-color" => "0 0 0 1",
+    "position" => "0 0 " . $depth[2],
+  ];
+
   if (array_key_exists("minwidth", $detailType)){
     if (!$detailType["minwidth"] == false){
       echo("(test_panel:minwidth:" . $detailType["minwidth"] . "\n");
+      $default_rootLayout["minwidth"] = $detailType["minwidth"];
     }
   }else{
     echo("(test_panel:minwidth:0.44\n");
+    $default_rootLayout["minwidth"] = "0.44";
   }
 
   
@@ -960,7 +962,6 @@
     "numeric" => "./dock/details_numeric.php",
   ];
 
-
   for ($i = 0; $i < count($keyvaluePairs); $i++){
     $type = $keyvaluePairs[$i]["type"];
     $data = $keyvaluePairs[$i]["data"];
@@ -974,7 +975,7 @@
       $sqlBinding = $keyvaluePairs[$i]["sql"];
     }
 
-    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos, $sqlBinding);
+    includeTemplate($templateFile, $rootElementName, $i, $data, $unique_control_id, $zpos, $sqlBinding, $depth, $default_rootLayout);
     array_push($test_panel_elements, $rootElementName);
 
     echo ("\n");
