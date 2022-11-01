@@ -621,15 +621,6 @@
             "key" => "Tint", 
             "value" => [
               [ 
-                "type" => "float", 
-                "name" => "Red", 
-                "value" => [ 
-                  "binding" => "tint", 
-                  "binding-index" =>  0,
-                  "type" => "number",
-                ]
-              ],
-              /*[ 
                 "type" => "slider", 
                 "name" => "Red", 
                 "value" => [ 
@@ -637,7 +628,7 @@
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
-              ],*/
+              ],
               [ 
                 "type" => "slider", 
                 "name" => "Green", 
@@ -779,18 +770,6 @@
       "horizontal" => "center",
       "tint" => false,
       "items" => [
-       # [
-       #   "type" => "list",
-       #   "data" => [
-       #     "key" => "Transform Mode",
-       #     "mode" => "oneof",
-       #     "values" => [
-       #       ["image" => "./res/scenes/editor/dock/images/transform.png", "action" => "set-transform-mode" ],
-       #       ["image" => "./res/scenes/editor/dock/images/scale.png", "action" => "set-scale-mode" ],
-       #       ["image" => "./res/scenes/editor/dock/images/rotate.png", "action" => "set-rotate-mode" ],
-       #     ],
-       #   ],
-       # ],
         [
           "type" => "list",
           "data" => [
@@ -808,36 +787,10 @@
                 "binding" => "pause-mode-on", 
                 "binding-on" => "on",
                 "binding-off" => "off",
-                //"disabled" => [
-                //  "binding" => "play-mode-on",
-                //  "binding-value" => "on",
-                //],
               ],
             ],
           ],
         ],
-        //[
-        //  "type" => "checkbox",
-        //  "data" => [
-        //    "key" => "Move Relative", 
-        //    "value" => [
-        //      "binding" => "tools-manipulator-coord", # relative/absolute
-        //      "binding-on" => "relative",
-        //      "binding-off" => "absolute",
-        //    ],
-        //  ],
-        //],
-        //[
-        //  "type" => "checkbox",
-        //  "data" => [
-        //    "key" => "EoE Mode", 
-        //    "value" => [
-        //      "binding" => "editor-eoe-mode",
-        //      "binding-on" => "enabled",
-        //      "binding-off" => "disabled",
-        //    ],
-        //  ],
-        //],
       ],
     ],
     "transform" => [
@@ -857,17 +810,26 @@
                 "image" => "./res/scenes/editor/dock/images/transform.png", 
                 "action" => "set-transform-mode",
                 "size" => "0.02 0.05 0.02",
-                "binding" => "play-mode-on", 
               ],
               [ "image" => "./res/scenes/editor/dock/images/scale.png", 
                 "action" => "set-scale-mode",
                 "size" => "0.02 0.05 0.02",
-                "binding" => "pause-mode-on", 
               ],
               [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
                 "action" => "set-rotate-mode",
                 "size" => "0.02 0.05 0.02",
-                "binding" => "pause-mode-on", 
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
+                "action" => "set-axis-x",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
+                "action" => "set-axis-y",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
+                "action" => "set-axis-z",
+                "size" => "0.02 0.05 0.02",
               ],
             ],
           ],

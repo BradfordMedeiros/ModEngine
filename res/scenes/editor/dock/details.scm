@@ -275,6 +275,7 @@
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
 (define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
+(define (setAxis axis) (set-wstate (list (list "tools" "manipulator-axis" axis))))
 
 (define pauseModeEnabled #t)
 
@@ -317,6 +318,9 @@
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
     (list "toggle-play-mode" togglePlayMode)
     (list "toggle-pause-mode" togglePauseMode)
+    (list "set-axis-x" (lambda() (setAxis "x")))
+    (list "set-axis-y" (lambda() (setAxis "y")))
+    (list "set-axis-z" (lambda() (setAxis "z")))
   )
 )
 
