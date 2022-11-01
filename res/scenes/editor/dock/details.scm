@@ -273,9 +273,23 @@
 )
 
 (define (uniqueName) (number->string (random 1000000)))
-(define (createCameraPlaceholder) (mk-obj-attr (string-append ">camera-" (uniqueName)) (list)))
-(define (createLightPlaceholder) (mk-obj-attr (string-append "!light-" (uniqueName)) (list)))
-(define (createTextPlaceholder) (mk-obj-attr (string-append ")text-" (uniqueName)) (list (list "value" "sample text"))))
+
+(define activeSceneId #f)
+(define (createCameraPlaceholder) 
+  (if activeSceneId 
+    (mk-obj-attr (string-append ">camera-" (uniqueName)) (list) activeSceneId)
+  )
+)
+(define (createLightPlaceholder) 
+  (if activeSceneId
+    (mk-obj-attr (string-append "!light-" (uniqueName)) (list) activeSceneId)
+  )
+)
+(define (createTextPlaceholder) 
+  (if activeSceneId 
+    (mk-obj-attr (string-append ")text-" (uniqueName)) (list (list "value" "sample text")) activeSceneId)
+  )
+)
 
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
 (define (setAxis axis) (set-wstate (list (list "tools" "manipulator-axis" axis))))
@@ -773,15 +787,26 @@
   ;(set! managedTextSelectionMode #f)
 )
 
+(define (handleActiveScene sceneId objattr)
+  (define layerAttr (assoc "layer" objattr))
+  (define layer (if layerAttr (cadr layerAttr) #f))
+  (format #t "layer: ~a\n" layer)
+  (if (not (equal? layer "basicui"))
+    (begin
+      (set! activeSceneId sceneId)
+      (sendnotify "active-scene-id" (number->string sceneId))
+    )
+  )
+)
+
 (define managedObj #f)
 (define (onObjSelected gameobj _)
   (define objattr (gameobj-attr gameobj))
   (define reselectAttr (assoc "details-reselect" objattr))
-  (define objInScene (equal? (list-sceneid (gameobj-id gameobj)) (list-sceneid (gameobj-id mainobj))))
+  (define sceneId (list-sceneid (gameobj-id gameobj)))
+  (define objInScene (equal? sceneId (list-sceneid (gameobj-id mainobj))))
   (define managedText (and objInScene (isManagedText gameobj)))
   (define valueIsSelectionType (assoc "details-value-selection" objattr))
-
-  (format #t "placeholder\n")
 
   (if (and objInScene reselectAttr)
     (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
@@ -835,8 +860,13 @@
 )
 (define (onMouse button action mods)
   (if (and (equal? button 0) (equal? action 0) (and hoveredObj))
-    (if (equal? (list-sceneid (gameobj-id hoveredObj)) (list-sceneid (gameobj-id mainobj)))
-      (maybe-perform-action (gameobj-attr  hoveredObj))
+    (begin
+      (handleActiveScene (list-sceneid (gameobj-id hoveredObj)) (gameobj-attr hoveredObj))  ; pull this into a seperate script, don't like the idea of the editor managing this 
+      (if (equal? (list-sceneid (gameobj-id hoveredObj)) (list-sceneid (gameobj-id mainobj)))
+        (begin
+          (maybe-perform-action (gameobj-attr  hoveredObj))
+        )
+      )
     )
   )
   (if (and (equal? button 1) (equal? action 0) hoveredObj)
@@ -1050,6 +1080,9 @@
 )
 
 (define (onMessage key value)
+  (if (equal? key "active-scene-id")
+    (set! activeSceneId (string->number value))
+  )
   (if (equal? key "editor-button-on")
     (begin
       (toggleButtonBinding (string->number value) #t)
