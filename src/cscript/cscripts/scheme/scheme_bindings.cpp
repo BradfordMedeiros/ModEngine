@@ -235,8 +235,9 @@ std::optional<objid> (*_makeObjectAttr)(
   GameobjAttributes& attr,
   std::map<std::string, GameobjAttributes>& submodelAttributes
 );
-SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes){
-  auto sceneId = _listSceneId(currentModuleId());
+SCM scmMakeObjectAttr(SCM scmName, SCM scmAttributes, SCM scmSceneId){
+  auto sceneIdDefined = !scm_is_eq(scmSceneId, SCM_UNDEFINED);
+  auto sceneId = sceneIdDefined ? scm_to_int32(scmSceneId) : _listSceneId(currentModuleId());
   auto attrs = scmToAttributes(scmAttributes);
   std::map<std::string, GameobjAttributes> submodelAttributes;
   std::optional<objid> id = _makeObjectAttr(sceneId, scm_to_locale_string(scmName), attrs.attr, attrs.submodelAttributes);
@@ -1233,7 +1234,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("create-recording", 1, 0, 0, (void*)scmCreateRecording);
   scm_c_define_gsubr("save-recording", 2, 0, 0, (void*) scmSaveRecording);
 
-  scm_c_define_gsubr("mk-obj-attr", 2, 0, 0, (void*)scmMakeObjectAttr);
+  scm_c_define_gsubr("mk-obj-attr", 2, 1, 0, (void*)scmMakeObjectAttr);
   scm_c_define_gsubr("make-parent", 2, 0, 0, (void*)scmMakeParent);
 
   scm_c_define_gsubr("raycast", 3, 0, 0, (void*)scmRaycast);
