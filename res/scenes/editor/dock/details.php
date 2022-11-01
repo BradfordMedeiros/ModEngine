@@ -840,6 +840,40 @@
         //],
       ],
     ],
+    "transform" => [
+      "minheight" => false,
+      "minwidth" => false,
+      "hidex" => true,
+      "vertical" => "center",
+      "horizontal" => "center",
+      "tint" => "0 0 0 1",
+      "items" => [
+        [
+          "type" => "list",
+          "data" => [
+            "key" => "",
+            "values" => [
+              [ 
+                "image" => "./res/scenes/editor/dock/images/transform.png", 
+                "action" => "set-transform-mode",
+                "size" => "0.02 0.05 0.02",
+                "binding" => "play-mode-on", 
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/scale.png", 
+                "action" => "set-scale-mode",
+                "size" => "0.02 0.05 0.02",
+                "binding" => "pause-mode-on", 
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
+                "action" => "set-rotate-mode",
+                "size" => "0.02 0.05 0.02",
+                "binding" => "pause-mode-on", 
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
     "scenegraph" => [
       "title" => "Scenegraph",
       "items" => [

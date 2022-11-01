@@ -5,6 +5,7 @@ all:
 	@php ./dock/details.php object_details > ./dock/object_details.rawscene
 	@php ./dock/details.php world_state > ./dock/world_state.rawscene
 	@php ./dock/details.php object_tools > ./dock/object_tools.rawscene
+	@php ./dock/details.php transform > ./dock/transform.rawscene
 	@php ./dock/details.php scenegraph > ./dock/scenegraph.rawscene
 	@php ./dock/details.php performance > ./dock/performance.rawscene
 	@php ./dock/details.php cameras > ./dock/cameras.rawscene
@@ -18,7 +19,8 @@ clean:
 	@rm ./dock/testpanel.rawscene
 	@rm ./dock/object_details.rawscene
 	@rm ./dock/world_state.rawscene
-	@rm ./dock/object_tools.rawscene 
+	@rm ./dock/object_tools.rawscene
+	@rm ./dock/transform.rawscene 
 	@rm ./dock/scenegraph.rawscene
 	@rm ./dock/performance.rawscene
 	@rm ./dock/cameras.rawscene
