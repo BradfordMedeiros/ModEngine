@@ -272,9 +272,11 @@
   (populateSqlData)
 )
 
-(define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
-(define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
-(define (createTextPlaceholder) (format #t "placeholder to create text!\n"))
+(define (uniqueName) (number->string (random 1000000)))
+(define (createCameraPlaceholder) (mk-obj-attr (string-append ">camera-" (uniqueName)) (list)))
+(define (createLightPlaceholder) (mk-obj-attr (string-append "!light-" (uniqueName)) (list)))
+(define (createTextPlaceholder) (mk-obj-attr (string-append ")text-" (uniqueName)) (list (list "value" "sample text"))))
+
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
 (define (setAxis axis) (set-wstate (list (list "tools" "manipulator-axis" axis))))
 
@@ -833,7 +835,9 @@
 )
 (define (onMouse button action mods)
   (if (and (equal? button 0) (equal? action 0) (and hoveredObj))
-    (maybe-perform-action (gameobj-attr  hoveredObj))
+    (if (equal? (list-sceneid (gameobj-id hoveredObj)) (list-sceneid (gameobj-id mainobj)))
+      (maybe-perform-action (gameobj-attr  hoveredObj))
+    )
   )
   (if (and (equal? button 1) (equal? action 0) hoveredObj)
     (begin
