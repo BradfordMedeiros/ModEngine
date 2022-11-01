@@ -9,8 +9,6 @@
 ?>
 (test_panel:layer:basicui
 (test_panel:type:vertical
-(test_panel:backpanel:true
-(test_panel:tint:0.1 0.1 0.1 1
 #(test_panel:margin:0.02
 (test_panel:margin-top:0.1
 #(test_panel:spacing:0.02
@@ -779,6 +777,7 @@
       "hidex" => true,
       "vertical" => "center",
       "horizontal" => "center",
+      "tint" => false,
       "items" => [
        # [
        #   "type" => "list",
@@ -883,6 +882,16 @@
     }
   }else{
     echo("(test_panel:minheight:2\n");
+  }
+
+  if (array_key_exists("tint", $detailType)){
+    if(!$detailType["tint"] == false){
+      echo ("(test_panel:backpanel:true\n");
+      echo ("(test_panel:tint:" . $detailType["tint"] . "\n");
+    }
+  }else{
+    echo ("(test_panel:tint:" . "0.1 0.1 0.1 1" . "\n");
+    echo ("(test_panel:backpanel:true\n");
   }
 
   $multiplier = 1;
