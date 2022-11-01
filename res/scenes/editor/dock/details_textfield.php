@@ -20,7 +20,16 @@
   (key_0:minwidth:0.36
   (key_0:elements:)key_0,)value_0*/
   $keyname = ")key_" . $i;
-  createElement($keyname, $default_key, [ "value" => $data["key"] ]);
+
+  $labelStyle = [ "value" => $data["key"] ];
+  if (array_key_exists("tint", $data)){
+    $labelStyle["tint"] = $data["tint"];
+  }
+
+  if (array_key_exists("action", $data)){
+    $labelStyle["details-action"] = $data["action"];
+  }
+  createElement($keyname, $default_key, $labelStyle);
 
   $holdername = "(" . $unique_control_id . "_textfield_holder_" . $i;
   $valuename = ")value_" . $i;

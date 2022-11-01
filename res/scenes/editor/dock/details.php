@@ -107,6 +107,18 @@
           ],
         ],
         [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Camera",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-camera",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
           "type" => "checkbox",
           "data" => [
             "key" => "depth of field", 
@@ -173,7 +185,19 @@
             "readonly" => true,
             "value" => [
               "binding" => "false-binding-0",
-            ]
+            ],
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Light",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-light",
+            "tint" => "1 1 0 1",
           ],
         ],
         [
@@ -340,6 +364,18 @@
             "value" => [
               "binding" => "false-binding-0",
             ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Text",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-text",
+            "tint" => "1 1 0 1",
           ],
         ],
         [ "type" => "label", 

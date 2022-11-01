@@ -274,6 +274,7 @@
 
 (define (createCameraPlaceholder) (format #t "placeholder to create camera!\n"))
 (define (createLightPlaceholder) (format #t "placeholder to create light!\n"))
+(define (createTextPlaceholder) (format #t "placeholder to create text!\n"))
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
 (define (setAxis axis) (set-wstate (list (list "tools" "manipulator-axis" axis))))
 
@@ -313,6 +314,7 @@
   (list
     (list "create-camera" createCameraPlaceholder)
     (list "create-light" createLightPlaceholder)
+    (list "create-text" createTextPlaceholder)
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
