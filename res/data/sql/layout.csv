@@ -1,0 +1,4 @@
+layout.name:STRING,layout.panel:STRING,layout.position:STRING
+layout2,./res/scenes/editor/dock/cameras.rawscene,0.78125?-0.09700000286102295?-1.0
+main,./res/scenes/editor/dock/object_tools.rawscene,0.9519033432006836?-0.9302089810371399?-1.0
+main,./res/scenes/editor/dock/transform.rawscene,0.9348876476287842?0.8670350313186646?-1.0
