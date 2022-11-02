@@ -227,6 +227,8 @@ ObjectStateMapping simpleEnumSerializer(std::string object, std::string attribut
 }
 
 std::vector<ObjectStateMapping> mapping = {
+  simpleBoolSerializer("editor", "debug", offsetof(engineState, showDebug)),
+  simpleIntSerializer("editor", "debugmask", offsetof(engineState, showDebugMask)),
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
   simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
   simpleBoolSerializer("pbr", "enabled", offsetof(engineState, enablePBR)),
@@ -331,7 +333,8 @@ void setState(engineState& state, std::vector<ObjectValue>& values, float now){
 engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initialScreenHeight){
 	engineState state = {
 		.visualizeNormals = false,
-		.showCameras = false,
+    .showDebug = false,
+    .showDebugMask = 0,
 		.isRotateSelection = false,
 		.selectedName = "no object selected",
 		.useDefaultCamera = true,

@@ -285,7 +285,7 @@ int renderObject(
   GLint shaderProgram, 
   objid id, 
   std::map<objid, GameObjectObj>& mapping, 
-  bool showDebug, 
+  int showDebugMask,
   bool showBoneWeight,
   bool useBoneTransform,
   unsigned int portalTexture,
@@ -331,7 +331,7 @@ int renderObject(
     return numTriangles;
   }
 
-  if (meshObj != NULL && meshObj -> nodeOnly && showDebug) {
+  if (meshObj != NULL && meshObj -> nodeOnly && (showDebugMask & 0b1)) {
     glUniform1i(glGetUniformLocation(shaderProgram, "showBoneWeight"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "useBoneTransform"), false);
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);   
@@ -342,15 +342,17 @@ int renderObject(
     return defaultMeshes.nodeMesh -> numTriangles;
   }
 
+
   auto cameraObj = std::get_if<GameObjectCamera>(&toRender);
-  if (cameraObj != NULL && showDebug){
+  if (cameraObj != NULL && (showDebugMask & 0b10)){
     return renderDefaultNode(shaderProgram, *defaultMeshes.cameraMesh);
   }
 
   auto soundObject = std::get_if<GameObjectSound>(&toRender);
-  if (soundObject != NULL && showDebug){
+  if (soundObject != NULL && (showDebugMask & 0b100)){
     return renderDefaultNode(shaderProgram, *defaultMeshes.soundMesh);
   }
+
 
   auto portalObj = std::get_if<GameObjectPortal>(&toRender);
   if (portalObj != NULL){
@@ -363,7 +365,7 @@ int renderObject(
   }
 
   auto lightObj = std::get_if<GameObjectLight>(&toRender);
-  if (lightObj != NULL && showDebug){   
+  if (lightObj != NULL && (showDebugMask & 0b1000)){   
     return renderDefaultNode(shaderProgram, *defaultMeshes.lightMesh);
   }
 
@@ -389,14 +391,14 @@ int renderObject(
 
   auto rootObj = std::get_if<GameObjectRoot>(&toRender);
   if (rootObj != NULL){
-    if (showDebug){
+    if ((showDebugMask & 0b10000)){
       return renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     return 0;
   }
 
   auto emitterObj = std::get_if<GameObjectEmitter>(&toRender);
-  if (emitterObj != NULL && showDebug){
+  if (emitterObj != NULL && (showDebugMask & 0b100000)){
     std::cout << "rendering emitter" << std::endl;
     return renderDefaultNode(shaderProgram, *defaultMeshes.emitter);
   }
@@ -412,12 +414,12 @@ int renderObject(
   }
 
   auto navmeshObj = std::get_if<GameObjectNavmesh>(&toRender);
-  if (navmeshObj != NULL && showDebug){
+  if (navmeshObj != NULL && (showDebugMask & 0b1000000)){
     return renderDefaultNode(shaderProgram, *defaultMeshes.nav);
   }
 
   auto navconnObj = std::get_if<GameObjectNavConns>(&toRender);
-  if (navconnObj != NULL && showDebug){
+  if (navconnObj != NULL &&  (showDebugMask & 0b1000000)){
     int numTriangles = 0;
 
     glUniform1i(glGetUniformLocation(shaderProgram, "hasBones"), false);
@@ -508,7 +510,7 @@ int renderObject(
     glUniform2fv(glGetUniformLocation(shaderProgram, "textureSize"), 1, glm::value_ptr(layoutObj -> texture.texturesize));
 
     int layoutVertexCount = 0;
-    if (showDebug){
+    if (showDebugMask & 0b10000000){
       layoutVertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     if (layoutObj -> showBackpanel){
@@ -538,7 +540,7 @@ int renderObject(
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
     auto sphereVertexCount = 0;
-    if (showDebug){
+    if (showDebugMask & 0b10000000){
       for (auto point : geoObj -> points){
         sphereVertexCount += drawSphere(point);
       }
@@ -550,7 +552,7 @@ int renderObject(
   auto customObj = std::get_if<GameObjectNil>(&toRender);
   if (customObj != NULL){
     int vertexCount;
-    if (showDebug){
+    if (showDebugMask & 0b10000000){
       vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     onRender(id);
@@ -560,7 +562,7 @@ int renderObject(
   auto prefabObj = std::get_if<GameObjectPrefab>(&toRender);
   if (prefabObj != NULL){
     int vertexCount;
-    if (showDebug){
+    if (showDebugMask & 0b10000000){
       vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
     }
     return vertexCount;

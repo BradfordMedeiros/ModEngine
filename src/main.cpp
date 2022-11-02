@@ -527,7 +527,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
         newShader, 
         id, 
         world.objectMapping, 
-        state.showCameras, 
+        state.showDebug ? state.showDebugMask : 0,
         state.showBoneWeight,
         state.useBoneTransform,
         (isPortal && portalTextureInCache &&  !isPerspectivePortal) ? portalIdCache.at(id) : -1,
@@ -624,10 +624,8 @@ void renderVector(GLint shaderProgram, glm::mat4 view, glm::mat4 model){
   if (showDebugInfo){
     drawCoordinateSystem(100.f);
     glDisable(GL_DEPTH_TEST);
+    drawTraversalPositions();   
     drawAllLines(lineData, shaderProgram, std::nullopt);
-    if (state.showCameras){
-      drawTraversalPositions();   
-    }    
   }
 
 }

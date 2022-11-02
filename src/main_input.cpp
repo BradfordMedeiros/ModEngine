@@ -965,20 +965,20 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      state.showCameras = !state.showCameras;
-      std::cout << "show cameras: " << state.showCameras << std::endl;
+      state.showDebug = !state.showDebug;
     }
   },
-  InputDispatch{
+  /*InputDispatch{
     .sourceKey = 'O',  
     .sourceType = BUTTON_PRESS,
     .prereqKey = 0, 
     .hasPreq = false,
     .fn = []() -> void {
-      state.drawPoints = !state.drawPoints;
-      std::cout << "draw points: " << state.drawPoints << std::endl;
+
+      //state.drawPoints = !state.drawPoints;
+      //std::cout << "draw points: " << state.drawPoints << std::endl;
     }
-  },
+  },*/
   InputDispatch{
     .sourceKey = ';',  
     .sourceType = BUTTON_PRESS,

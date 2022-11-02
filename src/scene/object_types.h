@@ -219,7 +219,7 @@ int renderObject(
   GLint shaderProgram, 
   objid id, 
   std::map<objid, GameObjectObj>& mapping,
-  bool showDebug, 
+  int showDebugMask,
   bool showBoneWeight,
   bool useBoneTransform,
   unsigned int portalTexture,

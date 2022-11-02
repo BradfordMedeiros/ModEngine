@@ -1,6 +1,10 @@
 
 ### Lighting ###
 
+editor:debug:true
+editor:debugmask:126
+#editor:debugmask:254
+
 world:paused:false  # true / false
 
 diffuse:enabled:true
@@ -15,7 +19,7 @@ light:amount:0.6 0.6 0.6
 ###############################
 
 ### Post Process ###
-fog:color:0 0 1
+fog:color:0.2 0.1 0
 fog:enabled:true
 ###############################
 

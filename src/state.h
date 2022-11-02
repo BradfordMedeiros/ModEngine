@@ -24,7 +24,8 @@ enum CURSOR_TYPE { CURSOR_NORMAL, CURSOR_CAPTURE, CURSOR_HIDDEN };
 
 struct engineState {
   bool visualizeNormals;
-  bool showCameras;
+  bool showDebug;
+  int showDebugMask;
   bool isRotateSelection;
   std::string selectedName;
   bool useDefaultCamera;
