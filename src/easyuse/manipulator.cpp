@@ -135,6 +135,12 @@ void manipulatorPopulateInitialPositions(ManipulatorData& manipulatorState, Mani
     });
   }
 }
+
+void manipulatorEnsureDoesNotExistPopulatePos(ManipulatorData& manipulatorState, ManipulatorTools& tools, ManipulatorUpdateInfo& update){
+   manipulatorEnsureDoesNotExist(manipulatorState, tools, update);
+   manipulatorPopulateInitialPositions(manipulatorState, tools, update);
+}
+
 Transformation getInitialTransformation(ManipulatorData& manipulatorState, objid targetId){
   for (auto &idTransform : manipulatorState.initialTransforms){
     if (idTransform.id == targetId){
@@ -282,7 +288,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "translateMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
       ManipulatorNextState { .nextState = "scaleIdle", .transition = "gotoScaleIdle", .fn = manipulatorDoNothing },
-      ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExist },
+      ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExistPopulatePos },
     },
   },
   ManipulatorState {
@@ -335,7 +341,7 @@ std::vector<ManipulatorState> manipulatorStates = {
       ManipulatorNextState { .nextState = "idle", .transition = "unselected", .fn = manipulatorEnsureDoesNotExist },
       ManipulatorNextState { .nextState = "scaleMode", .transition = "axisSelected", .fn = manipulatorPopulateInitialPositions },
       ManipulatorNextState { .nextState = "translateIdle", .transition = "gotoTranslateIdle", .fn = manipulatorDoNothing },
-      ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExist },
+      ManipulatorNextState { .nextState = "rotateIdle", .transition = "gotoRotateIdle", .fn = manipulatorEnsureDoesNotExistPopulatePos },
     },
   },
   ManipulatorState {
