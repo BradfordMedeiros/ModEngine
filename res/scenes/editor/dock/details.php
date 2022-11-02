@@ -10,7 +10,6 @@
 (test_panel:layer:basicui
 (test_panel:type:vertical
 #(test_panel:margin:0.02
-(test_panel:margin-top:0.1
 #(test_panel:spacing:0.02
 
 (test_panel:position:-0.78 -0.097 <?php echo($zpos . "\n"); ?>
@@ -835,7 +834,9 @@
       "hidex" => true,
       "vertical" => "center",
       "horizontal" => "center",
-      "tint" => "0 0 0 1",
+      "tint" => "0 0 0 0.3",
+      "margin-top" => false,
+      "spacing" => false,
       "items" => [
         [
           "type" => "list",
@@ -930,6 +931,14 @@
     echo ("(test_panel:backpanel:true\n");
   }
 
+  if (array_key_exists("margin-top", $detailType)){
+    if (!($detailType["margin-top"] == false)){
+      echo ("(test_panel:margin-top:" . $detailType["margin-top"] . "\n");
+    }
+  }else{
+    echo ("(test_panel:margin-top:0.1\n");
+  }
+
   $multiplier = 1;
   $depth = [
     0 => $zpos,
@@ -947,11 +956,18 @@
     "margin" => "0.02",
     "margin-left" => "0.01",
     "margin-right" => "0.01",
-    "spacing" => "0.02",
     "border-size" => "0.002",
     "border-color" => "0 0 0 1",
     "position" => "0 0 " . $depth[2],
   ];
+
+  if (array_key_exists("spacing", $detailType)){
+    if (!($detailType["spacing"] == false)){
+      $default_rootLayout["spacing"] = $detailType["spacing"];
+    }
+  }else{
+    $default_rootLayout["spacing"] = "0.02";
+  }
 
   if (array_key_exists("minwidth", $detailType)){
     if (!$detailType["minwidth"] == false){

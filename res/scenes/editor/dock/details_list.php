@@ -63,9 +63,7 @@
   }
 
   $listHolderVals = [
-    "tint" => "0.1 0.1 0.1 1",
     "elements" => implode(",", $listElementNames),
-    "backpanel" => "true",
     "position" => "0 0 " . $depth[2],
     "align-content" => "center",
     "align-items-horizontal" => "left",
