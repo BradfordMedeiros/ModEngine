@@ -5,23 +5,23 @@ world:paused:false  # true / false
 
 diffuse:enabled:true
 specular:enabled:true
-bloom:enabled:true
+bloom:enabled:false
 bloom:amount:1
 bloomblur:amount:1
 #exposure:amount:0.8
 pbr:enabled:false
 
-light:amount:0.2 0.2 0.2
+light:amount:0.6 0.6 0.6
 ###############################
 
 ### Post Process ###
-#fog:color:5 0 5 1
-#fog:enabled:true
+fog:color:0 0 1
+fog:enabled:true
 ###############################
 
 ### Effects ###
 #dof:state:enabled
-skybox:texture:./res/textures/skyboxs/sky/
+skybox:texture:./res/textures/skyboxs/desert/
 #skybox:color:5 0.2 0.2 1
 skybox:enable:true
 ###############################

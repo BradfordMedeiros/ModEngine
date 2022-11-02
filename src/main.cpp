@@ -1902,7 +1902,7 @@ int main(int argc, char* argv[]){
     glUniform1f(glGetUniformLocation(finalProgram, "near"), 0.1);
     glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
     glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);
-    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 1.1f);
+    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 0.9999f);  // skybox is at 1, so under that excludes skybox, over includes
 
     state.exposure = exposureAmount();
     glUniform1f(glGetUniformLocation(finalProgram, "exposure"), state.exposure);
