@@ -339,6 +339,7 @@
     (list "set-axis-x" (lambda() (setAxis "x")))
     (list "set-axis-y" (lambda() (setAxis "y")))
     (list "set-axis-z" (lambda() (setAxis "z")))
+    (list "copy-object" (lambda() (sendnotify "copy-object" "true")))
   )
 )
 

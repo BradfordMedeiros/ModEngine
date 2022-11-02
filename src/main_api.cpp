@@ -307,7 +307,23 @@ std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttr
 void copyObject(int32_t id){
   copyObjectToScene(world, id);
 }
-
+void handleCopy(){
+  modlog("clipboard", "pasting objects");
+  copyAllObjects(state.editor, copyObject);
+}
+void handleClipboardSelect(){
+  auto numObject = state.editor.selectedObjs.size();
+  if (numObject == 0 && state.editor.clipboardObjs.size() > 0){
+    sendNotifyMessage("alert", "cleared clipboard");
+  }
+  else if (numObject == 1){
+    sendNotifyMessage("alert", "copied object to clipboard");
+  }else if (numObject > 1){
+    sendNotifyMessage("alert", "copied objects to clipboard");
+  }
+  modlog("clipboard", "copied objects to clipboard");
+  setClipboardFromSelected(state.editor);
+}
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId){
   //std::cout << "draw text: " << word << ": perma? " << permatext << std::endl;

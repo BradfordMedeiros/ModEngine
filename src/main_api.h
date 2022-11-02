@@ -93,6 +93,8 @@ void setGameObjectRotationRelative(int32_t index, glm::quat rotation);
 std::optional<objid> makeObjectAttr(objid sceneId, std::string name, GameobjAttributes& attributes, std::map<std::string, GameobjAttributes>& submodelAttributes);
 void removeObjectById(int32_t id);
 void copyObject(int32_t id);
+void handleCopy();
+void handleClipboardSelect();
 
 void drawText(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamily, std::optional<objid> selectionId);
 void drawText(std::string word, float left, float top, unsigned int fontSize);

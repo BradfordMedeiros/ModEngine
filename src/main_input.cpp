@@ -689,17 +689,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
-      auto numObject = state.editor.selectedObjs.size();
-      if (numObject == 0 && state.editor.clipboardObjs.size() > 0){
-        sendNotifyMessage("alert", "cleared clipboard");
-      }
-      else if (numObject == 1){
-        sendNotifyMessage("alert", "copied object to clipboard");
-      }else if (numObject > 1){
-        sendNotifyMessage("alert", "copied objects to clipboard");
-      }
-      modlog("clipboard", "copied objects to clipboard");
-      setClipboardFromSelected(state.editor);
+      handleClipboardSelect();
     }
   }, 
   InputDispatch{
@@ -708,8 +698,7 @@ std::vector<InputDispatch> inputFns = {
     .prereqKey = 341,  // ctrl,
     .hasPreq = true,
     .fn = [&state]() -> void {
-      modlog("clipboard", "pasting objects");
-      copyAllObjects(state.editor, copyObject);
+      handleCopy();
     }
   }, 
   InputDispatch{

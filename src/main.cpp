@@ -1851,11 +1851,14 @@ int main(int argc, char* argv[]){
     while (!channelMessages.empty()){
       auto message = channelMessages.front();
       channelMessages.pop();
+      if (message.strTopic == "copy-object"){  // should we have any built in messages supported like this?
+        handleClipboardSelect();
+        handleCopy();
+      }
       cBindings.onMessage(message.strTopic, message.strValue);
     }
 
     renderVector(shaderProgram, view, glm::mat4(1.0f));
-        
     portalIdCache.clear();
  
 
