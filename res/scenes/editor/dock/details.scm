@@ -120,28 +120,40 @@
   )
 )
 
+(define (gameobjAttrFromPrefixAttr value)
+  (define attribute (car value))
+  (define payload (cadr value))
+  (define index (string-index attribute #\:))
+  (if index
+    (let* 
+      ( (strLength (string-length attribute))
+        (prefix (substring attribute 0 index))
+        (substr (substring attribute (min strLength (+ index 1)) strLength))
+      )
+      (if (and index (> (string-length substr) 0) (equal? prefix "gameobj"))
+        (list substr payload)
+        #f
+      )
+    )
+    #f
+  )
+)
+(define (getGameobjAttr updatedValues)
+  (define updatedAttrs (map gameobjAttrFromPrefixAttr updatedValues))
+  (define filterUpdated (filter (lambda(val) val) updatedAttrs))
+  filterUpdated
+)
 (define (submitData)
   (if managedObj
     (begin
-      (let ((updatedValues (filterUpdatedObjectValues)))
+      (let* ((updatedValues (filterUpdatedObjectValues)) (objattr (getGameobjAttr updatedValues)))
         (if (gameobj-name managedObj)
           (begin
-            (gameobj-setattr! managedObj updatedValues)
-            (format #t "set attr: ~a ~a\n" (gameobj-name managedObj) updatedValues)
+            (gameobj-setattr! managedObj objattr)
+            (format #t "set attr updated: ~a ~a\n" (gameobj-name managedObj) updatedValues)
+            (format #t "set attr: ~a ~a\n" (gameobj-name managedObj) objattr)
           )
-          
         )
-        ;; temporary, just to get the effect, should change
-        (for-each (lambda(attrPair) 
-          (if (equal? "editor-eoe-mode" (car attrPair))
-            (begin
-              (format #t "new eoe mode: ~a\n" (cadr attrPair))
-              (format #t "not eoe -> ~a\n" attrPair)
-              (if (equal? (cadr attrPair) "enabled") (set! eoeMode #t))
-              (if (equal? (cadr attrPair) "disabled") (set! eoeMode #f))
-            )
-          )
-        ) updatedValues)
         (submitSqlUpdates updatedValues)
       )
     )
@@ -156,17 +168,23 @@
     (#t "unknown")
   )
 )
+(define (attrToPretty val) (format #f "~a, type is = ~a\n" val (typeof (cadr val))))
 (define (prettyPrint attr)
   (for-each 
     (lambda(val) 
-      (format #t "~a, type is = ~a\n" val (typeof (cadr val)))
+      (format #t (attrToPretty val))
     )
     attr
   )
 )
 (define (onKeyChar key)
   (if (equal? key 44) ; comma
-    (prettyPrint dataValues)
+    (begin
+      (format #t "pretty print: \n")
+      (prettyPrint dataValues)
+      (format #t "\n")
+    )
+    
   )
   (if (isSubmitKey key) (submitAndPopulateData))
 )
@@ -253,19 +271,37 @@
   (for-each populateSqlResults results)
   (format #t "querypair: ~a\n" bindingQueryPair)
 )
+
+(define (getRefillStoreWorldValue stateValue)
+  (define object (car stateValue))
+  (define attribute (cadr stateValue))
+  (define value (caddr stateValue))
+  (define name (string-append "world:" object ":" attribute))
+  (define storeValue (list name value))
+  storeValue
+)
+(define (getRefillGameobjAttr attr)
+  (define attribute (car attr))
+  (define value (cadr attr))
+  (define name (string-append "gameobj:" attribute))
+  (format #t "gameobj attr: ~a\n" (attrToPretty attr))
+  (list name value)
+)
+
 (define (refillStore gameobj)
   (clearStore)
   (updateStoreValue (list "object_name" (gameobj-name gameobj)))
   (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
-  (map updateStoreValue (gameobj-attr gameobj))
+  (map updateStoreValue (map getRefillGameobjAttr (gameobj-attr gameobj)))
 
-  (updateStoreValue (list "editor-eoe-mode" (if eoeMode "enabled" "disabled")))
   (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
   (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
   (updateStoreValue (list "runtime-sceneid" (number->string (list-sceneid (gameobj-id gameobj)))))
 
   (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
   (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
+
+  (for-each updateStoreValue (map getRefillStoreWorldValue (get-wstate)))
 
   (populateSqlData)
 )
@@ -696,17 +732,7 @@
   (submitAndPopulateData)
 )
 
-(define eoeMode #f)
-(define (isSelectableItem layerAttr)
-  (if eoeMode 
-    (begin
-      (updateStoreValue (list "editor-eoe-mode" "disabled"))
-      (set! eoeMode #f)
-      #t
-    )
-    (and (not eoeMode)  (if layerAttr (not (equal? "basicui" (cadr layerAttr))) #t))
-  )
-)
+(define (isSelectableItem layerAttr) (if layerAttr (not (equal? "basicui" (cadr layerAttr))) #t))
 
 (define (maybe-perform-action objattr)
   (define attrActions (assoc "details-action" objattr))

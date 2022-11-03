@@ -122,7 +122,7 @@
           "data" => [
             "key" => "depth of field", 
             "value" => [
-              "binding" => "dof",  
+              "binding" => "gameobj:dof",  
               "binding-on" => "enabled",
               "binding-off" => "disabled",
             ],
@@ -137,7 +137,7 @@
                 "type" => "slider", 
                 "name" => "min blur", 
                 "value" => [ 
-                  "binding" => "minblur", 
+                  "binding" => "gameobj:minblur", 
                   "min" => -100,  // what should min and max really be?d
                   "max" => 100,
                 ]
@@ -146,7 +146,7 @@
                 "type" => "slider", 
                 "name" => "maxblur", 
                 "value" => [ 
-                  "binding" => "maxblur", 
+                  "binding" => "gameobj:maxblur", 
                   "min" => -100,
                   "max" => 100,
                 ]
@@ -155,7 +155,7 @@
                 "type" => "slider", 
                 "name" => "amount", 
                 "value" => [ 
-                  "binding" => "bluramount", 
+                  "binding" => "gameobj:bluramount", 
                   "min" => 0,
                   "max" => 100,
                 ]
@@ -169,7 +169,7 @@
             "key" => "Depth of Field Target",
             "value" => [
               "valueFromSelection" => true,
-              "binding" => "target",
+              "binding" => "gameobj:target",
             ]
           ],
         ],
@@ -204,9 +204,9 @@
           "data" => [
             "key" => "type", 
             "options" => [
-              [ "label" => "point", "binding" => "type", "binding-on" => "point" ],
-              [ "label" => "spotlight", "binding" => "type", "binding-on" => "spotlight" ],
-              [ "label" => "directional", "binding" => "type", "binding-on" => "directional" ],
+              [ "label" => "point", "binding" => "gameobj:type", "binding-on" => "point" ],
+              [ "label" => "spotlight", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
+              [ "label" => "directional", "binding" => "gameobj:type", "binding-on" => "directional" ],
             ],
           ],
         ],
@@ -219,7 +219,7 @@
                 "type" => "slider", 
                 "name" => "red", 
                 "value" => [ 
-                  "binding" => "color", 
+                  "binding" => "gameobj:color", 
                   "binding-index" =>  0,
                 ]
               ],
@@ -227,7 +227,7 @@
                 "type" => "slider", 
                 "name" => "green", 
                 "value" => [ 
-                  "binding" => "color", 
+                  "binding" => "gameobj:color", 
                   "binding-index" =>  1,
                 ]
               ],
@@ -235,7 +235,7 @@
                 "type" => "slider", 
                 "name" => "blue", 
                 "value" => [ 
-                  "binding" => "color", 
+                  "binding" => "gameobj:color", 
                   "binding-index" =>  2,
                 ]
               ]
@@ -251,7 +251,7 @@
                 "type" => "slider", 
                 "name" => "constant", 
                 "value" => [ 
-                  "binding" => "attenuation", 
+                  "binding" => "gameobj:attenuation", 
                   "binding-index" =>  0,
                 ]
               ],
@@ -259,7 +259,7 @@
                 "type" => "slider", 
                 "name" => "linear", 
                 "value" => [ 
-                  "binding" => "attenuation", 
+                  "binding" => "gameobj:attenuation", 
                   "binding-index" =>  1,
                 ]
               ],
@@ -267,7 +267,7 @@
                 "type" => "slider", 
                 "name" => "quadratic", 
                 "value" => [ 
-                  "binding" => "attenuation", 
+                  "binding" => "gameobj:attenuation", 
                   "binding-index" =>  2,
                 ]
               ],
@@ -283,7 +283,7 @@
                 "type" => "slider", 
                 "name" => "angle", 
                 "value" => [ 
-                  "binding" => "angle", 
+                  "binding" => "gameobj:angle", 
                   "min" => -1,
                   "max" => 1,
                 ]
@@ -292,7 +292,7 @@
                 "type" => "slider", 
                 "name" => "delta", 
                 "value" => [ 
-                  "binding" => "angledelta", 
+                  "binding" => "gameobj:angledelta", 
                   "min" => 0,
                   "max" => 1,
                 ]
@@ -319,7 +319,7 @@
           "data" => [
             "key" => "loop", 
             "value" => [
-              "binding" => "loop",  
+              "binding" => "gameobj:loop",  
               "binding-on" => "true",
               "binding-off" => "false",
             ],
@@ -334,7 +334,7 @@
                 "type" => "float", 
                 "name" => "volume", 
                 "value" => [ 
-                  "binding" => "volume", 
+                  "binding" => "gameobj:volume", 
                   "type" => "number",
                 ]
               ],
@@ -347,7 +347,7 @@
             "key" => "Path to Clip",
             "readonly" => true,
             "value" => [
-              "binding" => "clip",
+              "binding" => "gameobj:clip",
             ]
           ],
         ],
@@ -381,7 +381,7 @@
           "data" => [
             "key" => "text", 
             "value" => [
-              "binding" => "value",
+              "binding" => "gameobj:value",
             ],
           ]
         ],
@@ -390,9 +390,9 @@
           "data" => [
             "key" => "align", 
             "options" => [
-                [ "label" => "left", "binding" => "align", "binding-on" => "left" ],
-                [ "label" => "center", "binding" => "align", "binding-on" => "center" ],
-                [ "label" => "right", "binding" => "align", "binding-on" => "right" ],
+                [ "label" => "left", "binding" => "gameobj:align", "binding-on" => "left" ],
+                [ "label" => "center", "binding" => "gameobj:align", "binding-on" => "center" ],
+                [ "label" => "right", "binding" => "gameobj:align", "binding-on" => "right" ],
             ],
           ],
         ],
@@ -401,8 +401,8 @@
           "data" => [
             "key" => "wraptype", 
             "options" => [
-                [ "label" => "none", "binding" => "wraptype", "binding-on" => "none" ],
-                [ "label" => "char", "binding" => "wraptype", "binding-on" => "char" ],
+                [ "label" => "none", "binding" => "gameobj:wraptype", "binding-on" => "none" ],
+                [ "label" => "char", "binding" => "gameobj:wraptype", "binding-on" => "char" ],
             ],
           ],
         ],
@@ -416,7 +416,7 @@
                 "type" => "float", 
                 "name" => "wrapamount", 
                 "value" => [ 
-                  "binding" => "wrapamount", 
+                  "binding" => "gameobj:wrapamount", 
                   "type" => "number",
                 ]
               ],
@@ -428,7 +428,7 @@
           "data" => [
             "key" => "font",
             "value" => [
-              "binding" => "font",
+              "binding" => "gameobj:font",
             ]
           ],
         ],
@@ -442,7 +442,7 @@
                 "type" => "float", 
                 "name" => "offsetx", 
                 "value" => [ 
-                  "binding" => "offsetx", 
+                  "binding" => "gameobj:offsetx", 
                   "type" => "number",
                 ]
               ],
@@ -450,7 +450,7 @@
                 "type" => "float", 
                 "name" => "offsety", 
                 "value" => [ 
-                  "binding" => "offsety", 
+                  "binding" => "gameobj:offsety", 
                   "type" => "number",
                 ]
               ],
@@ -458,7 +458,7 @@
                 "type" => "float", 
                 "name" => "offset", 
                 "value" => [ 
-                  "binding" => "offset", 
+                  "binding" => "gameobj:offset", 
                   "type" => "number",
                 ]
               ],
@@ -658,7 +658,7 @@
                 "type" => "slider", 
                 "name" => "Red", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "gameobj:tint", 
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
@@ -667,7 +667,7 @@
                 "type" => "slider", 
                 "name" => "Green", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "gameobj:tint", 
                   "binding-index" =>  1,
                   "type" => "positive-number",
                 ]
@@ -676,7 +676,7 @@
                 "type" => "slider", 
                 "name" => "Blue", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "gameobj:tint", 
                   "binding-index" =>  2,
                   "type" => "positive-number",
                 ]
@@ -685,7 +685,7 @@
                 "type" => "slider", 
                 "name" => "Alpha", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "gameobj:tint", 
                   "binding-index" =>  3,
                   "type" => "positive-number",
                 ]
@@ -779,7 +779,7 @@
           "data" => [
             "key" => "Object Id", 
             "value" => [
-              "binding" => "tint", 
+              "binding" => "gameobj:tint", 
               "binding-index" =>  0,
               "type" => "positive-integer",
             ]
@@ -918,7 +918,7 @@
                 "type" => "slider", 
                 "name" => "red", 
                 "value" => [ 
-                  "binding" => "minblur", 
+                  "binding" => "gameobj:minblur", 
                   "min" => 0,  // what should min and max really be?d
                   "max" => 1,
                 ]
@@ -927,7 +927,7 @@
                 "type" => "slider", 
                 "name" => "green", 
                 "value" => [ 
-                  "binding" => "minblur", 
+                  "binding" => "gameobj:minblur", 
                   "min" => 0,  // what should min and max really be?d
                   "max" => 1,
                 ]
@@ -936,7 +936,7 @@
                 "type" => "slider", 
                 "name" => "blue", 
                 "value" => [ 
-                  "binding" => "minblur", 
+                  "binding" => "gameobj:minblur", 
                   "min" => 0,  // what should min and max really be?d
                   "max" => 1,
                 ]
@@ -950,7 +950,7 @@
           "data" => [
             "key" => "enable skybox", 
             "value" => [
-              "binding" => "dof",  
+              "binding" => "gameobj:dof",  
               "binding-on" => "enabled",
               "binding-off" => "disabled",
             ],
@@ -1094,9 +1094,9 @@
           "data" => [
             "key" => "enable bloom", 
             "value" => [
-              "binding" => "dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:bloom:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],
