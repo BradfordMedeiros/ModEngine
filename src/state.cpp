@@ -27,7 +27,7 @@ std::string renderModeAsStr(RENDER_MODE mode){
 
 struct ObjectStateMapping {
   std::function<void(engineState& state, AttributeValue, float)> attr;
-  std::function<std::optional<AttributeValue>(engineState& state)> getAttr;
+  std::function<AttributeValue(engineState& state)> getAttr;
   std::string object;
   std::string attribute;
 };
@@ -247,6 +247,7 @@ std::vector<ObjectStateMapping> mapping = {
   },
   simpleBoolSerializer("fog", "enabled", offsetof(engineState, enableFog)),
   simpleBoolSerializer("bloom", "enabled", offsetof(engineState, enableBloom)),
+  simpleFloatSerializer("bloom", "threshold", offsetof(engineState, bloomThreshold)),
   simpleFloatSerializer("bloom", "amount", offsetof(engineState, bloomAmount)),
   simpleIntSerializer("bloomblur", "amount", offsetof(engineState, bloomBlurAmount)),
   ObjectStateMapping{
@@ -378,6 +379,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.shouldPaint = false,
     .shouldTerrainPaint = false,
   	.enableBloom = false, 
+    .bloomThreshold = 2.7f,
   	.bloomAmount = 1.f,   
     .bloomBlurAmount = 5,
     .enableFog = true,  
@@ -449,16 +451,13 @@ std::vector<ObjectValue> getState(engineState& state){
   std::vector<ObjectValue> values;
   for (auto &stateMap : mapping){
     auto value = stateMap.getAttr(state);
-    //modassert(value.has_value(), std::string("not yet implemented: ") + stateMap.object + " - " + stateMap.attribute);
-    if (value.has_value()){
-      values.push_back(
-        ObjectValue {
-          .object = stateMap.object,
-          .attribute = stateMap.attribute,
-          .value = value.value(),
-        }
-      );
-    }
+    values.push_back(
+      ObjectValue {
+        .object = stateMap.object,
+        .attribute = stateMap.attribute,
+        .value = value,
+      }
+    );
   }
   return values;
 }

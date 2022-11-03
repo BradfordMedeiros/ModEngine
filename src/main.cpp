@@ -440,6 +440,7 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform4fv(glGetUniformLocation(shader, "tint"), 1, glm::value_ptr(glm::vec4(color.x, color.y, color.z, 1.f)));
   glUniform4fv(glGetUniformLocation(shader, "encodedid"), 1, glm::value_ptr(getColorFromGameobject(id)));
   glUniform3fv(glGetUniformLocation(shader, "ambientAmount"), 1, glm::value_ptr(glm::vec3(state.ambient)));
+  glUniform1f(glGetUniformLocation(shader, "bloomThreshold"),  state.bloomThreshold);
 
   setRenderUniformData(shader, uniforms);
 }

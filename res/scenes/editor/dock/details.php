@@ -996,9 +996,9 @@
           "data" => [
             "key" => "enable fog", 
             "value" => [
-              "binding" => "dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:fog:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],
@@ -1046,9 +1046,9 @@
           "data" => [
             "key" => "enable diffuse", 
             "value" => [
-              "binding" => "dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:diffuse:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],
@@ -1057,9 +1057,9 @@
           "data" => [
             "key" => "enable specular", 
             "value" => [
-              "binding" => "dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:specular:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],
@@ -1072,18 +1072,27 @@
                 "type" => "slider", 
                 "name" => "amount", 
                 "value" => [ 
-                  "binding" => "minblur", 
-                  "min" => 0,  // what should min and max really be?d
-                  "max" => 1,
+                  "binding" => "world:bloom:amount", 
+                  "min" => 0,  
+                  "max" => 5,
                 ]
               ],
               [ 
                 "type" => "slider", 
                 "name" => "blur amount", 
                 "value" => [ 
-                  "binding" => "minblur", 
-                  "min" => 0,  // what should min and max really be?d
+                  "binding" => "world:bloomblur:amount", 
+                  "min" => 0, 
                   "max" => 1,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "blur thresholder", 
+                "value" => [ 
+                  "binding" => "world:bloom:threshold", 
+                  "min" => 0, 
+                  "max" => 5,
                 ]
               ],
             ]

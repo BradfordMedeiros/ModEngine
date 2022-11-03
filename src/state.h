@@ -76,6 +76,7 @@ struct engineState {
   bool terrainPaintDown;
   
   bool enableBloom;
+  float bloomThreshold;
   float bloomAmount;
   int bloomBlurAmount;
   bool enableFog;
