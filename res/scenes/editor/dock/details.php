@@ -908,7 +908,6 @@
       ],
     ],
     "world" => [
-      "title" => "World",
       "items" => [
         [
           "type" => "numeric",
@@ -1041,7 +1040,6 @@
       ],
     ],
     "rendering" => [
-      "title" => "Rendering",
       "items" => [
         [
           "type" => "checkbox",
