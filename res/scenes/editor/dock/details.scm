@@ -15,7 +15,6 @@
 
 (define (isSubmitKey key) (equal? key 47))   ; /
 (define (isControlKey key) 
-  (format #t "key is: ~a\n" key)
   (or 
     (isSubmitKey key) 
     (equal? key 44) 
@@ -166,7 +165,6 @@
   )
 )
 (define (onKeyChar key)
-  (format #t "key is: ~a\n" key)
   (if (equal? key 44) ; comma
     (prettyPrint dataValues)
   )
@@ -545,7 +543,7 @@
     ((or (equal? eventType 'selectAll) (equal? eventType 'left) (equal? eventType 'right) (equal? eventType 'up) (equal? eventType 'down)) #t)
     (#t 
       (begin
-        (format #t "key is ~a ~a\n" key (string (integer->char key)))
+       ;(format #t "key is ~a ~a\n" key (string (integer->char key)))
         (set! currentText (appendString currentText key effectiveIndex highlightLength))
       )
     )
@@ -901,7 +899,6 @@
       )
     )
   )
-  (format #t "key: ~a\n" key)
   (if (and (or (equal? action 1) (equal? action 2)) (not (isControlKey key)))
     (processFocusedElement key)
   )

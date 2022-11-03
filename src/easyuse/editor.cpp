@@ -32,6 +32,9 @@ void setSelectedIndex(EditorContent& editor, objid id, std::string name, bool re
       });
     }
   }
+
+}
+void setActiveObj(EditorContent& editor, objid id){
   std::cout << "setting active obj to: " << id << std::endl;
   editor.activeObj = id;
 }

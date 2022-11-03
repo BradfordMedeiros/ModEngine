@@ -303,8 +303,11 @@ void selectItem(objid selectedId, int layerSelectIndex){
   applyFocusUI(world.objectMapping, selectedId, sendNotifyMessage);
   shouldCallItemSelected = true;
 
-  setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
-  state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";
+  if (layerSelectIndex >= 0){
+    setSelectedIndex(state.editor, idToUse, selectedObject.name, !state.multiselect);
+    state.selectedName = selectedObject.name + "(" + std::to_string(selectedObject.id) + ")";  
+  }
+  setActiveObj(state.editor, idToUse);
 }
 
 
@@ -1826,10 +1829,7 @@ int main(int argc, char* argv[]){
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     if (shouldCallItemSelected){
-      auto selectedId = latestSelected(state.editor);
-      if (selectedId.has_value()){
-        cBindings.onObjectSelected(selectedId.value(), glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
-      }
+      cBindings.onObjectSelected(selectTargetId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       shouldCallItemSelected = false;
     }
 
