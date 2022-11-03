@@ -1,8 +1,14 @@
 
-### Lighting ###
-
+# camera  =  0b      10
+# sound   =  0b     100
+# light   =  0b    1000
+# root    =  0b   10000
+# emitter =  0b  100000
+# nav     =  0b 1000000
+# soe more options in object_types.cpp renderObject
 editor:debug:true
-editor:debugmask:126
+editor:debugmask:126  # this & the above number determines if the debug object should show
+
 #editor:debugmask:254
 
 world:paused:false  # true / false
