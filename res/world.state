@@ -32,7 +32,7 @@ fog:enabled:true
 ### Effects ###
 #dof:state:enabled
 skybox:texture:./res/textures/skyboxs/desert/
-#skybox:color:5 0.2 0.2 1
+skybox:color:1 1 1
 skybox:enable:true
 ###############################
 

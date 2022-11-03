@@ -47,9 +47,10 @@
     ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/sound.rawscene"],
     ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/text.rawscene"],
     ["value" => "SCENEGRAPH", "dialogoption" => "./res/scenes/editor/dock/scenegraph.rawscene"],
-    ["value" => "SCENE INFO", "dialogoption" => "./res/scenes/editor/dock/world_state.rawscene"],
+    ["value" => "SCENE INFO", "dialogoption" => "./res/scenes/editor/dock/scene_info.rawscene"],
     ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/performance.rawscene"],
-
+    ["value" => "WORLD", "dialogoption" => "./res/scenes/editor/dock/world.rawscene"],
+    ["value" => "RENDERING", "dialogoption" => "./res/scenes/editor/dock/rendering.rawscene"],
   ];
 
   $text_attr = [

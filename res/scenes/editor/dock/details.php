@@ -469,7 +469,6 @@
 
       ],
     ],
-
     "object_details" => [
       "title" => "Object Details",
       "items" => [
@@ -763,7 +762,7 @@
         ],*/
       ]
     ],
-    "world_state" => [
+    "scene_info" => [
       "items" => [
         [
           "type" => "label",
@@ -904,6 +903,203 @@
               ["image" => "graphs-testplot", "action" => "set-rotate-mode", "size" => "0.42 -1.2 0.16" ],
             ],
             "type" => "vertical",
+          ],
+        ],
+      ],
+    ],
+    "world" => [
+      "title" => "World",
+      "items" => [
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "ambient amount", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "red", 
+                "value" => [ 
+                  "binding" => "minblur", 
+                  "min" => 0,  // what should min and max really be?d
+                  "max" => 1,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "green", 
+                "value" => [ 
+                  "binding" => "minblur", 
+                  "min" => 0,  // what should min and max really be?d
+                  "max" => 1,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "blue", 
+                "value" => [ 
+                  "binding" => "minblur", 
+                  "min" => 0,  // what should min and max really be?d
+                  "max" => 1,
+                ]
+              ],
+
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable skybox", 
+            "value" => [
+              "binding" => "dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "Skybox Color", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "Red", 
+                "value" => [ 
+                  "binding" => "tint",   // bindings are wrong 
+                  "binding-index" =>  0,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "Green", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  1,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "Blue", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  2,
+                  "type" => "positive-number",
+                ]
+              ],
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable fog", 
+            "value" => [
+              "binding" => "dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "Fog Color", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "Red", 
+                "value" => [ 
+                  "binding" => "tint",   // bindings are wrong 
+                  "binding-index" =>  0,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "Green", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  1,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "Blue", 
+                "value" => [ 
+                  "binding" => "tint", 
+                  "binding-index" =>  2,
+                  "type" => "positive-number",
+                ]
+              ],
+            ]
+          ],
+        ],
+      ],
+    ],
+    "rendering" => [
+      "title" => "Rendering",
+      "items" => [
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable diffuse", 
+            "value" => [
+              "binding" => "dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable specular", 
+            "value" => [
+              "binding" => "dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "bloom", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "amount", 
+                "value" => [ 
+                  "binding" => "minblur", 
+                  "min" => 0,  // what should min and max really be?d
+                  "max" => 1,
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "blur amount", 
+                "value" => [ 
+                  "binding" => "minblur", 
+                  "min" => 0,  // what should min and max really be?d
+                  "max" => 1,
+                ]
+              ],
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable bloom", 
+            "value" => [
+              "binding" => "dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
           ],
         ],
       ],
