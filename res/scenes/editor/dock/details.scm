@@ -120,7 +120,7 @@
   )
 )
 
-(define (gameobjAttrFromPrefixAttr value)
+(define (attrFromPrefixAttr value)
   (define attribute (car value))
   (define payload (cadr value))
   (define index (string-index attribute #\:))
@@ -130,30 +130,49 @@
         (prefix (substring attribute 0 index))
         (substr (substring attribute (min strLength (+ index 1)) strLength))
       )
-      (if (and index (> (string-length substr) 0) (equal? prefix "gameobj"))
-        (list substr payload)
+      (if (and index (> (string-length substr) 0))
+        (list prefix (list substr payload))
         #f
       )
     )
     #f
   )
 )
-(define (getGameobjAttr updatedValues)
-  (define updatedAttrs (map gameobjAttrFromPrefixAttr updatedValues))
-  (define filterUpdated (filter (lambda(val) val) updatedAttrs))
-  filterUpdated
+(define (getPrefixAttr updatedValues prefix)
+  (define updatedAttrs (map attrFromPrefixAttr updatedValues))
+  (define filterUpdated (filter (lambda(val) (and val (equal? prefix (car val)))) updatedAttrs))
+  (define values (map (lambda (val) (cadr val)) filterUpdated))
+  values
+)
+
+(define (formatWorldAttr worldattr)
+  (define prefix (string-split (car worldattr) #\:))
+  (define name (car prefix))
+  (define attribute (cadr prefix))
+  (define value (cadr worldattr))
+  (list name attribute value)
+)
+(define (submitWorldAttr worldattr)
+  (define values (map formatWorldAttr worldattr))
+  (set-wstate values)
+
 )
 (define (submitData)
   (if managedObj
     (begin
-      (let* ((updatedValues (filterUpdatedObjectValues)) (objattr (getGameobjAttr updatedValues)))
+      (let* (
+        (updatedValues (filterUpdatedObjectValues)) 
+        (objattr (getPrefixAttr updatedValues "gameobj"))
+        (worldattr (getPrefixAttr updatedValues "world"))
+      )
         (if (gameobj-name managedObj)
           (begin
             (gameobj-setattr! managedObj objattr)
-            (format #t "set attr updated: ~a ~a\n" (gameobj-name managedObj) updatedValues)
             (format #t "set attr: ~a ~a\n" (gameobj-name managedObj) objattr)
+            (format #t "world attr: ~a\n" worldattr)
           )
         )
+        (submitWorldAttr worldattr)
         (submitSqlUpdates updatedValues)
       )
     )
