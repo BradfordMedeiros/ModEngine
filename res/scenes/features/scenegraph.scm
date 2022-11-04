@@ -135,7 +135,8 @@
 	(onGraphChange)
 )
 
-(define texturename (string-append "gentexture-scenegraph" ))
+
+(define texturename (string-append (cadr (assoc "gentexture" (gameobj-attr mainobj)))))
 
 (define (create-obj)
   (mk-obj-attr "someobj"     

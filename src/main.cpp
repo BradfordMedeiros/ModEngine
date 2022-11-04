@@ -1937,7 +1937,7 @@ int main(int argc, char* argv[]){
       glBindTexture(GL_TEXTURE_2D, portalTextures[state.textureIndex]);  
     }else if (state.renderMode == RENDER_PAINT){
       //glBindTexture(GL_TEXTURE_2D, textureToPaint);
-      glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_seletion_texture").texture.textureId);
+      glBindTexture(GL_TEXTURE_2D, world.textures.at("gentexture-scenegraph_selection_texture").texture.textureId);
     }else if (state.renderMode == RENDER_DEPTH){
       assert(state.textureIndex <=  numDepthTextures && state.textureIndex >= 0);
       glBindTexture(GL_TEXTURE_2D, depthTextures[state.textureIndex]);
