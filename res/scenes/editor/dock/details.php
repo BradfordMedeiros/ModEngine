@@ -1031,6 +1031,24 @@
                   "type" => "positive-number",
                 ]
               ],
+              [ 
+                "type" => "slider", 
+                "name" => "mincutoff", 
+                "value" => [ 
+                  "binding" => "world:fog:mincutoff",   // bindings are wrong 
+                  "min" => 0,
+                  "max" => 1.1
+                ]
+              ],
+              [ 
+                "type" => "slider", 
+                "name" => "maxcutoff", 
+                "value" => [ 
+                  "binding" => "world:fog:maxcutoff",   // bindings are wrong 
+                  "min" => 0,
+                  "max" => 1.1
+                ]
+              ],
             ]
           ],
         ],
