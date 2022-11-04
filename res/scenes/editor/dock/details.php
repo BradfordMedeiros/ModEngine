@@ -877,12 +877,21 @@
       ],
     ],
     "scenegraph" => [
-      "title" => "Scenegraph",
       "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Scenegraph",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
         [
           "type" => "list",
           "data" => [
-            "key" => "Scenegraph",
+            "key" => "",
             "mode" => "oneof",
             "values" => [
               ["image" => "gentexture-scenegraph", "action" => "set-rotate-mode", "size" => "0.42 1 0.16" ],

@@ -123,7 +123,7 @@
 (setTypeFromAttr)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define fontsize 30)
+(define fontsize 22)
 (define (increaseFontSize)
 	(set! fontsize (+ fontsize 1))
 	(refreshDepGraph)         
@@ -179,7 +179,7 @@
 (define offset 0)
 (define maxOffset 0)
 
-(define (calcSpacing) (* (/ fontsize 1000) 2))
+(define (calcSpacing) (* (/ fontsize 1000) 4))
 (define (calcX depth) 
 	(define spacingPerLetter (calcSpacing))
 	(+ -1 (* 0.5 spacingPerLetter) (* depth spacingPerLetter))
@@ -372,7 +372,7 @@
 				)
 				(if hasChildren
 					(draw-text-ndi
-						(if expanded "E" "N")
+						(if expanded "X" "O")
 						(calcX depth) 
 						(calcY height) 
 						fontsize
@@ -384,7 +384,7 @@
 					)
 				)
 				(draw-text-ndi
-					(if showSceneIds (string-append elementName "(" (number->string sceneId) ")") elementName)
+					(if showSceneIds (string-append elementName " (" (number->string sceneId) ")") elementName)
 					(calcX (+ depth 1)) 
 					(calcY height) 
 					fontsize
