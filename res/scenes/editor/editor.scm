@@ -101,7 +101,7 @@
   (if moveable  (set! attrs (cons (list "(test_panel" "script" "./res/scenes/editor/dialogmove.scm") attrs)))
   (if restrictX (set! attrs (cons (list "(test_panel" "dialogmove-restrictx" "true") attrs)))
   (if snapX     (set! attrs (cons (list "(test_panel" "editor-shouldsnap" "true") attrs)))
-  (load-scene scene attrs)
+  (load-scene scene attrs (list "editor"))
 )
 
 (define (change-sidepanel snappingIndex scene anchorElementName)
@@ -267,6 +267,7 @@
             ) 
               (apply append (map cadr dialogOpts))
             )
+          (list "editor")
         )
       )
     )
@@ -361,7 +362,7 @@
   (maybe-unload-popover)
   (if (not isAlreadyLoaded)
     (begin
-      (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist)))))
+      (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist))) (list "editor")))
       (set! currOption uiOption)
       (format #t "object id: ~a\n" (lsobj-name "(dialog" sceneId))
       (enforce-layout (gameobj-id (lsobj-name "(dialog" sceneId)))  ; wait....why need two passed?
