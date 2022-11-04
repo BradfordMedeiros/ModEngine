@@ -22,8 +22,16 @@
 	(list "folder3" "folder3-2" (list 0 0))
 ))
 
-(define (makeIntoModelGraph modelpath) (list "models" modelpath (list 0 0)))
-(define (getModelList) (map makeIntoModelGraph (ls-models)))
+(define (makeIntoGraph header modelpath) (list header modelpath (list 0 0)))
+(define (getModelList) (map (lambda(model) (makeIntoGraph "models" model)) (ls-models)))
+(define (getMockTextureList) 
+	(list
+		(list "Textures" "texture-mock" (list 0 0))
+	)
+)
+
+(define (getTextureList) (map (lambda(model) (makeIntoGraph "textures" model)) (ls-textures)))
+
 (define (getNoData) (list (list "data" "none available" (list 0 0))))
 
 
@@ -51,6 +59,20 @@
 			(list "mesh" modelpath)
 		)
 	)
+)
+
+(define (selectTextureItem element isAlt)
+	(define texturepath (car element))
+	(define gameobjs (map gameobj-by-id (selected)))
+	(for-each 
+		(lambda(gameobj)
+			(gameobj-setattr! gameobj (list
+				(list "texture" "./res/textures/wood.jpg")
+			))
+		)
+		gameobjs
+	)
+	#f
 )
 
 (define (onObjDoNothing gameobj color) 
@@ -94,6 +116,8 @@
 		(list "scenegraph" getFilteredScenegraph selectScenegraphItem #t onObjectSelectedSelectItem)
 		(list "mock-models" getMockModelList donothing #f onObjDoNothing)
 		(list "models" getModelList selectModelItem #f onObjDoNothing)
+		(list "mock-textures" getMockTextureList donothing #f onObjDoNothing)
+		(list "textures" getTextureList selectTextureItem #f onObjDoNothing)
 	)
 )
 (define (getDepGraph) #f)
@@ -507,9 +531,11 @@
 	;(format #t "value: ~a\n" value)
 	newSelectIndex
 )
+
 (define (onObjSelected gameobj color)
 	(onObjectSelected gameobj color)
 )
+
 
 (define (onMapping index)
 	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
