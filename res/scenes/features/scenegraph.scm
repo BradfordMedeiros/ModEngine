@@ -77,7 +77,7 @@
 	(define scenes (list-ref graphRelation 2))
 	(define sceneOne (car scenes))
 	(define sceneTwo (cadr scenes))
-	(not (or (member sceneOne editorScenes) (member sceneTwo editorScenes)))
+	(not (or (equal? sceneOne 0) (member sceneOne editorScenes) (member sceneTwo editorScenes)))
 )
 (define (getFilteredScenegraph)
 	(define graph (scenegraph))
@@ -85,6 +85,7 @@
 	(format #t "filtered graph: \n~a\n" graph)
 	(format #t "editor scenes: ~a\n" editorScenes)
 	(filter (lambda (graphRelation) (sceneNotInList graphRelation editorScenes)) graph)
+
 )
 (define modeToGetDepGraph
 	(list

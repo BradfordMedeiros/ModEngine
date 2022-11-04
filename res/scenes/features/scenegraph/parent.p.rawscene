@@ -10,3 +10,7 @@ box:child:follower
 
 follower:mesh:./res/models/box/box.obj
 follower:position:0 2 0
+follower:child:follower2
+
+#follower2:mesh:./res/models/box/box.obj
+#follower2:position:0 2 0

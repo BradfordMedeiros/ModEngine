@@ -2,10 +2,11 @@
 platform:mesh:./res/models/box/box.obj
 platform:scale:100 1 100
 platform:position:0 -5 0
+platform:physics:enabled
 
 box:mesh:./res/models/box/box.obj
 box:position:0 5 0
-box:physics:dynamic
+#box:physics_type:dynamic
 box:child:follower1,follower2
 
 follower1:mesh:./res/models/box/box.obj
@@ -17,3 +18,5 @@ follower2:child:follower3
 
 follower3:mesh:./res/models/box/box.obj
 follower3:position:2 2 0
+follower3:physics:enabled
+follower3:physics_type:dynamic
