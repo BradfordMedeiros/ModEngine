@@ -87,7 +87,8 @@ struct engineState {
   float oldExposure;
   float targetExposure;
   float exposure;
-
+  bool enableExposure;
+  bool enableGammaCorrection;
 
   bool takeScreenshot;
   std::string screenshotPath;

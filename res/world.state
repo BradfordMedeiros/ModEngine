@@ -22,6 +22,9 @@ bloomblur:amount:1
 #exposure:amount:0.8
 pbr:enabled:false
 
+exposure:enabled:true
+gamma:enabled:false
+
 light:amount:0.6 0.6 0.6
 ###############################
 

@@ -1905,6 +1905,8 @@ int main(int argc, char* argv[]){
 
     state.exposure = exposureAmount();
     glUniform1f(glGetUniformLocation(finalProgram, "exposure"), state.exposure);
+    glUniform1i(glGetUniformLocation(finalProgram, "enableGammaCorrection"), state.enableGammaCorrection);
+    glUniform1i(glGetUniformLocation(finalProgram, "enableExposure"), state.enableExposure);
 
     glUniform1f(glGetUniformLocation(finalProgram, "bloomAmount"), state.bloomAmount);
     glUniform1i(glGetUniformLocation(finalProgram, "bloomTexture"), 1);
