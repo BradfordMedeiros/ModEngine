@@ -51,6 +51,7 @@
     ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/performance.rawscene"],
     ["value" => "WORLD", "dialogoption" => "./res/scenes/editor/dock/world.rawscene"],
     ["value" => "RENDERING", "dialogoption" => "./res/scenes/editor/dock/rendering.rawscene"],
+    ["value" => "MODELS", "dialogoption" => "./res/scenes/editor/dock/models.rawscene"],
   ];
 
   $text_attr = [

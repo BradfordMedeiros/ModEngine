@@ -1174,6 +1174,31 @@
         ],
       ],
     ],
+    "models" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Models",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "list",
+          "data" => [
+            "key" => "",
+            "mode" => "oneof",
+            "values" => [
+              ["image" => "gentexture-models", "action" => "set-rotate-mode", "size" => "0.42 1 0.16" ],
+            ],
+            "type" => "vertical",
+          ],
+        ],
+      ],
+    ],
   ];
 
   $detailType = $mappingPerType[$target_type];
