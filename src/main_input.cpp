@@ -1509,5 +1509,23 @@ std::vector<InputDispatch> inputFns = {
 
     }
   },
+  InputDispatch{
+    .sourceKey = 258,
+    .sourceType = BUTTON_PRESS,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.selectionDisabled = true;
+    }
+  },
+  InputDispatch{
+    .sourceKey = 258,
+    .sourceType = BUTTON_RELEASE,
+    .prereqKey = 0,
+    .hasPreq = false,
+    .fn = []() -> void {
+      state.selectionDisabled = false;
+    }
+  },
 };
 

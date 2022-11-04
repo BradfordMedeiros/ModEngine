@@ -341,6 +341,7 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
     .showDebug = false,
     .showDebugMask = 0,
 		.isRotateSelection = false,
+    .selectionDisabled = false,
 		.selectedName = "no object selected",
 		.useDefaultCamera = true,
 		.moveRelativeEnabled = false,

@@ -1683,7 +1683,7 @@ int main(int argc, char* argv[]){
         auto layerSelectNegOne = layerSelectIndex == -1;
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
-        if (!(layerSelectNegOne || layerSelectThreeCond)){
+        if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
           selectItem(selectTargetId, layerSelectIndex);
         }
       }else{
