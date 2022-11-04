@@ -43,10 +43,13 @@
       "ontexture" => $value["image"],
       "offtexture" => $value["image"],
       "tint" => "1 1 1 1",
-      "details-action" => $value["action"],
       "position" => "0 0 " . $depth[3],
       "layer" => "basicui",
     ];
+
+    if (array_key_exists("action", $value)){
+      $extraVals["details-action"] = $value["action"];
+    }
     if (array_key_exists("binding", $value)){
       $extraVals["details-binding-toggle"] = $value["binding"];
     }

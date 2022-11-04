@@ -15,6 +15,7 @@ all:
 	@php ./dock/details.php world > ./dock/world.rawscene
 	@php ./dock/details.php rendering > ./dock/rendering.rawscene
 	@php ./dock/details.php models > ./dock/models.rawscene
+	@php ./dock/details.php textures > ./dock/textures.rawscene
 	@php ./dock/details.php not_implemented > ./dock/not_implemented.rawscene
 
 clean:
@@ -33,4 +34,5 @@ clean:
 	@rm ./dock/world.rawscene
 	@rm ./dock/rendering.rawscene
 	@rm ./dock/models.rawscene
+	@rm ./dock/textures.rawscene
 	@rm ./dock/not_implemented.rawscene

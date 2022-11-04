@@ -892,9 +892,8 @@
           "type" => "list",
           "data" => [
             "key" => "",
-            "mode" => "oneof",
             "values" => [
-              ["image" => "gentexture-scenegraph", "action" => "set-rotate-mode", "size" => "0.42 1 0.16" ],
+              ["image" => "gentexture-scenegraph", "size" => "0.42 1 0.16" ],
             ],
             "type" => "vertical",
           ],
@@ -1190,9 +1189,32 @@
           "type" => "list",
           "data" => [
             "key" => "",
-            "mode" => "oneof",
             "values" => [
-              ["image" => "gentexture-models", "action" => "set-rotate-mode", "size" => "0.42 1 0.16" ],
+              ["image" => "gentexture-models", "size" => "0.42 1 0.16" ],
+            ],
+            "type" => "vertical",
+          ],
+        ],
+      ],
+    ],
+    "textures" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Textures",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "list",
+          "data" => [
+            "key" => "",
+            "values" => [
+              ["image" => "gentexture-textures", "size" => "0.42 1 0.16" ],
             ],
             "type" => "vertical",
           ],
