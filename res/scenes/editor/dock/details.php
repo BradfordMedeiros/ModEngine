@@ -918,27 +918,24 @@
                 "type" => "slider", 
                 "name" => "red", 
                 "value" => [ 
-                  "binding" => "gameobj:minblur", 
-                  "min" => 0,  // what should min and max really be?d
-                  "max" => 1,
+                  "binding" => "world:light:amount", 
+                  "binding-index" => 0,
                 ]
               ],
               [ 
                 "type" => "slider", 
                 "name" => "green", 
                 "value" => [ 
-                  "binding" => "gameobj:minblur", 
-                  "min" => 0,  // what should min and max really be?d
-                  "max" => 1,
+                  "binding" => "world:light:amount", 
+                  "binding-index" => 1,
                 ]
               ],
               [ 
                 "type" => "slider", 
                 "name" => "blue", 
                 "value" => [ 
-                  "binding" => "gameobj:minblur", 
-                  "min" => 0,  // what should min and max really be?d
-                  "max" => 1,
+                  "binding" => "world:light:amount", 
+                  "binding-index" => 2,
                 ]
               ],
 
@@ -950,9 +947,9 @@
           "data" => [
             "key" => "enable skybox", 
             "value" => [
-              "binding" => "gameobj:dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:skybox:enable",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],
@@ -965,7 +962,7 @@
                 "type" => "slider", 
                 "name" => "Red", 
                 "value" => [ 
-                  "binding" => "tint",   // bindings are wrong 
+                  "binding" => "world:skybox:color",   
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
@@ -974,7 +971,7 @@
                 "type" => "slider", 
                 "name" => "Green", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "world:skybox:color",
                   "binding-index" =>  1,
                   "type" => "positive-number",
                 ]
@@ -983,7 +980,7 @@
                 "type" => "slider", 
                 "name" => "Blue", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "world:skybox:color",
                   "binding-index" =>  2,
                   "type" => "positive-number",
                 ]
@@ -1011,7 +1008,7 @@
                 "type" => "slider", 
                 "name" => "Red", 
                 "value" => [ 
-                  "binding" => "tint",   // bindings are wrong 
+                  "binding" => "world:fog:color",   // bindings are wrong 
                   "binding-index" =>  0,
                   "type" => "positive-number",
                 ]
@@ -1020,7 +1017,7 @@
                 "type" => "slider", 
                 "name" => "Green", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "world:fog:color", 
                   "binding-index" =>  1,
                   "type" => "positive-number",
                 ]
@@ -1029,7 +1026,7 @@
                 "type" => "slider", 
                 "name" => "Blue", 
                 "value" => [ 
-                  "binding" => "tint", 
+                  "binding" => "world:fog:color", 
                   "binding-index" =>  2,
                   "type" => "positive-number",
                 ]
