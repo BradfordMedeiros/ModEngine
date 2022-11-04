@@ -8,7 +8,7 @@
 # visible: true / false (true)
 # selection: 
 # 	-1 = cannot be selected
-#		-2 = can be selected, but built in operations will not apply
+#		-2 = can be selected, but built in (eg manipulator) operations will not apply
 #   -3 = only allow selection if no mapping id applies
 # cursor: ./path/to/texture or none (disables cursor)
 
@@ -30,14 +30,15 @@ ui:ortho:true
 scale:zindex:2
 scale:depth:2
 scale:scale:true
+scale:!enableLighting:false
+scale:?enableLighting:bool
 
 basicui:zindex:3
 basicui:view:false
 basicui:ortho:true
-
-
 basicui:!enableLighting:false
 basicui:?enableLighting:bool
 basicui:selection:-2
 
-noselect1:selection:-1
+
+noselect:selection:-1
