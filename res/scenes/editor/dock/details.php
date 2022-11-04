@@ -1106,6 +1106,45 @@
             ],
           ],
         ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable exposure", 
+            "value" => [
+              "binding" => "world:exposure:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable gamma", 
+            "value" => [
+              "binding" => "world:gamma:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "Color correction", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "exposure", 
+                "value" => [ 
+                  "binding" => "world:exposure:amount",   
+                  "min" => 0,
+                  "max" => 5,
+                ]
+              ],
+            ]
+          ],
+        ],
       ],
     ],
   ];
