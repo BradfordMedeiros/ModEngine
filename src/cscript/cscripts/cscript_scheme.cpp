@@ -129,6 +129,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.listMods,
     api.compileSqlQuery,
     api.executeSqlQuery,
+    api.selected,
     {}
   );
 

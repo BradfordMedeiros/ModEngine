@@ -1379,6 +1379,9 @@ int main(int argc, char* argv[]){
     .listMods = listMods,
     .compileSqlQuery = sql::compileSqlQuery,
     .executeSqlQuery = executeSqlQuery,
+    .selected = []() -> std::vector<objid> {
+      return selectedIds(state.editor);
+    }
   };
   registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) });
 

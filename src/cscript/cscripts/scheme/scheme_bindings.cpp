@@ -963,6 +963,10 @@ SCM scmListMods(){
   return listToSCM(_listMods());
 }
 
+std::vector<objid> (*_selected)();
+SCM scmSelected(){
+  return listToSCM(_selected());
+}
 
 
 // Callbacks
@@ -1287,6 +1291,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("uninstall-mod", 1, 0, 0, (void*)scmUninstallMod);
   scm_c_define_gsubr("list-mods", 0, 0, 0, (void*)scmListMods);
 
+  scm_c_define_gsubr("selected", 0, 0, 0, (void*)scmSelected);
+
   sql::sqlRegisterGuileFns();
 
   for (auto registerFn : _registerGuileFns){
@@ -1384,6 +1390,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listMods)(),
   sql::SqlQuery (*compileSqlQuery)(std::string queryString),
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid),
+  std::vector<objid> (*selected)(),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1498,6 +1505,8 @@ void createStaticSchemeBindings(
   _lock = lock;
   _unlock = unlock;
   _debugInfo = debugInfo;
+
+  _selected = selected;
 
   // sql should be pulled out
   sql::sqlRegisterGuileTypes();
