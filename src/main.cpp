@@ -1900,8 +1900,8 @@ int main(int argc, char* argv[]){
     glUniform4fv(glGetUniformLocation(finalProgram, "fogColor"), 1, glm::value_ptr(state.fogColor));
     glUniform1f(glGetUniformLocation(finalProgram, "near"), 0.1);
     glUniform1f(glGetUniformLocation(finalProgram, "far"), 100);
-    glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), 0.5);
-    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), 0.9999f);  // skybox is at 1, so under that excludes skybox, over includes
+    glUniform1f(glGetUniformLocation(finalProgram, "mincutoff"), state.fogMinCutoff);  // 0.5
+    glUniform1f(glGetUniformLocation(finalProgram, "maxcuttoff"), state.fogMaxCutoff);  // 0.9999f) skybox is at 1, so under that excludes skybox, over includes
 
     state.exposure = exposureAmount();
     glUniform1f(glGetUniformLocation(finalProgram, "exposure"), state.exposure);

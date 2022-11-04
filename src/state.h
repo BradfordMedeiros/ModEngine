@@ -80,6 +80,8 @@ struct engineState {
   float bloomAmount;
   int bloomBlurAmount;
   bool enableFog;
+  float fogMinCutoff;
+  float fogMaxCutoff;
   glm::vec4 fogColor;
   glm::vec3 ambient;
   

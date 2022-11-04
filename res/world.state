@@ -31,6 +31,9 @@ light:amount:0.6 0.6 0.6
 ### Post Process ###
 fog:color:0.2 0.1 0
 fog:enabled:true
+fog:mincutoff:0.5
+fog:maxcutoff:0.9999
+
 ###############################
 
 ### Effects ###
