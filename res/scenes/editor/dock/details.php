@@ -1210,6 +1210,68 @@
           ],
         ],
         [
+          "type" => "numeric",
+          "data" => [
+            "key" => "texture options", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "tiling x", 
+                "value" => [ 
+                  "binding" => "gameobj:texturetiling", 
+                  "binding-index" => 0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "tiling y", 
+                "value" => [ 
+                  "binding" => "gameobj:texturetiling", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "size x", 
+                "value" => [ 
+                  "binding" => "gameobj:texturesize", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "size y", 
+                "value" => [ 
+                  "binding" => "gameobj:texturesize", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "offset x", 
+                "value" => [ 
+                  "binding" => "gameobj:textureoffset", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "offset y", 
+                "value" => [ 
+                  "binding" => "gameobj:textureoffset", 
+                  "binding-index" => 1,
+                  "type" => "number",
+                ]
+              ],
+            ]
+          ],
+        ],
+        [
           "type" => "list",
           "data" => [
             "key" => "",
