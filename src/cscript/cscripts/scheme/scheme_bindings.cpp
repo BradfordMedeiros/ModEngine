@@ -597,6 +597,16 @@ SCM scmListModels(){
   return list;
 }
 
+std::vector<std::string> (*_listTextures)();
+SCM scmListTextures(){
+  std::vector<std::string> textures = _listTextures();
+  SCM list = scm_make_list(scm_from_unsigned_integer(textures.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < textures.size(); i++){
+    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_locale_string(textures.at(i).c_str()));
+  }
+  return list;
+}
+
 void (*_sendNotifyMessage)(std::string message, std::string value);
 SCM scmSendNotify(SCM topic, SCM value){
   _sendNotifyMessage(scm_to_locale_string(topic), scm_to_locale_string(value));
@@ -1168,6 +1178,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("send-load-scene", 1, 0, 0, (void *)scm_sendLoadScene);
 
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
+  scm_c_define_gsubr("ls-textures", 0, 0, 0, (void *)scmListTextures);
 
   scm_c_define_gsubr("set-camera", 1, 1, 0, (void *)scmSetActiveCamera);    
   scm_c_define_gsubr("mov-cam", 3, 1, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
@@ -1346,6 +1357,7 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid),
   std::vector<std::string> (*listModels)(),
+  std::vector<std::string> (*listTextures)(),
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
@@ -1450,6 +1462,7 @@ void createStaticSchemeBindings(
   _listClips = listClips;
   _playClip = playClip;
   _listModels = listModels;
+  _listTextures = listTextures;
 
   _sendNotifyMessage = sendNotifyMessage;
 

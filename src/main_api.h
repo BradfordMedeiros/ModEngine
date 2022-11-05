@@ -111,6 +111,7 @@ std::vector<std::string> listSounds(int32_t id);
 void playSound(std::string sound);
 
 std::vector<std::string> listModels();
+std::vector<std::string> listTextures();
 
 void sendNotifyMessage(std::string message, std::string value);
 

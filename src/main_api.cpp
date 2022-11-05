@@ -390,6 +390,10 @@ std::vector<std::string> listModels(){
   return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }
 
+std::vector<std::string> listTextures(){
+  return listFilesWithExtensions("./res/textures", { "png", "jpg" });
+}
+
 void sendNotifyMessage(std::string message, std::string value){
   channelMessages.push(StringString {
     .strTopic = message,

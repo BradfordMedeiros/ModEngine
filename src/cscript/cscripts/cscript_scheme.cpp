@@ -85,6 +85,7 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.listClips,
     api.playClip,
     api.listModels,
+    api.listTextures,
     api.sendNotifyMessage,
     api.timeSeconds,
     api.timeElapsed,
