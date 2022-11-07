@@ -67,7 +67,7 @@
 	(for-each 
 		(lambda(gameobj)
 			(gameobj-setattr! gameobj (list
-				(list "texture" "./res/textures/wood.jpg")
+				(list "texture" texturepath)
 			))
 		)
 		gameobjs
