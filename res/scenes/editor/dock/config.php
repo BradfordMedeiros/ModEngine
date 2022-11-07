@@ -988,6 +988,17 @@
         [
           "type" => "checkbox",
           "data" => [
+            "key" => "enable culling", 
+            "value" => [
+              "binding" => "world:rendering:cull",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
             "key" => "enable diffuse", 
             "value" => [
               "binding" => "world:diffuse:enabled",  

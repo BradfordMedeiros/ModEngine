@@ -143,6 +143,7 @@ void windowPositionCallback(GLFWwindow* window, int xpos, int ypos);
 void windowSizeCallback(GLFWwindow* window, int width, int height);
 void toggleFullScreen(bool fullscreen);
 
+void setCulling(bool cullEnabled);
 void setWorldState(std::vector<ObjectValue> values);
 std::vector<ObjectValue> getWorldState();
 void setLayerState(std::vector<StrValues> values);

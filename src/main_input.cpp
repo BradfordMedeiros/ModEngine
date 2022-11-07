@@ -1137,13 +1137,7 @@ std::vector<InputDispatch> inputFns = {
     .hasPreq = false,
     .fn = []() -> void {
       state.cullEnabled = !state.cullEnabled;
-      if (state.cullEnabled){
-        glEnable(GL_CULL_FACE);  
-      }else{
-        glDisable(GL_CULL_FACE);  
-      }
-      std::cout << "culling enabled: " << state.cullEnabled << std::endl;
-      sendNotifyMessage("alert", std::string("culling toggled: ") + (state.cullEnabled ? "enabled" : "disabled"));
+      setCulling(state.cullEnabled);
     }
   },
   InputDispatch{

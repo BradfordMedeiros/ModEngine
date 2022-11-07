@@ -534,6 +534,15 @@ void toggleFullScreen(bool fullscreen){
   }
 }
 
+void setCulling(bool cullEnabled){
+  if (cullEnabled){
+    glEnable(GL_CULL_FACE);  
+  }else{
+    glDisable(GL_CULL_FACE);  
+  }
+  std::cout << "culling enabled: " << state.cullEnabled << std::endl;
+  sendNotifyMessage("alert", std::string("culling toggled: ") + (cullEnabled ? "enabled" : "disabled"));
+}
 void setWorldState(std::vector<ObjectValue> values){
   std::vector<ObjectValue> renderStagesValues;
   std::vector<ObjectValue> otherValues;
@@ -553,9 +562,13 @@ void setWorldState(std::vector<ObjectValue> values){
   }
   
   auto oldFullScreen = state.fullscreen;
+  auto oldCullEnabled = state.cullEnabled;
   setState(state, otherValues, now);
   if (oldFullScreen != state.fullscreen){
     toggleFullScreen(state.fullscreen);
+  }
+  if (oldCullEnabled != state.cullEnabled){
+    setCulling(state.cullEnabled);
   }
   //// todo add updates for each state ... should check if it was changed in state maybe?
   setCrosshairSprite();
