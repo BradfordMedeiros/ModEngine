@@ -1,6 +1,4 @@
 
-<?php /*include "../example.p.rawscene"; */ ?>
-
 <?php 
 
   function createElement($name, $attr, $more_attr){
@@ -53,6 +51,9 @@
     ["value" => "RENDERING", "dialogoption" => "./res/scenes/editor/dock/rendering.rawscene"],
     ["value" => "MODELS", "dialogoption" => "./res/scenes/editor/dock/models.rawscene"],
     ["value" => "TEXTURES", "dialogoption" => "./res/scenes/editor/dock/textures.rawscene"],
+    //["value" => "MOVEMENT", "dialogoption" => "./res/scenes/editor/dock/movement.rawscene"],
+    //["value" => "WEAPONS", "dialogoption" => "./res/scenes/editor/dock/weapons.rawscene"],
+
   ];
 
   $text_attr = [

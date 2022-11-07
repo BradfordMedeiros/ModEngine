@@ -16,6 +16,8 @@ all:
 	@php ./dock/details.php rendering > ./dock/rendering.rawscene
 	@php ./dock/details.php models > ./dock/models.rawscene
 	@php ./dock/details.php textures > ./dock/textures.rawscene
+	@php ./dock/details.php movement > ./dock/movement.rawscene
+	@php ./dock/details.php weapons > ./dock/weapons.rawscene
 	@php ./dock/details.php not_implemented > ./dock/not_implemented.rawscene
 
 clean:
@@ -35,4 +37,6 @@ clean:
 	@rm ./dock/rendering.rawscene
 	@rm ./dock/models.rawscene
 	@rm ./dock/textures.rawscene
+	@rm ./dock/movement.rawscene
+	@rm ./dock/weapons.rawscene
 	@rm ./dock/not_implemented.rawscene
