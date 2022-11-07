@@ -1,0 +1,24 @@
+
+<?php 
+  $text_buttons = [
+    ["value" => "hide", "dialogoption" => "HIDE"],
+    //["value" => "test", "dialogoption" => "./res/scenes/editor/dock/testpanel.rawscene"],
+    ["value" => "OBJECT DETAILS", "dialogoption" => "./res/scenes/editor/dock/editor_object_details.rawscene"],
+    ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/dock/editor_cameras.rawscene"],
+    ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/dock/editor_lights.rawscene"],
+    ["value" => "SOUND", "dialogoption" => "./res/scenes/editor/dock/editor_sound.rawscene"],
+    ["value" => "TEXT", "dialogoption" => "./res/scenes/editor/dock/editor_text.rawscene"],
+    ["value" => "SCENEGRAPH", "dialogoption" => "./res/scenes/editor/dock/editor_scenegraph.rawscene"],
+    ["value" => "SCENE INFO", "dialogoption" => "./res/scenes/editor/dock/editor_scene_info.rawscene"],
+    ["value" => "PERFORMANCE", "dialogoption" => "./res/scenes/editor/dock/editor_performance.rawscene"],
+    ["value" => "WORLD", "dialogoption" => "./res/scenes/editor/dock/editor_world.rawscene"],
+    ["value" => "RENDERING", "dialogoption" => "./res/scenes/editor/dock/editor_rendering.rawscene"],
+    ["value" => "MODELS", "dialogoption" => "./res/scenes/editor/dock/editor_models.rawscene"],
+    ["value" => "TEXTURES", "dialogoption" => "./res/scenes/editor/dock/editor_textures.rawscene"],
+    //["value" => "MOVEMENT", "dialogoption" => "./res/scenes/editor/dock/editor_movement.rawscene"],
+    //["value" => "WEAPONS", "dialogoption" => "./res/scenes/editor/dock/editor_weapons.rawscene"],
+  ];
+
+
+?>
+
