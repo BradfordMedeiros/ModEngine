@@ -157,11 +157,21 @@
   (set-wstate values)
 
 )
+
+(define (maybe-serialize-vec2 val)
+  (define key (car val))
+  (define value (cadr val))
+  (format #t "val is: ~a\n" value)
+  (if (and (list? value) (equal? (length value) 2))
+    (list key (string-join (map number->string value) " "))
+    (list key value)
+  )
+)
 (define (submitData)
   (if managedObj
     (begin
       (let* (
-        (updatedValues (filterUpdatedObjectValues)) 
+        (updatedValues (map maybe-serialize-vec2 (filterUpdatedObjectValues))) 
         (objattr (getPrefixAttr updatedValues "gameobj"))
         (worldattr (getPrefixAttr updatedValues "world"))
       )
@@ -307,11 +317,30 @@
   (list name value)
 )
 
+(define (maybe-parse-vec2 val)
+  (define listParts (string-split val #\ ))
+  (define toNumber (map string->number listParts))
+  (define allNumbers (equal? (length toNumber) (length (filter (lambda(x) x) toNumber))))
+  (if allNumbers
+    toNumber
+    val
+  )
+)
+(define (refillCorrectType value)
+  (define val (cadr value))
+  (define typeCorrectVal 
+    (if (string? val)
+      (maybe-parse-vec2 val)
+      val
+    )
+  )
+  (list (car value) typeCorrectVal)
+)
 (define (refillStore gameobj)
   (clearStore)
   (updateStoreValue (list "object_name" (gameobj-name gameobj)))
   (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
-  (map updateStoreValue (map getRefillGameobjAttr (gameobj-attr gameobj)))
+  (map updateStoreValue (map refillCorrectType (map getRefillGameobjAttr (gameobj-attr gameobj))))
 
   (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
   (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
@@ -320,7 +349,7 @@
   (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
   (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
 
-  (for-each updateStoreValue (map getRefillStoreWorldValue (get-wstate)))
+  (for-each updateStoreValue (map refillCorrectType (map getRefillStoreWorldValue (get-wstate))))
 
   (populateSqlData)
 )

@@ -1237,7 +1237,7 @@
                 "name" => "size x", 
                 "value" => [ 
                   "binding" => "gameobj:texturesize", 
-                  "binding-index" => 1,
+                  "binding-index" => 0,
                   "type" => "number",
                 ]
               ],
@@ -1255,7 +1255,7 @@
                 "name" => "offset x", 
                 "value" => [ 
                   "binding" => "gameobj:textureoffset", 
-                  "binding-index" => 1,
+                  "binding-index" => 0,
                   "type" => "number",
                 ]
               ],
