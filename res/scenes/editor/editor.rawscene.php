@@ -2,14 +2,8 @@
 <?php 
   
   $configFile = $argv[1];
-  if ($configFile == "main"){
-    include "editor_config.php";
-  }else if ($configFile == "gameplay"){
-    include "editor_weapons_config.php";
-  }else{
-    echo("Invalid config file for editor\n");
-    exit(1);
-  }
+
+  include $configFile;
   
 
   function createElement($name, $attr, $more_attr){

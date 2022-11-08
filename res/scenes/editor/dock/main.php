@@ -6,15 +6,7 @@
   }
 
   $configFile = $argv[1];
-  if ($configFile == "main"){
-    include 'config.php';
-  }else if ($configFile == "gameplay"){
-    include 'config_gameplay.php';
-  }else{
-    echo ("invalid config: " . $configFile . "\n");
-    exit(1);
-  }
-  #
+  include $configFile;
   
   $target_type = $argv[2];
   $detailType = $mappingPerType[$target_type];
