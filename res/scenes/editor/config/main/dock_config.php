@@ -1210,14 +1210,6 @@
                 "action" => "copy-object",
                 "size" => "0.02 0.05 0.02",
               ],
-              [ "image" => "./res/scenes/editor/dock/images/x.png", 
-                "action" => "set-symmetric-translate",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/x.png", 
-                "action" => "set-preserve-scale",
-                "size" => "0.02 0.05 0.02",
-              ],
             ],
           ],
         ],
@@ -1249,6 +1241,17 @@
         [
           "type" => "checkbox",
           "data" => [
+            "key" => "Symmetric Translate", 
+            "value" => [
+              "binding" => "world:tools:position-mirror",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
             "key" => "Absolute Translate", 
             "value" => [
               "binding" => "world:tools:snap-position",  
@@ -1267,6 +1270,17 @@
               [ "label" => "0.5", "binding" => "world:editor:snaptranslate-index", "binding-on" => "2" ],
               [ "label" => "1", "binding" => "world:editor:snaptranslate-index", "binding-on" => "3" ],
               [ "label" => "5", "binding" => "world:editor:snaptranslate-index", "binding-on" => "4" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Preserve Scale", 
+            "value" => [
+              "binding" => "world:tools:preserve-scale",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],

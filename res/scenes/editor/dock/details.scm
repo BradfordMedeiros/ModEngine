@@ -442,8 +442,6 @@
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
-    (list "set-symmetric-translate" (getToggleWorldValue "tools" "position-mirror"))
-    (list "set-preserve-scale" (getToggleWorldValue "tools" "preserve-scale"))
     (list "toggle-play-mode" togglePlayMode)
     (list "toggle-pause-mode" togglePauseMode)
     (list "set-axis-x" (lambda() (setAxis "x")))
