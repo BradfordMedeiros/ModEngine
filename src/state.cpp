@@ -232,6 +232,7 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("diffuse", "enabled", offsetof(engineState, enableDiffuse)),
   simpleBoolSerializer("specular", "enabled", offsetof(engineState, enableSpecular)),
   simpleBoolSerializer("pbr", "enabled", offsetof(engineState, enablePBR)),
+  simpleBoolSerializer("shadows", "enabled", offsetof(engineState, enableShadows)),
   simpleVec3Serializer("light", "amount", offsetof(engineState, ambient)),
   ObjectStateMapping{
     .attr = [](engineState& state, AttributeValue value, float now) -> void { 

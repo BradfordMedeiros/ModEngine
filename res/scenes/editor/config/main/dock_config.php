@@ -1274,6 +1274,41 @@
           ],
         ],
         [
+          "type" => "numeric",
+          "data" => [
+            "key" => "position", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "x", 
+                "value" => [ 
+                  "binding" => "gameobj:position", 
+                  "binding-index" =>  0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "y", 
+                "value" => [ 
+                  "binding" => "gameobj:position", 
+                  "binding-index" =>  1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "z", 
+                "value" => [ 
+                  "binding" => "gameobj:position", 
+                  "binding-index" =>  2,
+                  "type" => "number",
+                ]
+              ]
+            ]
+          ],
+        ],
+        [
           "type" => "checkbox",
           "data" => [
             "key" => "Preserve Scale", 
@@ -1295,6 +1330,41 @@
               [ "label" => "1", "binding" => "world:editor:snapscale-index", "binding-on" => "3" ],
               [ "label" => "5", "binding" => "world:editor:snapscale-index", "binding-on" => "4" ],
             ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "scale", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "x", 
+                "value" => [ 
+                  "binding" => "gameobj:scale", 
+                  "binding-index" =>  0,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "y", 
+                "value" => [ 
+                  "binding" => "gameobj:scale", 
+                  "binding-index" =>  1,
+                  "type" => "number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "z", 
+                "value" => [ 
+                  "binding" => "gameobj:scale", 
+                  "binding-index" =>  2,
+                  "type" => "number",
+                ]
+              ]
+            ]
           ],
         ],
         [

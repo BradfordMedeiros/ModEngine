@@ -69,6 +69,7 @@ struct engineState {
   bool enableDiffuse;
   bool enableSpecular;
   bool enablePBR;
+  bool enableShadows;
   bool showBoneWeight;
   bool useBoneTransform;
   int textureIndex;
