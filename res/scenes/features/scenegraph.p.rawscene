@@ -1,14 +1,18 @@
 |scenegraph:script:./res/scenes/features/scenegraph.scm
 |scenegraph:depgraph:scenegraph
 |scenegraph:gentexture:gentexture-scenegraph
+|scenegraph:basenumber:0
 
 |models:script:./res/scenes/features/scenegraph.scm
 |models:depgraph:models
 |models:gentexture:gentexture-models
+|models:basenumber:10000
+
 
 |textures:script:./res/scenes/features/scenegraph.scm
 |textures:depgraph:textures
 |textures:gentexture:gentexture-textures
+|textures:basenumber:20000
 
 
 

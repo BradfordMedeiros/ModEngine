@@ -29,9 +29,7 @@
 		(list "Textures" "texture-mock" (list 0 0))
 	)
 )
-
 (define (getTextureList) (map (lambda(model) (makeIntoGraph "textures" model)) (ls-textures)))
-
 (define (getNoData) (list (list "data" "none available" (list 0 0))))
 
 
@@ -49,7 +47,6 @@
   		(list "editor" "selected-index" (number->string objIndex))
   	))
   )
-
 )
 (define (selectModelItem element isAlt) 
 	(define modelpath (car element))
@@ -60,7 +57,6 @@
 		)
 	)
 )
-
 (define (selectTextureItem element isAlt)
 	(define texturepath (car element))
 	(define gameobjs (map gameobj-by-id (selected)))
@@ -74,7 +70,6 @@
 	)
 	#f
 )
-
 (define (onObjDoNothing gameobj color) 
 	(format #t "on obj do nothing\n")
 	#f
@@ -107,7 +102,6 @@
 	(format #t "filtered graph: \n~a\n" graph)
 	(format #t "editor scenes: ~a\n" editorScenes)
 	(filter (lambda (graphRelation) (sceneNotInList graphRelation editorScenes)) graph)
-
 )
 (define modeToGetDepGraph
 	(list
@@ -244,11 +238,13 @@
 
 
 
-(define baseNumber 90000)  ; arbitrary number, only uses for mapping selection for now, which numbering is basically a manually process
+(define baseNumber (inexact->exact (cadr (assoc "basenumber" (gameobj-attr mainobj)))))  ; arbitrary number, only uses for mapping selection for now, which numbering is basically a manually process
+(define mappingOffset 5000)
+
 (define baseNumberMapping (list))
 (define (baseNumberToSelectedIndex mappingIndex)
-	(define isPayloadMapping (>= mappingIndex 95000))
-	(define index (if isPayloadMapping (- mappingIndex 5000) mappingIndex))
+	(define isPayloadMapping (>= mappingIndex (+ baseNumber mappingOffset)))
+	(define index (if isPayloadMapping (- mappingIndex mappingOffset) mappingIndex))
 	(define baseIndexPair (assoc index baseNumberMapping))
 	(format #t "base mapping: ~a\n" baseNumberMapping)
 	(format #t "base index pair: ~a\n" baseIndexPair)
@@ -260,7 +256,7 @@
 		)
 	)
 )
-(define (payloadMappingNumber mappingNumber) (+ mappingNumber 5000)
+(define (payloadMappingNumber mappingNumber) (+ mappingNumber mappingOffset)
 )
 (define (clearBaseNumberMapping) (set! baseNumberMapping (list)))
 (define (setBaseNumberMapping basenumber index)
@@ -432,6 +428,13 @@
 			(drawListWithIndex (getDrawList))
 			(drawList (car drawListWithIndex))
 			(index (cadr drawListWithIndex))
+			(numElements (length drawList))
+		)
+		(if (>= numElements 5000)  ; because of mapping offsets, can adjust those to adjust this
+			(begin
+				(format #t "only 5k elements supported\n")
+				(exit 1)
+			)
 		)
 		(updateDrawListData drawList index)
   	drawList
