@@ -5,6 +5,7 @@ main: resources
 	@php ./dock/main.php config/main/dock_config.php scene_info > ./build/dock/editor_scene_info.rawscene
 	@php ./dock/main.php config/main/dock_config.php object_tools > ./build/dock/editor_object_tools.rawscene
 	@php ./dock/main.php config/main/dock_config.php transform > ./build/dock/editor_transform.rawscene
+	@php ./dock/main.php config/main/dock_config.php transform_types > ./build/dock/editor_transform_types.rawscene
 	@php ./dock/main.php config/main/dock_config.php scenegraph > ./build/dock/editor_scenegraph.rawscene
 	@php ./dock/main.php config/main/dock_config.php performance > ./build/dock/editor_performance.rawscene
 	@php ./dock/main.php config/main/dock_config.php cameras > ./build/dock/editor_cameras.rawscene

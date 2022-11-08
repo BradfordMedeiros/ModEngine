@@ -1,8 +1,7 @@
 
 <?php 
   $text_buttons = [
-    ["value" => "hide", "dialogoption" => "HIDE"],
-    //["value" => "test", "dialogoption" => "./res/scenes/editor/dock/testpanel.rawscene"],
+    ["value" => "EDITOR", "dialogoption" => "./res/scenes/editor/build/dock/editor_transform_types.rawscene"],
     ["value" => "OBJECT DETAILS", "dialogoption" => "./res/scenes/editor/build/dock/editor_object_details.rawscene"],
     ["value" => "CAMERAS", "dialogoption" => "./res/scenes/editor/build/dock/editor_cameras.rawscene"],
     ["value" => "LIGHTS", "dialogoption" => "./res/scenes/editor/build/dock/editor_lights.rawscene"],
@@ -15,8 +14,6 @@
     ["value" => "RENDERING", "dialogoption" => "./res/scenes/editor/build/dock/editor_rendering.rawscene"],
     ["value" => "MODELS", "dialogoption" => "./res/scenes/editor/build/dock/editor_models.rawscene"],
     ["value" => "TEXTURES", "dialogoption" => "./res/scenes/editor/build/dock/editor_textures.rawscene"],
-    //["value" => "MOVEMENT", "dialogoption" => "./res/scenes/editor/dock/editor_movement.rawscene"],
-    //["value" => "WEAPONS", "dialogoption" => "./res/scenes/editor/dock/editor_weapons.rawscene"],
   ];
 
 

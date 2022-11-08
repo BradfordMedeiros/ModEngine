@@ -748,63 +748,6 @@
         ],
       ],
     ],
-    "transform" => [
-      "minheight" => false,
-      "minwidth" => false,
-      "hidex" => true,
-      "vertical" => "center",
-      "horizontal" => "center",
-      "tint" => "0 0 0 0.3",
-      "margin-top" => false,
-      "spacing" => false,
-      "items" => [
-        [
-          "type" => "list",
-          "data" => [
-            "key" => "",
-            "values" => [
-              [ 
-                "image" => "./res/scenes/editor/dock/images/transform.png", 
-                "action" => "set-transform-mode",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/scale.png", 
-                "action" => "set-scale-mode",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
-                "action" => "set-rotate-mode",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/x.png", 
-                "action" => "set-axis-x",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/y.png", 
-                "action" => "set-axis-y",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/z.png", 
-                "action" => "set-axis-z",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/copy.png", 
-                "action" => "copy-object",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/x.png", 
-                "action" => "set-symmetric-translate",
-                "size" => "0.02 0.05 0.02",
-              ],
-              [ "image" => "./res/scenes/editor/dock/images/x.png", 
-                "action" => "set-preserve-scale",
-                "size" => "0.02 0.05 0.02",
-              ],
-            ],
-          ],
-        ],
-      ],
-    ],
     "scenegraph" => [
       "items" => [
         [
@@ -1222,7 +1165,145 @@
           ],
         ],
       ],
-    ]
+    ],
+    "transform" => [
+      "minheight" => false,
+      "minwidth" => false,
+      "hidex" => true,
+      "vertical" => "center",
+      "horizontal" => "center",
+      "tint" => "0 0 0 0.3",
+      "margin-top" => false,
+      "spacing" => false,
+      "items" => [
+        [
+          "type" => "list",
+          "data" => [
+            "key" => "",
+            "values" => [
+              [ 
+                "image" => "./res/scenes/editor/dock/images/transform.png", 
+                "action" => "set-transform-mode",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/scale.png", 
+                "action" => "set-scale-mode",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/rotate.png", 
+                "action" => "set-rotate-mode",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/x.png", 
+                "action" => "set-axis-x",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/y.png", 
+                "action" => "set-axis-y",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/z.png", 
+                "action" => "set-axis-z",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/copy.png", 
+                "action" => "copy-object",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/x.png", 
+                "action" => "set-symmetric-translate",
+                "size" => "0.02 0.05 0.02",
+              ],
+              [ "image" => "./res/scenes/editor/dock/images/x.png", 
+                "action" => "set-preserve-scale",
+                "size" => "0.02 0.05 0.02",
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
+    "transform_types" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Editor Defaults",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Group Selection", 
+            "value" => [
+              "binding" => "gameobj:dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Relative Translate", 
+            "value" => [
+              "binding" => "gameobj:dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "Snap Translate", 
+            "options" => [
+              [ "label" => "X", "binding" => "gameobj:type", "binding-on" => "point" ],
+              [ "label" => "15", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
+              [ "label" => "30", "binding" => "gameobj:type", "binding-on" => "directional" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "Snap Scale", 
+            "options" => [
+              [ "label" => "X", "binding" => "gameobj:type", "binding-on" => "point" ],
+              [ "label" => "15", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
+              [ "label" => "30", "binding" => "gameobj:type", "binding-on" => "directional" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Relative Rotation", 
+            "value" => [
+              "binding" => "gameobj:dof",  
+              "binding-on" => "enabled",
+              "binding-off" => "disabled",
+            ],
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "Snap Rotation", 
+            "options" => [
+              [ "label" => "X", "binding" => "gameobj:type", "binding-on" => "point" ],
+              [ "label" => "15", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
+              [ "label" => "30", "binding" => "gameobj:type", "binding-on" => "directional" ],
+              [ "label" => "90", "binding" => "gameobj:type", "binding-on" => "directional" ],
+            ],
+          ],
+        ],
+      ],
+    ],
   ];
 ?>
 
