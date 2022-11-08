@@ -408,6 +408,32 @@
   (sendnotify "play-mode" (if playModeEnabled "true" "false")) 
 )
 
+(define (worldStateEqual worldstate key attribute) 
+  (define keyValue (car worldstate))
+  (define attributeValue (cadr worldstate))
+  (and (equal? keyValue key) (equal? attributeValue attribute))
+)
+(define (getWorldValue worldstates key attribute)
+  (define values (filter (lambda(worldstate) (worldStateEqual worldstate key attribute)) worldstates))
+  (if (> (length values) 0)
+    (car values)
+    #f
+  )
+)
+(define (toggleWorldValue key attribute)
+  (define worldState (get-wstate))
+  (define value (caddr (getWorldValue worldState key attribute)))
+  (define isEnabled (not (equal? value "true")))
+  (set-wstate (list
+    (list key attribute (if isEnabled "true" "false"))
+  ))
+)
+(define (getToggleWorldValue key attribute)
+  (lambda() 
+    (toggleWorldValue key attribute)
+  )
+)
+
 (define buttonToAction
   (list
     (list "create-camera" createCameraPlaceholder)
@@ -416,6 +442,8 @@
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
+    (list "set-symmetric-translate" (getToggleWorldValue "tools" "position-mirror"))
+    (list "set-preserve-scale" (getToggleWorldValue "tools" "preserve-scale"))
     (list "toggle-play-mode" togglePlayMode)
     (list "toggle-pause-mode" togglePauseMode)
     (list "set-axis-x" (lambda() (setAxis "x")))
