@@ -1240,20 +1240,20 @@
           "data" => [
             "key" => "Group Selection", 
             "value" => [
-              "binding" => "gameobj:dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:editor:groupselection",  
+              "binding-on" => "true",
+              "binding-off" => "false",
             ],
           ],
         ],
         [
           "type" => "checkbox",
           "data" => [
-            "key" => "Relative Translate", 
+            "key" => "Absolute Translate", 
             "value" => [
-              "binding" => "gameobj:dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:tools:snap-position",  
+              "binding-on" => "absolute",
+              "binding-off" => "relative",
             ],
           ],
         ],
@@ -1262,31 +1262,35 @@
           "data" => [
             "key" => "Snap Translate", 
             "options" => [
-              [ "label" => "X", "binding" => "gameobj:type", "binding-on" => "point" ],
-              [ "label" => "15", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
-              [ "label" => "30", "binding" => "gameobj:type", "binding-on" => "directional" ],
+              [ "label" => "0.01", "binding" => "world:editor:snaptranslate-index", "binding-on" => "0" ],
+              [ "label" => "0.1", "binding" => "world:editor:snaptranslate-index", "binding-on" => "1" ],
+              [ "label" => "0.5", "binding" => "world:editor:snaptranslate-index", "binding-on" => "2" ],
+              [ "label" => "1", "binding" => "world:editor:snaptranslate-index", "binding-on" => "3" ],
+              [ "label" => "5", "binding" => "world:editor:snaptranslate-index", "binding-on" => "4" ],
             ],
           ],
         ],
         [
           "type" => "options",
           "data" => [
-            "key" => "Snap Scale", 
+            "key" => "Snap Scales", 
             "options" => [
-              [ "label" => "X", "binding" => "gameobj:type", "binding-on" => "point" ],
-              [ "label" => "15", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
-              [ "label" => "30", "binding" => "gameobj:type", "binding-on" => "directional" ],
+              [ "label" => "0.01", "binding" => "world:editor:snapscale-index", "binding-on" => "0" ],
+              [ "label" => "0.1", "binding" => "world:editor:snapscale-index", "binding-on" => "1" ],
+              [ "label" => "0.5", "binding" => "world:editor:snapscale-index", "binding-on" => "2" ],
+              [ "label" => "1", "binding" => "world:editor:snapscale-index", "binding-on" => "3" ],
+              [ "label" => "5", "binding" => "world:editor:snapscale-index", "binding-on" => "4" ],
             ],
           ],
         ],
         [
           "type" => "checkbox",
           "data" => [
-            "key" => "Relative Rotation", 
+            "key" => "Absolute Rotation", 
             "value" => [
-              "binding" => "gameobj:dof",  
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
+              "binding" => "world:tools:snap-rotate",  
+              "binding-on" => "absolute",
+              "binding-off" => "relative",
             ],
           ],
         ],
@@ -1295,10 +1299,13 @@
           "data" => [
             "key" => "Snap Rotation", 
             "options" => [
-              [ "label" => "X", "binding" => "gameobj:type", "binding-on" => "point" ],
-              [ "label" => "15", "binding" => "gameobj:type", "binding-on" => "spotlight" ],
-              [ "label" => "30", "binding" => "gameobj:type", "binding-on" => "directional" ],
-              [ "label" => "90", "binding" => "gameobj:type", "binding-on" => "directional" ],
+              [ "label" => "1", "binding" => "world:editor:snapangle-index", "binding-on" => "0" ],
+              [ "label" => "5", "binding" => "world:editor:snapangle-index", "binding-on" => "1" ],
+              [ "label" => "15", "binding" => "world:editor:snapangle-index", "binding-on" => "2" ],
+              [ "label" => "30", "binding" => "world:editor:snapangle-index", "binding-on" => "3" ],
+              [ "label" => "45", "binding" => "world:editor:snapangle-index", "binding-on" => "4" ],
+              [ "label" => "90", "binding" => "world:editor:snapangle-index", "binding-on" => "5" ],
+              [ "label" => "180", "binding" => "world:editor:snapangle-index", "binding-on" => "6" ],
             ],
           ],
         ],
