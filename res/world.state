@@ -21,8 +21,10 @@ bloom:threshold:3
 bloomblur:amount:1
 #exposure:amount:0.8
 pbr:enabled:false
+shadows:enabled:true
+shadows:intensity:0.7
 
-exposure:enabled:true
+exposure:enabled:false
 gamma:enabled:false
 
 light:amount:0.6 0.6 0.6

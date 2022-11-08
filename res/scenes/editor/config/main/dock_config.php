@@ -1054,6 +1054,34 @@
             ]
           ],
         ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "enable shadows", 
+            "value" => [
+              "binding" => "world:shadows:enabled",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "shadow amount", 
+            "value" => [
+              [ 
+                "type" => "slider", 
+                "name" => "shadow", 
+                "value" => [ 
+                  "binding" => "world:shadows:intensity", 
+                  "min" => 0,  // what should min and max really be?d
+                  "max" => 1,
+                ]
+              ],
+            ]
+          ],
+        ],
       ],
     ],
     "models" => [

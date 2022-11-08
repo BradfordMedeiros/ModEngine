@@ -415,7 +415,8 @@ void setShaderData(GLint shader, glm::mat4 proj, glm::mat4 view, std::vector<Lig
   glUniform1i(glGetUniformLocation(shader, "enablePBR"), state.enablePBR);
   glUniform1i(glGetUniformLocation(shader, "enableLighting"), true);
   glUniform1i(glGetUniformLocation(shader, "enableShadows"), state.enableShadows);
-
+  glUniform1f(glGetUniformLocation(shader, "shadowIntensity"),  state.shadowIntensity);
+  
   glUniform1i(glGetUniformLocation(shader, "numlights"), lights.size());
   glUniform1i(glGetUniformLocation(shader, "textureid"), 0);
 

@@ -31,6 +31,7 @@ uniform bool hasOpacityTexture;
 uniform bool hasCubemapTexture;
 uniform bool hasRoughnessTexture;
 uniform bool hasNormalTexture;
+uniform float shadowIntensity;
 
 uniform vec2 textureOffset;
 uniform vec2 textureTiling;
@@ -229,7 +230,7 @@ void main(){
     
 
     bool inShadow = (shadowCoord.z - 0.00001) > closestDepth;
-    float shadowDelta = (enableShadows && inShadow) ? 0.7 : 1.0;
+    float shadowDelta = (enableShadows && inShadow) ? shadowIntensity : 1.0;
 
     if (enableLighting){
       FragColor = tint *  vec4(color.xyz * shadowDelta, color.w);
