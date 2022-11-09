@@ -277,6 +277,11 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "minheight",
     .defaultValue = -1.f,
   },
+  AutoSerializeInt {
+    .structOffset = offsetof(GameObjectUILayout, limit),
+    .field = "limit",
+    .defaultValue = -1,
+  },
 };
 
 static auto _ = addTextureAutoserializer<GameObjectUILayout>(uiLayoutAutoserializer);

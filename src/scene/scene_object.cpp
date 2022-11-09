@@ -321,24 +321,43 @@ float getScaledBoundingHeight(World& world, objid id){
   return objectHeight;
 }
 
+glm::vec2 getScaledBoundingSize(World& world, objid id){
+  auto width = getScaledBoundingWidth(world, id);
+  auto height = getScaledBoundingHeight(world, id);
+  return glm::vec2(width, height);
+}
 
 struct calcPositionNewPosition {
   objid id;
   glm::vec3 position;
 };
-std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, float minSpacing, UILayoutType layoutType, LayoutContentSpacing contentSpacing){
+std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, float minSpacing, UILayoutType layoutType, LayoutContentSpacing contentSpacing, int limit){
   //std::cout << "root position: " << print(rootPosition) << std::endl;
   auto horizontal = rootPosition.x;
-  auto fixedY = rootPosition.y;
   auto vertical = rootPosition.y;
-  auto fixedX = rootPosition.x;
   
   std::vector<calcPositionNewPosition> newPositions;
 
+  float heightOffset = 0.f;
+  float widthOffset = 0.f;
+
+  int numElementsSpacedOnLine = 0;
   if (layoutType == LAYOUT_HORIZONTAL){
+    float maxHeight = 0.f;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      auto objectWidth =  getScaledBoundingWidth(world, obj.id);
+      if (numElementsSpacedOnLine >= limit && limit > 0){
+        numElementsSpacedOnLine = 0;
+        horizontal = rootPosition.x;
+        vertical -= maxHeight;
+        heightOffset -= maxHeight;
+        maxHeight = 0.f;
+      }
+      auto boundingSize = getScaledBoundingSize(world, obj.id);
+      auto objectWidth = boundingSize.x;
+      if (boundingSize.y > maxHeight){
+        maxHeight = boundingSize.y;
+      }
       auto left = horizontal + objectWidth / 2.f;
       auto effectiveSpacing = objectWidth + spacing;
       if (effectiveSpacing < minSpacing){
@@ -348,17 +367,30 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
 
       glm::vec3 newPos = obj.transformation.position;
       newPos.x = left;
-      newPos.y = fixedY;
+      newPos.y = vertical;
       newPositions.push_back(calcPositionNewPosition{
         .id = obj.id,
         .position = newPos,
       });
       horizontal += effectiveSpacing;
+      numElementsSpacedOnLine++;
     }
   }else if (layoutType == LAYOUT_VERTICAL){
+    float maxWidth = 0.f;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      auto objectHeight = getScaledBoundingHeight(world, obj.id);
+      if (numElementsSpacedOnLine >= limit && limit > 0){
+        numElementsSpacedOnLine = 0;
+        vertical = rootPosition.y;
+        horizontal += maxWidth;
+        widthOffset += maxWidth;
+        maxWidth = 0.f;
+      }
+      auto boundingSize = getScaledBoundingSize(world, obj.id);
+      auto objectHeight = boundingSize.y;
+      if (boundingSize.x > maxWidth){
+        maxWidth = boundingSize.x;
+      }
       auto top = vertical + objectHeight / 2.f;
       auto effectiveSpacing = objectHeight + spacing;
       if (effectiveSpacing < minSpacing){
@@ -366,18 +398,26 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
       }
 
       glm::vec3 newPos = obj.transformation.position;
-      newPos.x = fixedX;
+      newPos.x = horizontal;
       newPos.y = top;
       newPositions.push_back(calcPositionNewPosition{
         .id = obj.id,
         .position = newPos,
       });
       vertical += effectiveSpacing;
+      numElementsSpacedOnLine++;
     }  
   }else{
     std::cout << "layout type not supported" << std::endl;
     assert(false);
   }
+
+
+  for (auto &newPosition : newPositions){
+    newPosition.position.x -= widthOffset / 2.f;
+    newPosition.position.y -= heightOffset / 2.f;
+  }
+
   return newPositions;
 }
 
@@ -576,7 +616,6 @@ std::vector<glm::vec3> calcAlignItemsAdjustments(GameObjectUILayout* layoutObjec
 void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
   auto layoutType = layoutObject -> type;
   auto currentSceneId = sceneId(world.sandbox, id);
-
   //modlog("layout", std::string("enforcing layout for: " + getGameObject(world, id).name));
 
    // Set position of the layout based on anchor target
@@ -623,7 +662,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   auto layoutPos = fullTransformation(world.sandbox, id).position;
   // Figure out positions, starting from rootPosition (layout should center elements so not quite right yet)
-  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutObject -> minSpacing, layoutType, layoutObject -> contentSpacing);
+  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutObject -> minSpacing, layoutType, layoutObject -> contentSpacing, layoutObject -> limit);
   for (auto newPosition : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
     physicsTranslateSet(world, newPosition.id, newPosition.position, true);
   }

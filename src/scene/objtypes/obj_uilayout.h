@@ -55,6 +55,7 @@ struct GameObjectUILayout {
   TextureInformation texture;
   float minwidth;
   float minheight;
+  int limit;
   UILayoutFlowType horizontal;
   UILayoutFlowType vertical;
   LayoutBorder border;
