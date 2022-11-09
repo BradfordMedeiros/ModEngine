@@ -1644,10 +1644,12 @@ int main(int argc, char* argv[]){
     };
 
     std::vector<glm::mat4> lightMatrixs;
-    PROFILE(
-      "RENDERING-SHADOWMAPS",
-      lightMatrixs = renderShadowMaps(renderContext);
-    )
+    if (state.enableShadows){
+      PROFILE(
+        "RENDERING-SHADOWMAPS",
+        lightMatrixs = renderShadowMaps(renderContext);
+      )
+    }
 
     renderContext.lightProjview = lightMatrixs;
 
