@@ -1,0 +1,25 @@
+
+
+*basicbutton1:ontexture:gentexture-raw
+*basicbutton1:offtexture:gentexture-raw
+*basicbutton1:state:on
+*basicbutton1:ontint:0 0 1
+*basicbutton1:layer:basicui
+*basicbutton1:position:1 0 0
+*basicbutton1:scale:0.4 1 1
+
+)text_main:layer:basicui
+)text_main:scale:0.005 0.015 0.005
+)text_main:value:Sounds
+
+(dialog:layer:basicui
+(dialog:type:vertical
+(dialog:backpanel:true
+(dialog:tint:0 0 0 1
+(dialog:spacing:0.05
+(dialog:elements:*basicbutton1,)text_main
+(dialog:border-size:0.002
+(dialog:border-color:0.2 0.2 0.2 1
+(dialog:script:./res/scenes/editor/dialogmove.scm
+(dialog:position:0 0 0
+(dialog:margin-top:0.02

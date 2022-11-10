@@ -17,8 +17,8 @@
 |fileexplorer:script:./res/scenes/features/scenegraph.scm
 |fileexplorer:depgraph:raw
 |fileexplorer:gentexture:gentexture-raw
-|fileexplorer:values:sound one|sound two|sound three
 |fileexplorer:basenumber:30000
 |fileexplorer:title:Sound List
+|fileexplorer:values:sound one|sound two|sound three
 
 
