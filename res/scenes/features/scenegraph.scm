@@ -30,6 +30,18 @@
 	)
 )
 (define (getTextureList) (map (lambda(model) (makeIntoGraph "textures" model)) (ls-textures)))
+(define (getRawExplorerList) 
+	(define attr (gameobj-attr mainobj))
+	(define values (string-split (cadr (assoc "values" attr)) #\|))
+	(define title (cadr (assoc "title" attr)))
+	(map 
+		(lambda(model) 
+			(makeIntoGraph title model)
+		) 
+		values
+	)
+)
+
 (define (getNoData) (list (list "data" "none available" (list 0 0))))
 
 
@@ -112,6 +124,7 @@
 		(list "models" getModelList selectModelItem #f onObjDoNothing)
 		(list "mock-textures" getMockTextureList donothing #f onObjDoNothing)
 		(list "textures" getTextureList selectTextureItem #f onObjDoNothing)
+		(list "raw" getRawExplorerList donothing #f onObjDoNothing)
 	)
 )
 (define (getDepGraph) #f)
