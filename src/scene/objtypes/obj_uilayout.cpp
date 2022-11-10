@@ -282,6 +282,12 @@ std::vector<AutoSerialize> uiLayoutAutoserializer {
     .field = "limit",
     .defaultValue = -1,
   },
+  AutoSerializeFloat {
+    .structOffset = offsetof(GameObjectUILayout, limitsize),
+    .structOffsetFiller = std::nullopt,
+    .field = "limitsize",
+    .defaultValue = -1.f,
+  },
 };
 
 static auto _ = addTextureAutoserializer<GameObjectUILayout>(uiLayoutAutoserializer);

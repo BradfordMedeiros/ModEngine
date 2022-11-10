@@ -56,6 +56,7 @@ struct GameObjectUILayout {
   float minwidth;
   float minheight;
   int limit;
+  float limitsize;
   UILayoutFlowType horizontal;
   UILayoutFlowType vertical;
   LayoutBorder border;

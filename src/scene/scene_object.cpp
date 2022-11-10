@@ -331,7 +331,7 @@ struct calcPositionNewPosition {
   objid id;
   glm::vec3 position;
 };
-std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, float minSpacing, UILayoutType layoutType, LayoutContentSpacing contentSpacing, int limit){
+std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 rootPosition, std::vector<std::string>& elements, objid currentSceneId, float spacing, float minSpacing, UILayoutType layoutType, LayoutContentSpacing contentSpacing, int limit, float limitsize){
   //std::cout << "root position: " << print(rootPosition) << std::endl;
   auto horizontal = rootPosition.x;
   auto vertical = rootPosition.y;
@@ -346,14 +346,14 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
     float maxHeight = 0.f;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      if (numElementsSpacedOnLine >= limit && limit > 0){
+      auto boundingSize = getScaledBoundingSize(world, obj.id);
+      if ((numElementsSpacedOnLine >= limit && limit > 0) || (limitsize > 0.f && ((horizontal - rootPosition.x + boundingSize.x) > limitsize))){
         numElementsSpacedOnLine = 0;
         horizontal = rootPosition.x;
         vertical -= maxHeight;
         heightOffset -= maxHeight;
         maxHeight = 0.f;
       }
-      auto boundingSize = getScaledBoundingSize(world, obj.id);
       auto objectWidth = boundingSize.x;
       if (boundingSize.y > maxHeight){
         maxHeight = boundingSize.y;
@@ -379,14 +379,14 @@ std::vector<calcPositionNewPosition>  calcPositions(World& world, glm::vec3 root
     float maxWidth = 0.f;
     for (int i = 0; i < elements.size(); i++){
       GameObject& obj = getGameObject(world.sandbox, elements.at(i), currentSceneId);
-      if (numElementsSpacedOnLine >= limit && limit > 0){
+      auto boundingSize = getScaledBoundingSize(world, obj.id);
+      if ((numElementsSpacedOnLine >= limit && limit > 0) || (limitsize > 0.f && ((vertical - rootPosition.y + boundingSize.y) > limitsize))){
         numElementsSpacedOnLine = 0;
         vertical = rootPosition.y;
         horizontal += maxWidth;
         widthOffset += maxWidth;
         maxWidth = 0.f;
       }
-      auto boundingSize = getScaledBoundingSize(world, obj.id);
       auto objectHeight = boundingSize.y;
       if (boundingSize.x > maxWidth){
         maxWidth = boundingSize.x;
@@ -662,7 +662,7 @@ void enforceLayout(World& world, objid id, GameObjectUILayout* layoutObject){
 
   auto layoutPos = fullTransformation(world.sandbox, id).position;
   // Figure out positions, starting from rootPosition (layout should center elements so not quite right yet)
-  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutObject -> minSpacing, layoutType, layoutObject -> contentSpacing, layoutObject -> limit);
+  auto newPositions = calcPositions(world, /*root pos */ layoutPos, layoutObject -> elements, currentSceneId, layoutObject -> spacing, layoutObject -> minSpacing, layoutType, layoutObject -> contentSpacing, layoutObject -> limit, layoutObject -> limitsize);
   for (auto newPosition : newPositions){   // Put elements into correct positions, so we can create a bounding box around them 
     physicsTranslateSet(world, newPosition.id, newPosition.position, true);
   }
