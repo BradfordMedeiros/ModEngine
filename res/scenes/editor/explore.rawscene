@@ -1,5 +1,3 @@
-
-
 *basicbutton1:ontexture:gentexture-raw
 *basicbutton1:offtexture:gentexture-raw
 *basicbutton1:state:on
@@ -10,16 +8,30 @@
 
 )text_main:layer:basicui
 )text_main:scale:0.005 0.015 0.005
-)text_main:value:Sounds
+)text_main:value:Sound Files
 
 (dialog:layer:basicui
 (dialog:type:vertical
 (dialog:backpanel:true
-(dialog:tint:0 0 0 1
-(dialog:spacing:0.05
-(dialog:elements:*basicbutton1,)text_main
-(dialog:border-size:0.002
-(dialog:border-color:0.2 0.2 0.2 1
+(dialog:tint:0.1 0.1 0.1 0.6
+(dialog:elements:(choices,*basicbutton1,)text_main
 (dialog:script:./res/scenes/editor/dialogmove.scm
-(dialog:position:0 0 0
+(dialog:position:0 0 -1
 (dialog:margin-top:0.02
+(dialog:margin-bottom:0.02
+(dialog:spacing:0.02
+
+(choices:layer:basicui
+(choices:position:0 0 -2
+(choices:elements:)choice_two,)choice_one
+(choices:minwidth:0.2
+(choices:content-spacing:space-for-first
+
+)choice_one:layer:basicui
+)choice_one:scale:0.005 0.015 0.005
+)choice_one:value:OK
+
+)choice_two:layer:basicui
+)choice_two:scale:0.005 0.015 0.005
+)choice_two:value:Cancel
+
