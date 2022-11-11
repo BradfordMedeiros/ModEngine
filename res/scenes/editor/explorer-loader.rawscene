@@ -1,0 +1,9 @@
+
+|fileexplorer:script:./res/scenes/features/scenegraph.scm
+|fileexplorer:depgraph:raw
+|fileexplorer:gentexture:explorer-gentexture-sound
+|fileexplorer:basenumber:30000
+|fileexplorer:title:Sound List
+|fileexplorer:values:sound one|sound two|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three
+
+|explorerloader:script:./res/scenes/editor/explorer-loader.scm

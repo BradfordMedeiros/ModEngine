@@ -11,7 +11,7 @@
 (define messageToExplorer
   (list
     (list "load-test" "Test Menu" "./res/textures/wood.jpg")
-    (list "load-sound" "Sound Values" "gentexture-raw")
+    (list "load-sound" "Sound Values" "explorer-gentexture-sound")
   )
 )
 (define (loadExplorer key)
