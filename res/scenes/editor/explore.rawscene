@@ -1,14 +1,14 @@
-*basicbutton1:ontexture:gentexture-raw
-*basicbutton1:offtexture:gentexture-raw
+#*basicbutton1:ontexture:gentexture-raw
+*basicbutton1:cantoggle:false
 *basicbutton1:state:on
 *basicbutton1:ontint:0 0 1
 *basicbutton1:layer:basicui
-*basicbutton1:position:1 0 0
 *basicbutton1:scale:0.4 1 1
 
 )text_main:layer:basicui
 )text_main:scale:0.005 0.015 0.005
-)text_main:value:Sound Files
+)text_main:value:Explorer
+)text_main:script:./res/scenes/editor/explore.scm
 
 (dialog:layer:basicui
 (dialog:type:vertical
@@ -22,7 +22,6 @@
 (dialog:spacing:0.02
 
 (choices:layer:basicui
-(choices:position:0 0 -2
 (choices:elements:)choice_two,)choice_one
 (choices:minwidth:0.2
 (choices:content-spacing:space-for-first
@@ -30,8 +29,10 @@
 )choice_one:layer:basicui
 )choice_one:scale:0.005 0.015 0.005
 )choice_one:value:OK
+)choice_one:onclick:explorer-ok
 
 )choice_two:layer:basicui
 )choice_two:scale:0.005 0.015 0.005
 )choice_two:value:Cancel
+)choice_two:onclick:explorer-cancel
 
