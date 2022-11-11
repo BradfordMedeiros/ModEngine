@@ -533,19 +533,3 @@
 )
 
 (loadPanelsFromDb layoutToUse)
-
-(define (load-explorer)
-  (define sceneId 
-    (load-scene 
-      "./res/scenes/editor/explore.rawscene"
-      (list
-        (list "(dialog" "tint" "0 1 1 0.2")
-        (list ")text_main" "value" "Sound Values")
-        (list "*basicbutton1" "ontexture" "gentexture-raw")
-      )
-    )
-  )
-  (format #t "explorer scene id: ~a\n" sceneId)
-)
-
-(load-explorer)
