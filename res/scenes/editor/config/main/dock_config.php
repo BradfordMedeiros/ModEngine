@@ -266,9 +266,9 @@
           "type" => "label",
           "data" => [
             "key" => "Path to Clip",
-            "readonly" => true,
             "value" => [
               "binding" => "gameobj:clip",
+              "valueFromDialog" => "load-sound",
             ]
           ],
         ],

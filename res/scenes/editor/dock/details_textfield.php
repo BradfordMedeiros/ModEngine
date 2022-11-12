@@ -48,7 +48,12 @@
     $valueFromSelection = true;
   }
 
-  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $styles);
+  $valueFromDialog = false;
+  if (array_key_exists("valueFromDialog", $data["value"]) && $data["value"]["valueFromDialog"]){
+    $valueFromDialog = $data["value"]["valueFromDialog"];
+  }
+
+  createTextbox($holdername, $valuename, $readonly, $type, $data["value"], $valueFromSelection, $valueFromDialog, $styles);
 
   createElement($rootElementName, $default_rootLayout, [ "elements" => $keyname . "," . $holdername ]);
 ?>

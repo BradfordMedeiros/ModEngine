@@ -82,6 +82,11 @@
 	)
 	#f
 )
+(define (selectRawItem element isAlt)
+	(define graphType (cadr (assoc "depgraph" (gameobj-attr mainobj))))
+	(sendnotify "scenegraph-raw" (string-append graphType ":" (car element)))
+)
+
 (define (onObjDoNothing gameobj color) 
 	(format #t "on obj do nothing\n")
 	#f
@@ -124,7 +129,7 @@
 		(list "models" getModelList selectModelItem #f onObjDoNothing)
 		(list "mock-textures" getMockTextureList donothing #f onObjDoNothing)
 		(list "textures" getTextureList selectTextureItem #f onObjDoNothing)
-		(list "raw" getRawExplorerList donothing #f onObjDoNothing)
+		(list "raw" getRawExplorerList selectRawItem #f onObjDoNothing)
 	)
 )
 (define (getDepGraph) #f)

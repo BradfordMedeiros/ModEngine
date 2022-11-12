@@ -906,6 +906,7 @@
   (define objInScene (equal? sceneId (list-sceneid (gameobj-id mainobj))))
   (define managedText (and objInScene (isManagedText gameobj)))
   (define valueIsSelectionType (assoc "details-value-selection" objattr))
+  (define valueDialogType (assoc "details-value-dialog" objattr))
 
   (if (and objInScene reselectAttr)
     (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
@@ -914,6 +915,9 @@
         (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
       )
 
+      (if valueDialogType
+        (sendnotify "explorer" (cadr valueDialogType))
+      )
       (if valueIsSelectionType
         (if managedText 
           (setManagedSelectionMode gameobj)

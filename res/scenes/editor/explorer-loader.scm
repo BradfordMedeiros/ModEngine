@@ -39,10 +39,15 @@
 
 (define (onMessage key value)
   (format #t "explorer loader: ~a ~a\n" key value)
+  (if (equal? key "scenegraph-raw")
+    (format #t "scenegraph-raw: ~a\n" value)
+  )
   (if (equal? key "explorer")
     (cond 
       ((equal? value "explorer-ok")
-        (format #t "explorer ok placeholder\n")
+        (begin
+          (unloadExplorer)
+        )
       )
       ((equal? value "explorer-cancel")
         (unloadExplorer)

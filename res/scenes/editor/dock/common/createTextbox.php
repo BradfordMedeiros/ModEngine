@@ -5,7 +5,7 @@
   // or 
   // 2. [ "value" => [ "binding"= > "binding to create" ]]
 
-  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $valueFromSelection, $styles){
+  function createTextbox($holdername, $valuename, $readonly, $type, $binding, $valueFromSelection, $valueFromDialog, $styles){
     // details-editable-type to sponsor the type behavior
     if ($type != NULL){
       if ($type!= "number" && $type != "positive-number" && $type != "integer" && $type != "positive-integer"){  // should actually sponsor
@@ -39,6 +39,9 @@
     if ($valueFromSelection){
       $style["details-value-selection"] = "true";
     }
+    if ($valueFromDialog){
+      $style["details-value-dialog"] = $valueFromDialog;
+    }
 
     createElement($valuename, $default_value, $style);
 
@@ -48,9 +51,11 @@
       "minwidth" => "0.2",
       "align-items-horizontal" => "center",
       "details-reselect" => $valuename,
- 
       #"border-size" => "0.004", // should be the border size when selected
     ];
+    if ($valueFromDialog){
+      $editableStyle["tint"] = "0.3 0.3 0.3 1";
+    }
  
     $defaultStyle = [ 
       "min-spacing" => "0.08", 
