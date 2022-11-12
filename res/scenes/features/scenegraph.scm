@@ -83,8 +83,11 @@
 	#f
 )
 (define (selectRawItem element isAlt)
-	(define graphType (cadr (assoc "depgraph" (gameobj-attr mainobj))))
-	(sendnotify "scenegraph-raw" (string-append graphType ":" (car element)))
+	(define attr (gameobj-attr mainobj))
+
+	(define topic (cadr (assoc "topic" attr)))
+	(sendnotify topic (car element))
+	(format #t "topic\n")
 )
 
 (define (onObjDoNothing gameobj color) 

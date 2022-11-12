@@ -4,6 +4,7 @@
 |fileexplorer:gentexture:explorer-gentexture-sound
 |fileexplorer:basenumber:30000
 |fileexplorer:title:Sound List
-|fileexplorer:values:sound one|sound two|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three|sound three
+|fileexplorer:topic:explorer-sound
+|fileexplorer:values:hello|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go
 
 |explorerloader:script:./res/scenes/editor/explorer-loader.scm

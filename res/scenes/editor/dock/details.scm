@@ -1182,6 +1182,9 @@
 )
 
 (define (onMessage key value)
+  (if (equal? key "explorer-sound-final")
+    (format #t "details - explorer sound: ~a\n" value)
+  )
   (if (equal? key "active-scene-id")
     (set! activeSceneId (string->number value))
   )

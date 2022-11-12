@@ -37,15 +37,21 @@
   (loadExplorer value)
 )
 
+
+(define explorerSoundValue #f)
 (define (onMessage key value)
   (format #t "explorer loader: ~a ~a\n" key value)
-  (if (equal? key "scenegraph-raw")
-    (format #t "scenegraph-raw: ~a\n" value)
+  (if (equal? key "explorer-sound")
+    (set! explorerSoundValue value)
   )
   (if (equal? key "explorer")
     (cond 
       ((equal? value "explorer-ok")
         (begin
+          (if explorerSoundValue
+            (sendnotify "explorer-sound-final" explorerSoundValue)
+          )
+          (set! explorerSoundValue #f)
           (unloadExplorer)
         )
       )
