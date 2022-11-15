@@ -5,6 +5,6 @@
 |fileexplorer:basenumber:30000
 |fileexplorer:title:Sound List
 |fileexplorer:topic:explorer-sound
-|fileexplorer:values:hello|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go
+|fileexplorer:values:hello|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|./res/sounds/silenced-gunshot.wav|./res/sounds/sample.wav
 
 |explorerloader:script:./res/scenes/editor/explorer-loader.scm

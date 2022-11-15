@@ -789,20 +789,25 @@
   ;(format #t "min = ~a, max = ~a, range = ~a, ratio = ~a\n" min max range ratio)
   ratio
 )
-(define (onSlide objvalues)
-  (define obj (car objvalues))
-  (define slideAmount (cadr objvalues))
-  (define objattr (caddr objvalues))
+
+(define (updateBindingWithValue value objattr)
   (define detailBindingPair (assoc "details-binding" objattr))
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
-  (define value (calcSlideValue objattr slideAmount))
 
   ;(format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
   (if detailBinding 
     (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex value) #t)
   )
+)
+
+(define (onSlide objvalues)
+  (define obj (car objvalues))
+  (define slideAmount (cadr objvalues))
+  (define objattr (caddr objvalues))
+  (define value (calcSlideValue objattr slideAmount))
+  (updateBindingWithValue value objattr)
   (submitAndPopulateData)
 )
 
@@ -1172,6 +1177,22 @@
 )
 
 
+(define (objAttrEqual obj attrKey attrValue)
+  (define objattr (gameobj-attr obj))
+  (define keyPair (assoc attrKey objattr))
+  (format #t "obj attr: ~a\nkeypair: ~a\n\n" objattr keyPair)
+  (and keyPair (equal? attrValue (cadr keyPair)))
+)
+(define (updateDialogValues dialogType value)
+  (define allQueriesObj (lsobj-attr "details-value-dialog"))
+  (define matchingDialogObjs (filter (lambda(obj) (objAttrEqual obj "details-value-dialog" dialogType)) allQueriesObj))
+  (for-each 
+    (lambda(obj)  
+      (updateBindingWithValue value (gameobj-attr obj))
+    ) 
+    matchingDialogObjs
+  )
+)
 ;;;;;;;;;;;;;;;
 
 (define (getSlidePercentage id)
@@ -1183,7 +1204,10 @@
 
 (define (onMessage key value)
   (if (equal? key "explorer-sound-final")
-    (format #t "details - explorer sound: ~a\n" value)
+    (begin
+      (updateDialogValues "load-sound" value)
+      (submitAndPopulateData)
+    )
   )
   (if (equal? key "active-scene-id")
     (set! activeSceneId (string->number value))
