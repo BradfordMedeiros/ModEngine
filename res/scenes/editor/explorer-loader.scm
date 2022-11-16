@@ -84,5 +84,5 @@
   "explorer-sound"
   "explorer-gentexture-sound"
   30000
-  (list "0" "1" "2" "./res/sounds/silenced-gunshot.wav" "./res/sounds/sample.wav")
+  (append (list "first" "couple" "broken") (ls-sounds))
 )
