@@ -1,10 +1,3 @@
 
-|fileexplorer:script:./res/scenes/features/scenegraph.scm
-|fileexplorer:depgraph:raw
-|fileexplorer:gentexture:explorer-gentexture-sound
-|fileexplorer:basenumber:30000
-|fileexplorer:title:Sound List
-|fileexplorer:topic:explorer-sound
-|fileexplorer:values:hello|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|go|hello|wow|./res/sounds/silenced-gunshot.wav|./res/sounds/sample.wav
 
 |explorerloader:script:./res/scenes/editor/explorer-loader.scm

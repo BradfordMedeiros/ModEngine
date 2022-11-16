@@ -65,3 +65,24 @@
   )
 )
 
+(define (createScenegraph title topic texturepath basenumber values)
+  (mk-obj-attr "|fileexplorer" 
+    (list
+      (list "script" "./res/scenes/editor/scenegraph.scm")
+      (list "depgraph" "raw")
+      (list "gentexture" texturepath)
+      (list "basenumber" basenumber)
+      (list "title" title)
+      (list "topic" topic)
+      (list "values" (string-join values "|"))
+    )
+  )
+)
+
+(createScenegraph 
+  "Sound List"
+  "explorer-sound"
+  "explorer-gentexture-sound"
+  30000
+  (list "0" "1" "2" "./res/sounds/silenced-gunshot.wav" "./res/sounds/sample.wav")
+)
