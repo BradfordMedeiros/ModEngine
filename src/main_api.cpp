@@ -394,6 +394,10 @@ std::vector<std::string> listTextures(){
   return listFilesWithExtensions("./res/textures", { "png", "jpg" });
 }
 
+std::vector<std::string> listSoundFiles(){
+  return { listFilesWithExtensions("./res/sounds", { "wav" }) };
+}
+
 void sendNotifyMessage(std::string message, std::string value){
   channelMessages.push(StringString {
     .strTopic = message,

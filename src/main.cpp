@@ -1338,6 +1338,7 @@ int main(int argc, char* argv[]){
     .playClip = playSoundState,
     .listModels = listModels,
     .listTextures = listTextures,
+    .listSounds = listSoundFiles,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,
     .timeElapsed = timeElapsed,

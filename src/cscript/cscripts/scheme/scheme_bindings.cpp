@@ -587,24 +587,30 @@ SCM scmPlayClip(SCM soundname){
   return SCM_UNSPECIFIED;
 }
 
+SCM strVectorList(std::vector<std::string>& values){
+  SCM list = scm_make_list(scm_from_unsigned_integer(values.size()), scm_from_unsigned_integer(0));
+  for (int i = 0; i < values.size(); i++){
+    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_locale_string(values.at(i).c_str()));
+  }
+  return list;
+}
+
 std::vector<std::string> (*_listModels)();
 SCM scmListModels(){
   std::vector<std::string> models = _listModels();
-  SCM list = scm_make_list(scm_from_unsigned_integer(models.size()), scm_from_unsigned_integer(0));
-  for (int i = 0; i < models.size(); i++){
-    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_locale_string(models.at(i).c_str()));
-  }
-  return list;
+  return strVectorList(models);
 }
 
 std::vector<std::string> (*_listTextures)();
 SCM scmListTextures(){
   std::vector<std::string> textures = _listTextures();
-  SCM list = scm_make_list(scm_from_unsigned_integer(textures.size()), scm_from_unsigned_integer(0));
-  for (int i = 0; i < textures.size(); i++){
-    scm_list_set_x(list, scm_from_unsigned_integer(i), scm_from_locale_string(textures.at(i).c_str()));
-  }
-  return list;
+  return strVectorList(textures);
+}
+
+std::vector<std::string> (*_listSounds)();
+SCM scmListSounds(){
+  std::vector<std::string> sounds = _listSounds();
+  return strVectorList(sounds);
 }
 
 void (*_sendNotifyMessage)(std::string message, std::string value);
@@ -1179,6 +1185,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
   scm_c_define_gsubr("ls-textures", 0, 0, 0, (void *)scmListTextures);
+  scm_c_define_gsubr("ls-sounds", 0, 0, 0, (void *)scmListSounds);
 
   scm_c_define_gsubr("set-camera", 1, 1, 0, (void *)scmSetActiveCamera);    
   scm_c_define_gsubr("mov-cam", 3, 1, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
@@ -1358,6 +1365,7 @@ void createStaticSchemeBindings(
   void (*playClip)(std::string, objid),
   std::vector<std::string> (*listModels)(),
   std::vector<std::string> (*listTextures)(),
+  std::vector<std::string> (*listSounds)(),
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
@@ -1463,6 +1471,7 @@ void createStaticSchemeBindings(
   _playClip = playClip;
   _listModels = listModels;
   _listTextures = listTextures;
+  _listSounds = listSounds;
 
   _sendNotifyMessage = sendNotifyMessage;
 
