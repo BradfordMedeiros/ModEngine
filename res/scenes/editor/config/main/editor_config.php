@@ -14,6 +14,8 @@
     ["value" => "RENDERING", "dialogoption" => "./res/scenes/editor/build/dock/editor_rendering.rawscene"],
     ["value" => "MODELS", "dialogoption" => "./res/scenes/editor/build/dock/editor_models.rawscene"],
     ["value" => "TEXTURES", "dialogoption" => "./res/scenes/editor/build/dock/editor_textures.rawscene"],
+    ["value" => "GEO", "dialogoption" => "./res/scenes/editor/build/dock/editor_geo.rawscene"],
+    ["value" => "PORTAL", "dialogoption" => "./res/scenes/editor/build/dock/portal.rawscene"],
   ];
 
 

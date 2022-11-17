@@ -18,10 +18,13 @@ std::vector<LightInfo> getLightInfo(World& world){
   return lights;
 }
 
-PortalInfo getPortalInfo(World& world, objid id){
+std::optional<PortalInfo> getPortalInfo(World& world, objid id){
   GameObjectObj& objectPortal = world.objectMapping.at(id);
   auto portalObject = std::get_if<GameObjectPortal>(&objectPortal);
-  
+  if (portalObject -> camera == ""){
+    return std::nullopt;
+  }
+
   auto cameraId = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).id;
   auto cameraFullTransform = fullTransformation(world.sandbox, cameraId);
   
@@ -42,7 +45,10 @@ std::vector<PortalInfo> getPortalInfo(World& world){
   auto portalIndexes = getGameObjectsIndex<GameObjectPortal>(world.objectMapping);
   std::vector<PortalInfo> portals;
   for (int i = 0; i < portalIndexes.size(); i++){
-    portals.push_back(getPortalInfo(world, portalIndexes.at(i)));
+    auto portalInfo = getPortalInfo(world, portalIndexes.at(i));
+    if (portalInfo.has_value()){
+      portals.push_back(portalInfo.value());
+    }
   }
   return portals;
 }
@@ -66,7 +72,11 @@ void teleportObject(World& world, objid objectId, objid portalId){
   std::cout << "teleporting object: " << objectId << std::endl;
   assert(false);  // needs to use absolute positions
   GameObject& gameobject = getGameObject(world, objectId);
-  auto portalView = glm::inverse(renderPortalView(getPortalInfo(world, portalId), gameobject.transformation));
+  auto portalInfo = getPortalInfo(world, portalId);
+  if (!portalInfo.has_value()){
+    return;
+  }
+  auto portalView = glm::inverse(renderPortalView(portalInfo.value(), gameobject.transformation));
   auto newTransform = getTransformationFromMatrix(portalView);
   auto newPosition = newTransform.position;
   physicsTranslateSet(world, objectId, newPosition, false);

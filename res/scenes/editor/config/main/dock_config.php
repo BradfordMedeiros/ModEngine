@@ -96,6 +96,53 @@
         ],
       ],
     ],
+    "portal" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Portal Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Portal",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-portal",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "perspective", 
+            "value" => [
+              "binding" => "gameobj:perspective",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Depth of Field Target",
+            "value" => [
+              "valueFromSelection" => true,
+              "binding" => "gameobj:camera",
+            ]
+          ],
+        ],
+      ],
+    ],
     "lights" => [
       "items" => [
         [
@@ -388,6 +435,51 @@
         ],
 
 
+      ],
+    ],
+    "geo" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Geo Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Geo",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-geo",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
+          "type" => "options",
+          "data" => [
+            "key" => "shape", 
+            "options" => [
+                [ "label" => "default", "binding" => "gameobj:shape", "binding-on" => "default" ],
+                [ "label" => "sphere", "binding" => "gameobj:shape", "binding-on" => "sphere" ],
+            ],
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "points",
+            "value" => [
+              "binding" => "gameobj:points",
+            ]
+          ],
+        ],
       ],
     ],
     "object_details" => [

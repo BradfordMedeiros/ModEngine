@@ -16,7 +16,7 @@ struct PortalInfo {
   bool perspective;
   objid id;
 };
-PortalInfo getPortalInfo(World& world, objid id);
+std::optional<PortalInfo> getPortalInfo(World& world, objid id);
 std::vector<PortalInfo> getPortalInfo(World& world);
 bool isPortal(World& world, objid id);
 glm::mat4 renderPortalView(PortalInfo info, Transformation transform);

@@ -357,19 +357,31 @@
 (define (uniqueName) (number->string (random 1000000)))
 
 (define activeSceneId #f)
-(define (createCameraPlaceholder) 
+(define (createCamera) 
   (if activeSceneId 
     (mk-obj-attr (string-append ">camera-" (uniqueName)) (list) activeSceneId)
   )
 )
-(define (createLightPlaceholder) 
+(define (createLight) 
   (if activeSceneId
     (mk-obj-attr (string-append "!light-" (uniqueName)) (list) activeSceneId)
   )
 )
-(define (createTextPlaceholder) 
+(define (createText) 
   (if activeSceneId 
     (mk-obj-attr (string-append ")text-" (uniqueName)) (list (list "value" "sample text")) activeSceneId)
+  )
+)
+
+(define (createGeo)
+  (if activeSceneId 
+    (mk-obj-attr (string-append "<geo-" (uniqueName)) (list) activeSceneId)
+  )
+)
+
+(define (createPortal)
+  (if activeSceneId 
+    (mk-obj-attr (string-append "@portal-" (uniqueName)) (list) activeSceneId)
   )
 )
 
@@ -436,9 +448,11 @@
 
 (define buttonToAction
   (list
-    (list "create-camera" createCameraPlaceholder)
-    (list "create-light" createLightPlaceholder)
-    (list "create-text" createTextPlaceholder)
+    (list "create-camera" createCamera)
+    (list "create-light" createLight)
+    (list "create-text" createText)
+    (list "create-geo" createGeo)
+    (list "create-portal" createPortal)
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
