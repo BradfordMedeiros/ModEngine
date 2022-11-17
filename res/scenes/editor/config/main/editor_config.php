@@ -16,6 +16,8 @@
     ["value" => "TEXTURES", "dialogoption" => "./res/scenes/editor/build/dock/editor_textures.rawscene"],
     ["value" => "GEO", "dialogoption" => "./res/scenes/editor/build/dock/editor_geo.rawscene"],
     ["value" => "PORTAL", "dialogoption" => "./res/scenes/editor/build/dock/portal.rawscene"],
+    ["value" => "HEIGHTMAP", "dialogoption" => "./res/scenes/editor/build/dock/heightmap.rawscene"],
+
   ];
 
 
