@@ -19,6 +19,7 @@ main: resources
 	@php ./dock/main.php config/main/dock_config.php geo > ./build/dock/editor_geo.rawscene
 	@php ./dock/main.php config/main/dock_config.php portal > ./build/dock/portal.rawscene
 	@php ./dock/main.php config/main/dock_config.php heightmap > ./build/dock/heightmap.rawscene
+	@php ./dock/main.php config/main/dock_config.php voxel > ./build/dock/voxel.rawscene
 	@php ./dock/main.php config/main/dock_config.php not_implemented > ./build/dock/editor_not_implemented.rawscene
 
 gameplay: resources

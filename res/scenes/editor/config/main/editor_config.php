@@ -17,6 +17,7 @@
     ["value" => "GEO", "dialogoption" => "./res/scenes/editor/build/dock/editor_geo.rawscene"],
     ["value" => "PORTAL", "dialogoption" => "./res/scenes/editor/build/dock/portal.rawscene"],
     ["value" => "HEIGHTMAP", "dialogoption" => "./res/scenes/editor/build/dock/heightmap.rawscene"],
+    ["value" => "VOXELS", "dialogoption" => "./res/scenes/editor/build/dock/voxel.rawscene"],
 
   ];
 

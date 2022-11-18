@@ -205,6 +205,67 @@
         ],
       ],
     ],
+    "voxel" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Modify Voxel Settings",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Voxel",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-voxels",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "area", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "width", 
+                "value" => [ 
+                  "binding" => "gameobj:dim",
+                  "binding-index" =>  0,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "height", 
+                "value" => [ 
+                  "binding" => "gameobj:dim",
+                  "binding-index" =>  1,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "depth", 
+                "value" => [ 
+                  "binding" => "gameobj:dim",
+                  "binding-index" =>  1,
+                  "type" => "positive-number",
+                ]
+              ],
+            ]
+          ],
+        ],
+      ],
+    ],
     "lights" => [
       "items" => [
         [
