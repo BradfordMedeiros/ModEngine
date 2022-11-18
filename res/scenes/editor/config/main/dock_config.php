@@ -134,7 +134,7 @@
         [
           "type" => "label",
           "data" => [
-            "key" => "Depth of Field Target",
+            "key" => "Portal Camera",
             "value" => [
               "valueFromSelection" => true,
               "binding" => "gameobj:camera",
@@ -631,15 +631,16 @@
             ],
           ]
         ],
-        /*[ "type" => "label", 
+        [ "type" => "label", 
           "data" => [
             "key" => "Look at Target", 
             "value" => [
-              "binding" => "lookat",
+              "valueFromSelection" => true,
+              "binding" => "gameobj:lookat",
             ],
           ]
         ],
-        [ "type" => "label", 
+        /*[ "type" => "label", 
           "data" => [
             "key" => "No Data Source Test", 
             "value" => [

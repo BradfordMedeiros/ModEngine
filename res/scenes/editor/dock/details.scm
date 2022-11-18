@@ -927,7 +927,7 @@
 (define (finishManagedSelectionMode obj)
   (format #t "finishManagedSelectionMode end: ~a ~a\n" (gameobj-name obj) managedTextSelectionMode)
   (updateText managedTextSelectionMode (gameobj-name obj) (list 0 "left" 0) 0)
-  ;(set! managedTextSelectionMode #f)
+  (set! managedTextSelectionMode #f)
 )
 
 (define (handleActiveScene sceneId objattr)
@@ -968,27 +968,32 @@
           (format #t "selection type but not text\n")
         )
       )
-      (if managedText
+
+      (if (not managedTextSelectionMode)
         (begin
-          ;(format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
-          (unsetFocused)
-          (set! focusedElement gameobj)
-          (gameobj-setattr! gameobj 
-            (list (list "tint" (list 0.3 0.3 0.6 1)))
+          (if managedText
+            (begin
+              ;(format #t "is is a managed element: ~a\n" (gameobj-name gameobj))
+              (unsetFocused)
+              (set! focusedElement gameobj)
+              (gameobj-setattr! gameobj 
+                (list (list "tint" (list 0.3 0.3 0.6 1)))
+              )
+            )
+            (unsetFocused)
           )
+          
+          (if (isSelectableItem (assoc "layer" objattr))
+            (begin
+              (refillStore gameobj)
+              (set! managedObj gameobj)
+              (populateData)
+            )
+          )
+          (maybe-set-binding objattr)
+          (if managedText (maybe-set-text-cursor gameobj))
         )
-        (unsetFocused)
       )
-      
-      (if (isSelectableItem (assoc "layer" objattr))
-        (begin
-          (refillStore gameobj)
-          (set! managedObj gameobj)
-          (populateData)
-        )
-      )
-      (maybe-set-binding objattr)
-      (if managedText (maybe-set-text-cursor gameobj))
     )
   )
 )
