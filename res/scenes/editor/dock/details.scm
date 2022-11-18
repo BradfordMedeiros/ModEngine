@@ -396,6 +396,18 @@
   )
 )
 
+(define (createVoxels)
+  (if activeSceneId 
+    (mk-obj-attr (string-append "]voxel-" (uniqueName)) 
+      (list
+        (list "from" "2|2|2|11001111")
+        (list "fromtextures" "./res/brush/border_5x5.png,./res/heightmaps/dunes.jpg|10201020")
+      ) 
+      activeSceneId
+    )
+  )
+)
+
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
 (define (setAxis axis) (set-wstate (list (list "tools" "manipulator-axis" axis))))
 
@@ -465,6 +477,7 @@
     (list "create-geo" createGeo)
     (list "create-portal" createPortal)
     (list "create-heightmap" createHeightmap)
+    (list "create-voxels" createVoxels)
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
