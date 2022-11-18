@@ -173,7 +173,7 @@
             "key" => "Path to Heightmap",
             "value" => [
               "binding" => "gameobj:map",
-              "valueFromDialog" => "load-sound",
+              "valueFromDialog" => "load-heightmap",
             ]
           ],
         ],

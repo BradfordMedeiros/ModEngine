@@ -12,6 +12,7 @@
   (list
     (list "load-test" "Test Menu" "./res/textures/wood.jpg")
     (list "load-sound" "Sound Values" "explorer-gentexture-sound")
+    (list "load-heightmap" "Heightmap Values" "explorer-gentexture-heightmap")
   )
 )
 (define (loadExplorer key)
@@ -58,15 +59,15 @@
       ((equal? value "explorer-cancel")
         (unloadExplorer)
       )
-      ((or (equal? value "load-sound") (equal? value "load-test"))
+      ((or (equal? value "load-sound") (equal? value "load-test") (equal? value "load-heightmap"))
         (handleLoad value)
       )
     )
   )
 )
 
-(define (createScenegraph title topic texturepath basenumber values)
-  (mk-obj-attr "|fileexplorer" 
+(define (createScenegraph name title topic texturepath basenumber values)
+  (mk-obj-attr name
     (list
       (list "script" "./res/scenes/editor/scenegraph.scm")
       (list "depgraph" "raw")
@@ -79,10 +80,21 @@
   )
 )
 
-(createScenegraph 
-  "Sound List"
-  "explorer-sound"
-  "explorer-gentexture-sound"
-  30000
-  (append (list "first" "couple" "broken") (ls-sounds))
+;(createScenegraph 
+;  "fileexplorer"
+;  "Sound List"
+;  "explorer-sound"
+;  "explorer-gentexture-sound"
+;  30000
+;  (append (list "first" "couple" "broken") (ls-sounds))
+;)
+
+(createScenegraph
+  "fileexplorer-heightmap"
+  "Heightmap List"
+  "explorer-heightmap"
+  "explorer-gentexture-heightmap"
+  40000
+  (append (list "first" "couple" "broken") (list "first" "couple" "broken" "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
 )
+

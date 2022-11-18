@@ -385,6 +385,17 @@
   )
 )
 
+(define (createHeightmap)
+  (if activeSceneId 
+    (mk-obj-attr (string-append "-heightmap-" (uniqueName)) 
+      (list
+        (list "map" "./res/heightmaps/default.jpg")
+      ) 
+      activeSceneId
+    )
+  )
+)
+
 (define (setManipulatorMode mode) (set-wstate (list (list "tools" "manipulator-mode" mode) )))
 (define (setAxis axis) (set-wstate (list (list "tools" "manipulator-axis" axis))))
 
@@ -453,6 +464,7 @@
     (list "create-text" createText)
     (list "create-geo" createGeo)
     (list "create-portal" createPortal)
+    (list "create-heightmap" createHeightmap)
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
     (list "set-rotate-mode" (lambda() (setManipulatorMode "rotate")))
