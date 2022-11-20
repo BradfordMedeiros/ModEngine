@@ -539,14 +539,19 @@ int renderObject(
 
   auto geoObj = std::get_if<GameObjectGeo>(&toRender);
   if (geoObj != NULL){
-    auto sphereVertexCount = 0;
-    if (showDebugMask & 0b10000000){
-      for (auto point : geoObj -> points){
-        sphereVertexCount += drawSphere(point);
+    auto vertexCount = 0;
+    for (auto point : geoObj -> points){
+      if (geoObj -> type == GEOSPHERE){
+        vertexCount += drawSphere(point);
+      }else{
+        // this shouldn't be a sphere but it is for now since want a nicer interface to draw the points at diff pos
+        vertexCount += drawSphere(point);    
       }
     }
-    auto defaultNodeVertexCount = geoObj -> type == GEOSPHERE ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
-    return defaultNodeVertexCount + sphereVertexCount;
+    if (showDebugMask & 0b10000000){
+      vertexCount += (geoObj -> type == GEOSPHERE && geoObj -> points.size() == 0) ? drawSphere(glm::vec3(0.f, 0.f, 0.f)) : renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);      
+    }
+    return vertexCount;
   }
 
   auto customObj = std::get_if<GameObjectNil>(&toRender);
