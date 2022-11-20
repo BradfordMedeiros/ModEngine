@@ -417,19 +417,20 @@ std::vector<objid> allSceneIds(SceneSandbox& sandbox, std::optional<std::vector<
   return sceneIds;
 } 
 
-
 // something like .2041308683/testobject
 bool extractSceneIdFromName(std::string& name, objid* _id, std::string* _searchName){
   if (name.at(0) == '.'){
     auto parts = split(name, '/');
-    assert(parts.size() >= 2);
-    auto prefixSize = parts.at(0).size();
-    auto prefix = name.substr(1, prefixSize - 1);
-    auto rest = name.substr(prefixSize + 1, name.size());
-    auto sceneId = std::atoi(prefix.c_str());
-    *_id = sceneId;
-    *_searchName = rest;
-    return true;
+    if (parts.size() > 1){
+      assert(parts.size() >= 2);
+      auto prefixSize = parts.at(0).size();
+      auto prefix = name.substr(1, prefixSize - 1);
+      auto rest = name.substr(prefixSize + 1, name.size());
+      auto sceneId = std::atoi(prefix.c_str());
+      *_id = sceneId;
+      *_searchName = rest;
+      return true;
+    }
   }
   *_id = 0;
   *_searchName = "";

@@ -60,6 +60,8 @@ typedef std::variant<
   GameObjectPrefab
 > GameObjectObj;
 
+// . reserved for prefix scene id
+// : reserved for divider 
 // attributes: mesh, disabled, textureoffset, texture
 static Field obj = {
   .prefix = '`', 

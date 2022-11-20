@@ -25,7 +25,14 @@ std::optional<PortalInfo> getPortalInfo(World& world, objid id){
     return std::nullopt;
   }
 
-  auto cameraId = getGameObject(world, portalObject -> camera, getGameObjectH(world.sandbox, id).sceneId).id;
+  auto parsedSceneId = 0;
+  std::string parsedSearchName = "";
+  auto hasParsedName = extractSceneIdFromName(portalObject -> camera, &parsedSceneId, &parsedSearchName);
+  
+  std::string cameraName = hasParsedName ? parsedSearchName : portalObject -> camera; 
+  auto sceneId = hasParsedName ? parsedSceneId : getGameObjectH(world.sandbox, id).sceneId;
+
+  auto cameraId = getGameObject(world, portalObject -> camera, sceneId).id;
   auto cameraFullTransform = fullTransformation(world.sandbox, cameraId);
   
   auto portalGameObject = getGameObject(world, id);
