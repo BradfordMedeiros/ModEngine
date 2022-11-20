@@ -544,8 +544,8 @@ int renderObject(
       if (geoObj -> type == GEOSPHERE){
         vertexCount += drawSphere(point);
       }else{
-        // this shouldn't be a sphere but it is for now since want a nicer interface to draw the points at diff pos
-        vertexCount += drawSphere(point);    
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::translate(model, point)));
+        vertexCount += renderDefaultNode(shaderProgram, *defaultMeshes.nodeMesh);
       }
     }
     if (showDebugMask & 0b10000000){
