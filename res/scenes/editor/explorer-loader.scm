@@ -13,6 +13,7 @@
     (list "load-test" "Test Menu" "./res/textures/wood.jpg")
     (list "load-sound" "Sound Values" "explorer-gentexture-sound")
     (list "load-heightmap" "Heightmap Values" "explorer-gentexture-heightmap")
+    (list "load-heightmap-brush" "Heightmap Brushes" "explorer-gentexture-heightmap-brush")
   )
 )
 (define (loadExplorer key)
@@ -59,7 +60,7 @@
       ((equal? value "explorer-cancel")
         (unloadExplorer)
       )
-      ((or (equal? value "load-sound") (equal? value "load-test") (equal? value "load-heightmap"))
+      ((or (equal? value "load-sound") (equal? value "load-test") (equal? value "load-heightmap") (equal? value "load-heightmap-brush"))
         (handleLoad value)
       )
     )
@@ -89,12 +90,20 @@
 ;  (append (list "first" "couple" "broken") (ls-sounds))
 ;)
 
-(createScenegraph
-  "fileexplorer-heightmap"
-  "Heightmap List"
-  "explorer-heightmap"
-  "explorer-gentexture-heightmap"
-  40000
-  (append (list "first" "couple" "broken") (list "first" "couple" "broken" "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
-)
+;(createScenegraph
+;  "fileexplorer-heightmap"
+;  "Heightmap List"
+;  "explorer-heightmap"
+;  "explorer-gentexture-heightmap"
+;  40000
+;  (append (list "first" "couple" "broken") (list "first" "couple" "broken" "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
+;)
 
+(createScenegraph
+  "fileexplorer-heightmap-brush"
+  "Heightmap Brushes"
+  "explorer-heightmap-brush"
+  "explorer-gentexture-heightmap-brush"
+  50000
+  (append (list "first" "couple" "broken") (list "first" "couple" "broken" "./res/brush/border_5x5.png" "./res/brush/point.png" "./res/brush/ramp_5x5.png"))
+)

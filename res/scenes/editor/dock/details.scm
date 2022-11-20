@@ -534,13 +534,6 @@
   (define splitVecs (map splitVec values))
   (define filteredVecs (filter (lambda(x) (not (equal? x #f))) splitVecs))
   (define joinedValues (string-join filteredVecs "|"))
-  (format #t "fix list: values: ~a ~a\n" (length values) values)
-  ;(format #t "fix list: filtered vecs: ~a\n" filteredVecs)
-  
-;  joinedValues
-  (format #t "fix list: splitVecs: ~a\n" splitVecs)
-  (format #t "fix list: filtered vecs: ~a\n\n" filteredVecs)
-  (format #t "fix list: joined values: ~a\n" joinedValues)
   joinedValues
 )
 (define (getUpdatedValue detailBindingName detailBindingIndex detailBindingType newvalueOld)

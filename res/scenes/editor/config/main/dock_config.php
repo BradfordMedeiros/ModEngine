@@ -203,6 +203,67 @@
             ]
           ],
         ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Heightmap Brush Tool",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+        [
+          "type" => "list",
+          "data" => [
+            "key" => "",
+            "values" => [
+              [ 
+                "image" => "./res/scenes/editor/dock/images/play.png", 
+                "action" => "toggle-play-mode",
+                "binding" => "play-mode-on", 
+                "binding-on" => "on",
+                "binding-off" => "off",
+              ],
+            ],
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Type",
+            "value" => [
+              "binding" => "gameobj:map",
+              "valueFromDialog" => "load-heightmap-brush",
+            ]
+          ],
+        ],
+        [
+          "type" => "numeric",
+          "data" => [
+            "key" => "brush parameters", 
+            "value" => [
+              [ 
+                "type" => "float", 
+                "name" => "Size", 
+                "value" => [ 
+                  "binding" => "gameobj:dim",
+                  "binding-index" =>  0,
+                  "type" => "positive-number",
+                ]
+              ],
+              [ 
+                "type" => "float", 
+                "name" => "Opacity", 
+                "value" => [ 
+                  "binding" => "gameobj:dim",
+                  "binding-index" =>  1,
+                  "type" => "positive-number",
+                ]
+              ],
+            ]
+          ],
+        ],
       ],
     ],
     "voxel" => [
