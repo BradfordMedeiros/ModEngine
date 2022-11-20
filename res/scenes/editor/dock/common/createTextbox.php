@@ -8,7 +8,7 @@
   function createTextbox($holdername, $valuename, $readonly, $type, $binding, $valueFromSelection, $valueFromDialog, $styles){
     // details-editable-type to sponsor the type behavior
     if ($type != NULL){
-      if ($type!= "number" && $type != "positive-number" && $type != "integer" && $type != "positive-integer"){  // should actually sponsor
+      if ($type!= "number" && $type != "positive-number" && $type != "integer" && $type != "positive-integer" && $type != "list"){  // should actually sponsor
         print("invalid numeric type");
         exit(1);
       }

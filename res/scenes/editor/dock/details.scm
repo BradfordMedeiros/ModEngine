@@ -522,19 +522,42 @@
     newvalue
   )
 )
-(define (getUpdatedValue detailBindingName detailBindingIndex newvalue)
+
+(define (splitVec value)
+  (define values (string-split value #\ ))
+  (define isNumber (map string->number values))
+  (define numbers (filter (lambda(x) (not (equal? x #f))) isNumber))
+  (if (equal? (length numbers) 3) value #f)
+)
+(define (fixList value)
+  (define values (string-split value #\|))
+  (define splitVecs (map splitVec values))
+  (define filteredVecs (filter (lambda(x) (not (equal? x #f))) splitVecs))
+  (define joinedValues (string-join filteredVecs "|"))
+  (format #t "fix list: values: ~a ~a\n" (length values) values)
+  ;(format #t "fix list: filtered vecs: ~a\n" filteredVecs)
+  
+;  joinedValues
+  (format #t "fix list: splitVecs: ~a\n" splitVecs)
+  (format #t "fix list: filtered vecs: ~a\n\n" filteredVecs)
+  (format #t "fix list: joined values: ~a\n" joinedValues)
+  joinedValues
+)
+(define (getUpdatedValue detailBindingName detailBindingIndex detailBindingType newvalueOld)
   (define oldvalue (getDataValue detailBindingName))
+  (define newvalue (if (equal? detailBindingType "list") (fixList newvalueOld) newvalueOld))
   (if detailBindingIndex
-    (begin
-      (if (equal? oldvalue #f)
-        (set! oldvalue (list 0 0 0 0))  ; should come from some type hint
+      (begin
+        (if (equal? oldvalue #f)
+          (set! oldvalue (list 0 0 0 0))  ; should come from some type hint
+        )
+        (list-set! oldvalue detailBindingIndex (makeTypeCorrect (list-ref oldvalue detailBindingIndex) newvalue))
+        (format #t "old value: ~a ~a\n"  oldvalue (map number? oldvalue))
+        (list detailBindingName oldvalue)
       )
-      (list-set! oldvalue detailBindingIndex (makeTypeCorrect (list-ref oldvalue detailBindingIndex) newvalue))
-      (format #t "old value: ~a ~a\n"  oldvalue (map number? oldvalue))
-      (list detailBindingName oldvalue)
-    )
-    (list detailBindingName (makeTypeCorrect oldvalue newvalue))
-  )
+      (list detailBindingName (makeTypeCorrect oldvalue newvalue))
+  )    
+  
 )
 
 (define (newCursorIndex eventType oldIndex newTextLength oldoffset wrapAmount oldCursorDir oldHighlightLength) ;text wrapAmount key offset) 
@@ -639,6 +662,9 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
+  (define editableTypePair (assoc "details-editable-type" objattr))
+  (define editableType (if editableTypePair (cadr editableTypePair) #f))
+
   (define newValues 
     (list
       (list "offset" offset)
@@ -654,7 +680,7 @@
 
   (gameobj-setattr! obj newValues)
   (if detailBinding
-    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex text) #t)
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex editableType text) #t)
   )
   (format #t "cursor is: ~a\n" cursor)
 )
@@ -834,10 +860,12 @@
   (define detailBindingIndexPair (assoc "details-binding-index" objattr))
   (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
+  (define editableTypePair (assoc "details-editable-type" objattr))
+  (define editableType (if editableTypePair (cadr editableTypePair) #f))
 
   ;(format #t "values: ~a ~a ~a\n" (car objvalues) (cadr objvalues) (caddr objvalues))
   (if detailBinding 
-    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex value) #t)
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex editableType value) #t)
   )
 )
 
@@ -873,9 +901,12 @@
   (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
   (define bindingOn (assoc "details-binding-on" objattr))
   (define enableValue (if bindingOn (cadr bindingOn) #f))
+  (define editableTypePair (assoc "details-editable-type" objattr))
+  (define editableType (if editableTypePair (cadr editableTypePair) #f))
+
   ;;(format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
   (if (and shouldSet enableValue detailBinding) 
-    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex enableValue) #t)
+    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex editableType enableValue) #t)
   )
   (submitAndPopulateData)
 )

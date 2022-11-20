@@ -600,6 +600,7 @@
             "key" => "points",
             "value" => [
               "binding" => "gameobj:points",
+              "type" => "list",
             ]
           ],
         ],
