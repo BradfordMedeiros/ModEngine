@@ -670,20 +670,6 @@
     "object_details" => [
       "title" => "Object Details",
       "items" => [
-        /*[ "type" => "label", 
-          "sql" => [
-            "binding" => "sql-person-name",
-            "query" => "select name from people where class = warrior limit 1",
-            "update" => 'update people set people.name = $VALUE where people.class = warrior',
-            "cast" => "string", # string, number (vec not yet implemented)
-          ],  
-          "data" => [
-            "key" => "Another Label", 
-            "value" => [
-              "binding" => "sql-person-name",
-            ],
-          ]
-        ],*/
         [ "type" => "label", 
           "data" => [
             "key" => "Current Object", 
@@ -702,118 +688,49 @@
             ],
           ]
         ],
-        /*[ "type" => "label", 
-          "data" => [
-            "key" => "No Data Source Test", 
-            "value" => [
-              "binding" => "nodata",
-            ],
-          ]
-        ],
-        [
-          "type" => "checkbox",
-          "data" => [
-            "key" => "toggle particles", 
-            "value" => [
-              "binding" => "state",
-              "binding-on" => "enabled",
-              "binding-off" => "disabled",
-            ],
-          ],
-        ],
-        */
-
-        /*[
-          "type" => "checkbox",
-          "sql" => [
-            "binding" => "multiday-ticket",
-            "query" => "select tickets.multiday from tickets where tickets.name = single",
-            "update" => 'update tickets set tickets.multiday  = $VALUE where tickets.name = single',
-            "cast" => "string",
-          ],
-          "data" => [
-            "key" => "Is Multiday Ticket?", 
-            "value" => [
-              "binding" => "multiday-ticket",
-              "binding-on" => "true",
-              "binding-off" => "false",
-            ],
-          ],
-        ],
         [
           "type" => "checkbox",
           "data" => [
             "key" => "enable physics", 
             "value" => [
-              "binding" => "physics",
+              "binding" => "gameobj:physics",
               "binding-on" => "enabled",
               "binding-off" => "disabled",
             ],
           ],
         ],
-        
-         [
+        [
           "type" => "options",
-          "sql" => [
-            "binding" => "sql-tree-type",
-            "query" => "select tree_type from trees where growth_rate = medium limit 1",
-            "update" => 'update trees set trees.tree_type  = $VALUE where trees.growth_rate = medium',
-            "cast" => "string",
-          ],  
           "data" => [
-            "key" => "treetype", 
+            "key" => "physics shape", 
             "options" => [
-              [ "label" => "big tree", "binding" => "sql-tree-type", "binding-on" => "big_tree" ],
-              [ "label" => "medium tree", "binding" => "sql-tree-type", "binding-on" => "medium_tree" ],
-              [ "label" => "small tree", "binding" => "sql-tree-type", "binding-on" => "small_tree" ],
-   
+                [ "label" => "auto", "binding" => "gameobj:physics_shape", "binding-on" => "shape_auto" ],
+                [ "label" => "sphere", "binding" => "gameobj:physics_shape", "binding-on" => "shape_sphere" ],
+                [ "label" => "capsule", "binding" => "gameobj:physics_shape", "binding-on" => "shape_capsule" ],
+                [ "label" => "cylinder", "binding" => "gameobj:physics_shape", "binding-on" => "shape_cylinder" ],
+                [ "label" => "hull", "binding" => "gameobj:physics_shape", "binding-on" => "shape_hull" ],
+                [ "label" => "exact", "binding" => "gameobj:physics_shape", "binding-on" => "shape_exact" ],
             ],
           ],
-        ],*/
-
-        /*[
+        ],
+        [
           "type" => "numeric",
           "data" => [
-            "key" => "Gravity", 
+            "key" => "Physics Tuning", 
             "value" => [
               [ 
                 "type" => "slider", 
-                "name" => "Up/Down", 
+                "name" => "gravity", 
                 "value" => [ 
                   "binding" => "physics_gravity", 
                   "binding-index" =>  0,
                 ]
               ],
-            ]
-          ],
-        ],*/
-        /*[
-          "type" => "checkbox",
-          "data" => [
-            "key" => "Toggle Red", 
-            "value" => [
-              "binding" => "tint",
-              "binding-on" => "1 0 0 1",
-              "binding-off" => "1 1 1 1",
-            ]
-          ],
-        ],*/
-        /*[
-          "type" => "numeric",
-          "sql" => [
-            "binding" => "sql-trait-speed",
-            "query" => 'select people.topspeed from people where people.name = $object_name',
-            "update" => 'update people set people.topspeed = $VALUE where people.name = john',
-            "cast" => "number",
-          ], 
-          "data" => [
-            "key" => "Physics Tuning", 
-            "value" => [
               [ 
                 "type" => "float", 
                 "name" => "physics max speed", 
                 "value" => [ 
-                  "binding" => "sql-trait-speed", 
+                  "binding" => "physics_gravity", 
                   "type" => "number",
                   "min" => 0,
                   "max" => 100,
@@ -822,32 +739,6 @@
             ]
           ],
         ],
-        [
-          "type" => "numeric",
-          "sql" => [
-            "binding" => "sql-trait-color",
-            "query" => "select people.color from people where people.name = john",
-            "update" => 'update people set people.color = $VALUE where people.name = john',
-            #"update" => "select people.color from people where people.name = john",
-            "cast" => "vec",
-          ], 
-          "data" => [
-            "key" => "Vec4Demo", 
-            "value" => [
-              [ 
-                "type" => "float", 
-                "name" => "class-color", 
-                "value" => [ 
-                  "binding" => "sql-trait-color",
-                  "binding-index" => 3, 
-                  "type" => "number",
-                  "min" => 0,
-                  "max" => 100,
-                ],
-              ],
-            ]
-          ],
-        ],*/
         [
           "type" => "numeric",
           "data" => [
