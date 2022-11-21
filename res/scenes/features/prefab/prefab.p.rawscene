@@ -1,0 +1,13 @@
+
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -5 0
+platform:physics:disabled
+
+[house1:scene:./res/scenes/features/prefab/house.p.rawscene
+[house1:position:10 0 0
+[house1:+house/Cube:tint:0 0 1 1
+
+[house2:scene:./res/scenes/features/prefab/house.p.rawscene
+[house2:position:-10 0 0
+[house2:+house/Cube:tint:0 1 0 1

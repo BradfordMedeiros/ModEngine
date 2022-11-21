@@ -1,0 +1,7 @@
+house:mesh:./res/models/box/box.obj
+house:scale:5 5 5
+house:position:0 0 0
+
+#house2:mesh:./res/models/box/box.obj
+#house2:scale:5 5 5
+#house2:position:10 0 10
