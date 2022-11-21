@@ -714,6 +714,16 @@
           ],
         ],
         [
+          "type" => "options",
+          "data" => [
+            "key" => "physics_type", 
+            "options" => [
+                [ "label" => "static", "binding" => "gameobj:physics_type", "binding-on" => "static" ],
+                [ "label" => "dynamic", "binding" => "gameobj:physics_type", "binding-on" => "dynamic" ],
+            ],
+          ],
+        ],
+        [
           "type" => "numeric",
           "data" => [
             "key" => "Physics Tuning", 
