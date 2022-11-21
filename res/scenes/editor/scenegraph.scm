@@ -174,21 +174,7 @@
 	(onGraphChange)
 )
 
-
 (define texturename (string-append (cadr (assoc "gentexture" (gameobj-attr mainobj)))))
-
-(define (create-obj)
-  (mk-obj-attr "someobj"     
-  	(list
-  		(list "position" (list 1 1 0))
-  		(list "mesh" "./res/models/box/spriteplane.dae")
-  		(list "someobj/Plane" "texture" texturename)
-  		(list "layer" "noselect1")
-  	)
-	)
-)
-
-
 (define depgraph (getDepGraph))
 (define (refreshDepGraph) 
 	(set! depgraph (getDepGraph))
@@ -485,7 +471,6 @@
 	(format #t "key is: ~a\n" key)
 	(if (equal? action 1)
 		(begin
-     	(if (equal? key 47) (create-obj))  ; /
      	(if (equal? key 264) 
      		(begin
      			(setSelectedIndex (+ selectedIndex 1))

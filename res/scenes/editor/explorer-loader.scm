@@ -1,4 +1,19 @@
 
+(define (createScenegraph name title topic texturepath basenumber values)
+  (mk-obj-attr name
+    (list
+      (list "script" "./res/scenes/editor/scenegraph.scm")
+      (list "depgraph" "raw")
+      (list "gentexture" texturepath)
+      (list "basenumber" basenumber)
+      (list "title" title)
+      (list "topic" topic)
+      (list "values" (string-join values "|"))
+    )
+  )
+  (format #t "create scenegraph placeholder\n")
+)
+
 (define explorerInstance #f)
 
 (define (unloadExplorer)
@@ -67,37 +82,24 @@
   )
 )
 
-(define (createScenegraph name title topic texturepath basenumber values)
-  (mk-obj-attr name
-    (list
-      (list "script" "./res/scenes/editor/scenegraph.scm")
-      (list "depgraph" "raw")
-      (list "gentexture" texturepath)
-      (list "basenumber" basenumber)
-      (list "title" title)
-      (list "topic" topic)
-      (list "values" (string-join values "|"))
-    )
-  )
+
+(createScenegraph 
+  "fileexplorer"
+  "Sound List"
+  "explorer-sound"
+  "explorer-gentexture-sound"
+  30000
+  (append (list "first" "couple" "broken") (ls-sounds))
 )
 
-;(createScenegraph 
-;  "fileexplorer"
-;  "Sound List"
-;  "explorer-sound"
-;  "explorer-gentexture-sound"
-;  30000
-;  (append (list "first" "couple" "broken") (ls-sounds))
-;)
-
-;(createScenegraph
-;  "fileexplorer-heightmap"
-;  "Heightmap List"
-;  "explorer-heightmap"
-;  "explorer-gentexture-heightmap"
-;  40000
-;  (append (list "first" "couple" "broken") (list "first" "couple" "broken" "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
-;)
+(createScenegraph
+  "fileexplorer-heightmap"
+  "Heightmap List"
+  "explorer-heightmap"
+  "explorer-gentexture-heightmap"
+  40000
+  (append (list "first" "couple" "broken" "first" "couple" "broken") (list  "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
+)
 
 (createScenegraph
   "fileexplorer-heightmap-brush"
@@ -105,5 +107,5 @@
   "explorer-heightmap-brush"
   "explorer-gentexture-heightmap-brush"
   50000
-  (append (list "first" "couple" "broken") (list "first" "couple" "broken" "./res/brush/border_5x5.png" "./res/brush/point.png" "./res/brush/ramp_5x5.png"))
+  (append (list "first" "couple" "broken" "first" "couple" "broken" ) (list "./res/brush/border_5x5.png" "./res/brush/point.png" "./res/brush/ramp_5x5.png"))
 )

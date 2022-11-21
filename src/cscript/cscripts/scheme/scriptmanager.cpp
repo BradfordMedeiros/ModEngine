@@ -52,6 +52,7 @@ objid currentSceneId(){
 
 void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, bool isFreeScript, std::function<std::string(std::string)> pathForModLayer){ 
   auto script = getScriptName(scriptpath, id);
+  SCM oldModule = scm_current_module();
 
   std::cout << "SYSTEM: LOADING SCRIPT: (" << script << ", " << id << ")" << std::endl;
   assert(scriptnameToModule.find(script) == scriptnameToModule.end());
@@ -62,10 +63,12 @@ void loadScript(std::string scriptpath, objid id, objid sceneId, bool isServer, 
     .module = module,
     .isvalid = true,
   };                    
+
   scm_set_current_module(module);
   defineFunctions(id, isServer, isFreeScript);
   scm_c_primitive_load(pathForModLayer(scriptpath).c_str());
   onFrame();
+  scm_set_current_module(oldModule); // because this might be inside of another script load function,
 }
 
 // @TODO -- need to figure out how to really unload a module.
