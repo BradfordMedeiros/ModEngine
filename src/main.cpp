@@ -243,9 +243,9 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
   glBindVertexArray(quadVAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
-void handleTerrainPainting(UVCoord uvCoord){
+void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
   if (state.shouldTerrainPaint && state.mouseIsDown){
-    applyHeightmapMasking(world, latestSelected(state.editor).value(), state.terrainPaintDown ? -10.f : 10.f, uvCoord.x, uvCoord.y, true);
+    applyHeightmapMasking(world, hoveredId, state.terrainPaintDown ? -10.f : 10.f, uvCoord.x, uvCoord.y, false);
   }
 }
 
@@ -1681,7 +1681,7 @@ int main(int argc, char* argv[]){
     auto shouldSelectItem = selectItemCalled || (state.editor.forceSelectIndex != 0);
     state.editor.forceSelectIndex = 0;
 
-    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem){
+    if ((selectTargetId != getManipulatorId(state.manipulatorState)) && shouldSelectItem && !state.shouldTerrainPaint){
       std::cout << "INFO: select item called" << std::endl;
 
       std::cout << "select target id: " << selectTargetId << std::endl;
@@ -1809,7 +1809,7 @@ int main(int argc, char* argv[]){
 
 
     glViewport(0, 0, state.resolution.x, state.resolution.y);
-    handleTerrainPainting(uvCoord);
+    handleTerrainPainting(uvCoord, hoveredId);
      
     if (useChunkingSystem){
       handleChunkLoading(
