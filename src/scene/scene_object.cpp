@@ -137,7 +137,7 @@ void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toP
 }
 
 
-void applyHeightmapMasking(World& world, objid id, float amount, float uvx, float uvy, bool shouldAverage){
+void applyHeightmapMasking(World& world, objid id, HeightmapMask& mask, float amount, float uvx, float uvy, bool shouldAverage, float radius){
   auto heightmaps = getHeightmaps(world.objectMapping);
   if (heightmaps.find(id) == heightmaps.end()){
     return;
@@ -148,7 +148,7 @@ void applyHeightmapMasking(World& world, objid id, float amount, float uvx, floa
   int cellY = uvy * hm.heightmap.height;
   //std::cout << "cell (" << cellX << ", " << cellY << " )" << std::endl;
   //std::cout << "uv: ( " << uvx << ", " << uvy << " )" << std::endl;  
-  applyMasking(hm.heightmap, cellX, cellY, loadMask("./res/brush/ramp_5x5.png"), amount, [&world, id]() -> void { 
+  applyMasking(hm.heightmap, cellX, cellY, mask, amount, [&world, id]() -> void { 
       // We change *data fed to bullet.
       // This can be dynamic, however according to docs min + maxHeight must fall in range. 
       // Recreating simply ensures that the min/max height is always valid. 
@@ -846,6 +846,12 @@ void setTexture(World& world, objid index, std::string textureName){
       buttonObj -> onTexture.textureId = textureId;
       buttonObj -> offTexture.textureString = textureName;
       buttonObj -> offTexture.textureId = textureId;
+    }
+
+    GameObjectHeightmap* heightmapObj = std::get_if<GameObjectHeightmap>(&world.objectMapping.at(id));
+    if (heightmapObj != NULL){
+      heightmapObj -> texture.loadingInfo.textureString = textureName;
+      heightmapObj -> texture.loadingInfo.textureId = textureId;       
     }
   }
 }

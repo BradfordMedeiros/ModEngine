@@ -28,7 +28,7 @@ void handleVoxelRaycast(World& world, objid id, glm::vec3 fromPos, glm::vec3 toP
 
 std::optional<Texture> textureForId(World& world, objid id);
 
-void applyHeightmapMasking(World& world, objid id, float amount, float uvx, float uvy, bool shouldAverage);
+void applyHeightmapMasking(World& world, objid id, HeightmapMask& mask, float amount, float uvx, float uvy, bool shouldAverage, float radius);
 GameObjectHeightmap& getHeightmap(World& world, objid id);
 void saveHeightmap(World& world, objid id, std::string filepath);
 bool isHeightmap(World& world, objid id);

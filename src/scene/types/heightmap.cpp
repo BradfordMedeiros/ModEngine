@@ -192,7 +192,7 @@ void applyMasking(
 
       if ((hIndex < heightmap.height) && (wIndex < heightmap.width)){
         if (shouldAverage && maskAmount > 0.f){
-          heightmap.data[targetIndex] = oldAverageValue, heightmap.height, + effectiveAmount;
+          heightmap.data[targetIndex] = oldAverageValue + effectiveAmount;
         }else{
           heightmap.data[targetIndex] += effectiveAmount;
         }

@@ -324,10 +324,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     state.shouldTerrainPaint = !state.shouldTerrainPaint;
     std::cout << "toggling terrain paint: " << state.shouldTerrainPaint << std::endl;
   }
-  if (key == GLFW_KEY_E && action == 1){
-    state.terrainPaintDown = !state.terrainPaintDown;
-    std::cout << "toggling terrain paint direction: " << state.terrainPaintDown << std::endl;
-  }
 
   /*if (key == GLFW_KEY_N && action == 1){
     return;

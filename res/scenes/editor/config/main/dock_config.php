@@ -213,29 +213,40 @@
             ]
           ],
         ],
-        [
-          "type" => "list",
-          "data" => [
-            "key" => "",
-            "values" => [
-              [ 
-                "image" => "./res/scenes/editor/dock/images/play.png", 
-                "action" => "toggle-play-mode",
-                "binding" => "play-mode-on", 
-                "binding-on" => "on",
-                "binding-off" => "off",
-              ],
-            ],
-          ],
-        ],
+        //[
+        //  "type" => "list",
+        //  "data" => [
+        //    "key" => "",
+        //    "values" => [
+        //      [ 
+        //        "image" => "./res/scenes/editor/dock/images/play.png", 
+        //        "action" => "toggle-play-mode",
+        //        "binding" => "play-mode-on", 
+        //        "binding-on" => "on",
+        //        "binding-off" => "off",
+        //      ],
+        //    ],
+        //  ],
+        //],
         [
           "type" => "label",
           "data" => [
             "key" => "Type",
             "value" => [
-              "binding" => "gameobj:map",
+              "binding" => "world:tools:terrainpaint-brush",
               "valueFromDialog" => "load-heightmap-brush",
             ]
+          ],
+        ],
+        [
+          "type" => "checkbox",
+          "data" => [
+            "key" => "Smoothing", 
+            "value" => [
+              "binding" => "world:tools:terrainpaint-smoothing",  
+              "binding-on" => "true",
+              "binding-off" => "false",
+            ],
           ],
         ],
         [
@@ -245,19 +256,17 @@
             "value" => [
               [ 
                 "type" => "float", 
-                "name" => "Size", 
+                "name" => "Radius", 
                 "value" => [ 
-                  "binding" => "gameobj:dim",
-                  "binding-index" =>  0,
+                  "binding" => "world:tools:terrainpaint-radius",
                   "type" => "positive-number",
                 ]
               ],
               [ 
                 "type" => "float", 
-                "name" => "Opacity", 
+                "name" => "Amount", 
                 "value" => [ 
-                  "binding" => "gameobj:dim",
-                  "binding-index" =>  1,
+                  "binding" => "world:tools:terrainpaint-amount",
                   "type" => "positive-number",
                 ]
               ],

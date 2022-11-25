@@ -76,8 +76,11 @@ struct engineState {
   int textureIndex;
   bool shouldPaint;
   bool shouldTerrainPaint;
-  bool terrainPaintDown;
-  
+  float terrainPaintAmount;
+  float terrainPaintRadius;
+  bool terrainSmoothing;
+  std::string terrainPaintBrush;
+
   bool enableBloom;
   float bloomThreshold;
   float bloomAmount;

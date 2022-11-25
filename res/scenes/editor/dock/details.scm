@@ -1277,6 +1277,12 @@
       (submitAndPopulateData)
     )
   )
+  (if (equal? key "explorer-heightmap-brush-final")
+    (begin
+      (updateDialogValues "load-heightmap-brush" value)
+      (submitAndPopulateData)
+    )
+  )
   (if (equal? key "active-scene-id")
     (set! activeSceneId (string->number value))
   )

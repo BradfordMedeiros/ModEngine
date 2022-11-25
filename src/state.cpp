@@ -293,6 +293,12 @@ std::vector<ObjectStateMapping> mapping = {
   simpleBoolSerializer("tools", "position-mirror", offsetof(engineState, translateMirror)),
   simpleBoolSerializer("tools", "snap-scale", offsetof(engineState, snapManipulatorScales)),
   simpleEnumSerializer("tools", "snap-rotate", { SNAP_CONTINUOUS, SNAP_RELATIVE, SNAP_ABSOLUTE }, { "none", "relative", "absolute" }, offsetof(engineState, rotateMode)),
+  
+  simpleFloatSerializer("tools", "terrainpaint-amount", offsetof(engineState, terrainPaintAmount)),
+  simpleFloatSerializer("tools", "terrainpaint-radius", offsetof(engineState, terrainPaintRadius)),
+  simpleBoolSerializer("tools", "terrainpaint-smoothing", offsetof(engineState, terrainSmoothing)),
+  simpleStringSerializer("tools", "terrainpaint-brush", offsetof(engineState, terrainPaintBrush)),
+
   simpleStringSerializer("window", "name", offsetof(engineState, windowname)),
   simpleStringSerializer("window", "icon", offsetof(engineState, iconpath)),
   simpleIntSerializer("rendering", "fontsize", offsetof(engineState, fontsize)),
@@ -385,6 +391,10 @@ engineState getDefaultState(unsigned int initialScreenWidth, unsigned int initia
   	.textureIndex = 0,
   	.shouldPaint = false,
     .shouldTerrainPaint = false,
+    .terrainPaintAmount = 10.f,
+    .terrainPaintRadius = 1.f,
+    .terrainSmoothing = false,
+    .terrainPaintBrush = "./res/brush/point.png",
   	.enableBloom = false, 
     .bloomThreshold = 2.7f,
   	.bloomAmount = 1.f,   

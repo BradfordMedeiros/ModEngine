@@ -245,7 +245,8 @@ void handlePaintingModifiesViewport(UVCoord uvsToPaint){
 }
 void handleTerrainPainting(UVCoord uvCoord, objid hoveredId){
   if (state.shouldTerrainPaint && state.mouseIsDown){
-    applyHeightmapMasking(world, hoveredId, state.terrainPaintDown ? -10.f : 10.f, uvCoord.x, uvCoord.y, false);
+    auto mask = loadMask(state.terrainPaintBrush);
+    applyHeightmapMasking(world, hoveredId, mask, state.terrainPaintAmount, uvCoord.x, uvCoord.y, state.terrainSmoothing, state.terrainPaintRadius);
   }
 }
 
