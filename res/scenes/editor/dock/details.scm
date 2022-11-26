@@ -207,6 +207,7 @@
   )
 )
 (define (onKeyChar key)
+  (format #t "on key char ~a\n" key)
   (if (equal? key 44) ; comma
     (begin
       (format #t "pretty print: \n")
@@ -214,6 +215,9 @@
       (format #t "\n")
     )
     
+  )
+  (if (not (isControlKey key))
+    (processFocusedElement key)
   )
   (if (isSubmitKey key) (submitAndPopulateData))
 )
@@ -1076,7 +1080,12 @@
       )
     )
   )
-  (if (and (or (equal? action 1) (equal? action 2)) (not (isControlKey key)))
+  (if 
+    (and 
+      (or (equal? action 1) (equal? action 2)) 
+      (not (isControlKey key))
+      (or (equal? key 262) (equal? key 263) (equal? key 264) (equal? key 265) (equal? key 259) (equal? key 261)) ; arrow keys + backspace + delete
+    )
     (processFocusedElement key)
   )
 )
