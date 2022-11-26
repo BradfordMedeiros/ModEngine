@@ -94,28 +94,28 @@
 
 
 (createScenegraph 
-  "fileexplorer"
+  "|fileexplorer-sound"
   "Sound List"
   "explorer-sound"
   "explorer-gentexture-sound"
   30000
-  (append (list "first" "couple" "broken") (ls-sounds))
+  (ls-sounds)
 )
 
 (createScenegraph
-  "fileexplorer-heightmap"
+  "|fileexplorer-heightmap"
   "Heightmap List"
   "explorer-heightmap"
   "explorer-gentexture-heightmap"
   40000
-  (append (list "first" "couple" "broken" "first" "couple" "broken") (list  "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
+  (append (list  "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
 )
 
 (createScenegraph
-  "fileexplorer-heightmap-brush"
+  "|fileexplorer-heightmap-brush"
   "Heightmap Brushes"
   "explorer-heightmap-brush"
   "explorer-gentexture-heightmap-brush"
   50000
-  (append (list "first" "couple" "broken" "first" "couple" "broken" ) (list "./res/brush/border_5x5.png" "./res/brush/point.png" "./res/brush/ramp_5x5.png"))
+  (append (list "./res/brush/border_5x5.png" "./res/brush/point.png" "./res/brush/ramp_5x5.png"))
 )

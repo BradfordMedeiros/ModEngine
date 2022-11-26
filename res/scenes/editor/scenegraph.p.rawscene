@@ -14,11 +14,11 @@
 |textures:gentexture:gentexture-textures
 |textures:basenumber:20000
 
-|fileexplorer:script:./res/scenes/editor/scenegraph.scm
-|fileexplorer:depgraph:raw
-|fileexplorer:gentexture:gentexture-raw
-|fileexplorer:basenumber:30000
-|fileexplorer:title:Sound List
-|fileexplorer:values:sound one|sound two|sound three
+#|fileexplorer:script:./res/scenes/editor/scenegraph.scm
+#|fileexplorer:depgraph:raw
+#|fileexplorer:gentexture:gentexture-raw
+#|fileexplorer:basenumber:30000
+#|fileexplorer:title:Sound List
+#|fileexplorer:values:sound one|sound two|sound three
 
 

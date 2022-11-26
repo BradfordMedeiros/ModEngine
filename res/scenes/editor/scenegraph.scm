@@ -84,10 +84,8 @@
 )
 (define (selectRawItem element isAlt)
 	(define attr (gameobj-attr mainobj))
-
-	(define topic (cadr (assoc "topic" attr)))
+	(define topic  (cadr (assoc "topic" attr)))
 	(sendnotify topic (car element))
-	(format #t "topic\n")
 )
 
 (define (onObjDoNothing gameobj color) 
@@ -545,11 +543,20 @@
 	(onObjectSelected gameobj color)
 )
 
+(define (isManagedByThisScript index)
+	(and 
+		(< index (+ baseNumber (* 2 mappingOffset)))
+		(>= index baseNumber)
+	)
+)
 
 (define (onMapping index)
 	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
-	(format #t "mapping: ~a, mapping: ~a\n" index selectedIndexForMapping)
-	(if selectedIndexForMapping
+	(define isManagedIndex (isManagedByThisScript index))
+	(format #t "mapping: ~a, baseNumber: ~a, mappingoffset = ~a, ismanagedIndex = ~a, name ~a\n" index baseNumber mappingOffset isManagedIndex (gameobj-name mainobj))
+	(format #t "attr: ~a\n" (gameobj-attr mainobj))
+
+	(if (and selectedIndexForMapping isManagedIndex)
 		(let (
 				(isToggle (not (cadr selectedIndexForMapping)))
 				(mappedIndex (car selectedIndexForMapping))
@@ -564,9 +571,13 @@
 				)
 				(begin
 					;(refreshDepGraph)
+					(format #t "mapping: selected index for mapping!\n")
 	  			(setSelectedIndex mappedIndex)
+					(format #t "mapping: did set selected index for mapping!\n")
 	  			(refreshGraphData)   
+	  			(format #t "mapping: refreshed graph data!\n")
 	  			(handleItemSelected selectedElement #f)
+	  			(format #t "mapping: handled selected item!\n")
 	  			(onGraphChange)
 				)
 			)
