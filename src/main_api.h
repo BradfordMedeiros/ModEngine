@@ -114,6 +114,7 @@ void playSound(std::string sound);
 std::vector<std::string> listModels();
 std::vector<std::string> listTextures();
 std::vector<std::string> listSoundFiles();
+std::vector<std::string> listResources(std::string resourceType);
 
 void sendNotifyMessage(std::string message, std::string value);
 

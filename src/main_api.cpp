@@ -394,13 +394,28 @@ void removeObjectById(objid id){
 std::vector<std::string> listModels(){
   return listFilesWithExtensions("./res/models", { "obj", "dae" });
 }
-
 std::vector<std::string> listTextures(){
   return listFilesWithExtensions("./res/textures", { "png", "jpg" });
 }
-
 std::vector<std::string> listSoundFiles(){
   return { listFilesWithExtensions("./res/sounds", { "wav" }) };
+}
+std::vector<std::string> listHeightmaps(){
+  return { listFilesWithExtensions("./res/heightmaps", { "png", "jpg" }) };
+}
+
+std::vector<std::string> listResources(std::string resourceType){
+  if (resourceType == "sounds"){
+    return listSoundFiles();
+  }else if (resourceType == "textures"){
+    return listTextures();
+  }else if (resourceType == "models"){
+    return listModels();
+  }else if (resourceType == "heightmaps"){
+    return listHeightmaps();
+  }
+  modassert(false, "invalid resource type: " + resourceType);
+  return {};
 }
 
 void sendNotifyMessage(std::string message, std::string value){

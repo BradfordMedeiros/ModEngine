@@ -1340,6 +1340,7 @@ int main(int argc, char* argv[]){
     .listModels = listModels,
     .listTextures = listTextures,
     .listSounds = listSoundFiles,
+    .listResources = listResources,
     .sendNotifyMessage = sendNotifyMessage,
     .timeSeconds = timeSeconds,
     .timeElapsed = timeElapsed,

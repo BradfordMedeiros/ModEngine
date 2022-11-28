@@ -611,6 +611,12 @@ std::vector<std::string> (*_listSounds)();
 SCM scmListSounds(){
   std::vector<std::string> sounds = _listSounds();
   return strVectorList(sounds);
+} 
+
+std::vector<std::string> (*_listResources)(std::string);
+SCM scmListResources(SCM resourceType){
+  auto resources = _listResources(scm_to_locale_string(resourceType));
+  return strVectorList(resources);
 }
 
 void (*_sendNotifyMessage)(std::string message, std::string value);
@@ -1194,6 +1200,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
   scm_c_define_gsubr("ls-textures", 0, 0, 0, (void *)scmListTextures);
   scm_c_define_gsubr("ls-sounds", 0, 0, 0, (void *)scmListSounds);
+  scm_c_define_gsubr("ls-res", 1, 0, 0, (void *)scmListResources);
 
   scm_c_define_gsubr("set-camera", 1, 1, 0, (void *)scmSetActiveCamera);    
   scm_c_define_gsubr("mov-cam", 3, 1, 0, (void *)scmMoveCamera);   // @TODO move + rotate camera can be removed since had the gameobj manipulation functions
@@ -1375,6 +1382,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listModels)(),
   std::vector<std::string> (*listTextures)(),
   std::vector<std::string> (*listSounds)(),
+  std::vector<std::string> (*listResources)(std::string),
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
@@ -1482,6 +1490,7 @@ void createStaticSchemeBindings(
   _listModels = listModels;
   _listTextures = listTextures;
   _listSounds = listSounds;
+  _listResources = listResources;
 
   _sendNotifyMessage = sendNotifyMessage;
 

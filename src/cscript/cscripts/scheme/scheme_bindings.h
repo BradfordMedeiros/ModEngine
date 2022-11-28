@@ -57,6 +57,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listModels)(),
   std::vector<std::string> (*listTextures)(),
   std::vector<std::string> (*listSounds)(),
+  std::vector<std::string> (*listResources)(std::string),
   void (*sendNotifyMessage)(std::string message, std::string value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
