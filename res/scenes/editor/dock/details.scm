@@ -415,9 +415,9 @@
 (define (saveHeightmapAs)
   (define name (getStoreValue "heightmap:filename"))
   (define isNamed (and name (> (string-length name) 0)))
-  (if isNamed
-    (format #t "saving name as: ~a\n" name)
-    (format #t "saving name as: unnamed\n")
+  (if (and isNamed managedObj)
+    (save-heightmap (gameobj-id managedObj) (string-append "./res/heightmaps/" name ".png"))
+    (format #t "no name provided so cannot save heightmap\n")
   )
 )
 

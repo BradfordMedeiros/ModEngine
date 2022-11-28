@@ -171,6 +171,11 @@ void saveScene(bool includeIds, objid sceneId, std::optional<std::string> filena
   }
 }
 
+void saveHeightmap(objid id, std::optional<std::string> filename){
+  modassert(filename.has_value(), "save heightmap required specified filename (for now)");
+  saveHeightmap(world, id, filename.value());
+}
+
 std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags){
   return allSceneIds(world.sandbox, tags);
 }

@@ -642,6 +642,14 @@ SCM scmSaveScene(SCM scmIncludeIds, SCM scmSceneId, SCM filepath){
   return SCM_UNSPECIFIED;
 }
 
+void (*_saveHeightmap)(objid id, std::optional<std::string> filename);
+SCM scmSaveHeightmap(SCM scmObjId, SCM scmFilename){
+  auto objectId = scm_to_int32(scmObjId);
+  auto filenameDefined = scmFilename != SCM_UNDEFINED;
+  _saveHeightmap(objectId, filenameDefined ? std::optional<std::string>(scm_to_locale_string(scmFilename)) : std::nullopt);
+  return SCM_UNSPECIFIED;
+}
+
 void (*_sendMessageTcp)(std::string data);
 SCM scmSendMessageTcp(SCM topic){
   _sendMessageTcp(scm_to_locale_string(topic));
@@ -1244,6 +1252,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("time-elapsed", 0, 0, 0, (void*)scmTimeElapsed);
 
   scm_c_define_gsubr("save-scene", 0, 3, 0, (void*)scmSaveScene);
+  scm_c_define_gsubr("save-heightmap", 1, 1, 0, (void*)scmSaveHeightmap);
 
   scm_c_define_gsubr("list-servers", 0, 0, 0, (void*)scmListServers);
   scm_c_define_gsubr("connect-server", 1, 0, 0, (void*)scmConnectServer);
@@ -1369,7 +1378,8 @@ void createStaticSchemeBindings(
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
-  void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename), 
+  void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename),
+  void (*saveHeightmap)(objid id, std::optional<std::string> filename),
   std::map<std::string, std::string> (*listServers)(),
   std::string (*connectServer)(std::string server),
   void (*disconnectServer)(),
@@ -1478,6 +1488,7 @@ void createStaticSchemeBindings(
   _timeSeconds = timeSeconds;
   _timeElapsed = timeElapsed;
   _saveScene = saveScene;
+  _saveHeightmap = saveHeightmap;
 
   _listServers = listServers;
   _connectServer = connectServer;

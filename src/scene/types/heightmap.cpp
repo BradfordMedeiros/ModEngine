@@ -245,13 +245,15 @@ HeightmapMask loadMask(std::string brushFile){
 }
 
 void saveHeightmap(HeightMapData& heightmap, std::string filepath){
+  auto isPng = getExtension(filepath) == "png";
+  modassert(isPng, "save heightmap - only png files allowed, specified " + filepath);
+  modassert(false, "save heightmap is broken, doesn't seem to work");
   char* newData = new char[heightmap.width * heightmap.height * 3];
   for (int i = 0; i < heightmap.height; i++){
     for (int j = 0; j < heightmap.width; j++){
        auto dataOffset = (i * heightmap.height) + j;
        int byteOffset = (int)(dataOffset * 3);
        auto r = (char)(heightmap.data[dataOffset] + heightmap.originalMidpoint);
-       std::cout << "r is: " << (unsigned int)r << std::endl;
        newData[byteOffset] = r;
        newData[byteOffset + 1] = 0;
        newData[byteOffset + 2] = 0;

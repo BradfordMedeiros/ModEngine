@@ -1344,6 +1344,7 @@ int main(int argc, char* argv[]){
     .timeSeconds = timeSeconds,
     .timeElapsed = timeElapsed,
     .saveScene = saveScene,
+    .saveHeightmap = saveHeightmap,
     .listServers = listServers,
     .connectServer = connectServer,
     .disconnectServer = disconnectServer,
