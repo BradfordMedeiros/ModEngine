@@ -53,6 +53,8 @@ struct ObjectSetAttribUtil {
   std::function<void(bool)> setEmitterEnabled;
   std::function<Texture(std::string)> ensureTextureLoaded;
   std::function<void(int)> releaseTexture;
+  std::function<Mesh(MeshData&)> loadMesh;
+  std::function<void(Mesh&)> unloadMesh;
   std::function<std::string(std::string)> pathForModLayer;
 };
 

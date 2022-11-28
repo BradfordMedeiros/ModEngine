@@ -212,24 +212,14 @@
         [
           "type" => "numeric",
           "data" => [
-            "key" => "volume", 
+            "key" => "sizing", 
             "value" => [
               [ 
                 "type" => "float", 
-                "name" => "dim x", 
+                "name" => "dim", 
                 "value" => [ 
                   "binding" => "gameobj:dim",
-                  "binding-index" =>  0,
-                  "type" => "positive-number",
-                ]
-              ],
-              [ 
-                "type" => "float", 
-                "name" => "dim y", 
-                "value" => [ 
-                  "binding" => "gameobj:dim",
-                  "binding-index" =>  1,
-                  "type" => "positive-number",
+                  "type" => "number",
                 ]
               ],
             ]
@@ -299,7 +289,7 @@
                 "name" => "Amount", 
                 "value" => [ 
                   "binding" => "world:tools:terrainpaint-amount",
-                  "type" => "positive-number",
+                  "type" => "number",
                 ]
               ],
             ]

@@ -33,8 +33,18 @@ void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _att
   autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
 }
 bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  auto oldDim = heightmapObj.dim;
   autoserializerSetAttrWithTextureLoading((char*)&heightmapObj, heightmapAutoserializer, attributes, util);
-  return false;
+  auto newDim = heightmapObj.dim;
+  if (oldDim != newDim){
+    util.unloadMesh(heightmapObj.mesh);
+    delete[] heightmapObj.heightmap.data;
+    auto heightmap = loadAndAllocateHeightmap(heightmapObj.mapName, heightmapObj.dim);
+    auto meshData = generateHeightmapMeshdata(heightmap);
+    heightmapObj.heightmap = heightmap;
+    heightmapObj.mesh = util.loadMesh(meshData);
+  }
+  return true;
 }
 std::vector<std::pair<std::string, std::string>> serializeHeightmap(GameObjectHeightmap& heightmapObj, ObjectSerializeUtil& util){
   std::vector<std::pair<std::string, std::string>> pairs;

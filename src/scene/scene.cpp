@@ -1168,6 +1168,12 @@ void afterAttributesSet(World& world, objid id, GameObject& gameobj, bool veloci
 }
 
 void setAttributes(World& world, objid id, GameobjAttributes& attr){
+  auto loadMeshObject = [&world, id](MeshData& meshdata) -> Mesh {
+    return loadMesh("./res/textures/default.jpg", meshdata, [&world, id](std::string texture) -> Texture {
+      return loadTextureWorld(world, texture, id);
+    });    
+  };
+
   ObjectSetAttribUtil util {
     .setEmitterEnabled = [&world, id](bool enabled) -> void {
       setEmitterEnabled(world.emitters, id, enabled);
@@ -1178,6 +1184,8 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
     .releaseTexture = [&world, id](int textureId){
       freeTextureRefsIdByOwner(world, id, textureId);
     },
+    .loadMesh = loadMeshObject,
+    .unloadMesh = freeMesh,
     .pathForModLayer = world.interface.modlayerPath,
   };
   auto shouldRebuildPhysics = setObjectAttributes(world.objectMapping, id, attr, util);
