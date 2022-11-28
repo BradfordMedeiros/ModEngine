@@ -403,7 +403,9 @@ std::vector<std::string> listSoundFiles(){
 std::vector<std::string> listHeightmaps(){
   return { listFilesWithExtensions("./res/heightmaps", { "png", "jpg" }) };
 }
-
+std::vector<std::string> listHeightmapBrushes(){
+  return { listFilesWithExtensions("./res/brush", { "png", "jpg" }) };
+}
 std::vector<std::string> listResources(std::string resourceType){
   if (resourceType == "sounds"){
     return listSoundFiles();
@@ -413,6 +415,8 @@ std::vector<std::string> listResources(std::string resourceType){
     return listModels();
   }else if (resourceType == "heightmaps"){
     return listHeightmaps();
+  }else if (resourceType == "heightmap-brushes"){
+    return listHeightmapBrushes();
   }
   modassert(false, "invalid resource type: " + resourceType);
   return {};

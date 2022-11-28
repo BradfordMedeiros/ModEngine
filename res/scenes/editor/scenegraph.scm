@@ -10,7 +10,7 @@
 	)
 )
 
-(format #t "list models: ~a\n" (ls-models))
+(format #t "list models: ~a\n" (ls-res "models"))
 
 (define (getMockScenegraph) (list
 	(list "root" "mainfolder" (list 0 0))
@@ -23,13 +23,13 @@
 ))
 
 (define (makeIntoGraph header modelpath) (list header modelpath (list 0 0)))
-(define (getModelList) (map (lambda(model) (makeIntoGraph "models" model)) (ls-models)))
+(define (getModelList) (map (lambda(model) (makeIntoGraph "models" model)) (ls-res "models")))
 (define (getMockTextureList) 
 	(list
 		(list "Textures" "texture-mock" (list 0 0))
 	)
 )
-(define (getTextureList) (map (lambda(model) (makeIntoGraph "textures" model)) (ls-textures)))
+(define (getTextureList) (map (lambda(model) (makeIntoGraph "textures" model)) (ls-res "textures")))
 (define (getRawExplorerList) 
 	(define attr (gameobj-attr mainobj))
 	(define values (string-split (cadr (assoc "values" attr)) #\|))

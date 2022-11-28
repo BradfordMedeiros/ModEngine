@@ -131,12 +131,12 @@
 )
 
 
-(define allModels (ls-models))
+(define allModels (ls-res "models"))
 (define modelIndex 0)
 (define numModels  (length allModels))
 
 (define (getmodels index)
-  (define backlist (list-tail (ls-models) index))
+  (define backlist (list-tail (ls-res "models") index))
   (if (<= (length backlist) 4)
     backlist
     (list-head backlist 4)

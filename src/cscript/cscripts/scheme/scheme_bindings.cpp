@@ -595,24 +595,6 @@ SCM strVectorList(std::vector<std::string>& values){
   return list;
 }
 
-std::vector<std::string> (*_listModels)();
-SCM scmListModels(){
-  std::vector<std::string> models = _listModels();
-  return strVectorList(models);
-}
-
-std::vector<std::string> (*_listTextures)();
-SCM scmListTextures(){
-  std::vector<std::string> textures = _listTextures();
-  return strVectorList(textures);
-}
-
-std::vector<std::string> (*_listSounds)();
-SCM scmListSounds(){
-  std::vector<std::string> sounds = _listSounds();
-  return strVectorList(sounds);
-} 
-
 std::vector<std::string> (*_listResources)(std::string);
 SCM scmListResources(SCM resourceType){
   auto resources = _listResources(scm_to_locale_string(resourceType));
@@ -1196,10 +1178,6 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("scenegraph", 0, 1, 0, (void*)scmScenegraph);
 
   scm_c_define_gsubr("send-load-scene", 1, 0, 0, (void *)scm_sendLoadScene);
-
-  scm_c_define_gsubr("ls-models", 0, 0, 0, (void *)scmListModels);
-  scm_c_define_gsubr("ls-textures", 0, 0, 0, (void *)scmListTextures);
-  scm_c_define_gsubr("ls-sounds", 0, 0, 0, (void *)scmListSounds);
   scm_c_define_gsubr("ls-res", 1, 0, 0, (void *)scmListResources);
 
   scm_c_define_gsubr("set-camera", 1, 1, 0, (void *)scmSetActiveCamera);    
@@ -1379,9 +1357,6 @@ void createStaticSchemeBindings(
   void playAnimation(int32_t id, std::string animationToPlay),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid),
-  std::vector<std::string> (*listModels)(),
-  std::vector<std::string> (*listTextures)(),
-  std::vector<std::string> (*listSounds)(),
   std::vector<std::string> (*listResources)(std::string),
   void (*sendNotifyMessage)(std::string topic, std::string value),
   double (*timeSeconds)(bool realtime),
@@ -1487,9 +1462,6 @@ void createStaticSchemeBindings(
   _playAnimation = playAnimation;
   _listClips = listClips;
   _playClip = playClip;
-  _listModels = listModels;
-  _listTextures = listTextures;
-  _listSounds = listSounds;
   _listResources = listResources;
 
   _sendNotifyMessage = sendNotifyMessage;

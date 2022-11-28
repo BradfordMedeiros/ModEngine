@@ -1236,7 +1236,7 @@ void physicsRotateSet(World& world, objid index, glm::quat rotation, bool relati
       setRotation(body, rot);
     }
   }else{
-    modassert(false, "not supposed to be absolute");
+    //modassert(false, "not supposed to be absolute");
     updateAbsoluteRotation(world.sandbox, index, rotation);
     if (world.rigidbodys.find(index) != world.rigidbodys.end()){
       auto rigidBody = world.rigidbodys.at(index);

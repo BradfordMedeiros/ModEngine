@@ -99,7 +99,7 @@
   "explorer-sound"
   "explorer-gentexture-sound"
   30000
-  (ls-sounds)
+  (ls-res "sounds")
 )
 
 (createScenegraph
@@ -108,7 +108,7 @@
   "explorer-heightmap"
   "explorer-gentexture-heightmap"
   40000
-  (append (list  "./res/heightmaps/default.jpg" "./res/heightmaps/dunes_low.jpg"))
+  (append (ls-res "heightmaps"))
 )
 
 (createScenegraph
@@ -117,5 +117,5 @@
   "explorer-heightmap-brush"
   "explorer-gentexture-heightmap-brush"
   50000
-  (append (list "./res/brush/border_5x5.png" "./res/brush/point.png" "./res/brush/ramp_5x5.png"))
+  (append (ls-res "heightmap-brushes"))
 )
