@@ -67,7 +67,16 @@ int indexFromCoords(HeightMapData& heightmap, int vertexX, int vertexY){
 
 glm::vec3 positionForVertex(HeightMapData& heightmap, int h, int w){
   auto height = heightmap.data[(h * heightmap.width) + w];
-  return glm::vec3(w - ((heightmap.width  - 1)/ 2.f), height, h - ((heightmap.height - 1) / 2.f));
+
+  float cellWidth = 1.f / heightmap.width;
+  float cellHeight = 1.f / heightmap.height;
+
+  float offsetWidthCell = cellWidth * 0.5f;
+  float offsetHeightCell = cellHeight * 0.5f;
+  float halfWidth = heightmap.width * cellWidth * 0.5f;
+  float halfHeight = heightmap.height * cellHeight * 0.5f;
+
+  return glm::vec3(w * cellWidth - halfWidth + offsetWidthCell, height, h * cellHeight - halfHeight + offsetHeightCell);
 }
 
 // heightmap can share extra indicies for connected squares (they dont)
