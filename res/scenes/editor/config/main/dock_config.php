@@ -178,6 +178,38 @@
           ],
         ],
         [
+          "type" => "label",
+          "data" => [
+            "key" => "Save Heightmap",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "save-heightmap",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Save Heightmap As",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "save-heightmap-as",
+            "tint" => "1 1 0 1",
+          ],
+        ],
+        [ "type" => "label", 
+          "data" => [
+            "key" => "Heightmap Name", 
+            "value" => [
+              "binding" => "heightmap:filename",
+            ],
+          ]
+        ],
+        [
           "type" => "numeric",
           "data" => [
             "key" => "volume", 
@@ -473,6 +505,18 @@
             "value" => [
               "binding" => "false-binding-0",
             ]
+          ],
+        ],
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Sound",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ],
+            "action" => "create-sound",
+            "tint" => "1 1 0 1",
           ],
         ],
         [

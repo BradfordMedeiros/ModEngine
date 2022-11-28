@@ -240,6 +240,10 @@
   (set! dataValues (cons (list key value modified) newDataValues))
 )
 (define (updateStoreValue keyvalue) (updateStoreValueModified keyvalue #f))
+(define (getStoreValue key)
+  (define value (assoc key dataValues))
+  (if value (cadr value) #f)
+)
 
 (define (executeQuery query) 
   (define queryCast (list-ref query 3))
@@ -371,6 +375,11 @@
     (mk-obj-attr (string-append "!light-" (uniqueName)) (list) activeSceneId)
   )
 )
+(define (createSound) 
+  (if activeSceneId 
+    (mk-obj-attr (string-append "&sound-" (uniqueName)) (list (list "clip" "./res/sounds/sample.wav")) activeSceneId)
+  )
+)
 (define (createText) 
   (if activeSceneId 
     (mk-obj-attr (string-append ")text-" (uniqueName)) (list (list "value" "sample text")) activeSceneId)
@@ -397,6 +406,18 @@
       ) 
       activeSceneId
     )
+  )
+)
+(define (saveHeightmap)
+  (define name (getStoreValue "gameobj:map"))
+  (format #t "save heightmap ~a\n" name)
+)
+(define (saveHeightmapAs)
+  (define name (getStoreValue "heightmap:filename"))
+  (define isNamed (and name (> (string-length name) 0)))
+  (if isNamed
+    (format #t "saving name as: ~a\n" name)
+    (format #t "saving name as: unnamed\n")
   )
 )
 
@@ -477,10 +498,13 @@
   (list
     (list "create-camera" createCamera)
     (list "create-light" createLight)
+    (list "create-sound" createSound)
     (list "create-text" createText)
     (list "create-geo" createGeo)
     (list "create-portal" createPortal)
     (list "create-heightmap" createHeightmap)
+    (list "save-heightmap" saveHeightmap)
+    (list "save-heightmap-as" saveHeightmapAs)
     (list "create-voxels" createVoxels)
     (list "set-transform-mode" (lambda() (setManipulatorMode "translate")))
     (list "set-scale-mode" (lambda() (setManipulatorMode "scale")))
