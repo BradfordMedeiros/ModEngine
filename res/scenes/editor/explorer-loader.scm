@@ -56,6 +56,7 @@
 
 
 (define explorerSoundValue #f)
+(define explorerHeightmapValue #f)
 (define explorerHeightmapBrushValue #f)
 (define (onMessage key value)
   (format #t "explorer loader: ~a ~a\n" key value)
@@ -64,6 +65,9 @@
   )
   (if (equal? key "explorer-heightmap-brush")
     (set! explorerHeightmapBrushValue value)
+  )
+  (if (equal? key "explorer-heightmap")
+    (set! explorerHeightmapValue value)
   )
   (if (equal? key "explorer")
     (cond 
@@ -79,6 +83,10 @@
           )
           (set! explorerHeightmapBrushValue #f)        
 
+          (if explorerHeightmapValue
+            (sendnotify "explorer-heightmap-final" explorerHeightmapValue)
+          )
+          (set! explorerHeightmapValue #f)
           (unloadExplorer)
         )
       )

@@ -33,10 +33,12 @@ void heightmapObjAttr(GameObjectHeightmap& heightmapObj, GameobjAttributes& _att
   autoserializerGetAttr((char*)&heightmapObj, heightmapAutoserializer, _attributes);
 }
 bool setHeightmapAttributes(GameObjectHeightmap& heightmapObj, GameobjAttributes& attributes, ObjectSetAttribUtil& util){
+  auto oldMapName = heightmapObj.mapName;
   auto oldDim = heightmapObj.dim;
   autoserializerSetAttrWithTextureLoading((char*)&heightmapObj, heightmapAutoserializer, attributes, util);
+  auto newMapName = heightmapObj.mapName;
   auto newDim = heightmapObj.dim;
-  if (oldDim != newDim){
+  if ((oldDim != newDim) || (oldMapName != newMapName)){
     util.unloadMesh(heightmapObj.mesh);
     delete[] heightmapObj.heightmap.data;
     auto heightmap = loadAndAllocateHeightmap(heightmapObj.mapName, heightmapObj.dim);

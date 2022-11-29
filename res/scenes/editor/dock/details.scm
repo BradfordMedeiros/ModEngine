@@ -411,6 +411,8 @@
 (define (saveHeightmap)
   (define name (getStoreValue "gameobj:map"))
   (format #t "save heightmap ~a\n" name)
+  (format #t "not implemented")
+  (exit 1)
 )
 (define (saveHeightmapAs)
   (define name (getStoreValue "heightmap:filename"))
@@ -1313,6 +1315,12 @@
   (if (equal? key "explorer-heightmap-brush-final")
     (begin
       (updateDialogValues "load-heightmap-brush" value)
+      (submitAndPopulateData)
+    )
+  )
+  (if (equal? key "explorer-heightmap-final")
+    (begin
+      (updateDialogValues "load-heightmap" value)
       (submitAndPopulateData)
     )
   )
