@@ -62,10 +62,12 @@
 )
 (define (selectModelItem element isAlt) 
 	(define modelpath (car element))
+	(define objname (string-append (number->string (random 10000000)) "-fix-generated"))
 	(mk-obj-attr
-		(string-append (number->string (random 10000000)) "-generated")
+		objname
 		(list
 			(list "mesh" modelpath)
+			(list (string-append objname "/Plane") "texture" "gentexture-scenegraph")
 		)
 	)
 )
