@@ -508,12 +508,22 @@
 	;(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
 )
 
+(define didScroll #f)
 (define (onScroll amount)
 	(format #t "onScroll called: ~a" amount)
   (set! offset (min maxOffset (max minOffset (+ offset (* 0.04 amount)))))
   (format #t "minoffset: ~a, maxoffset: ~a, offset: ~a\n" minOffset maxOffset offset)
-  (refreshDepGraph)   
-	(onGraphChange)
+  (set! didScroll #t)
+)
+
+(define (onFrame)
+	(if didScroll
+		(begin
+			(set! didScroll #f)
+			(refreshDepGraph)   
+			(onGraphChange)
+		)
+	)
 )
 
 
