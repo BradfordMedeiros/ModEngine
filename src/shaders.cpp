@@ -80,3 +80,12 @@ unsigned int loadShader(std::string vertexShaderFilepath, std::string fragmentSh
    return shaderProgramId;
 }
 
+ShaderStringVals parseShaderString(std::string& shaderString){
+  // format: fragment, vertex (whitespace trimmed). 
+  auto values = filterWhitespace(split(shaderString, ','));
+  modassert(values.size() == 1 || values.size() == 2, "shader string size must be 1 or 2, got " + shaderString);
+  return ShaderStringVals {
+    .vertex = values.size() > 1 ? values.at(1) : std::optional<std::string>(std::nullopt),
+    .fragment = values.size() > 0 ? values.at(0) : std::optional<std::string>(std::nullopt),
+  };
+}

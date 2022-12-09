@@ -305,7 +305,7 @@ void traverseSceneByLayer(Scene& scene, std::vector<LayerInfo> layers, std::func
     for (auto data : datum){
       auto gameobject = scene.idToGameObjects.at(data.id);
       if (gameobject.layer == layer.name){
-        onObject(data.id, data.modelMatrix, data.parentMatrix, layer, gameobject.fragshader);
+        onObject(data.id, data.modelMatrix, data.parentMatrix, layer, gameobject.shader);
       }
     }  
   }

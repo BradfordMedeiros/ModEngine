@@ -162,8 +162,8 @@ std::vector<AutoSerialize> gameobjSerializer {
     .defaultValue = "",
   },
   AutoSerializeString {
-    .structOffset = offsetof(GameObject, fragshader),
-    .field = "fragshader",
+    .structOffset = offsetof(GameObject, shader),
+    .field = "shader",
     .defaultValue = "",
   },
   AutoSerializeString {
@@ -330,7 +330,7 @@ std::vector<std::pair<std::string, std::string>> uniqueAdditionalFields(GameObje
   return fields;
 }
 
-std::vector<std::string> reservedMultiObjFields = { "fragshader", "layer", "position", "scale" };
+std::vector<std::string> reservedMultiObjFields = { "shader", "layer", "position", "scale" };
 bool isReservedSubobjectAttribute(const char* field){
   for (int i = 0; i < reservedMultiObjFields.size(); i++){
     if (reservedMultiObjFields.at(i) == field){
@@ -343,7 +343,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
   MODTODO("default inheritance of attributes...should there really be any (aside from transform)");
   GameobjAttributes attributes {
     .stringAttributes = {
-      {"fragshader", gameobj.fragshader},
+      {"shader", gameobj.shader},
       {"layer", gameobj.layer},
     },
     .vecAttr = {
@@ -355,7 +355,7 @@ GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObj
       .vec4 = {},
     },
   };
-  //std::cout << "Default attributes: fragshader = " << gameobj.fragshader << ", layer = " << gameobj.layer << ", position = " << print(transform.position) << ", scale = " << print(transform.scale) << std::endl;
+  //std::cout << "Default attributes: shader = " << gameobj.shader << ", layer = " << gameobj.layer << ", position = " << print(transform.position) << ", scale = " << print(transform.scale) << std::endl;
   mergeAttributes(attributes, additionalFields);
   return attributes;
 }

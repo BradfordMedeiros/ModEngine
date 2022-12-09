@@ -355,17 +355,21 @@ void drawTraversalPositions(){
   }
 }
 
-std::map<std::string, GLint> shaderNameToId;
-GLint getShaderByName(std::string fragShaderName, GLint shaderProgram, bool allowShaderOverride){
-  if (fragShaderName == "" || !allowShaderOverride){
+std::map<std::string, GLint> shaderstringToId;
+GLint getShaderByShaderString(std::string shaderString, GLint shaderProgram, bool allowShaderOverride){
+  if (shaderString == "" || !allowShaderOverride){
     return shaderProgram;
   }
-  if (shaderNameToId.find(fragShaderName) == shaderNameToId.end()){
-    auto shaderId = loadShader(shaderFolderPath + "/vertex.glsl", fragShaderName, interface.readFile);
-    shaderNameToId[fragShaderName] = shaderId;
-    sendNotifyMessage("alert", std::string("loaded shader: ") + fragShaderName);
+  if (shaderstringToId.find(shaderString) == shaderstringToId.end()){
+    auto parsedShaderString = parseShaderString(shaderString);
+    auto vertexShaderPath = parsedShaderString.vertex.has_value() ? parsedShaderString.vertex.value() : shaderFolderPath + "/vertex.glsl";
+    auto fragmentShaderPath = parsedShaderString.fragment.has_value() ? parsedShaderString.fragment.value() : shaderFolderPath + "/fragment.glsl";
+
+    auto shaderId = loadShader(vertexShaderPath, fragmentShaderPath, interface.readFile);
+    shaderstringToId[shaderString] = shaderId;
+    sendNotifyMessage("alert", std::string("loaded shader: ") + shaderString);
   }
-  return shaderNameToId.at(fragShaderName);
+  return shaderstringToId.at(shaderString);
 }
 
 // Kind of crappy since the uniforms don't unset their values after rendering, but order should be deterministic so ... ok
@@ -476,7 +480,7 @@ int renderWorld(World& world,  GLint shaderProgram, bool allowShaderOverride, gl
     addPositionToRender(modelMatrix, parentModelMatrix);
 
     bool objectSelected = idInGroup(world, id, selectedIds(state.editor));
-    auto newShader = getShaderByName(shader, shaderProgram, allowShaderOverride);
+    auto newShader = getShaderByShaderString(shader, shaderProgram, allowShaderOverride);
 
     // todo -> need to just cache last shader value (or sort?) so don't abuse shader swapping (ok for now i guess)
     MODTODO("improve shader state switches by looking into some sort of caching");

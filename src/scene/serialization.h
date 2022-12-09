@@ -39,7 +39,7 @@ struct GameObject {
   std::string lookat;
   std::string layer;
   std::string script;
-  std::string fragshader;
+  std::string shader;
   bool netsynchronize;
   
   GameobjAttributes additionalAttr;
