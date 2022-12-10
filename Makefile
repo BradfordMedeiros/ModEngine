@@ -15,7 +15,7 @@ modengine: build resourcefiles
 
 modengine_release: build resourcefiles
 	@echo "making modengine release"
-	@(cd ./build && cmake -DCMAKE_BUILD_TYPE=Release .. && make all)
+	@(cd ./build && cmake -DCMAKE_BUILD_TYPE=Release -DADDITIONAL_SRC=$(additional_src) .. && make all)
 	@echo modengine release output to ./build/modengine          
 
 resourcefiles: build #assimp  		# This should probably be in CMakeLists.txt but is doesn't seem to play nice
