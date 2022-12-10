@@ -17,9 +17,22 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
+set (additional_source_list "")
+if (ADDITIONAL_SRC)
+  message("include additional src directory: ${ADDITIONAL_SRC}")
+  if(NOT EXISTS "${ADDITIONAL_SRC}")
+    message(FATAL_ERROR "Cannot include ADDITIONAL_SRC: ${ADDITIONAL_SRC} does not exist")
+  endif()
+  file(GLOB_RECURSE additional_source_list "${ADDITIONAL_SRC}/*.cpp")
+  # message("addition source list: ${additional_source_list}")
+endif()
+
+
+
+
 if (NOT BUILDTEST)
   file(GLOB_RECURSE source_list "${SRC_DIR}/*.cpp")
-  add_executable(${PROJECT_NAME} ${source_list})
+  add_executable(${PROJECT_NAME} ${source_list} ${additional_source_list})
 else()
   message("Peforming Build Test")
   file(GLOB_RECURSE source_list "${CMAKE_CURRENT_SOURCE_DIR}/buildtest/*.cpp")

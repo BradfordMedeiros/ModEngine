@@ -10,7 +10,7 @@ buildtest: build resourcefiles
 
 modengine: build resourcefiles
 	@echo "making modengine debug"
-	@(cd ./build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make all)
+	@(cd ./build && cmake -DCMAKE_BUILD_TYPE=Debug -DADDITIONAL_SRC=$(additional_src) .. && make all)
 	@echo modengine output to ./build/modengine
 
 modengine_release: build resourcefiles
@@ -26,3 +26,4 @@ build:
 	@mkdir -p ./build/screenshots
 clean:
 	@rm -r ./build
+
