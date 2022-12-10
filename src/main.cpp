@@ -34,6 +34,12 @@
 #include "./scene/common/textures_gen.h"
 #include "./modlayer.h"
 
+#define VAL(x) #x
+#define STR(macro) VAL(macro)
+#ifdef ADDITIONAL_SRC_HEADER
+  #include STR(ADDITIONAL_SRC_HEADER)
+#endif
+
 unsigned int framebufferProgram;
 unsigned int drawingProgram;
 unsigned int quadVAO;
@@ -1391,8 +1397,16 @@ int main(int argc, char* argv[]){
       return selectedIds(state.editor);
     }
   };
-  registerAllBindings({ sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) });
 
+
+  std::vector<CScriptBinding> pluginBindings = { sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) };
+  #ifdef ADDITIONAL_SRC_HEADER
+    auto userBindings = getUserBindings();
+    for (auto userBinding : userBindings){
+      pluginBindings.push_back(userBinding);
+    }
+  #endif
+  registerAllBindings(pluginBindings);
   cBindings = getCScriptBindingCallbacks();
 
   BulletDebugDrawer drawer(addLineNextCycle);
