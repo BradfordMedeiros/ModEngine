@@ -19,16 +19,22 @@ set(BUILD_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 set (additional_source_list "")
 if (ADDITIONAL_SRC)
-  message("include additional src directory: ${ADDITIONAL_SRC}")
+  if(IS_ABSOLUTE ${ADDITIONAL_SRC})
+    message(FATAL_ERROR "Source directory must be relative to root source dir, got : ${ADDITIONAL_SRC}")
+  endif()
+
+  set(ADDITIONAL_SRC_PATH "${SRC_DIR}/${ADDITIONAL_SRC}")
+  set(ADDITIONAL_SRC_PATH_HEADER "${ADDITIONAL_SRC_PATH}/bindings.h")
+  set(ADDITIONAL_SRC_PATH_GLOB "${ADDITIONAL_SRC_PATH}/*.cpp")
+  message("include additional src directory: ${ADDITIONAL_SRC_PATH}, glob on ${ADDITIONAL_SRC_PATH_GLOB}")
+  file(GLOB_RECURSE additional_source_list "${ADDITIONAL_SRC_PATH_GLOB}")
+  message("addition source list: ${additional_source_list}, header is ${ADDITIONAL_SRC_PATH_HEADER}")
+
   if(NOT EXISTS "${ADDITIONAL_SRC}")
     message(FATAL_ERROR "Cannot include ADDITIONAL_SRC: ${ADDITIONAL_SRC} does not exist")
   endif()
-  add_definitions("-DADDITIONAL_SRC_HEADER=${ADDITIONAL_SRC}/bindings.h")
-  file(GLOB_RECURSE additional_source_list "${ADDITIONAL_SRC}/*.cpp")
-  # message("addition source list: ${additional_source_list}")
+  add_definitions("-DADDITIONAL_SRC_HEADER=${ADDITIONAL_SRC_PATH_HEADER}")
 endif()
-
-
 
 
 if (NOT BUILDTEST)

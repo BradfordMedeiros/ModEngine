@@ -1401,7 +1401,7 @@ int main(int argc, char* argv[]){
 
   std::vector<CScriptBinding> pluginBindings = { sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) };
   #ifdef ADDITIONAL_SRC_HEADER
-    auto userBindings = getUserBindings();
+    auto userBindings = getUserBindings(pluginApi);
     for (auto userBinding : userBindings){
       pluginBindings.push_back(userBinding);
     }
