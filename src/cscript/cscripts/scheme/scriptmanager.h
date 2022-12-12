@@ -10,7 +10,7 @@
 #include "../../../common/util.h"
 
 struct SchemeBindingCallbacks {
-  id_func onFrame;
+  id_func_data onFrame;
   id_colposfun onCollisionEnter;
   id_colfun onCollisionExit;
   id_mousecallback onMouseCallback;

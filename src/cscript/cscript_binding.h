@@ -114,7 +114,7 @@ struct CScriptBinding {
   std::function<void(std::string scriptname, objid id, void*)> remove;
 
   // Other callbacks
-  id_func onFrame;
+  id_func_data onFrame;
   id_colposfun onCollisionEnter;
   id_colfun onCollisionExit;
   id_mousecallback onMouseCallback;

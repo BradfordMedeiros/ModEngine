@@ -55,7 +55,8 @@ void unloadCScript(int id){
   if (instanceExists){
     auto objInstance = customObjInstances.at(id);
     auto binding = getCScriptBinding(objInstance.name.c_str());
-    binding -> remove(objInstance.name, id, objInstance.data);   
+    binding -> remove(objInstance.name, id, objInstance.data); 
+    customObjInstances.erase(id);
   }
 }
 void renderCustomObj(int id){
@@ -74,7 +75,7 @@ void onCFrameAllScripts(){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onFrame(instanceId);
+    binding -> onFrame(instanceId, objInstance.data);
   }
 }
 

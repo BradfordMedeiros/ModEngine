@@ -30,7 +30,7 @@ extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
 extern TimePlayback timePlayback;
 
-std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    // @todo : odd behavior: currently these names do not have to be unique in different scenes.  this just finds first instance of that name.
+std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    
   return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
 }
 

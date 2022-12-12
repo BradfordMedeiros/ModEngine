@@ -246,7 +246,7 @@ void attrSetLoadTextureManual(GameobjAttributes& attr, TextureLoadingData* _text
     _textureLoading -> textureId = -1;
     _textureLoading -> textureString = textureToLoad;
   }
-  std::cout << "texture to load: " << textureToLoad << " isloaded: " << _textureLoading -> isLoaded << std::endl;
+  //std::cout << "texture to load: " << textureToLoad << " isloaded: " << _textureLoading -> isLoaded << std::endl;
 }
 
 void attrSet(GameobjAttributes& attr, int* _value, std::vector<int> enums, std::vector<std::string> enumStrings, const char* field, bool strict){
@@ -310,7 +310,7 @@ void autoserializeHandleTextureLoading(char* structAddress, std::vector<AutoSeri
         _textureLoading -> isLoaded = true;
       }
       
-      std::cout << "texture to load: " << _textureLoading -> textureString << " isloaded: " << _textureLoading -> isLoaded << std::endl;
+      //std::cout << "texture to load: " << _textureLoading -> textureString << " isloaded: " << _textureLoading -> isLoaded << std::endl;
     }
   }
 }

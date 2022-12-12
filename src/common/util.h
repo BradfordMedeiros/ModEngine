@@ -222,6 +222,7 @@ std::vector<T> mapKeys(std::map<T, N>& values){
 /* Move back into customobj, just here to share between this an scheme for now */
 typedef void(*func)();
 typedef void(*id_func)(int32_t id);
+typedef void(*id_func_data)(int32_t id, void* data);
 typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
 typedef void(*id_colposfun)(int32_t id, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
 typedef void(*colfun)(int32_t obj1, int32_t obj2);

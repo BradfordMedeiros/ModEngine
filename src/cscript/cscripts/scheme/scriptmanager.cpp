@@ -96,7 +96,7 @@ void unloadScriptsCleanup(){
   }
 }
 
-void onFrameAllScripts(objid scriptId){
+void onFrameAllScripts(objid scriptId, void* data){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
