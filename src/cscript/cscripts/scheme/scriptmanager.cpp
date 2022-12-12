@@ -141,7 +141,7 @@ void onMouseCallbackAllScripts(objid scriptId, int button, int action, int mods)
   onMouseCallback(button, action, mods);
 }
 
-void onMouseMoveCallbackAllScripts(objid scriptId, double xPos, double yPos, float xNdc, float yNdc){
+void onMouseMoveCallbackAllScripts(objid scriptId, void* data, double xPos, double yPos, float xNdc, float yNdc){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;

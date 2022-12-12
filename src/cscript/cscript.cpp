@@ -104,7 +104,7 @@ void onCMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float 
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMouseMoveCallback(instanceId, xPos, yPos, xNdc, yNdc);
+    binding -> onMouseMoveCallback(instanceId, objInstance.data, xPos, yPos, xNdc, yNdc);
   }
 }
 void onCScrollCallbackAllScripts(double amount){

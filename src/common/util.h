@@ -230,7 +230,7 @@ typedef void(*id_colfun)(int32_t id, int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
 typedef void(*id_mousecallback)(int32_t id, int button, int action, int mods);
 typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNdc);
-typedef void(*id_mousemovecallback)(int32_t id, double xPos, double yPos, float xNdc, float yNdc);
+typedef void(*id_mousemovecallback)(int32_t id, void* data, double xPos, double yPos, float xNdc, float yNdc);
 typedef void(*scrollcallback)(double amount);
 typedef void(*id_scrollcallback)(int32_t id, double amount);
 typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
