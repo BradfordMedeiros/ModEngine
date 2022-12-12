@@ -195,7 +195,7 @@ void onMappingAllScripts(int32_t scriptId, int32_t index){
   onMapping(index);
 }
 
-void onKeyCallbackAllScripts(int32_t scriptId, int key, int scancode, int action, int mods){
+void onKeyCallbackAllScripts(int32_t scriptId, void* data, int key, int scancode, int action, int mods){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
@@ -221,7 +221,7 @@ void onCameraSystemChangeAllScripts(int32_t scriptId, std::string camera, bool u
   onCameraSystemChange(camera, usingBuiltInCamera);  
 }
 
-void onMessageAllScripts(objid scriptId, std::string& topic, AttributeValue& value){
+void onMessageAllScripts(objid scriptId, void* data, std::string& topic, AttributeValue& value){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;

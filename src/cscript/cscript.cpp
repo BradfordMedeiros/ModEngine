@@ -147,7 +147,7 @@ void onCKeyCallbackAllScripts(int key, int scancode, int action, int mods){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onKeyCallback(instanceId, key, scancode, action, mods);
+    binding -> onKeyCallback(instanceId, objInstance.data, key, scancode, action, mods);
   }
 }
 void onCKeyCharCallbackAllScripts(unsigned int codepoint){
@@ -169,7 +169,7 @@ void onCMessageAllScripts(std::string& topic, AttributeValue& value){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMessage(instanceId, topic, value);
+    binding -> onMessage(instanceId, objInstance.data, topic, value);
   }
 }
 
