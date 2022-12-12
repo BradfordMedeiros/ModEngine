@@ -674,6 +674,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
     return;
   }
 
+
   if (interpolationTime > 0){
     state.cameraInterp = CamInterpolation {
       .shouldInterpolate = true,
@@ -684,6 +685,7 @@ void setActiveCamera(int32_t cameraId, float interpolationTime){
     return;
   }
 
+  state.useDefaultCamera = false;
   state.activeCameraObj = &getGameObject(world, cameraId);
   state.activeCameraData = &getCamera(world, cameraId);
   setSelectedIndex(state.editor, cameraId, state.activeCameraObj -> name, true);
