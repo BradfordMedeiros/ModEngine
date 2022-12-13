@@ -105,7 +105,7 @@ void onFrameAllScripts(objid scriptId, void* data){
   onFrame();
 }
 
-void onCollisionEnterAllScripts(objid scriptId, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
+void onCollisionEnterAllScripts(objid scriptId, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
@@ -118,7 +118,7 @@ void onCollisionEnterAllScripts(objid scriptId, int32_t obj1, int32_t obj2, glm:
   }
   onGlobalCollisionEnter(obj1, obj2, pos, normal, oppositeNormal);
 }
-void onCollisionExitAllScripts(objid scriptId, int32_t obj1, int32_t obj2){
+void onCollisionExitAllScripts(objid scriptId, void* data, int32_t obj1, int32_t obj2){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;

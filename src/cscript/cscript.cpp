@@ -83,14 +83,14 @@ void onCCollisionEnterAllScripts(int32_t obj1, int32_t obj2, glm::vec3 pos, glm:
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onCollisionEnter(instanceId, obj1, obj2, pos, normal, oppositeNormal);
+    binding -> onCollisionEnter(instanceId, objInstance.data, obj1, obj2, pos, normal, oppositeNormal);
   }
 }
 void onCCollisionExitAllScripts(int32_t obj1, int32_t obj2){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onCollisionExit(instanceId, obj1, obj2);
+    binding -> onCollisionExit(instanceId, objInstance.data, obj1, obj2);
   }
 }
 void onCMouseCallbackAllScripts(int button, int action, int mods){
