@@ -93,6 +93,8 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
       state.cursorLeft = xpos;
       state.cursorTop = ypos;
     }
+    auto coords = ndiCoord();
+    cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
 }
 
 glm::vec2 ndiCoord(){
@@ -443,8 +445,6 @@ void handleInput(GLFWwindow* window){
       unlock("input", 0);
     }
   }
-  auto coords = ndiCoord();
-  cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
   processManipulator();
 }
 
