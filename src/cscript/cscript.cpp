@@ -97,7 +97,7 @@ void onCMouseCallbackAllScripts(int button, int action, int mods){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMouseCallback(instanceId, button, action, mods);
+    binding -> onMouseCallback(instanceId, objInstance.data, button, action, mods);
   }
 }
 void onCMouseMoveCallbackAllScripts(double xPos, double yPos, float xNdc, float yNdc){

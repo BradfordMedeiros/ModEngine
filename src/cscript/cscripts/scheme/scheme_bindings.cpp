@@ -1231,7 +1231,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
 
   // event system
-  scm_c_define_gsubr("sendnotify", 2, 0, 0, (void*)scmSendNotify);
+  scm_c_define_gsubr("send", 2, 0, 0, (void*)scmSendNotify);
 
   scm_c_define_gsubr("time-seconds", 0, 1, 0, (void*)scmTimeSeconds);
   scm_c_define_gsubr("time-elapsed", 0, 0, 0, (void*)scmTimeElapsed);

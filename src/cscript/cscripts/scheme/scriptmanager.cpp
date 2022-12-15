@@ -132,7 +132,7 @@ void onCollisionExitAllScripts(objid scriptId, void* data, int32_t obj1, int32_t
   onGlobalCollisionExit(obj1, obj2);
 }
 
-void onMouseCallbackAllScripts(objid scriptId, int button, int action, int mods){
+void onMouseCallbackAllScripts(objid scriptId, void* data, int button, int action, int mods){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
