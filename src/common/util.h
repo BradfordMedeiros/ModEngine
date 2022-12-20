@@ -61,6 +61,7 @@ glm::vec2 parseVec2(std::string positionRaw);
 std::vector<float> parseFloatVec(std::string value);
 bool maybeParseBool(std::string value, bool* _value);
 bool maybeParseFloat(std::string value, float& _number);
+float parseFloat(std::string value);
 glm::quat eulerToQuat(glm::vec3 eulerAngles);
 glm::quat parseQuat(glm::vec4 vecXYZRotation);
 

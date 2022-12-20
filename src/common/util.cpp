@@ -247,6 +247,13 @@ bool maybeParseFloat(std::string value, float& _number){
   return false;
 }
 
+float parseFloat(std::string value){
+  float number = 0.f;
+  bool valid = maybeParseFloat(value, number);
+  modassert(valid, "invalid float number: " + value);
+  return number;
+}
+
 glm::vec3 parseVec(std::string positionRaw){;
   float x, y, z;
   std::istringstream in(positionRaw);

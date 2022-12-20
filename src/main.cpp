@@ -293,7 +293,7 @@ bool mappingClickCalled = false;
 void selectItem(objid selectedId, int layerSelectIndex){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
-  if (!showCursor){
+  if (!showCursor || disableInput){
     return;
   }
   auto idToUse = state.groupSelection ? getGroupId(world.sandbox, selectedId) : selectedId;

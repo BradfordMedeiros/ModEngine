@@ -82,6 +82,9 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
     state.offsetX = xoffset;
     state.offsetY = yoffset;
 
+    auto coords = ndiCoord();
+    cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
+    
     if (disableInput){
       return;
     }
@@ -93,8 +96,7 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
       state.cursorLeft = xpos;
       state.cursorTop = ypos;
     }
-    auto coords = ndiCoord();
-    cBindings.onMouseMoveCallback(state.offsetX, state.offsetY, coords.x, coords.y);
+
 }
 
 glm::vec2 ndiCoord(){
