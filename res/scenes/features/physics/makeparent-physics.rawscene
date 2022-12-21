@@ -1,0 +1,25 @@
+platform:mesh:./res/models/box/box.obj
+platform:scale:100 1 100
+platform:position:0 -10 0
+platform:physics:enabled
+platform:false-target:default
+
+box:mesh:./res/models/box/box.obj
+box:position:0 0 0
+#box:child:follower
+box/Cube:tint:1 0 0 1
+box:physics_type:dynamic
+box:physics:enabled
+
+follower:mesh:./res/models/box/box.obj
+follower:position:2 0 0
+follower/Cube:tint:0 1 0 1
+
+
+follower2:mesh:./res/models/box/box.obj
+follower2:position:2 0 0
+follower2/Cube:tint:0 1 0 1
+
+
+
+parent:script:./res/scenes/features/physics/makeparent-physics.scm
