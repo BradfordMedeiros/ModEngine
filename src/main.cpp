@@ -1153,7 +1153,7 @@ int main(int argc, char* argv[]){
   const std::string framebufferShaderPath = "./res/shaders/framebuffer";
   const std::string uiShaderPath = result["uishader"].as<std::string>();
   showDebugInfo = result["info"].as<bool>();
-  showCursor = result["cursor"].as<bool>() || showDebugInfo;
+  showCursor = result["cursor"].as<bool>();
   
   auto benchmarkFile = result["benchmark"].as<std::string>();
   auto shouldBenchmark = benchmarkFile != "";
