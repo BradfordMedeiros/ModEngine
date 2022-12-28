@@ -6,9 +6,9 @@
 (define maxBufferSize 1)
 (define messageBuffer (list))
 
-(define displayMessage (args "alert"))
+(define alertKey (if (args "alert") (args "alert") "alert"))
 (define (onMessage key value)
-  (if (equal? key "alert")
+  (if (equal? key alertKey)
     (begin
       (set! messageBuffer (reverse (cons (list value (time-seconds #t)) (reverse messageBuffer)))) 
       (if (> (length messageBuffer) maxBufferSize)
