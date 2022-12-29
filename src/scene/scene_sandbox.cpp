@@ -250,10 +250,10 @@ void removeObjectsFromScenegraph(SceneSandbox& sandbox, std::vector<objid> objec
   }
 }
 
-std::vector<objid> listObjInScene(SceneSandbox& sandbox, objid sceneId){
+std::vector<objid> listObjInScene(SceneSandbox& sandbox, std::optional<objid> sceneId){
   std::vector<objid> allObjects;
   for (auto const&[id, obj] : sandbox.mainScene.idToGameObjectsH){
-    if (obj.sceneId == sceneId){
+    if (!sceneId.has_value() || obj.sceneId == sceneId.value()){
       allObjects.push_back(id);
     }
   }

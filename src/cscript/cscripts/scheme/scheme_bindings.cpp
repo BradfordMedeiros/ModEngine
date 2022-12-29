@@ -364,7 +364,7 @@ SCM lsObjectsByType(SCM value){
   return indexListToSCM(getObjByType(objectType));
 }
 
-std::vector<int32_t> (*_getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t);
+std::vector<int32_t> (*_getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>);
 SCM scm_getObjectsByAttr(SCM attr, SCM scmValue){
   auto sceneId = currentSceneId();
   auto valueDefined = !scm_is_eq(scmValue, SCM_UNDEFINED);
@@ -1332,7 +1332,7 @@ void createStaticSchemeBindings(
   void (*rotateCamera)(float xoffset, float yoffset),
   void (*removeObjectById)(int32_t id),
   std::vector<int32_t> (*getObjectsByType)(std::string),
-  std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, int32_t),
+  std::vector<int32_t> (*getObjectsByAttr)(std::string, std::optional<AttributeValue>, std::optional<int32_t>),
   void (*setActiveCamera)(int32_t cameraId, float interpolationTime),
   void (*drawText)(std::string word, float left, float top, unsigned int fontSize, bool permatext, std::optional<glm::vec4> tint, std::optional<unsigned int> textureId, bool ndi, std::optional<std::string> fontFamil, std::optional<objid> selectionId),
   int32_t (*drawLine)(glm::vec3 posFrom, glm::vec3 posTo, bool permaline, objid owner, std::optional<glm::vec4> color, std::optional<unsigned int> textureId, std::optional<unsigned int> linewidth),
