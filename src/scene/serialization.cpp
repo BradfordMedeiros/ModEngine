@@ -411,7 +411,7 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
 }
 
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
-  modassert(false, "set attribute not yet implemented");
+  //modassert(false, "set attribute not yet implemented");
 } 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);

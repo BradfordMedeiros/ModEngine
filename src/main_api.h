@@ -119,7 +119,7 @@ double timeSeconds(bool realtime);
 double timeElapsed();
 
 void playRecording(objid id, std::string recordingPath);
-void stopRecording(objid id, std::string recordingPath);
+void stopRecording(objid id);
 
 void tickRecording(float time, GameObject& gameobject);
 void tickRecordings(float time);

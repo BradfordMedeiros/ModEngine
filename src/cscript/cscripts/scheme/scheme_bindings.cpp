@@ -675,9 +675,9 @@ SCM scmPlayRecording(SCM id, SCM recordingPath){
   _playRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
   return SCM_UNSPECIFIED;
 }
-void (*_stopRecording)(objid id, std::string recordingPath);
-SCM scmStopRecording(SCM id, SCM recordingPath){
-  _stopRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
+void (*_stopRecording)(objid id);
+SCM scmStopRecording(SCM id){
+  _stopRecording(scm_to_int32(id));
   return SCM_UNSPECIFIED;
 }
 
@@ -1246,7 +1246,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("send-udp", 1, 0, 0, (void*)scmSendMessageUdp);
 
   scm_c_define_gsubr("play-recording", 2, 0, 0, (void*)scmPlayRecording);
-  scm_c_define_gsubr("stop-recording", 2, 0, 0, (void*)scmStopRecording);
+  scm_c_define_gsubr("stop-recording", 1, 0, 0, (void*)scmStopRecording);
   scm_c_define_gsubr("create-recording", 1, 0, 0, (void*)scmCreateRecording);
   scm_c_define_gsubr("save-recording", 2, 0, 0, (void*) scmSaveRecording);
 
@@ -1369,7 +1369,7 @@ void createStaticSchemeBindings(
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
   void (*playRecording)(objid id, std::string recordingPath),
-  void (*stopRecording)(objid id, std::string recordingPath),
+  void (*stopRecording)(objid id),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),
   std::optional<objid> (*makeObjectAttr)(objid sceneId, std::string name, GameobjAttributes& attr, std::map<std::string, GameobjAttributes>& submodelAttributes),
