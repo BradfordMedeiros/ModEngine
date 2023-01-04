@@ -480,9 +480,18 @@ void tickRecordings(float time){
     saveRecordingIndex(activeRecording.recording, "position", gameobject.transformation.position, time);
   } 
 
+  std::vector<objid> recordingsToRemove;
   for (auto &[id, recording] : playingRecordings){
-    auto interpolatedProperties = recordingPropertiesInterpolated(recording, time, interpolateAttribute);
+    bool isComplete = false;
+    auto interpolatedProperties = recordingPropertiesInterpolated(recording, time, interpolateAttribute, &isComplete);
+    if (isComplete){
+      recordingsToRemove.push_back(id);
+      continue;
+    }
     setProperty(world, id, interpolatedProperties);
+  }
+  for (auto id : recordingsToRemove){
+    stopRecording(id);
   }
 }
 

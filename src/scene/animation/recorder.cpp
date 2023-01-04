@@ -95,6 +95,7 @@ struct PropertyIndexs {
   int lowIndex;
   int highIndex;
   float percentage;
+  bool complete;
 };
 
 PropertyIndexs indexsForRecording(Recording& recording, float time){
@@ -110,11 +111,13 @@ PropertyIndexs indexsForRecording(Recording& recording, float time){
   auto elapsed = time - lowTimestamp;
   auto totalTime = highTimestamp - lowTimestamp;
   auto percentage = elapsed / totalTime;
+  bool complete = percentage > 1.f;
 
   PropertyIndexs properties {
     .lowIndex = lowIndex,
     .highIndex = highIndex,
-    .percentage = lowIndex == highIndex ? 1.f : (percentage > 1.f ? 1.f : percentage),
+    .percentage = lowIndex == highIndex ? 1.f : (complete ? 1.f : percentage),
+    .complete = complete,
   };
   return properties;
 }
@@ -128,11 +131,12 @@ std::optional<Property> maybeGetProperty(std::vector<Property>& properties, std:
   return std::nullopt;
 }
 
-std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate){
+std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, bool* _isComplete){
   auto recordingIndexs = indexsForRecording(recording, time);
   auto lowProperty = recording.keyframes.at(recordingIndexs.lowIndex).properties;
   auto highProperty = recording.keyframes.at(recordingIndexs.highIndex).properties;
-
+  *_isComplete = recordingIndexs.complete;
+  //std::cout << "time = " << time << ", low index: " << recordingIndexs.lowIndex << ", highIndex = " << recordingIndexs.highIndex << ", percentage = " << recordingIndexs.percentage << ", complete = " << recordingIndexs.complete << std::endl;
   std::vector<Property> properties;
   for (auto property : lowProperty){
     auto nextProperty = maybeGetProperty(highProperty, property.propertyName);
