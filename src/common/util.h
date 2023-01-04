@@ -222,34 +222,34 @@ std::vector<T> mapKeys(std::map<T, N>& values){
 
 /* Move back into customobj, just here to share between this an scheme for now */
 typedef void(*func)();
-typedef void(*id_func)(int32_t id);
-typedef void(*id_func_data)(int32_t id, void* data);
-typedef void(*colposfun)(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
-typedef void(*id_colposfun)(int32_t id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal);
+typedef std::function<void(int32_t id)> id_func;
+typedef std::function<void(int32_t id, void* data)> id_func_data;
+typedef std::function<void(int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal)> colposfun;
+typedef std::function<void(int32_t id, void* data, int32_t obj1, int32_t obj2, glm::vec3 pos, glm::vec3 normal, glm::vec3 oppositeNormal)> id_colposfun;
 typedef void(*colfun)(int32_t obj1, int32_t obj2);
 typedef void(*id_colfun)(int32_t id, void* data, int32_t obj1, int32_t obj2);
 typedef void(*mousecallback)(int button, int action, int mods);
-typedef void(*id_mousecallback)(int32_t id, void* data, int button, int action, int mods);
+typedef std::function<void(int32_t id, void* data, int button, int action, int mods)> id_mousecallback;
 typedef void(*mousemovecallback)(double xPos, double yPos, float xNdc, float yNdc);
-typedef void(*id_mousemovecallback)(int32_t id, void* data, double xPos, double yPos, float xNdc, float yNdc);
+typedef std::function<void(int32_t id, void* data, double xPos, double yPos, float xNdc, float yNdc)> id_mousemovecallback;
 typedef void(*scrollcallback)(double amount);
-typedef void(*id_scrollcallback)(int32_t id, double amount);
+typedef std::function<void(int32_t id, double amount)> id_scrollcallback;
 typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
-typedef void(*id_onobjectSelectedFunc)(int32_t id, int32_t index, glm::vec3 color);
+typedef std::function<void(int32_t id, int32_t index, glm::vec3 color)> id_onobjectSelectedFunc;
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
-typedef void(*id_onobjectHoverFunc)(int32_t id, int32_t index, bool hoverOn);
+typedef std::function<void(int32_t id, int32_t index, bool hoverOn)> id_onobjectHoverFunc;
 typedef void(*funcMappingFunc)(int32_t index);
-typedef void(*id_funcMappingFunc)(int32_t id, int32_t index);
+typedef std::function<void(int32_t id, int32_t index)> id_funcMappingFunc;
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
-typedef void(*id_keycallback)(int32_t id, void* data, int key, int scancode, int action, int mods);
+typedef std::function<void(int32_t id, void* data, int key, int scancode, int action, int mods)> id_keycallback;
 typedef void(*keycharcallback)(unsigned int codepoint);
-typedef void(*id_keycharcallback)(int32_t id, unsigned int codepoint);
+typedef std::function<void(int32_t id, unsigned int codepoint)> id_keycharcallback;
 typedef void(*stringboolFunc)(std::string, bool value);
-typedef void(*id_stringboolFunc)(int32_t id, std::string, bool value);
+typedef std::function<void(int32_t id, std::string, bool value)> id_stringboolFunc;
 typedef void(*string2func)(std::string&, AttributeValue&);
-typedef void(*id_string2func)(int32_t, void*, std::string&, AttributeValue&);
+typedef std::function<void(int32_t, void*, std::string&, AttributeValue&)> id_string2func;
 typedef void(*stringfunc)(std::string&);
-typedef void(*id_stringfunc)(int32_t, std::string&);
+typedef std::function<void(int32_t, std::string&)> id_stringfunc;
 
 typedef void(*messagefunc)(std::queue<StringString>&);
 
