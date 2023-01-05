@@ -675,7 +675,7 @@ SCM scmPlayRecording(SCM id, SCM recordingPath, SCM type){
   auto typeDefined = !scm_is_eq(type, SCM_UNDEFINED);
   auto playbackType = std::optional<RecordingPlaybackType>(std::nullopt);
   if (typeDefined){
-    auto typeStr = scm_to_locale_string(type);
+    auto typeStr = std::string(scm_to_locale_string(type));
     if (typeStr == "once"){
       playbackType = RECORDING_PLAY_ONCE;
     }else if (typeStr == "loop"){
