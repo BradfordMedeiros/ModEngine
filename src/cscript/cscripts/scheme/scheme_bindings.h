@@ -65,7 +65,7 @@ void createStaticSchemeBindings(
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
-  void (*playRecording)(objid id, std::string recordingPath),
+  void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type),
   void (*stopRecording)(objid id),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),

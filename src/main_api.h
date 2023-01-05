@@ -24,6 +24,8 @@
 #include "./colorselection.h"
 #include "./sql/sql.h"
 
+float getTotalTime();
+
 NetworkPacket toNetworkPacket(UdpPacket& packet);
 
 // This file is really just an extension of main.cpp (notice heavy usage of external scope) but organizes the business logic of the api functions
@@ -118,7 +120,7 @@ void sendNotifyMessage(std::string message, std::string value);
 double timeSeconds(bool realtime);
 double timeElapsed();
 
-void playRecording(objid id, std::string recordingPath);
+void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type);
 void stopRecording(objid id);
 
 void tickRecording(float time, GameObject& gameobject);

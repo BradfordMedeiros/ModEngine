@@ -292,4 +292,6 @@ struct Token {
   std::string payload;
 };
 
+enum RecordingPlaybackType { RECORDING_PLAY_ONCE, RECORDING_PLAY_LOOP };
+
 #endif

@@ -30,6 +30,10 @@ extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
 extern TimePlayback timePlayback;
 
+float getTotalTime(){
+  return now - initialTime;
+}
+
 std::optional<objid> getGameObjectByName(std::string name, objid sceneId, bool sceneIdExplicit){    
   return getGameObjectByNamePrefix(world, name, sceneId, sceneIdExplicit);
 }
@@ -463,10 +467,19 @@ void saveRecording(objid recordingId, std::string filepath){
   std::cout << "SAVING RECORDING COMPLETE - " << filepath << std::endl;
 }
 
-std::map<objid, Recording> playingRecordings;
-void playRecording(objid id, std::string recordingPath){
+struct PlayingRecording {
+  float startTime;
+  RecordingPlaybackType type;
+  Recording recording;
+};
+std::map<objid, PlayingRecording> playingRecordings;
+void playRecording(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type){
   stopRecording(id);
-  playingRecordings[id] = loadRecording(recordingPath, parsePropertySuffix, interface.readFile);
+  playingRecordings[id] = PlayingRecording {
+    .startTime = getTotalTime(),
+    .type = type.has_value() ? type.value() : RECORDING_PLAY_ONCE,
+    .recording = loadRecording(recordingPath, parsePropertySuffix, interface.readFile),
+  };
 }
 void stopRecording(objid id){
   if (playingRecordings.find(id) != playingRecordings.end()){
@@ -483,10 +496,9 @@ void tickRecordings(float time){
   std::vector<objid> recordingsToRemove;
   for (auto &[id, recording] : playingRecordings){
     bool isComplete = false;
-    auto interpolatedProperties = recordingPropertiesInterpolated(recording, time, interpolateAttribute, &isComplete);
+    auto interpolatedProperties = recordingPropertiesInterpolated(recording.recording, time, interpolateAttribute, recording.startTime, recording.type, &isComplete);
     if (isComplete){
       recordingsToRemove.push_back(id);
-      continue;
     }
     setProperty(world, id, interpolatedProperties);
   }

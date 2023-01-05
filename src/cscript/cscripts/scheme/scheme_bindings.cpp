@@ -670,9 +670,21 @@ SCM scmDisconnectServer(){
   return SCM_UNSPECIFIED;
 }
 
-void (*_playRecording)(objid id, std::string recordingPath);
-SCM scmPlayRecording(SCM id, SCM recordingPath){
-  _playRecording(scm_to_int32(id), scm_to_locale_string(recordingPath));
+void (*_playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type);
+SCM scmPlayRecording(SCM id, SCM recordingPath, SCM type){
+  auto typeDefined = !scm_is_eq(type, SCM_UNDEFINED);
+  auto playbackType = std::optional<RecordingPlaybackType>(std::nullopt);
+  if (typeDefined){
+    auto typeStr = scm_to_locale_string(type);
+    if (typeStr == "once"){
+      playbackType = RECORDING_PLAY_ONCE;
+    }else if (typeStr == "loop"){
+      playbackType = RECORDING_PLAY_LOOP;
+    }else{
+      modassert(false, std::string("invalid playback loop type: ") + typeStr);
+    }
+  }
+  _playRecording(scm_to_int32(id), scm_to_locale_string(recordingPath), playbackType);
   return SCM_UNSPECIFIED;
 }
 void (*_stopRecording)(objid id);
@@ -1245,7 +1257,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("send-tcp", 1, 0, 0, (void*)scmSendMessageTcp);
   scm_c_define_gsubr("send-udp", 1, 0, 0, (void*)scmSendMessageUdp);
 
-  scm_c_define_gsubr("play-recording", 2, 0, 0, (void*)scmPlayRecording);
+  scm_c_define_gsubr("play-recording", 2, 1, 0, (void*)scmPlayRecording);
   scm_c_define_gsubr("stop-recording", 1, 0, 0, (void*)scmStopRecording);
   scm_c_define_gsubr("create-recording", 1, 0, 0, (void*)scmCreateRecording);
   scm_c_define_gsubr("save-recording", 2, 0, 0, (void*) scmSaveRecording);
@@ -1368,7 +1380,7 @@ void createStaticSchemeBindings(
   void (*disconnectServer)(),
   void (*sendMessageTcp)(std::string data),
   void (*sendMessageUdp)(std::string data),
-  void (*playRecording)(objid id, std::string recordingPath),
+  void (*playRecording)(objid id, std::string recordingPath, std::optional<RecordingPlaybackType> type),
   void (*stopRecording)(objid id),
   objid (*createRecording)(objid id),
   void (*saveRecording)(objid recordingId, std::string filepath),

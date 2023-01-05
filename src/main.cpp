@@ -136,9 +136,6 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
-float getTotalTime(){
-  return now - initialTime;
-}
 
 bool useYAxis = true;
 void onDebugKey(){
