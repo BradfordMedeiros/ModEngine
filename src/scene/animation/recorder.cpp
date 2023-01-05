@@ -82,6 +82,9 @@ void saveRecording(std::string name, Recording& recording, std::function<std::st
   saveFile(name, serializeRecording(recording, serializePropertySuffix));
 }
 
+int maxTimeForRecording(Recording& recording, float time){
+  return recording.keyframes.at(recording.keyframes.size() - 1).time;
+}
 int indexForRecording(Recording& recording, float time){
   for (int i = 0; i < recording.keyframes.size(); i++){
     if (recording.keyframes.at(i).time > time){
@@ -132,11 +135,15 @@ std::optional<Property> maybeGetProperty(std::vector<Property>& properties, std:
 }
 
 std::vector<Property> recordingPropertiesInterpolated(Recording& recording, float time, std::function<AttributeValue(AttributeValue, AttributeValue, float)> interpolate, float recordingStartTime, RecordingPlaybackType type, bool* _isComplete){
-  auto recordingIndexs = indexsForRecording(recording, time);
+  float adjustedTime = time - recordingStartTime;
+  int maxTime = maxTimeForRecording(recording, adjustedTime);
+  adjustedTime = adjustedTime - maxTime * static_cast<int>((adjustedTime / maxTime));
+
+  auto recordingIndexs = indexsForRecording(recording, adjustedTime);
   auto lowProperty = recording.keyframes.at(recordingIndexs.lowIndex).properties;
   auto highProperty = recording.keyframes.at(recordingIndexs.highIndex).properties;
   *_isComplete = recordingIndexs.complete;
-  std::cout << "time = " << time << ", low index: " << recordingIndexs.lowIndex << ", highIndex = " << recordingIndexs.highIndex << ", percentage = " << recordingIndexs.percentage << ", complete = " << recordingIndexs.complete << std::endl;
+  //std::cout << "time = " << adjustedTime << ", low index: " << recordingIndexs.lowIndex << ", highIndex = " << recordingIndexs.highIndex << ", percentage = " << recordingIndexs.percentage << ", complete = " << recordingIndexs.complete << std::endl;
   std::vector<Property> properties;
   for (auto property : lowProperty){
     auto nextProperty = maybeGetProperty(highProperty, property.propertyName);
