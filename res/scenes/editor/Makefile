@@ -26,6 +26,8 @@ gameplay: resources
 	@php ./editor.rawscene.php config/gameplay/editor_config.php > ./build/editor.rawscene
 	@php ./dock/main.php config/gameplay/dock_config.php movement  > ./build/dock/editor_movement.rawscene
 	@php ./dock/main.php config/gameplay/dock_config.php weapons  > ./build/dock/editor_weapons.rawscene
+	@php ./dock/main.php config/gameplay/dock_config.php volumes  > ./build/dock/editor_volumes.rawscene
+	@php ./dock/main.php config/gameplay/dock_config.php hud  > ./build/dock/hud.rawscene
 
 resources: build
 	@mkdir -p ./build/dock
