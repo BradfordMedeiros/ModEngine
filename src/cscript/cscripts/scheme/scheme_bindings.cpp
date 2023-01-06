@@ -41,11 +41,11 @@ namespace sql {
     return sqlNestedVecToSCM(sqlResult);
   } 
   
-  sql::SqlQuery (*_compileSqlQuery)(std::string queryString);
+  sql::SqlQuery (*_compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues);
   SCM scmSqlCompile(SCM sqlQueryString){
     auto queryObj = (sqlQueryHolder*)scm_gc_malloc(sizeof(sqlQueryHolder), "sqlquery");
     SqlQuery* query = new SqlQuery;
-    *query = _compileSqlQuery(scm_to_locale_string(sqlQueryString));
+    *query = _compileSqlQuery(scm_to_locale_string(sqlQueryString), {});
     queryObj -> query = query;
     return scm_make_foreign_object_1(sqlObjectType, queryObj);
   }
@@ -1413,7 +1413,7 @@ void createStaticSchemeBindings(
   void (*installMod)(std::string layer),
   void (*uninstallMod)(std::string layer),
   std::vector<std::string> (*listMods)(),
-  sql::SqlQuery (*compileSqlQuery)(std::string queryString),
+  sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues),
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid),
   std::vector<objid> (*selected)(),
   std::vector<func_t> registerGuileFns

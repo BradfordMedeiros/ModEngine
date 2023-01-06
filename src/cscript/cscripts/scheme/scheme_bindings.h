@@ -98,7 +98,7 @@ void createStaticSchemeBindings(
   void (*installMod)(std::string layer),
   void (*uninstallMod)(std::string layer),
   std::vector<std::string> (*listMods)(),
-  sql::SqlQuery (*compileSqlQuery)(std::string queryString),
+  sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues),
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid),
   std::vector<objid> (*selected)(),
   std::vector<func_t> registerGuileFns

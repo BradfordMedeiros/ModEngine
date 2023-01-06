@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
       shellMode = true;
     }else if (strcmp(argv[1], "script") == 0){
       assert(argc >= 3);
-      auto sqlQuery = compileSqlQuery(argv[2]);
+      auto sqlQuery = compileSqlQuery(argv[2], {});
       bool valid = false;
       std::string error;
       auto rows = executeSqlQuery(sqlQuery, dataDir, &valid, &error);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
 
       bool hasInvalidQuery = false;
       for (auto content : lines){
-        auto sqlQuery = compileSqlQuery(content);
+        auto sqlQuery = compileSqlQuery(content, {});
         if (!sqlQuery.validQuery){
           std::cout << "invalid syntax: " << content << std::endl;
           hasInvalidQuery = true;

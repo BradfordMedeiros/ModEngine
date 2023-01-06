@@ -106,7 +106,7 @@ struct SqlQuery {
 
 SqlQuery parseTokens(std::vector<LexTokens> lexTokens);
 
-SqlQuery compileSqlQuery(std::string queryString);
+SqlQuery compileSqlQuery(std::string queryString, std::vector<std::string> bindValues);
 
 std::string drawDotGraph();
 

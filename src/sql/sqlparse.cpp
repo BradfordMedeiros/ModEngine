@@ -676,8 +676,30 @@ SqlQuery parseTokens(std::vector<LexTokens> lexTokens){
   return query;
 }
 
-SqlQuery compileSqlQuery(std::string queryString){
-  return parseTokens(lex(queryString));
+int numBindingsInQuery(std::vector<LexTokens>& lexTokens){
+  int numBindings = 0;
+  for (auto &token : lexTokens){
+    auto tokenVal = std::get_if<IdentifierToken>(&token);
+    if (tokenVal != NULL && tokenVal -> content == "?"){
+      numBindings++;
+    }
+  }
+  return numBindings;
+}
+
+SqlQuery compileSqlQuery(std::string queryString, std::vector<std::string> bindValues){
+  auto lexedTokens = lex(queryString);
+  assert(numBindingsInQuery(lexedTokens) == bindValues.size());
+
+  int bindIndex = 0;
+  for (auto &token : lexedTokens){
+    auto tokenVal = std::get_if<IdentifierToken>(&token);
+    if (tokenVal != NULL && tokenVal -> content == "?"){
+      tokenVal -> content = bindValues.at(bindIndex);
+      bindIndex++;
+    }
+  }
+  return parseTokens(lexedTokens);
 }
 
 std::string drawDotGraph(){

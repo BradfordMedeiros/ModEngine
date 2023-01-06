@@ -111,43 +111,43 @@ void testParserIncomplete(){
 }
 
 void testCompileSqlCreateTable(){
-  auto sqlQuery1 = compileSqlQuery("create table testtable");
+  auto sqlQuery1 = compileSqlQuery("create table testtable", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_CREATE_TABLE);
   assert(sqlQuery1.table == "testtable");
 
-  auto sqlQuery2 = compileSqlQuery(" create    table another (age, id) ");
+  auto sqlQuery2 = compileSqlQuery(" create    table another (age, id) ", {});
   assert(sqlQuery2.validQuery);
   assert(sqlQuery2.type == SQL_CREATE_TABLE);
   assert(sqlQuery2.table == "another");
 }
 
 void testCompileSqlCreateTableWithTypes(){
-  auto sqlQuery1 = compileSqlQuery("create table testtable (age int)");
+  auto sqlQuery1 = compileSqlQuery("create table testtable (age int)", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_CREATE_TABLE);
   assert(sqlQuery1.table == "testtable");
 
-  auto sqlQuery2 = compileSqlQuery(" create    table another (pass STRING, thing INT) ");
+  auto sqlQuery2 = compileSqlQuery(" create    table another (pass STRING, thing INT) ", {});
   assert(sqlQuery2.validQuery);
   assert(sqlQuery2.type == SQL_CREATE_TABLE);
   assert(sqlQuery2.table == "another");
 }
 
 void testCompileSqlDropTable(){
-  auto sqlQuery1 = compileSqlQuery("drop table testtable");
+  auto sqlQuery1 = compileSqlQuery("drop table testtable", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_DELETE_TABLE);
   assert(sqlQuery1.table == "testtable");
 
-  auto sqlQuery2 = compileSqlQuery("drop table another");
+  auto sqlQuery2 = compileSqlQuery("drop table another", {});
   assert(sqlQuery2.validQuery);
   assert(sqlQuery2.type == SQL_DELETE_TABLE);
   assert(sqlQuery2.table == "another");
 }
 
 void testCompileSqlSelect(){
-  auto sqlQuery1 = compileSqlQuery("select name, age from testtable");
+  auto sqlQuery1 = compileSqlQuery("select name, age from testtable", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_SELECT);
   assert(sqlQuery1.table == "testtable");
@@ -159,7 +159,7 @@ void testCompileSqlSelect(){
 }
 
 void testCompileSqlSelectJoin(){
-  auto sqlQuery1 = compileSqlQuery("select name, anothertable.age from testtable left join anothertable on testtable.name = anothertable.name");
+  auto sqlQuery1 = compileSqlQuery("select name, anothertable.age from testtable left join anothertable on testtable.name = anothertable.name", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_SELECT);
   assert(sqlQuery1.table == "testtable");
@@ -175,7 +175,7 @@ void testCompileSqlSelectJoin(){
 }
 
 void testCompileSqlUpdate(){
-  auto sqlQuery1 = compileSqlQuery("update atable set name = nonamehere");
+  auto sqlQuery1 = compileSqlQuery("update atable set name = nonamehere", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_UPDATE);
   assert(sqlQuery1.table == "atable");
@@ -186,7 +186,7 @@ void testCompileSqlUpdate(){
 }
 
 void testCompileSqlUpdateWhere(){
-  auto sqlQuery1 = compileSqlQuery("update somepeople set age = nonamehere where age = 50");
+  auto sqlQuery1 = compileSqlQuery("update somepeople set age = nonamehere where age = 50", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_UPDATE);
   assert(sqlQuery1.table == "somepeople");
@@ -202,7 +202,7 @@ void testCompileSqlUpdateWhere(){
 }
 
 void testCompileSqlOffset(){
-  auto sqlQuery1 = compileSqlQuery("select name from testtable offset 15");
+  auto sqlQuery1 = compileSqlQuery("select name from testtable offset 15", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_SELECT);
   assert(sqlQuery1.table == "testtable");
@@ -213,7 +213,7 @@ void testCompileSqlOffset(){
 }
 
 void testCompileSqlOffsetWithLimit(){
-  auto sqlQuery1 = compileSqlQuery("select name from testtable limit 5 offset 5");
+  auto sqlQuery1 = compileSqlQuery("select name from testtable limit 5 offset 5", {});
   assert(sqlQuery1.validQuery);
   assert(sqlQuery1.type == SQL_SELECT);
   assert(sqlQuery1.table == "testtable");
