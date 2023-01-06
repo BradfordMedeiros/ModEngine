@@ -30,6 +30,8 @@ extern GLFWmonitor* monitor;
 extern const GLFWvidmode* mode;
 extern TimePlayback timePlayback;
 
+extern std::string sqlDirectory;
+
 float getTotalTime(){
   return now - initialTime;
 }
@@ -959,13 +961,9 @@ std::map<std::string, std::string> getArgs(){
 
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid){
   auto args = getArgs();
-  std::string directory = "./res/data/sql/";
-  if (args.find("sqldir") != args.end()){
-    directory = args.at("sqldir");
-  }
 
   std::string error = "";
-  auto result = sql::executeSqlQuery(query, directory, valid, &error);
+  auto result = sql::executeSqlQuery(query, sqlDirectory, valid, &error);
   if (!*valid){
     modlog("sql", std::string("invalid query execution: " + error), MODLOG_ERROR);
   }

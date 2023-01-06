@@ -33,6 +33,7 @@
 #include "./lines.h"
 #include "./scene/common/textures_gen.h"
 #include "./modlayer.h"
+#include "./sql/shell.h"
 
 #define VAL(x) #x
 #define STR(macro) VAL(macro)
@@ -136,6 +137,7 @@ TimePlayback timePlayback(
   []() -> void {}
 ); 
 
+std::string sqlDirectory = "./res/data/sql/";
 
 bool useYAxis = true;
 void onDebugKey(){
@@ -1065,6 +1067,7 @@ int main(int argc, char* argv[]){
    ("font", "Default font to use", cxxopts::value<std::vector<std::string>>()->default_value("./res/textures/fonts/gamefont"))
    ("log", "List of logs to display", cxxopts::value<std::vector<std::string>>() -> default_value(""))
    ("loglevel", "Log level", cxxopts::value<int>()->default_value("0"))
+   ("sqlshell", "Launch into sql shell", cxxopts::value<bool>()->default_value("false"))
    ("h,help", "Print help")
   ;        
 
@@ -1096,6 +1099,14 @@ int main(int argc, char* argv[]){
       args[parsedArg.at(0)] = "";
     }
   }
+
+  if (args.find("sqldir") != args.end()){
+    sqlDirectory = args.at("sqldir");
+  }
+  if (result["sqlshell"].as<bool>()){
+    return loopSqlShell(sqlDirectory);
+  }
+
 
   interface = SysInterface {
     .loadCScript = [](std::string script, objid id, objid sceneId) -> void {
