@@ -70,6 +70,7 @@ std::map<std::string, AttrChildrenPair> deserializeSceneTokens(std::vector<Token
 GameobjAttributes defaultAttributesForMultiObj(Transformation transform, GameObject& gameobj, GameobjAttributes& additionalFields);
 std::string serializeObj(objid id, objid groupId, GameObject& gameobject, std::vector<std::string> children, bool includeIds, std::vector<std::pair<std::string, std::string>> additionalFields, std::string name = "");
 
+void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::string payload);
 void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr);
 
 void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr);
