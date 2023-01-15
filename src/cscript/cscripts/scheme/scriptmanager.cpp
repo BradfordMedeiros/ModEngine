@@ -149,7 +149,7 @@ void onMouseMoveCallbackAllScripts(objid scriptId, void* data, double xPos, doub
   scm_set_current_module(scriptModule.module);
   onMouseMoveCallback(xPos, yPos, xNdc, yNdc);
 }
-void onScrollCallbackAllScripts(objid scriptId, double amount){
+void onScrollCallbackAllScripts(objid scriptId, void* data, double amount){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;

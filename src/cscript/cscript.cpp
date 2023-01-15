@@ -111,7 +111,7 @@ void onCScrollCallbackAllScripts(double amount){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onScrollCallback(instanceId, amount);
+    binding -> onScrollCallback(instanceId, objInstance.data, amount);
   }
 }
 void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
