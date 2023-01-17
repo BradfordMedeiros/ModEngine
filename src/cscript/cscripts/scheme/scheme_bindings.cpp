@@ -992,9 +992,11 @@ SCM scmSelected(){
   return listToSCM(_selected());
 }
 
-void (*_click)();
-SCM scmClick(){
-  _click();
+void (*_click)(int button, int action);
+SCM scmClick(SCM scmButton, SCM scmAction){
+  auto button = scmButton != SCM_UNDEFINED ? scm_to_int32(scmButton) : 0;
+  auto action = scmAction != SCM_UNDEFINED ? scm_to_int32(scmAction) : 1;
+  _click(button, action);
   return SCM_UNSPECIFIED;
 }
 void (*_moveMouse)(glm::vec2 ndi);
@@ -1326,7 +1328,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("list-mods", 0, 0, 0, (void*)scmListMods);
 
   scm_c_define_gsubr("selected", 0, 0, 0, (void*)scmSelected);
-  scm_c_define_gsubr("click", 0, 0, 0, (void*)scmClick);
+  scm_c_define_gsubr("click", 0, 2, 0, (void*)scmClick);
   scm_c_define_gsubr("move-mouse", 1, 0, 0, (void*)scmMoveMouse);
 
   sql::sqlRegisterGuileFns();
@@ -1428,7 +1430,7 @@ void createStaticSchemeBindings(
   sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues),
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid),
   std::vector<objid> (*selected)(),
-  void (*click)(),
+  void (*click)(int button, int action),
   void (*moveMouse)(glm::vec2 ndi),
   std::vector<func_t> registerGuileFns
 ){

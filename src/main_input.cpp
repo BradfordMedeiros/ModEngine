@@ -140,9 +140,9 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
   onMouse(button, action, mods);
 }
 
-void dispatchClick(){
+void dispatchClick(int button, int action){
   std::cout << "dispatch click placeholder" << std::endl;
-  onMouse(0/*button */,  1 /*action */,  0/*mods*/); // since this forces a click, could get into weird edge cases in behavior
+  onMouse(button, action,  0/*mods*/); // since this forces a click, could get into weird edge cases in behavior
 }
 
 

@@ -34,7 +34,7 @@ glm::vec2 ndiCoord();
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onMouseEventsUpdate();
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods);
-void dispatchClick();
+void dispatchClick(int button, int action);
 void moveMouse(glm::vec2 ndi);
 
 void mouse_button_callback(bool disableInput, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));
