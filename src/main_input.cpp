@@ -67,7 +67,7 @@ void processManipulator(){
   }
 }
 
-void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
+void onMouse(bool disableInput,  engineState& state, double xpos, double ypos, void(*rotateCamera)(float, float)){
     if(state.firstMouse){
         state.lastX = xpos;
         state.lastY = ypos;
@@ -99,6 +99,7 @@ void onMouse(bool disableInput, GLFWwindow* window, engineState& state, double x
 
 }
 
+
 glm::vec2 ndiCoord(){
   float xNdc = 2 * (state.cursorLeft / (float)state.resolution.x) - 1;
   float yNdc = -1 * (2 * (state.cursorTop  / (float)state.resolution.y) - 1);
@@ -106,18 +107,18 @@ glm::vec2 ndiCoord(){
 }
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
-  onMouse(disableInput, window, state, xpos, ypos, rotateCamera); 
+  std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
+  onMouse(disableInput,  state, xpos, ypos, rotateCamera); 
 }
 
-void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
+void onMouse(int button, int action, int mods){
   if (button == 0 && action == 1){
     state.mouseIsDown = true;
   }else if (button == 0 && action == 0){
     state.mouseIsDown = false;
   }
 
-  mouse_button_callback(disableInput, window, state, button, action, mods, onMouseButton);
+  mouse_button_callback(disableInput, state, button, action, mods, onMouseButton);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     selectItemCalled = true;
     onManipulatorMouseDown(state.manipulatorState);
@@ -135,12 +136,34 @@ void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
     }
   }
 }
+void onMouseCallback(GLFWwindow* window, int button, int action, int mods){
+  onMouse(button, action, mods);
+}
+
+void dispatchClick(){
+  std::cout << "dispatch click placeholder" << std::endl;
+  onMouse(0/*button */,  1 /*action */,  0/*mods*/); // since this forces a click, could get into weird edge cases in behavior
+}
+
 
 void onSelectNullItem(){
   clearSelectedIndexs(state.editor); 
 }
 
-void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
+void moveCursor(float x, float y){
+  state.cursorLeft = x;
+  state.cursorTop = y;
+  state.lastY = state.cursorTop;
+  state.lastX = state.cursorLeft;
+  glfwSetCursorPos(window, x, y);
+}
+void moveMouse(glm::vec2 ndi){
+  //std::cout << "Move mouse to ndi: " << print(ndi) << std::endl;
+  auto pixelCoords = ndiToPixelCoord(glm::vec2(ndi.x, -1 * ndi.y), state.resolution);
+  moveCursor(pixelCoords.x, pixelCoords.y);
+}
+
+void mouse_button_callback(bool disableInput, engineState& state, int button, int action, int mods, void (*handleSerialization) (void)){
   if (disableInput){
     return;
   }
@@ -159,11 +182,8 @@ void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& s
     }else if (action == GLFW_RELEASE){
       state.isRotateSelection = false;
     }
-    state.cursorLeft = state.currentScreenWidth / 2;
-    state.cursorTop = state.currentScreenHeight / 2;
-    state.lastY = state.cursorTop;
-    state.lastX = state.cursorLeft;
-    glfwSetCursorPos(window, state.currentScreenWidth / 2, state.currentScreenHeight / 2);
+
+    moveCursor(state.currentScreenWidth / 2, state.currentScreenHeight / 2);
   }
 }
 
@@ -489,7 +509,7 @@ void processControllerInput(KeyRemapper& remapper, void (*moveCamera)(glm::vec3)
     //std::cout << "joystick 0 not present" << std::endl;
     return;
   }
-  //std::cout << "joystick is present" << std::endl;
+  std::cout << "joystick is present" << std::endl;
   int count;
   auto axises = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);  
   int buttonCount;

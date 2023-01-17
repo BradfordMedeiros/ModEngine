@@ -992,6 +992,16 @@ SCM scmSelected(){
   return listToSCM(_selected());
 }
 
+void (*_click)();
+SCM scmClick(){
+  _click();
+  return SCM_UNSPECIFIED;
+}
+void (*_moveMouse)(glm::vec2 ndi);
+SCM scmMoveMouse(SCM ndiCoord){
+  _moveMouse(listToVec2(ndiCoord));
+  return SCM_UNSPECIFIED;
+}
 
 // Callbacks
 void onFrame(){
@@ -1316,6 +1326,8 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("list-mods", 0, 0, 0, (void*)scmListMods);
 
   scm_c_define_gsubr("selected", 0, 0, 0, (void*)scmSelected);
+  scm_c_define_gsubr("click", 0, 0, 0, (void*)scmClick);
+  scm_c_define_gsubr("move-mouse", 1, 0, 0, (void*)scmMoveMouse);
 
   sql::sqlRegisterGuileFns();
 
@@ -1416,6 +1428,8 @@ void createStaticSchemeBindings(
   sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues),
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid),
   std::vector<objid> (*selected)(),
+  void (*click)(),
+  void (*moveMouse)(glm::vec2 ndi),
   std::vector<func_t> registerGuileFns
 ){
   scm_init_guile();
@@ -1533,6 +1547,8 @@ void createStaticSchemeBindings(
   _debugInfo = debugInfo;
 
   _selected = selected;
+  _click = click;
+  _moveMouse = moveMouse;
 
   // sql should be pulled out
   sql::sqlRegisterGuileTypes();

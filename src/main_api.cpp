@@ -929,6 +929,7 @@ void freeTexture(std::string name, objid ownerId){
 
 }
 
+// clear texture, should automatically load texture
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture){
   UserTexture& userTex = *userTextureById(textureId);
   std::optional<unsigned int> clearTextureId = std::nullopt;

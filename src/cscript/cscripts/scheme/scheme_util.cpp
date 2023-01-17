@@ -20,6 +20,11 @@ SCM scmQuatToSCM(glm::quat rotation){
   return list;
 }
 
+glm::vec2 listToVec2(SCM vecList){
+  auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
+  auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));
+  return glm::vec2(x, y);
+}
 glm::vec3 listToVec3(SCM vecList){
   auto x = scm_to_double(scm_list_ref(vecList, scm_from_int64(0)));   
   auto y = scm_to_double(scm_list_ref(vecList, scm_from_int64(1)));

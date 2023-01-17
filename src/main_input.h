@@ -34,7 +34,10 @@ glm::vec2 ndiCoord();
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos);
 void onMouseEventsUpdate();
 void onMouseCallback(GLFWwindow* window, int button, int action, int mods);
-void mouse_button_callback(bool disableInput, GLFWwindow* window, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));
+void dispatchClick();
+void moveMouse(glm::vec2 ndi);
+
+void mouse_button_callback(bool disableInput, engineState& state, int button, int action, int mods,  void (*handleSerialization) (void));
 void joystickCallback(int jid, int event);
 void onJoystick(std::vector<JoyStickInfo> infos);
 void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset);

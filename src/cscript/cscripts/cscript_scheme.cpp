@@ -131,6 +131,8 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
     api.compileSqlQuery,
     api.executeSqlQuery,
     api.selected,
+    api.click,
+    api.moveMouse,
     {}
   );
 

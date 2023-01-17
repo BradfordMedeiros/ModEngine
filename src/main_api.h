@@ -197,4 +197,5 @@ void markUserTexturesCleared();
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid);
 std::map<std::string, std::string> getArgs();
 
+
 #endif

@@ -103,6 +103,9 @@ struct CustomApiBindings {
   sql::SqlQuery (*compileSqlQuery)(std::string queryString, std::vector<std::string> bindValues);
   std::vector<std::vector<std::string>> (*executeSqlQuery)(sql::SqlQuery& query, bool* valid);
   std::vector<objid> (*selected)();
+
+  void (*click)();
+  void (*moveMouse)(glm::vec2 ndi);
   //std::vector<func_t> registerGuileFns
 };
 

@@ -1403,7 +1403,9 @@ int main(int argc, char* argv[]){
     .executeSqlQuery = executeSqlQuery,
     .selected = []() -> std::vector<objid> {
       return selectedIds(state.editor);
-    }
+    },
+    .click = dispatchClick,
+    .moveMouse = moveMouse,
   };
 
 

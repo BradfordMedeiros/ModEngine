@@ -12,6 +12,7 @@
 unsigned int toUnsignedInt(SCM value);
 glm::quat scmListToQuat(SCM rotation);
 SCM scmQuatToSCM(glm::quat rotation);
+glm::vec2 listToVec2(SCM vecList);
 glm::vec3 listToVec3(SCM vecList);
 glm::vec4 listToVec4(SCM vecList);
 std::vector<glm::vec3> listToVecVec3(SCM vecList);
