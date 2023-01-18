@@ -971,3 +971,56 @@ std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool
   return result;
 }
 
+
+//////////////////////////
+struct ScheduledTask {
+  objid ownerId;
+  std::function<void(void*)> fn;
+  float time;  // delay time + now 
+  void* data;
+};
+
+std::vector<ScheduledTask> scheduledTasks;
+void schedule(objid id, std::function<void(void*)> fn, float delayTimeMs, void* data){
+  scheduledTasks.push_back(ScheduledTask {
+    .ownerId = id,
+    .fn = fn,
+    .time = now * 1000 + delayTimeMs,
+    .data = data,
+  });
+}
+
+void removeScheduledTask(std::set<objid> ids){
+  std::vector<ScheduledTask> newScheduledTasks;
+  for (int i = 0; i < scheduledTasks.size(); i++){
+    if (ids.find(i) == ids.end()){
+      newScheduledTasks.push_back(scheduledTasks.at(i));
+    }
+  }
+  scheduledTasks = newScheduledTasks;
+}
+void removeScheduledTaskByOwner(std::set<objid> ids){
+  std::vector<ScheduledTask> newScheduledTasks;
+  for (int i = 0; i < scheduledTasks.size(); i++){
+    if (ids.find(scheduledTasks.at(i).ownerId) == ids.end()){
+      newScheduledTasks.push_back(scheduledTasks.at(i));
+    }
+  }
+  scheduledTasks = newScheduledTasks; 
+}
+
+void tickScheduledTasks(){
+  std::set<objid> idsToRemove;
+  float currTime = now * 1000;
+  for (int i = 0; i < scheduledTasks.size(); i++){
+    ScheduledTask& task = scheduledTasks.at(i);
+    std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
+    auto shouldExecuteTask = currTime > task.time;
+    if (!shouldExecuteTask){
+     return;
+    }
+    task.fn(task.data);
+    idsToRemove.insert(i);
+  }
+  removeScheduledTask(idsToRemove);
+}

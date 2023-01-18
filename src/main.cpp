@@ -765,6 +765,7 @@ void onObjDelete(objid id){
  std::cout << "deleted obj id: " << id << std::endl;
   maybeResetCamera(id);
   unsetSelectedIndex(state.editor, id, true);
+  removeScheduledTaskByOwner({ id });
 }
 
 std::map<std::string, std::string> args;
@@ -1406,6 +1407,7 @@ int main(int argc, char* argv[]){
     },
     .click = dispatchClick,
     .moveMouse = moveMouse,
+    .schedule = schedule,
   };
 
 
@@ -1641,6 +1643,7 @@ int main(int argc, char* argv[]){
     onWorldFrame(world, deltaTime, timePlayback.currentTime, enablePhysics, dumpPhysics, state.worldpaused);
     auto time = getTotalTime();
     tickRecordings(time);
+    tickScheduledTasks();
 
     onNetCode(world, netcode, onClientMessage, bootStrapperMode);
     auto viewTransform = getCameraTransform();
