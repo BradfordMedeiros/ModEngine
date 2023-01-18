@@ -981,8 +981,9 @@ struct ScheduledTask {
 };
 
 std::vector<ScheduledTask> scheduledTasks;
+std::vector<ScheduledTask> tasksToSchedule; // taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
 void schedule(objid id, std::function<void(void*)> fn, float delayTimeMs, void* data){
-  scheduledTasks.push_back(ScheduledTask {
+  tasksToSchedule.push_back(ScheduledTask { 
     .ownerId = id,
     .fn = fn,
     .time = now * 1000 + delayTimeMs,
@@ -1010,8 +1011,14 @@ void removeScheduledTaskByOwner(std::set<objid> ids){
 }
 
 void tickScheduledTasks(){
+  for (auto &task : tasksToSchedule){
+    scheduledTasks.push_back(task);
+  }
+  tasksToSchedule = {};
+
   std::set<objid> idsToRemove;
   float currTime = now * 1000;
+  std::cout << "num tasks: " << scheduledTasks.size() << std::endl;
   for (int i = 0; i < scheduledTasks.size(); i++){
     ScheduledTask& task = scheduledTasks.at(i);
     std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
@@ -1019,8 +1026,8 @@ void tickScheduledTasks(){
     if (!shouldExecuteTask){
      return;
     }
-    task.fn(task.data);
-    idsToRemove.insert(i);
+    task.fn(task.data); // if this wasn't copied, this could screw up the loop
+    idsToRemove.insert(i);  
   }
   removeScheduledTask(idsToRemove);
 }
