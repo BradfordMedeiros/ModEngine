@@ -247,7 +247,29 @@ void addFieldDynamic(GameobjAttributes& attributes, std::string attribute, std::
   assertCoreType(ATTRIBUTE_STRING, attribute, payload);
   attributes.stringAttributes[attribute] = payload;
 }
-
+void addAttributeFieldDynamic(GameobjAttributes& attributes, std::string attribute, AttributeValue& value){
+  auto vec3Field = std::get_if<glm::vec3>(&value);
+  if (vec3Field != NULL){
+    attributes.vecAttr.vec3[attribute] = *vec3Field;
+    return;
+  }
+  auto vec4Field = std::get_if<glm::vec4>(&value);
+  if (vec4Field != NULL){
+    attributes.vecAttr.vec4[attribute] = *vec4Field;
+    return;
+  }
+  auto numField = std::get_if<float>(&value);
+  if (numField != NULL){
+    attributes.numAttributes[attribute] = *numField;
+    return;
+  }
+  auto strField = std::get_if<std::string>(&value);
+  if (strField != NULL){
+    attributes.stringAttributes[attribute] = *strField;
+    return;
+  }
+  modassert(false, "add attribute dynamic invalid - " + attribute);
+}
 
 DividedTokens divideMainAndSubelementTokens(std::vector<Token> tokens){
   std::vector<Token> mainTokens;
@@ -410,9 +432,6 @@ void getAllAttributes(GameObject& gameobj, GameobjAttributes& _attr){
   autoserializerGetAttr((char*)&gameobj, gameobjSerializer, _attr);
 }
 
-void setAttribute(GameObject& gameobj, std::string field, AttributeValue attr){
-  //modassert(false, "set attribute not yet implemented");
-} 
 void setAllAttributes(GameObject& gameobj, GameobjAttributes& attr, ObjectSetAttribUtil& util){
   autoserializerSetAttrWithTextureLoading((char*)&gameobj, gameobjSerializer, attr, util);
   modassert(attr.stringAttributes.find("script") == attr.stringAttributes.end(), "setting script attr not yet supported");

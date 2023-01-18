@@ -1198,9 +1198,15 @@ void setAttributes(World& world, objid id, GameobjAttributes& attr){
 }
 void setProperty(World& world, objid id, std::vector<Property>& properties){
   GameObject& gameobj = getGameObject(world, id);
+  GameobjAttributes attr { 
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {}},
+  };
   for (auto property : properties){
-    setAttribute(gameobj, property.propertyName, property.value);
+    addAttributeFieldDynamic(attr, property.propertyName, property.value); 
   }
+  setAttributes(world, id, attr);
 }
 
 void physicsTranslateSet(World& world, objid index, glm::vec3 pos, bool relative){

@@ -1018,14 +1018,15 @@ void tickScheduledTasks(){
 
   std::set<objid> idsToRemove;
   float currTime = now * 1000;
-  std::cout << "num tasks: " << scheduledTasks.size() << std::endl;
+  //std::cout << "num tasks: " << scheduledTasks.size() << std::endl;
   for (int i = 0; i < scheduledTasks.size(); i++){
     ScheduledTask& task = scheduledTasks.at(i);
-    std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
+    //std::cout << "task time: " << task.time << ", currTime = " << currTime << std::endl;
     auto shouldExecuteTask = currTime > task.time;
     if (!shouldExecuteTask){
      return;
     }
+    modlog("SCHEDULER", "executing scheduled task, owner = " + std::to_string(task.ownerId));
     task.fn(task.data); // if this wasn't copied, this could screw up the loop
     idsToRemove.insert(i);  
   }
