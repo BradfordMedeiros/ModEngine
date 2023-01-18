@@ -13,11 +13,11 @@
 
 (define (onDraggableStart)
   (format #t "draggable start dialog move ~a\n" mainobj)
-  (sendnotify "dialogmove-drag-start" (number->string (gameobj-id mainobj)))
+  (send "dialogmove-drag-start" (number->string (gameobj-id mainobj)))
 )
 (define (onDraggableRelease)
   (format #t "draggable release dialog move ~a\n" mainobj)
-  (sendnotify "dialogmove-drag-stop" (number->string (gameobj-id mainobj)))
+  (send "dialogmove-drag-stop" (number->string (gameobj-id mainobj)))
 )
 
 (define (onMouse button action mods)

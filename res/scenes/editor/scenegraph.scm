@@ -87,7 +87,7 @@
 (define (selectRawItem element isAlt)
 	(define attr (gameobj-attr mainobj))
 	(define topic  (cadr (assoc "topic" attr)))
-	(sendnotify topic (car element))
+	(send topic (car element))
 )
 
 (define (onObjDoNothing gameobj color) 

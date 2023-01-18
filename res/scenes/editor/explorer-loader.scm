@@ -74,17 +74,17 @@
       ((equal? value "explorer-ok")
         (begin
           (if explorerSoundValue
-            (sendnotify "explorer-sound-final" explorerSoundValue)
+            (send "explorer-sound-final" explorerSoundValue)
           )
           (set! explorerSoundValue #f)
  
           (if explorerHeightmapBrushValue
-            (sendnotify "explorer-heightmap-brush-final" explorerHeightmapBrushValue)
+            (send "explorer-heightmap-brush-final" explorerHeightmapBrushValue)
           )
           (set! explorerHeightmapBrushValue #f)        
 
           (if explorerHeightmapValue
-            (sendnotify "explorer-heightmap-final" explorerHeightmapValue)
+            (send "explorer-heightmap-final" explorerHeightmapValue)
           )
           (set! explorerHeightmapValue #f)
           (unloadExplorer)

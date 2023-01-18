@@ -445,7 +445,7 @@
   (set-wstate (list
     (list "world" "paused" (if pauseModeEnabled "true" "false"))
   ))
-  (sendnotify "alert" (string-append "pause mode " (if pauseModeEnabled "enabled" "disabled"))) 
+  (send "alert" (string-append "pause mode " (if pauseModeEnabled "enabled" "disabled"))) 
   (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
 )
 (define (togglePauseMode)
@@ -466,8 +466,8 @@
   (set! playModeEnabled (not playModeEnabled))
   (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
   (format #t "play mode: ~a" (if playModeEnabled "true" "false"))
-  (sendnotify "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
-  (sendnotify "play-mode" (if playModeEnabled "true" "false")) 
+  (send "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
+  (send "play-mode" (if playModeEnabled "true" "false")) 
 )
 
 (define (worldStateEqual worldstate key attribute) 
@@ -516,7 +516,7 @@
     (list "set-axis-x" (lambda() (setAxis "x")))
     (list "set-axis-y" (lambda() (setAxis "y")))
     (list "set-axis-z" (lambda() (setAxis "z")))
-    (list "copy-object" (lambda() (sendnotify "copy-object" "true")))
+    (list "copy-object" (lambda() (send "copy-object" "true")))
   )
 )
 
@@ -991,7 +991,7 @@
   (if (not (equal? layer "basicui"))
     (begin
       (set! activeSceneId sceneId)
-      (sendnotify "active-scene-id" (number->string sceneId))
+      (send "active-scene-id" (number->string sceneId))
     )
   )
 )
@@ -1010,11 +1010,11 @@
     (onObjSelected (lsobj-name (cadr reselectAttr)) #f)
     (begin
       (if (equal? (gameobj-id gameobj) (gameobj-id mainobj)) ; assumes script it attached to window x
-        (sendnotify "dock-self-remove" (number->string (gameobj-id mainobj)))
+        (send "dock-self-remove" (number->string (gameobj-id mainobj)))
       )
 
       (if valueDialogType
-        (sendnotify "explorer" (cadr valueDialogType))
+        (send "explorer" (cadr valueDialogType))
       )
       (if valueIsSelectionType
         (if managedText 

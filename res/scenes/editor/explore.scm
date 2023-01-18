@@ -9,7 +9,7 @@
 
 (define (handleAttr onclick)
 	(define onclickValue (if onclick (cadr onclick) #f))
-	(if onclickValue (sendnotify "explorer" onclickValue))
+	(if onclickValue (send "explorer" onclickValue))
 )
 (define (onMouse button action mods)
   (if (and (equal? button 0) (equal? action 0) (and hoveredObj))
