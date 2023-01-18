@@ -982,7 +982,7 @@ struct ScheduledTask {
 
 std::vector<ScheduledTask> scheduledTasks;
 std::vector<ScheduledTask> tasksToSchedule; // taks to schedule is sepearate since want enqueue only in the tick, since task.fn can modify 
-void schedule(objid id, std::function<void(void*)> fn, float delayTimeMs, void* data){
+void schedule(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn) {
   tasksToSchedule.push_back(ScheduledTask { 
     .ownerId = id,
     .fn = fn,

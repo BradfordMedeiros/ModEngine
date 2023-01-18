@@ -107,7 +107,7 @@ glm::vec2 ndiCoord(){
 }
 
 void onMouseEvents(GLFWwindow* window, double xpos, double ypos){
-  std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
+  //std::cout << "mouse events: " << xpos << ", " << ypos << std::endl;
   onMouse(disableInput,  state, xpos, ypos, rotateCamera); 
 }
 

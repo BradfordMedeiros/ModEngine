@@ -198,7 +198,7 @@ void markUserTexturesCleared();
 std::vector<std::vector<std::string>> executeSqlQuery(sql::SqlQuery& query, bool* valid);
 std::map<std::string, std::string> getArgs();
 
-void schedule(objid id, std::function<void(void*)> fn, float delayTimeMs, void* data);
+void schedule(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn);
 void tickScheduledTasks();
 void removeScheduledTask(std::set<objid> ids);
 void removeScheduledTaskByOwner(std::set<objid> ids);

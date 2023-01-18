@@ -106,7 +106,7 @@ struct CustomApiBindings {
 
   void (*click)(int button, int action);
   void (*moveMouse)(glm::vec2 ndi);
-  void (*schedule)(objid id, std::function<void(void*)> fn, float delayTimeMs, void* data);
+  void (*schedule)(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn);
   //std::vector<func_t> registerGuileFns
 };
 
