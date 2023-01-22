@@ -248,13 +248,14 @@ void setObjectDimensions(World& world, std::vector<objid>& ids, float width, flo
   }  
 }
 
-objid getIdForCollisionObject(World& world, const btCollisionObject* body){
+std::optional<objid> getIdForCollisionObject(World& world, const btCollisionObject* body){
   for (auto const&[id, physicsObj] : world.rigidbodys){
     if (physicsObj.body == body){
+      modassert(idExists(world.sandbox, id), "get id for collision, id does not exist: " + std::to_string(id) + " but the rigid body still does");
       return id;
     }
   }
-  return -1;
+  return std::nullopt;
 }
 
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds){

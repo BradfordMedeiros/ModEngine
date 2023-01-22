@@ -25,7 +25,7 @@ CollisionCache::CollisionCache(collisionPairPosFn onObjectEnter, collisionPairFn
 
 void CollisionCache::onObjectsCollide(std::vector<CollisionInstance>& collisionPairs){
   for (auto collisionPair : collisionPairs){
-    if (!collisionInList(oldCollisions, collisionPair)){
+    if (!collisionInList(this -> oldCollisions, collisionPair)){
       onObjectEnter(collisionPair.obj1, collisionPair.obj2, collisionPair.pos, collisionPair.normal);
     }
   }
@@ -37,3 +37,13 @@ void CollisionCache::onObjectsCollide(std::vector<CollisionInstance>& collisionP
   this -> oldCollisions = collisionPairs;
 }
 
+
+void CollisionCache::rmObject(const btCollisionObject* obj){
+  std::vector<CollisionInstance> oldCollisions;   
+  for (auto collisionObj : this -> oldCollisions){
+    if (collisionObj.obj1 != obj && collisionObj.obj2 != obj){
+      oldCollisions.push_back(collisionObj);
+    }
+  }
+  this -> oldCollisions = oldCollisions;
+}

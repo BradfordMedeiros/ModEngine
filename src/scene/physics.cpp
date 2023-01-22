@@ -212,6 +212,7 @@ btRigidBody* addRigidBodyHeightmap(physicsEnv& env, glm::vec3 pos, glm::quat rot
 }
 
 void rmRigidBody(physicsEnv& env, btRigidBody* body){
+  env.collisionCache.rmObject(body);
   env.dynamicsWorld -> removeRigidBody(body);
   cleanupRigidBody(body);
 }

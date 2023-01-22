@@ -30,6 +30,7 @@ class CollisionCache {
     CollisionCache();
     CollisionCache(collisionPairPosFn onObjectEnter, collisionPairFn onObjectLeave);
     void onObjectsCollide(std::vector<CollisionInstance>& collisionPairs);
+    void rmObject(const btCollisionObject* obj);
 };
 
 #endif 

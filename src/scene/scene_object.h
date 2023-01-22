@@ -41,7 +41,7 @@ std::vector<HitObject> raycast(World& world, glm::vec3 posFrom, glm::quat direct
 std::optional<Texture> textureForId(World& world, objid id);
 void setObjectDimensions(World& world, std::vector<objid>& ids, float width, float height, float depth);
 
-objid getIdForCollisionObject(World& world, const btCollisionObject* body);
+std::optional<objid> getIdForCollisionObject(World& world, const btCollisionObject* body);
 bool idInGroup(World& world, objid id, std::vector<objid> groupIds);
 
 void emit(World& world, objid id, NewParticleOptions particleOpts);
