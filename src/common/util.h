@@ -106,7 +106,7 @@ struct StringPairVec2 {
   glm::ivec2 vec;
 };
 
-struct StringString {
+struct StringAttribute {
   std::string strTopic;
   AttributeValue strValue;
 };
@@ -251,7 +251,7 @@ typedef std::function<void(int32_t, void*, std::string&, AttributeValue&)> id_st
 typedef void(*stringfunc)(std::string&);
 typedef std::function<void(int32_t, std::string&)> id_stringfunc;
 
-typedef void(*messagefunc)(std::queue<StringString>&);
+typedef void(*messagefunc)(std::queue<StringAttribute>&);
 
 void assertWithBacktrace(bool isTrue, std::string message);
 void assertTodo(std::string message);

@@ -11,7 +11,7 @@ extern Mesh* crosshairSprite;
 extern Mesh defaultCrosshairSprite;
 extern unsigned int uiShaderProgram;
 extern float initialTime;
-extern std::queue<StringString> channelMessages;
+extern std::queue<StringAttribute> channelMessages;
 
 extern float now;
 extern float deltaTime;
@@ -428,8 +428,8 @@ std::vector<std::string> listResources(std::string resourceType){
   return {};
 }
 
-void sendNotifyMessage(std::string message, std::string value){
-  channelMessages.push(StringString {
+void sendNotifyMessage(std::string message, AttributeValue value){
+  channelMessages.push(StringAttribute {
     .strTopic = message,
     .strValue = value,
   });

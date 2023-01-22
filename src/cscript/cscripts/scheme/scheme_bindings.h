@@ -55,7 +55,7 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid sceneId),
   std::vector<std::string> (*listResources)(std::string),
-  void (*sendNotifyMessage)(std::string message, std::string value),
+  void (*sendNotifyMessage)(std::string message, AttributeValue value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
   void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename),

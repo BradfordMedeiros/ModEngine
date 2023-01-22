@@ -55,7 +55,7 @@ struct CustomApiBindings {
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);
-  void (*sendNotifyMessage)(std::string message, std::string value);
+  void (*sendNotifyMessage)(std::string message, AttributeValue amount);
   double (*timeSeconds)(bool realtime);
   double (*timeElapsed)();
   void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename);

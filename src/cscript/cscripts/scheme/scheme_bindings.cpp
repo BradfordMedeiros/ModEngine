@@ -601,9 +601,9 @@ SCM scmListResources(SCM resourceType){
   return strVectorList(resources);
 }
 
-void (*_sendNotifyMessage)(std::string message, std::string value);
+void (*_sendNotifyMessage)(std::string message, AttributeValue value);
 SCM scmSendNotify(SCM topic, SCM value){
-  _sendNotifyMessage(scm_to_locale_string(topic), scm_to_locale_string(value));
+  _sendNotifyMessage(scm_to_locale_string(topic), toAttributeValue(value));
   return SCM_UNSPECIFIED;
 }
 
@@ -1384,7 +1384,7 @@ void createStaticSchemeBindings(
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid),
   std::vector<std::string> (*listResources)(std::string),
-  void (*sendNotifyMessage)(std::string topic, std::string value),
+  void (*sendNotifyMessage)(std::string topic, AttributeValue value),
   double (*timeSeconds)(bool realtime),
   double (*timeElapsed)(),
   void (*saveScene)(bool includeIds, objid sceneId, std::optional<std::string> filename),

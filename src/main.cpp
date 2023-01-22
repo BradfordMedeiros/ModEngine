@@ -106,7 +106,7 @@ unsigned int uiShaderProgram;
 
 CScriptBindingCallbacks cBindings;
 
-std::queue<StringString> channelMessages;
+std::queue<StringAttribute> channelMessages;
 KeyRemapper keyMapper;
 extern std::vector<InputDispatch> inputFns;
 
@@ -1754,7 +1754,7 @@ int main(int argc, char* argv[]){
           return getGameObjectRotation(id, true);
         },
         [](std::string topic, std::string value) -> void { 
-          StringString message {
+          StringAttribute message {
             .strTopic = topic,
             .strValue = value,
           };
