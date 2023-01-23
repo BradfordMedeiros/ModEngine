@@ -33,6 +33,8 @@ struct CScriptBindingCallbacks {
   stringfunc onUdpMessage;
   stringfunc onPlayerJoined;
   stringfunc onPlayerLeave;
+  std::function<void(objid)> onObjectAdded;
+  std::function<void(objid)> onObjectRemoved;
 };
 
 CScriptBindingCallbacks getCScriptBindingCallbacks();

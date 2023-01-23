@@ -107,6 +107,7 @@ struct CustomApiBindings {
   void (*click)(int button, int action);
   void (*moveMouse)(glm::vec2 ndi);
   void (*schedule)(objid id, float delayTimeMs, void* data, std::function<void(void*)> fn);
+
   //std::vector<func_t> registerGuileFns
 };
 
@@ -136,6 +137,8 @@ struct CScriptBinding {
   id_stringfunc onUdpMessage;
   id_stringfunc onPlayerJoined;
   id_stringfunc onPlayerLeave;
+  std::function<void(objid, void*, objid)> onObjectAdded;
+  std::function<void(objid, void*, objid)> onObjectRemoved;
   std::function<void(void*)> render;
 };
 

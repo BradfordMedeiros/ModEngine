@@ -26,6 +26,8 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onUdpMessage = [](objid scriptId, std::string&) -> void {},
     .onPlayerJoined = [](objid scriptId, std::string&) -> void {},
     .onPlayerLeave = [](objid scriptId, std::string&) -> void {},
+    .onObjectAdded = [](objid scriptId, void* data, objid idAdded) -> void {},
+    .onObjectRemoved = [](objid scriptId, void* data, objid idRemoved) -> void {},
     .render = [](void*) -> void { },
   };
   return defaultBinding;

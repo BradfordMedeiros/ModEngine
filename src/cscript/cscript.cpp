@@ -202,6 +202,20 @@ void onCPlayerLeaveAllScripts(std::string& connectionHash){
     binding -> onPlayerLeave(instanceId, connectionHash);
   }
 }
+void onCObjectAddedAllScripts(objid idAdded){
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCScriptBinding(objInstance.name.c_str());
+    assert(binding != NULL);
+    binding -> onObjectAdded(instanceId, objInstance.data, idAdded);
+  }
+}
+void onCObjectRemovedAllScripts(objid idRemoved){
+  for (auto &[instanceId, objInstance] : customObjInstances){
+    auto binding = getCScriptBinding(objInstance.name.c_str());
+    assert(binding != NULL);
+    binding -> onObjectRemoved(instanceId, objInstance.data, idRemoved);
+  }
+}
 
 CScriptBindingCallbacks getCScriptBindingCallbacks(){
   return CScriptBindingCallbacks {
@@ -223,5 +237,7 @@ CScriptBindingCallbacks getCScriptBindingCallbacks(){
     .onUdpMessage = onCUdpMessageAllScripts,
     .onPlayerJoined = onCPlayerJoinedAllScripts,
     .onPlayerLeave = onCPlayerLeaveAllScripts,
+    .onObjectAdded = onCObjectAddedAllScripts,
+    .onObjectRemoved = onCObjectRemovedAllScripts,
   };
 }

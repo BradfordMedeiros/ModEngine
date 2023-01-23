@@ -1474,10 +1474,12 @@ int main(int argc, char* argv[]){
     }, 
     [&world](GameObject& obj) -> void {
       netObjectCreate(world, obj, netcode, bootStrapperMode);
+      cBindings.onObjectAdded(obj.id);
     },
     [](objid id, bool isNet) -> void {
       onObjDelete(id);
       netObjectDelete(id, isNet, netcode, bootStrapperMode);
+      cBindings.onObjectRemoved(id);
     }, 
     debuggerDrawer, 
     layers,

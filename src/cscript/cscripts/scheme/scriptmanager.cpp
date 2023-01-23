@@ -264,6 +264,23 @@ void onPlayerLeaveAllScripts(objid scriptId, std::string& connectionHash){
   onPlayerLeave(connectionHash);
 }
 
+void onObjectAddedAllScripts(objid scriptId, void* data, objid idAdded){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  onObjectAdded(idAdded);
+}
+void onObjectRemovedAllScripts(objid scriptId, void* data, objid idRemoved){
+  auto scriptModule = moduleForId(scriptId);
+  if (!scriptModule.isvalid){
+    return;
+  }
+  scm_set_current_module(scriptModule.module);
+  onObjectRemoved(idRemoved);
+}
+
 SchemeBindingCallbacks getSchemeCallbacks(){
   SchemeBindingCallbacks callbackFuncs = {
     .onFrame = onFrameAllScripts,
@@ -284,6 +301,8 @@ SchemeBindingCallbacks getSchemeCallbacks(){
     .onUdpMessage = onUdpMessageAllScripts,
     .onPlayerJoined = onPlayerJoinedAllScripts,
     .onPlayerLeave = onPlayerLeaveAllScripts,
+    .onObjectAdded = onObjectAddedAllScripts,
+    .onObjectRemoved = onObjectRemovedAllScripts,
   };
 
   return callbackFuncs;

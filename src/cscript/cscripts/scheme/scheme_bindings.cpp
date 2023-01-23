@@ -1178,6 +1178,20 @@ void onPlayerJoined(std::string connectionHash){
 void onPlayerLeave(std::string connectionHash){
   maybeCallFuncString("on-player-leave", connectionHash.c_str());
 }
+void onObjectAdded(objid idAdded){
+  const char* function = "onObjAdded";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, scm_from_unsigned_integer(idAdded));
+  }
+}
+void onObjectRemoved(objid idRemoved){
+  const char* function = "onObjRm";
+  if (symbolDefined(function)){
+    SCM func_symbol = scm_variable_ref(scm_c_lookup(function));
+    scm_call_1(func_symbol, scm_from_unsigned_integer(idRemoved));
+  }
+}
 
 void onScriptUnload(){
   maybeCallFunc("beforeUnload");

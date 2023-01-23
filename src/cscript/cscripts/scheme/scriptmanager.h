@@ -28,6 +28,8 @@ struct SchemeBindingCallbacks {
   id_stringfunc onUdpMessage;
   id_stringfunc onPlayerJoined;
   id_stringfunc onPlayerLeave;
+  std::function<void(objid, void*, objid)> onObjectAdded;
+  std::function<void(objid, void*, objid)> onObjectRemoved;
 };
 
 objid currentModuleId();

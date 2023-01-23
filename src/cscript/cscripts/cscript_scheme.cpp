@@ -37,6 +37,8 @@ CScriptBinding cscriptSchemeBinding(CustomApiBindings& api, std::function<std::s
   binding.onUdpMessage = schemeCallbacks.onUdpMessage;
   binding.onPlayerJoined = schemeCallbacks.onPlayerJoined;
   binding.onPlayerLeave = schemeCallbacks.onPlayerLeave;
+  binding.onObjectAdded = schemeCallbacks.onObjectAdded;
+  binding.onObjectRemoved = schemeCallbacks.onObjectRemoved;
   // notice binding.render not implemented
 
   createStaticSchemeBindings(
