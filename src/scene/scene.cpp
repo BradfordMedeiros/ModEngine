@@ -934,6 +934,7 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
   }
 
   world.interface.stopAnimation(objectId);
+  world.onObjectDelete(objectId, netsynchronized);
   removeObject(
     world.objectMapping, 
     objectId, 
@@ -948,7 +949,6 @@ void removeObjectById(World& world, objid objectId, std::string name, std::strin
     }
   );
   
-  world.onObjectDelete(objectId, netsynchronized);
   freeMeshRefsByOwner(world, objectId);
   freeTextureRefsByOwner(world, objectId);
   freeAnimationsForOwner(world, objectId);
