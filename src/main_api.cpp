@@ -385,7 +385,8 @@ std::vector<std::string> listAnimations(int32_t id){
   return animationNames;
 }
 
-void playAnimation(int32_t id, std::string animationToPlay){
+void playAnimation(int32_t id, std::string animationToPlay, bool loop){
+  modassert(!loop, "play animation does not yet support loop");
   addAnimation(world, timings, id, animationToPlay);
 }
 

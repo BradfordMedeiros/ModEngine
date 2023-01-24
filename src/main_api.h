@@ -108,7 +108,7 @@ FontFamily& fontFamilyByName(std::string name);
 int drawWord(GLint shaderProgram, objid id, std::string word, unsigned int fontSize, float offsetDelta, AlignType align, TextWrap wrap, TextVirtualization virtualization, UiTextCursor cursor, std::string fontFamilyName, bool drawBoundingOnly);
 
 std::vector<std::string> listAnimations(int32_t id);
-void playAnimation(int32_t id, std::string animationToPlay);
+void playAnimation(int32_t id, std::string animationToPlay, bool loop);
 void stopAnimation(int32_t id);
 
 std::vector<std::string> listSounds(int32_t id);

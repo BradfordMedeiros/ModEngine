@@ -533,9 +533,14 @@ SCM scmListAnimations(SCM value){
   return list;
 }
 
-void (*_playAnimation)(int32_t id, std::string animationName);
-SCM scmPlayAnimation(SCM value, SCM animationName){
-  _playAnimation(getGameobjId(value), scm_to_locale_string(animationName));
+void (*_playAnimation)(int32_t id, std::string animationName, bool loop);
+SCM scmPlayAnimation(SCM value, SCM animationName, SCM scmLoop){
+  auto loopDefined = scmLoop != SCM_UNDEFINED;
+  auto shouldLoop = false;
+  if (loopDefined){
+    shouldLoop = scm_to_bool(scmLoop);
+  }
+  _playAnimation(getGameobjId(value), scm_to_locale_string(animationName), shouldLoop);
   return SCM_UNSPECIFIED;
 }
 
@@ -1246,7 +1251,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
   scm_c_define_gsubr("gameobj-by-id", 1, 0, 0, (void *)scmGetGameObjectById);
 
   scm_c_define_gsubr("gameobj-animations", 1, 0, 0, (void *)scmListAnimations);
-  scm_c_define_gsubr("gameobj-playanimation", 2, 0, 0, (void *)scmPlayAnimation);
+  scm_c_define_gsubr("gameobj-playanimation", 2, 1, 0, (void *)scmPlayAnimation);
 
   scm_c_define_gsubr("gameobj-attr", 1, 0, 0, (void *)scmGetGameObjectAttr);
   scm_c_define_gsubr("gameobj-setattr!", 2, 0, 0, (void *)scmSetGameObjectAttr);
@@ -1394,7 +1399,7 @@ void createStaticSchemeBindings(
   void (*applyImpulseRel)(int32_t index, glm::vec3 impulse),
   void (*clearImpulse)(int32_t index),
   std::vector<std::string> (*listAnimations)(int32_t id),
-  void playAnimation(int32_t id, std::string animationToPlay),
+  void playAnimation(int32_t id, std::string animationToPlay, bool loop),
   std::vector<std::string>(*listClips)(),
   void (*playClip)(std::string, objid),
   std::vector<std::string> (*listResources)(std::string),
