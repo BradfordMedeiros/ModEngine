@@ -28,6 +28,7 @@ gameplay: resources
 	@php ./dock/main.php config/gameplay/dock_config.php weapons  > ./build/dock/editor_weapons.rawscene
 	@php ./dock/main.php config/gameplay/dock_config.php volumes  > ./build/dock/editor_volumes.rawscene
 	@php ./dock/main.php config/gameplay/dock_config.php hud  > ./build/dock/hud.rawscene
+	@php ./dock/main.php config/gameplay/dock_config.php water  > ./build/dock/water.rawscene
 
 resources: build
 	@mkdir -p ./build/dock

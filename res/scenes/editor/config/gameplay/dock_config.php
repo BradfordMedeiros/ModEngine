@@ -207,5 +207,19 @@
         ],
       ],
     ],
+    "water" => [
+      "items" => [
+        [
+          "type" => "label",
+          "data" => [
+            "key" => "Create Water",
+            "readonly" => true,
+            "value" => [
+              "binding" => "false-binding-0",
+            ]
+          ],
+        ],
+      ],
+    ],
   ];
 ?>
