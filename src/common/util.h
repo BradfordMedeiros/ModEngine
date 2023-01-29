@@ -43,6 +43,7 @@ enum ManipulatorMode { NONE, ROTATE, TRANSLATE, SCALE };
 enum Axis { NOAXIS, XAXIS, YAXIS, ZAXIS };
 enum SNAPPING_MODE { SNAP_CONTINUOUS, SNAP_ABSOLUTE, SNAP_RELATIVE };
 
+std::string print(bool value);
 std::string print(glm::vec3 vec);
 std::string print(glm::vec4 vec);
 std::string print(glm::ivec3 vec);

@@ -166,6 +166,9 @@ std::vector<std::string> filterComments(std::vector<std::string> values){
   return newStrings;
 }
 
+std::string print(bool value){
+  return value ? "true" : "false";
+}
 std::string print(glm::vec3 vec){
   std::stringstream stream;
   stream << vec.x << " " << vec.y << " " << vec.z;
