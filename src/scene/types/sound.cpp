@@ -10,8 +10,30 @@ void stopSoundSystem(){
   alutExit();
 }
 
-void playSource(ALuint source){
+void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position){
+  ALfloat oldVolume;
+  ALfloat x;
+  ALfloat y;
+  ALfloat z;
+
+  if (volume.has_value()){
+    alGetListenerf(AL_GAIN, &oldVolume);
+    setSoundVolume(source, volume.value());
+  }
+  if (position.has_value()){
+    alGetSource3f(source, AL_POSITION, &x, &y, &z);
+    setSoundPosition(source, position.value().x, position.value().y, position.value().z);
+  }
+
   alSourcePlay(source);
+
+  if (volume.has_value()){
+    setSoundVolume(source, oldVolume);
+  }
+  if (position.has_value()){
+    setSoundPosition(source, x, y, z);
+  }
+
 }
 std::vector<std::string> listSounds(){
   std::vector<std::string> sounds;

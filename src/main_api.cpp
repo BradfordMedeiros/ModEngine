@@ -774,11 +774,11 @@ void setCameraRotation(glm::quat orientation){
   }
 }
 
-void playSoundState(std::string source, objid sceneId){
+void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position){
   std::cout << "Info: play sound: " << source << std::endl;
   auto gameobj = getGameObjectByName(source, sceneId, false);
   if (gameobj.has_value()){
-    playSoundState(world.objectMapping, gameobj.value()); 
+    playSoundState(world.objectMapping, gameobj.value(), volume, position); 
   }else{
     std::cout << "ERROR: no source named: " << source << " in scene: " << sceneId << std::endl;
     assert(false);

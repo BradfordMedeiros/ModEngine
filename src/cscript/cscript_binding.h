@@ -51,7 +51,7 @@ struct CustomApiBindings {
   std::vector<std::string> (*listAnimations)(int32_t id);
   void (*playAnimation)(int32_t id, std::string animationToPlay, bool loop);
   std::vector<std::string>(*listClips)();
-  void (*playClip)(std::string, objid sceneId);
+  void (*playClip)(std::string, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 
   ///////////
   std::vector<std::string> (*listResources)(std::string);

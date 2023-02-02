@@ -585,10 +585,12 @@ SCM scmListClips(){
   }
   return list;
 }
-void (*_playClip)(std::string, objid);
-SCM scmPlayClip(SCM soundname){
+void (*_playClip)(std::string, objid, std::optional<float>, std::optional<glm::vec3>);
+SCM scmPlayClip(SCM soundname, SCM scmVolume, SCM scmPosition){
   auto sceneId = _listSceneId(currentModuleId());
-  _playClip(scm_to_locale_string(soundname), sceneId);
+  modassert(scm_is_eq(scmVolume, SCM_UNDEFINED), "scheme play volume not yet implemented");
+  modassert(scm_is_eq(scmPosition, SCM_UNDEFINED), "scheme play position not yet implemented");
+  _playClip(scm_to_locale_string(soundname), sceneId, std::nullopt, std::nullopt);
   return SCM_UNSPECIFIED;
 }
 
@@ -1271,7 +1273,7 @@ void defineFunctions(objid id, bool isServer, bool isFreeScript){
 
   // audio stuff
   scm_c_define_gsubr("lsclips", 0, 0, 0, (void*)scmListClips);
-  scm_c_define_gsubr("playclip", 1, 0, 0, (void*)scmPlayClip);
+  scm_c_define_gsubr("playclip", 1, 2, 0, (void*)scmPlayClip);
 
   // event system
   scm_c_define_gsubr("send", 2, 0, 0, (void*)scmSendNotify);
@@ -1401,7 +1403,7 @@ void createStaticSchemeBindings(
   std::vector<std::string> (*listAnimations)(int32_t id),
   void playAnimation(int32_t id, std::string animationToPlay, bool loop),
   std::vector<std::string>(*listClips)(),
-  void (*playClip)(std::string, objid),
+  void (*playClip)(std::string, objid, std::optional<float> volume, std::optional<glm::vec3> position),
   std::vector<std::string> (*listResources)(std::string),
   void (*sendNotifyMessage)(std::string topic, AttributeValue value),
   double (*timeSeconds)(bool realtime),

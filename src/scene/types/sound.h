@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <cstring>
 #include <queue>
+#include <glm/glm.hpp>
 
 // https://www.openal.org/documentation/OpenAL_Programmers_Guide.pdf
 
@@ -18,7 +19,7 @@ void startSoundSystem();
 void stopSoundSystem();
 ALuint loadSoundState(std::string filepath);
 void unloadSoundState(ALuint source, std::string filepath);
-void playSource(ALuint source);
+void playSource(ALuint source, std::optional<float> volume, std::optional<glm::vec3> position);
 
 std::vector<std::string> listSounds();
 void setSoundPosition(ALuint source, float x, float y, float z);

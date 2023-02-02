@@ -153,7 +153,7 @@ void setLayerState(std::vector<StrValues> values);
 void setFloatState(std::string stateName, float value);
 void setIntState(std::string stateName, int value);
 
-void playSoundState(std::string source, objid sceneId);
+void playSoundState(std::string source, objid sceneId, std::optional<float> volume, std::optional<glm::vec3> position);
 
 unsigned int activeTextureId();
 
