@@ -657,6 +657,35 @@ void assertTodo(std::string message){
   assertWithBacktrace(false, "TODO hit: " + message);
 }
 
+std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.stringAttributes.find(key) != objAttr.stringAttributes.end()){
+    return objAttr.stringAttributes.at(key);
+  }
+  return std::nullopt;
+}
+
+std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key){
+  if (objAttr.numAttributes.find(key) != objAttr.numAttributes.end()){
+    return objAttr.numAttributes.at(key);
+  }
+  return std::nullopt;
+}
+
+std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key){
+   if (objAttr.vecAttr.vec3.find(key) != objAttr.vecAttr.vec3.end()){
+    return objAttr.vecAttr.vec3.at(key);
+  }
+  return std::nullopt; 
+}
+
+bool hasAttribute(GameobjAttributes& attributes, std::string attr){
+  bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();
+  bool hasFloatAttr = attributes.numAttributes.find(attr) != attributes.numAttributes.end();
+  bool hasVec3Attr = attributes.vecAttr.vec3.find(attr) != attributes.vecAttr.vec3.end();
+  bool hasVec4Attr = attributes.vecAttr.vec4.find(attr) != attributes.vecAttr.vec4.end();
+  return hasStrAttr || hasFloatAttr || hasVec3Attr || hasVec4Attr;
+}
+
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes){
   if (attributes.vecAttr.vec3.find(field) != attributes.vecAttr.vec3.end()){
     *_valueToUpdate = attributes.vecAttr.vec3.at(field);

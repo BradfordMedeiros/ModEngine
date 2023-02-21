@@ -30,6 +30,7 @@
 #include "./cscript/cscript.h"
 #include "./cscript/cscripts/cscript_sample.h"
 #include "./cscript/cscripts/cscript_scheme.h"
+#include "./cscript/cscripts/cscript_editor.h"
 #include "./lines.h"
 #include "./scene/common/textures_gen.h"
 #include "./modlayer.h"
@@ -1417,7 +1418,11 @@ int main(int argc, char* argv[]){
   };
 
 
-  std::vector<CScriptBinding> pluginBindings = { sampleBindingPlugin(pluginApi), cscriptSchemeBinding(pluginApi, interface.modlayerPath) };
+  std::vector<CScriptBinding> pluginBindings = { 
+    sampleBindingPlugin(pluginApi), 
+    cscriptSchemeBinding(pluginApi, interface.modlayerPath),
+    cscriptEditorBinding(pluginApi),
+  };
   #ifdef ADDITIONAL_SRC_HEADER
     auto userBindings = getUserBindings(pluginApi);
     for (auto userBinding : userBindings){

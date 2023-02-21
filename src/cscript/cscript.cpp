@@ -154,7 +154,7 @@ void onCKeyCharCallbackAllScripts(unsigned int codepoint){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onKeyCharCallback(instanceId, codepoint);
+    binding -> onKeyCharCallback(instanceId, objInstance.data, codepoint);
   }
 }
 

@@ -19,7 +19,7 @@ CScriptBinding createCScriptBinding(const char* bindingMatcher, CustomApiBinding
     .onObjectUnselected = [](objid scriptId) -> void {},
     .onObjectHover = [](objid scriptId, int32_t index, bool hoverOn) -> void {},
     .onKeyCallback = [](objid scriptId, void* data, int key, int scancode, int action, int mods) -> void {},
-    .onKeyCharCallback = [](objid scriptId, unsigned int codepoint) -> void {},
+    .onKeyCharCallback = [](objid scriptId, void* data, unsigned int codepoint) -> void {},
     .onCameraSystemChange = [](objid scriptId, std::string, bool) -> void {},
     .onMessage = [](objid scriptId, void* data, std::string& topic, AttributeValue& value) -> void {},
     .onTcpMessage = [](objid scriptId, std::string&) -> void {},

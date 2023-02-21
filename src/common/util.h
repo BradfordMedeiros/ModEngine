@@ -193,6 +193,10 @@ struct GameobjAttributes {
   vectorAttributes vecAttr;
 };
 
+std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
+std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);
+bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 
@@ -244,7 +248,7 @@ typedef std::function<void(int32_t id, int32_t index)> id_funcMappingFunc;
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef std::function<void(int32_t id, void* data, int key, int scancode, int action, int mods)> id_keycallback;
 typedef void(*keycharcallback)(unsigned int codepoint);
-typedef std::function<void(int32_t id, unsigned int codepoint)> id_keycharcallback;
+typedef std::function<void(int32_t id, void* data, unsigned int codepoint)> id_keycharcallback;
 typedef void(*stringboolFunc)(std::string, bool value);
 typedef std::function<void(int32_t id, std::string, bool value)> id_stringboolFunc;
 typedef void(*string2func)(std::string&, AttributeValue&);

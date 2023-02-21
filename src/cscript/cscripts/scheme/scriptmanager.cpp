@@ -203,7 +203,7 @@ void onKeyCallbackAllScripts(int32_t scriptId, void* data, int key, int scancode
   scm_set_current_module(scriptModule.module);
   onKeyCallback(key, scancode, action, mods);  
 }
-void onKeyCharCallbackAllScripts(int32_t scriptId, unsigned int codepoint){
+void onKeyCharCallbackAllScripts(int32_t scriptId, void* data, unsigned int codepoint){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
