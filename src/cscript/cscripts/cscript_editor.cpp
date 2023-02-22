@@ -95,23 +95,39 @@ void handleDialogClick(std::string name, GameobjAttributes& attributes){
 */
 }
 
-void maybeUnloadSidepanelAll(){
-  /*
-  (define (maybe-unload-sidepanel-all)
-  (for-each (lambda (sceneId) (maybe-unload-sidepanel-by-scene sceneId)) snappingPositionToSceneId)
-)
+void maybeUnloadSidepanelByScene(int sceneId){
+/*
+(define (maybe-unload-sidepanel-by-scene sceneIndex)
+  (define snapIndex (list-index snappingPositionToSceneId sceneIndex))
+  (format #t "dock: remove: ~a ~a\n" snapIndex sceneIndex)
+  (if snapIndex 
+    (maybe-unload-sidepanel-snap snapIndex)
+    (unload-scene sceneIndex)
+  )
+) 
 */
+  mainApi -> unloadScene(sceneId);
 }
 
-void maybeUnloadSidepanelSnap(int panelIndex){
-  // (define sidePanelSceneId (get-snap-id panelIndex))
-  //(if sidePanelSceneId (unload-scene sidePanelSceneId))
-  //(update-snap-pos panelIndex #f) 
+void maybeUnloadSidepanelAll(EditorData& editorData){
+  for (auto [_, sceneId] : editorData.snapPosToSceneId){
+    maybeUnloadSidepanelByScene(sceneId);
+  }
+}
+
+void maybeUnloadSidepanelSnap(EditorData& editorData, int panelIndex){
+  if (editorData.snapPosToSceneId.find(panelIndex) != editorData.snapPosToSceneId.end()){
+    auto sceneId = editorData.snapPosToSceneId.at(panelIndex);
+    mainApi -> unloadScene(sceneId);
+    editorData.snapPosToSceneId.erase(panelIndex);
+  }
 }
 
 
-std::optional<int> getSnapId(int index){
-  // (list-ref snappingPositionToSceneId index)
+std::optional<int> getSnapId(EditorData& editorData, int index){
+  if (editorData.snapPosToSceneId.find(index) != editorData.snapPosToSceneId.end()){
+    return editorData.snapPosToSceneId.at(index);
+  }
   return std::nullopt;
 }
 
@@ -184,6 +200,7 @@ struct PanelAndPosition {
   glm::vec3 position;
 };
 
+
 objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveable, bool restrictX, bool snapX){
   std::vector<std::vector<std::string>> additionalTokens = {
     { ")window_x", "script", "./res/scenes/editor/dock/details.scm" },
@@ -209,8 +226,8 @@ void updateSnapPos(EditorData& editorData, int snappingIndex, int sceneId){
 
 void changeSidepanel(EditorData& editorData, int snappingIndex, std::string scene, std::string anchorElementName){
   modlog("editor", "change sidepanel, load scene: " + scene + ", anchor: " + anchorElementName);
-  maybeUnloadSidepanelSnap(snappingIndex);
-  auto snapId = getSnapId(snappingIndex);
+  maybeUnloadSidepanelSnap(editorData, snappingIndex);
+  auto snapId = getSnapId(editorData, snappingIndex);
   if (!snapId.has_value()){
     auto sidePanelSceneId = loadSidePanel(scene, std::nullopt, true, true, true);
     auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sidePanelSceneId, false);
@@ -251,21 +268,7 @@ std::vector<PanelAndPosition> tableLayout(std::string layoutname){
 }
 
 
-void maybeUnloadSidepanelByScene(int sceneId){
 
-/*
-(define (maybe-unload-sidepanel-by-scene sceneIndex)
-  (define snapIndex (list-index snappingPositionToSceneId sceneIndex))
-  (format #t "dock: remove: ~a ~a\n" snapIndex sceneIndex)
-  (if snapIndex 
-    (maybe-unload-sidepanel-snap snapIndex)
-    (unload-scene sceneIndex)
-  )
-) 
-
-*/
-  mainApi -> unloadScene(sceneId);
-}
 
 void loadPanelsFromDb(EditorData& editorData, std::string layoutname){
   std::cout << "should load all panels" << std::endl;
@@ -309,7 +312,7 @@ void onObjectSelected(int32_t id, void* data, int32_t index, glm::vec3 color){
   handleDialogClick(elementName, objattrs);
   if (dialogOption.has_value() && dialogOption.value() != ""){
     if (dialogOption.value() == "HIDE"){
-      maybeUnloadSidepanelAll();
+      maybeUnloadSidepanelAll(*editorData);
     }else{
       changeSidepanel(*editorData, 1, dialogOption.value(), fullElementName("(menubar", sceneId));
     }
