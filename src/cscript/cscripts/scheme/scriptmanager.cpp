@@ -158,7 +158,7 @@ void onScrollCallbackAllScripts(objid scriptId, void* data, double amount){
   onScrollCallback(amount);  
 }
 
-void onObjectSelectedAllScripts(objid scriptId, int32_t index, glm::vec3 color){
+void onObjectSelectedAllScripts(objid scriptId, void* data, int32_t index, glm::vec3 color){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;

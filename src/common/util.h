@@ -240,7 +240,7 @@ typedef std::function<void(int32_t id, void* data, double xPos, double yPos, flo
 typedef void(*scrollcallback)(double amount);
 typedef std::function<void(int32_t id, void* data, double amount)> id_scrollcallback;
 typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
-typedef std::function<void(int32_t id, int32_t index, glm::vec3 color)> id_onobjectSelectedFunc;
+typedef std::function<void(int32_t id, void* data, int32_t index, glm::vec3 color)> id_onobjectSelectedFunc;
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef std::function<void(int32_t id, int32_t index, bool hoverOn)> id_onobjectHoverFunc;
 typedef void(*funcMappingFunc)(int32_t index);

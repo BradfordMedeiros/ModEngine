@@ -118,7 +118,7 @@ void onCObjectSelectedAllScripts(int32_t index, glm::vec3 color){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onObjectSelected(instanceId, index, color);
+    binding -> onObjectSelected(instanceId, objInstance.data, index, color);
   }
 }
 void onCObjectUnselectedAllScripts(){

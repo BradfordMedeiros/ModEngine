@@ -4,6 +4,10 @@ CustomApiBindings* mainApi;
 
 struct EditorData {
   std::vector<objid> panels;
+
+  std::optional<std::string> currOption;
+  std::optional<objid> popoverSceneId;
+  std::map<int, objid> snapPosToSceneId;
 };
 
 std::string popItemPrefix = ")text_";
@@ -13,18 +17,71 @@ bool isPopoverElement(std::string name){
 }
 
 
-
-void changePopover(std::string elementName, std::string uiOption){
-  // 
+void maybeUnloadPopover(EditorData& editorData){
+  if (editorData.popoverSceneId.has_value()){
+    mainApi -> unloadScene(editorData.popoverSceneId.value());
+    editorData.currOption = std::nullopt;
+    editorData.popoverSceneId = std::nullopt;
+  }
 }
-void maybeUnloadPopover(){
 
+
+std::vector<std::vector<std::string>> popoverOptions(std::string elementName, std::vector<std::string> menuOptions){
+  return {};
+}
+/*
+(define (popover-options elementName menuOptions)
+  (define nextName (genNextName popItemPrefix))
+  (define (create-value text) (textvalue (nextName) text text))
+
+  (define val (map create-value menuOptions))
+  (define itemnames (map car val))
+  (define elements (map cadr val))
+  (define joinedNames (string-join itemnames ","))
+  (define joinedElements (apply append elements))
+  (define baselist (list 
+    (list "(dialog" "elements" joinedNames)
+    (list "(dialog" "anchor" elementName)
+    (list "(dialog" "anchor-offset" "-0.04 -0.067 0")
+    (list "(dialog" "anchor-dir-horizontal" "right")
+    (list "(dialog" "anchor-dir-vertical" "down")
+
+  ))
+  (format #t "joinedNames: ~a\n" joinedNames)
+  (format #t "joinedElements name: ~a\n" joinedElements)
+  (format #t "element name is: ~a\n" elementName)
+  (append baselist  joinedElements)
+)
+*/
+
+void changePopover(EditorData& editorData, std::string elementName, std::string uiOption){
+  modlog("editor", "load popover: " + uiOption);
+  bool isAlreadyLoaded = editorData.currOption.has_value() && editorData.currOption.value() == uiOption;
+  if (isAlreadyLoaded){
+    modlog("editor", "ui is already loaded: " + uiOption);
+    return;
+  }
+  
+  maybeUnloadPopover(editorData);
+  
+  // (popover-options elementName (cadr (assoc uiOption uilist)))
+  std::optional<std::vector<std::string>> tags = std::optional<std::vector<std::string>>({ "editor" });
+  
+  std::vector<std::string> menuOptions; // need to get this from something
+  // (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist))) (list "editor")))
+  auto sceneId = mainApi -> loadScene("./res/scenes/editor/popover.rawscene", popoverOptions(elementName, menuOptions), std::nullopt, tags);
+  editorData.popoverSceneId = sceneId;
+  editorData.currOption = uiOption;
+
+  auto dialogId = mainApi -> getGameObjectByName("(dialog", sceneId, true);
+  mainApi -> enforceLayout(dialogId.value()); // wait....why need two passed?
+  mainApi -> enforceLayout(dialogId.value());
 }
 
-std::string fullElementName(std::string localname){
-  // (string-append "." (number->string mainSceneId) "/" localname))
-  modassert(false, "not yet implemented");
-  return localname;
+
+std::string fullElementName(std::string localname, objid mainSceneId){
+  auto fullElementName = "." + std::to_string(mainSceneId) + "/" + localname;
+  return fullElementName;
 } 
 
 void handleDialogClick(std::string name, GameobjAttributes& attributes){
@@ -46,18 +103,18 @@ void maybeUnloadSidepanelAll(){
 */
 }
 
-void changeSidepanel(int snappingIndex, std::string scene, std::string fullElementName){
-  //(format #t "change sidepanel: elementname: ~a\n" anchorElementName)
-  //(maybe-unload-sidepanel-snap snappingIndex)
-  //(if (not (get-snap-id snappingIndex))
-  //  (begin
-  //    (update-snap-pos snappingIndex (loadSidePanel scene #f #t #t #t))
-  //    (format #t "editor: load scene: ~a\n" scene)
-  //    (format #t "sidepanel id is: ~a\n" (get-snap-id snappingIndex))
-  //    (enforce-layout (gameobj-id (lsobj-name "(test_panel" (get-snap-id snappingIndex))))
-  //  )
-  //)
+void maybeUnloadSidepanelSnap(int panelIndex){
+  // (define sidePanelSceneId (get-snap-id panelIndex))
+  //(if sidePanelSceneId (unload-scene sidePanelSceneId))
+  //(update-snap-pos panelIndex #f) 
 }
+
+
+std::optional<int> getSnapId(int index){
+  // (list-ref snappingPositionToSceneId index)
+  return std::nullopt;
+}
+
 
 
 void popoverAction(std::string action){
@@ -75,38 +132,7 @@ void popoverAction(std::string action){
 */
 }
 
-void onObjectSelected(int32_t id, int32_t index, glm::vec3 color){
-  auto objattrs =  mainApi -> getGameObjectAttr(index);
-  auto popOptionPair = getStrAttr(objattrs, "popoption");
-  auto popAction = getStrAttr(objattrs, "popaction");
-  bool hasPopOption = popOptionPair.has_value();
-  auto elementName = mainApi -> getGameObjNameForId(index).value();
-  auto isPopover = isPopoverElement(elementName);
-  auto dialogOption = getStrAttr(objattrs, "dialogoption");
 
-  if (hasPopOption){
-    changePopover(fullElementName(elementName), popOptionPair.value());
-  }else{
-    maybeUnloadPopover();
-  }
-
-  if (isPopover && popAction.has_value()){
-    popoverAction(popAction.value());
-  }
-
-  if (! (hasPopOption || isPopover)){
-    maybeUnloadPopover();
-  }
-
-  handleDialogClick(elementName, objattrs);
-  if (dialogOption.has_value() && dialogOption.value() != ""){
-    if (dialogOption.value() == "HIDE"){
-      maybeUnloadSidepanelAll();
-    }else{
-      changeSidepanel(1, dialogOption.value(), fullElementName("(menubar"));
-    }
-  }
-}
 
 
 void saveAllPanels(){
@@ -139,40 +165,155 @@ void saveAllPanels(){
 
 
 bool hasLayoutTable(){
-  //;;;;;;;;;;;;;;;;;;;;;;;
-  //(define (hasLayoutTable) 
-  //  (define tables (map car (sql (sql-compile "show tables"))))
-  //  (define tableExists (> (length (filter (lambda(x) (equal? x "layout")) tables)) 0))
-  //  tableExists
-  //)
+  auto query = mainApi -> compileSqlQuery("show tables", {});
+  bool validSql = false;
+  auto result = mainApi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+
+  bool tableExists = false;
+  for (auto row : result){
+    if (row.at(0) == "layout"){
+      return true;
+    }
+  }
   return false;
 }
 
-std::vector<objid> loadAllPanels(){
-  // (define panelsMoveable (args "gridmove"))
-  //(define (load-all-panels panelIdAndPos)
-  //(map 
-  //  (lambda (panelIdAndPos)
-  //    (loadSidePanel (car panelIdAndPos) (cadr panelIdAndPos) panelsMoveable #f #f)
-  //  )
-  //  panelIdAndPos
-  //)
-  //)
-  return {};
+struct PanelAndPosition {
+  std::string panel;
+  glm::vec3 position;
+};
+
+objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveable, bool restrictX, bool snapX){
+  std::vector<std::vector<std::string>> additionalTokens = {
+    { ")window_x", "script", "./res/scenes/editor/dock/details.scm" },
+    // ;(list "(test_panel" "anchor" anchorElementName)
+    { "(test_panel", "position", serializeVec(pos.has_value() ? pos.value() : glm::vec3(-0.78f, -0.097f, -1.f)) }, 
+  };
+  if (moveable){
+    additionalTokens.push_back({ "(test_panel", "script", "./res/scenes/editor/dialogmove.scm" });
+  }
+  if (restrictX){
+    additionalTokens.push_back({ "(test_panel", "dialogmove-restrictx", "true" });
+  }
+  if (snapX){
+    additionalTokens.push_back({ "(test_panel", "editor-shouldsnap", "true" });
+  }
+  std::optional<std::vector<std::string>> tags = std::optional<std::vector<std::string>>({ "editor" });
+  return mainApi -> loadScene(scene, additionalTokens, std::nullopt, tags);
 }
 
-void loadPanelsFromDb(EditorData& editorData){
-  std::cout << "should load all panels" << std::endl;
-  if (hasLayoutTable()){
-    //(for-each maybe-unload-sidepanel-by-scene panels) need to implement
+void updateSnapPos(EditorData& editorData, int snappingIndex, int sceneId){
+  editorData.snapPosToSceneId[snappingIndex] = sceneId;
+}
 
+void changeSidepanel(EditorData& editorData, int snappingIndex, std::string scene, std::string anchorElementName){
+  modlog("editor", "change sidepanel, load scene: " + scene + ", anchor: " + anchorElementName);
+  maybeUnloadSidepanelSnap(snappingIndex);
+  auto snapId = getSnapId(snappingIndex);
+  if (!snapId.has_value()){
+    auto sidePanelSceneId = loadSidePanel(scene, std::nullopt, true, true, true);
+    auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sidePanelSceneId, false);
+    updateSnapPos(editorData, snappingIndex, sidePanelSceneId);
+    mainApi -> enforceLayout(testPanelId.value());
   }
-/*  (if (hasLayoutTable) 
-    (begin
-      
-      (set! panels  (load-all-panels (tableLayout layout)))
-    )
-  )*/
+}
+
+std::vector<objid> loadAllPanels(std::vector<PanelAndPosition> panels){
+  std::cout << "wanting to load panels: " << panels.size() << std::endl;
+  auto args =  mainApi -> getArgs();
+  auto panelsMoveable = args.find("gridmove") != args.end();
+
+  std::vector<objid> ids;
+  for (auto panel : panels){
+    ids.push_back(loadSidePanel(panel.panel, panel.position, panelsMoveable, false, false));
+  }
+  return ids;
+}
+
+std::vector<PanelAndPosition> tableLayout(std::string layoutname){
+  auto query = mainApi -> compileSqlQuery(
+    "select panel, position from layout where name = ?",  // maybe just hardcode this, since built in data dir which isn't really supported, for eg play pause button
+    { layoutname }
+  );
+  bool validSql = false;
+  auto result = mainApi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+
+  std::vector<PanelAndPosition> panels;
+  for (auto row : result){
+    panels.push_back(PanelAndPosition {
+      .panel = row.at(0),
+      .position = parseVec(row.at(1)),
+    });
+  }
+  return panels;
+}
+
+
+void maybeUnloadSidepanelByScene(int sceneId){
+
+/*
+(define (maybe-unload-sidepanel-by-scene sceneIndex)
+  (define snapIndex (list-index snappingPositionToSceneId sceneIndex))
+  (format #t "dock: remove: ~a ~a\n" snapIndex sceneIndex)
+  (if snapIndex 
+    (maybe-unload-sidepanel-snap snapIndex)
+    (unload-scene sceneIndex)
+  )
+) 
+
+*/
+  mainApi -> unloadScene(sceneId);
+}
+
+void loadPanelsFromDb(EditorData& editorData, std::string layoutname){
+  std::cout << "should load all panels" << std::endl;
+  auto layoutTableExists = hasLayoutTable();
+  modlog("editor", "layout exists: " + print(layoutTableExists));
+  if (layoutTableExists){
+    //(for-each maybe-unload-sidepanel-by-scene panels) need to implement
+    for (auto panelSceneId : editorData.panels){
+      maybeUnloadSidepanelByScene(panelSceneId);
+    }
+    editorData.panels = loadAllPanels(tableLayout(layoutname));
+  }
+}
+
+void onObjectSelected(int32_t id, void* data, int32_t index, glm::vec3 color){
+  EditorData* editorData = static_cast<EditorData*>(data);
+
+  auto objattrs =  mainApi -> getGameObjectAttr(index);
+  auto popOptionPair = getStrAttr(objattrs, "popoption");
+  auto popAction = getStrAttr(objattrs, "popaction");
+  bool hasPopOption = popOptionPair.has_value();
+  auto elementName = mainApi -> getGameObjNameForId(index).value();
+  auto isPopover = isPopoverElement(elementName);
+  auto dialogOption = getStrAttr(objattrs, "dialogoption");
+
+  auto sceneId = mainApi -> listSceneId(id);
+  if (hasPopOption){
+    changePopover(*editorData, fullElementName(elementName, sceneId), popOptionPair.value());
+  }else{
+    maybeUnloadPopover(*editorData);
+  }
+
+  if (isPopover && popAction.has_value()){
+    popoverAction(popAction.value());
+  }
+
+  if (! (hasPopOption || isPopover)){
+    maybeUnloadPopover(*editorData);
+  }
+
+  handleDialogClick(elementName, objattrs);
+  if (dialogOption.has_value() && dialogOption.value() != ""){
+    if (dialogOption.value() == "HIDE"){
+      maybeUnloadSidepanelAll();
+    }else{
+      changeSidepanel(*editorData, 1, dialogOption.value(), fullElementName("(menubar", sceneId));
+    }
+  }
 }
 
 
@@ -182,6 +323,13 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
   binding.create = [](std::string scriptname, objid id, objid sceneId, bool isServer, bool isFreeScript) -> void* {
     EditorData* editorData = new EditorData;
     editorData -> panels = {};
+    editorData -> currOption = std::nullopt;
+    editorData -> popoverSceneId = std::nullopt;
+    editorData -> snapPosToSceneId = {};
+
+    auto args =  mainApi -> getArgs();
+    auto layoutToUse = args.find("layout") == args.end() ? "none" : args.at("layout");
+    loadPanelsFromDb(*editorData, layoutToUse);
 
     auto row2Id = mainApi -> getGameObjectByName("(row2", sceneId, false);
     auto row3Id = mainApi -> getGameObjectByName("(row3", sceneId, false);
@@ -201,16 +349,12 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     if (codepoint == 'o'){
       saveAllPanels();
     }else if (codepoint == 'p'){
-      //loadPanelsFromDb();
+      EditorData* editorData = static_cast<EditorData*>(data);
+      loadPanelsFromDb(*editorData, "main");
     }
-    /* (define (onKeyChar key)
-  (if (equal? key 46)
-    (save-all-panels layoutToUse)
-    ;(loadPanelsFromDb "main")
-  ) */
   };
 
-
   binding.onObjectSelected = onObjectSelected;
+
   return binding;
 }
