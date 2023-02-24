@@ -125,14 +125,14 @@ void onCObjectUnselectedAllScripts(){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onObjectUnselected(instanceId);
+    binding -> onObjectUnselected(instanceId, objInstance.data);
   }
 }
 void onCObjectHoverAllScripts(int32_t index, bool isHover){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onObjectHover(instanceId, index, isHover);
+    binding -> onObjectHover(instanceId, objInstance.data, index, isHover);
   }
 }
 void onCMappingAllScripts(int32_t index){

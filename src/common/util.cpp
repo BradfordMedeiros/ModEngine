@@ -678,6 +678,13 @@ std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key
   return std::nullopt; 
 }
 
+std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key){
+   if (objAttr.vecAttr.vec4.find(key) != objAttr.vecAttr.vec4.end()){
+    return objAttr.vecAttr.vec4.at(key);
+  }
+  return std::nullopt; 
+}
+
 bool hasAttribute(GameobjAttributes& attributes, std::string attr){
   bool hasStrAttr = attributes.stringAttributes.find(attr) != attributes.stringAttributes.end();
   bool hasFloatAttr = attributes.numAttributes.find(attr) != attributes.numAttributes.end();

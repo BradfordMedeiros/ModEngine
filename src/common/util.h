@@ -196,6 +196,7 @@ struct GameobjAttributes {
 std::optional<std::string> getStrAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<float> getFloatAttr(GameobjAttributes& objAttr, std::string key);
 std::optional<glm::vec3> getVec3Attr(GameobjAttributes& objAttr, std::string key);
+std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key);
 bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
@@ -242,7 +243,7 @@ typedef std::function<void(int32_t id, void* data, double amount)> id_scrollcall
 typedef void(*onobjectSelectedFunc)(int32_t index, glm::vec3 color);
 typedef std::function<void(int32_t id, void* data, int32_t index, glm::vec3 color)> id_onobjectSelectedFunc;
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
-typedef std::function<void(int32_t id, int32_t index, bool hoverOn)> id_onobjectHoverFunc;
+typedef std::function<void(int32_t id, void* data, int32_t index, bool hoverOn)> id_onobjectHoverFunc;
 typedef void(*funcMappingFunc)(int32_t index);
 typedef std::function<void(int32_t id, int32_t index)> id_funcMappingFunc;
 typedef void(*keycallback)(int key, int scancode, int action, int mods);

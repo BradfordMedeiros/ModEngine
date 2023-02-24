@@ -8,7 +8,75 @@ struct EditorData {
   std::optional<std::string> currOption;
   std::optional<objid> popoverSceneId;
   std::map<int, objid> snapPosToSceneId;
+
+  std::optional<std::string> layoutToUse;
 };
+
+std::map<std::string, std::vector<std::string>> uiList = {
+  { "file", { "load", "quit" }},
+  { "misc", { "fullscreen" }},
+};
+
+
+
+void maybeUnloadDialog(EditorData& editorData){
+  /*
+  (define (maybe-unload-dialog)
+  (if dialogSceneId (unload-scene dialogSceneId))
+  (set! dialogSceneId #f)
+  (set! activeDialogName #f)
+  )
+  */
+}
+
+struct DialogOptions {
+  std::string title;
+  std::string message;
+  std::map<std::string, std::function<void(EditorData&)>> optionToAction;
+};
+
+std::map<std::string, DialogOptions> dialogMap = {
+  { "load", DialogOptions {
+      .title = "Load Layout",
+      .message = "layouts enable different ui workflows",
+      .optionToAction = {
+        { "CANCEL", [](EditorData& editorData) -> void { maybeUnloadDialog(editorData); }},
+        { "LOAD", [](EditorData& editorData) -> void {}},
+      },
+    }
+  },
+  { "quit", DialogOptions {
+      .title = "Confirm QUIT",
+      .message = "are you sure you want to quit?",
+      .optionToAction = {
+        { "CANCEL", [](EditorData& editorData) -> void { maybeUnloadDialog(editorData); }},
+        { "QUIT", [](EditorData& editorData) -> void { exit(0); }},
+      },
+
+    }
+  },
+};
+
+std::map<std::string, std::function<void(EditorData&)>> nameAction = {
+  { "load", [](EditorData& editorData) -> void { 
+    /* (get-change-dialog "load")*/ } 
+  },
+  { "fullscreen", [](EditorData& editorData) -> void { /* 
+
+    (lambda () 
+//      (format #t "toggling fullscreen\n")
+//      (set! fullscreen (not fullscreen))
+//      (set-wstate (list
+//        (list "rendering" "fullscreen" (if fullscreen "true" "false")) ; doesn't actually toggle since fullscreen state never updates to match internal with set-wstate
+//      ))
+//      #f
+//    )
+//  )
+
+  */ } },
+
+};
+
 
 std::string popItemPrefix = ")text_";
 const int popItemPrefixLength = popItemPrefix.size();
@@ -26,33 +94,46 @@ void maybeUnloadPopover(EditorData& editorData){
 }
 
 
-std::vector<std::vector<std::string>> popoverOptions(std::string elementName, std::vector<std::string> menuOptions){
-  return {};
+std::function<std::string(void)> genNextName(std::string prefix){
+  int index = -1;
+  return [&index, &prefix]() -> std::string {
+    index++;
+    return prefix + std::to_string(index);
+  };
 }
-/*
-(define (popover-options elementName menuOptions)
-  (define nextName (genNextName popItemPrefix))
-  (define (create-value text) (textvalue (nextName) text text))
 
-  (define val (map create-value menuOptions))
-  (define itemnames (map car val))
-  (define elements (map cadr val))
-  (define joinedNames (string-join itemnames ","))
-  (define joinedElements (apply append elements))
-  (define baselist (list 
-    (list "(dialog" "elements" joinedNames)
-    (list "(dialog" "anchor" elementName)
-    (list "(dialog" "anchor-offset" "-0.04 -0.067 0")
-    (list "(dialog" "anchor-dir-horizontal" "right")
-    (list "(dialog" "anchor-dir-vertical" "down")
+std::vector<std::vector<std::string>> textValue(std::string& name, std::string& content, std::string& action){
+  return {
+    { name, "layer", "basicui" },
+    { name, "scale", "0.004 0.01 0.004" },
+    { name, "value", content },
+    { name, "popaction", action },
+  };
+    
+}
 
-  ))
-  (format #t "joinedNames: ~a\n" joinedNames)
-  (format #t "joinedElements name: ~a\n" joinedElements)
-  (format #t "element name is: ~a\n" elementName)
-  (append baselist  joinedElements)
-)
-*/
+std::vector<std::vector<std::string>> popoverOptions(std::string elementName, std::vector<std::string> menuOptions){
+  auto nextName = genNextName(popItemPrefix);
+  std::vector<std::vector<std::string>> items = {};
+  std::vector<std::string> allItemNames;
+  for (auto &menuOption : menuOptions){
+    auto menuItemName = nextName();
+    allItemNames.push_back(menuItemName);
+
+    items.push_back({ menuItemName, "layer", "basicui" });
+    items.push_back({ menuItemName, "scale", "0.004 0.01 0.004" });
+    items.push_back({ menuItemName, "value", menuOption });
+    items.push_back({ menuItemName, "popaction", menuOption });
+  }
+
+  items.push_back({ "(dialog", "anchor", elementName });
+  items.push_back({ "(dialog", "anchor-offset", "-0.04 -0.067 0" });
+  items.push_back({ "(dialog", "anchor-dir-horizontal", "right" });
+  items.push_back({ "(dialog", "anchor-dir-vertical", "down" });
+  items.push_back({ "(dialog", "elements", join(allItemNames, ',') });
+
+  return items;
+}
 
 void changePopover(EditorData& editorData, std::string elementName, std::string uiOption){
   modlog("editor", "load popover: " + uiOption);
@@ -64,12 +145,12 @@ void changePopover(EditorData& editorData, std::string elementName, std::string 
   
   maybeUnloadPopover(editorData);
   
-  // (popover-options elementName (cadr (assoc uiOption uilist)))
-  std::optional<std::vector<std::string>> tags = std::optional<std::vector<std::string>>({ "editor" });
-  
-  std::vector<std::string> menuOptions; // need to get this from something
-  // (set! sceneId (load-scene "./res/scenes/editor/popover.rawscene" (popover-options elementName (cadr (assoc uiOption uilist))) (list "editor")))
-  auto sceneId = mainApi -> loadScene("./res/scenes/editor/popover.rawscene", popoverOptions(elementName, menuOptions), std::nullopt, tags);
+  auto sceneId = mainApi -> loadScene(
+    "./res/scenes/editor/popover.rawscene", 
+    popoverOptions(elementName, uiList.at(uiOption)), 
+    std::nullopt, 
+    std::optional<std::vector<std::string>>({ "editor" })
+  );
   editorData.popoverSceneId = sceneId;
   editorData.currOption = uiOption;
 
@@ -133,7 +214,8 @@ std::optional<int> getSnapId(EditorData& editorData, int index){
 
 
 
-void popoverAction(std::string action){
+void popoverAction(EditorData& editorData, std::string action){
+  auto actionFn = nameAction.at(action);
   /*(define (popoverAction action)
   (define mappedAction (assoc action nameAction))
   (define actionName (car mappedAction))
@@ -149,34 +231,29 @@ void popoverAction(std::string action){
 }
 
 
+void removeOldLayout(std::string& layoutname){
+  auto query = mainApi -> compileSqlQuery("delete from layout where name = ?", { layoutname });
+  bool validSql = false;
+  auto result = mainApi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+}
 
+void saveNewLayout(std::string& layoutname, std::string& panel, glm::vec3 position){
+  auto query = mainApi -> compileSqlQuery( "insert into layout (name, panel, position) values (?, ?, ?)", { layoutname, panel, serializeVec(position) });
+  bool validSql = false;
+  auto result = mainApi -> executeSqlQuery(query, &validSql);
+  modassert(validSql, "error executing sql query");
+}
 
-void saveAllPanels(){
-  std::cout << "should save all panels" << std::endl;
-
-/*
-/*(define (sceneFileForSceneId sceneId) 
-  (define sceneIds (list-scenefiles sceneId))
-  (if (> (length sceneIds) 0) (car sceneIds) #f)
-)
-
-(define (save-all-panels layoutname)
-  (define layoutInfo 
-    (map 
-      (lambda(sceneId) 
-        (let ((scenefilename (sceneFileForSceneId sceneId)))
-          (if scenefilename
-            (list 
-              scenefilename
-              (gameobj-pos (lsobj-name "(test_panel" sceneId))
-            )
-            #f
-          )
-        )
-      ) 
-      panels
-    )
-  )*/
+void saveAllPanels(EditorData& editorData, std::string layoutname){
+  modlog("editor save panels", "saving layout: " + layoutname);
+  removeOldLayout(layoutname);
+  for (auto sceneIdForPanel : editorData.panels){
+    auto sceneFile = mainApi -> listSceneFiles(sceneIdForPanel).at(0);
+    auto testPanelId = mainApi -> getGameObjectByName("(test_panel", sceneIdForPanel, false).value();
+    auto position = mainApi -> getGameObjectPos(testPanelId, false);
+    saveNewLayout(layoutname, sceneFile, position);
+  }
 }
 
 
@@ -287,25 +364,24 @@ void onObjectSelected(int32_t id, void* data, int32_t index, glm::vec3 color){
   EditorData* editorData = static_cast<EditorData*>(data);
 
   auto objattrs =  mainApi -> getGameObjectAttr(index);
-  auto popOptionPair = getStrAttr(objattrs, "popoption");
+  auto popOption = getStrAttr(objattrs, "popoption");
   auto popAction = getStrAttr(objattrs, "popaction");
-  bool hasPopOption = popOptionPair.has_value();
   auto elementName = mainApi -> getGameObjNameForId(index).value();
   auto isPopover = isPopoverElement(elementName);
   auto dialogOption = getStrAttr(objattrs, "dialogoption");
 
   auto sceneId = mainApi -> listSceneId(id);
-  if (hasPopOption){
-    changePopover(*editorData, fullElementName(elementName, sceneId), popOptionPair.value());
+  if (popOption.has_value()){
+    changePopover(*editorData, fullElementName(elementName, sceneId), popOption.value());
   }else{
     maybeUnloadPopover(*editorData);
   }
 
   if (isPopover && popAction.has_value()){
-    popoverAction(popAction.value());
+    popoverAction(*editorData, popAction.value());
   }
 
-  if (! (hasPopOption || isPopover)){
+  if (! (popOption.has_value() || isPopover)){
     maybeUnloadPopover(*editorData);
   }
 
@@ -319,6 +395,67 @@ void onObjectSelected(int32_t id, void* data, int32_t index, glm::vec3 color){
   }
 }
 
+void changeCursor(bool hoverOn){
+  std::vector<ObjectValue> values = {};
+  if (hoverOn){
+    values.push_back(
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "crosshair",
+        .value = "./res/textures/crosshairs/crosshair029.png",
+      }
+    );
+  }else{
+    values.push_back(
+      ObjectValue {
+        .object = "mouse",
+        .attribute = "crosshair",
+        .value = "",
+      }
+    );   
+  }
+  mainApi -> setWorldState(values);
+}
+bool isButton(int32_t id){
+  auto name = mainApi -> getGameObjNameForId(id).value();
+  return name.size() >= 1 && name.at(0) == '*';
+}
+
+void maybeHandleSidePanelDrop(objid id){
+/*
+  (define gameobj (gameobj-by-id id))
+  (define pos (gameobj-pos gameobj))
+  (define snapValue (assoc "editor-shouldsnap" (gameobj-attr gameobj)))
+  (define shouldSnap (if snapValue (equal? "true" (cadr snapValue)) #f))
+  (define sceneId (list-sceneid id))
+  (if shouldSnap 
+    (let ((snappingPair (get-snapping-pair-by-loc gameobj)))
+      ;(format #t "snapping pair is: ~a\n" snappingPair)
+      (if (and snappingPair (not (snap-slot-occupied (car snappingPair))))
+        (update-snap-pos (applySnapping gameobj snappingPair) sceneId)
+        (update-snap-pos (applySnapping gameobj (get-current-snapping-pair sceneId)) sceneId)
+      )
+    )
+  )
+*/
+}
+
+void tintThemeColors(bool isPlay, objid sceneId){
+  auto themeObjs = mainApi -> getObjectsByAttr("theme-play-tint", std::nullopt, sceneId);
+  for (auto themeObjId : themeObjs){
+    auto currAttr = mainApi -> getGameObjectAttr(themeObjId);
+    auto themeTint = getVec4Attr(currAttr, "theme-play-tint");
+    auto restoreTint = getVec4Attr(currAttr, "theme-restore-tint");
+    GameobjAttributes attr {
+      .stringAttributes = {},
+      .numAttributes = {},
+      .vecAttr = { .vec3 = {}, .vec4 = { {"tint", isPlay ? themeTint.value() : restoreTint.value() }} },
+    };
+    mainApi -> setGameObjectAttr(themeObjId, attr);
+  }
+}
+
+
 
 CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/editor", api);
@@ -331,8 +468,11 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     editorData -> snapPosToSceneId = {};
 
     auto args =  mainApi -> getArgs();
-    auto layoutToUse = args.find("layout") == args.end() ? "none" : args.at("layout");
-    loadPanelsFromDb(*editorData, layoutToUse);
+    editorData -> layoutToUse = args.find("layout") == args.end() ? std::nullopt: std::optional<std::string>(args.at("layout"));
+
+    if (editorData -> layoutToUse.has_value()){
+      loadPanelsFromDb(*editorData, editorData -> layoutToUse.value());
+    }
 
     auto row2Id = mainApi -> getGameObjectByName("(row2", sceneId, false);
     auto row3Id = mainApi -> getGameObjectByName("(row3", sceneId, false);
@@ -350,14 +490,48 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
 
   binding.onKeyCharCallback = [](int32_t id, void* data, unsigned int codepoint) -> void {
     if (codepoint == 'o'){
-      saveAllPanels();
+      EditorData* editorData = static_cast<EditorData*>(data);
+      if (editorData -> layoutToUse.has_value()){
+        saveAllPanels(*editorData, editorData -> layoutToUse.value());
+      }
     }else if (codepoint == 'p'){
       EditorData* editorData = static_cast<EditorData*>(data);
-      loadPanelsFromDb(*editorData, "main");
+      loadPanelsFromDb(*editorData, "testload");
     }
   };
 
   binding.onObjectSelected = onObjectSelected;
+  binding.onObjectUnselected = [](objid scriptId, void* data) -> void {
+    EditorData* editorData = static_cast<EditorData*>(data);
+    maybeUnloadPopover(*editorData);
+  };
+
+
+  binding.onObjectHover = [](objid scriptId, void* data, int32_t index, bool hoverOn) -> void {
+    if (hoverOn){
+      if (isButton(index)){
+        changeCursor(true);
+      }
+    }else{
+      changeCursor(false);
+    }
+  };
+
+  binding.onMessage = [](objid scriptId, void* data, std::string& topic, AttributeValue& value) -> void {
+    EditorData* editorData = static_cast<EditorData*>(data);
+    if (topic == "dialogmove-drag-stop"){
+      auto idStr = std::get_if<std::string>(&value);
+      maybeHandleSidePanelDrop(std::atoi(idStr -> c_str()));
+    }else if (topic == "dock-self-remove"){
+      modlog("editor", "should unload the dock because x was clicked");
+      auto idStr = std::get_if<std::string>(&value);
+      maybeUnloadSidepanelByScene(mainApi -> listSceneId(std::atoi(idStr -> c_str())));
+    }else if (topic == "play-mode"){
+      auto valueStr = std::get_if<std::string>(&value);
+      tintThemeColors(*valueStr == "true", mainApi -> listSceneId(scriptId));
+    }
+  };
+
 
   return binding;
 }

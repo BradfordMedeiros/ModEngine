@@ -166,7 +166,7 @@ void onObjectSelectedAllScripts(objid scriptId, void* data, int32_t index, glm::
   scm_set_current_module(scriptModule.module);
   onObjectSelected(index, color);
 }
-void onObjectUnselectedAllScripts(objid scriptId){
+void onObjectUnselectedAllScripts(objid scriptId, void* data){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
@@ -174,7 +174,7 @@ void onObjectUnselectedAllScripts(objid scriptId){
   scm_set_current_module(scriptModule.module);
   onObjectUnselected();
 }
-void onObjectHoverAllScripts(int32_t scriptId, int32_t index, bool isHover){
+void onObjectHoverAllScripts(int32_t scriptId, void* data, int32_t index, bool isHover){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;
