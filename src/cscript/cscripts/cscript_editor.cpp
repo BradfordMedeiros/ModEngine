@@ -298,7 +298,23 @@ objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveab
 }
 
 void updateSnapPos(EditorData& editorData, int snappingIndex, int sceneId){
+  modassert(editorData.snapPosToSceneId.find(snappingIndex) == editorData.snapPosToSceneId.end() || editorData.snapPosToSceneId.at(snappingIndex) == sceneId, "update snap failed, index occupied: " + snappingIndex);
+  std::optional<int> oldSnappingIndex = std::nullopt;
+  for (auto &[snapindex, sceneId] : editorData.snapPosToSceneId){
+    if (sceneId == sceneId){
+      oldSnappingIndex = snapindex;
+    }
+  }
+  if (oldSnappingIndex.has_value()){
+    editorData.snapPosToSceneId.erase(oldSnappingIndex.value());
+  }
   editorData.snapPosToSceneId[snappingIndex] = sceneId;
+
+  std::cout << "snapping pos: ";
+  for (auto &[snapIndex, sceneId] : editorData.snapPosToSceneId){
+    std:: cout << "(" << snapIndex << ", " << sceneId << ") ";
+  }
+  std::cout << std::endl;
 }
 
 void changeSidepanel(EditorData& editorData, int snappingIndex, std::string scene, std::string anchorElementName){
@@ -421,13 +437,50 @@ bool isButton(int32_t id){
   return name.size() >= 1 && name.at(0) == '*';
 }
 
-void maybeHandleSidePanelDrop(objid id){
+struct SnappingPosition { 
+  float xPos;
+  glm::vec3 snappingPosition;
+};
+
+std::vector<SnappingPosition> snappingPositions = {
+  //SnappingPosition { .xPos = 0.f, .snappingPosition = glm::vec3(0.78, -0.097f, 0.f) },
+  SnappingPosition { .xPos = -1.f, .snappingPosition = glm::vec3(-0.78, -0.097f, 0.f) },
+  SnappingPosition { .xPos = 1.f, .snappingPosition = glm::vec3(0.78 , -0.097f, 0.f) },
+  SnappingPosition { .xPos = 1.2f, .snappingPosition = glm::vec3(1.2f, -0.097f, 0.f) },
+  SnappingPosition { .xPos = -1.2f, .snappingPosition = glm::vec3(-1.2f, -0.097f, 0.f) },
+};
+
+int getSnappingPosition(glm::vec3 position){
+  float minDistance = glm::abs(position.x - snappingPositions.at(0).xPos);
+  int minIndex = 0;
+
+  std::cout << "snapping, curr pos: " << print(position) << std::endl;
+  for (int i = 0; i < snappingPositions.size(); i++){
+    auto distance = glm::abs(position.x - snappingPositions.at(i).xPos);
+    std::cout << "snapping: distance is: " << distance << ", index = " << i << ", min = " << minDistance << std::endl;
+    if (distance < minDistance){
+      minIndex = i;
+      minDistance = distance;
+    }
+  }
+  return minIndex;
+}
+
+void maybeHandleSidePanelDrop(EditorData& editorData, objid id){
+  auto sceneId = mainApi -> listSceneId(id);
+  auto attr = mainApi -> getGameObjectAttr(id);
+  auto snapValue = getStrAttr(attr, "editor-shouldsnap");
+  bool shouldSnap = snapValue.has_value() && snapValue.value() == "true";
+  if (shouldSnap){
+    auto pos = mainApi -> getGameObjectPos(id, true);
+    int snappingIndex = getSnappingPosition(pos);
+    std::cout << "snapping index: " << snappingIndex << std::endl;
+    auto snappingPos = snappingPositions.at(snappingIndex).snappingPosition;
+    updateSnapPos(editorData, snappingIndex, sceneId);
+    mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
+    mainApi -> enforceLayout(id);
+  }
 /*
-  (define gameobj (gameobj-by-id id))
-  (define pos (gameobj-pos gameobj))
-  (define snapValue (assoc "editor-shouldsnap" (gameobj-attr gameobj)))
-  (define shouldSnap (if snapValue (equal? "true" (cadr snapValue)) #f))
-  (define sceneId (list-sceneid id))
   (if shouldSnap 
     (let ((snappingPair (get-snapping-pair-by-loc gameobj)))
       ;(format #t "snapping pair is: ~a\n" snappingPair)
@@ -521,7 +574,7 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     EditorData* editorData = static_cast<EditorData*>(data);
     if (topic == "dialogmove-drag-stop"){
       auto idStr = std::get_if<std::string>(&value);
-      maybeHandleSidePanelDrop(std::atoi(idStr -> c_str()));
+      maybeHandleSidePanelDrop(*editorData, std::atoi(idStr -> c_str()));
     }else if (topic == "dock-self-remove"){
       modlog("editor", "should unload the dock because x was clicked");
       auto idStr = std::get_if<std::string>(&value);
