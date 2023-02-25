@@ -9,24 +9,61 @@ struct EditorData {
   std::optional<objid> popoverSceneId;
   std::map<int, objid> snapPosToSceneId;
 
+  std::optional<std::string> activeDialogName;
+  std::optional<objid> dialogSceneId;
+
   std::optional<std::string> layoutToUse;
 };
 
 std::map<std::string, std::vector<std::string>> uiList = {
-  { "file", { "load", "quit" }},
+  { "file", { "quit", "load" }},
   { "misc", { "fullscreen" }},
 };
 
 
 
 void maybeUnloadDialog(EditorData& editorData){
-  /*
-  (define (maybe-unload-dialog)
-  (if dialogSceneId (unload-scene dialogSceneId))
-  (set! dialogSceneId #f)
-  (set! activeDialogName #f)
-  )
-  */
+  modlog("editor", "maybe unload dialog");
+  if (editorData.dialogSceneId.has_value()){
+    mainApi -> unloadScene(editorData.dialogSceneId.value());
+    editorData.dialogSceneId = std::nullopt;
+    editorData.activeDialogName = std::nullopt;
+  }
+}
+
+std::function<std::string(void)> genNextName(std::string prefix){
+  int index = -1;
+  return [&index, &prefix]() -> std::string {
+    index++;
+    return prefix + std::to_string(index);
+  };
+}
+
+void changeDialog(EditorData& editorData, std::string title, std::string subtitle, std::vector<std::string> options){
+  modlog("editor", "changedialog " + title);
+  if (!editorData.dialogSceneId.has_value()){
+    std::vector<std::vector<std::string>> additionalTokens = {
+        { ")text_2", "value", title },
+        { ")text_main", "value", subtitle },
+    };
+    std::vector<std::string> dialogOptions;
+    auto nextName = genNextName(")option_");
+    for (int index = 0; index < options.size(); index++){
+      auto option = options.at(index);
+      auto elementName = nextName();
+
+      additionalTokens.push_back({ elementName, "layer", "basicui" });
+      additionalTokens.push_back({ elementName, "scale", "0.004 0.01 0.004" });
+      additionalTokens.push_back({ elementName, "value", option });
+      additionalTokens.push_back({ elementName, "option_index", option });
+
+      dialogOptions.push_back(elementName);
+    }
+    additionalTokens.push_back({ "(options", "elements", join(dialogOptions, ',') });
+
+    auto sceneId = mainApi -> loadScene("./res/scenes/editor/dialog.rawscene", additionalTokens, std::nullopt,  std::optional<std::vector<std::string>>({ "editor" }));
+    editorData.dialogSceneId = sceneId;
+  }
 }
 
 struct DialogOptions {
@@ -57,23 +94,42 @@ std::map<std::string, DialogOptions> dialogMap = {
   },
 };
 
-std::map<std::string, std::function<void(EditorData&)>> nameAction = {
-  { "load", [](EditorData& editorData) -> void { 
-    /* (get-change-dialog "load")*/ } 
-  },
-  { "fullscreen", [](EditorData& editorData) -> void { /* 
+bool isFullScreen(){
+  auto worldStates = mainApi -> getWorldState();
+  for (auto &worldState : worldStates){
+    if (worldState.object == "rendering" && worldState.attribute == "fullscreen"){
+      auto strValue = std::get_if<std::string>(&worldState.value);
+      return *strValue == "true";
+    }
+  }
+  modassert(false, "could not determine if fullscreen");
+  return false;
+}
 
-    (lambda () 
-//      (format #t "toggling fullscreen\n")
-//      (set! fullscreen (not fullscreen))
-//      (set-wstate (list
-//        (list "rendering" "fullscreen" (if fullscreen "true" "false")) ; doesn't actually toggle since fullscreen state never updates to match internal with set-wstate
-//      ))
-//      #f
-//    )
-//  )
+std::function<void(EditorData& editorData)> createPopoverAction(std::string dialogOption){
+  DialogOptions& option = dialogMap.at(dialogOption);
+  std::vector<std::string> options = {};
+  for (auto &[key, _] : option.optionToAction){
+    options.push_back(key);
+  }
+  return [&option, options, dialogOption](EditorData& editorData) -> void { 
+     editorData.activeDialogName = dialogOption;
+     changeDialog(editorData, option.title, option.message, options);
+  }; 
+}
 
-  */ } },
+std::map<std::string, std::function<void(EditorData& editorData)>> nameAction = {
+  { "load", createPopoverAction("load") },
+  { "quit", createPopoverAction("quit")},
+  { "fullscreen", [](EditorData& editorData) -> void { 
+    mainApi -> setWorldState({ 
+      ObjectValue {
+        .object = "rendering",
+        .attribute = "fullscreen",
+        .value = isFullScreen() ? "false" : "true",
+      }
+    });
+  }}
 
 };
 
@@ -81,7 +137,7 @@ std::map<std::string, std::function<void(EditorData&)>> nameAction = {
 std::string popItemPrefix = ")text_";
 const int popItemPrefixLength = popItemPrefix.size();
 bool isPopoverElement(std::string name){
-  return name.substr(0, popItemPrefixLength) == name;
+  return name.substr(0, popItemPrefixLength) == popItemPrefix;
 }
 
 
@@ -94,13 +150,6 @@ void maybeUnloadPopover(EditorData& editorData){
 }
 
 
-std::function<std::string(void)> genNextName(std::string prefix){
-  int index = -1;
-  return [&index, &prefix]() -> std::string {
-    index++;
-    return prefix + std::to_string(index);
-  };
-}
 
 std::vector<std::vector<std::string>> textValue(std::string& name, std::string& content, std::string& action){
   return {
@@ -165,7 +214,23 @@ std::string fullElementName(std::string localname, objid mainSceneId){
   return fullElementName;
 } 
 
-void handleDialogClick(std::string name, GameobjAttributes& attributes){
+
+void handleDialogClick(EditorData& editorData, std::string& name, GameobjAttributes& attributes){
+  modlog("editor", "handle dialog click");
+  auto isOptionName = name.size() >= 8 && name.substr(0, 8) == ")option_";
+
+  if (isOptionName && editorData.activeDialogName.has_value()){
+    auto value = getStrAttr(attributes, "option_index").value();
+    modlog("editor", "isOption = " + print(isOptionName) + ", activeDialogName: "  + (editorData.activeDialogName.has_value() ? editorData.activeDialogName.value() : "no dialog") + ", name = " + value);
+    auto dialogOptionFn =  dialogMap.at(editorData.activeDialogName.value()).optionToAction.at(value);
+    dialogOptionFn(editorData);
+  }
+
+  if (isOptionName && !editorData.activeDialogName.has_value()){
+    std::cout << "is option but no active dialog" << std::endl;
+  }
+
+
 /*
 (define (handle-dialog-click name attr)
   (define optionname (resolve-option-name name attr))
@@ -215,7 +280,9 @@ std::optional<int> getSnapId(EditorData& editorData, int index){
 
 
 void popoverAction(EditorData& editorData, std::string action){
+  modlog("editor", "popover action: " + action);
   auto actionFn = nameAction.at(action);
+  actionFn(editorData);
   /*(define (popoverAction action)
   (define mappedAction (assoc action nameAction))
   (define actionName (car mappedAction))
@@ -393,6 +460,7 @@ void onObjectSelected(int32_t id, void* data, int32_t index, glm::vec3 color){
     maybeUnloadPopover(*editorData);
   }
 
+  std::cout << "element = " << elementName << ", is popover: " << isPopover << ", hasPopAction " << popAction.has_value() << std::endl;
   if (isPopover && popAction.has_value()){
     popoverAction(*editorData, popAction.value());
   }
@@ -401,7 +469,7 @@ void onObjectSelected(int32_t id, void* data, int32_t index, glm::vec3 color){
     maybeUnloadPopover(*editorData);
   }
 
-  handleDialogClick(elementName, objattrs);
+  handleDialogClick(*editorData, elementName, objattrs);
   if (dialogOption.has_value() && dialogOption.value() != ""){
     if (dialogOption.value() == "HIDE"){
       maybeUnloadSidepanelAll(*editorData);
@@ -519,6 +587,8 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     editorData -> currOption = std::nullopt;
     editorData -> popoverSceneId = std::nullopt;
     editorData -> snapPosToSceneId = {};
+    editorData -> activeDialogName = std::nullopt;
+    editorData -> dialogSceneId = std::nullopt;
 
     auto args =  mainApi -> getArgs();
     editorData -> layoutToUse = args.find("layout") == args.end() ? std::nullopt: std::optional<std::string>(args.at("layout"));
