@@ -30,7 +30,8 @@
 #include "./cscript/cscript.h"
 #include "./cscript/cscripts/cscript_sample.h"
 #include "./cscript/cscripts/cscript_scheme.h"
-#include "./cscript/cscripts/cscript_editor.h"
+#include "./cscript/cscripts/editor/cscript_editor.h"
+#include "./cscript/cscripts/editor/dialogmove.h"
 #include "./lines.h"
 #include "./scene/common/textures_gen.h"
 #include "./modlayer.h"
@@ -1422,6 +1423,7 @@ int main(int argc, char* argv[]){
     sampleBindingPlugin(pluginApi), 
     cscriptSchemeBinding(pluginApi, interface.modlayerPath),
     cscriptEditorBinding(pluginApi),
+    cscriptDialogMoveBinding(pluginApi),
   };
   #ifdef ADDITIONAL_SRC_HEADER
     auto userBindings = getUserBindings(pluginApi);

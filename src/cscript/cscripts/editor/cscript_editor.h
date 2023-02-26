@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <iostream>
-#include "../cscript_binding.h"
+#include "../../cscript_binding.h"
 
 CScriptBinding cscriptEditorBinding(CustomApiBindings& api);
 

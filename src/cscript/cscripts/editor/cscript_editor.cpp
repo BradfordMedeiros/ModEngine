@@ -229,35 +229,25 @@ void handleDialogClick(EditorData& editorData, std::string& name, GameobjAttribu
   if (isOptionName && !editorData.activeDialogName.has_value()){
     std::cout << "is option but no active dialog" << std::endl;
   }
-
-
-/*
-(define (handle-dialog-click name attr)
-  (define optionname (resolve-option-name name attr))
-  (if (and activeDialogName (not (equal? optionname "")))
-    ((get-fn-for-dialog-option activeDialogName optionname))
-  )
-)
-*/
 }
 
-void maybeUnloadSidepanelByScene(int sceneId){
-/*
-(define (maybe-unload-sidepanel-by-scene sceneIndex)
-  (define snapIndex (list-index snappingPositionToSceneId sceneIndex))
-  (format #t "dock: remove: ~a ~a\n" snapIndex sceneIndex)
-  (if snapIndex 
-    (maybe-unload-sidepanel-snap snapIndex)
-    (unload-scene sceneIndex)
-  )
-) 
-*/
+void maybeUnloadSidepanelByScene(EditorData& editorData, int sceneId){
+  std::optional<int> snapPosToDelete = std::nullopt;
+  for (auto &[snapPos, scene] : editorData.snapPosToSceneId){
+    if (sceneId == scene){
+      snapPosToDelete = snapPos;
+      break;
+    }
+  }
+  if (snapPosToDelete.has_value()){
+    editorData.snapPosToSceneId.erase(snapPosToDelete.value());
+  }
   mainApi -> unloadScene(sceneId);
 }
 
 void maybeUnloadSidepanelAll(EditorData& editorData){
   for (auto [_, sceneId] : editorData.snapPosToSceneId){
-    maybeUnloadSidepanelByScene(sceneId);
+    maybeUnloadSidepanelByScene(editorData, sceneId);
   }
 }
 
@@ -283,18 +273,6 @@ void popoverAction(EditorData& editorData, std::string action){
   modlog("editor", "popover action: " + action);
   auto actionFn = nameAction.at(action);
   actionFn(editorData);
-  /*(define (popoverAction action)
-  (define mappedAction (assoc action nameAction))
-  (define actionName (car mappedAction))
-  (if mappedAction 
-    (let ((openedDialog ((cadr mappedAction))))
-      (if (equal? openedDialog #t)
-        (set! activeDialogName actionName)
-      )
-    )
-  )
-)
-*/
 }
 
 
@@ -352,7 +330,7 @@ objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveab
     { "(test_panel", "position", serializeVec(pos.has_value() ? pos.value() : glm::vec3(-0.78f, -0.097f, -1.f)) }, 
   };
   if (moveable){
-    additionalTokens.push_back({ "(test_panel", "script", "./res/scenes/editor/dialogmove.scm" });
+    additionalTokens.push_back({ "(test_panel", "script", "native/dialogmove" });
   }
   if (restrictX){
     additionalTokens.push_back({ "(test_panel", "dialogmove-restrictx", "true" });
@@ -427,17 +405,13 @@ std::vector<PanelAndPosition> tableLayout(std::string layoutname){
   return panels;
 }
 
-
-
-
 void loadPanelsFromDb(EditorData& editorData, std::string layoutname){
   std::cout << "should load all panels" << std::endl;
   auto layoutTableExists = hasLayoutTable();
   modlog("editor", "layout exists: " + print(layoutTableExists));
   if (layoutTableExists){
-    //(for-each maybe-unload-sidepanel-by-scene panels) need to implement
     for (auto panelSceneId : editorData.panels){
-      maybeUnloadSidepanelByScene(panelSceneId);
+      maybeUnloadSidepanelByScene(editorData, panelSceneId);
     }
     editorData.panels = loadAllPanels(tableLayout(layoutname));
   }
@@ -548,17 +522,6 @@ void maybeHandleSidePanelDrop(EditorData& editorData, objid id){
     mainApi -> setGameObjectPos(id, glm::vec3(snappingPos.x, pos.y, pos.z));
     mainApi -> enforceLayout(id);
   }
-/*
-  (if shouldSnap 
-    (let ((snappingPair (get-snapping-pair-by-loc gameobj)))
-      ;(format #t "snapping pair is: ~a\n" snappingPair)
-      (if (and snappingPair (not (snap-slot-occupied (car snappingPair))))
-        (update-snap-pos (applySnapping gameobj snappingPair) sceneId)
-        (update-snap-pos (applySnapping gameobj (get-current-snapping-pair sceneId)) sceneId)
-      )
-    )
-  )
-*/
 }
 
 void tintThemeColors(bool isPlay, objid sceneId){
@@ -648,12 +611,15 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     }else if (topic == "dock-self-remove"){
       modlog("editor", "should unload the dock because x was clicked");
       auto idStr = std::get_if<std::string>(&value);
-      maybeUnloadSidepanelByScene(mainApi -> listSceneId(std::atoi(idStr -> c_str())));
+      maybeUnloadSidepanelByScene(*editorData, mainApi -> listSceneId(std::atoi(idStr -> c_str())));
     }else if (topic == "play-mode"){
       auto valueStr = std::get_if<std::string>(&value);
       tintThemeColors(*valueStr == "true", mainApi -> listSceneId(scriptId));
     }
   };
+
+
+
 
 
   return binding;
