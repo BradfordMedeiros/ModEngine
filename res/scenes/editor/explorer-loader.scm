@@ -109,21 +109,21 @@
   30000
   (ls-res "sounds")
 )
-
-(createScenegraph
-  "|fileexplorer-heightmap"
-  "Heightmap List"
-  "explorer-heightmap"
-  "explorer-gentexture-heightmap"
-  40000
-  (append (ls-res "heightmaps"))
-)
-
-(createScenegraph
-  "|fileexplorer-heightmap-brush"
-  "Heightmap Brushes"
-  "explorer-heightmap-brush"
-  "explorer-gentexture-heightmap-brush"
-  50000
-  (append (ls-res "heightmap-brushes"))
-)
+;
+;(createScenegraph
+;  "|fileexplorer-heightmap"
+;  "Heightmap List"
+;  "explorer-heightmap"
+;  "explorer-gentexture-heightmap"
+;  40000
+;  (append (ls-res "heightmaps"))
+;)
+;
+;(createScenegraph
+;  "|fileexplorer-heightmap-brush"
+;  "Heightmap Brushes"
+;  "explorer-heightmap-brush"
+;  "explorer-gentexture-heightmap-brush"
+;  50000
+;  (append (ls-res "heightmap-brushes"))
+;)
