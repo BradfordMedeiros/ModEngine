@@ -139,7 +139,7 @@ void onCMappingAllScripts(int32_t index){
   for (auto &[instanceId, objInstance] : customObjInstances){
     auto binding = getCScriptBinding(objInstance.name.c_str());
     assert(binding != NULL);
-    binding -> onMapping(instanceId, index);
+    binding -> onMapping(instanceId, objInstance.data, index);
   }
 }
 

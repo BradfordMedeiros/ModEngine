@@ -186,7 +186,7 @@ void onObjectHoverAllScripts(int32_t scriptId, void* data, int32_t index, bool i
     onObjectUnhover(index);
   }
 }
-void onMappingAllScripts(int32_t scriptId, int32_t index){
+void onMappingAllScripts(int32_t scriptId, void* data, int32_t index){
   auto scriptModule = moduleForId(scriptId);
   if (!scriptModule.isvalid){
     return;

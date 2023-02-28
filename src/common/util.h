@@ -245,7 +245,7 @@ typedef std::function<void(int32_t id, void* data, int32_t index, glm::vec3 colo
 typedef void(*onobjectHoverFunc)(int32_t index, bool hoverOn);
 typedef std::function<void(int32_t id, void* data, int32_t index, bool hoverOn)> id_onobjectHoverFunc;
 typedef void(*funcMappingFunc)(int32_t index);
-typedef std::function<void(int32_t id, int32_t index)> id_funcMappingFunc;
+typedef std::function<void(int32_t id, void* data, int32_t index)> id_funcMappingFunc;
 typedef void(*keycallback)(int key, int scancode, int action, int mods);
 typedef std::function<void(int32_t id, void* data, int key, int scancode, int action, int mods)> id_keycallback;
 typedef void(*keycharcallback)(unsigned int codepoint);
