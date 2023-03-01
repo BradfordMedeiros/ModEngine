@@ -186,25 +186,28 @@ std::vector<int32_t> listScenes(std::optional<std::vector<std::string>> tags){
   return allSceneIds(world.sandbox, tags);
 }
 
-std::vector<StringPairVec2> scenegraph(){
-  std::vector<StringPairVec2> parentToChild;
+std::vector<ScenegraphDebug> scenegraph(){
+  std::vector<ScenegraphDebug> parentToChild;
   auto dotRelations = getDotRelations(world.sandbox, world.objectMapping);
   for (auto &dotRelation : dotRelations){
     if (dotRelation.parent.has_value()){
-      parentToChild.push_back(StringPairVec2{
-        .key = dotRelation.parent.value().name,
-        .value = dotRelation.child.name,
-        .vec = glm::ivec2(dotRelation.parent.value().sceneId, dotRelation.child.sceneId),
+      parentToChild.push_back(ScenegraphDebug{
+        .parent = dotRelation.parent.value().name,
+        .parentId = dotRelation.parent.value().id,
+        .child = dotRelation.child.name,
+        .childId = dotRelation.child.id,
+        .parentScene = dotRelation.parent.value().sceneId,
+        .childScene = dotRelation.child.sceneId,
       });
     }
   }
 
-  std::sort(parentToChild.begin(), parentToChild.end(), [](StringPairVec2 one, StringPairVec2 two) {
-    int value = one.key.compare(two.key);
+  std::sort(parentToChild.begin(), parentToChild.end(), [](ScenegraphDebug one, ScenegraphDebug two) {
+    int value = one.parent.compare(two.parent);
     if (value != 0){
       return value < 0;
     }
-    return one.value.compare(two.value) < 0;
+    return one.child.compare(two.child) < 0;
   });
   return parentToChild;
 }
@@ -932,6 +935,7 @@ void freeTexture(std::string name, objid ownerId){
 
 // clear texture, should automatically load texture
 void clearTexture(unsigned int textureId, std::optional<bool> autoclear, std::optional<glm::vec4> color, std::optional<std::string> texture){
+  modassert(!(autoclear.has_value() && !autoclear.value()), "autoclear set to false, which means always don't clear, probably meant std::nullopt to not set autoclear to mean neverclear");
   UserTexture& userTex = *userTextureById(textureId);
   std::optional<unsigned int> clearTextureId = std::nullopt;
   if (texture.has_value()){

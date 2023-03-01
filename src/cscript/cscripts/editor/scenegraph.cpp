@@ -7,6 +7,8 @@ struct SceneDependency {
 	std::string depends;
 	int elementScene;
 	int dependsScene;
+	objid parentId;
+	objid childId;
 };
 
 
@@ -32,11 +34,29 @@ std::vector<SceneDependency> getNoData(EditorScenegraph& scenegraph){
 		SceneDependency { .element = "data", .depends = "none available", .elementScene = 0, .dependsScene = 0 } 
 	};
 }
+
+struct IdCreator {
+	int idIterator;
+	std::map<std::pair<std::string, int>, int> pairToId;
+};
+IdCreator makeIdCreator(){
+	return IdCreator { .idIterator = -1, .pairToId = { }};
+}
+int createId(IdCreator& idCreator, std::string name, int sceneId){
+	auto idPair = std::make_pair(name, sceneId);
+	if (idCreator.pairToId.find(idPair) == idCreator.pairToId.end()){
+		idCreator.idIterator++;
+		idCreator.pairToId[idPair] = idCreator.idIterator;
+		return idCreator.idIterator;
+	}
+	return idCreator.pairToId.at(idPair);
+}
+
 std::vector<SceneDependency> getMockScenegraph(EditorScenegraph& scenegraph){
 	return {
-		SceneDependency { .element = "root", .depends = "mainfolder", .elementScene = 0, .dependsScene = 0 },
-		SceneDependency { .element = "root2", .depends = "mainfolder2", .elementScene = 0, .dependsScene = 1 },
-		SceneDependency { .element = "mainfolder", .depends = "folder1", .elementScene = 0, .dependsScene = 0 },
+		SceneDependency { .element = "root", .depends = "mainfolder", .elementScene = 0, .dependsScene = 0, .parentId = 0, .childId = 1, },
+		SceneDependency { .element = "root2", .depends = "mainfolder2", .elementScene = 0, .dependsScene = 1, .parentId = 2, .childId = 3 },
+		SceneDependency { .element = "mainfolder", .depends = "folder1", .elementScene = 0, .dependsScene = 0, .parentId = 1, .childId = 4 },
 		SceneDependency { .element = "mainfolder", .depends = "folder2", .elementScene = 0, .dependsScene = 0 },
 		SceneDependency { .element = "mainfolder", .depends = "folder3", .elementScene = 0, .dependsScene = 0 },
 		SceneDependency { .element = "folder3", .depends = "folder3-1", .elementScene = 0, .dependsScene = 0 },
@@ -50,40 +70,73 @@ std::vector<SceneDependency> getFilteredScenegraph(EditorScenegraph& scenegraph)
 	for (auto &scenePair : mainApi -> scenegraph()){
 		bool sceneInList = false;
 		for (auto sceneId : editorScenes){
-			if (scenePair.vec.x == sceneId || scenePair.vec.y == sceneId){
+			if (scenePair.parentScene == sceneId || scenePair.childScene == sceneId){
 				sceneInList = true;
 				break;
 			}
 		}
 		if (!sceneInList){
 		  filteredScenes.push_back({
-		  	.element = scenePair.key,
-		  	.depends = scenePair.value,
-		  	.elementScene = scenePair.vec.x,
-		  	.dependsScene = scenePair.vec.y,
+		  	.element = scenePair.parent,
+		  	.depends = scenePair.child,
+		  	.elementScene = scenePair.parentScene,
+		  	.dependsScene = scenePair.childScene,
+		  	.parentId = scenePair.parentId,
+		  	.childId = scenePair.childId,
 		  });
 		}
 	}
 	return filteredScenes;
 }
 std::vector<SceneDependency> getMockModelList(EditorScenegraph& scenegraph){
+	auto idCreator = makeIdCreator();
 	return {
-		SceneDependency { .element = "AllMeshes", .depends = "mesh1", .elementScene = 0, .dependsScene = 0 },
-		SceneDependency { .element = "AllMeshes", .depends = "mesh2", .elementScene = 0, .dependsScene = 0 },
+		SceneDependency { .element = "AllMeshes", .depends = "mesh1", .elementScene = 0, .dependsScene = 0, .parentId = createId(idCreator, "AllMeshes", 0), .childId = createId(idCreator, "mesh1", 0) },
+		SceneDependency { .element = "AllMeshes", .depends = "mesh2", .elementScene = 0, .dependsScene = 0, .parentId = createId(idCreator, "AllMeshes", 0), .childId = createId(idCreator, "mesh2", 0) },
 	};
 }
 std::vector<SceneDependency> getModelList(EditorScenegraph& scenegraph){
-	return {};
-	//(define (getModelList) (map (lambda(model) (makeIntoGraph "models" model)) (ls-res "models")))
+	std::vector<SceneDependency> deps;
+	auto idCreator = makeIdCreator();
+	for (auto &model : mainApi -> listResources("models")){
+		deps.push_back(SceneDependency {
+			.element = "models",
+			.depends = model,
+			.elementScene = 0,
+			.dependsScene = 0,
+			.parentId = createId(idCreator, "models", 0),
+			.childId = createId(idCreator, model, 0),
+		});
+	}
+	return deps;
 }
 std::vector<SceneDependency> getMockTextureList(EditorScenegraph& scenegraph){
+	auto idCreator = makeIdCreator();
 	return { 
-		SceneDependency { .element = "Textures", .depends = "texture-mock", .elementScene = 0, .dependsScene = 0 } 
+		SceneDependency { 
+			.element = "Textures", 
+			.depends = "texture-mock", 
+			.elementScene = 0, 
+			.dependsScene = 0,
+			.parentId = createId(idCreator, "Textures", 0),
+			.childId = createId(idCreator, "texture-mock", 0),
+		} 
 	};
 }
 std::vector<SceneDependency> getTextureList(EditorScenegraph& scenegraph){
-	return {};
-	// (define (getTextureList) (map (lambda(model) (makeIntoGraph "textures" model)) (ls-res "textures")))
+	std::vector<SceneDependency> deps;
+	auto idCreator = makeIdCreator();
+	for (auto &texture : mainApi -> listResources("textures")){
+		deps.push_back(SceneDependency {
+			.element = "textures",
+			.depends = texture,
+			.elementScene = 0,
+			.dependsScene = 0,
+			.parentId = createId(idCreator, "textures", 0),
+			.childId = createId(idCreator, texture, 0),
+		});
+	}
+	return deps;
 }
 
 std::vector<SceneDependency> getRawExplorerList(EditorScenegraph& scenegraph){
@@ -91,12 +144,16 @@ std::vector<SceneDependency> getRawExplorerList(EditorScenegraph& scenegraph){
 	auto values = split(getStrAttr(attr, "values").value(), '|');
 	auto title = getStrAttr(attr, "title").value();
 	std::vector<SceneDependency> deps;
+
+	auto idCreator = makeIdCreator();
 	for (auto &value : values){
 		deps.push_back(SceneDependency {
 			.element = title,
 			.depends = value,
 			.elementScene = 0,
 			.dependsScene = 0,
+			.parentId = createId(idCreator, title, 0),
+			.childId = createId(idCreator, value, 0),
 		});
 	}
 	return deps;
@@ -163,6 +220,7 @@ void selectRawItem(EditorScenegraph& scenegraph){
 
 // onObjectSelected
 void onObjDoNothing(EditorScenegraph& scenegraph, objid gameobjid){
+	modlog("editor", "scenegraph - onObjDoNothing");
 }
 
 
@@ -247,6 +305,7 @@ std::map<std::string, ModeDepGraph> modeToGetDepGraph {
 
 
 void refreshDepGraph(EditorScenegraph& scenegraph){
+	modlog("editor", "refresh graph type = " + scenegraph.depgraphType);
 	ModeDepGraph& depGraph = modeToGetDepGraph.at(scenegraph.depgraphType);
 	scenegraph.depGraph = depGraph.getGraph(scenegraph);
 }
@@ -285,6 +344,7 @@ float calcY(int depth, int fontsize, float offset){
 	return rawCalcY(depth, fontsize) - offset;
 }
 void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool showSceneIds){
+	modlog("editor", "scenegraph - offset: " + std::to_string(scenegraph.offset));
 	for (auto &drawElement : drawList.elements){
 		if (drawElement.hasChildren){
 			mainApi -> drawText(
@@ -315,7 +375,7 @@ void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool show
 	}
 }
 
-bool isAnyDependency(std::map<std::string, std::set<std::string>>& dependencyMap, std::string value){
+bool isAnyDependency(std::map<objid, std::set<objid>>& dependencyMap, objid value){
 	for (auto &[_, dep] : dependencyMap){
 		if (dep.count(value) > 0){
 			return true;
@@ -324,11 +384,16 @@ bool isAnyDependency(std::map<std::string, std::set<std::string>>& dependencyMap
 	return false;
 }
 
-void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<std::string, std::set<std::string>> _dependencyMap, std::string currElement, int& index, int childIndex){
+struct DepInfo {
+	objid sceneId;
+	std::string name;
+};
+
+void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std::set<objid>> _dependencyMap, objid currElement, int& index, int childIndex, std::function<std::string(objid)> nameForId){
 	bool hasChildren = _dependencyMap.find(currElement) != _dependencyMap.end();
 	_elements.push_back(
 		SceneDrawElement {
-			.elementName = currElement,
+			.elementName = nameForId(currElement),
 			.sceneId = 0,
 			.depth = childIndex,
 			.height = index,
@@ -345,24 +410,24 @@ void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<std::string
 	}
 	auto dependencies = _dependencyMap.at(currElement);
 	for (auto &dependency : dependencies){
-		navigateDeps(_elements, _dependencyMap, dependency, index, childIndex + 1);
+		navigateDeps(_elements, _dependencyMap, dependency, index, childIndex + 1, nameForId);
 	}
 }
 
-void topologicalSort(std::vector<SceneDrawElement>& elements, std::map<std::string, std::set<std::string>> _dependencyMap, int index){
-	std::vector<std::string> rootElements;
+void addElementsToList(std::vector<SceneDrawElement>& elements, std::map<objid, std::set<objid>> _dependencyMap, int index, std::function<std::string(objid)> nameForId){
+	std::vector<objid> rootElements;
 	for (auto &[item, deps] : _dependencyMap){
 		if (!isAnyDependency(_dependencyMap, item)){
 			rootElements.push_back(item);
 		}
 	}
 	for (auto &rootElement : rootElements){
-		navigateDeps(elements, _dependencyMap, rootElement, index, 0);
+		navigateDeps(elements, _dependencyMap, rootElement, index, 0, nameForId);
 	}
 }
 
 
-bool drawTitle = true;
+bool drawTitle = false;
 void onGraphChange(EditorScenegraph& scenegraph){
 	refreshDepGraph(scenegraph);
 
@@ -374,21 +439,27 @@ void onGraphChange(EditorScenegraph& scenegraph){
   	mainApi -> drawLine(glm::vec3(-1.f, 1.f, 0), glm::vec3(1.f, 1.f, 0), false, scenegraph.mainObjId, glm::vec4(0, 0, 1.f, 1.f), scenegraph.textureId, std::nullopt);
 	}
 
+	std::map<objid, std::set<objid>> dependencyMap = {};
+	for (auto &sceneDep : scenegraph.depGraph.value()){
+		if (dependencyMap.find(sceneDep.parentId) == dependencyMap.end()){
+			dependencyMap[sceneDep.parentId] = {};
+		}
+		dependencyMap.at(sceneDep.parentId).insert(sceneDep.childId);
+	}	
+
+	std::cout << "dependent map size: " << dependencyMap.size() << std::endl;
+	for (auto &[key, value] : dependencyMap){
+		std::cout << "dep map: " << key << std::endl;
+	}
+
 	std::vector<SceneDrawElement> elements;
-	topologicalSort(
-		elements, 
-		{
-			{ "one", { "two", "three" }}, 
-			{ "four", { "five" }},
-			{ "five", { "six", "seven"}}
-		},
-		0
-	);
+	addElementsToList(elements, dependencyMap, 0, [](objid id) -> std::string { return "hello"; });
 
 	SceneDrawList drawList {
 		.elements = elements,
 	};
 
+	modlog("editor", "draw list size: " + std::to_string(drawList.elements.size()));
 	scenegraph.selectedIndex = std::min(static_cast<int>(drawList.elements.size() - 1),  std::max(0, scenegraph.selectedIndex));
 	drawList.elements.at(scenegraph.selectedIndex).isSelected = true;
 	doDrawList(scenegraph, drawList, true);
@@ -510,9 +581,11 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
      	(if (equal? key 345) (handleItemSelected selectedElement #t))  ; ctrl
 		)*/
   	}else if (key == '='){  // =
+  		modlog("editor", "scenegraph - increase font size");
 			scenegraph -> fontSize += 1;
 			onGraphChange(*scenegraph);
   	}else if (key == '-'){  // -
+  		modlog("editor", "scenegraph - decrease font size");
 			scenegraph -> fontSize -= 1;
 			onGraphChange(*scenegraph);
   	}
@@ -525,36 +598,6 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 }
 
 /*
-
-
-
-(define (getDepGraph) #f)
-(define showSceneIds #f)
-(define handleItemSelected donothing)
-(define onObjectSelected onObjDoNothing)
-
-(define (setDepGraphType type)
-	(define depGraphPair (assoc type modeToGetDepGraph))
-	(if depGraphPair
-		(begin
-			(set! getDepGraph (cadr depGraphPair))
-			(set! handleItemSelected (caddr depGraphPair))
-			(set! onObjectSelected (list-ref depGraphPair 4))
-			(set! showSceneIds (cadddr depGraphPair))
-		)
-	)
-)
-
-(define (setTypeFromAttr)
-	(define depgraphAttr (assoc "depgraph" (gameobj-attr mainobj)))
-	(if depgraphAttr 
-		(setDepGraphType (cadr depgraphAttr))
-		(setDepGraphType "nodata")
-	)
-)
-(setTypeFromAttr)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 (define expandState (list))
 (define (expandPath name sceneId) (string-append name ":" (number->string sceneId)))
@@ -654,7 +697,6 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 		drawList
 	)
 )
-// (define (makeIntoGraph header modelpath) (list header modelpath (list 0 0)))
 
 
 

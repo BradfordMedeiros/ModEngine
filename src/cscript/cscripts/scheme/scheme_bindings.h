@@ -21,7 +21,7 @@ void createStaticSchemeBindings(
   std::vector<objid> (*childScenes)(objid sceneId),
   std::optional<objid> (*sceneIdByName)(std::string name),
   objid (*rootIdForScene)(objid sceneId),
-  std::vector<StringPairVec2> (*_scenegraph)(),
+  std::vector<ScenegraphDebug> (*_scenegraph)(),
   void (*sendLoadScene)(int32_t id),
   void (*createScene)(std::string scenename),
   void (*deleteScene)(std::string scenename),
