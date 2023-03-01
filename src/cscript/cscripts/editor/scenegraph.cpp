@@ -385,16 +385,18 @@ bool isAnyDependency(std::map<objid, std::set<objid>>& dependencyMap, objid valu
 }
 
 struct DepInfo {
-	objid sceneId;
 	std::string name;
+	objid sceneId;
 };
 
-void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std::set<objid>> _dependencyMap, objid currElement, int& index, int childIndex, std::function<std::string(objid)> nameForId){
+void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std::set<objid>> _dependencyMap, objid currElement, int& index, int childIndex, std::function<DepInfo(objid)> infoForId){
 	bool hasChildren = _dependencyMap.find(currElement) != _dependencyMap.end();
+
+	auto idInfo = infoForId(currElement);
 	_elements.push_back(
 		SceneDrawElement {
-			.elementName = nameForId(currElement),
-			.sceneId = 0,
+			.elementName = idInfo.name,
+			.sceneId = idInfo.sceneId,
 			.depth = childIndex,
 			.height = index,
 			.expanded = false,
@@ -410,11 +412,11 @@ void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std:
 	}
 	auto dependencies = _dependencyMap.at(currElement);
 	for (auto &dependency : dependencies){
-		navigateDeps(_elements, _dependencyMap, dependency, index, childIndex + 1, nameForId);
+		navigateDeps(_elements, _dependencyMap, dependency, index, childIndex + 1, infoForId);
 	}
 }
 
-void addElementsToList(std::vector<SceneDrawElement>& elements, std::map<objid, std::set<objid>> _dependencyMap, int index, std::function<std::string(objid)> nameForId){
+void addElementsToList(std::vector<SceneDrawElement>& elements, std::map<objid, std::set<objid>> _dependencyMap, int index, std::function<DepInfo(objid)> infoForId){
 	std::vector<objid> rootElements;
 	for (auto &[item, deps] : _dependencyMap){
 		if (!isAnyDependency(_dependencyMap, item)){
@@ -422,7 +424,7 @@ void addElementsToList(std::vector<SceneDrawElement>& elements, std::map<objid, 
 		}
 	}
 	for (auto &rootElement : rootElements){
-		navigateDeps(elements, _dependencyMap, rootElement, index, 0, nameForId);
+		navigateDeps(elements, _dependencyMap, rootElement, index, 0, infoForId);
 	}
 }
 
@@ -453,7 +455,22 @@ void onGraphChange(EditorScenegraph& scenegraph){
 	}
 
 	std::vector<SceneDrawElement> elements;
-	addElementsToList(elements, dependencyMap, 0, [](objid id) -> std::string { return "hello"; });
+	addElementsToList(
+		elements, 
+		dependencyMap, 
+		0, 
+		[&scenegraph](objid id) -> DepInfo { 
+			for (auto &scenedep : scenegraph.depGraph.value()){
+				if (scenedep.parentId == id){
+					return DepInfo { .name = scenedep.element, .sceneId = scenedep.elementScene };
+				}else if (scenedep.childId == id){
+					return DepInfo { .name = scenedep.depends, .sceneId = scenedep.dependsScene };
+				}
+			}
+			modassert(false, "editor - scenegraph - could not resolve id = " + std::to_string(id));
+			return DepInfo {}; 
+		}
+	);
 
 	SceneDrawList drawList {
 		.elements = elements,
