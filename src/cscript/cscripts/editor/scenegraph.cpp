@@ -11,7 +11,6 @@ struct SceneDependency {
 	objid childId;
 };
 
-
 struct EditorScenegraph {
 	objid mainObjId;
 	bool didScroll;
@@ -26,7 +25,7 @@ struct EditorScenegraph {
 	std::optional<objid> textureId;
 
 	int fontSize;
-	int mappingOffset;
+	int baseNumber;
 
 	std::map<int, bool> idToExpandState;
 };
@@ -179,8 +178,8 @@ struct SceneDrawList {
 void onGraphChange(EditorScenegraph& scenegraph);
 SceneDrawList drawListFromDepGraph(EditorScenegraph& scenegraph);
 
-objid getIdForSelectedIndex(EditorScenegraph& scenegraph){
-	auto drawListElement = drawListFromDepGraph(scenegraph).elements.at(scenegraph.selectedIndex);
+objid getIdForIndex(EditorScenegraph& scenegraph, int index){
+	auto drawListElement = drawListFromDepGraph(scenegraph).elements.at(index);
 	return drawListElement.id;;
 }
 SceneDrawElement getElementForSelectedIndex(EditorScenegraph& scenegraph){
@@ -193,7 +192,7 @@ void doNothing(EditorScenegraph& scenegraph, bool isAlt){
 }
 void selectScenegraphItem(EditorScenegraph& scenegraph, bool isAlt){
 	modlog("editor", "scenegraph selectScenegraphItem: " + std::to_string(scenegraph.selectedIndex));
-	auto selectedId = getIdForSelectedIndex(scenegraph);
+	auto selectedId = getIdForIndex(scenegraph, scenegraph.selectedIndex);
 	if (isAlt){
 	  // set camera position to target
 	  //mainApi -> setGameObjectPos(cameraId, mainApi -> getGameObjectPos(selectedId, true));
@@ -345,9 +344,16 @@ float rawCalcY(int depth, int fontsize){
 float calcY(int depth, int fontsize, float offset){
 	return rawCalcY(depth, fontsize) - offset;
 }
+
+const int mappingInterval = 5000;
 void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool showSceneIds){
 	modlog("editor", "scenegraph - offset: " + std::to_string(scenegraph.offset));
 	for (auto &drawElement : drawList.elements){
+		auto mappingNumber = drawElement.mappingNumber + scenegraph.baseNumber + mappingInterval;
+		if (mappingNumber > (scenegraph.baseNumber + 2 * mappingInterval)){
+			modlog("editor", "scenegraph - warning max elements exceeded, not drawing all elements");
+			return;	
+		}
 		if (drawElement.hasChildren){
 			mainApi -> drawText(
 				drawElement.expanded ? "X" : "O",
@@ -359,7 +365,7 @@ void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool show
 				scenegraph.textureId, 
 				true, 
 				"./res/fonts/Walby-Regular.ttf", 
-				drawElement.mappingNumber
+				mappingNumber
 			);
 		}
 		mainApi -> drawText(
@@ -372,7 +378,7 @@ void doDrawList(EditorScenegraph& scenegraph, SceneDrawList& drawList, bool show
 			scenegraph.textureId, 
 			true, 
 			"./res/fonts/Walby-Regular.ttf", 
-			drawElement.mappingNumber  + scenegraph.mappingOffset
+			drawElement.mappingNumber  + scenegraph.baseNumber
 		);
 	}
 }
@@ -492,15 +498,14 @@ void onGraphChange(EditorScenegraph& scenegraph){
 	doDrawList(scenegraph, drawList, modeToGetDepGraph.at(scenegraph.depgraphType).showSceneIds);
 }
 
-void toggleExpanded(EditorScenegraph& scenegraph){
-	modlog("editor", "scenegraph toggle index: " + std::to_string(scenegraph.selectedIndex));
-	auto selectedIndexId = getIdForSelectedIndex(scenegraph);
+void toggleExpanded(EditorScenegraph& scenegraph, int index){
+	modlog("editor", "scenegraph toggle index: " + std::to_string(index));
+	auto selectedIndexId = getIdForIndex(scenegraph, index);
 	if (scenegraph.idToExpandState.find(selectedIndexId) == scenegraph.idToExpandState.end()){
 		scenegraph.idToExpandState[selectedIndexId] = true;
 	}
 	scenegraph.idToExpandState.at(selectedIndexId) = !scenegraph.idToExpandState.at(selectedIndexId);
 }
-
 
 CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/scenegraph", api);
@@ -516,12 +521,11 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
     scenegraph -> depGraph = std::nullopt;
     scenegraph -> textureId = std::nullopt;
     scenegraph -> fontSize = 22;
-    scenegraph -> mappingOffset = 5000;
     scenegraph -> idToExpandState = {};
 
 		auto attr = mainApi -> getGameObjectAttr(scenegraph -> mainObjId);
-		auto type = getStrAttr(attr, "depgraph").value();
-		scenegraph -> depgraphType = type;
+    scenegraph -> baseNumber = static_cast<int>(getFloatAttr(attr, "basenumber").value());
+		scenegraph -> depgraphType = getStrAttr(attr, "depgraph").value();;
 		auto textureName = getStrAttr(attr, "gentexture").value();
 		scenegraph -> textureId = mainApi -> createTexture(textureName, 1000, 1000, id);
 		onGraphChange(*scenegraph);
@@ -532,7 +536,6 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
     EditorScenegraph* scenegraph = static_cast<EditorScenegraph*>(data);
     delete scenegraph;
   };
-
 
   binding.onFrame = [](int32_t id, void* data) -> void {
   	EditorScenegraph* scenegraph = static_cast<EditorScenegraph*>(data);
@@ -549,42 +552,20 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 	};
 
 	binding.onMapping = [](int32_t id, void* data, int32_t index) -> void {
-/*(define (onMapping index)
-	(define selectedIndexForMapping (baseNumberToSelectedIndex index))
-	(define isManagedIndex (isManagedByThisScript index))
-	(format #t "mapping: ~a, baseNumber: ~a, mappingoffset = ~a, ismanagedIndex = ~a, name ~a\n" index baseNumber mappingOffset isManagedIndex (gameobj-name mainobj))
-	(format #t "attr: ~a\n" (gameobj-attr mainobj))
+		EditorScenegraph* scenegraph = static_cast<EditorScenegraph*>(data);
 
-	(if (and selectedIndexForMapping isManagedIndex)
-		(let (
-				(isToggle (not (cadr selectedIndexForMapping)))
-				(mappedIndex (car selectedIndexForMapping))
-			)
-			(if isToggle
-				(begin
-					;(refreshDepGraph)
-	  			(setSelectedIndex mappedIndex)
-	  			(refreshGraphData)   
-	   			(toggleExpanded selectedName)
-	  			(onGraphChange)
-				)
-				(begin
-					;(refreshDepGraph)
-					(format #t "mapping: selected index for mapping!\n")
-	  			(setSelectedIndex mappedIndex)
-					(format #t "mapping: did set selected index for mapping!\n")
-	  			(refreshGraphData)   
-	  			(format #t "mapping: refreshed graph data!\n")
-	  			(handleItemSelected selectedElement #f)
-	  			(format #t "mapping: handled selected item!\n")
-	  			(onGraphChange)
-				)
-			)
-		)
-	)
-	;(format #t "selected_index = ~a, selected_name = ~a, selected_element = ~a\n" selectedIndex selectedName selectedElement)
-)
-*/
+		if (index >= scenegraph -> baseNumber && index < (scenegraph -> baseNumber + 2 * mappingInterval)){
+			auto selectedIndex = index - scenegraph -> baseNumber;
+			modlog("editor", "scenegraph on mapping: " + std::to_string(index) + ", selected index = " + std::to_string(selectedIndex) + ", type = " + scenegraph -> depgraphType + ", basenumbe = " + std::to_string(scenegraph -> baseNumber));
+			bool isToggle = selectedIndex >= mappingInterval;
+			if (isToggle){
+  			toggleExpanded(*scenegraph, selectedIndex - mappingInterval);
+				return;
+			}
+			scenegraph -> selectedIndex = selectedIndex;
+			onGraphChange(*scenegraph);
+			modeToGetDepGraph.at(scenegraph -> depgraphType).handleItemSelected(*scenegraph, false);
+		}
 	};
 
 	binding.onScrollCallback = [](objid scriptId, void* data, double amount) -> void{
@@ -603,13 +584,9 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
   			scenegraph -> selectedIndex = scenegraph -> selectedIndex - 1;
   			onGraphChange(*scenegraph);
   		}else if (key == 257){  // enter
-  			toggleExpanded(*scenegraph);
+  			toggleExpanded(*scenegraph, scenegraph -> selectedIndex);
   			onGraphChange(*scenegraph);
   		}
-  		/*
-     	(if (equal? key 344) (handleItemSelected selectedElement #f))  ; shift
-     	(if (equal? key 345) (handleItemSelected selectedElement #t))  ; ctrl
-		)*/
   	}else if (key == 344){
   		modeToGetDepGraph.at(scenegraph -> depgraphType).handleItemSelected(*scenegraph, false);
   	}else if (key == 345){
