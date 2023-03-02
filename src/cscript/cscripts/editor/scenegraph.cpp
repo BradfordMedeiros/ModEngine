@@ -27,6 +27,8 @@ struct EditorScenegraph {
 
 	int fontSize;
 	int mappingOffset;
+
+	std::map<int, bool> idToExpandState;
 };
 
 std::vector<SceneDependency> getNoData(EditorScenegraph& scenegraph){
@@ -159,25 +161,51 @@ std::vector<SceneDependency> getRawExplorerList(EditorScenegraph& scenegraph){
 	return deps;
 }
 
+struct SceneDrawElement {
+	std::string elementName;
+	objid sceneId;
+	int depth;
+	int height;
+	bool expanded;
+	bool isSelected;
+	int mappingNumber;
+	bool hasChildren;
+	objid id;
+};
+struct SceneDrawList {
+	std::vector<SceneDrawElement> elements;
+};
+
+void onGraphChange(EditorScenegraph& scenegraph);
+SceneDrawList drawListFromDepGraph(EditorScenegraph& scenegraph);
+
+objid getIdForSelectedIndex(EditorScenegraph& scenegraph){
+	auto drawListElement = drawListFromDepGraph(scenegraph).elements.at(scenegraph.selectedIndex);
+	return drawListElement.id;;
+}
+
 // handleItemSelected
-void doNothing(EditorScenegraph& scenegraph){
+void doNothing(EditorScenegraph& scenegraph, bool isAlt){
+	modlog("editor", "scenegraph doNothing");
 }
-void selectScenegraphItem(EditorScenegraph& scenegraph){
-/*(define (selectScenegraphItem x isAlt) 
-  (define objname (car x))
-  (define sceneId (cadr x))
-  (define selectedObj (lsobj-name objname sceneId))
-  (define objIndex (gameobj-id selectedObj))
-  (define objpos (gameobj-pos-world selectedObj))
-  (if isAlt
-  	(mov-cam (car objpos) (cadr objpos) (caddr objpos) #f)
-  	(set-wstate (list
-  		(list "editor" "selected-index" (number->string objIndex))
-  	))
-  )
-)*/
+void selectScenegraphItem(EditorScenegraph& scenegraph, bool isAlt){
+	modlog("editor", "scenegraph selectScenegraphItem: " + std::to_string(scenegraph.selectedIndex));
+	auto selectedId = getIdForSelectedIndex(scenegraph);
+	if (isAlt){
+	  // set camera position to target
+	  //mainApi -> setGameObjectPos(cameraId, mainApi -> getGameObjectPos(selectedId, true));
+	}else{
+  	mainApi -> setWorldState({ 
+  	  ObjectValue {
+  	    .object = "editor",
+  	    .attribute = "selected-index",
+  	    .value = std::to_string(selectedId),
+  	  }
+  	});
+	}
 }
-void selectModelItem(EditorScenegraph& scenegraph){
+void selectModelItem(EditorScenegraph& scenegraph, bool isAlt){
+	modlog("editor", "scenegraph selectModelItem: " + std::to_string(scenegraph.selectedIndex));
 	/*
 	(define (selectModelItem element isAlt) 
 	(define modelpath (car element))
@@ -193,7 +221,9 @@ void selectModelItem(EditorScenegraph& scenegraph){
 */
 }
 
-void selectTextureItem(EditorScenegraph& scenegraph){
+void selectTextureItem(EditorScenegraph& scenegraph, bool isAlt){
+	modlog("editor", "scenegraph selectTextureItem: " + std::to_string(scenegraph.selectedIndex));
+
 	/*
 	(define (selectTextureItem element isAlt)
 	(define texturepath (car element))
@@ -210,43 +240,33 @@ void selectTextureItem(EditorScenegraph& scenegraph){
 )
 */
 }
-void selectRawItem(EditorScenegraph& scenegraph){
-	/*
-		(define attr (gameobj-attr mainobj))
-	(define topic  (cadr (assoc "topic" attr)))
-	(send topic (car element))
-	*/
+
+void selectRawItem(EditorScenegraph& scenegraph, bool isAlt){
+	modlog("editor", "scenegraph selectRawItem: " + std::to_string(scenegraph.selectedIndex));
+	auto attr = mainApi -> getGameObjectAttr(scenegraph.mainObjId);
+	auto topic = getStrAttr(attr, "topic").value();
+	mainApi -> sendNotifyMessage(topic, "helloworld");
 }
 
-// onObjectSelected
 void onObjDoNothing(EditorScenegraph& scenegraph, objid gameobjid){
 	modlog("editor", "scenegraph - onObjDoNothing");
 }
 
 
 void onObjectSelectedSelectItem(EditorScenegraph& scenegraph, objid gameobjid){
-	/*
-	(define (onObjectSelectedSelectItem gameobj color)
-	(refreshDepGraph)
-	(let (
-			(index (selectedIndexForGameobj gameobj))
-		)
-		(if index
-			(begin
-		    (format #t "on object selected: ~a, ~a\n" gameobj color)
-		    (setSelectedIndex index)
-		    (refreshGraphData)   
-		    (onGraphChange)
-			)
-		)
-	)
-)
-*/
+	auto drawList = drawListFromDepGraph(scenegraph);
+	for (int i = 0; i <drawList.elements.size(); i++){
+		if (drawList.elements.at(i).id == gameobjid){
+			scenegraph.selectedIndex = i;
+			break;
+		}
+	}
+	onGraphChange(scenegraph);
 }
 
 struct ModeDepGraph {
 	std::function<std::vector<SceneDependency>(EditorScenegraph& scenegraph)> getGraph;
-	std::function<void(EditorScenegraph& scenegraph)> handleItemSelected;
+	std::function<void(EditorScenegraph& scenegraph, bool)> handleItemSelected;
 	bool showSceneIds;
 	std::function<void(EditorScenegraph& scenegraph, objid gameobjid)> onObjectSelected;
 };
@@ -294,7 +314,6 @@ std::map<std::string, ModeDepGraph> modeToGetDepGraph {
 			.showSceneIds = false,
 			.onObjectSelected = onObjDoNothing,
 	}},
-	// (list "raw" getRawExplorerList selectRawItem #f onObjDoNothing)
 	{ "raw", ModeDepGraph {
 			.getGraph = getRawExplorerList,
 			.handleItemSelected = selectRawItem,
@@ -309,21 +328,6 @@ void refreshDepGraph(EditorScenegraph& scenegraph){
 	ModeDepGraph& depGraph = modeToGetDepGraph.at(scenegraph.depgraphType);
 	scenegraph.depGraph = depGraph.getGraph(scenegraph);
 }
-
-
-struct SceneDrawElement {
-	std::string elementName;
-	objid sceneId;
-	int depth;
-	int height;
-	bool expanded;
-	bool isSelected;
-	int mappingNumber;
-	bool hasChildren;
-};
-struct SceneDrawList {
-	std::vector<SceneDrawElement> elements;
-};
 
 
 float calcSpacing(int fontsize){
@@ -387,11 +391,13 @@ bool isAnyDependency(std::map<objid, std::set<objid>>& dependencyMap, objid valu
 struct DepInfo {
 	std::string name;
 	objid sceneId;
+	objid id;
+	bool expanded;
 };
+
 
 void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std::set<objid>> _dependencyMap, objid currElement, int& index, int childIndex, std::function<DepInfo(objid)> infoForId){
 	bool hasChildren = _dependencyMap.find(currElement) != _dependencyMap.end();
-
 	auto idInfo = infoForId(currElement);
 	_elements.push_back(
 		SceneDrawElement {
@@ -399,15 +405,15 @@ void navigateDeps(std::vector<SceneDrawElement>& _elements, std::map<objid, std:
 			.sceneId = idInfo.sceneId,
 			.depth = childIndex,
 			.height = index,
-			.expanded = false,
+			.expanded = idInfo.expanded,
 			.isSelected = false,
-			.mappingNumber = 0,
+			.mappingNumber = index,
 			.hasChildren = hasChildren,
+			.id = currElement,
 		}
 	);
 	index++;
-
-	if (!hasChildren){
+	if (!hasChildren || !idInfo.expanded){
 		return;
 	}
 	auto dependencies = _dependencyMap.at(currElement);
@@ -428,6 +434,46 @@ void addElementsToList(std::vector<SceneDrawElement>& elements, std::map<objid, 
 	}
 }
 
+bool scenegraphExpanded(EditorScenegraph& scenegraph, objid id){
+	if (scenegraph.idToExpandState.find(id) == scenegraph.idToExpandState.end()){
+		return true;
+	}
+	return scenegraph.idToExpandState.at(id);
+}
+
+SceneDrawList drawListFromDepGraph(EditorScenegraph& scenegraph){
+	std::map<objid, std::set<objid>> dependencyMap = {};
+	for (auto &sceneDep : scenegraph.depGraph.value()){
+		if (dependencyMap.find(sceneDep.parentId) == dependencyMap.end()){
+			dependencyMap[sceneDep.parentId] = {};
+		}
+		dependencyMap.at(sceneDep.parentId).insert(sceneDep.childId);
+	}
+	std::vector<SceneDrawElement> elements;
+	addElementsToList(
+		elements, 
+		dependencyMap, 
+		0, 
+		[&scenegraph](objid id) -> DepInfo { 
+			for (auto &scenedep : scenegraph.depGraph.value()){
+				if (scenedep.parentId == id){
+					return DepInfo { .name = scenedep.element, .sceneId = scenedep.elementScene, .id = id, .expanded = scenegraphExpanded(scenegraph, id) };
+				}else if (scenedep.childId == id){
+					return DepInfo { .name = scenedep.depends, .sceneId = scenedep.dependsScene, .id = id, .expanded = scenegraphExpanded(scenegraph, id)};
+				}
+			}
+			modassert(false, "editor - scenegraph - could not resolve id = " + std::to_string(id));
+			return DepInfo {}; 
+		}
+	);
+	SceneDrawList drawList {
+		.elements = elements,
+	};
+	return drawList;
+}
+
+
+
 
 bool drawTitle = false;
 void onGraphChange(EditorScenegraph& scenegraph){
@@ -441,45 +487,20 @@ void onGraphChange(EditorScenegraph& scenegraph){
   	mainApi -> drawLine(glm::vec3(-1.f, 1.f, 0), glm::vec3(1.f, 1.f, 0), false, scenegraph.mainObjId, glm::vec4(0, 0, 1.f, 1.f), scenegraph.textureId, std::nullopt);
 	}
 
-	std::map<objid, std::set<objid>> dependencyMap = {};
-	for (auto &sceneDep : scenegraph.depGraph.value()){
-		if (dependencyMap.find(sceneDep.parentId) == dependencyMap.end()){
-			dependencyMap[sceneDep.parentId] = {};
-		}
-		dependencyMap.at(sceneDep.parentId).insert(sceneDep.childId);
-	}	
-
-	std::cout << "dependent map size: " << dependencyMap.size() << std::endl;
-	for (auto &[key, value] : dependencyMap){
-		std::cout << "dep map: " << key << std::endl;
-	}
-
-	std::vector<SceneDrawElement> elements;
-	addElementsToList(
-		elements, 
-		dependencyMap, 
-		0, 
-		[&scenegraph](objid id) -> DepInfo { 
-			for (auto &scenedep : scenegraph.depGraph.value()){
-				if (scenedep.parentId == id){
-					return DepInfo { .name = scenedep.element, .sceneId = scenedep.elementScene };
-				}else if (scenedep.childId == id){
-					return DepInfo { .name = scenedep.depends, .sceneId = scenedep.dependsScene };
-				}
-			}
-			modassert(false, "editor - scenegraph - could not resolve id = " + std::to_string(id));
-			return DepInfo {}; 
-		}
-	);
-
-	SceneDrawList drawList {
-		.elements = elements,
-	};
-
-	modlog("editor", "draw list size: " + std::to_string(drawList.elements.size()));
+	auto drawList = drawListFromDepGraph(scenegraph);
 	scenegraph.selectedIndex = std::min(static_cast<int>(drawList.elements.size() - 1),  std::max(0, scenegraph.selectedIndex));
 	drawList.elements.at(scenegraph.selectedIndex).isSelected = true;
-	doDrawList(scenegraph, drawList, true);
+	modlog("editor", "draw list size: " + std::to_string(drawList.elements.size()) + ", selected index = " + std::to_string(scenegraph.selectedIndex));
+	doDrawList(scenegraph, drawList, modeToGetDepGraph.at(scenegraph.depgraphType).showSceneIds);
+}
+
+void toggleExpanded(EditorScenegraph& scenegraph){
+	modlog("editor", "scenegraph toggle index: " + std::to_string(scenegraph.selectedIndex));
+	auto selectedIndexId = getIdForSelectedIndex(scenegraph);
+	if (scenegraph.idToExpandState.find(selectedIndexId) == scenegraph.idToExpandState.end()){
+		scenegraph.idToExpandState[selectedIndexId] = true;
+	}
+	scenegraph.idToExpandState.at(selectedIndexId) = !scenegraph.idToExpandState.at(selectedIndexId);
 }
 
 
@@ -498,6 +519,7 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
     scenegraph -> textureId = std::nullopt;
     scenegraph -> fontSize = 22;
     scenegraph -> mappingOffset = 5000;
+    scenegraph -> idToExpandState = {};
 
 		auto attr = mainApi -> getGameObjectAttr(scenegraph -> mainObjId);
 		auto type = getStrAttr(attr, "depgraph").value();
@@ -583,20 +605,17 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
   			scenegraph -> selectedIndex = scenegraph -> selectedIndex - 1;
   			onGraphChange(*scenegraph);
   		}else if (key == 257){  // enter
-  			/*  			
-  				(toggleExpanded selectedName)
-     			(refreshDepGraph)   
-   				(onGraphChange)*/
+  			toggleExpanded(*scenegraph);
+  			onGraphChange(*scenegraph);
   		}
   		/*
-     	(if (equal? key 257) 
-     		(begin
-   
-     		)  ; enter
-     	)
      	(if (equal? key 344) (handleItemSelected selectedElement #f))  ; shift
      	(if (equal? key 345) (handleItemSelected selectedElement #t))  ; ctrl
 		)*/
+  	}else if (key == 344){
+  		modeToGetDepGraph.at(scenegraph -> depgraphType).handleItemSelected(*scenegraph, false);
+  	}else if (key == 345){
+  		modeToGetDepGraph.at(scenegraph -> depgraphType).handleItemSelected(*scenegraph, true);
   	}else if (key == '='){  // =
   		modlog("editor", "scenegraph - increase font size");
 			scenegraph -> fontSize += 1;
@@ -613,160 +632,3 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 
   return binding;
 }
-
-/*
-
-(define expandState (list))
-(define (expandPath name sceneId) (string-append name ":" (number->string sceneId)))
-
-(define (rmFromList listVals keyToRemove) 
-	(filter 
-		(lambda(val) 
-			(format #t "key = ~a, val = ~a\n" keyToRemove val)
-			(not (equal? (car val) keyToRemove))
-		) 
-		listVals
-	)
-)
-(define (toggleExpanded name)
-	(define element (assoc name expandState))
-	(define isExpanded (if element (cadr element) #t))
-	(define filteredList (rmFromList expandState name))
-	(define newExpandState (cons  (list name (not isExpanded)) filteredList))
-	(format #t "toggle expanded, selectname = ~a, element = ~a\n" name element)
-	(set! expandState newExpandState)
-)
-
-
-
-(define (setMinOffset depth) 
-	(define newMinOffset (rawCalcY depth))
-	(if (< newMinOffset minOffset)
-		(set! minOffset newMinOffset)
-	)
-)
-(define (resetMinOffset) (set! minOffset 0))
-(define minOffset (* -1 (rawCalcY 1)))
-
-(define selectedIndex 1)
-(define maxIndex #f)
-(define selectedElement #f)
-(define selectedName #f)
-
-; should set selectedElement and selectedName here
-
-(define (checkExpanded elementName sceneId)
-	(define elementPath (expandPath elementName sceneId))
-	(define value (assoc elementPath expandState))
-	(if value (equal? #t (cadr value)) #t)
-)
-
-
-
-(define baseNumber (inexact->exact (cadr (assoc "basenumber" (gameobj-attr mainobj)))))  ; arbitrary number, only uses for mapping selection for now, which numbering is basically a manually process
-
-(define baseNumberMapping (list))
-(define (baseNumberToSelectedIndex mappingIndex)
-	(define isPayloadMapping (>= mappingIndex (+ baseNumber mappingOffset)))
-	(define index (if isPayloadMapping (- mappingIndex mappingOffset) mappingIndex))
-	(define baseIndexPair (assoc index baseNumberMapping))
-	(format #t "base mapping: ~a\n" baseNumberMapping)
-	(format #t "base index pair: ~a\n" baseIndexPair)
-	(if baseIndexPair
-		(list (cadr baseIndexPair) isPayloadMapping)
-		(begin
-			(format #t "warning: no basemapping for: ~a\n" index)
-			#f
-		)
-	)
-)
-
-(define (clearBaseNumberMapping) (set! baseNumberMapping (list)))
-(define (setBaseNumberMapping basenumber index)
-	(set! baseNumberMapping (cons (list basenumber index) baseNumberMapping))
-)
-
-;	(list "mainfolder" "folder1" (list 0 0))
-(define (fullParentName element) (list (car element) (car (caddr element))))
-(define (fullChildName element) (list (cadr element)  (cadr (caddr element))))
-
-
-
-(define (updateDrawListData drawList index)
-	(resetMinOffset)
-	(clearBaseNumberMapping)
-	(set! maxIndex index)
-	(setMinOffset index)
-	(for-each
-		(lambda (drawElement)
-			(let (
-					(isSelected (list-ref drawElement 5))
-					(target (list-ref drawElement 0))
-					(sceneId (list-ref drawElement 1))
-					(mappingNumber (list-ref drawElement 6))
-					(height (list-ref drawElement 3))
-				)
-				(if isSelected (set! selectedName (expandPath target sceneId)))
-				(if isSelected (set! selectedElement (list target sceneId)))
-				(setBaseNumberMapping mappingNumber height)
-			)
-		)
-		drawList
-	)
-)
-
-
-
-(define (refreshGraphData)
-	(let* (
-			(drawListWithIndex (getDrawList))
-			(drawList (car drawListWithIndex))
-			(index (cadr drawListWithIndex))
-			(numElements (length drawList))
-		)
-		(if (>= numElements 5000)  ; because of mapping offsets, can adjust those to adjust this
-			(begin
-				(format #t "only 5k elements supported\n")
-				(exit 1)
-			)
-		)
-		(updateDrawListData drawList index)
-  	drawList
-	)
-)
-
-
-(define (isMatchingDrawElement gameobj)
-	(define objname (gameobj-name gameobj))
-	(define sceneId (list-sceneid (gameobj-id gameobj)))
-	(format #t "objname = ~a, sceneid = ~a\n" objname sceneId)
-	(lambda(drawElement)
-		(let (
-				(drawElementName (car drawElement))
-				(drawElementSceneId (cadr drawElement))
-			)
-			(and (equal? drawElementName objname) (equal? sceneId drawElementSceneId))
-		)
-	)
-)
-(define (selectedIndexForGameobj gameobj)
-	(define drawElements (car  (getDrawList)))
-	(define matchGameObj (isMatchingDrawElement gameobj))
-	(define newSelectIndex (list-index matchGameObj drawElements))
-	;(define value (list-ref drawElements newSelectIndex))
-	;(format #t "draw list: ~a\n" drawElements)
-	;(format #t "newSelectIndex: ~a\n" newSelectIndex)
-	;(format #t "value: ~a\n" value)
-	newSelectIndex
-)
-
-
-(define (isManagedByThisScript index)
-	(and 
-		(< index (+ baseNumber (* 2 mappingOffset)))
-		(>= index baseNumber)
-	)
-)
-
-
-*/
