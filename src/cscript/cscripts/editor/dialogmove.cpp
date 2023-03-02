@@ -80,7 +80,6 @@ CScriptBinding cscriptDialogMoveBinding(CustomApiBindings& api){
   			mainApi -> sendNotifyMessage("dialogmove-drag-stop", std::to_string(dialogMove -> objSelected.value()));
   		}
   		dialogMove -> objSelected = std::nullopt;
-  		dialogMove -> currNdi = std::nullopt;
   		dialogMove -> ndiMouseDown = std::nullopt;
   		dialogMove -> objposMouseDown = std::nullopt;
   	}else if (button == 0 && action == 1 && dialogMove -> hoveringObj.has_value() && dialogMove -> currNdi.has_value()){
