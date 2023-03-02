@@ -183,8 +183,11 @@ objid getIdForSelectedIndex(EditorScenegraph& scenegraph){
 	auto drawListElement = drawListFromDepGraph(scenegraph).elements.at(scenegraph.selectedIndex);
 	return drawListElement.id;;
 }
+SceneDrawElement getElementForSelectedIndex(EditorScenegraph& scenegraph){
+	auto drawListElement = drawListFromDepGraph(scenegraph).elements.at(scenegraph.selectedIndex);
+	return drawListElement;
+}
 
-// handleItemSelected
 void doNothing(EditorScenegraph& scenegraph, bool isAlt){
 	modlog("editor", "scenegraph doNothing");
 }
@@ -206,46 +209,41 @@ void selectScenegraphItem(EditorScenegraph& scenegraph, bool isAlt){
 }
 void selectModelItem(EditorScenegraph& scenegraph, bool isAlt){
 	modlog("editor", "scenegraph selectModelItem: " + std::to_string(scenegraph.selectedIndex));
-	/*
-	(define (selectModelItem element isAlt) 
-	(define modelpath (car element))
-	(define objname (string-append (number->string (random 10000000)) "-fix-generated"))
-	(mk-obj-attr
-		objname
-		(list
-			(list "mesh" modelpath)
-			(list (string-append objname "/Plane") "texture" "gentexture-scenegraph")
-		)
-	)
-)
-*/
+	auto element = getElementForSelectedIndex(scenegraph);
+	auto objName = std::to_string(rand() % 1000000000) + "-generated";
+  auto sceneId = mainApi -> listSceneId(scenegraph.mainObjId); 
+  modlog("editor", "scenegraph - mkobj in editor scene, which is wrong");
+  GameobjAttributes attr {
+    .stringAttributes = {
+     	{ "mesh", element.elementName }
+    },
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  std::map<std::string, GameobjAttributes> submodelAttributes;
+  mainApi -> makeObjectAttr(sceneId, objName, attr, submodelAttributes);
 }
 
 void selectTextureItem(EditorScenegraph& scenegraph, bool isAlt){
 	modlog("editor", "scenegraph selectTextureItem: " + std::to_string(scenegraph.selectedIndex));
-
-	/*
-	(define (selectTextureItem element isAlt)
-	(define texturepath (car element))
-	(define gameobjs (map gameobj-by-id (selected)))
-	(for-each 
-		(lambda(gameobj)
-			(gameobj-setattr! gameobj (list
-				(list "texture" texturepath)
-			))
-		)
-		gameobjs
-	)
-	#f
-)
-*/
+	auto element = getElementForSelectedIndex(scenegraph);
+  GameobjAttributes attr {
+    .stringAttributes = { {"texture", element.elementName }},
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  for (auto targetObjId : mainApi -> selected()){
+  	modlog("editor", "scenegraph set texture: " + std::to_string(targetObjId) + ", name = " + mainApi -> getGameObjNameForId(targetObjId).value() + ", with texture = " + element.elementName);
+  	mainApi -> setGameObjectAttr(targetObjId, attr);
+  }
 }
 
 void selectRawItem(EditorScenegraph& scenegraph, bool isAlt){
 	modlog("editor", "scenegraph selectRawItem: " + std::to_string(scenegraph.selectedIndex));
+	auto element = getElementForSelectedIndex(scenegraph);
 	auto attr = mainApi -> getGameObjectAttr(scenegraph.mainObjId);
 	auto topic = getStrAttr(attr, "topic").value();
-	mainApi -> sendNotifyMessage(topic, "helloworld");
+	mainApi -> sendNotifyMessage(topic, element.elementName);
 }
 
 void onObjDoNothing(EditorScenegraph& scenegraph, objid gameobjid){
