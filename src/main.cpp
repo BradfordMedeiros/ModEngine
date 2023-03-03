@@ -34,6 +34,8 @@
 #include "./cscript/cscripts/editor/dialogmove.h"
 #include "./cscript/cscripts/editor/scenegraph.h"
 #include "./cscript/cscripts/editor/explorer_loader.h"
+#include "./cscript/cscripts/editor/explore.h"
+#include "./cscript/cscripts/editor/details.h"
 #include "./lines.h"
 #include "./scene/common/textures_gen.h"
 #include "./modlayer.h"
@@ -1428,6 +1430,8 @@ int main(int argc, char* argv[]){
     cscriptDialogMoveBinding(pluginApi),
     cscriptScenegraphBinding(pluginApi),
     cscriptExplorerLoaderBinding(pluginApi),
+    cscriptExploreBinding(pluginApi),
+    cscriptDetailsBinding(pluginApi),
   };
   #ifdef ADDITIONAL_SRC_HEADER
     auto userBindings = getUserBindings(pluginApi);
