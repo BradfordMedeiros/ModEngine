@@ -618,9 +618,5 @@ CScriptBinding cscriptEditorBinding(CustomApiBindings& api){
     }
   };
 
-
-
-
-
   return binding;
 }
