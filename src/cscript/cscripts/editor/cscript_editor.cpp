@@ -325,7 +325,7 @@ struct PanelAndPosition {
 
 objid loadSidePanel(std::string scene, std::optional<glm::vec3> pos, bool moveable, bool restrictX, bool snapX){
   std::vector<std::vector<std::string>> additionalTokens = {
-    { ")window_x", "script", "./res/scenes/editor/dock/details.scm" },
+    { ")window_x", "script", "native/details" },
     // ;(list "(test_panel" "anchor" anchorElementName)
     { "(test_panel", "position", serializeVec(pos.has_value() ? pos.value() : glm::vec3(-0.78f, -0.097f, -1.f)) }, 
   };

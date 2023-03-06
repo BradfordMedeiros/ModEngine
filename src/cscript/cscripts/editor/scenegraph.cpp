@@ -600,8 +600,6 @@ CScriptBinding cscriptScenegraphBinding(CustomApiBindings& api){
 			scenegraph -> fontSize -= 1;
 			onGraphChange(*scenegraph);
   	}
-
-
   };
 
 
