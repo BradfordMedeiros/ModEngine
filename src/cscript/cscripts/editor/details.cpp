@@ -6,6 +6,8 @@ struct EditorDetails {
   std::optional<objid> activeSceneId;
   std::optional<objid> hoveredObj;
   std::optional<objid> focusedElement;
+  bool playModeEnabled;
+  bool pauseModeEnabled;
 };
 
 std::string uniqueName(){
@@ -125,49 +127,43 @@ void setAxis(std::string axis){
   }); 
 }
 
-/*
-(define (togglePauseMode)
- (setPauseMode (not pauseModeEnabled))
-)
 
-(define playModeEnabled #f)
+void updateStoreValue(std::string key, std::string value){
 
-*/
+}
 
+void setPauseMode(EditorDetails& details, bool enabled){
+  details.pauseModeEnabled = enabled;
+  mainApi -> setWorldState({ 
+    ObjectValue {
+      .object = "world ",
+      .attribute = "paused",
+      .value = details.pauseModeEnabled ? "true" : "false",
+    }
+  });
+  mainApi -> sendNotifyMessage("alert", std::string("pause mode ") + (details.pauseModeEnabled ? "enabled" : "disabled"));
+  updateStoreValue("pause-mode-on", details.pauseModeEnabled ? "on" : "off");
+}
 void togglePlayMode(EditorDetails& details){
-/*
-(define (togglePlayMode)
-  (if playModeEnabled
-    (begin
-      (setPauseMode #t)
-      (for-each reset-scene (list-scenes (list "editable")))
-    )
-    (begin
-      (setPauseMode #f)
-    )
-  )
-  (set! playModeEnabled (not playModeEnabled))
-  (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
-  (format #t "play mode: ~a" (if playModeEnabled "true" "false"))
-  (send "alert" (format #f "play mode: ~a" (if playModeEnabled "true" "false"))) 
-  (send "play-mode" (if playModeEnabled "true" "false")) 
-
-)*/
+  if (details.playModeEnabled){
+    setPauseMode(details, true);
+    std::vector<std::string> tags = { "editable" };
+    for (auto &scene : mainApi -> listScenes(tags)){
+      mainApi -> resetScene(scene);
+    }
+  }else{
+    setPauseMode(details, false);
+  }
+  details.playModeEnabled = !details.playModeEnabled;
+  details.pauseModeEnabled = true;
+  updateStoreValue("play-mode-on", details.playModeEnabled ? "on" : "off");
+  modlog("editor", "play mode: " + details.playModeEnabled ? "true" : "false");
+  mainApi -> sendNotifyMessage("alert", details.playModeEnabled ? "true" : "false");
+  mainApi -> sendNotifyMessage("play-mode", details.playModeEnabled ? "true" : "false");
 }
 
 void togglePauseMode(EditorDetails& details){
-  /*(define (setPauseMode enabled)
-  (set! pauseModeEnabled enabled)
-  (set-wstate (list
-    (list "world" "paused" (if pauseModeEnabled "true" "false"))
-  ))
-  (send "alert" (string-append "pause mode " (if pauseModeEnabled "enabled" "disabled"))) 
-  (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
-)
-(define (togglePauseMode)
- (setPauseMode (not pauseModeEnabled))
-)
-*/
+  setPauseMode(details, !details.pauseModeEnabled);
 }
 
 bool isSubmitKey(int key){
@@ -230,7 +226,12 @@ std::string getUpdatedText(GameobjAttributes& attr, objid focusedElement, int ke
   return "";
 }
 
-int newCursorIndex(DetailsUpdateType& eventType, int oldIndex, int newTextLength, int oldOffset, int wrapAmount, std::string& oldCursorDir, int oldHighlightLength){
+struct CursorUpdate {
+  int index;
+  int highlightLength;
+  std::string newCursorDir;
+};
+CursorUpdate newCursorIndex(DetailsUpdateType& eventType, int oldIndex, int newTextLength, int oldOffset, int wrapAmount, std::string& oldCursorDir, int oldHighlightLength){
   auto distanceOnLine = oldIndex - oldOffset;
   auto lastEndingOnRight = distanceOnLine == (wrapAmount - 1);
   auto lastEndingOnLeft = distanceOnLine == 0;
@@ -271,84 +272,82 @@ int newCursorIndex(DetailsUpdateType& eventType, int oldIndex, int newTextLength
     }
   }
 
-  
+  if ((eventType == UPDATE_RIGHT) || (eventType == UPDATE_LEFT) || (eventType == UPDATE_INSERT) || (eventType == UPDATE_BACKSPACE) || (eventType == UPDATE_DELETE)){
+    highlightLength = 0;
+  }
 
-/*
-
-  (if (or (equal? eventType 'right) (equal? eventType 'left) (equal? eventType 'insert) (equal? eventType 'backspace) (equal? eventType 'delete))
-    (set! highlightLength 0)
-  )
-
-  (format #t "last ending: (~a, ~a)\n" lastEndingOnLeft lastEndingOnRight)
-  (format #t "distance on line: ~a\n" distanceOnLine)
-  (list index newCursorDir highlightLength)
-)
-*/
-  return 0;
+  return CursorUpdate {
+    .index = index,
+    .highlightLength = highlightLength,
+    .newCursorDir = newCursorDir,
+  };
 }
 
-int newOffsetIndex(DetailsUpdateType& type, int oldOffset, int cursor, int wrapAmount, int strLen){
-/*
-; todo -> take into account when the text is deleted 
-(define (newOffsetIndex type oldoffset cursor wrapAmount strlen)
-  (define rawCursorIndex (car cursor))
-  (define newCursorIndex (if (equal? (cadr cursor) "left") rawCursorIndex (+ rawCursorIndex 1)))
-  (define cursorHighlight (caddr cursor))
-  (define cursorFromOffset (- (+ newCursorIndex cursorHighlight) oldoffset))
-  (define wrapRemaining (- wrapAmount cursorFromOffset))
-  (define cursorOverLeftSide (> wrapRemaining wrapAmount))
-  (define cursorOverRightSide (< wrapRemaining 0))
-  (define amountOverLeftSide (- wrapRemaining wrapAmount))
-  (define amountOverRightSide (* -1 wrapRemaining))
-  (define newOffset   
-    (cond 
-      (cursorOverRightSide (+ oldoffset amountOverRightSide))
-      (cursorOverLeftSide  (- oldoffset amountOverLeftSide))
-      (#t oldoffset)
-    )
-  )
-  (define numCharsLeft (- strlen newOffset))
-  (define diffFromWrap (- numCharsLeft wrapAmount))
-  (define finalOffset (if (<= diffFromWrap 0)
-    (+ newOffset diffFromWrap)
-    newOffset
-  ))
-
-  (format #t "offset index, highlight: ~a\n" cursorHighlight)
-  finalOffset
-)
-
-*/
-  return 0;
+int newOffsetIndex(DetailsUpdateType& type, int oldOffset, CursorUpdate& cursor, int wrapAmount, int strLen){
+  auto rawCursorIndex = cursor.index;
+  auto newCursorIndex = cursor.newCursorDir == "left" ? rawCursorIndex : (rawCursorIndex + 1);
+  auto cursorHighlight = cursor.highlightLength;
+  auto cursorFromOffset = newCursorIndex + cursorHighlight - oldOffset;
+  auto wrapRemaining = wrapAmount - cursorFromOffset;
+  auto cursorOverLeftSide = wrapRemaining > wrapAmount;
+  auto cursorOverRightSide = wrapRemaining < 0;
+  auto amountOverLeftSide = wrapRemaining - wrapAmount;
+  auto amountOverRightSide = -1 * wrapRemaining;
+  auto newOffset = oldOffset;
+  if (cursorOverRightSide){
+    newOffset = oldOffset + amountOverRightSide;
+  }
+  if (cursorOverLeftSide){
+    newOffset = oldOffset - amountOverLeftSide;
+  }
+  auto numCharsLeft = strLen - newOffset;
+  auto diffFromWrap = numCharsLeft - wrapAmount;
+  auto finalOffset = (diffFromWrap <= 0) ? (newOffset + diffFromWrap) : newOffset;
+  return finalOffset;
 }
 
-bool shouldUpdateType(std::string& newText, GameobjAttributes& attr){
-/*(define (shouldUpdateType newText attr)
-  (define update (cond
-    ((isEditableType "number" attr) 
-      (format #t "evaluating number type!\n")
-      (isTypeNumber newText)
-    )
-    ((isEditableType "positive-number" attr) 
-      (format #t "evaluating positive number type!\n")
-      (isTypePositiveNumber newText)
-    )
-    ((isEditableType "integer" attr)
-      (isTypeInteger newText)
-    )
-    ((isEditableType "positive-integer" attr)
-      (isTypePositiveInteger newText)
-    )
-    (#t #t)
-  ))
-  (format #t "should update: (~a) (~a)\n" newText update)
-  update
-)
-*/
+bool isEditableType(std::string type, GameobjAttributes& attr){
+  /*
+  (define (isEditableType type attr) 
+  (define editableText (assoc "details-editable-type" attr))
+  (define isEditableType (if editableText (equal? (cadr editableText) type) #f))
+  (format #t "is editable type: ~a ~a\n" type isEditableType)
+  isEditableType
+)*/
   return false;
 }
 
-void updateText(objid focusedElement, std::string& newText, int cursor, int offset){
+bool isTypeNumber(std::string& text){
+  //(define (isTypeNumber text) (or (isZeroLength text) (isNumber text) (isDecimal text) (isNegativePrefix text)))
+  return false;
+}
+bool isTypePositiveNumber(std::string& text){
+  // (or (isZeroLength text) (isDecimal text) (isPositiveNumber text)))
+  return false;
+} 
+bool isTypeInteger(std::string& text){
+  // //(define (isTypeInteger text) (or (isZeroLength text) (isInteger text) (isNegativePrefix text)))
+  return false;
+}
+bool isTypePositiveInteger(std::string& text){
+  //(define (isTypePositiveInteger text) (or (isZeroLength text) (isPositiveInteger text)))
+  return false;
+}
+
+bool shouldUpdateType(std::string& newText, GameobjAttributes& attr){
+  if (isEditableType("number", attr)){
+    return isTypeNumber(newText);
+  }else if (isEditableType("positive-number", attr)){
+    return isTypePositiveNumber(newText);
+  }else if (isEditableType("integer", attr)){
+    return isTypeInteger(newText);
+  }else if (isEditableType("positive-integer", attr)){
+    return isTypePositiveInteger(newText);
+  }
+  return false;
+}
+
+void updateText(objid focusedElement, std::string& newText, CursorUpdate& cursor, int offset){
 /*
 (define (updateText obj text cursor offset)
   (define cursorIndex (car cursor))
@@ -439,6 +438,7 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
     details -> activeSceneId = std::nullopt;
     details -> hoveredObj = std::nullopt;
     details -> focusedElement = std::nullopt;
+    details -> playModeEnabled = false;
     return details;
   };
   binding.remove = [&api] (std::string scriptname, objid id, void* data) -> void {
