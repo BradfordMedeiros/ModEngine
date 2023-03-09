@@ -203,6 +203,7 @@ std::optional<glm::vec4> getVec4Attr(GameobjAttributes& objAttr, std::string key
 bool hasAttribute(GameobjAttributes& attributes, std::string attr);
 bool maybeSetVec3FromAttr(glm::vec3* _valueToUpdate, const char* field, GameobjAttributes& attributes);
 bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjAttributes& attributes);
+std::optional<int> optionalInt(std::optional<float> value);
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes);
 

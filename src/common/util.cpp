@@ -707,6 +707,12 @@ bool maybeSetVec4FromAttr(glm::vec4* _valueToUpdate, const char* field, GameobjA
   }
   return false;
 }
+std::optional<int> optionalInt(std::optional<float> value){
+  if (!value.has_value()){
+    return std::nullopt;
+  }
+  return static_cast<int>(value.value());
+}
 
 void mergeAttributes(GameobjAttributes& toAttributes, GameobjAttributes& fromAttributes){
   for (auto &[name, value] : fromAttributes.stringAttributes){

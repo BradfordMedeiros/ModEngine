@@ -26,7 +26,7 @@ std::string uniqueName(){
 
 struct UpdatedValue {
   std::string key;
-  std::string value;
+  AttributeValue value;
 };
 
 std::optional<AttributeValue> getDataValue(EditorDetails& details, std::string attrField){
@@ -36,23 +36,29 @@ std::optional<AttributeValue> getDataValue(EditorDetails& details, std::string a
   return details.dataValues.at(attrField).value;
 } 
 
-UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, std::string& detailBindingType, std::string& newvalueOld) {
-  //auto oldvalue = getDataValue()
-//
-//  //(define oldvalue (getDataValue detailBindingName))
-//  //(define newvalue (if (equal? detailBindingType "list") (fixList newvalueOld) newvalueOld))
-//  //(if detailBindingIndex
-//  //    (begin
-//  //      (if (equal? oldvalue #f)
-//  //        (set! oldvalue (list 0 0 0 0))  ; should come from some type hint
-//  //      )
-//  //      (list-set! oldvalue detailBindingIndex (makeTypeCorrect (list-ref oldvalue detailBindingIndex) newvalue))
-//  //      (format #t "old value: ~a ~a\n"  oldvalue (map number? oldvalue))
-//  //      (list detailBindingName oldvalue)
-//  //    )
-//  //    (list detailBindingName (makeTypeCorrect oldvalue newvalue))
-  //)    
-  return UpdatedValue{ };
+UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, std::string& detailBindingType, AttributeValue newvalueOld) {
+  auto oldvalue = getDataValue(details, detailBindingName);
+  if (detailBindingIndex.has_value()){
+    auto list3 = std::get_if<glm::vec3>(&newvalueOld);
+    auto list4 = std::get_if<glm::vec4>(&newvalueOld);
+    modassert(list3 != NULL || list4 != NULL, "get update value - index specified, must be vec3 or vec4");
+    modassert(detailBindingIndex.value() >= 0 && (detailBindingIndex.value() < (list4 != NULL ? 4 :  3)), "detail binding index to high for type");
+    auto updateValue = std::get_if<float>(&newvalueOld);
+    modassert(updateValue != NULL, "update value must be float for vec type with binding index");
+    if (!oldvalue.has_value()){
+      if (list3 != NULL){
+        glm::vec3 updateVec(0.f, 0.f, 0.f);
+        updateVec[detailBindingIndex.value()] = *updateValue;
+        oldvalue = updateVec;
+      }else if (list4 != NULL){
+        glm::vec4 updateVec(0.f, 0.f, 0.f, 0.f);
+        updateVec[detailBindingIndex.value()] = *updateValue;
+        oldvalue = updateVec;
+      }
+    }
+    return UpdatedValue { .key = detailBindingName, .value = oldvalue.value() };
+  }
+  return UpdatedValue{ .key = detailBindingName, .value = newvalueOld };
 }
 
 
@@ -90,50 +96,296 @@ void clearStore(EditorDetails& details){
 )
 */
 
-void refillStore(EditorDetails& details, objid gameobj){
-   clearStore(details);
-   updateStoreValue(details, "object_name", mainApi -> getGameObjNameForId(gameobj).value());
+/*
 
-   auto gameobjAttr = mainApi -> getGameObjectAttr(gameobj);
-   auto allKeysAndAttr = allKeysAndAttributes(gameobjAttr);
-   for (auto &[attribute, value] : allKeysAndAttr){
-    //(format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
-    //(map updateStoreValue (map refillCorrectType (map getRefillGameobjAttr (gameobj-attr gameobj))))
-      auto keyname = std::string("gameobj:" + attribute);
-      updateStoreValue(details, keyname, value);
-   }
 
+*/
+
+
+std::string bindQueryMain(std::string& query, std::map<std::string, DataValue>& dataValues){
+/*
+(define (bind-query-main query)  
+  (define templatedQuery query)
+  (for-each 
+    (lambda(dataValue)
+      (let ((key (car dataValue)) (value (cadr dataValue)))
+        (format #t "data value, key = ~a, value = ~a\n" key value)
+        (format #t "template: ~a\n" templatedQuery)
+        (set! templatedQuery (template templatedQuery (string-append "$" key) (sqlMakeTypeCorrect value)))
+      )
+    ) 
+    dataValues
+  )
+  (format #t "bind-query data valus: ~a" dataValues)
+  templatedQuery
+)*/
+  return query;
+}
+
+AttributeValue parseSqlVec(std::string& value){
+  auto parts = split(value, '?');
+  modassert(parts.size() == 3 || parts.size() == 4, "parseSqlVec size must be 3 or 4");
+  if (parts.size() == 4){
+    return glm::vec4(std::atoi(parts.at(0).c_str()), std::atoi(parts.at(1).c_str()), std::atoi(parts.at(2).c_str()), std::atoi(parts.at(3).c_str()));
+  }
+  return glm::vec3(std::atoi(parts.at(0).c_str()), std::atoi(parts.at(1).c_str()), std::atoi(parts.at(2).c_str()));
+}
+void populateSqlData(EditorDetails& details){
+  auto allQueriesObj = mainApi -> getObjectsByAttr("sql-query", std::nullopt, std::nullopt);
+
+  for (auto queryObjId : allQueriesObj){
+    auto attr = mainApi -> getGameObjectAttr(queryObjId);
+    auto sqlBinding = getStrAttr(attr, "sql-binding");
+    auto sqlQuery = getStrAttr(attr, "sql-query");
+    auto sqlCast = getStrAttr(attr, "sql-cast");
+
+    auto query = bindQueryMain(sqlQuery.value(), details.dataValues);
+    bool valid = false;
+    auto compiledQuery = mainApi -> compileSqlQuery(query, {});
+    auto sqlResult = mainApi -> executeSqlQuery(compiledQuery, &valid);
+    modassert(valid, "populate sql data, invalid query");
+
+    auto firstColInFirstRow = sqlResult.at(0).at(0);
+    if (!sqlCast.has_value()){
+      updateStoreValue(details, sqlBinding.value(), firstColInFirstRow);
+    }else{
+      auto type = sqlCast.value();
+      if (type == "number"){
+        updateStoreValue(details, sqlBinding.value(), std::atoi(firstColInFirstRow.c_str()));
+      }else if (type == "vec"){
+        updateStoreValue(details, sqlBinding.value(), parseSqlVec(firstColInFirstRow));
+      }else{
+        modassert(false, "invalid type populateSqlData");
+      }
+    }
+
+
+
+  /*  
+
+
+(define (populateSqlResults result) 
+  (if result
+    (let* ((bindingName (car result)) (data (cadr result)))
+      (if data
+        (extractFirstElement bindingName data (caddr result))
+        (format #t "warning no data for sql binding: ~a\n" bindingName)
+      )
+    )
+  )
+) */
+
+
+
+  }
 
   /*
 
 
-  (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
-  (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
-  (updateStoreValue (list "runtime-sceneid" (number->string (list-sceneid (gameobj-id gameobj)))))
-
-  (updateStoreValue (list "play-mode-on" (if playModeEnabled "on" "off")))
-  (updateStoreValue (list "pause-mode-on" (if pauseModeEnabled "on" "off")))
-
-  (for-each updateStoreValue (map refillCorrectType (map getRefillStoreWorldValue (get-wstate))))
-
-  (populateSqlData)
+  (define results (map executeQuery queries))
+  (for-each populateSqlResults results)
+  (format #t "querypair: ~a\n" bindingQueryPair)
 )
 */
 }
+
+
+//
+//(define (not-found-from-attr attrs)
+//  (define type (assoc "details-editable-type" attrs))
+//  (set! type (if type (cadr type) type))
+//  (if (or (equal? type "number") (equal? type "positive-number"))
+//    (list 0 0 0 0)
+//    #f
+//  )
+//)
+//
+//(define (extract-binding-element attr-pair bindingType) 
+//  (define attrs (cadr attr-pair))
+//  (define detailBindingIndex (assoc "details-binding-index" attrs))
+//  (list 
+//    (car attr-pair) 
+//    (cadr (assoc bindingType attrs))
+//    (if detailBindingIndex (inexact->exact (cadr detailBindingIndex)) #f)
+//    (not-found-from-attr attrs)
+//  )
+//)
+
+
+enum DetailObjType { SLIDER, TEXT, INVALID };
+DetailObjType getGameobjType(std::string name){
+  if (name.at(0) == '_'){
+    return SLIDER;
+  }
+  if (name.at(1) == ')'){
+    return TEXT;
+  }
+  modassert(false, "getGameobjType not found");
+  return INVALID;
+}
+
+std::string attrValToUiString(AttributeValue& value){
+  return "";
+}
+
+float calcSlideValue(GameobjAttributes& attr, float percentage){
+/*(define (calcSlideValue objattr percentage)
+  (define min (cadr (assoc "min" objattr)))
+  (define max (cadr (assoc "max" objattr)))
+  (define range (- max min))
+  (+ min (* range percentage))
+)*/
+  return 0.f; 
+}
+
+float uncalcSlideValue(objid obj, float value){
+/*  (define objattr (gameobj-attr obj))
+  (define min (cadr (assoc "min" objattr)))
+  (define max (cadr (assoc "max" objattr)))
+  (define ratio (/ (- value min) (- max min)))
+  ;(format #t "min = ~a, max = ~a, range = ~a, ratio = ~a\n" min max range ratio)
+  ratio
+)
+*/
+  return 0.f;
+}
+
+
+void updateBinding(EditorDetails& details, objid id, std::string& detailBinding, std::optional<int> detailBindingIndex){
+  auto hasValue = details.dataValues.find(detailBinding) != details.dataValues.end();
+  modlog("editor", "details update binding: " + detailBinding + ", hasvalue = " + print(hasValue));
+  if (!hasValue){
+    return;
+  }
+  auto dataValue = details.dataValues.at(detailBinding).value;
+  auto objType = getGameobjType(mainApi -> getGameObjNameForId(id).value());
+  // (format #t "binding index: ~a ~a\n" bindingIndex (number? bindingIndex))
+  // (format #t "type for update dataValue is: ~a, value: ~a\n" (getType dataValue) dataValue)
+  if (detailBindingIndex.has_value()){
+    auto vec3 = std::get_if<glm::vec3>(&dataValue);
+    auto vec4 = std::get_if<glm::vec4>(&dataValue);
+    if (vec3 != NULL){
+      modassert(detailBindingIndex.value() <= 2, "detail binding index must be [0, 2]");
+      dataValue = (*vec3)[detailBindingIndex.value()];
+    }else if (vec4 != NULL){
+      modassert(detailBindingIndex.value() <= 3, "detail binding index must be [0, 3]");
+      dataValue = (*vec4)[detailBindingIndex.value()];
+    }else{
+      modassert(false, "update binding detail binding index can only be applied to vec3 or vec4");
+    }
+  }
+
+  if (objType == TEXT){
+    GameobjAttributes newAttr {
+      .stringAttributes = { {"value", attrValToUiString(dataValue) }},
+      .numAttributes = { },
+      .vecAttr = { .vec3 = {}, .vec4 = {} },
+    };
+    mainApi -> setGameObjectAttr(id, newAttr);
+  }else if (objType == SLIDER){
+    auto floatDataValue = std::get_if<float>(&dataValue);
+    modassert(floatDataValue, "update binding slider, not float value");
+    GameobjAttributes newAttr {
+      .stringAttributes = {},
+      .numAttributes = { { "slideamount", uncalcSlideValue(id, *floatDataValue) } },
+      .vecAttr = { .vec3 = {}, .vec4 = {} },
+    };
+    mainApi -> setGameObjectAttr(id, newAttr);
+  }else {
+    modassert(false, "update binding, invalid obj type");
+  }
+
+  //(format #t "data value: ~a\n" dataValue)
+  //(format #t "update binding for: ~a\n" (gameobj-name obj))
+  //(format #t "datavalues: ~a\n" dataValues)
+  //(format #t "data = ~a, index = ~a\n" dataValue bindingIndex)
+
+}
+
+bool controlEnabled(EditorDetails& details, GameobjAttributes& gameobjAttr){
+  auto isEnabledBinding = getStrAttr(gameobjAttr, "details-enable-binding");
+  auto isEnabledBindingOff = getStrAttr(gameobjAttr, "details-enable-binding-off");
+  auto bindingValue = getDataValue(details, isEnabledBinding.value());
+  if (isEnabledBinding.has_value() && isEnabledBindingOff.has_value()){
+    auto bindingValueStr = std::get_if<std::string>(&bindingValue.value());
+    modassert(bindingValueStr, "control enabled - binding value must be string type");
+    return *bindingValueStr != isEnabledBindingOff.value();
+  }
+  return true;
+}
+
+void updateToggleBinding(EditorDetails& details, objid id, std::string& detailBinding, std::optional<int> detailBindingIndex, std::optional<std::string> bindingOn){
+  auto hasValue = details.dataValues.find(detailBinding) != details.dataValues.end();
+  modlog("editor", "details update binding: " + detailBinding + ", hasvalue = " + print(hasValue));
+  if (!hasValue){
+    return;
+  }
+  auto toggleEnableText = details.dataValues.at(detailBinding).value;
+  auto toggleEnableTextStr = std::get_if<std::string>(&toggleEnableText);
+  modassert(toggleEnableTextStr, "toggle enable text str is not a string");
+  auto enableValueStr = bindingOn.has_value() ? bindingOn.value() : "enabled";
+  auto enableValue = enableValueStr == *toggleEnableTextStr;
+  auto gameobjAttr = mainApi -> getGameObjectAttr(id);
+  auto isEnabled = controlEnabled(details, gameobjAttr);
+  auto onOffColor = enableValue ? glm::vec4(0.3f, 0.3f, 0.6f, 1.f) : glm::vec4(1.f, 1.f, 1.f, 1.f);
+  GameobjAttributes newAttr {
+    .stringAttributes = { {"state", enableValue ? "on" : "off" }},
+    .numAttributes = {  },
+    .vecAttr = { .vec3 = {}, .vec4 = { {"tint", isEnabled ? onOffColor : glm::vec4(0.4f, 0.4f, 0.4f, 1.f) }} },
+  };
+  mainApi -> setGameObjectAttr(id, newAttr);
+}
+
+
+void refillStore(EditorDetails& details, objid gameobj){
+   clearStore(details);
+   updateStoreValue(details, "object_name", mainApi -> getGameObjNameForId(gameobj).value());
+   auto gameobjAttr = mainApi -> getGameObjectAttr(gameobj);
+   auto allKeysAndAttr = allKeysAndAttributes(gameobjAttr);
+   for (auto &[attribute, value] : allKeysAndAttr){
+      auto keyname = std::string("gameobj:" + attribute);
+      updateStoreValue(details, keyname, value);
+   }
+   updateStoreValue(details, "meta-numscenes", mainApi -> listScenes({}).size());
+   updateStoreValue(details, "runtime-id", std::to_string(gameobj));
+   updateStoreValue(details, "runtime-sceneid", std::to_string(mainApi -> listSceneId(gameobj)));
+   updateStoreValue(details, "play-mode-on", details.playModeEnabled ? "on" : "off");
+   updateStoreValue(details, "pause-mode-on", details.pauseModeEnabled ? "on" : "off");
+   for (auto &state : mainApi -> getWorldState()){
+      updateStoreValue(details, std::string("world:") + state.object + ":" + state.attribute, state.value);
+   }
+   populateSqlData(details);
+}
 void populateData(EditorDetails& details){
+  for (auto &bindingElementId : mainApi -> getObjectsByAttr("details-binding", std::nullopt, std::nullopt)){
+    auto attr = mainApi -> getGameObjectAttr(bindingElementId);
+    auto detailBindingIndex = getFloatAttr(attr, "details-binding-index");
+    auto bindingTypeValue = getStrAttr(attr, "details-binding");
+    updateBinding(details, bindingElementId, bindingTypeValue.value(), optionalInt(detailBindingIndex));
+  }
+
+  for (auto &bindingElementId : mainApi -> getObjectsByAttr("details-binding-toggle", std::nullopt, std::nullopt)){
+    auto attr = mainApi -> getGameObjectAttr(bindingElementId);
+    auto detailBindingIndex = getFloatAttr(attr, "details-binding-index");
+    auto bindingTypeValue = getStrAttr(attr, "details-binding");
+    auto bindingOn = getStrAttr(attr, "details-binding-on");
+    updateToggleBinding(details, bindingElementId, bindingTypeValue.value(), optionalInt(detailBindingIndex), bindingOn);
+  }
+
+
 /*(define (populateData)
   (for-each 
     (lambda(attrpair) 
       (update-binding attrpair (generateGetDataForAttr  (notFoundData attrpair)))
     ) 
-    (all-obj-to-bindings "details-binding")
+    (all-obj-to-bindings )
   )
   (for-each 
     (lambda(attrpair) 
       ;(update-binding attrpair getDataForAttr)
       (update-toggle-binding attrpair (generateGetDataForAttr  #f))
     ) 
-    (all-obj-to-bindings "details-binding-toggle")  ;
+    (all-obj-to-bindings "")  ;
   )
   (enforceLayouts)
 )
@@ -728,17 +980,6 @@ void handleActiveScene(EditorDetails& details, objid sceneId, GameobjAttributes&
   }
 }
 
-bool controlEnabled(EditorDetails& details, GameobjAttributes& gameobjAttr){
-  auto isEnabledBinding = getStrAttr(gameobjAttr, "details-enable-binding");
-  auto isEnabledBindingOff = getStrAttr(gameobjAttr, "details-enable-binding-off");
-  auto bindingValue = getDataValue(details, isEnabledBinding.value());
-  if (isEnabledBinding.has_value() && isEnabledBindingOff.has_value()){
-    auto bindingValueStr = std::get_if<std::string>(&bindingValue.value());
-    modassert(bindingValueStr, "control enabled - binding value must be string type");
-    return *bindingValueStr != isEnabledBindingOff.value();
-  }
-  return true;
-}
 
 std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
 	{ "create-camera", createCamera },
