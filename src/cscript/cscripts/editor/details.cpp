@@ -2,6 +2,11 @@
 
 extern CustomApiBindings* mainApi;
 
+struct DataValue {
+  bool modified;
+  AttributeValue value;
+};
+
 struct EditorDetails {
   std::optional<objid> activeSceneId;
   std::optional<objid> hoveredObj;
@@ -11,7 +16,7 @@ struct EditorDetails {
   bool pauseModeEnabled;
   std::optional<objid> managedSelectionMode;
 
-  std::map<std::string, AttributeValue> dataValues;
+  std::map<std::string, DataValue> dataValues;
 };
 
 std::string uniqueName(){
@@ -24,16 +29,14 @@ struct UpdatedValue {
   std::string value;
 };
 
-std::optional<std::string> getDataValue(EditorDetails& details, std::string attrField){
-/*(define (getDataValue attrField) 
-  (define value (assoc attrField dataValues))
-  (if value (cadr value) #f)
-)
-*/
-  return std::nullopt;
+std::optional<AttributeValue> getDataValue(EditorDetails& details, std::string attrField){
+  if (details.dataValues.find(attrField) == details.dataValues.end()){
+    return std::nullopt;
+  }
+  return details.dataValues.at(attrField).value;
 } 
 
-UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, int detailBindingIndex, std::string& detailBindingType, std::string& newvalueOld) {
+UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingName, std::optional<int> detailBindingIndex, std::string& detailBindingType, std::string& newvalueOld) {
   //auto oldvalue = getDataValue()
 //
 //  //(define oldvalue (getDataValue detailBindingName))
@@ -53,30 +56,56 @@ UpdatedValue getUpdatedValue(EditorDetails& details, std::string& detailBindingN
 }
 
 
-void updateStoreValueModified(std::string key, std::string value, bool modified){
-  /*
-  (define newDataValues (delete (assoc key dataValues) dataValues))
-  (set! dataValues (cons (list key value modified) newDataValues))*/
+void updateStoreValueModified(EditorDetails& details, std::string key, AttributeValue value, bool modified){
+  details.dataValues[key] = DataValue { .modified = modified, .value = value };
 
 }
-void updateStoreValue(std::string key, std::string value){
-  updateStoreValueModified(key, value, false);
+void updateStoreValue(EditorDetails& details, std::string key, AttributeValue value){
+  updateStoreValueModified(details, key, value, false);
 }
-std::string getStoreValue(std::string key){
-/*(define (getStoreValue key)
-  (define value (assoc key dataValues))
-  (if value (cadr value) #f)
+AttributeValue getStoreValue(EditorDetails& details, std::string key){
+  return details.dataValues.at(key).value;
+}
+
+template <typename T>
+T getAsType(AttributeValue value){
+  auto tValue = std::get_if<T>(&value);
+  modassert(tValue, "attribute value must be different type");
+  return *tValue;
+}
+
+void clearStore(EditorDetails& details){
+  details.dataValues = {};
+}
+
+/*(define (refillCorrectType value)
+  (define val (cadr value))
+  (define typeCorrectVal 
+    (if (string? val)
+      (maybe-parse-vec2 val)
+      val
+    )
+  )
+  (list (car value) typeCorrectVal)
 )
 */
-  return "";
-}
 
-void refillStore(EditorDetails& details, objid id){
-/*(define (refillStore gameobj)
-  (clearStore)
-  (updateStoreValue (list "object_name" (gameobj-name gameobj)))
-  (format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
-  (map updateStoreValue (map refillCorrectType (map getRefillGameobjAttr (gameobj-attr gameobj))))
+void refillStore(EditorDetails& details, objid gameobj){
+   clearStore(details);
+   updateStoreValue(details, "object_name", mainApi -> getGameObjNameForId(gameobj).value());
+
+   auto gameobjAttr = mainApi -> getGameObjectAttr(gameobj);
+   auto allKeysAndAttr = allKeysAndAttributes(gameobjAttr);
+   for (auto &[attribute, value] : allKeysAndAttr){
+    //(format #t "store: all attrs are: ~a\n" (gameobj-attr gameobj))
+    //(map updateStoreValue (map refillCorrectType (map getRefillGameobjAttr (gameobj-attr gameobj))))
+      auto keyname = std::string("gameobj:" + attribute);
+      updateStoreValue(details, keyname, value);
+   }
+
+
+  /*
+
 
   (updateStoreValue (list "meta-numscenes" (number->string (length (list-scenes)))))
   (updateStoreValue (list "runtime-id" (number->string (gameobj-id gameobj))))
@@ -92,60 +121,84 @@ void refillStore(EditorDetails& details, objid id){
 */
 }
 void populateData(EditorDetails& details){
-
-}
-
-void submitAndPopulateData(EditorDetails& details){
-  /*(define (submitAndPopulateData)
-  (submitData)
-  (populateData)
-)*/
-}
-
-void maybeSetBinding(GameobjAttributes& attr){
-/*(define (maybe-set-binding objattr)
-  (define shouldSet (if (assoc "details-binding-set" objattr) #t #f))
-  (define detailBindingPair (assoc "details-binding-toggle" objattr))
-  (define detailBindingIndexPair (assoc "details-binding-index" objattr))
-  (define detailBinding (if detailBindingPair (cadr detailBindingPair) #f))
-  (define detailBindingIndex (if detailBindingIndexPair (inexact->exact (cadr detailBindingIndexPair)) #f))
-  (define bindingOn (assoc "details-binding-on" objattr))
-  (define enableValue (if bindingOn (cadr bindingOn) #f))
-  (define editableTypePair (assoc "details-editable-type" objattr))
-  (define editableType (if editableTypePair (cadr editableTypePair) #f))
-
-  ;;(format #t "shouldset = ~a, enableValue = ~a, detailBinding = ~a\n" shouldSet enableValue detailBinding)
-  (if (and shouldSet enableValue detailBinding) 
-    (updateStoreValueModified (getUpdatedValue detailBinding detailBindingIndex editableType enableValue) #t)
+/*(define (populateData)
+  (for-each 
+    (lambda(attrpair) 
+      (update-binding attrpair (generateGetDataForAttr  (notFoundData attrpair)))
+    ) 
+    (all-obj-to-bindings "details-binding")
   )
-  (submitAndPopulateData)
+  (for-each 
+    (lambda(attrpair) 
+      ;(update-binding attrpair getDataForAttr)
+      (update-toggle-binding attrpair (generateGetDataForAttr  #f))
+    ) 
+    (all-obj-to-bindings "details-binding-toggle")  ;
+  )
+  (enforceLayouts)
 )
 */
 }
-void maybeSetTextCursor(objid obj){
-/*(define (maybe-set-text-cursor gameobj)
-  (define objattr (gameobj-attr gameobj))
-  (define value (assoc "value" objattr))
-  (define wrap (assoc "wrapamount" objattr))
-  (define offset (assoc "offset" objattr))
-
-  (define wrapAmount (if wrap (cadr wrap) #f))
-  (define text (if value (cadr value) #f))
-  (define offsetValue (if offset (cadr offset) #f))
-  (if (and text wrapAmount offsetValue)
-    (let ((cursorValue (min (- (max 1 (string-length text)) 1) (+ (- wrapAmount 1) offsetValue))))
-      (assert (>= cursorValue 0) (format #f "name: ~a => cursor value is expected to be >= 0 (got = ~a), wrapAmount = ~a, text = ~a, offset = ~a\n" (gameobj-name gameobj) cursorValue wrapAmount text offsetValue))
-      (gameobj-setattr! gameobj 
-        (list
-          (list "cursor" cursorValue)
-          (list "cursor-dir" "right")
-          (list "cursor-highlight" 0)
+void submitData(EditorDetails& details){
+/*(define (submitData)
+  (if managedObj
+    (begin
+      (let* (
+        (updatedValues (map maybe-serialize-vec2 (filterUpdatedObjectValues))) 
+        (objattr (getPrefixAttr updatedValues "gameobj"))
+        (worldattr (getPrefixAttr updatedValues "world"))
+      )
+        (if (gameobj-name managedObj)
+          (begin
+            (gameobj-setattr! managedObj objattr)
+            (format #t "set attr: ~a ~a\n" (gameobj-name managedObj) objattr)
+            (format #t "world attr: ~a\n" worldattr)
+          )
         )
+        (submitWorldAttr worldattr)
+        (submitSqlUpdates updatedValues)
       )
     )
   )
 )
 */
+}
+
+
+
+void submitAndPopulateData(EditorDetails& details){
+  submitData(details);
+  populateData(details);
+}
+
+void maybeSetBinding(EditorDetails& details, GameobjAttributes& objattr){
+  auto shouldSet = getStrAttr(objattr, "details-binding-set").has_value();
+  auto detailBinding = getStrAttr(objattr, "details-binding-toggle");
+  auto detailBindingIndex = getFloatAttr(objattr, "details-binding-index");
+  auto enableValue = getStrAttr(objattr, "details-binding-on");
+  auto editableType = getStrAttr(objattr, "details-editable-type");
+
+  if (shouldSet && enableValue.has_value() && detailBinding.has_value()){
+    auto updatedValue =  getUpdatedValue(details, detailBinding.value(), detailBindingIndex, editableType.value(), enableValue.value());
+    updateStoreValueModified(details, updatedValue.key, updatedValue.value, true);
+  }
+  submitAndPopulateData(details);
+}
+void maybeSetTextCursor(objid gameobj){
+  auto objattr = mainApi -> getGameObjectAttr(gameobj);
+  auto text = getStrAttr(objattr, "value");
+  auto wrapAmount = getFloatAttr(objattr, "wrapamount");
+  auto offset = getFloatAttr(objattr, "offset");
+  if (text.has_value() && wrapAmount.has_value() && offset.has_value()){
+    auto cursorValue = std::min(std::max(1, static_cast<int>(text.value().size())) - 1,  static_cast<int>(wrapAmount.value()) - 1 + static_cast<int>(offset.value()));
+    modassert(cursorValue >= 0, "cursor value is expected to be >= 0");
+    GameobjAttributes newAttr {
+      .stringAttributes = { {"cursor-dir", "right"} },
+      .numAttributes = { { "cursor", cursorValue }, { "cursor-highlight", 0 }},
+      .vecAttr = { .vec3 = {}, .vec4 = {} },
+    };
+    mainApi -> setGameObjectAttr(gameobj, newAttr);
+  }
 }
 
 void createObject(EditorDetails& details, std::string prefix){
@@ -205,12 +258,12 @@ void createHeightmap(EditorDetails& details){
 }
 
 void saveHeightmap(EditorDetails& details){
-  auto name = getStoreValue("gameobj:map");
+  auto name = getAsType<std::string>(getStoreValue(details, "gameobj:map"));
   modassert(false, std::string("save heightmap not implemented, tried to save: ") + name);
 }
 
 void saveHeightmapAs(EditorDetails& details){
-  auto name = getStoreValue("heightmap:filename");
+  auto name = getAsType<std::string>(getStoreValue(details, "heightmap:filename"));
   bool isNamed = name.size() > 0;
   if (isNamed && details.managedObj.has_value()){
     mainApi -> saveHeightmap(details.managedObj.value(), std::string("./res/heightmaps/") + name + ".png");
@@ -261,7 +314,7 @@ void setPauseMode(EditorDetails& details, bool enabled){
     }
   });
   mainApi -> sendNotifyMessage("alert", std::string("pause mode ") + (details.pauseModeEnabled ? "enabled" : "disabled"));
-  updateStoreValue("pause-mode-on", details.pauseModeEnabled ? "on" : "off");
+  updateStoreValue(details, "pause-mode-on", details.pauseModeEnabled ? "on" : "off");
 }
 void togglePlayMode(EditorDetails& details){
   if (details.playModeEnabled){
@@ -275,7 +328,7 @@ void togglePlayMode(EditorDetails& details){
   }
   details.playModeEnabled = !details.playModeEnabled;
   details.pauseModeEnabled = true;
-  updateStoreValue("play-mode-on", details.playModeEnabled ? "on" : "off");
+  updateStoreValue(details, "play-mode-on", details.playModeEnabled ? "on" : "off");
   modlog("editor", "play mode: " + details.playModeEnabled ? "true" : "false");
   mainApi -> sendNotifyMessage("alert", details.playModeEnabled ? "true" : "false");
   mainApi -> sendNotifyMessage("play-mode", details.playModeEnabled ? "true" : "false");
@@ -292,30 +345,6 @@ bool isControlKey(int key){
   return isSubmitKey(key) || key == 44 || key == 257 /* enter*/;
 }
 
-void submitData(EditorDetails& details){
-/*(define (submitData)
-  (if managedObj
-    (begin
-      (let* (
-        (updatedValues (map maybe-serialize-vec2 (filterUpdatedObjectValues))) 
-        (objattr (getPrefixAttr updatedValues "gameobj"))
-        (worldattr (getPrefixAttr updatedValues "world"))
-      )
-        (if (gameobj-name managedObj)
-          (begin
-            (gameobj-setattr! managedObj objattr)
-            (format #t "set attr: ~a ~a\n" (gameobj-name managedObj) objattr)
-            (format #t "world attr: ~a\n" worldattr)
-          )
-        )
-        (submitWorldAttr worldattr)
-        (submitSqlUpdates updatedValues)
-      )
-    )
-  )
-)
-*/
-}
 
 bool shouldUpdateText(GameobjAttributes& attr){
   auto editableText = getStrAttr(attr, "details-editabletext");
@@ -348,7 +377,7 @@ std::string appendString(std::string& currentText, int key, int cursorIndex, int
   auto splitIndex = std::min(static_cast<int>(length), cursorIndex);
   auto start = currentText.substr(0, splitIndex);
   auto end = currentText.substr(splitIndex + highlightLength, length);
-  return start + static_cast<char>(key) +end;
+  return start + static_cast<char>(key) + end;
 }
 
 std::string deleteChar(std::string& currentText, int cursorIndex, int highlightLength){
@@ -459,14 +488,8 @@ int newOffsetIndex(DetailsUpdateType& type, int oldOffset, CursorUpdate& cursor,
 }
 
 bool isEditableType(std::string type, GameobjAttributes& attr){
-  /*
-  (define (isEditableType type attr) 
-  (define editableText (assoc "details-editable-type" attr))
-  (define isEditableType (if editableText (equal? (cadr editableText) type) #f))
-  (format #t "is editable type: ~a ~a\n" type isEditableType)
-  isEditableType
-)*/
-  return false;
+  auto editableText = getStrAttr(attr, "details-editable-type");
+  return editableText.has_value() && editableText.value() == type;
 }
 
 bool isZeroLength(std::string& text){ return text.size() == 0; }
@@ -538,8 +561,7 @@ void updateText(EditorDetails& details, objid obj, std::string& text, CursorUpda
   mainApi -> setGameObjectAttr(obj, newAttr);
   if (detailBinding.has_value()){
     auto updateValue = getUpdatedValue(details, detailBinding.value(), detailBindingIndex, editableType.value(), text);
-    updateStoreValueModified(updateValue.key, updateValue.value, true);
-
+    updateStoreValueModified(details, updateValue.key, updateValue.value, true);
   }
 }
 
@@ -568,13 +590,21 @@ void processFocusedElement(EditorDetails& details, int key){
   submitData(details);
 }
 
-std::string print(std::map<std::string, AttributeValue> values){
-  std::string value = "";
+std::string print(std::map<std::string, DataValue> values){
+  std::string strValue = "";
   for (auto &[key, value] : values){
-    value = "(" + key + ", " + print(value) + ") ";
+    strValue = "(" + key + ", " + print(value.value) + ") ";
   }
-  return value;
+  return strValue;
 }
+void prettyPrint(std::map<std::string, DataValue>& dataValues){
+  std::cout << "data values: [";
+  for (auto &[key, value] : dataValues){
+    std::cout << "(" << key << ", value = " << print(value.value) << " ) ";
+  }
+  std::cout << "]" << std::endl;
+}
+
 
 bool isManagedText(GameobjAttributes& attr, std::string objname){
   return shouldUpdateText(attr) && objname.at(0) == ')';
@@ -655,7 +685,7 @@ void onDetailsObjectSelected(int32_t id, void* data, int32_t index) {
         details -> managedObj = index;
         populateData(*details);
       }
-      maybeSetBinding(attr);
+      maybeSetBinding(*details, attr);
       if (managedText){
         maybeSetTextCursor(index);
       }
@@ -676,6 +706,39 @@ void updateDialogValues(std::string dialogType, AttributeValue value){
 */
 }
 
+void toggleButtonBinding(EditorDetails& details, objid buttonId, bool on){
+  auto attr = mainApi -> getGameObjectAttr(buttonId);
+  auto detailsBinding = getStrAttr(attr, "details-binding-toggle");
+  auto onValue = getStrAttr(attr, "details-binding-on");
+  auto offValue = getStrAttr(attr, "details-binding-off");
+  modlog("editor", std::string("details: on = ") + (onValue.has_value() ? onValue.value() : "novalue") + ", off = " + (offValue.has_value() ? offValue.value() : "novalue"));
+  if (detailsBinding.has_value() && on && onValue.has_value()){
+    updateStoreValueModified(details, detailsBinding.value(), onValue.value(), true);
+  }
+  if (detailsBinding.has_value() && !on && offValue.has_value()){
+    updateStoreValueModified(details, detailsBinding.value(), offValue.value(), true);
+  }
+}
+
+void handleActiveScene(EditorDetails& details, objid sceneId, GameobjAttributes& attr){
+  auto layerAttr = getStrAttr(attr, "layer");
+  if (layerAttr.has_value() && layerAttr.value() == "basicui"){
+    details.activeSceneId = sceneId;
+    mainApi -> sendNotifyMessage("active-scene-id", std::to_string(sceneId));
+  }
+}
+
+bool controlEnabled(EditorDetails& details, GameobjAttributes& gameobjAttr){
+  auto isEnabledBinding = getStrAttr(gameobjAttr, "details-enable-binding");
+  auto isEnabledBindingOff = getStrAttr(gameobjAttr, "details-enable-binding-off");
+  auto bindingValue = getDataValue(details, isEnabledBinding.value());
+  if (isEnabledBinding.has_value() && isEnabledBindingOff.has_value()){
+    auto bindingValueStr = std::get_if<std::string>(&bindingValue.value());
+    modassert(bindingValueStr, "control enabled - binding value must be string type");
+    return *bindingValueStr != isEnabledBindingOff.value();
+  }
+  return true;
+}
 
 std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
 	{ "create-camera", createCamera },
@@ -698,6 +761,20 @@ std::map<std::string, std::function<void(EditorDetails&)>> buttonToAction = {
   { "set-axis-z", [](EditorDetails&) -> void { setAxis("z"); }},
   { "copy-object", [](EditorDetails&) -> void { mainApi -> sendNotifyMessage("copy-object", "true"); }},
 };
+
+void maybePerformAction(EditorDetails& details, GameobjAttributes& objattr){
+  auto attrAction = getStrAttr(objattr, "details-action");
+  modlog("editor", std::string("details attr actions: ") + (attrAction.has_value() ? attrAction.value() : "no actions"));
+  if (attrAction.has_value() && controlEnabled(details, objattr)){
+    if (buttonToAction.find(attrAction.value()) != buttonToAction.end()){
+      auto action = buttonToAction.at(attrAction.value());
+      action(details);
+    }
+  }
+}
+
+
+
 
 CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
   auto binding = createCScriptBinding("native/details", api);
@@ -736,29 +813,20 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
       auto strValue = std::get_if<std::string>(&value);
       modassert(strValue, "active-scene-id: str value is null");
       details -> activeSceneId = std::atoi(strValue -> c_str());
+    }else if (topic == "editor-button-on"){
+      auto strValue = std::get_if<std::string>(&value);
+      modassert(strValue, "editor-button-on: str value is null");
+      toggleButtonBinding(*details, std::atoi(strValue -> c_str()), true);
+      submitAndPopulateData(*details);
+    }else if (topic == "editor-button-off"){
+      auto strValue = std::get_if<std::string>(&value);
+      modassert(strValue, "editor-button-off: str value is null");
+      toggleButtonBinding(*details, std::atoi(strValue -> c_str()), false);
+      submitAndPopulateData(*details);
+    }else if (topic == "details-editable-slide"){
+      // (format #t "slide: ~a\n" (onSlide (getSlidePercentage (string->number value))))
     }
-
-/*
-
-  (if (equal? key "editor-button-on")
-    (begin
-      (toggleButtonBinding (string->number value) #t)
-      (submitAndPopulateData) ; remove
-    )
-
-  )
-  (if (equal? key "editor-button-off")
-    (begin
-      (toggleButtonBinding (string->number value) #f)
-      (submitAndPopulateData) ; remove
-    )
-  )
-  (if (equal? key "details-editable-slide")
-    (format #t "slide: ~a\n" (onSlide (getSlidePercentage (string->number value))))
-  )
-  */
   };
-
 
   binding.onKeyCallback = [](int32_t id, void* data, int key, int scancode, int action, int mods) -> void {
     EditorDetails* details = static_cast<EditorDetails*>(data);
@@ -775,6 +843,19 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
       (key == 262 || key == 263 || key == 264 || key == 265 || key == 259 || key == 261) // /* arrow, backspace, delete
     ){
       processFocusedElement(*details, key);
+    }
+  };
+
+  binding.onKeyCharCallback = [](int32_t id, void* data, unsigned int key) -> void {
+    EditorDetails* details = static_cast<EditorDetails*>(data);
+    if (key == ','){
+      prettyPrint(details -> dataValues);
+    }
+    if (!isControlKey(key)){
+      processFocusedElement(*details, key);
+    }
+    if (isSubmitKey(key)){
+      submitAndPopulateData(*details);
     }
   };
 
@@ -796,6 +877,15 @@ CScriptBinding cscriptDetailsBinding(CustomApiBindings& api){
     unsetFocused(*details);
   };
 
+  binding.onMouseCallback = [](objid id, void* data, int button, int action, int mods) -> void {
+    EditorDetails* details = static_cast<EditorDetails*>(data);
+    if ((button == 0) && (action == 0) && details -> hoveredObj.has_value()){
+      auto attr = mainApi -> getGameObjectAttr(details -> hoveredObj.value());
+      handleActiveScene(*details, mainApi -> listSceneId(details -> hoveredObj.value()), attr);  // pull this into a seperate script, don't like the idea of the editor managing this 
+      maybePerformAction(*details, attr);
+      populateData(*details);
+    }
+  };
 
   return binding;
 }
