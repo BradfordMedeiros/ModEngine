@@ -828,3 +828,34 @@ std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attrib
   }
   return values;
 }
+
+GameobjAttributes gameobjAttrFromAttributes(std::vector<KeyAndAttribute>& attrs){
+  GameobjAttributes attrAttrs {
+    .stringAttributes = {},
+    .numAttributes = {},
+    .vecAttr = { .vec3 = {}, .vec4 = {} },
+  };
+  for (auto &attr : attrs){
+    auto strValue = std::get_if<std::string>(&attr.value);
+    if (strValue){
+      attrAttrs.stringAttributes[attr.key] = *strValue;
+      continue;
+    }
+    auto floatValue = std::get_if<float>(&attr.value);
+    if (floatValue){
+      attrAttrs.numAttributes[attr.key] = *floatValue;
+      continue;
+    }
+    auto vec3Value = std::get_if<glm::vec3>(&attr.value);
+    if (vec3Value){
+      attrAttrs.vecAttr.vec3[attr.key] = *vec3Value;
+      continue;
+    }
+    auto vec4Value = std::get_if<glm::vec4>(&attr.value);
+    if (vec4Value){
+      attrAttrs.vecAttr.vec4[attr.key] = *vec4Value;
+      continue;
+    }
+  }
+  return attrAttrs;
+}

@@ -296,6 +296,12 @@ struct AttributeKeyAndValue {
 
 std::vector<AttributeKeyAndValue> allKeysAndAttributes(GameobjAttributes& attributes);
 
+struct KeyAndAttribute { 
+  std::string key;
+  AttributeValue value;
+};
+GameobjAttributes gameobjAttrFromAttributes(std::vector<KeyAndAttribute>& attrs);
+
 struct Token {
   std::string target;
   std::string attribute;
