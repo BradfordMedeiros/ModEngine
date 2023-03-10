@@ -295,13 +295,13 @@ objid createManipulator(){
 bool selectItemCalled = false;
 bool shouldCallItemSelected = false;
 bool mappingClickCalled = false;
-void selectItem(objid selectedId, int layerSelectIndex){
+void selectItem(objid selectedId, int layerSelectIndex, int groupId){
   std::cout << "SELECT ITEM CALLED!" << std::endl;
   modlog("selection", (std::string("select item called") + ", selectedId = " + std::to_string(selectedId) + ", layerSelectIndex = " + std::to_string(layerSelectIndex)).c_str());
   if (!showCursor || disableInput){
     return;
   }
-  auto idToUse = state.groupSelection ? getGroupId(world.sandbox, selectedId) : selectedId;
+  auto idToUse = state.groupSelection ? groupId : selectedId;
   auto selectedSubObj = getGameObject(world, selectedId);
   auto selectedObject =  getGameObject(world, idToUse);
 
@@ -1731,7 +1731,7 @@ int main(int argc, char* argv[]){
 
     bool selectItemCalledThisFrame = selectItemCalled;
 
-    auto selectTargetId = state.editor.forceSelectIndex == 0 ? hoveredId : state.editor.forceSelectIndex;;
+    auto selectTargetId = state.editor.forceSelectIndex == 0 ? hoveredId : state.editor.forceSelectIndex;
     auto shouldSelectItem = selectItemCalled || (state.editor.forceSelectIndex != 0);
     state.editor.forceSelectIndex = 0;
 
@@ -1747,7 +1747,7 @@ int main(int argc, char* argv[]){
         auto layerSelectThreeCond = layerSelectIndex == -3 && mappingClickCalled;
         std::cout << "cond1 = " << (layerSelectNegOne ? "true" : "false") << ", condtwo = " << (layerSelectThreeCond ? "true" : "false") << ", selectindex " << layerSelectIndex << ", mapping = " << mappingClickCalled << std::endl;
         if (!(layerSelectNegOne || layerSelectThreeCond) && !state.selectionDisabled){
-          selectItem(selectTargetId, layerSelectIndex);
+          selectItem(selectTargetId, layerSelectIndex, getGroupId(world.sandbox, selectTargetId));
         }
       }else{
         std::cout << "INFO: select item called -> id not in scene! - " << selectTargetId<< std::endl;
@@ -1893,7 +1893,7 @@ int main(int argc, char* argv[]){
 
     Color pixelColor = getPixelColor(adjustedCoords.x, adjustedCoords.y);
     if (shouldCallItemSelected){
-      cBindings.onObjectSelected(selectTargetId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
+      cBindings.onObjectSelected(state.groupSelection ? getGroupId(world.sandbox, selectTargetId) : selectTargetId, glm::vec3(pixelColor.r, pixelColor.g, pixelColor.b));
       shouldCallItemSelected = false;
     }
 
